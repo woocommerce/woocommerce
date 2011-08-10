@@ -33,7 +33,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Price_Filter() {
 		$widget_ops = array( 'description' => __( "Shows a price filter slider in a widget which lets you narrow down the list of shown products in categories.", 'woothemes') );
-		parent::WP_Widget('price_filter', __('Price Filter', 'woothemes'), $widget_ops);
+		parent::WP_Widget('price_filter', __('WooCommerce Price Filter', 'woothemes'), $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

@@ -12,7 +12,7 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Tag_Cloud() {
 		$widget_ops = array( 'description' => __( "Your most used product tags in cloud format", 'woothemes') );
-		parent::WP_Widget('tag_cloud', __('Product Tag Cloud', 'woothemes'), $widget_ops);
+		parent::WP_Widget('tag_cloud', __('WooCommerce Product Tag Cloud', 'woothemes'), $widget_ops);
 	}
 	
 	/** @see WP_Widget::widget */

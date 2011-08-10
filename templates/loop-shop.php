@@ -24,7 +24,7 @@ if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocomme
 			
 			<?php do_action('woocommerce_before_shop_loop_item_title', $post, $_product); ?>
 			
-			<strong><?php the_title(); ?></strong>
+			<h3><?php the_title(); ?></h3>
 			
 			<?php do_action('woocommerce_after_shop_loop_item_title', $post, $_product); ?>
 		

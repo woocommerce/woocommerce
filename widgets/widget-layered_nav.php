@@ -11,7 +11,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Layered_Nav() {
 		$widget_ops = array( 'description' => __( "Shows a custom attribute in a widget which lets you narrow down the list of shown products in categories.", 'woothemes') );
-		parent::WP_Widget('layered_nav', __('Layered Nav', 'woothemes'), $widget_ops);
+		parent::WP_Widget('layered_nav', __('WooCommerce Layered Nav', 'woothemes'), $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

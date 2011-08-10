@@ -12,7 +12,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Product_Categories() {
 		$widget_ops = array( 'classname' => 'widget_product_categories', 'description' => __( "A list or dropdown of product categories", 'woothemes' ) );
-		parent::WP_Widget('product_categories', __('Product Categories', 'woothemes'), $widget_ops);
+		parent::WP_Widget('product_categories', __('WooCommerce Product Categories', 'woothemes'), $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

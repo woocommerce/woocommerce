@@ -12,7 +12,7 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Recent_Products() {
 		$widget_ops = array('classname' => 'widget_recent_entries', 'description' => __( "The most recent products on your site", 'woothemes') );
-		parent::WP_Widget('recent-products', __('New Products', 'woothemes'), $widget_ops);
+		parent::WP_Widget('recent-products', __('WooCommerce New Products', 'woothemes'), $widget_ops);
 		$this->alt_option_name = 'widget_recent_entries';
 
 		add_action( 'save_post', array(&$this, 'flush_widget_cache') );

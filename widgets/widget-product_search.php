@@ -12,7 +12,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Product_Search() {
 		$widget_ops = array( 'description' => __( "Search box for products only.", 'woothemes') );
-		parent::WP_Widget('product_search', __('Product Search', 'woothemes'), $widget_ops);
+		parent::WP_Widget('product_search', __('WooCommerce Product Search', 'woothemes'), $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

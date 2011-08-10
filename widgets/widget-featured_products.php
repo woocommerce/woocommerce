@@ -13,7 +13,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Featured_Products() {
 		$widget_ops = array('classname' => 'widget_featured_products', 'description' => __( "Featured products on your site", 'woothemes') );
-		parent::WP_Widget('featured-products', __('Featured Products', 'woothemes'), $widget_ops);
+		parent::WP_Widget('featured-products', __('WooCommerce Featured Products', 'woothemes'), $widget_ops);
 		$this->alt_option_name = 'widget_featured_products';
 
 		add_action( 'save_post', array(&$this, 'flush_widget_cache') );

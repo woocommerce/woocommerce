@@ -13,7 +13,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	/** constructor */
 	function WooCommerce_Widget_Cart() {
 		$widget_ops = array( 'description' => __( "Shopping Cart for the sidebar.", 'woothemes') );
-		parent::WP_Widget('shopping_cart', __('Shopping Cart', 'woothemes'), $widget_ops);
+		parent::WP_Widget('shopping_cart', __('WooCommerce Shopping Cart', 'woothemes'), $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */
