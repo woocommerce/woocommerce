@@ -96,13 +96,12 @@ function woocommerce_order_data_meta_box($post) {
 			<select id="customer_user" name="customer_user">
 				<option value=""><?php _e('Guest', 'woothemes') ?></option>
 				<?php
-					$users = $wpdb->get_col( $wpdb->prepare("SELECT $wpdb->users.ID FROM $wpdb->users ORDER BY %s ASC", 'display_name' ));
+					$users = $wpdb->get_results( $wpdb->prepare("SELECT $wpdb->users.ID, $wpdb->users.user_email, $wpdb->users.display_name FROM $wpdb->users ORDER BY %s ASC", 'display_name' ));
 
-					foreach ( $users as $user_id ) :
+					foreach ( $users as $user ) :
 						
-						$user = get_userdata( $user_id );
 						echo '<option value="'.$user->ID.'" ';
-						if ($user->ID==$data['customer_user']) echo 'selected="selected"';
+						selected($data['customer_user'], $user->ID);
 						echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
 						
 					endforeach;
