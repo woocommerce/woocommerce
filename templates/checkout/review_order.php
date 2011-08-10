@@ -1,5 +1,5 @@
 <?php
-	if (!defined('JIGOSHOP_CHECKOUT')) define('JIGOSHOP_CHECKOUT', true);
+	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
 	if (!defined('ABSPATH')) :
 		define('DOING_AJAX', true);
@@ -7,45 +7,45 @@
 		require_once( $root.'/wp-load.php' );
 	endif;
 	
-	if (sizeof(jigoshop_cart::$cart_contents)==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'jigoshop').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'jigoshop').'</a></p>';
+	if (sizeof(woocommerce_cart::$cart_contents)==0) :
+		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
 		exit;
 	endif;
 	
 	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_method_id'] = $_POST['shipping_method'];
 	
-	if (isset($_POST['country'])) jigoshop_customer::set_country( $_POST['country'] );
-	if (isset($_POST['state'])) jigoshop_customer::set_state( $_POST['state'] );
-	if (isset($_POST['postcode'])) jigoshop_customer::set_postcode( $_POST['postcode'] );
+	if (isset($_POST['country'])) woocommerce_customer::set_country( $_POST['country'] );
+	if (isset($_POST['state'])) woocommerce_customer::set_state( $_POST['state'] );
+	if (isset($_POST['postcode'])) woocommerce_customer::set_postcode( $_POST['postcode'] );
 	
-	if (isset($_POST['s_country'])) jigoshop_customer::set_shipping_country( $_POST['s_country'] );
-	if (isset($_POST['s_state'])) jigoshop_customer::set_shipping_state( $_POST['s_state'] );
-	if (isset($_POST['s_postcode'])) jigoshop_customer::set_shipping_postcode( $_POST['s_postcode'] );
+	if (isset($_POST['s_country'])) woocommerce_customer::set_shipping_country( $_POST['s_country'] );
+	if (isset($_POST['s_state'])) woocommerce_customer::set_shipping_state( $_POST['s_state'] );
+	if (isset($_POST['s_postcode'])) woocommerce_customer::set_shipping_postcode( $_POST['s_postcode'] );
 	
-	jigoshop_cart::calculate_totals();
+	woocommerce_cart::calculate_totals();
 ?>
 <div id="order_review">
 	
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'jigoshop'); ?></th>
-				<th><?php _e('Qty', 'jigoshop'); ?></th>
-				<th><?php _e('Totals', 'jigoshop'); ?></th>
+				<th><?php _e('Product', 'woothemes'); ?></th>
+				<th><?php _e('Qty', 'woothemes'); ?></th>
+				<th><?php _e('Totals', 'woothemes'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
 			<tr>
-				<td colspan="2"><?php _e('Subtotal', 'jigoshop'); ?></td>
-				<td><?php echo jigoshop_cart::get_cart_subtotal(); ?></td>
+				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
+				<td><?php echo woocommerce_cart::get_cart_subtotal(); ?></td>
 			</tr>
 			
-			<?php  if (jigoshop_cart::needs_shipping()) : ?>
-				<td colspan="2"><?php _e('Shipping', 'jigoshop'); ?></td>
+			<?php  if (woocommerce_cart::needs_shipping()) : ?>
+				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
 				<td>
 				<?php
 				
-					$available_methods = jigoshop_shipping::get_available_shipping_methods();
+					$available_methods = woocommerce_shipping::get_available_shipping_methods();
 					
 					if (sizeof($available_methods)>0) :
 						
@@ -60,10 +60,10 @@
 							echo '>'.$method->title.' &ndash; ';
 							
 							if ($method->shipping_total>0) :
-								echo jigoshop_price($method->shipping_total);
-								if ($method->shipping_tax>0) : __(' (ex. tax)', 'jigoshop'); endif;
+								echo woocommerce_price($method->shipping_total);
+								if ($method->shipping_tax>0) : __(' (ex. tax)', 'woothemes'); endif;
 							else :
-								echo __('Free', 'jigoshop');
+								echo __('Free', 'woothemes');
 							endif;
 							
 							echo '</option>';
@@ -74,10 +74,10 @@
 						
 					else :
 						
-						if ( !jigoshop_customer::get_country() ) :
-							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'jigoshop').'</p>';
+						if ( !woocommerce_customer::get_country() ) :
+							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woothemes').'</p>';
 						else :
-							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'jigoshop').'</p>';
+							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
 						endif;
 						
 					endif;
@@ -86,31 +86,31 @@
 
 			<?php endif; ?>
 			
-			<?php if (jigoshop_cart::get_cart_tax()) : ?><tr>
-				<td colspan="2"><?php _e('Tax', 'jigoshop'); ?></td>
-				<td><?php echo jigoshop_cart::get_cart_tax(); ?></td>
+			<?php if (woocommerce_cart::get_cart_tax()) : ?><tr>
+				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
+				<td><?php echo woocommerce_cart::get_cart_tax(); ?></td>
 			</tr><?php endif; ?>
 
-			<?php if (jigoshop_cart::get_total_discount()) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Discount', 'jigoshop'); ?></td>
-				<td>-<?php echo jigoshop_cart::get_total_discount(); ?></td>
+			<?php if (woocommerce_cart::get_total_discount()) : ?><tr class="discount">
+				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
+				<td>-<?php echo woocommerce_cart::get_total_discount(); ?></td>
 			</tr><?php endif; ?>
 			<tr>
-				<td colspan="2"><strong><?php _e('Grand Total', 'jigoshop'); ?></strong></td>
-				<td><strong><?php echo jigoshop_cart::get_total(); ?></strong></td>
+				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
+				<td><strong><?php echo woocommerce_cart::get_total(); ?></strong></td>
 			</tr>
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof(jigoshop_cart::$cart_contents)>0) : 
-				foreach (jigoshop_cart::$cart_contents as $item_id => $values) :
+			if (sizeof(woocommerce_cart::$cart_contents)>0) : 
+				foreach (woocommerce_cart::$cart_contents as $item_id => $values) :
 					$_product = $values['data'];
 					if ($_product->exists() && $values['quantity']>0) :
 						echo '
 							<tr>
-								<td class="product-name">'.$_product->get_title().jigoshop_get_formatted_variation( $values['variation'] ).'</td>
+								<td class="product-name">'.$_product->get_title().woocommerce_get_formatted_variation( $values['variation'] ).'</td>
 								<td>'.$values['quantity'].'</td>
-								<td>'.jigoshop_price($_product->get_price_excluding_tax()*$values['quantity'], array('ex_tax_label' => 1)).'</td>
+								<td>'.woocommerce_price($_product->get_price_excluding_tax()*$values['quantity'], array('ex_tax_label' => 1)).'</td>
 							</tr>';
 					endif;
 				endforeach; 
@@ -120,10 +120,10 @@
 	</table>
 	
 	<div id="payment">
-		<?php if (jigoshop_cart::needs_payment()) : ?>
+		<?php if (woocommerce_cart::needs_payment()) : ?>
 		<ul class="payment_methods methods">
 			<?php 
-				$available_gateways = jigoshop_payment_gateways::get_available_payment_gateways();
+				$available_gateways = woocommerce_payment_gateways::get_available_payment_gateways();
 				if ($available_gateways) : 
 					// Chosen Method
 					if (sizeof($available_gateways)) current($available_gateways)->set_current();
@@ -144,10 +144,10 @@
 					endforeach;
 				else :
 				
-					if ( !jigoshop_customer::get_country() ) :
-						echo '<p>'.__('Please fill in your details above to see available payment methods.', 'jigoshop').'</p>';
+					if ( !woocommerce_customer::get_country() ) :
+						echo '<p>'.__('Please fill in your details above to see available payment methods.', 'woothemes').'</p>';
 					else :
-						echo '<p>'.__('Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'jigoshop').'</p>';
+						echo '<p>'.__('Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
 					endif;
 					
 				endif;
@@ -157,21 +157,21 @@
 
 		<div class="form-row">
 		
-			<noscript><?php _e('Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'jigoshop'); ?><br/><input type="submit" class="button-alt" name="update_totals" value="<?php _e('Update totals', 'jigoshop'); ?>" /></noscript>
+			<noscript><?php _e('Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'woothemes'); ?><br/><input type="submit" class="button-alt" name="update_totals" value="<?php _e('Update totals', 'woothemes'); ?>" /></noscript>
 		
-			<?php jigoshop::nonce_field('process_checkout')?>
-			<input type="submit" class="button-alt" name="place_order" id="place_order" value="<?php _e('Place order', 'jigoshop'); ?>" />
+			<?php woocommerce::nonce_field('process_checkout')?>
+			<input type="submit" class="button-alt" name="place_order" id="place_order" value="<?php _e('Place order', 'woothemes'); ?>" />
 			
-			<?php do_action( 'jigoshop_review_order_before_submit' ); ?>
+			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 			
-			<?php if (get_option('jigoshop_terms_page_id')>0) : ?>
+			<?php if (get_option('woocommerce_terms_page_id')>0) : ?>
 			<p class="form-row terms">
-				<label for="terms" class="checkbox"><?php _e('I accept the', 'jigoshop'); ?> <a href="<?php echo get_permalink(get_option('jigoshop_terms_page_id')); ?>" target="_blank"><?php _e('terms &amp; conditions', 'jigoshop'); ?></a></label>
+				<label for="terms" class="checkbox"><?php _e('I accept the', 'woothemes'); ?> <a href="<?php echo get_permalink(get_option('woocommerce_terms_page_id')); ?>" target="_blank"><?php _e('terms &amp; conditions', 'woothemes'); ?></a></label>
 				<input type="checkbox" class="input-checkbox" name="terms" <?php if (isset($_POST['terms'])) echo 'checked="checked"'; ?> id="terms" />
 			</p>
 			<?php endif; ?>
 			
-			<?php do_action( 'jigoshop_review_order_after_submit' ); ?>
+			<?php do_action( 'woocommerce_review_order_after_submit' ); ?>
 			
 		</div>
 

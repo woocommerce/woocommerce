@@ -25,14 +25,14 @@
 		
 		echo '<div class="hreview-aggregate">';
 		
-		echo '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'jigoshop'),$average).'"><span style="width:'.($average*16).'px"><span class="rating">'.$average.'</span> '.__('out of 5', 'jigoshop').'</span></div>';
+		echo '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'woothemes'),$average).'"><span style="width:'.($average*16).'px"><span class="rating">'.$average.'</span> '.__('out of 5', 'woothemes').'</span></div>';
 		
-		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'jigoshop'), '<span class="count">'.$count.'</span>', '<span class="item fn">'.wptexturize($post->post_title).'</span>' ).'</h2>';
+		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woothemes'), '<span class="count">'.$count.'</span>', '<span class="item fn">'.wptexturize($post->post_title).'</span>' ).'</h2>';
 
 		echo '</div>';
 		
 	else :
-		echo '<h2>'.__('Reviews', 'jigoshop').'</h2>';
+		echo '<h2>'.__('Reviews', 'woothemes').'</h2>';
 	endif;
 
 	$title_reply = '';
@@ -41,26 +41,26 @@
 
 		echo '<ol class="commentlist">';
 		
-		wp_list_comments( array( 'callback' => 'jigoshop_comments' ) );
+		wp_list_comments( array( 'callback' => 'woocommerce_comments' ) );
 
 		echo '</ol>';
 	
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
 			<div class="navigation">
-				<div class="nav-previous"><?php previous_comments_link( __( '<span class="meta-nav">&larr;</span> Previous', 'jigoshop' ) ); ?></div>
-				<div class="nav-next"><?php next_comments_link( __( 'Next <span class="meta-nav">&rarr;</span>', 'jigoshop' ) ); ?></div>
+				<div class="nav-previous"><?php previous_comments_link( __( '<span class="meta-nav">&larr;</span> Previous', 'woothemes' ) ); ?></div>
+				<div class="nav-next"><?php next_comments_link( __( 'Next <span class="meta-nav">&rarr;</span>', 'woothemes' ) ); ?></div>
 			</div>
 		<?php endif;
 		
-		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">'.__('Add Review', 'jigoshop').'</a></p>';
+		echo '<p class="add_review"><a href="#review_form" class="inline show_review_form button">'.__('Add Review', 'woothemes').'</a></p>';
 		
-		$title_reply = __('Add a review', 'jigoshop');
+		$title_reply = __('Add a review', 'woothemes');
 		
 	else : 
 
-		$title_reply = __('Be the first to review ', 'jigoshop').'&ldquo;'.$post->post_title.'&rdquo;';
+		$title_reply = __('Be the first to review ', 'woothemes').'&ldquo;'.$post->post_title.'&rdquo;';
 		
-		echo '<p>'.__('There are no reviews yet, would you like to <a href="#review_form" class="inline show_review_form">submit yours</a>?', 'jigoshop').'</p>';
+		echo '<p>'.__('There are no reviews yet, would you like to <a href="#review_form" class="inline show_review_form">submit yours</a>?', 'woothemes').'</p>';
 	
 	endif;
 	
@@ -78,19 +78,19 @@
 			'email'  => '<p class="comment-form-email"><label for="email">' . __( 'Email' ) . '</label> ' . '<span class="required">*</span>' .
 			            '<input id="email" name="email" type="text" value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30" aria-required="true" /></p>',
 		),
-		'label_submit' => __('Submit Review', 'jigoshop'),
+		'label_submit' => __('Submit Review', 'woothemes'),
 		'logged_in_as' => '',
 		'comment_field' => '
-			<p class="comment-form-rating"><label for="rating">' . __('Rating', 'jigoshop') .'</label><select name="rating" id="rating">
-				<option value="">'.__('Rate...','jigoshop').'</option>
-				<option value="5">'.__('Perfect','jigoshop').'</option>
-				<option value="4">'.__('Good','jigoshop').'</option>
-				<option value="3">'.__('Average','jigoshop').'</option>
-				<option value="2">'.__('Not that bad','jigoshop').'</option>
-				<option value="1">'.__('Very Poor','jigoshop').'</option>
+			<p class="comment-form-rating"><label for="rating">' . __('Rating', 'woothemes') .'</label><select name="rating" id="rating">
+				<option value="">'.__('Rate...', 'woothemes').'</option>
+				<option value="5">'.__('Perfect', 'woothemes').'</option>
+				<option value="4">'.__('Good', 'woothemes').'</option>
+				<option value="3">'.__('Average', 'woothemes').'</option>
+				<option value="2">'.__('Not that bad', 'woothemes').'</option>
+				<option value="1">'.__('Very Poor', 'woothemes').'</option>
 			</select></p>
 			<p class="comment-form-comment"><label for="comment">' . _x( 'Your Review', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'
-			. jigoshop::nonce_field('comment_rating', true, false)
+			. woocommerce::nonce_field('comment_rating', true, false)
 	)); 
 
 	echo '</div></div>';

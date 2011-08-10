@@ -101,18 +101,18 @@ jQuery( function($){
 		
 		if (item_id) {
 
-			jQuery('table.jigoshop_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 			
 			var data = {
-				action: 		'jigoshop_add_order_item',
+				action: 		'woocommerce_add_order_item',
 				item_to_add: 	jQuery('select.item_id').val(),
 				security: 		params.add_order_item_nonce
 			};
 
 			jQuery.post( params.ajax_url, data, function(response) {
 				
-				jQuery('table.jigoshop_order_items tbody#order_items_list').append( response );
-				jQuery('table.jigoshop_order_items').unblock();
+				jQuery('table.woocommerce_order_items tbody#order_items_list').append( response );
+				jQuery('table.woocommerce_order_items').unblock();
 				jQuery('select.item_id').css('border-color', '').val('');
 			
 			});
@@ -152,7 +152,7 @@ jQuery( function($){
 		var select_val = jQuery(this).val();
 		
 		// Hide options
-		$('#jigoshop-product-type-options .inside > div').hide();
+		$('#woocommerce-product-type-options .inside > div').hide();
 		$('#'+select_val+'_product_options').show();
 		
 		// Show option
@@ -173,7 +173,7 @@ jQuery( function($){
 			jQuery('.menu_order_field, .parent_id_field').show();
 		}
 		
-		$('body').trigger('jigoshop-product-type-change', select_val, $(this) );
+		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
 		
 	}).change();
 
@@ -215,17 +215,17 @@ jQuery( function($){
 	// ATTRIBUTE TABLES
 	
 		// Initial order
-		var jigoshop_attributes_table_items = jQuery('#attributes_list').children('tr').get();
-		jigoshop_attributes_table_items.sort(function(a, b) {
+		var woocommerce_attributes_table_items = jQuery('#attributes_list').children('tr').get();
+		woocommerce_attributes_table_items.sort(function(a, b) {
 		   var compA = jQuery(a).attr('rel');
 		   var compB = jQuery(b).attr('rel');
 		   return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
 		})
-		jQuery(jigoshop_attributes_table_items).each( function(idx, itm) { jQuery('#attributes_list').append(itm); } );
+		jQuery(woocommerce_attributes_table_items).each( function(idx, itm) { jQuery('#attributes_list').append(itm); } );
 		
 		// Show
 		function show_attribute_table() {
-			jQuery('table.jigoshop_attributes, table.jigoshop_variable_attributes').each(function(){
+			jQuery('table.woocommerce_attributes, table.woocommerce_variable_attributes').each(function(){
 				if (jQuery('tbody tr', this).size()==0) 
 					jQuery(this).parent().hide();
 				else 
@@ -241,20 +241,20 @@ jQuery( function($){
 		// Add rows
 		jQuery('button.add_attribute').click(function(){
 			
-			var size = jQuery('table.jigoshop_attributes tbody tr').size();
+			var size = jQuery('table.woocommerce_attributes tbody tr').size();
 			
 			var attribute_type = jQuery('select.attribute_taxonomy').val();
 			
 			if (!attribute_type) {
 				
 				// Add custom attribute row
-				jQuery('table.jigoshop_attributes tbody').append('<tr><td class="center"><button type="button" class="button move_up">&uarr;</button><button type="button" class="move_down button">&darr;</button><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center"><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
+				jQuery('table.woocommerce_attributes tbody').append('<tr><td class="center"><button type="button" class="button move_up">&uarr;</button><button type="button" class="move_down button">&darr;</button><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center"><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
 				
 			} else {
 				
 				// Reveal taxonomy row
-				var thisrow = jQuery('table.jigoshop_attributes tbody tr.' + attribute_type);
-				jQuery('table.jigoshop_attributes tbody').append( jQuery(thisrow) );
+				var thisrow = jQuery('table.woocommerce_attributes tbody tr.' + attribute_type);
+				jQuery('table.woocommerce_attributes tbody').append( jQuery(thisrow) );
 				jQuery(thisrow).show();
 				row_indexes();
 				

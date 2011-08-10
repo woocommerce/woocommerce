@@ -2,7 +2,7 @@
 
 global $columns, $per_page;
 
-do_action('jigoshop_before_shop_loop');
+do_action('woocommerce_before_shop_loop');
 
 $loop = 0;
 
@@ -13,24 +13,24 @@ if ($per_page > get_option('posts_per_page')) query_posts( array_merge( $wp_quer
 
 ob_start();
 
-if (have_posts()) : while (have_posts()) : the_post(); $_product = &new jigoshop_product( $post->ID ); $loop++;
+if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); $loop++;
 	
 	?>
 	<li class="product <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
 		
-		<?php do_action('jigoshop_before_shop_loop_item'); ?>
+		<?php do_action('woocommerce_before_shop_loop_item'); ?>
 		
 		<a href="<?php the_permalink(); ?>">
 			
-			<?php do_action('jigoshop_before_shop_loop_item_title', $post, $_product); ?>
+			<?php do_action('woocommerce_before_shop_loop_item_title', $post, $_product); ?>
 			
 			<strong><?php the_title(); ?></strong>
 			
-			<?php do_action('jigoshop_after_shop_loop_item_title', $post, $_product); ?>
+			<?php do_action('woocommerce_after_shop_loop_item_title', $post, $_product); ?>
 		
 		</a>
 
-		<?php do_action('jigoshop_after_shop_loop_item', $post, $_product); ?>
+		<?php do_action('woocommerce_after_shop_loop_item', $post, $_product); ?>
 		
 	</li><?php 
 	
@@ -40,7 +40,7 @@ endwhile; endif;
 
 if ($loop==0) :
 
-	echo '<p class="info">'.__('No products found which match your selection.', 'jigoshop').'</p>'; 
+	echo '<p class="info">'.__('No products found which match your selection.', 'woothemes').'</p>'; 
 	
 else :
 	
@@ -50,4 +50,4 @@ else :
 	
 endif;
 
-do_action('jigoshop_after_shop_loop');
+do_action('woocommerce_after_shop_loop');
