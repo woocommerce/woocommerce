@@ -5,13 +5,13 @@
 #menu-posts-product:hover .wp-menu-image,#menu-posts-product.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -35px 0px !important;}
 #menu-posts-shop_order .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -70px -32px !important;}
 #menu-posts-shop_order:hover .wp-menu-image,#menu-posts-shop_order.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -70px 0px !important;}
-#icon-woocommerce,.woocommerce_icon,.icon32-posts-product,.icon32-posts-shoporder{background-image:url(../images/icons/woocommerce-icons.png) !important;background-position:-11px -5px;}
-.icon32-posts-product{background-position:-185px -5px !important;}
-.icon32-posts-product{background-position:-69px -5px !important;}
-.icon32-posts-shoporder{background-position:-127px -5px !important;}
-.icon32-attributes{background-position:-185px -5px !important;}
-.icon32-woocommerce-settings{background-position:-359px -5px !important;}
-.icon32-woocommerce-debug{background-position:-417px -5px !important;}
+#icon-woocommerce,.woocommerce_icon,.icon32-posts-product,.icon32-posts-shop_order{background-image:url(../images/icons/woocommerce-icons.png) !important;background-position:-11px -6px;}
+.icon32-posts-product{background-position:-185px -6px !important;}
+.icon32-posts-product{background-position:-69px -6px !important;}
+.icon32-posts-shop_order{background-position:-127px -6px !important;}
+.icon32-attributes{background-position:-185px -6px !important;}
+.icon32-woocommerce-settings{background-position:-359px -6px !important;}
+.icon32-woocommerce-debug{background-position:-417px -6px !important;}
 .order_actions{color:#999;font-size:11px;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px;margin:0;line-height:1.6em;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}
 #woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .item_id{width:300px;vertical-align:top;}
