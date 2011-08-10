@@ -142,7 +142,7 @@ function woocommerce_edit_order_columns($columns){
 	
 	$columns = array();
 	
-	//$columns["cb"] = "<input type=\"checkbox\" />";
+	$columns["cb"] = "<input type=\"checkbox\" />";
 	
 	$columns["order_status"] = __("Status", 'woothemes');
 	
@@ -318,7 +318,10 @@ add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
  * Order page views
  **/
 function woocommerce_bulk_actions( $actions ) {
-	return array();
+	
+	if (isset($actions['edit'])) unset($actions['edit']);
+	
+	return $actions;
 }
 add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
 
