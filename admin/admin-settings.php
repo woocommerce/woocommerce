@@ -152,7 +152,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	),
 	
 	array(  
-		'name' => __('Disable WooCommerce frontend.css', 'woothemes'),
+		'name' => __('Disable WooCommerce CSS', 'woothemes'),
 		'desc' 		=> '',
 		'tip' 		=> __('Useful if you want to disable WooCommerce styles and theme it yourself via your theme.', 'woothemes'),
 		'id' 		=> 'woocommerce_disable_css',

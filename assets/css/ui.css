@@ -24,7 +24,7 @@
 ----------------------------------*/
 .ui-corner-all { -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; }
 
-.ui-slider { position: relative; text-align: left; }
+.ui-slider { position: relative; text-align: left; -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; }
 .ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
 .ui-slider .ui-slider-range { position: absolute; z-index: 1; font-size: .7em; display: block; border: 0; background-position: 0 0; }
 
