@@ -156,6 +156,59 @@ function woocommerce_add_order_item() {
 	
 }
 
+/**
+ * Search for products for upsells/crosssells
+ */
+add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
+
+function woocommerce_upsell_crosssell_search_products() {
+	
+	check_ajax_referer( 'search-products', 'security' );
+	
+	$search = (string) urldecode(stripslashes(strip_tags($_POST['search'])));
+	$name = (string) urldecode(stripslashes(strip_tags($_POST['name'])));
+	
+	if (empty($search)) die();
+	
+	if (is_numeric($search)) :
+		
+		$args = array(
+			'post_type'	=> 'product',
+			'post_status' => 'publish',
+			'posts_per_page' => 20,
+			'post__in' => array(0, $search)
+		);
+		
+	else :
+	
+		$args = array(
+			'post_type'	=> 'product',
+			'post_status' => 'publish',
+			'posts_per_page' => 20,
+			's' => $search
+		);
+	
+	endif;
+	
+	$posts = get_posts( $args );
+	
+	if ($posts) : foreach ($posts as $post) : 
+		
+		$SKU = get_post_meta($post->ID, 'SKU', true);
+		
+		?>
+		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add" title="Add">&rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo $name; ?>[]" value="0" /></li>
+		<?php
+						
+	endforeach; else : 
+	
+		?><li><?php _e('No products found', 'woocommerce'); ?></li><?php 
+		
+	endif; 
+	
+	die();
+	
+}
 
 /**
  * When default permalinks are enabled, redirect shop page to post type archive url

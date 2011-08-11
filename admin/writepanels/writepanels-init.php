@@ -150,7 +150,8 @@ function woocommerce_write_panel_scripts() {
 		'meta_value'					=> __('Meta Value', 'woothemes'),
 		'plugin_url' 					=> woocommerce::plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
-		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item")
+		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
+		'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products")
 	 );
 				 
 	wp_localize_script( 'woocommerce-writepanel', 'params', $params );

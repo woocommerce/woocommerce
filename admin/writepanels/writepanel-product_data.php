@@ -38,7 +38,8 @@ function woocommerce_product_data_box() {
 			<li class="pricing_tab"><a href="#pricing_product_data"><?php _e('Pricing', 'woothemes'); ?></a></li>
 			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab"><a href="#inventory_product_data"><?php _e('Inventory', 'woothemes'); ?></a></li><?php endif; ?>
 			<li><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
-			
+			<li><a href="#upsell_product_data" title="<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woothemes'); ?>"><?php _e('Up-sells', 'woothemes'); ?></a></li>
+			<li><a href="#crosssell_product_data" title="<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woothemes'); ?>"><?php _e('Cross-sells', 'woothemes'); ?></a></li>
 			<?php do_action('product_write_panel_tabs'); ?>
 
 		</ul>
@@ -354,6 +355,44 @@ function woocommerce_product_data_box() {
 			</select>
 			<div class="clear"></div>
 		</div>	
+		<div id="upsell_product_data" class="panel woocommerce_options_panel">
+				<div class="multi_select_products_wrapper"><h4><?php _e('Products', 'woothemes'); ?></h4>
+				<ul class="multi_select_products multi_select_products_source">
+					<li class="product_search"><input type="search" rel="upsell_ids" name="product_search" id="product_search" placeholder="<?php _e('Search for product', 'woothemes'); ?>" /><div class="clear"></div></li>
+				</ul>
+				</div>
+				<div class="multi_select_products_wrapper"><h4><?php _e('Up-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
+					<?php
+					if (isset($data['upsell_ids']) && is_array($data['upsell_ids']) && sizeof($data['upsell_ids'])>0) :
+						$upsell_ids = $data['upsell_ids'];
+					else :
+						$upsell_ids = array(0);
+					endif;
+					woocommerce_product_selection_list_remove($upsell_ids, 'upsell_ids');
+					?>
+				</ul></div>
+				<div class="clear"></div>
+						
+			</div>
+			<div id="crosssell_product_data" class="panel woocommerce_options_panel">
+				<div class="multi_select_products_wrapper"><h4><?php _e('Products', 'woothemes'); ?></h4>
+				
+				<ul class="multi_select_products multi_select_products_source">
+					<li class="product_search"><input type="search" rel="crosssell_ids" name="product_search" id="product_search" placeholder="<?php _e('Search for product', 'woothemes'); ?>" /><div class="clear"></div></li>
+				</ul>
+			</div>
+			<div class="multi_select_products_wrapper"><h4><?php _e('Cross-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
+					<?php
+					if (isset($data['crosssell_ids']) && is_array($data['crosssell_ids']) && sizeof($data['crosssell_ids'])>0) :
+						$crosssell_ids = $data['crosssell_ids'];
+					else :
+						$crosssell_ids = array(0);
+					endif;
+					woocommerce_product_selection_list_remove($crosssell_ids, 'crosssell_ids');
+					?>
+				</ul></div>
+				<div class="clear"></div>
+			</div>
 		
 		<?php do_action('product_write_panels'); ?>
 		
@@ -553,6 +592,28 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			endif;
 		endif;
 		
+		// Upsells
+		
+		if (isset($_POST['upsell_ids'])) :
+			$upsells = array();
+			$ids = $_POST['upsell_ids'];
+			foreach ($ids as $id) :
+				if ($id && $id>0) $upsells[] = $id;
+			endforeach;
+			$data['upsell_ids'] = $upsells;
+		endif;
+		
+		// Cross sells
+		
+		if (isset($_POST['crosssell_ids'])) :
+			$crosssells = array();
+			$ids = $_POST['crosssell_ids'];
+			foreach ($ids as $id) :
+				if ($id && $id>0) $crosssells[] = $id;
+			endforeach;
+			$data['crosssell_ids'] = $crosssells;
+		endif;
+		
 		// Apply filters to data
 		$data = apply_filters( 'process_product_meta', $data, $post_id );
 		
@@ -566,4 +627,31 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'product_attributes', $attributes );
 	update_post_meta( $post_id, 'product_data', $data );
 	update_option('woocommerce_errors', $woocommerce_errors);
+}
+
+/**
+* Outputs product list in selection boxes
+**/
+function woocommerce_product_selection_list_remove( $posts_to_display, $name ) {
+	global $thepostid;
+	
+	$args = array(
+		'post_type'	=> 'product',
+		'post_status'     => 'publish',
+		'numberposts' => -1,
+		'orderby' => 'title',
+		'order' => 'asc',
+		'include' => $posts_to_display,
+	);
+	$related_posts = get_posts($args);
+	$loop = 0;
+	if ($related_posts) : foreach ($related_posts as $related_post) :
+		
+		if ($related_post->ID==$thepostid) continue;
+		
+		$SKU = get_post_meta($related_post->ID, 'SKU', true);
+		
+		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">X</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo $name; ?>[]" value="<?php echo $related_post->ID; ?>" /></li><?php 
+
+	endforeach; endif;
 }

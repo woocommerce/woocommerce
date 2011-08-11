@@ -296,5 +296,47 @@ jQuery( function($){
 			row_indexes();
 		});
 
+	// Cross sells/Up sells
+	jQuery('.multi_select_products button').live('click', function(){
+		var wrapper = jQuery(this).parent().parent().parent().parent();
+		
+		if (jQuery(this).parent().parent().is('.multi_select_products_target')) {	
+			jQuery(this).parent().remove();
+		} else {
+			var target = jQuery('.multi_select_products_target', jQuery(wrapper));
+			
+			var exists = jQuery('li[rel=' + jQuery(this).parent().attr('rel') + ']', target);
+			
+			if (jQuery(exists).size()>0) return false;
+			
+			jQuery(this).parent().clone().appendTo(target).find('button').html('X').parent().find('input').val( jQuery(this).parent().attr('rel') );
+		}
+	});
+	
+	jQuery('.multi_select_products #product_search').bind('keyup click', function(){
+		
+		jQuery('.multi_select_products_source li:not(.product_search)').remove();
+		
+		var search = encodeURI( jQuery(this).val() );
+		var input = this;
+		var name = jQuery(this).attr('rel');
+		
+		if (search.length<3) return;
+		
+		var data = {
+			name: 			name,
+			search: 		search,
+			action: 		'woocommerce_upsell_crosssell_search_products',
+			security: 		params.upsell_crosssell_search_products_nonce
+		};
+		
+	    jQuery.post( params.ajax_url, data, function( response ) {
+			
+			jQuery('.multi_select_products_source li:not(.product_search)').remove();
+			jQuery(input).parent().parent().append( response );
+			
+		} );
+ 			
+	});
 
 });

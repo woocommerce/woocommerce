@@ -787,7 +787,9 @@ if (!function_exists('woocommerce_breadcrumb')) {
 	}
 }
 
-
+/**
+ * Remove the singular class for woocommerce single product
+ **/
 function woocommerce_body_classes ($classes) {
 	
 	if( ! is_singular('product') ) return $classes;
@@ -796,4 +798,49 @@ function woocommerce_body_classes ($classes) {
 	if ( $key !== false ) unset($classes[$key]);
 	return $classes;
 	
+}
+
+/**
+ * Display Up Sells
+ **/
+function woocommerce_upsell_display() {
+	global $_product;
+	$upsells = $_product->get_upsells();
+	if (sizeof($upsells)>0) :
+		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2><ul>';
+		$args = array(
+			'post_type'	=> 'product',
+			'ignore_sticky_posts'	=> 1,
+			'posts_per_page' => 4,
+			'orderby' => 'rand',
+			'post__in' => $upsells
+		);
+		query_posts($args);
+		woocommerce_get_template_part( 'loop', 'shop' ); 
+		echo '</div>';
+	endif;
+	wp_reset_query();
+}
+
+/**
+ * Display Cross Sells
+ **/
+function woothemes_cross_sell_display() {
+	global $columns;
+	$columns = 2;
+	$crosssells = woocommerce_cart::get_cross_sells();
+	if (sizeof($crosssells)>0) :
+		echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';
+		$args = array(
+			'post_type'	=> 'product',
+			'ignore_sticky_posts'	=> 1,
+			'posts_per_page' => 2,
+			'orderby' => 'rand',
+			'post__in' => $crosssells
+		);
+		query_posts($args);
+		woocommerce_get_template_part( 'loop', 'shop' ); 
+		echo '</div>';
+	endif;
+	wp_reset_query();
 }

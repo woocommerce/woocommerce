@@ -49,6 +49,9 @@ add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_
 add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_meta', 40, 2);
 add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_sharing', 50, 2);
 
+/* After Single Products */
+add_action('woocommerce_after_single_product', 'woocommerce_upsell_display');
+
 /* Product Add to cart */
 add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_add_to_cart', 30, 2 );
 add_action( 'simple_add_to_cart', 'woocommerce_simple_add_to_cart' ); 
@@ -79,6 +82,8 @@ add_action( 'before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 add_action( 'after_setup_theme', 'woocommerce_body_classes_check' );
 
 function woocommerce_body_classes_check () {
-	if( has_filter( 'body_class', 'twentyeleven_body_classes' ) ) 
-		add_filter( 'body_class', 'woocommerce_body_classes' );
+	if( has_filter( 'body_class', 'twentyeleven_body_classes' ) ) add_filter( 'body_class', 'woocommerce_body_classes' );
 }
+
+/* Cart */
+add_action('cart-collaterals', 'woocommerce_cross_sell_display');
