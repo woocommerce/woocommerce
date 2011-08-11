@@ -163,41 +163,89 @@ function woocommerce_edit_address() {
 		if ($load_address == 'billing') $load_address = 'billing'; else $load_address = 'shipping';
 		
 		if ($_POST) :
-		
-			if ($user_id>0 && woocommerce::verify_nonce('edit_address') ) :
-				update_user_meta( $user_id, $load_address . '-first_name', woocommerce_clean($_POST['address-first_name']) );
-				update_user_meta( $user_id, $load_address . '-last_name', woocommerce_clean($_POST['address-last_name']) );
-				update_user_meta( $user_id, $load_address . '-company', woocommerce_clean($_POST['address-company']) );
-				update_user_meta( $user_id, $load_address . '-email', woocommerce_clean($_POST['address-email']) );
-				update_user_meta( $user_id, $load_address . '-address', woocommerce_clean($_POST['address-address']) );
-				update_user_meta( $user_id, $load_address . '-address2', woocommerce_clean($_POST['address-address2']) );
-				update_user_meta( $user_id, $load_address . '-city', woocommerce_clean($_POST['address-city']) );
-				update_user_meta( $user_id, $load_address . '-postcode', woocommerce_clean($_POST['address-postcode']) );
-				update_user_meta( $user_id, $load_address . '-country', woocommerce_clean($_POST['address-country']) );
-				update_user_meta( $user_id, $load_address . '-state', woocommerce_clean($_POST['address-state']) );
-				update_user_meta( $user_id, $load_address . '-phone', woocommerce_clean($_POST['address-phone']) );
-				update_user_meta( $user_id, $load_address . '-fax', woocommerce_clean($_POST['address-fax']) );
+			
+			/* Validate */
+			$_POST = array_map('woocommerce_clean', $_POST);
+			
+			// Required Fields
+			if (empty($_POST['address-first_name'])) : woocommerce::add_error( __('First name is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-last_name'])) : woocommerce::add_error( __('Last name is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-address'])) : woocommerce::add_error( __('Address is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-city'])) : woocommerce::add_error( __('City is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-postcode'])) : woocommerce::add_error( __('Postcode is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-country'])) : woocommerce::add_error( __('Country is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-state'])) : woocommerce::add_error( __('State is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-email'])) : woocommerce::add_error( __('Email is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-phone'])) : woocommerce::add_error( __('Phone number is a required field.', 'woothemes') ); endif;
+					
+			// Email
+			if (!woocommerce_validation::is_email( $_POST['address-email'] )) : woocommerce::add_error( __('Please enter a valid email address.', 'woothemes') ); endif;
+			
+			// Phone
+			if (!woocommerce_validation::is_phone( $_POST['address-phone'] )) : woocommerce::add_error( __('Please enter a valid phone number.', 'woothemes') ); endif;
+			
+			// Postcode
+			if (!woocommerce_validation::is_postcode( $_POST['address-postcode'], $_POST['address-country'] )) : woocommerce::add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
+			else :
+				$_POST['address-postcode'] = woocommerce_validation::format_postcode( $_POST['address-postcode'], $_POST['address-country'] );
 			endif;
 			
-			wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
-			exit;
+			/* Save */
+			if ($user_id>0 && woocommerce::verify_nonce('edit_address') && woocommerce::error_count() == 0 ) :
+				update_user_meta( $user_id, $load_address . '-first_name', $_POST['address-first_name'] );
+				update_user_meta( $user_id, $load_address . '-last_name', $_POST['address-last_name'] );
+				update_user_meta( $user_id, $load_address . '-company', $_POST['address-company'] );
+				update_user_meta( $user_id, $load_address . '-email', $_POST['address-email'] );
+				update_user_meta( $user_id, $load_address . '-address', $_POST['address-address'] );
+				update_user_meta( $user_id, $load_address . '-address2', $_POST['address-address2'] );
+				update_user_meta( $user_id, $load_address . '-city', $_POST['address-city'] );
+				update_user_meta( $user_id, $load_address . '-postcode', $_POST['address-postcode'] );
+				update_user_meta( $user_id, $load_address . '-country', $_POST['address-country'] );
+				update_user_meta( $user_id, $load_address . '-state', $_POST['address-state'] );
+				update_user_meta( $user_id, $load_address . '-phone', $_POST['address-phone'] );
+				update_user_meta( $user_id, $load_address . '-fax', $_POST['address-fax'] );
+			
+				wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
+				exit;
+			else :
+			
+				$address = array(
+					'first_name' => $_POST['address-first_name'],
+					'last_name' => $_POST['address-last_name'],
+					'company' => $_POST['address-company'],
+					'email' => $_POST['address-email'],
+					'phone' => $_POST['address-phone'],
+					'fax' => $_POST['address-fax'],
+					'address' => $_POST['address-address'],
+					'address2' => $_POST['address-address2'],
+					'city' => $_POST['address-city'],		
+					'state' => $_POST['address-state'],
+					'postcode' => $_POST['address-postcode'],
+					'country' => $_POST['address-country']
+				);
+			
+			endif;
+		
+		else :
+		
+			$address = array(
+				'first_name' => get_user_meta( get_current_user_id(), $load_address . '-first_name', true ),
+				'last_name' => get_user_meta( get_current_user_id(), $load_address . '-last_name', true ),
+				'company' => get_user_meta( get_current_user_id(), $load_address . '-company', true ),
+				'email' => get_user_meta( get_current_user_id(), $load_address . '-email', true ),
+				'phone' => get_user_meta( get_current_user_id(), $load_address . '-phone', true ),
+				'fax' => get_user_meta( get_current_user_id(), $load_address . '-fax', true ),
+				'address' => get_user_meta( get_current_user_id(), $load_address . '-address', true ),
+				'address2' => get_user_meta( get_current_user_id(), $load_address . '-address2', true ),
+				'city' => get_user_meta( get_current_user_id(), $load_address . '-city', true ),		
+				'state' => get_user_meta( get_current_user_id(), $load_address . '-state', true ),
+				'postcode' => get_user_meta( get_current_user_id(), $load_address . '-postcode', true ),
+				'country' => get_user_meta( get_current_user_id(), $load_address . '-country', true )
+			);
 		
 		endif;
-		
-		$address = array(
-			'first_name' => get_user_meta( get_current_user_id(), $load_address . '-first_name', true ),
-			'last_name' => get_user_meta( get_current_user_id(), $load_address . '-last_name', true ),
-			'company' => get_user_meta( get_current_user_id(), $load_address . '-company', true ),
-			'email' => get_user_meta( get_current_user_id(), $load_address . '-email', true ),
-			'phone' => get_user_meta( get_current_user_id(), $load_address . '-phone', true ),
-			'fax' => get_user_meta( get_current_user_id(), $load_address . '-fax', true ),
-			'address' => get_user_meta( get_current_user_id(), $load_address . '-address', true ),
-			'address2' => get_user_meta( get_current_user_id(), $load_address . '-address2', true ),
-			'city' => get_user_meta( get_current_user_id(), $load_address . '-city', true ),		
-			'state' => get_user_meta( get_current_user_id(), $load_address . '-state', true ),
-			'postcode' => get_user_meta( get_current_user_id(), $load_address . '-postcode', true ),
-			'country' => get_user_meta( get_current_user_id(), $load_address . '-country', true )
-		);
+
+		woocommerce::show_messages();
 		?>
 		<form action="<?php echo add_query_arg('address', $load_address, get_permalink(get_option('woocommerce_edit_address_page_id'))); ?>" method="post">
 	
