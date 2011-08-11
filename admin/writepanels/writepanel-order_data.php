@@ -290,7 +290,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
 						<td class="quantity"><input type="text" name="item_quantity[]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo $item['qty']; ?>" /></td>
-						<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit including tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
+						<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
 						<td class="tax"><input type="text" name="item_tax_rate[]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $item['taxrate']; ?>" /></td>
 						<td class="center">
 							<input type="hidden" name="item_id[]" value="<?php echo $item['id']; ?>" />
@@ -303,7 +303,7 @@ function woocommerce_order_items_meta_box($post) {
 		</table>
 	</div>
 	<p class="buttons">
-		<select name="item_id" class="item_id">
+		<select name="add_item_id" class="item_id">
 			<?php
 				echo '<option value="">'.__('Choose an item&hellip;', 'woothemes').'</option>';
 				
@@ -502,7 +502,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	if (!isset($item_cost[$i])) continue;
 			 	if (!isset($item_tax_rate[$i])) continue;
 			 	
-			 	$ex_tax = woocommerce_clean($item_cost[$i]) / ((woocommerce_clean($item_tax_rate[$i])/100)+1);
+			 	//$ex_tax = woocommerce_clean($item_cost[$i]) / (($item_tax_rate[$i]/100)+1);
 			 	
 			 	$order_items[] = apply_filters('update_order_item', array(
 			 		'id' 			=> htmlspecialchars(stripslashes($item_id[$i])),
@@ -510,7 +510,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
 			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2, '.', ''),
-			 		'cost_ex_tax' 	=> number_format(woocommerce_clean($ex_tax[$i]), 2, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
 			 	));
 			 	

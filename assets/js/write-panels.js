@@ -58,9 +58,9 @@ jQuery( function($){
 					
 					if (itemTax && itemTax>0) {
 						
-						taxRate = itemTax/100 + 1;
+						taxRate = itemTax/100;
 						
-						itemTaxAmount = ((itemCost - (itemCost / taxRate)) * 100 );
+						itemTaxAmount = ((itemCost * taxRate) * 100 );
 						
 						itemTaxAmount = itemTaxAmount.toFixed(2);
 						
@@ -76,7 +76,7 @@ jQuery( function($){
 				}
 			}
 			
-			subtotal = itemTotal - tax;
+			subtotal = itemTotal;
 			
 			total = parseFloat(subtotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
 			
@@ -93,7 +93,7 @@ jQuery( function($){
 	
 	jQuery('button.add_shop_order_item').click(function(){
 		
-		var item_id = jQuery('select.item_id').val();
+		var item_id = jQuery('select.add_item_id').val();
 		
 		if (item_id) {
 
@@ -101,7 +101,7 @@ jQuery( function($){
 			
 			var data = {
 				action: 		'woocommerce_add_order_item',
-				item_to_add: 	jQuery('select.item_id').val(),
+				item_to_add: 	jQuery('select.add_item_id').val(),
 				security: 		params.add_order_item_nonce
 			};
 
@@ -109,12 +109,12 @@ jQuery( function($){
 				
 				jQuery('table.woocommerce_order_items tbody#order_items_list').append( response );
 				jQuery('table.woocommerce_order_items').unblock();
-				jQuery('select.item_id').css('border-color', '').val('');
+				jQuery('select.add_item_id').css('border-color', '').val('');
 			
 			});
 
 		} else {
-			jQuery('select.item_id').css('border-color', 'red');
+			jQuery('select.add_item_id').css('border-color', 'red');
 		}
 
 	});
