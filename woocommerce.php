@@ -23,10 +23,6 @@ load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) 
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
 if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0");	
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
-if (!defined('WOOCOMMERCE_USE_CSS')) :
-	if (get_option('woocommerce_disable_css')=='yes') define('WOOCOMMERCE_USE_CSS', false);
-	else define('WOOCOMMERCE_USE_CSS', true);
-endif;
 
 /**
  * Include core files
@@ -140,6 +136,12 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 function woocommerce_init() {
 	
 	woocommerce_post_type();
+	
+	// Constants	
+	if (!defined('WOOCOMMERCE_USE_CSS')) :
+		if (get_option('woocommerce_disable_css')=='yes') define('WOOCOMMERCE_USE_CSS', false);
+		else define('WOOCOMMERCE_USE_CSS', true);
+	endif;
 	
 	// Image sizes
 	add_image_size( 'shop_tiny', woocommerce::get_var('shop_tiny_w'), woocommerce::get_var('shop_tiny_h'), 'true' );

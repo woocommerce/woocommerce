@@ -269,7 +269,7 @@ function woocommerce_order_items_meta_box($post) {
 					<tr class="item">
 						<td class="product-id"><?php echo $item['id']; ?></td>
 						<td class="variation-id"><?php if ($item['variation_id']) echo $item['variation_id']; else echo '-'; ?></td>
-						<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; ?></td>
+						<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
 						<td class="name"><a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $item['name']; ?></a></td>
 						<td class="variation"><?php
 							if (isset($_product->variation_data)) :
@@ -282,7 +282,7 @@ function woocommerce_order_items_meta_box($post) {
 							<table class="meta" cellspacing="0">
 								<tfoot>
 									<tr>
-										<td colspan="3"><button class="add_meta button"><?php _e('Add meta', 'woothemes'); ?></button></td>
+										<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
 									</tr>
 								</tfoot>
 								<tbody></tbody>
@@ -290,7 +290,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
 						<td class="quantity"><input type="text" name="item_quantity[]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo $item['qty']; ?>" /></td>
-						<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
+						<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit including tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
 						<td class="tax"><input type="text" name="item_tax_rate[]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $item['taxrate']; ?>" /></td>
 						<td class="center">
 							<input type="hidden" name="item_id[]" value="<?php echo $item['id']; ?>" />
@@ -305,6 +305,8 @@ function woocommerce_order_items_meta_box($post) {
 	<p class="buttons">
 		<select name="item_id" class="item_id">
 			<?php
+				echo '<option value="">'.__('Choose an item&hellip;', 'woothemes').'</option>';
+				
 				$args = array(
 					'post_type' 		=> 'product',
 					'posts_per_page' 	=> -1,
@@ -500,13 +502,16 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	if (!isset($item_cost[$i])) continue;
 			 	if (!isset($item_tax_rate[$i])) continue;
 			 	
+			 	$ex_tax = woocommerce_clean($item_cost[$i]) / ((woocommerce_clean($item_tax_rate[$i])/100)+1);
+			 	
 			 	$order_items[] = apply_filters('update_order_item', array(
 			 		'id' 			=> htmlspecialchars(stripslashes($item_id[$i])),
 			 		'variation_id' 	=> (int) $item_variation[$i],
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
-			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2),
-			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4)
+			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2, '.', ''),
+			 		'cost_ex_tax' 	=> number_format(woocommerce_clean($ex_tax[$i]), 2, '.', ''),
+			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
 			 	));
 			 	
 			 endfor; 

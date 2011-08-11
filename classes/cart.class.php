@@ -303,8 +303,8 @@ class woocommerce_cart {
 				
 				self::$cart_contents_weight = self::$cart_contents_weight + ($_product->get_weight() * $values['quantity']);
 
-				$total_item_price = $_product->get_price() * $values['quantity'] * 100; // Into pounds
-
+				$total_item_price = $_product->get_price() * $values['quantity'];
+				
 				if ( get_option('woocommerce_calc_taxes')=='yes') :
 					
 					if ( $_product->is_taxable() ) :
@@ -313,11 +313,11 @@ class woocommerce_cart {
 						
 						if (get_option('woocommerce_prices_include_tax')=='yes') :
 						
-							$tax_amount = $_tax->calc_tax( $total_item_price, $rate, true );
+							$tax_amount = $_tax->calc_tax( $_product->get_price(), $rate, true ) * $values['quantity'];
 							
 						else :
 						
-							$tax_amount = $_tax->calc_tax( $total_item_price, $rate, false );
+							$tax_amount = $_tax->calc_tax( $_product->get_price(), $rate, false ) * $values['quantity'];
 							
 						endif;
 						
@@ -331,27 +331,27 @@ class woocommerce_cart {
 							$base_rate = $_tax->get_shop_base_rate( $_product->data['tax_class'] );
 							
 							// Calc tax for base country
-							$base_tax_amount = round($_tax->calc_tax( $total_item_price, $base_rate, true ));
+							$base_tax_amount = $_tax->calc_tax( $_product->get_price(), $base_rate, true);
 							
 							// Now calc tax for user county (which now excludes tax)
-							$tax_amount = round($_tax->calc_tax( ($total_item_price-$base_tax_amount), $rate, false ));
+							$tax_amount = $_tax->calc_tax( ( $_product->get_price() - $base_tax_amount ), $rate, false );
+							$tax_amount = $tax_amount * $values['quantity'];
 							
 							// Finally, update $total_item_price to reflect tax amounts
-							$total_item_price = ($total_item_price - $base_tax_amount + $tax_amount);
+							$total_item_price = ($total_item_price - ($base_tax_amount * $values['quantity']) + $tax_amount);
 							
 						endif;
 
 					endif;
 					
 				endif;
-				
-				$total_item_price 			= $total_item_price / 100; // Back to pounds
-				$tax_amount 				= ( isset($tax_amount) ? $tax_amount : 0 ) / 100; // Back to pounds
+
+				$tax_amount 				= ( isset($tax_amount) ? $tax_amount : 0 );
 				
 				self::$cart_contents_tax = self::$cart_contents_tax + $tax_amount;
 								
 				self::$cart_contents_total = self::$cart_contents_total + $total_item_price;
-				self::$cart_contents_total_ex_tax = self::$cart_contents_total_ex_tax + ($_product->get_price_excluding_tax() * $values['quantity']);
+				self::$cart_contents_total_ex_tax = self::$cart_contents_total_ex_tax + ($_product->get_price_excluding_tax()*$values['quantity']);
 				
 				// Product Discounts
 				if (self::$applied_coupons) foreach (self::$applied_coupons as $code) :

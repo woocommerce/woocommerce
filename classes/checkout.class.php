@@ -239,6 +239,8 @@ class woocommerce_checkout {
 	
 		global $wpdb;
 		
+		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+
 		do_action('woocommerce_before_checkout_process');
 		
 		if (isset($_POST) && $_POST && !isset($_POST['login'])) :
@@ -542,7 +544,8 @@ class woocommerce_checkout {
 					 		'variation_id' 	=> $values['variation_id'],
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
-					 		'cost' 			=> $_product->get_price_excluding_tax(),
+					 		'cost' 			=> $_product->get_price(),
+					 		'cost_ex_tax'	=> $_product->get_price_excluding_tax(),
 					 		'taxrate' 		=> $rate
 					 	));
 					 	
@@ -584,7 +587,7 @@ class woocommerce_checkout {
 			                break;
 						endif;
 					endif;
-
+					
 					// Update post meta
 					update_post_meta( $order_id, 'order_data', $data );
 					update_post_meta( $order_id, 'order_key', uniqid('order_') );

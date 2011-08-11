@@ -192,7 +192,7 @@ class woocommerce_order {
 				
 			endif;
 			
-			$return .= ' - ' . strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 )));
+			$return .= ' - ' . strip_tags(woocommerce_price( $item['cost_ex_tax']*$item['qty'], array('ex_tax_label' => 1 )));
 			
 			if (isset($_product->variation_data)) :
 				$return .= PHP_EOL . woocommerce_get_formatted_variation( $_product->variation_data, true );

@@ -58,20 +58,16 @@ jQuery( function($){
 					
 					if (itemTax && itemTax>0) {
 						
-						//taxRate = Math.round( ((itemTax / 100) + 1) * 100)/100; // tax rate to 2 decimal places
+						taxRate = itemTax/100 + 1;
 						
-						taxRate = itemTax/100;
+						itemTaxAmount = ((itemCost - (itemCost / taxRate)) * 100 );
 						
-						//totalItemTax = itemCost * taxRate;
+						itemTaxAmount = itemTaxAmount.toFixed(2);
 						
-						itemCost = (itemCost * taxRate);
-						
-						totalItemTax = Math.round(itemCost*Math.pow(10,2))/Math.pow(10,2);
-						
-						alert(totalItemTax);
+						totalItemTax = Math.round( itemTaxAmount ) / 100;
 						
 						totalItemTax = totalItemTax * itemQty;
-
+						
 					}
 					
 					itemTotal = itemTotal + totalItemCost;
@@ -80,7 +76,7 @@ jQuery( function($){
 				}
 			}
 			
-			subtotal = itemTotal;
+			subtotal = itemTotal - tax;
 			
 			total = parseFloat(subtotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
 			

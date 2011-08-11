@@ -346,26 +346,7 @@ class woocommerce_product {
 	function get_price() {
 		
 		return $this->price;
-		
-		/*if (!$price) $price = $this->price;
-		
-		if (get_option('woocommerce_prices_include_tax')=='yes' && $this->is_taxable() && woocommerce_customer::is_customer_outside_base()) :
-			
-			$_tax = &new woocommerce_tax();
-			
-			$price = $price * 100;
-			
-			$base_rate 			= $_tax->get_shop_base_rate( $this->data['tax_class'] );
-			$rate 				= $_tax->get_rate( $this->data['tax_class'] );
-			
-			$base_tax_amount 	= round($_tax->calc_tax( $price, $base_rate, true ));
-			$tax_amount 		= round($_tax->calc_tax( ($price-$base_tax_amount), $rate, false ));
-			
-			return ($price - $base_tax_amount + $tax_amount) / 100;			
-
-		endif;
-		
-		return $price;*/
+	
 	}
 	
 	/** Returns the price (excluding tax) */
@@ -384,6 +365,12 @@ class woocommerce_product {
 					$tax_amount = $_tax->calc_tax( $price, $rate, true );
 					
 					$price = $price - $tax_amount;
+					
+					// Round
+					$price = round( $price * 100 ) / 100;
+
+					// Format
+					$price = number_format($price, 2, '.', '');
 					
 				endif;
 				

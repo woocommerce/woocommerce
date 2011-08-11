@@ -508,7 +508,7 @@ function woocommerce_view_order() {
 							
 							echo '	</td>
 									<td>'.$item['qty'].'</td>
-									<td>'.woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1) ).'</td>
+									<td>'.woocommerce_price( $item['cost_ex_tax']*$item['qty'], array('ex_tax_label' => 1) ).'</td>
 								</tr>';
 						endforeach; 
 					endif;

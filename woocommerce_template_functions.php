@@ -281,7 +281,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		
 		?>
 		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
-			<table cellspacing="0">
+			<table cellspacing="0" class="group_table">
 				<tbody>
 					<?php foreach ($_product->children as $child) : $child_product = &new woocommerce_product( $child->ID ); $cavailability = $child_product->get_availability(); ?>
 						<tr>
@@ -825,7 +825,7 @@ function woocommerce_upsell_display() {
 /**
  * Display Cross Sells
  **/
-function woothemes_cross_sell_display() {
+function woocommerce_cross_sell_display() {
 	global $columns;
 	$columns = 2;
 	$crosssells = woocommerce_cart::get_cross_sells();

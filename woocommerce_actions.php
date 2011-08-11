@@ -476,7 +476,7 @@ add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
 add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
 
 function woocommerce_process_checkout () {
-	include_once woocommerce::plugin_path() . '/classes/woocommerce_checkout.class.php';
+	include_once(woocommerce::plugin_path() . '/classes/checkout.class.php');
 
 	woocommerce_checkout::instance()->process_checkout();
 	

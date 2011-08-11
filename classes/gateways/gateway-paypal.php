@@ -179,9 +179,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	
 				// Payment Info
 				'invoice' 				=> $order->order_key,
-				'tax'					=> $order->get_total_tax(),
+				//'tax'					=> $order->get_total_tax(),
 				'tax_cart'				=> $order->get_total_tax(),
-				'amount' 				=> $order->order_total,
+				//'amount' 				=> $order->order_total,
 				'discount_amount_cart' 	=> $order->order_discount
 			), 
 			$phone_args

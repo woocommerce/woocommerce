@@ -24,6 +24,9 @@ function woocommerce_thankyou() {
 	if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
 	if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
 	
+	// Empty awaiting payment session
+	unset($_SESSION['order_awaiting_payment']);
+	
 	if ($order_id > 0) :
 	
 		$order = &new woocommerce_order( $order_id );

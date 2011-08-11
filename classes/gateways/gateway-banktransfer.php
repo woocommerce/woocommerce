@@ -186,6 +186,9 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 
       // Remove cart
       jigoshop_cart::empty_cart();
+      
+      // Empty awaiting payment session
+		unset($_SESSION['order_awaiting_payment']);
 
       // Return thankyou redirect
       return array(
