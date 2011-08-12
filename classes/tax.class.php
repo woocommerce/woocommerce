@@ -236,8 +236,8 @@ class woocommerce_tax {
 			$tax_amount = $price * ($rate/100);
 		endif;
 		
-		// Round up to the nearest pence
-		$tax_amount = ceil($tax_amount);
+		// Round to the nearest pence
+		$tax_amount = round($tax_amount);
 
 		$tax_amount = $tax_amount / 100; // Back to pounds
 		

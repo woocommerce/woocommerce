@@ -50,8 +50,8 @@ table.shop_attributes .alt td,table.shop_attributes .alt th{background:#f9f9f9;}
 a.button,button.button,input.button,#review_form #submit{color:#fff !important;background:#ff9c07;padding:6px;line-height:1em !important;margin:4px 2px 0 0;float:left;font-size:12px !important;width:auto !important;vertical-align:middle !important;text-align:center;text-decoration:none;border:none;cursor:pointer;font-family:inherit;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;}
 a.button:hover,button.button:hover,input.button:hover,#review_form #submit:hover{background:#ff9933;text-decoration:none;}
 .cart .button,.cart input.button{float:none;}
-.button-alt{color:#fff !important;background:#069bcd;padding:6px;line-height:1em !important;margin:4px 2px 0 0;float:left;font-size:12px !important;width:auto !important;vertical-align:middle !important;text-align:center;text-decoration:none;border:none;cursor:pointer;font-family:inherit;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;}
-.button-alt:hover{background:#0588b5;}
+.button.alt{color:#fff !important;background:#069bcd;padding:6px;line-height:1em !important;margin:4px 2px 0 0;float:left;font-size:12px !important;width:auto !important;vertical-align:middle !important;text-align:center;text-decoration:none;border:none;cursor:pointer;font-family:inherit;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;}
+.button.alt:hover{background:#0588b5;}
 #reviews h2 small{float:right;color:#999;font-size:15px;line-height:21px;margin:10px 0 0 0;}#reviews h2 small a{text-decoration:none;color:#999;}
 #reviews h3{margin:0;}
 #reviews #respond{margin:0;border:0;padding:0;}
@@ -87,7 +87,7 @@ a.remove:hover{background-color:#f93;}
 .cart th,.cart td{vertical-align:middle;}
 td.actions{text-align:right;}td.actions .coupon{float:left;}td.actions .coupon label{display:none;}
 td.actions .coupon .input-text{width:80px !important;float:left;margin:1px 6px 0 0 !important;}
-td.actions .button-alt{float:right;margin:2px 0 0 6px;}
+td.actions .button.alt{float:right;margin:2px 0 0 6px;}
 td.product-name dl.variation{margin:0;}td.product-name dl.variation dt{font-weight:bold;display:inline;margin:0 4px 0 0;padding:0;}
 td.product-name dl.variation dd{display:inline;margin:0 12px 0 0;padding:0;}
 td.quantity{min-width:80px;}
@@ -110,7 +110,7 @@ td.quantity{min-width:80px;}
 .cart-collaterals .cart_totals table small{display:block;color:#999;}
 .cart-collaterals .cart_totals .discount td{color:green;}
 .cart-collaterals .cart_totals tr td,.cart-collaterals .cart_totals tr th{border-top:1px solid #E7E7E7;padding:6px 24px;}
-.cart-collaterals .cart_totals a.button-alt{width:193px;display:block;font-size:0.92em;}
+.cart-collaterals .cart_totals a.button.alt{width:193px;display:block;font-size:0.92em;}
 .form-row{overflow:hidden;zoom:1;padding:3px;margin:0 0 6px !important;}.form-row label{display:block;}
 .form-row label.hidden{visibility:hidden;}
 .form-row select{width:100%;cursor:pointer;margin:0 !important;}

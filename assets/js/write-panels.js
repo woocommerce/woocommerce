@@ -93,9 +93,9 @@ jQuery( function($){
 	
 	jQuery('button.add_shop_order_item').click(function(){
 		
-		var item_id = jQuery('select.add_item_id').val();
+		var add_item_id = jQuery('select.add_item_id').val();
 		
-		if (item_id) {
+		if (add_item_id) {
 
 			jQuery('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 			

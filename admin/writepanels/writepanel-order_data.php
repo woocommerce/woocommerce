@@ -303,7 +303,7 @@ function woocommerce_order_items_meta_box($post) {
 		</table>
 	</div>
 	<p class="buttons">
-		<select name="add_item_id" class="item_id">
+		<select name="add_item_id" class="add_item_id">
 			<?php
 				echo '<option value="">'.__('Choose an item&hellip;', 'woothemes').'</option>';
 				
