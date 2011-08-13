@@ -37,25 +37,25 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
     	<h3><?php _e('Cheque Payment', 'woothemes'); ?></h3>
     	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases without having to use the sandbox area of a payment gateway which is useful for demonstrating to clients and for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr>
-		        <td class="titledesc"><?php _e('Enable Cheque Payment', 'woothemes') ?>:</td>
+	    	<tr valign="top" class="option_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <select name="woocommerce_cheque_enabled" id="woocommerce_cheque_enabled" style="min-width:100px;">
-			            <option value="yes" <?php if (get_option('woocommerce_cheque_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-			            <option value="no" <?php if (get_option('woocommerce_cheque_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-			        </select>
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
+						<label for="woocommerce_cheque_enabled">
+						<input name="woocommerce_cheque_enabled" id="woocommerce_cheque_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_cheque_enabled'), 'yes'); ?> /> <?php _e('Enable Cheque Payment', 'woothemes') ?></label><br>
+					</fieldset>
 		        </td>
 		    </tr>
-		    <tr>
-		        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" />
+			        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr>
-		        <td class="titledesc"><a href="#" tip="<?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Customer Message', 'woothemes') ?>:</td>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" />
+			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" /> <span class="description"><?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		</table>
@@ -78,7 +78,9 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	 * - Saves the options to the DB
 	 **/
     public function process_admin_options() {
-   		if(isset($_POST['woocommerce_cheque_enabled'])) 	update_option('woocommerce_cheque_enabled', 	woocommerce_clean($_POST['woocommerce_cheque_enabled'])); else @delete_option('woocommerce_cheque_enabled');
+    
+   		if(isset($_POST['woocommerce_cheque_enabled'])) update_option('woocommerce_cheque_enabled', 'yes'); else update_option('woocommerce_cheque_enabled', 'no');
+   		
    		if(isset($_POST['woocommerce_cheque_title'])) 	update_option('woocommerce_cheque_title', 	woocommerce_clean($_POST['woocommerce_cheque_title'])); else @delete_option('woocommerce_cheque_title');
    		if(isset($_POST['woocommerce_cheque_description'])) 	update_option('woocommerce_cheque_description', 	woocommerce_clean($_POST['woocommerce_cheque_description'])); else @delete_option('woocommerce_cheque_description');
     }

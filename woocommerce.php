@@ -164,12 +164,6 @@ function woocommerce_init() {
 	include_once( 'woocommerce_template_functions.php' );
 	
 	@ob_start();
-	
-	add_role('customer', 'Customer', array(
-	    'read' => true,
-	    'edit_posts' => false,
-	    'delete_posts' => false
-	));
 
 	$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : woocommerce::plugin_url() . '/assets/css/woocommerce.css';
     if (WOOCOMMERCE_USE_CSS) wp_register_style('woocommerce_frontend_styles', $css );
@@ -607,18 +601,23 @@ function woocommerce_init_roles() {
 	
 	if (is_object($wp_roles)) :
 		
+		// Customer role
+		add_role('customer', __('Customer', 'woothemes'), array(
+		    'read' => true,
+		    'edit_posts' => false,
+		    'delete_posts' => false
+		));
+	
 		// Shop manager role
-		add_role('basic_contributor', 'Basic Contributor', array(
-		    'read' 			=> true, // True allows that capability
+		add_role('shop_manager', __('Shop Manager', 'woothemes'), array(
+		    'read' 			=> true,
 		    'edit_posts' 	=> true,
-		    'delete_posts' 	=> true, // Use false to explicitly deny
+		    'delete_posts' 	=> true,
 		));
 
-		// Main Shop Roles
-		$wp_roles->add_cap( 'administrator', 'manage_tickets' );
-		$wp_roles->add_cap( 'editor', 'manage_tickets' );
-		$wp_roles->add_cap( 'author', 'manage_tickets' );
-		$wp_roles->add_cap( 'contributor', 'manage_tickets' );
+		// Main Shop capabilities
+		$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
+		$wp_roles->add_cap( 'shop_manager', 'manage_woocommerce' );
 		
 	endif;
 }

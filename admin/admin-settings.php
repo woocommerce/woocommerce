@@ -889,6 +889,17 @@ function woocommerce_admin_fields($options) {
 			jQuery('.woo-nav-tab-wrapper a:eq(<?php echo $_COOKIE['woocommerce_settings_tab_index']; ?>)').click();
 		<?php endif; ?>
 		
+		// Options
+		jQuery('tr.hidden_unless_enabled').hide();
+		jQuery('tr.option_enabled input').change(function(){
+			if (jQuery(this).is(':checked')) {
+				jQuery('tr.hidden_unless_enabled', jQuery(this).closest( 'table' )).show();
+			} else {
+				jQuery('tr.hidden_unless_enabled', jQuery(this).closest( 'table' )).hide();
+			}
+		});
+		jQuery('tr.option_enabled input').change();
+		
 		// Countries
 		jQuery('select#woocommerce_allowed_countries').change(function(){
 			if (jQuery(this).val()=="specific") {
@@ -911,6 +922,7 @@ function woocommerce_admin_fields($options) {
  */
 function woocommerce_settings() {
     global $options_settings;
+    woocommerce_update_options( $options_settings );
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">

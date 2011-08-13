@@ -87,22 +87,22 @@ class flat_rate extends woocommerce_shipping_method {
     	<h3><?php _e('Flat Rates', 'woothemes'); ?></h3>
     	<p><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Enabled', 'woothemes') ?></th>
+	    	<tr valign="top" class="option_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enabled', 'woothemes') ?></span></legend>
-						<label for="<?php echo $value['id'] ?>">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
+						<label for="woocommerce_flat_rate_enabled">
 						<input name="woocommerce_flat_rate_enabled" id="woocommerce_flat_rate_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_flat_rate_enabled'), 'yes'); ?> /> <?php _e('Enable Flat Rate', 'woothemes') ?></label><br>
 					</fieldset>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input type="text" name="woocommerce_flat_rate_title" id="woocommerce_flat_rate_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_title')) echo $value; else echo 'Flat Rate'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Type', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <select name="woocommerce_flat_rate_type" id="woocommerce_flat_rate_type" style="min-width:100px;">
@@ -112,7 +112,7 @@ class flat_rate extends woocommerce_shipping_method {
 		        </td>
 		    </tr>
 		    <?php $_tax = new woocommerce_tax(); ?>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Tax Status', 'woothemes') ?></th>
 		        <td class="forminp">
 		        	<select name="woocommerce_flat_rate_tax_status">
@@ -121,19 +121,19 @@ class flat_rate extends woocommerce_shipping_method {
 		        	</select>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Cost', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input type="text" name="woocommerce_flat_rate_cost" id="woocommerce_flat_rate_cost" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_cost')) echo $value; ?>" /> <span class="description"><?php _e('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Handling Fee', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input type="text" name="woocommerce_flat_rate_handling_fee" id="woocommerce_flat_rate_handling_fee" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_handling_fee')) echo $value; ?>" /> <span class="description"><?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Method availability', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <select name="woocommerce_flat_rate_availability" id="woocommerce_flat_rate_availability" style="min-width:100px;">
@@ -177,7 +177,7 @@ class flat_rate extends woocommerce_shipping_method {
     
     public function process_admin_options() {
 
-   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else @delete_option('woocommerce_flat_rate_tax_status');
+   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', 'yes'); else update_option('woocommerce_flat_rate_tax_status', 'no');
    		
    		if(isset($_POST['woocommerce_flat_rate_enabled'])) update_option('woocommerce_flat_rate_enabled', 'yes'); else update_option('woocommerce_flat_rate_enabled', 'no');
    		

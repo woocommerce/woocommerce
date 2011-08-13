@@ -33,12 +33,12 @@ function woocommerce_admin_menu() {
 	
 	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator' );
 	
-    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_options', 'woocommerce' , 'woocommerce_dashboard', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
-    add_submenu_page('woocommerce', __('Dashboard', 'woothemes'), __('Dashboard', 'woothemes'), 'manage_options', 'woocommerce', 'woocommerce_dashboard'); 
-    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_options', 'woocommerce-settings', 'woocommerce_settings');
-    add_submenu_page('woocommerce', __('Coupons', 'woothemes'),  __('Coupons', 'woothemes') , 'manage_options', 'woocommerce-coupons', 'woocommerce_coupons');
+    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_dashboard', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
+    add_submenu_page('woocommerce', __('Dashboard', 'woothemes'), __('Dashboard', 'woothemes'), 'manage_woocommerce', 'woocommerce', 'woocommerce_dashboard'); 
+    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce-settings', 'woocommerce_settings');
+    add_submenu_page('woocommerce', __('Coupons', 'woothemes'),  __('Coupons', 'woothemes') , 'manage_woocommerce', 'woocommerce-coupons', 'woocommerce_coupons');
     add_submenu_page('woocommerce', __('System Info', 'woothemes'), __('System Info', 'woothemes'), 'manage_options', 'sysinfo', 'woocommerce_system_info');
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_options', 'attributes', 'woocommerce_attributes');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
 
 function woocommerce_admin_menu_order( $menu_order ) {
@@ -106,105 +106,81 @@ function woocommerce_system_info() {
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-debug" id="icon-woocommerce"><br/></div>
-	    <h2><?php _e('System Information', 'woothemes') ?></h2>
-		<div id="tabs-wrap">
-			<ul class="tabs">
-				<li><a href="#versions"><?php _e('Environment', 'woothemes'); ?></a></li>
-				<li><a href="#debugging"><?php _e('Debugging', 'woothemes'); ?></a></li>
-			</ul>
-			<div id="versions" class="panel">
-				<table class="widefat fixed" style="width:850px;">
-		            <thead>		            
-		            	<tr>
-		                    <th scope="col" width="200px"><?php _e('Versions', 'woothemes')?></th>
-		                    <th scope="col">&nbsp;</th>
-		                </tr>
-		           	</thead>
-		           	<tbody>
-		                <tr>
-		                    <td class="titledesc"><?php _e('WooCommerce Version', 'woothemes')?></td>
-		                    <td class="forminp"><?php echo woocommerce::get_var('version'); ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('WordPress Version', 'woothemes')?></td>
-		                    <td class="forminp"><?php if (is_multisite()) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
-		                </tr>
-		            </tbody>
-		            <thead>
-		                <tr>
-		                    <th scope="col" width="200px"><?php _e('Server', 'woothemes')?></th>
-		                    <th scope="col">&nbsp;</th>
-		                </tr>
-		            </thead>
-		           	<tbody>
-		                <tr>
-		                    <td class="titledesc"><?php _e('PHP Version', 'woothemes')?></td>
-		                    <td class="forminp"><?php if(function_exists('phpversion')) echo phpversion(); ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('Server Software', 'woothemes')?></td>
-		                    <td class="forminp"><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
-		                </tr>
-		        	</tbody>
-		        </table>
-			</div>
-			<div id="debugging" class="panel">
-				<table class="widefat fixed" style="width:850px;">
-		            <tbody>
-		            	<tr>
-		                    <th scope="col" width="200px"><?php _e('Debug Information', 'woothemes')?></th>
-		                    <th scope="col">&nbsp;</th>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('UPLOAD_MAX_FILESIZE', 'woothemes')?></td>
-		                    <td class="forminp"><?php 
-		                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('upload_max_filesize'))/(1024*1024))."MB";
-		                    ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('POST_MAX_SIZE', 'woothemes')?></td>
-		                    <td class="forminp"><?php 
-		                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('post_max_size'))/(1024*1024))."MB";
-		                    ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('WordPress Memory Limit', 'woothemes')?></td>
-		                    <td class="forminp"><?php 
-		                    	echo (woocommerce_let_to_num(WP_MEMORY_LIMIT)/(1024*1024))."MB";
-		                    ?></td>
-		                </tr>
-		                 <tr>
-		                    <td class="titledesc"><?php _e('WP_DEBUG', 'woothemes')?></td>
-		                    <td class="forminp"><?php if (WP_DEBUG) echo __('On', 'woothemes'); else __('Off', 'woothemes'); ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('DISPLAY_ERRORS', 'woothemes')?></td>
-		                    <td class="forminp"><?php if(function_exists('phpversion')) echo ini_get('display_errors'); ?></td>
-		                </tr>
-		                <tr>
-		                    <td class="titledesc"><?php _e('FSOCKOPEN', 'woothemes')?></td>
-		                    <td class="forminp"><?php if(function_exists('fsockopen')) echo '<span style="color:green">' . __('Your server supports fsockopen.', 'woothemes'). '</span>'; else echo '<span style="color:red">' . __('Your server does not support fsockopen.', 'woothemes'). '</span>'; ?></td>
-		                </tr>
-		        	</tbody>
-		        </table>
-			</div>
-		</div> 
-    </div>
-    <script type="text/javascript">
-	jQuery(function() {
-	    // Tabs
-		jQuery('ul.tabs').show();
-		jQuery('ul.tabs li:first').addClass('active');
-		jQuery('div.panel:not(div.panel:first)').hide();
-		jQuery('ul.tabs a').click(function(){
-			jQuery('ul.tabs li').removeClass('active');
-			jQuery(this).parent().addClass('active');
-			jQuery('div.panel').hide();
-			jQuery( jQuery(this).attr('href') ).show();
-			return false;
-		});
-	});
-	</script>
+		<h2><?php _e('System Information', 'woothemes')?></h2>
+		<br class="clear" />
+		<table class="widefat fixed">
+            <thead>		            
+            	<tr>
+                    <th scope="col" width="200px"><?php _e('Versions', 'woothemes')?></th>
+                    <th scope="col">&nbsp;</th>
+                </tr>
+           	</thead>
+           	<tbody>
+                <tr>
+                    <td class="titledesc"><?php _e('WooCommerce Version', 'woothemes')?></td>
+                    <td class="forminp"><?php echo woocommerce::get_var('version'); ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('WordPress Version', 'woothemes')?></td>
+                    <td class="forminp"><?php if (is_multisite()) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
+                </tr>
+            </tbody>
+            <thead>
+                <tr>
+                    <th scope="col" width="200px"><?php _e('Server', 'woothemes')?></th>
+                    <th scope="col">&nbsp;</th>
+                </tr>
+            </thead>
+           	<tbody>
+                <tr>
+                    <td class="titledesc"><?php _e('PHP Version', 'woothemes')?></td>
+                    <td class="forminp"><?php if(function_exists('phpversion')) echo phpversion(); ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('Server Software', 'woothemes')?></td>
+                    <td class="forminp"><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
+                </tr>
+        	</tbody>
+			<thead>		            
+            	<tr>
+                    <th scope="col" width="200px"><?php _e('Debug Information', 'woothemes')?></th>
+                    <th scope="col">&nbsp;</th>
+                </tr>
+           	</thead>
+            <tbody>
+                <tr>
+                    <td class="titledesc"><?php _e('UPLOAD_MAX_FILESIZE', 'woothemes')?></td>
+                    <td class="forminp"><?php 
+                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('upload_max_filesize'))/(1024*1024))."MB";
+                    ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('POST_MAX_SIZE', 'woothemes')?></td>
+                    <td class="forminp"><?php 
+                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('post_max_size'))/(1024*1024))."MB";
+                    ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('WordPress Memory Limit', 'woothemes')?></td>
+                    <td class="forminp"><?php 
+                    	echo (woocommerce_let_to_num(WP_MEMORY_LIMIT)/(1024*1024))."MB";
+                    ?></td>
+                </tr>
+                 <tr>
+                    <td class="titledesc"><?php _e('WP_DEBUG', 'woothemes')?></td>
+                    <td class="forminp"><?php if (WP_DEBUG) echo __('On', 'woothemes'); else __('Off', 'woothemes'); ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('DISPLAY_ERRORS', 'woothemes')?></td>
+                    <td class="forminp"><?php if(function_exists('phpversion')) echo ini_get('display_errors'); ?></td>
+                </tr>
+                <tr>
+                    <td class="titledesc"><?php _e('FSOCKOPEN', 'woothemes')?></td>
+                    <td class="forminp"><?php if(function_exists('fsockopen')) echo '<span style="color:green">' . __('Your server supports fsockopen.', 'woothemes'). '</span>'; else echo '<span style="color:red">' . __('Your server does not support fsockopen.', 'woothemes'). '</span>'; ?></td>
+                </tr>
+        	</tbody>
+        </table>
+	</div> 
 	<?php
 }
 

@@ -46,52 +46,55 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 **/
 	public function admin_options() {
     	?>
-    	<thead><tr><th scope="col" width="200px"><?php _e('PayPal standard', 'woothemes'); ?></th><th scope="col" class="desc"><?php _e('PayPal standard works by sending the user to <a href="https://www.paypal.com/uk/mrb/pal=JFC9L8JJUZZK2">PayPal</a> to enter their payment information.', 'woothemes'); ?></th></tr></thead>
-    	<tr>
-	        <td class="titledesc"><?php _e('Enable PayPal standard', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_paypal_enabled" id="woocommerce_paypal_enabled" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_paypal_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_paypal_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_paypal_title" id="woocommerce_paypal_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_title')) echo $value; else echo 'PayPal'; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Description', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_description')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('PayPal email address', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_email')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('If your checkout page does not ask for shipping details, or if you do not want to send shipping information to PayPal, set this option to no. If you enable this option PayPal may restrict where things can be sent, and will prevent some orders going through for your protection.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Send shipping details to PayPal', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_paypal_send_shipping" id="woocommerce_paypal_send_shipping" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_paypal_send_shipping') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_paypal_send_shipping') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><?php _e('Enable PayPal sandbox', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_paypal_testmode" id="woocommerce_paypal_testmode" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_paypal_testmode') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_paypal_testmode') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
+    	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
+    	<p><?php _e('PayPal standard works by sending the user to <a href="https://www.paypal.com/uk/mrb/pal=JFC9L8JJUZZK2">PayPal</a> to enter their payment information.', 'woothemes'); ?></p>
+    	<table class="form-table">
+	    	<tr valign="top" class="option_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
+						<label for="woocommerce_paypal_enabled">
+						<input name="woocommerce_paypal_enabled" id="woocommerce_paypal_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_enabled'), 'yes'); ?> /> <?php _e('Enable PayPal standard', 'woothemes') ?></label><br>
+					</fieldset>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_paypal_title" id="woocommerce_paypal_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_title')) echo $value; else echo 'PayPal'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Description', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_description')) echo $value; ?>" /> <span class="description"><?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('PayPal email address', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_email')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Shipping details', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Shipping details', 'woothemes') ?></span></legend>
+						<label for="woocommerce_paypal_send_shipping">
+						<input name="woocommerce_paypal_send_shipping" id="woocommerce_paypal_send_shipping" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_send_shipping'), 'yes'); ?> /> <?php _e('Send shipping details to PayPal', 'woothemes') ?></label><br>
+					</fieldset>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('PayPal sandbox', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('PayPal sandbox', 'woothemes') ?></span></legend>
+						<label for="woocommerce_paypal_testmode">
+						<input name="woocommerce_paypal_testmode" id="woocommerce_paypal_testmode" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_testmode'), 'yes'); ?> /> <?php _e('Enable PayPal sandbox', 'woothemes') ?></label><br>
+					</fieldset>
+		        </td>
+		    </tr>
+		</table>
     	<?php
     }
     
@@ -107,12 +110,16 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 * - Saves the options to the DB
 	 **/
     public function process_admin_options() {
-   		if(isset($_POST['woocommerce_paypal_enabled'])) update_option('woocommerce_paypal_enabled', woocommerce_clean($_POST['woocommerce_paypal_enabled'])); else @delete_option('woocommerce_paypal_enabled');
+    
+   		if(isset($_POST['woocommerce_paypal_enabled'])) update_option('woocommerce_paypal_enabled', 'yes'); else update_option('woocommerce_paypal_enabled', 'no');
+   		
    		if(isset($_POST['woocommerce_paypal_title'])) update_option('woocommerce_paypal_title', woocommerce_clean($_POST['woocommerce_paypal_title'])); else @delete_option('woocommerce_paypal_title');
    		if(isset($_POST['woocommerce_paypal_email'])) update_option('woocommerce_paypal_email', woocommerce_clean($_POST['woocommerce_paypal_email'])); else @delete_option('woocommerce_paypal_email');
    		if(isset($_POST['woocommerce_paypal_description'])) update_option('woocommerce_paypal_description', woocommerce_clean($_POST['woocommerce_paypal_description'])); else @delete_option('woocommerce_paypal_description');
-   		if(isset($_POST['woocommerce_paypal_testmode'])) update_option('woocommerce_paypal_testmode', woocommerce_clean($_POST['woocommerce_paypal_testmode'])); else @delete_option('woocommerce_paypal_testmode');
-   		if(isset($_POST['woocommerce_paypal_send_shipping'])) update_option('woocommerce_paypal_send_shipping', woocommerce_clean($_POST['woocommerce_paypal_send_shipping'])); else @delete_option('woocommerce_paypal_send_shipping');
+   		
+   		if(isset($_POST['woocommerce_paypal_testmode'])) update_option('woocommerce_paypal_testmode', 'yes'); else update_option('woocommerce_paypal_testmode', 'no');
+   		
+   		if(isset($_POST['woocommerce_paypal_send_shipping'])) update_option('woocommerce_paypal_send_shipping', 'yes'); else update_option('woocommerce_paypal_send_shipping', 'no');
     }
     
 	/**

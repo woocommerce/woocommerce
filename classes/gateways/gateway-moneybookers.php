@@ -42,40 +42,43 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 	 **/
 	public function admin_options() {
     	?>
-    	<thead><tr><th scope="col" width="200px"><?php _e('Moneybookers (Moneybookers)', 'woothemes'); ?></th><th scope="col" class="desc"><?php _e('Moneybookers works by using an iFrame to submit payment information securely to Moneybookers.', 'woothemes'); ?></th></tr></thead>
-    	<tr>
-	        <td class="titledesc"><?php _e('Enable Moneybookers', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_moneybookers_enabled" id="woocommerce_moneybookers_enabled" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_moneybookers_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_moneybookers_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_moneybookers_title" id="woocommerce_moneybookers_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_title')) echo $value; else echo 'moneybookers'; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('Please enter your moneybookers email address; this is needed in order to take payment!', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Moneybookers merchant e-mail', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_moneybookers_email" id="woocommerce_moneybookers_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_email')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	    	<td class="titledesc"><a href="#" tip="<?php _e('Please enter your moneybookers secretword; this is needed in order to take payment!', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Moneybookers Secret Word', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_moneybookers_secret_word" id="woocommerce_moneybookers_secret_word" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_secret_word')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	    	<td class="titledesc"><a href="#" tip="<?php _e('Please enter your moneybookers Customer ID; this is needed in order to take payment!', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Moneybookers Customer ID', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_moneybookers_customer_id" id="woocommerce_moneybookers_customer_id" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_customer_id')) echo $value; ?>" />
-	        </td>
-	    </tr>
+    	<h3><?php _e('Moneybookers', 'woothemes'); ?></h3>
+    	<p><?php _e('Moneybookers works by using an iFrame to submit payment information securely to Moneybookers.', 'woothemes'); ?></p>
+    	<table class="form-table">
+	    	<tr valign="top" class="option_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
+						<label for="woocommerce_moneybookers_enabled">
+						<input name="woocommerce_moneybookers_enabled" id="woocommerce_moneybookers_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_moneybookers_enabled'), 'yes'); ?> /> <?php _e('Enable Moneybookers', 'woothemes') ?></label><br>
+					</fieldset>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_title" id="woocommerce_moneybookers_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_title')) echo $value; else echo 'moneybookers'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Moneybookers merchant e-mail', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_email" id="woocommerce_moneybookers_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_email')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers email address; this is needed in order to take payment!', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		    	<th scope="row" class="titledesc"><?php _e('Moneybookers Secret Word', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_secret_word" id="woocommerce_moneybookers_secret_word" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_secret_word')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers secretword; this is needed in order to take payment!', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top" class="hidden_unless_enabled">
+		    	<th scope="row" class="titledesc"><?php _e('Moneybookers Customer ID', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_customer_id" id="woocommerce_moneybookers_customer_id" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_customer_id')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers Customer ID; this is needed in order to take payment!', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		</table>
     	<?php
     }
     
@@ -84,7 +87,8 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 	 * - Saves the options to the DB
 	 **/
     public function process_admin_options() {
-   		if(isset($_POST['woocommerce_moneybookers_enabled'])) update_option('woocommerce_moneybookers_enabled', woocommerce_clean($_POST['woocommerce_moneybookers_enabled'])); else @delete_option('woocommerce_moneybookers_enabled');
+   		if(isset($_POST['woocommerce_moneybookers_enabled'])) update_option('woocommerce_moneybookers_enabled', 'yes'); else update_option('woocommerce_moneybookers_enabled', 'no');
+   		
    		if(isset($_POST['woocommerce_moneybookers_title'])) update_option('woocommerce_moneybookers_title', woocommerce_clean($_POST['woocommerce_moneybookers_title'])); else @delete_option('woocommerce_moneybookers_title');
    		if(isset($_POST['woocommerce_moneybookers_email'])) update_option('woocommerce_moneybookers_email', woocommerce_clean($_POST['woocommerce_moneybookers_email'])); else @delete_option('woocommerce_moneybookers_email');
    		if(isset($_POST['woocommerce_moneybookers_secret_word'])) update_option('woocommerce_moneybookers_secret_word', woocommerce_clean($_POST['woocommerce_moneybookers_secret_word'])); else @delete_option('woocommerce_moneybookers_secret_word');

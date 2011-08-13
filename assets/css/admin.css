@@ -106,24 +106,9 @@ ul.recent-orders li .refunded,ul.recent-orders li .cancelled{color:#999;}
 .woocommerce-reviews-widget blockquote{padding:0;margin:0;}
 .woocommerce-reviews-widget .avatar{float:left;margin:0 10px 5px 0;}
 .woocommerce-reviews-widget .star-rating{float:right;width:80px;height:16px;background:url(../images/star.png) repeat-x left 0;}.woocommerce-reviews-widget .star-rating span{background:url(../images/star.png) repeat-x left -32px;height:0;padding-top:16px;overflow:hidden;float:left;}
-.woocommerce table.widefat{width:850px;margin-top:0.5em !important;}.woocommerce table.widefat .button{float:left;margin:0 3px 3px 0 !important;}
-.woocommerce table.widefat .button-right{float:right;margin:0 0 3px 3px !important;}
-.woocommerce table.widefat td,.woocommerce table.widefat th{padding:9px 9px;}
-.woocommerce table.widefat .forminp .input-text,.woocommerce table.widefat .forminp .select{width:45%;}
-.woocommerce table.widefat .forminp .wide-input{width:99%;}
-.woocommerce table.widefat th.desc{font-weight:normal;color:#2958aa;}
-.woocommerce table.widefat td small{color:#999;}
-.woocommerce #tabs-wrap{background:#ececec;width:850px;padding:7px 9px;overflow:hidden;margin-top:0.5em !important;margin-bottom:2em !important;zoom:1;}
-.woocommerce #tabs-wrap ul.tabs{padding:0;}
-.woocommerce #tabs-wrap table{margin:0 0 5px !important;border:1px solid #e1e1e1;border-top:0;}
-.woocommerce #tabs-wrap table thead tr th{border-top:4px solid #e1e1e1;}
-.woocommerce #tabs-wrap table thead:first-child tr th{border-top:0;}
-.woocommerce #tabs-wrap table thead th{background:#fff;}
-.woocommerce #tabs-wrap table select{white-space:nowrap;}
-.woocommerce #tabs-wrap .submit{float:right;margin:0 !important;padding:0 !important;}
-.woocommerce #tabs-wrap table.shippingrows{border:0;width:100%;}
-.woocommerce #tabs-wrap table.shippingrows td,.woocommerce #tabs-wrap table.shippingrows th{padding:4px 4px 4px 0 !important;border:0 !important;vertical-align:middle;}
-.woocommerce #tabs-wrap table.shippingrows td a.remove{margin:0 !important;}
+.woocommerce table.shippingrows{border:0;width:100%;}
+.woocommerce table.shippingrows td,.woocommerce table.shippingrows th{padding:4px 4px 4px 0 !important;border:0 !important;vertical-align:middle;}
+.woocommerce table.shippingrows td a.remove{margin:0 !important;}
 p.taxrow select{width:125px;}
 p.taxrow input.text{width:60px;}
 p.taxrow label{line-height:1.5em;margin:0 8px;}p.taxrow label input{margin:0 4px 0 0;}

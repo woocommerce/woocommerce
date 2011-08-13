@@ -35,28 +35,28 @@ class free_shipping extends woocommerce_shipping_method {
     	?>
     	<h3><?php _e('Free Shipping', 'woothemes'); ?></h3>
     	<table class="form-table">
-	    	<tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Enabled', 'woothemes') ?></th>
+	    	<tr valign="top" class="option_enabled">
+		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enabled', 'woothemes') ?></span></legend>
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
 						<label for="woocommerce_free_shipping_enabled>">
 						<input name="woocommerce_free_shipping_enabled" id="woocommerce_free_shipping_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_free_shipping_enabled'), 'yes'); ?> /> <?php _e('Enable Free Shipping', 'woothemes') ?></label><br>
 					</fieldset>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input type="text" name="woocommerce_free_shipping_title" id="woocommerce_free_shipping_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_free_shipping_title')) echo $value; else echo 'Free Shipping'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Minimum Order Amount', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input type="text" name="woocommerce_free_shipping_minimum_amount" id="woocommerce_free_shipping_minimum_amount" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_free_shipping_minimum_amount')) echo $value; else echo 'Free Shipping'; ?>" /> <span class="description"><?php _e('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top">
+		    <tr valign="top" class="hidden_unless_enabled">
 		        <th scope="row" class="titledesc"><?php _e('Method availability', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <select name="woocommerce_free_shipping_availability" id="woocommerce_free_shipping_availability" style="min-width:100px;">
