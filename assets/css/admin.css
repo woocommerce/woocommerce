@@ -166,7 +166,7 @@ table.woocommerce_attributes .taxonomy td.name{padding:10px 15px;font-size:14px;
 table.woocommerce_attributes .center{text-align:center;}
 #woocommerce_attributes select.attribute_taxonomy,button.add_attribute,button.add_variable_attribute,button.add_configuration{float:right;}
 div.multi_select_products_wrapper{float:left;padding:0 9px 9px;}
-.multi_select_products,div.multi_select_countries{border:1px solid #ececec;height:200px;overflow:auto;width:250px;float:left;}
+.multi_select_products,div.multi_select_countries{border:1px solid #ececec;height:200px;overflow:auto;width:100%;float:left;}
 .multi_select_products li{padding:7px 9px;line-height:2em;border-bottom:1px dotted #ececec;}
 .multi_select_countries li{padding:3px 9px;margin:0;line-height:2em;border-bottom:1px dotted #ececec;}
 .multi_select_countries li label{display:block;}

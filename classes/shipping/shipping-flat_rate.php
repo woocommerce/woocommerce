@@ -84,80 +84,83 @@ class flat_rate extends woocommerce_shipping_method {
     
     public function admin_options() {
     	?>
-    	<thead><tr><th scope="col" width="200px"><?php _e('Flat Rates', 'woothemes'); ?></th><th scope="col" class="desc"><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woothemes'); ?>&nbsp;</th></tr></thead>
-    	<tr>
-	        <td class="titledesc"><?php _e('Enable Flat Rate', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_flat_rate_enabled" id="woocommerce_flat_rate_enabled" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_flat_rate_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_flat_rate_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input type="text" name="woocommerce_flat_rate_title" id="woocommerce_flat_rate_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_title')) echo $value; else echo 'Flat Rate'; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><?php _e('Type', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_flat_rate_type" id="woocommerce_flat_rate_type" style="min-width:100px;">
-		            <option value="order" <?php if (get_option('woocommerce_flat_rate_type') == 'order') echo 'selected="selected"'; ?>><?php _e('Per Order', 'woothemes'); ?></option>
-		            <option value="item" <?php if (get_option('woocommerce_flat_rate_type') == 'item') echo 'selected="selected"'; ?>><?php _e('Per Item', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <?php $_tax = new woocommerce_tax(); ?>
-	    <tr>
-	        <td class="titledesc"><?php _e('Tax Status', 'woothemes') ?>:</td>
-	        <td class="forminp">
-	        	<select name="woocommerce_flat_rate_tax_status">
-	        		<option value="taxable" <?php if (get_option('woocommerce_flat_rate_tax_status')=='taxable') echo 'selected="selected"'; ?>><?php _e('Taxable', 'woothemes'); ?></option>
-	        		<option value="none" <?php if (get_option('woocommerce_flat_rate_tax_status')=='none') echo 'selected="selected"'; ?>><?php _e('None', 'woothemes'); ?></option>
-	        	</select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Cost', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input type="text" name="woocommerce_flat_rate_cost" id="woocommerce_flat_rate_cost" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_cost')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Handling Fee', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input type="text" name="woocommerce_flat_rate_handling_fee" id="woocommerce_flat_rate_handling_fee" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_handling_fee')) echo $value; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><?php _e('Method available for', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_flat_rate_availability" id="woocommerce_flat_rate_availability" style="min-width:100px;">
-		            <option value="all" <?php if (get_option('woocommerce_flat_rate_availability') == 'all') echo 'selected="selected"'; ?>><?php _e('All allowed countries', 'woothemes'); ?></option>
-		            <option value="specific" <?php if (get_option('woocommerce_flat_rate_availability') == 'specific') echo 'selected="selected"'; ?>><?php _e('Specific Countries', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <?php
-    	$countries = woocommerce_countries::$countries;
-    	asort($countries);
-    	$selections = get_option('woocommerce_flat_rate_countries', array());
-    	?><tr class="multi_select_countries">
-            <td class="titledesc"><?php _e('Specific Countries', 'woothemes'); ?>:</td>
-            <td class="forminp">
-            	<div class="multi_select_countries"><ul><?php
-        			if ($countries) foreach ($countries as $key=>$val) :
-            			                    			
-        				echo '<li><label><input type="checkbox" name="woocommerce_flat_rate_countries[]" value="'. $key .'" ';
-        				if (in_array($key, $selections)) echo 'checked="checked"';
-        				echo ' />'. __($val, 'woothemes') .'</label></li>';
-
-            		endforeach;
-       			?></ul></div>
-       		</td>
-       	</tr>
+    	<h3><?php _e('Flat Rates', 'woothemes'); ?></h3>
+    	<p><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woothemes'); ?></p>
+    	<table class="form-table">
+	    	<tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Enabled', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enabled', 'woothemes') ?></span></legend>
+						<label for="<?php echo $value['id'] ?>">
+						<input name="woocommerce_flat_rate_enabled" id="woocommerce_flat_rate_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_flat_rate_enabled'), 'yes'); ?> /> <?php _e('Enable Flat Rate', 'woothemes') ?></label><br>
+					</fieldset>
+		        </td>
+		    </tr>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input type="text" name="woocommerce_flat_rate_title" id="woocommerce_flat_rate_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_title')) echo $value; else echo 'Flat Rate'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Type', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <select name="woocommerce_flat_rate_type" id="woocommerce_flat_rate_type" style="min-width:100px;">
+			            <option value="order" <?php if (get_option('woocommerce_flat_rate_type') == 'order') echo 'selected="selected"'; ?>><?php _e('Per Order', 'woothemes'); ?></option>
+			            <option value="item" <?php if (get_option('woocommerce_flat_rate_type') == 'item') echo 'selected="selected"'; ?>><?php _e('Per Item', 'woothemes'); ?></option>
+			        </select>
+		        </td>
+		    </tr>
+		    <?php $_tax = new woocommerce_tax(); ?>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Tax Status', 'woothemes') ?></th>
+		        <td class="forminp">
+		        	<select name="woocommerce_flat_rate_tax_status">
+		        		<option value="taxable" <?php if (get_option('woocommerce_flat_rate_tax_status')=='taxable') echo 'selected="selected"'; ?>><?php _e('Taxable', 'woothemes'); ?></option>
+		        		<option value="none" <?php if (get_option('woocommerce_flat_rate_tax_status')=='none') echo 'selected="selected"'; ?>><?php _e('None', 'woothemes'); ?></option>
+		        	</select>
+		        </td>
+		    </tr>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Cost', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input type="text" name="woocommerce_flat_rate_cost" id="woocommerce_flat_rate_cost" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_cost')) echo $value; ?>" /> <span class="description"><?php _e('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Handling Fee', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <input type="text" name="woocommerce_flat_rate_handling_fee" id="woocommerce_flat_rate_handling_fee" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_handling_fee')) echo $value; ?>" /> <span class="description"><?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes') ?></span>
+		        </td>
+		    </tr>
+		    <tr valign="top">
+		        <th scope="row" class="titledesc"><?php _e('Method availability', 'woothemes') ?></th>
+		        <td class="forminp">
+			        <select name="woocommerce_flat_rate_availability" id="woocommerce_flat_rate_availability" style="min-width:100px;">
+			            <option value="all" <?php if (get_option('woocommerce_flat_rate_availability') == 'all') echo 'selected="selected"'; ?>><?php _e('All allowed countries', 'woothemes'); ?></option>
+			            <option value="specific" <?php if (get_option('woocommerce_flat_rate_availability') == 'specific') echo 'selected="selected"'; ?>><?php _e('Specific Countries', 'woothemes'); ?></option>
+			        </select>
+		        </td>
+		    </tr>
+		    <?php
+	    	$countries = woocommerce_countries::$countries;
+	    	asort($countries);
+	    	$selections = get_option('woocommerce_flat_rate_countries', array());
+	    	?><tr class="multi_select_countries">
+	            <th scope="row" class="titledesc"><?php _e('Specific Countries', 'woothemes'); ?></th>
+	            <td class="forminp">
+	            	<div class="multi_select_countries"><ul><?php
+	        			if ($countries) foreach ($countries as $key=>$val) :
+	            			                    			
+	        				echo '<li><label><input type="checkbox" name="woocommerce_flat_rate_countries[]" value="'. $key .'" ';
+	        				if (in_array($key, $selections)) echo 'checked="checked"';
+	        				echo ' />'. __($val, 'woothemes') .'</label></li>';
+	
+	            		endforeach;
+	       			?></ul></div>
+	       		</td>
+	       	</tr>
+       	</table>
        	<script type="text/javascript">
 		jQuery(function() {
 			jQuery('select#woocommerce_flat_rate_availability').change(function(){
@@ -176,7 +179,8 @@ class flat_rate extends woocommerce_shipping_method {
 
    		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else @delete_option('woocommerce_flat_rate_tax_status');
    		
-   		if(isset($_POST['woocommerce_flat_rate_enabled'])) update_option('woocommerce_flat_rate_enabled', woocommerce_clean($_POST['woocommerce_flat_rate_enabled'])); else @delete_option('woocommerce_flat_rate_enabled');
+   		if(isset($_POST['woocommerce_flat_rate_enabled'])) update_option('woocommerce_flat_rate_enabled', 'yes'); else update_option('woocommerce_flat_rate_enabled', 'no');
+   		
    		if(isset($_POST['woocommerce_flat_rate_title'])) update_option('woocommerce_flat_rate_title', woocommerce_clean($_POST['woocommerce_flat_rate_title'])); else @delete_option('woocommerce_flat_rate_title');
    		if(isset($_POST['woocommerce_flat_rate_type'])) update_option('woocommerce_flat_rate_type', woocommerce_clean($_POST['woocommerce_flat_rate_type'])); else @delete_option('woocommerce_flat_rate_type');
    		if(isset($_POST['woocommerce_flat_rate_cost'])) update_option('woocommerce_flat_rate_cost', woocommerce_clean($_POST['woocommerce_flat_rate_cost'])); else @delete_option('woocommerce_flat_rate_cost');

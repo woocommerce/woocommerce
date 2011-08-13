@@ -35,7 +35,8 @@ function woocommerce_admin_menu() {
 	
     add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_options', 'woocommerce' , 'woocommerce_dashboard', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
     add_submenu_page('woocommerce', __('Dashboard', 'woothemes'), __('Dashboard', 'woothemes'), 'manage_options', 'woocommerce', 'woocommerce_dashboard'); 
-    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_options', 'settings', 'woocommerce_settings');
+    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_options', 'woocommerce-settings', 'woocommerce_settings');
+    add_submenu_page('woocommerce', __('Coupons', 'woothemes'),  __('Coupons', 'woothemes') , 'manage_options', 'woocommerce-coupons', 'woocommerce_coupons');
     add_submenu_page('woocommerce', __('System Info', 'woothemes'), __('System Info', 'woothemes'), 'manage_options', 'sysinfo', 'woocommerce_system_info');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_options', 'attributes', 'woocommerce_attributes');
 }
@@ -94,6 +95,7 @@ function woocommerce_admin_head() {
 	<?php
 }
 add_action('admin_head', 'woocommerce_admin_head');
+
 
 /**
  * System info

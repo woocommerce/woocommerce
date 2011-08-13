@@ -34,29 +34,31 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	 **/
 	public function admin_options() {
     	?>
-    	<thead><tr><th scope="col" width="200px"><?php _e('Cheque Payment', 'woothemes'); ?></th><th scope="col" class="desc"><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases without having to use the sandbox area of a payment gateway which is useful for demonstrating to clients and for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></th></tr></thead>
-    	<tr>
-	        <td class="titledesc"><?php _e('Enable Cheque Payment', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <select name="woocommerce_cheque_enabled" id="woocommerce_cheque_enabled" style="min-width:100px;">
-		            <option value="yes" <?php if (get_option('woocommerce_cheque_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
-		            <option value="no" <?php if (get_option('woocommerce_cheque_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
-		        </select>
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" />
-	        </td>
-	    </tr>
-	    <tr>
-	        <td class="titledesc"><a href="#" tip="<?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Customer Message', 'woothemes') ?>:</td>
-	        <td class="forminp">
-		        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" />
-	        </td>
-	    </tr>
-
+    	<h3><?php _e('Cheque Payment', 'woothemes'); ?></h3>
+    	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases without having to use the sandbox area of a payment gateway which is useful for demonstrating to clients and for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></p>
+    	<table class="form-table">
+	    	<tr>
+		        <td class="titledesc"><?php _e('Enable Cheque Payment', 'woothemes') ?>:</td>
+		        <td class="forminp">
+			        <select name="woocommerce_cheque_enabled" id="woocommerce_cheque_enabled" style="min-width:100px;">
+			            <option value="yes" <?php if (get_option('woocommerce_cheque_enabled') == 'yes') echo 'selected="selected"'; ?>><?php _e('Yes', 'woothemes'); ?></option>
+			            <option value="no" <?php if (get_option('woocommerce_cheque_enabled') == 'no') echo 'selected="selected"'; ?>><?php _e('No', 'woothemes'); ?></option>
+			        </select>
+		        </td>
+		    </tr>
+		    <tr>
+		        <td class="titledesc"><a href="#" tip="<?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Method Title', 'woothemes') ?>:</td>
+		        <td class="forminp">
+			        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" />
+		        </td>
+		    </tr>
+		    <tr>
+		        <td class="titledesc"><a href="#" tip="<?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?>" class="tips" tabindex="99"></a><?php _e('Customer Message', 'woothemes') ?>:</td>
+		        <td class="forminp">
+			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" />
+		        </td>
+		    </tr>
+		</table>
     	<?php
     }
     

@@ -21,80 +21,22 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 
 	array( 'type' => 'tab', 'tabname' => __('General', 'woothemes') ),
 
-	array( 'name' => __('General Options', 'woothemes'), 'type' => 'title', 'desc' 		=> '' ),
-	
-	array(  
-		'name' => __('Demo store', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Enable this option to show a banner at the top of the page stating its a demo store.', 'woothemes'),
-		'id' 		=> 'woocommerce_demo_store',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'no',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
-	),
+	array( 'name' => 'General settings', 'type' => 'title', 'desc' 		=> '' ),
 
 	array(  
-		'name' => __('Enable SKU field', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Turning off the SKU field will give products an SKU of their post id.', 'woothemes'),
-		'id' 		=> 'woocommerce_enable_sku',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
-	),
-	
-	array(  
-		'name' => __('Enable weight field', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_enable_weight',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
-	),
-	
-	array(  
-		'name' => __('Weight Unit', 'woothemes'),
-		'desc' 		=> __("This controls what unit you will define weights in.", 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_weight_unit',
-		'css' 		=> 'min-width:200px;',
-		'std' 		=> 'GBP',
-		'type' 		=> 'select',
-		'options' => array( 
-			'kg' => __('kg', 'woothemes'),
-			'lbs' => __('lbs', 'woothemes')
-		)
-	),
-	
-	array(  
 		'name' => __('Base Country/Region', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('This is the base country for your business. Tax rates will be based on this country.', 'woothemes'),
+		'desc' 		=> __('This is the base country for your business. Tax rates will be based on this country.', 'woothemes'),
 		'id' 		=> 'woocommerce_default_country',
-		'css' 		=> '',
+		'css' 		=> 'min-width:175px;',
 		'std' 		=> 'GB',
 		'type' 		=> 'single_select_country'
 	),
 	
 	array(  
 		'name' => __('Allowed Countries', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('These are countries that you are willing to ship to.', 'woothemes'),
+		'desc' 		=> __('These are countries that you are willing to ship to.', 'woothemes'),
 		'id' 		=> 'woocommerce_allowed_countries',
-		'css' 		=> 'min-width:100px;',
+		'css' 		=> 'min-width:175px;',
 		'std' 		=> 'all',
 		'type' 		=> 'select',
 		'options' => array(  
@@ -106,7 +48,6 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	array(  
 		'name' => __('Specific Countries', 'woothemes'),
 		'desc' 		=> '',
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_specific_allowed_countries',
 		'css' 		=> '',
 		'std' 		=> '',
@@ -114,37 +55,24 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	),
 	
 	array(  
-		'name' => __('Enable guest checkout?', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Without guest checkout, all users will require an account in order to checkout.', 'woothemes'),
+		'name' => __('Guest checkout', 'woothemes'),
+		'desc' 		=> __('Allow guest users to checkout without an account', 'woothemes'),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'	
 	),
 	
 	array(  
-		'name' => __('Force SSL on checkout?', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Forcing SSL is recommended', 'woothemes'),
+		'name' => __('Force SSL', 'woothemes'),
+		'desc' 		=> __('Force SSL on the checkout for added security (SSL Certificate required).', 'woothemes'),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'no',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
 		'name' => __('ShareThis Publisher ID', 'woothemes'),
 		'desc' 		=> __("Enter your <a href='http://sharethis.com/account/'>ShareThis publisher ID</a> to show ShareThis on product pages.", 'woothemes'),
-		'tip' 		=> __('ShareThis is a small social sharing widget for posting links on popular sites such as Twitter and Facebook.', 'woothemes'),
 		'id' 		=> 'woocommerce_sharethis',
 		'css' 		=> 'width:300px;',
 		'type' 		=> 'text',
@@ -152,134 +80,44 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	),
 	
 	array(  
-		'name' => __('Disable WooCommerce CSS', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Useful if you want to disable WooCommerce styles and theme it yourself via your theme.', 'woothemes'),
-		'id' 		=> 'woocommerce_disable_css',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'no',
-		'type' 		=> 'select',
-		'options' => array(  
-			'no'  => __('No', 'woothemes'),
-			'yes' => __('Yes', 'woothemes')
-		)
+		'name' => __('WooCommerce CSS', 'woothemes'),
+		'desc' 		=> __('Enable WooCommerce frontend CSS styles', 'woothemes'),
+		'id' 		=> 'woocommerce_frontend_css',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
 	),
+	
+	array(  
+		'name' => __('Demo store', 'woothemes'),
+		'desc' 		=> __('Enable the "Demo Store" notice on your site', 'woothemes'),
+		'id' 		=> 'woocommerce_demo_store',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox'
+	),
+	
+	array( 'type' => 'sectionend'),
 	
 	array( 'type' => 'tabend'),
 	
 	array( 'type' => 'tab', 'tabname' => __('Pages', 'woothemes') ),
-
-	array( 'name' => __('Shop page configuration', 'woothemes'), 'type' => 'title', 'desc' 		=> '' ),
+	
+	array( 'name' => 'Page setup', 'type' => 'title', 'desc' 		=> '' ),
 	
 	array(  
-		'name' => __('Cart Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_cart]', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_cart_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('Checkout Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_checkout]', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_checkout_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('Pay Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_pay] and usually have "Checkout" as the parent.', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_pay_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('Thanks Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_thankyou] and usually have "Checkout" as the parent.', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_thanks_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('My Account Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_my_account]', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_myaccount_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('Edit Address Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_edit_address] and usually have "My Account" as the parent.', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_edit_address_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('View Order Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_view_order] and usually have "My Account" as the parent.', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_view_order_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __('Change Password Page', 'woothemes'),
-		'desc' 		=> __('Your page should contain [woocommerce_change_password] and usually have "My Account" as the parent.', 'woothemes'),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_change_password_page_id',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'single_select_page',
-		'std' 		=> ''
-	),	
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Catalog', 'woothemes') ),
-	
-	array(	'name' => __('Catalog Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
-
-	
-	array(  
-		'name' => __('Products Base Page', 'woothemes'),
-		'desc' 		=> sprintf( __("IMPORTANT: You must <a target='_blank' href='%s'>re-save your permalinks</a> for this change to take effect.", 'woothemes'), 'options-permalink.php' ),
-		'tip' 		=> __('This sets the base page of your shop. You should not change this value once you have launched your site otherwise you risk breaking urls of other sites pointing to yours, etc.', 'woothemes'),
+		'name' => __('Shop Base Page', 'woothemes'),
+		'desc' 		=> sprintf( __("This sets the base page of your shop. IMPORTANT: You must <a target='_blank' href='%s'>re-save your permalinks</a> for this change to take effect.", 'woothemes'), 'options-permalink.php' ),
 		'id' 		=> 'woocommerce_shop_page_id',
-		'css' 		=> 'min-width:50px;',
+		'css' 		=> 'min-width:175px;',
 		'type' 		=> 'single_select_page',
 		'std' 		=> ''
 	),
 	
 	array(  
-		'name' => __('Prepend shop categories/tags with base page?', 'woothemes'),
-		'desc' 		=> sprintf( __("IMPORTANT: You must <a target='_blank' href='%s'>re-save your permalinks</a> for this change to take effect.", 'woothemes'), 'options-permalink.php' ),
-		'tip' 		=> __('If set to yes, categories will show up as your_base_page/shop_category instead of just shop_category.', 'woothemes'),
+		'name' => __('Prepend base page', 'woothemes'),
+		'desc' 		=> __('Prepend shop categories/tags with shop base page', 'woothemes'),
 		'id' 		=> 'woocommerce_prepend_shop_page_to_urls',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'no',
-		'type' 		=> 'select',
-		'options' => array(  
-			'no'  => __('No', 'woothemes'),
-			'yes' => __('Yes', 'woothemes')
-		)
+		'type' 		=> 'checkbox',
 	),
 
 	array(  
@@ -293,14 +131,130 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'args'		=> 'show_option_none=' . __('None', 'woothemes'),
 	),
 	
-	array(	'name' => __('Pricing Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array( 'type' => 'sectionend'),
+	
+	array( 'name' => 'Shop pages', 'type' => 'title', 'desc' 		=> 'The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin.' ),
+	
+	array(  
+		'name' => __('Cart Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_cart]', 'woothemes'),
+		'id' 		=> 'woocommerce_cart_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Checkout Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_checkout]', 'woothemes'),
+		'id' 		=> 'woocommerce_checkout_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Pay Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_pay] Parent: "Checkout"', 'woothemes'),
+		'id' 		=> 'woocommerce_pay_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Thanks Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_thankyou] Parent: "Checkout"', 'woothemes'),
+		'id' 		=> 'woocommerce_thanks_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('My Account Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_my_account]', 'woothemes'),
+		'id' 		=> 'woocommerce_myaccount_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Edit Address Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_edit_address] Parent: "My Account"', 'woothemes'),
+		'id' 		=> 'woocommerce_edit_address_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('View Order Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_view_order] Parent: "My Account"', 'woothemes'),
+		'id' 		=> 'woocommerce_view_order_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Change Password Page', 'woothemes'),
+		'desc' 		=> __('Page contents: [woocommerce_change_password] Parent: "My Account"', 'woothemes'),
+		'id' 		=> 'woocommerce_change_password_page_id',
+		'css' 		=> 'min-width:50px;',
+		'type' 		=> 'single_select_page',
+		'std' 		=> ''
+	),	
+	
+	array( 'type' => 'sectionend'),
+	
+	array( 'type' => 'tabend'),
+	
+	array( 'type' 		=> 'tab', 'tabname' => __('Catalog', 'woothemes') ),
+	
+	array(	'name' => __('Catalog Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 
+	array(  
+		'name' => __('Product fields', 'woothemes'),
+		'desc' 		=> __('Enable the SKU field for products', 'woothemes'),
+		'id' 		=> 'woocommerce_enable_sku',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __('Enable the weight field for products', 'woothemes'),
+		'id' 		=> 'woocommerce_enable_weight',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' => __('Weight Unit', 'woothemes'),
+		'desc' 		=> __("This controls what unit you will define weights in.", 'woothemes'),
+		'id' 		=> 'woocommerce_weight_unit',
+		'css' 		=> 'min-width:175px;',
+		'std' 		=> 'GBP',
+		'type' 		=> 'select',
+		'options' => array( 
+			'kg' => __('kg', 'woothemes'),
+			'lbs' => __('lbs', 'woothemes')
+		)
+	),
+	
+	array( 'type' => 'sectionend'),
+	
+	array(	'name' => __('Pricing Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	
 	array(  
 		'name' => __('Currency', 'woothemes'),
 		'desc' 		=> sprintf( __("This controls what currency prices are listed at in the catalog, and which currency PayPal, and other gateways, will take payments in. See the list of supported <a target='_new' href='%s'>PayPal currencies</a>.", 'woothemes'), 'https://www.paypal.com/cgi-bin/webscr?cmd=p/sell/mc/mc_intro-outside' ),
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency',
-		'css' 		=> 'min-width:200px;',
+		'css' 		=> 'min-width:175px;',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'options' => apply_filters('woocommerce_currencies', array( 
@@ -336,7 +290,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'desc' 		=> __("This controls the position of the currency symbol.", 'woothemes'),
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency_pos',
-		'css' 		=> 'min-width:200px;',
+		'css' 		=> 'min-width:175px;',
 		'std' 		=> 'left',
 		'type' 		=> 'select',
 		'options' => array( 
@@ -377,54 +331,33 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'type' 		=> 'text',
 	),
 	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' => 'tab', 'tabname' => __('Coupons', 'woothemes') ),
+	array( 'type' => 'sectionend'),
 
-	array( 'name' => __('Coupon Codes', 'woothemes'), 'type' => 'title', 'desc' 		=> '' ),
+	array(	'name' => __('Inventory Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 	
 	array(  
-		'name' => __('Coupons', 'woothemes'),
-		'desc' 		=> 'All fields are required.',
-		'tip' 		=> 'Coupons allow you to give customers special offers and discounts. Leave product IDs blank to apply to all products/items in the cart.',
-		'id' 		=> 'woocommerce_coupons',
-		'css' 		=> 'min-width:50px;',
-		'type' 		=> 'coupons',
-		'std' 		=> ''
-	),
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Inventory', 'woothemes') ),
-	
-	array(	'name' => __('Inventory Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
-	
-	array(  
-		'name' => __('Manage stock?', 'woothemes'),
-		'desc' 		=> __('If you are not managing stock, turn it off here to disable it in admin and on the front-end.', 'woothemes'),
-		'tip' 		=> __('You can manage stock on a per-item basis if you leave this option on.', 'woothemes'),
+		'name' => __('Manage stock', 'woothemes'),
+		'desc' 		=> __('Enable stock management', 'woothemes'),
 		'id' 		=> 'woocommerce_manage_stock',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
-		'name' => __('Low stock notification', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Set the minimum threshold for this below.', 'woothemes'),
+		'name' => __('Notifications', 'woothemes'),
+		'desc' 		=> __('Enable low stock notifications', 'woothemes'),
 		'id' 		=> 'woocommerce_notify_low_stock',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox',
+		'checkboxgroup' => 'start'
+	),
+	
+	array(  
+		'desc' 		=> __('Enable out of stock notifications', 'woothemes'),
+		'id' 		=> 'woocommerce_notify_no_stock',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup' => 'end'
 	),
 	
 	array(  
@@ -438,20 +371,6 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	),
 	
 	array(  
-		'name' => __('Out-of-stock notification', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('Set the minimum threshold for this below.', 'woothemes'),
-		'id' 		=> 'woocommerce_notify_no_stock',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
-	),
-	
-	array(  
 		'name' => __('Out of stock threshold', 'woothemes'),
 		'desc' 		=> '',
 		'tip' 		=> '',
@@ -461,6 +380,8 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'std' 		=> '0'
 	),
 	
+	array( 'type' => 'sectionend'),
+	
 	array( 'type' => 'tabend'),
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Shipping', 'woothemes') ),
@@ -468,46 +389,30 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	array(	'name' => __('Shipping Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 	
 	array(  
-		'name' => __('Calculate Shipping', 'woothemes'),
-		'desc' 		=> __('Only set this to no if you are not shipping items, or items have shipping costs included.', 'woothemes'),
-		'tip' 		=> __('If you are not calculating shipping then you can ignore all other tax options.', 'woothemes'),
+		'name' 		=> __('Calculate shipping', 'woothemes'),
+		'desc' 		=> __('Enable shipping/shipping calculations', 'woothemes'),
 		'id' 		=> 'woocommerce_calc_shipping',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
-		'name' => __('Enable shipping calculator on cart', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> '',
+		'name' 		=> __('Shipping calculator', 'woothemes'),
+		'desc' 		=> __('Enable the shipping calculator on the cart page', 'woothemes'),
 		'id' 		=> 'woocommerce_enable_shipping_calc',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
-		'name' => __('Only ship to billing address?', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> '',
+		'name' 		=> __('Ship to billing', 'woothemes'),
+		'desc' 		=> __('Only ship to the users billing address', 'woothemes'),
 		'id' 		=> 'woocommerce_ship_to_billing_address_only',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'no',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
+	
+	array( 'type' => 'sectionend'),
 	
 	array( 'type' => 'shipping_options'),
 	
@@ -519,30 +424,18 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array(  
 		'name' => __('Calculate Taxes', 'woothemes'),
-		'desc' 		=> __('Only set this to no if you are exclusively selling non-taxable items.', 'woothemes'),
-		'tip' 		=> __('If you are not calculating taxes then you can ignore all other tax options.', 'woothemes'),
+		'desc' 		=> __('Enable taxes and tax calculations', 'woothemes'),
 		'id' 		=> 'woocommerce_calc_taxes',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
-		'name' => __('Catalog Prices include tax?', 'woothemes'),
-		'desc' 		=> '',
-		'tip' 		=> __('If prices include tax then tax calculations will work backwards.', 'woothemes'),
+		'name' => __('Prices inclusive of tax', 'woothemes'),
+		'desc' 		=> __('Catalog Prices include tax', 'woothemes'),
 		'id' 		=> 'woocommerce_prices_include_tax',
-		'css' 		=> 'min-width:100px;',
 		'std' 		=> 'yes',
-		'type' 		=> 'select',
-		'options' => array(  
-			'yes' => __('Yes', 'woothemes'),
-			'no'  => __('No', 'woothemes')
-		)
+		'type' 		=> 'checkbox'
 	),
 	
 	array(  
@@ -579,6 +472,8 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'std' 		=> ''
 	),
 	
+	array( 'type' => 'sectionend'),
+
 	array( 'type' => 'tabend'),
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Payment Gateways', 'woothemes') ),
@@ -700,6 +595,14 @@ function woocommerce_update_options($options) {
 	                @delete_option($value['id']);
 	            }
 	            
+	        elseif (isset($value['type']) && $value['type']=='checkbox') :
+	            
+	            if(isset($value['id']) && isset($_POST[$value['id']])) {
+	            	update_option($value['id'], 'yes');
+	            } else {
+	                update_option($value['id'], 'no');
+	            }
+	            
         	else :
 			    
         		if(isset($value['id']) && isset($_POST[$value['id']])) {
@@ -725,131 +628,310 @@ function woocommerce_update_options($options) {
  */
 function woocommerce_admin_fields($options) {
 	?>
-	<div id="tabs-wrap">
-		<p class="submit"><input name="save" type="submit" value="<?php _e('Save changes', 'woothemes') ?>" /></p>
+	<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
-		    $counter = 1;
-		    echo '<ul class="tabs">';
-		    foreach ($options as $value) {
-				if ( 'tab' == $value['type'] ) :
-		            echo '<li><a href="#'.$value['type'].$counter.'">'.$value['tabname'].'</a></li>'. "\n";
-		            $counter = $counter + 1;
-				endif;
-		    }
-		    echo '</ul>';
-		    $counter = 1;
-		    foreach ($options as $value) :
-		        switch($value['type']) :
-					case 'string':
+		$counter = 1;
+	    foreach ($options as $value) {
+			if ( 'tab' == $value['type'] ) :
+	            echo '<a href="#'.$value['type'].$counter.'" class="nav-tab">'.$value['tabname'].'</a>';
+	            $counter++;
+			endif;
+	    }
+		?>
+	</h2>
+	<?php
+	    $counter = 1;
+	    foreach ($options as $value) :
+	        switch($value['type']) :
+				case 'string':
+					?>
+					<tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name']; ?></th>
+						<td class="forminp"><?php echo $value['desc']; ?></td>
+					</tr>
+					<?php
+				break;
+	            case 'tab':
+	                echo '<div id="'.$value['type'].$counter.'" class="panel">';
+	            break;
+	            case 'title':
+	            	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
+	            	if (isset($value['desc']) && $value['desc']) echo wpautop(wptexturize($value['desc']));
+	            	echo '<table class="form-table">'. "\n\n";
+	            break;
+	            case 'sectionend':
+	            	echo '</table>';
+	            break;
+	            case 'text':
+	            	?><tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp"><input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="<?php echo $value['type'] ?>" style="<?php echo $value['css'] ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+	                </tr><?php
+	            break;
+	            case 'select':
+	            	?><tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp"><select name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>">
+	                        <?php
+	                        foreach ($value['options'] as $key => $val) {
+	                        ?>
+	                            <option value="<?php echo $key ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo ucfirst($val) ?></option>
+	                        <?php
+	                        }
+	                        ?>
+	                       </select> <span class="description"><?php echo $value['desc'] ?></span>
+	                    </td>
+	                </tr><?php
+	            break;
+	            case 'checkbox' :
+	            
+	            	if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='start')) :
+	            		?>
+	            		<tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+						<td class="forminp">
+						<?php
+	            	endif;
+	            	
+	            	?>
+		            <fieldset><legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
+						<label for="<?php echo $value['id'] ?>">
+						<input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
+						<?php echo $value['desc'] ?></label><br>
+					</fieldset>
+					<?php
+					
+					if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :
 						?>
-						<tr>
-							<td class="titledesc"><?php echo $value['name']; ?></td>
-							<td class="forminp"><?php echo $value['desc']; ?></td>
+							</td>
 						</tr>
 						<?php
-					break;
-		            case 'tab':
-		                echo '<div id="'.$value['type'].$counter.'" class="panel">';
-		                echo '<table class="widefat fixed" style="width:850px; margin-bottom:20px;">'. "\n\n";
-		            break;
-		            case 'title':
-		            	?><thead><tr><th scope="col" width="200px"><?php echo $value['name'] ?></th><th scope="col" class="desc"><?php if (isset($value['desc'])) echo $value['desc'] ?>&nbsp;</th></tr></thead><?php
-		            break;
-		            case 'text':
-		            	?><tr>
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp"><input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="<?php echo $value['type'] ?>" style="<?php echo $value['css'] ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /><br /><small><?php echo $value['desc'] ?></small></td>
-		                </tr><?php
-		            break;
-		            case 'select':
-		            	?><tr>
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp"><select name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>">
-		                        <?php
-		                        foreach ($value['options'] as $key => $val) {
-		                        ?>
-		                            <option value="<?php echo $key ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo ucfirst($val) ?></option>
-		                        <?php
-		                        }
-		                        ?>
-		                       </select><br /><small><?php echo $value['desc'] ?></small>
-		                    </td>
-		                </tr><?php
-		            break;
-		            case 'textarea':
-		            	?><tr>
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp">
-		                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>"><?php if (get_option($value['id'])) echo stripslashes(get_option($value['id'])); else echo $value['std']; ?></textarea>
-		                        <br /><small><?php echo $value['desc'] ?></small>
-		                    </td>
-		                </tr><?php
-		            break;
-		            case 'tabend':
-						echo '</table></div>';
-		                $counter = $counter + 1;
-		            break;
-		            case 'single_select_page' :
-		            	$page_setting = (int) get_option($value['id']);
-		            	
-		            	$args = array( 'name'	=> $value['id'],
-		            				   'id'		=> $value['id']. '" style="width: 200px;',
-		            				   'sort_column' 	=> 'menu_order',
-		            				   'sort_order'		=> 'ASC',
-		            				   'selected'		=> $page_setting);
-		            	
-		            	if( isset($value['args']) ) $args = wp_parse_args($value['args'], $args);
-		            	
-		            	?><tr class="single_select_page">
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp">
-					        	<?php wp_dropdown_pages($args); ?>  
-					        	<br /><small><?php echo $value['desc'] ?></small>        
-					        </td>
-		               	</tr><?php	
-		            break;
-		            case 'single_select_country' :
-		            	$countries = woocommerce_countries::$countries;
-		            	$country_setting = (string) get_option($value['id']);
-		            	if (strstr($country_setting, ':')) :
-		            		$country = current(explode(':', $country_setting));
-		            		$state = end(explode(':', $country_setting));
-		            	else :
-		            		$country = $country_setting;
-		            		$state = '*';
-		            	endif;
-		            	?><tr class="multi_select_countries">
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp"><select name="<?php echo $value['id'] ?>" title="Country" style="width: 150px;">	
-					        	<?php echo woocommerce_countries::country_dropdown_options($country, $state); ?>          
-					        </select>
-		               		</td>
-		               	</tr><?php	
-		            break;
-		            case 'multi_select_countries' :
-		            	$countries = woocommerce_countries::$countries;
-		            	asort($countries);
-		            	$selections = (array) get_option($value['id']);
-		            	?><tr class="multi_select_countries">
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp">
-		                    	<div class="multi_select_countries"><ul><?php
-			            			if ($countries) foreach ($countries as $key=>$val) :
-		                    			                    			
-			            				echo '<li><label><input type="checkbox" name="'. $value['id'] .'[]" value="'. $key .'" ';
-			            				if (in_array($key, $selections)) echo 'checked="checked"';
-			            				echo ' />'. $val .'</label></li>';
-		 
-		                    		endforeach;
-		               			?></ul></div>
-		               		</td>
-		               	</tr><?php		            	
-		            break;
-		            case 'coupons' :
-		            	$coupons = new woocommerce_coupons();
+					endif;
+					
+	            break;
+	            case 'textarea':
+	            	?><tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp">
+	                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>"><?php if (get_option($value['id'])) echo stripslashes(get_option($value['id'])); else echo $value['std']; ?></textarea> <span class="description"><?php echo $value['desc'] ?></span>
+	                    </td>
+	                </tr><?php
+	            break;
+	            case 'tabend':
+					echo '</div>';
+	                $counter++;
+	            break;
+	            case 'single_select_page' :
+	            	$page_setting = (int) get_option($value['id']);
+	            	
+	            	$args = array( 'name'	=> $value['id'],
+	            				   'id'		=> $value['id']. '" style="width: 200px;',
+	            				   'sort_column' 	=> 'menu_order',
+	            				   'sort_order'		=> 'ASC',
+	            				   'selected'		=> $page_setting);
+	            	
+	            	if( isset($value['args']) ) $args = wp_parse_args($value['args'], $args);
+	            	
+	            	?><tr valign="top" class="single_select_page">
+	                    <th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp">
+				        	<?php wp_dropdown_pages($args); ?> <span class="description"><?php echo $value['desc'] ?></span>        
+				        </td>
+	               	</tr><?php	
+	            break;
+	            case 'single_select_country' :
+	            	$countries = woocommerce_countries::$countries;
+	            	$country_setting = (string) get_option($value['id']);
+	            	if (strstr($country_setting, ':')) :
+	            		$country = current(explode(':', $country_setting));
+	            		$state = end(explode(':', $country_setting));
+	            	else :
+	            		$country = $country_setting;
+	            		$state = '*';
+	            	endif;
+	            	?><tr valign="top" class="multi_select_countries">
+	                    <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp"><select name="<?php echo $value['id'] ?>" title="Country" style="width: 175px;">	
+				        	<?php echo woocommerce_countries::country_dropdown_options($country, $state); ?>          
+				        </select> <span class="description"><?php echo $value['desc'] ?></span>
+	               		</td>
+	               	</tr><?php	
+	            break;
+	            case 'multi_select_countries' :
+	            	$countries = woocommerce_countries::$countries;
+	            	asort($countries);
+	            	$selections = (array) get_option($value['id']);
+	            	?><tr valign="top" class="multi_select_countries">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp">
+	                    	<div class="multi_select_countries"><ul><?php
+		            			if ($countries) foreach ($countries as $key=>$val) :
+	                    			                    			
+		            				echo '<li><label><input type="checkbox" name="'. $value['id'] .'[]" value="'. $key .'" ';
+		            				if (in_array($key, $selections)) echo 'checked="checked"';
+		            				echo ' />'. $val .'</label></li>';
+	 
+	                    		endforeach;
+	               			?></ul></div>
+	               		</td>
+	               	</tr><?php		            	
+	            break;
+	            case 'tax_rates' :
+	            	$_tax = new woocommerce_tax();
+	            	$tax_classes = $_tax->get_tax_classes();
+	            	$tax_rates = get_option('woocommerce_tax_rates');
+	            	?><tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp" id="tax_rates">
+	                    	<div class="taxrows">
+		                    	<?php
+		                    	$i = -1;
+		                    	if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) : $i++;
+		                    		echo '<p class="taxrow"><select name="tax_class['.$i.']" title="Tax Class"><option value="">'.__('Standard Rate', 'woothemes').'</option>';
+		                    		
+		                    		if ($tax_classes) foreach ($tax_classes as $class) :
+				                        echo '<option value="'.sanitize_title($class).'"';
+				                        
+				                        if ($rate['class']==sanitize_title($class)) echo 'selected="selected"';
+				                        
+				                        echo '>'.$class.'</option>';
+				                    endforeach;
+				                    
+				                    echo '</select><select name="tax_country['.$i.']" title="Country">';	
+				                        		
+				                    woocommerce_countries::country_dropdown_options($rate['country'], $rate['state']);
+				                    
+				                    echo '</select><input type="text" class="text" value="'.$rate['rate'].'" name="tax_rate['.$i.']" title="'.__('Rate', 'woothemes').'" placeholder="'.__('Rate', 'woothemes').'" maxlength="8" />% <label><input type="checkbox" name="tax_shipping['.$i.']" ';
+				                    
+				                    if (isset($rate['shipping']) && $rate['shipping']=='yes') echo 'checked="checked"';
+				                    
+				                    echo ' /> '.__('Apply to shipping', 'woothemes').'</label><a href="#" class="remove button">&times;</a></p>';
+		                    	endforeach;
+		                    	?>
+	                        </div>
+	                        <p><a href="#" class="add button"><?php _e('+ Add Tax Rule', 'woothemes'); ?></a></p>
+	                    </td>
+	                </tr>
+	                <script type="text/javascript">
+					/* <![CDATA[ */
+						jQuery(function() {
+							jQuery('#tax_rates a.add').live('click', function(){
+								var size = jQuery('.taxrows .taxrow').size();
+								
+								// Add the row
+								jQuery('<p class="taxrow"> \
+			                        <select name="tax_class[' + size + ']" title="Tax Class"> \
+			                        	<option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
+			                        		$tax_classes = $_tax->get_tax_classes();
+			                        		if ($tax_classes) foreach ($tax_classes as $class) :
+			                        			echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
+			                        		endforeach;
+			                        	?></select><select name="tax_country[' + size + ']" title="Country"><?php
+			                        		woocommerce_countries::country_dropdown_options('','',true);
+			                        	?></select><input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />%\
+			                        	<label><input type="checkbox" name="tax_shipping[' + size + ']" /> <?php _e('Apply to shipping', 'woothemes'); ?></label>\
+			                        	<a href="#" class="remove button">&times;</a>\
+		                        </p>').appendTo('#tax_rates div.taxrows');
+								return false;
+							});
+							jQuery('#tax_rates a.remove').live('click', function(){
+								var answer = confirm("<?php _e('Delete this rule?', 'woothemes'); ?>");
+								if (answer) {
+									jQuery('input', jQuery(this).parent()).val('');
+									jQuery(this).parent().hide();
+								}
+								return false;
+							});
+						});						
+					/* ]]> */
+					</script>
+	                <?php
+	            break;
+	            case "shipping_options" :
+	            
+	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
+	            		
+	            		$method->admin_options();
+	            		
+	            	endforeach;  
+	            	          
+	            break;
+	            case "gateway_options" :
+	            
+	            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
+	            		
+	            		$gateway->admin_options();
+	            		
+	            	endforeach; 
+	            	           
+	            break;
+	        endswitch;
+	    endforeach;
+	?>
+	<p class="submit"><input name="save" class="button-primary" type="submit" value="<?php _e('Save changes', 'woothemes') ?>" /></p>
+	<script type="text/javascript">
+	jQuery(function() {
+	    // Tabs
+		jQuery('.woo-nav-tab-wrapper a:first').addClass('nav-tab-active');
+		jQuery('div.panel:not(div.panel:first)').hide();
+		jQuery('.woo-nav-tab-wrapper a').click(function(){
+			jQuery('.woo-nav-tab-wrapper a').removeClass('nav-tab-active');
+			jQuery(this).addClass('nav-tab-active');
+			jQuery('div.panel').hide();
+			jQuery( jQuery(this).attr('href') ).show();
+			
+			jQuery.cookie('woocommerce_settings_tab_index', jQuery(this).index('.woo-nav-tab-wrapper a'))
+
+			return false;
+		});
+		
+		<?php if (isset($_COOKIE['woocommerce_settings_tab_index']) && $_COOKIE['woocommerce_settings_tab_index'] > 0) : ?>
+			jQuery('.woo-nav-tab-wrapper a:eq(<?php echo $_COOKIE['woocommerce_settings_tab_index']; ?>)').click();
+		<?php endif; ?>
+		
+		// Countries
+		jQuery('select#woocommerce_allowed_countries').change(function(){
+			if (jQuery(this).val()=="specific") {
+				jQuery(this).parent().parent().next('tr.multi_select_countries').show();
+			} else {
+				jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
+			}
+		}).change();
+		
+	});
+	</script>
+	<?php
+}
+
+
+/**
+ * Settings page
+ * 
+ * Handles the display of the settings page in admin.
+ */
+function woocommerce_settings() {
+    global $options_settings;
+    ?>
+	<div class="wrap woocommerce">
+		<form method="post" id="mainform" action="">
+	        <?php woocommerce_admin_fields($options_settings); ?>
+	        <input name="submitted" type="hidden" value="yes" />
+		</form>
+	</div>
+	<?php
+}
+
+
+/**
+ * Coupons page
+ * 
+ * Handles the display of the coupons page in admin.
+ */
+function woocommerce_coupons() {
+	$coupons = new woocommerce_coupons();
 		            	$coupon_codes = $coupons->get_coupons();
 		            	?><tr>
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
+		                    <td class="titledesc"><?php echo $value['name'] ?>:</td>
 		                    <td class="forminp" id="coupon_codes">
 		                    	<table class="coupon_rows" cellspacing="0">
 			                    	<thead>
@@ -926,157 +1008,5 @@ function woocommerce_admin_fields($options) {
 							});						
 						/* ]]> */
 						</script>
-		                <?php
-		            break;
-		            case 'tax_rates' :
-		            	$_tax = new woocommerce_tax();
-		            	$tax_classes = $_tax->get_tax_classes();
-		            	$tax_rates = get_option('woocommerce_tax_rates');
-		            	?><tr>
-		                    <td class="titledesc"><?php if ($value['tip']) { ?><a href="#" tip="<?php echo $value['tip'] ?>" class="tips" tabindex="99"></a><?php } ?><?php echo $value['name'] ?>:</td>
-		                    <td class="forminp" id="tax_rates">
-		                    	<div class="taxrows">
-			                    	<?php
-			                    	$i = -1;
-			                    	if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) : $i++;
-			                    		echo '<p class="taxrow"><select name="tax_class['.$i.']" title="Tax Class"><option value="">'.__('Standard Rate', 'woothemes').'</option>';
-			                    		
-			                    		if ($tax_classes) foreach ($tax_classes as $class) :
-					                        echo '<option value="'.sanitize_title($class).'"';
-					                        
-					                        if ($rate['class']==sanitize_title($class)) echo 'selected="selected"';
-					                        
-					                        echo '>'.$class.'</option>';
-					                    endforeach;
-					                    
-					                    echo '</select><select name="tax_country['.$i.']" title="Country">';	
-					                        		
-					                    woocommerce_countries::country_dropdown_options($rate['country'], $rate['state']);
-					                    
-					                    echo '</select><input type="text" class="text" value="'.$rate['rate'].'" name="tax_rate['.$i.']" title="'.__('Rate', 'woothemes').'" placeholder="'.__('Rate', 'woothemes').'" maxlength="8" />% <label><input type="checkbox" name="tax_shipping['.$i.']" ';
-					                    
-					                    if (isset($rate['shipping']) && $rate['shipping']=='yes') echo 'checked="checked"';
-					                    
-					                    echo ' /> '.__('Apply to shipping', 'woothemes').'</label><a href="#" class="remove button">&times;</a></p>';
-			                    	endforeach;
-			                    	?>
-		                        </div>
-		                        <p><a href="#" class="add button"><?php _e('+ Add Tax Rule', 'woothemes'); ?></a></p>
-		                    </td>
-		                </tr>
-		                <script type="text/javascript">
-						/* <![CDATA[ */
-							jQuery(function() {
-								jQuery('#tax_rates a.add').live('click', function(){
-									var size = jQuery('.taxrows .taxrow').size();
-									
-									// Add the row
-									jQuery('<p class="taxrow"> \
-				                        <select name="tax_class[' + size + ']" title="Tax Class"> \
-				                        	<option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
-				                        		$tax_classes = $_tax->get_tax_classes();
-				                        		if ($tax_classes) foreach ($tax_classes as $class) :
-				                        			echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
-				                        		endforeach;
-				                        	?></select><select name="tax_country[' + size + ']" title="Country"><?php
-				                        		woocommerce_countries::country_dropdown_options('','',true);
-				                        	?></select><input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />%\
-				                        	<label><input type="checkbox" name="tax_shipping[' + size + ']" /> <?php _e('Apply to shipping', 'woothemes'); ?></label>\
-				                        	<a href="#" class="remove button">&times;</a>\
-			                        </p>').appendTo('#tax_rates div.taxrows');
-									return false;
-								});
-								jQuery('#tax_rates a.remove').live('click', function(){
-									var answer = confirm("<?php _e('Delete this rule?', 'woothemes'); ?>");
-									if (answer) {
-										jQuery('input', jQuery(this).parent()).val('');
-										jQuery(this).parent().hide();
-									}
-									return false;
-								});
-							});						
-						/* ]]> */
-						</script>
-		                <?php
-		            break;
-		            case "shipping_options" :
-		            
-		            	foreach (woocommerce_shipping::$shipping_methods as $method) :
-		            		
-		            		$method->admin_options();
-		            		
-		            	endforeach;  
-		            	          
-		            break;
-		            case "gateway_options" :
-		            
-		            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
-		            		
-		            		$gateway->admin_options();
-		            		
-		            	endforeach; 
-		            	           
-		            break;
-		        endswitch;
-		    endforeach;
-		?>
-		<p class="submit"><input name="save" type="submit" value="<?php _e('Save changes', 'woothemes') ?>" /></p>
-	</div>
-	<script type="text/javascript">
-	jQuery(function() {
-	    // Tabs
-		jQuery('ul.tabs').show();
-		jQuery('ul.tabs li:first').addClass('active');
-		jQuery('div.panel:not(div.panel:first)').hide();
-		jQuery('ul.tabs a').click(function(){
-			jQuery('ul.tabs li').removeClass('active');
-			jQuery(this).parent().addClass('active');
-			jQuery('div.panel').hide();
-			jQuery( jQuery(this).attr('href') ).show();
-			
-			jQuery.cookie('woocommerce_settings_tab_index', jQuery(this).parent().index('ul.tabs li'))
-
-			return false;
-		});
-		
-		<?php if (isset($_COOKIE['woocommerce_settings_tab_index']) && $_COOKIE['woocommerce_settings_tab_index'] > 0) : ?>
-			
-			jQuery('ul.tabs li:eq(<?php echo $_COOKIE['woocommerce_settings_tab_index']; ?>) a').click();
-			
-		<?php endif; ?>
-		
-		// Countries
-		jQuery('select#woocommerce_allowed_countries').change(function(){
-			if (jQuery(this).val()=="specific") {
-				jQuery(this).parent().parent().next('tr.multi_select_countries').show();
-			} else {
-				jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
-			}
-		}).change();
-		
-	});
-	</script>
-	<?php
-}
-
-
-/**
- * Settings page
- * 
- * Handles the display of the settings page in admin.
- */
-function woocommerce_settings() {
-    global $options_settings;
-    woocommerce_update_options($options_settings);
-	?>
-	<script type="text/javascript" src="<?php echo woocommerce::plugin_url(); ?>/assets/js/easyTooltip.js"></script>
-	<div class="wrap woocommerce">
-        <div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br/></div>
-		<h2><?php _e('General Settings', 'woothemes'); ?></h2>
-		<form method="post" id="mainform" action="">
-	        <?php woocommerce_admin_fields($options_settings); ?>
-	        <input name="submitted" type="hidden" value="yes" />
-		</form>
-	</div>
-	<?php
+						<?php
 }

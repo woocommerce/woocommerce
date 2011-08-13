@@ -17,12 +17,14 @@ Tested up to: 3.2
  **/
 load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
 
+
 /**
  * Constants
  **/
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
 if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0");	
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
+
 
 /**
  * Include core files
@@ -40,6 +42,7 @@ include_once( 'classes/gateways/gateways.class.php' );
 include_once( 'classes/gateways/gateway.class.php' );
 include_once( 'classes/shipping/shipping.class.php' );
 include_once( 'classes/shipping/shipping_method.class.php' );
+	
 	
 /**
  * Include admin area
@@ -59,6 +62,7 @@ if (is_admin()) :
 	
 endif;
 
+
 /**
  * Include classes
  */
@@ -74,11 +78,13 @@ include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
 include_once( 'classes/validation.class.php' ); 
 
+
 /**
  * Include shipping modules
  */
 include_once( 'classes/shipping/shipping-flat_rate.php' );
 include_once( 'classes/shipping/shipping-free_shipping.php' );
+
 
 /**
  * Include payment gateways
@@ -88,6 +94,7 @@ include_once( 'classes/gateways/gateway-cheque.php' );
 include_once( 'classes/gateways/gateway-moneybookers.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
 
+
 /**
  * Init class singletons
  */		
@@ -96,6 +103,7 @@ $woocommerce_customer 			= woocommerce_customer::get();				// Customer class, so
 $woocommerce_shipping 			= woocommerce_shipping::get();				// Shipping class. loads and stores shipping methods
 $woocommerce_payment_gateways 	= woocommerce_payment_gateways::get();		// Payment gateways class. loads and stores payment methods
 $woocommerce_cart 				= woocommerce_cart::get();					// Cart class, stores the cart contents
+	
 	
 /**
  * Add post thumbnail support to wordpress
@@ -110,6 +118,7 @@ function woocommerce_remove_post_type_thumbnail_support() {
    remove_post_type_support( 'page', 'thumbnail' );
 }
 	
+	
 /**
  * Filters and hooks
  **/
@@ -122,6 +131,7 @@ if (get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp_head', 
 add_action( 'wp_footer', 'woocommerce_demo_store' );
 add_action( 'wp_footer', 'woocommerce_sharethis' );
 
+
 /**
  * IIS compat fix/fallback
  **/
@@ -129,6 +139,7 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 	$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'],1 );
 	if (isset($_SERVER['QUERY_STRING'])) { $_SERVER['REQUEST_URI'].='?'.$_SERVER['QUERY_STRING']; }
 }
+
 
 /**
  * Init WooCommerce
@@ -139,7 +150,7 @@ function woocommerce_init() {
 	
 	// Constants	
 	if (!defined('WOOCOMMERCE_USE_CSS')) :
-		if (get_option('woocommerce_disable_css')=='yes') define('WOOCOMMERCE_USE_CSS', false);
+		if (get_option('woocommerce_frontend_css')=='no') define('WOOCOMMERCE_USE_CSS', false);
 		else define('WOOCOMMERCE_USE_CSS', true);
 	endif;
 	
@@ -243,6 +254,7 @@ function woocommerce_demo_store() {
 	endif;
 }
 
+
 /**
  * Sharethis
  *
@@ -261,6 +273,7 @@ function woocommerce_sharethis() {
 		
 	endif;
 }
+
 
 /**
  * WooCommerce conditionals
@@ -281,6 +294,7 @@ if (!function_exists('is_ajax')) {
 		return false;
 	}
 }
+
 
 /**
  * Force SSL (if enabled)
@@ -307,8 +321,9 @@ add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
 add_filter('wp_get_attachment_image_attributes', 'woocommerce_force_ssl_images');
 add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
 
+
 /**
- * Currencys
+ * Currency
  **/
 function get_woocommerce_currency_symbol() {
 	$currency = get_option('woocommerce_currency');
@@ -344,6 +359,7 @@ function get_woocommerce_currency_symbol() {
 	return apply_filters('woocommerce_currency_symbol', $currency_symbol, $currency);
 }
 
+
 /**
  * Price Formatting
  **/
@@ -378,6 +394,7 @@ function woocommerce_price( $price, $args = array() ) {
 	
 	return $return;
 }
+
 
 /**
  * Variation Formatting
@@ -418,6 +435,7 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 	endif;
 }
 
+
 /**
  * Letter to number
  **/
@@ -440,12 +458,14 @@ function woocommerce_let_to_num($v) {
     return $ret;
 }
 
+
 /**
  * Clean variables
  **/
 function woocommerce_clean( $var ) {
 	return strip_tags(stripslashes(trim($var)));
 }
+
 
 /**
  * Rating field for comments
@@ -470,6 +490,7 @@ function woocommerce_check_comment_rating($comment_data) {
 	return $comment_data;
 }
 add_filter('preprocess_comment', 'woocommerce_check_comment_rating', 0);	
+
 
 /**
  * Review comments template
@@ -501,6 +522,7 @@ function woocommerce_comments($comment, $args, $depth) {
 	<?php
 }
 
+
 /**
  * Exclude order comments from front end
  **/
@@ -522,6 +544,7 @@ function woocommerce_exclude_order_comments( $clauses ) {
 
 }
 if (!is_admin()) add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+
 
 /**
  * Cron Job - Update price if on sale
@@ -572,3 +595,32 @@ function woocommerce_update_sale_prices_schedule_check(){
 if (get_option('woocommerce_update_sale_prices')!='yes') woocommerce_update_sale_prices_schedule_check();
 
 add_action('woocommerce_update_sale_prices_schedule_check', 'woocommerce_update_sale_prices');
+
+
+/**
+ * Set up Roles & Capabilities
+ **/
+function woocommerce_init_roles() {
+	global $wp_roles;
+
+	if (class_exists('WP_Roles')) if ( ! isset( $wp_roles ) ) $wp_roles = new WP_Roles();	
+	
+	if (is_object($wp_roles)) :
+		
+		// Shop manager role
+		add_role('basic_contributor', 'Basic Contributor', array(
+		    'read' 			=> true, // True allows that capability
+		    'edit_posts' 	=> true,
+		    'delete_posts' 	=> true, // Use false to explicitly deny
+		));
+
+		// Main Shop Roles
+		$wp_roles->add_cap( 'administrator', 'manage_tickets' );
+		$wp_roles->add_cap( 'editor', 'manage_tickets' );
+		$wp_roles->add_cap( 'author', 'manage_tickets' );
+		$wp_roles->add_cap( 'contributor', 'manage_tickets' );
+		
+	endif;
+}
+
+add_action('init', 'woocommerce_init_roles');
