@@ -21,7 +21,7 @@ function woocommerce_dashboard() {
 	?>
 	<div class="wrap woocommerce">
         <div class="icon32 woocommerce_icon"><br/></div>
-		<h2><?php _e('WooCommerce Dashboard', 'woothemes'); ?></h2>
+		<h2><?php _e('Dashboard', 'woothemes'); ?></h2>
 		<div id="woocommerce_dashboard">
 			
 			<div id="dashboard-widgets" class="metabox-holder">
@@ -102,7 +102,7 @@ function woocommerce_dashboard() {
 						<div class="inside">
 							<?php
 								$args = array(
-								    'numberposts'     => 10,
+								    'numberposts'     => 8,
 								    'orderby'         => 'post_date',
 								    'order'           => 'DESC',
 								    'post_type'       => 'shop_order',
@@ -202,7 +202,7 @@ function woocommerce_dashboard() {
 					
 				
 				</div>
-				<div class="postbox-container" style="width:49%; float:right;">
+				<div class="postbox-container" style="width:49%; float:right; overflow:hidden;">
 					
 					<?php
 						global $current_month_offset;
@@ -460,58 +460,6 @@ function woocommerce_dashboard() {
 							?>
 						</div>
 					</div><!-- postbox end -->	
-
-					<div class="postbox">
-						<h3 class="hndle" id="poststuff"><span><?php _e('Latest News', 'woothemes') ?></span></h3>
-						<div class="inside woocommerce-rss-widget">
-				     		<?php
-				    			if (file_exists(ABSPATH.WPINC.'/class-simplepie.php')) {
-					    			
-					    			include_once(ABSPATH.WPINC.'/class-simplepie.php');
-					    			
-									$rss = fetch_feed('http://woocommerce.com/feed');
-									
-									if (!is_wp_error( $rss ) ) :
-									
-										$maxitems = $rss->get_item_quantity(5); 
-										$rss_items = $rss->get_items(0, $maxitems); 					
-									
-										if ( $maxitems > 0 ) :
-										
-											echo '<ul>';
-										
-												foreach ( $rss_items as $item ) :
-											
-												$title = wptexturize($item->get_title(), ENT_QUOTES, "UTF-8");
-				
-												$link = $item->get_permalink();
-															
-							  					$date = $item->get_date('U');
-							  
-												if ( ( abs( time() - $date) ) < 86400 ) : // 1 Day
-													$human_date = sprintf(__('%s ago', 'woothemes'), human_time_diff($date));
-												else :
-													$human_date = date(__('F jS Y', 'woothemes'), $date);
-												endif;
-							
-												echo '<li><a href="'.$link.'">'.$title.'</a> &ndash; <span class="rss-date">'.$human_date.'</span></li>';
-										
-											endforeach;
-										
-											echo '</ul>';
-											
-										else :
-											echo '<ul><li>'.__('No items found.', 'woothemes').'</li></ul>';
-										endif;
-									
-									else :
-										echo '<ul><li>'.__('No items found.', 'woothemes').'</li></ul>';
-									endif;
-								
-								}
-				    		?>
-						</div>
-					</div><!-- postbox end -->
 					
 					<div class="postbox">
 						<h3 class="hndle" id="poststuff"><span><?php _e('Useful Links', 'woothemes') ?></span></h3>
@@ -519,21 +467,15 @@ function woocommerce_dashboard() {
 				     		<ul class="links">
 				     			<li><a href="http://www.woothemes.com/"><?php _e('WooThemes', 'woothemes'); ?></a> &ndash; <?php _e('Premium WordPress Themes', 'woothemes'); ?></li>
 				     			<li><a href="https://github.com/mikejolley/woocommerce"><?php _e('WooCommerce on Github', 'woothemes'); ?></a> &ndash; <?php _e('Help extend and develop WooCommerce.', 'woothemes'); ?></li>
-				     			<li><a href="http://wordpress.org/extend/plugins/woocommerce/"><?php _e('WooCommerce on WordPress.org', 'woothemes'); ?></a> &ndash; <?php _e('Leave us a rating if you like it!', 'woothemes'); ?></li>
+				     			<li><a href="http://wordpress.org/extend/plugins/woocommerce/"><?php _e('WooCommerce on WordPress.org', 'woothemes'); ?></a> &ndash; <?php _e('Leave us a rating if you like WooCommerce!', 'woothemes'); ?></li>
 				     		</ul>
 				     		<div class="social">
 				     			
-				     			<h4 class="first"><?php _e('Show your support for WooCommerce!', 'woothemes'); ?></h4>
-								
 				     			<iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwoocommerce.com&amp;send=false&amp;layout=standard&amp;width=450&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=segoe+ui&amp;height=24" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:24px;" allowTransparency="true"></iframe>
 				     			
-				     			<p><a href="http://twitter.com/share" class="twitter-share-button" data-url="http://woocommerce.com/" data-text="WooCommerce: A WordPress eCommerce solution that works" data-count="horizontal" data-via="woocommerce" data-related="WooThemes:Creators">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></p>
+				     			<p><a href="http://twitter.com/share" class="twitter-share-button" data-url="http://woocommerce.com/" data-text="WooCommerce" data-count="horizontal" data-via="woocommerce" data-related="WooThemes:Creators">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></p>
 				     			
 				     			<p><g:plusone size="medium" href="http://woocommerce.com/"></g:plusone><script type="text/javascript" src="https://apis.google.com/js/plusone.js">{lang: 'en-GB'}</script></p>
-				     			
-				     			<h4><?php _e('WooCommerce is bought to you by&hellip;', 'woothemes'); ?></h4>
-
-				     			<p><a href="http://woocommerce.co.uk/"><img src="<?php echo woocommerce::plugin_url(); ?>/assets/images/woocommerce.png" alt="WooThemes" /></a></p>
 				     			
 				     		</div>
 				     		<div class="clear"></div>
