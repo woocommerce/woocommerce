@@ -203,7 +203,7 @@ function woocommerce_post_type() {
 			'capability_type' => 'post',
 			'publicly_queryable' => false,
 			'exclude_from_search' => true,
-			'menu_position' => 58,
+			'show_in_menu' => 'woocommerce',
 			'hierarchical' => false,
 			'show_in_nav_menus' => false,
 			'rewrite' => false,
@@ -236,6 +236,38 @@ function woocommerce_post_type() {
             'rewrite' => false,
         )
     );
+    
+    register_post_type( "shop_coupon",
+		array(
+			'labels' => array(
+				'name' => __( 'Coupons', 'woothemes' ),
+				'singular_name' => __( 'Coupon', 'woothemes' ),
+				'add_new' => __( 'Add Coupon', 'woothemes' ),
+				'add_new_item' => __( 'Add New Coupon', 'woothemes' ),
+				'edit' => __( 'Edit', 'woothemes' ),
+				'edit_item' => __( 'Edit Coupon', 'woothemes' ),
+				'new_item' => __( 'New Coupon', 'woothemes' ),
+				'view' => __( 'View Coupons', 'woothemes' ),
+				'view_item' => __( 'View Coupon', 'woothemes' ),
+				'search_items' => __( 'Search Coupons', 'woothemes' ),
+				'not_found' => __( 'No Coupons found', 'woothemes' ),
+				'not_found_in_trash' => __( 'No Coupons found in trash', 'woothemes' ),
+				'parent' => __( 'Parent Coupon', 'woothemes' )
+			),
+			'description' => __( 'This is where you can add new coupons that customers can use in your store.', 'woothemes' ),
+			'public' => true,
+			'show_ui' => true,
+			'capability_type' => 'post',
+			'publicly_queryable' => true,
+			'exclude_from_search' => true,
+			'show_in_menu' => 'woocommerce',
+			'hierarchical' => false,
+			'rewrite' => false,
+			'query_var' => false,			
+			'supports' => array( 'title' ),
+			'show_in_nav_menus' => false,
+		)
+	);
 
     if (get_option('woocommerce_update_rewrite_rules')=='1') :
     	// Re-generate rewrite rules

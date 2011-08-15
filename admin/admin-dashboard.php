@@ -90,7 +90,9 @@ function woocommerce_dashboard() {
 								</table>
 							</div>
 							<div class="versions">
-								<p id="wp-version-message"><?php _e('You are using', 'woothemes'); ?> <strong>WooCommerce <?php echo WOOCOMMERCE_VERSION; ?>.</strong></p>
+							
+								<p id="wp-version-message"><?php _e('You are using', 'woothemes'); ?> <strong>WooCommerce <?php echo WOOCOMMERCE_VERSION; ?></strong> <?php _e('and', 'woothemes'); ?> <strong><?php if (is_multisite()) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></strong> <?php _e('running on PHP', 'woothemes'); ?> <?php if(function_exists('phpversion')) echo phpversion(); ?> (<?php echo $_SERVER['SERVER_SOFTWARE']; ?>). <?php if(function_exists('fsockopen')) echo '<span style="color:green">' . __('Your server supports fsockopen.', 'woothemes'). '</span>'; else echo '<span style="color:red">' . __('Your server does not support fsockopen.', 'woothemes'). '</span>'; ?></p>
+								
 							</div>
 							<div class="clear"></div>
 						</div>

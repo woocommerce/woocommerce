@@ -5,13 +5,13 @@
 #menu-posts-product:hover .wp-menu-image,#menu-posts-product.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -35px 0px !important;}
 #menu-posts-shop_order .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -70px -32px !important;}
 #menu-posts-shop_order:hover .wp-menu-image,#menu-posts-shop_order.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -70px 0px !important;}
-#icon-woocommerce,.woocommerce_icon,.icon32-posts-product,.icon32-posts-shop_order{background-image:url(../images/icons/woocommerce-icons.png) !important;background-position:-11px -6px;}
+#icon-woocommerce,.woocommerce_icon,.icon32-posts-product,.icon32-posts-shop_order,.icon32-posts-shop_coupon,.icon32-posts-product_variation{background-image:url(../images/icons/woocommerce-icons.png) !important;background-position:-11px -6px;}
 .icon32-posts-product{background-position:-185px -6px !important;}
 .icon32-posts-product{background-position:-69px -6px !important;}
 .icon32-posts-shop_order{background-position:-127px -6px !important;}
-.icon32-attributes{background-position:-185px -6px !important;}
+.icon32-attributes,.icon32-posts-product_variation{background-position:-185px -6px !important;}
 .icon32-woocommerce-settings{background-position:-359px -6px !important;}
-.icon32-woocommerce-debug{background-position:-417px -6px !important;}
+.icon32-posts-shop_coupon{background-position:-475px -6px !important;}
 .order_actions{color:#999;font-size:11px;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px;margin:0;line-height:1.6em;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}
 #woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .item_id{width:300px;vertical-align:top;}
@@ -135,7 +135,7 @@ a.tips{height:16px;width:16px;margin:4px -8px 0 0;float:right;background:url(../
 .woocommerce_options_panel textarea,.woocommerce_options_panel input,.woocommerce_options_panel select{margin:0;}
 .woocommerce_options_panel textarea{width:50% !important;float:left;}
 .woocommerce_options_panel input{width:50%;float:left;}
-.woocommerce_options_panel .checkbox,table.woocommerce_variable_attributes .checkbox{vertical-align:middle;margin:7px 0;}
+.woocommerce_options_panel .checkbox,table.woocommerce_variable_attributes .checkbox{vertical-align:middle;margin:7px 0;width:auto;}
 .woocommerce_options_panel select{float:left;}
 .woocommerce_options_panel .short{width:20%;}
 #woocommerce_attributes{padding:12px;}

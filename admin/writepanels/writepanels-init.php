@@ -12,6 +12,7 @@
 require_once('writepanel-product_data.php');
 require_once('writepanel-product-types.php');
 require_once('writepanel-order_data.php');
+require_once('writepanel-coupon_data.php');
 
 /**
  * Init the meta boxes
@@ -32,6 +33,11 @@ function woocommerce_meta_boxes() {
 	
 	remove_meta_box( 'commentstatusdiv', 'shop_order' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_order' , 'normal' );
+	
+	add_meta_box( 'woocommerce-coupon-data', __('Coupon Data', 'woothemes'), 'woocommerce_coupon_data_meta_box', 'shop_coupon', 'normal', 'high');
+	
+	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
+	remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
 }
 
 /**
@@ -48,7 +54,7 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
 	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
 	if ( !isset($_POST['woocommerce_meta_nonce']) || (isset($_POST['woocommerce_meta_nonce']) && !wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ))) return $post_id;
 	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
-	if ( $post->post_type != 'product' && $post->post_type != 'shop_order' ) return $post_id;
+	if ( $post->post_type != 'product' && $post->post_type != 'shop_order' && $post->post_type != 'shop_coupon' ) return $post_id;
 	
 	do_action( 'woocommerce_process_'.$post->post_type.'_meta', $post_id, $post );
 }

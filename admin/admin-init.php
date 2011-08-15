@@ -36,8 +36,6 @@ function woocommerce_admin_menu() {
     add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_dashboard', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
     add_submenu_page('woocommerce', __('Dashboard', 'woothemes'), __('Dashboard', 'woothemes'), 'manage_woocommerce', 'woocommerce', 'woocommerce_dashboard'); 
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce-settings', 'woocommerce_settings');
-    add_submenu_page('woocommerce', __('Coupons', 'woothemes'),  __('Coupons', 'woothemes') , 'manage_woocommerce', 'woocommerce-coupons', 'woocommerce_coupons');
-    add_submenu_page('woocommerce', __('System Info', 'woothemes'), __('System Info', 'woothemes'), 'manage_options', 'sysinfo', 'woocommerce_system_info');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
 
@@ -72,7 +70,7 @@ function woocommerce_admin_custom_menu_order() {
 
 	return true;
 }
-add_action('admin_menu', 'woocommerce_admin_menu');
+add_action('admin_menu', 'woocommerce_admin_menu', 9);
 add_action('menu_order', 'woocommerce_admin_menu_order');
 add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');
 
@@ -96,93 +94,6 @@ function woocommerce_admin_head() {
 }
 add_action('admin_head', 'woocommerce_admin_head');
 
-
-/**
- * System info
- * 
- * Shows the system info panel which contains version data and debug info
- */
-function woocommerce_system_info() {
-	?>
-	<div class="wrap woocommerce">
-		<div class="icon32 icon32-woocommerce-debug" id="icon-woocommerce"><br/></div>
-		<h2><?php _e('System Information', 'woothemes')?></h2>
-		<br class="clear" />
-		<table class="widefat fixed">
-            <thead>		            
-            	<tr>
-                    <th scope="col" width="200px"><?php _e('Versions', 'woothemes')?></th>
-                    <th scope="col">&nbsp;</th>
-                </tr>
-           	</thead>
-           	<tbody>
-                <tr>
-                    <td class="titledesc"><?php _e('WooCommerce Version', 'woothemes')?></td>
-                    <td class="forminp"><?php echo woocommerce::get_var('version'); ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('WordPress Version', 'woothemes')?></td>
-                    <td class="forminp"><?php if (is_multisite()) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
-                </tr>
-            </tbody>
-            <thead>
-                <tr>
-                    <th scope="col" width="200px"><?php _e('Server', 'woothemes')?></th>
-                    <th scope="col">&nbsp;</th>
-                </tr>
-            </thead>
-           	<tbody>
-                <tr>
-                    <td class="titledesc"><?php _e('PHP Version', 'woothemes')?></td>
-                    <td class="forminp"><?php if(function_exists('phpversion')) echo phpversion(); ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('Server Software', 'woothemes')?></td>
-                    <td class="forminp"><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
-                </tr>
-        	</tbody>
-			<thead>		            
-            	<tr>
-                    <th scope="col" width="200px"><?php _e('Debug Information', 'woothemes')?></th>
-                    <th scope="col">&nbsp;</th>
-                </tr>
-           	</thead>
-            <tbody>
-                <tr>
-                    <td class="titledesc"><?php _e('UPLOAD_MAX_FILESIZE', 'woothemes')?></td>
-                    <td class="forminp"><?php 
-                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('upload_max_filesize'))/(1024*1024))."MB";
-                    ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('POST_MAX_SIZE', 'woothemes')?></td>
-                    <td class="forminp"><?php 
-                    	if(function_exists('phpversion')) echo (woocommerce_let_to_num(ini_get('post_max_size'))/(1024*1024))."MB";
-                    ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('WordPress Memory Limit', 'woothemes')?></td>
-                    <td class="forminp"><?php 
-                    	echo (woocommerce_let_to_num(WP_MEMORY_LIMIT)/(1024*1024))."MB";
-                    ?></td>
-                </tr>
-                 <tr>
-                    <td class="titledesc"><?php _e('WP_DEBUG', 'woothemes')?></td>
-                    <td class="forminp"><?php if (WP_DEBUG) echo __('On', 'woothemes'); else __('Off', 'woothemes'); ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('DISPLAY_ERRORS', 'woothemes')?></td>
-                    <td class="forminp"><?php if(function_exists('phpversion')) echo ini_get('display_errors'); ?></td>
-                </tr>
-                <tr>
-                    <td class="titledesc"><?php _e('FSOCKOPEN', 'woothemes')?></td>
-                    <td class="forminp"><?php if(function_exists('fsockopen')) echo '<span style="color:green">' . __('Your server supports fsockopen.', 'woothemes'). '</span>'; else echo '<span style="color:red">' . __('Your server does not support fsockopen.', 'woothemes'). '</span>'; ?></td>
-                </tr>
-        	</tbody>
-        </table>
-	</div> 
-	<?php
-}
 
 /**
  * Feature a product from admin

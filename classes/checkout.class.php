@@ -584,6 +584,9 @@ class woocommerce_checkout {
 						if (is_wp_error($order_id)) :
 							woocommerce::add_error( 'Error: Unable to create order. Please try again.' );
 			                break;
+						else :
+							// Inserted successfully 
+							do_action('woocommerce_new_order', $order_id);
 						endif;
 					endif;
 					
@@ -595,9 +598,6 @@ class woocommerce_checkout {
 					wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
 					
 					$order = &new woocommerce_order($order_id);
-					
-					// Inserted successfully 
-					do_action('woocommerce_new_order', $order_id);
 
 					if (woocommerce_cart::needs_payment()) :
 						

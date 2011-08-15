@@ -4,6 +4,7 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- Increase coupon usage count
  *		- Get variation
  *		- Add order item
  *		- When default permalinks are enabled, redirect shop page to post type archive url
@@ -18,6 +19,18 @@
  * @category	Emails
  * @author		WooThemes
  */
+
+/**
+ * Increase coupon usage count
+ */
+add_action('woocommerce_new_order', 'woocommerce_increase_coupon_counts');
+
+function woocommerce_increase_coupon_counts() {
+	if (woocommerce_cart::$applied_coupons) foreach (woocommerce_cart::$applied_coupons as $code) :
+		woocommerce_coupons::inc_usage_count($code);
+	endforeach;
+}
+
 
 /**
  * Get variation price etc when using frontend form

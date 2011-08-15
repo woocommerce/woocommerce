@@ -519,13 +519,13 @@ class woocommerce_cart {
 			endif;
 			
 			// If its individual use then remove other coupons
-			if ($the_coupon['individual_use']=='yes') :
+			if ($the_coupon['individual_use']==1) :
 				self::$applied_coupons = array();
 			endif;
 			
 			foreach (self::$applied_coupons as $coupon) :
 				$coupon = woocommerce_coupons::get_coupon($coupon);
-				if ($coupon['individual_use']=='yes') :
+				if ($coupon['individual_use']==1) :
 					self::$applied_coupons = array();
 				endif;
 			endforeach;
