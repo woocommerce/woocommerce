@@ -215,6 +215,48 @@ class woocommerce_order {
 		endforeach;	
 		
 		return $return;	
+	}
+	
+	/** Output items for display in html emails */
+	function email_order_items_table( $show_download_links = false, $show_sku = false ) {
+
+		$return = '';
+		
+		foreach($this->items as $item) : 
+			
+			$_product = $this->get_product_from_item( $item );
+			
+			$file = $sku = $variation = '';
+			
+			if ($show_sku) :
+				$sku = ' (#' . $_product->sku . ')';
+			endif;
+			
+			if (isset($_product->variation_data)) :
+				$variation = '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
+			endif;
+			
+			if ($show_download_links) :
+				
+				if ($_product->exists) :
+			
+					if ($_product->is_type('downloadable')) :
+						$file = '<br/>' . $this->get_downloadable_file_url( $item['id'] ) . '';
+					endif;
+		
+				endif;	
+					
+			endif;
+			
+			$return = '<tr>
+				<td style="text-align:left;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
+				<td style="text-align:left;">'.$item['qty'].'</td>
+				<td style="text-align:left;">'.strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 ))).'</td>
+			</tr>';
+			
+		endforeach;	
+		
+		return $return;	
 		
 	}
 	

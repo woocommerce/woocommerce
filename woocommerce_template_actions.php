@@ -77,6 +77,7 @@ add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_reviews_panel
 
 /* Checkout */
 add_action( 'before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
 /* Remove the singular class for woocommerce single product */
 add_action( 'after_setup_theme', 'woocommerce_body_classes_check' );

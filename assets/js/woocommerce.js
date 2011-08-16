@@ -7,6 +7,61 @@ jQuery.fn.animateHighlight = function(highlightColor, duration) {
 
 jQuery(function(){
 	
+	// Ajax add to cart
+	jQuery('.add_to_cart_button').live('click', function() {
+		
+		// AJAX add to cart request
+		var thisbutton = jQuery(this);
+		
+		if (thisbutton.is('.product_type_simple')) {
+	
+			jQuery(thisbutton).addClass('loading');
+			
+			var data = {
+				action: 		'woocommerce_add_to_cart',
+				product_id: 	jQuery(thisbutton).attr('rel'),
+				security: 		params.add_to_cart_nonce
+			};
+			
+			// Trigger event
+			jQuery('body').trigger('adding_to_cart');
+			
+			// Block widget
+			jQuery('.widget_shopping_cart').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+	
+			jQuery.post( params.ajax_url, data, function(response) {
+
+				// Changes button classes
+				jQuery(thisbutton).addClass('added');
+				jQuery(thisbutton).removeClass('loading');
+
+				// Cart widget load
+				jQuery('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
+					jQuery('.widget_shopping_cart').unblock();
+				} );
+				
+				// Trigger event so themes can refresh other areas
+				jQuery('body').trigger('added_to_cart');
+				
+				// Get response
+				fragments = jQuery.parseJSON( response );
+				
+				if (fragments) {
+					jQuery.each(fragments, function(key, value) { 
+						jQuery(key).replaceWith(value);
+					});
+				}
+		
+			});
+			
+			return false;
+		
+		} else {
+			return true;
+		}
+		
+	});
+	
 	// Lightbox
 	jQuery('a.zoom').fancybox({
 		'transitionIn'	:	'elastic',
@@ -247,16 +302,25 @@ if (params.is_checkout==1) {
 		}
 		
 		jQuery('#order_methods, #order_review').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-		jQuery.ajax({
-			type: 		'POST',
-			url: 		params.review_order_url,
-			data: 		{ shipping_method: method, country: country, state: state, postcode: postcode, s_country: s_country, s_state: s_state, s_postcode: s_postcode },
-			success: 	function( code ) {
-							jQuery('#order_methods, #order_review').remove();
-							jQuery('#order_review_heading').after(code);
-							jQuery('#order_review input[name=payment_method]:checked').click();
-						},
-			dataType: 	"html"
+		
+		var data = {
+			action: 			'woocommerce_update_order_review',
+			security: 			params.update_order_review_nonce,
+			shipping_method: 	method, 
+			country: 			country, 
+			state: 				state, 
+			postcode: 			postcode, 
+			s_country: 			s_country, 
+			s_state: 			s_state, 
+			s_postcode: 		s_postcode
+		};
+			
+		jQuery.post( params.ajax_url, data, function(response) {
+		
+			jQuery('#order_methods, #order_review').remove();
+			jQuery('#order_review_heading').after(response);
+			jQuery('#order_review input[name=payment_method]:checked').click();
+		
 		});
 	
 	}

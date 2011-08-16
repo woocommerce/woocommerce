@@ -19,7 +19,7 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', woocommerce_c
 	
 	<h3 id="order_review_heading"><?php _e('Your order', 'woothemes'); ?></h3>
 	
-	<?php woocommerce_get_template('checkout/review_order.php', false); ?>
+	<?php do_action('woocommerce_checkout_order_review'); ?>
 	
 </form>
 

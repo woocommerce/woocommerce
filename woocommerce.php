@@ -210,7 +210,8 @@ function woocommerce_frontend_scripts() {
 		'plugin_url' 					=> woocommerce::plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
-		'review_order_url'				=> woocommerce_get_template_file_url('checkout/review_order.php', true),
+		'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
+		'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
 		'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
 		'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout')
 	);

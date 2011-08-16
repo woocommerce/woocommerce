@@ -2,7 +2,7 @@
 /**
  * WooCommerce Template Functions
  * 
- * Functions used in the template files to output content - hooked in via the template actions.
+ * Functions used in the template files to output content - in most cases hooked in via the template actions.
  *
  * @package		WooCommerce
  * @category	Core
@@ -76,7 +76,7 @@ if (!function_exists('woocommerce_get_sidebar')) {
  **/
 if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 	function woocommerce_template_loop_add_to_cart( $post, $_product ) {		
-		?><a href="<?php echo $_product->add_to_cart_url(); ?>" class="button"><?php _e('Add to cart', 'woothemes'); ?></a><?php
+		?><a href="<?php echo $_product->add_to_cart_url(); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php _e('Add to cart', 'woothemes'); ?></a><?php
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
@@ -843,4 +843,14 @@ function woocommerce_cross_sell_display() {
 		echo '</div>';
 	endif;
 	wp_reset_query();
+}
+
+
+/**
+ * Order review table for checkout
+ **/
+function woocommerce_order_review() {
+
+	woocommerce_get_template('checkout/review_order.php', false);
+
 }

@@ -8,7 +8,8 @@
  * @category	Emails
  * @author		WooThemes
  */
- 
+
+
 /**
  * Mail from name/email
  **/
@@ -27,6 +28,88 @@ function woocommerce_mail_from( $email ) {
 
 
 /**
+ * HTML email template for standard WordPress emails
+ **/
+add_action('phpmailer_init', 'woocommerce_email_template');
+
+function woocommerce_email_template( $phpmailer ) {
+	
+	if (!strstr($phpmailer->Body, '<html>')) :
+		
+		// Standard WordPress email
+		global $email_heading;
+		
+		$subject = $phpmailer->Subject;
+		$subject = str_replace('['.get_bloginfo('name').'] ', '', $subject);
+		
+		$email_heading = $subject;
+		
+		$content = nl2br(wptexturize($phpmailer->Body));
+		
+		// Buffer
+		ob_start();
+		
+		// Get mail template
+		woocommerce_email_header();
+		echo $content;
+		woocommerce_email_footer();
+		
+		// Get contents
+		$message = ob_get_clean();
+		
+		$phpmailer->Body = $message;
+		
+	else :
+		
+		// Email already using custom template
+		
+	endif;
+	
+	return $phpmailer;
+
+}
+
+
+/**
+ * Email Header
+ **/
+add_action('woocommerce_email_header', 'woocommerce_email_header');
+
+function woocommerce_email_header() {
+	woocommerce_get_template('emails/email_header.php', false);
+}
+
+
+/**
+ * Email Footer
+ **/
+add_action('woocommerce_email_footer', 'woocommerce_email_footer');
+
+function woocommerce_email_footer() {
+	woocommerce_get_template('emails/email_footer.php', false);
+}
+	
+	
+/**
+ * HTML email type
+ **/
+add_filter('wp_mail_content_type', 'woocommerce_email_content_type');
+
+function woocommerce_email_content_type($content_type){
+	return 'text/html';
+}
+
+
+/**
+ * Fix recieve password mail links
+ **/
+function woocommerce_retrieve_password_message($content){
+	return htmlspecialchars($content);
+}
+add_filter('retrieve_password_message', 'woocommerce_retrieve_password_message');
+	
+
+/**
  * Hooks for emails
  **/
 add_action('woocommerce_low_stock_notification', 'woocommerce_low_stock_notification');
@@ -41,58 +124,28 @@ add_action('order_status_pending_to_processing', 'woocommerce_new_order_notifica
 add_action('order_status_pending_to_completed', 'woocommerce_new_order_notification');
 add_action('order_status_pending_to_on-hold', 'woocommerce_new_order_notification');
 
-function woocommerce_new_order_notification( $order_id ) {
+function woocommerce_new_order_notification( $id ) {
 	
-	$order = &new woocommerce_order( $order_id );
-
-	$subject = sprintf(__('[%s] New Customer Order (# %s)', 'woothemes'), get_bloginfo('name'), $order->id);
-			
-	$message = __("You have received an order from ", 'woothemes') . $order->billing_first_name . ' ' . $order->billing_last_name . __(". Their order is as follows:", 'woothemes') . PHP_EOL . PHP_EOL;
+	global $order_id, $email_heading;
 	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('ORDER #: ', 'woothemes') . $order->id . '' . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
+	$order_id = $id;
 	
-	$message 	.= $order->email_order_items_list( false, true );
+	$email_heading = __('New Customer Order', 'woothemes');
 	
-	if ($order->customer_note) :
-		$message .= PHP_EOL . __('Note:', 'woothemes') .$order->customer_note . PHP_EOL;
-	endif;
-
-	$message .= PHP_EOL . __('Subtotal:', 'woothemes') . "\t\t\t" . $order->get_subtotal_to_display() . PHP_EOL;
-	if ($order->order_shipping > 0) $message .= __('Shipping:', 'woothemes') . "\t\t\t" . $order->get_shipping_to_display() . PHP_EOL;
-	if ($order->order_discount > 0) $message .= __('Discount:', 'woothemes') . "\t\t\t" . woocommerce_price($order->order_discount) . PHP_EOL;
-	if ($order->get_total_tax() > 0) $message .= __('Tax:', 'woothemes') . "\t\t\t\t\t" . woocommerce_price($order->get_total_tax()) . PHP_EOL;
-	$message .= __('Total:', 'woothemes') . "\t\t\t\t" . woocommerce_price($order->order_total) . ' - via ' . ucwords($order->payment_method) . PHP_EOL . PHP_EOL;
+	$subject = sprintf(__('[%s] New Customer Order (# %s)', 'woothemes'), get_bloginfo('name'), $order_id);
 	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('CUSTOMER DETAILS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
+	// Buffer
+	ob_start();
 	
-	if ($order->billing_email) $message .= __('Email:', 'woothemes') . "\t\t\t\t" . $order->billing_email . PHP_EOL;
-	if ($order->billing_phone) $message .= __('Tel:', 'woothemes') . "\t\t\t\t\t" . $order->billing_phone . PHP_EOL;
+	// Get mail template
+	woocommerce_get_template('emails/new_order.php', false);
 	
-	$message .= PHP_EOL;
+	// Get contents
+	$message = ob_get_clean();
 	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('BILLING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->billing_first_name . ' ' . $order->billing_last_name . PHP_EOL;
-	if ($order->billing_company) $message .= $order->billing_company . PHP_EOL;
-	$message .= $order->formatted_billing_address . PHP_EOL . PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('SHIPPING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->shipping_first_name . ' ' . $order->shipping_last_name . PHP_EOL;
-	if ($order->shipping_company) $message .= $order->shipping_company . PHP_EOL;
-	$message .= $order->formatted_shipping_address . PHP_EOL . PHP_EOL;
-	
-	$message = html_entity_decode( strip_tags( $message ) );
-	
+	// Send the mail	
 	wp_mail( get_option('admin_email'), $subject, $message );
+	
 }
 
 
@@ -102,57 +155,28 @@ function woocommerce_new_order_notification( $order_id ) {
 add_action('order_status_pending_to_processing', 'woocommerce_processing_order_customer_notification');
 add_action('order_status_pending_to_on-hold', 'woocommerce_processing_order_customer_notification');
  
-function woocommerce_processing_order_customer_notification( $order_id ) {
+function woocommerce_processing_order_customer_notification( $id ) {
+	
+	global $order_id, $email_heading;
+	
+	$order_id = $id;
 	
 	$order = &new woocommerce_order( $order_id );
-
+	
+	$email_heading = __('Order Received', 'woothemes');
+	
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Order Received', 'woothemes');
 	
-	$message 	 = __("Thank you, we are now processing your order. Your order's details are below:", 'woothemes') . PHP_EOL . PHP_EOL;
+	// Buffer
+	ob_start();
 	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message 	.= __('ORDER #: ', 'woothemes') . $order->id . '' . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
+	// Get mail template
+	woocommerce_get_template('emails/customer_processing_order.php', false);
 	
-	$message 	.= $order->email_order_items_list();
-	
-	if ($order->customer_note) :
-		$message .= PHP_EOL . __('Note:', 'woothemes') .$order->customer_note . PHP_EOL;
-	endif;
+	// Get contents
+	$message = ob_get_clean();
 
-	$message .= PHP_EOL . __('Subtotal:', 'woothemes') . "\t\t\t" . $order->get_subtotal_to_display() . PHP_EOL;
-	if ($order->order_shipping > 0) $message .= __('Shipping:', 'woothemes') . "\t\t\t" . $order->get_shipping_to_display() . PHP_EOL;
-	if ($order->order_discount > 0) $message .= __('Discount:', 'woothemes') . "\t\t\t" . woocommerce_price($order->order_discount) . PHP_EOL;
-	if ($order->get_total_tax() > 0) $message .= __('Tax:', 'woothemes') . "\t\t\t\t\t" . woocommerce_price($order->get_total_tax()) . PHP_EOL;
-	$message .= __('Total:', 'woothemes') . "\t\t\t\t" . woocommerce_price($order->order_total) . ' - via ' . ucwords($order->payment_method) . PHP_EOL . PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('CUSTOMER DETAILS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	if ($order->billing_email) $message .= __('Email:', 'woothemes') . "\t\t\t\t" . $order->billing_email . PHP_EOL;
-	if ($order->billing_phone) $message .= __('Tel:', 'woothemes') . "\t\t\t\t\t" . $order->billing_phone . PHP_EOL;
-	
-	$message .= PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('BILLING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->billing_first_name . ' ' . $order->billing_last_name . PHP_EOL;
-	if ($order->billing_company) $message .= $order->billing_company . PHP_EOL;
-	$message .= $order->formatted_billing_address . PHP_EOL . PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('SHIPPING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->shipping_first_name . ' ' . $order->shipping_last_name . PHP_EOL;
-	if ($order->shipping_company) $message .= $order->shipping_company . PHP_EOL;
-	$message .= $order->formatted_shipping_address . PHP_EOL . PHP_EOL;
-	
-	$message = html_entity_decode( strip_tags( $message ) );
-
+	// Send the mail	
 	wp_mail( $order->billing_email, $subject, $message );
 }
 
@@ -162,57 +186,28 @@ function woocommerce_processing_order_customer_notification( $order_id ) {
  **/
 add_action('order_status_completed', 'woocommerce_completed_order_customer_notification');
  
-function woocommerce_completed_order_customer_notification( $order_id ) {
+function woocommerce_completed_order_customer_notification( $id ) {
+	
+	global $order_id, $email_heading;
+	
+	$order_id = $id;
 	
 	$order = &new woocommerce_order( $order_id );
+	
+	$email_heading = __('Order Complete', 'woothemes');
 
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Order Complete', 'woothemes');
 	
-	$message 	 = __("Your order is complete. Your order's details are below:", 'woothemes') . PHP_EOL . PHP_EOL;
+	// Buffer
+	ob_start();
 	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message 	.= __('ORDER #: ', 'woothemes') . $order->id . '' . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
+	// Get mail template
+	woocommerce_get_template('emails/customer_completed_order.php', false);
 	
-	$message 	.= $order->email_order_items_list( true );
-	
-	if ($order->customer_note) :
-		$message .= PHP_EOL . __('Note:', 'woothemes') .$order->customer_note . PHP_EOL;
-	endif;
+	// Get contents
+	$message = ob_get_clean();
 
-	$message .= PHP_EOL . __('Subtotal:', 'woothemes') . "\t\t\t" . $order->get_subtotal_to_display() . PHP_EOL;
-	if ($order->order_shipping > 0) $message .= __('Shipping:', 'woothemes') . "\t\t\t" . $order->get_shipping_to_display() . PHP_EOL;
-	if ($order->order_discount > 0) $message .= __('Discount:', 'woothemes') . "\t\t\t" . woocommerce_price($order->order_discount) . PHP_EOL;
-	if ($order->get_total_tax() > 0) $message .= __('Tax:', 'woothemes') . "\t\t\t\t\t" . woocommerce_price($order->get_total_tax()) . PHP_EOL;
-	$message .= __('Total:', 'woothemes') . "\t\t\t\t" . woocommerce_price($order->order_total) . ' - via ' . ucwords($order->payment_method) . PHP_EOL . PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('CUSTOMER DETAILS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	if ($order->billing_email) $message .= __('Email:', 'woothemes') . "\t\t\t\t" . $order->billing_email . PHP_EOL;
-	if ($order->billing_phone) $message .= __('Tel:', 'woothemes') . "\t\t\t\t\t" . $order->billing_phone . PHP_EOL;
-	
-	$message .= PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('BILLING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->billing_first_name . ' ' . $order->billing_last_name . PHP_EOL;
-	if ($order->billing_company) $message .= $order->billing_company . PHP_EOL;
-	$message .= $order->formatted_billing_address . PHP_EOL . PHP_EOL;
-	
-	$message 	.= '=====================================================================' . PHP_EOL;
-	$message .= __('SHIPPING ADDRESS', 'woothemes') . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message .= $order->shipping_first_name . ' ' . $order->shipping_last_name . PHP_EOL;
-	if ($order->shipping_company) $message .= $order->shipping_company . PHP_EOL;
-	$message .= $order->formatted_shipping_address . PHP_EOL . PHP_EOL;
-	
-	$message = html_entity_decode( strip_tags( $message ) );
-
+	// Send the mail	
 	wp_mail( $order->billing_email, $subject, $message );
 }
 
@@ -220,33 +215,29 @@ function woocommerce_completed_order_customer_notification( $order_id ) {
 /**
  * Pay for order notification email template - this one includes a payment link
  **/
-function woocommerce_pay_for_order_customer_notification( $order_id ) {
+function woocommerce_pay_for_order_customer_notification( $id ) {
+	
+	global $order_id, $email_heading;
+	
+	$order_id = $id;
 	
 	$order = &new woocommerce_order( $order_id );
+	
+	$email_heading = __('Pay for Order', 'woothemes');
 
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Pay for Order', 'woothemes');
-	
-	$customer_message = sprintf( __("An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: %s", 'woothemes') . PHP_EOL . PHP_EOL, get_bloginfo('name'), $order->get_checkout_payment_url() );
-	
-	$message 	 = '=====================================================================' . PHP_EOL;
-	$message 	.= __('ORDER #: ', 'woothemes') . $order->id . '' . PHP_EOL;
-	$message 	.= '=====================================================================' . PHP_EOL;
-	
-	$message 	.= $order->email_order_items_list();
-	
-	if ($order->customer_note) :
-		$message .= PHP_EOL . __('Note:', 'woothemes') .$order->customer_note . PHP_EOL;
-	endif;
 
-	$message .= PHP_EOL . __('Subtotal:', 'woothemes') . "\t\t\t" . $order->get_subtotal_to_display() . PHP_EOL;
-	if ($order->order_shipping > 0) $message .= __('Shipping:', 'woothemes') . "\t\t\t" . $order->get_shipping_to_display() . PHP_EOL;
-	if ($order->order_discount > 0) $message .= __('Discount:', 'woothemes') . "\t\t\t" . woocommerce_price($order->order_discount) . PHP_EOL;
-	if ($order->get_total_tax() > 0) $message .= __('Tax:', 'woothemes') . "\t\t\t\t\t" . woocommerce_price($order->get_total_tax()) . PHP_EOL;
-	$message .= __('Total:', 'woothemes') . "\t\t\t\t" . woocommerce_price($order->order_total) . ' - via ' . ucwords($order->payment_method) . PHP_EOL . PHP_EOL;
+	// Buffer
+	ob_start();
 	
-	$customer_message = html_entity_decode( strip_tags( $customer_message.$message ) );
+	// Get mail template
+	woocommerce_get_template('emails/customer_pay_for_order.php', false);
+	
+	// Get contents
+	$message = ob_get_clean();
 
-	wp_mail( $order->billing_email, $subject, $customer_message );
+	// Send the mail	
+	wp_mail( $order->billing_email, $subject, $message );
 }
 
 

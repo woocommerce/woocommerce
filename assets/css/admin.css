@@ -135,6 +135,7 @@ a.tips{height:16px;width:16px;margin:4px -8px 0 0;float:right;background:url(../
 .woocommerce_options_panel textarea,.woocommerce_options_panel input,.woocommerce_options_panel select{margin:0;}
 .woocommerce_options_panel textarea{width:50% !important;float:left;}
 .woocommerce_options_panel input{width:50%;float:left;}
+.woocommerce_options_panel input.button{width:auto;margin-left:8px;}
 .woocommerce_options_panel .checkbox,table.woocommerce_variable_attributes .checkbox{vertical-align:middle;margin:7px 0;width:auto;}
 .woocommerce_options_panel select{float:left;}
 .woocommerce_options_panel .short{width:20%;}

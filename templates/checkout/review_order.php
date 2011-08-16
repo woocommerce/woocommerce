@@ -1,29 +1,3 @@
-<?php
-	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
-	
-	if (!defined('ABSPATH')) :
-		define('DOING_AJAX', true);
-		$root = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
-		require_once( $root.'/wp-load.php' );
-	endif;
-	
-	if (sizeof(woocommerce_cart::$cart_contents)==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
-		exit;
-	endif;
-	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_method_id'] = $_POST['shipping_method'];
-	
-	if (isset($_POST['country'])) woocommerce_customer::set_country( $_POST['country'] );
-	if (isset($_POST['state'])) woocommerce_customer::set_state( $_POST['state'] );
-	if (isset($_POST['postcode'])) woocommerce_customer::set_postcode( $_POST['postcode'] );
-	
-	if (isset($_POST['s_country'])) woocommerce_customer::set_shipping_country( $_POST['s_country'] );
-	if (isset($_POST['s_state'])) woocommerce_customer::set_shipping_state( $_POST['s_state'] );
-	if (isset($_POST['s_postcode'])) woocommerce_customer::set_shipping_postcode( $_POST['s_postcode'] );
-	
-	woocommerce_cart::calculate_totals();
-?>
 <div id="order_review">
 	
 	<table class="shop_table">

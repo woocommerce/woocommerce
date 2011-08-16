@@ -4,6 +4,8 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- AJAX update order review on checkout
+ *		- AJAX add to cart
  *		- Increase coupon usage count
  *		- Get variation
  *		- Add order item
@@ -19,6 +21,65 @@
  * @category	Emails
  * @author		WooThemes
  */
+
+
+/**
+ * AJAX get order review on checkout
+ */
+add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
+add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
+
+function woocommerce_ajax_update_order_review() {
+	
+	check_ajax_referer( 'update-order-review', 'security' );
+	
+	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+	
+	if (sizeof(woocommerce_cart::$cart_contents)==0) :
+		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
+		die();
+	endif;
+	
+	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_method_id'] = $_POST['shipping_method'];
+	
+	if (isset($_POST['country'])) woocommerce_customer::set_country( $_POST['country'] );
+	if (isset($_POST['state'])) woocommerce_customer::set_state( $_POST['state'] );
+	if (isset($_POST['postcode'])) woocommerce_customer::set_postcode( $_POST['postcode'] );
+	
+	if (isset($_POST['s_country'])) woocommerce_customer::set_shipping_country( $_POST['s_country'] );
+	if (isset($_POST['s_state'])) woocommerce_customer::set_shipping_state( $_POST['s_state'] );
+	if (isset($_POST['s_postcode'])) woocommerce_customer::set_shipping_postcode( $_POST['s_postcode'] );
+	
+	woocommerce_cart::calculate_totals();
+	
+	do_action('woocommerce_checkout_order_review');
+	
+	die();
+}
+
+/**
+ * AJAX add to cart
+ */
+add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+
+function woocommerce_ajax_add_to_cart() {
+	
+	check_ajax_referer( 'add-to-cart', 'security' );
+	
+	$product_id = (int) $_POST['product_id'];
+
+	woocommerce_cart::add_to_cart($product_id, 1);
+	
+	// Return html fragments
+	$fragments = apply_filters('add_to_cart_fragments', array());
+	
+	echo json_encode( $fragments );
+	
+	die();
+	
+}
+
 
 /**
  * Increase coupon usage count
@@ -544,7 +605,7 @@ add_action('init', 'woocommerce_download_product');
 function woocommerce_download_product() {
 	
 	if ( isset($_GET['download_file']) && isset($_GET['order']) && isset($_GET['email']) ) :
-		
+	
 		global $wpdb;
 		
 		$download_file = (int) urldecode($_GET['download_file']);
@@ -574,13 +635,22 @@ function woocommerce_download_product() {
 					'product_id' => $download_file 
 				), array( '%d' ), array( '%s', '%s', '%d' ) );
 			endif;
-		
-			// Download the file
-			$file_path = ABSPATH . get_post_meta($download_file, 'file_path', true);			
 			
-            $file_path = realpath($file_path);
-
-            $file_extension = strtolower(substr(strrchr($file_path,"."),1));
+			// Get the downloads URL and try to replace the url with a path
+			$file_path = get_post_meta($download_file, 'file_path', true);	
+			
+			$file_path = str_replace(trailingslashit(home_url()), ABSPATH, $file_path);
+			
+			// See if its local or remote
+			if (strstr($file_path, 'http:') || strstr($file_path, 'https:') || strstr($file_path, 'ftp:')) :
+				$remote_file = true;
+			else :
+				$remote_file = false;
+				$file_path = realpath($file_path);
+			endif;
+			
+			// Download the file
+			$file_extension = strtolower(substr(strrchr($file_path,"."),1));
 
             switch ($file_extension) :
                 case "pdf": $ctype="application/pdf"; break;
@@ -595,9 +665,8 @@ function woocommerce_download_product() {
                 default: $ctype="application/force-download";
             endswitch;
 
-            if (!file_exists($file_path)) wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
-			
-			@ini_set('zlib.output_compression', 'Off');
+            // Headers
+            @ini_set('zlib.output_compression', 'Off');
 			@set_time_limit(0);
 			@session_start();					
 			@session_cache_limiter('none');		
@@ -622,9 +691,22 @@ function woocommerce_download_product() {
 
 			header("Content-Transfer-Encoding: binary");
 							
-            header("Content-Length: ".@filesize($file_path));
-            @readfile("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
-			exit;
+            if ($size = @filesize($file_path)) header("Content-Length: ".$size);
+            
+            // Serve it
+            if ($remote_file) :
+            	
+            	@readfile("$file_path") or header('Location: '.$file_path);
+            	
+            else :
+            	
+            	if (!file_exists($file_path)) wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+            	 
+            	@readfile("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			
+            endif;
+            
+            exit;
 			
 		endif;
 		

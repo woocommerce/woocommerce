@@ -23,9 +23,10 @@ function downloadable_product_type_options() {
 			// File URL
 			$file_path = get_post_meta($post->ID, 'file_path', true);
 			$field = array( 'id' => 'file_path', 'label' => __('File path', 'woothemes') );
-			echo '<p class="form-field">
-				<label for="'.$field['id'].'">'.$field['label'].':</label>
-				<span style="float:left">'.ABSPATH.'</span><input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('path to file on your server', 'woothemes').'" /></p>';
+			echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label>
+				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woothemes').'" />
+				<input type="button"  class="upload_file_button button" value="'.__('Upload a file', 'woothemes').'" />
+			</p>';
 				
 			// Download Limit
 			$download_limit = get_post_meta($post->ID, 'download_limit', true);
@@ -39,6 +40,58 @@ function downloadable_product_type_options() {
 	<?php
 }
 add_action('woocommerce_product_type_options_box', 'downloadable_product_type_options');
+
+
+/**
+ * Product Type Javascript
+ * 
+ * Javascript for the downloadable product type
+ */
+function downloadable_product_write_panel_js() {
+	global $post;
+	?>
+	jQuery(function(){
+
+		window.send_to_editor_default = window.send_to_editor;
+
+		jQuery('.upload_file_button').live('click', function(){
+			
+			var post_id = <?php echo $post->ID; ?>;
+			
+			formfield = jQuery('#file_path').attr('name');
+			
+			window.send_to_editor = window.send_to_download_url;
+			
+			tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=file&amp;from=wc01&amp;TB_iframe=true');
+			return false;
+		});
+
+		window.send_to_download_url = function(html) {
+			
+			file_url = jQuery(html).attr('href');
+			if (file_url) {
+				jQuery('#file_path').val(file_url);
+			}
+			tb_remove();
+			window.send_to_editor = window.send_to_editor_default;
+			
+		}
+		
+	});
+	<?php
+}
+add_action('product_write_panel_js', 'downloadable_product_write_panel_js');
+
+add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
+
+function woocommerce_change_insert_into_post( $translation, $original ) {
+    if( !isset( $_REQUEST['from'] ) ) return $translation;
+
+    if( $_REQUEST['from'] == 'wc01' && $original == 'Insert into Post' ) return __('Insert into URL field', 'woothemes' );
+
+    return $translation;
+}
+
 
 /**
  * Product Type selector
