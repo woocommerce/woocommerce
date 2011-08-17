@@ -542,6 +542,28 @@ if (!is_admin()) add_filter('comments_clauses', 'woocommerce_exclude_order_comme
 
 
 /**
+ * Sync lowest price so grouped products can be sorted by price
+ **/
+function woocommerce_grouped_price_sync( $parent_id ) {
+
+	$children_by_price = get_posts( array(
+		'post_parent' 	=> $parent_id,
+		'orderby' 	=> 'meta_value_num',
+		'order'		=> 'asc',
+		'meta_key'	=> 'price',
+		'posts_per_page' => 1,
+		'post_type' => 'product'
+	));
+	if ($children_by_price) :
+		$children_by_price = $children_by_price[0];
+		$child = $children_by_price->ID;
+		$low_price = get_post_meta($child, 'price', true);
+		update_post_meta( $parent_id, 'price', $low_price );
+	endif;
+}
+
+
+/**
  * Cron Job - Update price if on sale
  **/
 function woocommerce_update_sale_prices() {
@@ -549,36 +571,42 @@ function woocommerce_update_sale_prices() {
 	global $wpdb;
 	
 	// On Sale Products
-	$on_sale = $wpdb->get_results("
+	$on_sale = $wpdb->get_col("
 		SELECT post_id FROM $wpdb->postmeta
 		WHERE meta_key = 'sale_price_dates_from'
 		AND meta_value < ".strtotime('NOW')."
 	");
 	if ($on_sale) foreach ($on_sale as $product) :
 		
-		$data = unserialize( get_post_meta($product, 'product_data', true) );
+		$thispost = get_post($product);
+		$sale_price = get_post_meta($product, 'sale_price', true);
 		$price = get_post_meta($product, 'price', true); 
 	
-		if ($data['sale_price'] && $price!==$data['sale_price']) update_post_meta($product, 'price', $data['sale_price']);
+		if ($sale_price && $price!==$sale_price) update_post_meta($product, 'price', $sale_price);
+		
+		if ($thispost->post_parent>0) woocommerce_grouped_price_sync( $thispost->post_parent );
 		
 	endforeach;
 	
 	// Expired Sales
-	$sale_expired = $wpdb->get_results("
+	$sale_expired = $wpdb->get_col("
 		SELECT post_id FROM $wpdb->postmeta
 		WHERE meta_key = 'sale_price_dates_to'
 		AND meta_value < ".strtotime('NOW')."
 	");
 	if ($sale_expired) foreach ($sale_expired as $product) :
-	
-		$data = unserialize( get_post_meta($product, 'product_data', true) );
+		
+		$thispost = get_post($product);
+		$regular_price = get_post_meta($product, 'regular_price', true);
 		$price = get_post_meta($product, 'price', true); 
 	
-		if ($data['regular_price'] && $price!==$data['regular_price']) update_post_meta($product, 'price', $data['regular_price']);
+		if ($regular_price && $price!==$regular_price) update_post_meta($product, 'price', $regular_price);
 		
 		// Sale has expired - clear the schedule boxes
 		update_post_meta($product, 'sale_price_dates_from', '');
 		update_post_meta($product, 'sale_price_dates_to', '');
+		
+		if ($thispost->post_parent>0) woocommerce_grouped_price_sync( $thispost->post_parent );
 		
 	endforeach;
 	

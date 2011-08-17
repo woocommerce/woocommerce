@@ -536,7 +536,7 @@ class woocommerce_checkout {
 						// Calc item tax to store
 						$rate = '';
 						if ( $_product->is_taxable()) :
-							$rate = $_tax->get_rate( $_product->data['tax_class'] );
+							$rate = $_tax->get_rate( $_product->tax_class );
 						endif;
 						
 						$order_items[] = apply_filters('new_order_item', array(

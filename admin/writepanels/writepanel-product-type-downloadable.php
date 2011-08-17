@@ -98,24 +98,21 @@ function woocommerce_change_insert_into_post( $translation, $original ) {
  * 
  * Adds this product type to the product type selector in the product options meta box
  */
-function downloadable_product_type_selector( $product_type ) {
-	
-	echo '<option value="downloadable" '; if ($product_type=='downloadable') echo 'selected="selected"'; echo '>'.__('Downloadable', 'woothemes').'</option>';
-
+function downloadable_product_type_selector( $types, $product_type ) {
+	$types['downloadable'] = __('Downloadable', 'woothemes');
+	return $types;
 }
-add_action('product_type_selector', 'downloadable_product_type_selector');
+add_filter('product_type_selector', 'downloadable_product_type_selector', 1, 2);
 
 /**
  * Process meta
  * 
  * Processes this product types options when a post is saved
  */
-function filter_product_meta_downloadable( $data, $post_id ) {
+function process_product_meta_downloadable( $post_id ) {
 	
 	if (isset($_POST['file_path']) && $_POST['file_path']) update_post_meta( $post_id, 'file_path', $_POST['file_path'] );
 	if (isset($_POST['download_limit'])) update_post_meta( $post_id, 'download_limit', $_POST['download_limit'] );
-	
-	return $data;
 
 }
-add_filter('filter_product_meta_downloadable', 'filter_product_meta_downloadable', 1, 2);
+add_action('process_product_meta_downloadable', 'process_product_meta_downloadable');

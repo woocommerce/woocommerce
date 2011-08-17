@@ -72,13 +72,15 @@ add_action('woocommerce_product_type_options_box', 'grouped_product_type_options
  * 
  * Adds a product type to the product type selector in the product options meta box
  */
-add_action('product_type_selector', 'virtual_product_type_selector');
-add_action('product_type_selector', 'grouped_product_type_selector');
+add_filter('product_type_selector', 'virtual_product_type_selector', 1, 2);
+add_filter('product_type_selector', 'grouped_product_type_selector', 1, 2);
 
-function virtual_product_type_selector( $product_type ) {
-	echo '<option value="virtual" '; if ($product_type=='virtual') echo 'selected="selected"'; echo '>'.__('Virtual', 'woothemes').'</option>';
+function virtual_product_type_selector( $types, $product_type ) {
+	$types['virtual'] = __('Virtual', 'woothemes');
+	return $types;
 }
 
-function grouped_product_type_selector( $product_type ) {
-	echo '<option value="grouped" '; if ($product_type=='grouped') echo 'selected="selected"'; echo '>'.__('Grouped', 'woothemes').'</option>';
+function grouped_product_type_selector( $types, $product_type ) {
+	$types['grouped'] = __('Grouped', 'woothemes');
+	return $types;
 }

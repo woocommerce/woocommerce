@@ -244,7 +244,7 @@ function woocommerce_order_items_meta_box($post) {
 				<tr>
 					<th class="product-id"><?php _e('ID', 'woothemes'); ?></th>
 					<th class="variation-id"><?php _e('Variation ID', 'woothemes'); ?></th>
-					<th class="product-sku"><?php _e('SKU', 'woothemes'); ?></th>
+					<th class="product-sku"><?php _e('sku', 'woothemes'); ?></th>
 					<th class="name"><?php _e('Name', 'woothemes'); ?></th>
 					<th class="variation"><?php _e('Variation', 'woothemes'); ?></th>
 					<th class="meta"><?php _e('Order Item Meta', 'woothemes'); ?></th>
@@ -319,7 +319,7 @@ function woocommerce_order_items_meta_box($post) {
 				
 				if ($products) foreach ($products as $product) :
 					
-					$sku = get_post_meta($product->ID, 'SKU', true);
+					$sku = get_post_meta($product->ID, 'sku', true);
 					
 					if ($sku) $sku = ' SKU: '.$sku;
 					

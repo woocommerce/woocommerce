@@ -264,7 +264,7 @@ class woocommerce_cart {
 				if ($_product->is_in_stock() && $_product->has_enough_stock( $values['quantity'] )) :
 					// :)
 				else :
-					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title(), $_product->stock ) );
 					return $error;
 				endif;
 			else :
@@ -309,7 +309,7 @@ class woocommerce_cart {
 					
 					if ( $_product->is_taxable() ) :
 					
-						$rate = $_tax->get_rate( $_product->data['tax_class'] );
+						$rate = $_tax->get_rate( $_product->tax_class );
 						
 						if (get_option('woocommerce_prices_include_tax')=='yes') :
 						
@@ -328,7 +328,7 @@ class woocommerce_cart {
 							 *
 							 * Lets get the base rate first
 							 */
-							$base_rate = $_tax->get_shop_base_rate( $_product->data['tax_class'] );
+							$base_rate = $_tax->get_shop_base_rate( $_product->tax_class );
 							
 							// Calc tax for base country
 							$base_tax_amount = $_tax->calc_tax( $_product->get_price(), $base_rate, true);

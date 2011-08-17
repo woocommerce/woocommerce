@@ -62,6 +62,11 @@ jQuery(function(){
 		
 	});
 	
+	// Orderby
+	jQuery('select.orderby').change(function(){
+		jQuery(this).closest('form').submit();
+	});
+	
 	// Lightbox
 	jQuery('a.zoom').fancybox({
 		'transitionIn'	:	'elastic',
@@ -97,11 +102,15 @@ jQuery(function(){
 		current_max_price = max_price;
 	}
 	
+	current_min_price = parseInt(current_min_price);
+	current_max_price = parseInt(current_max_price);
+	
 	jQuery('.price_slider').slider({
 		range: true,
+		animate: true,
 		min: min_price,
 		max: max_price,
-		values: [ current_min_price, current_max_price ],
+		values: [current_min_price,current_max_price],
 		create : function( event, ui ) {
 			jQuery( ".price_slider_amount span" ).html( params.currency_symbol + current_min_price + " - " + params.currency_symbol + current_max_price );
 			jQuery( ".price_slider_amount #min_price" ).val(current_min_price);

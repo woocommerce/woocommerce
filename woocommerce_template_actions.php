@@ -65,6 +65,7 @@ add_action( 'woocommerce_add_to_cart_form', 'woocommerce_add_to_cart_form_nonce'
 
 /* Pagination in loop-shop */
 add_action( 'woocommerce_pagination', 'woocommerce_pagination', 10 );
+add_action( 'woocommerce_pagination', 'woocommerce_catalog_ordering', 20 );
 
 /* Product page tabs */
 add_action( 'woocommerce_product_tabs', 'woocommerce_product_description_tab', 10 );

@@ -41,7 +41,7 @@ function woocommerce_thankyou() {
 				</li>
 				<li class="date">
 					<?php _e('Date:', 'woothemes'); ?>
-					<strong><?php echo date('d.m.Y', strtotime($order->order_date)); ?></strong>
+					<strong><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></strong>
 				</li>
 				<li class="total">
 					<?php _e('Total:', 'woothemes'); ?>

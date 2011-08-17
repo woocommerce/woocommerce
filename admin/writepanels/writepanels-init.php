@@ -181,3 +181,60 @@ function woocommerce_meta_scripts() {
 	</script>
 	<?php
 }
+
+/**
+ * Output write panel form elements
+ */
+function woocommerce_wp_text_input( $field ) {
+	global $thepostid;
+	
+	if (!isset($field['placeholder'])) $field['placeholder'] = '';
+	if (!isset($field['class'])) $field['class'] = 'short';
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$field['value'].'" placeholder="'.$field['placeholder'].'" /> ';
+	
+	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+		
+	echo '</p>';
+}
+
+function woocommerce_wp_checkbox( $field ) {
+	global $thepostid;
+	
+	if (!isset($field['class'])) $field['class'] = 'checkbox';
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" ';
+	
+	checked($field['value'], 'yes');
+	
+	echo ' /> ';
+	
+	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+		
+	echo '</p>';
+}
+
+function woocommerce_wp_select( $field ) {
+	global $thepostid;
+	
+	if (!isset($field['class'])) $field['class'] = 'select short';
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><select id="'.$field['id'].'" name="'.$field['id'].'" class="'.$field['class'].'">';
+	
+	foreach ($field['options'] as $key => $value) :
+		
+		echo '<option value="'.$key.'" ';
+		selected($field['value'], $key);
+		echo '>'.$value.'</option>';
+		
+	endforeach;
+	
+	echo '</select>';
+	
+	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+		
+	echo '</p>';
+}

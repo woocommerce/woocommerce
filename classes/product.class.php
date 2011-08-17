@@ -13,17 +13,18 @@ class woocommerce_product {
 	
 	var $id;
 	var $exists;
-	var $data;
-	var $sku;
 	var $attributes;
 	var $post;
-	var $stock;
-	var $children;
-	var $visibility;
-	var $product_type;
+	var $sku;
 	var $price;
-	var $sale_price_dates_to;
-	var $sale_price_dates_from;
+	var $visibility;
+	var $stock;
+	var $stock_status;
+	var $backorders;
+	var $children;
+	
+	var $product_type;
+	
 	
 	/**
 	 * Loads all product data from custom fields
@@ -35,23 +36,38 @@ class woocommerce_product {
 		$this->id = $id;
 
 		$product_custom_fields = get_post_custom( $this->id );
-
-		if (isset($product_custom_fields['SKU'][0]) && !empty($product_custom_fields['SKU'][0])) $this->sku = $product_custom_fields['SKU'][0]; else $this->sku = $this->id;
 		
-		if (isset($product_custom_fields['product_data'][0])) $this->data = maybe_unserialize( $product_custom_fields['product_data'][0] ); else $this->data = '';
+		// Define the data we're going to load: Key => Default value
+		$load_data = array(
+			'sku'			=> $this->id,
+			'price' 		=> 0,
+			'visibility'	=> 'hidden',
+			'stock'			=> 0,
+			'stock_status'	=> 'instock',
+			'backorders'	=> 'no',
+			'manage_stock'	=> 'no',
+			'sale_price'	=> '',
+			'regular_price' => '',
+			'weight'		=> '',
+			'tax_status'	=> 'taxable',
+			'tax_class'		=> '',
+			'upsell_ids'	=> array(),
+			'crosssell_ids' => array()
+		);
 		
-		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( $product_custom_fields['product_attributes'][0] ); else $this->attributes = array();		
+		// Load the data from the custom fields
+		foreach ($load_data as $key => $default) :
+			if (isset($product_custom_fields[$key][0]) && !empty($product_custom_fields[$key][0])) :
+				$this->$key = $product_custom_fields[$key][0];
+			else :
+				$this->$key = $default;
+			endif;
+		endforeach;
 		
-		if (isset($product_custom_fields['price'][0])) $this->price = $product_custom_fields['price'][0]; else $this->price = 0;
-
-		if (isset($product_custom_fields['visibility'][0])) $this->visibility = $product_custom_fields['visibility'][0]; else $this->visibility = 'hidden';
-		
-		if (isset($product_custom_fields['stock'][0])) $this->stock = $product_custom_fields['stock'][0]; else $this->stock = 0;
-		
-		// Again just in case, to fix WP bug
-		$this->data = maybe_unserialize( $this->data );
-		$this->attributes = maybe_unserialize( $this->attributes );
-		
+		// Load serialised data, unserialise twice to fix WP bug
+		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $product_custom_fields['product_attributes'][0] )); else $this->attributes = array();		
+						
+		// Get product type
 		$terms = wp_get_object_terms( $id, 'product_type' );
 		if (!is_wp_error($terms) && $terms) :
 			$term = current($terms);
@@ -62,7 +78,7 @@ class woocommerce_product {
 		
 		$this->get_children();
 		
-		if ($this->data) :
+		if ($product_custom_fields) :
 			$this->exists = true;		
 		else :
 			$this->exists = false;	
@@ -147,13 +163,13 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is taxable */
 	function is_taxable() {
-		if (isset($this->data['tax_status']) && $this->data['tax_status']=='taxable') return true;
+		if ($this->tax_status=='taxable') return true;
 		return false;
 	}
 	
 	/** Returns whether or not the product shipping is taxable */
 	function is_shipping_taxable() {
-		if (isset($this->data['tax_status']) && ($this->data['tax_status']=='taxable' || $this->data['tax_status']=='shipping')) return true;
+		if ($this->tax_status=='taxable' || $this->tax_status=='shipping') return true;
 		return false;
 	}
 	
@@ -193,7 +209,7 @@ class woocommerce_product {
 	/** Returns whether or not the product is stock managed */
 	function managing_stock() {
 		if (get_option('woocommerce_manage_stock')=='yes') :
-			if (isset($this->data['manage_stock']) && $this->data['manage_stock']=='yes') return true;
+			if (isset($this->manage_stock) && $this->manage_stock=='yes') return true;
 		endif;
 		return false;
 	}
@@ -205,11 +221,11 @@ class woocommerce_product {
 				if ($this->stock==0 || $this->stock<0) :
 					return false;
 				else :
-					if ($this->data['stock_status']=='instock') return true;
+					if ($this->stock_status=='instock') return true;
 					return false;
 				endif;
 			else :
-				if ($this->data['stock_status']=='instock') return true;
+				if ($this->stock_status=='instock') return true;
 				return false;
 			endif;
 		endif;
@@ -218,13 +234,13 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product can be backordered */
 	function backorders_allowed() {
-		if ($this->data['backorders']=='yes' || $this->data['backorders']=='notify') return true;
+		if ($this->backorders=='yes' || $this->backorders=='notify') return true;
 		return false;
 	}
 	
 	/** Returns whether or not the product needs to notify the customer on backorder */
 	function backorders_require_notification() {
-		if ($this->data['backorders']=='notify') return true;
+		if ($this->backorders=='notify') return true;
 		return false;
 	}
 	
@@ -321,14 +337,14 @@ class woocommerce_product {
 			$onsale = false;
 			
 			foreach ($this->children as $child) :
-				if ( isset($child->product->data['sale_price']) && $child->product->data['sale_price']==$child->product->price ) :
+				if ( $child->product->sale_price==$child->product->price ) :
 					return true;
 				endif;
 			endforeach;
 			
 		else :
 		
-			if ( isset($this->data['sale_price']) && $this->data['sale_price']==$this->price ) :
+			if ( $this->sale_price==$this->price ) :
 				return true;
 			endif;
 		
@@ -339,7 +355,7 @@ class woocommerce_product {
 	
 	/** Returns the product's weight */
 	function get_weight() {
-		if ($this->data['weight']) return $this->data['weight'];
+		if ($this->weight) return $this->weight;
 	}
 	
 	/** Returns the product's price */
@@ -387,7 +403,7 @@ class woocommerce_product {
 		if ( $this->is_taxable() && get_option('woocommerce_calc_taxes')=='yes') :
 			
 			$_tax = &new woocommerce_tax();
-			$rate = $_tax->get_shop_base_rate( $this->data['tax_class'] );
+			$rate = $_tax->get_shop_base_rate( $this->tax_class );
 			
 			return $rate;
 			
@@ -416,8 +432,8 @@ class woocommerce_product {
 		
 		else :
 			if ($this->price) :
-				if ($this->is_on_sale() && isset($this->data['regular_price'])) :
-					$price .= '<del>'.woocommerce_price( $this->data['regular_price'] ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
+				if ($this->is_on_sale() && isset($this->regular_price)) :
+					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
 				else :
 					$price .= woocommerce_price($this->get_price());
 				endif;
@@ -428,12 +444,12 @@ class woocommerce_product {
 	
 	/** Returns the upsell product ids */
 	function get_upsells() {
-		if (isset($this->data['upsell_ids'])) return (array) $this->data['upsell_ids']; else return array();
+		return (array) $this->upsell_ids;
 	}
 	
 	/** Returns the crosssell product ids */
 	function get_cross_sells() {
-		if (isset($this->data['crosssell_ids'])) return (array) $this->data['crosssell_ids']; else return array();
+		return (array) $this->crosssell_ids;
 	}
 	
 	/** Returns the product categories */

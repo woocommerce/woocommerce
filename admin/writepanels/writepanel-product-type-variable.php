@@ -77,7 +77,7 @@ function variable_product_type_options() {
 						<tbody>	
 							<tr>
 								<td class="upload_image"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php if (isset($variation_data['_thumbnail_id'][0])) echo $variation_data['_thumbnail_id'][0]; ?>" /><input type="button" rel="<?php echo $variation->ID; ?>" class="upload_image_button button" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>
-								<td><label><?php _e('SKU:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['SKU'][0])) echo $variation_data['SKU'][0]; ?>" /></td>
+								<td><label><?php _e('SKU:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" /></td>
 								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" /></td>
 								<td><label><?php _e('Stock Qty:', 'woothemes'); ?></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['stock'][0])) echo $variation_data['stock'][0]; ?>" /></td>
 								<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
@@ -298,19 +298,18 @@ function woocommerce_add_variation() {
  * 
  * Adds this product type to the product type selector in the product options meta box
  */
-function variable_product_type_selector( $product_type ) {
-	
-	echo '<option value="variable" '; if ($product_type=='variable') echo 'selected="selected"'; echo '>'.__('Variable', 'woothemes').'</option>';
-
+function variable_product_type_selector( $types, $product_type ) {
+	$types['variable'] = __('Variable', 'woothemes');
+	return $types;
 }
-add_action('product_type_selector', 'variable_product_type_selector');
+add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
 
 /**
  * Process meta
  * 
  * Processes this product types options when a post is saved
  */
-function process_product_meta_variable( $data, $post_id ) {
+function process_product_meta_variable( $post_id ) {
 	
 	if (isset($_POST['variable_sku'])) :
 		
@@ -367,7 +366,7 @@ function process_product_meta_variable( $data, $post_id ) {
 			endif;
 
 			// Update post meta
-			update_post_meta( $variation_id, 'SKU', $variable_sku[$i] );
+			update_post_meta( $variation_id, 'sku', $variable_sku[$i] );
 			update_post_meta( $variation_id, 'price', $variable_price[$i] );
 			update_post_meta( $variation_id, 'sale_price', $variable_sale_price[$i] );
 			update_post_meta( $variation_id, 'weight', $variable_weight[$i] );
@@ -391,4 +390,4 @@ function process_product_meta_variable( $data, $post_id ) {
 	endif;
 
 }
-add_action('process_product_meta_variable', 'process_product_meta_variable', 1, 2);
+add_action('process_product_meta_variable', 'process_product_meta_variable');

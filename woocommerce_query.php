@@ -85,7 +85,7 @@ function woocommerce_get_products_in_view() {
 add_action('wp_head', 'woocommerce_get_products_in_view', 0);
 
 /**
- * Do Filters/Layered Nav
+ * Do Filters/Layered Nav/Ordering
  */
 function woocommerce_filter_loop() {
 	
@@ -95,15 +95,44 @@ function woocommerce_filter_loop() {
 		
 		$filters = array();
 		$filters = apply_filters('loop-shop-query', $filters);
-		
-		//$post_ids = woocommerce_get_post_ids();
+
 		$post_ids = $all_post_ids;
 		$post_ids = apply_filters('loop-shop-posts-in', $post_ids);
+		
+		if ($_POST['orderby']) :
+			$_SESSION['orderby'] = $_POST['orderby'];
+		endif;
+		
+		$order_query = array(
+			'orderby' 	=> 'title',
+			'order'		=> 'asc'
+		);
+		
+		if (isset($_SESSION['orderby'])) :
+			switch ($_SESSION['orderby']) :
+				case 'date' :
+					$order_query = array(
+						'orderby' 	=> 'date',
+						'order'		=> 'desc'
+					);
+				break;
+				case 'price' :
+					$order_query = array(
+						'orderby' 	=> 'meta_value_num',
+						'order'		=> 'asc',
+						'meta_key'	=> 'price'
+					);
+				break;
+			endswitch;
+		endif;
+		
+		$order_query = apply_filters('loop-shop-orderby', $order_query);
+		
 		$filters = array_merge($filters, array(
-			'post__in' => $post_ids
+			'post__in' 	=> $post_ids
 		));
 		
-		$args = array_merge( $wp_query->query, $filters );
+		$args = array_merge( $wp_query->query, $order_query, $filters );
 		
 		query_posts( $args );
 	endif;
@@ -141,9 +170,21 @@ function woocommerce_get_post_ids() {
 	
 	global $wpdb;
 	
+	// Visibility
 	$in = array('visible');
 	if (is_search()) $in[] = 'search';
 	if (!is_search()) $in[] = 'catalog';
+	
+	// Out of stock visibility
+	if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+		$stock_query = array(
+			'key' 		=> 'stock_status',
+			'value' 	=> 'instock',
+			'compare' 	=> '='
+		);
+	else :
+		$stock_query = array();
+	endif;
 	
 	// WP Query to get all queried post ids
 	
@@ -158,10 +199,11 @@ function woocommerce_get_post_ids() {
 			'post_status' => 'publish',
 			'meta_query' => array(
 				array(
-					'key' => 'visibility',
-					'value' => $in,
-					'compare' => 'IN'
-				)
+					'key' 		=> 'visibility',
+					'value' 	=> $in,
+					'compare'	=> 'IN'
+				),
+				$stock_query
 			)
 		)
 	);

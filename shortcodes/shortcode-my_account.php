@@ -60,7 +60,7 @@ function woocommerce_my_account( $atts ) {
 				if ($woocommerce_orders->orders) foreach ($woocommerce_orders->orders as $order) :
 					?><tr class="order">
 						<td><?php echo $order->id; ?></td>
-						<td><time title="<?php echo strtotime($order->order_date); ?>"><?php echo date('d.m.Y', strtotime($order->order_date)); ?></time></td>
+						<td><time title="<?php echo strtotime($order->order_date); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
 						<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
 						<td><?php echo woocommerce_price($order->order_total); ?></td>
 						<td><?php echo $order->status; ?></td>
@@ -443,7 +443,7 @@ function woocommerce_view_order() {
 		
 		if ( $order_id>0 && $order->user_id == get_current_user_id() ) :
 			
-			echo '<p>' . sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woothemes'), $order->id, date('d.m.Y', strtotime($order->order_date)) );
+			echo '<p>' . sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woothemes'), $order->id, date(get_option('date_format'), strtotime($order->order_date)) );
 			
 			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $order->status );
 			

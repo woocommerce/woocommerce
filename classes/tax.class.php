@@ -175,9 +175,9 @@ class woocommerce_tax {
 			// Loop cart and find the highest tax band
 			if (sizeof(woocommerce_cart::$cart_contents)>0) : foreach (woocommerce_cart::$cart_contents as $item) :
 				
-				if ($item['data']->data['tax_class']) :
+				if ($item['data']->tax_class) :
 					
-					$found_rate = $this->find_rate( $country, $state, $item['data']->data['tax_class'] );
+					$found_rate = $this->find_rate( $country, $state, $item['data']->tax_class );
 					
 					$found_rates[] = $found_rate['rate'];
 					

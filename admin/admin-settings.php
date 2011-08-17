@@ -380,6 +380,14 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		'std' 		=> '0'
 	),
 	
+	array(  
+		'name' => __('Out of stock visibility', 'woothemes'),
+		'desc' 		=> __('Hide out of stock items from the catalog', 'woothemes'),
+		'id' 		=> 'woocommerce_hide_out_of_stock_items',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox'
+	),
+	
 	array( 'type' => 'sectionend'),
 	
 	array( 'type' => 'tabend'),

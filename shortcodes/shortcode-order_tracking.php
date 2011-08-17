@@ -46,7 +46,7 @@ function woocommerce_order_tracking( $atts ) {
 					<thead>
 						<tr>
 							<th><?php _e('Title', 'woothemes'); ?></th>
-							<th><?php _e('SKU', 'woothemes'); ?></th>
+							<th><?php _e('sku', 'woothemes'); ?></th>
 							<th><?php _e('Price', 'woothemes'); ?></th>
 							<th><?php _e('Quantity', 'woothemes'); ?></th>
 						</tr>
