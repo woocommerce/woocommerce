@@ -49,7 +49,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
     	<p><?php _e('PayPal standard works by sending the user to <a href="https://www.paypal.com/uk/mrb/pal=JFC9L8JJUZZK2">PayPal</a> to enter their payment information.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr valign="top" class="option_enabled">
+	    	<tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 		        <td class="forminp">
 		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
@@ -58,25 +58,25 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					</fieldset>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input class="input-text" type="text" name="woocommerce_paypal_title" id="woocommerce_paypal_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_title')) echo $value; else echo 'PayPal'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Description', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_description')) echo $value; ?>" /> <span class="description"><?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('PayPal email address', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_email')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Shipping details', 'woothemes') ?></th>
 		        <td class="forminp">
 		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Shipping details', 'woothemes') ?></span></legend>
@@ -85,7 +85,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					</fieldset>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('PayPal sandbox', 'woothemes') ?></th>
 		        <td class="forminp">
 		        	<fieldset><legend class="screen-reader-text"><span><?php _e('PayPal sandbox', 'woothemes') ?></span></legend>

@@ -48,7 +48,7 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
       <h3><?php _e('BACS Payment', 'woothemes'); ?></h3>
       <p><?php _e('Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer.', 'woothemes'); ?></p>
       <table class="form-table">
-	      <tr valign="top" class="option_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 	        <td class="forminp">
 	        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
@@ -57,49 +57,49 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 				</fieldset>
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('Method Title', 'woocommerce') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_title" id="woocommerce_bacs_title" value="<?php if ($value = get_option('woocommerce_bacs_title')) echo $value; else echo 'BACS Payment'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.','woothemes') ?></span>
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woocommerce') ?></th>
 	        <td class="forminp">
 	          <input class="input-text wide-input" type="text" name="woocommerce_bacs_description" id="woocommerce_bacs_description" value="<?php if ($value = get_option('woocommerce_bacs_description')) echo $value; ?>" /> <span class="description"><?php _e('Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.','woothemes') ?></span>
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Name', 'woothemes') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_account_name" id="woocommerce_bacs_account_name" value="<?php if ($value = get_option('woocommerce_bacs_account_name')) echo $value; ?>" />
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Number', 'woothemes') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_account_number" id="woocommerce_bacs_account_number" value="<?php if ($value = get_option('woocommerce_bacs_account_number')) echo $value; ?>" />
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Sort Code', 'woothemes') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_sort_code" id="woocommerce_bacs_sort_code" value="<?php if ($value = get_option('woocommerce_bacs_sort_code')) echo $value; ?>" />
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Bank Name', 'woothemes') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_bank_name" id="woocommerce_bacs_bank_name" value="<?php if ($value = get_option('woocommerce_bacs_bank_name')) echo $value; ?>" />
 	        </td>
 	      </tr>      
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('IBAN', 'woothemes') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_iban" id="woocommerce_bacs_iban" value="<?php if ($value = get_option('woocommerce_bacs_iban')) echo $value; ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
 	        </td>
 	      </tr>
-	      <tr valign="top" class="hidden_unless_enabled">
+	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('BIC (formerly \'Swift\')', 'woocommerce') ?></th>
 	        <td class="forminp">
 	          <input class="input-text" type="text" name="woocommerce_bacs_bic" id="woocommerce_bacs_bic" value="<?php if ($value = get_option('woocommerce_bacs_bic')) echo $value; ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>

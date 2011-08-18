@@ -352,7 +352,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'weight', stripslashes( $_POST['weight'] ) );
 	update_post_meta( $post_id, 'tax_status', stripslashes( $_POST['tax_status'] ) );
 	update_post_meta( $post_id, 'tax_class', stripslashes( $_POST['tax_class'] ) );
-	if (isset($_POST['stock_status'])) update_post_meta( $post_id, 'stock_status', stripslashes( $_POST['stock_status'] ) );
+	update_post_meta( $post_id, 'stock_status', stripslashes( $_POST['stock_status'] ) );
 	update_post_meta( $post_id, 'visibility', stripslashes( $_POST['visibility'] ) );
 	if ($_POST['featured']) update_post_meta( $post_id, 'featured', 'yes' ); else update_post_meta( $post_id, 'featured', 'no' );
 		
@@ -516,6 +516,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, 'stock', $_POST['stock'] );
 			update_post_meta( $post_id, 'manage_stock', 'yes' );
 			update_post_meta( $post_id, 'backorders', stripslashes( $_POST['backorders'] ) );
+			
+			if ($_POST['backorders']=='no' && $_POST['stock']<1) :
+				update_post_meta( $post_id, 'stock_status', 'outofstock' );
+			endif;
 			
 		else :
 			

@@ -14,6 +14,7 @@ class woocommerce_product {
 	var $id;
 	var $exists;
 	var $attributes;
+	var $children;
 	var $post;
 	var $sku;
 	var $price;
@@ -21,8 +22,14 @@ class woocommerce_product {
 	var $stock;
 	var $stock_status;
 	var $backorders;
-	var $children;
-	
+	var $manage_stock;
+	var $sale_price;
+	var $regular_price;
+	var $weight;
+	var $tax_status;
+	var $tax_class;
+	var $upsell_ids;
+	var $crosssell_ids;
 	var $product_type;
 	
 	
@@ -122,6 +129,10 @@ class woocommerce_product {
 		if ($this->managing_stock()) :
 			$reduce_to = $this->stock - $by;
 			update_post_meta($this->id, 'stock', $reduce_to);
+			
+			// Out of stock attribute
+			if (!$this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'outofstock');
+			
 			return $reduce_to;
 		endif;
 	}
@@ -135,6 +146,10 @@ class woocommerce_product {
 		if ($this->managing_stock()) :
 			$increase_to = $this->stock + $by;
 			update_post_meta($this->id, 'stock', $increase_to);
+			
+			// Out of stock attribute
+			if ($this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'instock');
+			
 			return $increase_to;
 		endif;
 	}
@@ -229,7 +244,8 @@ class woocommerce_product {
 				return false;
 			endif;
 		endif;
-		return true;
+		if ($this->stock_status=='instock') return true;
+		return false;
 	}
 	
 	/** Returns whether or not the product can be backordered */
@@ -321,6 +337,13 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is visible */
 	function is_visible() {
+	
+		// Out of stock visibility
+		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+			if (!$this->is_in_stock()) return false;
+		endif;
+		
+		// visibility setting
 		if ($this->visibility=='hidden') return false;
 		if ($this->visibility=='visible') return true;
 		if ($this->visibility=='search' && is_search()) return true;

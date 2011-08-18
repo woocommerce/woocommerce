@@ -37,7 +37,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
     	<h3><?php _e('Cheque Payment', 'woothemes'); ?></h3>
     	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases without having to use the sandbox area of a payment gateway which is useful for demonstrating to clients and for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr valign="top" class="option_enabled">
+	    	<tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
 		        <td class="forminp">
 		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
@@ -46,13 +46,13 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 					</fieldset>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
-		    <tr valign="top" class="hidden_unless_enabled">
+		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woothemes') ?></th>
 		        <td class="forminp">
 			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" /> <span class="description"><?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?></span>

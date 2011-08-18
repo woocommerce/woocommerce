@@ -245,6 +245,14 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 		)
 	),
 	
+	array(  
+		'name' => __('Cart redirect', 'woothemes'),
+		'desc' 		=> __('Redirect to cart after adding a product to the cart (on single product pages)', 'woothemes'),
+		'id' 		=> 'woocommerce_cart_redirect_after_add',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox'
+	),
+	
 	array( 'type' => 'sectionend'),
 	
 	array(	'name' => __('Pricing Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
@@ -822,12 +830,28 @@ function woocommerce_admin_fields($options) {
 	            	          
 	            break;
 	            case "gateway_options" :
+	            	
+	            	$links = array();
+	            	
+	            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
+	            		
+	            		$title = ($gateway->title) ? ucwords($gateway->title) : ucwords($gateway->id);
+	            		
+	            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
+					
+					endforeach;
+					
+					echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
 	            
 	            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
 	            		
+	            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
 	            		$gateway->admin_options();
+	            		echo '</div>';
 	            		
 	            	endforeach; 
+	            	
+	            	echo '</div>';
 	            	           
 	            break;
 	        endswitch;
@@ -836,6 +860,7 @@ function woocommerce_admin_fields($options) {
 	<p class="submit"><input name="save" class="button-primary" type="submit" value="<?php _e('Save changes', 'woothemes') ?>" /></p>
 	<script type="text/javascript">
 	jQuery(function() {
+	
 	    // Tabs
 		jQuery('.woo-nav-tab-wrapper a:first').addClass('nav-tab-active');
 		jQuery('div.panel:not(div.panel:first)').hide();
@@ -853,6 +878,17 @@ function woocommerce_admin_fields($options) {
 		<?php if (isset($_COOKIE['woocommerce_settings_tab_index']) && $_COOKIE['woocommerce_settings_tab_index'] > 0) : ?>
 			jQuery('.woo-nav-tab-wrapper a:eq(<?php echo $_COOKIE['woocommerce_settings_tab_index']; ?>)').click();
 		<?php endif; ?>
+		
+		// Subsubsub tabs
+		jQuery('ul.subsubsub li a').click(function(){
+			jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
+			jQuery(this).addClass('current');
+			jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
+			jQuery( jQuery(this).attr('href') ).show();
+		});
+		jQuery('ul.subsubsub').each(function(){
+			jQuery('li a:eq(0)', jQuery(this)).click();
+		});
 		
 		// Options
 		jQuery('tr.hidden_unless_enabled').hide();

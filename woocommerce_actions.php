@@ -356,7 +356,11 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			if (isset($_POST['quantity'])) $quantity = $_POST['quantity'];
 			woocommerce_cart::add_to_cart($_GET['add-to-cart'], $quantity);
 			
-			woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+			if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+				woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+			else :
+				woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+			endif;
 		
 		elseif ($_GET['add-to-cart']=='variation') :
 			
@@ -391,7 +395,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 					if ($variation_id>0) :
 						// Add to cart
 						woocommerce_cart::add_to_cart($product_id, $quantity, $variations, $variation_id);
-						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						
+						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+							woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+						else :
+							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						endif;
+			
 					else :
 						woocommerce::add_error( __('Sorry, this variation is not available.', 'woothemes') );
 					endif;
@@ -416,7 +426,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				foreach ($_POST['quantity'] as $item => $quantity) :
 					if ($quantity>0) :
 						woocommerce_cart::add_to_cart($item, $quantity);
-						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						
+						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+							woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+						else :
+							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						endif;
+						
 						$total_quantity = $total_quantity + $quantity;
 					endif;
 				endforeach;
@@ -444,8 +460,14 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			exit;
 		}
 		
+		// Redirect to cart option
+		elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && woocommerce::error_count() == 0) {
+			wp_safe_redirect( woocommerce_cart::get_cart_url() );
+			exit;
+		}
+		
 		// Otherwise redirect to where they came
-		else if ( isset($_SERVER['HTTP_REFERER'])) {
+		elseif ( isset($_SERVER['HTTP_REFERER'])) {
 			wp_safe_redirect($_SERVER['HTTP_REFERER']);
 			exit;
 		}
