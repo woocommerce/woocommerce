@@ -21,7 +21,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 
 	array( 'type' => 'tab', 'tabname' => __('General', 'woothemes') ),
 
-	array( 'name' => 'General settings', 'type' => 'title', 'desc' 		=> '' ),
+	array( 'name' => 'General Options', 'type' => 'title', 'desc' 		=> '' ),
 
 	array(  
 		'name' => __('Base Country/Region', 'woothemes'),
@@ -213,7 +213,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Catalog', 'woothemes') ),
 	
-	array(	'name' => __('Catalog Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Catalog Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 
 	array(  
 		'name' => __('Product fields', 'woothemes'),
@@ -255,7 +255,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array( 'type' => 'sectionend'),
 	
-	array(	'name' => __('Pricing Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Pricing Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 	
 	array(  
 		'name' => __('Currency', 'woothemes'),
@@ -341,7 +341,7 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array( 'type' => 'sectionend'),
 
-	array(	'name' => __('Inventory Settings', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Inventory Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 	
 	array(  
 		'name' => __('Manage stock', 'woothemes'),
@@ -430,8 +430,14 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array( 'type' => 'sectionend'),
 	
+	array( 'type' => 'tabend'),
+	
+	array( 'type' 		=> 'tab', 'tabname' => __('Shipping Methods', 'woothemes') ),
+	
 	array( 'type' => 'shipping_options'),
 	
+	array( 'type' => 'sectionend'),
+
 	array( 'type' => 'tabend'),
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Tax', 'woothemes') ),
@@ -822,11 +828,27 @@ function woocommerce_admin_fields($options) {
 	            break;
 	            case "shipping_options" :
 	            
+	            	$links = array();
+	            	
 	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
 	            		
-	            		$method->admin_options();
+	            		$title = ($method->title) ? ucwords($method->title) : ucwords($method->id);
 	            		
-	            	endforeach;  
+	            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
+					
+					endforeach;
+					
+					echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+	            
+	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
+	            		
+	            		echo '<div class="section" id="shipping-'.$method->id.'">';
+	            		$method->admin_options();
+	            		echo '</div>';
+	            		
+	            	endforeach; 
+	            	
+	            	echo '</div>';
 	            	          
 	            break;
 	            case "gateway_options" :
@@ -885,6 +907,7 @@ function woocommerce_admin_fields($options) {
 			jQuery(this).addClass('current');
 			jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
 			jQuery( jQuery(this).attr('href') ).show();
+			return false;
 		});
 		jQuery('ul.subsubsub').each(function(){
 			jQuery('li a:eq(0)', jQuery(this)).click();

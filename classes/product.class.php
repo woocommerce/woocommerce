@@ -467,12 +467,12 @@ class woocommerce_product {
 	
 	/** Returns the upsell product ids */
 	function get_upsells() {
-		return (array) $this->upsell_ids;
+		return (array) maybe_unserialize( $this->upsell_ids );
 	}
 	
 	/** Returns the crosssell product ids */
 	function get_cross_sells() {
-		return (array) $this->crosssell_ids;
+		return (array) maybe_unserialize( $this->crosssell_ids );
 	}
 	
 	/** Returns the product categories */

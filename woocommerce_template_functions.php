@@ -851,6 +851,7 @@ function woocommerce_cross_sell_display() {
 	global $columns;
 	$columns = 2;
 	$crosssells = woocommerce_cart::get_cross_sells();
+	
 	if (sizeof($crosssells)>0) :
 		echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';
 		$args = array(

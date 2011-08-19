@@ -22,7 +22,7 @@ function variable_product_type_options() {
 	?>
 	<div id="variable_product_options" class="panel">
 		
-		<div class="woocommerce_configurations">
+		<div class="woocommerce_variations">
 			<?php
 			$args = array(
 				'post_type'	=> 'product_variation',
@@ -44,7 +44,7 @@ function variable_product_type_options() {
 				
 				if (!$image) $image = woocommerce::plugin_url().'/assets/images/placeholder.png';
 				?>
-				<div class="woocommerce_configuration">
+				<div class="woocommerce_variation">
 					<p>
 						<button type="button" class="remove_variation button" rel="<?php echo $variation->ID; ?>"><?php _e('Remove', 'woothemes'); ?></button>
 						<strong>#<?php echo $variation->ID; ?> &mdash; <?php _e('Variation:', 'woothemes'); ?></strong>
@@ -115,7 +115,7 @@ function variable_product_write_panel_js() {
 		
 		jQuery('button.add_configuration').live('click', function(){
 		
-			jQuery('.woocommerce_configurations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 					
 			var data = {
 				action: 'woocommerce_add_variation',
@@ -127,9 +127,9 @@ function variable_product_write_panel_js() {
 				
 				var variation_id = parseInt(response);
 				
-				var loop = jQuery('.woocommerce_configuration').size();
+				var loop = jQuery('.woocommerce_variation').size();
 				
-				jQuery('.woocommerce_configurations').append('<div class="woocommerce_configuration">\
+				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation">\
 					<p>\
 						<button type="button" class="remove_variation button"><?php _e('Remove', 'woothemes'); ?></button>\
 						<strong><?php _e('Variation:', 'woothemes'); ?></strong>\
@@ -166,7 +166,7 @@ function variable_product_write_panel_js() {
 					</table>\
 				</div>');
 				
-				jQuery('.woocommerce_configurations').unblock();
+				jQuery('.woocommerce_variations').unblock();
 
 			});
 

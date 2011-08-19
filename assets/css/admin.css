@@ -37,7 +37,7 @@
 .icon32-posts-shop_order {
   background-position: -127px -6px !important;
 }
-.icon32-attributes, .icon32-posts-product_variation {
+.icon32-attributes {
   background-position: -185px -6px !important;
 }
 .icon32-woocommerce-settings {
@@ -45,6 +45,9 @@
 }
 .icon32-posts-shop_coupon {
   background-position: -475px -6px !important;
+}
+.icon32-posts-product_variation {
+  background-position: -533px -6px !important;
 }
 /* Orders */
 .order_actions {
@@ -130,7 +133,8 @@ dl.totals dd input.last {
 .woocommerce_order_items_wrapper table.woocommerce_order_items td {
   padding: 8px 10px;
   text-align: left;
-  vertical-align: middle;
+  line-height: 26px;
+  vertical-align: top;
   border-bottom: 1px dotted #ececec;
 }
 .woocommerce_order_items_wrapper table.woocommerce_order_items td input, .woocommerce_order_items_wrapper table.woocommerce_order_items td textarea {
@@ -708,23 +712,23 @@ div.multi_select_products_wrapper {
   padding: 0;
   margin: 0;
 }
-.woocommerce_configuration {
+.woocommerce_variation {
   background: #ececec;
   border: 1px solid #ececec;
   margin: 0 0 8px;
 }
-.woocommerce_configuration p {
+.woocommerce_variation p {
   margin: 0 !important;
 }
-.woocommerce_configuration p button {
+.woocommerce_variation p button {
   float: right;
 }
-.woocommerce_configuration table td {
+.woocommerce_variation table td {
   background: #fff;
   padding: 6px 6px;
   vertical-align: middle;
 }
-.woocommerce_configuration table td label {
+.woocommerce_variation table td label {
   color: #999;
   font-size: 10px;
   text-transform: uppercase;
@@ -732,20 +736,20 @@ div.multi_select_products_wrapper {
   display: block;
   line-height: 16px;
 }
-.woocommerce_configuration table td input {
+.woocommerce_variation table td input {
   float: left;
   width: 100%;
 }
-.woocommerce_configuration table td.upload_image {
+.woocommerce_variation table td.upload_image {
   width: 1%;
   white-space: nowrap;
 }
-.woocommerce_configuration table td.upload_image img {
+.woocommerce_variation table td.upload_image img {
   float: none;
   margin-right: 6px;
   vertical-align: middle;
 }
-.woocommerce_configuration table td.upload_image .button {
+.woocommerce_variation table td.upload_image .button {
   margin: 0;
   padding: 4px 10px;
   width: auto;

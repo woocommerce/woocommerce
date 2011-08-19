@@ -6,6 +6,7 @@
  *
  *		- AJAX update order review on checkout
  *		- AJAX add to cart
+ *		- AJAX add to cart fragments
  *		- Increase coupon usage count
  *		- Get variation
  *		- Add order item
@@ -77,7 +78,6 @@ function woocommerce_ajax_add_to_cart() {
 	echo json_encode( $fragments );
 	
 	die();
-	
 }
 
 
@@ -156,6 +156,7 @@ function woocommerce_add_order_item() {
 	
 	global $wpdb;
 	
+	$index = trim(stripslashes($_POST['index']));
 	$item_to_add = trim(stripslashes($_POST['item_to_add']));
 	
 	$post = '';
@@ -188,11 +189,9 @@ function woocommerce_add_order_item() {
 	else :
 		$_product = &new woocommerce_product_variation( $post->ID );
 	endif;
-	
-	$loop = 0;
 	?>
-	<tr class="item">
-		<td class="product-id">#<?php echo $_product->id; ?></td>
+	<tr class="item" rel="<?php echo $index; ?>">
+		<td class="product-id"><?php echo $_product->id; ?></td>
 		<td class="variation-id"><?php if (isset($_product->variation_id)) echo $_product->variation_id; else echo '-'; ?></td>
 		<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; ?></td>
 		<td class="name"><a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $_product->get_title(); ?></a></td>
@@ -210,16 +209,16 @@ function woocommerce_add_order_item() {
 						<td colspan="3"><button class="add_meta button"><?php _e('Add meta', 'woothemes'); ?></button></td>
 					</tr>
 				</tfoot>
-				<tbody></tbody>
+				<tbody class="meta_items"></tbody>
 			</table>
 		</td>
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
-		<td class="quantity"><input type="text" name="item_quantity[]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="1" /></td>
-		<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $_product->get_price_excluding_tax(); ?>" /></td>
-		<td class="tax"><input type="text" name="item_tax_rate[]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $_product->get_tax_base_rate(); ?>" /></td>
+		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="1" /></td>
+		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $_product->get_price_excluding_tax(); ?>" /></td>
+		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $_product->get_tax_base_rate(); ?>" /></td>
 		<td class="center">
-			<input type="hidden" name="item_id[]" value="<?php echo $_product->id; ?>" />
-			<input type="hidden" name="item_name[]" value="<?php echo $_product->get_title(); ?>" />
+			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo $_product->id; ?>" />
+			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo $_product->get_title(); ?>" />
 			<button type="button" class="remove_row button">&times;</button>
 		</td>
 	</tr>

@@ -19,7 +19,8 @@ jQuery( function($){
 	jQuery('#order_items_list button.remove_row').live('click', function(){
 		var answer = confirm(params.remove_item_notice);
 		if (answer){
-			jQuery(this).parent().parent().remove();
+			jQuery(this).closest('tr.item').hide();
+			jQuery('input', jQuery(this).closest('tr.item')).val('');
 		}
 		return false;
 	});
@@ -96,12 +97,15 @@ jQuery( function($){
 		var add_item_id = jQuery('select.add_item_id').val();
 		
 		if (add_item_id) {
-
+			
 			jQuery('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			var size = jQuery('table.woocommerce_order_items tbody tr.item').size();
 			
 			var data = {
 				action: 		'woocommerce_add_order_item',
 				item_to_add: 	jQuery('select.add_item_id').val(),
+				index:			size,
 				security: 		params.add_order_item_nonce
 			};
 
@@ -121,8 +125,20 @@ jQuery( function($){
 	
 	jQuery('button.add_meta').live('click', function(){
 		
-		jQuery(this).parent().parent().parent().parent().append('<tr><td><input type="text" name="meta_name[][]" placeholder="' + params.meta_name + '" /></td><td><input type="text" name="meta_value[][]" placeholder="' + params.meta_value + '" /></td></tr>');
+		var index = jQuery(this).closest('tr.item').attr('rel');
 		
+		jQuery(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + params.meta_value + '" /></td><td><button class="remove_meta button">&times;</button></td></tr>');
+		
+		return false;
+		
+	});
+	
+	jQuery('button.remove_meta').live('click', function(){
+		var answer = confirm("Remove this meta key?")
+		if (answer){
+			jQuery(this).closest('tr').remove();
+		}
+		return false;
 	});
 	
 	jQuery('button.billing-same-as-shipping').live('click', function(){

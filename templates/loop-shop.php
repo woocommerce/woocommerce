@@ -13,7 +13,7 @@ if ($per_page !== get_option('posts_per_page')) query_posts( array_merge( $wp_qu
 
 ob_start();
 
-if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); $loop++;
+if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); if (!$_product->is_visible()) continue; $loop++;
 	
 	?>
 	<li class="product <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">

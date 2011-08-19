@@ -27,7 +27,7 @@ jQuery(function(){
 			jQuery('body').trigger('adding_to_cart');
 			
 			// Block widget
-			jQuery('.widget_shopping_cart').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('.widget_shopping_cart, .shop_table.cart').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 	
 			jQuery.post( params.ajax_url, data, function(response) {
 
@@ -38,6 +38,12 @@ jQuery(function(){
 				// Cart widget load
 				jQuery('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
 					jQuery('.widget_shopping_cart').unblock();
+				} );
+				
+				// Cart load
+				jQuery('.shop_table.cart').load( window.location + ' .shop_table.cart:eq(0) > *', function() {
+					jQuery("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
+					jQuery('.shop_table.cart').unblock();
 				} );
 				
 				// Trigger event so themes can refresh other areas
@@ -124,8 +130,9 @@ jQuery(function(){
 	});
 			
 	// Quantity buttons
-	jQuery("div.quantity, td.quantity").append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
-	jQuery(".plus").click(function()
+	jQuery("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
+	
+	jQuery(".plus").live('click', function()
 	{
 	    var currentVal = parseInt(jQuery(this).prev(".qty").val());
 	   
@@ -134,7 +141,7 @@ jQuery(function(){
 	    jQuery(this).prev(".qty").val(currentVal + 1); 
 	});
 	
-	jQuery(".minus").click(function()
+	jQuery(".minus").live('click', function()
 	{
 	    var currentVal = parseInt(jQuery(this).next(".qty").val());
 	    if (currentVal == "NaN") currentVal = 0;

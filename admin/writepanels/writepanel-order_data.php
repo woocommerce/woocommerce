@@ -59,7 +59,6 @@ function woocommerce_order_data_meta_box($post) {
 	else :
 		$order_title = $post->post_title;
 	endif;
-
 	?>
 	<style type="text/css">
 		#titlediv, #major-publishing-actions, #minor-publishing-actions { display:none }
@@ -67,17 +66,11 @@ function woocommerce_order_data_meta_box($post) {
 	<div class="panel-wrap woocommerce">
 		<input name="post_title" type="hidden" value="<?php echo $order_title; ?>" />
 		<input name="post_status" type="hidden" value="publish" />
-	
 		<ul class="product_data_tabs tabs" style="display:none;">
-			
 			<li class="active"><a href="#order_data"><?php _e('Order', 'woothemes'); ?></a></li>
-			
 			<li><a href="#order_customer_billing_data"><?php _e('Customer Billing Address', 'woothemes'); ?></a></li>
-			
 			<li><a href="#order_customer_shipping_data"><?php _e('Customer Shipping Address', 'woothemes'); ?></a></li>
-
 		</ul>
-		
 		<div id="order_data" class="panel woocommerce_options_panel">
 			
 			<p class="form-field"><label for="order_status"><?php _e('Order status:', 'woothemes') ?></label>
@@ -96,14 +89,10 @@ function woocommerce_order_data_meta_box($post) {
 			<select id="customer_user" name="customer_user">
 				<option value=""><?php _e('Guest', 'woothemes') ?></option>
 				<?php
-					$users = $wpdb->get_results( $wpdb->prepare("SELECT $wpdb->users.ID, $wpdb->users.user_email, $wpdb->users.display_name FROM $wpdb->users ORDER BY %s ASC", 'display_name' ));
-
-					foreach ( $users as $user ) :
-						
-						echo '<option value="'.$user->ID.'" ';
-						selected($data['customer_user'], $user->ID);
-						echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
-						
+					$users = new WP_User_Query( array( 'orderby' => 'display_name' ) );
+					$users = $users->get_results();
+					if ($users) foreach ( $users as $user ) :
+						echo '<option value="'.$user->ID.'" '; selected($data['customer_user'], $user->ID); echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
 					endforeach;
 				?>
 			</select></p>
@@ -111,122 +100,34 @@ function woocommerce_order_data_meta_box($post) {
 			<p class="form-field"><label for="excerpt"><?php _e('Customer Note:', 'woothemes') ?></label>
 			<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo $post->post_excerpt; ?></textarea></p>
 		</div>
-		
 		<div id="order_customer_billing_data" class="panel woocommerce_options_panel"><?php
-				
-				// First Name
-				$field = array( 'id' => 'billing_first_name', 'label' => 'First Name:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Last Name
-				$field = array( 'id' => 'billing_last_name', 'label' => 'Last Name:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Company
-				$field = array( 'id' => 'billing_company', 'label' => 'Company:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Address 1
-				$field = array( 'id' => 'billing_address_1', 'label' => 'Address 1:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Address 2
-				$field = array( 'id' => 'billing_address_2', 'label' => 'Address 2:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// City
-				$field = array( 'id' => 'billing_city', 'label' => 'City:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Postcode
-				$field = array( 'id' => 'billing_postcode', 'label' => 'Postcode:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Country
-				$field = array( 'id' => 'billing_country', 'label' => 'Country:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// State
-				$field = array( 'id' => 'billing_state', 'label' => 'State/County:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Email
-				$field = array( 'id' => 'billing_email', 'label' => 'Email Address:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Tel
-				$field = array( 'id' => 'billing_phone', 'label' => 'Tel:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-			?>
-		</div>
-		
+			woocommerce_wp_text_input( array( 'id' => 'billing_first_name', 'label' => __('First Name', 'woothemes'), 'value' => $data['billing_first_name'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_last_name', 'label' => __('Last Name', 'woothemes'), 'value' => $data['billing_last_name'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_company', 'label' => __('Company', 'woothemes'), 'value' => $data['billing_company'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_address_1', 'label' => __('Address 1', 'woothemes'), 'value' => $data['billing_address_1'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_address_2', 'label' => __('Address 2', 'woothemes'), 'value' => $data['billing_address_2'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_city', 'label' => __('City', 'woothemes'), 'value' => $data['billing_city'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_postcode', 'label' => __('Postcode', 'woothemes'), 'value' => $data['billing_postcode'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_country', 'label' => __('Country', 'woothemes'), 'value' => $data['billing_country'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_state', 'label' => __('State/County', 'woothemes'), 'value' => $data['billing_state'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_email', 'label' => __('Email Address', 'woothemes'), 'value' => $data['billing_email'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'billing_phone', 'label' => __('Tel', 'woothemes'), 'value' => $data['billing_phone'] ) );
+		?></div>
 		<div id="order_customer_shipping_data" class="panel woocommerce_options_panel">
 		
-			<p class="form-field"><button class="button billing-same-as-shipping"><?php _e('Copy billing address to shipping address', 'woothemes'); ?></button></p>
-			<?php
-				
-				// First Name
-				$field = array( 'id' => 'shipping_first_name', 'label' => 'First Name:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Last Name
-				$field = array( 'id' => 'shipping_last_name', 'label' => 'Last Name:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Company
-				$field = array( 'id' => 'shipping_company', 'label' => 'Company:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Address 1
-				$field = array( 'id' => 'shipping_address_1', 'label' => 'Address 1:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Address 2
-				$field = array( 'id' => 'shipping_address_2', 'label' => 'Address 2:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// City
-				$field = array( 'id' => 'shipping_city', 'label' => 'City:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Postcode
-				$field = array( 'id' => 'shipping_postcode', 'label' => 'Postcode:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// Country
-				$field = array( 'id' => 'shipping_country', 'label' => 'Country:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-				// State
-				$field = array( 'id' => 'shipping_state', 'label' => 'State/County:' );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].'</label>
-				<input type="text" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$data[$field['id']].'" /></p>';
-				
-			?>
-		</div>
+			<p class="form-field"><button class="button billing-same-as-shipping"><?php _e('Copy billing address to shipping address', 'woothemes'); ?></button></p><?php
+			woocommerce_wp_text_input( array( 'id' => 'shipping_first_name', 'label' => __('First Name', 'woothemes'), 'value' => $data['shipping_first_name'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_last_name', 'label' => __('Last Name', 'woothemes'), 'value' => $data['shipping_last_name'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_company', 'label' => __('Company', 'woothemes'), 'value' => $data['shipping_company'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_address_1', 'label' => __('Address 1', 'woothemes'), 'value' => $data['shipping_address_1'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_address_2', 'label' => __('Address 2', 'woothemes'), 'value' => $data['shipping_address_2'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_city', 'label' => __('City', 'woothemes'), 'value' => $data['shipping_city'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_postcode', 'label' => __('Postcode', 'woothemes'), 'value' => $data['shipping_postcode'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_country', 'label' => __('Country', 'woothemes'), 'value' => $data['shipping_country'] ) );
+			woocommerce_wp_text_input( array( 'id' => 'shipping_state', 'label' => __('State/County', 'woothemes'), 'value' => $data['shipping_state'] ) );
+		?></div>
 	</div>
 	<?php
-	
 }
 
 /**
@@ -242,22 +143,22 @@ function woocommerce_order_items_meta_box($post) {
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
 			<thead>
 				<tr>
-					<th class="product-id"><?php _e('ID', 'woothemes'); ?></th>
-					<th class="variation-id"><?php _e('Variation ID', 'woothemes'); ?></th>
-					<th class="product-sku"><?php _e('sku', 'woothemes'); ?></th>
+					<th class="product-id" width="1%"><?php _e('ID', 'woothemes'); ?></th>
+					<th class="variation-id" width="1%"><?php _e('Variation&nbsp;ID', 'woothemes'); ?></th>
+					<th class="product-sku" width="1%"><?php _e('SKU', 'woothemes'); ?></th>
 					<th class="name"><?php _e('Name', 'woothemes'); ?></th>
 					<th class="variation"><?php _e('Variation', 'woothemes'); ?></th>
 					<th class="meta"><?php _e('Order Item Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
-					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost"><?php _e('Cost', 'woothemes'); ?></th>
-					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
+					<th class="quantity" style="width:72px"><?php _e('Quantity', 'woothemes'); ?></th>
+					<th class="cost" style="width:72px"><?php _e('Cost', 'woothemes'); ?></th>
+					<th class="tax" style="width:72px"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
 			</thead>
 			<tbody id="order_items_list">	
 				
-				<?php if (sizeof($order_items)>0 && isset($order_items[0]['id'])) foreach ($order_items as $item) : 
+				<?php $loop = 0; if (sizeof($order_items)>0 && isset($order_items[0]['id'])) foreach ($order_items as $item) : 
 					
 					if (isset($item['variation_id']) && $item['variation_id'] > 0) :
 						$_product = &new woocommerce_product_variation( $item['variation_id'] );
@@ -266,7 +167,7 @@ function woocommerce_order_items_meta_box($post) {
 					endif;
 
 					?>
-					<tr class="item">
+					<tr class="item" rel="<?php echo $loop; ?>">
 						<td class="product-id"><?php echo $item['id']; ?></td>
 						<td class="variation-id"><?php if ($item['variation_id']) echo $item['variation_id']; else echo '-'; ?></td>
 						<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
@@ -282,23 +183,29 @@ function woocommerce_order_items_meta_box($post) {
 							<table class="meta" cellspacing="0">
 								<tfoot>
 									<tr>
-										<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
+										<td colspan="4"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
 									</tr>
 								</tfoot>
-								<tbody></tbody>
+								<tbody class="meta_items">
+								<?php
+									if (isset($item['item_meta']) && is_array($item['item_meta'])) foreach ($item['item_meta'] as $key => $value) :
+										echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$key.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.$value.'" /></td><td><button class="remove_meta button">&times;</button></td></tr>';
+									endforeach;
+								?>
+								</tbody>
 							</table>
 						</td>
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
-						<td class="quantity"><input type="text" name="item_quantity[]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo $item['qty']; ?>" /></td>
-						<td class="cost"><input type="text" name="item_cost[]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
-						<td class="tax"><input type="text" name="item_tax_rate[]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $item['taxrate']; ?>" /></td>
+						<td class="quantity"><input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo $item['qty']; ?>" /></td>
+						<td class="cost"><input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
+						<td class="tax"><input type="text" name="item_tax_rate[<?php echo $loop; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $item['taxrate']; ?>" /></td>
 						<td class="center">
-							<input type="hidden" name="item_id[]" value="<?php echo $item['id']; ?>" />
-							<input type="hidden" name="item_name[]" value="<?php echo $item['name']; ?>" />
+							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo $item['id']; ?>" />
+							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo $item['name']; ?>" />
 							<button type="button" class="remove_row button">&times;</button>
 						</td>
 					</tr>
-				<?php endforeach; ?>
+				<?php $loop++; endforeach; ?>
 			</tbody>
 		</table>
 	</div>
@@ -487,23 +394,36 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		$order_items = array();
 	
 		if (isset($_POST['item_id'])) :
-			 $item_id		= $_POST['item_id'];
-			 $item_variation= $_POST['item_variation'];
-			 $item_name 	= $_POST['item_name'];
-			 $item_quantity = $_POST['item_quantity'];
-			 $item_cost 	= $_POST['item_cost'];
-			 $item_tax_rate = $_POST['item_tax_rate'];
+			 $item_id			= $_POST['item_id'];
+			 $item_variation	= $_POST['item_variation'];
+			 $item_name 		= $_POST['item_name'];
+			 $item_quantity 	= $_POST['item_quantity'];
+			 $item_cost 		= $_POST['item_cost'];
+			 $item_tax_rate 	= $_POST['item_tax_rate'];
+			 $item_meta_names 	= $_POST['meta_name'];
+			 $item_meta_values 	= $_POST['meta_value'];
 	
 			 for ($i=0; $i<sizeof($item_id); $i++) :
 			 	
-			 	if (!isset($item_id[$i])) continue;
+			 	if (!isset($item_id[$i]) || !$item_id[$i]) continue;
 			 	if (!isset($item_name[$i])) continue;
-			 	if (!isset($item_quantity[$i])) continue;
+			 	if (!isset($item_quantity[$i]) || $item_quantity[$i] < 1) continue;
 			 	if (!isset($item_cost[$i])) continue;
 			 	if (!isset($item_tax_rate[$i])) continue;
 			 	
-			 	//$ex_tax = woocommerce_clean($item_cost[$i]) / (($item_tax_rate[$i]/100)+1);
+			 	// Meta
+			 	$item_meta = array();
+			 	$meta_names = $item_meta_names[$i];
+			 	$meta_values = $item_meta_values[$i];
 			 	
+			 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
+			 		$key = sanitize_title($meta_names[$ii]);
+			 		if ($key && $meta_values[$ii]) :
+			 			$item_meta[$key] = woocommerce_clean( $meta_values[$ii] );
+			 		endif;
+			 	endfor;
+			 	
+			 	// Add to array	 	
 			 	$order_items[] = apply_filters('update_order_item', array(
 			 		'id' 			=> htmlspecialchars(stripslashes($item_id[$i])),
 			 		'variation_id' 	=> (int) $item_variation[$i],
@@ -511,6 +431,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'qty' 			=> (int) $item_quantity[$i],
 			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
+			 		'item_meta'		=> $item_meta
 			 	));
 			 	
 			 endfor; 
