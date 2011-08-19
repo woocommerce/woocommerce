@@ -25,17 +25,14 @@ add_action('admin_init', 'woocommerce_admin_init');
  * Admin Menus
  * 
  * Sets up the admin menus in wordpress.
- *
- * @since 		1.0
  */
 function woocommerce_admin_menu() {
 	global $menu;
 	
 	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator' );
 	
-    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_dashboard', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
-    add_submenu_page('woocommerce', __('Dashboard', 'woothemes'), __('Dashboard', 'woothemes'), 'manage_woocommerce', 'woocommerce', 'woocommerce_dashboard'); 
-    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce-settings', 'woocommerce_settings');
+    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
+    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
 
