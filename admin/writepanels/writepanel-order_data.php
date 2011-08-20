@@ -144,15 +144,12 @@ function woocommerce_order_items_meta_box($post) {
 			<thead>
 				<tr>
 					<th class="product-id" width="1%"><?php _e('ID', 'woothemes'); ?></th>
-					<th class="variation-id" width="1%"><?php _e('Variation&nbsp;ID', 'woothemes'); ?></th>
-					<th class="product-sku" width="1%"><?php _e('SKU', 'woothemes'); ?></th>
 					<th class="name"><?php _e('Name', 'woothemes'); ?></th>
-					<th class="variation"><?php _e('Variation', 'woothemes'); ?></th>
-					<th class="meta"><?php _e('Order Item Meta', 'woothemes'); ?></th>
+					<th class="meta" width="1%"><?php _e('Item Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
-					<th class="quantity" style="width:72px"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost" style="width:72px"><?php _e('Cost', 'woothemes'); ?></th>
-					<th class="tax" style="width:72px"><?php _e('Tax Rate', 'woothemes'); ?></th>
+					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
+					<th class="cost"><?php _e('Cost', 'woothemes'); ?></th>
+					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
 			</thead>
@@ -168,17 +165,21 @@ function woocommerce_order_items_meta_box($post) {
 
 					?>
 					<tr class="item" rel="<?php echo $loop; ?>">
-						<td class="product-id"><?php echo $item['id']; ?></td>
-						<td class="variation-id"><?php if ($item['variation_id']) echo $item['variation_id']; else echo '-'; ?></td>
-						<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
-						<td class="name"><a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $item['name']; ?></a></td>
-						<td class="variation"><?php
-							if (isset($_product->variation_data)) :
-								echo woocommerce_get_formatted_variation( $_product->variation_data, true );
-							else :
-								echo '-';
-							endif;
-						?></td>
+						<td class="product-id">
+							<img class="tips" tip="<?php
+								echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $item['id'];
+								echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($item['variation_id']) echo $item['variation_id']; else echo '-';
+								echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
+							?>" src="<?php echo woocommerce::plugin_url(); ?>/assets/images/tip.png" />
+						</td>
+						<td class="name">
+							<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $item['name']; ?></a>
+							<?php
+								if (isset($_product->variation_data)) :
+									echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
+								endif;
+							?>
+						</td>
 						<td>
 							<table class="meta" cellspacing="0">
 								<tfoot>

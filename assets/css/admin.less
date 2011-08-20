@@ -129,12 +129,12 @@ dl.totals {
 		background: #fff;
 		thead th {
 			background: #ECECEC;
-			padding: 8px 10px;
+			padding: 8px 8px;
 			font-size: 11px;
 			text-align: left;
 		}
 		td {
-			padding: 8px 10px;
+			padding: 8px 8px;
 			text-align: left;
 			line-height: 26px;
 			vertical-align: top;
@@ -154,14 +154,21 @@ dl.totals {
 		.name {
 			min-width: 100px;
 		}
-		.center, .variation-id, .product-id, .product-sku {
+		.center, .variation-id, .product-id {
 			text-align: center;
 		}
+		.quantity, .cost, .tax {
+			width: 60px;
+		}
 		table.meta {
+			width: 100%;
 			tr {
 				td {
 					padding: 1px 4px 1px 0;
 					border: 0;
+					input {
+						width: 150px;
+					}
 				}
 			}
 		}
@@ -220,42 +227,26 @@ dl.totals {
 		float: left;
 	}
 }
-.column-total_cost {
-	table.cost {
-		border: 1px solid #ddd !important;
-		width: 100%;
-		margin: 5px 0 !important;
-		td, th {
-			padding: 4px 9px 4px;
-			background: #eee;
-			line-height: 1;
-		}
-	}
-}
 
 .widefat {
 	th.column-id {
 		width:60px !important;
+	}	
+	.column-order_title {
+		time {
+			display: block;
+			color:#999;
+			margin: 3px 0;
+		}
 	}
-	
+	small.meta {
+		display: block;
+		color:#999;
+		font-size: inherit;
+		margin: 3px 0;
+	}
 	.column-total_cost {
 		width:150px !important;
-	}
-	
-	.column-order_title {
-		width:120px;
-		
-		a {
-			display: block;
-		}
-		
-		time {
-			color:#999;
-		}
-	}
-	
-	.column-customer {
-		width:140px;
 	}
 	.column-order_status {
 		width:80px;
@@ -824,6 +815,24 @@ div.multi_select_products_wrapper {
 	outline: 1px dotted #A0C443;
 	height: 60px;
 	background: #000;
+}
+
+/* Tooltips */
+.tips {
+	cursor: help;
+	padding: 5px 0 0 0;
+}
+#easyTooltip { 
+	padding:5px 10px;  
+	border:3px solid #3da5d5;  
+	background:#288ab7;  
+	color: #fff;
+	font-size: 12px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	-o-border-radius:4px;
+	-khtml-border-radius:4px;
+	border-radius:4px;
 }
 
 /* Datepicker */

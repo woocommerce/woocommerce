@@ -189,18 +189,12 @@ function woocommerce_edit_order_columns($columns){
 	$columns = array();
 	
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	
 	$columns["order_status"] = __("Status", 'woothemes');
-	
 	$columns["order_title"] = __("Order", 'woothemes');
-	
 	$columns["customer"] = __("Customer", 'woothemes');
-	$columns["billing_address"] = __("Billing Address", 'woothemes');
-	$columns["shipping_address"] = __("Shipping Address", 'woothemes');
-	
-	$columns["billing_and_shipping"] = __("Billing & Shipping", 'woothemes');
-	
-	$columns["total_cost"] = __("Order Cost", 'woothemes');
+	$columns["billing_address"] = __("Billing", 'woothemes');
+	$columns["shipping_address"] = __("Shipping", 'woothemes');
+	$columns["total_cost"] = __("Order Total", 'woothemes');
 	
 	return $columns;
 }
@@ -210,6 +204,7 @@ function woocommerce_custom_order_columns($column) {
 
 	global $post;
 	$order = &new woocommerce_order( $post->ID );
+	
 	switch ($column) {
 		case "order_status" :
 			
@@ -218,44 +213,46 @@ function woocommerce_custom_order_columns($column) {
 		break;
 		case "order_title" :
 			
-			echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'">'.sprintf( __('Order #%s', 'woothemes'), $post->ID ).'</a>';
+			echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'">'.sprintf( __('Order #%s', 'woothemes'), $post->ID ).'</a> ';
 			
 			echo '<time title="'.date_i18n('c', strtotime($post->post_date)).'">'.date_i18n('F j, Y, g:i a', strtotime($post->post_date)).'</time>';
 			
 		break;
 		case "customer" :
-			
-			if ($order->user_id) $user_info = get_userdata($order->user_id);
-
-			?>
-			<dl>
-				<dt><?php _e('User:', 'woothemes'); ?></dt>
-				<dd><?php
-					if (isset($user_info) && $user_info) : 
-			                    	
-		            	echo '<a href="user-edit.php?user_id='.$user_info->ID.'">#'.$user_info->ID.' &ndash; <strong>';
-		            	
-		            	if ($user_info->first_name || $user_info->last_name) echo $user_info->first_name.' '.$user_info->last_name;
-		            	else echo $user_info->display_name;
-		            	
-		            	echo '</strong></a>';
 		
-		           	else : 
-		           		_e('Guest', 'woothemes'); 
-		           	endif;
-				?></dd>
-        		<?php if ($order->billing_email) : ?><dt><?php _e('Billing Email:', 'woothemes'); ?></dt>
-        		<dd><a href="mailto:<?php echo $order->billing_email; ?>"><?php echo $order->billing_email; ?></a></dd><?php endif; ?>
-        		<?php if ($order->billing_phone) : ?><dt><?php _e('Billing Tel:', 'woothemes'); ?></dt>
-        		<dd><?php echo $order->billing_phone; ?></dd><?php endif; ?>
-        	</dl>
-        	<?php
+			if ($order->user_id) $user_info = get_userdata($order->user_id);
+			
+			if (isset($user_info) && $user_info) : 
+			                    	
+            	echo '<a href="user-edit.php?user_id='.$user_info->ID.'">';
+            	
+            	if ($user_info->first_name || $user_info->last_name) echo $user_info->first_name.' '.$user_info->last_name;
+            	else echo $user_info->display_name;
+            	
+            	echo '</a>';
+
+           	else : 
+           		_e('Guest', 'woothemes');
+           	endif;
+           	
+           	if ($order->billing_email) :
+        		echo '<small class="meta">'.__('Email: ', 'woothemes').'<a href="mailto:'.$order->billing_email.'">'.$order->billing_email.'</a></small>';
+        	endif;
+        	if ($order->billing_phone) :
+        		echo '<small class="meta">'.__('Tel: ', 'woothemes'). $order->billing_phone . '</small>';
+        	endif;
+		
 		break;
 		case "billing_address" :
 			echo '<strong>'.$order->billing_first_name . ' ' . $order->billing_last_name;
         	if ($order->billing_company) echo ', '.$order->billing_company;
         	echo '</strong><br/>';
         	echo '<a target="_blank" href="http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16">'.$order->formatted_billing_address.'</a>';
+        	
+        	if ($order->payment_method) :
+        		echo '<small class="meta">' . __('Paid via ', 'woo themes') . $order->payment_method . '</small>';
+        	endif;
+        	
 		break;
 		case "shipping_address" :
 			if ($order->formatted_shipping_address) :
@@ -266,42 +263,13 @@ function woocommerce_custom_order_columns($column) {
         	else :
         		echo '&ndash;';
         	endif;
-		break;
-		case "billing_and_shipping" :
-			?>
-			<dl>
-				<dt><?php _e('Payment:', 'woothemes'); ?></dt>
-				<dd><?php echo $order->payment_method; ?></dd>
-        		<dt><?php _e('Shipping:', 'woothemes'); ?></dt>
-				<dd><?php echo $order->shipping_method; ?></dd>
-        	</dl>
-        	<?php
+        	
+        	if ($order->shipping_metho) :
+        		echo '<small class="meta">' . __('Shipped via ', 'woothemes') . $order->shipping_method . '</small>';
+        	endif;
 		break;
 		case "total_cost" :
-			?>
-			<table cellpadding="0" cellspacing="0" class="cost">
-        		<tr>
-        			<th><?php _e('Subtotal', 'woothemes'); ?></th>
-        			<td><?php echo woocommerce_price($order->order_subtotal); ?></td>
-        		</tr>
-        		<?php if ($order->order_shipping>0) : ?><tr>
-        			<th><?php _e('Shipping', 'woothemes'); ?></th>
-        			<td><?php echo woocommerce_price($order->order_shipping); ?></td>
-        		</tr><?php endif; ?>
-        		<?php if ($order->get_total_tax()>0) : ?><tr>
-        			<th><?php _e('Tax', 'woothemes'); ?></th>
-        			<td><?php echo woocommerce_price($order->get_total_tax()); ?></td>
-        		</tr><?php endif; ?>
-        		<?php if ($order->order_discount>0) : ?><tr>
-        			<th><?php _e('Discount', 'woothemes'); ?></th>
-        			<td><?php echo woocommerce_price($order->order_discount); ?></td>
-        		</tr><?php endif; ?>
-        		<tr>	
-        			<th><?php _e('Total', 'woothemes'); ?></th>
-        			<td><?php echo woocommerce_price($order->order_total); ?></td>
-        		</tr>
-            </table>
-            <?php
+			echo woocommerce_price($order->order_total);
 		break;
 	}
 }

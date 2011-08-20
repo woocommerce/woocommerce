@@ -133,7 +133,7 @@ function display_variation_data() {
 	endif;
 	
 	$data = array(
-		'price_html' 		=> '<span class="price">'.$_product->get_price_html().'</span>',
+		'price_html' 		=> '<span class="price">'.$_product->get_price_html() .'</span>',
 		'availability_html' => $availability_html,
 		'image_src'			=> $image,
 		'image_link'		=> $image_link
@@ -191,22 +191,26 @@ function woocommerce_add_order_item() {
 	endif;
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
-		<td class="product-id"><?php echo $_product->id; ?></td>
-		<td class="variation-id"><?php if (isset($_product->variation_id)) echo $_product->variation_id; else echo '-'; ?></td>
-		<td class="product-sku"><?php if ($_product->sku) echo $_product->sku; ?></td>
-		<td class="name"><a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $_product->get_title(); ?></a></td>
-		<td class="variation"><?php
-			if (isset($_product->variation_data)) :
-				echo woocommerce_get_formatted_variation( $_product->variation_data, true );
-			else :
-				echo '-';
-			endif;
-		?></td>
+		<td class="product-id">
+			<img class="tips" tip="<?php
+				echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $_product->id;
+				echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($_product->variation_id) echo $_product->variation_id; else echo '-';
+				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
+			?>" src="<?php echo woocommerce::plugin_url(); ?>/assets/images/tip.png" />
+		</td>
+		<td class="name">
+			<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $_product->get_title(); ?></a>
+			<?php
+				if (isset($_product->variation_data)) :
+					echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
+				endif;
+			?>
+		</td>
 		<td>
 			<table class="meta" cellspacing="0">
 				<tfoot>
 					<tr>
-						<td colspan="3"><button class="add_meta button"><?php _e('Add meta', 'woothemes'); ?></button></td>
+						<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
 					</tr>
 				</tfoot>
 				<tbody class="meta_items"></tbody>

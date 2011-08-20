@@ -47,24 +47,47 @@ class woocommerce_product_variation extends woocommerce_product {
 		$this->id = $this->variation->post_parent;
 		
 		$parent_custom_fields = get_post_custom( $this->id );
+		
+		// Define the data we're going to load: Key => Default value
+		$load_data = array(
+			'sku'			=> $this->id,
+			'price' 		=> 0,
+			'visibility'	=> 'hidden',
+			'stock'			=> 0,
+			'stock_status'	=> 'instock',
+			'backorders'	=> 'no',
+			'manage_stock'	=> 'no',
+			'sale_price'	=> '',
+			'regular_price' => '',
+			'weight'		=> '',
+			'tax_status'	=> 'taxable',
+			'tax_class'		=> '',
+			'upsell_ids'	=> array(),
+			'crosssell_ids' => array()
+		);
+		
+		// Load the data from the custom fields
+		foreach ($load_data as $key => $default) :
+			if (isset($parent_custom_fields[$key][0]) && !empty($parent_custom_fields[$key][0])) :
+				$this->$key = $parent_custom_fields[$key][0];
+			else :
+				$this->$key = $default;
+			endif;
+		endforeach;
+		
+		// Load serialised data, unserialise twice to fix WP bug
+		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $product_custom_fields['product_attributes'][0] )); else $this->attributes = array();	
 
-		if (isset($parent_custom_fields['sku'][0]) && !empty($parent_custom_fields['sku'][0])) $this->sku = $parent_custom_fields['sku'][0]; else $this->sku = $this->id;
-		if (isset($parent_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $parent_custom_fields['product_attributes'][0] ) ); else $this->attributes = array();		
-		if (isset($parent_custom_fields['price'][0])) $this->price = $parent_custom_fields['price'][0]; else $this->price = 0;
-		if (isset($parent_custom_fields['visibility'][0])) $this->visibility = $parent_custom_fields['visibility'][0]; else $this->visibility = 'hidden';
-		if (isset($parent_custom_fields['stock'][0])) $this->stock = $parent_custom_fields['stock'][0]; else $this->stock = 0;
 		
 		$this->product_type = 'variable';
 			
-		if ($product_custom_fields) :
+		if ($parent_custom_fields) :
 			$this->exists = true;		
 		else :
 			$this->exists = false;	
 		endif;
-		
-		//parent::woocommerce_product( $this->variation->post_parent );
-		
-		/* Pverride parent data with variation */
+				
+		/* Override parent data with variation */
 		if (isset($product_custom_fields['sku'][0]) && !empty($product_custom_fields['sku'][0])) :
 			$this->variation_has_sku = true;
 			$this->sku = $product_custom_fields['sku'][0];
@@ -83,11 +106,13 @@ class woocommerce_product_variation extends woocommerce_product {
 		if (isset($product_custom_fields['price'][0]) && !empty($product_custom_fields['price'][0])) :
 			$this->variation_has_price = true;
 			$this->price = $product_custom_fields['price'][0];
+			$this->regular_price = $product_custom_fields['price'][0];
 		endif;
 		
 		if (isset($product_custom_fields['sale_price'][0]) && !empty($product_custom_fields['sale_price'][0])) :
 			$this->variation_has_sale_price = true;
 			$this->sale_price = $product_custom_fields['sale_price'][0];
+			if ($this->sale_price < $this->price) $this->price = $this->sale_price;
 		endif;
 	}
 
@@ -99,29 +124,14 @@ class woocommerce_product_variation extends woocommerce_product {
 		return $this->variation;
 	}
 	
-	/** Returns the product's price */
-	function get_price() {
-		
-		if ($this->variation_has_price) :
-			if ($this->variation_has_sale_price) :
-				return $this->sale_price;
-			else :
-				return $this->price;
-			endif;
-		else :
-			return parent::get_price();
-		endif;
-		
-	}
-	
 	/** Returns the price in html format */
 	function get_price_html() {
-		if ($this->variation_has_price) :
+		if ($this->variation_has_price || $this->variation_has_sale_price) :
 			$price = '';
 			
 			if ($this->price) :
 				if ($this->variation_has_sale_price) :
-					$price .= '<del>'.woocommerce_price( $this->price ).'</del> <ins>'.woocommerce_price( $this->sale_price ).'</ins>';
+					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price( $this->sale_price ).'</ins>';
 				else :
 					$price .= woocommerce_price( $this->price );
 				endif;

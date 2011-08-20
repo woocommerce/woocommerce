@@ -539,14 +539,31 @@ class woocommerce_checkout {
 							$rate = $_tax->get_rate( $_product->tax_class );
 						endif;
 						
+						// Store any item meta data
+						$item_meta = array();
+						
+						// Variations meta
+						if ($values['variation'] && is_array($values['variation'])) :
+							foreach ($values['variation'] as $key => $value) :
+								$item_meta[ sanitize_title(str_replace('tax_', '', $key)) ] = $value;
+							endforeach;
+						endif;
+						
+						// Discount code meta
+						if (woocommerce_cart::$applied_coupons) $item_meta[ 'coupons' ] = implode(', ', woocommerce_cart::$applied_coupons);
+						
+						// Run filter
+						$item_meta = apply_filters('order_item_meta', $item_meta, $values);
+						
 						$order_items[] = apply_filters('new_order_item', array(
 					 		'id' 			=> $values['product_id'],
 					 		'variation_id' 	=> $values['variation_id'],
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'cost' 			=> $_product->get_price_excluding_tax(),
-					 		'taxrate' 		=> $rate
-					 	));
+					 		'taxrate' 		=> $rate,
+					 		'item_meta'		=> $item_meta
+					 	), $values);
 					 	
 					 	// Check stock levels
 					 	if ($_product->managing_stock()) :

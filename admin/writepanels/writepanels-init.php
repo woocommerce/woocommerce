@@ -129,12 +129,7 @@ function woocommerce_write_panel_scripts() {
 	$post_type = woocommerce_get_current_post_type();
 	
 	if( $post_type !== 'product' && $post_type !== 'shop_order' ) return;
-	
-	wp_register_script('woocommerce-date', woocommerce::plugin_url() . '/assets/js/date.js');
-	wp_register_script('woocommerce-datepicker', woocommerce::plugin_url() . '/assets/js/datepicker.js', array('jquery', 'woocommerce-date'));
-	
-	wp_enqueue_script('woocommerce-datepicker');
-	
+		
 	wp_register_script('woocommerce-writepanel', woocommerce::plugin_url() . '/assets/js/write-panels.js', array('jquery'));
 	wp_enqueue_script('woocommerce-writepanel');
 	

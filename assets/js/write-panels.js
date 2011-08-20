@@ -114,7 +114,8 @@ jQuery( function($){
 				jQuery('table.woocommerce_order_items tbody#order_items_list').append( response );
 				jQuery('table.woocommerce_order_items').unblock();
 				jQuery('select.add_item_id').css('border-color', '').val('');
-			
+				jQuery(".tips").easyTooltip();
+				
 			});
 
 		} else {

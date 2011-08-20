@@ -126,12 +126,12 @@ dl.totals dd input.last {
 }
 .woocommerce_order_items_wrapper table.woocommerce_order_items thead th {
   background: #ECECEC;
-  padding: 8px 10px;
+  padding: 8px 8px;
   font-size: 11px;
   text-align: left;
 }
 .woocommerce_order_items_wrapper table.woocommerce_order_items td {
-  padding: 8px 10px;
+  padding: 8px 8px;
   text-align: left;
   line-height: 26px;
   vertical-align: top;
@@ -151,15 +151,21 @@ dl.totals dd input.last {
 .woocommerce_order_items_wrapper table.woocommerce_order_items .name {
   min-width: 100px;
 }
-.woocommerce_order_items_wrapper table.woocommerce_order_items .center,
-.woocommerce_order_items_wrapper table.woocommerce_order_items .variation-id,
-.woocommerce_order_items_wrapper table.woocommerce_order_items .product-id,
-.woocommerce_order_items_wrapper table.woocommerce_order_items .product-sku {
+.woocommerce_order_items_wrapper table.woocommerce_order_items .center, .woocommerce_order_items_wrapper table.woocommerce_order_items .variation-id, .woocommerce_order_items_wrapper table.woocommerce_order_items .product-id {
   text-align: center;
+}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .quantity, .woocommerce_order_items_wrapper table.woocommerce_order_items .cost, .woocommerce_order_items_wrapper table.woocommerce_order_items .tax {
+  width: 60px;
+}
+.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta {
+  width: 100%;
 }
 .woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td {
   padding: 1px 4px 1px 0;
   border: 0;
+}
+.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td input {
+  width: 150px;
 }
 .woocommerce-order-panel {
   overflow: hidden;
@@ -214,33 +220,22 @@ dl.totals dd input.last {
   width: 65%;
   float: left;
 }
-.column-total_cost table.cost {
-  border: 1px solid #ddd !important;
-  width: 100%;
-  margin: 5px 0 !important;
-}
-.column-total_cost table.cost td, .column-total_cost table.cost th {
-  padding: 4px 9px 4px;
-  background: #eee;
-  line-height: 1;
-}
 .widefat th.column-id {
   width: 60px !important;
 }
+.widefat .column-order_title time {
+  display: block;
+  color: #999;
+  margin: 3px 0;
+}
+.widefat small.meta {
+  display: block;
+  color: #999;
+  font-size: inherit;
+  margin: 3px 0;
+}
 .widefat .column-total_cost {
   width: 150px !important;
-}
-.widefat .column-order_title {
-  width: 120px;
-}
-.widefat .column-order_title a {
-  display: block;
-}
-.widefat .column-order_title time {
-  color: #999;
-}
-.widefat .column-customer {
-  width: 140px;
 }
 .widefat .column-order_status {
   width: 80px;
@@ -760,6 +755,23 @@ div.multi_select_products_wrapper {
   outline: 1px dotted #A0C443;
   height: 60px;
   background: #000;
+}
+/* Tooltips */
+.tips {
+  cursor: help;
+  padding: 5px 0 0 0;
+}
+#easyTooltip {
+  padding: 5px 10px;
+  border: 3px solid #3da5d5;
+  background: #288ab7;
+  color: #fff;
+  font-size: 12px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -o-border-radius: 4px;
+  -khtml-border-radius: 4px;
+  border-radius: 4px;
 }
 /* Datepicker */
 table.jCalendar {
