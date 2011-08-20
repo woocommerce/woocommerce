@@ -336,6 +336,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
 				<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 			</div>
+			<div><input type="hidden" name="product_id" value="<?php echo $post->ID; ?>" /></div>
 			<?php do_action('woocommerce_add_to_cart_form'); ?>
 		</form>
 		<?php

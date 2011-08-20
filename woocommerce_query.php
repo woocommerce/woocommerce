@@ -12,8 +12,10 @@
 /**
  * Find and get a specific variation
  */
-function woocommerce_find_variation( $variation_data = array() ) {
+function woocommerce_find_variation( $product_id = '', $variation_data = array() ) {
 
+	if (!$product_id) return false;
+	
 	foreach ($variation_data as $key => $value) :
 		
 		if (!strstr($key, 'tax_')) continue;
@@ -32,6 +34,7 @@ function woocommerce_find_variation( $variation_data = array() ) {
 		'orderby'			=> 'id',
 		'order'				=> 'desc',
 		'posts_per_page'	=> 1,
+		'post_parent'		=> $product_id,
 		'meta_query' 		=> $variation_query
 	);
 	$posts = get_posts( $args );

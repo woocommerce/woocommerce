@@ -93,23 +93,23 @@ class woocommerce_product_variation extends woocommerce_product {
 			$this->sku = $product_custom_fields['sku'][0];
 		endif;
 		
-		if (isset($product_custom_fields['stock'][0]) && !empty($product_custom_fields['stock'][0])) :
+		if (isset($product_custom_fields['stock'][0]) && $product_custom_fields['stock'][0]!=='') :
 			$this->variation_has_stock = true;
 			$this->stock = $product_custom_fields['stock'][0];
 		endif;
 		
-		if (isset($product_custom_fields['weight'][0]) && !empty($product_custom_fields['weight'][0])) :
+		if (isset($product_custom_fields['weight'][0]) && $product_custom_fields['weight'][0]!=='') :
 			$this->variation_has_weight = true;
 			$this->weight = $product_custom_fields['weight'][0];
 		endif;
 		
-		if (isset($product_custom_fields['price'][0]) && !empty($product_custom_fields['price'][0])) :
+		if (isset($product_custom_fields['price'][0]) && $product_custom_fields['price'][0]!=='') :
 			$this->variation_has_price = true;
 			$this->price = $product_custom_fields['price'][0];
 			$this->regular_price = $product_custom_fields['price'][0];
 		endif;
 		
-		if (isset($product_custom_fields['sale_price'][0]) && !empty($product_custom_fields['sale_price'][0])) :
+		if (isset($product_custom_fields['sale_price'][0]) && $product_custom_fields['sale_price'][0]!=='') :
 			$this->variation_has_sale_price = true;
 			$this->sale_price = $product_custom_fields['sale_price'][0];
 			if ($this->sale_price < $this->price) $this->price = $this->sale_price;

@@ -638,7 +638,8 @@ table.woocommerce_attributes .center {
 #woocommerce_attributes select.attribute_taxonomy,
 button.add_attribute,
 button.add_variable_attribute,
-button.add_configuration {
+button.add_variation,
+button.link_all_variations {
   float: right;
 }
 div.multi_select_products_wrapper {

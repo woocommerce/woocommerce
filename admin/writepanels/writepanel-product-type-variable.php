@@ -89,9 +89,11 @@ function variable_product_type_options() {
 				</div>
 			<?php $loop++; endforeach; ?>
 		</div>
-		<p class="description"><?php _e('Add (optional) pricing/inventory for product variations. You must save your product attributes in the "Product Data" panel to make them available for selection.', 'woothemes'); ?></p>
 
-		<button type="button" class="button button-primary add_configuration"><?php _e('Add Configuration', 'woothemes'); ?></button>
+		<button type="button" class="button button-primary add_variation"><?php _e('Add Variation', 'woothemes'); ?></button>
+		<button type="button" class="button link_all_variations"><?php _e('Link all variations', 'woothemes'); ?></button>
+		
+		<p class="description"><?php _e('Add (optional) information for product variations. You must save your product attributes in the "Product Data" panel to make them selectable.', 'woothemes'); ?></p>
 		
 		<div class="clear"></div>
 	</div>
@@ -113,7 +115,7 @@ function variable_product_write_panel_js() {
 	?>
 	jQuery(function(){
 		
-		jQuery('button.add_configuration').live('click', function(){
+		jQuery('button.add_variation').live('click', function(){
 		
 			jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 					
@@ -172,6 +174,30 @@ function variable_product_write_panel_js() {
 
 			return false;
 		
+		});
+		
+		jQuery('button.link_all_variations').live('click', function(){
+			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woothemes'); ?>');
+			if (answer){
+			
+				jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+						
+				var data = {
+					action: 'woocommerce_link_all_variations',
+					post_id: <?php echo $post->ID; ?>,
+					security: '<?php echo wp_create_nonce("link-variations"); ?>'
+				};
+	
+				jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
+					
+					if (response==1) {				
+						jQuery('.woocommerce_variations').load( window.location + ' .woocommerce_variations > *' );
+					}
+					jQuery('.woocommerce_variations').unblock();
+	
+				});
+			}
+			return false;
 		});
 		
 		jQuery('button.remove_variation').live('click', function(){
@@ -291,6 +317,132 @@ function woocommerce_add_variation() {
 	
 }
 
+
+/**
+ * Link all variations via ajax function
+ */
+add_action('wp_ajax_woocommerce_link_all_variations', 'woocommerce_link_all_variations');
+
+function woocommerce_link_all_variations() {
+	
+	check_ajax_referer( 'link-variations', 'security' );
+	
+	$post_id = intval( $_POST['post_id'] );
+	
+	if (!$post_id) die();
+	
+	$variations = array();
+	
+	$attributes = maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
+	if (!isset($attributes)) $attributes = array();
+	
+	// Put variation attributes into an array
+	foreach ($attributes as $attribute) :
+								
+		if ( $attribute['variation']!=='yes' ) continue;
+		
+		$taxonmy_name = 'tax_' . sanitize_title($attribute['name']);
+		
+		$options = $attribute['value'];
+		if (!is_array($options)) $options = explode(',', $options);
+		$options = array_map('trim', $options);
+		
+		$variations[$taxonmy_name] = $options;
+		
+	endforeach;
+	
+	// Quit out if none were found
+	if (sizeof($variations)==0) die();
+	
+	// Created posts will all have the following data
+	$variation_post_data = array(
+		'post_title' => 'Product #' . $post_id . ' Variation',
+		'post_content' => '',
+		'post_status' => 'publish',
+		'post_author' => get_current_user_id(),
+		'post_parent' => $post_id,
+		'post_type' => 'product_variation'
+	);
+		
+	// Now find all combinations and create posts
+	if (!function_exists('array_cartesian')) {
+		function array_cartesian($input) {
+		    $result = array();
+		 
+		    while (list($key, $values) = each($input)) {
+		        // If a sub-array is empty, it doesn't affect the cartesian product
+		        if (empty($values)) {
+		            continue;
+		        }
+		 
+		        // Special case: seeding the product array with the values from the first sub-array
+		        if (empty($result)) {
+		            foreach($values as $value) {
+		                $result[] = array($key => $value);
+		            }
+		        }
+		        else {
+		            // Second and subsequent input sub-arrays work like this:
+		            //   1. In each existing array inside $product, add an item with
+		            //      key == $key and value == first item in input sub-array
+		            //   2. Then, for each remaining item in current input sub-array,
+		            //      add a copy of each existing array inside $product with
+		            //      key == $key and value == first item in current input sub-array
+		 
+		            // Store all items to be added to $product here; adding them on the spot
+		            // inside the foreach will result in an infinite loop
+		            $append = array();
+		            foreach($result as &$product) {
+		                // Do step 1 above. array_shift is not the most efficient, but it
+		                // allows us to iterate over the rest of the items with a simple
+		                // foreach, making the code short and familiar.
+		                $product[$key] = array_shift($values);
+		 
+		                // $product is by reference (that's why the key we added above
+		                // will appear in the end result), so make a copy of it here
+		                $copy = $product;
+		 
+		                // Do step 2 above.
+		                foreach($values as $item) {
+		                    $copy[$key] = $item;
+		                    $append[] = $copy;
+		                }
+		 
+		                // Undo the side effecst of array_shift
+		                array_unshift($values, $product[$key]);
+		            }
+		 
+		            // Out of the foreach, we can add to $results now
+		            $result = array_merge($result, $append);
+		        }
+		    }
+		    
+		    return $result;
+		}
+	}
+	
+	$variation_ids = array();
+	$possible_variations = array_cartesian( $variations );
+	
+	foreach ($possible_variations as $variation) :
+		
+		$variation_id = wp_insert_post( $variation_post_data );
+		
+		$variation_ids[] = $variation_id;
+		
+		foreach ($variation as $key => $value) :
+			
+			update_post_meta( $variation_id, $key, $value );
+			
+		endforeach;
+		
+	endforeach;
+	
+	echo 1;
+		
+	die();
+	
+}
 
 
 /**

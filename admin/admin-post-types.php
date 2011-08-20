@@ -115,6 +115,7 @@ function woocommerce_edit_product_columns($columns){
 	endif;
 	
 	$columns["price"] = __("Price", 'woothemes');
+	$columns["date"] = __("Date", 'woothemes');
 	
 	return $columns;
 }

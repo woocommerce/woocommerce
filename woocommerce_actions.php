@@ -108,7 +108,7 @@ function display_variation_data() {
 	$variation_data 	= array();
 	parse_str( $_POST['variation_data'], $variation_data );
 	
-	$variation_id = woocommerce_find_variation( $variation_data );
+	$variation_id = woocommerce_find_variation( $variation_data['product_id'], $variation_data );
 	
 	if (!$variation_id) die();
 	
@@ -393,7 +393,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 					woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
 				else :
 					// Find matching variation
-					$variation_id = woocommerce_find_variation( $variations );
+					$variation_id = woocommerce_find_variation( $product_id, $variations );
 					
 					if ($variation_id>0) :
 						// Add to cart
