@@ -203,6 +203,7 @@ function woocommerce_order_items_meta_box($post) {
 						<td class="center">
 							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo $item['id']; ?>" />
 							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo $item['name']; ?>" />
+							<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php echo $item['variation_id']; ?>" />
 							<button type="button" class="remove_row button">&times;</button>
 						</td>
 					</tr>

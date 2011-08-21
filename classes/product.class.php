@@ -140,13 +140,14 @@ class woocommerce_product {
 	 */
 	function reduce_stock( $by = 1 ) {
 		if ($this->managing_stock()) :
-			$reduce_to = $this->stock - $by;
-			update_post_meta($this->id, 'stock', $reduce_to);
+			$this->stock = $this->stock - $by;
+			$this->total_stock = $this->total_stock - $by;
+			update_post_meta($this->id, 'stock', $this->stock);
 			
 			// Out of stock attribute
 			if (!$this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'outofstock');
 			
-			return $reduce_to;
+			return $this->stock;
 		endif;
 	}
 	
@@ -157,13 +158,14 @@ class woocommerce_product {
 	 */
 	function increase_stock( $by = 1 ) {
 		if ($this->managing_stock()) :
-			$increase_to = $this->stock + $by;
-			update_post_meta($this->id, 'stock', $increase_to);
+			$this->stock = $this->stock + $by;
+			$this->total_stock = $this->total_stock + $by;
+			update_post_meta($this->id, 'stock', $this->stock);
 			
 			// Out of stock attribute
 			if ($this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'instock');
 			
-			return $increase_to;
+			return $this->stock;
 		endif;
 	}
 	

@@ -156,9 +156,32 @@ class woocommerce_product_variation extends woocommerce_product {
 	function reduce_stock( $by = 1 ) {
 		if ($this->variation_has_stock) :
 			if ($this->managing_stock()) :
-				$reduce_to = $this->stock - $by;
-				update_post_meta($this->variation_id, 'stock', $reduce_to);
-				return $reduce_to;
+				
+				$this->stock = $this->stock - $by;
+				$this->total_stock = $this->total_stock - $by;
+				update_post_meta($this->variation_id, 'stock', $this->stock);
+				
+				// Parents out of stock attribute
+				if (!$this->is_in_stock()) :
+				
+					// Check parent
+					$parent_product = &new woocommerce_product( $this->id );
+					
+					if ($parent_product->managing_stock()) :
+						if (!$parent_product->backorders_allowed()) :
+							if ($parent_product->total_stock==0 || $parent_product->total_stock<0) :
+								update_post_meta($this->id, 'stock_status', 'outofstock');
+							endif;
+						endif;
+					else :
+						if ($parent_product->total_stock==0 || $parent_product->total_stock<0) :
+							update_post_meta($this->id, 'stock_status', 'outofstock');
+						endif;
+					endif;
+
+				endif;
+				
+				return $this->stock;
 			endif;
 		else :
 			return parent::reduce_stock( $by );
@@ -173,9 +196,15 @@ class woocommerce_product_variation extends woocommerce_product {
 	function increase_stock( $by = 1 ) {
 		if ($this->variation_has_stock) :
 			if ($this->managing_stock()) :
-				$increase_to = $this->stock + $by;
-				update_post_meta($this->variation_id, 'stock', $increase_to);
-				return $increase_to;
+
+				$this->stock = $this->stock + $by;
+				$this->total_stock = $this->total_stock + $by;
+				update_post_meta($this->variation_id, 'stock', $this->stock);
+				
+				// Parents out of stock attribute
+				if ($this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'instock');
+				
+				return $this->stock;
 			endif;
 		else :
 			return parent::increase_stock( $by );
