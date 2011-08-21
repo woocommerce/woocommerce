@@ -31,6 +31,7 @@ class woocommerce_product {
 	var $upsell_ids;
 	var $crosssell_ids;
 	var $product_type;
+	var $total_stock;
 	
 	
 	/**
@@ -84,6 +85,18 @@ class woocommerce_product {
 		endif;
 		
 		$this->get_children();
+		
+		// total_stock
+		$this->total_stock = $this->stock;
+		if (sizeof($this->children)>0) foreach ($this->children as $child) :
+			if (isset($child->product->variation_has_stock)) :
+				if ($child->product->variation_has_stock) :
+					$this->total_stock += $child->product->stock;
+				endif;
+			else :
+				$this->total_stock += $child->product->stock;
+			endif;
+		endforeach;
 		
 		if ($product_custom_fields) :
 			$this->exists = true;		
@@ -233,7 +246,7 @@ class woocommerce_product {
 	function is_in_stock() {
 		if ($this->managing_stock()) :
 			if (!$this->backorders_allowed()) :
-				if ($this->stock==0 || $this->stock<0) :
+				if ($this->total_stock==0 || $this->total_stock<0) :
 					return false;
 				else :
 					if ($this->stock_status=='instock') return true;
@@ -288,7 +301,7 @@ class woocommerce_product {
 			endif;
 		else :
 			if ($this->is_in_stock()) :
-				if ($this->stock > 0) :
+				if ($this->total_stock > 0) :
 					$availability = __('In stock', 'woothemes');
 					
 					if ($this->backorders_allowed()) :

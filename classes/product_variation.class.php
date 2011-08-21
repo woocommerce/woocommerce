@@ -86,6 +86,8 @@ class woocommerce_product_variation extends woocommerce_product {
 		else :
 			$this->exists = false;	
 		endif;
+		
+		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
 		/* Override parent data with variation */
 		if (isset($product_custom_fields['sku'][0]) && !empty($product_custom_fields['sku'][0])) :
@@ -95,6 +97,7 @@ class woocommerce_product_variation extends woocommerce_product {
 		
 		if (isset($product_custom_fields['stock'][0]) && $product_custom_fields['stock'][0]!=='') :
 			$this->variation_has_stock = true;
+			$this->manage_stock = 'yes';
 			$this->stock = $product_custom_fields['stock'][0];
 		endif;
 		
@@ -114,6 +117,8 @@ class woocommerce_product_variation extends woocommerce_product {
 			$this->sale_price = $product_custom_fields['sale_price'][0];
 			if ($this->sale_price < $this->price) $this->price = $this->sale_price;
 		endif;
+		
+		$this->total_stock = $this->stock;
 	}
 
 	/** Get the product's post data */

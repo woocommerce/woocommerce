@@ -170,20 +170,20 @@ jQuery( function($){
 		
 		// Show option
 		if (select_val=='variable') {
-			jQuery('.inventory_tab, .pricing_tab').show();
-			jQuery('.menu_order_field, .parent_id_field').val('').hide();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.options_group.grouping').val('').hide();
 		} else if (select_val=='simple') {
-			jQuery('.inventory_tab, .pricing_tab').show();
-			jQuery('.menu_order_field, .parent_id_field').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.options_group.grouping').show();
 		} else if (select_val=='grouped') {
-			jQuery('.inventory_tab, .pricing_tab').hide();
-			jQuery('.menu_order_field, .parent_id_field').val('').hide();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').hide();
+			jQuery('.options_group.grouping').val('').hide();
 		} else if (select_val=='downloadable') {
-			jQuery('.inventory_tab, .pricing_tab').show();
-			jQuery('.menu_order_field, .parent_id_field').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.options_group.grouping').show();
 		} else if (select_val=='virtual') {
-			jQuery('.inventory_tab, .pricing_tab').show();
-			jQuery('.menu_order_field, .parent_id_field').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.options_group.grouping').show();
 		}
 		
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );

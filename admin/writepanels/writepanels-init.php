@@ -22,6 +22,7 @@ require_once('writepanel-coupon_data.php');
 add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
 
 function woocommerce_meta_boxes() {
+	add_meta_box( 'woocommerce-product-type', __('Product Type &amp; Visibility', 'woothemes'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woothemes'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-type-options', __('Product Type Options', 'woothemes'), 'woocommerce_product_type_options_box', 'product', 'normal', 'high' );
 	

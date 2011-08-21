@@ -344,6 +344,9 @@ table.wp-list-table .column-featured, table.wp-list-table .column-sellable, tabl
 #dashboard_right_now .complete {
   color: green;
 }
+#dashboard_right_now .t, #dashboard_right_now .t a {
+  white-space: normal;
+}
 #woocommmerce_dashboard_sales h3 a {
   float: right;
   margin-left: 8px;
@@ -524,7 +527,10 @@ p.taxrow label input {
   border-color: #e1e1e1;
   color: #333;
 }
-#woocommerce-product-data .inside, #woocommerce-product-type-options .inside, #woocommerce-order-data .inside {
+#woocommerce-product-data .inside,
+#woocommerce-product-type-options .inside,
+#woocommerce-order-data .inside,
+#woocommerce-product-type .inside {
   padding: 0;
   margin: 0;
 }
@@ -532,7 +538,7 @@ p.taxrow label input {
   padding: 9px 9px 9px 9px;
   color: #555;
 }
-.woocommerce_page_settings .woocommerce_options_panel, .panel {
+.woocommerce_page_settings .woocommerce_options_panel, .panel, #woocommerce-product-type .woocommerce_options_panel {
   padding: 0;
 }
 #woocommerce-product-type-options .panel, #woocommerce-product-specs .inside {
@@ -544,7 +550,7 @@ p.taxrow label input {
   zoom: 1;
   margin: 0 0 9px;
   font-size: 12px;
-  padding: 7px 9px;
+  padding: 5px 9px;
   line-height: 24px;
 }
 .woocommerce_options_panel label {
@@ -590,6 +596,10 @@ p.taxrow label input {
 }
 .woocommerce_options_panel .short {
   width: 20%;
+}
+.woocommerce_options_panel .options_group {
+  border-top: 1px solid white;
+  border-bottom: 1px solid #DFDFDF;
 }
 #woocommerce_attributes {
   padding: 12px;
@@ -642,10 +652,16 @@ button.add_variation,
 button.link_all_variations {
   float: right;
 }
+#upsell_product_data, #crosssell_product_data {
+  padding: 0 9px 9px;
+}
 div.multi_select_products_wrapper {
   float: left;
-  width: 45%;
-  padding: 0 9px 9px;
+  width: 49%;
+  padding: 0;
+}
+div.multi_select_products_wrapper-alt {
+  float: right;
 }
 .multi_select_products, div.multi_select_countries {
   border: 1px solid #ececec;
@@ -653,6 +669,9 @@ div.multi_select_products_wrapper {
   overflow: auto;
   width: 100%;
   float: left;
+}
+.multi_select_products {
+  background: #fff;
 }
 .multi_select_products li {
   padding: 7px 9px;
@@ -694,7 +713,6 @@ div.multi_select_products_wrapper {
   cursor: default;
 }
 #woocommerce-product-data input.dp-applied {
-  width: 140px;
   float: left;
 }
 #grouped_product_options, #virtual_product_options, #simple_product_options {
@@ -760,6 +778,9 @@ div.multi_select_products_wrapper {
 /* Tooltips */
 .tips {
   cursor: help;
+  text-decoration: none;
+}
+img.tips {
   padding: 5px 0 0 0;
 }
 #easyTooltip {
@@ -773,6 +794,7 @@ div.multi_select_products_wrapper {
   -o-border-radius: 4px;
   -khtml-border-radius: 4px;
   border-radius: 4px;
+  max-width: 300px;
 }
 /* Datepicker */
 table.jCalendar {

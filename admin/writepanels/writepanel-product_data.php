@@ -27,7 +27,7 @@ function woocommerce_product_data_box() {
 	
 		<ul class="product_data_tabs tabs" style="display:none;">
 			<li class="active"><a href="#general_product_data"><?php _e('General', 'woothemes'); ?></a></li>
-			<li class="pricing_tab"><a href="#pricing_product_data"><?php _e('Pricing', 'woothemes'); ?></a></li>
+			<li class="tax_tab"><a href="#tax_product_data"><?php _e('Tax', 'woothemes'); ?></a></li>
 			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab"><a href="#inventory_product_data"><?php _e('Inventory', 'woothemes'); ?></a></li><?php endif; ?>
 			<li><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
 			<li><a href="#upsell_product_data" title="<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woothemes'); ?>"><?php _e('Up-sells', 'woothemes'); ?></a></li>
@@ -37,97 +37,96 @@ function woocommerce_product_data_box() {
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 			
-			// Product Type
-			if ($terms = wp_get_object_terms( $thepostid, 'product_type' )) $product_type = current($terms)->slug; else $product_type = 'simple';
+			echo '<div class="options_group grouping">';
 			
-			woocommerce_wp_select( array( 'id' => 'product-type', 'label' => __('Product Type', 'woothemes'), 'value' => $product_type, 'options' => apply_filters('product_type_selector', array(
-				'simple' => __('Simple', 'woothemes')
-			), $product_type) ) );
+				// List Grouped products
+				$post_parents = array();
+				$post_parents[''] = __('Choose a grouped product&hellip;', 'woothemes');
+	
+				$posts_in = array_unique((array) get_objects_in_term( get_term_by( 'slug', 'grouped', 'product_type' )->term_id, 'product_type' ));
+				if (sizeof($posts_in)>0) :
+					$args = array(
+						'post_type'	=> 'product',
+						'post_status' => 'publish',
+						'numberposts' => -1,
+						'orderby' => 'title',
+						'order' => 'asc',
+						'post_parent' => 0,
+						'include' => $posts_in,
+					);
+					$grouped_products = get_posts($args);
+					$loop = 0;
+					if ($grouped_products) : foreach ($grouped_products as $product) :
+						
+						if ($product->ID==$post->ID) continue;
+						
+						$post_parents[$product->ID] = $product->post_title;
+				
+					endforeach; endif; 
+				endif;
+				
+				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __('Grouping', 'woothemes'), 'value' => $post->post_parent, 'options' => $post_parents ) );
+				
+				// Ordering
+				woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Sort Order', 'ordering', 'woothemes'), 'value' => $post->menu_order ) );
 			
-			// List Grouped products
-			$post_parents = array();
-			$post_parents[''] = __('Choose a grouped product&hellip;', 'woothemes');
-
-			$posts_in = array_unique((array) get_objects_in_term( get_term_by( 'slug', 'grouped', 'product_type' )->term_id, 'product_type' ));
-			if (sizeof($posts_in)>0) :
-				$args = array(
-					'post_type'	=> 'product',
-					'post_status' => 'publish',
-					'numberposts' => -1,
-					'orderby' => 'title',
-					'order' => 'asc',
-					'post_parent' => 0,
-					'include' => $posts_in,
-				);
-				$grouped_products = get_posts($args);
-				$loop = 0;
-				if ($grouped_products) : foreach ($grouped_products as $product) :
+			echo '</div>';
+			
+			echo '<div class="options_group">';
+			
+				// SKU
+				if( get_option('woocommerce_enable_sku', true) !== 'no' ) :
+					woocommerce_wp_text_input( array( 'id' => 'sku', 'label' => __('SKU', 'woothemes'), 'placeholder' => $post->ID ) );
+				else:
+					echo '<input type="hidden" name="sku" value="'.get_post_meta($thepostid, 'sku', true).'" />';
+				endif;
+			
+			echo '</div>';
+						
+			echo '<div class="options_group pricing">';
+			
+				// Price
+				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
+				
+				// Special Price
+				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
+						
+				// Special Price date range
+				$field = array( 'id' => 'sale_price_dates', 'label' => __('Sale Price Dates', 'woothemes') );
+				
+				$sale_price_dates_from = get_post_meta($thepostid, 'sale_price_dates_from', true);
+				$sale_price_dates_to = get_post_meta($thepostid, 'sale_price_dates_to', true);
+				
+				echo '	<p class="form-field">
+							<label for="'.$field['id'].'_from">'.$field['label'].':</label>
+							<input type="text" class="short date-pick" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
+				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
+				echo '" placeholder="' . __('From&hellip;', 'woothemes') . '" maxlength="10" />
+							<input type="text" class="short date-pick" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
+				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
+				echo '" placeholder="' . __('To&hellip;', 'woothemes') . '" maxlength="10" />
+							<span class="description">' . __('Date format', 'woothemes') . ': <code>YYYY-MM-DD</code></span>
+						</p>';
 					
-					if ($product->ID==$post->ID) continue;
-					
-					$post_parents[$product->ID] = $product->post_title;
+			echo '</div>';
 			
-				endforeach; endif; 
-			endif;
+			echo '<div class="options_group">';
 			
-			woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __('Parent post', 'woothemes'), 'value' => $post->post_parent, 'options' => $post_parents ) );
+				// Weight
+				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
+					woocommerce_wp_text_input( array( 'id' => 'weight', 'label' => __('Weight', 'woothemes') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00' ) );
+				else:
+					echo '<input type="hidden" name="weight" value="'.get_post_meta($thepostid, 'weight', true).'" />';
+				endif;
 			
-			// Ordering
-			woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Post Order', 'ordering', 'woothemes'), 'value' => $post->menu_order ) );
-			
-			// SKU
-			if( get_option('woocommerce_enable_sku', true) !== 'no' ) :
-				woocommerce_wp_text_input( array( 'id' => 'sku', 'label' => __('SKU', 'woothemes'), 'description' => __('Leave blank to use product ID', 'woothemes') ) );
-			else:
-				echo '<input type="hidden" name="sku" value="'.get_post_meta($thepostid, 'sku', true).'" />';
-			endif;
-			
-			// Weight
-			if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
-				woocommerce_wp_text_input( array( 'id' => 'weight', 'label' => __('Weight', 'woothemes') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00' ) );
-			else:
-				echo '<input type="hidden" name="weight" value="'.get_post_meta($thepostid, 'weight', true).'" />';
-			endif;
-			
-			// Featured
-			woocommerce_wp_checkbox( array( 'id' => 'featured', 'label' => __('Featured?', 'woothemes') ) );
-			
-			// Visibility
-			woocommerce_wp_select( array( 'id' => 'visibility', 'label' => __('Visibility', 'woothemes'), 'options' => array(
-				'visible' => __('Catalog &amp; Search', 'woothemes'),
-				'catalog' => __('Catalog', 'woothemes'),
-				'search' => __('Search', 'woothemes'),
-				'hidden' => __('Hidden', 'woothemes')
-			) ) );
+			echo '</div>';
 
 			?>
 		</div>
-		<div id="pricing_product_data" class="panel woocommerce_options_panel">
+		<div id="tax_product_data" class="panel woocommerce_options_panel">
 			
 			<?php 
-			// Price
-			woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
-			
-			// Special Price
-			woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
-					
-			// Special Price date range
-			$field = array( 'id' => 'sale_price_dates', 'label' => __('Sale Price Dates', 'woothemes') );
-			
-			$sale_price_dates_from = get_post_meta($thepostid, 'sale_price_dates_from', true);
-			$sale_price_dates_to = get_post_meta($thepostid, 'sale_price_dates_to', true);
-			
-			echo '	<p class="form-field">
-						<label for="'.$field['id'].'_from">'.$field['label'].':</label>
-						<input type="text" class="short date-pick" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
-			if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
-			echo '" placeholder="' . __('From&hellip;', 'woothemes') . '" maxlength="10" />
-						<input type="text" class="short date-pick" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
-			if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
-			echo '" placeholder="' . __('To&hellip;', 'woothemes') . '" maxlength="10" />
-						<span class="description">' . __('Date format', 'woothemes') . ': <code>YYYY-MM-DD</code></span>
-					</p>';
-					
+		
 			// Tax
 			woocommerce_wp_select( array( 'id' => 'tax_status', 'label' => __('Tax Status', 'woothemes'), 'options' => array(
 				'taxable' => __('Taxable', 'woothemes'),
@@ -152,7 +151,7 @@ function woocommerce_product_data_box() {
 			
 			<?php
 			// manage stock
-			woocommerce_wp_checkbox( array( 'id' => 'manage_stock', 'label' => __('Manage stock??', 'woothemes') ) );
+			woocommerce_wp_checkbox( array( 'id' => 'manage_stock', 'label' => __('Manage stock?', 'woothemes') ) );
 			
 			// Stock status
 			woocommerce_wp_select( array( 'id' => 'stock_status', 'label' => __('Stock status', 'woothemes'), 'options' => array(
@@ -300,7 +299,7 @@ function woocommerce_product_data_box() {
 					<li class="product_search"><input type="search" rel="upsell_ids" name="product_search" id="product_search" placeholder="<?php _e('Search for product', 'woothemes'); ?>" /><div class="clear"></div></li>
 				</ul>
 				</div>
-				<div class="multi_select_products_wrapper"><h4><?php _e('Up-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
+				<div class="multi_select_products_wrapper multi_select_products_wrapper-alt"><h4><?php _e('Up-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
 					<?php
 					$upsell_ids = get_post_meta($thepostid, 'upsell_ids', true);
 					if (!$upsell_ids) $upsell_ids = array(0);
@@ -317,7 +316,7 @@ function woocommerce_product_data_box() {
 					<li class="product_search"><input type="search" rel="crosssell_ids" name="product_search" id="product_search" placeholder="<?php _e('Search for product', 'woothemes'); ?>" /><div class="clear"></div></li>
 				</ul>
 			</div>
-			<div class="multi_select_products_wrapper"><h4><?php _e('Cross-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
+			<div class="multi_select_products_wrapper multi_select_products_wrapper-alt"><h4><?php _e('Cross-Sells', 'woothemes'); ?></h4><ul class="multi_select_products multi_select_products_target">
 					<?php
 					$crosssell_ids = get_post_meta($thepostid, 'crosssell_ids', true);
 					if (!$crosssell_ids) $crosssell_ids = array(0);
@@ -517,7 +516,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, 'manage_stock', 'yes' );
 			update_post_meta( $post_id, 'backorders', stripslashes( $_POST['backorders'] ) );
 			
-			if ($_POST['backorders']=='no' && $_POST['stock']<1) :
+			if ($product_type!=='variable' && $_POST['backorders']=='no' && $_POST['stock']<1) :
 				update_post_meta( $post_id, 'stock_status', 'outofstock' );
 			endif;
 			
@@ -587,4 +586,37 @@ function woocommerce_product_selection_list_remove( $posts_to_display, $name ) {
 		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">X</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo $name; ?>[]" value="<?php echo $related_post->ID; ?>" /></li><?php 
 
 	endforeach; endif;
+}
+
+/**
+* Procuct type panel
+**/
+function woocommerce_product_type_box() {
+	
+	global $post, $thepostid;
+	
+	$thepostid = $post->ID;
+
+	echo '<div class="woocommerce_options_panel">';
+	
+	// Product Type
+	if ($terms = wp_get_object_terms( $thepostid, 'product_type' )) $product_type = current($terms)->slug; else $product_type = 'simple';
+	
+	woocommerce_wp_select( array( 'id' => 'product-type', 'label' => __('Product Type', 'woothemes'), 'value' => $product_type, 'options' => apply_filters('product_type_selector', array(
+		'simple' => __('Simple', 'woothemes')
+	), $product_type) ) );
+	
+	// Visibility
+	woocommerce_wp_select( array( 'id' => 'visibility', 'label' => __('Visibility', 'woothemes'), 'options' => array(
+		'visible' => __('Catalog &amp; Search', 'woothemes'),
+		'catalog' => __('Catalog', 'woothemes'),
+		'search' => __('Search', 'woothemes'),
+		'hidden' => __('Hidden', 'woothemes')
+	) ) );
+	
+	// Featured
+	woocommerce_wp_checkbox( array( 'id' => 'featured', 'label' => __('Featured?', 'woothemes') ) );
+	
+	echo '</div>';
+			
 }

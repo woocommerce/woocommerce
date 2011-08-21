@@ -26,7 +26,7 @@ function woocommerce_content_right_now() {
 	$outofstock = array();
 	$lowinstock = array();
 	$args = array(
-		'post_type'	=> 'product',
+		'post_type'	=> array('product', 'product_variation'),
 		'post_status' => 'publish',
 		'ignore_sticky_posts'	=> 1,
 		'posts_per_page' => -1
@@ -34,20 +34,27 @@ function woocommerce_content_right_now() {
 	$my_query = new WP_Query($args);
 	if ($my_query->have_posts()) : while ($my_query->have_posts()) : $my_query->the_post(); 
 		
-		$_product = &new woocommerce_product( $my_query->post->ID );
+		if ($my_query->post->post_type == 'product_variation') :
+			$parent = $my_query->post->post_parent;
+			$_product = &new woocommerce_product_variation( $my_query->post->ID );
+		else :
+			$parent = $my_query->post->ID;
+			$_product = &new woocommerce_product( $my_query->post->ID );
+		endif;
+		
 		if (!$_product->managing_stock()) continue;
 
 		$thisitem = '<tr class="first">
-			<td class="first b"><a href="post.php?post='.$my_query->post->ID.'&action=edit">'.$_product->stock.'</a></td>
-			<td class="t"><a href="post.php?post='.$my_query->post->ID.'&action=edit">'.$my_query->post->post_title.'</a></td>
+			<td class="first b"><a href="post.php?post='.$parent.'&action=edit">'.$_product->stock.'</a></td>
+			<td class="t"><a href="post.php?post='.$parent.'&action=edit">'.$my_query->post->post_title.'</a></td>
 		</tr>';
 		
-		if ($_product->stock<=$nostockamount) :
+		if ($_product->total_stock<=$nostockamount) :
 			$outofstock[] = $thisitem;
 			continue;
 		endif;
 		
-		if ($_product->stock<=$lowstockamount) $lowinstock[] = $thisitem;
+		if ($_product->total_stock<=$lowstockamount) $lowinstock[] = $thisitem;
 
 	endwhile; endif;
 	wp_reset_query();

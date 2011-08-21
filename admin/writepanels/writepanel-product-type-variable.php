@@ -77,12 +77,18 @@ function variable_product_type_options() {
 						<tbody>	
 							<tr>
 								<td class="upload_image"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php if (isset($variation_data['_thumbnail_id'][0])) echo $variation_data['_thumbnail_id'][0]; ?>" /><input type="button" rel="<?php echo $variation->ID; ?>" class="upload_image_button button" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>
-								<td><label><?php _e('SKU:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" /></td>
-								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" /></td>
-								<td><label><?php _e('Stock Qty:', 'woothemes'); ?></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['stock'][0])) echo $variation_data['stock'][0]; ?>" /></td>
-								<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
-								<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
-								<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
+								
+								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" /></td>
+								
+								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" /></td>
+								
+								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product\'s stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['stock'][0])) echo $variation_data['stock'][0]; ?>" /></td>
+								
+								<td><label><?php _e('Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
+								
+								<td><label><?php _e('Sale Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s sale price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
+								
+								<td><label><?php _e('Enabled', 'woothemes'); ?> <a class="tips" tip="<?php _e('If you don\'t enable this variation the user will be informed that it is not available.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
 							</tr>		
 						</tbody>
 					</table>
@@ -114,6 +120,18 @@ function variable_product_write_panel_js() {
 	if (!isset($attributes)) $attributes = array();
 	?>
 	jQuery(function(){
+		
+		<?php if (!$attributes || (is_array($attributes) && sizeof($attributes)==0)) : ?>
+			
+			jQuery('button.link_all_variations, button.add_variation').live('click', function(){
+				
+				alert('<?php _e('You must add some attributes via the "Product Data" panel and save before adding a new variation.', 'woothemes'); ?>');
+				
+				return false;
+				
+			});
+			
+		<?php else : ?>
 		
 		jQuery('button.add_variation').live('click', function(){
 		
@@ -175,7 +193,7 @@ function variable_product_write_panel_js() {
 			return false;
 		
 		});
-		
+
 		jQuery('button.link_all_variations').live('click', function(){
 			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woothemes'); ?>');
 			if (answer){
@@ -234,6 +252,8 @@ function variable_product_write_panel_js() {
 			}
 			return false;
 		});
+		
+		<?php endif; ?>
 		
 		var current_field_wrapper;
 		
