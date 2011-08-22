@@ -104,23 +104,30 @@ class woocommerce_cart {
 		unset($_SESSION['coupons']);
 	}
 	
-	/** Check if product is in the cart */
-	function find_product_in_cart( $product_id, $variation = '' ) {
-		
-		foreach (self::$cart_contents as $cart_item_key => $cart_item) :
-			
-			if ($variation) :				
-				if ($cart_item['product_id'] == $product_id && $cart_item['variation']==$variation) :
+	/**
+     * Check if product is in the cart and return cart item key
+     * 
+     * @param int $product_id
+     * @param int $variation_id optional variation id
+     * @param array $variation array of attributre values
+     * @return int|null
+     */
+	function find_product_in_cart($product_id, $variation_id, $variation = array()) {
+
+        foreach (self::$cart_contents as $cart_item_key => $cart_item) :
+        
+            if (empty($variation_id) && $cart_item['product_id'] == $product_id) :
+				return $cart_item_key;
+            elseif ($cart_item['product_id'] == $product_id && $cart_item['variation_id'] == $variation_id) :
+                if($variation == $cart_item['variation']) :
 					return $cart_item_key;
-				endif;
-			else :
-				if ($cart_item['product_id'] == $product_id) :
-					return $cart_item_key;
-				endif;
-			endif;
-			
-		endforeach;
-	}
+                endif;
+            endif;
+        
+        endforeach;
+        
+        return NULL;
+    }
 	
 	/**
 	 * Add a product to the cart
@@ -130,7 +137,7 @@ class woocommerce_cart {
 	 */
 	function add_to_cart( $product_id, $quantity = 1, $variation = '', $variation_id = '' ) {
 		
-		$found_cart_item_key = self::find_product_in_cart($product_id, $variation);
+		$found_cart_item_key = self::find_product_in_cart($product_id, $variation_id, $variation);
 		
 		if (is_numeric($found_cart_item_key)) :
 			

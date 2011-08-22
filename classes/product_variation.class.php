@@ -129,7 +129,29 @@ class woocommerce_product_variation extends woocommerce_product {
 		return $this->variation;
 	}
 	
-	/** Returns the price in html format */
+	/**
+     * Get variation ID
+     * 
+     * @return int
+     */
+    function get_variation_id() {
+        return (int) $this->variation_id;
+    }
+    
+    /**
+     * Get variation attribute values
+     * 
+     * @return array of attributes and their values for this variation
+     */
+    function get_variation_attributes() {
+        return $this->variation_data;
+    }
+	
+	/**
+     * Get variation attribute values
+     * 
+     * @return string containing the formatted price
+     */
 	function get_price_html() {
 		if ($this->variation_has_price || $this->variation_has_sale_price) :
 			$price = '';

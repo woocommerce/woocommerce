@@ -27,7 +27,7 @@ jQuery(function(){
 			jQuery('body').trigger('adding_to_cart');
 			
 			// Block widget
-			jQuery('.widget_shopping_cart, .shop_table.cart').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('.widget_shopping_cart, .shop_table.cart').block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 	
 			jQuery.post( params.ajax_url, data, function(response) {
 
@@ -53,7 +53,7 @@ jQuery(function(){
 				fragments = jQuery.parseJSON( response );
 				
 				if (fragments) {
-					jQuery.each(fragments, function(key, value) { 
+					jQuery.each(fragments, function(key, value) {
 						jQuery(key).replaceWith(value);
 					});
 				}
@@ -148,7 +148,7 @@ jQuery(function(){
 	    if (currentVal > 0)
 	    {
 	        jQuery(this).next(".qty").val(currentVal - 1);
-	    }
+	   }
 	});
 	
 	/* states */
@@ -208,12 +208,12 @@ jQuery(function(){
 	jQuery('.shipping-calculator-button').click(function() {
 	  jQuery('.shipping-calculator-form').slideToggle('slow', function() {
 	    // Animation complete.
-	  });
+	 });
 	}); 
 	
 	// Stop anchors moving the viewport
 
-	jQuery(".shipping-calculator-button").click(function() { return false; });
+	jQuery(".shipping-calculator-button").click(function() {return false;});
 	
 	// Variations
 	
@@ -229,7 +229,7 @@ jQuery(function(){
 		
 		if (!not_set) {
 			
-			jQuery('.variations').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('.variations').block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 			
 			var data = {
 				action: 		'woocommerce_get_variation',
@@ -317,7 +317,7 @@ if (params.is_checkout==1) {
 			var s_postcode 	= jQuery('input#shipping-postcode').val();
 		}
 		
-		jQuery('#order_methods, #order_review').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		jQuery('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 		
 		var data = {
 			action: 			'woocommerce_update_order_review',
@@ -403,7 +403,7 @@ if (params.is_checkout==1) {
 		/* AJAX Form Submission */
 		jQuery('form.checkout').submit(function(){
 			var form = this;
-			jQuery(form).block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery(form).block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 			jQuery.ajax({
 				type: 		'POST',
 				url: 		params.checkout_url,
@@ -417,7 +417,7 @@ if (params.is_checkout==1) {
 								catch(err) {
 								  	jQuery(form).prepend( code );
 									jQuery(form).unblock(); 
-									jQuery.scrollTo(jQuery(form).parent(), { easing:'swing' });
+									jQuery.scrollTo(jQuery(form).parent(), {easing:'swing'});
 								}
 							},
 				dataType: 	"html"
