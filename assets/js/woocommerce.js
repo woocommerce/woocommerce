@@ -144,8 +144,8 @@ jQuery(function(){
 	jQuery(".minus").live('click', function()
 	{
 	    var currentVal = parseInt(jQuery(this).next(".qty").val());
-	    if (currentVal == "NaN") currentVal = 0;
-	    if (currentVal > 0)
+	    if (currentVal == "NaN") currentVal = 1;
+	    if (currentVal > 1)
 	    {
 	        jQuery(this).next(".qty").val(currentVal - 1);
 	   }

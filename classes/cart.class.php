@@ -134,8 +134,12 @@ class woocommerce_cart {
 	 *
 	 * @param   string	product_id	contains the id of the product to add to the cart
 	 * @param   string	quantity	contains the quantity of the item to add
+	 * @param   int     variation_id
+	 * @param   array   variation attribute values
 	 */
 	function add_to_cart( $product_id, $quantity = 1, $variation = '', $variation_id = '' ) {
+		
+		if ($quantity < 1) $quantity = 1;
 		
 		$found_cart_item_key = self::find_product_in_cart($product_id, $variation_id, $variation);
 		
