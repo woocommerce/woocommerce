@@ -206,7 +206,6 @@ function woocommerce_frontend_scripts() {
 		'countries' 					=> json_encode(woocommerce_countries::$states),
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
-		'variation_not_available_text' 	=> __('This variation is not available.', 'woothemes'),
 		'plugin_url' 					=> woocommerce::plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'get_variation_nonce' 			=> wp_create_nonce("get-variation"),

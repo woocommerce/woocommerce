@@ -307,34 +307,71 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		
 		global $post, $_product;
 		
-		$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
-		if (!isset($attributes)) $attributes = array();
+		$attributes = $_product->get_available_attribute_variations();
 
+		// Put available variations into an array and put in a Javascript variable (JSON encoded)
+        $available_variations = array();
+        $children = $_product->get_children();
+        
+        foreach($children as $child) {
+            $variation = $child->product;
+            
+            if($variation instanceof woocommerce_product_variation) {
+            
+            	if ($variation->variation->post_status != 'publish') continue; // Disabled
+            
+                $variation_attributes = $variation->get_variation_attributes();
+                $availability = $variation->get_availability();
+                $availability_html = (!empty($availability['availability'])) ? '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>' : '';
+                
+                if (has_post_thumbnail($variation->get_variation_id())) {
+                    $attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
+                    $large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_large');
+                    $image = current(wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size ));
+                    $image_link = current(wp_get_attachment_image_src( $attachment_id, 'full' ));
+                } else {
+                    $image = '';
+                    $image_link = '';
+                }
+
+                $available_variations[] = array(
+                    'variation_id' => $variation->get_variation_id(),
+                    'attributes' => $variation_attributes,
+                    'image_src' => $image,
+                    'image_link' => $image_link,
+                    'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
+                    'availability_html' => $availability_html,
+                );
+            }
+        }
 		?>
+        <script type="text/javascript">
+            var product_variations = <?php echo json_encode($available_variations) ?>;
+        </script>
+
 		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="variations_form cart" method="post">
-			
 			<table class="variations" cellspacing="0">
 				<tbody>
-				<?php
-					foreach ($attributes as $attribute) :
-								
-						if ( $attribute['variation']!=='yes' ) continue;
-						
-						$options = $attribute['value'];
-						
-						if (!is_array($options)) $options = explode(',', $options);
-						
-						echo '<tr><td><label for="'.sanitize_title($attribute['name']).'">'.ucfirst($attribute['name']).'</label></td><td><select id="'.sanitize_title($attribute['name']).'" name="tax_'.sanitize_title($attribute['name']).'"><option value="">'.__('Choose an option', 'woothemes').'&hellip;</option><option>'.implode('</option><option>', $options).'</option></select></td></tr>';
-	
-					endforeach;
-				?>
+				<?php foreach ($attributes as $name => $options) :?>
+					<tr>
+						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo ucfirst($name)?></label></td>
+						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
+							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
+							<?php if(is_array($options)) : ?>
+								<option><?php echo implode('</option><option>', $options); ?></option>
+							<?php endif;?>
+						</td>
+					</tr>
+                <?php endforeach;?>
 				</tbody>
 			</table>
-			<div class="single_variation"></div>
-			<div class="variations_button" style="display:none;">
-				
-				<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
-				<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+			<div class="single_variation_wrap" style="display:none;">
+				<div class="single_variation"></div>
+				<div class="variations_button">
+					<input type="hidden" name="variation_id" value="" />
+					<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
+					<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+				</div>
 			</div>
 			<div><input type="hidden" name="product_id" value="<?php echo $post->ID; ?>" /></div>
 			<?php do_action('woocommerce_add_to_cart_form'); ?>

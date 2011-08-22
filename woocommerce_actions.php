@@ -8,7 +8,6 @@
  *		- AJAX add to cart
  *		- AJAX add to cart fragments
  *		- Increase coupon usage count
- *		- Get variation
  *		- Add order item
  *		- When default permalinks are enabled, redirect shop page to post type archive url
  *		- Add to Cart
@@ -90,59 +89,6 @@ function woocommerce_increase_coupon_counts() {
 	if (woocommerce_cart::$applied_coupons) foreach (woocommerce_cart::$applied_coupons as $code) :
 		woocommerce_coupons::inc_usage_count($code);
 	endforeach;
-}
-
-
-/**
- * Get variation price etc when using frontend form
- */
-add_action('wp_ajax_woocommerce_get_variation', 'display_variation_data');
-add_action('wp_ajax_nopriv_woocommerce_get_variation', 'display_variation_data');
-
-function display_variation_data() {
-	
-	check_ajax_referer( 'get-variation', 'security' );
-	
-	// get variation terms
-	$variation_query 	= array();
-	$variation_data 	= array();
-	parse_str( $_POST['variation_data'], $variation_data );
-	
-	$variation_id = woocommerce_find_variation( $variation_data['product_id'], $variation_data );
-	
-	if (!$variation_id) die();
-	
-	$_product = &new woocommerce_product_variation($variation_id);
-	
-	$availability = $_product->get_availability();
-	
-	if ($availability['availability']) :
-		$availability_html = '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>';
-	else :
-		$availability_html = '';
-	endif;
-	
-	if (has_post_thumbnail($variation_id)) :
-		$attachment_id = get_post_thumbnail_id( $variation_id );
-		$large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_large');
-		$image = current(wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size));
-		$image_link = current(wp_get_attachment_image_src( $attachment_id, 'full'));
-	else :
-		$image = '';
-		$image_link = '';
-	endif;
-	
-	$data = array(
-		'price_html' 		=> '<span class="price">'.$_product->get_price_html() .'</span>',
-		'availability_html' => $availability_html,
-		'image_src'			=> $image,
-		'image_link'		=> $image_link
-	);
-	
-	echo json_encode( $data );
-
-	// Quit out
-	die();
 }
 
 /**
@@ -350,139 +296,131 @@ add_action( 'init', 'woocommerce_add_to_cart_action' );
 
 function woocommerce_add_to_cart_action( $url = false ) {
 	
-	if (isset($_GET['add-to-cart']) && $_GET['add-to-cart']) :
-	
-		if ( !woocommerce::verify_nonce('add_to_cart', '_GET') ) :
-
-		elseif (is_numeric($_GET['add-to-cart'])) :
+	if (empty($_GET['add-to-cart']) || !woocommerce::verify_nonce('add_to_cart', '_GET')) return;
+    
+	if (is_numeric($_GET['add-to-cart'])) :
 		
-			$quantity = 1;
-			if (isset($_POST['quantity'])) $quantity = $_POST['quantity'];
-			woocommerce_cart::add_to_cart($_GET['add-to-cart'], $quantity);
+		//single product
+		$quantity = (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
+		woocommerce_cart::add_to_cart($_GET['add-to-cart'], $quantity);
+		
+		if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+			woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+		else :
+			woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+		endif;
+	
+	elseif ($_GET['add-to-cart']=='variation') :
+		
+		// Variation add to cart
+		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id'])) :
+            
+            woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
+            wp_safe_redirect(get_permalink($_GET['product']));
+            exit;
+            
+       else :
 			
-			if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-				woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
-			else :
-				woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+			$product_id 	= (int) $_GET['product'];
+			$variation_id 	= (int) $_POST['variation_id'];
+			$quantity 		= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
+			
+            $attributes = (array) maybe_unserialize(get_post_meta($product_id, 'product_attributes', true));
+            $variations = array();
+            $all_variations_set = true;
+            
+            foreach ($attributes as $attribute) :
+
+                if ( $attribute['variation']!=='yes' ) continue;
+
+                $taxonomy = 'tax_' . sanitize_title($attribute['name']);
+                if (!empty($_POST[$taxonomy])) :
+                    $variations[$taxonomy] = $_POST[$taxonomy];
+				else :
+                    $all_variations_set = false;
+                endif;
+            endforeach;
+
+            if ($all_variations_set && $variation_id > 0) :
+                
+                // Add to cart
+				woocommerce_cart::add_to_cart($product_id, $quantity, $variations, $variation_id);
+				
+				if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+					woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+				else :
+					woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+				endif;
+
+            else :
+                woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
+                wp_redirect(get_permalink($_GET['product']));
+                exit;
+            endif;
+
+		endif; 
+	
+	elseif ($_GET['add-to-cart']=='group') :
+		
+		// Group add to cart
+		if (isset($_POST['quantity']) && is_array($_POST['quantity'])) :
+			
+			$total_quantity = 0;
+			
+			foreach ($_POST['quantity'] as $item => $quantity) :
+				if ($quantity>0) :
+					woocommerce_cart::add_to_cart($item, $quantity);
+					
+					if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+						woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+					else :
+						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+					endif;
+					
+					$total_quantity = $total_quantity + $quantity;
+				endif;
+			endforeach;
+			
+			if ($total_quantity==0) :
+				woocommerce::add_error( __('Please choose a quantity&hellip;', 'woothemes') );
 			endif;
 		
-		elseif ($_GET['add-to-cart']=='variation') :
+		elseif ($_GET['product']) :
 			
-			// Variation add to cart
-			if (isset($_POST['quantity']) && $_POST['quantity']) :
-				
-				$product_id = (int) $_GET['product'];
-				$quantity 	= ($_POST['quantity']) ? $_POST['quantity'] : 1;
-				$attributes = (array) maybe_unserialize( get_post_meta($product_id, 'product_attributes', true) );
-				$variations = array();
-				$all_variations_set = true;
-				$variation_id = 0;
-				
-				foreach ($attributes as $attribute) :
-								
-					if ( $attribute['variation']!=='yes' ) continue;
-					
-					if (isset($_POST[ 'tax_' . sanitize_title($attribute['name']) ]) && $_POST[ 'tax_' . sanitize_title($attribute['name']) ]) :
-						$variations['tax_' .sanitize_title($attribute['name'])] = $_POST[ 'tax_' . sanitize_title($attribute['name']) ];
-					else :
-						$all_variations_set = false;
-					endif;
-
-				endforeach;
-				
-				if (!$all_variations_set) :
-					woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
-				else :
-					// Find matching variation
-					$variation_id = woocommerce_find_variation( $product_id, $variations );
-					
-					if ($variation_id>0) :
-						// Add to cart
-						woocommerce_cart::add_to_cart($product_id, $quantity, $variations, $variation_id);
-						
-						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-							woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
-						else :
-							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
-						endif;
-			
-					else :
-						woocommerce::add_error( __('Sorry, this variation is not available.', 'woothemes') );
-					endif;
-				endif;
-			
-			elseif ($_GET['product']) :
-				
-				/* Link on product pages */
-				woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
-				wp_redirect( get_permalink( $_GET['product'] ) );
-				exit;
-			
-			endif; 
-		
-		elseif ($_GET['add-to-cart']=='group') :
-			
-			// Group add to cart
-			if (isset($_POST['quantity']) && is_array($_POST['quantity'])) :
-				
-				$total_quantity = 0;
-				
-				foreach ($_POST['quantity'] as $item => $quantity) :
-					if ($quantity>0) :
-						woocommerce_cart::add_to_cart($item, $quantity);
-						
-						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-							woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
-						else :
-							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
-						endif;
-						
-						$total_quantity = $total_quantity + $quantity;
-					endif;
-				endforeach;
-				
-				if ($total_quantity==0) :
-					woocommerce::add_error( __('Please choose a quantity&hellip;', 'woothemes') );
-				endif;
-			
-			elseif ($_GET['product']) :
-				
-				/* Link on product pages */
-				woocommerce::add_error( __('Please choose a product&hellip;', 'woothemes') );
-				wp_redirect( get_permalink( $_GET['product'] ) );
-				exit;
-			
-			endif; 
-			
-		endif;
-		
-		$url = apply_filters('add_to_cart_redirect', $url);
-		
-		// If has custom URL redirect there
-		if ( $url ) {
-			wp_safe_redirect( $url );
+			/* Link on product pages */
+			woocommerce::add_error( __('Please choose a product&hellip;', 'woothemes') );
+			wp_redirect( get_permalink( $_GET['product'] ) );
 			exit;
-		}
 		
-		// Redirect to cart option
-		elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && woocommerce::error_count() == 0) {
-			wp_safe_redirect( woocommerce_cart::get_cart_url() );
-			exit;
-		}
+		endif; 
 		
-		// Otherwise redirect to where they came
-		elseif ( isset($_SERVER['HTTP_REFERER'])) {
-			wp_safe_redirect($_SERVER['HTTP_REFERER']);
-			exit;
-		}
-		
-		// If all else fails redirect to root
-		else {
-			wp_safe_redirect('/');
-			exit;
-		}
 	endif;
 	
+	$url = apply_filters('add_to_cart_redirect', $url);
+	
+	// If has custom URL redirect there
+	if ( $url ) {
+		wp_safe_redirect( $url );
+		exit;
+	}
+	
+	// Redirect to cart option
+	elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && woocommerce::error_count() == 0) {
+		wp_safe_redirect( woocommerce_cart::get_cart_url() );
+		exit;
+	}
+	
+	// Otherwise redirect to where they came
+	elseif ( isset($_SERVER['HTTP_REFERER'])) {
+		wp_safe_redirect($_SERVER['HTTP_REFERER']);
+		exit;
+	}
+	
+	// If all else fails redirect to root
+	else {
+		wp_safe_redirect(home_url());
+		exit;
+	}	
 }
 
 /**

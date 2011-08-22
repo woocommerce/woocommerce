@@ -88,7 +88,7 @@ function variable_product_type_options() {
 								
 								<td><label><?php _e('Sale Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s sale price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
 								
-								<td><label><?php _e('Enabled', 'woothemes'); ?> <a class="tips" tip="<?php _e('If you don\'t enable this variation the user will be informed that it is not available.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
+								<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
 							</tr>		
 						</tbody>
 					</table>

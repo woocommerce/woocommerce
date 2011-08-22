@@ -217,80 +217,145 @@ jQuery(function(){
 	
 	// Variations
 	
-	function check_variations() {
-		
-		var not_set = false;
-		
-		jQuery('.variations select').each(function(){
-			if (jQuery(this).val()=="") not_set = true;
-		});
-		
-		jQuery('.variations_button, .single_variation').slideUp();
-		
-		if (!not_set) {
-			
-			jQuery('.variations').block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
-			
-			var data = {
-				action: 		'woocommerce_get_variation',
-				variation_data: jQuery('form.variations_form').serialize(),
-				security: 		params.get_variation_nonce
-			};
+	//check if two arrays of attributes match
+    function variations_match(attrs1, attrs2) {        
+        var match = true;
+        for (name in attrs1) {
+            var val1 = attrs1[name];
+            var val2 = attrs2[name];
+            
+            if(val1.length != 0 && val2.length != 0 && val1 != val2) {
+                match = false;
+            }
+        }
+        
+        return match;
+    }
+    
+    //search for matching variations for given set of attributes
+    function find_matching_variations(settings) {
+        var matching = [];
+        
+        for (var i = 0; i < product_variations.length; i++) {
+        	var variation = product_variations[i];
+        	var variation_id = variation.variation_id;
+        	
+			if(variations_match(variation.attributes, settings)) {
+                matching.push(variation);
+            }
+        }
+        return matching;
+    }
+    
+    //disable option fields that are unavaiable for current set of attributes
+    function update_variation_values(variations) {
+        
+        var current_attr_select = jQuery('.variations select').not('[disabled]').last();
+        current_attr_select.find('option:gt(0)').attr('disabled', 'disabled');
+        
+        var current_attr_name = current_attr_select.attr('name');
+        
+        for(num in variations) {
+            var attributes = variations[num].attributes;
+            
+            for(attr_name in attributes) {
+                var attr_val = attributes[attr_name];
+                
+                if(attr_name == current_attr_name) {
+                    current_attr_select.find('option:contains("'+attr_val+'")').removeAttr('disabled');
+                }
+            }
+        }
+        
+    }
+    
+    //show single variation details (price, stock, image)
+    function show_variation(variation) {
+        var img = jQuery('div.images img:eq(0)');
+        var link = jQuery('div.images a.zoom');
+        var o_src = jQuery(img).attr('original-src');
+        var o_link = jQuery(link).attr('original-href');
 
-			jQuery.post( params.ajax_url, data, function(response) {
-				
-				var img = jQuery('div.images img:eq(0)');
-				var link = jQuery('div.images a.zoom');
-				var o_src = jQuery(img).attr('original-src');
-				var o_link = jQuery(link).attr('original-href');
+        var variation_image = variation.image_src;
+        var variation_link = variation.image_link;
 
-				if (response.length > 1) {
-				
-					variation_response = jQuery.parseJSON( response );
-					
-					var variation_image = variation_response.image_src;
-					var variation_link = variation_response.image_link;
+        jQuery('.single_variation').html( variation.price_html + variation.availability_html );
 
-					jQuery('.single_variation').html( variation_response.price_html + variation_response.availability_html );
-					
-					if (!o_src) {
-						jQuery(img).attr('original-src', jQuery(img).attr('src'));
-					}
-					
-					if (!o_link) {
-						jQuery(link).attr('original-href', jQuery(link).attr('href'));
-					}
-					
-					if (variation_image.length > 1) {	
-						jQuery(img).attr('src', variation_image);
-						jQuery(link).attr('href', variation_link);
-					} else {
-						jQuery(img).attr('src', o_src);
-						jQuery(link).attr('href', o_link);
-					}
+        if (!o_src) {
+            jQuery(img).attr('original-src', jQuery(img).attr('src'));
+        }
 
-					jQuery('.variations_button, .single_variation').slideDown();
-				} else {
-					if (o_src) {
-						jQuery(img).attr('src', o_src);
-						jQuery(link).attr('href', o_link);
-					}
-					jQuery('.single_variation').slideDown();
-					jQuery('.single_variation').html( '<p>' + params.variation_not_available_text + '</p>' );
-				}
-								
-				jQuery('.variations').unblock();
-			});
-		
-		} else {
-			jQuery('.variations_button').hide();
-		}
-		
-	}
+        if (!o_link) {
+            jQuery(link).attr('original-href', jQuery(link).attr('href'));
+        }
+
+        if (variation_image && variation_image.length > 1) {	
+            jQuery(img).attr('src', variation_image);
+            jQuery(link).attr('href', variation_link);
+        } else {
+            jQuery(img).attr('src', o_src);
+            jQuery(link).attr('href', o_link);
+        }
+
+        jQuery('.single_variation_wrap').slideDown();
+    }
 	
+	//when one of attributes is changed - check everything to show only valid options
+    function check_variations() {
+        jQuery('form input[name=variation_id]').val('');
+        jQuery('.single_variation_wrap').hide();
+        jQuery('.single_variation').text('');
+        
+		var all_set = true;
+		var current_settings = {};
+        
+		jQuery('.variations select').each(function(){
+			if (jQuery(this).val().length == 0) {
+                all_set = false;
+            }
+            current_settings[jQuery(this).attr('name')] = jQuery(this).val();
+		});
+        
+        var matching_variations = find_matching_variations(current_settings);
+        
+        if(all_set) {
+            var variation = matching_variations.pop();
+            
+            jQuery('form input[name=variation_id]').val(variation.variation_id);
+            show_variation(variation);
+        } else {
+            update_variation_values(matching_variations);
+        }
+    }
+
 	jQuery('.variations select').change(function(){
-		check_variations();
+        //make sure that only selects before this one, and one after this are enabled
+        var index = jQuery(this).data('index');
+        
+        if(jQuery(this).val().length > 0) {
+            index += 1;
+        }
+        
+        var selects = jQuery('.variations select');
+        selects.filter(':lt('+index+')').removeAttr('disabled');
+        selects.filter(':eq('+index+')').removeAttr('disabled').val('');
+        selects.filter(':gt('+index+')').attr('disabled', 'disabled').val('');
+        
+		check_variations(jQuery(this));
+		
+		if(jQuery().uniform) {
+			jQuery.uniform.update();
+		}
 	});
+    
+    //disable all but first select field
+    jQuery('.variations select:gt(0)').attr('disabled', 'disabled');
+    
+    // index all selects
+    jQuery.each(jQuery('.variations select'), function(i, item){
+        jQuery(item).data('index', i);
+    });
+	
 	
 });
 

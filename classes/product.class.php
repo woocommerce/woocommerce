@@ -105,6 +105,16 @@ class woocommerce_product {
 		endif;
 	}
 	
+	/**
+     * Get SKU (Stock-keeping unit) - product uniqe ID
+     * 
+     * @return mixed
+     */
+    function get_sku() {
+        return $this->sku;
+    }
+    
+    
 	/** Returns the product's children */
 	function get_children() {
 		
@@ -130,7 +140,7 @@ class woocommerce_product {
 			
 		endif;
 		
-		return $this->children;
+		return (array) $this->children;
 	}
 
 	/**
@@ -275,6 +285,15 @@ class woocommerce_product {
 		return false;
 	}
 	
+	/**
+     * Returns number of items available for sale.
+     * 
+     * @return int
+     */
+    function get_stock_quantity() {
+        return (int)$this->stock;
+    }
+
 	/** Returns whether or not the product has enough stock for the order */
 	function has_enough_stock( $quantity ) {
 		
@@ -597,5 +616,64 @@ class woocommerce_product {
 
 		endif;
 	}
+	
+	/**
+     * Return an array of attributes used for variations, as well as their possible values
+     * 
+     * @return two dimensional array of attributes and their available values
+     */   
+    function get_available_attribute_variations() {
+       
+        if (!$this->is_type('variable') || !$this->has_child()) return array();
+        
+        $attributes = $this->get_attributes();
+        
+        if(!is_array($attributes)) return array();
+        
+        $available_attributes = array();
+        $children = $this->get_children();
+        
+        foreach ($attributes as $attribute) {
+            if ($attribute['variation'] !== 'yes') continue;
+
+            $values = array();
+            $taxonomy = 'tax_'.sanitize_title($attribute['name']);
+
+            foreach ($children as $child) {
+                /* @var $variation woocommerce_product_variation */
+                $variation = $child->product;
+
+                if ($variation instanceof woocommerce_product_variation) {
+                	
+                	if ($variation->variation->post_status != 'publish') continue; // Disabled
+                	
+                    $attributes = $variation->get_variation_attributes();
+
+                    if (is_array($attributes)) {
+                        foreach ($attributes as $name => $value) {
+                            if ($name == $taxonomy) {
+                                $values[] = $value;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // empty value indicates that all options for given attribute are available
+            if(in_array('', $values)) {
+                $options = $attribute['value'];
+
+                if (!is_array($options)) {
+                    $options = explode(',', $options);
+                }
+                
+                $values = $options;
+            }
+              
+            $available_attributes[$attribute['name']] = array_unique($values);
+        }
+        
+        return $available_attributes;
+    }
 
 }
