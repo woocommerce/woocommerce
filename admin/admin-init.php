@@ -181,3 +181,77 @@ function woocommerce_categories_ordering() {
 	
 }
 add_action('wp_ajax_woocommerce-categories-ordering', 'woocommerce_categories_ordering');
+
+/**
+ * Search by SKU ro ID for products. Adapted from code by BenIrvin (Admin Search by ID)
+ */
+if (is_admin()) :
+	add_action('parse_request', 'woocommerce_admin_product_search');
+	add_filter( 'get_search_query', 'woocommerce_admin_id_search_label' );
+endif;
+
+function woocommerce_admin_product_search( $wp ) {
+    global $pagenow, $wpdb;
+	
+	if( 'edit.php' != $pagenow ) return;
+	if( !isset( $wp->query_vars['s'] ) ) return;
+	if ($wp->query_vars['post_type']!='product') return;
+
+	if( '#' == substr( $wp->query_vars['s'], 0, 1 ) ) :
+
+		$id = absint( substr( $wp->query_vars['s'], 1 ) );
+			
+		if( !$id ) return; 
+		
+		unset( $wp->query_vars['s'] );
+		$wp->query_vars['p'] = $id;
+		
+	elseif( 'SKU:' == substr( $wp->query_vars['s'], 0, 4 ) ) :
+		
+		$sku = trim( substr( $wp->query_vars['s'], 4 ) );
+			
+		if( !$sku ) return; 
+		
+		$id = $wpdb->get_var('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key="sku" AND meta_value LIKE "%'.$sku.'%";');
+		
+		if( !$id ) return; 
+
+		unset( $wp->query_vars['s'] );
+		$wp->query_vars['p'] = $id;
+		$wp->query_vars['sku'] = $sku;
+		
+	endif;
+}
+
+function woocommerce_admin_id_search_label($query) {
+	global $pagenow;
+
+    if( 'edit.php' != $pagenow ) return;
+	
+	$s =  get_query_var( 's' );
+	if($s) return $query;
+	
+	$sku = get_query_var( 'sku' );
+	if($sku) {
+		global $wp;
+		$post_type = get_post_type_object($wp->query_vars['post_type']);
+		
+		return sprintf(__("[%s with SKU of %s]", 'woothemes'), $post_type->labels->singular_name, $sku);
+	}
+	
+	$p = get_query_var( 'p' );
+	if($p) {
+		global $wp;
+		$post_type = get_post_type_object($wp->query_vars['post_type']);
+		
+		return sprintf(__("[%s with ID of %d]", 'woothemes'), $post_type->labels->singular_name, $p);
+	}
+	
+	return $query;
+}
+
+add_filter('query_vars', 'woocommerce_add_sku_var');
+function woocommerce_add_sku_var($public_query_vars) {
+	$public_query_vars[] = 'sku';
+	return $public_query_vars;
+}
