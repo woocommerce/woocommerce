@@ -91,24 +91,36 @@ function woocommerce_cart( $atts ) {
 				foreach (woocommerce_cart::$cart_contents as $cart_item_key => $values) :
 					$_product = $values['data'];
 					if ($_product->exists() && $values['quantity']>0) :
-						echo '
-							<tr>
-								<td class="product-remove"><a href="'.woocommerce_cart::get_remove_url($cart_item_key).'" class="remove" title="Remove this item">&times;</a></td>
-								<td class="product-thumbnail"><a href="'.get_permalink($values['product_id']).'">';
-						
-						if ($values['variation_id'] && has_post_thumbnail($values['variation_id'])) echo get_the_post_thumbnail($values['variation_id'], 'shop_tiny'); 
-						elseif (has_post_thumbnail($values['product_id'])) echo get_the_post_thumbnail($values['product_id'], 'shop_tiny'); 
-						else echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_tiny_w').'" height="'.woocommerce::get_var('shop_tiny_h').'" />'; 
-							
-						echo '	</a></td>
-								<td class="product-name">
-									<a href="'.get_permalink($values['product_id']).'">' . apply_filters('woocommerce_cart_product_title', $_product->get_title(), $_product) . '</a>
-									'.woocommerce_get_formatted_variation( $values['variation'] ).'
-								</td>
-								<td class="product-price">'.woocommerce_price($_product->get_price()).'</td>
-								<td class="product-quantity"><div class="quantity"><input name="cart['.$cart_item_key.'][qty]" value="'.$values['quantity'].'" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
-								<td class="product-subtotal">'.woocommerce_price($_product->get_price()*$values['quantity']).'</td>
-							</tr>';
+					
+						?>
+						<tr>
+							<td class="product-remove"><a href="<?php echo woocommerce_cart::get_remove_url($cart_item_key); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
+							<td class="product-thumbnail">
+								<a href="<?php echo get_permalink($values['product_id']); ?>">
+								<?php 
+									if ($values['variation_id'] && has_post_thumbnail($values['variation_id'])) :
+										echo get_the_post_thumbnail($values['variation_id'], 'shop_tiny'); 
+									elseif (has_post_thumbnail($values['product_id'])) :
+										echo get_the_post_thumbnail($values['product_id'], 'shop_tiny'); 
+									else :
+										echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_tiny_w').'" height="'.woocommerce::get_var('shop_tiny_h').'" />'; 
+									endif;
+								?>
+								</a>
+							</td>
+							<td class="product-name">
+								<a href="<?php echo get_permalink($values['product_id']); ?>"><?php echo apply_filters('woocommerce_cart_product_title', $_product->get_title(), $_product); ?></a>
+								<?php
+									if($_product instanceof woocommerce_product_variation && is_array($values['variation'])) :
+                            			echo woocommerce_get_formatted_variation( $values['variation'] );
+                       				endif;
+								?>
+							</td>
+							<td class="product-price"><?php echo woocommerce_price($_product->get_price()); ?></td>
+							<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo $values['quantity']; ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
+							<td class="product-subtotal"><?php echo woocommerce_price($_product->get_price()*$values['quantity']); ?></td>
+						</tr>
+						<?php
 					endif;
 				endforeach; 
 			endif;

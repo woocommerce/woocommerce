@@ -68,7 +68,7 @@ class woocommerce_cart {
 					$_product = &new woocommerce_product($values['product_id']);
 				endif;
 				
-				if ($_product->exists) :
+				if ($_product->exists && $values['quantity']>0) :
 				
 					self::$cart_contents[] = array(
 						'product_id'	=> $values['product_id'],
