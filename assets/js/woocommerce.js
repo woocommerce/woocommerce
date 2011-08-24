@@ -26,37 +26,51 @@ jQuery(function(){
 			// Trigger event
 			jQuery('body').trigger('adding_to_cart');
 			
-			// Block widget
-			jQuery('.widget_shopping_cart, .shop_table.cart').block({message: null, overlayCSS: {background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
-	
+			// Ajax action
 			jQuery.post( params.ajax_url, data, function(response) {
+				
+				// Get response
+				fragments = jQuery.parseJSON( response );
 
+				// Block fragments class
+				if (fragments) {
+					jQuery.each(fragments, function(key, value) {
+						jQuery(key).addClass('updating');
+					});
+				}
+				
+				// Block widgets and fragments
+				jQuery('.widget_shopping_cart, .shop_table.cart, .updating').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+				
 				// Changes button classes
 				jQuery(thisbutton).addClass('added');
 				jQuery(thisbutton).removeClass('loading');
 
 				// Cart widget load
 				jQuery('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
-					jQuery('.widget_shopping_cart').unblock();
+					
+					// Replace fragments
+					if (fragments) {
+						jQuery.each(fragments, function(key, value) {
+							jQuery(key).replaceWith(value);
+						});
+					}
+					
+					// Unblock
+					jQuery('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
 				} );
 				
 				// Cart load
 				jQuery('.shop_table.cart').load( window.location + ' .shop_table.cart:eq(0) > *', function() {
+					
 					jQuery("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
-					jQuery('.shop_table.cart').unblock();
+					
+					jQuery('.shop_table.cart').css('opacity', '1').unblock();
+					
 				} );
 				
 				// Trigger event so themes can refresh other areas
 				jQuery('body').trigger('added_to_cart');
-				
-				// Get response
-				fragments = jQuery.parseJSON( response );
-				
-				if (fragments) {
-					jQuery.each(fragments, function(key, value) {
-						jQuery(key).replaceWith(value);
-					});
-				}
 		
 			});
 			

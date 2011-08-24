@@ -161,10 +161,10 @@ function woocommerce_post_type() {
 			'capability_type' => 'post',
 			'publicly_queryable' => true,
 			'exclude_from_search' => true,
-			'hierarchical' => false,
+			'hierarchical' => true,
 			'rewrite' => false,
 			'query_var' => true,			
-			'supports' => array( 'title', 'editor', 'custom-fields' ),
+			'supports' => array( 'title', 'custom-fields', 'page-attributes', 'thumbnail' ),
 			'show_in_nav_menus' => false,
 			'show_in_menu' => 'edit.php?post_type=product'
 		)

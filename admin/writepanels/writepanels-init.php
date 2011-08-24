@@ -39,6 +39,22 @@ function woocommerce_meta_boxes() {
 	
 	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
+	
+	remove_meta_box('pageparentdiv', 'product_variation', 'side');
+	add_meta_box('product_variation-parent', __('Product', 'woothemes'), 'variations_product_meta_box', 'product_variation', 'side', 'default');
+}
+
+/**
+ * Let variations have a product as the parent
+ */
+function variations_product_meta_box($post) {
+	$post_type_object = get_post_type_object($post->post_type);
+	if ( $post_type_object->hierarchical ) {
+			$pages = wp_dropdown_pages(array('post_type' => 'product', 'selected' => $post->post_parent, 'name' => 'parent_id', 'show_option_none' => __('(no parent)'), 'sort_column'=> 'menu_order, post_title', 'echo' => 0));
+		if ( ! empty($pages) ) {
+			echo $pages;
+		} // end empty pages check
+	} // end hierarchical check.
 }
 
 /**
