@@ -171,6 +171,7 @@ function woocommerce_init() {
     if (is_admin()) :
     	wp_register_style('woocommerce_admin_styles', woocommerce::plugin_url() . '/assets/css/admin.css');
     	wp_enqueue_style('woocommerce_admin_styles');
+    	wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
     else :
     	wp_register_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox.css' ); 
     	wp_register_style( 'jqueryui_styles', woocommerce::plugin_url() . '/assets/css/ui.css' );
@@ -183,7 +184,7 @@ function woocommerce_init() {
 
 function woocommerce_admin_scripts() {
 	
-	wp_register_script( 'woocommerce_admin', woocommerce::plugin_url() . '/assets/js/woocommerce_admin.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce_admin', woocommerce::plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
     wp_enqueue_script('woocommerce_admin');
     	
 }

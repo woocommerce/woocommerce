@@ -47,12 +47,23 @@ class woocommerce_tax {
 		$tax_rates = get_option('woocommerce_tax_rates');
 		$tax_rates_array = array();
 		if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
-			if ($rate['class']) :
-				$tax_rates_array[$rate['country']][$rate['state']][$rate['class']] = array( 'rate' => $rate['rate'], 'shipping' => $rate['shipping'] );
-			else :
-				// Standard Rate
-				$tax_rates_array[$rate['country']][$rate['state']]['*'] = $rate['rate'] = array( 'rate' => $rate['rate'], 'shipping' => $rate['shipping'] );
-			endif;
+			
+			// Standard Rate?
+			if (!$rate['class']) $rate['class'] = '*';
+			
+			// Add entry for each country
+			if ($rate['countries']) foreach ($rate['countries'] as $country => $states) :
+				
+				if ($states) :
+					foreach ($states as $state) :
+						
+						$tax_rates_array[$country][$state][$rate['class']] = array( 'rate' => $rate['rate'], 'shipping' => $rate['shipping'] );
+						
+					endforeach;
+				endif;
+			
+			endforeach;
+			
 		endforeach;
 		return $tax_rates_array;
 	}
@@ -238,7 +249,6 @@ class woocommerce_tax {
 		
 		// Round to the nearest pence
 		$tax_amount = round($tax_amount);
-
 		$tax_amount = $tax_amount / 100; // Back to pounds
 		
 		//return number_format($tax_amount, 4, '.', '');
@@ -255,7 +265,6 @@ class woocommerce_tax {
 	function calc_shipping_tax( $price, $rate ) {
 	
 		$rate = round($rate, 4);
-			
 		$tax_amount = $price * ($rate/100);
 
 		return round($tax_amount, 2);

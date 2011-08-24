@@ -552,9 +552,9 @@ class woocommerce_countries {
 		if ( $countries ) foreach ( $countries as $key=>$value) :
 			if ( $states =  self::get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
-    				echo '<option value="'.$key.'"';
+    				/*echo '<option value="'.$key.'"';
     				if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    				echo '>'.$value.' &mdash; '.__('All states', 'woothemes').'</option>';
+    				echo '>'.$value.' &mdash; '.__('All states', 'woothemes').'</option>';*/
     				foreach ($states as $state_key=>$state_value) :
     					echo '<option value="'.$key.':'.$state_key.'"';
     					
@@ -566,6 +566,33 @@ class woocommerce_countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
+    			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woothemes') ) : __($value, 'woothemes') ) .'</option>';
+			endif;
+		endforeach;
+	}
+	
+	/** Outputs the list of countries and states for use in multiselect boxes */
+	function country_multiselect_options( $selected_countries = '', $escape=false ) {
+		
+		$countries = self::$countries;
+		asort($countries);
+		
+		if ( $countries ) foreach ( $countries as $key=>$value) :
+			if ( $states =  self::get_states($key) ) :
+				echo '<optgroup label="'.$value.'">';
+    				foreach ($states as $state_key=>$state_value) :
+    					echo '<option value="'.$key.':'.$state_key.'"';
+  
+    					if (isset($selected_countries[$key]) && in_array($state_key, $selected_countries[$key])) echo ' selected="selected"';
+    					
+    					echo '>' . ($escape ? esc_js($state_value) : $state_value) .'</option>';
+    				endforeach;
+    			echo '</optgroup>';
+			else :
+    			echo '<option';
+    			
+    			if (isset($selected_countries[$key]) && in_array('*', $selected_countries[$key])) echo ' selected="selected"';
+    			
     			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woothemes') ) : __($value, 'woothemes') ) .'</option>';
 			endif;
 		endforeach;

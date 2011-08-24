@@ -416,32 +416,6 @@ ul.recent-orders {
 		}
 	}
 }
-
-#woocommmerce_dashboard_useful_links {
-	ul.links {
-		float: left;
-		width: 49%;
-	}
-	.social {
-		float: right;
-		width: 49%;
-		h4 {
-			color: #999;
-			&.first {
-				margin-top: 0;
-			}
-		}
-		img {
-			width: 49%;
-		}
-		p {
-			color: #ccc;
-			line-height: 1.5em;
-			font-style: italic;
-		}
-	}
-}
-
 #woocommmerce_dashboard_recent_reviews {
 	li {
 		line-height: 1.5em;
@@ -490,17 +464,22 @@ ul.recent-orders {
 	margin: 0 !important;
 }
 
-p.taxrow select {
-	width: 125px;
-}
-p.taxrow input.text {
-	width: 60px;
-}
-p.taxrow label {
-	line-height: 1.5em;
-	margin: 0 8px;
-	input {
-		margin: 0 4px 0 0;
+div.taxrows {
+	.taxrow {
+		padding-bottom: 8px;
+		select {
+			width: 125px;
+		}
+		input.text {
+			width: 60px;
+		}
+		label.checkbox {
+			line-height: 1.5em;
+			margin: 0 8px;
+			input {
+				margin: 0 4px 0 0;
+			}
+		}
 	}
 }
 
@@ -529,8 +508,6 @@ p.taxrow label {
 		}
 	}
 }
-
-
 
 .woocommerce #tabs-wrap table a.remove {
 	margin-left: 4px;
@@ -855,127 +832,64 @@ img.tips {
 }
 
 /* Datepicker */
-table.jCalendar {
-	border: 1px solid #000;
-	background: #aaa;
-    border-collapse: separate;
-    border-spacing: 2px;
-    width: 190px;
-}
-table.jCalendar th {
-	background: #333;
-	color: #fff;
-	font-weight: bold;
-	padding: 3px 5px;
-}
+table.jCalendar{border:1px solid #000; background:#aaa;  border-collapse:separate;  border-spacing:2px;  width:190px}
+table.jCalendar th{background:#333; color:#fff; font-weight:bold; padding:3px 5px}
 
-table.jCalendar td {
-	background: #ccc;
-	color: #000;
-	padding: 3px 5px;
-	text-align: center;
-	font-size: 10px !important;
-}
-table.jCalendar td.other-month {
-	background: #ddd;
-	color: #aaa;
-}
-table.jCalendar td.today {
-	background: #666;
-	color: #fff;
-}
-table.jCalendar td.selected {
-	background: #f66;
-	color: #fff;
-}
-table.jCalendar td.selected.dp-hover {
-	background: #f33;
-	color: #fff;
-}
-table.jCalendar td.dp-hover,
-table.jCalendar tr.activeWeekHover td {
-	background: #fff;
-	color: #000;
-}
-table.jCalendar tr.selectedWeek td {
-	background: #f66;
-	color: #fff;
-}
-table.jCalendar td.disabled, table.jCalendar td.disabled.dp-hover {
-	background: #bbb;
-	color: #888;
-}
-table.jCalendar td.unselectable,
-table.jCalendar td.unselectable:hover,
-table.jCalendar td.unselectable.dp-hover {
-	background: #bbb;
-	color: #888;
-}
-div.dp-popup {
-	position: relative;
-	background: #ccc;
-	font-size: 10px !important;
-	font-family: arial, sans-serif;
-	padding: 2px;
-	width: 190px;
-	line-height: 1.2em;
-}
-div#dp-popup {
-	position: absolute;
-	z-index: 199;
-}
-div.dp-popup h2 {
-	font-size: 12px !important;
-	text-align: center;
-	margin: 2px 0;
-	padding: 0;
-}
-a#dp-close {
-	font-size: 11px !important;
-	padding: 4px 0;
-	text-align: center;
-	display: block;
-}
-a#dp-close:hover {
-	text-decoration: underline;
-}
-div.dp-popup a {
-	color: #000;
-	text-decoration: none;
-	padding: 3px 2px 0;
-}
-div.dp-popup div.dp-nav-prev {
-	position: absolute;
-	top: 2px;
-	left: 4px;
-	width: 100px;
-}
-div.dp-popup div.dp-nav-prev a {
-	float: left;
-}
-/* Opera needs the rules to be this specific otherwise it doesn't change the cursor back to pointer after you have disabled and re-enabled a link */
-div.dp-popup div.dp-nav-prev a, div.dp-popup div.dp-nav-next a {
-	cursor: pointer;
-}
-div.dp-popup div.dp-nav-prev a.disabled, div.dp-popup div.dp-nav-next a.disabled {
-	cursor: default;
-}
-div.dp-popup div.dp-nav-next {
-	position: absolute;
-	top: 2px;
-	right: 4px;
-	width: 100px;
-}
-div.dp-popup div.dp-nav-next a {
-	float: right;
-}
-div.dp-popup a.disabled {
-	cursor: default;
-	color: #aaa;
-}
-div.dp-popup td {
-	cursor: pointer;
-}
-div.dp-popup td.disabled {
-	cursor: default;
-}
+table.jCalendar td{background:#ccc; color:#000; padding:3px 5px; text-align:center; font-size:10px !important}
+table.jCalendar td.other-month{background:#ddd; color:#aaa}
+table.jCalendar td.today{background:#666; color:#fff}
+table.jCalendar td.selected{background:#f66; color:#fff}
+table.jCalendar td.selected.dp-hover{background:#f33; color:#fff}
+table.jCalendar td.dp-hover, 
+table.jCalendar tr.activeWeekHover td{background:#fff; color:#000}
+table.jCalendar tr.selectedWeek td{background:#f66; color:#fff}
+table.jCalendar td.disabled, table.jCalendar td.disabled.dp-hover{background:#bbb; color:#888}
+table.jCalendar td.unselectable, 
+table.jCalendar td.unselectable:hover, 
+table.jCalendar td.unselectable.dp-hover{background:#bbb; color:#888}
+div.dp-popup{position:relative; background:#ccc; font-size:10px !important; font-family:arial,sans-serif; padding:2px; width:190px; line-height:1.2em}
+div#dp-popup{position:absolute; z-index:199}
+div.dp-popup h2{font-size:12px !important; text-align:center; margin:2px 0; padding:0}
+a#dp-close{font-size:11px !important; padding:4px 0; text-align:center; display:block}
+a#dp-close:hover{text-decoration:underline}
+div.dp-popup a{color:#000; text-decoration:none; padding:3px 2px 0}
+div.dp-popup div.dp-nav-prev{position:absolute; top:2px; left:4px; width:100px}
+div.dp-popup div.dp-nav-prev a{float:left}
+
+div.dp-popup div.dp-nav-prev a, div.dp-popup div.dp-nav-next a{cursor:pointer}
+div.dp-popup div.dp-nav-prev a.disabled, div.dp-popup div.dp-nav-next a.disabled{cursor:default}
+div.dp-popup div.dp-nav-next{position:absolute; top:2px; right:4px; width:100px}
+div.dp-popup div.dp-nav-next a{float:right}
+div.dp-popup a.disabled{cursor:default; color:#aaa}
+div.dp-popup td{cursor:pointer}
+div.dp-popup td.disabled{cursor:default}
+
+/* Multiselect
+----------------------------------*/
+.ui-multiselect { padding:3px 0 3px 4px; text-align:left; margin: 1px; vertical-align: middle; height: 24px; }
+.ui-multiselect span.ui-icon { float:right }
+.ui-multiselect-single .ui-multiselect-checkboxes input { position:absolute !important; top: auto !important; left:-9999px; }
+.ui-multiselect-single .ui-multiselect-checkboxes label { padding:5px !important; }
+
+
+.ui-multiselect-header { margin-bottom:3px; padding:3px 0 3px 4px }
+.ui-multiselect-header ul { font-size:0.9em }
+.ui-multiselect-header ul li { float:left; padding:0 10px 0 0; margin: 0; }
+.ui-multiselect-header a { text-decoration:none }
+.ui-multiselect-header a:hover { text-decoration:underline }
+.ui-multiselect-header span.ui-icon { float:left }
+.ui-multiselect-header li.ui-multiselect-close { float:right; text-align:right; padding-right:0 }
+
+.ui-multiselect-menu { display:none; padding:3px; position:absolute; z-index:10000 }
+.ui-multiselect-checkboxes { position:relative /* fixes bug in IE6/7 */; overflow-y:scroll }
+.ui-multiselect-checkboxes label { cursor:default; display:block; border:1px solid transparent; padding:3px 1px; }
+.ui-multiselect-checkboxes label input { position:relative; top:0; vertical-align: middle; }
+.ui-multiselect-checkboxes label span { padding-left: 4px; }
+.ui-multiselect-checkboxes li { clear:both; font-size:0.9em; padding-right:3px }
+.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { text-align:center; font-weight:bold; border-bottom:1px solid }
+.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a { display:block; padding:3px; margin:1px 0; text-decoration:none }
+
+.ui-multiselect-checkboxes li.ui-multiselect-optgroup-last { border-bottom:1px solid }
+
+/* remove label borders in IE6 because IE6 does not support transparency */
+* html .ui-multiselect-checkboxes label { border:none }
