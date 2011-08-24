@@ -202,7 +202,7 @@ function woocommerce_frontend_scripts() {
 	wp_enqueue_script('fancybox');
     	
 	/* Script variables */
-	$params = array(
+	$woocommerce_params = array(
 		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
 		'countries' 					=> json_encode(woocommerce_countries::$states),
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
@@ -217,19 +217,19 @@ function woocommerce_frontend_scripts() {
 	);
 	
 	if (isset($_SESSION['min_price'])) :
-		$params['min_price'] = $_SESSION['min_price'];
+		$woocommerce_params['min_price'] = $_SESSION['min_price'];
 	endif;
 	if (isset($_SESSION['max_price'])) :
-		$params['max_price'] = $_SESSION['max_price'];
+		$woocommerce_params['max_price'] = $_SESSION['max_price'];
 	endif;
 		
 	if ( is_page(get_option('woocommerce_checkout_page_id')) || is_page(get_option('woocommerce_pay_page_id')) ) :
-		$params['is_checkout'] = 1;
+		$woocommerce_params['is_checkout'] = 1;
 	else :
-		$params['is_checkout'] = 0;
+		$woocommerce_params['is_checkout'] = 0;
 	endif;
 	
-	wp_localize_script( 'woocommerce', 'params', $params );
+	wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
 	
 }
 add_action('template_redirect', 'woocommerce_frontend_scripts');
