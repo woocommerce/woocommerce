@@ -45,7 +45,7 @@ function woocommerce_filter_loop() {
 		$post_ids = $all_post_ids;
 		$post_ids = apply_filters('loop-shop-posts-in', $post_ids);
 		
-		if ($_POST['orderby']) :
+		if ( isset( $_POST['orderby'] ) && ( $_POST['orderby'] != '' ) ) :
 			$_SESSION['orderby'] = $_POST['orderby'];
 		endif;
 		
