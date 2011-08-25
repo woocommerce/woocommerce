@@ -53,7 +53,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		
 		<li><a href="<?php echo get_permalink( $r->ID ) ?>" title="<?php echo esc_attr($r->post_title ? $r->post_title : $r->ID); ?>">
 			<?php if (has_post_thumbnail( $r->ID )) echo get_the_post_thumbnail($r->ID, 'shop_tiny'); else echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_tiny_w').'px" height="'.woocommerce::get_var('shop_tiny_h').'px" />'; ?>
-			<?php if ( $r->post_title ) echo esc_attr(__($r->post_title)); else echo $r->ID; ?>			
+			<?php if ( $r->post_title ) echo get_the_title( $r->ID ); else echo $r->ID; ?>			
 		</a> <?php echo $_product->get_price_html(); ?></li>
 		
 		<?php endforeach; ?>
