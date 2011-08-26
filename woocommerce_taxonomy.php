@@ -157,7 +157,7 @@ function woocommerce_post_type() {
 				'parent' => __( 'Parent Variation', 'woothemes' )
 			),
 			'public' => true,
-			'show_ui' => true,
+			'show_ui' => false,
 			'capability_type' => 'post',
 			'publicly_queryable' => true,
 			'exclude_from_search' => true,
@@ -166,7 +166,7 @@ function woocommerce_post_type() {
 			'query_var' => true,			
 			'supports' => array( 'title', 'custom-fields', 'page-attributes', 'thumbnail' ),
 			'show_in_nav_menus' => false,
-			'show_in_menu' => 'edit.php?post_type=product'
+			//'show_in_menu' => 'edit.php?post_type=product'
 		)
 	);
 	
