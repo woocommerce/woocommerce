@@ -10,10 +10,26 @@
  */
 class WooCommerce_Widget_Cart extends WP_Widget {
 	
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+
 	/** constructor */
 	function WooCommerce_Widget_Cart() {
-		$widget_ops = array( 'description' => __( "Shopping Cart for the sidebar.", 'woothemes') );
-		parent::WP_Widget('shopping_cart', __('WooCommerce Shopping Cart', 'woothemes'), $widget_ops);
+	
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_shopping_cart';
+		$this->woo_widget_description = __( 'Display the users Shopping Cart in the sidebar.', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_shopping_cart';
+		$this->woo_widget_name = __('WooCommerce Shopping Cart', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('shopping_cart', $this->woo_widget_name, $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

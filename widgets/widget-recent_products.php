@@ -9,11 +9,26 @@
 
 class WooCommerce_Widget_Recent_Products extends WP_Widget {
 
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+	
 	/** constructor */
 	function WooCommerce_Widget_Recent_Products() {
-		$widget_ops = array('classname' => 'widget_recent_entries', 'description' => __( "The most recent products on your site", 'woothemes') );
-		parent::WP_Widget('recent-products', __('WooCommerce New Products', 'woothemes'), $widget_ops);
-		$this->alt_option_name = 'widget_recent_entries';
+		
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_recent_entries';
+		$this->woo_widget_description = __( 'Display a list of your most recent products on your site..', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_recent_products';
+		$this->woo_widget_name = __('WooCommerce Recent Products', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('recent_products', $this->woo_widget_name, $widget_ops);
 
 		add_action( 'save_post', array(&$this, 'flush_widget_cache') );
 		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );

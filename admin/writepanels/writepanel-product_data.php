@@ -242,7 +242,17 @@ function woocommerce_product_data_box() {
 												?>			
 											</select>
 										<?php elseif ($tax->attribute_type=="text") : ?>
-											<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php if (isset($attribute['value'])) echo $attribute['value']; ?>" placeholder="<?php _e('Comma separate terms', 'woothemes'); ?>" />
+											<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php 
+											
+												if (isset($attribute['value'])) :
+													if (is_array($attribute['value'])) :
+														echo implode(', ', $attribute['value']);
+													else :
+														echo $attribute['value']; 
+													endif;
+												endif;
+												
+											?>" placeholder="<?php _e('Comma separate terms', 'woothemes'); ?>" />
 										<?php endif; ?>
 										</td>
 										<td class="center"><input type="checkbox" <?php echo $checked; ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>

@@ -9,10 +9,26 @@
  
 class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+	
 	/** constructor */
 	function WooCommerce_Widget_Product_Categories() {
-		$widget_ops = array( 'classname' => 'widget_product_categories', 'description' => __( "A list or dropdown of product categories", 'woothemes' ) );
-		parent::WP_Widget('product_categories', __('WooCommerce Product Categories', 'woothemes'), $widget_ops);
+	
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_product_categories';
+		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_product_categories';
+		$this->woo_widget_name = __('WooCommerce Product Categories', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('product_categories', $this->woo_widget_name, $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

@@ -30,10 +30,26 @@ add_action('init', 'woocommerce_price_filter_init');
 
 class WooCommerce_Widget_Price_Filter extends WP_Widget {
 
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+	
 	/** constructor */
 	function WooCommerce_Widget_Price_Filter() {
-		$widget_ops = array( 'description' => __( "Shows a price filter slider in a widget which lets you narrow down the list of shown products in categories.", 'woothemes') );
-		parent::WP_Widget('price_filter', __('WooCommerce Price Filter', 'woothemes'), $widget_ops);
+		
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_price_filter';
+		$this->woo_widget_description = __( 'Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories.', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_price_filter';
+		$this->woo_widget_name = __('WooCommerce Price Filter', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('price_filter', $this->woo_widget_name, $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */

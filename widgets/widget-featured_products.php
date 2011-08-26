@@ -9,12 +9,27 @@
  * @author		WooThemes
  */
 class WooCommerce_Widget_Featured_Products extends WP_Widget {
-
+	
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+	
 	/** constructor */
 	function WooCommerce_Widget_Featured_Products() {
-		$widget_ops = array('classname' => 'widget_featured_products', 'description' => __( "Featured products on your site", 'woothemes') );
-		parent::WP_Widget('featured-products', __('WooCommerce Featured Products', 'woothemes'), $widget_ops);
-		$this->alt_option_name = 'widget_featured_products';
+	
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_featured_products';
+		$this->woo_widget_description = __( 'Display a list of featured products on your site.', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_featured_products';
+		$this->woo_widget_name = __('WooCommerce Featured Products', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('featured-products', $this->woo_widget_name, $widget_ops);
 
 		add_action( 'save_post', array(&$this, 'flush_widget_cache') );
 		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );

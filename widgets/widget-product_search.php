@@ -9,10 +9,26 @@
 
 class WooCommerce_Widget_Product_Search extends WP_Widget {
 
+	/** Variables to setup the widget. */
+	var $woo_widget_cssclass;
+	var $woo_widget_description;
+	var $woo_widget_idbase;
+	var $woo_widget_name;
+	
 	/** constructor */
 	function WooCommerce_Widget_Product_Search() {
-		$widget_ops = array( 'description' => __( "Search box for products only.", 'woothemes') );
-		parent::WP_Widget('product_search', __('WooCommerce Product Search', 'woothemes'), $widget_ops);
+	
+		/* Widget variable settings. */
+		$this->woo_widget_cssclass = 'widget_product_search';
+		$this->woo_widget_description = __( 'A Search box for products only.', 'woothemes' );
+		$this->woo_widget_idbase = 'woocommerce_product_search';
+		$this->woo_widget_name = __('WooCommerce Product Search', 'woothemes' );
+		
+		/* Widget settings. */
+		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		
+		/* Create the widget. */
+		$this->WP_Widget('product_search', $this->woo_widget_name, $widget_ops);
 	}
 
 	/** @see WP_Widget::widget */
