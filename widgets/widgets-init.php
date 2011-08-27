@@ -17,6 +17,7 @@ include_once('widget-product_categories.php');
 include_once('widget-product_search.php');
 include_once('widget-product_tag_cloud.php');
 include_once('widget-recent_products.php');
+include_once('widget-top_rated_products.php');
 
 function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Recent_Products');
@@ -27,5 +28,6 @@ function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Layered_Nav');
 	register_widget('WooCommerce_Widget_Price_Filter');
 	register_widget('WooCommerce_Widget_Product_Search');
+	register_widget('WooCommerce_Widget_Top_Rated_Products');
 }
 add_action('widgets_init', 'woocommerce_register_widgets');

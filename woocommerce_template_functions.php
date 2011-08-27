@@ -611,12 +611,13 @@ if (!function_exists('woocommerce_shipping_calculator')) {
  * WooCommerce Login Form
  **/
 if (!function_exists('woocommerce_login_form')) {
-	function woocommerce_login_form() {
+	function woocommerce_login_form( $message = '' ) {
 	
 		if (is_user_logged_in()) return;
 		
 		?>
 		<form method="post" class="login">
+			<?php if ($message) echo wpautop(wptexturize($message)); ?>
 			<p class="form-row form-row-first">
 				<label for="username"><?php _e('Username', 'woothemes'); ?> <span class="required">*</span></label>
 				<input type="text" class="input-text" name="username" id="username" />
@@ -647,7 +648,7 @@ if (!function_exists('woocommerce_checkout_login_form')) {
 		
 		?><p class="info"><?php _e('Already registered?', 'woothemes'); ?> <a href="#" class="showlogin"><?php _e('Click here to login', 'woothemes'); ?></a></p><?php
 
-		woocommerce_login_form();
+		woocommerce_login_form( __('If you have shopped with us before, please enter your username and password in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section.', 'woothemes') );
 	}
 }
 

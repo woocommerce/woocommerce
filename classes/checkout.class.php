@@ -96,6 +96,8 @@ class woocommerce_checkout {
 			
 			echo '<div class="create-account">';
 			
+			echo '<p>'.__('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woothemes').'</p>'; 
+			
 			$this->checkout_form_field( array( 'type' => 'text', 'name' => 'account-username', 'label' => __('Account username', 'woothemes'), 'placeholder' => __('Username', 'woothemes') ) );
 			$this->checkout_form_field( array( 'type' => 'password', 'name' => 'account-password', 'label' => __('Account password', 'woothemes'), 'placeholder' => __('Password', 'woothemes'),'class' => array('form-row-first')) );
 			$this->checkout_form_field( array( 'type' => 'password', 'name' => 'account-password-2', 'label' => __('Account password', 'woothemes'), 'placeholder' => __('Password', 'woothemes'),'class' => array('form-row-last'), 'label_class' => array('hidden')) );
