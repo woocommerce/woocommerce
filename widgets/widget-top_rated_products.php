@@ -20,7 +20,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 	function WooCommerce_Widget_Top_Rated_Products() {
 	
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_top_rated_products widget_recent_entries';
+		$this->woo_widget_cssclass = 'widget_top_rated_products';
 		$this->woo_widget_description = __( 'Display a list of top rated products on your site.', 'woothemes' );
 		$this->woo_widget_idbase = 'woocommerce_top_rated_products';
 		$this->woo_widget_name = __('WooCommerce Top Rated Products', 'woothemes' );
