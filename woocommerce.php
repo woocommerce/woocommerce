@@ -204,6 +204,7 @@ function woocommerce_frontend_scripts() {
 	/* Script variables */
 	$woocommerce_params = array(
 		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
+		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
 		'countries' 					=> json_encode(woocommerce_countries::$states),
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),

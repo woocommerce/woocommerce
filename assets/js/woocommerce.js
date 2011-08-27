@@ -132,12 +132,31 @@ jQuery(function(){
 		max: max_price,
 		values: [current_min_price,current_max_price],
 		create : function( event, ui ) {
-			jQuery( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + current_min_price + " - " + woocommerce_params.currency_symbol + current_max_price );
+
+			if (params.currency_pos == "left"){
+				jQuery( ".price_slider_amount span" ).html( params.currency_symbol + current_min_price + " - " + params.currency_symbol + current_max_price );
+			} else if (params.currency_pos == "left_space") {
+				jQuery( ".price_slider_amount span" ).html( params.currency_symbol + " " + current_min_price + " - " + params.currency_symbol + " " + current_max_price );
+			} else if (params.currency_pos == "right") {
+				jQuery( ".price_slider_amount span" ).html( current_min_price + params.currency_symbol + " - " + current_max_price + params.currency_symbol );
+			} else if (params.currency_pos == "right_space") {
+				jQuery( ".price_slider_amount span" ).html( current_min_price + " " + params.currency_symbol + " - " + current_max_price + " " + params.currency_symbol );
+			}
+			
 			jQuery( ".price_slider_amount #min_price" ).val(current_min_price);
 			jQuery( ".price_slider_amount #max_price" ).val(current_max_price);
 		},
 		slide: function( event, ui ) {
-			jQuery( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + ui.values[ 0 ] + " - " + woocommerce_params.currency_symbol + ui.values[ 1 ] );
+			
+			if (params.currency_pos == "left"){
+				jQuery( ".price_slider_amount span" ).html( params.currency_symbol + ui.values[ 0 ] + " - " + params.currency_symbol + ui.values[ 1 ] );
+			} else if (params.currency_pos == "left_space") {
+				jQuery( ".price_slider_amount span" ).html( params.currency_symbol + " " + ui.values[ 0 ] + " - " + params.currency_symbol + " " + ui.values[ 1 ] );
+			} else if (params.currency_pos == "right") {
+				jQuery( ".price_slider_amount span" ).html( ui.values[ 0 ] + params.currency_symbol + " - " + ui.values[ 1 ] + params.currency_symbol );
+			} else if (params.currency_pos == "right_space") {
+				jQuery( ".price_slider_amount span" ).html( ui.values[ 0 ] + " " + params.currency_symbol + " - " + ui.values[ 1 ] + " " + params.currency_symbol );
+			}
 			jQuery( "input#min_price" ).val(ui.values[ 0 ]);
 			jQuery( "input#max_price" ).val(ui.values[ 1 ]);
 		}
