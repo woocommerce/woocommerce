@@ -10,8 +10,10 @@
  */
  
 /**
- * Custom columns
+ * Columns for Coupons page
  **/
+add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
+
 function woocommerce_edit_coupon_columns($columns){
 	
 	$columns = array();
@@ -26,7 +28,12 @@ function woocommerce_edit_coupon_columns($columns){
 
 	return $columns;
 }
-add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
+
+
+/**
+ * Custom Columns for Coupons page
+ **/
+add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
 
 function woocommerce_custom_coupon_columns($column) {
 	global $post;
@@ -56,7 +63,12 @@ function woocommerce_custom_coupon_columns($column) {
 		break;
 	}
 }
-add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
+
+
+/**
+ * Columns for Variations page
+ **/
+add_filter('manage_edit-product_variation_columns', 'woocommerce_edit_variation_columns');
 
 function woocommerce_edit_variation_columns($columns){
 	
@@ -70,7 +82,12 @@ function woocommerce_edit_variation_columns($columns){
 
 	return $columns;
 }
-add_filter('manage_edit-product_variation_columns', 'woocommerce_edit_variation_columns');
+
+
+/**
+ * Custom Columns for Variations page
+ **/
+add_action('manage_product_variation_posts_custom_column', 'woocommerce_custom_variation_columns', 2);
 
 function woocommerce_custom_variation_columns($column) {
 	global $post;
@@ -93,14 +110,19 @@ function woocommerce_custom_variation_columns($column) {
 		break;
 	}
 }
-add_action('manage_product_variation_posts_custom_column', 'woocommerce_custom_variation_columns', 2);
+
+
+/**
+ * Columns for Products page
+ **/
+add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
 
 function woocommerce_edit_product_columns($columns){
 	
 	$columns = array();
 	
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = __("Thumb", 'woothemes');
+	$columns["thumb"] = __("Image", 'woothemes');
 	$columns["title"] = __("Name", 'woothemes');
 	$columns["product_type"] = __("Type", 'woothemes');
 	$columns["sku"] = __("ID/SKU", 'woothemes');
@@ -119,7 +141,12 @@ function woocommerce_edit_product_columns($columns){
 	
 	return $columns;
 }
-add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
+
+
+/**
+ * Custom Columns for Products page
+ **/
+add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_columns', 2);
 
 function woocommerce_custom_product_columns($column) {
 	global $post;
@@ -178,12 +205,68 @@ function woocommerce_custom_product_columns($column) {
 		case "product_type" :
 			echo ucwords($product->product_type);
 		break;
-		case "id" :
-			echo '#'.$post->ID;
-		break;
 	}
 }
-add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_columns', 2);
+
+
+/**
+ * Make product columns sortable
+ * https://gist.github.com/906872
+ **/
+add_filter("manage_edit-product_sortable_columns", 'woocommerce_custom_product_sort');
+
+function woocommerce_custom_product_sort($columns) {
+	$custom = array(
+		'inventory' 	=> 'inventory',
+		'price'			=> 'price',
+		'featured'		=> 'featured',
+		'sku'			=> 'sku'
+	);
+	return wp_parse_args($custom, $columns);
+}
+
+
+/**
+ * Product column orderby
+ * http://scribu.net/wordpress/custom-sortable-columns.html#comment-4732
+ **/
+add_filter( 'request', 'woocommerce_custom_product_orderby' );
+
+function woocommerce_custom_product_orderby( $vars ) {
+	if (isset( $vars['orderby'] )) :
+		if ( 'inventory' == $vars['orderby'] ) :
+			$vars = array_merge( $vars, array(
+				'meta_key' 	=> 'stock',
+				'orderby' 	=> 'meta_value_num'
+			) );
+		endif;
+		if ( 'price' == $vars['orderby'] ) :
+			$vars = array_merge( $vars, array(
+				'meta_key' 	=> 'price',
+				'orderby' 	=> 'meta_value_num'
+			) );
+		endif;
+		if ( 'featured' == $vars['orderby'] ) :
+			$vars = array_merge( $vars, array(
+				'meta_key' 	=> 'featured',
+				'orderby' 	=> 'meta_value'
+			) );
+		endif;
+		if ( 'sku' == $vars['orderby'] ) :
+			$vars = array_merge( $vars, array(
+				'orderby' 	=> 'id'
+			) );
+		endif;
+	endif;
+	
+	return $vars;
+}
+
+
+/**
+ * Columns for order page
+ **/
+add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
 
 function woocommerce_edit_order_columns($columns){
 	
@@ -199,7 +282,12 @@ function woocommerce_edit_order_columns($columns){
 	
 	return $columns;
 }
-add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
+
+
+/**
+ * Custom Columns for order page
+ **/
+add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_columns', 2);
 
 function woocommerce_custom_order_columns($column) {
 
@@ -274,11 +362,13 @@ function woocommerce_custom_order_columns($column) {
 		break;
 	}
 }
-add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_columns', 2);
+
 
 /**
  * Order page filters
  **/
+add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
+
 function woocommerce_custom_order_views( $views ) {
 	
 	$woocommerce_orders = &new woocommerce_orders();
@@ -314,11 +404,13 @@ function woocommerce_custom_order_views( $views ) {
 	
 	return $views;
 }
-add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
+
 
 /**
  * Order page actions
  **/
+add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
+
 function woocommerce_remove_row_actions( $actions ) {
     if( get_post_type() === 'shop_order' ) :
         unset( $actions['view'] );
@@ -326,23 +418,26 @@ function woocommerce_remove_row_actions( $actions ) {
     endif;
     return $actions;
 }
-add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
 
 
 /**
  * Order page views
  **/
+add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
+
 function woocommerce_bulk_actions( $actions ) {
 	
 	if (isset($actions['edit'])) unset($actions['edit']);
 	
 	return $actions;
 }
-add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
+
 
 /**
  * Order messages
  **/
+add_filter( 'post_updated_messages', 'woocommerce_post_updated_messages' );
+
 function woocommerce_post_updated_messages( $messages ) {
 	if( get_post_type() === 'shop_order' ) :
     	
@@ -356,5 +451,3 @@ function woocommerce_post_updated_messages( $messages ) {
    	endif;
     return $messages;
 }
-add_filter( 'post_updated_messages', 'woocommerce_post_updated_messages' );
-
