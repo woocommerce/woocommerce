@@ -143,6 +143,14 @@ class woocommerce_cart {
 		
 		$found_cart_item_key = self::find_product_in_cart($product_id, $variation_id, $variation);
 		
+		$product_data = &new woocommerce_product( $product_id );
+		
+		// Price set check
+		if( $product_data->get_price() === '' ) { 
+			woocommerce::add_error( __('This product cannot be purchased - the price is not yet announced', 'woothemes') );
+			return false; 
+		}
+		
 		if (is_numeric($found_cart_item_key)) :
 			
 			$quantity = $quantity + self::$cart_contents[$found_cart_item_key]['quantity'];
@@ -152,15 +160,13 @@ class woocommerce_cart {
 		else :
 			
 			$cart_item_key = sizeof(self::$cart_contents);
-			
-			$data = &new woocommerce_product( $product_id );
 				
 			self::$cart_contents[$cart_item_key] = array(
 				'product_id'	=> $product_id,
 				'variation_id'	=> $variation_id,
 				'variation' 	=> $variation,
 				'quantity' 		=> $quantity,
-				'data'			=> $data
+				'data'			=> $product_data
 			);
 			
 		endif;

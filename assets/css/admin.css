@@ -319,6 +319,8 @@ table.wp-list-table .column-thumb img {
   padding: 2px;
   border: 1px solid #dfdfdf;
   vertical-align: middle;
+  width: 42px;
+  height: 42px;
 }
 table.wp-list-table span.na {
   color: #999;

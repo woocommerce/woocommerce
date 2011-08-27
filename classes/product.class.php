@@ -48,7 +48,7 @@ class woocommerce_product {
 		// Define the data we're going to load: Key => Default value
 		$load_data = array(
 			'sku'			=> $this->id,
-			'price' 		=> 0,
+			'price' 		=> '',
 			'visibility'	=> 'hidden',
 			'stock'			=> 0,
 			'stock_status'	=> 'instock',
@@ -65,7 +65,7 @@ class woocommerce_product {
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :
-			if (isset($product_custom_fields[$key][0]) && !empty($product_custom_fields[$key][0])) :
+			if (isset($product_custom_fields[$key][0]) && $product_custom_fields[$key][0]!=='') :
 				$this->$key = $product_custom_fields[$key][0];
 			else :
 				$this->$key = $default;
@@ -401,7 +401,7 @@ class woocommerce_product {
 			
 		else :
 		
-			if ( $this->sale_price==$this->price ) :
+			if ( $this->sale_price && $this->sale_price==$this->price ) :
 				return true;
 			endif;
 		
@@ -494,6 +494,10 @@ class woocommerce_product {
 				else :
 					$price .= woocommerce_price($this->get_price());
 				endif;
+			elseif ($this->price === '' ) :
+				return false;
+			elseif ($this->price === '0' ) :
+				$price = __('Free!', 'woothemes');      
 			endif;
 		endif;
 		return $price;
