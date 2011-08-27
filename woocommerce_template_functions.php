@@ -113,7 +113,7 @@ if (!function_exists('woocommerce_show_product_images')) {
 		$thumb_id = 0;
 		if (has_post_thumbnail()) :
 			$thumb_id = get_post_thumbnail_id();
-			$large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_large');
+			$large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
 			echo '<a href="'.wp_get_attachment_url($thumb_id).'" class="zoom" rel="thumbnails">';
 			the_post_thumbnail($large_thumbnail_size); 
 			echo '</a>';
@@ -326,7 +326,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
                 
                 if (has_post_thumbnail($variation->get_variation_id())) {
                     $attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-                    $large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_large');
+                    $large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
                     $image = current(wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size ));
                     $image_link = current(wp_get_attachment_image_src( $attachment_id, 'full' ));
                 } else {
@@ -493,12 +493,12 @@ if (!function_exists('woocommerce_product_reviews_panel')) {
  * WooCommerce Product Thumbnail
  **/
 if (!function_exists('woocommerce_get_product_thumbnail')) {
-	function woocommerce_get_product_thumbnail( $size = 'shop_small', $placeholder_width = 0, $placeholder_height = 0 ) {
+	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0 ) {
 		
 		global $post;
 		
-		if (!$placeholder_width) $placeholder_width = woocommerce::get_var('shop_small_w');
-		if (!$placeholder_height) $placeholder_height = woocommerce::get_var('shop_small_h');
+		if (!$placeholder_width) $placeholder_width = woocommerce::get_var('shop_single_image_width');
+		if (!$placeholder_height) $placeholder_height = woocommerce::get_var('shop_single_image_height');
 		
 		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
 		

@@ -96,7 +96,7 @@ function woocommerce_custom_variation_columns($column) {
 	switch ($column) {
 		case "thumb" :
 			if (has_post_thumbnail($post->ID)) :
-				echo get_the_post_thumbnail($post->ID, 'shop_tiny');
+				echo get_the_post_thumbnail($post->ID, 'shop_thumbnail');
 			endif;
 		break;
 		case "id" :
@@ -155,7 +155,7 @@ function woocommerce_custom_product_columns($column) {
 	switch ($column) {
 		case "thumb" :
 			if (has_post_thumbnail($post->ID)) :
-				echo get_the_post_thumbnail($post->ID, 'shop_tiny');
+				echo get_the_post_thumbnail($post->ID, 'shop_thumbnail');
 			endif;
 		break;
 		case "summary" :

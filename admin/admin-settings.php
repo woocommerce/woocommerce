@@ -255,6 +255,37 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	
 	array( 'type' => 'sectionend'),
 	
+	array(	'name' => __('Image Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	
+	array(  
+		'name' => __('Catalog images', 'woothemes'),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_catalog_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '150'
+	),
+
+	array(  
+		'name' => __('Single product images', 'woothemes'),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_single_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '300'
+	),
+	
+	array(  
+		'name' => __('Thumbnail images', 'woothemes'),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_thumbnail_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '90'
+	),
+	
+	array( 'type' => 'sectionend'),
+	
 	array(	'name' => __('Pricing Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
 	
 	array(  
@@ -590,6 +621,16 @@ function woocommerce_update_options($options) {
 	                update_option($value['id'], 'no');
 	            }
 	            
+	        elseif (isset($value['type']) && $value['type']=='image_width') :
+	            	
+	            if(isset($value['id'])) {
+	            	update_option($value['id'].'_width', (int) woocommerce_clean($_POST[$value['id'].'_width']));
+	            	update_option($value['id'].'_height', (int) woocommerce_clean($_POST[$value['id'].'_height']));
+	            } else {
+	                update_option($value['id'].'_width', $value['std']);
+	            	update_option($value['id'].'_height', $value['std']);
+	            }	
+	            	
         	else :
 			    
         		if(isset($value['id']) && isset($_POST[$value['id']])) {
@@ -630,14 +671,6 @@ function woocommerce_admin_fields($options) {
 	    $counter = 1;
 	    foreach ($options as $value) :
 	        switch($value['type']) :
-				case 'string':
-					?>
-					<tr valign="top">
-						<th scope="row" class="titledesc"><?php echo $value['name']; ?></th>
-						<td class="forminp"><?php echo $value['desc']; ?></td>
-					</tr>
-					<?php
-				break;
 	            case 'tab':
 	                echo '<div id="'.$value['type'].$counter.'" class="panel">';
 	            break;
@@ -653,6 +686,12 @@ function woocommerce_admin_fields($options) {
 	            	?><tr valign="top">
 						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
 	                    <td class="forminp"><input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="<?php echo $value['type'] ?>" style="<?php echo $value['css'] ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+	                </tr><?php
+	            break;
+	            case 'image_width' :
+	            	?><tr valign="top">
+						<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+	                    <td class="forminp"><?php _e('Width'); ?> <input name="<?php echo $value['id'] ?>_width" id="<?php echo $value['id'] ?>_width" type="text" size="3" value="<?php if ( get_option( $value['id'].'_width') ) echo stripslashes(get_option($value['id'].'_width')); else echo $value['std'] ?>" /> <?php _e('Height'); ?> <input name="<?php echo $value['id'] ?>_height" id="<?php echo $value['id'] ?>_height" type="text" size="3"" value="<?php if ( get_option( $value['id'].'_height') ) echo stripslashes(get_option($value['id'].'_height')); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
 	                </tr><?php
 	            break;
 	            case 'select':

@@ -50,8 +50,8 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 			if ($_product->exists() && $cart_item['quantity']>0) :
 				echo '<li><a href="'.get_permalink($cart_item['product_id']).'">';
 				
-				if (has_post_thumbnail($cart_item['product_id'])) echo get_the_post_thumbnail($cart_item['product_id'], 'shop_tiny'); 
-				else echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_tiny_w').'" height="'.woocommerce::get_var('shop_tiny_h').'" />'; 
+				if (has_post_thumbnail($cart_item['product_id'])) echo get_the_post_thumbnail($cart_item['product_id'], 'shop_thumbnail'); 
+				else echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_thumbnail_image_width').'" height="'.woocommerce::get_var('shop_thumbnail_image_height').'" />'; 
 				
 				echo apply_filters('woocommerce_cart_widget_product_title', $_product->get_title(), $_product).'</a> '.$cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</li>';
 			endif;

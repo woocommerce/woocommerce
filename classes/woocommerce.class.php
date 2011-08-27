@@ -18,16 +18,7 @@ class woocommerce {
 	
 	public static $plugin_url;
 	public static $plugin_path;
-	
-	const SHOP_SMALL_W = '150';
-	const SHOP_SMALL_H = '150';
-	const SHOP_TINY_W = '36';
-	const SHOP_TINY_H = '36';
-	const SHOP_THUMBNAIL_W = '90';
-	const SHOP_THUMBNAIL_H = '90';
-	const SHOP_LARGE_W = '300';
-	const SHOP_LARGE_H = '300';
-	
+		
 	/** constructor */
 	function __construct () {
 		global $wpdb;
@@ -101,14 +92,12 @@ class woocommerce {
 		$return = '';
 		switch ($var) :
 			case "version" : $return = WOOCOMMERCE_VERSION; break;
-			case "shop_small_w" : $return = self::SHOP_SMALL_W; break;
-			case "shop_small_h" : $return = self::SHOP_SMALL_H; break;
-			case "shop_tiny_w" : $return = self::SHOP_TINY_W; break;
-			case "shop_tiny_h" : $return = self::SHOP_TINY_H; break;
-			case "shop_thumbnail_w" : $return = self::SHOP_THUMBNAIL_W; break;
-			case "shop_thumbnail_h" : $return = self::SHOP_THUMBNAIL_H; break;
-			case "shop_large_w" : $return = self::SHOP_LARGE_W; break;
-			case "shop_large_h" : $return = self::SHOP_LARGE_H; break;
+			case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
+			case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
+			case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
+			case "shop_catalog_image_height" : $return = get_option('woocommerce_catalog_image_height'); break;
+			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
+			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
 		endswitch;
 		return apply_filters( 'woocommerce_get_var_'.$var, $return );
 	}

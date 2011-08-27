@@ -45,7 +45,22 @@ function install_woocommerce() {
 function woocommerce_default_options() {
 	global $options_settings;
 	foreach ($options_settings as $value) {
-        if (isset($value['std'])) add_option($value['id'], $value['std']);
+	
+        if (isset($value['std'])) :
+        
+        	if ($value['type']=='image_width') :
+        		
+        		add_option($value['id'].'_width', $value['std']);
+        		add_option($value['id'].'_height', $value['std']);
+        		
+        	else :
+        
+        		add_option($value['id'], $value['std']);
+        	
+        	endif;
+        	
+        endif;
+        
     }
     
     add_option('woocommerce_shop_slug', 'shop');
