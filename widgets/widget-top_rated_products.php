@@ -74,7 +74,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 					<li><a href="<?php echo get_permalink( $top_rated_posts->post->ID ) ?>" title="<?php echo esc_attr($top_rated_posts->post->post_title ? $top_rated_posts->post->post_title : $top_rated_posts->post->ID); ?>">
 						<?php if (has_post_thumbnail( $top_rated_posts->post->ID )) echo get_the_post_thumbnail($top_rated_posts->post->ID, 'shop_thumbnail'); else echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_thumbnail_image_width').'px" height="'.woocommerce::get_var('shop_thumbnail_image_height').'px" />'; ?>
 						<?php if ( $top_rated_posts->post->post_title ) echo get_the_title( $top_rated_posts->post->ID ); else echo $top_rated_posts->post->ID; ?>			
-					</a> <?php echo $_product->get_rating_html(); ?><?php echo $_product->get_price_html(); ?></li>
+					</a> <?php echo $_product->get_rating_html('sidebar'); ?><?php echo $_product->get_price_html(); ?></li>
 					
 					<?php endwhile; ?>
 				</ul>

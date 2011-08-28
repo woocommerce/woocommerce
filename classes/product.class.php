@@ -504,10 +504,11 @@ class woocommerce_product {
 	}
 	
 	/** Returns the product rating in html format */
-	function get_rating_html() {
+	function get_rating_html( $location = '' ) {
 		global $wpdb;
 		
-		$star_size = apply_filters('woocommerce_star_rating_size', 16);
+		if ($location) $location = '_'.$location;
+		$star_size = apply_filters('woocommerce_star_rating_size'.$location, 16);
 		
 		$count = $wpdb->get_var("
 			SELECT COUNT(meta_value) FROM $wpdb->commentmeta 
