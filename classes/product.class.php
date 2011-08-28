@@ -503,6 +503,38 @@ class woocommerce_product {
 		return $price;
 	}
 	
+	/** Returns the product rating in html format */
+	function get_rating_html() {
+		global $wpdb;
+		
+		$star_size = apply_filters('woocommerce_star_rating_size', 16);
+		
+		$count = $wpdb->get_var("
+			SELECT COUNT(meta_value) FROM $wpdb->commentmeta 
+			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+			WHERE meta_key = 'rating'
+			AND comment_post_ID = $this->id
+			AND comment_approved = '1'
+			AND meta_value > 0
+		");
+		
+		$ratings = $wpdb->get_var("
+			SELECT SUM(meta_value) FROM $wpdb->commentmeta 
+			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+			WHERE meta_key = 'rating'
+			AND comment_post_ID = $this->id
+			AND comment_approved = '1'
+		");
+		
+		if ( $count>0 ) :
+			$rating = number_format($ratings / $count, 2);
+			
+			return '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'woothemes'), $rating).'"><span style="width:'.($rating*$star_size).'px"><span class="rating">'.$rating.'</span> '.__('out of 5', 'woothemes').'</span></div>';
+		else :
+			return '';
+		endif;
+	}
+	
 	/** Returns the upsell product ids */
 	function get_upsells() {
 		return (array) maybe_unserialize( $this->upsell_ids );
