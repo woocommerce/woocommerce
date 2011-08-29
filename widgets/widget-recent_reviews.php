@@ -72,7 +72,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 					<span style="width:'.(get_comment_meta( $comment->comment_ID, 'rating', true )*$star_size).'px">'.get_comment_meta( $comment->comment_ID, 'rating', true ).' '.__('out of 5', 'woothemes').'</span>
 				</div>';
 				
-				echo '<li class="recentcomments"><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
+				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
 				
 				if (has_post_thumbnail( $comment->comment_post_ID )) 
 					echo get_the_post_thumbnail($comment->comment_post_ID, 'shop_thumbnail'); 
