@@ -37,7 +37,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 
 	/** @see WP_Widget::widget */
 	function widget($args, $instance) {
-	*$cache = wp_cache_get('recently_viewed_products', 'widget');
+		$cache = wp_cache_get('recently_viewed_products', 'widget');
 
 		if ( !is_array($cache) ) $cache = array();
 
