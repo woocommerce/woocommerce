@@ -17,41 +17,23 @@
 function woocommerce_order_data_meta_box($post) {
 	
 	global $post, $wpdb, $thepostid;
+	
+	$thepostid = $post->ID;
+	
 	add_action('admin_footer', 'woocommerce_meta_scripts');
 	
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
-	$data = (array) maybe_unserialize( get_post_meta($post->ID, 'order_data', true) );
+	// Custom user
+	$customer_user = (int) get_post_meta($post->ID, '_customer_user', true);
 	
-	if (!isset($data['billing_first_name'])) $data['billing_first_name'] = '';
-	if (!isset($data['billing_last_name'])) $data['billing_last_name'] = '';
-	if (!isset($data['billing_company'])) $data['billing_company'] = '';
-	if (!isset($data['billing_address_1'])) $data['billing_address_1'] = '';
-	if (!isset($data['billing_address_2'])) $data['billing_address_2'] = '';
-	if (!isset($data['billing_city'])) $data['billing_city'] = '';
-	if (!isset($data['billing_postcode'])) $data['billing_postcode'] = '';
-	if (!isset($data['billing_country'])) $data['billing_country'] = '';
-	if (!isset($data['billing_state'])) $data['billing_state'] = '';
-	if (!isset($data['billing_email'])) $data['billing_email'] = '';
-	if (!isset($data['billing_phone'])) $data['billing_phone'] = '';
-	if (!isset($data['shipping_first_name'])) $data['shipping_first_name'] = '';
-	if (!isset($data['shipping_last_name'])) $data['shipping_last_name'] = '';
-	if (!isset($data['shipping_company'])) $data['shipping_company'] = '';
-	if (!isset($data['shipping_address_1'])) $data['shipping_address_1'] = '';
-	if (!isset($data['shipping_address_2'])) $data['shipping_address_2'] = '';
-	if (!isset($data['shipping_city'])) $data['shipping_city'] = '';
-	if (!isset($data['shipping_postcode'])) $data['shipping_postcode'] = '';
-	if (!isset($data['shipping_country'])) $data['shipping_country'] = '';
-	if (!isset($data['shipping_state'])) $data['shipping_state'] = '';
-	
-	$data['customer_user'] = (int) get_post_meta($post->ID, 'customer_user', true);
-	
+	// Order status
 	$order_status = wp_get_post_terms($post->ID, 'shop_order_status');
 	if ($order_status) :
 		$order_status = current($order_status);
-		$data['order_status'] = $order_status->slug;
+		$order_status = $order_status->slug;
 	else :
-		$data['order_status'] = 'pending';
+		$order_status = 'pending';
 	endif;
 	
 	if (!isset($post->post_title) || empty($post->post_title)) :
@@ -79,7 +61,7 @@ function woocommerce_order_data_meta_box($post) {
 					$statuses = (array) get_terms('shop_order_status', array('hide_empty' => 0, 'orderby' => 'id'));
 					foreach ($statuses as $status) :
 						echo '<option value="'.$status->slug.'" ';
-						if ($status->slug==$data['order_status']) echo 'selected="selected"';
+						if ($status->slug==$order_status) echo 'selected="selected"';
 						echo '>'.$status->name.'</option>';
 					endforeach;
 				?>
@@ -92,7 +74,7 @@ function woocommerce_order_data_meta_box($post) {
 					$users = new WP_User_Query( array( 'orderby' => 'display_name' ) );
 					$users = $users->get_results();
 					if ($users) foreach ( $users as $user ) :
-						echo '<option value="'.$user->ID.'" '; selected($data['customer_user'], $user->ID); echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
+						echo '<option value="'.$user->ID.'" '; selected($customer_user, $user->ID); echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
 					endforeach;
 				?>
 			</select></p>
@@ -101,30 +83,30 @@ function woocommerce_order_data_meta_box($post) {
 			<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo $post->post_excerpt; ?></textarea></p>
 		</div>
 		<div id="order_customer_billing_data" class="panel woocommerce_options_panel"><?php
-			woocommerce_wp_text_input( array( 'id' => 'billing_first_name', 'label' => __('First Name', 'woothemes'), 'value' => $data['billing_first_name'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_last_name', 'label' => __('Last Name', 'woothemes'), 'value' => $data['billing_last_name'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_company', 'label' => __('Company', 'woothemes'), 'value' => $data['billing_company'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_address_1', 'label' => __('Address 1', 'woothemes'), 'value' => $data['billing_address_1'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_address_2', 'label' => __('Address 2', 'woothemes'), 'value' => $data['billing_address_2'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_city', 'label' => __('City', 'woothemes'), 'value' => $data['billing_city'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_postcode', 'label' => __('Postcode', 'woothemes'), 'value' => $data['billing_postcode'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_country', 'label' => __('Country', 'woothemes'), 'value' => $data['billing_country'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_state', 'label' => __('State/County', 'woothemes'), 'value' => $data['billing_state'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_email', 'label' => __('Email Address', 'woothemes'), 'value' => $data['billing_email'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'billing_phone', 'label' => __('Tel', 'woothemes'), 'value' => $data['billing_phone'] ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_first_name', 'label' => __('First Name', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_last_name', 'label' => __('Last Name', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_company', 'label' => __('Company', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_address_1', 'label' => __('Address 1', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_address_2', 'label' => __('Address 2', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_city', 'label' => __('City', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_postcode', 'label' => __('Postcode', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_country', 'label' => __('Country', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_state', 'label' => __('State/County', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_email', 'label' => __('Email Address', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_billing_phone', 'label' => __('Tel', 'woothemes') ) );
 		?></div>
 		<div id="order_customer_shipping_data" class="panel woocommerce_options_panel">
 		
 			<p class="form-field"><button class="button billing-same-as-shipping"><?php _e('Copy billing address to shipping address', 'woothemes'); ?></button></p><?php
-			woocommerce_wp_text_input( array( 'id' => 'shipping_first_name', 'label' => __('First Name', 'woothemes'), 'value' => $data['shipping_first_name'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_last_name', 'label' => __('Last Name', 'woothemes'), 'value' => $data['shipping_last_name'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_company', 'label' => __('Company', 'woothemes'), 'value' => $data['shipping_company'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_address_1', 'label' => __('Address 1', 'woothemes'), 'value' => $data['shipping_address_1'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_address_2', 'label' => __('Address 2', 'woothemes'), 'value' => $data['shipping_address_2'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_city', 'label' => __('City', 'woothemes'), 'value' => $data['shipping_city'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_postcode', 'label' => __('Postcode', 'woothemes'), 'value' => $data['shipping_postcode'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_country', 'label' => __('Country', 'woothemes'), 'value' => $data['shipping_country'] ) );
-			woocommerce_wp_text_input( array( 'id' => 'shipping_state', 'label' => __('State/County', 'woothemes'), 'value' => $data['shipping_state'] ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_first_name', 'label' => __('First Name', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_last_name', 'label' => __('Last Name', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_company', 'label' => __('Company', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_address_1', 'label' => __('Address 1', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_address_2', 'label' => __('Address 2', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_city', 'label' => __('City', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_postcode', 'label' => __('Postcode', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_country', 'label' => __('Country', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => '_shipping_state', 'label' => __('State/County', 'woothemes') ) );
 		?></div>
 	</div>
 	<?php
@@ -137,7 +119,7 @@ function woocommerce_order_data_meta_box($post) {
  */
 function woocommerce_order_items_meta_box($post) {
 	
-	$order_items = (array) maybe_unserialize( get_post_meta($post->ID, 'order_items', true) );
+	$order_items = (array) maybe_unserialize( get_post_meta($post->ID, '_order_items', true) );
 	?>
 	<div class="woocommerce_order_items_wrapper">
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -304,36 +286,42 @@ function woocommerce_order_actions_meta_box($post) {
  */
 function woocommerce_order_totals_meta_box($post) {
 	
-	$data = maybe_unserialize( get_post_meta($post->ID, 'order_data', true) );
-	
-	if (!isset($data['shipping_method'])) $data['shipping_method'] = '';
-	if (!isset($data['payment_method'])) $data['payment_method'] = '';
-	if (!isset($data['order_subtotal'])) $data['order_subtotal'] = '';
-	if (!isset($data['order_shipping'])) $data['order_shipping'] = '';
-	if (!isset($data['order_discount'])) $data['order_discount'] = '';
-	if (!isset($data['order_tax'])) $data['order_tax'] = '';
-	if (!isset($data['order_total'])) $data['order_total'] = '';
-	if (!isset($data['order_shipping_tax'])) $data['order_shipping_tax'] = '';
+	$data = get_post_custom( $post->ID );
 	?>
 	<dl class="totals">
 		<dt><?php _e('Subtotal:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_subtotal" name="order_subtotal" placeholder="0.00 <?php _e('(ex. tax)', 'woothemes'); ?>" value="<?php echo $data['order_subtotal']; ?>" class="first" /></dd>
+		<dd><input type="text" id="_order_subtotal" name="_order_subtotal" placeholder="0.00 <?php _e('(ex. tax)', 'woothemes'); ?>" value="<?php 
+			if (isset($data['_order_subtotal'][0])) echo $data['_order_subtotal'][0]; 
+		?>" class="first" /></dd>
 		
 		<dt><?php _e('Shipping &amp; Handling:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_shipping" name="order_shipping" placeholder="0.00 <?php _e('(ex. tax)', 'woothemes'); ?>" value="<?php echo $data['order_shipping']; ?>" class="first" /> <input type="text" name="shipping_method" id="shipping_method" value="<?php echo $data['shipping_method']; ?>" class="last" placeholder="<?php _e('Shipping method...', 'woothemes'); ?>" /></dd>
+		<dd><input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e('(ex. tax)', 'woothemes'); ?>" value="<?php 
+			if (isset($data['_order_shipping'][0])) echo $data['_order_shipping'][0];
+		?>" class="first" /> <input type="text" name="_shipping_method" id="_shipping_method" value="<?php 
+			if (isset($data['_shipping_method'][0])) echo $data['_shipping_method'][0];
+		?>" class="last" placeholder="<?php _e('Shipping method...', 'woothemes'); ?>" /></dd>
 		
 		<dt><?php _e('Order shipping tax:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_shipping_tax" name="order_shipping_tax" placeholder="0.00" value="<?php echo $data['order_shipping_tax']; ?>" class="first" /></dd>
+		<dd><input type="text" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php 
+			if (isset($data['_order_shipping_tax'][0])) echo $data['_order_shipping_tax'][0];
+		?>" class="first" /></dd>
 		
 		<dt><?php _e('Tax:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_tax" name="order_tax" placeholder="0.00" value="<?php echo $data['order_tax']; ?>" class="first" /></dd>
+		<dd><input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php 
+			if (isset($data['_order_tax'][0])) echo $data['_order_tax'][0];
+		?>" class="first" /></dd>
 		
 		<dt><?php _e('Discount:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_discount" name="order_discount" placeholder="0.00" value="<?php echo $data['order_discount']; ?>" /></dd>
+		<dd><input type="text" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php 
+			if (isset($data['_order_discount'][0])) echo $data['_order_discount'][0];
+		?>" /></dd>
 		
 		<dt><?php _e('Total:', 'woothemes'); ?></dt>
-		<dd><input type="text" id="order_total" name="order_total" placeholder="0.00" value="<?php echo $data['order_total']; ?>" class="first" /> <input type="text" name="payment_method" id="payment_method" value="<?php echo $data['payment_method']; ?>" class="last" placeholder="<?php _e('Payment method...', 'woothemes'); ?>" /></dd>
-				
+		<dd><input type="text" id="_order_total" name="_order_total" placeholder="0.00" value="<?php 
+			if (isset($data['_order_total'][0])) echo $data['_order_total'][0];
+		?>" class="first" /> <input type="text" name="_payment_method" id="_payment_method" value="<?php 
+			if (isset($data['_payment_method'][0])) echo $data['_payment_method'][0];
+		?>" class="last" placeholder="<?php _e('Payment method...', 'woothemes'); ?>" /></dd>	
 	</dl>
 	<div class="clear"></div>
 	<?php
@@ -353,41 +341,36 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	
 	$order = &new woocommerce_order($post_id);
 	
-	// Get old data + attributes
-		$data = (array) maybe_unserialize( get_post_meta($post_id, 'order_data', true) );
-	
-	// Add/Replace data to array
-		$data['billing_first_name'] 	= stripslashes( $_POST['billing_first_name'] );
-		$data['billing_last_name'] 		= stripslashes( $_POST['billing_last_name'] );
-		$data['billing_company'] 		= stripslashes( $_POST['billing_company'] );
-		$data['billing_address_1'] 		= stripslashes( $_POST['billing_address_1'] );
-		$data['billing_address_2']		= stripslashes( $_POST['billing_address_2'] );
-		$data['billing_city']			= stripslashes( $_POST['billing_city'] );
-		$data['billing_postcode'] 		= stripslashes( $_POST['billing_postcode'] );
-		$data['billing_country']		= stripslashes( $_POST['billing_country'] );
-		$data['billing_state'] 			= stripslashes( $_POST['billing_state'] );
-		$data['billing_email']			= stripslashes( $_POST['billing_email'] );
-		$data['billing_phone'] 			= stripslashes( $_POST['billing_phone'] );
-		$data['shipping_first_name']	= stripslashes( $_POST['shipping_first_name'] );
-		$data['shipping_last_name'] 	= stripslashes( $_POST['shipping_last_name'] );
-		$data['shipping_company'] 		= stripslashes( $_POST['shipping_company'] );
-		$data['shipping_address_1'] 	= stripslashes( $_POST['shipping_address_1'] );
-		$data['shipping_address_2'] 	= stripslashes( $_POST['shipping_address_2'] );
-		$data['shipping_city'] 			= stripslashes( $_POST['shipping_city'] );
-		$data['shipping_postcode'] 		= stripslashes( $_POST['shipping_postcode'] );
-		$data['shipping_country'] 		= stripslashes( $_POST['shipping_country'] );
-		$data['shipping_state'] 		= stripslashes( $_POST['shipping_state'] );
-		$data['shipping_method']		= stripslashes( $_POST['shipping_method'] );
-		$data['payment_method'] 		= stripslashes( $_POST['payment_method'] );
-		$data['order_subtotal'] 		= stripslashes( $_POST['order_subtotal'] );
-		$data['order_shipping']			= stripslashes( $_POST['order_shipping'] );
-		$data['order_discount'] 		= stripslashes( $_POST['order_discount'] );
-		$data['order_tax'] 				= stripslashes( $_POST['order_tax'] );
-		$data['order_shipping_tax'] 	= stripslashes( $_POST['order_shipping_tax'] );
-		$data['order_total'] 			= stripslashes( $_POST['order_total'] );
-	
-	// Customer
-		update_post_meta( $post_id, 'customer_user', (int) $_POST['customer_user'] );
+	// Update post data
+		update_post_meta( $post_id, '_billing_first_name', stripslashes( $_POST['_billing_first_name'] ));
+		update_post_meta( $post_id, '_billing_last_name', stripslashes( $_POST['_billing_last_name'] ));
+		update_post_meta( $post_id, '_billing_company', stripslashes( $_POST['_billing_company'] ));
+		update_post_meta( $post_id, '_billing_address_1', stripslashes( $_POST['_billing_address_1'] ));
+		update_post_meta( $post_id, '_billing_address_2', stripslashes( $_POST['_billing_address_2'] ));
+		update_post_meta( $post_id, '_billing_city', stripslashes( $_POST['_billing_city'] ));
+		update_post_meta( $post_id, '_billing_postcode', stripslashes( $_POST['_billing_postcode'] ));
+		update_post_meta( $post_id, '_billing_country', stripslashes( $_POST['_billing_country'] ));
+		update_post_meta( $post_id, '_billing_state', stripslashes( $_POST['_billing_state'] ));
+		update_post_meta( $post_id, '_billing_email', stripslashes( $_POST['_billing_email'] ));
+		update_post_meta( $post_id, '_billing_phone', stripslashes( $_POST['_billing_phone'] ));
+		update_post_meta( $post_id, '_shipping_first_name', stripslashes( $_POST['_shipping_first_name'] ));
+		update_post_meta( $post_id, '_shipping_last_name', stripslashes( $_POST['_shipping_last_name'] ));
+		update_post_meta( $post_id, '_shipping_company', stripslashes( $_POST['_shipping_company'] ));
+		update_post_meta( $post_id, '_shipping_address_1', stripslashes( $_POST['_shipping_address_1'] ));
+		update_post_meta( $post_id, '_shipping_address_2', stripslashes( $_POST['_shipping_address_2'] ));
+		update_post_meta( $post_id, '_shipping_city', stripslashes( $_POST['_shipping_city'] ));
+		update_post_meta( $post_id, '_shipping_postcode', stripslashes( $_POST['_shipping_postcode'] ));
+		update_post_meta( $post_id, '_shipping_country', stripslashes( $_POST['_shipping_country'] ));
+		update_post_meta( $post_id, '_shipping_state', stripslashes( $_POST['_shipping_state'] ));
+		update_post_meta( $post_id, '_shipping_method', stripslashes( $_POST['_shipping_method'] ));
+		update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
+		update_post_meta( $post_id, '_order_subtotal', stripslashes( $_POST['_order_subtotal'] ));
+		update_post_meta( $post_id, '_order_shipping', stripslashes( $_POST['_order_shipping'] ));
+		update_post_meta( $post_id, '_order_discount', stripslashes( $_POST['_order_discount'] ));
+		update_post_meta( $post_id, '_order_tax', stripslashes( $_POST['_order_tax'] ));
+		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
+		update_post_meta( $post_id, '_order_total', stripslashes( $_POST['_order_total'] ));
+		update_post_meta( $post_id, '_customer_user', (int) $_POST['customer_user'] );
 	
 	// Order status
 		$order->update_status( $_POST['order_status'] );
@@ -439,9 +422,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 endfor; 
 		endif;	
 	
-	// Save
-		update_post_meta( $post_id, 'order_data', $data );
-		update_post_meta( $post_id, 'order_items', $order_items );
+		update_post_meta( $post_id, '_order_items', $order_items );
 	
 	
 	// Handle button actions

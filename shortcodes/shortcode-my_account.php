@@ -14,7 +14,7 @@ function get_woocommerce_my_account ( $atts ) {
 function woocommerce_my_account( $atts ) {
 	
 	extract(shortcode_atts(array(
-    'recent_orders' => 5
+    	'recent_orders' => 5
 	), $atts));
 
   	$recent_orders = ('all' == $recent_orders) ? -1 : $recent_orders;

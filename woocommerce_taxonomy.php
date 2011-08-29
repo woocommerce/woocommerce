@@ -208,7 +208,7 @@ function woocommerce_post_type() {
 			'show_in_nav_menus' => false,
 			'rewrite' => false,
 			'query_var' => true,			
-			'supports' => array( 'title', 'comments' ),
+			'supports' => array( 'title', 'comments', 'custom-fields' ),
 			'has_archive' => false
 		)
 	);

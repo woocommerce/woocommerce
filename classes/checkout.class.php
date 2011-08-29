@@ -449,6 +449,7 @@ class woocommerce_checkout {
 					
 					// Save billing/shipping to user meta fields
 					if ($user_id>0) :
+					
 						update_user_meta( $user_id, 'billing-first_name', $this->posted['billing-first_name'] );
 						update_user_meta( $user_id, 'billing-last_name', $this->posted['billing-last_name'] );
 						update_user_meta( $user_id, 'billing-company', $this->posted['billing-company'] );
@@ -486,7 +487,6 @@ class woocommerce_checkout {
 					endif;
 					
 					// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
-					
 					$_tax = new woocommerce_tax();
 					
 					$order_data = array(
@@ -496,38 +496,7 @@ class woocommerce_checkout {
 						'post_excerpt' => $this->posted['order_comments'],
 						'post_author' => 1
 					);
-					
-					// Order meta data
-					$data = array();
-					$data['billing_first_name'] 	= $this->posted['billing-first_name'];
-					$data['billing_last_name'] 		= $this->posted['billing-last_name'];
-					$data['billing_company'] 		= $this->posted['billing-company'];
-					$data['billing_address_1'] 		= $this->posted['billing-address'];
-					$data['billing_address_2'] 		= $this->posted['billing-address-2'];
-					$data['billing_city'] 			= $this->posted['billing-city'];
-					$data['billing_postcode'] 		= $this->posted['billing-postcode'];
-					$data['billing_country'] 		= $this->posted['billing-country'];
-					$data['billing_state'] 			= $this->posted['billing-state'];
-					$data['billing_email']			= $this->posted['billing-email'];
-					$data['billing_phone']			= $this->posted['billing-phone'];
-					$data['shipping_first_name'] 	= $shipping_first_name;
-					$data['shipping_last_name'] 	= $shipping_last_name;
-					$data['shipping_company']	 	= $shipping_company;
-					$data['shipping_address_1']		= $shipping_address_1;
-					$data['shipping_address_2']		= $shipping_address_2;
-					$data['shipping_city']			= $shipping_city;
-					$data['shipping_postcode']		= $shipping_postcode;
-					$data['shipping_country']		= $shipping_country;
-					$data['shipping_state']			= $shipping_state;
-					$data['shipping_method']		= $this->posted['shipping_method'];
-					$data['payment_method']			= $this->posted['payment_method'];
-					$data['order_subtotal']			= number_format(woocommerce_cart::$subtotal_ex_tax, 2, '.', '');
-					$data['order_shipping']			= number_format(woocommerce_cart::$shipping_total, 2, '.', '');
-					$data['order_discount']			= number_format(woocommerce_cart::$discount_total, 2, '.', '');
-					$data['order_tax']				= number_format(woocommerce_cart::$tax_total, 2, '.', '');
-					$data['order_shipping_tax']		= number_format(woocommerce_cart::$shipping_tax_total, 2, '.', '');
-					$data['order_total']			= number_format(woocommerce_cart::$total, 2, '.', '');
-					
+
 					// Cart items
 					$order_items = array();
 					
@@ -550,10 +519,7 @@ class woocommerce_checkout {
 								$item_meta[ sanitize_title(str_replace('tax_', '', $key)) ] = $value;
 							endforeach;
 						endif;
-						
-						// Discount code meta
-						if (woocommerce_cart::$applied_coupons) $item_meta[ 'coupons' ] = implode(', ', woocommerce_cart::$applied_coupons);
-						
+
 						// Run filter
 						$item_meta = apply_filters('order_item_meta', $item_meta, $values);
 						
@@ -571,7 +537,7 @@ class woocommerce_checkout {
 					 	if ($_product->managing_stock()) :
 							if (!$_product->is_in_stock() || !$_product->has_enough_stock( $values['quantity'] )) :
 								
-								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
 		                		break;
 								
 							endif;
@@ -579,7 +545,7 @@ class woocommerce_checkout {
 						
 							if (!$_product->is_in_stock()) :
 							
-								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
 		                		break;
 
 							endif;
@@ -596,7 +562,8 @@ class woocommerce_checkout {
 						$order_id = (int) $_SESSION['order_awaiting_payment'];
 						$order_data['ID'] = $order_id;
 						wp_update_post( $order_data );
-					
+						do_action('woocommerce_resume_order', $order_id);
+						
 					else :
 						$order_id = wp_insert_post( $order_data );
 						
@@ -609,12 +576,44 @@ class woocommerce_checkout {
 						endif;
 					endif;
 					
-					// Update post meta
-					update_post_meta( $order_id, 'order_data', $data );
-					update_post_meta( $order_id, 'order_key', uniqid('order_') );
-					update_post_meta( $order_id, 'customer_user', (int) $user_id );
-					update_post_meta( $order_id, 'order_items', $order_items );
+					// Update order meta
+					update_post_meta( $order_id, '_billing_first_name', 	$this->posted['billing-first_name']);
+					update_post_meta( $order_id, '_billing_last_name', 		$this->posted['billing-last_name']);
+					update_post_meta( $order_id, '_billing_company', 		$this->posted['billing-company']);
+					update_post_meta( $order_id, '_billing_address_1', 		$this->posted['billing-address']);
+					update_post_meta( $order_id, '_billing_address_2', 		$this->posted['billing-address-2']);
+					update_post_meta( $order_id, '_billing_city', 			$this->posted['billing-city']);
+					update_post_meta( $order_id, '_billing_postcode', 		$this->posted['billing-postcode']);
+					update_post_meta( $order_id, '_billing_country', 		$this->posted['billing-country']);
+					update_post_meta( $order_id, '_billing_state', 			$this->posted['billing-state']);
+					update_post_meta( $order_id, '_billing_email', 			$this->posted['billing-email']);
+					update_post_meta( $order_id, '_billing_phone', 			$this->posted['billing-phone']);
+					update_post_meta( $order_id, '_shipping_first_name', 	$shipping_first_name);
+					update_post_meta( $order_id, '_shipping_last_name', 	$shipping_last_name);
+					update_post_meta( $order_id, '_shipping_company', 		$shipping_company);
+					update_post_meta( $order_id, '_shipping_address_1', 	$shipping_address_1);
+					update_post_meta( $order_id, '_shipping_address_2', 	$shipping_address_2);
+					update_post_meta( $order_id, '_shipping_city', 			$shipping_city);
+					update_post_meta( $order_id, '_shipping_postcode', 		$shipping_postcode);
+					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
+					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
+					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
+					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
+					update_post_meta( $order_id, '_order_subtotal', 		number_format(woocommerce_cart::$subtotal_ex_tax, 2, '.', ''));
+					update_post_meta( $order_id, '_order_shipping', 		number_format(woocommerce_cart::$shipping_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_discount', 		number_format(woocommerce_cart::$discount_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_tax', 				number_format(woocommerce_cart::$tax_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_shipping_tax', 	number_format(woocommerce_cart::$shipping_tax_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_total', 			number_format(woocommerce_cart::$total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_key', 				uniqid('order_') );
+					update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
+					update_post_meta( $order_id, '_order_items', 			$order_items );
+					
+					// Order status
 					wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
+						
+					// Discount code meta
+					if (woocommerce_cart::$applied_coupons) update_post_meta($order_id, 'coupons', implode(', ', woocommerce_cart::$applied_coupons));
 					
 					$order = &new woocommerce_order($order_id);
 

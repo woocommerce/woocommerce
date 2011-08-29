@@ -44,7 +44,7 @@ class woocommerce_orders {
 		
 		$args = array(
 		    'numberposts'     => $limit,
-		    'meta_key'        => 'customer_user',
+		    'meta_key'        => '_customer_user',
 		    'meta_value'	  => $user_id,
 		    'post_type'       => 'shop_order',
 		    'post_status'     => 'publish' 
