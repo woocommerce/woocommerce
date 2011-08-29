@@ -39,7 +39,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 	function widget( $args, $instance ) {
 		global $comments, $comment;
 		
-		/*$cache = wp_cache_get('widget_recent_reviews', 'widget');
+		$cache = wp_cache_get('widget_recent_reviews', 'widget');
 
 		if ( ! is_array( $cache ) )
 			$cache = array();
@@ -47,7 +47,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		if ( isset( $cache[$args['widget_id']] ) ) {
 			echo $cache[$args['widget_id']];
 			return;
-		}*/
+		}
 
  		ob_start();
 		extract($args);
@@ -55,7 +55,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
  		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recent Reviews', 'woothemes') : $instance['title'], $instance, $this->id_base);
 		if ( ! $number = absint( $instance['number'] ) ) $number = 5;
 		
-		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish' ) );
+		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
 		
 		if ( $comments ) :
 			echo $before_widget;
@@ -83,7 +83,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				
 				echo $rating_html;
 				
-				echo sprintf(_x('by %1$s', 'woothemes'), get_comment_author_link()) . '</li>';
+				echo sprintf(_x('by %1$s', 'woothemes'), get_comment_author()) . '</li>';
 				
 			endforeach;
 

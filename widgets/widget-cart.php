@@ -44,7 +44,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		echo $before_widget;
 		if ( $title ) echo $before_title . $title . $after_title;
 		
-		echo '<ul class="cart_list">';
+		echo '<ul class="cart_list product_list_widget">';
 		if (sizeof(woocommerce_cart::$cart_contents)>0) : foreach (woocommerce_cart::$cart_contents as $cart_item_key => $cart_item) :
 			$_product = $cart_item['data'];
 			if ($_product->exists() && $cart_item['quantity']>0) :
