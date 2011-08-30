@@ -53,7 +53,13 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 				if (has_post_thumbnail($cart_item['product_id'])) echo get_the_post_thumbnail($cart_item['product_id'], 'shop_thumbnail'); 
 				else echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_thumbnail_image_width').'" height="'.woocommerce::get_var('shop_thumbnail_image_height').'" />'; 
 				
-				echo apply_filters('woocommerce_cart_widget_product_title', $_product->get_title(), $_product).'</a> '.$cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</li>';
+				echo apply_filters('woocommerce_cart_widget_product_title', $_product->get_title(), $_product).'</a>';
+				
+				if($_product instanceof woocommerce_product_variation && is_array($cart_item['variation'])) :
+        			echo woocommerce_get_formatted_variation( $cart_item['variation'] );
+   				endif;
+				
+				echo $cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</li>';
 			endif;
 		endforeach; 
 		else: echo '<li class="empty">'.__('No products in the cart.', 'woothemes').'</li>'; endif;

@@ -249,7 +249,6 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		if( $_product->get_price() === '') return;
 
 		if ($availability['availability']) : ?><p class="stock <?php echo $availability['class'] ?>"><?php echo $availability['availability']; ?></p><?php endif;
-		
 		?>			
 		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
 		 	<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>

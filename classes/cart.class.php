@@ -143,18 +143,41 @@ class woocommerce_cart {
 		
 		$found_cart_item_key = self::find_product_in_cart($product_id, $variation_id, $variation);
 		
-		$product_data = &new woocommerce_product( $product_id );
+		if ($variation_id>0) :
+			$product_data = &new woocommerce_product_variation( $variation_id );
+		else :
+			$product_data = &new woocommerce_product( $product_id );
+		endif;
 		
 		// Price set check
-		if( $product_data->get_price() === '' ) { 
+		if( $product_data->get_price() === '' ) :
 			woocommerce::add_error( __('This product cannot be purchased - the price is not yet announced', 'woothemes') );
 			return false; 
-		}
+		endif;
 		
+		// Stock check - only check if we're managing stock and backorders are not allowed
+		if ( !$product_data->has_enough_stock( $quantity ) ) :
+			woocommerce::add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woothemes'), $product_data->get_stock_quantity() ));
+			return false; 
+		elseif ( !$product_data->is_in_stock() ) :
+			woocommerce::add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
+			return false;
+		endif;
+
+		// Add it
 		if (is_numeric($found_cart_item_key)) :
 			
 			$quantity = $quantity + self::$cart_contents[$found_cart_item_key]['quantity'];
 			
+			// Stock check - this time accounting for whats already in-cart
+			if ( !$product_data->has_enough_stock( $quantity ) ) :
+				woocommerce::add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woothemes'), $product_data->get_stock_quantity(), self::$cart_contents[$found_cart_item_key]['quantity'] ));
+				return false; 
+			elseif ( !$product_data->is_in_stock() ) :
+				woocommerce::add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
+				return false;
+			endif;
+
 			self::$cart_contents[$found_cart_item_key]['quantity'] = $quantity;
 			
 		else :
@@ -172,6 +195,8 @@ class woocommerce_cart {
 		endif;
 		
 		self::set_session();
+		
+		return true;
 	}
 	
 	/**

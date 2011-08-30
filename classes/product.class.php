@@ -223,7 +223,7 @@ class woocommerce_product {
 	}
 	
 	/** Get the title of the post */
-	function get_title () {
+	function get_title() {
 		$this->get_post_data();
 		return apply_filters('woocommerce_product_title', get_the_title($this->post->ID), $this);
 	}
@@ -296,6 +296,8 @@ class woocommerce_product {
 
 	/** Returns whether or not the product has enough stock for the order */
 	function has_enough_stock( $quantity ) {
+		
+		if (!$this->managing_stock()) return true;
 		
 		if ($this->backorders_allowed()) return true;
 		
