@@ -30,7 +30,15 @@ jQuery(function(){
 			jQuery.post( woocommerce_params.ajax_url, data, function(response) {
 				
 				// Get response
-				fragments = jQuery.parseJSON( response );
+				data = jQuery.parseJSON( response );
+				
+				if (data.error) {
+					alert(data.error);
+					jQuery(thisbutton).removeClass('loading');
+					return;
+				}
+				
+				fragments = data;
 
 				// Block fragments class
 				if (fragments) {

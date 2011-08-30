@@ -69,12 +69,18 @@ function woocommerce_ajax_add_to_cart() {
 	
 	$product_id = (int) $_POST['product_id'];
 
-	woocommerce_cart::add_to_cart($product_id, 1);
+	if (woocommerce_cart::add_to_cart($product_id, 1)) :
+		// Return html fragments
+		$data = apply_filters('add_to_cart_fragments', array());
+	else :
+		// Return error
+		$data = array(
+			'error' => woocommerce::$errors[0]
+		);
+		woocommerce::clear_messages();
+	endif;
 	
-	// Return html fragments
-	$fragments = apply_filters('add_to_cart_fragments', array());
-	
-	echo json_encode( $fragments );
+	echo json_encode( $data );
 	
 	die();
 }
