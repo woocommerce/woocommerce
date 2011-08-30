@@ -59,7 +59,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
         			echo woocommerce_get_formatted_variation( $cart_item['variation'] );
    				endif;
 				
-				echo $cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</li>';
+				echo '<span class="quantity">' .$cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</span></li>';
 			endif;
 		endforeach; 
 		else: echo '<li class="empty">'.__('No products in the cart.', 'woothemes').'</li>'; endif;
