@@ -206,7 +206,7 @@ function woocommerce_product_data_box() {
 						    		if (isset($attribute['visible']) && $attribute['visible']=='yes') $checked = 'checked="checked"'; else $checked = '';
 						    		if (isset($attribute['variation']) && $attribute['variation']=='yes') $checked2 = 'checked="checked"'; else $checked2 = '';
 						    		
-						    		$values = wp_get_post_terms( $thepostid, 'product_attribute_'.strtolower(sanitize_title($tax->attribute_name)) );
+						    		$values = wp_get_post_terms( $thepostid, woocommerce::attribute_name($tax->attribute_name) );
 						    		$value = array();
 						    		if (!is_wp_error($values) && $values) :
 						    			foreach ($values as $v) :
@@ -229,8 +229,8 @@ function woocommerce_product_data_box() {
 											<select <?php if ($tax->attribute_type=="multiselect") echo 'multiple="multiple" class="multiselect" name="attribute_values['.$i.'][]"'; else echo 'name="attribute_values['.$i.']"'; ?>>
 												<?php if ($tax->attribute_type=="select") : ?><option value=""><?php _e('Choose an option&hellip;', 'woothemes'); ?></option><?php endif; ?>
 												<?php
-												if (taxonomy_exists('product_attribute_'.strtolower(sanitize_title($tax->attribute_name)))) :
-					        						$terms = get_terms( 'product_attribute_'.strtolower(sanitize_title($tax->attribute_name)), 'orderby=name&hide_empty=0' );
+												if (taxonomy_exists(woocommerce::attribute_name($tax->attribute_name))) :
+					        						$terms = get_terms( woocommerce::attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
 					        						if ($terms) :
 						        						foreach ($terms as $term) :
 						        							echo '<option value="'.$term->slug.'" ';
@@ -406,8 +406,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 	endif;
 		 	
 		 	if (empty($attribute_values[$i]) || ( is_array($attribute_values[$i]) && sizeof($attribute_values[$i])==0) ) :
-		 		if ($is_taxonomy=='yes' && taxonomy_exists('product_attribute_'.strtolower(sanitize_title($attribute_names[$i])))) :
-		 			wp_set_object_terms( $post_id, 0, 'product_attribute_'.strtolower(sanitize_title($attribute_names[$i])) );
+		 		if ($is_taxonomy=='yes' && taxonomy_exists( woocommerce::attribute_name($attribute_names[$i])) ) :
+		 			wp_set_object_terms( $post_id, 0, woocommerce::attribute_name($attribute_names[$i]) );
 		 		endif;
 		 		continue;
 		 	endif;
@@ -426,9 +426,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 		$tax = $attribute_names[$i];
 		 		$value = $attribute_values[$i];
 		 		
-		 		if (taxonomy_exists('product_attribute_'.strtolower(sanitize_title($tax)))) :
+		 		if (taxonomy_exists( woocommerce::attribute_name($tax) )) :
 		 			
-		 			wp_set_object_terms( $post_id, $value, 'product_attribute_'.strtolower(sanitize_title($tax)) );
+		 			wp_set_object_terms( $post_id, $value, woocommerce::attribute_name($tax) );
 		 			
 		 		endif;
 		 		

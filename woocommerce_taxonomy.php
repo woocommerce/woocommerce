@@ -75,25 +75,27 @@ function woocommerce_post_type() {
 	if ( $attribute_taxonomies ) :
 		foreach ($attribute_taxonomies as $tax) :
 	    	
-	    	$name = 'product_attribute_'.strtolower(sanitize_title($tax->attribute_name));
+	    	$name = woocommerce::attribute_name($tax->attribute_name);
 	    	$hierarchical = true;
 	    	if ($name) :
+	    	
+	    		$label = ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name;
 
 	    		register_taxonomy( $name,
 			        array('product'),
 			        array(
 			            'hierarchical' => $hierarchical,
 			            'labels' => array(
-			                    'name' => $tax->attribute_name,
-			                    'singular_name' =>$tax->attribute_name,
-			                    'search_items' =>  __( 'Search ', 'woothemes') . $tax->attribute_name,
-			                    'all_items' => __( 'All ', 'woothemes') . $tax->attribute_name,
-			                    'parent_item' => __( 'Parent ', 'woothemes') . $tax->attribute_name,
-			                    'parent_item_colon' => __( 'Parent ', 'woothemes') . $tax->attribute_name . ':',
-			                    'edit_item' => __( 'Edit ', 'woothemes') . $tax->attribute_name,
-			                    'update_item' => __( 'Update ', 'woothemes') . $tax->attribute_name,
-			                    'add_new_item' => __( 'Add New ', 'woothemes') . $tax->attribute_name,
-			                    'new_item_name' => __( 'New ', 'woothemes') . $tax->attribute_name
+			                    'name' => $label,
+			                    'singular_name' => $label,
+			                    'search_items' =>  __( 'Search ', 'woothemes') . $label,
+			                    'all_items' => __( 'All ', 'woothemes') . $label,
+			                    'parent_item' => __( 'Parent ', 'woothemes') . $label,
+			                    'parent_item_colon' => __( 'Parent ', 'woothemes') . $label . ':',
+			                    'edit_item' => __( 'Edit ', 'woothemes') . $label,
+			                    'update_item' => __( 'Update ', 'woothemes') . $label,
+			                    'add_new_item' => __( 'Add New ', 'woothemes') . $label,
+			                    'new_item_name' => __( 'New ', 'woothemes') . $label
 			            ),
 			            'show_ui' => false,
 			            'query_var' => true,

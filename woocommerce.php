@@ -408,9 +408,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 		foreach ($variation as $name => $value) :
 			
 			if ($flat) :
-				$varation_list[] = ucfirst(str_replace('tax_', '', $name)).': '.ucfirst($value);
+				$varation_list[] = woocommerce::attribute_label(str_replace('tax_', '', $name)).': '.ucfirst($value);
 			else :
-				$varation_list[] = '<dt>'.ucfirst(str_replace('tax_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
+				$varation_list[] = '<dt>'.woocommerce::attribute_label(str_replace('tax_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
 			endif;
 			
 		endforeach;

@@ -43,6 +43,28 @@ class woocommerce {
         }
         return self::$_instance;
     }
+    
+    
+    /**
+	 * Get a product attributes name
+	 */
+	public static function attribute_name( $name ) { 
+		return 'pa_'.strtolower(sanitize_title($name));
+	}
+	
+	/**
+	 * Get a product attributes label
+	 */
+	public static function attribute_label( $name ) { 
+		global $wpdb;
+		
+		$name = $wpdb->prepare(strtolower(sanitize_title($name)));
+
+		$label = $wpdb->get_var("SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = '$name';");
+
+		if ($label) return $label; else return ucfirst($name);
+	}
+	
 	
 	/**
 	 * Get the plugin url

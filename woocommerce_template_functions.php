@@ -335,7 +335,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<tbody>
 				<?php foreach ($attributes as $name => $options) :?>
 					<tr>
-						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo ucfirst($name)?></label></td>
+						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo woocommerce::attribute_label($name); ?></label></td>
 						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>

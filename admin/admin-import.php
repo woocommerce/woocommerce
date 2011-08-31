@@ -33,12 +33,12 @@ function woocommerce_import_start() {
 						
 						$domain = $term['domain'];
 						
-						if (strstr($domain, 'product_attribute_')) :
+						if (strstr($domain, 'pa_')) :
 							
 							// Make sure it exists!
 							if (!taxonomy_exists( $domain )) :
 								
-								$nicename = ucfirst(str_replace('product_attribute_', '', $domain));
+								$nicename = strtolower(sanitize_title(str_replace('pa_', '', $domain)));
 								
 								// Create the taxonomy
 								$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'text' ), array( '%s', '%s' ) );

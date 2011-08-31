@@ -314,6 +314,7 @@ function woocommerce_tables_install() {
     $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "woocommerce_attribute_taxonomies" ." (
         `attribute_id` 			mediumint(9) NOT NULL AUTO_INCREMENT,
         `attribute_name`		varchar(200) NOT NULL,
+        `attribute_label`		longtext NULL,
         `attribute_type`		varchar(200) NOT NULL,
         PRIMARY KEY id (`attribute_id`)) $collate;";
     $wpdb->query($sql);

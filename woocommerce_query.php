@@ -146,7 +146,7 @@ function woocommerce_layered_nav_init() {
 		foreach ($attribute_taxonomies as $tax) :
 	    	
 	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
-	    	$taxonomy = 'product_attribute_' . $attribute;
+	    	$taxonomy = woocommerce::attribute_name($attribute);
 	    	$name = 'filter_' . $attribute;
 	    	
 	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) $_chosen_attributes[$taxonomy] = explode(',', $_GET[$name] );

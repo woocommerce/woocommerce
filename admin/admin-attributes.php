@@ -21,13 +21,13 @@ function woocommerce_attributes() {
 	
 	if (isset($_POST['add_new_attribute']) && $_POST['add_new_attribute']) :
 		
-		$attribute_name = (string) $_POST['attribute_name'];
+		$attribute_name = (string) strtolower(sanitize_title($_POST['attribute_name']));
 		$attribute_type = (string) $_POST['attribute_type'];
-		if (isset($_POST['show-on-product-page']) && $_POST['show-on-product-page']) $product_page = 1; else $product_page = 0;
+		$attribute_label = (string) $_POST['attribute_label'];
 		
-		if ($attribute_name && $attribute_type && !taxonomy_exists('product_attribute_'.strtolower(sanitize_title($attribute_name)))) :
+		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( woocommerce::attribute_name($attribute_name) )) :
 		
-			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
+			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
 			
 			update_option('woocommerce_update_rewrite_rules', '1');
 			
@@ -43,8 +43,9 @@ function woocommerce_attributes() {
 		if ($edit>0) :
 		
 			$attribute_type = $_POST['attribute_type'];
+			$attribute_label = (string) $_POST['attribute_label'];
 		
-			$wpdb->update( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_type' => $attribute_type ), array( 'attribute_id' => $_GET['edit'] ), array( '%s' ) );
+			$wpdb->update( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_type' => $attribute_type, 'attribute_label' => $attribute_label ), array( 'attribute_id' => $_GET['edit'] ), array( '%s', '%s' ) );
 		
 		endif;
 		
@@ -61,7 +62,7 @@ function woocommerce_attributes() {
 			
 			if ($att_name && $wpdb->query("DELETE FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$delete'")) :
 				
-				$taxonomy = 'product_attribute_'.strtolower(sanitize_title($att_name));
+				$taxonomy = woocommerce::attribute_name($att_name); 
 				
 				if (taxonomy_exists($taxonomy)) :
 				
@@ -100,7 +101,8 @@ function woocommerce_edit_attribute() {
 	
 	$edit = absint($_GET['edit']);
 		
-	$att_type = $wpdb->get_var("SELECT attribute_type FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");		
+	$att_type = $wpdb->get_var("SELECT attribute_type FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");	
+	$att_label = $wpdb->get_var("SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");		
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -115,8 +117,13 @@ function woocommerce_edit_attribute() {
 	    				<form action="admin.php?page=attributes&amp;edit=<?php echo $edit; ?>" method="post">
 							
 							<div class="form-field">
+								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
+								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo $att_label; ?>" />
+								<p class="description"><?php _e('Label for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
+							</div>
+							<div class="form-field">
 								<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
-								<select name="attribute_type" id="attribute_type" style="width: 100%;">
+								<select name="attribute_type" id="attribute_type">
 									<option value="select" <?php if ($att_type=='select') echo 'selected="selected"'; ?>><?php _e('Select', 'woothemes') ?></option>
 									<option value="multiselect" <?php if ($att_type=='multiselect') echo 'selected="selected"'; ?>><?php _e('Multiselect', 'woothemes') ?></option>
 									<option value="text" <?php if ($att_type=='text') echo 'selected="selected"'; ?>><?php _e('Text', 'woothemes') ?></option>										
@@ -152,6 +159,7 @@ function woocommerce_add_attribute() {
 				        <thead>
 				            <tr>
 				                <th scope="col"><?php _e('Name', 'woothemes') ?></th>
+				                <th scope="col"><?php _e('Label', 'woothemes') ?></th>
 				                <th scope="col"><?php _e('Type', 'woothemes') ?></th>
 				                <th scope="col"><?php _e('Terms', 'woothemes') ?></th>
 				            </tr>
@@ -163,15 +171,16 @@ function woocommerce_add_attribute() {
 				        			foreach ($attribute_taxonomies as $tax) :
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=product_attribute_<?php echo strtolower(sanitize_title($tax->attribute_name)); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo woocommerce::attribute_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo add_query_arg('edit', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo add_query_arg('delete', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
+				        					<td><?php echo ucwords($tax->attribute_label); ?></td>
 				        					<td><?php echo ucwords($tax->attribute_type); ?></td>
 				        					<td><?php 
-				        						if (taxonomy_exists('product_attribute_'.strtolower(sanitize_title($tax->attribute_name)))) :
+				        						if (taxonomy_exists(woocommerce::attribute_name($tax->attribute_name))) :
 					        						$terms_array = array();
-					        						$terms = get_terms( 'product_attribute_'.strtolower(sanitize_title($tax->attribute_name)), 'orderby=name&hide_empty=0' );
+					        						$terms = get_terms( woocommerce::attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
 					        						if ($terms) :
 						        						foreach ($terms as $term) :
 															$terms_array[] = $term->name;
@@ -187,7 +196,7 @@ function woocommerce_add_attribute() {
 				        				</tr><?php
 				        			endforeach;
 				        		else :
-				        			?><tr><td colspan="5"><?php _e('No attributes currently exist.', 'woothemes') ?></td></tr><?php
+				        			?><tr><td colspan="4"><?php _e('No attributes currently exist.', 'woothemes') ?></td></tr><?php
 				        		endif;
 				        	?>
 				        </tbody>
@@ -200,23 +209,25 @@ function woocommerce_add_attribute() {
 	    				<h3><?php _e('Add New Attribute', 'woothemes') ?></h3>
 	    				<p><?php _e('Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woothemes') ?></p>
 	    				<form action="admin.php?page=attributes" method="post">
-							<div style="width:47%; float:left; margin:0 1% 0 0;">
-								<div class="form-field">
-									<label for="attribute_name"><?php _e('Attribute Name', 'woothemes'); ?></label>
-									<input name="attribute_name" id="attribute_name" type="text" value="" />
-								</div>
+							<div class="form-field">
+								<label for="attribute_name"><?php _e('Attribute Name', 'woothemes'); ?></label>
+								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+								<p class="description"><?php _e('Name/reference for attribute; must be shorter than 29 characters.', 'woocommerce'); ?></p>
 							</div>
-							<div style="width:47%; float:left; margin:0 1% 0 0;">
-								<div class="form-field">
-									<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
-									<select name="attribute_type" id="attribute_type" style="width: 100%;">
-										<option value="select"><?php _e('Select', 'woothemes') ?></option>
-										<option value="multiselect"><?php _e('Multiselect', 'woothemes') ?></option>
-										<option value="text"><?php _e('Text', 'woothemes') ?></option>										
-									</select>
-								</div>
+							<div class="form-field">
+								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
+								<input name="attribute_label" id="attribute_label" type="text" value="" />
+								<p class="description"><?php _e('Label for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
 							</div>
-							<div class="clear"></div>
+							<div class="form-field">
+								<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
+								<select name="attribute_type" id="attribute_type">
+									<option value="select"><?php _e('Select', 'woothemes') ?></option>
+									<option value="multiselect"><?php _e('Multiselect', 'woothemes') ?></option>
+									<option value="text"><?php _e('Text', 'woothemes') ?></option>										
+								</select>
+								<p class="description"><?php _e('Determines how you select attributes for products. Variation attributes should use "multiselect".', 'woocommerce'); ?></p>
+							</div>
 							
 							<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e('Add Attribute', 'woothemes'); ?>"></p>
 	    				</form>
@@ -228,7 +239,7 @@ function woocommerce_add_attribute() {
 		/* <![CDATA[ */
 		
 			jQuery('a.delete').click(function(){
-	    		var answer = confirm ("<?php _e('Are you sure you want to delete this?', 'woothemes'); ?>");
+	    		var answer = confirm ("<?php _e('Are you sure you want to delete this attribute?', 'woothemes'); ?>");
 				if (answer) return true;
 				return false;
 	    	});

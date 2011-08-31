@@ -643,7 +643,7 @@ class woocommerce_product {
 				$alt = $alt*-1;
 				echo '<tr class="';
 				if ($alt==1) echo 'alt';
-				echo '"><th>'.wptexturize($attribute['name']).'</th><td>';
+				echo '"><th>'.woocommerce::attribute_label( $attribute['name'] ).'</th><td>';
 				
 				if (is_array($attribute['value'])) $attribute['value'] = implode(', ', $attribute['value']);
 				
