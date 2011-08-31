@@ -72,6 +72,11 @@ if (!function_exists('woocommerce_template_loop_price')) {
 if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility( $post, $_product ) {
 		if (!$_product->is_visible() && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
+		
+		/*if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+			woocommerce::add_error( __('Sorry, this product is currently unavailable.', 'woothemes') );
+		endif;*/
+		
 		if (!$_product->is_visible()) : wp_safe_redirect(home_url()); exit; endif;
 	}
 }
