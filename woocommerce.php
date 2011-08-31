@@ -93,7 +93,7 @@ include_once( 'classes/gateways/gateway-banktransfer.php' );
 include_once( 'classes/gateways/gateway-cheque.php' );
 include_once( 'classes/gateways/gateway-moneybookers.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
-include_once( 'classes/gateways/gateway-payfast.php' );
+//include_once( 'classes/gateways/gateway-payfast.php' );
 
 /**
  * Init class singletons

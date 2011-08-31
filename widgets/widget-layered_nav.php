@@ -154,7 +154,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	
 	/** @see WP_Widget::update */
 	function update( $new_instance, $old_instance ) {
-		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = ucwords($new_instance['attribute']);
+		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = woocommerce::attribute_label($new_instance['attribute']);
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		$instance['attribute'] = stripslashes($new_instance['attribute']);
 		return $instance;
