@@ -109,6 +109,7 @@ function woocommerce_get_products_in_view() {
 				'post_type' => 'product',
 				'numberposts' => -1,
 				'post_status' => 'publish',
+				'meta_query' => $woocommerce_query['meta_query']
 			)
 		)
 	);

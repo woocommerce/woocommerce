@@ -544,6 +544,10 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
  */
 function woocommerce_update_options($options) {
     if(isset($_POST['submitted']) && $_POST['submitted'] == 'yes') {
+    
+    	$nonce = $_REQUEST['_wpnonce'];
+		if (!wp_verify_nonce($nonce, 'woocommerce-settings') ) die( __('Action failed. Please refresh the page and retry.', 'woothemes') ); 
+    
         foreach ($options as $value) {
         	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
         	
@@ -645,7 +649,7 @@ function woocommerce_update_options($options) {
         
         do_action('woocommerce_update_options');
         
-        echo '<div id="message" class="updated fade"><p><strong>'.__('Your settings have been saved.', 'woothemes').'</strong></p></div>';
+        wp_redirect( add_query_arg('saved', 'true', admin_url('admin.php?page=woocommerce') ));
     }
 }
 
@@ -1004,9 +1008,11 @@ function woocommerce_admin_fields($options) {
 function woocommerce_settings() {
     global $options_settings;
     woocommerce_update_options( $options_settings );
+    if (isset($_GET['saved']) && $_GET['saved']) echo '<div id="message" class="updated fade"><p><strong>'.__('Your settings have been saved.', 'woothemes').'</strong></p></div>';
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">
+			<?php wp_nonce_field('woocommerce-settings', '_wpnonce', true, true); ?>
 	        <?php woocommerce_admin_fields($options_settings); ?>
 	        <input name="submitted" type="hidden" value="yes" />
 		</form>
