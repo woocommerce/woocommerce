@@ -15,33 +15,8 @@ $woocommerce_query['unfiltered_product_ids'] = array(); // Unfilted product ids 
 $woocommerce_query['filtered_product_ids'] = array(); // Filted product ids (after layered nav)
 $woocommerce_query['post__in'] = array(); // Product id's that match the layered nav + price filter
 $woocommerce_query['meta_query'] = ''; // The meta query for the page
-
-/**
- * Front page archive/shop template
- */
-if (!function_exists('woocommerce_front_page_archive')) {
-	function woocommerce_front_page_archive() {
-			
-		global $paged;
-		
-		if ( is_front_page() && is_page( get_option('woocommerce_shop_page_id') )) :
-			
-			if ( get_query_var('paged') ) {
-			    $paged = get_query_var('paged');
-			} else if ( get_query_var('page') ) {
-			    $paged = get_query_var('page');
-			} else {
-			    $paged = 1;
-			}
-			
-			query_posts( array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged ) );
-			
-			define('SHOP_IS_ON_FRONT', true);
-
-		endif;
-	}
-}
-add_action('wp', 'woocommerce_front_page_archive', 1);
+$woocommerce_query['layered_nav_post__in'] = array(); // posts matching layered nav only
+$woocommerce_query['layered_nav_product_ids'] = array(); // Stores posts matching layered nav, so price filter can find max price in view
 
 /**
  * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
@@ -138,12 +113,22 @@ function woocommerce_get_products_in_view() {
 		)
 	);
 	
+	// Add posts to array
 	foreach ($products as $p) $woocommerce_query['unfiltered_product_ids'][] = $p->ID;
 	
-	if (sizeof($woocommerce_query['post__in'])>0) 
+	// Also store filtered posts ids...
+	if (sizeof($woocommerce_query['post__in'])>0) :
 		$woocommerce_query['filtered_product_ids'] = array_intersect($woocommerce_query['unfiltered_product_ids'], $woocommerce_query['post__in']);
-	else 
+	else :
 		$woocommerce_query['filtered_product_ids'] = $woocommerce_query['unfiltered_product_ids'];
+	endif;
+	
+	// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
+	if (sizeof($woocommerce_query['layered_nav_post__in'])>0) :
+		$woocommerce_query['layered_nav_product_ids'] = array_intersect($woocommerce_query['unfiltered_product_ids'], $woocommerce_query['layered_nav_post__in']);
+	else :
+		$woocommerce_query['layered_nav_product_ids'] = $woocommerce_query['unfiltered_product_ids'];
+	endif;
 }
  
  
@@ -153,6 +138,8 @@ function woocommerce_get_products_in_view() {
 function woocommerce_layered_nav_init() {
 
 	global $_chosen_attributes, $wpdb;
+	
+	$_chosen_attributes = array();
 	
 	$attribute_taxonomies = woocommerce::$attribute_taxonomies;
 	if ( $attribute_taxonomies ) :
@@ -177,7 +164,7 @@ add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
 
 function woocommerce_layered_nav_query( $filtered_posts ) {
 	
-	global $_chosen_attributes, $wpdb;
+	global $_chosen_attributes, $wpdb, $woocommerce_query;
 	
 	if (sizeof($_chosen_attributes)>0) :
 		
@@ -202,6 +189,9 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 		endforeach;
 		
 		if ($filtered) :
+			
+			$woocommerce_query['layered_nav_post__in'] = $matched_products;
+			$woocommerce_query['layered_nav_post__in'][] = 0;
 			
 			if (sizeof($filtered_posts)==0) :
 				$filtered_posts = $matched_products;
@@ -262,10 +252,8 @@ function woocommerce_price_filter( $filtered_posts ) {
 		$grouped_products = get_objects_in_term( get_term_by('slug', 'grouped', 'product_type')->term_id, 'product_type' );
 		
 		if ($grouped_products) foreach ($grouped_products as $grouped_product) :
-			
-			$children = get_children( 'post_parent='.$grouped_product.'&post_type=product' );
-			
-			if ($children) foreach ($children as $product) :
+
+			if ($children = get_children( 'post_parent='.$grouped_product.'&post_type=product' )) foreach ($children as $product) :
 				$price = get_post_meta( $product->ID, 'price', true);
 
 				if ($price<=$_GET['max_price'] && $price>=$_GET['min_price']) :

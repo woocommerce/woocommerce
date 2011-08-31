@@ -51,7 +51,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		$terms = get_terms( $taxonomy, $args );
 		$count = count($terms);
 		if($count > 0){
-			
+
 			$found = false;
 			ob_start();
 
@@ -59,13 +59,20 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			
 			echo "<ul>";
 			
+			// Force found when option is selected
+			if (array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+			
 			foreach ($terms as $term) {
 			
 				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 				
 				$count = sizeof(array_intersect($_products_in_term, $woocommerce_query['filtered_product_ids']));
-				
+
 				if ($count>0) $found = true;
+				
+				$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]));
+				
+				if ($count==0 && !$option_is_set) continue;
 				
 				$class = '';
 				
@@ -120,11 +127,11 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				
 				echo '<li '.$class.'>';
 				
-				if ($count>0) echo '<a href="'.$link.'">'; else echo '<span>';
+				if ($count>0 || $option_is_set) echo '<a href="'.$link.'">'; else echo '<span>';
 				
 				echo $term->name;
 				
-				if ($count>0) echo '</a>'; else echo '</span>';
+				if ($count>0 || $option_is_set) echo '</a>'; else echo '</span>';
 				
 				echo ' <small class="count">'.$count.'</small></li>';
 				

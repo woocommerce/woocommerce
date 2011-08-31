@@ -109,6 +109,35 @@ function woocommerce_get_template_file_url($template_name, $ssl = false) {
 	return $return;
 }
 
+
+/**
+ * Front page archive/shop template
+ */
+if (!function_exists('woocommerce_front_page_archive')) {
+	function woocommerce_front_page_archive() {
+			
+		global $paged;
+		
+		if ( is_front_page() && is_page( get_option('woocommerce_shop_page_id') )) :
+			
+			if ( get_query_var('paged') ) {
+			    $paged = get_query_var('paged');
+			} else if ( get_query_var('page') ) {
+			    $paged = get_query_var('page');
+			} else {
+			    $paged = 1;
+			}
+			
+			query_posts( array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged ) );
+			
+			define('SHOP_IS_ON_FRONT', true);
+
+		endif;
+	}
+}
+add_action('wp', 'woocommerce_front_page_archive', 1);
+
+
 /**
  * Add Body classes based on page/template
  **/
