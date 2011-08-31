@@ -8,84 +8,145 @@
  * @category	Core
  * @author		WooThemes
  */
- 
+
+global $woocommerce_query;
+
+$woocommerce_query['unfiltered_product_ids'] = array(); // Unfilted product ids (before layered nav etc)
+$woocommerce_query['filtered_product_ids'] = array(); // Filted product ids (after layered nav)
+$woocommerce_query['post__in'] = array(); // Product id's that match the layered nav + price filter
+$woocommerce_query['meta_query'] = ''; // The meta query for the page
+
 /**
- * Get unfiltered list of posts in current view for use in loop + widgets
+ * Front page archive/shop template
+ */
+if (!function_exists('woocommerce_front_page_archive')) {
+	function woocommerce_front_page_archive() {
+			
+		global $paged;
+		
+		if ( is_front_page() && is_page( get_option('woocommerce_shop_page_id') )) :
+			
+			if ( get_query_var('paged') ) {
+			    $paged = get_query_var('paged');
+			} else if ( get_query_var('page') ) {
+			    $paged = get_query_var('page');
+			} else {
+			    $paged = 1;
+			}
+			
+			query_posts( array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged ) );
+			
+			define('SHOP_IS_ON_FRONT', true);
+
+		endif;
+	}
+}
+add_action('wp', 'woocommerce_front_page_archive', 1);
+
+/**
+ * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
+ */
+add_filter( 'parse_query', 'woocommerce_parse_query' ); 
+ 
+function woocommerce_parse_query( $q ) {
+	
+	global $woocommerce_query;
+	
+	if (true == $q->query_vars['suppress_filters']) return;
+	
+	// Only apply to product categories, the product post archive, the shop page, and product tags
+    if (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' )) return;
+	
+	$woocommerce_query['meta_query'] = (array) $q->get( 'meta_query' );
+	
+	// Visibility
+    if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
+
+    $woocommerce_query['meta_query'][] = array(
+        'key' => 'visibility',
+        'value' => $in,
+        'compare' => 'IN'
+    );
+    
+    // In stock
+	if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+		 $woocommerce_query['meta_query'][] = array(
+	        'key' 		=> 'stock_status',
+			'value' 	=> 'instock',
+			'compare' 	=> '='
+	    );
+	endif;
+	
+	// Ordering
+	if (isset($_POST['orderby']) && ($_POST['orderby'] != '') ) $_SESSION['orderby'] = $_POST['orderby'];
+	if (isset($_SESSION['orderby'])) $current_order = $_SESSION['orderby']; else $current_order = 'title';
+	
+	switch ($current_order) :
+		case 'date' :
+			$orderby = 'date';
+			$order = 'desc';
+			$meta_key = '';
+		break;
+		case 'price' :
+			$orderby = 'meta_value_num';
+			$order = 'asc';
+			$meta_key = 'price';
+		break;
+		default :
+			$orderby = 'title';
+			$order = 'asc';
+			$meta_key = '';
+		break;
+	endswitch;
+	
+	// Get a list of post id's which match the current filters set (in the layered nav and price filter)
+	$woocommerce_query['post__in'] = array_unique(apply_filters('loop-shop-posts-in', array()));
+	
+	// Ordering query vars
+	$q->set( 'orderby', $orderby );
+	$q->set( 'order', $order );
+	$q->set( 'meta_key', $meta_key );
+
+	// Query vars that affect posts shown
+	$q->set( 'meta_query', $woocommerce_query['meta_query'] );
+	$q->set( 'post_type', 'product' );
+    $q->set( 'post__in', $woocommerce_query['post__in'] );
+
+    // Apply to main loop only
+    remove_filter( 'parse_query', 'woocommerce_parse_query' );
+    
+    // We're on a shop page so queue the woocommerce_get_products_in_view function
+    add_action('wp', 'woocommerce_get_products_in_view', 2);
+}
+
+/**
+ * Get an unpaginated list all product ID's (both filtered and unfiltered)
  */
 function woocommerce_get_products_in_view() {
 	
-	global $all_post_ids;
+	global $woocommerce_query, $wp_query;
 	
-	$all_post_ids = array();
+	// Get all visible posts, regardless of filters
+    $products = get_posts(
+		array_merge( 
+			$wp_query->query,
+			array(
+				'post_type' => 'product',
+				'numberposts' => -1,
+				'post_status' => 'publish',
+			)
+		)
+	);
 	
-	if (is_tax( 'product_cat' ) || is_post_type_archive('product') || is_page( get_option('woocommerce_shop_page_id') ) || is_tax( 'product_tag' )) :
+	foreach ($products as $p) $woocommerce_query['unfiltered_product_ids'][] = $p->ID;
 	
-		$all_post_ids = woocommerce_get_post_ids();
-	
-	endif;
-	
-	$all_post_ids[] = 0;
-
+	if (sizeof($woocommerce_query['post__in'])>0) 
+		$woocommerce_query['filtered_product_ids'] = array_intersect($woocommerce_query['unfiltered_product_ids'], $woocommerce_query['post__in']);
+	else 
+		$woocommerce_query['filtered_product_ids'] = $woocommerce_query['unfiltered_product_ids'];
 }
-
-add_action('wp_head', 'woocommerce_get_products_in_view', 0);
-
-/**
- * Do Filters/Layered Nav/Ordering
- */
-function woocommerce_filter_loop() {
-	
-	global $wp_query, $all_post_ids; 
-	
-	if (is_tax( 'product_cat' ) || is_post_type_archive('product') || is_page( get_option('woocommerce_shop_page_id') ) || is_tax( 'product_tag' )) :
-		
-		$filters = array();
-		$filters = apply_filters('loop-shop-query', $filters);
-
-		$post_ids = $all_post_ids;
-		$post_ids = apply_filters('loop-shop-posts-in', $post_ids);
-		
-		if ( isset( $_POST['orderby'] ) && ( $_POST['orderby'] != '' ) ) :
-			$_SESSION['orderby'] = $_POST['orderby'];
-		endif;
-		
-		$order_query = array(
-			'orderby' 	=> 'title',
-			'order'		=> 'asc'
-		);
-		
-		if (isset($_SESSION['orderby'])) :
-			switch ($_SESSION['orderby']) :
-				case 'date' :
-					$order_query = array(
-						'orderby' 	=> 'date',
-						'order'		=> 'desc'
-					);
-				break;
-				case 'price' :
-					$order_query = array(
-						'orderby' 	=> 'meta_value_num',
-						'order'		=> 'asc',
-						'meta_key'	=> 'price'
-					);
-				break;
-			endswitch;
-		endif;
-		
-		$order_query = apply_filters('loop-shop-orderby', $order_query);
-		
-		$filters = array_merge($filters, array(
-			'post__in' 	=> $post_ids
-		));
-		
-		$args = array_merge( $wp_query->query, $order_query, $filters );
-		
-		query_posts( $args );
-	endif;
-}
-
-add_action('wp_head', 'woocommerce_filter_loop');
-
+ 
+ 
 /**
  * Layered Nav Init
  */
@@ -110,63 +171,10 @@ function woocommerce_layered_nav_init() {
 add_action('init', 'woocommerce_layered_nav_init', 1);
 
 /**
- * Get post ID's to filter from
- */
-function woocommerce_get_post_ids() {
-	
-	global $wpdb;
-	
-	// Visibility
-	$in = array('visible');
-	if (is_search()) $in[] = 'search';
-	if (!is_search()) $in[] = 'catalog';
-	
-	// Out of stock visibility
-	if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
-		$stock_query = array(
-			'key' 		=> 'stock_status',
-			'value' 	=> 'instock',
-			'compare' 	=> '='
-		);
-	else :
-		$stock_query = array();
-	endif;
-	
-	// WP Query to get all queried post ids
-	
-	global $wp_query;
-	
-	$args = array_merge(
-		$wp_query->query,
-		array(
-			'page_id' => '',
-			'posts_per_page' => -1,
-			'post_type' => 'product',
-			'post_status' => 'publish',
-			'meta_query' => array(
-				array(
-					'key' 		=> 'visibility',
-					'value' 	=> $in,
-					'compare'	=> 'IN'
-				),
-				$stock_query
-			)
-		)
-	);
-	$custom_query  = new WP_Query( $args );
-	
-	$queried_post_ids = array();
-	
-	foreach ($custom_query->posts as $p) $queried_post_ids[] = $p->ID;
-	
-	wp_reset_query();
-	
-	return $queried_post_ids;
-}
-
-/**
  * Layered Nav
  */
+add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
+
 function woocommerce_layered_nav_query( $filtered_posts ) {
 	
 	global $_chosen_attributes, $wpdb;
@@ -194,26 +202,33 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 		endforeach;
 		
 		if ($filtered) :
-			$matched_products[] = 0;
-			$filtered_posts = array_intersect($filtered_posts, $matched_products);
+			
+			if (sizeof($filtered_posts)==0) :
+				$filtered_posts = $matched_products;
+				$filtered_posts[] = 0;
+			else :
+				$filtered_posts = array_intersect($filtered_posts, $matched_products);
+				$filtered_posts[] = 0;
+			endif;
+			
 		endif;
 	
 	endif;
 
-	return $filtered_posts;
+	return (array) $filtered_posts;
 }
-
-add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
 
 
 /**
  * Price Filtering
  */
+add_filter('loop-shop-posts-in', 'woocommerce_price_filter');
+
 function woocommerce_price_filter( $filtered_posts ) {
 
 	if (isset($_GET['max_price']) && isset($_GET['min_price'])) :
 		
-		$matched_products = array( 0 );
+		$matched_products = array();
 		
 		$matched_products_query = get_posts(array(
 			'post_type' => 'product',
@@ -238,11 +253,9 @@ function woocommerce_price_filter( $filtered_posts ) {
 		));
 
 		if ($matched_products_query) :
-
 			foreach ($matched_products_query as $product) :
 				$matched_products[] = $product->ID;
 			endforeach;
-			
 		endif;
 		
 		// Get grouped product ids
@@ -266,11 +279,16 @@ function woocommerce_price_filter( $filtered_posts ) {
 		
 		endforeach;
 		
-		$filtered_posts = array_intersect($matched_products, $filtered_posts);
+		// Filter the id's
+		if (sizeof($filtered_posts)==0) :
+			$filtered_posts = $matched_products;
+			$filtered_posts[] = 0;
+		else :
+			$filtered_posts = array_intersect($filtered_posts, $matched_products);
+			$filtered_posts[] = 0;
+		endif;
 		
 	endif;
 	
-	return $filtered_posts;	
+	return (array) $filtered_posts;
 }
-
-add_filter('loop-shop-posts-in', 'woocommerce_price_filter');

@@ -36,7 +36,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $all_post_ids;
+		global $_chosen_attributes, $wpdb, $woocommerce_query;
 				
 		$title = $instance['title'];
 		$taxonomy = 'product_attribute_'.strtolower(sanitize_title($instance['attribute']));
@@ -58,16 +58,12 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			echo $before_widget . $before_title . $title . $after_title;
 			
 			echo "<ul>";
-
-			// Reduce count based on chosen attributes
-			$all_post_ids = woocommerce_layered_nav_query( $all_post_ids );
-			$all_post_ids = woocommerce_price_filter( $all_post_ids );
-
+			
 			foreach ($terms as $term) {
 			
 				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 				
-				$count = sizeof(array_intersect($_products_in_term, $all_post_ids));
+				$count = sizeof(array_intersect($_products_in_term, $woocommerce_query['filtered_product_ids']));
 				
 				if ($count>0) $found = true;
 				

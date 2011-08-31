@@ -34,8 +34,6 @@ if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocomme
 		
 	</li><?php 
 	
-	if ($loop==$per_page) break;
-	
 endwhile; endif;
 
 if ($loop==0) :

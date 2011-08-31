@@ -12,9 +12,9 @@ class woocommerce {
 	private static $_instance;
 	private static $_cache;
 	
-	public static $errors = array();
-	public static $messages = array();
-	public static $attribute_taxonomies;
+	public static $errors = array(); // Stores store errors
+	public static $messages = array(); // Stores store messages
+	public static $attribute_taxonomies; // Stores the attribute taxonomies used in the store
 	
 	public static $plugin_url;
 	public static $plugin_path;

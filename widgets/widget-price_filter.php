@@ -58,8 +58,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $all_post_ids;
-				
+		global $_chosen_attributes, $wpdb, $woocommerce_query;
+		
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
 		
@@ -83,9 +83,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		FROM $wpdb->posts
 		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 		WHERE meta_key = 'price' AND (
-			$wpdb->posts.ID IN (".implode(',', $all_post_ids).") 
+			$wpdb->posts.ID IN (".implode(',', $woocommerce_query['unfiltered_product_ids']).") 
 			OR (
-				$wpdb->posts.post_parent IN (".implode(',', $all_post_ids).")
+				$wpdb->posts.post_parent IN (".implode(',', $woocommerce_query['unfiltered_product_ids']).")
 				AND $wpdb->posts.post_parent != 0
 			)
 		)"));
