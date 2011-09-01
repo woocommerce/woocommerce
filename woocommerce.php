@@ -10,7 +10,7 @@ Requires at least: 3.1
 Tested up to: 3.2
 */
 
-@session_start();
+if (!session_id()) session_start();
 
 /**
  * Localisation

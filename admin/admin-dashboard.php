@@ -92,7 +92,7 @@ function woocommerce_content_right_now() {
 		</tr>
 		<tr>
 			<td class="first b"><a href="admin.php?page=attributes"><?php 
-				echo sizeof(woocommerce::$attribute_taxonomies);
+				echo sizeof(woocommerce::get_attribute_taxonomies());
 			?></a></td>
 			<td class="t"><a href="admin.php?page=attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
 		</tr>

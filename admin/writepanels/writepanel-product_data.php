@@ -192,7 +192,7 @@ function woocommerce_product_data_box() {
 					</thead>
 					<tbody id="attributes_list">	
 						<?php
-							$attribute_taxonomies = woocommerce::$attribute_taxonomies;
+							$attribute_taxonomies = woocommerce::get_attribute_taxonomies();
 							$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 
 							$i = -1;
@@ -201,7 +201,7 @@ function woocommerce_product_data_box() {
 							if ( $attribute_taxonomies ) :
 						    	foreach ($attribute_taxonomies as $tax) : $i++;
 						    							    	
-						    		$attribute_nicename = strtolower(sanitize_title($tax->attribute_name));
+						    		$attribute_nicename = sanitize_title($tax->attribute_name);
 						    		if (isset($attributes[$attribute_nicename])) $attribute = $attributes[$attribute_nicename];
 						    		if (isset($attribute['visible']) && $attribute['visible']=='yes') $checked = 'checked="checked"'; else $checked = '';
 						    		if (isset($attribute['variation']) && $attribute['variation']=='yes') $checked2 = 'checked="checked"'; else $checked2 = '';
@@ -214,7 +214,7 @@ function woocommerce_product_data_box() {
 						    			endforeach;
 						    		endif;
 						    		
-						    		?><tr class="taxonomy <?php echo strtolower(sanitize_title($tax->attribute_name)); ?>" rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" <?php if (!$value || sizeof($value)==0) echo 'style="display:none"'; ?>>
+						    		?><tr class="taxonomy <?php echo sanitize_title($tax->attribute_name); ?>" rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" <?php if (!$value || sizeof($value)==0) echo 'style="display:none"'; ?>>
 										<td class="center">
 											<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
 											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" />
@@ -296,7 +296,7 @@ function woocommerce_product_data_box() {
 				<?php
 					if ( $attribute_taxonomies ) :
 				    	foreach ($attribute_taxonomies as $tax) :
-				    		echo '<option value="'.strtolower(sanitize_title($tax->attribute_name)).'">'.$tax->attribute_name.'</option>';
+				    		echo '<option value="'.sanitize_title($tax->attribute_name).'">'.$tax->attribute_name.'</option>';
 				    	endforeach;
 				    endif;
 				?>
@@ -412,7 +412,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 		continue;
 		 	endif;
 		 	
-		 	$attributes[ strtolower(sanitize_title( $attribute_names[$i] )) ] = array(
+		 	$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
 		 		'name' => htmlspecialchars(stripslashes($attribute_names[$i])), 
 		 		'value' => $attribute_values[$i],
 		 		'position' => $attribute_position[$i],

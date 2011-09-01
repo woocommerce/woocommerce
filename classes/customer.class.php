@@ -14,7 +14,7 @@ class woocommerce_customer {
 	private static $_instance;
 	
 	/** constructor */
-	function __construct() {
+	private function __construct() {
 		
 		if ( !isset($_SESSION['customer']) ) :
 			

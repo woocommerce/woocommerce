@@ -170,7 +170,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			<p><label for="<?php echo $this->get_field_id('attribute'); ?>"><?php _e('Attribute:', 'woothemes') ?></label>
 			<select id="<?php echo $this->get_field_id('attribute'); ?>" name="<?php echo $this->get_field_name('attribute'); ?>">
 				<?php
-				$attribute_taxonomies = woocommerce::$attribute_taxonomies;
+				$attribute_taxonomies = woocommerce::get_attribute_taxonomies();
 				if ( $attribute_taxonomies ) :
 					foreach ($attribute_taxonomies as $tax) :
 						if (taxonomy_exists( woocommerce::attribute_name($tax->attribute_name))) :

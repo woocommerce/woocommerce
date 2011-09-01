@@ -166,7 +166,7 @@ function woocommerce_add_attribute() {
 				        </thead>
 				        <tbody>
 				        	<?php
-				        		$attribute_taxonomies = woocommerce::$attribute_taxonomies;
+				        		$attribute_taxonomies = woocommerce::get_attribute_taxonomies();
 				        		if ( $attribute_taxonomies ) :
 				        			foreach ($attribute_taxonomies as $tax) :
 				        				?><tr>

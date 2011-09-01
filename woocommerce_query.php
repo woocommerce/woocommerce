@@ -84,6 +84,7 @@ function woocommerce_parse_query( $q ) {
 	$q->set( 'post_type', 'product' );
 	$q->set( 'meta_query', $woocommerce_query['meta_query'] );
     $q->set( 'post__in', $woocommerce_query['post__in'] );
+    $q->set( 'posts_per_page', apply_filters('loop_shop_per_page', get_option('posts_per_page')) );
 
     // Apply to main loop only
     remove_filter( 'parse_query', 'woocommerce_parse_query' );

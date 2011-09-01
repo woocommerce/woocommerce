@@ -20,11 +20,9 @@ class woocommerce {
 	public static $plugin_path;
 		
 	/** constructor */
-	function __construct () {
-		global $wpdb;
+	private function __construct () {
 		
 		// Vars
-		self::$attribute_taxonomies = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies;");
 		if (isset($_SESSION['errors'])) self::$errors = $_SESSION['errors'];
 		if (isset($_SESSION['messages'])) self::$messages = $_SESSION['messages'];
 		
@@ -44,12 +42,22 @@ class woocommerce {
         return self::$_instance;
     }
     
+    /**
+	 * Get attribute taxonomies
+	 */
+	public static function get_attribute_taxonomies() { 
+		global $wpdb;
+		if (!self::$attribute_taxonomies) :
+			self::$attribute_taxonomies = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies;");
+		endif;
+		return self::$attribute_taxonomies;
+	}
     
     /**
 	 * Get a product attributes name
 	 */
 	public static function attribute_name( $name ) { 
-		return 'pa_'.strtolower(sanitize_title($name));
+		return 'pa_'.sanitize_title($name);
 	}
 	
 	/**
@@ -58,7 +66,7 @@ class woocommerce {
 	public static function attribute_label( $name ) { 
 		global $wpdb;
 		
-		$name = $wpdb->prepare(strtolower(sanitize_title($name)));
+		$name = $wpdb->prepare(sanitize_title($name));
 
 		$label = $wpdb->get_var("SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = '$name';");
 
