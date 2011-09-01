@@ -344,7 +344,9 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
-								<option><?php echo implode('</option><option>', $options); ?></option>
+								<?php foreach ($options as $option) : $option_term = get_term_by('slug', $option, woocommerce::attribute_name($name)); ?>
+									<?php echo '<option value="'.$option.'">'.$option_term->name.'</option>'; ?>
+								<?php endforeach; ?>
 							<?php endif;?>
 						</td>
 					</tr>

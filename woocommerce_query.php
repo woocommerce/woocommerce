@@ -25,13 +25,11 @@ add_filter( 'parse_query', 'woocommerce_parse_query' );
  
 function woocommerce_parse_query( $q ) {
 	
-	global $woocommerce_query;
-	
-	if (true == $q->query_vars['suppress_filters']) return;
-	
 	// Only apply to product categories, the product post archive, the shop page, and product tags
-    if (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' )) return;
+    if (true == $q->query_vars['suppress_filters'] || (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' ))) return;
 	
+	global $woocommerce_query;
+
 	$woocommerce_query['meta_query'] = (array) $q->get( 'meta_query' );
 	
 	// Visibility
@@ -53,8 +51,8 @@ function woocommerce_parse_query( $q ) {
 	endif;
 	
 	// Ordering
-	if (isset($_POST['orderby']) && ($_POST['orderby'] != '') ) $_SESSION['orderby'] = $_POST['orderby'];
-	if (isset($_SESSION['orderby'])) $current_order = $_SESSION['orderby']; else $current_order = 'title';
+	if (isset($_POST['orderby']) && $_POST['orderby'] != '') $_SESSION['orderby'] = $_POST['orderby'];
+	$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : 'title';
 	
 	switch ($current_order) :
 		case 'date' :
@@ -83,8 +81,8 @@ function woocommerce_parse_query( $q ) {
 	$q->set( 'meta_key', $meta_key );
 
 	// Query vars that affect posts shown
-	$q->set( 'meta_query', $woocommerce_query['meta_query'] );
 	$q->set( 'post_type', 'product' );
+	$q->set( 'meta_query', $woocommerce_query['meta_query'] );
     $q->set( 'post__in', $woocommerce_query['post__in'] );
 
     // Apply to main loop only
@@ -136,6 +134,8 @@ function woocommerce_get_products_in_view() {
 /**
  * Layered Nav Init
  */
+add_action('init', 'woocommerce_layered_nav_init', 1);
+
 function woocommerce_layered_nav_init() {
 
 	global $_chosen_attributes, $wpdb;
@@ -156,7 +156,6 @@ function woocommerce_layered_nav_init() {
     endif;
 
 }
-add_action('init', 'woocommerce_layered_nav_init', 1);
 
 /**
  * Layered Nav
@@ -232,41 +231,15 @@ function woocommerce_price_filter( $filtered_posts ) {
 					'type' => 'NUMERIC',
 					'compare' => 'BETWEEN'
 				)
-			),
-			'tax_query' => array(
-				array(
-					'taxonomy' => 'product_type',
-					'field' => 'slug',
-					'terms' => 'grouped',
-					'operator' => 'NOT IN'
-				)
 			)
 		));
 
 		if ($matched_products_query) :
 			foreach ($matched_products_query as $product) :
 				$matched_products[] = $product->ID;
+				if ($product->post_parent>0) $matched_products[] = $product->post_parent;
 			endforeach;
 		endif;
-		
-		// Get grouped product ids
-		$grouped_products = get_objects_in_term( get_term_by('slug', 'grouped', 'product_type')->term_id, 'product_type' );
-		
-		if ($grouped_products) foreach ($grouped_products as $grouped_product) :
-
-			if ($children = get_children( 'post_parent='.$grouped_product.'&post_type=product' )) foreach ($children as $product) :
-				$price = get_post_meta( $product->ID, 'price', true);
-
-				if ($price<=$_GET['max_price'] && $price>=$_GET['min_price']) :
-					
-					$matched_products[] = $grouped_product;
-				
-					break;
-					
-				endif;
-			endforeach;
-		
-		endforeach;
 		
 		// Filter the id's
 		if (sizeof($filtered_posts)==0) :

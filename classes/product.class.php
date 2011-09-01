@@ -686,10 +686,10 @@ class woocommerce_product {
                 	
                 	if ($variation->variation->post_status != 'publish') continue; // Disabled
                 	
-                    $attributes = $variation->get_variation_attributes();
+                    $vattributes = $variation->get_variation_attributes();
 
-                    if (is_array($attributes)) {
-                        foreach ($attributes as $name => $value) {
+                    if (is_array($vattributes)) {
+                        foreach ($vattributes as $name => $value) {
                             if ($name == $taxonomy) {
                                 $values[] = $value;
                             }
@@ -711,7 +711,7 @@ class woocommerce_product {
               
             $available_attributes[$attribute['name']] = array_unique($values);
         }
-        
+
         return $available_attributes;
     }
 
