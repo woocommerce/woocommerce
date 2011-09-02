@@ -353,7 +353,7 @@ function woocommerce_custom_order_columns($column) {
         		echo '&ndash;';
         	endif;
         	
-        	if ($order->shipping_metho) :
+        	if ($order->shipping_method) :
         		echo '<small class="meta">' . __('Shipped via ', 'woothemes') . $order->shipping_method . '</small>';
         	endif;
 		break;

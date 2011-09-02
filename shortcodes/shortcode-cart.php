@@ -26,7 +26,7 @@ function woocommerce_cart( $atts ) {
 	// Update Shipping
 	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && woocommerce::verify_nonce('cart')) :
 
-		unset($_SESSION['_chosen_method_id']);
+		unset($_SESSION['_chosen_shipping_method']);
 		$country 	= $_POST['calc_shipping_country'];
 		$state 		= $_POST['calc_shipping_state'];
 		

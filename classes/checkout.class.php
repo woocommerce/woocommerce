@@ -268,6 +268,9 @@ class woocommerce_checkout {
 			
 			if (woocommerce_cart::ship_to_billing_address_only()) $this->posted['shiptobilling'] = 'true';
 			
+			// Update shipping method to posted
+			$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
+			
 			// Billing Information
 			foreach ($this->billing_fields as $field) :
 				
@@ -576,6 +579,12 @@ class woocommerce_checkout {
 						endif;
 					endif;
 					
+					// Get better formatted shipping method (title/label)
+					$shipping_method = $this->posted['shipping_method'];
+					if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
+						$shipping_method = $available_methods[$this->posted['shipping_method']]->title;
+					endif;
+					
 					// Update order meta
 					update_post_meta( $order_id, '_billing_first_name', 	$this->posted['billing-first_name']);
 					update_post_meta( $order_id, '_billing_last_name', 		$this->posted['billing-last_name']);
@@ -597,7 +606,7 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_shipping_postcode', 		$shipping_postcode);
 					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
 					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
-					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
+					update_post_meta( $order_id, '_shipping_method', 		$shipping_method);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format(woocommerce_cart::$subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format(woocommerce_cart::$shipping_total, 2, '.', ''));

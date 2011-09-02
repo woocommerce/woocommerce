@@ -18,7 +18,6 @@ class free_shipping extends woocommerce_shipping_method {
 		$this->min_amount 	= get_option('woocommerce_free_shipping_minimum_amount');
 		$this->availability = get_option('woocommerce_free_shipping_availability');
 		$this->countries 	= get_option('woocommerce_free_shipping_countries');
-		if (isset($_SESSION['_chosen_method_id']) && $_SESSION['_chosen_method_id']==$this->id) $this->chosen = true;
 		
 		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_free_shipping_availability', 'all');
@@ -53,7 +52,7 @@ class free_shipping extends woocommerce_shipping_method {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Minimum Order Amount', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input type="text" name="woocommerce_free_shipping_minimum_amount" id="woocommerce_free_shipping_minimum_amount" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_free_shipping_minimum_amount')) echo $value; else echo 'Free Shipping'; ?>" /> <span class="description"><?php _e('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes') ?></span>
+			        <input type="text" name="woocommerce_free_shipping_minimum_amount" id="woocommerce_free_shipping_minimum_amount" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_free_shipping_minimum_amount')) echo $value; ?>" /> <span class="description"><?php _e('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">

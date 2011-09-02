@@ -177,7 +177,7 @@ class flat_rate extends woocommerce_shipping_method {
     
     public function process_admin_options() {
 
-   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', 'yes'); else update_option('woocommerce_flat_rate_tax_status', 'no');
+   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else @delete_option('woocommerce_flat_rate_tax_status');
    		
    		if(isset($_POST['woocommerce_flat_rate_enabled'])) update_option('woocommerce_flat_rate_enabled', 'yes'); else update_option('woocommerce_flat_rate_enabled', 'no');
    		

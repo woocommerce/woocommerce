@@ -29,7 +29,7 @@
 							
 							echo '<option value="'.$method->id.'" ';
 							
-							if ($method->chosen) echo 'selected="selected"';
+							if ($method->id==$_SESSION['_chosen_shipping_method']) echo 'selected="selected"';
 							
 							echo '>'.$method->title.' &ndash; ';
 							

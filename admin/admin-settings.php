@@ -585,7 +585,7 @@ function woocommerce_update_options($options) {
 								$state = end($cr);
 							endif;
 						
-							$counties_array[$country][] = $state;
+							$counties_array[trim($country)][] = trim($state);
 							
 						endforeach;
 						
@@ -840,51 +840,6 @@ function woocommerce_admin_fields($options) {
 	                        <p><a href="#" class="add button"><?php _e('+ Add Tax Rule', 'woothemes'); ?></a></p>
 	                    </td>
 	                </tr>
-	                <script type="text/javascript">
-					/* <![CDATA[ */
-						jQuery(function() {
-						
-							jQuery(".country_multiselect").multiselect({
-								noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
-								selectedList: 4
-							});
-						
-						
-							jQuery('#tax_rates a.add').live('click', function(){
-								var size = jQuery('.taxrows .taxrow').size();
-								
-								// Add the row
-								jQuery('<div class="taxrow">\
-		               				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo woocommerce_countries::country_multiselect_options('',true); ?></select>\
-					                <select name="tax_class[' + size + ']" title="Tax Class"><option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
-				                    		if ($tax_classes) foreach ($tax_classes as $class) :
-						                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
-						                    endforeach;
-					                ?></select>\
-				                    <input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% \
-				                    <label class="checkbox"><input type="checkbox" name="tax_shipping[' + size + ']" checked="checked" /> <?php _e('Apply to shipping', 'woothemes'); ?></label><a href="#" class="remove button">&times;</a>\
-	               				</div>').appendTo('#tax_rates div.taxrows');
-	               				
-	               				// Multiselect
-	               				jQuery(".country_multiselect").multiselect({
-									noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
-									selectedList: 4
-								});
-	               				
-								return false;
-							});
-							
-							jQuery('#tax_rates a.remove').live('click', function(){
-								var answer = confirm("<?php _e('Delete this rule?', 'woothemes'); ?>");
-								if (answer) {
-									jQuery('input', jQuery(this).parent()).val('');
-									jQuery(this).parent().hide();
-								}
-								return false;
-							});
-						});						
-					/* ]]> */
-					</script>
 	                <?php
 	            break;
 	            case "shipping_options" :
@@ -993,6 +948,46 @@ function woocommerce_admin_fields($options) {
 				jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
 			}
 		}).change();
+		
+		// Country Multiselect boxes
+		jQuery(".country_multiselect").multiselect({
+			noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
+			selectedList: 4
+		});
+	
+		// Tax
+		jQuery('#tax_rates a.add').live('click', function(){
+			var size = jQuery('.taxrows .taxrow').size();
+			
+			// Add the row
+			jQuery('<div class="taxrow">\
+   				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo woocommerce_countries::country_multiselect_options('',true); ?></select>\
+                <select name="tax_class[' + size + ']" title="Tax Class"><option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
+                		if ($tax_classes) foreach ($tax_classes as $class) :
+	                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
+	                    endforeach;
+                ?></select>\
+                <input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% \
+                <label class="checkbox"><input type="checkbox" name="tax_shipping[' + size + ']" checked="checked" /> <?php _e('Apply to shipping', 'woothemes'); ?></label><a href="#" class="remove button">&times;</a>\
+				</div>').appendTo('#tax_rates div.taxrows');
+				
+				// Multiselect
+				jQuery(".country_multiselect").multiselect({
+				noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
+				selectedList: 4
+			});
+				
+			return false;
+		});
+		
+		jQuery('#tax_rates a.remove').live('click', function(){
+			var answer = confirm("<?php _e('Delete this rule?', 'woothemes'); ?>");
+			if (answer) {
+				jQuery('input', jQuery(this).parent()).val('');
+				jQuery(this).parent().hide();
+			}
+			return false;
+		});
 		
 	});
 	</script>

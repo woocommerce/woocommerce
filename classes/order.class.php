@@ -79,6 +79,7 @@ class woocommerce_order {
 			'order_subtotal'		=> '',
 			'order_discount'		=> '',
 			'order_tax'				=> '',
+			'order_shipping'		=> '',
 			'order_shipping_tax'	=> '',
 			'order_total'			=> ''
 		);
@@ -156,8 +157,11 @@ class woocommerce_order {
 
 			$shipping = woocommerce_price($this->order_shipping);
 			if ($this->order_shipping_tax > 0) :
-				$shipping .= sprintf(__(' <small>(ex. tax) via %s</small>', 'woothemes'), ucwords($this->shipping_method));
+				$tax_text = __('(ex. tax) ', 'woothemes'); 
+			else :
+				$tax_text = '';
 			endif;
+			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method));
 
 		else :
 			$shipping = __('Free!', 'woothemes');

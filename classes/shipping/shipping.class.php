@@ -49,23 +49,46 @@ class woocommerce_shipping {
 		if (self::$enabled=='yes') :
 		
 			$_available_methods = array();
-		
-			foreach ( self::$shipping_methods as $method ) :
+			
+			foreach ( self::$shipping_methods as $shipping_method ) :
 				
-				if ($method->is_available()) $_available_methods[$method->id] = $method;
+				if ($shipping_method->is_available()) :
+					
+					$shipping_method->calculate_shipping();
+					
+					// If available, put available methods/rates in the array
+					if ($shipping_method->multiple_rates) :
+							
+							foreach ($shipping_method->rates as $rate) :
+								
+								$method = $rate;
+								
+								$_available_methods[$method->id] = $method;
+								
+							endforeach;
+							
+					else :
+						
+						$method = $shipping_method;
+						
+						$_available_methods[$method->id] = $method;
+
+					endif;
+					
+				endif;
 				
 			endforeach;
-
+			
 			return $_available_methods;
 			
 		endif;
 	}
 	
 	function reset_shipping_methods() {
-		foreach ( self::$shipping_methods as $method ) :
-			$method->chosen = false;
-			$method->shipping_total = 0;
-			$method->shipping_tax = 0;
+		foreach ( self::$shipping_methods as $shipping_method ) :
+			$shipping_method->shipping_total = 0;
+			$shipping_method->shipping_tax = 0;
+			$shipping_method->rates = array();
 		endforeach;
 	}
 	
@@ -78,7 +101,7 @@ class woocommerce_shipping {
 			self::$shipping_label = null;
 			$_cheapest_fee = '';
 			$_cheapest_method = '';
-			if (isset($_SESSION['_chosen_method_id'])) $chosen_method = $_SESSION['_chosen_method_id']; else $chosen_method = '';
+			if (isset($_SESSION['_chosen_shipping_method'])) $chosen_method = $_SESSION['_chosen_shipping_method']; else $chosen_method = '';
 			$calc_cheapest = false;
 			
 			if (!$chosen_method || empty($chosen_method)) $calc_cheapest = true;
@@ -89,15 +112,14 @@ class woocommerce_shipping {
 			
 			if (sizeof($_available_methods)>0) :
 			
-				foreach ($_available_methods as $method) :
+				foreach ($_available_methods as $method_id => $method) :
 					
-					$method->calculate_shipping();
 					$fee = $method->shipping_total;
 					if ($fee < $_cheapest_fee || !is_numeric($_cheapest_fee)) :
-						$_cheapest_fee = $fee;
-						$_cheapest_method = $method->id;
+						$_cheapest_fee 		= $fee;
+						$_cheapest_method 	= $method_id;
 					endif;
-					
+
 				endforeach;
 				
 				// Default to cheapest
@@ -107,7 +129,7 @@ class woocommerce_shipping {
 				
 				if ($chosen_method) :
 					
-					$_available_methods[$chosen_method]->choose();
+					$_SESSION['_chosen_shipping_method'] = $chosen_method;
 					self::$shipping_total 	= $_available_methods[$chosen_method]->shipping_total;
 					self::$shipping_tax 	= $_available_methods[$chosen_method]->shipping_tax;
 					self::$shipping_label 	= $_available_methods[$chosen_method]->title;
@@ -120,6 +142,7 @@ class woocommerce_shipping {
 	}
 	
 	function reset_shipping() {
+		unset($_SESSION['_chosen_shipping_method']);
 		self::$shipping_total = 0;
 		self::$shipping_tax = 0;
 		self::$shipping_label = null;

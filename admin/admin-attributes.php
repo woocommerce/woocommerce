@@ -21,7 +21,7 @@ function woocommerce_attributes() {
 	
 	if (isset($_POST['add_new_attribute']) && $_POST['add_new_attribute']) :
 		
-		$attribute_name = (string) strtolower(sanitize_title($_POST['attribute_name']));
+		$attribute_name = (string) sanitize_title($_POST['attribute_name']);
 		$attribute_type = (string) $_POST['attribute_type'];
 		$attribute_label = (string) $_POST['attribute_label'];
 		

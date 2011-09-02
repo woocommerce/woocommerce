@@ -16,13 +16,14 @@ class woocommerce_shipping_method {
 	var $availability;
 	var $countries;
 	var $type;
-	var $cost				= 0;
 	var $fee				= 0;
 	var $min_amount			= null;
 	var $enabled			= false;
-	var $chosen				= false;
 	var $shipping_total 	= 0;
 	var $shipping_tax 		= 0;
+	var $cost				= 0; // Stores cost if theres only one
+	var $multiple_rates		= false;
+	var $rates 				= array(); // When a method has more than one cost/choice it will be in this array of titles/costs
 	
     public function is_available() {
     	
@@ -55,17 +56,7 @@ class woocommerce_shipping_method {
 			return $fee;
 		endif;
 	}
-	
-	public function is_chosen() {
-    	if ($this->chosen) return true;
-    	return false;
-    }
-    
-    public function choose() {
-    	$this->chosen = true;
-    	$_SESSION['_chosen_method_id'] = $this->id;
-    }
-    
+	    
     public function admin_options() {}
     
     public function process_admin_options() {}

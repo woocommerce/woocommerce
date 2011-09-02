@@ -412,7 +412,7 @@ class woocommerce_countries {
 		),*/
 		'US' => array(
 			'AL' =>  'Alabama' ,
-			'AK' =>  'Alaska ' ,
+			'AK' =>  'Alaska' ,
 			'AZ' =>  'Arizona' ,
 			'AR' =>  'Arkansas' ,
 			'CA' =>  'California' ,

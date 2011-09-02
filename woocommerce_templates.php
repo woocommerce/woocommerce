@@ -128,6 +128,8 @@ if (!function_exists('woocommerce_front_page_archive')) {
 			    $paged = 1;
 			}
 			
+			add_filter( 'parse_query', 'woocommerce_parse_query' ); 
+			
 			query_posts( array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged ) );
 			
 			define('SHOP_IS_ON_FRONT', true);

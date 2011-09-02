@@ -40,7 +40,7 @@ function woocommerce_ajax_update_order_review() {
 		die();
 	endif;
 	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_method_id'] = $_POST['shipping_method'];
+	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
 	
 	if (isset($_POST['country'])) woocommerce_customer::set_country( $_POST['country'] );
 	if (isset($_POST['state'])) woocommerce_customer::set_state( $_POST['state'] );

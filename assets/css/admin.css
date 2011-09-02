@@ -416,13 +416,7 @@ ul.recent-orders li .refunded, ul.recent-orders li .cancelled {
   float: left;
 }
 /* Settings */
-.woocommerce table.shippingrows {
-  border: 0;
-  width: 100%;
-}
 .woocommerce table.shippingrows td, .woocommerce table.shippingrows th {
-  padding: 4px 4px 4px 0 !important;
-  border: 0 !important;
   vertical-align: middle;
 }
 .woocommerce table.shippingrows td a.remove {

@@ -303,7 +303,7 @@ jQuery(function(){
                 var attr_val = attributes[attr_name];
                 
                 if(attr_name == current_attr_name) {
-                    current_attr_select.find('option:contains("'+attr_val+'")').removeAttr('disabled');
+                    current_attr_select.find('option[value="'+attr_val+'"]').removeAttr('disabled');
                 }
             }
         }

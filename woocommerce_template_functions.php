@@ -344,8 +344,15 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
-								<?php foreach ($options as $option) : $option_term = get_term_by('slug', $option, woocommerce::attribute_name($name)); ?>
-									<?php echo '<option value="'.$option.'">'.$option_term->name.'</option>'; ?>
+								<?php foreach ($options as $option) : 
+									$option_term = get_term_by('slug', $option, woocommerce::attribute_name($name)); 
+									if (!is_wp_error($option_term) && isset($option_term->name)) :
+										$term_name = $option_term->name;
+									else :
+										$term_name = $option;
+									endif;
+									?>
+									<?php echo '<option value="'.$option.'">'.$term_name.'</option>'; ?>
 								<?php endforeach; ?>
 							<?php endif;?>
 						</td>
@@ -498,7 +505,7 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
  **/
 if (!function_exists('woocommerce_output_related_products')) {
 	function woocommerce_output_related_products() {
-		// 4 Related Products in 4 columns
+		// 2 Related Products in 2 columns
 		woocommerce_related_products( 2, 2 );
 	}
 }
@@ -506,10 +513,9 @@ if (!function_exists('woocommerce_output_related_products')) {
 if (!function_exists('woocommerce_related_products')) {
 	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
 		
-		global $_product, $columns, $per_page;
+		global $_product, $columns;
 		
 		// Pass vars to loop
-		$per_page = $posts_per_page;
 		$columns = $post_columns;
 		
 		$related = $_product->get_related();
@@ -518,7 +524,7 @@ if (!function_exists('woocommerce_related_products')) {
 			$args = array(
 				'post_type'	=> 'product',
 				'ignore_sticky_posts'	=> 1,
-				'posts_per_page' => $per_page,
+				'posts_per_page' => $posts_per_page,
 				'orderby' => $orderby,
 				'post__in' => $related
 			);
