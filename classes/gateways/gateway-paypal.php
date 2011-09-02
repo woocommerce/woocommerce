@@ -209,9 +209,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				
 				$item_loop++;
 				
-				$paypal_args['item_name_'.$item_loop] = $_product->get_title();
+				$paypal_args['item_name_'.$item_loop] = $item['name'];
 				$paypal_args['quantity_'.$item_loop] = $item['qty'];
-				$paypal_args['amount_'.$item_loop] = $_product->get_price_excluding_tax();
+				$paypal_args['amount_'.$item_loop] = $item['cost'];
 				
 			endif;
 		endforeach; endif;
