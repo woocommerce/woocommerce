@@ -21,7 +21,7 @@ $woocommerce_query['layered_nav_product_ids'] = array(); // Stores posts matchin
 /**
  * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
  */
-add_filter( 'parse_query', 'woocommerce_parse_query' ); 
+if (!is_admin()) add_filter( 'parse_query', 'woocommerce_parse_query' ); 
  
 function woocommerce_parse_query( $q ) {
 	
