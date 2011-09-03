@@ -314,9 +314,9 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		
 			// Output success messages
 			if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-				woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+				woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
 			else :
-				woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+				woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
 			endif;
 		
 		endif;
@@ -358,9 +358,9 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				if (woocommerce_cart::add_to_cart($product_id, $quantity, $variations, $variation_id)) :
 				
 					if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-						woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+						woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
 					else :
-						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
 					endif;
 				
 				endif;
@@ -386,9 +386,9 @@ function woocommerce_add_to_cart_action( $url = false ) {
 					if (woocommerce_cart::add_to_cart($item, $quantity)) :
 					
 						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-							woocommerce::add_message( __('Product successfully added to your basket.', 'woothemes') );
+							woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
 						else :
-							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your basket.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
 						endif;
 						
 					endif;
