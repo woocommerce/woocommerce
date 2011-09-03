@@ -130,7 +130,7 @@ function woocommerce_get_current_post_type() {
         
 	global $post, $typenow, $current_screen;
          
-    if( $current_screen && @$current_screen->post_type ) return $current_screen->post_type;
+    if( $current_screen && isset($current_screen->post_type) ) return $current_screen->post_type;
     
     if( $typenow ) return $typenow;
         

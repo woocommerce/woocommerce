@@ -100,9 +100,9 @@ class free_shipping extends woocommerce_shipping_method {
    		
    		if(isset($_POST['woocommerce_free_shipping_enabled'])) update_option('woocommerce_free_shipping_enabled', 'yes'); else update_option('woocommerce_free_shipping_enabled', 'no');
    		
-   		if(isset($_POST['woocommerce_free_shipping_title'])) update_option('woocommerce_free_shipping_title', woocommerce_clean($_POST['woocommerce_free_shipping_title'])); else @delete_option('woocommerce_free_shipping_title');
-   		if(isset($_POST['woocommerce_free_shipping_minimum_amount'])) update_option('woocommerce_free_shipping_minimum_amount', woocommerce_clean($_POST['woocommerce_free_shipping_minimum_amount'])); else @delete_option('woocommerce_free_shipping_minimum_amount');
-   		if(isset($_POST['woocommerce_free_shipping_availability'])) update_option('woocommerce_free_shipping_availability', woocommerce_clean($_POST['woocommerce_free_shipping_availability'])); else @delete_option('woocommerce_free_shipping_availability');
+   		if(isset($_POST['woocommerce_free_shipping_title'])) update_option('woocommerce_free_shipping_title', woocommerce_clean($_POST['woocommerce_free_shipping_title'])); else delete_option('woocommerce_free_shipping_title');
+   		if(isset($_POST['woocommerce_free_shipping_minimum_amount'])) update_option('woocommerce_free_shipping_minimum_amount', woocommerce_clean($_POST['woocommerce_free_shipping_minimum_amount'])); else delete_option('woocommerce_free_shipping_minimum_amount');
+   		if(isset($_POST['woocommerce_free_shipping_availability'])) update_option('woocommerce_free_shipping_availability', woocommerce_clean($_POST['woocommerce_free_shipping_availability'])); else delete_option('woocommerce_free_shipping_availability');
 	    
 	    if (isset($_POST['woocommerce_free_shipping_countries'])) $selected_countries = $_POST['woocommerce_free_shipping_countries']; else $selected_countries = array();
 	    update_option('woocommerce_free_shipping_countries', $selected_countries);

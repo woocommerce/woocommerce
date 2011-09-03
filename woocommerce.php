@@ -162,7 +162,7 @@ function woocommerce_init() {
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
 	
-	@ob_start();
+	ob_start();
 
 	$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : woocommerce::plugin_url() . '/assets/css/woocommerce.css';
     if (WOOCOMMERCE_USE_CSS) wp_register_style('woocommerce_frontend_styles', $css );

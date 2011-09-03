@@ -113,9 +113,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     
    		if(isset($_POST['woocommerce_paypal_enabled'])) update_option('woocommerce_paypal_enabled', 'yes'); else update_option('woocommerce_paypal_enabled', 'no');
    		
-   		if(isset($_POST['woocommerce_paypal_title'])) update_option('woocommerce_paypal_title', woocommerce_clean($_POST['woocommerce_paypal_title'])); else @delete_option('woocommerce_paypal_title');
-   		if(isset($_POST['woocommerce_paypal_email'])) update_option('woocommerce_paypal_email', woocommerce_clean($_POST['woocommerce_paypal_email'])); else @delete_option('woocommerce_paypal_email');
-   		if(isset($_POST['woocommerce_paypal_description'])) update_option('woocommerce_paypal_description', woocommerce_clean($_POST['woocommerce_paypal_description'])); else @delete_option('woocommerce_paypal_description');
+   		if(isset($_POST['woocommerce_paypal_title'])) update_option('woocommerce_paypal_title', woocommerce_clean($_POST['woocommerce_paypal_title'])); else delete_option('woocommerce_paypal_title');
+   		if(isset($_POST['woocommerce_paypal_email'])) update_option('woocommerce_paypal_email', woocommerce_clean($_POST['woocommerce_paypal_email'])); else delete_option('woocommerce_paypal_email');
+   		if(isset($_POST['woocommerce_paypal_description'])) update_option('woocommerce_paypal_description', woocommerce_clean($_POST['woocommerce_paypal_description'])); else delete_option('woocommerce_paypal_description');
    		
    		if(isset($_POST['woocommerce_paypal_testmode'])) update_option('woocommerce_paypal_testmode', 'yes'); else update_option('woocommerce_paypal_testmode', 'no');
    		

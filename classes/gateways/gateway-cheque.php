@@ -81,8 +81,8 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
     
    		if(isset($_POST['woocommerce_cheque_enabled'])) update_option('woocommerce_cheque_enabled', 'yes'); else update_option('woocommerce_cheque_enabled', 'no');
    		
-   		if(isset($_POST['woocommerce_cheque_title'])) 	update_option('woocommerce_cheque_title', 	woocommerce_clean($_POST['woocommerce_cheque_title'])); else @delete_option('woocommerce_cheque_title');
-   		if(isset($_POST['woocommerce_cheque_description'])) 	update_option('woocommerce_cheque_description', 	woocommerce_clean($_POST['woocommerce_cheque_description'])); else @delete_option('woocommerce_cheque_description');
+   		if(isset($_POST['woocommerce_cheque_title'])) 	update_option('woocommerce_cheque_title', 	woocommerce_clean($_POST['woocommerce_cheque_title'])); else delete_option('woocommerce_cheque_title');
+   		if(isset($_POST['woocommerce_cheque_description'])) 	update_option('woocommerce_cheque_description', 	woocommerce_clean($_POST['woocommerce_cheque_description'])); else delete_option('woocommerce_cheque_description');
     }
 	
 	/**

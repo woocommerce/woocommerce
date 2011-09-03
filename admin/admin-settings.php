@@ -614,7 +614,7 @@ function woocommerce_update_options($options) {
 				if( isset( $_POST[ $value['id'] ] )  ) {
 					update_option($value['id'], $_POST[$value['id']] );
 				} else {
-	                @delete_option($value['id']);
+	                delete_option($value['id']);
 	            }
 	            
 	        elseif (isset($value['type']) && $value['type']=='checkbox') :
@@ -640,7 +640,7 @@ function woocommerce_update_options($options) {
         		if(isset($value['id']) && isset($_POST[$value['id']])) {
 	            	update_option($value['id'], woocommerce_clean($_POST[$value['id']]));
 	            } else {
-	                @delete_option($value['id']);
+	                delete_option($value['id']);
 	            }
             
 	        endif;

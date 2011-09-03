@@ -89,10 +89,10 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
     public function process_admin_options() {
    		if(isset($_POST['woocommerce_moneybookers_enabled'])) update_option('woocommerce_moneybookers_enabled', 'yes'); else update_option('woocommerce_moneybookers_enabled', 'no');
    		
-   		if(isset($_POST['woocommerce_moneybookers_title'])) update_option('woocommerce_moneybookers_title', woocommerce_clean($_POST['woocommerce_moneybookers_title'])); else @delete_option('woocommerce_moneybookers_title');
-   		if(isset($_POST['woocommerce_moneybookers_email'])) update_option('woocommerce_moneybookers_email', woocommerce_clean($_POST['woocommerce_moneybookers_email'])); else @delete_option('woocommerce_moneybookers_email');
-   		if(isset($_POST['woocommerce_moneybookers_secret_word'])) update_option('woocommerce_moneybookers_secret_word', woocommerce_clean($_POST['woocommerce_moneybookers_secret_word'])); else @delete_option('woocommerce_moneybookers_secret_word');
-   		if(isset($_POST['woocommerce_moneybookers_customer_id'])) update_option('woocommerce_moneybookers_customer_id', woocommerce_clean($_POST['woocommerce_moneybookers_customer_id'])); else @delete_option('woocommerce_moneybookers_customer_id');
+   		if(isset($_POST['woocommerce_moneybookers_title'])) update_option('woocommerce_moneybookers_title', woocommerce_clean($_POST['woocommerce_moneybookers_title'])); else delete_option('woocommerce_moneybookers_title');
+   		if(isset($_POST['woocommerce_moneybookers_email'])) update_option('woocommerce_moneybookers_email', woocommerce_clean($_POST['woocommerce_moneybookers_email'])); else delete_option('woocommerce_moneybookers_email');
+   		if(isset($_POST['woocommerce_moneybookers_secret_word'])) update_option('woocommerce_moneybookers_secret_word', woocommerce_clean($_POST['woocommerce_moneybookers_secret_word'])); else delete_option('woocommerce_moneybookers_secret_word');
+   		if(isset($_POST['woocommerce_moneybookers_customer_id'])) update_option('woocommerce_moneybookers_customer_id', woocommerce_clean($_POST['woocommerce_moneybookers_customer_id'])); else delete_option('woocommerce_moneybookers_customer_id');
     }
     
 	/**

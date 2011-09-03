@@ -177,16 +177,16 @@ class flat_rate extends woocommerce_shipping_method {
     
     public function process_admin_options() {
 
-   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else @delete_option('woocommerce_flat_rate_tax_status');
+   		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else delete_option('woocommerce_flat_rate_tax_status');
    		
    		if(isset($_POST['woocommerce_flat_rate_enabled'])) update_option('woocommerce_flat_rate_enabled', 'yes'); else update_option('woocommerce_flat_rate_enabled', 'no');
    		
-   		if(isset($_POST['woocommerce_flat_rate_title'])) update_option('woocommerce_flat_rate_title', woocommerce_clean($_POST['woocommerce_flat_rate_title'])); else @delete_option('woocommerce_flat_rate_title');
-   		if(isset($_POST['woocommerce_flat_rate_type'])) update_option('woocommerce_flat_rate_type', woocommerce_clean($_POST['woocommerce_flat_rate_type'])); else @delete_option('woocommerce_flat_rate_type');
-   		if(isset($_POST['woocommerce_flat_rate_cost'])) update_option('woocommerce_flat_rate_cost', woocommerce_clean($_POST['woocommerce_flat_rate_cost'])); else @delete_option('woocommerce_flat_rate_cost');
-   		if(isset($_POST['woocommerce_flat_rate_handling_fee'])) update_option('woocommerce_flat_rate_handling_fee', woocommerce_clean($_POST['woocommerce_flat_rate_handling_fee'])); else @delete_option('woocommerce_flat_rate_handling_fee');
+   		if(isset($_POST['woocommerce_flat_rate_title'])) update_option('woocommerce_flat_rate_title', woocommerce_clean($_POST['woocommerce_flat_rate_title'])); else delete_option('woocommerce_flat_rate_title');
+   		if(isset($_POST['woocommerce_flat_rate_type'])) update_option('woocommerce_flat_rate_type', woocommerce_clean($_POST['woocommerce_flat_rate_type'])); else delete_option('woocommerce_flat_rate_type');
+   		if(isset($_POST['woocommerce_flat_rate_cost'])) update_option('woocommerce_flat_rate_cost', woocommerce_clean($_POST['woocommerce_flat_rate_cost'])); else delete_option('woocommerce_flat_rate_cost');
+   		if(isset($_POST['woocommerce_flat_rate_handling_fee'])) update_option('woocommerce_flat_rate_handling_fee', woocommerce_clean($_POST['woocommerce_flat_rate_handling_fee'])); else delete_option('woocommerce_flat_rate_handling_fee');
    		
-   		if(isset($_POST['woocommerce_flat_rate_availability'])) update_option('woocommerce_flat_rate_availability', woocommerce_clean($_POST['woocommerce_flat_rate_availability'])); else @delete_option('woocommerce_flat_rate_availability');	    
+   		if(isset($_POST['woocommerce_flat_rate_availability'])) update_option('woocommerce_flat_rate_availability', woocommerce_clean($_POST['woocommerce_flat_rate_availability'])); else delete_option('woocommerce_flat_rate_availability');	    
 	    if (isset($_POST['woocommerce_flat_rate_countries'])) $selected_countries = $_POST['woocommerce_flat_rate_countries']; else $selected_countries = array();
 	    update_option('woocommerce_flat_rate_countries', $selected_countries);
    		

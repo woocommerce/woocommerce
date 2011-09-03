@@ -165,14 +165,14 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
     
       if(isset($_POST['woocommerce_bacs_enabled'])) update_option('woocommerce_bacs_enabled', 'yes'); else update_option('woocommerce_bacs_enabled', 'no');
       
-      if(isset($_POST['woocommerce_bacs_title'])) 	        update_option('woocommerce_bacs_title', 	        woocommerce_clean($_POST['woocommerce_bacs_title']));           else @delete_option('woocommerce_bacs_title');
-      if(isset($_POST['woocommerce_bacs_description']))    update_option('woocommerce_bacs_description',  	woocommerce_clean($_POST['woocommerce_bacs_description']));     else @delete_option('woocommerce_bacs_description');
-      if(isset($_POST['woocommerce_bacs_account_name']))   update_option('woocommerce_bacs_account_name',   woocommerce_clean($_POST['woocommerce_bacs_account_name']));    else @delete_option('woocommerce_bacs_account_name');
-      if(isset($_POST['woocommerce_bacs_account_number'])) update_option('woocommerce_bacs_account_number', woocommerce_clean($_POST['woocommerce_bacs_account_number']));  else @delete_option('woocommerce_bacs_account_number');
-      if(isset($_POST['woocommerce_bacs_sort_code']))      update_option('woocommerce_bacs_sort_code',      woocommerce_clean($_POST['woocommerce_bacs_sort_code']));       else @delete_option('woocommerce_bacs_sort_code');
-      if(isset($_POST['woocommerce_bacs_bank_name']))      update_option('woocommerce_bacs_bank_name',      woocommerce_clean($_POST['woocommerce_bacs_bank_name']));       else @delete_option('woocommerce_bacs_bank_name');
-      if(isset($_POST['woocommerce_bacs_iban']))           update_option('woocommerce_bacs_iban',           woocommerce_clean($_POST['woocommerce_bacs_iban']));            else @delete_option('woocommerce_bacs_iban');
-      if(isset($_POST['woocommerce_bacs_bic']))            update_option('woocommerce_bacs_bic',            woocommerce_clean($_POST['woocommerce_bacs_bic']));             else @delete_option('woocommerce_bacs_bic');
+      if(isset($_POST['woocommerce_bacs_title'])) 	        update_option('woocommerce_bacs_title', 	        woocommerce_clean($_POST['woocommerce_bacs_title']));           else delete_option('woocommerce_bacs_title');
+      if(isset($_POST['woocommerce_bacs_description']))    update_option('woocommerce_bacs_description',  	woocommerce_clean($_POST['woocommerce_bacs_description']));     else delete_option('woocommerce_bacs_description');
+      if(isset($_POST['woocommerce_bacs_account_name']))   update_option('woocommerce_bacs_account_name',   woocommerce_clean($_POST['woocommerce_bacs_account_name']));    else delete_option('woocommerce_bacs_account_name');
+      if(isset($_POST['woocommerce_bacs_account_number'])) update_option('woocommerce_bacs_account_number', woocommerce_clean($_POST['woocommerce_bacs_account_number']));  else delete_option('woocommerce_bacs_account_number');
+      if(isset($_POST['woocommerce_bacs_sort_code']))      update_option('woocommerce_bacs_sort_code',      woocommerce_clean($_POST['woocommerce_bacs_sort_code']));       else delete_option('woocommerce_bacs_sort_code');
+      if(isset($_POST['woocommerce_bacs_bank_name']))      update_option('woocommerce_bacs_bank_name',      woocommerce_clean($_POST['woocommerce_bacs_bank_name']));       else delete_option('woocommerce_bacs_bank_name');
+      if(isset($_POST['woocommerce_bacs_iban']))           update_option('woocommerce_bacs_iban',           woocommerce_clean($_POST['woocommerce_bacs_iban']));            else delete_option('woocommerce_bacs_iban');
+      if(isset($_POST['woocommerce_bacs_bic']))            update_option('woocommerce_bacs_bic',            woocommerce_clean($_POST['woocommerce_bacs_bic']));             else delete_option('woocommerce_bacs_bic');
     }
 
     /**
