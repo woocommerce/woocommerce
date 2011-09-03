@@ -508,12 +508,25 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	// Update parent if grouped so price sorting works
 	if ($post->post_parent || $product_type=='grouped') :
 		if ($post->post_parent) :
-			$parent_id = $post->post_parent; 
+			$post_parent = $post->post_parent; 
 		else :
-			$parent_id = $post_id;
+			$post_parent = $post_id;
+		endif;
+
+		$children_by_price = get_posts( array(
+			'post_parent' 	=> $post_parent,
+			'orderby' 	=> 'meta_value_num',
+			'order'		=> 'asc',
+			'meta_key'	=> 'price',
+			'posts_per_page' => 1,
+			'post_type' => 'product'
+		));
+		if ($children_by_price) :
+			$children_by_price = $children_by_price[0];
+			$child = $children_by_price->ID;
+			update_post_meta( $post_parent, 'price', get_post_meta($child, 'price', true) );
 		endif;
 		
-		woocommerce_grouped_price_sync( $parent_id );
 	endif;
 	
 	// Stock Data

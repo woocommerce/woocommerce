@@ -32,7 +32,8 @@ class woocommerce_product {
 	var $crosssell_ids;
 	var $product_type;
 	var $total_stock;
-	
+	var $sale_price_dates_from;
+	var $sale_price_dates_to;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -41,7 +42,7 @@ class woocommerce_product {
 	 */
 	function woocommerce_product( $id ) {
 		
-		$this->id = $id;
+		$this->id = (int) $id;
 
 		$product_custom_fields = get_post_custom( $this->id );
 		
@@ -714,5 +715,68 @@ class woocommerce_product {
 
         return $available_attributes;
     }
+    
+    /**
+     * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price
+     */  
+    function check_sale_price() {
+
+    	if ($this->sale_price_dates_from && $this->sale_price_dates_from < strtotime('NOW')) :
+    		
+    		if ($this->sale_price && $this->price!==$this->sale_price) :
+    			
+    			$this->price = $this->sale_price;
+    			update_post_meta($this->id, 'price', $this->price);
+    			
+    			// Grouped products are affected by children
+    			$this->grouped_product_price_sync();
+    			
+    		endif;
+
+    	endif;
+    	
+    	if ($this->sale_price_dates_to && $this->sale_price_dates_to < strtotime('NOW')) :
+    		
+    		if ($this->regular_price && $this->price!==$this->regular_price) :
+    			
+    			$this->price = $this->regular_price;
+    			update_post_meta($this->id, 'price', $this->price);
+		
+				// Sale has expired - clear the schedule boxes
+				update_post_meta($this->id, 'sale_price_dates_from', '');
+				update_post_meta($this->id, 'sale_price_dates_to', '');
+			
+				// Grouped products are affected by children
+    			$this->grouped_product_price_sync();
+			
+			endif;
+    		
+    	endif;
+    }
+    
+    /**
+	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately)
+	 **/
+	function grouped_product_price_sync() {
+		
+		global $wpdb;
+		$post_parent = $wpdb->get_var("SELECT post_parent FROM $wpdb->posts WHERE ID = $this->id;");
+		
+		if (!$post_parent) return;
+		
+		$children_by_price = get_posts( array(
+			'post_parent' 	=> $post_parent,
+			'orderby' 	=> 'meta_value_num',
+			'order'		=> 'asc',
+			'meta_key'	=> 'price',
+			'posts_per_page' => 1,
+			'post_type' => 'product'
+		));
+		if ($children_by_price) :
+			$children_by_price = $children_by_price[0];
+			$child = $children_by_price->ID;
+			update_post_meta( $post_parent, 'price', get_post_meta($child, 'price', true) );
+		endif;
+	}
 
 }
