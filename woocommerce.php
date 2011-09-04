@@ -126,6 +126,8 @@ function woocommerce_init() {
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
 	
+	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	
     if (is_admin()) :
     	wp_enqueue_style( 'woocommerce_admin_styles', woocommerce::plugin_url() . '/assets/css/admin.css' );
     	wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
@@ -137,8 +139,8 @@ function woocommerce_init() {
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		endif;
     
-    	wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox.css' );
-    	wp_enqueue_style( 'jquery-ui-style', woocommerce::plugin_url() . '/assets/css/ui.css' );
+    	wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
+    	wp_enqueue_style( 'jquery-ui-style', woocommerce::plugin_url() . '/assets/css/ui'.$suffix.'.css' );
     endif;
 }
 
@@ -180,9 +182,11 @@ function woocommerce_init_roles() {
  **/
 function woocommerce_frontend_scripts() {
 	
-	wp_register_script( 'woocommerce', woocommerce::plugin_url() . '/assets/js/woocommerce.js', 'jquery', '1.0' );
-	wp_register_script( 'woocommerce_plugins', woocommerce::plugin_url() . '/assets/js/woocommerce_plugins.js', 'jquery', '1.0' );
-	wp_register_script( 'fancybox', woocommerce::plugin_url() . '/assets/js/fancybox.js', 'jquery', '1.0' );
+	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	
+	wp_register_script( 'woocommerce', woocommerce::plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce_plugins', woocommerce::plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'fancybox', woocommerce::plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0' );
 	
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('woocommerce_plugins');
@@ -205,12 +209,8 @@ function woocommerce_frontend_scripts() {
 		'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout')
 	);
 	
-	if (isset($_SESSION['min_price'])) :
-		$woocommerce_params['min_price'] = $_SESSION['min_price'];
-	endif;
-	if (isset($_SESSION['max_price'])) :
-		$woocommerce_params['max_price'] = $_SESSION['max_price'];
-	endif;
+	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];
+	if (isset($_SESSION['max_price'])) $woocommerce_params['max_price'] = $_SESSION['max_price'];
 		
 	if ( is_page(get_option('woocommerce_checkout_page_id')) || is_page(get_option('woocommerce_pay_page_id')) ) :
 		$woocommerce_params['is_checkout'] = 1;
@@ -226,11 +226,27 @@ add_action('template_redirect', 'woocommerce_frontend_scripts');
 /**
  * WooCommerce conditionals
  **/
+function is_woocommerce() {
+	// Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
+	if (is_shop() || is_product_category() || is_product_tag() || is_product()) return true; else return false;
+}
+function is_shop() {
+	if (is_post_type_archive( 'product' ) || is_page(get_option('woocommerce_shop_page_id'))) return true; else return false;
+}
+function is_product_category() {
+	return is_tax( 'product_cat' );
+}
+function is_product_tag() {
+	return is_tax( 'product_tag' );
+}
+function is_product() {
+	return is_singular( array('product') );
+}
 function is_cart() {
-	if (is_page(get_option('woocommerce_cart_page_id'))) return true; else return false;
+	return is_page(get_option('woocommerce_cart_page_id'));
 }
 function is_checkout() {
-	if (is_page(get_option('woocommerce_checkout_page_id'))) return true; else return false;
+	return is_page(get_option('woocommerce_checkout_page_id'));
 }
 if (!function_exists('is_ajax')) {
 	function is_ajax() {

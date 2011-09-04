@@ -523,7 +523,10 @@ if (woocommerce_params.is_checkout==1) {
 								catch(err) {
 								  	jQuery(form).prepend( code );
 									jQuery(form).unblock(); 
-									jQuery.scrollTo(jQuery(form).parent(), {easing:'swing'});
+									
+									jQuery('html, body').animate({
+									    scrollTop: (jQuery('form.checkout').offset().top - 100)
+									}, 1000);
 								}
 							},
 				dataType: 	"html"
