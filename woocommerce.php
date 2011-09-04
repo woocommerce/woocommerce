@@ -17,14 +17,12 @@ if (!session_id()) session_start();
  **/
 load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
 
-
 /**
  * Constants
  **/
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
 if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0");	
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
-
 
 /**
  * Include core files
@@ -43,7 +41,6 @@ include_once( 'classes/gateways/gateway.class.php' );
 include_once( 'classes/shipping/shipping.class.php' );
 include_once( 'classes/shipping/shipping_method.class.php' );
 	
-	
 /**
  * Include admin area
  **/
@@ -55,13 +52,9 @@ if (is_admin()) :
 	 **/
 	register_activation_hook( __FILE__, 'install_woocommerce' );
 	
-	function woocommerce_update_check() {
-	    if (get_site_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) install_woocommerce();
-	}
-	add_action('init', 'woocommerce_update_check');
+	if (get_site_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) add_action('init', 'install_woocommerce');
 	
 endif;
-
 
 /**
  * Include classes
@@ -78,22 +71,25 @@ include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
 include_once( 'classes/validation.class.php' ); 
 
-
 /**
- * Include shipping modules
+ * Include core shipping modules
  */
 include_once( 'classes/shipping/shipping-flat_rate.php' );
 include_once( 'classes/shipping/shipping-free_shipping.php' );
 
-
 /**
- * Include payment gateways
+ * Include core payment gateways
  */
 include_once( 'classes/gateways/gateway-banktransfer.php' );
 include_once( 'classes/gateways/gateway-cheque.php' );
 include_once( 'classes/gateways/gateway-moneybookers.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
-//include_once( 'classes/gateways/gateway-payfast.php' );
+
+/**
+ * Queue addon gateways and shipping methods
+ **/
+add_action('plugins_loaded', 'woocommerce_shipping::init', 1); 		// Load shipping methods - some may be added by plugins
+add_action('plugins_loaded', 'woocommerce_payment_gateways::init', 1); // Load payment methods - some may be added by plugins
 
 /**
  * Init class singletons
@@ -103,57 +99,25 @@ $woocommerce_customer 			= woocommerce_customer::get();				// Customer class, so
 $woocommerce_shipping 			= woocommerce_shipping::get();				// Shipping class. loads and stores shipping methods
 $woocommerce_payment_gateways 	= woocommerce_payment_gateways::get();		// Payment gateways class. loads and stores payment methods
 $woocommerce_cart 				= woocommerce_cart::get();					// Cart class, stores the cart contents
-	
-	
-/**
- * Add post thumbnail support to wordpress
- **/
-if ( !current_theme_supports( 'post-thumbnails' ) ) :
-   add_theme_support( 'post-thumbnails' );
-   add_action( 'init', 'woocommerce_remove_post_type_thumbnail_support' );
-endif;
-
-function woocommerce_remove_post_type_thumbnail_support() {
-   remove_post_type_support( 'post', 'thumbnail' );
-   remove_post_type_support( 'page', 'thumbnail' );
-}
-	
-	
-/**
- * Filters and hooks
- **/
-add_action('init', 'woocommerce_init', 0);
-add_action('plugins_loaded', 'woocommerce_shipping::init', 1); 		// Load shipping methods - some may be added by plugins
-add_action('plugins_loaded', 'woocommerce_payment_gateways::init', 1); // Load payment methods - some may be added by plugins
-
-if (get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp_head', 'woocommerce_force_ssl');
-
-add_action( 'wp_footer', 'woocommerce_demo_store' );
-add_action( 'wp_footer', 'woocommerce_sharethis' );
-
-
-/**
- * IIS compat fix/fallback
- **/
-if (!isset($_SERVER['REQUEST_URI'])) {
-	$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'],1 );
-	if (isset($_SERVER['QUERY_STRING'])) { $_SERVER['REQUEST_URI'].='?'.$_SERVER['QUERY_STRING']; }
-}
-
 
 /**
  * Init WooCommerce
  **/
+add_action('init', 'woocommerce_init', 0);
+
 function woocommerce_init() {
 	
+	ob_start();
+	
 	woocommerce_post_type();
-	
-	// Constants	
-	if (!defined('WOOCOMMERCE_USE_CSS')) :
-		if (get_option('woocommerce_frontend_css')=='no') define('WOOCOMMERCE_USE_CSS', false);
-		else define('WOOCOMMERCE_USE_CSS', true);
+
+	// Post thumbnail support
+	if ( !current_theme_supports( 'post-thumbnails' ) ) :
+		add_theme_support( 'post-thumbnails' );
+		remove_post_type_support( 'post', 'thumbnail' );
+		remove_post_type_support( 'page', 'thumbnail' );
 	endif;
-	
+
 	// Image sizes
 	add_image_size( 'shop_thumbnail', woocommerce::get_var('shop_thumbnail_image_width'), woocommerce::get_var('shop_thumbnail_image_height'), 'true' );
 	add_image_size( 'shop_catalog', woocommerce::get_var('shop_catalog_image_width'), woocommerce::get_var('shop_catalog_image_height'), 'true' );
@@ -162,33 +126,58 @@ function woocommerce_init() {
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
 	
-	ob_start();
-
-	$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : woocommerce::plugin_url() . '/assets/css/woocommerce.css';
-    if (WOOCOMMERCE_USE_CSS) wp_register_style('woocommerce_frontend_styles', $css );
-
     if (is_admin()) :
-    	wp_register_style('woocommerce_admin_styles', woocommerce::plugin_url() . '/assets/css/admin.css');
-    	wp_enqueue_style('woocommerce_admin_styles');
-    	wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+    	wp_enqueue_style( 'woocommerce_admin_styles', woocommerce::plugin_url() . '/assets/css/admin.css' );
+    	wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
     else :
-    	wp_register_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox.css' ); 
-    	wp_register_style( 'jqueryui_styles', woocommerce::plugin_url() . '/assets/css/ui.css' );
-    	
-    	wp_enqueue_style('woocommerce_frontend_styles');
-    	wp_enqueue_style('woocommerce_fancybox_styles');
-    	wp_enqueue_style('jqueryui_styles');
+    	// Optional front end css	
+		if ((defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS) || (!defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css')=='yes')) :
+			$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : woocommerce::plugin_url() . '/assets/css/woocommerce.css';
+			wp_register_style('woocommerce_frontend_styles', $css );
+			wp_enqueue_style( 'woocommerce_frontend_styles' );
+		endif;
+    
+    	wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox.css' );
+    	wp_enqueue_style( 'jquery-ui-style', woocommerce::plugin_url() . '/assets/css/ui.css' );
     endif;
 }
 
-function woocommerce_admin_scripts() {
-	
-	wp_register_script( 'woocommerce_admin', woocommerce::plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
-    wp_enqueue_script('woocommerce_admin');
-    	
-}
-add_action('admin_print_scripts', 'woocommerce_admin_scripts');
+/**
+ * Set up Roles & Capabilities
+ **/
+add_action('init', 'woocommerce_init_roles');
 
+function woocommerce_init_roles() {
+	global $wp_roles;
+
+	if (class_exists('WP_Roles')) if ( ! isset( $wp_roles ) ) $wp_roles = new WP_Roles();	
+	
+	if (is_object($wp_roles)) :
+		
+		// Customer role
+		add_role('customer', __('Customer', 'woothemes'), array(
+		    'read' => true,
+		    'edit_posts' => false,
+		    'delete_posts' => false
+		));
+	
+		// Shop manager role
+		add_role('shop_manager', __('Shop Manager', 'woothemes'), array(
+		    'read' 			=> true,
+		    'edit_posts' 	=> true,
+		    'delete_posts' 	=> true,
+		));
+
+		// Main Shop capabilities
+		$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
+		$wp_roles->add_cap( 'shop_manager', 'manage_woocommerce' );
+		
+	endif;
+}
+
+/**
+ * Enqueue frontend scripts
+ **/
 function woocommerce_frontend_scripts() {
 	
 	wp_register_script( 'woocommerce', woocommerce::plugin_url() . '/assets/js/woocommerce.js', 'jquery', '1.0' );
@@ -234,72 +223,42 @@ function woocommerce_frontend_scripts() {
 }
 add_action('template_redirect', 'woocommerce_frontend_scripts');
 
-
-/**
- * Demo Banner
- *
- * Adds a demo store banner to the site if enabled
- **/
-function woocommerce_demo_store() {
-	
-	if (get_option('woocommerce_demo_store')=='yes') :
-		
-		echo '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>';
-		
-	endif;
-}
-
-
-/**
- * Sharethis
- *
- * Adds social sharing code
- **/
-function woocommerce_sharethis() {
-	if (is_single() && get_option('woocommerce_sharethis')) :
-		
-		if (is_ssl()) :
-			$sharethis = 'https://ws.sharethis.com/button/buttons.js';
-		else :
-			$sharethis = 'http://w.sharethis.com/button/buttons.js';
-		endif;
-		
-		echo '<script type="text/javascript">var switchTo5x=true;</script><script type="text/javascript" src="'.$sharethis.'"></script><script type="text/javascript">stLight.options({publisher:"'.get_option('woocommerce_sharethis').'"});</script>';
-		
-	endif;
-}
-
-
 /**
  * WooCommerce conditionals
  **/
 function is_cart() {
-	if (is_page(get_option('woocommerce_cart_page_id'))) return true;
-	return false;
+	if (is_page(get_option('woocommerce_cart_page_id'))) return true; else return false;
 }
 function is_checkout() {
-	if (
-		is_page(get_option('woocommerce_checkout_page_id'))
-	) return true;
-	return false;
+	if (is_page(get_option('woocommerce_checkout_page_id'))) return true; else return false;
 }
 if (!function_exists('is_ajax')) {
 	function is_ajax() {
-		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true;
-		return false;
+		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
 	}
 }
-
 
 /**
  * Force SSL (if enabled)
  **/
+if (get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp', 'woocommerce_force_ssl');
+
 function woocommerce_force_ssl() {
 	if (is_checkout() && !is_ssl()) :
 		wp_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
 		exit;
 	endif;
 }
+
+/**
+ * Force SSL for images
+ **/
+add_filter('post_thumbnail_html', 'woocommerce_force_ssl_images');
+add_filter('widget_text', 'woocommerce_force_ssl_images');
+add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
+add_filter('wp_get_attachment_image_attributes', 'woocommerce_force_ssl_images');
+add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
+
 function woocommerce_force_ssl_images( $content ) {
 	if (is_ssl()) :
 		if (is_array($content)) :
@@ -310,12 +269,14 @@ function woocommerce_force_ssl_images( $content ) {
 	endif;
 	return $content;
 }
-add_filter('post_thumbnail_html', 'woocommerce_force_ssl_images');
-add_filter('widget_text', 'woocommerce_force_ssl_images');
-add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
-add_filter('wp_get_attachment_image_attributes', 'woocommerce_force_ssl_images');
-add_filter('wp_get_attachment_url', 'woocommerce_force_ssl_images');
 
+/**
+ * IIS compatability fix/fallback
+ **/
+if (!isset($_SERVER['REQUEST_URI'])) {
+	$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'],1 );
+	if (isset($_SERVER['QUERY_STRING'])) { $_SERVER['REQUEST_URI'].='?'.$_SERVER['QUERY_STRING']; }
+}
 
 /**
  * Currency
@@ -354,7 +315,6 @@ function get_woocommerce_currency_symbol() {
 	return apply_filters('woocommerce_currency_symbol', $currency_symbol, $currency);
 }
 
-
 /**
  * Price Formatting
  **/
@@ -389,7 +349,6 @@ function woocommerce_price( $price, $args = array() ) {
 	
 	return $return;
 }
-
 
 /**
  * Variation Formatting
@@ -430,37 +389,12 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 	endif;
 }
 
-
-/**
- * Letter to number
- **/
-function woocommerce_let_to_num($v) {
-    $l = substr($v, -1);
-    $ret = substr($v, 0, -1);
-    switch(strtoupper($l)){
-    case 'P':
-        $ret *= 1024;
-    case 'T':
-        $ret *= 1024;
-    case 'G':
-        $ret *= 1024;
-    case 'M':
-        $ret *= 1024;
-    case 'K':
-        $ret *= 1024;
-        break;
-    }
-    return $ret;
-}
-
-
 /**
  * Clean variables
  **/
 function woocommerce_clean( $var ) {
-	return strip_tags(stripslashes(trim($var)));
+	return trim(strip_tags(stripslashes($var)));
 }
-
 
 /**
  * Rating field for comments
@@ -485,7 +419,6 @@ function woocommerce_check_comment_rating($comment_data) {
 	return $comment_data;
 }
 add_filter('preprocess_comment', 'woocommerce_check_comment_rating', 0);	
-
 
 /**
  * Review comments template
@@ -517,7 +450,6 @@ function woocommerce_comments($comment, $args, $depth) {
 	<?php
 }
 
-
 /**
  * Exclude order comments from front end
  **/
@@ -539,37 +471,3 @@ function woocommerce_exclude_order_comments( $clauses ) {
 
 }
 if (!is_admin()) add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
-
-
-/**
- * Set up Roles & Capabilities
- **/
-function woocommerce_init_roles() {
-	global $wp_roles;
-
-	if (class_exists('WP_Roles')) if ( ! isset( $wp_roles ) ) $wp_roles = new WP_Roles();	
-	
-	if (is_object($wp_roles)) :
-		
-		// Customer role
-		add_role('customer', __('Customer', 'woothemes'), array(
-		    'read' => true,
-		    'edit_posts' => false,
-		    'delete_posts' => false
-		));
-	
-		// Shop manager role
-		add_role('shop_manager', __('Shop Manager', 'woothemes'), array(
-		    'read' 			=> true,
-		    'edit_posts' 	=> true,
-		    'delete_posts' 	=> true,
-		));
-
-		// Main Shop capabilities
-		$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
-		$wp_roles->add_cap( 'shop_manager', 'manage_woocommerce' );
-		
-	endif;
-}
-
-add_action('init', 'woocommerce_init_roles');

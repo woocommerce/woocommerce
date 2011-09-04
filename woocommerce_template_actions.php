@@ -89,3 +89,6 @@ function woocommerce_body_classes_check () {
 
 /* Cart */
 add_action('cart-collaterals', 'woocommerce_cross_sell_display');
+
+/* Footer */
+add_action( 'wp_footer', 'woocommerce_demo_store' );

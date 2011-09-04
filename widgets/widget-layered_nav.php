@@ -1,10 +1,91 @@
 <?php
 /**
- * Layered Navigation Widget
+ * Layered Navigation Widget and related functions
  * 
  * @package		WooCommerce
  * @category	Widgets
  * @author		WooThemes
+ */
+ 
+/**
+ * Layered Nav Init
+ */
+add_action('init', 'woocommerce_layered_nav_init', 1);
+
+function woocommerce_layered_nav_init() {
+
+	global $_chosen_attributes, $wpdb;
+	
+	$_chosen_attributes = array();
+	
+	$attribute_taxonomies = woocommerce::$attribute_taxonomies;
+	if ( $attribute_taxonomies ) :
+		foreach ($attribute_taxonomies as $tax) :
+	    	
+	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
+	    	$taxonomy = woocommerce::attribute_name($attribute);
+	    	$name = 'filter_' . $attribute;
+	    	
+	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) $_chosen_attributes[$taxonomy] = explode(',', $_GET[$name] );
+	    		
+	    endforeach;    	
+    endif;
+
+}
+
+/**
+ * Layered Nav post filter
+ */
+add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
+
+function woocommerce_layered_nav_query( $filtered_posts ) {
+	
+	global $_chosen_attributes, $wpdb;
+	
+	if (sizeof($_chosen_attributes)>0) :
+		
+		$matched_products = array();
+		$filtered = false;
+		
+		foreach ($_chosen_attributes as $attribute => $values) :
+			if (sizeof($values)>0) :
+				foreach ($values as $value) :
+					
+					$posts = get_objects_in_term( $value, $attribute );
+					if (!is_wp_error($posts) && (sizeof($matched_products)>0 || $filtered)) :
+						$matched_products = array_intersect($posts, $matched_products);
+					elseif (!is_wp_error($posts)) :
+						$matched_products = $posts;
+					endif;
+					
+					$filtered = true;
+					
+				endforeach;
+			endif;
+		endforeach;
+		
+		if ($filtered) :
+			
+			woocommerce::$query['layered_nav_post__in'] = $matched_products;
+			woocommerce::$query['layered_nav_post__in'][] = 0;
+			
+			if (sizeof($filtered_posts)==0) :
+				$filtered_posts = $matched_products;
+				$filtered_posts[] = 0;
+			else :
+				$filtered_posts = array_intersect($filtered_posts, $matched_products);
+				$filtered_posts[] = 0;
+			endif;
+			
+		endif;
+	
+	endif;
+
+	return (array) $filtered_posts;
+}
+
+/**
+ * Layered Nav Widget
  */
 class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	
@@ -36,7 +117,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $woocommerce_query;
+		global $_chosen_attributes, $wpdb;
 				
 		$title = $instance['title'];
 		$taxonomy = woocommerce::attribute_name($instance['attribute']);
@@ -66,7 +147,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			
 				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 				
-				$count = sizeof(array_intersect($_products_in_term, $woocommerce_query['filtered_product_ids']));
+				$count = sizeof(array_intersect($_products_in_term, woocommerce::$query['filtered_product_ids']));
 
 				if ($count>0) $found = true;
 				

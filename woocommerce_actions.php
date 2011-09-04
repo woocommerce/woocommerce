@@ -15,10 +15,10 @@
  *		- Restore an order via a link
  *		- Cancel a pending order
  *		- Download a file
- *		- Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
+ *		- Order Status completed - allow customer to access Downloadable product
  *
  * @package		WooCommerce
- * @category	Emails
+ * @category	Actions
  * @author		WooThemes
  */
 

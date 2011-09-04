@@ -1,6 +1,6 @@
 <?php 
 /**
- * Price Filter Widget
+ * Price Filter Widget and related functions
  * 
  * Generates a range slider to filter products by price
  *
@@ -9,25 +9,74 @@
  * @author		WooThemes
  */
  
+/**
+ * Price filter Init
+ */
+add_action('init', 'woocommerce_price_filter_init');
+
 function woocommerce_price_filter_init() {
 	
 	unset($_SESSION['min_price']);
 	unset($_SESSION['max_price']);
 	
 	if (isset($_GET['min_price'])) :
-		
 		$_SESSION['min_price'] = $_GET['min_price'];
-		
 	endif;
 	if (isset($_GET['max_price'])) :
-		
 		$_SESSION['max_price'] = $_GET['max_price'];
-		
 	endif;
 	
 }
-add_action('init', 'woocommerce_price_filter_init');
 
+/**
+ * Price Filter post filter
+ */
+add_filter('loop-shop-posts-in', 'woocommerce_price_filter');
+
+function woocommerce_price_filter( $filtered_posts ) {
+
+	if (isset($_GET['max_price']) && isset($_GET['min_price'])) :
+		
+		$matched_products = array();
+		
+		$matched_products_query = get_posts(array(
+			'post_type' => 'product',
+			'post_status' => 'publish',
+			'posts_per_page' => -1,
+			'meta_query' => array(
+				array(
+					'key' => 'price',
+					'value' => array( $_GET['min_price'], $_GET['max_price'] ),
+					'type' => 'NUMERIC',
+					'compare' => 'BETWEEN'
+				)
+			)
+		));
+
+		if ($matched_products_query) :
+			foreach ($matched_products_query as $product) :
+				$matched_products[] = $product->ID;
+				if ($product->post_parent>0) $matched_products[] = $product->post_parent;
+			endforeach;
+		endif;
+		
+		// Filter the id's
+		if (sizeof($filtered_posts)==0) :
+			$filtered_posts = $matched_products;
+			$filtered_posts[] = 0;
+		else :
+			$filtered_posts = array_intersect($filtered_posts, $matched_products);
+			$filtered_posts[] = 0;
+		endif;
+		
+	endif;
+	
+	return (array) $filtered_posts;
+}
+
+/**
+ * Price Filter post Widget
+ */
 class WooCommerce_Widget_Price_Filter extends WP_Widget {
 
 	/** Variables to setup the widget. */
@@ -58,7 +107,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $woocommerce_query;
+		global $_chosen_attributes, $wpdb;
 		
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
@@ -83,9 +132,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		FROM $wpdb->posts
 		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 		WHERE meta_key = 'price' AND (
-			$wpdb->posts.ID IN (".implode(',', $woocommerce_query['layered_nav_product_ids']).") 
+			$wpdb->posts.ID IN (".implode(',', woocommerce::$query['layered_nav_product_ids']).") 
 			OR (
-				$wpdb->posts.post_parent IN (".implode(',', $woocommerce_query['layered_nav_product_ids']).")
+				$wpdb->posts.post_parent IN (".implode(',', woocommerce::$query['layered_nav_product_ids']).")
 				AND $wpdb->posts.post_parent != 0
 			)
 		)"));

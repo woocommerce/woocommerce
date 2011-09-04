@@ -22,6 +22,15 @@ function woocommerce_admin_init() {
 add_action('admin_init', 'woocommerce_admin_init');
 
 /**
+ * Admin Scripts
+ */
+function woocommerce_admin_scripts() {
+	wp_register_script( 'woocommerce_admin', woocommerce::plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
+    wp_enqueue_script('woocommerce_admin');
+}
+add_action('admin_print_scripts', 'woocommerce_admin_scripts');
+
+/**
  * Admin Menus
  * 
  * Sets up the admin menus in wordpress.

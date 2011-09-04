@@ -15,12 +15,12 @@ class woocommerce {
 	public static $errors = array(); // Stores store errors
 	public static $messages = array(); // Stores store messages
 	public static $attribute_taxonomies; // Stores the attribute taxonomies used in the store
-	
 	public static $plugin_url;
 	public static $plugin_path;
+	public static $query;
 		
 	/** constructor */
-	private function __construct () {
+	private function __construct() {
 		
 		// Vars
 		if (isset($_SESSION['errors'])) self::$errors = $_SESSION['errors'];
@@ -28,6 +28,16 @@ class woocommerce {
 		
 		unset($_SESSION['messages']);
 		unset($_SESSION['errors']);
+		
+		// Query vars
+		self::$query = array(
+			'unfiltered_product_ids' 	=> array(), // Unfilted product ids (before layered nav etc)
+			'filtered_product_ids' 		=> array(), // Filted product ids (after layered nav)
+			'post__in' 					=> array(), // Product id's that match the layered nav + price filter
+			'meta_query' 				=> '', // The meta query for the page
+			'layered_nav_post__in' 		=> array(), // posts matching layered nav only
+			'layered_nav_product_ids' 	=> array() // Stores posts matching layered nav, so price filter can find max price in view
+		);
 		
 		// Hooks
 		add_filter('wp_redirect', array(&$this, 'redirect'), 1, 2);
