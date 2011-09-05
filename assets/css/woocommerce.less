@@ -3,10 +3,6 @@ overflow:hidden;
 zoom:1;
 }
 
-.clear() {
-clear: both;
-} 
-
 .border_radius(@radius:4px) {
 -webkit-border-radius:@radius;
 -moz-border-radius:@radius;
@@ -80,9 +76,7 @@ background: -moz-gradient(center top, @from 0%, @to 100%);
 transition:@selector @animation @duration;
 }
 
-
 /* Global/Helpers/Clears */
-
 .clear { clear: both; }
 .nobr { white-space: nowrap; }
 .info {
@@ -143,8 +137,7 @@ small.note {
 }
 
 #breadcrumb {
-	overflow: hidden;
-	zoom: 1;
+	.clearfix();
 	margin: 0 0 1em;
 	padding: 0;
 	font-size: 0.92em;
@@ -397,34 +390,6 @@ span.onsale {
 	}
 }
 
-table.shop_attributes {
-	border: 0;
-	border-top: 1px dotted #ccc;
-	th {
-		width: 150px;
-		font-weight: bold;
-		padding: 8px;
-		color: black;
-		border-bottom: 1px dotted #ccc;
-		margin: 0;
-		line-height: 1.5em;
-	}
-	td {
-		font-style: italic;
-		padding: 0;
-		border-bottom: 1px dotted #ccc;
-		margin: 0;
-		line-height: 1.5em;
-		p {
-			margin: 0;
-			padding: 8px;
-		}
-	}
-	.alt td, .alt th {
-		background: #f9f9f9;
-	}
-}
-
 /* =Buttons
 -------------------------------------------------------------- */
 a.button, button.button, input.button, #review_form #submit {
@@ -475,6 +440,8 @@ a.button:hover, button.button:hover, input.button:hover, #review_form #submit:ho
 	background:#0588b5;
 }
 
+/* =Reviews/comments
+-------------------------------------------------------------- */
 #reviews {
 	h2 small {
 		float: right;
@@ -616,6 +583,35 @@ p.stars {
 
 /* =Tables
 -------------------------------------------------------------- */
+
+table.shop_attributes {
+	border: 0;
+	border-top: 1px dotted #ccc;
+	th {
+		width: 150px;
+		font-weight: bold;
+		padding: 8px;
+		color: black;
+		border-bottom: 1px dotted #ccc;
+		margin: 0;
+		line-height: 1.5em;
+	}
+	td {
+		font-style: italic;
+		padding: 0;
+		border-bottom: 1px dotted #ccc;
+		margin: 0;
+		line-height: 1.5em;
+		p {
+			margin: 0;
+			padding: 8px;
+		}
+	}
+	.alt td, .alt th {
+		background: #f9f9f9;
+	}
+}
+
 table.shop_table {
 	border: 1px solid #E7E7E7;
 	margin: 0px -1px 24px 0px;
@@ -896,15 +892,6 @@ td.quantity {
 
 form, #content {
 	.form-row {
-		/*display: block;
-		padding: 1px;
-		-webkit-box-sizing:border-box;
-		-moz-box-sizing:border-box;
-		box-sizing:border-box;
-		width: 100%;
-		border: 1px solid #ccc;
-		outline: 3px solid #f5f5f5;
-		background: #fff;*/
 		input.input-text, textarea {
 			-webkit-box-sizing:border-box;
 			-moz-box-sizing:border-box;
@@ -945,9 +932,6 @@ form, #content {
 
 /* =Checkout
 -------------------------------------------------------------- */
-
-
-
 form.login {
 	border: 1px solid #ccc;
 	padding: 20px;
@@ -1143,6 +1127,24 @@ div.shipping-address {
 			line-height: 2em;
 		}
 	}
+	.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #d3d3d3; background: #e6e6e6; font-weight: normal; color: #555555; }
+	.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dadada; font-weight: normal; color: #212121; }
+	.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #ffffff; font-weight: normal; color: #212121; }
+	
+	.ui-corner-all { -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; }
+	
+	.ui-slider { position: relative; text-align: left; }
+	.ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
+	.ui-slider .ui-slider-range { position: absolute; z-index: 1; font-size: .7em; display: block; border: 0; background-position: 0 0; }
+	
+	.price_slider_wrapper .ui-widget-content { border: 1px solid #aaaaaa; background: #ffffff; color: #222222; }
+	.price_slider_wrapper .ui-widget-header { border: 1px solid #aaaaaa; background: #cccccc; color: #222222; font-weight: bold; }
+	
+	.ui-slider-horizontal { height: .8em; }
+	.ui-slider-horizontal .ui-slider-handle { top: -.3em; margin-left: -.6em; }
+	.ui-slider-horizontal .ui-slider-range { top: 0; height: 100%; }
+	.ui-slider-horizontal .ui-slider-range-min { left: 0; }
+	.ui-slider-horizontal .ui-slider-range-max { right: 0; }
 }
 
 .widget_layered_nav ul {

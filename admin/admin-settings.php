@@ -88,6 +88,14 @@ $options_settings = apply_filters('woocommerce_options_settings', array(
 	),
 	
 	array(  
+		'name' => __('Lightbox', 'woothemes'),
+		'desc' 		=> __('Enable WooCommerce lightbox?', 'woothemes'),
+		'id' 		=> 'woocommerce_enable_lightbox',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
+	),
+	
+	array(  
 		'name' => __('Demo store', 'woothemes'),
 		'desc' 		=> __('Enable the "Demo Store" notice on your site', 'woothemes'),
 		'id' 		=> 'woocommerce_demo_store',

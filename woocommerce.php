@@ -139,8 +139,7 @@ function woocommerce_init() {
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		endif;
     
-    	wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
-    	wp_enqueue_style( 'jquery-ui-style', woocommerce::plugin_url() . '/assets/css/ui'.$suffix.'.css' );
+    	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
 
@@ -191,7 +190,7 @@ function woocommerce_frontend_scripts() {
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('woocommerce_plugins');
 	wp_enqueue_script('woocommerce');
-	wp_enqueue_script('fancybox');
+	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_script('fancybox');
     	
 	/* Script variables */
 	$woocommerce_params = array(
