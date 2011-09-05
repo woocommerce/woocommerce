@@ -156,15 +156,11 @@ if (!function_exists('woocommerce_output_product_data_tabs')) {
 		if (isset($_COOKIE["current_tab"])) $current_tab = $_COOKIE["current_tab"]; else $current_tab = '#tab-description';
 		
 		?>
-		<div id="tabs">
+		<div class="woocommerce_tabs">
 			<ul class="tabs">
-			
 				<?php do_action('woocommerce_product_tabs', $current_tab); ?>
-				
 			</ul>			
-			
 			<?php do_action('woocommerce_product_tab_panels'); ?>
-			
 		</div>
 		<?php
 		

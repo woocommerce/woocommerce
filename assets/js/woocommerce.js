@@ -217,24 +217,29 @@ jQuery(function(){
 	}).change();
 	
 	/* Tabs */
-	jQuery('#tabs .panel:not(#tabs .panel)').hide();
-	jQuery('#tabs li a').click(function(){
+	jQuery('div.woocommerce_tabs .panel').hide();
+	jQuery('div.woocommerce_tabs ul.tabs li a').click(function(){
+	
+		var tabs_wrapper = jQuery(this).closest('div.woocommerce_tabs');
 		var href = jQuery(this).attr('href');
-		jQuery('#tabs li').removeClass('active');
-		jQuery('div.panel').hide();
+		
+		jQuery('ul.tabs li.active', tabs_wrapper).removeClass('active');
+		jQuery('div.panel', tabs_wrapper).hide();
 		jQuery('div' + href).show();
 		jQuery(this).parent().addClass('active');
 		jQuery.cookie('current_tab', href);
-		return false;
+		
+		return false;	
 	});
-	if (jQuery('#tabs li.active').size()==0) {
-		jQuery('#tabs li:first a').click();
-	} else {
-		jQuery('#tabs li.active a').click();
-	}
+	jQuery('div.woocommerce_tabs').each(function() {
+		if (jQuery('ul.tabs li.active', jQuery(this)).size()==0) {
+			jQuery('ul.tabs li:first a', jQuery(this)).click();
+		} else { 
+			jQuery('ul.tabs li.active a', jQuery(this)).click();
+		}
+	});
 	
 	/* Shipping calculator */
-	
 	jQuery('.shipping-calculator-form').hide();
 	
 	jQuery('.shipping-calculator-button').click(function() {
