@@ -649,6 +649,9 @@ function woocommerce_update_options($options) {
         
         do_action('woocommerce_update_options');
         
+        // Permalinks flush
+        flush_rewrite_rules( false );
+        
         wp_redirect( add_query_arg('saved', 'true', admin_url('admin.php?page=woocommerce') ));
     }
 }
@@ -1003,7 +1006,11 @@ function woocommerce_admin_fields($options) {
 function woocommerce_settings() {
     global $options_settings;
     woocommerce_update_options( $options_settings );
-    if (isset($_GET['saved']) && $_GET['saved']) echo '<div id="message" class="updated fade"><p><strong>'.__('Your settings have been saved.', 'woothemes').'</strong></p></div>';
+    if (isset($_GET['saved']) && $_GET['saved']) :
+    	echo '<div id="message" class="updated fade"><p><strong>'.__('Your settings have been saved.', 'woothemes').'</strong></p></div>';
+    	// Permalinks flush
+        flush_rewrite_rules( false );
+    endif;
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">

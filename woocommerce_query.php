@@ -19,7 +19,7 @@ function woocommerce_parse_query( $q ) {
 	if (is_admin()) return;
 	
 	// Apply to main loop only
-    remove_filter( 'parse_query', 'woocommerce_parse_query' );
+    //remove_filter( 'parse_query', 'woocommerce_parse_query' );
     
 	// Only apply to product categories, the product post archive, the shop page, and product tags
     if (true == $q->query_vars['suppress_filters'] || (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' ))) return;
@@ -86,6 +86,14 @@ function woocommerce_parse_query( $q ) {
 
     // We're on a shop page so queue the woocommerce_get_products_in_view function
     add_action('wp', 'woocommerce_get_products_in_view', 2);
+}
+
+/**
+ * Remove parse_query so it only applies to main loop
+ */
+add_action('wp', 'woocommerce_remove_parse_query');
+function woocommerce_remove_parse_query() {
+	remove_filter( 'parse_query', 'woocommerce_parse_query' ); 
 }
 
 /**
