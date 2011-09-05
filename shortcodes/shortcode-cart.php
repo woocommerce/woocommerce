@@ -103,7 +103,7 @@ function woocommerce_cart( $atts ) {
 									elseif (has_post_thumbnail($values['product_id'])) :
 										echo get_the_post_thumbnail($values['product_id'], 'shop_thumbnail'); 
 									else :
-										echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_var('shop_thumbnail_image_width').'" height="'.woocommerce::get_var('shop_thumbnail_image_height').'" />'; 
+										echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_image_size('shop_thumbnail_image_width').'" height="'.woocommerce::get_image_size('shop_thumbnail_image_height').'" />'; 
 									endif;
 								?>
 								</a>

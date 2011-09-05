@@ -517,8 +517,8 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
 		
 		global $post;
 		
-		if (!$placeholder_width) $placeholder_width = woocommerce::get_var('shop_single_image_width');
-		if (!$placeholder_height) $placeholder_height = woocommerce::get_var('shop_single_image_height');
+		if (!$placeholder_width) $placeholder_width = woocommerce::get_image_size('shop_single_image_width');
+		if (!$placeholder_height) $placeholder_height = woocommerce::get_image_size('shop_single_image_height');
 		
 		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
 		

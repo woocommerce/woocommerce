@@ -83,11 +83,8 @@ class woocommerce {
 		if ($label) return $label; else return ucfirst($name);
 	}
 	
-	
 	/**
 	 * Get the plugin url
-	 *
-	 * @return  string	url
 	 */
 	public static function plugin_url() { 
 		if(self::$plugin_url) return self::$plugin_url;
@@ -97,13 +94,10 @@ class woocommerce {
 		else :
 			return self::$plugin_url = WP_PLUGIN_URL . "/" . plugin_basename( dirname(dirname(__FILE__))); 
 		endif;
-		
 	}
 	
 	/**
 	 * Get the plugin path
-	 *
-	 * @return  string	url
 	 */
 	public static function plugin_path() { 	
 		if(self::$plugin_path) return self::$plugin_path;
@@ -112,8 +106,6 @@ class woocommerce {
 	 
 	/**
 	 * Return the URL with https if SSL is on
-	 *
-	 * @return  string	url
 	 */
 	public static function force_ssl( $url ) { 	
 		if (is_ssl()) $url = str_replace('http:', 'https:', $url);
@@ -121,17 +113,13 @@ class woocommerce {
 	 }
 	
 	/**
-	 * Get a var
+	 * Get an image size
 	 *
-	 * Variable is filtered by woocommerce_get_var_{var name}
-	 *
-	 * @param   string	var
-	 * @return  string	variable
+	 * Variable is filtered by woocommerce_get_image_size_{image_size}
 	 */
-	public static function get_var($var) {
+	public static function get_image_size( $image_size ) {
 		$return = '';
-		switch ($var) :
-			case "version" : $return = WOOCOMMERCE_VERSION; break;
+		switch ($image_size) :
 			case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
 			case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
 			case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
@@ -139,20 +127,16 @@ class woocommerce {
 			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
 			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
 		endswitch;
-		return apply_filters( 'woocommerce_get_var_'.$var, $return );
+		return apply_filters( 'woocommerce_get_image_size_'.$image_size, $return );
 	}
 	
 	/**
 	 * Add an error
-	 *
-	 * @param   string	error
 	 */
 	function add_error( $error ) { self::$errors[] = $error; }
 	
 	/**
 	 * Add a message
-	 *
-	 * @param   string	message
 	 */
 	function add_message( $message ) { self::$messages[] = $message; }
 	
@@ -165,15 +149,11 @@ class woocommerce {
 	
 	/**
 	 * Get error count
-	 *
-	 * @return   int
 	 */
 	function error_count() { return sizeof(self::$errors); }
 	
 	/**
 	 * Get message count
-	 *
-	 * @return   int
 	 */
 	function message_count() { return sizeof(self::$messages); }
 	
@@ -197,24 +177,16 @@ class woocommerce {
 		endif;
 	}
 	
-	public static function nonce_field ($action, $referer = true , $echo = true) {
-		
-		$name = '_n';
-		$action = 'woocommerce-' . $action;
-		
-		return wp_nonce_field($action, $name, $referer, $echo);
-		
-	}
+	/**
+	 * Return a nonce field
+	 */
+	public static function nonce_field ($action, $referer = true , $echo = true) { return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo); }
 	
-	public static function nonce_url ($action, $url = '') {
-		
-		$name = '_n';
-		$action = 'woocommerce-' . $action;
-		
-		$url = add_query_arg( $name, wp_create_nonce( $action ), $url);
-		
-		return $url;
-	}
+	/**
+	 * Return a url with a nonce appended
+	 */
+	public static function nonce_url ($action, $url = '') { return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url); }
+	
 	/**
 	 * Check a nonce and sets woocommerce error in case it is invalid
 	 * To fail silently, set the error_message to an empty string
@@ -234,12 +206,6 @@ class woocommerce {
 		if( $error_message === false ) $error_message = __('Action failed. Please refresh the page and retry.', 'woothemes'); 
 		
 		if(!in_array($method, array('_GET', '_POST', '_REQUEST'))) $method = '_POST';
-		
-		/*
-		$request = $GLOBALS[$method];
-		
-		if ( isset($request[$name]) && wp_verify_nonce($request[$name], $action) ) return true;
-		*/
 		
 		if ( isset($_REQUEST[$name]) && wp_verify_nonce($_REQUEST[$name], $action) ) return true;
 		
@@ -262,7 +228,10 @@ class woocommerce {
 		return $location;
 	}
 	
-	static public function shortcode_wrapper ($function, $atts=array()) {
+	/**
+	 * Shortcode cache
+	 */
+	static public function shortcode_wrapper($function, $atts=array()) {
 		if( $content = woocommerce::cache_get( $function . '-shortcode', $atts ) ) return $content;
 		
 		ob_start();
@@ -273,7 +242,6 @@ class woocommerce {
 	/**
 	 * Cache API
 	 */
-	
 	public static function cache ( $id, $data, $args=array() ) {
 
 		if( ! isset(self::$_cache[ $id ]) ) self::$_cache[ $id ] = array();

@@ -119,9 +119,9 @@ function woocommerce_init() {
 	endif;
 
 	// Image sizes
-	add_image_size( 'shop_thumbnail', woocommerce::get_var('shop_thumbnail_image_width'), woocommerce::get_var('shop_thumbnail_image_height'), 'true' );
-	add_image_size( 'shop_catalog', woocommerce::get_var('shop_catalog_image_width'), woocommerce::get_var('shop_catalog_image_height'), 'true' );
-	add_image_size( 'shop_single', woocommerce::get_var('shop_single_image_width'), woocommerce::get_var('shop_single_image_height'), 'true' );
+	add_image_size( 'shop_thumbnail', woocommerce::get_image_size('shop_thumbnail_image_width'), woocommerce::get_image_size('shop_thumbnail_image_height'), 'true' );
+	add_image_size( 'shop_catalog', woocommerce::get_image_size('shop_catalog_image_width'), woocommerce::get_image_size('shop_catalog_image_height'), 'true' );
+	add_image_size( 'shop_single', woocommerce::get_image_size('shop_single_image_width'), woocommerce::get_image_size('shop_single_image_height'), 'true' );
 
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
