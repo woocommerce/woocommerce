@@ -13,6 +13,7 @@ class free_shipping extends woocommerce_shipping_method {
 	
 	public function __construct() { 
         $this->id 			= 'free_shipping';
+        $this->method_title = __('Free shipping', 'woothemes');
         $this->enabled		= get_option('woocommerce_free_shipping_enabled');
 		$this->title 		= get_option('woocommerce_free_shipping_title');
 		$this->min_amount 	= get_option('woocommerce_free_shipping_minimum_amount');

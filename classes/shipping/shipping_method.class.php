@@ -12,6 +12,7 @@
 class woocommerce_shipping_method {
 	
 	var $id;
+	var $method_title;
 	var $title;
 	var $availability;
 	var $countries;

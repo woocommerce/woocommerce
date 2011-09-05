@@ -13,6 +13,7 @@ class flat_rate extends woocommerce_shipping_method {
 	
 	public function __construct() { 
         $this->id 			= 'flat_rate';
+        $this->method_title = __('Flat rate', 'woothemes');
         $this->enabled		= get_option('woocommerce_flat_rate_enabled');
 		$this->title 		= get_option('woocommerce_flat_rate_title');
 		$this->availability = get_option('woocommerce_flat_rate_availability');

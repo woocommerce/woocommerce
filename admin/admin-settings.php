@@ -859,7 +859,7 @@ function woocommerce_admin_fields($options) {
 	            	
 	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
 	            		
-	            		$title = ($method->title) ? ucwords($method->title) : ucwords($method->id);
+	            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
 	            		
 	            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
 					

@@ -69,6 +69,8 @@ function woocommerce_product_data_box() {
 				
 				// Ordering
 				woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Sort Order', 'ordering', 'woothemes'), 'value' => $post->menu_order ) );
+				
+				do_action('woocommerce_product_options_grouping');
 			
 			echo '</div>';
 			
@@ -80,6 +82,8 @@ function woocommerce_product_data_box() {
 				else:
 					echo '<input type="hidden" name="sku" value="'.get_post_meta($thepostid, 'sku', true).'" />';
 				endif;
+				
+				do_action('woocommerce_product_options_sku');
 			
 			echo '</div>';
 						
@@ -107,6 +111,8 @@ function woocommerce_product_data_box() {
 				echo '" placeholder="' . __('To&hellip;', 'woothemes') . '" maxlength="10" />
 							<span class="description">' . __('Date format', 'woothemes') . ': <code>YYYY-MM-DD</code></span>
 						</p>';
+						
+				do_action('woocommerce_product_options_pricing');
 					
 			echo '</div>';
 			
@@ -118,8 +124,12 @@ function woocommerce_product_data_box() {
 				else:
 					echo '<input type="hidden" name="weight" value="'.get_post_meta($thepostid, 'weight', true).'" />';
 				endif;
+				
+				do_action('woocommerce_product_options_weight');
 			
 			echo '</div>';
+			
+			do_action('woocommerce_product_options_general_product_data');
 
 			?>
 		</div>
@@ -143,7 +153,8 @@ function woocommerce_product_data_box() {
     		endforeach;
 
 			woocommerce_wp_select( array( 'id' => 'tax_class', 'label' => __('Tax Class', 'woothemes'), 'options' => $classes_options ) );
-
+			
+			do_action('woocommerce_product_options_tax');
 			?>
 		</div>
 		<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
@@ -159,6 +170,8 @@ function woocommerce_product_data_box() {
 				'outofstock' => __('Out of stock', 'woothemes')
 			) ) );
 			
+			do_action('woocommerce_product_options_stock');
+			
 			echo '<div class="stock_fields">';
 			
 			// Stock
@@ -170,6 +183,8 @@ function woocommerce_product_data_box() {
 				'notify' => __('Allow, but notify customer', 'woothemes'),
 				'yes' => __('Allow', 'woothemes')
 			) ) );
+			
+			do_action('woocommerce_product_options_stock_fields');
 			
 			echo '</div>';
 			?>			
