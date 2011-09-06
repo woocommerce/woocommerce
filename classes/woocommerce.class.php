@@ -285,7 +285,7 @@ class woocommerce {
 		/**
 		 * Shortcode cache
 		 */
-		static public function shortcode_wrapper($function, $atts=array()) {
+		function shortcode_wrapper($function, $atts=array()) {
 			if( $content = $this->cache_get( $function . '-shortcode', $atts ) ) return $content;
 			
 			ob_start();

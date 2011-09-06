@@ -11,7 +11,7 @@
  */  
 class flat_rate extends woocommerce_shipping_method {
 	
-	public function __construct() { 
+	function __construct() { 
         $this->id 			= 'flat_rate';
         $this->method_title = __('Flat rate', 'woothemes');
         $this->enabled		= get_option('woocommerce_flat_rate_enabled');
@@ -29,7 +29,7 @@ class flat_rate extends woocommerce_shipping_method {
 		add_option('woocommerce_flat_rate_tax_status', 'taxable');
     } 
     
-    public function calculate_shipping() {
+    function calculate_shipping() {
     	global $woocommerce;
     	
     	$_tax = &new woocommerce_tax();
@@ -84,7 +84,7 @@ class flat_rate extends woocommerce_shipping_method {
 		endif;			
     } 
     
-    public function admin_options() {
+    function admin_options() {
     	global $woocommerce;
     	?>
     	<h3><?php _e('Flat Rates', 'woothemes'); ?></h3>
@@ -178,7 +178,7 @@ class flat_rate extends woocommerce_shipping_method {
     	<?php
     }
     
-    public function process_admin_options() {
+    function process_admin_options() {
 
    		if(isset($_POST['woocommerce_flat_rate_tax_status'])) update_option('woocommerce_flat_rate_tax_status', woocommerce_clean($_POST['woocommerce_flat_rate_tax_status'])); else delete_option('woocommerce_flat_rate_tax_status');
    		

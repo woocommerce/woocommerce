@@ -11,7 +11,7 @@
  */ 
 class free_shipping extends woocommerce_shipping_method {
 	
-	public function __construct() { 
+	function __construct() { 
         $this->id 			= 'free_shipping';
         $this->method_title = __('Free shipping', 'woothemes');
         $this->enabled		= get_option('woocommerce_free_shipping_enabled');
@@ -25,13 +25,13 @@ class free_shipping extends woocommerce_shipping_method {
 		add_option('woocommerce_free_shipping_title', 'Free Shipping');
     } 
     
-    public function calculate_shipping() {
+    function calculate_shipping() {
 		$this->shipping_total 	= 0;
 		$this->shipping_tax 	= 0;
 		$this->shipping_label 	= $this->title;	    	
     }
     
-    public function admin_options() {
+    function admin_options() {
     	global $woocommerce;
     	?>
     	<h3><?php _e('Free Shipping', 'woothemes'); ?></h3>
@@ -98,7 +98,7 @@ class free_shipping extends woocommerce_shipping_method {
     	<?php
     }
     
-    public function process_admin_options() {
+    function process_admin_options() {
    		
    		if(isset($_POST['woocommerce_free_shipping_enabled'])) update_option('woocommerce_free_shipping_enabled', 'yes'); else update_option('woocommerce_free_shipping_enabled', 'no');
    		

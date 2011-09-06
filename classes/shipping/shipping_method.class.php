@@ -26,7 +26,7 @@ class woocommerce_shipping_method {
 	var $multiple_rates		= false;
 	var $rates 				= array(); // When a method has more than one cost/choice it will be in this array of titles/costs
 	
-    public function is_available() {
+    function is_available() {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -51,7 +51,7 @@ class woocommerce_shipping_method {
 		
     } 
     
-    public function get_fee( $fee, $total ) {
+    function get_fee( $fee, $total ) {
 		if (strstr($fee, '%')) :
 			return ($total/100) * str_replace('%', '', $fee);
 		else :
@@ -59,8 +59,8 @@ class woocommerce_shipping_method {
 		endif;
 	}
 	    
-    public function admin_options() {}
+    function admin_options() {}
     
-    public function process_admin_options() {}
+    function process_admin_options() {}
     	
 }

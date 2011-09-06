@@ -18,7 +18,7 @@ class woocommerce_checkout {
 	var $creating_account;
 	
 	/** constructor */
-	protected function __construct () {
+	function __construct () {
 		
 		add_action('woocommerce_checkout_billing',array(&$this,'checkout_form_billing'));
 		add_action('woocommerce_checkout_shipping',array(&$this,'checkout_form_shipping'));
@@ -137,6 +137,7 @@ class woocommerce_checkout {
 	 * @param   array	args	contains a list of args for showing the field, merged with defaults (below)
 	 */
 	function checkout_form_field( $args ) {
+		global $woocommerce;
 		
 		$defaults = array(
 			'type' => 'input',
