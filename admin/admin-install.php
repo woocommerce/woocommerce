@@ -16,6 +16,9 @@
  */
 function install_woocommerce() {
 	
+	global $woocommerce;
+	$woocommerce = &new woocommerce();
+
 	// Define post types before we start
 	woocommerce_post_type();
 	

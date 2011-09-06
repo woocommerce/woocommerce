@@ -166,7 +166,7 @@ function woocommerce_post_type() {
 			'hierarchical' => true,
 			'rewrite' => false,
 			'query_var' => true,			
-			'supports' => array( 'title', 'custom-fields', 'page-attributes', 'thumbnail' ),
+			'supports' => array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
 			'show_in_nav_menus' => false,
 			//'show_in_menu' => 'edit.php?post_type=product'
 		)

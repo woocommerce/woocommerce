@@ -289,6 +289,16 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 }
 
 /**
+ * Fix 'insert into post' buttons for images
+ **/
+add_filter('get_media_item_args', 'woocommerce_allow_img_insertion');
+
+function woocommerce_allow_img_insertion($vars) {
+    $vars['send'] = true; // 'send' as in "Send to Editor"
+    return($vars);
+}
+
+/**
  * Currency
  **/
 function get_woocommerce_currency_symbol() {
