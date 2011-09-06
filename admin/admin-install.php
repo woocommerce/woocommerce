@@ -10,6 +10,13 @@
  */
 
 /**
+ * Queue install when activated
+ */
+function queue_install_woocommerce() {
+	add_action('init', 'install_woocommerce', 0);
+}
+
+/**
  * Install woocommerce
  * 
  * Calls each function to install things, and clears the cron jobs and rewrite rules
@@ -17,8 +24,7 @@
 function install_woocommerce() {
 	
 	global $woocommerce;
-	$woocommerce = &new woocommerce();
-
+	
 	// Define post types before we start
 	woocommerce_post_type();
 	
