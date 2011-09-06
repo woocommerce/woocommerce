@@ -10,13 +10,15 @@
  */
  
 function get_woocommerce_pay( $atts ) {
-	return woocommerce::shortcode_wrapper('woocommerce_pay', $atts); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_pay', $atts); 
 }
 
 /**
  * Outputs the pay page - payment gateways can hook in here to show payment forms etc
  **/
 function woocommerce_pay() {
+	global $woocommerce;
 	
 	if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
@@ -28,12 +30,12 @@ function woocommerce_pay() {
 		if ($order->id == $order_id && $order->order_key == $order_key && $order->status=='pending') :
 			
 			// Set customer location to order location
-			if ($order->billing_country) woocommerce_customer::set_country( $order->billing_country );
-			if ($order->billing_state) woocommerce_customer::set_state( $order->billing_state );
-			if ($order->billing_postcode) woocommerce_customer::set_postcode( $order->billing_postcode );
+			if ($order->billing_country) $woocommerce->customer->set_country( $order->billing_country );
+			if ($order->billing_state) $woocommerce->customer->set_state( $order->billing_state );
+			if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
 			
 			// Pay form was posted - process payment
-			if (isset($_POST['pay']) && woocommerce::verify_nonce('pay')) :
+			if (isset($_POST['pay']) && $woocommerce->verify_nonce('pay')) :
 			
 				// Update payment method
 				if ($order->order_total > 0 ) : 
@@ -42,7 +44,7 @@ function woocommerce_pay() {
 					$data['payment_method']		= $payment_method;
 					update_post_meta( $order_id, 'order_data', $data );
 			
-					$available_gateways = woocommerce_payment_gateways::get_available_payment_gateways();
+					$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				
 					$result = $available_gateways[$payment_method]->process_payment( $order_id );
 					
@@ -63,22 +65,22 @@ function woocommerce_pay() {
 			endif;
 			
 			// Show messages
-			woocommerce::show_messages();
+			$woocommerce->show_messages();
 			
 			// Show form
 			woocommerce_pay_for_existing_order( $order );
 		
 		elseif ($order->status!='pending') :
 			
-			woocommerce::add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woothemes') );
+			$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woothemes') );
 			
-			woocommerce::show_messages();
+			$woocommerce->show_messages();
 			
 		else :
 		
-			woocommerce::add_error( __('Invalid order.', 'woothemes') );
+			$woocommerce->add_error( __('Invalid order.', 'woothemes') );
 			
-			woocommerce::show_messages();
+			$woocommerce->show_messages();
 			
 		endif;
 		
@@ -111,7 +113,7 @@ function woocommerce_pay() {
 					<li class="method">
 						<?php _e('Payment method:', 'woothemes'); ?>
 						<strong><?php 
-							$gateways = woocommerce_payment_gateways::payment_gateways();
+							$gateways = $woocommerce->payment_gateways->payment_gateways();
 							if (isset($gateways[$order->payment_method])) echo $gateways[$order->payment_method]->title;
 							else echo $order->payment_method; 
 						?></strong>

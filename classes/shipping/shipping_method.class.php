@@ -27,10 +27,11 @@ class woocommerce_shipping_method {
 	var $rates 				= array(); // When a method has more than one cost/choice it will be in this array of titles/costs
 	
     public function is_available() {
+    	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
     	
-		if (isset(woocommerce_cart::$cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > woocommerce_cart::$cart_contents_total) return false;
+		if (isset($woocommerce->cart->cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total) return false;
 		
 		$ship_to_countries = '';
 		
@@ -43,7 +44,7 @@ class woocommerce_shipping_method {
 		endif; 
 		
 		if (is_array($ship_to_countries)) :
-			if (!in_array(woocommerce_customer::get_shipping_country(), $ship_to_countries)) return false;
+			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
 		endif;
 		
 		return true;

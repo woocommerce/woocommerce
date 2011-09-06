@@ -232,6 +232,7 @@ class woocommerce_product {
 	
 	/** Get the add to url */
 	function add_to_cart_url() {
+		global $woocommerce;
 		
 		if ($this->is_type('variable')) :
 			$url = add_query_arg('add-to-cart', 'variation');
@@ -243,7 +244,7 @@ class woocommerce_product {
 			$url = add_query_arg('add-to-cart', $this->id);
 		endif;
 		
-		$url = woocommerce::nonce_url( 'add_to_cart', $url );
+		$url = $woocommerce->nonce_url( 'add_to_cart', $url );
 		return $url;
 	}
 	
@@ -634,6 +635,8 @@ class woocommerce_product {
 	
 	/** Lists a table of attributes for the product page */
 	function list_attributes() {
+		global $woocommerce;
+		
 		$attributes = $this->get_attributes();
 		if ($attributes && sizeof($attributes)>0) :
 			
@@ -644,7 +647,7 @@ class woocommerce_product {
 				$alt = $alt*-1;
 				echo '<tr class="';
 				if ($alt==1) echo 'alt';
-				echo '"><th>'.woocommerce::attribute_label( $attribute['name'] ).'</th><td>';
+				echo '"><th>'.$woocommerce->attribute_label( $attribute['name'] ).'</th><td>';
 				
 				if (is_array($attribute['value'])) $attribute['value'] = implode(', ', $attribute['value']);
 				

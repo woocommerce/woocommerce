@@ -32,6 +32,7 @@ class free_shipping extends woocommerce_shipping_method {
     }
     
     public function admin_options() {
+    	global $woocommerce;
     	?>
     	<h3><?php _e('Free Shipping', 'woothemes'); ?></h3>
     	<table class="form-table">
@@ -66,7 +67,7 @@ class free_shipping extends woocommerce_shipping_method {
 		        </td>
 		    </tr>
 		    <?php
-	    	$countries = woocommerce_countries::$countries;
+	    	$countries = $woocommerce->countries->countries;
 	    	$selections = get_option('woocommerce_free_shipping_countries', array());
 	    	?><tr class="multi_select_countries">
 	            <th scope="row" class="titledesc"><?php _e('Specific Countries', 'woothemes'); ?></th>

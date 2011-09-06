@@ -17,8 +17,6 @@ class woocommerce_checkout {
 	var $must_create_account;
 	var $creating_account;
 	
-	protected static $instance;
-	
 	/** constructor */
 	protected function __construct () {
 		
@@ -55,20 +53,12 @@ class woocommerce_checkout {
 			array( 'type'=> 'state', 'name'=>'shipping-state', 'label' => __('State/County', 'woothemes'), 'required' => true, 'class' => array('form-row-last'), 'rel' => 'shipping-country' )
 		);
 	}
-	
-	public static function instance () {
-		if(!self::$instance) {
-			$class = __CLASS__;
-			self::$instance = new $class;
-		}
 		
-		return self::$instance;
-	}
-	
 	/** Output the billing information form */
 	function checkout_form_billing() {
+		global $woocommerce;
 		
-		if (woocommerce_cart::ship_to_billing_address_only()) :
+		if ($woocommerce->cart->ship_to_billing_address_only()) :
 			
 			echo '<h3>'.__('Billing &amp Shipping', 'woothemes').'</h3>';
 			
@@ -110,9 +100,10 @@ class woocommerce_checkout {
 	
 	/** Output the shipping information form */
 	function checkout_form_shipping() {
+		global $woocommerce;
 		
 		// Shipping Details
-		if (woocommerce_cart::needs_shipping() && !woocommerce_cart::ship_to_billing_address_only()) :
+		if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only()) :
 			
 			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" ';
 			
@@ -130,7 +121,7 @@ class woocommerce_checkout {
 								
 			echo'</div>';
 		
-		elseif (woocommerce_cart::ship_to_billing_address_only()) :
+		elseif ($woocommerce->cart->ship_to_billing_address_only()) :
 		
 			echo '<h3>'.__('Notes/Comments', 'woothemes').'</h3>';
 		
@@ -175,10 +166,10 @@ class woocommerce_checkout {
 					<select name="'.$args['name'].'" id="'.$args['name'].'" class="country_to_state" rel="'.$args['rel'].'">
 						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
 				
-				foreach(woocommerce_countries::get_allowed_countries() as $key=>$value) :
+				foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
 					$field .= '<option value="'.$key.'"';
 					if ($this->get_value($args['name'])==$key) $field .= 'selected="selected"';
-					elseif (!$this->get_value($args['name']) && woocommerce_customer::get_country()==$key) $field .= 'selected="selected"';
+					elseif (!$this->get_value($args['name']) && $woocommerce->customer->get_country()==$key) $field .= 'selected="selected"';
 					$field .= '>'.__($value, 'woothemes').'</option>';
 				endforeach;
 				
@@ -191,12 +182,12 @@ class woocommerce_checkout {
 					<label for="'.$args['name'].'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>';
 					
 				$current_cc = $this->get_value($args['rel']);
-				if (!$current_cc) $current_cc = woocommerce_customer::get_country();
+				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
 				
 				$current_r = $this->get_value($args['name']);
-				if (!$current_r) $current_r = woocommerce_customer::get_state();
+				if (!$current_r) $current_r = $woocommerce->customer->get_state();
 				
-				$states = woocommerce_countries::$states;	
+				$states = $woocommerce->countries->states;	
 					
 				if (isset( $states[$current_cc][$current_r] )) :
 					// Dropdown
@@ -239,7 +230,8 @@ class woocommerce_checkout {
 	/** Process the checkout after the confirm order button is pressed */
 	function process_checkout() {
 	
-		global $wpdb;
+		global $wpdb, $woocommerce;
+		$validation = &new woocommerce_validation();
 		
 		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 
@@ -247,12 +239,12 @@ class woocommerce_checkout {
 		
 		if (isset($_POST) && $_POST && !isset($_POST['login'])) :
 
-			woocommerce_cart::calculate_totals();
+			$woocommerce->cart->calculate_totals();
 			
-			woocommerce::verify_nonce('process_checkout');
+			$woocommerce->verify_nonce('process_checkout');
 			
-			if (sizeof(woocommerce_cart::$cart_contents)==0) :
-				woocommerce::add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			if (sizeof($woocommerce->cart->cart_contents)==0) :
+				$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woothemes'), home_url()) );
 			endif;
 						
 			// Checkout fields
@@ -266,7 +258,7 @@ class woocommerce_checkout {
 			$this->posted['account-password'] = isset($_POST['account-password']) ? woocommerce_clean($_POST['account-password']) : '';
 			$this->posted['account-password-2'] = isset($_POST['account-password-2']) ? woocommerce_clean($_POST['account-password-2']) : '';
 			
-			if (woocommerce_cart::ship_to_billing_address_only()) $this->posted['shiptobilling'] = 'true';
+			if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 'true';
 			
 			// Update shipping method to posted
 			$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
@@ -282,20 +274,20 @@ class woocommerce_checkout {
 				endswitch;
 				
 				// Required
-				if ( isset($field['required']) && $field['required'] && empty($this->posted[$field['name']]) ) woocommerce::add_error( $field['label'] . __(' (billing) is a required field.', 'woothemes') );
+				if ( isset($field['required']) && $field['required'] && empty($this->posted[$field['name']]) ) $woocommerce->add_error( $field['label'] . __(' (billing) is a required field.', 'woothemes') );
 	
 				// Validation
 				if (isset($field['validate']) && !empty($this->posted[$field['name']])) switch ( $field['validate'] ) :
 					case 'phone' :
-						if (!woocommerce_validation::is_phone( $this->posted[$field['name']] )) : woocommerce::add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
+						if (!$validation->is_phone( $this->posted[$field['name']] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
 					break;
 					case 'email' :
-						if (!woocommerce_validation::is_email( $this->posted[$field['name']] )) : woocommerce::add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
+						if (!$validation->is_email( $this->posted[$field['name']] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
 					break;
 					case 'postcode' :
-						if (!woocommerce_validation::is_postcode( $this->posted[$field['name']], $_POST['billing-country'] )) : woocommerce::add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
+						if (!$validation->is_postcode( $this->posted[$field['name']], $_POST['billing-country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
 						else :
-							$this->posted[$field['name']] = woocommerce_validation::format_postcode( $this->posted[$field['name']], $_POST['billing-country'] );
+							$this->posted[$field['name']] = $validation->format_postcode( $this->posted[$field['name']], $_POST['billing-country'] );
 						endif;
 					break;
 				endswitch;
@@ -303,7 +295,7 @@ class woocommerce_checkout {
 			endforeach;
 			
 			// Shipping Information
-			if (woocommerce_cart::needs_shipping() && !woocommerce_cart::ship_to_billing_address_only() && empty($this->posted['shiptobilling'])) :
+			if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only() && empty($this->posted['shiptobilling'])) :
 				
 				foreach ($this->shipping_fields as $field) :
 					if (isset( $_POST[$field['name']] )) $this->posted[$field['name']] = woocommerce_clean($_POST[$field['name']]); else $this->posted[$field['name']] = '';
@@ -314,14 +306,14 @@ class woocommerce_checkout {
 					endswitch;
 					
 					// Required
-					if ( isset($field['required']) && $field['required'] && empty($this->posted[$field['name']]) ) woocommerce::add_error( $field['label'] . __(' (shipping) is a required field.', 'woothemes') );
+					if ( isset($field['required']) && $field['required'] && empty($this->posted[$field['name']]) ) $woocommerce->add_error( $field['label'] . __(' (shipping) is a required field.', 'woothemes') );
 		
 					// Validation
 					if (isset($field['validate']) && !empty($this->posted[$field['name']])) switch ( $field['validate'] ) :
 						case 'postcode' :
-							if (!woocommerce_validation::is_postcode( $this->posted[$field['name']], $this->posted['shipping-country'] )) : woocommerce::add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
+							if (!$validation->is_postcode( $this->posted[$field['name']], $this->posted['shipping-country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
 							else :
-								$this->posted[$field['name']] = woocommerce_validation::format_postcode( $this->posted[$field['name']], $this->posted['shipping-country'] );
+								$this->posted[$field['name']] = $validation->format_postcode( $this->posted[$field['name']], $this->posted['shipping-country'] );
 							endif;
 						break;
 					endswitch;
@@ -342,48 +334,48 @@ class woocommerce_checkout {
 			
 			if ($this->creating_account && !$user_id) :
 			
-				if ( empty($this->posted['account-username']) ) woocommerce::add_error( __('Please enter an account username.', 'woothemes') );
-				if ( empty($this->posted['account-password']) ) woocommerce::add_error( __('Please enter an account password.', 'woothemes') );
-				if ( $this->posted['account-password-2'] !== $this->posted['account-password'] ) woocommerce::add_error( __('Passwords do not match.', 'woothemes') );
+				if ( empty($this->posted['account-username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woothemes') );
+				if ( empty($this->posted['account-password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woothemes') );
+				if ( $this->posted['account-password-2'] !== $this->posted['account-password'] ) $woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
 			
 				// Check the username
 				if ( !validate_username( $this->posted['account-username'] ) ) :
-					woocommerce::add_error( __('Invalid email/username.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid email/username.', 'woothemes') );
 				elseif ( username_exists( $this->posted['account-username'] ) ) :
-					woocommerce::add_error( __('An account is already registered with that username. Please choose another.', 'woothemes') );
+					$woocommerce->add_error( __('An account is already registered with that username. Please choose another.', 'woothemes') );
 				endif;
 				
 				// Check the e-mail address
 				if ( email_exists( $this->posted['billing-email'] ) ) :
-					woocommerce::add_error( __('An account is already registered with your email address. Please login.', 'woothemes') );
+					$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woothemes') );
 				endif;
 			endif;
 			
 			// Terms
-			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) woocommerce::add_error( __('You must accept our Terms &amp; Conditions.', 'woothemes') );
+			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woothemes') );
 			
-			if (woocommerce_cart::needs_shipping()) :
+			if ($woocommerce->cart->needs_shipping()) :
 			
 				// Shipping Method
-				$available_methods = woocommerce_shipping::get_available_shipping_methods();
+				$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				if (!isset($available_methods[$this->posted['shipping_method']])) :
-					woocommerce::add_error( __('Invalid shipping method.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid shipping method.', 'woothemes') );
 				endif;	
 			
 			endif;	
 			
-			if (woocommerce_cart::needs_payment()) :
+			if ($woocommerce->cart->needs_payment()) :
 				// Payment Method
-				$available_gateways = woocommerce_payment_gateways::get_available_payment_gateways();
+				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if (!isset($available_gateways[$this->posted['payment_method']])) :
-					woocommerce::add_error( __('Invalid payment method.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid payment method.', 'woothemes') );
 				else :
 					// Payment Method Field Validation
 					$available_gateways[$this->posted['payment_method']]->validate_fields();
 				endif;
 			endif;
 					
-			if (!isset($_POST['update_totals']) && woocommerce::error_count()==0) :
+			if (!isset($_POST['update_totals']) && $woocommerce->error_count()==0) :
 				
 				$user_id = get_current_user_id();
 				
@@ -402,7 +394,7 @@ class woocommerce_checkout {
 			                $user_pass = $this->posted['account-password'];
 			                $user_id = wp_create_user( $this->posted['account-username'], $user_pass, $this->posted['billing-email'] );
 			                if ( !$user_id ) {
-			                	woocommerce::add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woothemes'), get_option('admin_email')));
+			                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woothemes'), get_option('admin_email')));
 			                    break;
 			                }
 		
@@ -417,7 +409,7 @@ class woocommerce_checkout {
 		                    wp_set_auth_cookie($user_id, true, $secure_cookie);
 						
 						else :
-							woocommerce::add_error( $reg_errors->get_error_message() );
+							$woocommerce->add_error( $reg_errors->get_error_message() );
 		                	break;                    
 						endif;
 						
@@ -436,7 +428,7 @@ class woocommerce_checkout {
 						$shipping_postcode = $this->posted['billing-postcode'];	
 						$shipping_country = $this->posted['billing-country'];
 						
-					elseif ( woocommerce_cart::needs_shipping() ) :
+					elseif ( $woocommerce->cart->needs_shipping() ) :
 								
 						$shipping_first_name = $this->posted['shipping-first_name'];
 						$shipping_last_name = $this->posted['shipping-last_name'];
@@ -465,7 +457,7 @@ class woocommerce_checkout {
 						update_user_meta( $user_id, 'billing-state', $this->posted['billing-state'] );
 						update_user_meta( $user_id, 'billing-phone', $this->posted['billing-phone'] );
 
-						if ( empty($this->posted['shiptobilling']) && woocommerce_cart::needs_shipping() ) :
+						if ( empty($this->posted['shiptobilling']) && $woocommerce->cart->needs_shipping() ) :
 							update_user_meta( $user_id, 'shipping-first_name', $this->posted['shipping-first_name'] );
 							update_user_meta( $user_id, 'shipping-last_name', $this->posted['shipping-last_name'] );
 							update_user_meta( $user_id, 'shipping-company', $this->posted['shipping-company'] );
@@ -475,7 +467,7 @@ class woocommerce_checkout {
 							update_user_meta( $user_id, 'shipping-postcode', $this->posted['shipping-postcode'] );
 							update_user_meta( $user_id, 'shipping-country', $this->posted['shipping-country'] );
 							update_user_meta( $user_id, 'shipping-state', $this->posted['shipping-state'] );
-						elseif ( $this->posted['shiptobilling'] && woocommerce_cart::needs_shipping() ) :
+						elseif ( $this->posted['shiptobilling'] && $woocommerce->cart->needs_shipping() ) :
 							update_user_meta( $user_id, 'shipping-first_name', $this->posted['billing-first_name'] );
 							update_user_meta( $user_id, 'shipping-last_name', $this->posted['billing-last_name'] );
 							update_user_meta( $user_id, 'shipping-company', $this->posted['billing-company'] );
@@ -503,7 +495,7 @@ class woocommerce_checkout {
 					// Cart items
 					$order_items = array();
 					
-					foreach (woocommerce_cart::$cart_contents as $cart_item_key => $values) :
+					foreach ($woocommerce->cart->cart_contents as $cart_item_key => $values) :
 						
 						$_product = $values['data'];
 			
@@ -540,7 +532,7 @@ class woocommerce_checkout {
 					 	if ($_product->managing_stock()) :
 							if (!$_product->is_in_stock() || !$_product->has_enough_stock( $values['quantity'] )) :
 								
-								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+								$woocommerce->add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
 		                		break;
 								
 							endif;
@@ -548,7 +540,7 @@ class woocommerce_checkout {
 						
 							if (!$_product->is_in_stock()) :
 							
-								woocommerce::add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+								$woocommerce->add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
 		                		break;
 
 							endif;
@@ -557,7 +549,7 @@ class woocommerce_checkout {
 					 	
 					endforeach;
 					
-					if (woocommerce::error_count()>0) break;
+					if ($woocommerce->error_count()>0) break;
 					
 					// Insert or update the post data
 					if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
@@ -571,7 +563,7 @@ class woocommerce_checkout {
 						$order_id = wp_insert_post( $order_data );
 						
 						if (is_wp_error($order_id)) :
-							woocommerce::add_error( 'Error: Unable to create order. Please try again.' );
+							$woocommerce->add_error( 'Error: Unable to create order. Please try again.' );
 			                break;
 						else :
 							// Inserted successfully 
@@ -608,12 +600,12 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
 					update_post_meta( $order_id, '_shipping_method', 		$shipping_method);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
-					update_post_meta( $order_id, '_order_subtotal', 		number_format(woocommerce_cart::$subtotal_ex_tax, 2, '.', ''));
-					update_post_meta( $order_id, '_order_shipping', 		number_format(woocommerce_cart::$shipping_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_discount', 		number_format(woocommerce_cart::$discount_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_tax', 				number_format(woocommerce_cart::$tax_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_shipping_tax', 	number_format(woocommerce_cart::$shipping_tax_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_total', 			number_format(woocommerce_cart::$total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
+					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->discount_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_tax', 				number_format($woocommerce->cart->tax_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_shipping_tax', 	number_format($woocommerce->cart->shipping_tax_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_total', 			number_format($woocommerce->cart->total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_key', 				uniqid('order_') );
 					update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
 					update_post_meta( $order_id, '_order_items', 			$order_items );
@@ -622,11 +614,11 @@ class woocommerce_checkout {
 					wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
 						
 					// Discount code meta
-					if (woocommerce_cart::$applied_coupons) update_post_meta($order_id, 'coupons', implode(', ', woocommerce_cart::$applied_coupons));
+					if ($woocommerce->cart->applied_coupons) update_post_meta($order_id, 'coupons', implode(', ', $woocommerce->cart->applied_coupons));
 					
 					$order = &new woocommerce_order($order_id);
 
-					if (woocommerce_cart::needs_payment()) :
+					if ($woocommerce->cart->needs_payment()) :
 						
 						// Store Order ID in session so it can be re-used after payment failure
 						$_SESSION['order_awaiting_payment'] = $order_id;
@@ -654,7 +646,7 @@ class woocommerce_checkout {
 						$order->payment_complete();
 						
 						// Empty the Cart
-						woocommerce_cart::empty_cart();
+						$woocommerce->cart->empty_cart();
 						
 						// Redirect to success/confirmation/payment page
 						if (is_ajax()) : 
@@ -678,10 +670,10 @@ class woocommerce_checkout {
 			// If we reached this point then there were errors
 			if (is_ajax()) : 
 				ob_clean();
-				woocommerce::show_messages();
+				$woocommerce->show_messages();
 				exit;
 			else :
-				woocommerce::show_messages();
+				$woocommerce->show_messages();
 			endif;
 		
 		endif;

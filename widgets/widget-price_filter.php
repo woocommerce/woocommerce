@@ -101,13 +101,13 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$this->WP_Widget('price_filter', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget( $args, $instance ) {
 		extract($args);
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb;
+		global $_chosen_attributes, $wpdb, $woocommerce;
 		
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
@@ -132,9 +132,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		FROM $wpdb->posts
 		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 		WHERE meta_key = 'price' AND (
-			$wpdb->posts.ID IN (".implode(',', woocommerce::$query['layered_nav_product_ids']).") 
+			$wpdb->posts.ID IN (".implode(',', $woocommerce->query['layered_nav_product_ids']).") 
 			OR (
-				$wpdb->posts.post_parent IN (".implode(',', woocommerce::$query['layered_nav_product_ids']).")
+				$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query['layered_nav_product_ids']).")
 				AND $wpdb->posts.post_parent != 0
 			)
 		)"));
@@ -162,14 +162,14 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		echo $after_widget;
 	}
 
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = __('Filter by price', 'woothemes');
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		return $instance;
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		global $wpdb;
 		?>

@@ -4,39 +4,42 @@
  * 
  * The WooCommerce coupons class gets coupon data from storage
  *
- * @class 		woocommerce_coupons
+ * @class 		woocommerce_coupon
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_coupons {
+class woocommerce_coupon {
+	
+	var $code;
+	var $id;
+	var $type;
+	var $amount;
+	var $individual_use;
+	var $product_ids;
+	var $usage_limit;
+	var $usage_count;
 	
 	/** get coupon with $code */
-	function get_coupon( $code ) {
+	function woocommerce_coupon( $code ) {
 		
-		$coupon = get_page_by_title( $code, 'OBJECT', 'shop_coupon' );
+		$this->code = $code;
+		
+		$coupon = get_page_by_title( $this->code, 'OBJECT', 'shop_coupon' );
 		
 		if ($coupon && $coupon->post_status == 'publish') :
-		
-			$type 			= get_post_meta($coupon->ID, 'discount_type', true);
-			$amount 		= get_post_meta($coupon->ID, 'coupon_amount', true);
-			$individual_use = get_post_meta($coupon->ID, 'individual_use', true);
-			$product_ids 	= array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true)));
-			$usage_limit 	= get_post_meta($coupon->ID, 'usage_limit', true);
-			$usage_count 	= (int) get_post_meta($coupon->ID, 'usage_count', true);
 			
-			if (!$amount) return false;
+			$this->id				= $coupon->ID;
+			$this->type 			= get_post_meta($coupon->ID, 'discount_type', true);
+			$this->amount 			= get_post_meta($coupon->ID, 'coupon_amount', true);
+			$this->individual_use 	= get_post_meta($coupon->ID, 'individual_use', true);
+			$this->product_ids 		= array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true)));
+			$this->usage_limit 		= get_post_meta($coupon->ID, 'usage_limit', true);
+			$this->usage_count 		= (int) get_post_meta($coupon->ID, 'usage_count', true);
 			
-			return array(
-				'id'				=> $coupon->ID,
-				'code' 				=> $code,
-				'type' 				=> $type,
-				'amount'			=> $amount,
-				'individual_use'	=> $individual_use,
-				'products'			=> $product_ids,
-				'usage_limit'		=> $usage_limit,
-				'usage_count'		=> $usage_count
-			);
+			if (!$this->amount) return false;
+			
+			return true;
 			
 		endif;
 		
@@ -44,33 +47,30 @@ class woocommerce_coupons {
 	}
 	
 	/** Increase usage count */
-	function inc_usage_count( $code ) {
-		$coupon = get_page_by_title( $code, 'OBJECT', 'shop_coupon' );
-		if ($coupon) :
-			$usage_count 	= (int) get_post_meta($coupon->ID, 'usage_count', true);
-			$usage_count++;
-			update_post_meta($coupon->ID, 'usage_count', $usage_count);
-		endif;
+	function inc_usage_count() {
+		$this->usage_count++;
+		update_post_meta($this->id, 'usage_count', $this->usage_count);
 	}
 	
 	/** Check coupon is valid */
 	function is_valid($code) {
-		$coupon = self::get_coupon($code);
 		
-		if ($coupon) :
+		global $woocommerce;
 		
-			if (sizeof($coupon['products'])>0) :
+		if ($this->id) :
+		
+			if (sizeof( $this->product_ids )>0) :
 				$valid = false;
-				if (sizeof(woocommerce_cart::$cart_contents)>0) : foreach (woocommerce_cart::$cart_contents as $item_id => $values) :
-					if (in_array($item_id, $coupon['products'])) :
+				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
+					if (in_array($item_id, $this->product_ids)) :
 						$valid = true;
 					endif;
 				endforeach; endif;
 				if (!$valid) return false;
 			endif;
 			
-			if ($coupon['usage_limit']>0) :
-				if ($coupon['usage_count']>$coupon['usage_limit']) :
+			if ($this->usage_limit>0) :
+				if ($this->usage_count>$this->usage_limit) :
 					return false;
 				endif;
 			endif;

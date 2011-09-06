@@ -35,8 +35,10 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget($args, $instance) {
+		global $woocommerce;
+
 		$cache = wp_cache_get('recently_viewed_products', 'widget');
 
 		if ( !is_array($cache) ) $cache = array();
@@ -70,7 +72,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		<ul class="product_list_widget">
 		<?php  while ($r->have_posts()) : $r->the_post(); $_product = &new woocommerce_product(get_the_ID()); ?>
 		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
-			<?php if (has_post_thumbnail()) the_post_thumbnail('shop_thumbnail'); else echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_image_size('shop_thumbnail_image_width').'px" height="'.woocommerce::get_image_size('shop_thumbnail_image_height').'px" />'; ?>
+			<?php if (has_post_thumbnail()) the_post_thumbnail('shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />'; ?>
 			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>
 		</a> <?php echo $_product->get_price_html(); ?></li>
 		<?php endwhile; ?>
@@ -86,7 +88,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		wp_cache_set('recently_viewed_products', $cache, 'widget');
 	}
 
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -104,7 +106,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		wp_cache_delete('recently_viewed_products', 'widget');
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;

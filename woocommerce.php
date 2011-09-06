@@ -86,19 +86,10 @@ include_once( 'classes/gateways/gateway-moneybookers.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
 
 /**
- * Queue addon gateways and shipping methods
- **/
-add_action('plugins_loaded', 'woocommerce_shipping::init', 1); 		// Load shipping methods - some may be added by plugins
-add_action('plugins_loaded', 'woocommerce_payment_gateways::init', 1); // Load payment methods - some may be added by plugins
-
-/**
- * Init class singletons
- */		
-$woocommerce 					= woocommerce::get();
-$woocommerce_customer 			= woocommerce_customer::get();				// Customer class, sorts out session data such as location
-$woocommerce_shipping 			= woocommerce_shipping::get();				// Shipping class. loads and stores shipping methods
-$woocommerce_payment_gateways 	= woocommerce_payment_gateways::get();		// Payment gateways class. loads and stores payment methods
-$woocommerce_cart 				= woocommerce_cart::get();					// Cart class, stores the cart contents
+ * Init woocommerce class
+ */
+global $woocommerce;
+$woocommerce = &new woocommerce();
 
 /**
  * Init WooCommerce
@@ -106,6 +97,8 @@ $woocommerce_cart 				= woocommerce_cart::get();					// Cart class, stores the c
 add_action('init', 'woocommerce_init', 0);
 
 function woocommerce_init() {
+
+	global $woocommerce;
 	
 	ob_start();
 	
@@ -119,9 +112,9 @@ function woocommerce_init() {
 	endif;
 
 	// Image sizes
-	add_image_size( 'shop_thumbnail', woocommerce::get_image_size('shop_thumbnail_image_width'), woocommerce::get_image_size('shop_thumbnail_image_height'), 'true' );
-	add_image_size( 'shop_catalog', woocommerce::get_image_size('shop_catalog_image_width'), woocommerce::get_image_size('shop_catalog_image_height'), 'true' );
-	add_image_size( 'shop_single', woocommerce::get_image_size('shop_single_image_width'), woocommerce::get_image_size('shop_single_image_height'), 'true' );
+	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), 'true' );
+	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), 'true' );
+	add_image_size( 'shop_single', $woocommerce->get_image_size('shop_single_image_width'), $woocommerce->get_image_size('shop_single_image_height'), 'true' );
 
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
@@ -129,17 +122,17 @@ function woocommerce_init() {
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
     if (is_admin()) :
-    	wp_enqueue_style( 'woocommerce_admin_styles', woocommerce::plugin_url() . '/assets/css/admin.css' );
+    	wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
     	wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
     else :
     	// Optional front end css	
 		if ((defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS) || (!defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css')=='yes')) :
-			$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : woocommerce::plugin_url() . '/assets/css/woocommerce.css';
+			$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $woocommerce->plugin_url() . '/assets/css/woocommerce.css';
 			wp_register_style('woocommerce_frontend_styles', $css );
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		endif;
     
-    	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', woocommerce::plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
+    	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $woocommerce->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
 
@@ -181,11 +174,13 @@ function woocommerce_init_roles() {
  **/
 function woocommerce_frontend_scripts() {
 	
+	global $woocommerce;
+	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
-	wp_register_script( 'woocommerce', woocommerce::plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'woocommerce_plugins', woocommerce::plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'fancybox', woocommerce::plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce', $woocommerce->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce_plugins', $woocommerce->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'fancybox', $woocommerce->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0' );
 	
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('woocommerce_plugins');
@@ -196,10 +191,10 @@ function woocommerce_frontend_scripts() {
 	$woocommerce_params = array(
 		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
 		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
-		'countries' 					=> json_encode(woocommerce_countries::$states),
+		'countries' 					=> json_encode($woocommerce->countries->states),
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
-		'plugin_url' 					=> woocommerce::plugin_url(),
+		'plugin_url' 					=> $woocommerce->plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
 		'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
@@ -369,6 +364,9 @@ function woocommerce_price( $price, $args = array() ) {
  * Variation Formatting
  **/
 function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
+
+	global $woocommerce;
+	
 	if ($variation && is_array($variation)) :
 		
 		$return = '';
@@ -382,9 +380,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 		foreach ($variation as $name => $value) :
 			
 			if ($flat) :
-				$varation_list[] = woocommerce::attribute_label(str_replace('tax_', '', $name)).': '.ucfirst($value);
+				$varation_list[] = $woocommerce->attribute_label(str_replace('tax_', '', $name)).': '.ucfirst($value);
 			else :
-				$varation_list[] = '<dt>'.woocommerce::attribute_label(str_replace('tax_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
+				$varation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('tax_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
 			endif;
 			
 		endforeach;
@@ -423,8 +421,11 @@ function woocommerce_add_comment_rating($comment_id) {
 add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
 
 function woocommerce_check_comment_rating($comment_data) {
+	
+	global $woocommerce;
+	
 	// If posting a comment (not trackback etc) and not logged in
-	if ( isset($_POST['rating']) && !woocommerce::verify_nonce('comment_rating') )
+	if ( isset($_POST['rating']) && !$woocommerce->verify_nonce('comment_rating') )
 		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woothemes') );
 		
 	elseif ( isset($_POST['rating']) && empty($_POST['rating']) && $comment_data['comment_type']== '' ) {

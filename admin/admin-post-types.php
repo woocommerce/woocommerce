@@ -149,7 +149,7 @@ function woocommerce_edit_product_columns($columns){
 add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_columns', 2);
 
 function woocommerce_custom_product_columns($column) {
-	global $post;
+	global $post, $woocommerce;
 	$product = &new woocommerce_product($post->ID);
 
 	switch ($column) {
@@ -180,8 +180,8 @@ function woocommerce_custom_product_columns($column) {
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID) );
 			echo '<a href="'.$url.'" title="'.__('Change', 'woothemes') .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.woocommerce::plugin_url().'/assets/images/success.gif" alt="yes" />';
-			else echo '<img src="'.woocommerce::plugin_url().'/assets/images/success-off.gif" alt="no" />';
+			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
+			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';
 			echo '</a>';
 		break;
 		case "visibility" :
@@ -192,7 +192,7 @@ function woocommerce_custom_product_columns($column) {
 			endif;
 		break;
 		case "is_in_stock" :
-			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) echo '<img src="'.woocommerce::plugin_url().'/assets/images/success.gif" alt="yes" />';
+			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
 			else echo '<span class="na">&ndash;</span>';
 		break;
 		case "inventory" :

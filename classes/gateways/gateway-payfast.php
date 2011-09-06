@@ -26,9 +26,10 @@ class woocommerce_payfast extends woocommerce_payment_gateway {
 	var $sanitized_fields = array();
 	
 	public function __construct() { 
+        global $woocommerce;
         
         $this->id			= 'payfast';
-        $this->icon 		= woocommerce::plugin_url() . '/assets/images/icons/payfast.png';
+        $this->icon 		= $woocommerce->plugin_url() . '/assets/images/icons/payfast.png';
         $this->has_fields 	= true;
 		
 		// Load the settings.
@@ -440,7 +441,7 @@ class woocommerce_payfast extends woocommerce_payment_gateway {
 					jQuery(function(){
 						jQuery("body").block(
 							{ 
-								message: "<img src=\"'.woocommerce::plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+								message: "<img src=\"'.$woocommerce->plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
 								overlayCSS: 
 								{ 
 									background: "#fff", 
@@ -529,7 +530,7 @@ class woocommerce_payfast extends woocommerce_payment_gateway {
 		
         	$_POST = stripslashes_deep($_POST);
         	
-        	if (self::check_ipn_request_is_valid()) :
+        	if ($this->check_ipn_request_is_valid()) :
         	
             	do_action("valid-paypal-standard-ipn-request", $_POST);
 

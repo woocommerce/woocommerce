@@ -142,12 +142,13 @@ function woocommerce_meta_boxes_save_errors() {
  * Enqueue JavaScript used by the meta panels.
  */
 function woocommerce_write_panel_scripts() {
+	global $woocommerce;
 	
 	$post_type = woocommerce_get_current_post_type();
 	
 	if( $post_type !== 'product' && $post_type !== 'shop_order' ) return;
 		
-	wp_register_script('woocommerce-writepanel', woocommerce::plugin_url() . '/assets/js/write-panels.js', array('jquery'));
+	wp_register_script('woocommerce-writepanel', $woocommerce->plugin_url() . '/assets/js/write-panels.js', array('jquery'));
 	wp_enqueue_script('woocommerce-writepanel');
 	
 	wp_enqueue_script('media-upload');
@@ -166,7 +167,7 @@ function woocommerce_write_panel_scripts() {
 		'tax_rate' 						=> __('Tax Rate e.g. 20.0000', 'woothemes'),
 		'meta_name'						=> __('Meta Name', 'woothemes'),
 		'meta_value'					=> __('Meta Value', 'woothemes'),
-		'plugin_url' 					=> woocommerce::plugin_url(),
+		'plugin_url' 					=> $woocommerce->plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
 		'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products")

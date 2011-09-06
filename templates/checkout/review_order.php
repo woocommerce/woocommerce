@@ -1,3 +1,4 @@
+<?php global $woocommerce; ?>
 <div id="order_review">
 	
 	<table class="shop_table">
@@ -11,15 +12,15 @@
 		<tfoot>
 			<tr>
 				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
-				<td><?php echo woocommerce_cart::get_cart_subtotal(); ?></td>
+				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 			
-			<?php  if (woocommerce_cart::needs_shipping()) : ?>
+			<?php  if ($woocommerce->cart->needs_shipping()) : ?>
 				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
 				<td>
 				<?php
 				
-					$available_methods = woocommerce_shipping::get_available_shipping_methods();
+					$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 					if (sizeof($available_methods)>0) :
 						
@@ -48,7 +49,7 @@
 						
 					else :
 						
-						if ( !woocommerce_customer::get_country() ) :
+						if ( !$woocommerce->customer->get_country() ) :
 							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woothemes').'</p>';
 						else :
 							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
@@ -60,24 +61,24 @@
 
 			<?php endif; ?>
 			
-			<?php if (woocommerce_cart::get_cart_tax()) : ?><tr>
+			<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
 				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
-				<td><?php echo woocommerce_cart::get_cart_tax(); ?></td>
+				<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 			</tr><?php endif; ?>
 
-			<?php if (woocommerce_cart::get_total_discount()) : ?><tr class="discount">
+			<?php if ($woocommerce->cart->get_total_discount()) : ?><tr class="discount">
 				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
-				<td>-<?php echo woocommerce_cart::get_total_discount(); ?></td>
+				<td>-<?php echo $woocommerce->cart->get_total_discount(); ?></td>
 			</tr><?php endif; ?>
 			<tr>
 				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
-				<td><strong><?php echo woocommerce_cart::get_total(); ?></strong></td>
+				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 			</tr>
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof(woocommerce_cart::$cart_contents)>0) : 
-				foreach (woocommerce_cart::$cart_contents as $item_id => $values) :
+			if (sizeof($woocommerce->cart->cart_contents)>0) : 
+				foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
 					$_product = $values['data'];
 					if ($_product->exists() && $values['quantity']>0) :
 						echo '
@@ -94,10 +95,10 @@
 	</table>
 	
 	<div id="payment">
-		<?php if (woocommerce_cart::needs_payment()) : ?>
+		<?php if ($woocommerce->cart->needs_payment()) : ?>
 		<ul class="payment_methods methods">
 			<?php 
-				$available_gateways = woocommerce_payment_gateways::get_available_payment_gateways();
+				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if ($available_gateways) : 
 					// Chosen Method
 					if (sizeof($available_gateways)) current($available_gateways)->set_current();
@@ -118,7 +119,7 @@
 					endforeach;
 				else :
 				
-					if ( !woocommerce_customer::get_country() ) :
+					if ( !$woocommerce->customer->get_country() ) :
 						echo '<p>'.__('Please fill in your details above to see available payment methods.', 'woothemes').'</p>';
 					else :
 						echo '<p>'.__('Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
@@ -133,7 +134,7 @@
 		
 			<noscript><?php _e('Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'woothemes'); ?><br/><input type="submit" class="button-alt" name="update_totals" value="<?php _e('Update totals', 'woothemes'); ?>" /></noscript>
 		
-			<?php woocommerce::nonce_field('process_checkout')?>
+			<?php $woocommerce->nonce_field('process_checkout')?>
 			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php _e('Place order', 'woothemes'); ?>" />
 			
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>

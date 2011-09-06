@@ -9,10 +9,12 @@
  * @author		WooThemes
  */
 function get_woocommerce_order_tracking ($atts) {
-	return woocommerce::shortcode_wrapper('woocommerce_order_tracking', $atts); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_order_tracking', $atts); 
 }
 
 function woocommerce_order_tracking( $atts ) {
+	global $woocommerce;
 	
 	extract(shortcode_atts(array(
 	), $atts));
@@ -26,7 +28,7 @@ function woocommerce_order_tracking( $atts ) {
 		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order->id = (int) $_POST['orderid']; else $order->id = 0;
 		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
 		
-		if ( !woocommerce::verify_nonce('order_tracking') ):
+		if ( !$woocommerce->verify_nonce('order_tracking') ):
 		
 			echo '<p>'.__('You have taken too long. Please refresh the page and retry.', 'woothemes').'</p>';
 				
@@ -142,7 +144,7 @@ function woocommerce_order_tracking( $atts ) {
 			<p class="form-row form-row-last"><label for="order_email"><?php _e('Billing Email', 'woothemes'); ?></label> <input class="input-text" type="text" name="order_email" id="order_email" placeholder="<?php _e('Email you used during checkout.', 'woothemes'); ?>" /></p>
 			<div class="clear"></div>
 			<p class="form-row"><input type="submit" class="button" name="track" value="<?php _e('Track"', 'woothemes'); ?>" /></p>
-			<?php woocommerce::nonce_field('order_tracking') ?>
+			<?php $woocommerce->nonce_field('order_tracking') ?>
 		</form>
 		<?php
 		

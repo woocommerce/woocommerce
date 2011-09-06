@@ -670,6 +670,7 @@ function woocommerce_update_options($options) {
  * Loops though the woocommerce options array and outputs each field.
  */
 function woocommerce_admin_fields($options) {
+	global $woocommerce;
 	?>
 	<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
@@ -781,7 +782,7 @@ function woocommerce_admin_fields($options) {
 	               	</tr><?php	
 	            break;
 	            case 'single_select_country' :
-	            	$countries = woocommerce_countries::$countries;
+	            	$countries = $woocommerce->countries->countries;
 	            	$country_setting = (string) get_option($value['id']);
 	            	if (strstr($country_setting, ':')) :
 	            		$country = current(explode(':', $country_setting));
@@ -793,13 +794,13 @@ function woocommerce_admin_fields($options) {
 	            	?><tr valign="top" class="multi_select_countries">
 	                    <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
 	                    <td class="forminp"><select name="<?php echo $value['id'] ?>" title="Country" style="width: 175px;">	
-				        	<?php echo woocommerce_countries::country_dropdown_options($country, $state); ?>          
+				        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 				        </select> <span class="description"><?php echo $value['desc'] ?></span>
 	               		</td>
 	               	</tr><?php	
 	            break;
 	            case 'multi_select_countries' :
-	            	$countries = woocommerce_countries::$countries;
+	            	$countries = $woocommerce->countries->countries;
 	            	asort($countries);
 	            	$selections = (array) get_option($value['id']);
 	            	?><tr valign="top" class="multi_select_countries">
@@ -830,7 +831,7 @@ function woocommerce_admin_fields($options) {
 								<?php $i = -1; if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) : $i++; ?>
 								<div class="taxrow">
 		               				<select name="tax_country[<?php echo $i; ?>][]" title="Country" class="country_multiselect" size="10" multiple="multiple">
-					                   <?php echo woocommerce_countries::country_multiselect_options( $rate['countries'] ); ?>
+					                   <?php echo $woocommerce->countries->country_multiselect_options( $rate['countries'] ); ?>
 					                </select>
 					                <select name="tax_class[<?php echo $i; ?>]" title="Tax Class">
 						                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
@@ -857,7 +858,7 @@ function woocommerce_admin_fields($options) {
 	            
 	            	$links = array();
 	            	
-	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
+	            	foreach ($woocommerce->shipping->shipping_methods as $method) :
 	            		
 	            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
 	            		
@@ -867,7 +868,7 @@ function woocommerce_admin_fields($options) {
 					
 					echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
 	            
-	            	foreach (woocommerce_shipping::$shipping_methods as $method) :
+	            	foreach ($woocommerce->shipping->shipping_methods as $method) :
 	            		
 	            		echo '<div class="section" id="shipping-'.$method->id.'">';
 	            		$method->admin_options();
@@ -882,7 +883,7 @@ function woocommerce_admin_fields($options) {
 	            	
 	            	$links = array();
 	            	
-	            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
+	            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 	            		
 	            		$title = ($gateway->title) ? ucwords($gateway->title) : ucwords($gateway->id);
 	            		
@@ -892,7 +893,7 @@ function woocommerce_admin_fields($options) {
 					
 					echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
 	            
-	            	foreach (woocommerce_payment_gateways::payment_gateways() as $gateway) :
+	            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 	            		
 	            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
 	            		$gateway->admin_options();
@@ -972,7 +973,7 @@ function woocommerce_admin_fields($options) {
 			
 			// Add the row
 			jQuery('<div class="taxrow">\
-   				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo woocommerce_countries::country_multiselect_options('',true); ?></select>\
+   				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo $woocommerce->countries->country_multiselect_options('',true); ?></select>\
                 <select name="tax_class[' + size + ']" title="Tax Class"><option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
                 		if ($tax_classes) foreach ($tax_classes as $class) :
 	                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';

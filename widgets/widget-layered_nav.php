@@ -14,16 +14,16 @@ add_action('init', 'woocommerce_layered_nav_init', 1);
 
 function woocommerce_layered_nav_init() {
 
-	global $_chosen_attributes, $wpdb;
+	global $_chosen_attributes, $wpdb, $woocommerce;
 	
 	$_chosen_attributes = array();
 	
-	$attribute_taxonomies = woocommerce::$attribute_taxonomies;
+	$attribute_taxonomies = $woocommerce->attribute_taxonomies;
 	if ( $attribute_taxonomies ) :
 		foreach ($attribute_taxonomies as $tax) :
 	    	
 	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
-	    	$taxonomy = woocommerce::attribute_name($attribute);
+	    	$taxonomy = $woocommerce->attribute_name($attribute);
 	    	$name = 'filter_' . $attribute;
 	    	
 	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) $_chosen_attributes[$taxonomy] = explode(',', $_GET[$name] );
@@ -40,7 +40,7 @@ add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
 
 function woocommerce_layered_nav_query( $filtered_posts ) {
 	
-	global $_chosen_attributes, $wpdb;
+	global $_chosen_attributes, $wpdb, $woocommerce;
 	
 	if (sizeof($_chosen_attributes)>0) :
 		
@@ -66,8 +66,8 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 		
 		if ($filtered) :
 			
-			woocommerce::$query['layered_nav_post__in'] = $matched_products;
-			woocommerce::$query['layered_nav_post__in'][] = 0;
+			$woocommerce->query['layered_nav_post__in'] = $matched_products;
+			$woocommerce->query['layered_nav_post__in'][] = 0;
 			
 			if (sizeof($filtered_posts)==0) :
 				$filtered_posts = $matched_products;
@@ -111,16 +111,16 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		$this->WP_Widget('layered_nav', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget( $args, $instance ) {
 		extract($args);
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb;
+		global $_chosen_attributes, $wpdb, $woocommerce;
 				
 		$title = $instance['title'];
-		$taxonomy = woocommerce::attribute_name($instance['attribute']);
+		$taxonomy = $woocommerce->attribute_name($instance['attribute']);
 		
 		if (!taxonomy_exists($taxonomy)) return;
 
@@ -147,7 +147,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			
 				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 				
-				$count = sizeof(array_intersect($_products_in_term, woocommerce::$query['filtered_product_ids']));
+				$count = sizeof(array_intersect($_products_in_term, $woocommerce->query['filtered_product_ids']));
 
 				if ($count>0) $found = true;
 				
@@ -233,17 +233,18 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		}
 	}
 	
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
-		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = woocommerce::attribute_label($new_instance['attribute']);
+		global $woocommerce;
+		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = $woocommerce->attribute_label($new_instance['attribute']);
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		$instance['attribute'] = stripslashes($new_instance['attribute']);
 		return $instance;
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
-		global $wpdb;
+		global $wpdb, $woocommerce;
 		?>
 			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes') ?></label>
 			<input type="text" class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
@@ -251,10 +252,10 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			<p><label for="<?php echo $this->get_field_id('attribute'); ?>"><?php _e('Attribute:', 'woothemes') ?></label>
 			<select id="<?php echo $this->get_field_id('attribute'); ?>" name="<?php echo $this->get_field_name('attribute'); ?>">
 				<?php
-				$attribute_taxonomies = woocommerce::get_attribute_taxonomies();
+				$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
 				if ( $attribute_taxonomies ) :
 					foreach ($attribute_taxonomies as $tax) :
-						if (taxonomy_exists( woocommerce::attribute_name($tax->attribute_name))) :
+						if (taxonomy_exists( $woocommerce->attribute_name($tax->attribute_name))) :
 							
 							echo '<option value="'.$tax->attribute_name.'" ';
 							if (isset($instance['attribute']) && $instance['attribute']==$tax->attribute_name) :

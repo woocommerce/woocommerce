@@ -73,10 +73,6 @@ if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility( $post, $_product ) {
 		if (!$_product->is_visible() && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
 		
-		/*if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
-			woocommerce::add_error( __('Sorry, this product is currently unavailable.', 'woothemes') );
-		endif;*/
-		
 		if (!$_product->is_visible()) : wp_safe_redirect(home_url()); exit; endif;
 	}
 }
@@ -87,7 +83,7 @@ if (!function_exists('woocommerce_check_product_visibility')) {
 if (!function_exists('woocommerce_show_product_images')) {
 	function woocommerce_show_product_images() {
 		
-		global $_product, $post;
+		global $_product, $post, $woocommerce;
 
 		echo '<div class="images">';
 
@@ -99,7 +95,7 @@ if (!function_exists('woocommerce_show_product_images')) {
 			the_post_thumbnail($large_thumbnail_size); 
 			echo '</a>';
 		else : 
-			echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" />'; 
+			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" />'; 
 		endif; 
 
 		do_action('woocommerce_product_thumbnails');
@@ -312,7 +308,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 if (!function_exists('woocommerce_variable_add_to_cart')) {
 	function woocommerce_variable_add_to_cart() {
 		
-		global $post, $_product;
+		global $post, $_product, $woocommerce;
 		
 		$attributes = $_product->get_available_attribute_variations();
 
@@ -361,12 +357,12 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<tbody>
 				<?php foreach ($attributes as $name => $options) :?>
 					<tr>
-						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo woocommerce::attribute_label($name); ?></label></td>
+						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
 						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
 								<?php foreach ($options as $option) : 
-									$option_term = get_term_by('slug', $option, woocommerce::attribute_name($name)); 
+									$option_term = get_term_by('slug', $option, $woocommerce->attribute_name($name)); 
 									if (!is_wp_error($option_term) && isset($option_term->name)) :
 										$term_name = $option_term->name;
 									else :
@@ -402,7 +398,8 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
  **/
 if (!function_exists('woocommerce_add_to_cart_form_nonce')) {
 	function woocommerce_add_to_cart_form_nonce() {
-		woocommerce::nonce_field('add_to_cart');
+		global $woocommerce;
+		$woocommerce->nonce_field('add_to_cart');
 	}
 }
 
@@ -511,12 +508,12 @@ if (!function_exists('woocommerce_product_reviews_panel')) {
 if (!function_exists('woocommerce_get_product_thumbnail')) {
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0 ) {
 		
-		global $post;
+		global $post, $woocommerce;
 		
-		if (!$placeholder_width) $placeholder_width = woocommerce::get_image_size('shop_single_image_width');
-		if (!$placeholder_height) $placeholder_height = woocommerce::get_image_size('shop_single_image_height');
+		if (!$placeholder_width) $placeholder_width = $woocommerce->get_image_size('shop_single_image_width');
+		if (!$placeholder_height) $placeholder_height = $woocommerce->get_image_size('shop_single_image_height');
 		
-		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
+		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
 		
 	}
 }
@@ -564,18 +561,19 @@ if (!function_exists('woocommerce_related_products')) {
  **/
 if (!function_exists('woocommerce_shipping_calculator')) {
 	function woocommerce_shipping_calculator() {
-		if (woocommerce_shipping::$enabled && get_option('woocommerce_enable_shipping_calc')=='yes' && woocommerce_cart::needs_shipping()) : 
+		global $woocommerce;
+		if ($woocommerce->shipping->enabled && get_option('woocommerce_enable_shipping_calc')=='yes' && $woocommerce->cart->needs_shipping()) : 
 		?>
-		<form class="shipping_calculator" action="<?php echo woocommerce_cart::get_cart_url(); ?>" method="post">
+		<form class="shipping_calculator" action="<?php echo $woocommerce->cart->get_cart_url(); ?>" method="post">
 			<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
 			<section class="shipping-calculator-form">
 			<p class="form-row">
 				<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
 					<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
 					<?php				
-						foreach(woocommerce_countries::get_allowed_countries() as $key=>$value) :
+						foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
 							echo '<option value="'.$key.'"';
-							if (woocommerce_customer::get_shipping_country()==$key) echo 'selected="selected"';
+							if ($woocommerce->customer->get_shipping_country()==$key) echo 'selected="selected"';
 							echo '>'.$value.'</option>';
 						endforeach;
 					?>
@@ -584,9 +582,9 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 			<div class="col2-set">
 				<p class="form-row col-1">
 					<?php 
-						$current_cc = woocommerce_customer::get_shipping_country();
-						$current_r = woocommerce_customer::get_shipping_state();
-						$states = woocommerce_countries::$states;
+						$current_cc = $woocommerce->customer->get_shipping_country();
+						$current_r = $woocommerce->customer->get_shipping_state();
+						$states = $woocommerce->countries->states;
 						
 						if (isset( $states[$current_cc][$current_r] )) :
 							// Dropdown
@@ -610,11 +608,11 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 					?>
 				</p>
 				<p class="form-row col-2">
-					<input type="text" class="input-text" value="<?php echo woocommerce_customer::get_shipping_postcode(); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
+					<input type="text" class="input-text" value="<?php echo $woocommerce->customer->get_shipping_postcode(); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
 				</p>
 			</div>
 			<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woothemes'); ?></button></p>
-			<?php woocommerce::nonce_field('cart') ?>
+			<?php $woocommerce->nonce_field('cart') ?>
 			</section>
 		</form>
 		<?php
@@ -627,7 +625,8 @@ if (!function_exists('woocommerce_shipping_calculator')) {
  **/
 if (!function_exists('woocommerce_login_form')) {
 	function woocommerce_login_form( $message = '' ) {
-	
+		global $woocommerce;
+		
 		if (is_user_logged_in()) return;
 		
 		?>
@@ -644,7 +643,7 @@ if (!function_exists('woocommerce_login_form')) {
 			<div class="clear"></div>
 			
 			<p class="form-row">
-				<?php woocommerce::nonce_field('login', 'login') ?>
+				<?php $woocommerce->nonce_field('login', 'login') ?>
 				<input type="submit" class="button" name="login" value="<?php _e('Login', 'woothemes'); ?>" />
 				<a class="lost_password" href="<?php echo home_url('wp-login.php?action=lostpassword'); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
 			</p>
@@ -902,9 +901,9 @@ function woocommerce_upsell_display() {
  * Display Cross Sells
  **/
 function woocommerce_cross_sell_display() {
-	global $columns;
+	global $columns, $woocommerce;
 	$columns = 2;
-	$crosssells = woocommerce_cart::get_cross_sells();
+	$crosssells = $woocommerce->cart->get_cross_sells();
 	
 	if (sizeof($crosssells)>0) :
 		echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';

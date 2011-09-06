@@ -179,22 +179,24 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
     * Process the payment and return the result
     **/
     function process_payment( $order_id ) {
-      $order = &new woocommerce_order( $order_id );
-
-      // Mark as on-hold (we're awaiting the payment)
-      $order->update_status('on-hold', __('Awaiting BACS payment', 'woothemes'));
-
-      // Remove cart
-      woocommerce_cart::empty_cart();
-      
-      // Empty awaiting payment session
+    	global $woocommerce;
+    	
+		$order = &new woocommerce_order( $order_id );
+		
+		// Mark as on-hold (we're awaiting the payment)
+		$order->update_status('on-hold', __('Awaiting BACS payment', 'woothemes'));
+		
+		// Remove cart
+		$woocommerce->cart->empty_cart();
+		
+		// Empty awaiting payment session
 		unset($_SESSION['order_awaiting_payment']);
-
-      // Return thankyou redirect
-      return array(
-        'result' 	=> 'success',
-        'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
-      );
+		
+		// Return thankyou redirect
+		return array(
+			'result' 	=> 'success',
+			'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
+		);
     }
 
 }

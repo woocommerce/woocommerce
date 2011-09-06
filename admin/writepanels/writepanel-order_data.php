@@ -118,7 +118,7 @@ function woocommerce_order_data_meta_box($post) {
  * Displays the order items meta box - for showing individual items in the order
  */
 function woocommerce_order_items_meta_box($post) {
-	
+	global $woocommerce;
 	$order_items = (array) maybe_unserialize( get_post_meta($post->ID, '_order_items', true) );
 	?>
 	<div class="woocommerce_order_items_wrapper">
@@ -152,7 +152,7 @@ function woocommerce_order_items_meta_box($post) {
 								echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $item['id'];
 								echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($item['variation_id']) echo $item['variation_id']; else echo '-';
 								echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-							?>" src="<?php echo woocommerce::plugin_url(); ?>/assets/images/tip.png" />
+							?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 						</td>
 						<td class="name">
 							<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $item['name']; ?></a>

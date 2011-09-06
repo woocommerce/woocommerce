@@ -15,7 +15,7 @@ add_action('right_now_table_end', 'woocommerce_right_now');
 
 function woocommerce_content_right_now() {
 	
-	global $lowinstock, $outofstock;
+	global $lowinstock, $outofstock, $woocommerce;
 	
 	$lowstockamount = get_option('woocommerce_notify_low_stock_amount');
 	if (!is_numeric($lowstockamount)) $lowstockamount = 1;
@@ -92,7 +92,7 @@ function woocommerce_content_right_now() {
 		</tr>
 		<tr>
 			<td class="first b"><a href="admin.php?page=attributes"><?php 
-				echo sizeof(woocommerce::get_attribute_taxonomies());
+				echo sizeof($woocommerce->get_attribute_taxonomies());
 			?></a></td>
 			<td class="t"><a href="admin.php?page=attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
 		</tr>
@@ -263,6 +263,8 @@ function woocommmerce_dashboard_sales() {
  */
 function woocommmerce_dashboard_sales_js() {
 	
+	global $woocommerce;
+	
 	$screen = get_current_screen();
 	
 	if (!$screen || $screen->id!=='dashboard') return;
@@ -355,7 +357,7 @@ function woocommmerce_dashboard_sales_js() {
 	$params['order_data'] = json_encode($order_data);	
 	
 	// Queue
-	wp_register_script( 'woocommerce_dashboard_sales', woocommerce::plugin_url() . '/assets/js/woocommerce_dashboard_sales.js', 'jquery', '1.0' );
+	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/woocommerce_dashboard_sales.js', 'jquery', '1.0' );
 	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
 	wp_print_scripts('woocommerce_dashboard_sales');
 	

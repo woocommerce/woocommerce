@@ -36,8 +36,9 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget($args, $instance) {
+		global $woocommerce;
 		
 		$cache = wp_cache_get('widget_top_rated_products', 'widget');
 
@@ -72,7 +73,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 					<?php while ($top_rated_posts->have_posts()) : $top_rated_posts->the_post(); $_product = &new woocommerce_product( $top_rated_posts->post->ID ); 
 					?>
 					<li><a href="<?php echo get_permalink( $top_rated_posts->post->ID ) ?>" title="<?php echo esc_attr($top_rated_posts->post->post_title ? $top_rated_posts->post->post_title : $top_rated_posts->post->ID); ?>">
-						<?php if (has_post_thumbnail( $top_rated_posts->post->ID )) echo get_the_post_thumbnail($top_rated_posts->post->ID, 'shop_thumbnail'); else echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_image_size('shop_thumbnail_image_width').'px" height="'.woocommerce::get_image_size('shop_thumbnail_image_height').'px" />'; ?>
+						<?php if (has_post_thumbnail( $top_rated_posts->post->ID )) echo get_the_post_thumbnail($top_rated_posts->post->ID, 'shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />'; ?>
 						<?php if ( $top_rated_posts->post->post_title ) echo get_the_title( $top_rated_posts->post->ID ); else echo $top_rated_posts->post->ID; ?>			
 					</a> <?php echo $_product->get_rating_html('sidebar'); ?><?php echo $_product->get_price_html(); ?></li>
 					
@@ -108,7 +109,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		return $args;
 	}
 
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -125,7 +126,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		wp_cache_delete('widget_top_rated_products', 'widget');
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] )

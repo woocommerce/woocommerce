@@ -89,6 +89,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	 * Process the payment and return the result
 	 **/
 	function process_payment( $order_id ) {
+		global $woocommerce;
 		
 		$order = &new woocommerce_order( $order_id );
 		
@@ -96,7 +97,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		$order->update_status('on-hold', __('Awaiting cheque payment', 'woothemes'));
 		
 		// Remove cart
-		woocommerce_cart::empty_cart();
+		$woocommerce->cart->empty_cart();
 		
 		// Empty awaiting payment session
 		unset($_SESSION['order_awaiting_payment']);

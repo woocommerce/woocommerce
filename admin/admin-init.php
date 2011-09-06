@@ -25,7 +25,8 @@ add_action('admin_init', 'woocommerce_admin_init');
  * Admin Scripts
  */
 function woocommerce_admin_scripts() {
-	wp_register_script( 'woocommerce_admin', woocommerce::plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
+	global $woocommerce;
+	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
     wp_enqueue_script('woocommerce_admin');
 }
 add_action('admin_print_scripts', 'woocommerce_admin_scripts');
@@ -36,11 +37,11 @@ add_action('admin_print_scripts', 'woocommerce_admin_scripts');
  * Sets up the admin menus in wordpress.
  */
 function woocommerce_admin_menu() {
-	global $menu;
+	global $menu, $woocommerce;
 	
 	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator' );
 	
-    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', woocommerce::plugin_url() . '/assets/images/icons/menu_icons.png', 56);
+    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 56);
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
@@ -159,10 +160,11 @@ function woocommerce_get_current_post_type() {
  * Categories ordering scripts
  */
 function woocommerce_categories_scripts () {
+	global $woocommerce;
 	
 	if( !isset($_GET['taxonomy']) || $_GET['taxonomy'] !== 'product_cat') return;
 	
-	wp_register_script('woocommerce-categories-ordering', woocommerce::plugin_url() . '/assets/js/categories-ordering.js', array('jquery-ui-sortable'));
+	wp_register_script('woocommerce-categories-ordering', $woocommerce->plugin_url() . '/assets/js/categories-ordering.js', array('jquery-ui-sortable'));
 	wp_print_scripts('woocommerce-categories-ordering');
 	
 }

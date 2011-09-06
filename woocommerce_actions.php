@@ -30,27 +30,28 @@ add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_o
 add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
 
 function woocommerce_ajax_update_order_review() {
+	global $woocommerce;
 	
 	check_ajax_referer( 'update-order-review', 'security' );
 	
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
-	if (sizeof(woocommerce_cart::$cart_contents)==0) :
+	if (sizeof($woocommerce->cart->cart_contents)==0) :
 		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
 		die();
 	endif;
 	
 	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
 	
-	if (isset($_POST['country'])) woocommerce_customer::set_country( $_POST['country'] );
-	if (isset($_POST['state'])) woocommerce_customer::set_state( $_POST['state'] );
-	if (isset($_POST['postcode'])) woocommerce_customer::set_postcode( $_POST['postcode'] );
+	if (isset($_POST['country'])) $woocommerce->customer->set_country( $_POST['country'] );
+	if (isset($_POST['state'])) $woocommerce->customer->set_state( $_POST['state'] );
+	if (isset($_POST['postcode'])) $woocommerce->customer->set_postcode( $_POST['postcode'] );
 	
-	if (isset($_POST['s_country'])) woocommerce_customer::set_shipping_country( $_POST['s_country'] );
-	if (isset($_POST['s_state'])) woocommerce_customer::set_shipping_state( $_POST['s_state'] );
-	if (isset($_POST['s_postcode'])) woocommerce_customer::set_shipping_postcode( $_POST['s_postcode'] );
+	if (isset($_POST['s_country'])) $woocommerce->customer->set_shipping_country( $_POST['s_country'] );
+	if (isset($_POST['s_state'])) $woocommerce->customer->set_shipping_state( $_POST['s_state'] );
+	if (isset($_POST['s_postcode'])) $woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
 	
-	woocommerce_cart::calculate_totals();
+	$woocommerce->cart->calculate_totals();
 	
 	do_action('woocommerce_checkout_order_review');
 	
@@ -65,19 +66,21 @@ add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_ca
 
 function woocommerce_ajax_add_to_cart() {
 	
+	global $woocommerce;
+	
 	check_ajax_referer( 'add-to-cart', 'security' );
 	
 	$product_id = (int) $_POST['product_id'];
 
-	if (woocommerce_cart::add_to_cart($product_id, 1)) :
+	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
 		// Return html fragments
 		$data = apply_filters('add_to_cart_fragments', array());
 	else :
 		// Return error
 		$data = array(
-			'error' => woocommerce::$errors[0]
+			'error' => $woocommerce->errors[0]
 		);
-		woocommerce::clear_messages();
+		$woocommerce->clear_messages();
 	endif;
 	
 	echo json_encode( $data );
@@ -92,8 +95,10 @@ function woocommerce_ajax_add_to_cart() {
 add_action('woocommerce_new_order', 'woocommerce_increase_coupon_counts');
 
 function woocommerce_increase_coupon_counts() {
-	if (woocommerce_cart::$applied_coupons) foreach (woocommerce_cart::$applied_coupons as $code) :
-		woocommerce_coupons::inc_usage_count($code);
+	global $woocommerce;
+	if ($woocommerce->cart->applied_coupons) foreach ($woocommerce->cart->applied_coupons as $code) :
+		$coupon = &new woocommerce_coupon( $code );
+		$coupon->inc_usage_count();
 	endforeach;
 }
 
@@ -104,6 +109,8 @@ add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
 
 function woocommerce_add_order_item() {
 	
+	global $woocommerce;
+
 	check_ajax_referer( 'add-order-item', 'security' );
 	
 	global $wpdb;
@@ -148,7 +155,7 @@ function woocommerce_add_order_item() {
 				echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $_product->id;
 				echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($_product->variation_id) echo $_product->variation_id; else echo '-';
 				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-			?>" src="<?php echo woocommerce::plugin_url(); ?>/assets/images/tip.png" />
+			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 		</td>
 		<td class="name">
 			<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $_product->get_title(); ?></a>
@@ -260,16 +267,15 @@ function woocommerce_shop_page_archive_redirect() {
 add_action( 'init', 'woocommerce_update_cart_action' );
 
 function woocommerce_update_cart_action() {
-
-	// Remove from cart
-	if ( isset($_GET['remove_item']) && is_numeric($_GET['remove_item'])  && woocommerce::verify_nonce('cart', '_GET')) :
 	
-		woocommerce_cart::set_quantity( $_GET['remove_item'], 0 );
+	global $woocommerce;
+	
+	// Remove from cart
+	if ( isset($_GET['remove_item']) && is_numeric($_GET['remove_item'])  && $woocommerce->verify_nonce('cart', '_GET')) :
+	
+		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 		
-		// Re-calc price
-		//woocommerce_cart::calculate_totals();
-			
-		woocommerce::add_message( __('Cart updated.', 'woothemes') );
+		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
 		
 		if ( isset($_SERVER['HTTP_REFERER'])) :
 			wp_safe_redirect($_SERVER['HTTP_REFERER']);
@@ -277,19 +283,19 @@ function woocommerce_update_cart_action() {
 		endif;
 	
 	// Update Cart
-	elseif (isset($_POST['update_cart']) && $_POST['update_cart']  && woocommerce::verify_nonce('cart')) :
+	elseif (isset($_POST['update_cart']) && $_POST['update_cart']  && $woocommerce->verify_nonce('cart')) :
 		
 		$cart_totals = $_POST['cart'];
 		
-		if (sizeof(woocommerce_cart::$cart_contents)>0) : 
-			foreach (woocommerce_cart::$cart_contents as $cart_item_key => $values) :
+		if (sizeof($woocommerce->cart->cart_contents)>0) : 
+			foreach ($woocommerce->cart->cart_contents as $cart_item_key => $values) :
 				
-				if (isset($cart_totals[$cart_item_key]['qty'])) woocommerce_cart::set_quantity( $cart_item_key, $cart_totals[$cart_item_key]['qty'] );
+				if (isset($cart_totals[$cart_item_key]['qty'])) $woocommerce->cart->set_quantity( $cart_item_key, $cart_totals[$cart_item_key]['qty'] );
 				
 			endforeach;
 		endif;
 		
-		woocommerce::add_message( __('Cart updated.', 'woothemes') );
+		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
 		
 	endif;
 
@@ -302,7 +308,9 @@ add_action( 'init', 'woocommerce_add_to_cart_action' );
 
 function woocommerce_add_to_cart_action( $url = false ) {
 	
-	if (empty($_GET['add-to-cart']) || !woocommerce::verify_nonce('add_to_cart', '_GET')) return;
+	global $woocommerce;
+
+	if (empty($_GET['add-to-cart']) || !$woocommerce->verify_nonce('add_to_cart', '_GET')) return;
     
 	if (is_numeric($_GET['add-to-cart'])) :
 		
@@ -310,13 +318,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		$quantity = (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
 		
 		// Add to the cart
-		if (woocommerce_cart::add_to_cart($_GET['add-to-cart'], $quantity)) :
+		if ($woocommerce->cart->add_to_cart($_GET['add-to-cart'], $quantity)) :
 		
 			// Output success messages
 			if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-				woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
+				$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
 			else :
-				woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+				$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
 			endif;
 		
 		endif;
@@ -326,7 +334,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		// Variation add to cart
 		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id'])) :
             
-            woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
+            $woocommerce->add_error( __('Please choose product options&hellip;', 'woothemes') );
             wp_safe_redirect(get_permalink($_GET['product']));
             exit;
             
@@ -355,18 +363,18 @@ function woocommerce_add_to_cart_action( $url = false ) {
             if ($all_variations_set && $variation_id > 0) :
                 
                 // Add to cart
-				if (woocommerce_cart::add_to_cart($product_id, $quantity, $variations, $variation_id)) :
+				if ($woocommerce->cart->add_to_cart($product_id, $quantity, $variations, $variation_id)) :
 				
 					if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-						woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
+						$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
 					else :
-						woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+						$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
 					endif;
 				
 				endif;
 
             else :
-                woocommerce::add_error( __('Please choose product options&hellip;', 'woothemes') );
+                $woocommerce->add_error( __('Please choose product options&hellip;', 'woothemes') );
                 wp_redirect(get_permalink($_GET['product']));
                 exit;
             endif;
@@ -383,12 +391,12 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			foreach ($_POST['quantity'] as $item => $quantity) :
 				if ($quantity>0) :
 					
-					if (woocommerce_cart::add_to_cart($item, $quantity)) :
+					if ($woocommerce->cart->add_to_cart($item, $quantity)) :
 					
 						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-							woocommerce::add_message( __('Product successfully added to your cart.', 'woothemes') );
+							$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
 						else :
-							woocommerce::add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), woocommerce_cart::get_cart_url()) );
+							$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
 						endif;
 						
 					endif;
@@ -398,13 +406,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			endforeach;
 			
 			if ($total_quantity==0) :
-				woocommerce::add_error( __('Please choose a quantity&hellip;', 'woothemes') );
+				$woocommerce->add_error( __('Please choose a quantity&hellip;', 'woothemes') );
 			endif;
 		
 		elseif ($_GET['product']) :
 			
 			/* Link on product pages */
-			woocommerce::add_error( __('Please choose a product&hellip;', 'woothemes') );
+			$woocommerce->add_error( __('Please choose a product&hellip;', 'woothemes') );
 			wp_redirect( get_permalink( $_GET['product'] ) );
 			exit;
 		
@@ -421,8 +429,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
 	}
 	
 	// Redirect to cart option
-	elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && woocommerce::error_count() == 0) {
-		wp_safe_redirect( woocommerce_cart::get_cart_url() );
+	elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && $woocommerce->error_count() == 0) {
+		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 		exit;
 	}
 	
@@ -453,7 +461,7 @@ function woocommerce_clear_cart_on_return() {
 		if ($order_id > 0) :
 			$order = &new woocommerce_order( $order_id );
 			if ($order->order_key == $order_key) :
-				woocommerce_cart::empty_cart();
+				$woocommerce->cart->empty_cart();
 			endif;
 		endif;
 		
@@ -474,7 +482,7 @@ function woocommerce_clear_cart_after_payment( $url = false ) {
 		
 		if ($order->id > 0 && ($order->status=='completed' || $order->status=='processing')) :
 			
-			woocommerce_cart::empty_cart();
+			$woocommerce->cart->empty_cart();
 			
 			unset($_SESSION['order_awaiting_payment']);
 			
@@ -492,14 +500,16 @@ add_action('init', 'woocommerce_process_login');
  
 function woocommerce_process_login() {
 	
+	global $woocommerce;
+	
 	if (isset($_POST['login']) && $_POST['login']) :
 	
-		woocommerce::verify_nonce('login');
+		$woocommerce->verify_nonce('login');
 
-		if ( !isset($_POST['username']) || empty($_POST['username']) ) woocommerce::add_error( __('Username is required.', 'woothemes') );
-		if ( !isset($_POST['password']) || empty($_POST['password']) ) woocommerce::add_error( __('Password is required.', 'woothemes') );
+		if ( !isset($_POST['username']) || empty($_POST['username']) ) $woocommerce->add_error( __('Username is required.', 'woothemes') );
+		if ( !isset($_POST['password']) || empty($_POST['password']) ) $woocommerce->add_error( __('Password is required.', 'woothemes') );
 		
-		if (woocommerce::error_count()==0) :
+		if ($woocommerce->error_count()==0) :
 			
 			$creds = array();
 			$creds['user_login'] = $_POST['username'];
@@ -508,7 +518,7 @@ function woocommerce_process_login() {
 			$secure_cookie = is_ssl() ? true : false;
 			$user = wp_signon( $creds, $secure_cookie );
 			if ( is_wp_error($user) ) :
-				woocommerce::add_error( $user->get_error_message() );
+				$woocommerce->add_error( $user->get_error_message() );
 			else :
 				if ( isset($_SERVER['HTTP_REFERER'])) {
 					wp_safe_redirect($_SERVER['HTTP_REFERER']);
@@ -530,9 +540,12 @@ add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
 add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
 
 function woocommerce_process_checkout () {
-	include_once(woocommerce::plugin_path() . '/classes/checkout.class.php');
-
-	woocommerce_checkout::instance()->process_checkout();
+	global $woocommerce;
+	
+	include_once($woocommerce->plugin_path() . '/classes/checkout.class.php');
+	
+	$woocommerce_checkout = &new woocommerce_checkout();
+	$woocommerce_checkout->process_checkout();
 	
 	die(0);
 }
@@ -545,6 +558,8 @@ add_action('init', 'woocommerce_cancel_order');
 
 function woocommerce_cancel_order() {
 	
+	global $woocommerce;
+	
 	if ( isset($_GET['cancel_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
 		$order_key = urldecode( $_GET['order'] );
@@ -552,25 +567,25 @@ function woocommerce_cancel_order() {
 		
 		$order = &new woocommerce_order( $order_id );
 
-		if ($order->id == $order_id && $order->order_key == $order_key && $order->status=='pending' && woocommerce::verify_nonce('cancel_order', '_GET')) :
+		if ($order->id == $order_id && $order->order_key == $order_key && $order->status=='pending' && $woocommerce->verify_nonce('cancel_order', '_GET')) :
 			
 			// Cancel the order + restore stock
 			$order->cancel_order( __('Order cancelled by customer.', 'woothemes') );
 			
 			// Message
-			woocommerce::add_message( __('Your order was cancelled.', 'woothemes') );
+			$woocommerce->add_message( __('Your order was cancelled.', 'woothemes') );
 		
 		elseif ($order->status!='pending') :
 			
-			woocommerce::add_error( __('Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woothemes') );
+			$woocommerce->add_error( __('Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woothemes') );
 			
 		else :
 		
-			woocommerce::add_error( __('Invalid order.', 'woothemes') );
+			$woocommerce->add_error( __('Invalid order.', 'woothemes') );
 			
 		endif;
 		
-		wp_safe_redirect(woocommerce_cart::get_cart_url());
+		wp_safe_redirect($woocommerce->cart->get_cart_url());
 		exit;
 		
 	endif;

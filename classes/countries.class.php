@@ -11,7 +11,7 @@
  */
 class woocommerce_countries {
 	
-	public static $countries = array(
+	var $countries = array(
 		'AD' => 'Andorra',
     	'AE' => 'United Arab Emirates',
 		'AF' => 'Afghanistan',
@@ -262,7 +262,7 @@ class woocommerce_countries {
 		'VE' => 'Venezuela',
 	);
 	
-	public static $states = array(
+	var $states = array(
 		'AU' => array(
 			'ACT' =>  'Australian Capital Territory' ,
 			'NSW' =>  'New South Wales' ,
@@ -501,7 +501,7 @@ class woocommerce_countries {
 	/** get countries we allow only */
 	function get_allowed_countries() {
 	
-		$countries = self::$countries;
+		$countries = $this->countries;
 		
 		asort($countries);
 		
@@ -524,33 +524,35 @@ class woocommerce_countries {
 	
 	/** Gets the correct string for shipping - ether 'to the' or 'to' */
 	function shipping_to_prefix() {
+		global $woocommerce;
 		$return = '';
-		if (in_array(woocommerce_customer::get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
+		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
 		else $return = __('to', 'woothemes');
-		$return = apply_filters('shipping_to_prefix', $return, woocommerce_customer::get_shipping_country());
+		$return = apply_filters('shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
 		return $return;
 	}
 	
 	function estimated_for_prefix() {
+		global $woocommerce;
 		$return = '';
-		if (in_array(woocommerce_customer::get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the ', 'woothemes');
-		$return = apply_filters('estimated_for_prefix', $return, woocommerce_customer::get_shipping_country());
+		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the ', 'woothemes');
+		$return = apply_filters('estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
 		return $return;
 	}
 	
 	/** get states */
 	function get_states( $cc ) {
-		if (isset( self::$states[$cc] )) return self::$states[$cc];
+		if (isset( $this->states[$cc] )) return $this->states[$cc];
 	}
 	
 	/** Outputs the list of countries and states for use in dropdown boxes */
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
-		$countries = self::$countries;
+		$countries = $this->countries;
 		asort($countries);
 		
 		if ( $countries ) foreach ( $countries as $key=>$value) :
-			if ( $states =  self::get_states($key) ) :
+			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				/*echo '<option value="'.$key.'"';
     				if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
@@ -574,11 +576,11 @@ class woocommerce_countries {
 	/** Outputs the list of countries and states for use in multiselect boxes */
 	function country_multiselect_options( $selected_countries = '', $escape=false ) {
 		
-		$countries = self::$countries;
+		$countries = $this->countries;
 		asort($countries);
 		
 		if ( $countries ) foreach ( $countries as $key=>$value) :
-			if ( $states =  self::get_states($key) ) :
+			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
     					echo '<option value="'.$key.':'.$state_key.'"';

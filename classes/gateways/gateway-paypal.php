@@ -12,8 +12,10 @@
 class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 	public function __construct() { 
+		global $woocommerce;
+		
         $this->id			= 'paypal';
-        $this->icon 		= woocommerce::plugin_url() . '/assets/images/icons/paypal.png';
+        $this->icon 		= $woocommerce->plugin_url() . '/assets/images/icons/paypal.png';
         $this->has_fields 	= false;
       	$this->enabled		= get_option('woocommerce_paypal_enabled');
 		$this->title 		= get_option('woocommerce_paypal_title');
@@ -126,6 +128,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 * Generate the paypal button link
 	 **/
     public function generate_paypal_form( $order_id ) {
+		global $woocommerce;
 		
 		$order = &new woocommerce_order( $order_id );
 		
@@ -235,7 +238,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					jQuery(function(){
 						jQuery("body").block(
 							{ 
-								message: "<img src=\"'.woocommerce::plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+								message: "<img src=\"'.$woocommerce->plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
 								overlayCSS: 
 								{ 
 									background: "#fff", 
@@ -323,7 +326,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
         	$_POST = stripslashes_deep($_POST);
         	
-        	if (self::check_ipn_request_is_valid()) :
+        	if ($this->check_ipn_request_is_valid()) :
         	
             	do_action("valid-paypal-standard-ipn-request", $_POST);
 

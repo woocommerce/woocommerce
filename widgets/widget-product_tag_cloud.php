@@ -31,7 +31,7 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 		$this->WP_Widget('tag_cloud', $this->woo_widget_name, $widget_ops);
 	}
 	
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget( $args, $instance ) {
 		extract($args);
 		$current_taxonomy = $this->_get_current_taxonomy($instance);
@@ -56,14 +56,14 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 		echo $after_widget;
 	}
 	
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		$instance['taxonomy'] = stripslashes($new_instance['taxonomy']);
 		return $instance;
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		$current_taxonomy = $this->_get_current_taxonomy($instance);
 ?>

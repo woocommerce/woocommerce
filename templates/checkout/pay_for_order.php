@@ -1,4 +1,4 @@
-<?php global $order; ?>
+<?php global $order, $woocommerce; ?>
 <form id="order_review" method="post">
 	
 	<table class="shop_table">
@@ -51,7 +51,7 @@
 		<?php if ($order->order_total > 0) : ?>
 		<ul class="payment_methods methods">
 			<?php 
-				$available_gateways = woocommerce_payment_gateways::get_available_payment_gateways();
+				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if ($available_gateways) : 
 					// Chosen Method
 					if (sizeof($available_gateways)) current($available_gateways)->set_current();
@@ -80,7 +80,7 @@
 		<?php endif; ?>
 
 		<div class="form-row">
-			<?php woocommerce::nonce_field('pay')?>
+			<?php $woocommerce->nonce_field('pay')?>
 			<input type="submit" class="button-alt" name="pay" id="place_order" value="<?php _e('Pay for order', 'woothemes'); ?>" />
 
 		</div>

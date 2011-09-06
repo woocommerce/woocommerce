@@ -38,6 +38,7 @@ class woocommerce_order {
 	
 	/** Populates an order from the loaded post data */
 	function populate( $result ) {
+		global $woocommerce;
 		
 		// Standard post data
 		$this->id = $result->ID; 
@@ -95,7 +96,7 @@ class woocommerce_order {
 	
 		// Formatted Addresses
 		$formatted_address = array();
-		$country = ($this->billing_country && isset(woocommerce_countries::$countries[$this->billing_country])) ? woocommerce_countries::$countries[$this->billing_country] : $this->billing_country;
+		$country = ($this->billing_country && isset($woocommerce->countries->countries[$this->billing_country])) ? $woocommerce->countries->countries[$this->billing_country] : $this->billing_country;
 		$address =  array_map('trim', array(
 			$this->billing_address_1,
 			$this->billing_address_2,
@@ -109,7 +110,7 @@ class woocommerce_order {
 		
 		if ($this->shipping_address_1) :
 			$formatted_address = array();
-			$country = ($this->shipping_country && isset(woocommerce_countries::$countries[$this->shipping_country])) ? woocommerce_countries::$countries[$this->shipping_country] : $this->shipping_country;
+			$country = ($this->shipping_country && isset($woocommerce->countries->countries[$this->shipping_country])) ? $woocommerce->countries->countries[$this->shipping_country] : $this->shipping_country;
 			$address = array_map('trim', array(
 				$this->shipping_address_1,
 				$this->shipping_address_2,
@@ -281,7 +282,8 @@ class woocommerce_order {
 	
 	/** Generates a URL so that a customer can cancel their (unpaid - pending) order */
 	function get_cancel_order_url() {
-		return woocommerce::nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, home_url()))));
+		global $woocommerce;
+		return $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, home_url()))));
 	}
 	
 	

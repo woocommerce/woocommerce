@@ -41,7 +41,7 @@ class woocommerce_validation {
 	public static function is_postcode( $postcode, $country ) {
 		if (strlen(trim(preg_replace('/[\s\-A-Za-z0-9]/', '', $postcode)))>0) return false;
 		if ($country=='GB') :
-			return self::is_GB_postcode( $postcode );
+			return $this->is_GB_postcode( $postcode );
 		endif;
 		return true;
 	}

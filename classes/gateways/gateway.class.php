@@ -37,8 +37,9 @@ class woocommerce_payment_gateway {
 	}
 	
 	function icon() {
+		global $woocommerce;
 		if ($this->icon) :
-			return '<img src="'. woocommerce::force_ssl($this->icon).'" alt="'.$this->title.'" />';
+			return '<img src="'. $woocommerce->force_ssl($this->icon).'" alt="'.$this->title.'" />';
 		endif;
 	}
 	

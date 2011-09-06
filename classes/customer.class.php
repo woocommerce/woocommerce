@@ -11,10 +11,8 @@
  */
 class woocommerce_customer {
 	
-	private static $_instance;
-	
 	/** constructor */
-	private function __construct() {
+	function __construct() {
 		
 		if ( !isset($_SESSION['customer']) ) :
 			
@@ -39,18 +37,9 @@ class woocommerce_customer {
 		endif;
 		
 	}
-	
-	/** get class instance */
-	public static function get() {
-        if (!isset(self::$_instance)) {
-            $c = __CLASS__;
-            self::$_instance = new $c;
-        }
-        return self::$_instance;
-    }
     
     /** Is customer outside base country? */
-	public static function is_customer_outside_base() {
+	function is_customer_outside_base() {
 		if (isset($_SESSION['customer']['country'])) :
 			
 			$default = get_option('woocommerce_default_country');
@@ -69,37 +58,37 @@ class woocommerce_customer {
 	}
 	
 	/** Gets the state from the current session */
-	public static function get_state() {
+	function get_state() {
 		if (isset($_SESSION['customer']['state'])) return $_SESSION['customer']['state'];
 	}
 	
 	/** Gets the country from the current session */
-	public static function get_country() {
+	function get_country() {
 		if (isset($_SESSION['customer']['country'])) return $_SESSION['customer']['country'];
 	}
 	
 	/** Gets the postcode from the current session */
-	public static function get_postcode() {
+	function get_postcode() {
 		if (isset($_SESSION['customer']['postcode'])) return strtolower(str_replace(' ', '', $_SESSION['customer']['postcode']));
 	}
 	
 	/** Gets the state from the current session */
-	public static function get_shipping_state() {
+	function get_shipping_state() {
 		if (isset($_SESSION['customer']['shipping_state'])) return $_SESSION['customer']['shipping_state'];
 	}
 	
 	/** Gets the country from the current session */
-	public static function get_shipping_country() {
+	function get_shipping_country() {
 		if (isset($_SESSION['customer']['shipping_country'])) return $_SESSION['customer']['shipping_country'];
 	}
 	
 	/** Gets the postcode from the current session */
-	public static function get_shipping_postcode() {
+	function get_shipping_postcode() {
 		if (isset($_SESSION['customer']['shipping_postcode'])) return strtolower(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
 	}
 	
 	/** Sets session data for the location */
-	public static function set_location( $country, $state, $postcode = '' ) {
+	function set_location( $country, $state, $postcode = '' ) {
 		$data = (array) $_SESSION['customer'];
 		
 		$data['country'] = $country;
@@ -110,22 +99,22 @@ class woocommerce_customer {
 	}
 	
 	/** Sets session data for the country */
-	public static function set_country( $country ) {
+	function set_country( $country ) {
 		$_SESSION['customer']['country'] = $country;
 	}
 	
 	/** Sets session data for the state */
-	public static function set_state( $state ) {
+	function set_state( $state ) {
 		$_SESSION['customer']['state'] = $state;
 	}
 	
 	/** Sets session data for the postcode */
-	public static function set_postcode( $postcode ) {
+	function set_postcode( $postcode ) {
 		$_SESSION['customer']['postcode'] = $postcode;
 	}
 	
 	/** Sets session data for the location */
-	public static function set_shipping_location( $country, $state = '', $postcode = '' ) {
+	function set_shipping_location( $country, $state = '', $postcode = '' ) {
 		$data = (array) $_SESSION['customer'];
 		
 		$data['shipping_country'] = $country;
@@ -136,17 +125,17 @@ class woocommerce_customer {
 	}
 	
 	/** Sets session data for the country */
-	public static function set_shipping_country( $country ) {
+	function set_shipping_country( $country ) {
 		$_SESSION['customer']['shipping_country'] = $country;
 	}
 	
 	/** Sets session data for the state */
-	public static function set_shipping_state( $state ) {
+	function set_shipping_state( $state ) {
 		$_SESSION['customer']['shipping_state'] = $state;
 	}
 	
 	/** Sets session data for the postcode */
-	public static function set_shipping_postcode( $postcode ) {
+	function set_shipping_postcode( $postcode ) {
 		$_SESSION['customer']['shipping_postcode'] = $postcode;
 	}
 	
@@ -155,7 +144,7 @@ class woocommerce_customer {
 	 *
 	 * @return   array	downloads	Array of downloadable products
 	 */
-	public static function get_downloadable_products() {
+	function get_downloadable_products() {
 		
 		global $wpdb;
 		

@@ -9,9 +9,11 @@
  * @author		WooThemes
  */
 function get_woocommerce_my_account ( $atts ) {
-	return woocommerce::shortcode_wrapper('woocommerce_my_account', $atts); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_my_account', $atts); 
 }	
 function woocommerce_my_account( $atts ) {
+	global $woocommerce;
 	
 	extract(shortcode_atts(array(
     	'recent_orders' => 5
@@ -23,7 +25,7 @@ function woocommerce_my_account( $atts ) {
 
 	get_currentuserinfo();
 	
-	woocommerce::show_messages();
+	$woocommerce->show_messages();
 	
 	if (is_user_logged_in()) :
 	
@@ -31,7 +33,7 @@ function woocommerce_my_account( $atts ) {
 		<p><?php echo sprintf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woothemes'), $current_user->display_name, get_permalink(get_option('woocommerce_change_password_page_id'))); ?></p>
 		
 		
-		<?php if ($downloads = woocommerce_customer::get_downloadable_products()) : ?>
+		<?php if ($downloads = $woocommerce->customer->get_downloadable_products()) : ?>
 		<h2><?php _e('Available downloads', 'woothemes'); ?></h2>
 		<ul class="digital-downloads">
 			<?php foreach ($downloads as $download) : ?>
@@ -89,7 +91,7 @@ function woocommerce_my_account( $atts ) {
 				</header>
 				<address>
 					<?php
-						if (isset(woocommerce_countries::$countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )])) $country = woocommerce_countries::$countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )]; else $country = '';
+						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )]; else $country = '';
 						$address = array(
 							get_user_meta( get_current_user_id(), 'billing-first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'billing-last_name', true )
 							,get_user_meta( get_current_user_id(), 'billing-company', true )
@@ -118,7 +120,7 @@ function woocommerce_my_account( $atts ) {
 				</header>
 				<address>
 					<?php
-						if (isset(woocommerce_countries::$countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )])) $country = woocommerce_countries::$countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )]; else $country = '';
+						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )]; else $country = '';
 						$address = array(
 							get_user_meta( get_current_user_id(), 'shipping-first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'shipping-last_name', true )
 							,get_user_meta( get_current_user_id(), 'shipping-company', true )
@@ -151,10 +153,13 @@ function woocommerce_my_account( $atts ) {
 }
 
 function get_woocommerce_edit_address () {
-	return woocommerce::shortcode_wrapper('woocommerce_edit_address'); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_edit_address'); 
 }	
 function woocommerce_edit_address() {
+	global $woocommerce;
 	
+	$validation = &new woocommerce_validation();
 	$user_id = get_current_user_id();
 	
 	if (is_user_logged_in()) :
@@ -168,30 +173,30 @@ function woocommerce_edit_address() {
 			$_POST = array_map('woocommerce_clean', $_POST);
 			
 			// Required Fields
-			if (empty($_POST['address-first_name'])) : woocommerce::add_error( __('First name is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-last_name'])) : woocommerce::add_error( __('Last name is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-address'])) : woocommerce::add_error( __('Address is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-city'])) : woocommerce::add_error( __('City is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-postcode'])) : woocommerce::add_error( __('Postcode is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-country'])) : woocommerce::add_error( __('Country is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-state'])) : woocommerce::add_error( __('State is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-email'])) : woocommerce::add_error( __('Email is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address-phone'])) : woocommerce::add_error( __('Phone number is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-first_name'])) : $woocommerce->add_error( __('First name is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-last_name'])) : $woocommerce->add_error( __('Last name is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-address'])) : $woocommerce->add_error( __('Address is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-city'])) : $woocommerce->add_error( __('City is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-postcode'])) : $woocommerce->add_error( __('Postcode is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-country'])) : $woocommerce->add_error( __('Country is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-state'])) : $woocommerce->add_error( __('State is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-email'])) : $woocommerce->add_error( __('Email is a required field.', 'woothemes') ); endif;
+			if (empty($_POST['address-phone'])) : $woocommerce->add_error( __('Phone number is a required field.', 'woothemes') ); endif;
 					
 			// Email
-			if (!woocommerce_validation::is_email( $_POST['address-email'] )) : woocommerce::add_error( __('Please enter a valid email address.', 'woothemes') ); endif;
+			if (!$validation->is_email( $_POST['address-email'] )) : $woocommerce->add_error( __('Please enter a valid email address.', 'woothemes') ); endif;
 			
 			// Phone
-			if (!woocommerce_validation::is_phone( $_POST['address-phone'] )) : woocommerce::add_error( __('Please enter a valid phone number.', 'woothemes') ); endif;
+			if (!$validation->is_phone( $_POST['address-phone'] )) : $woocommerce->add_error( __('Please enter a valid phone number.', 'woothemes') ); endif;
 			
 			// Postcode
-			if (!woocommerce_validation::is_postcode( $_POST['address-postcode'], $_POST['address-country'] )) : woocommerce::add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
+			if (!$validation->is_postcode( $_POST['address-postcode'], $_POST['address-country'] )) : $woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
 			else :
-				$_POST['address-postcode'] = woocommerce_validation::format_postcode( $_POST['address-postcode'], $_POST['address-country'] );
+				$_POST['address-postcode'] = $validation->format_postcode( $_POST['address-postcode'], $_POST['address-country'] );
 			endif;
 			
 			/* Save */
-			if ($user_id>0 && woocommerce::verify_nonce('edit_address') && woocommerce::error_count() == 0 ) :
+			if ($user_id>0 && $woocommerce->verify_nonce('edit_address') && $woocommerce->error_count() == 0 ) :
 				update_user_meta( $user_id, $load_address . '-first_name', $_POST['address-first_name'] );
 				update_user_meta( $user_id, $load_address . '-last_name', $_POST['address-last_name'] );
 				update_user_meta( $user_id, $load_address . '-company', $_POST['address-company'] );
@@ -245,7 +250,7 @@ function woocommerce_edit_address() {
 		
 		endif;
 
-		woocommerce::show_messages();
+		$woocommerce->show_messages();
 		?>
 		<form action="<?php echo add_query_arg('address', $load_address, get_permalink(get_option('woocommerce_edit_address_page_id'))); ?>" method="post">
 	
@@ -291,10 +296,10 @@ function woocommerce_edit_address() {
 				<select name="address-country" id="address-country" class="country_to_state" rel="address-state">
 					<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
 					<?php						
-						foreach(woocommerce_countries::$countries as $key=>$value) :
+						foreach($woocommerce->countries->countries as $key=>$value) :
 							echo '<option value="'.$key.'"';
 							if ($address['country']==$key) echo 'selected="selected"';
-							elseif (!$address['country'] && woocommerce_customer::get_country()==$key) echo 'selected="selected"';
+							elseif (!$address['country'] && $woocommerce->customer->get_country()==$key) echo 'selected="selected"';
 							echo '>'.$value.'</option>';
 						endforeach;
 					?>
@@ -304,12 +309,12 @@ function woocommerce_edit_address() {
 				<label for="address-state"><?php _e('state', 'woothemes'); ?> <span class="required">*</span></label>
 				<?php 
 					$current_cc = $address['country'];
-					if (!$current_cc) $current_cc = woocommerce_customer::get_country();
+					if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
 					
 					$current_r = $address['state'];
-					if (!$current_r) $current_r = woocommerce_customer::get_state();
+					if (!$current_r) $current_r = $woocommerce->customer->get_state();
 					
-					$states = woocommerce_countries::$states;
+					$states = $woocommerce->countries->states;
 					
 					if (isset( $states[$current_cc][$current_r] )) :
 						// Dropdown
@@ -346,7 +351,7 @@ function woocommerce_edit_address() {
 				</p>
 				<div class="clear"></div>
 			<?php endif; ?>
-			<?php woocommerce::nonce_field('edit_address') ?>
+			<?php $woocommerce->nonce_field('edit_address') ?>
 			<input type="submit" class="button" name="save_address" value="<?php _e('Save Address', 'woothemes'); ?>" />
 	
 		</form>
@@ -361,17 +366,19 @@ function woocommerce_edit_address() {
 }
 
 function get_woocommerce_change_password () {
-	return woocommerce::shortcode_wrapper('woocommerce_change_password'); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_change_password'); 
 }	
 function woocommerce_change_password() {
-
+	global $woocommerce;
+	
 	$user_id = get_current_user_id();
 	
 	if (is_user_logged_in()) :
 		
 		if ($_POST) :
 			
-			if ($user_id>0 && woocommerce::verify_nonce('change_password')) :
+			if ($user_id>0 && $woocommerce->verify_nonce('change_password')) :
 				
 				if ( $_POST['password-1'] && $_POST['password-2']  ) :
 					
@@ -384,13 +391,13 @@ function woocommerce_change_password() {
 						
 					else :
 					
-						woocommerce::add_error( __('Passwords do not match.', 'woothemes') );
+						$woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
 					
 					endif;
 				
 				else :
 				
-					woocommerce::add_error( __('Please enter your password.', 'woothemes') );
+					$woocommerce->add_error( __('Please enter your password.', 'woothemes') );
 					
 				endif;			
 				
@@ -398,7 +405,7 @@ function woocommerce_change_password() {
 		
 		endif;
 		
-		woocommerce::show_messages();
+		$woocommerce->show_messages();
 
 		?>
 		<form action="<?php echo get_permalink(get_option('woocommerce_change_password_page_id')); ?>" method="post">
@@ -412,7 +419,7 @@ function woocommerce_change_password() {
 				<input type="password" class="input-text" name="password-2" id="password-2" />
 			</p>
 			<div class="clear"></div>
-			<?php woocommerce::nonce_field('change_password')?>
+			<?php $woocommerce->nonce_field('change_password')?>
 			<p><input type="submit" class="button" name="save_password" value="<?php _e('Save', 'woothemes'); ?>" /></p>
 	
 		</form>
@@ -428,10 +435,12 @@ function woocommerce_change_password() {
 }
 
 function get_woocommerce_view_order () {
-	return woocommerce::shortcode_wrapper('woocommerce_view_order'); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_view_order'); 
 }	
 
 function woocommerce_view_order() {
+	global $woocommerce;
 	
 	$user_id = get_current_user_id();
 	

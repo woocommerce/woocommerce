@@ -35,9 +35,9 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 	
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget( $args, $instance ) {
-		global $comments, $comment;
+		global $comments, $comment, $woocommerce;
 		
 		$cache = wp_cache_get('widget_recent_reviews', 'widget');
 
@@ -77,7 +77,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				if (has_post_thumbnail( $comment->comment_post_ID )) 
 					echo get_the_post_thumbnail($comment->comment_post_ID, 'shop_thumbnail'); 
 				else 
-					echo '<img src="'.woocommerce::plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_image_size('shop_thumbnail_image_width').'px" height="'.woocommerce::get_image_size('shop_thumbnail_image_height').'px" />';
+					echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />';
 				
 				echo get_the_title($comment->comment_post_ID).'</a>';
 				
@@ -95,7 +95,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		wp_cache_set('widget_recent_reviews', $cache, 'widget');
 	}
 
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -113,7 +113,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		wp_cache_delete('widget_recent_reviews', 'widget');
 	}
 	
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;

@@ -10,21 +10,23 @@
  */
  
 function get_woocommerce_cart( $atts ) {
-	return woocommerce::shortcode_wrapper('woocommerce_cart', $atts);
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_cart', $atts);
 }
 
 function woocommerce_cart( $atts ) {
-	
+	global $woocommerce;
 	$errors = array();
+	$validation = &new woocommerce_validation();
 	
 	// Process Discount Codes
-	if (isset($_POST['apply_coupon']) && $_POST['apply_coupon'] && woocommerce::verify_nonce('cart')) :
+	if (isset($_POST['apply_coupon']) && $_POST['apply_coupon'] && $woocommerce->verify_nonce('cart')) :
 	
 		$coupon_code = stripslashes(trim($_POST['coupon_code']));
-		woocommerce_cart::add_discount($coupon_code);
+		$woocommerce->cart->add_discount($coupon_code);
 
 	// Update Shipping
-	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && woocommerce::verify_nonce('cart')) :
+	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && $woocommerce->verify_nonce('cart')) :
 
 		unset($_SESSION['_chosen_shipping_method']);
 		$country 	= $_POST['calc_shipping_country'];
@@ -32,48 +34,48 @@ function woocommerce_cart( $atts ) {
 		
 		$postcode 	= $_POST['calc_shipping_postcode'];
 		
-		if ($postcode && !woocommerce_validation::is_postcode( $postcode, $country )) : 
-			woocommerce::add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
+		if ($postcode && !$validation->is_postcode( $postcode, $country )) : 
+			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
 			$postcode = '';
 		elseif ($postcode) :
-			$postcode = woocommerce_validation::format_postcode( $postcode, $country );
+			$postcode = $validation->format_postcode( $postcode, $country );
 		endif;
 		
 		if ($country) :
 		
 			// Update customer location
-			woocommerce_customer::set_location( $country, $state, $postcode );
-			woocommerce_customer::set_shipping_location( $country, $state, $postcode );
+			$woocommerce->customer->set_location( $country, $state, $postcode );
+			$woocommerce->customer->set_shipping_location( $country, $state, $postcode );
 			
 			// Re-calc price
-			woocommerce_cart::calculate_totals();
+			$woocommerce->cart->calculate_totals();
 			
-			woocommerce::add_message(  __('Shipping costs updated.', 'woothemes') );
+			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
 		
 		else :
 		
-			woocommerce_customer::set_shipping_location( '', '', '' );
+			$woocommerce->customer->set_shipping_location( '', '', '' );
 			
-			woocommerce::add_message(  __('Shipping costs updated.', 'woothemes') );
+			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
 			
 		endif;
 			
 	endif;
 	
-	$result = woocommerce_cart::check_cart_item_stock();
+	$result = $woocommerce->cart->check_cart_item_stock();
 	if (is_wp_error($result)) :
-		woocommerce::add_error( $result->get_error_message() );
+		$woocommerce->add_error( $result->get_error_message() );
 	endif;
 	
-	woocommerce::show_messages();
+	$woocommerce->show_messages();
 	
-	if (sizeof(woocommerce_cart::$cart_contents)==0) :
+	if (sizeof($woocommerce->cart->cart_contents)==0) :
 		echo '<p>'.__('Your cart is empty.', 'woothemes').'</p>';
 		return;
 	endif;
 	
 	?>
-	<form action="<?php echo woocommerce_cart::get_cart_url(); ?>" method="post">
+	<form action="<?php echo $woocommerce->cart->get_cart_url(); ?>" method="post">
 	<table class="shop_table cart" cellspacing="0">
 		<thead>
 			<tr>
@@ -87,14 +89,14 @@ function woocommerce_cart( $atts ) {
 		</thead>
 		<tbody>
 			<?php
-			if (sizeof(woocommerce_cart::$cart_contents)>0) : 
-				foreach (woocommerce_cart::$cart_contents as $cart_item_key => $values) :
+			if (sizeof($woocommerce->cart->cart_contents)>0) : 
+				foreach ($woocommerce->cart->cart_contents as $cart_item_key => $values) :
 					$_product = $values['data'];
 					if ($_product->exists() && $values['quantity']>0) :
 					
 						?>
 						<tr>
-							<td class="product-remove"><a href="<?php echo woocommerce_cart::get_remove_url($cart_item_key); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
+							<td class="product-remove"><a href="<?php echo $woocommerce->cart->get_remove_url($cart_item_key); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
 							<td class="product-thumbnail">
 								<a href="<?php echo get_permalink($values['product_id']); ?>">
 								<?php 
@@ -103,7 +105,7 @@ function woocommerce_cart( $atts ) {
 									elseif (has_post_thumbnail($values['product_id'])) :
 										echo get_the_post_thumbnail($values['product_id'], 'shop_thumbnail'); 
 									else :
-										echo '<img src="'.woocommerce::plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.woocommerce::get_image_size('shop_thumbnail_image_width').'" height="'.woocommerce::get_image_size('shop_thumbnail_image_height').'" />'; 
+										echo '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />'; 
 									endif;
 								?>
 								</a>
@@ -132,8 +134,8 @@ function woocommerce_cart( $atts ) {
 					<div class="coupon">
 						<label for="coupon_code"><?php _e('Coupon', 'woothemes'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woothemes'); ?>" />
 					</div>
-					<?php woocommerce::nonce_field('cart') ?>
-					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Shopping Cart', 'woothemes'); ?>" /> <a href="<?php echo woocommerce_cart::get_checkout_url(); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
+					<?php $woocommerce->nonce_field('cart') ?>
+					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Shopping Cart', 'woothemes'); ?>" /> <a href="<?php echo $woocommerce->cart->get_checkout_url(); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
 				</td>
 			</tr>
 		</tbody>
@@ -146,35 +148,35 @@ function woocommerce_cart( $atts ) {
 		<div class="cart_totals">
 		<?php
 		// Hide totals if customer has set location and there are no methods going there
-		$available_methods = woocommerce_shipping::get_available_shipping_methods();
-		if ($available_methods || !woocommerce_customer::get_shipping_country() || !woocommerce_shipping::$enabled ) : 
+		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
+		if ($available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->shipping->enabled ) : 
 			?>
 			<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
 			<table cellspacing="0" cellpadding="0">
 				<tbody>
 					<tr>
 						<th><?php _e('Subtotal', 'woothemes'); ?></th>
-						<td><?php echo woocommerce_cart::get_cart_subtotal(); ?></td>
+						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 					</tr>
 					
-					<?php if (woocommerce_cart::get_cart_shipping_total()) : ?><tr>
-						<th><?php _e('Shipping', 'woothemes'); ?> <small><?php echo woocommerce_countries::shipping_to_prefix().' '.woocommerce_countries::$countries[ woocommerce_customer::get_shipping_country() ]; ?></small></th>
-						<td><?php echo woocommerce_cart::get_cart_shipping_total(); ?> <small><?php echo woocommerce_cart::get_cart_shipping_title(); ?></small></td>
+					<?php if ($woocommerce->cart->get_cart_shipping_total()) : ?><tr>
+						<th><?php _e('Shipping', 'woothemes'); ?> <small><?php echo $woocommerce->countries->shipping_to_prefix().' '.$woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ]; ?></small></th>
+						<td><?php echo $woocommerce->cart->get_cart_shipping_total(); ?> <small><?php echo $woocommerce->cart->get_cart_shipping_title(); ?></small></td>
 					</tr><?php endif; ?>
-					<?php if (woocommerce_cart::get_cart_tax()) : ?><tr>
-						<th><?php _e('Tax', 'woothemes'); ?> <?php if (woocommerce_customer::is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), woocommerce_countries::estimated_for_prefix() . woocommerce_countries::$countries[ woocommerce_countries::get_base_country() ] ); ?></small><?php endif; ?></th>
+					<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
+						<th><?php _e('Tax', 'woothemes'); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . $woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ] ); ?></small><?php endif; ?></th>
 						<td><?php 
-							echo woocommerce_cart::get_cart_tax(); 
+							echo $woocommerce->cart->get_cart_tax(); 
 						?></td>
 					</tr><?php endif; ?>
 					
-					<?php if (woocommerce_cart::get_total_discount()) : ?><tr class="discount">
+					<?php if ($woocommerce->cart->get_total_discount()) : ?><tr class="discount">
 						<th><?php _e('Discount', 'woothemes'); ?></th>
-						<td>-<?php echo woocommerce_cart::get_total_discount(); ?></td>
+						<td>-<?php echo $woocommerce->cart->get_total_discount(); ?></td>
 					</tr><?php endif; ?>
 					<tr>
 						<th><strong><?php _e('Total', 'woothemes'); ?></strong></th>
-						<td><strong><?php echo woocommerce_cart::get_total(); ?></strong></td>
+						<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 					</tr>
 				</tbody>
 			</table>

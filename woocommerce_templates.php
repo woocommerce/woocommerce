@@ -12,6 +12,7 @@
  * @author		WooThemes
  */
 function woocommerce_template_loader( $template ) {
+	global $woocommerce;
 	
 	if ( is_single() && get_post_type() == 'product' ) {
 		
@@ -19,7 +20,7 @@ function woocommerce_template_loader( $template ) {
 		
 		$template = locate_template( array( 'single-product.php', WOOCOMMERCE_TEMPLATE_URL . 'single-product.php' ) );
 		
-		if ( ! $template ) $template = woocommerce::plugin_path() . '/templates/single-product.php';
+		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/single-product.php';
 		
 	}
 	elseif ( is_tax('product_cat') ) {
@@ -28,7 +29,7 @@ function woocommerce_template_loader( $template ) {
 		
 		$template = locate_template(  array( 'taxonomy-product_cat.php', WOOCOMMERCE_TEMPLATE_URL . 'taxonomy-product_cat.php' ) );
 		
-		if ( ! $template ) $template = woocommerce::plugin_path() . '/templates/taxonomy-product_cat.php';
+		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/taxonomy-product_cat.php';
 	}
 	elseif ( is_tax('product_tag') ) {
 		
@@ -36,7 +37,7 @@ function woocommerce_template_loader( $template ) {
 		
 		$template = locate_template( array( 'taxonomy-product_tag.php', WOOCOMMERCE_TEMPLATE_URL . 'taxonomy-product_tag.php' ) );
 		
-		if ( ! $template ) $template = woocommerce::plugin_path() . '/templates/taxonomy-product_tag.php';
+		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/taxonomy-product_tag.php';
 	}
 	elseif ( is_post_type_archive('product') ||  is_page( get_option('woocommerce_shop_page_id') )) {
 
@@ -44,7 +45,7 @@ function woocommerce_template_loader( $template ) {
 		
 		$template = locate_template( array( 'archive-product.php', WOOCOMMERCE_TEMPLATE_URL . 'archive-product.php' ) );
 		
-		if ( ! $template ) $template = woocommerce::plugin_path() . '/templates/archive-product.php';
+		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/archive-product.php';
 		
 	}
 	
@@ -57,9 +58,10 @@ add_filter( 'template_include', 'woocommerce_template_loader' );
  * Get template part (for templates like loop)
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
+	global $woocommerce;
 	if ($name=='shop') :
 		if (!locate_template(array( 'loop-shop.php', WOOCOMMERCE_TEMPLATE_URL . 'loop-shop.php' ))) :
-			load_template( woocommerce::plugin_path() . '/templates/loop-shop.php',false );
+			load_template( $woocommerce->plugin_path() . '/templates/loop-shop.php',false );
 			return;
 		endif;
 	endif;
@@ -70,13 +72,14 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
  * Get the reviews template (comments)
  */
 function woocommerce_comments_template($template) {
+	global $woocommerce;
 		
 	if(get_post_type() !== 'product') return $template;
 	
 	if (file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . 'single-product-reviews.php' ))
 		return STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . 'single-product-reviews.php'; 
 	else
-		return woocommerce::plugin_path() . '/templates/single-product-reviews.php';
+		return $woocommerce->plugin_path() . '/templates/single-product-reviews.php';
 }
 
 add_filter('comments_template', 'woocommerce_comments_template' );
@@ -86,21 +89,23 @@ add_filter('comments_template', 'woocommerce_comments_template' );
  * Get other templates (e.g. product attributes)
  */
 function woocommerce_get_template($template_name, $require_once = true) {
+	global $woocommerce;
 	if (file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name )) load_template( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name, $require_once ); 
 	elseif (file_exists( STYLESHEETPATH . '/' . $template_name )) load_template( STYLESHEETPATH . '/' . $template_name , $require_once); 
-	else load_template( woocommerce::plugin_path() . '/templates/' . $template_name , $require_once);
+	else load_template( $woocommerce->plugin_path() . '/templates/' . $template_name , $require_once);
 }
 
 /**
  * Get other templates (e.g. product attributes) - path
  */
 function woocommerce_get_template_file_url($template_name, $ssl = false) {
+	global $woocommerce;
 	if (file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name )) 
 		$return = get_bloginfo('template_url') . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name; 
 	elseif (file_exists( STYLESHEETPATH . '/' . $template_name )) 
 		$return = get_bloginfo('template_url') . '/' . $template_name; 
 	else 
-		$return = woocommerce::plugin_url() . '/templates/' . $template_name;
+		$return = $woocommerce->plugin_url() . '/templates/' . $template_name;
 	
 	if (get_option('woocommerce_force_ssl_checkout')=='yes' || is_ssl()) :
 		if ($ssl) $return = str_replace('http:', 'https:', $return);

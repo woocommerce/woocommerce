@@ -1,6 +1,9 @@
 <?php do_action('before_checkout_form');
+
+global $woocommerce;
+
 // filter hook for include new pages inside the payment method
-$get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', woocommerce_cart::get_checkout_url() ); ?>
+$get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce->cart->get_checkout_url() ); ?>
 
 <form name="checkout" method="post" class="checkout" action="<?php echo $get_checkout_url; ?>">
 	

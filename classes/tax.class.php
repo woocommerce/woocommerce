@@ -109,12 +109,13 @@ class woocommerce_tax {
 	 * @return  int
 	 */
 	function get_rate( $tax_class = '' ) {
+		global $woocommerce;
 		
 		/* Checkout uses customer location, otherwise use store base rate */
 		if ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) :
 			
-			$country 	= woocommerce_customer::get_country();
-			$state 		= woocommerce_customer::get_state();
+			$country 	= $woocommerce->customer->get_country();
+			$state 		= $woocommerce->customer->get_state();
 			
 			$rate = $this->find_rate( $country, $state, $tax_class );
 			
@@ -135,9 +136,10 @@ class woocommerce_tax {
 	 * @return  int
 	 */
 	function get_shop_base_rate( $tax_class = '' ) {
+		global $woocommerce;
 		
-		$country 	= woocommerce_countries::get_base_country();
-		$state 		= woocommerce_countries::get_base_state();
+		$country 	= $woocommerce->countries->get_base_country();
+		$state 		= $woocommerce->countries->get_base_state();
 		
 		$rate = $this->find_rate( $country, $state, $tax_class );
 		
@@ -152,13 +154,14 @@ class woocommerce_tax {
 	 * @return  mixed		
 	 */
 	function get_shipping_tax_rate( $tax_class = '' ) {
+		global $woocommerce;
 		
 		if (defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT) :
-			$country 	= woocommerce_customer::get_country();
-			$state 		= woocommerce_customer::get_state();
+			$country 	= $woocommerce->customer->get_country();
+			$state 		= $woocommerce->customer->get_state();
 		else :
-			$country 	= woocommerce_countries::get_base_country();
-			$state 		= woocommerce_countries::get_base_state();
+			$country 	= $woocommerce->countries->get_base_country();
+			$state 		= $woocommerce->countries->get_base_state();
 		endif;
 		
 		// If we are here then shipping is taxable - work it out
@@ -184,7 +187,7 @@ class woocommerce_tax {
 			$found_shipping_rates = array();
 			
 			// Loop cart and find the highest tax band
-			if (sizeof(woocommerce_cart::$cart_contents)>0) : foreach (woocommerce_cart::$cart_contents as $item) :
+			if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item) :
 				
 				if ($item['data']->tax_class) :
 					

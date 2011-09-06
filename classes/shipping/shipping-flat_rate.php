@@ -30,6 +30,7 @@ class flat_rate extends woocommerce_shipping_method {
     } 
     
     public function calculate_shipping() {
+    	global $woocommerce;
     	
     	$_tax = &new woocommerce_tax();
     	
@@ -38,7 +39,7 @@ class flat_rate extends woocommerce_shipping_method {
     	
     	if ($this->type=='order') :
 			// Shipping for whole order
-			$this->shipping_total = $this->cost + $this->get_fee( $this->fee, woocommerce_cart::$cart_contents_total );
+			$this->shipping_total = $this->cost + $this->get_fee( $this->fee, $woocommerce->cart->cart_contents_total );
 			
 			if ( get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
 				
@@ -51,7 +52,7 @@ class flat_rate extends woocommerce_shipping_method {
 			endif;
 		else :
 			// Shipping per item
-			if (sizeof(woocommerce_cart::$cart_contents)>0) : foreach (woocommerce_cart::$cart_contents as $item_id => $values) :
+			if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
 				$_product = $values['data'];
 				if ($_product->exists() && $values['quantity']>0) :
 					
@@ -84,6 +85,7 @@ class flat_rate extends woocommerce_shipping_method {
     } 
     
     public function admin_options() {
+    	global $woocommerce;
     	?>
     	<h3><?php _e('Flat Rates', 'woothemes'); ?></h3>
     	<p><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woothemes'); ?></p>
@@ -144,7 +146,7 @@ class flat_rate extends woocommerce_shipping_method {
 		        </td>
 		    </tr>
 		    <?php
-	    	$countries = woocommerce_countries::$countries;
+	    	$countries = $woocommerce->countries->countries;
 	    	asort($countries);
 	    	$selections = get_option('woocommerce_flat_rate_countries', array());
 	    	?><tr class="multi_select_countries">

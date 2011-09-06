@@ -15,7 +15,7 @@
  * Product Options for the variable product type
  */
 function variable_product_type_options() {
-	global $post;
+	global $post, $woocommerce;
 	
 	$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 	if (!isset($attributes)) $attributes = array();
@@ -42,7 +42,7 @@ function variable_product_type_options() {
 					$image = wp_get_attachment_url( $variation_data['_thumbnail_id'][0] );
 				endif;
 				
-				if (!$image) $image = woocommerce::plugin_url().'/assets/images/placeholder.png';
+				if (!$image) $image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
 				?>
 				<div class="woocommerce_variation">
 					<p>
@@ -114,7 +114,7 @@ add_action('woocommerce_product_type_options_box', 'variable_product_type_option
  * Javascript for the variable product type
  */
 function variable_product_write_panel_js() {
-	global $post;
+	global $post, $woocommerce;
 	
 	$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 	if (!isset($attributes)) $attributes = array();
@@ -135,7 +135,7 @@ function variable_product_write_panel_js() {
 		
 		jQuery('button.add_variation').live('click', function(){
 		
-			jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 					
 			var data = {
 				action: 'woocommerce_add_variation',
@@ -174,7 +174,7 @@ function variable_product_write_panel_js() {
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">\
 						<tbody>\
 							<tr>\
-								<td class="upload_image"><img src="<?php echo woocommerce::plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><input type="button" class="upload_image_button button" rel="" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>\
+								<td class="upload_image"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><input type="button" class="upload_image_button button" rel="" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>\
 								<td><label><?php _e('SKU:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sku[' + loop + ']" /></td>\
 								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?></label><input type="text" size="5" name="variable_weight[' + loop + ']" /></td>\
 								<td><label><?php _e('Stock Qty:', 'woothemes'); ?></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
@@ -198,7 +198,7 @@ function variable_product_write_panel_js() {
 			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woothemes'); ?>');
 			if (answer){
 			
-				jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 						
 				var data = {
 					action: 'woocommerce_link_all_variations',
@@ -228,7 +228,7 @@ function variable_product_write_panel_js() {
 				
 				if (variation>0) {
 				
-					jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo woocommerce::plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+					jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 					
 					var data = {
 						action: 'woocommerce_remove_variation',

@@ -17,7 +17,7 @@
  */
 function woocommerce_attributes() {
 	
-	global $wpdb;
+	global $wpdb, $woocommerce;
 	
 	if (isset($_POST['add_new_attribute']) && $_POST['add_new_attribute']) :
 		
@@ -25,7 +25,7 @@ function woocommerce_attributes() {
 		$attribute_type = (string) $_POST['attribute_type'];
 		$attribute_label = (string) $_POST['attribute_label'];
 		
-		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( woocommerce::attribute_name($attribute_name) )) :
+		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_name($attribute_name) )) :
 		
 			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
 			
@@ -62,7 +62,7 @@ function woocommerce_attributes() {
 			
 			if ($att_name && $wpdb->query("DELETE FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$delete'")) :
 				
-				$taxonomy = woocommerce::attribute_name($att_name); 
+				$taxonomy = $woocommerce->attribute_name($att_name); 
 				
 				if (taxonomy_exists($taxonomy)) :
 				
@@ -147,6 +147,7 @@ function woocommerce_edit_attribute() {
  * Shows the interface for adding new attributes
  */
 function woocommerce_add_attribute() {
+	global $woocommerce;
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -166,21 +167,21 @@ function woocommerce_add_attribute() {
 				        </thead>
 				        <tbody>
 				        	<?php
-				        		$attribute_taxonomies = woocommerce::get_attribute_taxonomies();
+				        		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
 				        		if ( $attribute_taxonomies ) :
 				        			foreach ($attribute_taxonomies as $tax) :
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo woocommerce::attribute_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo add_query_arg('edit', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo add_query_arg('delete', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
 				        					<td><?php echo ucwords($tax->attribute_label); ?></td>
 				        					<td><?php echo ucwords($tax->attribute_type); ?></td>
 				        					<td><?php 
-				        						if (taxonomy_exists(woocommerce::attribute_name($tax->attribute_name))) :
+				        						if (taxonomy_exists($woocommerce->attribute_name($tax->attribute_name))) :
 					        						$terms_array = array();
-					        						$terms = get_terms( woocommerce::attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
+					        						$terms = get_terms( $woocommerce->attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
 					        						if ($terms) :
 						        						foreach ($terms as $term) :
 															$terms_array[] = $term->name;

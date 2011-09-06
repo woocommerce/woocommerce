@@ -10,13 +10,15 @@
  */
  
 function get_woocommerce_thankyou( $atts ) {
-	return woocommerce::shortcode_wrapper('woocommerce_thankyou', $atts); 
+	global $woocommerce;
+	return $woocommerce->shortcode_wrapper('woocommerce_thankyou', $atts); 
 }
 
 /**
  * Outputs the thankyou page
  **/
 function woocommerce_thankyou() {
+	global $woocommerce;
 	
 	_e('<p>Thank you. Your order has been processed successfully.</p>', 'woothemes');	
 
@@ -50,7 +52,7 @@ function woocommerce_thankyou() {
 				<li class="method">
 					<?php _e('Payment method:', 'woothemes'); ?>
 					<strong><?php 
-						$gateways = woocommerce_payment_gateways::payment_gateways();
+						$gateways = $woocommerce->payment_gateways->payment_gateways();
 						if (isset($gateways[$order->payment_method])) echo $gateways[$order->payment_method]->title;
 						else echo $order->payment_method; 
 					?></strong>

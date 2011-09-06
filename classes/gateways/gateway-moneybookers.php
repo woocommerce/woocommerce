@@ -12,9 +12,11 @@
 class woocommerce_moneybookers extends woocommerce_payment_gateway {
 		
 	public function __construct() { 
+		global $woocommerce;
+		
         $this->id			= 'moneybookers';
         $this->title 		= 'Moneybookers';
-        $this->icon 		= woocommerce::plugin_url() . '/assets/images/icons/moneybookers.png';
+        $this->icon 		= $woocommerce->plugin_url() . '/assets/images/icons/moneybookers.png';
         $this->has_fields 	= false;
       	$this->enabled		= get_option('woocommerce_moneybookers_enabled');
 		$this->title 		= get_option('woocommerce_moneybookers_title');
@@ -254,7 +256,7 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 		
         	$_POST = stripslashes_deep($_POST);
 
-        	if (self::check_status_report_is_valid()) :
+        	if ($this->check_status_report_is_valid()) :
         	
             	do_action("valid-moneybookers-status-report", $_POST);
             	

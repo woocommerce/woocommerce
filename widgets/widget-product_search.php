@@ -31,7 +31,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		$this->WP_Widget('product_search', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget::widget */
+	/** @see WP_Widget */
 	function widget( $args, $instance ) {
 		extract($args);
 
@@ -56,13 +56,13 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		echo $after_widget;
 	}
 
-	/** @see WP_Widget::update */
+	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		return $instance;
 	}
 
-	/** @see WP_Widget::form */
+	/** @see WP_Widget->form */
 	function form( $instance ) {
 		global $wpdb;
 		?>
