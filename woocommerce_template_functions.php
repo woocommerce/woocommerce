@@ -14,14 +14,20 @@
  **/
 if (!function_exists('woocommerce_output_content_wrapper')) {
 	function woocommerce_output_content_wrapper() {	
-		if(  get_option('template') === 'twentyeleven' ) echo '<section id="primary"><div id="content" role="main">';
-		else echo '<div id="container"><div id="content" role="main">';	
+		if ( get_option('template') === 'twentyeleven' ) :
+			echo '<div id="primary"><div id="content" role="main">';
+		else :
+			echo '<div id="container"><div id="content" role="main">';	
+		endif;
 	}
 }
 if (!function_exists('woocommerce_output_content_wrapper_end')) {
 	function woocommerce_output_content_wrapper_end() {	
-		if(  get_option('template') === 'twentyeleven' ) echo  '</section></div>';
-		else echo '</div></div>';	
+		if ( get_option('template') === 'twentyeleven' ) :
+			echo  '</div></div>';
+		else :
+			echo '</div></div>';
+		endif;
 	}
 }
 
