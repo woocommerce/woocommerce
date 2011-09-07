@@ -885,7 +885,7 @@ function woocommerce_admin_fields($options) {
 	            	
 	            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 	            		
-	            		$title = ($gateway->title) ? ucwords($gateway->title) : ucwords($gateway->id);
+	            		$title = ($gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
 	            		
 	            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
 					

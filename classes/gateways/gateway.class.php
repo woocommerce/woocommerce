@@ -186,14 +186,15 @@ class woocommerce_payment_gateway {
     function generate_checkbox_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
-    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title'];
+    	if ( isset( $data['label'] ) && $data['label'] != '' ) $label = $data['label']; else $label = $data['title'];
+    	    	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' />' . $title . '</label><br />' . "\n";
+				$html .= '<input name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' /> ' . $label . '</label><br />' . "\n";
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
