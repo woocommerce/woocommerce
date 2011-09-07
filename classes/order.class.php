@@ -283,7 +283,7 @@ class woocommerce_order {
 	/** Generates a URL so that a customer can cancel their (unpaid - pending) order */
 	function get_cancel_order_url() {
 		global $woocommerce;
-		return $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, home_url()))));
+		return $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() )))));
 	}
 	
 	
@@ -299,7 +299,7 @@ class woocommerce_order {
 			endif;
 		endif;
 				
-	 	return add_query_arg('download_file', $item_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, home_url())));
+	 	return add_query_arg('download_file', $item_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, trailingslashit( home_url() ))));
 	 }
 	 
 	/**
