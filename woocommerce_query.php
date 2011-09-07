@@ -20,7 +20,7 @@ function woocommerce_parse_query( $q ) {
 	if (is_admin()) return;
 	    
 	// Only apply to product categories, the product post archive, the shop page, and product tags
-    if (true == $q->query_vars['suppress_filters'] || (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' ))) return;
+    if ( ( isset( $q->query_vars['suppress_filters'] ) && true == $q->query_vars['suppress_filters'] ) || (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' ))) return;
 	
 	$meta_query = (array) $q->get( 'meta_query' );
 	

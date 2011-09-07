@@ -79,7 +79,7 @@ function woocommerce_post_type() {
 	    	$hierarchical = true;
 	    	if ($name) :
 	    	
-	    		$label = ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name;
+	    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
 	    		register_taxonomy( $name,
 			        array('product'),
