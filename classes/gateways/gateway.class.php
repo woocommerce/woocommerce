@@ -21,6 +21,13 @@ class woocommerce_payment_gateway {
 	var $icon;
 	var $description;
 	
+	var $plugin_id = 'woocommerce_';
+	var $settings = array();
+	
+	var $form_fields = array();
+	var $errors = array();
+	var $sanitized_fields = array();
+	
 	function is_available() {
 		
 		if ($this->enabled=="yes") :
@@ -48,4 +55,214 @@ class woocommerce_payment_gateway {
 	function process_payment() {}
 	
 	function validate_fields() { return true; }
+	
+	function init_form_fields () { return __( 'This function needs to be overridden by your payment gateway class.', 'woothemes' ); }
+	
+	/**
+	 * Admin Panel Options Processing
+	 * - Saves the options to the DB
+	 *
+	 * @since 1.0.0
+	 */
+    public function process_admin_options() {
+    	// TO DO: NONCE SECURITY CHECK
+    	
+    	$this->validate_settings_fields();
+    	
+    	if ( count( $this->errors ) > 0 ) {
+    		$this->display_errors();
+    	} else {
+    		update_option( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields );
+    	}
+    }
+    
+    /**
+     * Display admin error messages.
+     *
+     * @since 1.0.0
+     */
+    function display_errors() {
+    	// TO DO - Generate errors HTML.
+    } // End display_errors()
+	
+	/**
+     * Initialise Gateway Settings
+     *
+     * Store all settings in a single database entry
+     * and make sure the $settings array is either the default
+     * or the settings stored in the database.
+     *
+     * @since 1.0.0
+     * @uses get_option(), add_option()
+     */
+    
+    function init_settings () {
+    	if ( ! is_array( $this->settings ) ) { return; }
+    	
+    	$settings = array();
+    	$existing_settings = get_option( $this->plugin_id . $this->id . '_settings' );
+    	
+    	$defaults = array();
+    	
+    	foreach ( $this->form_fields as $k => $v ) {
+    		if ( isset( $v['default'] ) ) {
+    			$defaults[$k] = $v['default'];
+    		} else {
+    			$defaults[$k] = '';
+    		}
+    	}
+    	
+    	if ( ! $existing_settings ) {
+    		$existing_settings = $defaults;
+    	} else {
+    		// Prevent "undefined index" errors.
+    		foreach ( $existing_settings as $k => $v ) {
+    			if ( ! isset( $existing_settings[$k] ) ) {
+    				$existing_settings[$k] = $v;
+    			}  
+    		}
+    	}
+    	
+    	$this->settings = $existing_settings;
+    	
+    	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) ) { $this->enabled = 'yes'; }
+    } // End init_settings()
+    
+    /**
+     * Generate Settings HTML.
+     *
+     * Generate the HTML for the fields on the "settings" screen.
+     *
+     * @since 1.0.0
+     * @uses method_exists()
+     */
+    
+    function generate_settings_html () {
+    	$html = '';
+    	foreach ( $this->form_fields as $k => $v ) {
+    		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
+    		
+    		if ( method_exists( $this, 'generate_' . $v['type'] . '_html' ) ) {
+    			$html .= $this->{'generate_' . $v['type'] . '_html'}( $k, $v );
+    		}
+    	}
+    	
+    	echo $html;
+    } // End generate_settings_html()
+    
+    /**
+     * Generate Text Input HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+    
+    function generate_text_html ( $key, $data ) {
+    	$html = '';
+    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	
+		$html .= '<tr valign="top">' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<td class="forminp">' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
+				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<input class="input-text wide-input" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . $this->settings[$key] . '" />';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+			$html .= '</fieldset>';
+			$html .= '</td>' . "\n";
+		$html .= '</tr>' . "\n";
+    	
+    	return $html;
+    } // End generate_checkbox_html()
+    
+    /**
+     * Generate Checkbox HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+    
+    function generate_checkbox_html ( $key, $data ) {
+    	$html = '';
+    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	
+		$html .= '<tr valign="top">' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<td class="forminp">' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
+				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<input name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' />' . $title . '</label><br />' . "\n";
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+			$html .= '</fieldset>';
+			$html .= '</td>' . "\n";
+		$html .= '</tr>' . "\n";
+    	
+    	return $html;
+    } // End generate_checkbox_html()
+    
+    /**
+     * Validate Settings Field Data.
+     *
+     * Validate the data on the "Settings" form.
+     *
+     * @since 1.0.0
+     * @uses method_exists()
+     */
+    
+    function validate_settings_fields () {
+    	// TO DO: NONCE SECURITY CHECK
+    	
+    	foreach ( $this->form_fields as $k => $v ) {
+    		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
+    		
+    		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
+    			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
+    			$this->sanitized_fields[$k] = $field;
+    		} else {
+    			$this->sanitized_fields[$k] = $this->settings[$k];
+    		}
+    	}
+    } // End validate_settings_fields()
+    
+    /**
+     * Validate Checkbox Field.
+     *
+     * If not set, return "no", otherwise return "yes".
+     * 
+     * @since 1.0.0
+     * @return $status string
+     */
+     
+    function validate_checkbox_field ( $key ) {
+    	// TO DO: NONCE SECURITY CHECK
+    	
+    	$status = 'no';
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( 1 == $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    		$status = 'yes';
+    	}
+    	
+    	return $status;
+    } // End validate_checkbox_field()
+    
+    /**
+     * Validate Text Field.
+     *
+     * Make sure the data is escaped correctly, etc.
+     * 
+     * @since 1.0.0
+     * @return $text string
+     */
+     
+    function validate_text_field ( $key ) {
+    	// TO DO: NONCE SECURITY CHECK
+    	$text = $this->settings[$key];
+    	
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    	}
+    	
+    	return $text;
+    } // End validate_text_field()
 }
