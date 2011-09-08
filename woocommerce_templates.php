@@ -16,8 +16,6 @@ function woocommerce_template_loader( $template ) {
 	
 	if ( is_single() && get_post_type() == 'product' ) {
 		
-		woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-product' ) );
-		
 		$template = locate_template( array( 'single-product.php', WOOCOMMERCE_TEMPLATE_URL . 'single-product.php' ) );
 		
 		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/single-product.php';
@@ -25,15 +23,11 @@ function woocommerce_template_loader( $template ) {
 	}
 	elseif ( is_tax('product_cat') ) {
 		
-		woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-product_cat' ) );
-		
 		$template = locate_template(  array( 'taxonomy-product_cat.php', WOOCOMMERCE_TEMPLATE_URL . 'taxonomy-product_cat.php' ) );
 		
 		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/taxonomy-product_cat.php';
 	}
 	elseif ( is_tax('product_tag') ) {
-		
-		woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-product_tag' ) );
 		
 		$template = locate_template( array( 'taxonomy-product_tag.php', WOOCOMMERCE_TEMPLATE_URL . 'taxonomy-product_tag.php' ) );
 		
@@ -41,8 +35,6 @@ function woocommerce_template_loader( $template ) {
 	}
 	elseif ( is_post_type_archive('product') ||  is_page( get_option('woocommerce_shop_page_id') )) {
 
-		woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-products' ) );
-		
 		$template = locate_template( array( 'archive-product.php', WOOCOMMERCE_TEMPLATE_URL . 'archive-product.php' ) );
 		
 		if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/archive-product.php';
@@ -156,28 +148,16 @@ function woocommerce_page_body_classes() {
 	
 	$woocommerce_body_classes = (array) $woocommerce_body_classes;
 	
-	if (is_checkout() || is_page(get_option('woocommerce_pay_page_id'))) woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-checkout' ) );
+	$woocommerce_body_classes[] = 'theme-' . strtolower( get_current_theme() );
 	
-	if (is_cart()) woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-cart' ) );
+	if (is_woocommerce()) $woocommerce_body_classes[] = 'woocommerce';
 	
-	if (is_page(get_option('woocommerce_thanks_page_id'))) woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-thanks' ) );
+	if (is_checkout()) $woocommerce_body_classes[] = 'woocommerce-checkout';
 	
-	if (is_page(get_option('woocommerce_shop_page_id'))) woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-shop' ) );
-	
-	if (is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id'))) woocommerce_add_body_class( array( 'woocommerce', 'woocommerce-myaccount' ) );	
-	
+	if (is_cart()) $woocommerce_body_classes[] = 'woocommerce-cart';
+		
 }
 add_action('wp_head', 'woocommerce_page_body_classes');
-
-function woocommerce_add_body_class( $class = array() ) {
-	
-	global $woocommerce_body_classes;
-	
-	$woocommerce_body_classes = (array) $woocommerce_body_classes;
-	
-	$woocommerce_body_classes = array_merge($class, $woocommerce_body_classes);
-	
-}
 
 function woocommerce_body_class($classes) {
 	
