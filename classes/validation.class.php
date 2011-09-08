@@ -16,7 +16,7 @@ class woocommerce_validation {
 	 * @param   string	email address
 	 * @return  boolean
 	 */
-	public static function is_email( $email ) {
+	function is_email( $email ) {
 		return is_email( $email );
 	}
 	
@@ -26,7 +26,7 @@ class woocommerce_validation {
 	 * @param   string	phone number
 	 * @return  boolean
 	 */
-	public static function is_phone( $phone ) {
+	function is_phone( $phone ) {
 		if (strlen(trim(preg_replace('/[\s\#0-9_\-\+\(\)]/', '', $phone)))>0) return false;
 		return true;
 	}
@@ -38,7 +38,7 @@ class woocommerce_validation {
 	 * @param	string	country
 	 * @return  boolean
 	 */
-	public static function is_postcode( $postcode, $country ) {
+	function is_postcode( $postcode, $country ) {
 		if (strlen(trim(preg_replace('/[\s\-A-Za-z0-9]/', '', $postcode)))>0) return false;
 		if ($country=='GB') :
 			return $this->is_GB_postcode( $postcode );
@@ -47,7 +47,7 @@ class woocommerce_validation {
 	}
 	
 	/* Author: John Gardner */
-	public static function is_GB_postcode( $toCheck ) {
+	function is_GB_postcode( $toCheck ) {
  
 		// Permitted letters depend upon their position in the postcode.
 		$alpha1 = "[abcdefghijklmnoprstuwyz]";                          // Character 1
@@ -108,7 +108,7 @@ class woocommerce_validation {
 	 * @param	string	country
 	 * @return  string	formatted postcode
 	 */
-	public static function format_postcode( $postcode, $country ) {
+	function format_postcode( $postcode, $country ) {
 		$postcode = strtoupper(trim($postcode));
 		$postcode = trim(preg_replace('/[\s]/', '', $postcode));
 		
