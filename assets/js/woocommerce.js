@@ -393,143 +393,141 @@ jQuery(document).ready(function($) {
         $(item).data('index', i);
     });
 	
+	if (woocommerce_params.is_checkout==1) {
 	
-});
-
-if (woocommerce_params.is_checkout==1) {
-
-	var updateTimer;
-	
-	function update_checkout() {
-	
-		var method = $('#shipping_method').val();
+		var updateTimer;
 		
-		var country 	= $('#billing-country').val();
-		var state 		= $('#billing-state').val();
-		var postcode 	= $('input#billing-postcode').val();
+		function update_checkout() {
+		
+			var method = $('#shipping_method').val();
 			
-		if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
-			var s_country 	= $('#billing-country').val();
-			var s_state 	= $('#billing-state').val();
-			var s_postcode 	= $('input#billing-postcode').val();
-			
-		} else {
-			var s_country 	= $('#shipping-country').val();
-			var s_state 	= $('#shipping-state').val();
-			var s_postcode 	= $('input#shipping-postcode').val();
-		}
-		
-		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
-		
-		var data = {
-			action: 			'woocommerce_update_order_review',
-			security: 			woocommerce_params.update_order_review_nonce,
-			shipping_method: 	method, 
-			country: 			country, 
-			state: 				state, 
-			postcode: 			postcode, 
-			s_country: 			s_country, 
-			s_state: 			s_state, 
-			s_postcode: 		s_postcode
-		};
-			
-		$.post( woocommerce_params.ajax_url, data, function(response) {
-		
-			$('#order_methods, #order_review').remove();
-			$('#order_review_heading').after(response);
-			$('#order_review input[name=payment_method]:checked').click();
-		
-		});
-	
-	}
-		
-	$(function(){
-		
-		$('p.password').hide();
-		
-		$('input.show_password').change(function(){
-			$('p.password').slideToggle();
-		});
-		
-		$('div.shipping-address').hide();
-		
-		$('#shiptobilling input').change(function(){
-			$('div.shipping-address').hide();
-			if (!$(this).is(':checked')) {
-				$('div.shipping-address').slideDown();
+			var country 	= $('#billing-country').val();
+			var state 		= $('#billing-state').val();
+			var postcode 	= $('input#billing-postcode').val();
+				
+			if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
+				var s_country 	= $('#billing-country').val();
+				var s_state 	= $('#billing-state').val();
+				var s_postcode 	= $('input#billing-postcode').val();
+				
+			} else {
+				var s_country 	= $('#shipping-country').val();
+				var s_state 	= $('#shipping-state').val();
+				var s_postcode 	= $('input#shipping-postcode').val();
 			}
-		}).change();
+			
+			$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+			
+			var data = {
+				action: 			'woocommerce_update_order_review',
+				security: 			woocommerce_params.update_order_review_nonce,
+				shipping_method: 	method, 
+				country: 			country, 
+				state: 				state, 
+				postcode: 			postcode, 
+				s_country: 			s_country, 
+				s_state: 			s_state, 
+				s_postcode: 		s_postcode
+			};
+				
+			$.post( woocommerce_params.ajax_url, data, function(response) {
+			
+				$('#order_methods, #order_review').remove();
+				$('#order_review_heading').after(response);
+				$('#order_review input[name=payment_method]:checked').click();
+			
+			});
 		
-		if (woocommerce_params.option_guest_checkout=='yes') {
+		}
 			
-			$('div.create-account').hide();
+		$(function(){
 			
-			$('input#createaccount').change(function(){
-				$('div.create-account').hide();
-				if ($(this).is(':checked')) {
-					$('div.create-account').slideDown();
+			$('p.password').hide();
+			
+			$('input.show_password').change(function(){
+				$('p.password').slideToggle();
+			});
+			
+			$('div.shipping-address').hide();
+			
+			$('#shiptobilling input').change(function(){
+				$('div.shipping-address').hide();
+				if (!$(this).is(':checked')) {
+					$('div.shipping-address').slideDown();
 				}
 			}).change();
-		
-		}
-		
-		$('.payment_methods input.input-radio').live('click', function(){
-			$('div.payment_box').hide();
-			if ($(this).is(':checked')) {
-				$('div.payment_box.' + $(this).attr('ID')).slideDown();
+			
+			if (woocommerce_params.option_guest_checkout=='yes') {
+				
+				$('div.create-account').hide();
+				
+				$('input#createaccount').change(function(){
+					$('div.create-account').hide();
+					if ($(this).is(':checked')) {
+						$('div.create-account').slideDown();
+					}
+				}).change();
+			
 			}
-		});
-		
-		$('#order_review input[name=payment_method]:checked').click();
-		
-		$('form.login').hide();
-		
-		$('a.showlogin').click(function(){
-			$('form.login').slideToggle();
-		});
-		
-		/* Update totals */
-		$('#shipping_method').live('change', function(){
-			clearTimeout(updateTimer);
-			update_checkout();
-		}).change();
-		$('input#billing-country, input#billing-state, #billing-postcode, input#shipping-country, input#shipping-state, #shipping-postcode').live('keydown', function(){
-			clearTimeout(updateTimer);
-			updateTimer = setTimeout("update_checkout()", '1000');
-		});
-		$('select#billing-country, select#billing-state, select#shipping-country, select#shipping-state, #shiptobilling input').live('change', function(){
-			clearTimeout(updateTimer);
-			update_checkout();
-		});
-		
-		/* AJAX Form Submission */
-		$('form.checkout').submit(function(){
-			var form = this;
-			$(form).block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
-			$.ajax({
-				type: 		'POST',
-				url: 		woocommerce_params.checkout_url,
-				data: 		$(form).serialize(),
-				success: 	function( code ) {
-								$('.woocommerce_error, .woocommerce_message').remove();
-								try {
-									success = $.parseJSON( code );					
-									window.location = decodeURI(success.redirect);
-								}
-								catch(err) {
-								  	$(form).prepend( code );
-									$(form).unblock(); 
-									
-									$('html, body').animate({
-									    scrollTop: ($('form.checkout').offset().top - 100)
-									}, 1000);
-								}
-							},
-				dataType: 	"html"
+			
+			$('.payment_methods input.input-radio').live('click', function(){
+				$('div.payment_box').hide();
+				if ($(this).is(':checked')) {
+					$('div.payment_box.' + $(this).attr('ID')).slideDown();
+				}
 			});
-			return false;
+			
+			$('#order_review input[name=payment_method]:checked').click();
+			
+			$('form.login').hide();
+			
+			$('a.showlogin').click(function(){
+				$('form.login').slideToggle();
+			});
+			
+			/* Update totals */
+			$('#shipping_method').live('change', function(){
+				clearTimeout(updateTimer);
+				update_checkout();
+			}).change();
+			$('input#billing-country, input#billing-state, #billing-postcode, input#shipping-country, input#shipping-state, #shipping-postcode').live('keydown', function(){
+				clearTimeout(updateTimer);
+				updateTimer = setTimeout("update_checkout()", '1000');
+			});
+			$('select#billing-country, select#billing-state, select#shipping-country, select#shipping-state, #shiptobilling input').live('change', function(){
+				clearTimeout(updateTimer);
+				update_checkout();
+			});
+			
+			/* AJAX Form Submission */
+			$('form.checkout').submit(function(){
+				var form = this;
+				$(form).block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+				$.ajax({
+					type: 		'POST',
+					url: 		woocommerce_params.checkout_url,
+					data: 		$(form).serialize(),
+					success: 	function( code ) {
+									$('.woocommerce_error, .woocommerce_message').remove();
+									try {
+										success = $.parseJSON( code );					
+										window.location = decodeURI(success.redirect);
+									}
+									catch(err) {
+									  	$(form).prepend( code );
+										$(form).unblock(); 
+										
+										$('html, body').animate({
+										    scrollTop: ($('form.checkout').offset().top - 100)
+										}, 1000);
+									}
+								},
+					dataType: 	"html"
+				});
+				return false;
+			});
+		
 		});
-	
-	});
-	
-}
+	}
+
+});
