@@ -180,7 +180,7 @@ div.dp-popup div.dp-nav-next a{float:right;}
 div.dp-popup a.disabled{cursor:default;color:#aaaaaa;}
 div.dp-popup td{cursor:pointer;}
 div.dp-popup td.disabled{cursor:default;}
-.ui-multiselect{padding:3px 0 3px 4px;text-align:left;margin:1px;vertical-align:middle;height:24px;}
+.ui-multiselect{padding:3px 0 3px 4px;text-align:left;margin:1px;vertical-align:middle;height:24px;width:225px !important;}
 .ui-multiselect span.ui-icon{float:right;}
 .ui-multiselect-single .ui-multiselect-checkboxes input{position:absolute !important;top:auto !important;left:-9999px;}
 .ui-multiselect-single .ui-multiselect-checkboxes label{padding:5px !important;}
