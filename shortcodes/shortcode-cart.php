@@ -70,7 +70,9 @@ function woocommerce_cart( $atts ) {
 	$woocommerce->show_messages();
 	
 	if (sizeof($woocommerce->cart->cart_contents)==0) :
-		echo '<p>'.__('Your cart is empty.', 'woothemes').'</p>';
+		echo '<p>'.__('Your cart is currently empty.', 'woothemes').'</p>';
+		do_action('woocommerce_empty_cart');
+		echo '<p><a class="button" href="'.get_permalink(get_option('woocommerce_shop_page_id')).'">'.__('&larr; Return To Shop', 'woothemes').'</a></p>';
 		return;
 	endif;
 	
