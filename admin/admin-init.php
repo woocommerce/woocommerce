@@ -39,9 +39,9 @@ add_action('admin_print_scripts', 'woocommerce_admin_scripts');
 function woocommerce_admin_menu() {
 	global $menu, $woocommerce;
 	
-	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator' );
+	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
-    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 56);
+    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
@@ -53,16 +53,20 @@ function woocommerce_admin_menu_order( $menu_order ) {
 
 	// Get the index of our custom separator
 	$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order );
+	
+	// Get index of product menu
+	$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order );
 
 	// Loop through menu order and do some rearranging
 	foreach ( $menu_order as $index => $item ) :
 
 		if ( ( ( 'woocommerce' ) == $item ) ) :
 			$woocommerce_menu_order[] = 'separator-woocommerce';
+			$woocommerce_menu_order[] = $item;
+			$woocommerce_menu_order[] = 'edit.php?post_type=product';
 			unset( $menu_order[$woocommerce_separator] );
-		endif;
-
-		if ( !in_array( $item, array( 'separator-woocommerce' ) ) ) :
+			unset( $menu_order[$woocommerce_product] );
+		elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) :
 			$woocommerce_menu_order[] = $item;
 		endif;
 

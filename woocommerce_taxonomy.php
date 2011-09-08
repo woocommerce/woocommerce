@@ -131,7 +131,6 @@ function woocommerce_post_type() {
 			'capability_type' => 'post',
 			'publicly_queryable' => true,
 			'exclude_from_search' => false,
-			'menu_position' => 57,
 			'hierarchical' => true,
 			'rewrite' => array( 'slug' => $base_slug, 'with_front' => false ),
 			'query_var' => true,			
