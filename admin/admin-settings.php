@@ -221,7 +221,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Catalog', 'woothemes') ),
 	
-	array(	'name' => __('Catalog Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Catalog Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'catalog_options' ),
 
 	array(  
 		'name' => __('Product fields', 'woothemes'),
@@ -261,9 +261,9 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'type' 		=> 'checkbox'
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'catalog_options'),
 	
-	array(	'name' => __('Image Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Image Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'image_options' ),
 	
 	array(  
 		'name' => __('Catalog images', 'woothemes'),
@@ -292,9 +292,9 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'std' 		=> '90'
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'image_options'),
 	
-	array(	'name' => __('Pricing Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Pricing Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'pricing_options' ),
 	
 	array(  
 		'name' => __('Currency', 'woothemes'),
@@ -378,9 +378,9 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'type' 		=> 'text',
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
-	array(	'name' => __('Inventory Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Inventory Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'inventory_options' ),
 	
 	array(  
 		'name' => __('Manage stock', 'woothemes'),
@@ -435,7 +435,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'type' 		=> 'checkbox'
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'inventory_options'),
 	
 	array( 'type' => 'tabend'),
 	

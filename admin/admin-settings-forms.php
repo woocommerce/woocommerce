@@ -138,8 +138,10 @@ function woocommerce_admin_fields($options) {
             	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
             	if (isset($value['desc']) && $value['desc']) echo wpautop(wptexturize($value['desc']));
             	echo '<table class="form-table">'. "\n\n";
+            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']));
             break;
             case 'sectionend':
+            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']).'_end');
             	echo '</table>';
             break;
             case 'text':
