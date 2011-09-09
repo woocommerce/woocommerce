@@ -147,8 +147,10 @@ function woocommerce_write_panel_scripts() {
 	$post_type = woocommerce_get_current_post_type();
 	
 	if( $post_type !== 'product' && $post_type !== 'shop_order' ) return;
-		
-	wp_register_script('woocommerce-writepanel', $woocommerce->plugin_url() . '/assets/js/write-panels.js', array('jquery'));
+	
+	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	
+	wp_register_script('woocommerce-writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery'));
 	wp_enqueue_script('woocommerce-writepanel');
 	
 	wp_enqueue_script('media-upload');

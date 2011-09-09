@@ -486,24 +486,42 @@ class woocommerce_product {
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
 			
-			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($min_price);		
+			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($min_price);	
+			
+			$price = apply_filters('grouped_price_html', $price, $this);
+				
 		elseif ($this->is_type('variable')) :
 		
-			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($this->get_price());	
-		
+			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($this->get_price());
+			
+			$price = apply_filters('variable_price_html', $price, $this);
+			
 		else :
 			if ($this->price) :
 				if ($this->is_on_sale() && isset($this->regular_price)) :
+				
 					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
+					
+					$price = apply_filters('sale_price_html', $price, $this);
+					
 				else :
+				
 					$price .= woocommerce_price($this->get_price());
+					
+					$price = apply_filters('price_html', $price, $this);
+					
 				endif;
 			elseif ($this->price === '' ) :
 				return false;
 			elseif ($this->price === '0' ) :
-				$price = __('Free!', 'woothemes');      
+			
+				$price = __('Free!', 'woothemes');  
+				
+				$price = apply_filters('free_price_html', $price, $this);
+				
 			endif;
 		endif;
+		
 		return $price;
 	}
 	

@@ -9,6 +9,7 @@
  * @package 	WooCommerce
  */
 
+include_once( 'admin-settings-forms.php' );
 include_once( 'admin-settings.php' );
 include_once( 'admin-install.php' );
 
@@ -26,7 +27,8 @@ add_action('admin_init', 'woocommerce_admin_init');
  */
 function woocommerce_admin_scripts() {
 	global $woocommerce;
-	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/woocommerce_admin.js', array('jquery', 'jquery-ui-widget'), '1.0' );
+	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
     wp_enqueue_script('woocommerce_admin');
 }
 add_action('admin_print_scripts', 'woocommerce_admin_scripts');
