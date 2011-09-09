@@ -453,7 +453,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
 add_action( 'wp_header', 'woocommerce_clear_cart_on_return' );
 
 function woocommerce_clear_cart_on_return() {
-
+	global $woocommerce;
+	
 	if (is_page(get_option('woocommerce_thanks_page_id'))) :
 	
 		if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
@@ -475,6 +476,7 @@ function woocommerce_clear_cart_on_return() {
 add_action( 'init', 'woocommerce_clear_cart_after_payment' );
 
 function woocommerce_clear_cart_after_payment( $url = false ) {
+	global $woocommerce;
 	
 	if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
 		

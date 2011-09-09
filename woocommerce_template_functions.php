@@ -36,7 +36,7 @@ if (!function_exists('woocommerce_output_content_wrapper_end')) {
  **/
 if (!function_exists('woocommerce_show_product_sale_flash')) {
 	function woocommerce_show_product_sale_flash( $post, $_product ) {
-		if ($_product->is_on_sale()) echo '<span class="onsale">'.__('Sale!', 'woothemes').'</span>';
+		if ($_product->is_on_sale()) echo apply_filters('woocommerce_sale_flash', '<span class="onsale">'.__('Sale!', 'woothemes').'</span>', $post, $_product);
 	}
 }
 
