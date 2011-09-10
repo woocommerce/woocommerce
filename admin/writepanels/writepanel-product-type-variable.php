@@ -18,6 +18,7 @@ function variable_product_type_options() {
 	global $post, $woocommerce;
 	
 	$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
+	$variation_attribute_found = false;
 	if (!isset($attributes)) $attributes = array();
 	?>
 	<div id="variable_product_options" class="panel">
@@ -52,6 +53,8 @@ function variable_product_type_options() {
 							foreach ($attributes as $attribute) :
 								
 								if ( !$attribute['is_variation'] ) continue;
+								
+								$variation_attribute_found = true;
 								
 								$options = $attribute['value'];
 								$value = get_post_meta( $variation->ID, 'tax_' . sanitize_title($attribute['name']), true );
@@ -96,8 +99,8 @@ function variable_product_type_options() {
 			<?php $loop++; endforeach; ?>
 		</div>
 
-		<button type="button" class="button button-primary add_variation"><?php _e('Add Variation', 'woothemes'); ?></button>
-		<button type="button" class="button link_all_variations"><?php _e('Link all variations', 'woothemes'); ?></button>
+		<button type="button" class="button button-primary add_variation" <?php disabled($variation_attribute_found, false); ?>><?php _e('Add Variation', 'woothemes'); ?></button>
+		<button type="button" class="button link_all_variations" <?php disabled($variation_attribute_found, false); ?>><?php _e('Link all variations', 'woothemes'); ?></button>
 		
 		<p class="description"><?php _e('Add (optional) information for product variations. You must save your product attributes in the "Product Data" panel to make them selectable.', 'woothemes'); ?></p>
 		
