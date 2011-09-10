@@ -51,7 +51,7 @@ function variable_product_type_options() {
 						<?php
 							foreach ($attributes as $attribute) :
 								
-								if ( $attribute['variation']!=='yes' ) continue;
+								if ( !$attribute['is_variation'] ) continue;
 								
 								$options = $attribute['value'];
 								$value = get_post_meta( $variation->ID, 'tax_' . sanitize_title($attribute['name']), true );
@@ -156,7 +156,7 @@ function variable_product_write_panel_js() {
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
 								
-								if ( $attribute['variation']!=='yes' ) continue;
+								if ( !$attribute['is_variation'] ) continue;
 								
 								$options = $attribute['value'];
 								if (!is_array($options)) $options = explode(',', $options);
@@ -359,7 +359,7 @@ function woocommerce_link_all_variations() {
 	// Put variation attributes into an array
 	foreach ($attributes as $attribute) :
 								
-		if ( $attribute['variation']!=='yes' ) continue;
+		if ( !$attribute['is_variation'] ) continue;
 		
 		$taxonmy_name = 'tax_' . sanitize_title($attribute['name']);
 		
@@ -508,7 +508,7 @@ function process_product_meta_variable( $post_id ) {
 			$title = array();
 			
 			foreach ($attributes as $attribute) :
-				if ( $attribute['variation']=='yes' ) :
+				if ( $attribute['is_variation'] ) :
 					$value = trim($_POST[ 'tax_' . sanitize_title($attribute['name']) ][$i]);
 					if ($value) $title[] = ucfirst($attribute['name']).': '.$value;
 				endif;
@@ -548,7 +548,7 @@ function process_product_meta_variable( $post_id ) {
 			// Update taxonomies
 			foreach ($attributes as $attribute) :
 							
-				if ( $attribute['variation']=='yes' ) :
+				if ( $attribute['is_variation'] ) :
 				
 					$value = trim($_POST[ 'tax_' . sanitize_title($attribute['name']) ][$i]);
 					

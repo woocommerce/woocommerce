@@ -218,8 +218,6 @@ function woocommerce_product_data_box() {
 						    							    	
 						    		$attribute_nicename = sanitize_title($tax->attribute_name);
 						    		if (isset($attributes[$attribute_nicename])) $attribute = $attributes[$attribute_nicename];
-						    		if (isset($attribute['visible']) && $attribute['visible']=='yes') $checked = 'checked="checked"'; else $checked = '';
-						    		if (isset($attribute['variation']) && $attribute['variation']=='yes') $checked2 = 'checked="checked"'; else $checked2 = '';
 						    		
 						    		$values = wp_get_post_terms( $thepostid, $woocommerce->attribute_name($tax->attribute_name) );
 						    		$value = array();
@@ -270,8 +268,8 @@ function woocommerce_product_data_box() {
 											?>" placeholder="<?php _e('Comma separate terms', 'woothemes'); ?>" />
 										<?php endif; ?>
 										</td>
-										<td class="center"><input type="checkbox" <?php echo $checked; ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
-										<td class="center"><input type="checkbox" <?php echo $checked2; ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
+										<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
+										<td class="center"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 										<td class="center"><button type="button" class="hide_row button">&times;</button></td>
 									</tr><?php
 						    	endforeach;
@@ -279,12 +277,9 @@ function woocommerce_product_data_box() {
 							
 							// Attributes
 							if ($attributes && sizeof($attributes)>0) foreach ($attributes as $attribute) : 
-								if (isset($attribute['is_taxonomy']) && $attribute['is_taxonomy']=='yes') continue;
+								if ($attribute['is_taxonomy']) continue;
 								
 								$i++; 
-								
-								if (isset($attribute['visible']) && $attribute['visible']=='yes') $checked = 'checked="checked"'; else $checked = '';
-								if (isset($attribute['variation']) && $attribute['variation']=='yes') $checked2 = 'checked="checked"'; else $checked2 = '';
 								
 								?><tr rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>">
 									<td class="center">
@@ -296,8 +291,8 @@ function woocommerce_product_data_box() {
 										<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="0" />
 									</td>
 									<td><input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php echo $attribute['value']; ?>" /></td>
-									<td class="center"><input type="checkbox" <?php echo $checked; ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
-									<td class="center"><input type="checkbox" <?php echo $checked2; ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
+									<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
+									<td class="center"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 									<td class="center"><button type="button" class="remove_row button">&times;</button></td>
 								</tr><?php
 							endforeach;
@@ -388,11 +383,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			if ($wpdb->get_var("SELECT * FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='".$new_sku."';") || $wpdb->get_var("SELECT * FROM $wpdb->posts WHERE ID='".$new_sku."' AND ID!=".$post_id.";")) :
 				$woocommerce_errors[] = __('Product SKU must be unique.', 'woothemes');
 			else :
-				delete_post_meta( $post_id, 'SKU' );
 				update_post_meta( $post_id, 'sku', $new_sku );
 			endif;
 		else :
-			delete_post_meta( $post_id, 'SKU' );
 			update_post_meta( $post_id, 'sku', '' );
 		endif;
 	endif;
@@ -410,9 +403,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 		 for ($i=0; $i<sizeof($attribute_names); $i++) :
 		 	if (!($attribute_names[$i])) continue;
-		 	if (isset($attribute_visibility[$i])) $visible = 'yes'; else $visible = 'no';
-		 	if (isset($attribute_variation[$i])) $variation = 'yes'; else $variation = 'no';
-		 	if ($attribute_is_taxonomy[$i]) $is_taxonomy = 'yes'; else $is_taxonomy = 'no';
+		 	
+		 	$is_visible = (isset($attribute_visibility[$i])) ? 1 : 0;
+		 	$is_variation = (isset($attribute_variation[$i])) ? 1 : 0;
+		 	$is_taxonomy = (isset($attribute_variation[$i])) ? 1 : 0;
 		 	
 		 	if (is_array($attribute_values[$i])) :
 		 		$attribute_values[$i] = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
@@ -421,22 +415,22 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 	endif;
 		 	
 		 	if (empty($attribute_values[$i]) || ( is_array($attribute_values[$i]) && sizeof($attribute_values[$i])==0) ) :
-		 		if ($is_taxonomy=='yes' && taxonomy_exists( $woocommerce->attribute_name($attribute_names[$i])) ) :
+		 		if ($is_taxonomy && taxonomy_exists( $woocommerce->attribute_name($attribute_names[$i])) ) :
 		 			wp_set_object_terms( $post_id, 0, $woocommerce->attribute_name($attribute_names[$i]) );
 		 		endif;
 		 		continue;
 		 	endif;
 		 	
 		 	$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
-		 		'name' => htmlspecialchars(stripslashes($attribute_names[$i])), 
-		 		'value' => $attribute_values[$i],
-		 		'position' => $attribute_position[$i],
-		 		'visible' => $visible,
-		 		'variation' => $variation,
-		 		'is_taxonomy' => $is_taxonomy
+		 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+		 		'value' 		=> $attribute_values[$i],
+		 		'position' 		=> $attribute_position[$i],
+		 		'is_visible' 	=> $is_visible,
+		 		'is_variation' 	=> $is_variation,
+		 		'is_taxonomy' 	=> $is_taxonomy
 		 	);
 		 	
-		 	if ($is_taxonomy=='yes') :
+		 	if ($is_taxonomy) :
 		 		// Update post terms
 		 		$tax = $attribute_names[$i];
 		 		$value = $attribute_values[$i];

@@ -350,7 +350,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
             
             foreach ($attributes as $attribute) :
 
-                if ( $attribute['variation']!=='yes' ) continue;
+                if ( !$attribute['is_variation'] ) continue;
 
                 $taxonomy = 'tax_' . sanitize_title($attribute['name']);
                 if (!empty($_POST[$taxonomy])) :

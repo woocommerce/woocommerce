@@ -645,7 +645,7 @@ class woocommerce_product {
 	function has_attributes() {
 		if (isset($this->attributes) && sizeof($this->attributes)>0) :
 			foreach ($this->attributes as $attribute) :
-				if ($attribute['visible'] == 'yes') return true;
+				if ($attribute['is_visible']) return true;
 			endforeach;
 		endif;
 		return false;
@@ -661,7 +661,7 @@ class woocommerce_product {
 			echo '<table cellspacing="0" class="shop_attributes">';
 			$alt = 1;
 			foreach ($attributes as $attribute) :
-				if ($attribute['visible'] == 'no') continue;
+				if (!$attribute['is_visible']) continue;
 				$alt = $alt*-1;
 				echo '<tr class="';
 				if ($alt==1) echo 'alt';
@@ -695,7 +695,7 @@ class woocommerce_product {
         $children = $this->get_children();
         
         foreach ($attributes as $attribute) {
-            if ($attribute['variation'] !== 'yes') continue;
+            if (!$attribute['is_variation']) continue;
 
             $values = array();
             $taxonomy = 'tax_'.sanitize_title($attribute['name']);
