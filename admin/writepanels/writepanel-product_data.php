@@ -243,7 +243,7 @@ function woocommerce_product_data_box() {
 											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $attribute_taxonomy_name; ?>" />
 											<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
 										</td>
-										<td>
+										<td class="values">
 										<?php if ($tax->attribute_type=="select") : ?>
 											<select multiple="multiple" class="multiselect" name="attribute_values[<?php echo $i; ?>][]">
 												<?php

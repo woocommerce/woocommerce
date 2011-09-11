@@ -125,8 +125,10 @@ table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding
 table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{width:100%;}
 table.woocommerce_attributes td select{width:100%;}
 table.woocommerce_attributes td select.multiselect{height:8em !important;}
+table.woocommerce_attributes td .ui-multiselect-checkboxes input{width:auto;}
 table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{font-size:14px;padding:4px;color:#555;}
 table.woocommerce_attributes .taxonomy td.name{padding:10px 15px;font-size:14px;color:#555;}
+table.woocommerce_attributes .taxonomy td.values{position:relative;}
 table.woocommerce_attributes .center{text-align:center;}
 #woocommerce_attributes select.attribute_taxonomy,button.add_attribute,button.add_variable_attribute,button.add_variation,button.link_all_variations{float:right;}
 #upsell_product_data,#crosssell_product_data{padding:0 9px 9px;}
@@ -180,10 +182,13 @@ div.dp-popup div.dp-nav-next a{float:right;}
 div.dp-popup a.disabled{cursor:default;color:#aaaaaa;}
 div.dp-popup td{cursor:pointer;}
 div.dp-popup td.disabled{cursor:default;}
-.ui-multiselect{padding:3px 0 3px 4px;text-align:left;margin:1px;vertical-align:middle;height:24px;width:225px !important;}
+.ui-multiselect{padding:3px 0 3px 4px;text-align:left;margin:1px;vertical-align:middle;height:24px;}
 .ui-multiselect span.ui-icon{float:right;}
 .ui-multiselect-single .ui-multiselect-checkboxes input{position:absolute !important;top:auto !important;left:-9999px;}
 .ui-multiselect-single .ui-multiselect-checkboxes label{padding:5px !important;}
+.woocommerce .panel .ui-multiselect{width:225px !important;}
+#attributes_list td.values .ui-multiselect{width:100% !important;}
+#attributes_list td.values .ui-multiselect-menu{width:auto !important;right:9px;}
 .ui-multiselect-header{margin-bottom:3px;padding:3px 0 3px 4px;}
 .ui-multiselect-header ul{font-size:0.9em;}
 .ui-multiselect-header ul li{float:left;padding:0 10px 0 0;margin:0;}

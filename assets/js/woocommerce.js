@@ -393,6 +393,30 @@ jQuery(document).ready(function($) {
         $(item).data('index', i);
     });
 	
+	if (woocommerce_params.is_cart==1) {
+	
+		$('select#shipping_method').live('change', function() {
+			
+			var method = $('#shipping_method').val();
+			
+			$('div.cart_totals').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+			
+			var data = {
+				action: 			'woocommerce_update_shipping_method',
+				security: 			woocommerce_params.update_shipping_method_nonce,
+				shipping_method: 	method
+			};
+				
+			$.post( woocommerce_params.ajax_url, data, function(response) {
+				
+				$('div.cart_totals').replaceWith( response );
+							
+			});
+			
+		});
+	
+	}
+	
 	if (woocommerce_params.is_checkout==1) {
 	
 		var updateTimer;

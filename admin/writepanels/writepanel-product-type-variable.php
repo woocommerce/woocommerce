@@ -135,7 +135,7 @@ function variable_product_write_panel_js() {
 	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 	?>
 	jQuery(function(){
-		
+	
 		<?php if (!$attributes || (is_array($attributes) && sizeof($attributes)==0)) : ?>
 			
 			jQuery('button.link_all_variations, button.add_variation').live('click', function(){

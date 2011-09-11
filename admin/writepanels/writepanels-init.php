@@ -169,6 +169,7 @@ function woocommerce_write_panel_scripts() {
 		'tax_rate' 						=> __('Tax Rate e.g. 20.0000', 'woothemes'),
 		'meta_name'						=> __('Meta Name', 'woothemes'),
 		'meta_value'					=> __('Meta Value', 'woothemes'),
+		'select_terms'					=> __('Select terms', 'woothemes'),
 		'plugin_url' 					=> $woocommerce->plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
