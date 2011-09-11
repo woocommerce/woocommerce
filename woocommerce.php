@@ -199,6 +199,7 @@ function woocommerce_frontend_scripts() {
 		'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
 		'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
 		'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
+		'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
 		'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
 		'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout')
 	);
@@ -210,6 +211,12 @@ function woocommerce_frontend_scripts() {
 		$woocommerce_params['is_checkout'] = 1;
 	else :
 		$woocommerce_params['is_checkout'] = 0;
+	endif;
+	
+	if ( is_cart() ) :
+		$woocommerce_params['is_cart'] = 1;
+	else :
+		$woocommerce_params['is_cart'] = 0;
 	endif;
 	
 	wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );

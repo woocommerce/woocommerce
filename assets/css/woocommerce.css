@@ -108,6 +108,7 @@ td.quantity{min-width:80px;}
 .cart-collaterals .cart_totals table{border-collapse:separate;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;margin:0 0 6px;padding:0;}.cart-collaterals .cart_totals table tr:first-child th,.cart-collaterals .cart_totals table tr:first-child td{border-top:0;}
 .cart-collaterals .cart_totals table td,.cart-collaterals .cart_totals table th{padding:6px 12px;}
 .cart-collaterals .cart_totals table small{display:block;color:#999;}
+.cart-collaterals .cart_totals table select{width:100%;}
 .cart-collaterals .cart_totals .discount td{color:green;}
 .cart-collaterals .cart_totals tr td,.cart-collaterals .cart_totals tr th{border-top:1px solid #E7E7E7;padding:6px 24px;}
 .cart-collaterals .cart_totals a.button.alt{width:193px;display:block;font-size:0.92em;}

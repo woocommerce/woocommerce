@@ -4,6 +4,7 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
  *		- AJAX add to cart
  *		- AJAX add to cart fragments
@@ -24,7 +25,28 @@
 
 
 /**
- * AJAX get order review on checkout
+ * AJAX update shipping method on cart page
+ */
+add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
+add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
+
+function woocommerce_ajax_update_shipping_method() {
+	global $woocommerce;
+	
+	check_ajax_referer( 'update-shipping-method', 'security' );
+	
+	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
+
+	$woocommerce->cart->calculate_totals();
+	
+	woocommerce_cart_totals();
+	
+	die();
+}
+
+
+/**
+ * AJAX update order review on checkout
  */
 add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
 add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');

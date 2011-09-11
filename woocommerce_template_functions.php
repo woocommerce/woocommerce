@@ -626,6 +626,100 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 	}
 }
 
+
+/**
+ * WooCommerce Cart totals
+ **/
+if (!function_exists('woocommerce_cart_totals')) {
+	function woocommerce_cart_totals() {
+		global $woocommerce;
+		
+		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
+		?>
+		<div class="cart_totals">
+		<?php
+		if ($available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->shipping->enabled ) : 
+			// Hide totals if customer has set location and there are no methods going there
+			?>
+			<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
+			<table cellspacing="0" cellpadding="0">
+				<tbody>
+					<tr>
+						<th><?php _e('Subtotal', 'woothemes'); ?></th>
+						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
+					</tr>
+					
+					<?php if ($woocommerce->cart->get_cart_shipping_total()) : ?><tr>
+						<th><?php _e('Shipping', 'woothemes'); ?> <small><?php echo $woocommerce->countries->shipping_to_prefix().' '.$woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ]; ?></small></th>
+						<td>
+							<?php
+								if (sizeof($available_methods)>0) :
+									
+									echo '<select name="shipping_method" id="shipping_method">';
+									
+									foreach ($available_methods as $method ) :
+										
+										echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &ndash; ';
+										if ($method->shipping_total>0) :
+										
+											if (get_option('woocommerce_display_totals_tax')=='excluding') :
+					
+												echo woocommerce_price($method->shipping_total);
+												if ($method->shipping_tax>0) :
+													_e(' (ex. tax)', 'woothemes');
+												endif;
+												
+											else :
+												
+												echo woocommerce_price($method->shipping_total + $method->shipping_tax);
+												if ($method->shipping_tax>0) :
+													_e(' (inc. tax)', 'woothemes');
+												endif;
+											
+											endif;
+	
+										else :
+											echo __('Free', 'woothemes');
+										endif;
+										
+										echo '</option>';
+			
+									endforeach;
+									
+									echo '</select>';
+								endif;
+							?>
+						</td>
+					</tr><?php endif; ?>
+					
+					<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
+						<th><?php _e('Tax', 'woothemes'); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . $woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ] ); ?></small><?php endif; ?></th>
+						<td><?php 
+							echo $woocommerce->cart->get_cart_tax(); 
+						?></td>
+					</tr><?php endif; ?>
+					
+					<?php if ($woocommerce->cart->get_total_discount()) : ?><tr class="discount">
+						<th><?php _e('Discount', 'woothemes'); ?></th>
+						<td>-<?php echo $woocommerce->cart->get_total_discount(); ?></td>
+					</tr><?php endif; ?>
+					<tr>
+						<th><strong><?php _e('Total', 'woothemes'); ?></strong></th>
+						<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
+					</tr>
+				</tbody>
+			</table>
+			<p><small><?php _e('Note: Tax and shipping totals are estimated and will be updated during checkout based on your billing information.', 'woothemes'); ?></small></p>
+			<?php
+		else :
+			echo '<p>'.__('Sorry, it seems that there are no available shipping methods to your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
+		endif;
+		?>
+		</div>
+		<?php
+	}
+}
+
 /**
  * WooCommerce Login Form
  **/
