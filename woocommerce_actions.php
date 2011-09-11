@@ -663,13 +663,12 @@ function woocommerce_download_product() {
             endswitch;
 
             // Headers
+            @session_write_close();
+            if (function_exists('apache_setenv')) @apache_setenv('no-gzip', 1);
             @ini_set('zlib.output_compression', 'Off');
 			@set_time_limit(0);
-			@session_start();					
-			@session_cache_limiter('none');		
 			@set_magic_quotes_runtime(0);
 			@ob_end_clean();
-			@session_write_close();
 			
 			header("Pragma: no-cache");
 			header("Expires: 0");
