@@ -197,94 +197,99 @@ function woocommerce_product_data_box() {
 				<table cellpadding="0" cellspacing="0" class="woocommerce_attributes">
 					<thead>
 						<tr>
-							<th class="center" width="60"><?php _e('Order', 'woothemes'); ?></th>
-							<th width="180"><?php _e('Name', 'woothemes'); ?></th>
-							<th><?php _e('Value', 'woothemes'); ?></th>
-							<th class="center" width="1%"><?php _e('Visible?', 'woothemes'); ?></th>
-							<th class="center" width="1%"><?php _e('Variation?', 'woothemes'); ?></th>
+							<th class="center" width="60"><?php _e('Ordering', 'woothemes'); ?></th>
+							<th width="180"><?php _e('Attribute Name', 'woothemes'); ?></th>
+							<th><?php _e('Value(s)', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Add multiple attributes for text attributes by pipe (|) separating values.', 'woothemes'); ?>" href="#">[?]</a></th>
+							<th class="center" width="1%"><?php _e('Visible?', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Enable this to show the attribute on the product page.', 'woothemes'); ?>" href="#">[?]</a></th>
+							<th class="center enable_variation" width="1%"><?php _e('Variation?', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Enable to use this attribute for variations.', 'woothemes'); ?>" href="#">[?]</a></th>
 							<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 						</tr>
 					</thead>
 					<tbody id="attributes_list">	
 						<?php
-							$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
-							$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
-
+							$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();	// Array of defined attribute taxonomies
+							$attributes = maybe_unserialize( get_post_meta($thepostid, 'product_attributes', true) );	// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
+														
 							$i = -1;
 							
 							// Taxonomies
 							if ( $attribute_taxonomies ) :
 						    	foreach ($attribute_taxonomies as $tax) : $i++;
-						    							    	
-						    		$attribute_nicename = sanitize_title($tax->attribute_name);
-						    		if (isset($attributes[$attribute_nicename])) $attribute = $attributes[$attribute_nicename];
 						    		
-						    		$values = wp_get_post_terms( $thepostid, $woocommerce->attribute_name($tax->attribute_name) );
-						    		$value = array();
-						    		if (!is_wp_error($values) && $values) :
-						    			foreach ($values as $v) :
-						    				$value[] = $v->slug;
-						    			endforeach;
-						    		endif;
+						    		// Get name of taxonomy we're now outputting (pa_xxx)
+						    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
 						    		
-						    		?><tr class="taxonomy <?php echo sanitize_title($tax->attribute_name); ?>" rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" <?php if (!$value || sizeof($value)==0) echo 'style="display:none"'; ?>>
+						    		// Ensure it exists
+						    		if (!taxonomy_exists($attribute_taxonomy_name)) continue;		    	
+						    		
+						    		// Get product data values for current taxonomy - this contains ordering and visibility data	
+						    		if (isset($attributes[$attribute_taxonomy_name])) $attribute = $attributes[$attribute_taxonomy_name];
+						    		
+						    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
+						    		
+						    		// Get terms of this taxonomy associated with current product
+						    		$post_terms = wp_get_post_terms( $thepostid, $attribute_taxonomy_name );
+						    		
+						    		// Any set?
+						    		$has_terms = (is_wp_error($post_terms) || !$post_terms || sizeof($post_terms)==0) ? 0 : 1;
+						    		
+						    		?><tr class="taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
 										<td class="center">
 											<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" />
+											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo $position; ?>" />
 										</td>
 										<td class="name">
-											<?php echo $tax->attribute_name; ?> 
-											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $tax->attribute_name; ?>" />
+											<?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?> 
+											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $attribute_taxonomy_name; ?>" />
 											<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
 										</td>
 										<td>
-										<?php if ($tax->attribute_type=="select" || $tax->attribute_type=="multiselect") : ?>
-											<select <?php if ($tax->attribute_type=="multiselect") echo 'multiple="multiple" class="multiselect" name="attribute_values['.$i.'][]"'; else echo 'name="attribute_values['.$i.']"'; ?>>
-												<?php if ($tax->attribute_type=="select") : ?><option value=""><?php _e('Choose an option&hellip;', 'woothemes'); ?></option><?php endif; ?>
+										<?php if ($tax->attribute_type=="select") : ?>
+											<select multiple="multiple" class="multiselect" name="attribute_values[<?php echo $i; ?>][]">
 												<?php
-												if (taxonomy_exists($woocommerce->attribute_name($tax->attribute_name))) :
-					        						$terms = get_terms( $woocommerce->attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
-					        						if ($terms) :
-						        						foreach ($terms as $term) :
-						        							echo '<option value="'.$term->slug.'" ';
-						        							if (in_array($term->slug, $value)) echo 'selected="selected"';
-						        							echo '>'.$term->name.'</option>';
-														endforeach;
-													endif;
+					        					$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
+				        						if ($all_terms) :
+					        						foreach ($all_terms as $term) :
+					        							$has_term = ( has_term( $term->slug, $attribute_taxonomy_name, $thepostid ) ) ? 1 : 0;
+					        							echo '<option value="'.$term->slug.'" '.selected($has_term, 1, false).'>'.$term->name.'</option>';
+													endforeach;
 												endif;
 												?>			
 											</select>
 										<?php elseif ($tax->attribute_type=="text") : ?>
 											<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php 
-											
-												if (isset($attribute['value'])) :
-													if (is_array($attribute['value'])) :
-														echo implode(', ', $attribute['value']);
-													else :
-														echo $attribute['value']; 
-													endif;
+												
+												// Text attributes should list terms pipe separated
+												if ($post_terms) :
+													$values = array();
+													foreach ($post_terms as $term) :
+														$values[] = $term->name;
+													endforeach;
+													echo implode('|', $values);
 												endif;
 												
-											?>" placeholder="<?php _e('Comma separate terms', 'woothemes'); ?>" />
+											?>" placeholder="<?php _e('Pipe separate terms', 'woothemes'); ?>" />
 										<?php endif; ?>
 										</td>
 										<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
-										<td class="center"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
+										<td class="center enable_variation"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 										<td class="center"><button type="button" class="hide_row button">&times;</button></td>
 									</tr><?php
 						    	endforeach;
 						    endif;
 							
-							// Attributes
+							// Custom Attributes
 							if ($attributes && sizeof($attributes)>0) foreach ($attributes as $attribute) : 
 								if ($attribute['is_taxonomy']) continue;
 								
 								$i++; 
+
+					    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
 								
 								?><tr rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>">
 									<td class="center">
 										<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>" />
+										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo $position; ?>" />
 									</td>
 									<td>
 										<input type="text" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $attribute['name']; ?>" />
@@ -292,7 +297,7 @@ function woocommerce_product_data_box() {
 									</td>
 									<td><input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php echo $attribute['value']; ?>" /></td>
 									<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
-									<td class="center"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
+									<td class="center enable_variation"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 									<td class="center"><button type="button" class="remove_row button">&times;</button></td>
 								</tr><?php
 							endforeach;
@@ -306,7 +311,9 @@ function woocommerce_product_data_box() {
 				<?php
 					if ( $attribute_taxonomies ) :
 				    	foreach ($attribute_taxonomies as $tax) :
-				    		echo '<option value="'.sanitize_title($tax->attribute_name).'">'.$tax->attribute_name.'</option>';
+				    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
+				    		$label = ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name;
+				    		echo '<option value="'.$attribute_taxonomy_name.'">'.$label.'</option>';
 				    	endforeach;
 				    endif;
 				?>
@@ -390,7 +397,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		endif;
 	endif;
 		
-	// Attributes
+	// Save Attributes
 	$attributes = array();
 	
 	if (isset($_POST['attribute_names'])) :
@@ -406,41 +413,47 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 	
 		 	$is_visible = (isset($attribute_visibility[$i])) ? 1 : 0;
 		 	$is_variation = (isset($attribute_variation[$i])) ? 1 : 0;
-		 	$is_taxonomy = (isset($attribute_variation[$i])) ? 1 : 0;
 		 	
-		 	if (is_array($attribute_values[$i])) :
-		 		$attribute_values[$i] = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
-		 	else :
-		 		$attribute_values[$i] = trim(htmlspecialchars(stripslashes($attribute_values[$i])));
-		 	endif;
-		 	
-		 	if (empty($attribute_values[$i]) || ( is_array($attribute_values[$i]) && sizeof($attribute_values[$i])==0) ) :
-		 		if ($is_taxonomy && taxonomy_exists( $woocommerce->attribute_name($attribute_names[$i])) ) :
-		 			wp_set_object_terms( $post_id, 0, $woocommerce->attribute_name($attribute_names[$i]) );
-		 		endif;
-		 		continue;
-		 	endif;
-		 	
-		 	$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
-		 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
-		 		'value' 		=> $attribute_values[$i],
-		 		'position' 		=> $attribute_position[$i],
-		 		'is_visible' 	=> $is_visible,
-		 		'is_variation' 	=> $is_variation,
-		 		'is_taxonomy' 	=> $is_taxonomy
-		 	);
+		 	$is_taxonomy = ($attribute_is_taxonomy[$i]) ? 1 : 0;
 		 	
 		 	if ($is_taxonomy) :
+		 		// Format values
+		 		if (is_array($attribute_values[$i])) :
+			 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
+			 	else :
+			 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
+			 		// Text based, separate by pipe
+			 		$values = explode('|', $values);
+			 		$values = array_map('trim', $values);
+			 	endif;
+		 	
 		 		// Update post terms
-		 		$tax = $attribute_names[$i];
-		 		$value = $attribute_values[$i];
-		 		
-		 		if (taxonomy_exists( $woocommerce->attribute_name($tax) )) :
-		 			
-		 			wp_set_object_terms( $post_id, $value, $woocommerce->attribute_name($tax) );
-		 			
+		 		if (taxonomy_exists( $attribute_names[$i] )) :
+		 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
 		 		endif;
 		 		
+		 		// Add attribute to array, but don't set values
+		 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
+			 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+			 		'value' 		=> '',
+			 		'position' 		=> $attribute_position[$i],
+			 		'is_visible' 	=> $is_visible,
+			 		'is_variation' 	=> $is_variation,
+			 		'is_taxonomy' 	=> $is_taxonomy
+			 	);
+		 	else :
+		 		// Format values
+		 		$values = trim(htmlspecialchars(stripslashes($attribute_values[$i])));
+		 		
+		 		// Custom attribute - Add attribute to array and set the values
+			 	$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
+			 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+			 		'value' 		=> $values,
+			 		'position' 		=> $attribute_position[$i],
+			 		'is_visible' 	=> $is_visible,
+			 		'is_variation' 	=> $is_variation,
+			 		'is_taxonomy' 	=> $is_taxonomy
+			 	);
 		 	endif;
 		 	
 		 endfor; 

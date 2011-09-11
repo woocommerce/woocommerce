@@ -199,7 +199,7 @@ class woocommerce {
 	    /**
 		 * Get a product attributes name
 		 */
-		function attribute_name( $name ) { 
+		function attribute_taxonomy_name( $name ) { 
 			return 'pa_'.sanitize_title($name);
 		}
 		
@@ -209,7 +209,7 @@ class woocommerce {
 		function attribute_label( $name ) { 
 			global $wpdb;
 			
-			$name = $wpdb->prepare(sanitize_title($name));
+			$name = $wpdb->prepare(str_replace('pa_', '', sanitize_title($name)));
 	
 			$label = $wpdb->get_var("SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = '$name';");
 	

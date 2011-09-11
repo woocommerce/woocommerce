@@ -662,14 +662,22 @@ class woocommerce_product {
 			$alt = 1;
 			foreach ($attributes as $attribute) :
 				if (!$attribute['is_visible']) continue;
+				
 				$alt = $alt*-1;
 				echo '<tr class="';
 				if ($alt==1) echo 'alt';
 				echo '"><th>'.$woocommerce->attribute_label( $attribute['name'] ).'</th><td>';
 				
-				if (is_array($attribute['value'])) $attribute['value'] = implode(', ', $attribute['value']);
-				
-				echo wpautop(wptexturize($attribute['value']));
+				if ($attribute['is_taxonomy']) :
+					$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
+					$values = array();
+					foreach ($post_terms as $term) :
+						$values[] = $term->name;
+					endforeach;
+					echo implode(', ', $values);
+				else :
+					echo wpautop(wptexturize($attribute['value']));
+				endif;
 				
 				echo '</td></tr>';
 			endforeach;
@@ -683,8 +691,8 @@ class woocommerce_product {
      * 
      * @return two dimensional array of attributes and their available values
      */   
-    function get_available_attribute_variations() {
-       
+    function get_available_attribute_variations() {      
+
         if (!$this->is_type('variable') || !$this->has_child()) return array();
         
         $attributes = $this->get_attributes();
@@ -698,7 +706,7 @@ class woocommerce_product {
             if (!$attribute['is_variation']) continue;
 
             $values = array();
-            $taxonomy = 'tax_'.sanitize_title($attribute['name']);
+            $attribute_field_name = 'attribute_'.sanitize_title($attribute['name']);
 
             foreach ($children as $child) {
                 /* @var $variation woocommerce_product_variation */
@@ -712,7 +720,7 @@ class woocommerce_product {
 
                     if (is_array($vattributes)) {
                         foreach ($vattributes as $name => $value) {
-                            if ($name == $taxonomy) {
+                            if ($name == $attribute_field_name) {
                                 $values[] = $value;
                             }
                         }
@@ -722,11 +730,19 @@ class woocommerce_product {
             
             // empty value indicates that all options for given attribute are available
             if(in_array('', $values)) {
-                $options = $attribute['value'];
-
-                if (!is_array($options)) {
-                    $options = explode(',', $options);
-                }
+            	
+            	// Get all options
+            	if ($attribute['is_taxonomy']) :
+	            	$options = array();
+	            	$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
+					foreach ($post_terms as $term) :
+						$options[] = $term->slug;
+					endforeach;
+				else :
+					$options = explode('|', $attribute['value']);
+				endif;
+				
+				$options = array_map('trim', $options);
                 
                 $values = $options;
             }

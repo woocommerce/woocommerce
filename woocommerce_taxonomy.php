@@ -75,7 +75,7 @@ function woocommerce_post_type() {
 	if ( $attribute_taxonomies ) :
 		foreach ($attribute_taxonomies as $tax) :
 	    	
-	    	$name = $woocommerce->attribute_name($tax->attribute_name);
+	    	$name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
 	    	$hierarchical = true;
 	    	if ($name) :
 	    	

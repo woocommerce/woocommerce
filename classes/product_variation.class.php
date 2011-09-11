@@ -35,7 +35,7 @@ class woocommerce_product_variation extends woocommerce_product {
 		
 		foreach ($product_custom_fields as $name => $value) :
 			
-			if (!strstr($name, 'tax_')) continue;
+			if (!strstr($name, 'attribute_')) continue;
 			
 			$this->variation_data[$name] = $value[0];
 			

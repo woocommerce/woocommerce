@@ -17,9 +17,8 @@
 function variable_product_type_options() {
 	global $post, $woocommerce;
 	
-	$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
+	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 	$variation_attribute_found = false;
-	if (!isset($attributes)) $attributes = array();
 	?>
 	<div id="variable_product_options" class="panel">
 		
@@ -52,23 +51,32 @@ function variable_product_type_options() {
 						<?php
 							foreach ($attributes as $attribute) :
 								
+								// Only deal with attributes that are variations
 								if ( !$attribute['is_variation'] ) continue;
 								
+								// We've got one!
 								$variation_attribute_found = true;
-								
-								$options = $attribute['value'];
-								$value = get_post_meta( $variation->ID, 'tax_' . sanitize_title($attribute['name']), true );
+
+								// Get current value for variation (if set)
+								$variation_selected_value = get_post_meta( $variation->ID, 'attribute_' . sanitize_title($attribute['name']), true );
 								
 								if (!is_array($options)) $options = explode(',', $options);
 								
-								echo '<select name="tax_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any ', 'woothemes').$attribute['name'].'&hellip;</option>';
+								// Name will be something like attribute_pa_color
+								echo '<select name="attribute_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
-								foreach($options as $option) :
-									$option = trim($option);
-									echo '<option ';
-									selected($value, $option);
-									echo ' value="'.$option.'">'.ucfirst($option).'</option>';
-								endforeach;	
+								// Get terms for attribute taxonomy or value if its a custom attribute
+								if ($attribute['is_taxonomy']) :
+									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
+									foreach ($post_terms as $term) :
+										echo '<option '.selected($variation_selected_value, $term->slug, false).' value="'.$term->slug.'">'.$term->name.'</option>';
+									endforeach;
+								else :
+									$options = explode('|', $attribute['value']);
+									foreach ($options as $option) :
+										echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst($option).'</option>';
+									endforeach;
+								endif;
 									
 								echo '</select>';
 	
@@ -154,21 +162,27 @@ function variable_product_write_panel_js() {
 				
 				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation">\
 					<p>\
-						<button type="button" class="remove_variation button"><?php _e('Remove', 'woothemes'); ?></button>\
-						<strong><?php _e('Variation:', 'woothemes'); ?></strong>\
+						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php _e('Remove', 'woothemes'); ?></button>\
+						<strong>#' + variation_id + ' &mdash; <?php _e('Variation:', 'woothemes'); ?></strong>\
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
 								
 								if ( !$attribute['is_variation'] ) continue;
 								
-								$options = $attribute['value'];
-								if (!is_array($options)) $options = explode(',', $options);
+								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
-								echo '<select name="tax_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any ', 'woothemes').$attribute['name'].'&hellip;</option>';
-								
-								foreach($options as $option) :
-									echo '<option value="'.trim($option).'">'.ucfirst(trim($option)).'</option>';
-								endforeach;	
+								// Get terms for attribute taxonomy or value if its a custom attribute
+								if ($attribute['is_taxonomy']) :
+									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
+									foreach ($post_terms as $term) :
+										echo '<option value="'.$term->slug.'">'.$term->name.'</option>';
+									endforeach;
+								else :
+									$options = explode('|', $attribute['value']);
+									foreach ($options as $option) :
+										echo '<option value="'.$option.'">'.ucfirst($option).'</option>';
+									endforeach;
+								endif;
 									
 								echo '</select>';
 	
@@ -364,13 +378,21 @@ function woocommerce_link_all_variations() {
 								
 		if ( !$attribute['is_variation'] ) continue;
 		
-		$taxonmy_name = 'tax_' . sanitize_title($attribute['name']);
+		$attribute_field_name = 'attribute_' . sanitize_title($attribute['name']);
 		
-		$options = $attribute['value'];
-		if (!is_array($options)) $options = explode(',', $options);
+		if ($attribute['is_taxonomy']) :
+			$post_terms = wp_get_post_terms( $post_id, $attribute['name'] );
+			$options = array();
+			foreach ($post_terms as $term) :
+				$options[] = $term->slug;
+			endforeach;
+		else :
+			$options = explode('|', $attribute['value']);
+		endif;
+		
 		$options = array_map('trim', $options);
 		
-		$variations[$taxonmy_name] = $options;
+		$variations[$attribute_field_name] = $options;
 		
 	endforeach;
 	
@@ -485,6 +507,7 @@ add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
  * Processes this product types options when a post is saved
  */
 function process_product_meta_variable( $post_id ) {
+	global $woocommerce; 
 	
 	if (isset($_POST['variable_sku'])) :
 		
@@ -512,8 +535,8 @@ function process_product_meta_variable( $post_id ) {
 			
 			foreach ($attributes as $attribute) :
 				if ( $attribute['is_variation'] ) :
-					$value = trim($_POST[ 'tax_' . sanitize_title($attribute['name']) ][$i]);
-					if ($value) $title[] = ucfirst($attribute['name']).': '.$value;
+					$value = trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]);
+					if ($value) $title[] = $woocommerce->attribute_label($attribute['name']).': '.$value;
 				endif;
 			endforeach;
 			
@@ -553,9 +576,9 @@ function process_product_meta_variable( $post_id ) {
 							
 				if ( $attribute['is_variation'] ) :
 				
-					$value = trim($_POST[ 'tax_' . sanitize_title($attribute['name']) ][$i]);
+					$value = trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]);
 					
-					update_post_meta( $variation_id, 'tax_' . sanitize_title($attribute['name']), $value );
+					update_post_meta( $variation_id, 'attribute_' . sanitize_title($attribute['name']), $value );
 				
 				endif;
 

@@ -512,7 +512,7 @@ class woocommerce_checkout {
 						// Variations meta
 						if ($values['variation'] && is_array($values['variation'])) :
 							foreach ($values['variation'] as $key => $value) :
-								$item_meta[ sanitize_title(str_replace('tax_', '', $key)) ] = $value;
+								$item_meta[ sanitize_title(str_replace('attribute_', '', $key)) ] = $value;
 							endforeach;
 						endif;
 

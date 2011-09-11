@@ -23,7 +23,7 @@ function woocommerce_layered_nav_init() {
 		foreach ($attribute_taxonomies as $tax) :
 	    	
 	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
-	    	$taxonomy = $woocommerce->attribute_name($attribute);
+	    	$taxonomy = $woocommerce->attribute_taxonomy_name($attribute);
 	    	$name = 'filter_' . $attribute;
 	    	
 	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) $_chosen_attributes[$taxonomy] = explode(',', $_GET[$name] );
@@ -120,7 +120,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		global $_chosen_attributes, $wpdb, $woocommerce;
 				
 		$title = $instance['title'];
-		$taxonomy = $woocommerce->attribute_name($instance['attribute']);
+		$taxonomy = $woocommerce->attribute_taxonomy_name($instance['attribute']);
 		
 		if (!taxonomy_exists($taxonomy)) return;
 
@@ -255,7 +255,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
 				if ( $attribute_taxonomies ) :
 					foreach ($attribute_taxonomies as $tax) :
-						if (taxonomy_exists( $woocommerce->attribute_name($tax->attribute_name))) :
+						if (taxonomy_exists( $woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
 							
 							echo '<option value="'.$tax->attribute_name.'" ';
 							if (isset($instance['attribute']) && $instance['attribute']==$tax->attribute_name) :

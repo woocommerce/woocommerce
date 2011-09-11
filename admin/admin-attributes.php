@@ -25,7 +25,7 @@ function woocommerce_attributes() {
 		$attribute_type = (string) $_POST['attribute_type'];
 		$attribute_label = (string) $_POST['attribute_label'];
 		
-		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_name($attribute_name) )) :
+		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_taxonomy_name($attribute_name) )) :
 		
 			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
 			
@@ -62,7 +62,7 @@ function woocommerce_attributes() {
 			
 			if ($att_name && $wpdb->query("DELETE FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$delete'")) :
 				
-				$taxonomy = $woocommerce->attribute_name($att_name); 
+				$taxonomy = $woocommerce->attribute_taxonomy_name($att_name); 
 				
 				if (taxonomy_exists($taxonomy)) :
 				
@@ -93,7 +93,7 @@ function woocommerce_attributes() {
 /**
  * Edit Attribute admin panel
  * 
- * Shows the interface for changing an attributes type between select, multiselect and text
+ * Shows the interface for changing an attributes type between select and text
  */
 function woocommerce_edit_attribute() {
 	
@@ -124,9 +124,8 @@ function woocommerce_edit_attribute() {
 							<div class="form-field">
 								<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
 								<select name="attribute_type" id="attribute_type">
-									<option value="select" <?php if ($att_type=='select') echo 'selected="selected"'; ?>><?php _e('Select', 'woothemes') ?></option>
-									<option value="multiselect" <?php if ($att_type=='multiselect') echo 'selected="selected"'; ?>><?php _e('Multiselect', 'woothemes') ?></option>
-									<option value="text" <?php if ($att_type=='text') echo 'selected="selected"'; ?>><?php _e('Text', 'woothemes') ?></option>										
+									<option value="select" <?php selected($att_type, 'select'); ?>><?php _e('Select', 'woothemes') ?></option>
+									<option value="text" <?php selected($att_type, 'text'); ?>><?php _e('Text', 'woothemes') ?></option>										
 								</select>
 							</div>
 							
@@ -172,16 +171,16 @@ function woocommerce_add_attribute() {
 				        			foreach ($attribute_taxonomies as $tax) :
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo add_query_arg('edit', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo add_query_arg('delete', $tax->attribute_id, 'admin.php?page=attributes') ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
 				        					<td><?php echo ucwords($tax->attribute_label); ?></td>
 				        					<td><?php echo ucwords($tax->attribute_type); ?></td>
 				        					<td><?php 
-				        						if (taxonomy_exists($woocommerce->attribute_name($tax->attribute_name))) :
+				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
 					        						$terms_array = array();
-					        						$terms = get_terms( $woocommerce->attribute_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
+					        						$terms = get_terms( $woocommerce->attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
 					        						if ($terms) :
 						        						foreach ($terms as $term) :
 															$terms_array[] = $term->name;
@@ -213,7 +212,7 @@ function woocommerce_add_attribute() {
 							<div class="form-field">
 								<label for="attribute_name"><?php _e('Attribute Name', 'woothemes'); ?></label>
 								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
-								<p class="description"><?php _e('Name/reference for attribute; must be shorter than 29 characters.', 'woocommerce'); ?></p>
+								<p class="description"><?php _e('Unique name/reference for the attribute; must be shorter than 28 characters.', 'woocommerce'); ?></p>
 							</div>
 							<div class="form-field">
 								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
@@ -224,10 +223,9 @@ function woocommerce_add_attribute() {
 								<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
 								<select name="attribute_type" id="attribute_type">
 									<option value="select"><?php _e('Select', 'woothemes') ?></option>
-									<option value="multiselect"><?php _e('Multiselect', 'woothemes') ?></option>
 									<option value="text"><?php _e('Text', 'woothemes') ?></option>										
 								</select>
-								<p class="description"><?php _e('Determines how you select attributes for products. Variation attributes should use "multiselect".', 'woocommerce'); ?></p>
+								<p class="description"><?php _e('Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce'); ?></p>
 							</div>
 							
 							<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e('Add Attribute', 'woothemes'); ?>"></p>

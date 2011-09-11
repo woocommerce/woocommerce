@@ -385,22 +385,22 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 			$return = '<dl class="variation">';
 		endif;
 		
-		$varation_list = array();
+		$variation_list = array();
 		
 		foreach ($variation as $name => $value) :
 			
 			if ($flat) :
-				$varation_list[] = $woocommerce->attribute_label(str_replace('tax_', '', $name)).': '.ucfirst($value);
+				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.ucfirst($value);
 			else :
-				$varation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('tax_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
+				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
 			endif;
 			
 		endforeach;
 		
 		if ($flat) :
-			$return .= implode(', ', $varation_list);
+			$return .= implode(', ', $variation_list);
 		else :
-			$return .= implode('', $varation_list);
+			$return .= implode('', $variation_list);
 		endif;
 		
 		if (!$flat) :

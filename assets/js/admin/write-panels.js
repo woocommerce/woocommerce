@@ -172,18 +172,23 @@ jQuery( function($){
 		if (select_val=='variable') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
 			jQuery('.options_group.grouping').val('').hide();
+			jQuery('td.enable_variation, th.enable_variation').show();
 		} else if (select_val=='simple') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
 			jQuery('.options_group.grouping').show();
+			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='grouped') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').hide();
 			jQuery('.options_group.grouping').val('').hide();
+			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='downloadable') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
 			jQuery('.options_group.grouping').show();
+			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='virtual') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
 			jQuery('.options_group.grouping').show();
+			jQuery('td.enable_variation, th.enable_variation').hide();
 		}
 		
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
@@ -259,9 +264,12 @@ jQuery( function($){
 			var attribute_type = jQuery('select.attribute_taxonomy').val();
 			
 			if (!attribute_type) {
+			
+				var product_type = jQuery('select#product-type').val();
+				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 				
 				// Add custom attribute row
-				jQuery('table.woocommerce_attributes tbody').append('<tr><td class="center"><button type="button" class="button move_up">&uarr;</button><button type="button" class="move_down button">&darr;</button><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center"><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
+				jQuery('table.woocommerce_attributes tbody').append('<tr><td class="center"><button type="button" class="button move_up">&uarr;</button><button type="button" class="move_down button">&darr;</button><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
 				
 			} else {
 				

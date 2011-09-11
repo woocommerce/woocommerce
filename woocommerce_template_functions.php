@@ -326,7 +326,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
             $variation = $child->product;
             
             if($variation instanceof woocommerce_product_variation) {
-            
+                        	
             	if ($variation->variation->post_status != 'publish') continue; // Disabled
             
                 $variation_attributes = $variation->get_variation_attributes();
@@ -364,11 +364,11 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<?php foreach ($attributes as $name => $options) :?>
 					<tr>
 						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
-						<td><select id="<?php echo sanitize_title($name); ?>" name="tax_<?php echo sanitize_title($name); ?>">
+						<td><select id="<?php echo sanitize_title($name); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
 								<?php foreach ($options as $option) : 
-									$option_term = get_term_by('slug', $option, $woocommerce->attribute_name($name)); 
+									$option_term = get_term_by('slug', $option, $name); 
 									if (!is_wp_error($option_term) && isset($option_term->name)) :
 										$term_name = $option_term->name;
 									else :

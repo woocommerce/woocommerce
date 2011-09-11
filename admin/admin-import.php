@@ -40,8 +40,14 @@ function woocommerce_import_start() {
 								
 								$nicename = strtolower(sanitize_title(str_replace('pa_', '', $domain)));
 								
-								// Create the taxonomy
-								$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'text' ), array( '%s', '%s' ) );
+								$exists_in_db = $wpdb->get_var("SELECT attribute_id FROM ".$wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = '".$nicename."';");
+								
+								if (!$exists_in_db) :
+								
+									// Create the taxonomy
+									$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select' ), array( '%s', '%s' ) );
+									
+								endif;
 								
 								// Register the taxonomy now so that the import works!
 								register_taxonomy( $domain,
