@@ -18,7 +18,15 @@ function variable_product_type_options() {
 	global $post, $woocommerce;
 	
 	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
+	
+	// See if any are set
 	$variation_attribute_found = false;
+	foreach($attributes as $attribute){
+		if ($attribute['is_variation']) :
+			$variation_attribute_found = true;
+			break;
+		endif;
+	}
 	?>
 	<div id="variable_product_options" class="panel">
 		
@@ -53,9 +61,6 @@ function variable_product_type_options() {
 								
 								// Only deal with attributes that are variations
 								if ( !$attribute['is_variation'] ) continue;
-								
-								// We've got one!
-								$variation_attribute_found = true;
 
 								// Get current value for variation (if set)
 								$variation_selected_value = get_post_meta( $variation->ID, 'attribute_' . sanitize_title($attribute['name']), true );
@@ -127,8 +132,7 @@ add_action('woocommerce_product_type_options_box', 'variable_product_type_option
 function variable_product_write_panel_js() {
 	global $post, $woocommerce;
 	
-	$attributes = maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
-	if (!isset($attributes)) $attributes = array();
+	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
 	?>
 	jQuery(function(){
 		
@@ -370,8 +374,7 @@ function woocommerce_link_all_variations() {
 	
 	$variations = array();
 	
-	$attributes = maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
-	if (!isset($attributes)) $attributes = array();
+	$attributes = (array) maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
 	
 	// Put variation attributes into an array
 	foreach ($attributes as $attribute) :
@@ -520,8 +523,7 @@ function process_product_meta_variable( $post_id ) {
 		$upload_image_id		= $_POST['upload_image_id'];
 		if (isset($_POST['variable_enabled'])) $variable_enabled = $_POST['variable_enabled'];
 		
-		$attributes = maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
-		if (!isset($attributes)) $attributes = array();
+		$attributes = (array) maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
 		
 		for ($i=0; $i<sizeof($variable_sku); $i++) :
 			
