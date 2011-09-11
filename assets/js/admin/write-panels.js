@@ -231,7 +231,13 @@ jQuery( function($){
 	
 	
 	// ATTRIBUTE TABLES
-	
+		
+		// Multiselect attributes
+		jQuery("#attributes_list select.multiselect").multiselect({
+			noneSelectedText: params.select_terms,
+			selectedList: 4
+		});	
+		
 		// Initial order
 		var woocommerce_attributes_table_items = jQuery('#attributes_list').children('tr').get();
 		woocommerce_attributes_table_items.sort(function(a, b) {
