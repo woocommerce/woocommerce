@@ -151,6 +151,8 @@ small.note {
 -------------------------------------------------------------- */
 div.product {
 	position: relative;
+	margin-bottom:0;
+	
 	.product_title {
 		clear: none;
 	}
@@ -169,23 +171,27 @@ div.product {
 	}
 	div.images {
 		float: left;
-		width: 314px;
+		width: 47%;
 		margin-bottom: 10px;
 		img {
 			border: 1px solid #ddd;
 			background: #f5f5f5;
 			padding: 6px;
 			display: block;
+			width:100%;
+			height: auto;
 		}
 		div.thumbnails {
 			padding-top: 10px;
 			.clearfix;
 			a {
-				margin-right: 10px;
-				margin-bottom: 10px;
 				float: left;
+				width:30.75%;
+				margin-right:3.8%;
+				
 				img {
-					padding: 3px;
+					width:100%;
+					height: auto;
 				}
 			}
 			a.last {
@@ -198,7 +204,7 @@ div.product {
 	}
 	div.summary {
 		float: right;
-		width: 300px;
+		width: 48%;
 	}
 	div.social {
 		text-align: right;
@@ -269,8 +275,8 @@ p.cart {
 
 form.cart {
 	margin-bottom: 24px;
-	float: right;
-	width: 300px;
+	overflow: hidden;
+	zoom:1;
 	div.quantity {
 		float: left;
 		margin: 0 4px 0 0;
@@ -329,14 +335,33 @@ span.onsale {
 	list-style: none;
 	float: left;
 }
+
+.related, .upsells.products {
+	overflow: hidden;
+	zoom:1;
+	ul.products, ul {
+		float: none;
+		
+		li {
+			width:48%;
+			img {
+				width:100%;
+				height: auto;
+			}
+		}
+	}
+}
+
+
+
 .products {
 	clear: both;
 	li {
 		float: left;
-		margin: 0 10px 20px 0;
+		margin: 0 3.8% 20px 0;
 		padding: 0;
 		position: relative;
-		width:150px;
+		width:22.05%;
 		.onsale {
 			top: 0;
 			right: 0;
@@ -347,8 +372,8 @@ span.onsale {
 			text-decoration: none;
 		}
 		a img {
-			width: 150px;
-			height: 150px;
+			width: 100%;
+			height: auto;
 			display: block;
 			margin: 0 0 8px;
 			border: 1px solid #ddd;
@@ -388,6 +413,10 @@ span.onsale {
 	li.last {
 		margin-right: 0;
 	}
+}
+
+.woocommerce_ordering {
+	margin-bottom:24px;
 }
 
 /* =Buttons
@@ -652,6 +681,16 @@ table.my_account_orders {
 	}
 }
 
+/* =Cart
+-------------------------------------------------------------- */
+
+table.cart {
+	img {
+		width:32px;
+		height: auto;
+	}
+}
+
 /* =Cart Sidebar
 -------------------------------------------------------------- */
 ul.cart_list, ul.product_list_widget {
@@ -790,23 +829,31 @@ td.quantity {
 	.clearfix;
 	width:100%;
 	.related {
-		width:310px;
+		width:30.75%;
 		float: left;
 	}
 	
 	.cross-sells {
-		width:314px;
+		width:48%;
 		float: left;
+		
+		ul.products {
+			float: none;
+			
+			li {
+				width:48%;
+			}
+		}
 	}
 	.shipping_calculator {
-		float: right;
-		width:225px;
-		clear: right;
+		width:48%;
 		text-align: right;
 		.clearfix;
 		margin: 20px 0 0 0;
+		clear: right;
+		float: right;
 		.button {
-			width: 225px;
+			width: 100%;
 			float: none;
 			display: block;
 		}
@@ -819,7 +866,7 @@ td.quantity {
 	.cart_totals {
 		float: right;
 		
-		width:225px;
+		width:48%;
 		text-align: right;
 		p {
 			margin: 0;
