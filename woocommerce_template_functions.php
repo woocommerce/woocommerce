@@ -58,7 +58,19 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 		// No price set - so no button
 		if( $_product->get_price() === '') return;
 			
-		?><a href="<?php echo $_product->add_to_cart_url(); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php _e('Add to cart', 'woothemes'); ?></a><?php
+		?><a href="<?php echo $_product->add_to_cart_url(); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php
+			switch ($_product->product_type) :
+				case "variable" :
+					echo apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
+				break;
+				case "grouped" :
+					echo apply_filters('grouped_add_to_cart_text', __('View options', 'woothemes'));
+				break;
+				default :
+					echo apply_filters('add_to_cart_text', __('Add to cart', 'woothemes'));
+				break;
+			endswitch;
+		?></a><?php
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
