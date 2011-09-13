@@ -272,7 +272,6 @@ span.onsale {
   margin: 0 0 14px;
   padding: 0;
   list-style: none;
-  float: left;
 }
 .related, .upsells.products {
   overflow: hidden;
@@ -337,8 +336,6 @@ ul.products li .price {
   color: green;
   display: block;
   font-weight: normal;
-  float: right;
-  text-align: right;
 }
 ul.products li .price del {
   font-size: 10px;
@@ -386,6 +383,46 @@ input.button,
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
+  position: relative;
+  -webkit-transition: all ease-in-out 0.2s;
+  -moz-transition: all ease-in-out 0.2s;
+  -o-transition: all ease-in-out 0.2s;
+  transition: all ease-in-out 0.2s;
+}
+a.button.loading,
+button.button.loading,
+input.button.loading,
+#review_form #submit.loading {
+  filter: alpha(opacity=@opacity * 100);
+  -moz-opacity: 0.5;
+  -khtml-opacity: 0.5;
+  opacity: 0.5;
+}
+a.button.loading:before,
+button.button.loading:before,
+input.button.loading:before,
+#review_form #submit.loading:before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  top: 0.35em;
+  right: -26px;
+  text-indent: 0;
+  background: url(../images/ajax-loader.gif) no-repeat;
+}
+a.button.added:before,
+button.button.added:before,
+input.button.added:before,
+#review_form #submit.added:before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  top: 0.35em;
+  right: -26px;
+  text-indent: 0;
+  background: url(../images/success.gif) no-repeat;
 }
 a.button:hover,
 button.button:hover,

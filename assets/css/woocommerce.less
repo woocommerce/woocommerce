@@ -45,6 +45,13 @@ border-top-left-radius: @radius;
 border-top-right-radius: @radius;
 }
 
+.opacity(@opacity:0.75) {
+filter:~"alpha(opacity=@opacity * 100)";
+-moz-opacity:@opacity;
+-khtml-opacity: @opacity;
+opacity: @opacity;
+}
+
 .box_shadow(@shadow_x:3px, @shadow_y:3px, @shadow_rad:3px, @shadow_in:3px, @shadow_color:#888) {
 box-shadow:@shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
 -webkit-box-shadow:@shadow_x @shadow_y @shadow_rad @shadow_in @shadow_color;
@@ -331,7 +338,6 @@ span.onsale {
 	margin: 0 0 14px;
 	padding: 0;
 	list-style: none;
-	float: left;
 }
 
 .related, .upsells.products {
@@ -390,8 +396,6 @@ ul.products {
 			color: green;
 			display: block;
 			font-weight: normal;
-			float: right;
-			text-align: right;
 			del {
 				font-size: 10px;
 				line-height: 10px;
@@ -438,11 +442,41 @@ a.button, button.button, input.button, #review_form #submit {
 	cursor: pointer;
 	font-family: inherit;
 	.border_radius(3px);
-}
-
-a.button:hover, button.button:hover, input.button:hover, #review_form #submit:hover {
-	background: #ff9933;
-	text-decoration: none;
+	position: relative;
+	.transition();
+	
+	&.loading {
+		.opacity(0.5);
+				
+		&:before {
+			content:"";
+			position: absolute;
+			height:16px;
+			width:16px;
+			top:0.35em;
+			right:-26px;
+			text-indent: 0;
+			background: url(../images/ajax-loader.gif) no-repeat;
+		}
+	}
+	
+	&.added {
+		&:before {
+			content:"";
+			position: absolute;
+			height:16px;
+			width:16px;
+			top:0.35em;
+			right:-26px;
+			text-indent: 0;
+			background: url(../images/success.gif) no-repeat;
+		}
+	}
+	
+	&:hover {
+		background: #ff9933;
+		text-decoration: none;
+	}
 }
 
 .cart .button, .cart input.button {
