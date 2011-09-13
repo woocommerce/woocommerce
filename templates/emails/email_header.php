@@ -39,6 +39,7 @@
 				margin-bottom:10px;
 				margin-left:0;
 				text-align:left;
+				line-height: 1.5;
 			}
 
 			h2, .h2{
@@ -53,6 +54,7 @@
 				margin-bottom:10px;
 				margin-left:0;
 				text-align:left;
+				line-height: 1.5;
 			}
 
 			h3, .h3{
@@ -67,6 +69,7 @@
 				margin-bottom:10px;
 				margin-left:0;
 				text-align:left;
+				line-height: 1.5;
 			}
 
 			h4, .h4{
@@ -81,6 +84,7 @@
 				margin-bottom:10px;
 				margin-left:0;
 				text-align:left;
+				line-height: 1.5;
 			}
 
 			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: HEADER /\/\/\/\/\/\/\/\/\/\ */
@@ -107,6 +111,7 @@
 				color:#fff;
 				margin:0;
 				text-shadow:0 1px 0 #436380;
+				line-height: 1.5;
 			}
 
 			.headerContent a:link, .headerContent a:visited{
