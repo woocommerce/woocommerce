@@ -714,13 +714,13 @@ function woocommerce_download_product() {
             // Serve it
             if ($remote_file) :
             	
-            	@readfile("$file_path") or header('Location: '.$file_path);
+            	@readfile_chunked("$file_path") or header('Location: '.$file_path);
             	
             else :
             	
             	if (!file_exists($file_path)) wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
             	 
-            	@readfile("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+            	@readfile_chunked("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
 			
             endif;
             

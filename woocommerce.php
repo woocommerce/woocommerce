@@ -504,3 +504,40 @@ function woocommerce_exclude_order_comments( $clauses ) {
 
 }
 if (!is_admin()) add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+
+/**
+ * readfile_chunked
+ *
+ * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
+ *
+ * @access   public
+ * @param    string    file
+ * @param    boolean    return bytes of file
+ * @return   void
+ */
+if ( ! function_exists('readfile_chunked')) {
+    function readfile_chunked($file, $retbytes=TRUE) {
+    
+       $chunksize = 1 * (1024 * 1024);
+       $buffer = '';
+       $cnt = 0;
+
+       $handle = fopen($file, 'r');
+       if ($handle === FALSE) return FALSE;
+
+       while (!feof($handle)) :
+           $buffer = fread($handle, $chunksize);
+           echo $buffer;
+           ob_flush();
+           flush();
+
+           if ($retbytes) $cnt += strlen($buffer);
+       endwhile;
+
+       $status = fclose($handle);
+
+       if ($retbytes AND $status) return $cnt;
+
+       return $status;
+    }
+}
