@@ -52,8 +52,8 @@ function install_woocommerce() {
  * Sets up the default options used on the settings page
  */
 function woocommerce_default_options() {
-	global $options_settings;
-	foreach ($options_settings as $value) {
+	global $woocommerce_settings;
+	foreach ($woocommerce_settings as $value) {
 	
         if (isset($value['std'])) :
         
