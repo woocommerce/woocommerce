@@ -262,6 +262,27 @@ function woocommerce_custom_product_orderby( $vars ) {
 	return $vars;
 }
 
+/**
+ * Filter products by category
+ **/
+add_action('restrict_manage_posts','woocommerce_products_by_category');
+
+function woocommerce_products_by_category() {
+    global $typenow, $wp_query;
+    if ($typenow=='product') {
+
+			$terms = get_terms('product_cat');
+			$output = "<select name='product_cat' id='dropdown_product_cat'>";
+			$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
+			foreach($terms as $term){
+				$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
+			}
+			$output .="</select>";
+			echo $output;
+
+    }
+}
+
 
 /**
  * Columns for order page

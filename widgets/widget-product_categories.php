@@ -52,12 +52,9 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			$output = "<select name='product_cat' id='dropdown_product_cat'>";
 			$output .= '<option value="">'.__('Select Category', 'woothemes').'</option>';
 			foreach($terms as $term){
-				$root_url = get_bloginfo('url');
-				$term_taxonomy=$term->taxonomy;
 				$term_slug=$term->slug;
 				$term_name =$term->name;
-				$link = $term_slug;
-				$output .="<option value='".$link."'>".$term_name."</option>";
+				$output .="<option value='".$term_slug."'>".$term_name."</option>";
 			}
 			$output .="</select>";
 			echo $output;
