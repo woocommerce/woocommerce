@@ -169,11 +169,11 @@ class woocommerce_checkout {
 		endif;
 		
 		// Output billing form fields
-		do_action('woocommerce_before_checkout_billing_form');
+		do_action('woocommerce_before_checkout_billing_form', $this);
 		foreach ($this->billing_fields as $key => $field) :
 			$this->checkout_form_field( $key, $field );
 		endforeach;
-		do_action('woocommerce_after_checkout_billing_form');
+		do_action('woocommerce_after_checkout_billing_form', $this);
 		
 		// Registration Form Fields
 		if (!is_user_logged_in()) :
@@ -229,11 +229,11 @@ class woocommerce_checkout {
 			echo'<div class="shipping-address">';
 					
 				// Output shipping form fields
-				do_action('woocommerce_before_checkout_shipping_form');
+				do_action('woocommerce_before_checkout_shipping_form', $this);
 				foreach ($this->shipping_fields as $key => $field) :
 					$this->checkout_form_field( $key, $field );
 				endforeach;
-				do_action('woocommerce_after_checkout_shipping_form');
+				do_action('woocommerce_after_checkout_shipping_form', $this);
 								
 			echo '</div>';
 		

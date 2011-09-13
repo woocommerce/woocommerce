@@ -15,7 +15,7 @@ function get_woocommerce_checkout( $atts ) {
 }
 
 function woocommerce_checkout( $atts ) {
-	global $woocommerce;
+	global $woocommerce, $woocommerce_checkout;
 	
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
@@ -26,9 +26,9 @@ function woocommerce_checkout( $atts ) {
 	
 	$non_js_checkout = (isset($_POST['update_totals']) && $_POST['update_totals']) ? true : false;
 	
-	$_checkout = &new woocommerce_checkout();
+	$woocommerce_checkout = &new woocommerce_checkout();
 	
-	$_checkout->process_checkout();
+	$woocommerce_checkout->process_checkout();
 	
 	$result = $woocommerce->cart->check_cart_item_stock();
 	
