@@ -86,8 +86,8 @@
 			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: HEADER /\/\/\/\/\/\/\/\/\/\ */
 
 			#templateHeader{
-				background-color:#89b655;
-				background: -webkit-linear-gradient(#95be67, #89b655);
+				background-color:#557da1;
+				background: -webkit-linear-gradient(#7496b5, #557da1);
 				border-bottom:0;
 				-webkit-border-top-left-radius:6px;
 				-webkit-border-top-right-radius:6px;
@@ -106,7 +106,7 @@
 			.headerContent h1.h1 {
 				color:#fff;
 				margin:0;
-				text-shadow:0 1px 0 #215a6b;
+				text-shadow:0 1px 0 #436380;
 			}
 
 			.headerContent a:link, .headerContent a:visited{
@@ -195,7 +195,7 @@
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- // Begin Template Header \\ -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateHeader" style="background-color:#89b655; -webkit-border-top-left-radius:6px; -webkit-border-top-right-radius:6px; color:#202020; font-family:Arial; font-weight:bold; line-height:100%; vertical-align:middle;">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateHeader" style="background-color:#557da1; -webkit-border-top-left-radius:6px; -webkit-border-top-right-radius:6px; color:#202020; font-family:Arial; font-weight:bold; line-height:100%; vertical-align:middle;">
                                 	
                                         <tr>
                                             <td class="headerContent" style="padding:24px; ">

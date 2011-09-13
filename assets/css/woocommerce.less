@@ -166,7 +166,6 @@ div.product {
 	}
 	p.stock {
 		font-size: 0.92em;
-		float: left;
 		padding: 2px 0 0 0;
 	}
 	div.images {
@@ -264,7 +263,6 @@ div.product {
 
 .stock {
 	color: green;
-	float: left;
 }
 .out-of-stock {
 	color: red;
@@ -323,9 +321,9 @@ span.onsale {
 	position: absolute;
 	text-align: center;
 	line-height: 32px;
-	top:0;
-	right: 320px;
-	margin: -6px 0 0 0;
+	top:6px;
+	left: 6px;
+	margin:0;
 	.border_radius(20px);
 }
 
@@ -354,14 +352,17 @@ span.onsale {
 
 
 
-.products {
+ul.products {
 	clear: both;
+	margin-left:0;
+	padding-left:0;
 	li {
 		float: left;
 		margin: 0 3.8% 20px 0;
 		padding: 0;
 		position: relative;
 		width:22.05%;
+		margin-left:0;
 		.onsale {
 			top: 0;
 			right: 0;
@@ -506,11 +507,18 @@ a.button:hover, button.button:hover, input.button:hover, #review_form #submit:ho
 			overflow: hidden;
 			zoom: 1;
 			margin: 0;
+			width:100%;
+			background: none;
+			* {
+				background: none;
+			}
 			li {
 				padding: 00;
 				margin: 0 0 20px;
 				border: 0;
 				position: relative;
+				background: 0;
+				border:0;
 				.meta {
 					color: #999;
 					font-size: 0.75em;
@@ -709,6 +717,8 @@ ul.cart_list, ul.product_list_widget {
 			float: left;
 			margin-right: 4px;
 			border: 1px solid #ddd;
+			width:32px;
+			height: auto;
 		}
 	}
 }
@@ -791,6 +801,7 @@ td.quantity {
 	padding:1px 5px 2px;
 	line-height: 1em;
 	vertical-align: middle;
+	margin:0;
 }
 .quantity input.plus, .quantity input.minus {
 	background: #ccc;
@@ -800,9 +811,12 @@ td.quantity {
 	border:none; width:20px;
 	color:#fff;
 	cursor: pointer;
+	margin:0;
+	display:inline;
+	border:0;
 }
 .quantity input.minus { .border_radius_left(5px); }
-.quantity input.plus { .border_radius_right(5px); }
+.quantity input.plus { .border_radius_right(5px); float:none; }
 .quantity input.minus:hover, .quantity input.plus:hover { background: #f93; }
 
 .cart input {

@@ -97,7 +97,6 @@ div.product p.price del {
 }
 div.product p.stock {
   font-size: 0.92em;
-  float: left;
   padding: 2px 0 0 0;
 }
 div.product div.images {
@@ -208,7 +207,6 @@ div.product .woocommerce_tabs .panel {
 }
 .stock {
   color: green;
-  float: left;
 }
 .out-of-stock {
   color: red;
@@ -263,9 +261,9 @@ span.onsale {
   position: absolute;
   text-align: center;
   line-height: 32px;
-  top: 0;
-  right: 320px;
-  margin: -6px 0 0 0;
+  top: 6px;
+  left: 6px;
+  margin: 0;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
   border-radius: 20px;
@@ -299,64 +297,67 @@ span.onsale {
   width: 100%;
   height: auto;
 }
-.products {
+ul.products {
   clear: both;
+  margin-left: 0;
+  padding-left: 0;
 }
-.products li {
+ul.products li {
   float: left;
   margin: 0 3.8% 20px 0;
   padding: 0;
   position: relative;
   width: 22.05%;
+  margin-left: 0;
 }
-.products li .onsale {
+ul.products li .onsale {
   top: 0;
   right: 0;
   left: auto;
   margin: -6px -6px 0 0;
 }
-.products li a {
+ul.products li a {
   text-decoration: none;
 }
-.products li a img {
+ul.products li a img {
   width: 100%;
   height: auto;
   display: block;
   margin: 0 0 8px;
   border: 1px solid #ddd;
 }
-.products li a:hover img {
+ul.products li a:hover img {
   border: 1px solid #bbb;
 }
-.products li strong {
+ul.products li strong {
   color: #555;
   display: block;
 }
-.products li .price {
+ul.products li .price {
   color: green;
   display: block;
   font-weight: normal;
   float: right;
   text-align: right;
 }
-.products li .price del {
+ul.products li .price del {
   font-size: 10px;
   line-height: 10px;
   margin: -2px 0 0 0;
   display: block;
   color: #ccc;
 }
-.products li .price .from {
+ul.products li .price .from {
   font-size: 10px;
   line-height: 10px;
   margin: -2px 0 0 0;
   display: block;
   color: #ccc;
 }
-.products li.first {
+ul.products li.first {
   clear: both;
 }
-.products li.last {
+ul.products li.last {
   margin-right: 0;
 }
 .woocommerce_ordering {
@@ -453,12 +454,19 @@ input.button:hover,
   overflow: hidden;
   zoom: 1;
   margin: 0;
+  width: 100%;
+  background: none;
+}
+#reviews #comments ol.commentlist * {
+  background: none;
 }
 #reviews #comments ol.commentlist li {
   padding: 00;
   margin: 0 0 20px;
   border: 0;
   position: relative;
+  background: 0;
+  border: 0;
 }
 #reviews #comments ol.commentlist li .meta {
   color: #999;
@@ -659,6 +667,8 @@ ul.cart_list li img, ul.product_list_widget li img {
   float: left;
   margin-right: 4px;
   border: 1px solid #ddd;
+  width: 32px;
+  height: auto;
 }
 .widget_shopping_cart .total {
   border-top: 3px double #ddd;
@@ -734,6 +744,7 @@ td.quantity {
   padding: 1px 5px 2px;
   line-height: 1em;
   vertical-align: middle;
+  margin: 0;
 }
 .quantity input.plus, .quantity input.minus {
   background: #ccc;
@@ -744,6 +755,9 @@ td.quantity {
   width: 20px;
   color: #fff;
   cursor: pointer;
+  margin: 0;
+  display: inline;
+  border: 0;
 }
 .quantity input.minus {
   -webkit-border-top-left-radius: 5px;
@@ -760,6 +774,7 @@ td.quantity {
   -moz-border-radius-bottomright: 5px;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+  float: none;
 }
 .quantity input.minus:hover, .quantity input.plus:hover {
   background: #f93;
