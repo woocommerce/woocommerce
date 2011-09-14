@@ -25,12 +25,13 @@ class woocommerce_customer {
         		$state = '';
         	endif;
 			$data = array(
-				'country' => $country,
-				'state' => $state,
-				'postcode' => '',
-				'shipping_country' => $country,
-				'shipping_state' => $state,
-				'shipping_postcode' => ''
+				'country' 			=> $country,
+				'state' 			=> $state,
+				'postcode' 			=> '',
+				'shipping_country' 	=> $country,
+				'shipping_state' 	=> $state,
+				'shipping_postcode' => '',
+				'is_vat_exempt' 	=> false
 			);			
 			$_SESSION['customer'] = $data;
 			
@@ -54,6 +55,12 @@ class woocommerce_customer {
 			if ($country!==$_SESSION['customer']['country']) return true;
 			
 		endif;
+		return false;
+	}
+	
+	/** Is customer VAT exempt? */
+	function is_vat_exempt() {
+		if (isset($_SESSION['customer']['is_vat_exempt']) && $_SESSION['customer']['is_vat_exempt']) return true;
 		return false;
 	}
 	
@@ -137,6 +144,11 @@ class woocommerce_customer {
 	/** Sets session data for the postcode */
 	function set_shipping_postcode( $postcode ) {
 		$_SESSION['customer']['shipping_postcode'] = $postcode;
+	}
+	
+	/** Sets session data for the tax exemption */
+	function set_is_vat_exempt( $is_vat_exempt ) {
+		$_SESSION['customer']['is_vat_exempt'] = $is_vat_exempt;
 	}
 	
 	/**

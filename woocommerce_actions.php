@@ -36,7 +36,7 @@ function woocommerce_ajax_update_shipping_method() {
 	check_ajax_referer( 'update-shipping-method', 'security' );
 	
 	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
-
+	
 	$woocommerce->cart->calculate_totals();
 	
 	woocommerce_cart_totals();
@@ -63,20 +63,20 @@ function woocommerce_ajax_update_order_review() {
 		die();
 	endif;
 	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
+	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
 	
+	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
 	if (isset($_POST['country'])) $woocommerce->customer->set_country( $_POST['country'] );
 	if (isset($_POST['state'])) $woocommerce->customer->set_state( $_POST['state'] );
 	if (isset($_POST['postcode'])) $woocommerce->customer->set_postcode( $_POST['postcode'] );
-	
 	if (isset($_POST['s_country'])) $woocommerce->customer->set_shipping_country( $_POST['s_country'] );
 	if (isset($_POST['s_state'])) $woocommerce->customer->set_shipping_state( $_POST['s_state'] );
 	if (isset($_POST['s_postcode'])) $woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
 	
 	$woocommerce->cart->calculate_totals();
 	
-	do_action('woocommerce_checkout_order_review');
-	
+	do_action('woocommerce_checkout_order_review'); // Display review order table
+
 	die();
 }
 

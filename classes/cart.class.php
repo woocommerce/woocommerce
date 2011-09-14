@@ -425,6 +425,12 @@ class woocommerce_cart {
 			endif;
 		endforeach;
 		
+		// VAT excemption done at this point - so all totals are correct
+		if ($woocommerce->customer->is_vat_exempt()) :
+			$this->shipping_tax_total = 0;
+			$this->tax_total = 0;
+		endif;
+				
 		// Total
 		if (get_option('woocommerce_prices_include_tax')=='yes') :
 			$this->total = $this->subtotal + $this->shipping_tax_total - $this->discount_total + $woocommerce->shipping->shipping_total;

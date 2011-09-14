@@ -105,20 +105,18 @@ function woocommerce_get_products_in_view() {
 	$unfiltered_product_ids = array();
 	
 	// Get all visible posts, regardless of filters
-    $products = get_posts(
+    $unfiltered_product_ids = get_posts(
 		array_merge( 
 			$wp_query->query,
 			array(
-				'post_type' => 'product',
-				'numberposts' => -1,
-				'post_status' => 'publish',
-				'meta_query' => $woocommerce->query['meta_query']
+				'post_type' 	=> 'product',
+				'numberposts' 	=> -1,
+				'post_status' 	=> 'publish',
+				'meta_query' 	=> $woocommerce->query['meta_query'],
+				'fields' 		=> 'ids'
 			)
 		)
 	);
-	
-	// Add posts to array
-	foreach ($products as $p) $unfiltered_product_ids[] = $p->ID;
 	
 	// Store the variable
 	$woocommerce->query['unfiltered_product_ids'] = $unfiltered_product_ids;

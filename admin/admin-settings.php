@@ -481,7 +481,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	
 	array( 'type' 		=> 'tab', 'tabname' => __('Tax', 'woothemes') ),
 	
-	array(	'name' => __('Tax Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+	array(	'name' => __('Tax Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'tax_options' ),
 	
 	array(  
 		'name' => __('Calculate Taxes', 'woothemes'),
@@ -533,7 +533,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'std' 		=> ''
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'tax_options'),
 
 	array( 'type' => 'tabend'),
 	
