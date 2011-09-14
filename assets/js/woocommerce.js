@@ -55,8 +55,20 @@ jQuery(document).ready(function($) {
 				$(thisbutton).removeClass('loading');
 
 				// Cart widget load
-				$('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
-					
+				if ($('.widget_shopping_cart').size()>0) {
+					$('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
+						
+						// Replace fragments
+						if (fragments) {
+							$.each(fragments, function(key, value) {
+								$(key).replaceWith(value);
+							});
+						}
+						
+						// Unblock
+						$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
+					} );
+				} else {
 					// Replace fragments
 					if (fragments) {
 						$.each(fragments, function(key, value) {
@@ -66,7 +78,7 @@ jQuery(document).ready(function($) {
 					
 					// Unblock
 					$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
-				} );
+				}
 				
 				// Cart load
 				$('.shop_table.cart').load( window.location + ' .shop_table.cart:eq(0) > *', function() {
@@ -240,17 +252,17 @@ jQuery(document).ready(function($) {
 	});
 	
 	/* Shipping calculator */
-	$('.shipping-calculator-form').hide();
+	$('.shipping_calculator-form').hide();
 	
-	$('.shipping-calculator-button').click(function() {
-	  $('.shipping-calculator-form').slideToggle('slow', function() {
+	$('.shipping_calculator-button').click(function() {
+	  $('.shipping_calculator-form').slideToggle('slow', function() {
 	    // Animation complete.
 	 });
 	}); 
 	
 	// Stop anchors moving the viewport
 
-	$(".shipping-calculator-button").click(function() {return false;});
+	$(".shipping_calculator-button").click(function() {return false;});
 	
 	// Variations
 	
@@ -425,19 +437,19 @@ jQuery(document).ready(function($) {
 		
 			var method = $('#shipping_method').val();
 			
-			var country 	= $('#billing-country').val();
-			var state 		= $('#billing-state').val();
-			var postcode 	= $('input#billing-postcode').val();
+			var country 	= $('#billing_country').val();
+			var state 		= $('#billing_state').val();
+			var postcode 	= $('input#billing_postcode').val();
 				
 			if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
-				var s_country 	= $('#billing-country').val();
-				var s_state 	= $('#billing-state').val();
-				var s_postcode 	= $('input#billing-postcode').val();
+				var s_country 	= $('#billing_country').val();
+				var s_state 	= $('#billing_state').val();
+				var s_postcode 	= $('input#billing_postcode').val();
 				
 			} else {
-				var s_country 	= $('#shipping-country').val();
-				var s_state 	= $('#shipping-state').val();
-				var s_postcode 	= $('input#shipping-postcode').val();
+				var s_country 	= $('#shipping_country').val();
+				var s_state 	= $('#shipping_state').val();
+				var s_postcode 	= $('input#shipping_postcode').val();
 			}
 			
 			$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
@@ -451,7 +463,8 @@ jQuery(document).ready(function($) {
 				postcode: 			postcode, 
 				s_country: 			s_country, 
 				s_state: 			s_state, 
-				s_postcode: 		s_postcode
+				s_postcode: 		s_postcode,
+				post_data:			$('form.checkout').serialize()
 			};
 				
 			$.post( woocommerce_params.ajax_url, data, function(response) {
@@ -472,12 +485,12 @@ jQuery(document).ready(function($) {
 				$('p.password').slideToggle();
 			});
 			
-			$('div.shipping-address').hide();
+			$('div.shipping_address').hide();
 			
 			$('#shiptobilling input').change(function(){
-				$('div.shipping-address').hide();
+				$('div.shipping_address').hide();
 				if (!$(this).is(':checked')) {
-					$('div.shipping-address').slideDown();
+					$('div.shipping_address').slideDown();
 				}
 			}).change();
 			
@@ -514,11 +527,11 @@ jQuery(document).ready(function($) {
 				clearTimeout(updateTimer);
 				update_checkout();
 			}).change();
-			$('input#billing-country, input#billing-state, #billing-postcode, input#shipping-country, input#shipping-state, #shipping-postcode').live('keydown', function(){
+			$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 				clearTimeout(updateTimer);
 				updateTimer = setTimeout("update_checkout()", '1000');
 			});
-			$('select#billing-country, select#billing-state, select#shipping-country, select#shipping-state, #shiptobilling input').live('change', function(){
+			$('select#billing_country, select#billing_state, select#shipping_country, select#shipping_state, #shiptobilling input, .update_totals_on_change').live('change', function(){
 				clearTimeout(updateTimer);
 				update_checkout();
 			});
