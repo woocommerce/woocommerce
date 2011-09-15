@@ -21,7 +21,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 
 	array( 'type' => 'tab', 'tabname' => __('General', 'woothemes') ),
 
-	array( 'name' => 'General Options', 'type' => 'title', 'desc' 		=> '' ),
+	array( 'name' => 'General Options', 'type' => 'title', 'desc' 		=> '', 'id' => 'general_options' ),
 
 	array(  
 		'name' => __('Base Country/Region', 'woothemes'),
@@ -103,13 +103,13 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'type' 		=> 'checkbox'
 	),
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
 	array( 'type' => 'tabend'),
 	
 	array( 'type' => 'tab', 'tabname' => __('Pages', 'woothemes') ),
 	
-	array( 'name' => 'Page setup', 'type' => 'title', 'desc' 		=> '' ),
+	array( 'name' => 'Page setup', 'type' => 'title', 'desc' 		=> '', 'id' => 'page_options' ),
 	
 	array(  
 		'name' => __('Shop Base Page', 'woothemes'),
@@ -215,7 +215,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'std' 		=> ''
 	),	
 	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'page_options'),
 	
 	array( 'type' => 'tabend'),
 	
