@@ -20,7 +20,7 @@ class free_shipping extends woocommerce_shipping_method {
 		$this->availability = get_option('woocommerce_free_shipping_availability');
 		$this->countries 	= get_option('woocommerce_free_shipping_countries');
 		
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_free_shipping_availability', 'all');
 		add_option('woocommerce_free_shipping_title', 'Free Shipping');
     } 

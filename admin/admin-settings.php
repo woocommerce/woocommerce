@@ -11,17 +11,13 @@
  */
 
 /**
- * $woocommerce_settings
- * 
- * This variable contains all the options used on the settings page
+ * Define settings for the WooCommerce settings pages
  */
 global $woocommerce_settings;
 
-$woocommerce_settings = apply_filters('woocommerce_settings', array(
+$woocommerce_settings['general'] = apply_filters('woocommerce_general_settings', array(
 
-	array( 'type' => 'tab', 'tabname' => __('General', 'woothemes') ),
-
-	array( 'name' => 'General Options', 'type' => 'title', 'desc' 		=> '', 'id' => 'general_options' ),
+	array( 'name' => 'General Options', 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
 
 	array(  
 		'name' => __('Base Country/Region', 'woothemes'),
@@ -104,11 +100,12 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' => 'tab', 'tabname' => __('Pages', 'woothemes') ),
-	
+
+)); // End general settings
+
+
+$woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
+
 	array( 'name' => 'Page setup', 'type' => 'title', 'desc' 		=> '', 'id' => 'page_options' ),
 	
 	array(  
@@ -216,11 +213,12 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	),	
 	
 	array( 'type' => 'sectionend', 'id' => 'page_options'),
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Catalog', 'woothemes') ),
-	
+
+)); // End pages settings
+
+
+$woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings', array(
+
 	array(	'name' => __('Catalog Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'catalog_options' ),
 
 	array(  
@@ -380,6 +378,11 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	
 	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
+)); // End catalog settings
+
+
+$woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settings', array(
+
 	array(	'name' => __('Inventory Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'inventory_options' ),
 	
 	array(  
@@ -436,12 +439,13 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'inventory_options'),
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Shipping', 'woothemes') ),
-	
-	array(	'name' => __('Shipping Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> '' ),
+
+)); // End inventory settings
+
+
+$woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings', array(
+
+	array(	'name' => __('Shipping Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'shipping_options' ),
 	
 	array(  
 		'name' 		=> __('Calculate shipping', 'woothemes'),
@@ -467,20 +471,13 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 		'type' 		=> 'checkbox'
 	),
 	
-	array( 'type' => 'sectionend'),
-	
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Shipping Methods', 'woothemes') ),
-	
-	array( 'type' => 'shipping_options'),
-	
-	array( 'type' => 'sectionend'),
+	array( 'type' => 'sectionend', 'id' => 'shipping_options'),
 
-	array( 'type' => 'tabend'),
-	
-	array( 'type' 		=> 'tab', 'tabname' => __('Tax', 'woothemes') ),
-	
+)); // End shipping settings
+
+
+$woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
+
 	array(	'name' => __('Tax Options', 'woothemes'), 'type' 		=> 'title','desc' 		=> '', 'id' 		=> 'tax_options' ),
 	
 	array(  
@@ -535,16 +532,7 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
 	
 	array( 'type' => 'sectionend', 'id' => 'tax_options'),
 
-	array( 'type' => 'tabend'),
-	
-	array( 'type' => 'tab', 'tabname' => __('Payment Gateways', 'woothemes') ),
-	
-	array( 'type' => 'gateway_options'),
-	
-	array( 'type' => 'tabend')
-
-) );
-
+)); // End tax settings
 
 /**
  * Settings page
@@ -552,12 +540,28 @@ $woocommerce_settings = apply_filters('woocommerce_settings', array(
  * Handles the display of the main woocommerce settings page in admin.
  */
 function woocommerce_settings() {
-    global $woocommerce_settings;
+    global $woocommerce, $woocommerce_settings;
     
-    if (woocommerce_update_options( $woocommerce_settings )) :
-    	do_action('woocommerce_update_options');
-        flush_rewrite_rules( false );
-        wp_redirect( add_query_arg('saved', 'true', admin_url('admin.php?page=woocommerce') ));
+    $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
+    
+    if(isset($_POST) && $_POST) :
+    	if (!wp_verify_nonce($_REQUEST['_wpnonce'], 'woocommerce-settings') ) die( __('Action failed. Please refresh the page and retry.', 'woothemes') ); 
+    	
+    	switch ($current_tab) :
+			case "general" :
+			case "pages" :
+			case "catalog" :
+			case "inventory" :
+			case "shipping" :
+			case "tax" :
+				woocommerce_update_options($woocommerce_settings[$current_tab]);
+			break;
+		endswitch;
+		
+		do_action( 'woocommerce_update_options' );
+		do_action( 'woocommerce_update_options_' . $current_tab );
+		flush_rewrite_rules( false );
+		wp_redirect( add_query_arg('saved', 'true', admin_url('admin.php?page=woocommerce&tab=' . $current_tab ) ));
     endif;
     
     if (isset($_GET['saved']) && $_GET['saved']) :
@@ -569,19 +573,135 @@ function woocommerce_settings() {
 		<form method="post" id="mainform" action="">
 			<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 				<?php
-				$counter = 1;
-			    foreach ($woocommerce_settings as $value) {
-					if ( 'tab' == $value['type'] ) :
-			            echo '<a href="#'.$value['type'].$counter.'" class="nav-tab">'.$value['tabname'].'</a>';
-			            $counter++;
-					endif;
-			    }
+					$tabs = array(
+						'general' => __('General', 'woothemes'),
+						'pages' => __('Pages', 'woothemes'),
+						'catalog' => __('Catalog', 'woothemes'),
+						'inventory' => __('Inventory', 'woothemes'),
+						'shipping' => __('Shipping', 'woothemes'),
+						'tax' => __('Tax', 'woothemes'),
+						'shipping_methods' => __('Shipping Methods', 'woothemes'),
+						'payment_gateways' => __('Payment Gateways', 'woothemes')
+					);
+					foreach ($tabs as $name => $label) :
+						echo '<a href="'.admin_url('admin.php?page=woocommerce&tab='.$name).'" class="nav-tab ';
+						if($current_tab==$name) echo 'nav-tab-active';
+						echo '">'.$label.'</a>';
+					endforeach;
 				?>
+				<?php do_action('woocommerce_settings_tabs'); ?>
 			</h2>
 			<?php wp_nonce_field('woocommerce-settings', '_wpnonce', true, true); ?>
-	        <?php woocommerce_admin_fields($woocommerce_settings); ?>
+			<?php
+				switch ($current_tab) :
+					case "general" :
+					case "pages" :
+					case "catalog" :
+					case "inventory" :
+					case "shipping" :
+					case "tax" :
+						woocommerce_admin_fields($woocommerce_settings[$current_tab]);
+					break;
+					case "shipping_methods" : 	
+						
+						$links = array();
+		            	
+		            	foreach ($woocommerce->shipping->shipping_methods as $method) :
+		            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
+		            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
+						endforeach;
+						
+						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+		            
+		            	foreach ($woocommerce->shipping->shipping_methods as $method) :
+		            		echo '<div class="section" id="shipping-'.$method->id.'">';
+		            		$method->admin_options();
+		            		echo '</div>';
+		            	endforeach; 
+		            	
+		            	echo '</div>';
+            	
+					break;
+					case "payment_gateways" : 	
+					
+						$links = array();
+            	
+		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
+		            		$title = ($gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
+		            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
+						endforeach;
+						
+						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+		            
+		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
+		            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
+		            		$gateway->admin_options();
+		            		echo '</div>';
+		            	endforeach; 
+		            	
+		            	echo '</div>';
+            	
+					break;
+					default :
+						do_action( 'woocommerce_settings_tabs_' . $current_tab );
+					break;
+				endswitch;
+			?>
 	        <p class="submit"><input name="save" class="button-primary" type="submit" value="<?php _e('Save changes', 'woothemes') ?>" /></p>
 		</form>
+		
+		<script type="text/javascript">
+
+			// Subsubsub tabs
+			jQuery('ul.subsubsub li a:eq(0)').addClass('current');
+			jQuery('.subsubsub_section .section:gt(0)').hide();
+			
+			jQuery('ul.subsubsub li a').click(function(){
+				jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
+				jQuery(this).addClass('current');
+				jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
+				jQuery( jQuery(this).attr('href') ).show();
+				return false;
+			});
+			
+			// Countries
+			jQuery('select#woocommerce_allowed_countries').change(function(){
+				if (jQuery(this).val()=="specific") {
+					jQuery(this).parent().parent().next('tr.multi_select_countries').show();
+				} else {
+					jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
+				}
+			}).change();
+			
+			// Country Multiselect boxes
+			jQuery(".country_multiselect").multiselect({
+				noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
+				selectedList: 4
+			});
+			
+			// Edit prompt
+			jQuery(function(){
+				var changed = false;
+				
+				jQuery('input, textarea, select, checkbox').change(function(){
+					changed = true;
+				});
+				
+				jQuery('.woo-nav-tab-wrapper a').click(function(){
+					if (changed) {
+						window.onbeforeunload = function() {
+						    return '<?php echo __('The changes you made will be lost if you navigate away from this page.', 'woothemes'); ?>';
+						}
+					} else {
+						window.onbeforeunload = '';
+					}
+				});
+				
+				jQuery('.submit input').click(function(){
+					window.onbeforeunload = '';
+				});
+			});
+		</script>
 	</div>
 	<?php
 }

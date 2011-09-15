@@ -34,13 +34,8 @@ function install_woocommerce() {
 	woocommerce_tables_install();
 	woocommerce_default_taxonomies();
 	
-	// Clear cron
-	wp_clear_scheduled_hook('woocommerce_update_sale_prices_schedule_check');
-	update_option('woocommerce_update_sale_prices', 'no');
-	
 	// Flush Rules
-	global $wp_rewrite;
-	$wp_rewrite->flush_rules();
+	flush_rewrite_rules( false );
 	
 	// Update version
 	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );

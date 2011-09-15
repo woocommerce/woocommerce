@@ -20,7 +20,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		$this->title 			= get_option('woocommerce_cheque_title');
 		$this->description 		= get_option('woocommerce_cheque_description');
 
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_cheque_enabled', 'yes');
 		add_option('woocommerce_cheque_title', __('Cheque Payment', 'woothemes') );
 		add_option('woocommerce_cheque_description', __('Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woothemes'));

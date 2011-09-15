@@ -26,7 +26,7 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		$this->iban             = get_option('woocommerce_bacs_iban');
 		$this->bic              = get_option('woocommerce_bacs_bic');    
 		
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_bacs_enabled', 'no');
 		add_option('woocommerce_bacs_title', __('Direct Bank Transer', 'woothemes'));
 		add_option('woocommerce_bacs_description', __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woothemes'));

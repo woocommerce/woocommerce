@@ -30,7 +30,7 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 		
 		add_action('valid-moneybookers-status-report', array(&$this, 'successful_request') );
 		
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_moneybookers_enabled', 'yes');
 		add_option('woocommerce_moneybookers_email', '');
 		add_option('woocommerce_moneybookers_title', 'moneybookers');

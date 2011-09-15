@@ -23,7 +23,7 @@ class flat_rate extends woocommerce_shipping_method {
 		$this->cost 		= get_option('woocommerce_flat_rate_cost');
 		$this->fee 			= get_option('woocommerce_flat_rate_handling_fee'); 
 		
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_flat_rate_availability', 'all');
 		add_option('woocommerce_flat_rate_title', 'Flat Rate');
 		add_option('woocommerce_flat_rate_tax_status', 'taxable');

@@ -31,7 +31,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		add_action( 'init', array(&$this, 'check_ipn_response') );
 		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
 		
-		add_action('woocommerce_update_options', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		add_option('woocommerce_paypal_enabled', 'yes');
 		add_option('woocommerce_paypal_email', '');
 		add_option('woocommerce_paypal_title', __('PayPal', 'woothemes') );

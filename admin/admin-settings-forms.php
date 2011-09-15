@@ -15,9 +15,7 @@
 function woocommerce_update_options($options) {
     
     if(!isset($_POST) || !$_POST) return false;
-    
-    if (!wp_verify_nonce($_REQUEST['_wpnonce'], 'woocommerce-settings') ) die( __('Action failed. Please refresh the page and retry.', 'woothemes') ); 
-    
+
     foreach ($options as $value) {
     	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
     		
@@ -128,12 +126,8 @@ function woocommerce_update_options($options) {
 function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
-    $counter = 1;
     foreach ($options as $value) :
         switch($value['type']) :
-            case 'tab':
-                echo '<div id="'.$value['type'].$counter.'" class="panel">';
-            break;
             case 'title':
             	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
             	if (isset($value['desc']) && $value['desc']) echo wpautop(wptexturize($value['desc']));
@@ -204,10 +198,6 @@ function woocommerce_admin_fields($options) {
                         <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>"><?php if (get_option($value['id'])) echo stripslashes(get_option($value['id'])); else echo $value['std']; ?></textarea> <span class="description"><?php echo $value['desc'] ?></span>
                     </td>
                 </tr><?php
-            break;
-            case 'tabend':
-				echo '</div>';
-                $counter++;
             break;
             case 'single_select_page' :
             	$page_setting = (int) get_option($value['id']);
@@ -338,107 +328,6 @@ function woocommerce_admin_fields($options) {
                 </tr>
                 <?php
             break;
-            case "shipping_options" :
-            
-            	$links = array();
-            	
-            	foreach ($woocommerce->shipping->shipping_methods as $method) :
-            		
-            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
-            		
-            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
-				
-				endforeach;
-				
-				echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
-            
-            	foreach ($woocommerce->shipping->shipping_methods as $method) :
-            		
-            		echo '<div class="section" id="shipping-'.$method->id.'">';
-            		$method->admin_options();
-            		echo '</div>';
-            		
-            	endforeach; 
-            	
-            	echo '</div>';
-            	          
-            break;
-            case "gateway_options" :
-            	
-            	$links = array();
-            	
-            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
-            		
-            		$title = ($gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
-            		
-            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
-				
-				endforeach;
-				
-				echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
-            
-            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
-            		
-            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
-            		$gateway->admin_options();
-            		echo '</div>';
-            		
-            	endforeach; 
-            	
-            	echo '</div>';
-            	           
-            break;
-            default :
-            	do_action('woocommerce_settings_field_type_' . $value['type']);
-            break;
         endswitch;
     endforeach;
-	?>
-	<script type="text/javascript">
-
-	    // Tabs
-		jQuery('.woo-nav-tab-wrapper a:first').addClass('nav-tab-active');
-		jQuery('div.panel:not(div.panel:first)').hide();
-		jQuery('.woo-nav-tab-wrapper a').click(function(){
-			jQuery('.woo-nav-tab-wrapper a').removeClass('nav-tab-active');
-			jQuery(this).addClass('nav-tab-active');
-			jQuery('div.panel').hide();
-			jQuery( jQuery(this).attr('href') ).show();
-			jQuery.cookie('woocommerce_settings_tab_index', jQuery(this).index('.woo-nav-tab-wrapper a'))
-			return false;
-		});
-		
-		<?php if (isset($_COOKIE['woocommerce_settings_tab_index']) && $_COOKIE['woocommerce_settings_tab_index'] > 0) : ?>
-			jQuery('.woo-nav-tab-wrapper a:eq(<?php echo $_COOKIE['woocommerce_settings_tab_index']; ?>)').click();
-		<?php endif; ?>
-		
-		// Subsubsub tabs
-		jQuery('ul.subsubsub li a').click(function(){
-			jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
-			jQuery(this).addClass('current');
-			jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
-			jQuery( jQuery(this).attr('href') ).show();
-			return false;
-		});
-		jQuery('ul.subsubsub').each(function(){
-			jQuery('li a:eq(0)', jQuery(this)).click();
-		});
-		
-		// Countries
-		jQuery('select#woocommerce_allowed_countries').change(function(){
-			if (jQuery(this).val()=="specific") {
-				jQuery(this).parent().parent().next('tr.multi_select_countries').show();
-			} else {
-				jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
-			}
-		}).change();
-		
-		// Country Multiselect boxes
-		jQuery(".country_multiselect").multiselect({
-			noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
-			selectedList: 4
-		});
-		
-	</script>
-	<?php
 }
