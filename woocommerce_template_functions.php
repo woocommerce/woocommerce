@@ -57,7 +57,12 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 	
 		// No price set - so no button
 		if( $_product->get_price() === '') return;
-			
+		
+		if (!$_product->is_in_stock()) :
+			echo '<a href="'.get_permalink($post->ID).'" class="button">'.__('Read More', 'woothemes').'</a>';
+			return;
+		endif;
+		
 		?><a href="<?php echo $_product->add_to_cart_url(); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php
 			switch ($_product->product_type) :
 				case "variable" :
@@ -261,6 +266,9 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		if( $_product->get_price() === '') return;
 
 		if ($availability['availability']) : ?><p class="stock <?php echo $availability['class'] ?>"><?php echo $availability['availability']; ?></p><?php endif;
+		
+		// Don't show cart if out of stock
+		if (!$_product->is_in_stock()) return;
 		?>			
 		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
 		 	<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
@@ -287,6 +295,8 @@ if (!function_exists('woocommerce_downloadable_add_to_cart')) {
 		
 		if ($availability['availability']) : ?><p class="stock <?php echo $availability['class'] ?>"><?php echo $availability['availability']; ?></p><?php endif;
 		
+		// Don't show cart if out of stock
+		if (!$_product->is_in_stock()) return;
 		?>						
 		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
 			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
