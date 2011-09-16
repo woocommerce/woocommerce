@@ -26,8 +26,10 @@ jQuery(function(){
 	
 	for (var i = 0; i < d.length; ++i) d[i][0] += 60 * 60 * 1000;
     for (var i = 0; i < d2.length; ++i) d2[i][0] += 60 * 60 * 1000;
-
-	var plot = jQuery.plot(jQuery("#placeholder"), [ { label: "Number of sales", data: d }, { label: "Sales amount", data: d2, yaxis: 2 } ], {
+	
+	var placeholder = jQuery("#placeholder");
+	 
+	var plot = jQuery.plot(placeholder, [ { label: "Number of sales", data: d }, { label: "Sales amount", data: d2, yaxis: 2 } ], {
 		series: {
 			lines: { show: true },
 			points: { show: true }
@@ -50,8 +52,10 @@ jQuery(function(){
 			minTickSize: [1, "day"]
 		},
 		yaxes: [ { min: 0, tickSize: 1, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
-   		colors: ["#21759B", "#ed8432"]
+   		colors: ["#8a4b75", "#47a03e"]
  	});
+ 	
+ 	placeholder.resize();
      
 	function showTooltip(x, y, contents) {
         jQuery('<div id="tooltip">' + contents + '</div>').css( {

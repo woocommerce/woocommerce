@@ -151,10 +151,10 @@ function woocommerce_init_dashboard_widgets() {
 	$sales_heading = '';
 	
 	if ($current_month_offset!=date('m')) : 
-		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.__('Next Month &rarr;', 'woo themes').'</a>';
+		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($current_month_offset+1).'-2011')).__('  &rarr;', 'woo themes').'</a>';
 	endif;
 	
-	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">'.__('&larr; Previous Month', 'woo themes').'</a><span>'.__('Monthly Sales', 'woothemes').'</span>';
+	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">'.__('&larr; ', 'woo themes').date('F', strtotime('01-'.($current_month_offset-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woothemes').'</span>';
 
 	wp_add_dashboard_widget('woocommmerce_dashboard_sales', $sales_heading, 'woocommmerce_dashboard_sales');
 	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woothemes'), 'woocommmerce_dashboard_recent_orders');
@@ -361,10 +361,12 @@ function woocommmerce_dashboard_sales_js() {
 	
 	wp_register_script( 'woocommerce_dashboard_sales', $woocommerce->plugin_url() . '/assets/js/admin/dashboard_sales'.$suffix.'.js', 'jquery', '1.0' );
 	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
 	
 	wp_localize_script( 'woocommerce_dashboard_sales', 'params', $params );
 	
 	wp_print_scripts('flot');
+	wp_print_scripts('flot-resize');
 	wp_print_scripts('woocommerce_dashboard_sales');
 	
 }
