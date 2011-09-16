@@ -79,8 +79,8 @@ function woocommerce_parse_query( $q ) {
     $q->set( 'posts_per_page', apply_filters('loop_shop_per_page', get_option('posts_per_page')) );
     
     // Store variables
-    $woocommerce->query['post__in'] = $post__in;
-    $woocommerce->query['meta_query'] = $meta_query;
+    $woocommerce->query->post__in = $post__in;
+    $woocommerce->query->meta_query = $meta_query;
 
     // We're on a shop page so queue the woocommerce_get_products_in_view function
     add_action('wp', 'woocommerce_get_products_in_view', 2);
@@ -112,26 +112,26 @@ function woocommerce_get_products_in_view() {
 				'post_type' 	=> 'product',
 				'numberposts' 	=> -1,
 				'post_status' 	=> 'publish',
-				'meta_query' 	=> $woocommerce->query['meta_query'],
+				'meta_query' 	=> $woocommerce->query->meta_query,
 				'fields' 		=> 'ids'
 			)
 		)
 	);
 	
 	// Store the variable
-	$woocommerce->query['unfiltered_product_ids'] = $unfiltered_product_ids;
+	$woocommerce->query->unfiltered_product_ids = $unfiltered_product_ids;
 	
 	// Also store filtered posts ids...
-	if (sizeof($woocommerce->query['post__in'])>0) :
-		$woocommerce->query['filtered_product_ids'] = array_intersect($woocommerce->query['unfiltered_product_ids'], $woocommerce->query['post__in']);
+	if (sizeof($woocommerce->query->post__in)>0) :
+		$woocommerce->query->filtered_product_ids = array_intersect($woocommerce->query->unfiltered_product_ids, $woocommerce->query->post__in);
 	else :
-		$woocommerce->query['filtered_product_ids'] = $woocommerce->query['unfiltered_product_ids'];
+		$woocommerce->query->filtered_product_ids = $woocommerce->query->unfiltered_product_ids;
 	endif;
 	
 	// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
-	if (sizeof($woocommerce->query['layered_nav_post__in'])>0) :
-		$woocommerce->query['layered_nav_product_ids'] = array_intersect($woocommerce->query['unfiltered_product_ids'], $woocommerce->query['layered_nav_post__in']);
+	if (sizeof($woocommerce->query->layered_nav_post__in)>0) :
+		$woocommerce->query->layered_nav_product_ids = array_intersect($woocommerce->query->unfiltered_product_ids, $woocommerce->query->layered_nav_post__in);
 	else :
-		$woocommerce->query['layered_nav_product_ids'] = $woocommerce->query['unfiltered_product_ids'];
+		$woocommerce->query->layered_nav_product_ids = $woocommerce->query->unfiltered_product_ids;
 	endif;
 }

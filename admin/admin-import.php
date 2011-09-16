@@ -71,8 +71,6 @@ function woocommerce_import_start() {
 							            'rewrite' => array( 'slug' => strtolower(sanitize_title($nicename)), 'with_front' => false, 'hierarchical' => true ),
 							        )
 							    );
-			
-								update_option('woocommerce_update_rewrite_rules', '1');
 								
 							endif;
 							

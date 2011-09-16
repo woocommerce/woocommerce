@@ -18,6 +18,7 @@ function woocommerce_admin_init() {
 	include_once( 'admin-dashboard.php' );
 	include_once( 'admin-import.php' );
 	include_once( 'admin-post-types.php' );
+	include_once( 'admin-taxonomies.php' );
 	include_once( 'writepanels/writepanels-init.php' );	
 }
 add_action('admin_init', 'woocommerce_admin_init');

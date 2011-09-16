@@ -15,9 +15,9 @@ class woocommerce {
 	var $attribute_taxonomies; // Stores the attribute taxonomies used in the store
 	var $plugin_url;
 	var $plugin_path;
-	var $query;
 	
 	// Class instances
+	var $query;
 	var $customer;
 	var $shipping;
 	var $cart;
@@ -28,6 +28,7 @@ class woocommerce {
 	function __construct() {
 		
 		// Load class instances
+		$this->query			= &new woocommerce_query();				// Query class, handles front-end queries and loops
 		$this->customer 		= &new woocommerce_customer();			// Customer class, sorts out session data such as location
 		$this->shipping 		= &new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
 		$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
@@ -36,16 +37,6 @@ class woocommerce {
 		
 		// Load messages
 		$this->load_messages();
-		
-		// Define query vars
-		$this->query = array(
-			'unfiltered_product_ids' 	=> array(), // Unfilted product ids (before layered nav etc)
-			'filtered_product_ids' 		=> array(), // Filted product ids (after layered nav)
-			'post__in' 					=> array(), // Product id's that match the layered nav + price filter
-			'meta_query' 				=> '', 		// The meta query for the page
-			'layered_nav_post__in' 		=> array(), // posts matching layered nav only
-			'layered_nav_product_ids' 	=> array() 	// Stores posts matching layered nav, so price filter can find max price in view
-		);
 		
 		// Hooks
 		add_filter('wp_redirect', array(&$this, 'redirect'), 1, 2);

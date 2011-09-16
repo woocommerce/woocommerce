@@ -25,23 +25,6 @@ if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0");
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
 
 /**
- * Include core files
- **/
-include_once( 'woocommerce_taxonomy.php' );
-include_once( 'classes/woocommerce.class.php' );
-include_once( 'widgets/widgets-init.php' );
-include_once( 'shortcodes/shortcodes-init.php' );
-include_once( 'woocommerce_actions.php' );
-include_once( 'woocommerce_emails.php' );
-include_once( 'woocommerce_query.php' );
-include_once( 'woocommerce_template_actions.php' );
-include_once( 'woocommerce_templates.php' );
-include_once( 'classes/gateways/gateways.class.php' );
-include_once( 'classes/gateways/gateway.class.php' );
-include_once( 'classes/shipping/shipping.class.php' );
-include_once( 'classes/shipping/shipping_method.class.php' );
-	
-/**
  * Include admin area
  **/
 if (is_admin()) :
@@ -57,8 +40,19 @@ if (is_admin()) :
 endif;
 
 /**
- * Include classes
- */
+ * Include core files
+ **/
+include_once( 'woocommerce_taxonomy.php' );
+include_once( 'widgets/widgets-init.php' );
+include_once( 'shortcodes/shortcodes-init.php' );
+include_once( 'woocommerce_actions.php' );
+include_once( 'woocommerce_emails.php' );
+include_once( 'woocommerce_template_actions.php' );
+include_once( 'woocommerce_templates.php' );
+include_once( 'classes/gateways/gateways.class.php' );
+include_once( 'classes/gateways/gateway.class.php' );
+include_once( 'classes/shipping/shipping.class.php' );
+include_once( 'classes/shipping/shipping_method.class.php' );
 include_once( 'classes/cart.class.php' );
 include_once( 'classes/checkout.class.php' );
 include_once( 'classes/countries.class.php' );
@@ -70,6 +64,8 @@ include_once( 'classes/product.class.php' );
 include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
 include_once( 'classes/validation.class.php' ); 
+include_once( 'classes/woocommerce_query.class.php' );
+include_once( 'classes/woocommerce.class.php' );
 
 /**
  * Include core shipping modules

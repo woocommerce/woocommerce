@@ -2,7 +2,7 @@
 /**
  * Functions used for custom post types in admin 
  *
- * These functions control columns in admin, and other admin interface bits 
+ * These functions control columns in admin, and other admin interface bits.
  *
  * @author 		WooThemes
  * @category 	Admin

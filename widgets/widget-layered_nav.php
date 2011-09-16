@@ -66,8 +66,8 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 		
 		if ($filtered) :
 			
-			$woocommerce->query['layered_nav_post__in'] = $matched_products;
-			$woocommerce->query['layered_nav_post__in'][] = 0;
+			$woocommerce->query->layered_nav_post__in = $matched_products;
+			$woocommerce->query->layered_nav_post__in[] = 0;
 			
 			if (sizeof($filtered_posts)==0) :
 				$filtered_posts = $matched_products;
@@ -147,7 +147,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			
 				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
 				
-				$count = sizeof(array_intersect($_products_in_term, $woocommerce->query['filtered_product_ids']));
+				$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
 
 				if ($count>0) $found = true;
 				

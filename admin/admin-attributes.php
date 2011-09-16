@@ -28,9 +28,7 @@ function woocommerce_attributes() {
 		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_taxonomy_name($attribute_name) )) :
 		
 			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
-			
-			update_option('woocommerce_update_rewrite_rules', '1');
-			
+						
 			wp_safe_redirect( get_admin_url() . 'admin.php?page=attributes' );
 			exit;
 			

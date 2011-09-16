@@ -132,9 +132,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		FROM $wpdb->posts
 		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 		WHERE meta_key = 'price' AND (
-			$wpdb->posts.ID IN (".implode(',', $woocommerce->query['layered_nav_product_ids']).") 
+			$wpdb->posts.ID IN (".implode(',', $woocommerce->query->layered_nav_product_ids).") 
 			OR (
-				$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query['layered_nav_product_ids']).")
+				$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")
 				AND $wpdb->posts.post_parent != 0
 			)
 		)"));
