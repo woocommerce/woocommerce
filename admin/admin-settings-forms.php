@@ -15,7 +15,10 @@
 function woocommerce_update_options($options) {
     
     if(!isset($_POST) || !$_POST) return false;
-
+	
+	// Nonce security check.
+	check_admin_referer( 'woocommerce_admin_fields' );
+	
     foreach ($options as $value) {
     	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
     		
@@ -125,6 +128,9 @@ function woocommerce_update_options($options) {
  */
 function woocommerce_admin_fields($options) {
 	global $woocommerce;
+	
+	// Nonce security field.
+	wp_nonce_field( 'woocommerce_admin_fields' );
 
     foreach ($options as $value) :
         switch($value['type']) :

@@ -14,18 +14,6 @@
  */
 
 /**
- * Add a table to $wpdb to benefit from wordpress meta api
- */
-add_action('init','taxonomy_metadata_wpdbfix');
-add_action('switch_blog','taxonomy_metadata_wpdbfix');
-
-function taxonomy_metadata_wpdbfix() {
-	global $wpdb;
-	$wpdb->woocommerce_termmeta = "{$wpdb->prefix}woocommerce_termmeta";
-}
-
-
-/**
  * Add product_cat ordering to get_terms
  * 
  * It enables the support a 'menu_order' parameter to get_terms for the product_cat taxonomy.

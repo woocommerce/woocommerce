@@ -4,6 +4,7 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- Add a table to $wpdb to benefit from the WordPress Metadata API
  *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
  *		- AJAX add to cart
@@ -23,6 +24,24 @@
  * @author		WooThemes
  */
 
+/**
+ * woocommerce_taxonomy_metadata_wpdbfix()
+ *
+ * Add a table to $wpdb to benefit from the WordPress Metadata API
+ *
+ * @since 1.0.0
+ * @uses $wpdb global
+ */
+add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+
+function woocommerce_taxonomy_metadata_wpdbfix() {
+	global $wpdb;
+	
+	$variable_name = 'woocommerce_termmeta';
+	$wpdb->$variable_name = $wpdb->prefix . $variable_name;	
+	$wpdb->tables[] = $variable_name;
+} // End woocommerce_taxonomy_metadata_wpdbfix()
 
 /**
  * AJAX update shipping method on cart page

@@ -627,7 +627,7 @@ function woocommerce_settings() {
 						$links = array();
             	
 		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
-		            		$title = ($gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
+		            		$title = ( isset( $gateway->method_title ) && $gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
 		            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
 						endforeach;
 						

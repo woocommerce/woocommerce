@@ -275,7 +275,9 @@ function woocommerce_products_by_category() {
 			$output = "<select name='product_cat' id='dropdown_product_cat'>";
 			$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
 			foreach($terms as $term){
-				$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
+				if ( isset( $wp_query->query['product_cat'] ) ) {
+					$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
+				}
 			}
 			$output .="</select>";
 			echo $output;
