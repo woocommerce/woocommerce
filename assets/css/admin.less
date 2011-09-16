@@ -51,6 +51,9 @@
 .icon32-posts-product_variation {
 	background-position: -533px -6px !important;
 }
+.icon32-woocommerce-reports {
+	background-position: -591px -6px !important;
+}
 
 /* Orders */
 .order_actions {
@@ -835,6 +838,64 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 	-khtml-border-radius:4px;
 	border-radius:4px;
     opacity: 0.80
+}
+
+/* Custom charts */
+table.bar_chart {
+	width: 100%;
+	thead th {
+		text-align: left;
+		color: #ccc;
+		padding: 6px 0;
+	}
+	tbody {
+		th {
+			padding: 6px 0;
+			width: 25%;
+			text-align: left !important;
+			font-weight: normal !important;
+			border-bottom: 1px solid #fee;
+		}
+		td {
+			position: relative;
+			text-align: left;
+			padding: 6px 0 6px 0;
+			border-bottom: 1px solid #fee;
+			span {
+				clear: both;
+				background: #8a4b75;
+				float: left;
+				display: block;
+				line-height: 24px;
+				height: 24px;
+				-moz-border-radius:4px;
+				-webkit-border-radius:4px;
+				-o-border-radius:4px;
+				-khtml-border-radius:4px;
+				border-radius:4px;
+				span {
+					position: absolute;
+					left: 8px;
+					color: #dec3d5;
+					font-size: 11px;
+					text-shadow: 0 1px 0 #8a4b75;
+					height: auto;
+					background: transparent;
+				}
+			}
+			span.alt {
+				clear: both;
+				background: #47a03e;
+				margin-top: 6px;
+				span {
+					margin: 0;
+					color: #c5dec2;
+					text-shadow: 0 1px 0 #47a03e;
+					background: transparent;
+				}
+			}
+		}
+	}
 }
 
 /* Multiselect

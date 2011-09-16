@@ -13,6 +13,7 @@
 .icon32-woocommerce-settings{background-position:-359px -6px !important;}
 .icon32-posts-shop_coupon{background-position:-475px -6px !important;}
 .icon32-posts-product_variation{background-position:-533px -6px !important;}
+.icon32-woocommerce-reports{background-position:-591px -6px !important;}
 .order_actions{color:#999;font-size:11px;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px;margin:0;line-height:1.6em;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}
 #woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .item_id{width:300px;vertical-align:top;}
@@ -156,6 +157,10 @@ img.tips{padding:5px 0 0 0;}
 #easyTooltip{padding:5px 10px;border:3px solid #3da5d5;background:#288ab7;color:#fff;font-size:12px;-moz-border-radius:4px;-webkit-border-radius:4px;-o-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;max-width:300px;}
 img.ui-datepicker-trigger{vertical-align:middle;margin-top:-1px;cursor:pointer;}
 #tooltip{color:#fff;font-size:12px;-moz-border-radius:4px;-webkit-border-radius:4px;-o-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;opacity:0.8;}
+table.bar_chart{width:100%;}table.bar_chart thead th{text-align:left;color:#ccc;padding:6px 0;}
+table.bar_chart tbody th{padding:6px 0;width:25%;text-align:left !important;font-weight:normal !important;border-bottom:1px solid #fee;}
+table.bar_chart tbody td{position:relative;text-align:left;padding:6px 0 6px 0;border-bottom:1px solid #fee;}table.bar_chart tbody td span{clear:both;background:#8a4b75;float:left;display:block;line-height:24px;height:24px;-moz-border-radius:4px;-webkit-border-radius:4px;-o-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;}table.bar_chart tbody td span span{position:absolute;left:8px;color:#dec3d5;font-size:11px;text-shadow:0 1px 0 #8a4b75;height:auto;background:transparent;}
+table.bar_chart tbody td span.alt{clear:both;background:#47a03e;margin-top:6px;}table.bar_chart tbody td span.alt span{margin:0;color:#c5dec2;text-shadow:0 1px 0 #47a03e;background:transparent;}
 .ui-multiselect{padding:3px 0 3px 4px;text-align:left;margin:1px;vertical-align:middle;height:24px;}
 .ui-multiselect span.ui-icon{float:right;}
 .ui-multiselect-single .ui-multiselect-checkboxes input{position:absolute !important;top:auto !important;left:-9999px;}
