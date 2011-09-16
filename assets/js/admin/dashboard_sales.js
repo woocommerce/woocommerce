@@ -63,10 +63,9 @@ jQuery(function(){
             display: 'none',
             top: y + 5,
             left: x + 5,
-            border: '1px solid #fdd',
-            padding: '2px',
-            'background-color': '#fee',
-            opacity: 0.80
+		    padding: '5px 10px',  
+			border: '3px solid #3da5d5',  
+			background: '#288ab7'
         }).appendTo("body").fadeIn(200);
     }
  

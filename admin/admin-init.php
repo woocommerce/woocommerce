@@ -29,9 +29,23 @@ add_action('admin_init', 'woocommerce_admin_init');
  */
 function woocommerce_admin_scripts() {
 	global $woocommerce;
+	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
     wp_enqueue_script('woocommerce_admin');
+    
+    $screen = get_current_screen();
+
+    if ($screen->id=='woocommerce_page_woocommerce_reports') :
+    
+	    wp_enqueue_script('jquery');
+		wp_enqueue_script('jquery-ui-core');
+		wp_enqueue_script('jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
+		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
+		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
+	
+	endif;
 }
 add_action('admin_print_scripts', 'woocommerce_admin_scripts');
 
