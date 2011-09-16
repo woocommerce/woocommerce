@@ -84,7 +84,7 @@ ul.recent-orders li .refunded,ul.recent-orders li .cancelled{color:#999;}
 #woocommmerce_dashboard_recent_reviews h4.meta{line-height:1.4;margin:-0.2em 0 0 0;font-weight:normal;color:#999;}
 #woocommmerce_dashboard_recent_reviews blockquote{padding:0;margin:0;}
 #woocommmerce_dashboard_recent_reviews .avatar{float:left;margin:0 10px 5px 0;}
-#woocommmerce_dashboard_recent_reviews .star-rating{float:right;width:80px;height:16px;background:url(../images/star.png) repeat-x left 0;}#woocommmerce_dashboard_recent_reviews .star-rating span{background:url(../images/star.png) repeat-x left -32px;height:0;padding-top:16px;overflow:hidden;float:left;}
+#woocommmerce_dashboard_recent_reviews .star-rating{float:right;width:50px;height:10px;margin:3px 0 0 0;background:url(../images/admin-star.png) repeat-x left -10px;}#woocommmerce_dashboard_recent_reviews .star-rating span{background:url(../images/admin-star.png) repeat-x left 0;height:0;padding-top:10px;overflow:hidden;float:left;}
 .woocommerce table.shippingrows td,.woocommerce table.shippingrows th{vertical-align:middle;}
 .woocommerce table.shippingrows td a.remove{margin:0 !important;}
 div.taxrows .taxrow{padding-bottom:8px;}div.taxrows .taxrow select{width:125px;}

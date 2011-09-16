@@ -217,7 +217,7 @@ function woocommmerce_dashboard_recent_reviews() {
 			$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 			
 			echo '<div class="star-rating" title="'.$rating.'">
-				<span style="width:'.($rating*16).'px">'.$rating.' '.__('out of 5', 'woothemes').'</span></div>';
+				<span style="width:'.($rating*10).'px">'.$rating.' '.__('out of 5', 'woothemes').'</span></div>';
 				
 			echo '<h4 class="meta"><a href="'.get_permalink($comment->ID).'#comment-'.$comment->comment_ID .'">'.$comment->post_title.'</a> reviewed by ' .strip_tags($comment->comment_author) .'</h4>';
 			echo '<blockquote>'.strip_tags($comment->comment_excerpt).' [...]</blockquote></li>';

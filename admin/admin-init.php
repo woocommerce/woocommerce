@@ -18,6 +18,7 @@ function woocommerce_admin_init() {
 	include_once( 'admin-dashboard.php' );
 	include_once( 'admin-import.php' );
 	include_once( 'admin-post-types.php' );
+	include_once( 'admin-reports.php' );
 	include_once( 'admin-taxonomies.php' );
 	include_once( 'writepanels/writepanels-init.php' );	
 }
@@ -46,6 +47,7 @@ function woocommerce_admin_menu() {
 	
     add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
+    add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'attributes', 'woocommerce_attributes');
 }
 
