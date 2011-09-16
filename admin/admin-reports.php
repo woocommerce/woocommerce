@@ -15,6 +15,11 @@ function woocommerce_reports() {
 	$charts = array(
 		__('sales', 'woothemes') => array(
 			array(
+				'title' => __('Overview', 'woothemes'),
+				'description' => __('An overview of your sales/order data is shown below. For more detailed views, click on one of the above links.', 'woothemes'),
+				'function' => 'woocommerce_sales_overview'
+			),
+			array(
 				'title' => __('Daily Sales', 'woothemes'),
 				'description' => '',
 				'function' => 'woocommerce_daily_sales'
@@ -201,20 +206,113 @@ function orders_within_range( $where = '' ) {
 }
 
 /**
- * Daily sales chart
+ * Sales overview
  */
-function woocommerce_daily_sales() {
+function woocommerce_sales_overview() {
+
+	global $start_date, $end_date, $woocommerce, $wpdb;
 	
-	global $start_date, $end_date, $woocommerce;
+	$total_sales = 0;
+	$total_orders = 0;
+	$order_items = 0;
 	
-	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
-	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
+	$args = array(
+	    'numberposts'     => -1,
+	    'orderby'         => 'post_date',
+	    'order'           => 'DESC',
+	    'post_type'       => 'shop_order',
+	    'post_status'     => 'publish' ,
+	    'suppress_filters' => false,
+	    'tax_query' => array(
+	    	array(
+		    	'taxonomy' => 'shop_order_status',
+				'terms' => array('completed', 'processing', 'on-hold'),
+				'field' => 'slug',
+				'operator' => 'IN'
+			)
+	    )
+	);
+	$orders = get_posts( $args );
+	foreach ($orders as $order) :
+		$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
+		foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+		$total_sales += get_post_meta($order->ID, '_order_total', true);
+		$total_orders++;
+	endforeach;
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
-	if (!$end_date) $end_date = date('Ymd', strtotime('NOW'));
+	?>
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Total sales', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total orders', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woothemes').')'; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order total', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order items', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Last 5 orders', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<?php
+					if ($orders) :
+						$count = 0;
+						echo '<ul class="recent-orders">';
+						foreach ($orders as $order) :
+							
+							$this_order = &new woocommerce_order( $order->ID );
+							
+							if ($this_order->user_id > 0) :
+								$customer = get_user_by('id', $this_order->user_id);
+								$customer = $customer->user_login;
+							else :
+								$customer = __('Guest', 'woothemes');
+							endif;
+							
+							echo '
+							<li>
+								<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords($this_order->status).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">'.date_i18n('jS M Y (h:i A)', strtotime($this_order->order_date)).'</a><br />
+								<small>'.sizeof($this_order->items).' '._n('item', 'items', sizeof($this_order->items), 'woothemes').' <span class="order-cost">'.__('Total: ', 'woothemes').woocommerce_price($this_order->order_total).'</span> <span class="order-customer">'.$customer.'</span></small>
+							</li>';
+							
+							$count++;
+							if ($count==5) break;
+						endforeach;
+						echo '</ul>';
+					endif;
+					?>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('This months sales', 'woothemes'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
 	
-	$start_date = strtotime($start_date);
-	$end_date = strtotime($end_date);
+	$start_date = strtotime(date('Ymd', strtotime( date('Ym').'01' )));
+	$end_date = strtotime(date('Ymd', strtotime('NOW')));
 	
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_within_range' );
@@ -229,7 +327,7 @@ function woocommerce_daily_sales() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing'),
+				'terms' => array('completed', 'processing', 'on-hold'),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -290,10 +388,195 @@ function woocommerce_daily_sales() {
 
 	$chart_data = json_encode($order_data);
 	?>
+	<script type="text/javascript">
+		jQuery(function(){
+			var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
+		
+			var d = order_data.order_counts;
+		    var d2 = order_data.order_amounts;
+			
+			for (var i = 0; i < d.length; ++i) d[i][0] += 60 * 60 * 1000;
+		    for (var i = 0; i < d2.length; ++i) d2[i][0] += 60 * 60 * 1000;
+			
+			var placeholder = jQuery("#placeholder");
+			 
+			var plot = jQuery.plot(placeholder, [ { label: "Number of sales", data: d }, { label: "Sales amount", data: d2, yaxis: 2 } ], {
+				series: {
+					lines: { show: true },
+					points: { show: true }
+				},
+				grid: {
+					show: true,
+					aboveData: false,
+					color: '#ccc',
+					backgroundColor: '#fff',
+					borderWidth: 2,
+					borderColor: '#ccc',
+					clickable: false,
+					hoverable: true,
+					markings: weekendAreas
+				},
+				xaxis: { 
+					mode: "time",
+					timeformat: "%d %b", 
+					tickLength: 1,
+					minTickSize: [1, "day"]
+				},
+				yaxes: [ { min: 0, tickSize: 1, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
+		   		colors: ["#8a4b75", "#47a03e"]
+		 	});
+		 	
+		 	placeholder.resize();
+	 	
+			<?php woocommerce_weekend_area_js(); ?>
+			<?php woocommerce_tooltip_js(); ?>
+		});
+	</script>
+	<?php
+}
+
+/**
+ * Daily sales chart
+ */
+function woocommerce_daily_sales() {
+	
+	global $start_date, $end_date, $woocommerce, $wpdb;
+	
+	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
+	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
+	
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$end_date) $end_date = date('Ymd', strtotime('NOW'));
+	
+	$start_date = strtotime($start_date);
+	$end_date = strtotime($end_date);
+	
+	$total_sales = 0;
+	$total_orders = 0;
+	$order_items = 0;
+	
+	// Get orders to display in widget
+	add_filter( 'posts_where', 'orders_within_range' );
+
+	$args = array(
+	    'numberposts'     => -1,
+	    'orderby'         => 'post_date',
+	    'order'           => 'ASC',
+	    'post_type'       => 'shop_order',
+	    'post_status'     => 'publish' ,
+	    'suppress_filters' => false,
+	    'tax_query' => array(
+	    	array(
+		    	'taxonomy' => 'shop_order_status',
+				'terms' => array('completed', 'processing', 'on-hold'),
+				'field' => 'slug',
+				'operator' => 'IN'
+			)
+	    )
+	);
+	$orders = get_posts( $args );
+	
+	$order_counts = array();
+	$order_amounts = array();
+
+	// Blank date ranges to begin
+	$count = 0;
+	$days = ($end_date - $start_date) / (60 * 60 * 24);
+
+	while ($count < $days) :
+		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
+		
+		$order_counts[$time] = 0;
+		$order_amounts[$time] = 0;
+
+		$count++;
+	endwhile;
+	
+	if ($orders) :
+		foreach ($orders as $order) :
+			
+			$order_total = get_post_meta($order->ID, '_order_total', true);			
+			$time = strtotime(date('Ymd', strtotime($order->post_date))).'000';
+			
+			$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
+			foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+			$total_sales += $order_total;
+			$total_orders++;
+		
+			if (isset($order_counts[$time])) :
+				$order_counts[$time]++;
+			else :
+				$order_counts[$time] = 1;
+			endif;
+			
+			if (isset($order_amounts[$time])) :
+				$order_amounts[$time] = $order_amounts[$time] + $order_total;
+			else :
+				$order_amounts[$time] = (float) $order_total;
+			endif;
+			
+		endforeach;
+	endif;
+	
+	remove_filter( 'posts_where', 'orders_within_range' );
+	
+	?>
 	<form method="post" action="">
 		<p><label for="from"><?php _e('From:', 'woothemes'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo date('Y-m-d', $start_date); ?>" /> <label for="to"><?php _e('To:', 'woothemes'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo date('Y-m-d', $end_date); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woothemes'); ?>" /></p>
 	</form>
-	<div id="placeholder" style="width:100%; overflow:hidden; height:520px; position:relative;"></div>
+	
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Total sales in range', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total orders in range', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woothemes').')'; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order total in range', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order items in range', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('Sales in range', 'woothemes'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
+
+	$order_counts_array = array();
+	foreach ($order_counts as $key => $count) :
+		$order_counts_array[] = array($key, $count);
+	endforeach;
+	
+	$order_amounts_array = array();
+	foreach ($order_amounts as $key => $amount) :
+		$order_amounts_array[] = array($key, $amount);
+	endforeach;
+	
+	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
+
+	$chart_data = json_encode($order_data);
+	?>
 	<script type="text/javascript">
 		jQuery(function(){
 			var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
@@ -364,6 +647,10 @@ function woocommerce_monthly_sales() {
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
 	
+	$total_sales = 0;
+	$total_orders = 0;
+	$order_items = 0;
+	
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_within_range' );
 
@@ -377,7 +664,7 @@ function woocommerce_monthly_sales() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing'),
+				'terms' => array('completed', 'processing', 'on-hold'),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -394,7 +681,7 @@ function woocommerce_monthly_sales() {
 
 	while ($count < $months) :
 		$time = strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01').'000';
-		
+
 		$order_counts[$time] = 0;
 		$order_amounts[$time] = 0;
 
@@ -406,6 +693,11 @@ function woocommerce_monthly_sales() {
 			
 			$order_total = get_post_meta($order->ID, '_order_total', true);			
 			$time = strtotime(date('Ym', strtotime($order->post_date)).'01').'000';
+			
+			$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
+			foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+			$total_sales += $order_total;
+			$total_orders++;
 			
 			if (isset($order_counts[$time])) :
 				$order_counts[$time]++;
@@ -423,6 +715,53 @@ function woocommerce_monthly_sales() {
 	endif;
 	
 	remove_filter( 'posts_where', 'orders_within_range' );
+	
+	?>
+	<form method="post" action="">
+		<p><label for="show_year"><?php _e('Year:', 'woothemes'); ?></label> 
+		<select name="show_year" id="show_year">
+			<?php
+				for ($i = $first_year; $i <= date('Y'); $i++) printf('<option value="%u" %u>%u</option>', $i, selected($current_year, $i, false), $i);
+			?>
+		</select> <input type="submit" class="button" value="<?php _e('Show', 'woothemes'); ?>" /></p>
+	</form>
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Total sales for year', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total orders for year', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woothemes').')'; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order total for year', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average order items for year', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('Monthly sales for year', 'woothemes'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
 
 	$order_counts_array = array();
 	foreach ($order_counts as $key => $count) :
@@ -438,15 +777,6 @@ function woocommerce_monthly_sales() {
 
 	$chart_data = json_encode($order_data);
 	?>
-	<form method="post" action="">
-		<p><label for="show_year"><?php _e('Year:', 'woothemes'); ?></label> 
-		<select name="show_year" id="show_year">
-			<?php
-				for ($i = $first_year; $i <= date('Y'); $i++) printf('<option value="%u" %u>%u</option>', $i, selected($current_year, $i, false), $i);
-			?>
-		</select> <input type="submit" class="button" value="<?php _e('Show', 'woothemes'); ?>" /></p>
-	</form>
-	<div id="placeholder" style="width:100%; overflow:hidden; height:520px; position:relative;"></div>
 	<script type="text/javascript">
 		jQuery(function(){
 			var order_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
@@ -519,7 +849,7 @@ function woocommerce_top_sellers() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing'),
+				'terms' => array('completed', 'processing', 'on-hold'),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -611,7 +941,7 @@ function woocommerce_top_earners() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing'),
+				'terms' => array('completed', 'processing', 'on-hold'),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -703,7 +1033,7 @@ function woocommerce_product_sales() {
 		    'tax_query' => array(
 		    	array(
 			    	'taxonomy' => 'shop_order_status',
-					'terms' => array('completed', 'processing'),
+					'terms' => array('completed', 'processing', 'on-hold'),
 					'field' => 'slug',
 					'operator' => 'IN'
 				)
