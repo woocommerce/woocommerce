@@ -44,7 +44,6 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script('jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
-		wp_enqueue_script( 'flot-stack', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.stack'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-threshold', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.threshold'.$suffix.'.js', 'jquery', '1.0' );
 	
 	endif;

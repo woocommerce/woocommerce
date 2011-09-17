@@ -45,7 +45,13 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_top_earners'
 			)
 		),
-		__('customers', 'woothemes') => array()
+		__('customers', 'woothemes') => array(
+			array(
+				'title' => __('Overview', 'woothemes'),
+				'description' => '',
+				'function' => 'woocommerce_customer_overview'
+			),
+		)
 	);
     ?>
 	<div class="wrap woocommerce">
@@ -60,7 +66,7 @@ function woocommerce_reports() {
 			<?php do_action('woocommerce_reports_tabs'); ?>
 		</h2>
 		
-		<ul class="subsubsub"><li><?php
+		<?php if (sizeof($charts[$current_tab])>1) : ?><ul class="subsubsub"><li><?php
 			$links = array();
 			foreach ($charts[$current_tab] as $key => $chart) :
 				$link = '<a href="admin.php?page=woocommerce_reports&tab='.$current_tab.'&amp;chart='.$key.'" class="';
@@ -69,11 +75,12 @@ function woocommerce_reports() {
 				$links[] = $link;
 			endforeach;
 			echo implode(' | </li><li>', $links);
-		?></li></ul><br class="clear" />
+		?></li></ul><br class="clear" /><?php endif; ?>
 		
 		<?php if (isset($charts[$current_tab][$current_chart])) : ?> 
-			<h3><?php echo $charts[$current_tab][$current_chart]['title']; ?></h3>
+			<?php if (sizeof($charts[$current_tab])>1) : ?><h3><?php echo $charts[$current_tab][$current_chart]['title']; ?></h3>
 			<?php if ($charts[$current_tab][$current_chart]['description']) : ?><p><?php echo $charts[$current_tab][$current_chart]['description']; ?></p><?php endif; ?>
+			<?php endif; ?>
 			<?php
 				$func = $charts[$current_tab][$current_chart]['function'];
 				if ($func && function_exists($func)) $func();
@@ -1116,4 +1123,185 @@ function woocommerce_product_sales() {
 	</table>
 	<?php
 	endif;
+}
+
+
+/**
+ * Customer overview
+ */
+function woocommerce_customer_overview() {
+
+	global $start_date, $end_date, $woocommerce, $wpdb;
+	
+	$total_customers = 0;
+	$total_customer_sales = 0;
+	$total_guest_sales = 0;
+	$total_customer_orders = 0;
+	$total_guest_orders = 0;
+	
+	$users_query = new WP_User_Query( array( 
+		'fields' => array('user_registered'), 
+		'role' => 'customer'
+		) );
+	$customers = $users_query->get_results();
+	$total_customers = (int) sizeof($customers);
+	
+	$args = array(
+	    'numberposts'     => -1,
+	    'orderby'         => 'post_date',
+	    'order'           => 'DESC',
+	    'post_type'       => 'shop_order',
+	    'post_status'     => 'publish' ,
+	    'suppress_filters' => false,
+	    'tax_query' => array(
+	    	array(
+		    	'taxonomy' => 'shop_order_status',
+				'terms' => array('completed', 'processing', 'on-hold'),
+				'field' => 'slug',
+				'operator' => 'IN'
+			)
+	    )
+	);
+	$orders = get_posts( $args );
+	foreach ($orders as $order) :
+		if (get_post_meta( $order->ID, '_customer_user', true )>0) :
+			$total_customer_sales += get_post_meta($order->ID, '_order_total', true);
+			$total_customer_orders++;
+		else :
+			$total_guest_sales += get_post_meta($order->ID, '_order_total', true);
+			$total_guest_orders++;
+		endif;
+	endforeach;
+	
+	?>
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Total customers', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_customers>0) echo $total_customers; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total customer sales', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_customer_sales>0) echo woocommerce_price($total_customer_sales); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total guest sales', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_guest_sales>0) echo woocommerce_price($total_guest_sales); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total customer orders', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_customer_orders>0) echo $total_customer_orders; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total guest orders', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_guest_orders>0) echo $total_guest_orders; else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Average orders per customer', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($total_customer_orders>0 && $total_customers>0) echo number_format($total_customer_orders/$total_customers, 2); else _e('n/a', 'woothemes'); ?></p>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('Signups per day', 'woothemes'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
+	
+	$start_date = strtotime('-30 days');
+	$end_date = strtotime('NOW');
+	$signups = array();
+	
+	// Blank date ranges to begin
+	$count = 0;
+	$days = ($end_date - $start_date) / (60 * 60 * 24);
+
+	while ($count < $days) :
+		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
+		
+		$signups[$time] = 0;
+
+		$count++;
+	endwhile;
+	
+	
+	
+	foreach ($customers as $customer) :
+		if (strtotime($customer->user_registered) > $start_date) :
+			$time = strtotime(date('Ymd', strtotime($customer->user_registered))).'000';
+			
+			if (isset($signups[$time])) :
+				$signups[$time]++;
+			else :
+				$signups[$time] = 1;
+			endif;
+		endif;
+	endforeach;
+
+	$signups_array = array();
+	foreach ($signups as $key => $count) :
+		$signups_array[] = array($key, $count);
+	endforeach;
+	
+	$chart_data = json_encode($signups_array);
+	?>
+	<script type="text/javascript">
+		jQuery(function(){
+			var d = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
+
+			for (var i = 0; i < d.length; ++i) d[i][0] += 60 * 60 * 1000;
+			
+			var placeholder = jQuery("#placeholder");
+			 
+			var plot = jQuery.plot(placeholder, [ { data: d } ], {
+				series: {
+					bars: { 
+						barWidth: 60 * 60 * 24 * 1000,
+						align: "center",
+						show: true 
+					}
+				},
+				grid: {
+					show: true,
+					aboveData: false,
+					color: '#ccc',
+					backgroundColor: '#fff',
+					borderWidth: 2,
+					borderColor: '#ccc',
+					clickable: false,
+					hoverable: true,
+					markings: weekendAreas
+				},
+				xaxis: { 
+					mode: "time",
+					timeformat: "%d %b", 
+					tickLength: 1,
+					minTickSize: [1, "day"]
+				},
+				yaxes: [ { position: "right", min: 0, tickSize: 1, tickDecimals: 0 } ],
+		   		colors: ["#8a4b75"]
+		 	});
+		 	
+		 	placeholder.resize();
+	 	
+			<?php woocommerce_weekend_area_js(); ?>
+		});
+	</script>
+	<?php
 }
