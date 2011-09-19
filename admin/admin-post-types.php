@@ -344,10 +344,10 @@ function woocommerce_edit_order_columns($columns){
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["order_status"] = __("Status", 'woothemes');
 	$columns["order_title"] = __("Order", 'woothemes');
-	$columns["customer"] = __("Customer", 'woothemes');
 	$columns["billing_address"] = __("Billing", 'woothemes');
 	$columns["shipping_address"] = __("Shipping", 'woothemes');
 	$columns["total_cost"] = __("Order Total", 'woothemes');
+	$columns["order_date"] = __("Date", 'woothemes');
 	
 	return $columns;
 }
@@ -373,25 +373,22 @@ function woocommerce_custom_order_columns($column) {
 			
 			echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'">'.sprintf( __('Order #%s', 'woothemes'), $post->ID ).'</a> ';
 			
-			echo '<time title="'.date_i18n('c', strtotime($post->post_date)).'">'.date_i18n('F j, Y, g:i a', strtotime($post->post_date)).'</time>';
-			
-		break;
-		case "customer" :
-		
 			if ($order->user_id) $user_info = get_userdata($order->user_id);
 			
 			if (isset($user_info) && $user_info) : 
 			                    	
-            	echo '<a href="user-edit.php?user_id='.$user_info->ID.'">';
+            	$user = '<a href="user-edit.php?user_id='.$user_info->ID.'">';
             	
-            	if ($user_info->first_name || $user_info->last_name) echo $user_info->first_name.' '.$user_info->last_name;
-            	else echo $user_info->display_name;
+            	if ($user_info->first_name || $user_info->last_name) $user .= $user_info->first_name.' '.$user_info->last_name;
+            	else $user .= $user_info->display_name;
             	
-            	echo '</a>';
+            	$user .= '</a>';
 
            	else : 
-           		_e('Guest', 'woothemes');
+           		$user = __('Guest', 'woothemes');
            	endif;
+           	
+           	echo '<small class="meta">'.__('Customer: ', 'woothemes').$user.'</small>';
            	
            	if ($order->billing_email) :
         		echo '<small class="meta">'.__('Email: ', 'woothemes').'<a href="mailto:'.$order->billing_email.'">'.$order->billing_email.'</a></small>';
@@ -399,7 +396,7 @@ function woocommerce_custom_order_columns($column) {
         	if ($order->billing_phone) :
         		echo '<small class="meta">'.__('Tel: ', 'woothemes'). $order->billing_phone . '</small>';
         	endif;
-		
+						
 		break;
 		case "billing_address" :
 			echo '<strong>'.$order->billing_first_name . ' ' . $order->billing_last_name;
@@ -429,6 +426,26 @@ function woocommerce_custom_order_columns($column) {
 		case "total_cost" :
 			echo woocommerce_price($order->order_total);
 		break;
+		case "order_date" :
+			if ( '0000-00-00 00:00:00' == $post->post_date ) :
+				$t_time = $h_time = __( 'Unpublished' );
+				$time_diff = 0;
+			else :
+				$t_time = get_the_time( __( 'Y/m/d g:i:s A' ) );
+				$m_time = $post->post_date;
+				$time = get_post_time( 'G', true, $post );
+
+				$time_diff = time() - $time;
+
+				if ( $time_diff > 0 && $time_diff < 24*60*60 )
+					$h_time = sprintf( __( '%s ago' ), human_time_diff( $time ) );
+				else
+					$h_time = mysql2date( __( 'Y/m/d' ), $m_time );
+			endif;
+
+			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post, $column_name, $mode ) . '</abbr>';
+			
+		break;
 	}
 }
 
@@ -439,28 +456,6 @@ function woocommerce_custom_order_columns($column) {
 add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
 
 function woocommerce_custom_order_views( $views ) {
-	
-	$woocommerce_orders = &new woocommerce_orders();
-	
-	$pending = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='pending') ? 'current' : '';
-	$onhold = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='on-hold') ? 'current' : '';
-	$processing = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='processing') ? 'current' : '';
-	$completed = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='completed') ? 'current' : '';
-	$cancelled = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='cancelled') ? 'current' : '';
-	$refunded = (isset($_GET['shop_order_status']) && $_GET['shop_order_status']=='refunded') ? 'current' : '';
-	
-	$views['pending'] = '<a class="'.$pending.'" href="?post_type=shop_order&amp;shop_order_status=pending">Pending <span class="count">('.$woocommerce_orders->pending_count.')</span></a>';
-	$views['onhold'] = '<a class="'.$onhold.'" href="?post_type=shop_order&amp;shop_order_status=on-hold">On-Hold <span class="count">('.$woocommerce_orders->on_hold_count.')</span></a>';
-	$views['processing'] = '<a class="'.$processing.'" href="?post_type=shop_order&amp;shop_order_status=processing">Processing <span class="count">('.$woocommerce_orders->processing_count.')</span></a>';
-	$views['completed'] = '<a class="'.$completed.'" href="?post_type=shop_order&amp;shop_order_status=completed">Completed <span class="count">('.$woocommerce_orders->completed_count.')</span></a>';
-	$views['cancelled'] = '<a class="'.$cancelled.'" href="?post_type=shop_order&amp;shop_order_status=cancelled">Cancelled <span class="count">('.$woocommerce_orders->cancelled_count.')</span></a>';
-	$views['refunded'] = '<a class="'.$refunded.'" href="?post_type=shop_order&amp;shop_order_status=refunded">Refunded <span class="count">('.$woocommerce_orders->refunded_count.')</span></a>';
-	
-	if ($pending || $onhold || $processing || $completed || $cancelled || $refunded) :
-		
-		$views['all'] = str_replace('current', '', $views['all']);
-		
-	endif;	
 
 	unset($views['publish']);
 	
@@ -499,6 +494,113 @@ function woocommerce_bulk_actions( $actions ) {
 	if (isset($actions['edit'])) unset($actions['edit']);
 	
 	return $actions;
+}
+
+/**
+ * Filter orders by status
+ **/
+add_action('restrict_manage_posts','woocommerce_orders_by_status');
+
+function woocommerce_orders_by_status() {
+    global $typenow, $wp_query;
+    if ($typenow=='shop_order') :
+		$terms = get_terms('shop_order_status');
+		$output = "<select name='shop_order_status' id='dropdown_shop_order_status'>";
+		$output .= '<option value="">'.__('Show all statuses', 'woothemes').'</option>';
+		foreach($terms as $term) :
+			$output .="<option value='$term->slug' ";
+			if ( isset( $wp_query->query['shop_order_status'] ) ) $output .=selected($term->slug, $wp_query->query['shop_order_status'], false);
+			$output .=">$term->name ($term->count)</option>";
+		endforeach;
+		$output .="</select>";
+		echo $output;
+    endif;
+}
+
+/**
+ * Filter orders by customer
+ **/
+add_action('restrict_manage_posts', 'woocommerce_orders_by_customer');
+
+function woocommerce_orders_by_customer() {
+    global $typenow, $wp_query;
+    if ($typenow=='shop_order') :
+		
+		$users_query = new WP_User_Query( array( 
+			'fields' => 'all', 
+			//'role' => 'customer', 
+			'orderby' => 'display_name'
+			) );
+		$users = $users_query->get_results();
+		if ($users) :
+		
+			$output = "<select name='_customer_user' id='dropdown_customers'>";
+			$output .= '<option value="">'.__('Show all customers', 'woothemes').'</option>';
+			foreach($users as $user) :
+				$output .="<option value='$user->ID' ";
+				if ( isset( $_GET['_customer_user'] ) ) $output .=selected($user->ID, $_GET['_customer_user'], false);
+				$output .=">$user->display_name</option>";
+			endforeach;
+			$output .="</select>";
+			echo $output;
+		
+		endif;
+    endif;
+}
+
+/**
+ * Filter orders by customer query
+ **/
+add_filter( 'request', 'woocommerce_orders_by_customer_query' );
+
+function woocommerce_orders_by_customer_query( $vars ) {
+	global $typenow, $wp_query;
+    if ($typenow=='shop_order' && isset( $_GET['_customer_user'] )) :
+    
+		$vars['meta_key'] = '_customer_user';
+		$vars['meta_value'] = (int) $_GET['_customer_user'];
+		
+	endif;
+	
+	return $vars;
+}
+
+/**
+ * Make order columns sortable
+ * https://gist.github.com/906872
+ **/
+add_filter("manage_edit-shop_order_sortable_columns", 'woocommerce_custom_shop_order_sort');
+
+function woocommerce_custom_shop_order_sort($columns) {
+	$custom = array(
+		'order_title'	=> 'ID',
+		'order_total'	=> 'order_total',
+		'order_date'	=> 'date'
+	);
+	return wp_parse_args($custom, $columns);
+}
+
+
+/**
+ * Order column orderby/request
+ **/
+add_filter( 'request', 'woocommerce_custom_shop_order_orderby' );
+
+function woocommerce_custom_shop_order_orderby( $vars ) {
+	global $typenow, $wp_query;
+    if ($typenow!='shop_order') return $vars;
+    
+    // Sorting
+	if (isset( $vars['orderby'] )) :
+		if ( 'order_total' == $vars['orderby'] ) :
+			$vars = array_merge( $vars, array(
+				'meta_key' 	=> '_order_total',
+				'orderby' 	=> 'meta_value_num'
+			) );
+		endif;
+	endif;
+	
+	return $vars;
 }
 
 
