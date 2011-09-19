@@ -141,7 +141,7 @@ function woocommerce_admin_fields($options) {
             case 'text':
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo $value['type'] ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo esc_attr( $value['type'] ) ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo esc_attr( stripslashes( get_option($value['id'] ) ) ); else echo esc_att( $value['std'] ); ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
                 </tr><?php
             break;
             case 'image_width' :
@@ -298,7 +298,7 @@ function woocommerce_admin_fields($options) {
 						   				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo $woocommerce->countries->country_multiselect_options('',true); ?></select>\
 						                <select name="tax_class[' + size + ']" title="Tax Class"><option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
 						                		if ($tax_classes) foreach ($tax_classes as $class) :
-							                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
+							                        echo '<option value="'.esc_attr( sanitize_title($class) ).'">'.$class.'</option>';
 							                    endforeach;
 						                ?></select>\
 						                <input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% \
