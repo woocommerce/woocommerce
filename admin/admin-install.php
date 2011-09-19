@@ -23,7 +23,10 @@ function queue_install_woocommerce() {
  */
 function install_woocommerce() {
 	
-	global $woocommerce;
+	global $woocommerce, $woocommerce_settings;
+	
+	// Include settings so that we can run through defaults
+	include( 'admin-settings.php' );
 	
 	// Define post types before we start
 	woocommerce_post_type();

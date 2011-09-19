@@ -539,6 +539,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
  * 
  * Handles the display of the main woocommerce settings page in admin.
  */
+if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
@@ -704,4 +705,5 @@ function woocommerce_settings() {
 		</script>
 	</div>
 	<?php
+}
 }

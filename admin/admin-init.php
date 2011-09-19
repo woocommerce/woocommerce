@@ -9,11 +9,11 @@
  * @package 	WooCommerce
  */
 
-include_once( 'admin-settings-forms.php' );
-include_once( 'admin-settings.php' );
 include_once( 'admin-install.php' );
 
 function woocommerce_admin_init() {
+	include_once( 'admin-settings-forms.php' );
+	include_once( 'admin-settings.php' );
 	include_once( 'admin-attributes.php' );
 	include_once( 'admin-dashboard.php' );
 	include_once( 'admin-import.php' );
