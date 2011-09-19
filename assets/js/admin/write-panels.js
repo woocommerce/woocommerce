@@ -36,9 +36,9 @@ jQuery( function($){
 			
 			var item_count = jQuery('#order_items_list tr.item').size();
 			var subtotal = 0;
-			var discount = jQuery('input#order_discount').val();
-			var shipping = jQuery('input#order_shipping').val();
-			var shipping_tax = parseFloat(jQuery('input#order_shipping_tax').val());
+			var discount = jQuery('input#_order_discount').val();
+			var shipping = jQuery('input#_order_shipping').val();
+			var shipping_tax = parseFloat(jQuery('input#_order_shipping_tax').val());
 			var tax = 0;
 			var itemTotal = 0;
 			var total = 0;
@@ -88,10 +88,10 @@ jQuery( function($){
 			
 			if (total < 0 ) total = 0;
 
-			jQuery('input#order_subtotal').val( subtotal.toFixed(2) );
-			jQuery('input#order_tax').val( tax.toFixed(2) );
-			jQuery('input#order_shipping_tax').val( shipping_tax.toFixed(2) );
-			jQuery('input#order_total').val( total.toFixed(2) );
+			jQuery('input#_order_subtotal').val( subtotal.toFixed(2) );
+			jQuery('input#_order_tax').val( tax.toFixed(2) );
+			jQuery('input#_order_shipping_tax').val( shipping_tax.toFixed(2) );
+			jQuery('input#_order_total').val( total.toFixed(2) );
 
 		}
 		return false;
