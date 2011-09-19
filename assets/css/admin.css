@@ -122,7 +122,7 @@ div.taxrows .taxrow label.checkbox{line-height:1.5em;margin:0 8px;}div.taxrows .
 .woocommerce_attributes_wrapper,.woocommerce_variable_attributes_wrapper{margin-bottom:7px;border:1px solid #ececec;}
 table.woocommerce_attributes,table.woocommerce_variable_attributes{width:100%;}
 table.woocommerce_attributes thead th,table.woocommerce_variable_attributes thead th{background:#ececec;padding:7px 9px;font-size:11px;text-align:left;}
-table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding:2px 9px;text-align:left;vertical-align:middle;border-bottom:1px dotted #ececec;}
+table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding:2px 9px;text-align:left;vertical-align:middle;border-bottom:1px dotted #ececec;cursor:move;}
 table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{width:100%;}
 table.woocommerce_attributes td select{width:100%;}
 table.woocommerce_attributes td select.multiselect{height:8em !important;}

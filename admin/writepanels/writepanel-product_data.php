@@ -197,7 +197,6 @@ function woocommerce_product_data_box() {
 				<table cellpadding="0" cellspacing="0" class="woocommerce_attributes">
 					<thead>
 						<tr>
-							<th class="center" width="60"><?php _e('Ordering', 'woothemes'); ?></th>
 							<th width="180"><?php _e('Attribute Name', 'woothemes'); ?></th>
 							<th><?php _e('Value(s)', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Add multiple attributes for text attributes by pipe (|) separating values.', 'woothemes'); ?>" href="#">[?]</a></th>
 							<th class="center" width="1%"><?php _e('Visible?', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Enable this to show the attribute on the product page.', 'woothemes'); ?>" href="#">[?]</a></th>
@@ -234,13 +233,10 @@ function woocommerce_product_data_box() {
 						    		$has_terms = (is_wp_error($post_terms) || !$post_terms || sizeof($post_terms)==0) ? 0 : 1;
 						    		
 						    		?><tr class="taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
-										<td class="center">
-											<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
-										</td>
 										<td class="name">
 											<?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?> 
 											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
+											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
 											<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
 										</td>
 										<td class="values">
@@ -287,12 +283,9 @@ function woocommerce_product_data_box() {
 					    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
 								
 								?><tr rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>">
-									<td class="center">
-										<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
-									</td>
 									<td>
 										<input type="text" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['name'] ); ?>" />
+										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
 										<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="0" />
 									</td>
 									<td><input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['value'] ); ?>" /></td>
