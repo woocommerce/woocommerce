@@ -1,5 +1,10 @@
 jQuery( function($){
-
+	
+	// Prevent enter submitting post form
+	jQuery("form#post").bind("keypress", function(e) {
+		if (e.keyCode == 34 || e.keyCode == 13) return false;
+	});
+	
 	// TABS
 	jQuery('ul.tabs').show();
 	jQuery('div.panel-wrap').each(function(){
@@ -268,7 +273,7 @@ jQuery( function($){
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 				
 				// Add custom attribute row
-				jQuery('table.woocommerce_attributes tbody').append('<tr><td class="center"><button type="button" class="button move_up">&uarr;</button><button type="button" class="move_down button">&darr;</button><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
+				jQuery('table.woocommerce_attributes tbody').append('<tr><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
 				
 			} else {
 				
@@ -303,18 +308,28 @@ jQuery( function($){
 			return false;
 		});
 		
-		jQuery('button.move_up').live('click', function(){
-			var row = jQuery(this).parent().parent();
-			var prev_row = jQuery(row).prev('tr');
-			jQuery(row).after(prev_row);
-			row_indexes();
+		// Attribute ordering
+		jQuery('table.woocommerce_attributes tbody').sortable({
+			items:'tr',
+			cursor:'move',
+			axis:'y',
+			scrollSensitivity:40,
+			helper:function(e,ui){
+				ui.children().each(function(){
+					jQuery(this).width(jQuery(this).width());
+				});
+				return ui;
+			},
+			start:function(event,ui){
+				ui.item.css('background-color','#f6f6f6');
+			},
+			stop:function(event,ui){
+				ui.item.removeAttr('style');
+				row_indexes();
+			}
 		});
-		jQuery('button.move_down').live('click', function(){
-			var row = jQuery(this).parent().parent();
-			var next_row = jQuery(row).next('tr');
-			jQuery(row).before(next_row);
-			row_indexes();
-		});
+
+		
 
 	// Cross sells/Up sells
 	jQuery('.multi_select_products button').live('click', function(){
@@ -333,29 +348,43 @@ jQuery( function($){
 		}
 	});
 	
+	var xhr;
+	
 	jQuery('.multi_select_products #product_search').bind('keyup click', function(){
 		
+		jQuery('.multi_select_products_source').addClass('loading');
 		jQuery('.multi_select_products_source li:not(.product_search)').remove();
 		
-		var search = encodeURI( jQuery(this).val() );
+		if (xhr) xhr.abort();
+		
+		var search = jQuery(this).val();
 		var input = this;
 		var name = jQuery(this).attr('rel');
 		
-		if (search.length<3) return;
+		if (search.length<3) {
+			jQuery('.multi_select_products_source').removeClass('loading');
+			return;
+		}
 		
 		var data = {
 			name: 			name,
-			search: 		search,
+			search: 		encodeURI(search),
 			action: 		'woocommerce_upsell_crosssell_search_products',
 			security: 		woocommerce_writepanel_params.upsell_crosssell_search_products_nonce
 		};
 		
-	    jQuery.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
+		xhr = jQuery.ajax({
+			url: woocommerce_writepanel_params.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
 			
-			jQuery('.multi_select_products_source li:not(.product_search)').remove();
-			jQuery(input).parent().parent().append( response );
-			
-		} );
+				jQuery('.multi_select_products_source').removeClass('loading');
+				jQuery('.multi_select_products_source li:not(.product_search)').remove();
+				jQuery(input).parent().parent().append( response );
+				
+			}
+		});
  			
 	});
 

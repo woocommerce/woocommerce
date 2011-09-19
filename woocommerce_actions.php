@@ -255,7 +255,7 @@ function woocommerce_upsell_crosssell_search_products() {
 		$args = array(
 			'post_type'	=> 'product',
 			'post_status' => 'publish',
-			'posts_per_page' => 20,
+			'posts_per_page' => 15,
 			'post__in' => array(0, $search)
 		);
 		
@@ -264,7 +264,7 @@ function woocommerce_upsell_crosssell_search_products() {
 		$args = array(
 			'post_type'	=> 'product',
 			'post_status' => 'publish',
-			'posts_per_page' => 20,
+			'posts_per_page' => 15,
 			's' => $search
 		);
 	
