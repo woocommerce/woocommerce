@@ -25,7 +25,7 @@ function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Recent_Products');
 	register_widget('WooCommerce_Widget_Featured_Products');
 	register_widget('WooCommerce_Widget_Product_Categories');
-	register_widget('WooCommerce_Widget_Tag_Cloud');
+	register_widget('WooCommerce_Widget_Product_Tag_Cloud');
 	register_widget('WooCommerce_Widget_Cart');
 	register_widget('WooCommerce_Widget_Layered_Nav');
 	register_widget('WooCommerce_Widget_Price_Filter');

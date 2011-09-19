@@ -7,7 +7,7 @@
  * @author		WooThemes
  */
  
-class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
+class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 
 	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
@@ -16,19 +16,19 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 	var $woo_widget_name;
 	
 	/** constructor */
-	function WooCommerce_Widget_Tag_Cloud() {
+	function WooCommerce_Widget_Product_Tag_Cloud() {
 	
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_tag_cloud';
+		$this->woo_widget_cssclass = 'widget_product_tag_cloud';
 		$this->woo_widget_description = __( 'Your most used product tags in cloud format.', 'woothemes' );
-		$this->woo_widget_idbase = 'woocommerce_tag_cloud';
+		$this->woo_widget_idbase = 'woocommerce_product_tag_cloud';
 		$this->woo_widget_name = __('WooCommerce Product Tags', 'woothemes' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
 		
 		/* Create the widget. */
-		$this->WP_Widget('tag_cloud', $this->woo_widget_name, $widget_ops);
+		$this->WP_Widget('product_tag_cloud', $this->woo_widget_name, $widget_ops);
 	}
 	
 	/** @see WP_Widget */
@@ -51,7 +51,7 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 		if ( $title )
 			echo $before_title . $title . $after_title;
 		echo '<div class="tagcloud">';
-		wp_tag_cloud( apply_filters('widget_tag_cloud_args', array('taxonomy' => $current_taxonomy) ) );
+		wp_tag_cloud( apply_filters('widget_product_tag_cloud_args', array('taxonomy' => $current_taxonomy) ) );
 		echo "</div>\n";
 		echo $after_widget;
 	}
@@ -75,4 +75,4 @@ class WooCommerce_Widget_Tag_Cloud extends WP_Widget {
 	function _get_current_taxonomy($instance) {
 		return 'product_tag';
 	}
-} // class WooCommerce_Widget_Tag_Cloud
+} // class WooCommerce_Widget_Product_Tag_Cloud
