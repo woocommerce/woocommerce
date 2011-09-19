@@ -196,17 +196,18 @@ function variable_product_write_panel_js() {
 						<tbody>\
 							<tr>\
 								<td class="upload_image"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><input type="button" class="upload_image_button button" rel="" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>\
-								<td><label><?php _e('SKU:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sku[' + loop + ']" /></td>\
-								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?></label><input type="text" size="5" name="variable_weight[' + loop + ']" /></td>\
-								<td><label><?php _e('Stock Qty:', 'woothemes'); ?></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
-								<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
-								<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
+								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" /></td>\
+								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" /></td>\
+								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product\\\'s stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
+								<td><label><?php _e('Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
+								<td><label><?php _e('Sale Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s sale price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
 								<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /></td>\
 							</tr>\
 						</tbody>\
 					</table>\
 				</div>');
 				
+				jQuery(".tips").easyTooltip();
 				jQuery('.woocommerce_variations').unblock();
 
 			});
