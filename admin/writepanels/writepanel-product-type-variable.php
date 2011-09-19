@@ -87,7 +87,7 @@ function variable_product_type_options() {
 	
 							endforeach;
 						?>
-						<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo $variation->ID; ?>" />
+						<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation->ID ); ?>" />
 					</p>
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">
 						<tbody>	

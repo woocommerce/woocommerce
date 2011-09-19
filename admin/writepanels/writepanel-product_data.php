@@ -236,11 +236,11 @@ function woocommerce_product_data_box() {
 						    		?><tr class="taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
 										<td class="center">
 											<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo $position; ?>" />
+											<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
 										</td>
 										<td class="name">
 											<?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?> 
-											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $attribute_taxonomy_name; ?>" />
+											<input type="hidden" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute_taxonomy_name ); ?>" />
 											<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="1" />
 										</td>
 										<td class="values">
@@ -289,13 +289,13 @@ function woocommerce_product_data_box() {
 								?><tr rel="<?php if (isset($attribute['position'])) echo $attribute['position']; else echo '0'; ?>">
 									<td class="center">
 										<button type="button" class="move_up button">&uarr;</button><button type="button" class="move_down button">&darr;</button>
-										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo $position; ?>" />
+										<input type="hidden" name="attribute_position[<?php echo $i; ?>]" class="attribute_position" value="<?php echo esc_attr( $position ); ?>" />
 									</td>
 									<td>
-										<input type="text" name="attribute_names[<?php echo $i; ?>]" value="<?php echo $attribute['name']; ?>" />
+										<input type="text" name="attribute_names[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['name'] ); ?>" />
 										<input type="hidden" name="attribute_is_taxonomy[<?php echo $i; ?>]" value="0" />
 									</td>
-									<td><input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php echo $attribute['value']; ?>" /></td>
+									<td><input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php echo esc_attr( $attribute['value'] ); ?>" /></td>
 									<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
 									<td class="center enable_variation"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 									<td class="center"><button type="button" class="remove_row button">&times;</button></td>
@@ -628,7 +628,7 @@ function woocommerce_product_selection_list_remove( $posts_to_display, $name ) {
 		
 		$SKU = get_post_meta($related_post->ID, 'sku', true);
 		
-		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">X</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo $name; ?>[]" value="<?php echo $related_post->ID; ?>" /></li><?php 
+		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">X</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[]" value="<?php echo esc_attr( $related_post->ID ); ?>" /></li><?php 
 
 	endforeach; endif;
 }

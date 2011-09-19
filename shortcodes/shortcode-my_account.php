@@ -62,7 +62,7 @@ function woocommerce_my_account( $atts ) {
 				if ($woocommerce_orders->orders) foreach ($woocommerce_orders->orders as $order) :
 					?><tr class="order">
 						<td><?php echo $order->id; ?></td>
-						<td><time title="<?php echo strtotime($order->order_date); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
+						<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
 						<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
 						<td><?php echo woocommerce_price($order->order_total); ?></td>
 						<td><?php echo $order->status; ?></td>
@@ -258,36 +258,36 @@ function woocommerce_edit_address() {
 			
 			<p class="form-row form-row-first">
 				<label for="address-first_name"><?php _e('First Name', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address-first_name" id="address-first_name" placeholder="<?php _e('First Name', 'woothemes'); ?>" value="<?php echo $address['first_name']; ?>" />
+				<input type="text" class="input-text" name="address-first_name" id="address-first_name" placeholder="<?php _e('First Name', 'woothemes'); ?>" value="<?php echo esc_attr( $address['first_name'] ); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="address-last_name"><?php _e('Last Name', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address-last_name" id="address-last_name" placeholder="<?php _e('Last Name', 'woothemes'); ?>" value="<?php echo $address['last_name']; ?>" />
+				<input type="text" class="input-text" name="address-last_name" id="address-last_name" placeholder="<?php _e('Last Name', 'woothemes'); ?>" value="<?php echo esc_attr( $address['last_name'] ); ?>" />
 			</p>
 			<div class="clear"></div>
 			
 			<p class="form-row columned">
 				<label for="address-company"><?php _e('Company', 'woothemes'); ?></label>
-				<input type="text" class="input-text" name="address-company" id="address-company" placeholder="<?php _e('Company', 'woothemes'); ?>" value="<?php echo $address['company']; ?>" />
+				<input type="text" class="input-text" name="address-company" id="address-company" placeholder="<?php _e('Company', 'woothemes'); ?>" value="<?php echo esc_attr( $address['company'] ); ?>" />
 			</p>
 			
 			<p class="form-row form-row-first">
 				<label for="address-address"><?php _e('Address', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address-address" id="address-address" placeholder="<?php _e('1 Infinite Loop', 'woothemes'); ?>" value="<?php echo $address['address']; ?>" />
+				<input type="text" class="input-text" name="address-address" id="address-address" placeholder="<?php _e('1 Infinite Loop', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address'] ); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="address-address2" class="hidden"><?php _e('Address 2', 'woothemes'); ?></label>
-				<input type="text" class="input-text" name="address-address2" id="address-address2" placeholder="<?php _e('Cupertino', 'woothemes'); ?>" value="<?php echo $address['address2']; ?>" />
+				<input type="text" class="input-text" name="address-address2" id="address-address2" placeholder="<?php _e('Cupertino', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address2'] ); ?>" />
 			</p>
 			<div class="clear"></div>
 			
 			<p class="form-row form-row-first">
 				<label for="address-city"><?php _e('City', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address-city" id="address-city" placeholder="<?php _e('City', 'woothemes'); ?>" value="<?php echo $address['city']; ?>" />
+				<input type="text" class="input-text" name="address-city" id="address-city" placeholder="<?php _e('City', 'woothemes'); ?>" value="<?php echo esc_attr( $address['city'] ); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="address-postcode"><?php _e('Postcode', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address-postcode" id="address-postcode" placeholder="123456" value="<?php echo $address['postcode']; ?>" />
+				<input type="text" class="input-text" name="address-postcode" id="address-postcode" placeholder="123456" value="<?php echo esc_attr( $address['postcode'] ); ?>" />
 			</p>
 			<div class="clear"></div>
 			
@@ -329,7 +329,7 @@ function woocommerce_edit_address() {
 						<?php
 					else :
 						// Input
-						?><input type="text" class="input-text" value="<?php echo $current_r; ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="address-state" id="address-state" /><?php
+						?><input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="address-state" id="address-state" /><?php
 					endif;
 				?>
 			</p>
@@ -338,16 +338,16 @@ function woocommerce_edit_address() {
 			<?php if ($load_address=='billing') : ?>
 				<p class="form-row columned">
 					<label for="address-email"><?php _e('Email Address', 'woothemes'); ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="address-email" id="address-email" placeholder="<?php _e('you@yourdomain.com', 'woothemes'); ?>" value="<?php echo $address['email']; ?>" />
+					<input type="text" class="input-text" name="address-email" id="address-email" placeholder="<?php _e('you@yourdomain.com', 'woothemes'); ?>" value="<?php echo esc_attr( $address['email'] ); ?>" />
 				</p>
 				
 				<p class="form-row form-row-first">
 					<label for="address-phone"><?php _e('Phone', 'woothemes'); ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="address-phone" id="address-phone" placeholder="0123456789" value="<?php echo $address['phone']; ?>" />
+					<input type="text" class="input-text" name="address-phone" id="address-phone" placeholder="0123456789" value="<?php echo esc_attr( $address['phone'] ); ?>" />
 				</p>
 				<p class="form-row form-row-last">	
 					<label for="address-fax"><?php _e('Fax', 'woothemes'); ?></label>
-					<input type="text" class="input-text" name="address-fax" id="address-fax" placeholder="0123456789" value="<?php echo $address['fax']; ?>" />
+					<input type="text" class="input-text" name="address-fax" id="address-fax" placeholder="0123456789" value="<?php echo esc_attr( $address['fax'] ); ?>" />
 				</p>
 				<div class="clear"></div>
 			<?php endif; ?>

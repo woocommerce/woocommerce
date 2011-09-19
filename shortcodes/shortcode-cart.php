@@ -121,7 +121,7 @@ function woocommerce_cart( $atts ) {
 								?>
 							</td>
 							<td class="product-price"><?php echo woocommerce_price($_product->get_price()); ?></td>
-							<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo $values['quantity']; ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
+							<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 							<td class="product-subtotal"><?php echo woocommerce_price($_product->get_price()*$values['quantity']); ?></td>
 						</tr>
 						<?php

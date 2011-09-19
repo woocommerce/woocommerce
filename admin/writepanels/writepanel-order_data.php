@@ -46,7 +46,7 @@ function woocommerce_order_data_meta_box($post) {
 		#titlediv, #major-publishing-actions, #minor-publishing-actions { display:none }
 	</style>
 	<div class="panel-wrap woocommerce">
-		<input name="post_title" type="hidden" value="<?php echo $order_title; ?>" />
+		<input name="post_title" type="hidden" value="<?php echo esc_attr( $order_title ); ?>" />
 		<input name="post_status" type="hidden" value="publish" />
 		<ul class="product_data_tabs tabs" style="display:none;">
 			<li class="active"><a href="#order_data"><?php _e('Order', 'woothemes'); ?></a></li>
@@ -179,13 +179,13 @@ function woocommerce_order_items_meta_box($post) {
 							</table>
 						</td>
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
-						<td class="quantity"><input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo $item['qty']; ?>" /></td>
-						<td class="cost"><input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $item['cost']; ?>" /></td>
-						<td class="tax"><input type="text" name="item_tax_rate[<?php echo $loop; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $item['taxrate']; ?>" /></td>
+						<td class="quantity"><input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo esc_attr( $item['qty'] ); ?>" /></td>
+						<td class="cost"><input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo esc_attr( $item['cost'] ); ?>" /></td>
+						<td class="tax"><input type="text" name="item_tax_rate[<?php echo $loop; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $item['taxrate'] ); ?>" /></td>
 						<td class="center">
-							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo $item['id']; ?>" />
-							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo $item['name']; ?>" />
-							<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php echo $item['variation_id']; ?>" />
+							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['id'] ); ?>" />
+							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['name'] ); ?>" />
+							<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['variation_id'] ); ?>" />
 							<button type="button" class="remove_row button">&times;</button>
 						</td>
 					</tr>

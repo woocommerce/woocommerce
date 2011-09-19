@@ -461,7 +461,7 @@ function woocommerce_comments($comment, $args, $depth) {
   			<?php echo get_avatar( $comment, $size='60' ); ?>
 			
 			<div class="comment-text">
-				<div class="star-rating" title="<?php echo get_comment_meta( $comment->comment_ID, 'rating', true ); ?>">
+				<div class="star-rating" title="<?php echo esc_attr( get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>">
 					<span style="width:<?php echo get_comment_meta( $comment->comment_ID, 'rating', true )*16; ?>px"><?php echo get_comment_meta( $comment->comment_ID, 'rating', true ); ?> <?php _e('out of 5', 'woothemes'); ?></span>
 				</div>
 				<?php if ($comment->comment_approved == '0') : ?>

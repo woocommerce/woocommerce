@@ -218,11 +218,11 @@ function woocommerce_add_order_item() {
 		</td>
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
 		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="1" /></td>
-		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo $_product->get_price_excluding_tax(); ?>" /></td>
-		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo $_product->get_tax_base_rate(); ?>" /></td>
+		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax() ); ?>" /></td>
+		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_tax_base_rate() ); ?>" /></td>
 		<td class="center">
-			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo $_product->id; ?>" />
-			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo $_product->get_title(); ?>" />
+			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
+			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
 			<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
 			<button type="button" class="remove_row button">&times;</button>
 		</td>
@@ -275,7 +275,7 @@ function woocommerce_upsell_crosssell_search_products() {
 		$SKU = get_post_meta($post->ID, 'sku', true);
 		
 		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add" title="Add">&rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo $name; ?>[]" value="0" /></li>
+		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add" title="Add">&rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[]" value="0" /></li>
 		<?php
 						
 	endforeach; else : 

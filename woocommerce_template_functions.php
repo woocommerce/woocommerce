@@ -386,7 +386,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<?php foreach ($attributes as $name => $options) :?>
 					<tr>
 						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
-						<td><select id="<?php echo sanitize_title($name); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
+						<td><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
 								<?php foreach ($options as $option) : 
@@ -413,7 +413,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 					<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 				</div>
 			</div>
-			<div><input type="hidden" name="product_id" value="<?php echo $post->ID; ?>" /></div>
+			<div><input type="hidden" name="product_id" value="<?php echo esc_attr( $post->ID ); ?>" /></div>
 			<?php do_action('woocommerce_add_to_cart_form'); ?>
 		</form>
 		<?php
@@ -630,13 +630,13 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 						else :
 							// Input
 							?>
-							<input type="text" class="input-text" value="<?php echo $current_r; ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
+							<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
 							<?php
 						endif;
 					?>
 				</p>
 				<p class="form-row col-2">
-					<input type="text" class="input-text" value="<?php echo $woocommerce->customer->get_shipping_postcode(); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
+					<input type="text" class="input-text" value="<?php echo esc_attr( $woocommerce->customer->get_shipping_postcode() ); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
 				</p>
 			</div>
 			<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woothemes'); ?></button></p>

@@ -116,7 +116,7 @@ function woocommerce_edit_attribute() {
 							
 							<div class="form-field">
 								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
-								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo $att_label; ?>" />
+								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
 								<p class="description"><?php _e('Label for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
 							</div>
 							<div class="form-field">

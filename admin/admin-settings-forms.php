@@ -141,23 +141,23 @@ function woocommerce_admin_fields($options) {
             case 'text':
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="<?php echo $value['type'] ?>" style="<?php echo $value['css'] ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo $value['type'] ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id']) !== false && get_option( $value['id']) !== null ) echo  stripslashes(get_option($value['id'])); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
                 </tr><?php
             break;
             case 'image_width' :
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><?php _e('Width'); ?> <input name="<?php echo $value['id'] ?>_width" id="<?php echo $value['id'] ?>_width" type="text" size="3" value="<?php if ( get_option( $value['id'].'_width') ) echo stripslashes(get_option($value['id'].'_width')); else echo $value['std'] ?>" /> <?php _e('Height'); ?> <input name="<?php echo $value['id'] ?>_height" id="<?php echo $value['id'] ?>_height" type="text" size="3"" value="<?php if ( get_option( $value['id'].'_height') ) echo stripslashes(get_option($value['id'].'_height')); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+                    <td class="forminp"><?php _e('Width'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( get_option( $value['id'].'_width') ) echo stripslashes(get_option($value['id'].'_width')); else echo $value['std'] ?>" /> <?php _e('Height'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3"" value="<?php if ( get_option( $value['id'].'_height') ) echo stripslashes(get_option($value['id'].'_height')); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
                 </tr><?php
             break;
             case 'select':
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>">
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>">
                         <?php
                         foreach ($value['options'] as $key => $val) {
                         ?>
-                            <option value="<?php echo $key ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo ucfirst($val) ?></option>
+                            <option value="<?php echo esc_attr( $key ); ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo ucfirst($val) ?></option>
                         <?php
                         }
                         ?>
@@ -178,7 +178,7 @@ function woocommerce_admin_fields($options) {
             	?>
 	            <fieldset><legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
-					<input name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
+					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
 					<?php echo $value['desc'] ?></label><br>
 				</fieldset>
 				<?php
@@ -195,7 +195,7 @@ function woocommerce_admin_fields($options) {
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo $value['id'] ?>" id="<?php echo $value['id'] ?>" style="<?php echo $value['css'] ?>"><?php if (get_option($value['id'])) echo stripslashes(get_option($value['id'])); else echo $value['std']; ?></textarea> <span class="description"><?php echo $value['desc'] ?></span>
+                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>"><?php if (get_option($value['id'])) echo stripslashes(get_option($value['id'])); else echo $value['std']; ?></textarea> <span class="description"><?php echo $value['desc'] ?></span>
                     </td>
                 </tr><?php
             break;
@@ -229,7 +229,7 @@ function woocommerce_admin_fields($options) {
             	endif;
             	?><tr valign="top" class="multi_select_countries">
                     <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo $value['id'] ?>" title="Country" style="width: 175px;">	
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" title="Country" style="width: 175px;">	
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 			        </select> <span class="description"><?php echo $value['desc'] ?></span>
                		</td>
@@ -279,7 +279,7 @@ function woocommerce_admin_fields($options) {
 					                    endforeach;
 				                    ?>
 			                    </select>
-			                    <input type="text" class="text" value="<?php echo $rate['rate']; ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% 
+			                    <input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% 
 			                    <label class="checkbox"><input type="checkbox" name="tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> /> <?php _e('Apply to shipping', 'woothemes'); ?></label><a href="#" class="remove button">&times;</a>
                				</div>
                				<?php endforeach; ?>
