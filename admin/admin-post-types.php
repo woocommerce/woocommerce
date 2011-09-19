@@ -123,21 +123,21 @@ function woocommerce_edit_product_columns($columns){
 	
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["thumb"] = __("Image", 'woothemes');
+	
 	$columns["title"] = __("Name", 'woothemes');
+	if( get_option('woocommerce_enable_sku', true) == 'yes' ) $columns["sku"] = __("ID", 'woothemes');
 	$columns["product_type"] = __("Type", 'woothemes');
-	$columns["sku"] = __("ID/SKU", 'woothemes');
-	$columns["product_cat"] = __("Category", 'woothemes');
+	
+	$columns["product_cat"] = __("Categories", 'woothemes');
 	$columns["product_tags"] = __("Tags", 'woothemes');
-	$columns["visibility"] = __("Visibility", 'woothemes');
 	$columns["featured"] = __("Featured", 'woothemes');
 	
 	if (get_option('woocommerce_manage_stock')=='yes') :
 		$columns["is_in_stock"] = __("In Stock?", 'woothemes');
-		$columns["inventory"] = __("Inventory", 'woothemes');
 	endif;
 	
 	$columns["price"] = __("Price", 'woothemes');
-	$columns["date"] = __("Date", 'woothemes');
+	$columns["product_date"] = __("Date", 'woothemes');
 	
 	return $columns;
 }
@@ -158,17 +158,14 @@ function woocommerce_custom_product_columns($column) {
 				echo get_the_post_thumbnail($post->ID, 'shop_thumbnail');
 			endif;
 		break;
-		case "summary" :
-			echo $post->post_excerpt;
-		break;
 		case "price":
 			echo $product->get_price_html();	
 		break;
 		case "product_cat" :
-			echo get_the_term_list($post->ID, 'product_cat', '', ', ','');
+			if (!$terms = get_the_term_list($post->ID, 'product_cat', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
 		break;
 		case "product_tags" :
-			echo get_the_term_list($post->ID, 'product_tag', '', ', ','');
+			if (!$terms = get_the_term_list($post->ID, 'product_tag', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
 		break;
 		case "sku" :
 			if ( $sku = get_post_meta( $post->ID, 'sku', true )) :
@@ -184,26 +181,54 @@ function woocommerce_custom_product_columns($column) {
 			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';
 			echo '</a>';
 		break;
-		case "visibility" :
-			if ( $this_data = $product->visibility ) :
-				echo $this_data;	
-			else :
-				echo '<span class="na">&ndash;</span>';
-			endif;
-		break;
 		case "is_in_stock" :
-			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
-			else echo '<span class="na">&ndash;</span>';
-		break;
-		case "inventory" :
-			if ( $product->managing_stock() ) :
-				echo $product->stock.' in stock';	
+			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) :
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" /> ';
 			else :
-				echo '<span class="na">&ndash;</span>';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" /> ';
+			endif;
+			if ( $product->managing_stock() ) :
+				echo $product->stock.__(' in stock', 'woothemes');
 			endif;
 		break;
 		case "product_type" :
 			echo ucwords($product->product_type);
+		break;
+		case "product_date" :
+			if ( '0000-00-00 00:00:00' == $post->post_date ) :
+				$t_time = $h_time = __( 'Unpublished' );
+				$time_diff = 0;
+			else :
+				$t_time = get_the_time( __( 'Y/m/d g:i:s A' ) );
+				$m_time = $post->post_date;
+				$time = get_post_time( 'G', true, $post );
+
+				$time_diff = time() - $time;
+
+				if ( $time_diff > 0 && $time_diff < 24*60*60 )
+					$h_time = sprintf( __( '%s ago' ), human_time_diff( $time ) );
+				else
+					$h_time = mysql2date( __( 'Y/m/d' ), $m_time );
+			endif;
+
+			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post, $column_name, $mode ) . '</abbr><br />';
+			
+			if ( 'publish' == $post->post_status ) :
+				_e( 'Published' );
+			elseif ( 'future' == $post->post_status ) :
+				if ( $time_diff > 0 ) :
+					echo '<strong class="attention">' . __( 'Missed schedule' ) . '</strong>';
+				else :
+					_e( 'Scheduled' );
+				endif;
+			else :
+				_e( 'Last Modified' );
+			endif;
+
+			if ( $this_data = $product->visibility ) :
+				echo '<br />' . ucfirst($this_data);	
+			endif;
+			
 		break;
 	}
 }
@@ -217,10 +242,11 @@ add_filter("manage_edit-product_sortable_columns", 'woocommerce_custom_product_s
 
 function woocommerce_custom_product_sort($columns) {
 	$custom = array(
-		'inventory' 	=> 'inventory',
+		'is_in_stock' 	=> 'inventory',
 		'price'			=> 'price',
 		'featured'		=> 'featured',
-		'sku'			=> 'sku'
+		'sku'			=> 'sku',
+		'product_date'	=> 'date'
 	);
 	return wp_parse_args($custom, $columns);
 }
@@ -269,21 +295,41 @@ add_action('restrict_manage_posts','woocommerce_products_by_category');
 
 function woocommerce_products_by_category() {
     global $typenow, $wp_query;
-    if ($typenow=='product') {
-
-			$terms = get_terms('product_cat');
-			$output = "<select name='product_cat' id='dropdown_product_cat'>";
-			$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
-			foreach($terms as $term){
-				if ( isset( $wp_query->query['product_cat'] ) ) {
-					$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
-				}
-			}
-			$output .="</select>";
-			echo $output;
-
-    }
+    if ($typenow=='product') :
+		$terms = get_terms('product_cat');
+		$output = "<select name='product_cat' id='dropdown_product_cat'>";
+		$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
+		foreach($terms as $term) :
+			if ( isset( $wp_query->query['product_cat'] ) ) :
+				$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
+			endif;
+		endforeach;
+		$output .="</select>";
+		echo $output;
+    endif;
 }
+
+/**
+ * Filter products by type
+ **/
+add_action('restrict_manage_posts', 'woocommerce_products_by_type');
+
+function woocommerce_products_by_type() {
+    global $typenow, $wp_query;
+    if ($typenow=='product') :
+		$terms = get_terms('product_type');
+		$output = "<select name='product_type' id='dropdown_product_type'>";
+		$output .= '<option value="">'.__('Show all types', 'woothemes').'</option>';
+		foreach($terms as $term) :
+			$output .="<option value='$term->slug' ";
+			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
+			$output .=">$term->name ($term->count)</option>";
+		endforeach;
+		$output .="</select>";
+		echo $output;
+    endif;
+}
+
 
 
 /**

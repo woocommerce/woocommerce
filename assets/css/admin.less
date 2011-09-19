@@ -334,29 +334,34 @@ ul.subsubsub {
 }
 
 /* Product list */
-table.wp-list-table .column-thumb {
-	width: 66px;
-	text-align: center;
-	white-space: nowrap
-}
-table.wp-list-table .column-sku {
-	width: 100px;
-}
-table.wp-list-table img {
-	margin: 2px 0;
-}
-table.wp-list-table .column-thumb img {
-	padding: 2px;
-	border: 1px solid #dfdfdf;
-	vertical-align: middle;
-	width: 42px;
-	height: 42px;
-}
-table.wp-list-table span.na {
-	color: #999;
-}
-table.wp-list-table .column-featured, table.wp-list-table .column-sellable, table.wp-list-table .column-is_in_stock {
-	text-align: center !important;
+table.wp-list-table {
+	.column-thumb {
+		width: 66px;
+		text-align: center;
+		white-space: nowrap
+	}
+	.column-title {
+		width: 25%;
+	}
+	.column-sku {
+	}
+	img {
+		margin: 1px 2px;
+	}
+	.column-thumb img {
+		padding: 2px;
+		margin: 0;
+		border: 1px solid #dfdfdf;
+		vertical-align: middle;
+		width: 42px;
+		height: 42px;
+	}
+	span.na {
+		color: #999;
+	}
+	.column-featured, .column-is_in_stock {
+		text-align: left !important;
+	}
 }
 
 /* Dashboard */
