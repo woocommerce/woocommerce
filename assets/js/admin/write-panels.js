@@ -17,7 +17,7 @@ jQuery( function($){
 	// ORDERS
 	
 	jQuery('#order_items_list button.remove_row').live('click', function(){
-		var answer = confirm(params.remove_item_notice);
+		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){
 			jQuery(this).closest('tr.item').hide();
 			jQuery('input', jQuery(this).closest('tr.item')).val('');
@@ -26,7 +26,7 @@ jQuery( function($){
 	});
 	
 	jQuery('button.calc_totals').live('click', function(){
-		var answer = confirm(params.cart_total);
+		var answer = confirm(woocommerce_writepanel_params.cart_total);
 		if (answer){
 			
 			var item_count = jQuery('#order_items_list tr.item').size();
@@ -98,7 +98,7 @@ jQuery( function($){
 		
 		if (add_item_id) {
 			
-			jQuery('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			jQuery('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 			
 			var size = jQuery('table.woocommerce_order_items tbody tr.item').size();
 			
@@ -106,10 +106,10 @@ jQuery( function($){
 				action: 		'woocommerce_add_order_item',
 				item_to_add: 	jQuery('select.add_item_id').val(),
 				index:			size,
-				security: 		params.add_order_item_nonce
+				security: 		woocommerce_writepanel_params.add_order_item_nonce
 			};
 
-			jQuery.post( params.ajax_url, data, function(response) {
+			jQuery.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
 				
 				jQuery('table.woocommerce_order_items tbody#order_items_list').append( response );
 				jQuery('table.woocommerce_order_items').unblock();
@@ -128,7 +128,7 @@ jQuery( function($){
 		
 		var index = jQuery(this).closest('tr.item').attr('rel');
 		
-		jQuery(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + params.meta_value + '" /></td><td><button class="remove_meta button">&times;</button></td></tr>');
+		jQuery(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td><button class="remove_meta button">&times;</button></td></tr>');
 		
 		return false;
 		
@@ -143,7 +143,7 @@ jQuery( function($){
 	});
 	
 	jQuery('button.billing-same-as-shipping').live('click', function(){
-		var answer = confirm(params.copy_billing);
+		var answer = confirm(woocommerce_writepanel_params.copy_billing);
 		if (answer){
 			jQuery('input#shipping_first_name').val( jQuery('input#billing_first_name').val() );
 			jQuery('input#shipping_last_name').val( jQuery('input#billing_last_name').val() );
@@ -203,38 +203,31 @@ jQuery( function($){
 	
 	
 	// DATE PICKER FIELDS
-	Date.firstDayOfWeek = 1;
-	Date.format = 'yyyy-mm-dd';
-	jQuery('.date-pick').datePicker();
-	jQuery('#sale_price_dates_from').bind(
-		'dpClosed',
-		function(e, selectedDates)
-		{
-			var d = selectedDates[0];
-			if (d) {
-				d = new Date(d);
-				jQuery('#sale_price_dates_to').dpSetStartDate(d.addDays(1).asString());
-			}
+	var dates = jQuery( "#sale_price_dates_from, #sale_price_dates_to" ).datepicker({
+		defaultDate: "",
+		dateFormat: "yy-mm-dd",
+		numberOfMonths: 1,
+		showButtonPanel: true,
+		showOn: "button",
+		buttonImage: woocommerce_writepanel_params.calendar_image,
+		buttonImageOnly: true,
+		onSelect: function( selectedDate ) {
+			var option = this.id == "sale_price_dates_from" ? "minDate" : "maxDate",
+				instance = jQuery( this ).data( "datepicker" ),
+				date = jQuery.datepicker.parseDate(
+					instance.settings.dateFormat ||
+					jQuery.datepicker._defaults.dateFormat,
+					selectedDate, instance.settings );
+			dates.not( this ).datepicker( "option", option, date );
 		}
-	);
-	jQuery('#sale_price_dates_to').bind(
-		'dpClosed',
-		function(e, selectedDates)
-		{
-			var d = selectedDates[0];
-			if (d) {
-				d = new Date(d);
-				jQuery('#sale_price_dates_from').dpSetEndDate(d.addDays(-1).asString());
-			}
-		}
-	);
-	
+	});
+		
 	
 	// ATTRIBUTE TABLES
 		
 		// Multiselect attributes
 		jQuery("#attributes_list select.multiselect").multiselect({
-			noneSelectedText: params.select_terms,
+			noneSelectedText: woocommerce_writepanel_params.select_terms,
 			selectedList: 4
 		});	
 		
@@ -354,10 +347,10 @@ jQuery( function($){
 			name: 			name,
 			search: 		search,
 			action: 		'woocommerce_upsell_crosssell_search_products',
-			security: 		params.upsell_crosssell_search_products_nonce
+			security: 		woocommerce_writepanel_params.upsell_crosssell_search_products_nonce
 		};
 		
-	    jQuery.post( params.ajax_url, data, function( response ) {
+	    jQuery.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
 			
 			jQuery('.multi_select_products_source li:not(.product_search)').remove();
 			jQuery(input).parent().parent().append( response );

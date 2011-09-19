@@ -150,14 +150,14 @@ function woocommerce_write_panel_scripts() {
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
-	wp_register_script('woocommerce-writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery'));
-	wp_enqueue_script('woocommerce-writepanel');
+	wp_register_script('woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery'));
+	wp_enqueue_script('woocommerce_writepanel');
 	
 	wp_enqueue_script('media-upload');
 	wp_enqueue_script('thickbox');
 	wp_enqueue_style('thickbox');
 	
-	$params = array( 
+	$woocommerce_witepanel_params = array( 
 		'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),
 		'cart_total' 					=> __("Calc totals based on order items, discount amount, and shipping?", 'woothemes'),
 		'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
@@ -173,10 +173,11 @@ function woocommerce_write_panel_scripts() {
 		'plugin_url' 					=> $woocommerce->plugin_url(),
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
-		'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products")
+		'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products"),
+		'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png'
 	 );
 				 
-	wp_localize_script( 'woocommerce-writepanel', 'params', $params );
+	wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
 	
 	
 }
