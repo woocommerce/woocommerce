@@ -54,7 +54,7 @@ class free_shipping extends woocommerce_shipping_method {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Minimum Order Amount', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input type="text" name="woocommerce_free_shipping_minimum_amount" id="woocommerce_free_shipping_minimum_amount" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_free_shipping_minimum_amount')) echo $value; ?>" /> <span class="description"><?php _e('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes') ?></span>
+			        <input type="text" name="woocommerce_free_shipping_minimum_amount" id="woocommerce_free_shipping_minimum_amount" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_free_shipping_minimum_amount' ) ); ?>" /> <span class="description"><?php _e('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">

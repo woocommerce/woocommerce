@@ -69,13 +69,13 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Description', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_description')) echo $value; ?>" /> <span class="description"><?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?></span>
+			        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_paypal_description' ) ); ?>" /> <span class="description"><?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('PayPal email address', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_email')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?></span>
+			        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_paypal_email' ) ); ?>" /> <span class="description"><?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">

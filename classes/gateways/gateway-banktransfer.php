@@ -66,43 +66,43 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woocommerce') ?></th>
 	        <td class="forminp">
-	          <input class="input-text wide-input" type="text" name="woocommerce_bacs_description" id="woocommerce_bacs_description" value="<?php if ($value = get_option('woocommerce_bacs_description')) echo $value; ?>" /> <span class="description"><?php _e('Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.','woothemes') ?></span>
+	          <input class="input-text wide-input" type="text" name="woocommerce_bacs_description" id="woocommerce_bacs_description" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_description' ) ); ?>" /> <span class="description"><?php _e('Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.','woothemes') ?></span>
 	        </td>
 	      </tr>
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Name', 'woothemes') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_account_name" id="woocommerce_bacs_account_name" value="<?php if ($value = get_option('woocommerce_bacs_account_name')) echo $value; ?>" />
+	          <input class="input-text" type="text" name="woocommerce_bacs_account_name" id="woocommerce_bacs_account_name" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_account_name' ) ); ?>" />
 	        </td>
 	      </tr>
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Number', 'woothemes') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_account_number" id="woocommerce_bacs_account_number" value="<?php if ($value = get_option('woocommerce_bacs_account_number')) echo $value; ?>" />
+	          <input class="input-text" type="text" name="woocommerce_bacs_account_number" id="woocommerce_bacs_account_number" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_account_number' ) ); ?>" />
 	        </td>
 	      </tr>
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Sort Code', 'woothemes') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_sort_code" id="woocommerce_bacs_sort_code" value="<?php if ($value = get_option('woocommerce_bacs_sort_code')) echo $value; ?>" />
+	          <input class="input-text" type="text" name="woocommerce_bacs_sort_code" id="woocommerce_bacs_sort_code" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_sort_code' ) ); ?>" />
 	        </td>
 	      </tr>
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Bank Name', 'woothemes') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_bank_name" id="woocommerce_bacs_bank_name" value="<?php if ($value = get_option('woocommerce_bacs_bank_name')) echo $value; ?>" />
+	          <input class="input-text" type="text" name="woocommerce_bacs_bank_name" id="woocommerce_bacs_bank_name" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_bank_name' ) ); ?>" />
 	        </td>
 	      </tr>      
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('IBAN', 'woothemes') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_iban" id="woocommerce_bacs_iban" value="<?php if ($value = get_option('woocommerce_bacs_iban')) echo $value; ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
+	          <input class="input-text" type="text" name="woocommerce_bacs_iban" id="woocommerce_bacs_iban" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_iban' ) ); ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
 	        </td>
 	      </tr>
 	      <tr valign="top">
 	        <th scope="row" class="titledesc"><?php _e('BIC (formerly \'Swift\')', 'woocommerce') ?></th>
 	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_bic" id="woocommerce_bacs_bic" value="<?php if ($value = get_option('woocommerce_bacs_bic')) echo $value; ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
+	          <input class="input-text" type="text" name="woocommerce_bacs_bic" id="woocommerce_bacs_bic" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_bic' ) ); ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
 	        </td>
 	      </tr>
 		</table>

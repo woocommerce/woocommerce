@@ -65,19 +65,19 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Moneybookers merchant e-mail', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_moneybookers_email" id="woocommerce_moneybookers_email" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_email')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers email address; this is needed in order to take payment!', 'woothemes') ?></span>
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_email" id="woocommerce_moneybookers_email" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_moneybookers_email' ) ); ?>" /> <span class="description"><?php _e('Please enter your moneybookers email address; this is needed in order to take payment!', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">
 		    	<th scope="row" class="titledesc"><?php _e('Moneybookers Secret Word', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_moneybookers_secret_word" id="woocommerce_moneybookers_secret_word" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_secret_word')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers secretword; this is needed in order to take payment!', 'woothemes') ?></span>
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_secret_word" id="woocommerce_moneybookers_secret_word" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_moneybookers_secret_word' ) ); ?>" /> <span class="description"><?php _e('Please enter your moneybookers secretword; this is needed in order to take payment!', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">
 		    	<th scope="row" class="titledesc"><?php _e('Moneybookers Customer ID', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_moneybookers_customer_id" id="woocommerce_moneybookers_customer_id" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_moneybookers_customer_id')) echo $value; ?>" /> <span class="description"><?php _e('Please enter your moneybookers Customer ID; this is needed in order to take payment!', 'woothemes') ?></span>
+			        <input class="input-text" type="text" name="woocommerce_moneybookers_customer_id" id="woocommerce_moneybookers_customer_id" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_moneybookers_customer_id' ) ); ?>" /> <span class="description"><?php _e('Please enter your moneybookers Customer ID; this is needed in order to take payment!', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		</table>

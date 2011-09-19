@@ -127,13 +127,13 @@ class flat_rate extends woocommerce_shipping_method {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Cost', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input type="text" name="woocommerce_flat_rate_cost" id="woocommerce_flat_rate_cost" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_cost')) echo $value; ?>" /> <span class="description"><?php _e('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes') ?></span>
+			        <input type="text" name="woocommerce_flat_rate_cost" id="woocommerce_flat_rate_cost" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_flat_rate_cost' ) ); ?>" /> <span class="description"><?php _e('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Handling Fee', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input type="text" name="woocommerce_flat_rate_handling_fee" id="woocommerce_flat_rate_handling_fee" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_flat_rate_handling_fee')) echo $value; ?>" /> <span class="description"><?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes') ?></span>
+			        <input type="text" name="woocommerce_flat_rate_handling_fee" id="woocommerce_flat_rate_handling_fee" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_flat_rate_handling_fee' ) ); ?>" /> <span class="description"><?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		    <tr valign="top">

@@ -55,7 +55,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		    <tr valign="top">
 		        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woothemes') ?></th>
 		        <td class="forminp">
-			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php if ($value = get_option('woocommerce_cheque_description')) echo $value; ?>" /> <span class="description"><?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?></span>
+			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php echo esc_attr( get_option( 'woocommerce_cheque_description' ) ); ?>" /> <span class="description"><?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?></span>
 		        </td>
 		    </tr>
 		</table>
