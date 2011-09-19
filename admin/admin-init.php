@@ -188,7 +188,7 @@ function woocommerce_categories_scripts () {
 	
 	if( !isset($_GET['taxonomy']) || $_GET['taxonomy'] !== 'product_cat') return;
 	
-	wp_register_script('woocommerce-categories-ordering', $woocommerce->plugin_url() . '/assets/js/categories-ordering.js', array('jquery-ui-sortable'));
+	wp_register_script('woocommerce-categories-ordering', $woocommerce->plugin_url() . '/assets/js/admin/categories-ordering.js', array('jquery-ui-sortable'));
 	wp_print_scripts('woocommerce-categories-ordering');
 	
 }
