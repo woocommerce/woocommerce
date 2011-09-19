@@ -217,11 +217,13 @@ function variable_product_write_panel_js() {
 		});
 
 		jQuery('button.link_all_variations').live('click', function(){
-			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woothemes'); ?>');
-			if (answer){
 			
+			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woothemes'); ?>');
+			
+			if (answer) {
+				
 				jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-						
+				
 				var data = {
 					action: 'woocommerce_link_all_variations',
 					post_id: <?php echo $post->ID; ?>,
@@ -230,10 +232,11 @@ function variable_product_write_panel_js() {
 	
 				jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
 					
+					jQuery('.woocommerce_variations').unblock();
+					
 					if (response==1) {				
 						jQuery('.woocommerce_variations').load( window.location + ' .woocommerce_variations > *' );
 					}
-					jQuery('.woocommerce_variations').unblock();
 	
 				});
 			}
@@ -375,10 +378,10 @@ function woocommerce_link_all_variations() {
 	
 	$variations = array();
 	
-	$attributes = (array) maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
-	
+	$_product = &new woocommerce_product( $post_id );
+		
 	// Put variation attributes into an array
-	foreach ($attributes as $attribute) :
+	foreach ($_product->attributes as $attribute) :
 								
 		if ( !$attribute['is_variation'] ) continue;
 		
@@ -402,6 +405,16 @@ function woocommerce_link_all_variations() {
 	
 	// Quit out if none were found
 	if (sizeof($variations)==0) die();
+	
+	// Get existing variations so we don't create duplicated
+    $available_variations = array();
+    
+    foreach($_product->get_children() as $child) {
+        $variation = $child->product;
+        if($variation instanceof woocommerce_product_variation) {
+            $available_variations[] = $variation->get_variation_attributes();
+        }
+    }
 	
 	// Created posts will all have the following data
 	$variation_post_data = array(
@@ -474,6 +487,9 @@ function woocommerce_link_all_variations() {
 	$possible_variations = array_cartesian( $variations );
 	
 	foreach ($possible_variations as $variation) :
+		
+		// Check if variation already exists
+		if (in_array($variation, $available_variations)) continue;
 		
 		$variation_id = wp_insert_post( $variation_post_data );
 		
