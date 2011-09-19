@@ -18,6 +18,8 @@
  *		- Cancel a pending order
  *		- Download a file
  *		- Order Status completed - allow customer to access Downloadable product
+ *		- Google Analytics standard tracking
+ *		- Google Analytics eCommerce tracking
  *
  * @package		WooCommerce
  * @category	Actions
@@ -809,3 +811,125 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 	
 	endforeach;
 }
+
+
+/**
+ * Google Analytics standard tracking
+ **/
+add_action('wp_footer', 'woocommerce_google_tracking');
+
+function woocommerce_google_tracking() {
+	global $woocommerce;
+	
+	if (!get_option('woocommerce_ga_standard_tracking_enabled')) return;
+	
+	$tracking_id = get_option('woocommerce_ga_id');
+	
+	if (!$tracking_id) return;
+	
+	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
+	if (is_user_logged_in()) :
+		$user_id 		= get_current_user_id();
+		$current_user 	= get_user_by('id', $user_id);
+		$username 		= $current_user->user_login;
+	else :
+		$user_id 		= '';
+		$username 		= __('Guest', 'woothemes');
+	endif;
+	?>
+	<script type="text/javascript">
+	
+		var _gaq = _gaq || [];
+		_gaq.push(
+			['_setAccount', '<?php echo $tracking_id; ?>'],
+			['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
+			['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
+			['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
+			['_trackPageview']
+		);
+		
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+
+	</script>
+	<?php
+}
+			
+			
+/**
+ * Google Analytics eCommerce tracking
+ **/
+add_action('woocommerce_thankyou', 'woocommerce_ecommerce_tracking');
+
+function woocommerce_ecommerce_tracking( $order_id ) {
+	global $woocommerce;
+	
+	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
+	
+	$tracking_id = get_option('woocommerce_ga_id');
+	
+	if (!$tracking_id) return;
+	
+	// Doing eCommerce tracking so unhook standard tracking from the footer
+	remove_action('wp_footer', 'woocommerce_google_tracking');
+	
+	// Get the order and output tracking code
+	$order = &new woocommerce_order($order_id);
+	
+	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
+	if (is_user_logged_in()) :
+		$user_id 		= get_current_user_id();
+		$current_user 	= get_user_by('id', $user_id);
+		$username 		= $current_user->user_login;
+	else :
+		$user_id 		= '';
+		$username 		= __('Guest', 'woothemes');
+	endif;
+	?>
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		
+		_gaq.push(
+			['_setAccount', '<?php echo $tracking_id; ?>'],
+			['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
+			['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
+			['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
+			['_trackPageview']
+		);
+		
+		_gaq.push(['_addTrans',
+			'<?php echo $order_id; ?>',           		// order ID - required
+			'<?php bloginfo('name'); ?>',  				// affiliation or store name
+			'<?php echo $order->order_total; ?>',   	// total - required
+			'<?php echo $order->order_tax; ?>',     	// tax
+			'<?php echo $order->order_shipping; ?>',	// shipping
+			'<?php echo $order->billing_city; ?>',      // city
+			'<?php echo $order->billing_state; ?>',     // state or province
+			'<?php echo $order->billing_country; ?>'    // country
+		]);
+		
+		// Order items
+		<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
+			_gaq.push(['_addItem',
+				'<?php echo $order_id; ?>',           	// order ID - required
+				'<?php echo $_product->sku; ?>',      	// SKU/code - required
+				'<?php echo $item['name']; ?>',        	// product name
+				'<?php echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>',   // category or variation
+				'<?php echo $item['cost']; ?>',         // unit price - required
+				'<?php echo $item['qty']; ?>'           // quantity - required
+			]);
+		<?php endforeach; ?>
+		
+		_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
+		
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+	<?php
+} 

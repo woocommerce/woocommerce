@@ -67,15 +67,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
-		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
-		'id' 		=> 'woocommerce_sharethis',
-		'css' 		=> 'width:300px;',
-		'type' 		=> 'text',
-		'std' 		=> ''
-	),
-	
-	array(  
 		'name' => __( 'WooCommerce CSS', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce frontend CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
@@ -99,6 +90,35 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox'
 	),
 	
+	array(  
+		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
+		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
+		'id' 		=> 'woocommerce_sharethis',
+		'type' 		=> 'text',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __('Google Analytics ID', 'woothemes'),
+		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_id',
+		'type' 		=> 'text',
+	),
+	
+	array(  
+		'name' => __('Google Analytics tracking', 'woothemes'),
+		'desc' 		=> __('Adds standard tracking code to the footer. You don\'t need to enable this if using a 3rd party google analytics plugin.', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
+		'type' 		=> 'checkbox',
+	),
+	
+	array(  
+		'name' => __('Google Analytics eCommerce tracking', 'woothemes'),
+		'desc' 		=> __('Adds eCommerce tracking code to the thankyou page.', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
+		'type' 		=> 'checkbox',
+	),
+					
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 )); // End general settings
