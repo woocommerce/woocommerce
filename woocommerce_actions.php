@@ -4,6 +4,7 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- Update catalog ordering if posted
  *		- Add a table to $wpdb to benefit from the WordPress Metadata API
  *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
@@ -25,6 +26,15 @@
  * @category	Actions
  * @author		WooThemes
  */
+
+/**
+ * Update catalog ordering if posted
+ */
+add_action('init', 'woocommerce_update_catalog_ordering');
+
+function woocommerce_update_catalog_ordering() {
+	if (isset($_POST['orderby']) && $_POST['orderby'] != '') $_SESSION['orderby'] = $_POST['orderby'];
+}
 
 /**
  * woocommerce_taxonomy_metadata_wpdbfix()

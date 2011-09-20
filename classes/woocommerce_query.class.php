@@ -53,7 +53,6 @@ class woocommerce_query {
 		endif;
 		
 		// Ordering
-		if (isset($_POST['orderby']) && $_POST['orderby'] != '') $_SESSION['orderby'] = $_POST['orderby'];
 		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : 'title';
 		
 		switch ($current_order) :

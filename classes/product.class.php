@@ -780,6 +780,7 @@ class woocommerce_product {
     			update_post_meta($this->id, 'price', $this->price);
 		
 				// Sale has expired - clear the schedule boxes
+				update_post_meta($this->id, 'sale_price', '');
 				update_post_meta($this->id, 'sale_price_dates_from', '');
 				update_post_meta($this->id, 'sale_price_dates_to', '');
 			
