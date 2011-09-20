@@ -10,26 +10,14 @@
  */
 
 /**
- * Queue install when activated
- */
-function queue_install_woocommerce() {
-	add_action('init', 'install_woocommerce', 0);
-}
-
-/**
  * Install woocommerce
- * 
- * Calls each function to install things, and clears the cron jobs and rewrite rules
  */
 function install_woocommerce() {
 	
-	global $woocommerce, $woocommerce_settings;
+	global $woocommerce_settings;
 	
 	// Include settings so that we can run through defaults
-	include( 'admin-settings.php' );
-	
-	// Define post types before we start
-	woocommerce_post_type();
+	include_once( 'admin-settings.php' );
 	
 	// Do install
 	woocommerce_default_options();
@@ -37,12 +25,26 @@ function install_woocommerce() {
 	woocommerce_tables_install();
 	woocommerce_default_taxonomies();
 	
-	// Flush Rules
-	flush_rewrite_rules( false );
-	
 	// Update version
 	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );
+	
+	// Flag installed so we can redirect
+	update_option( "woocommerce_installed", 1 );
 }
+
+/**
+ * Install woocommerce redirect
+ */
+add_action('admin_init', 'install_woocommerce_redirect');
+function install_woocommerce_redirect() {
+	if (get_option('woocommerce_installed')==1) :
+		update_option( "woocommerce_installed", 0 );
+		flush_rewrite_rules( false );
+		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
+		exit;
+	endif;
+}
+
 
 /**
  * Default options

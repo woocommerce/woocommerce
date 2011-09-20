@@ -589,6 +589,11 @@ function woocommerce_settings() {
     	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woothemes' ) . '</strong></p></div>';
         flush_rewrite_rules( false );
     endif;
+    
+    if (isset($_GET['installed']) && $_GET['installed']) :
+    	echo '<div id="message" class="updated fade"><p><strong>' . __( 'WooCommerce has been installed. Enjoy :)', 'woothemes' ) . '</strong></p></div>';
+    	flush_rewrite_rules( false );
+    endif;
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">

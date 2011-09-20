@@ -14,6 +14,7 @@
 .icon32-posts-shop_coupon{background-position:-475px -6px !important;}
 .icon32-posts-product_variation{background-position:-533px -6px !important;}
 .icon32-woocommerce-reports{background-position:-591px -6px !important;}
+.wrap.woocommerce div.updated{margin-top:10px;}
 .order_actions{color:#999;font-size:11px;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px;margin:0;line-height:1.6em;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}
 #woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .item_id{width:300px;vertical-align:top;}
