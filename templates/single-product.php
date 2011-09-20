@@ -28,6 +28,6 @@
 
 <?php do_action('woocommerce_after_main_content'); // </div></div> ?>
 
-<!--mfunc do_action('woocommerce_sidebar') --><?php do_action('woocommerce_sidebar'); ?><!--/mfunc-->
+<?php do_action('woocommerce_sidebar'); ?>
 
 <?php get_footer('shop'); ?>
