@@ -16,7 +16,8 @@ function woocommerce_reports() {
 		__('sales', 'woothemes') => array(
 			array(
 				'title' => __('Overview', 'woothemes'),
-				'description' => __('An overview of your sales/order data is shown below. For more detailed views, click on one of the above links.', 'woothemes'),
+				'description' => '',
+				'hide_title' => true,
 				'function' => 'woocommerce_sales_overview'
 			),
 			array(
@@ -49,7 +50,16 @@ function woocommerce_reports() {
 			array(
 				'title' => __('Overview', 'woothemes'),
 				'description' => '',
+				'hide_title' => true,
 				'function' => 'woocommerce_customer_overview'
+			),
+		),
+		__('stock', 'woothemes') => array(
+			array(
+				'title' => __('Overview', 'woothemes'),
+				'description' => '',
+				'hide_title' => true,
+				'function' => 'woocommerce_stock_overview'
 			),
 		)
 	);
@@ -78,7 +88,7 @@ function woocommerce_reports() {
 		?></li></ul><br class="clear" /><?php endif; ?>
 		
 		<?php if (isset($charts[$current_tab][$current_chart])) : ?> 
-			<?php if (sizeof($charts[$current_tab])>1) : ?><h3><?php echo $charts[$current_tab][$current_chart]['title']; ?></h3>
+			<?php if (!isset($charts[$current_tab][$current_chart]['hide_title']) || $charts[$current_tab][$current_chart]['hide_title']!=true) : ?><h3><?php echo $charts[$current_tab][$current_chart]['title']; ?></h3>
 			<?php if ($charts[$current_tab][$current_chart]['description']) : ?><p><?php echo $charts[$current_tab][$current_chart]['description']; ?></p><?php endif; ?>
 			<?php endif; ?>
 			<?php
@@ -1303,5 +1313,194 @@ function woocommerce_customer_overview() {
 			<?php woocommerce_weekend_area_js(); ?>
 		});
 	</script>
+	<?php
+}
+
+
+/**
+ * Stock overview
+ */
+function woocommerce_stock_overview() {
+
+	global $start_date, $end_date, $woocommerce, $wpdb;
+	
+	$total_customers = 0;
+	$total_customer_sales = 0;
+	$total_guest_sales = 0;
+	$total_customer_orders = 0;
+	$total_guest_orders = 0;
+	
+	$users_query = new WP_User_Query( array( 
+		'fields' => array('user_registered'), 
+		'role' => 'customer'
+		) );
+	$customers = $users_query->get_results();
+	$total_customers = (int) sizeof($customers);
+	
+	$args = array(
+	    'numberposts'     => -1,
+	    'orderby'         => 'post_date',
+	    'order'           => 'DESC',
+	    'post_type'       => 'shop_order',
+	    'post_status'     => 'publish' ,
+	    'suppress_filters' => false,
+	    'tax_query' => array(
+	    	array(
+		    	'taxonomy' => 'shop_order_status',
+				'terms' => array('completed', 'processing', 'on-hold'),
+				'field' => 'slug',
+				'operator' => 'IN'
+			)
+	    )
+	);
+	$orders = get_posts( $args );
+	foreach ($orders as $order) :
+		if (get_post_meta( $order->ID, '_customer_user', true )>0) :
+			$total_customer_sales += get_post_meta($order->ID, '_order_total', true);
+			$total_customer_orders++;
+		else :
+			$total_guest_sales += get_post_meta($order->ID, '_order_total', true);
+			$total_guest_orders++;
+		endif;
+	endforeach;
+	
+	// Low/No stock lists
+	$lowstockamount = get_option('woocommerce_notify_low_stock_amount');
+	if (!is_numeric($lowstockamount)) $lowstockamount = 1;
+	
+	$nostockamount = get_option('woocommerce_notify_no_stock_amount');
+	if (!is_numeric($nostockamount)) $nostockamount = 0;
+	
+	$outofstock = array();
+	$lowinstock = array();
+	
+	// Get low in stock simple/downloadable/virtual products. Grouped don't have stock. Variations need a separate query.
+	$args = array(
+		'post_type'			=> 'product',
+		'post_status' 		=> 'publish',
+		'posts_per_page' 	=> -1,
+		'meta_query' => array(
+			array(
+				'key' 		=> 'manage_stock',
+				'value' 	=> 'yes'
+			),
+			array(
+				'key' 		=> 'stock',
+				'value' 	=> $lowstockamount,
+				'compare' 	=> '<=',
+				'type' 		=> 'NUMERIC'
+			)
+		),
+		'tax_query' => array(
+			array(
+				'taxonomy' 	=> 'product_type',
+				'field' 	=> 'slug',
+				'terms' 	=> array('simple', 'downloadable', 'virtual'),
+				'operator' 	=> 'IN'
+			)
+		)
+	);
+	$low_stock_products = (array) get_posts($args);
+	
+	// Get low stock product variations
+	$args = array(
+		'post_type'			=> 'product_variation',
+		'post_status' 		=> 'publish',
+		'posts_per_page' 	=> -1,
+		'meta_query' => array(
+			array(
+				'key' 		=> 'stock',
+				'value' 	=> $lowstockamount,
+				'compare' 	=> '<=',
+				'type' 		=> 'NUMERIC'
+			),
+			array(
+				'key' 		=> 'stock',
+				'value' 	=> array('', false, null),
+				'compare' 	=> 'NOT IN'
+			)
+		)
+	);
+	$low_stock_variations = (array) get_posts($args);
+	
+	// Finally, get low stock variable products (where stock is set for the parent)
+	$args = array(
+		'post_type'			=> array('product'),
+		'post_status' 		=> 'publish',
+		'posts_per_page' 	=> -1,
+		'meta_query' => array(
+			'relation' => 'AND',
+			array(
+				'key' 		=> 'manage_stock',
+				'value' 	=> 'yes'
+			),
+			array(
+				'key' 		=> 'stock',
+				'value' 	=> $lowstockamount,
+				'compare' 	=> '<=',
+				'type' 		=> 'NUMERIC'
+			)
+		),
+		'tax_query' => array(
+			array(
+				'taxonomy' 	=> 'product_type',
+				'field' 	=> 'slug',
+				'terms' 	=> array('variable'),
+				'operator' 	=> 'IN'
+			)
+		)
+	);
+	$low_stock_variable_products = (array) get_posts($args);
+	
+	// Merge results
+	$low_in_stock = array_merge($low_stock_products, $low_stock_variations, $low_stock_variable_products);
+	
+	?>
+	<div id="poststuff" class="woocommerce-reports-wrap halved">
+		<div class="woocommerce-reports-left">
+			<div class="postbox">
+				<h3><span><?php _e('Low stock', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<?php
+					if ($low_in_stock) :
+						echo '<ul class="stock_list">';
+						foreach ($low_in_stock as $product) :
+							$stock = get_post_meta($product->ID, 'stock', true);
+							if ($stock<=$nostockamount) continue;
+							echo '<li><a href="';
+							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
+							echo '"><small>'.$stock.__(' in stock', 'woothemes').'</small> '.$product->post_title.'</a></li>';
+						endforeach;
+						echo '</ul>';
+					else :
+						echo '<p>'.__('No products are low in stock.', 'woothemes').'</p>';
+					endif;
+					?>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-right">
+			<div class="postbox">
+				<h3><span><?php _e('Out of stock', 'woothemes'); ?></span></h3>
+				<div class="inside">
+					<?php
+					if ($low_in_stock) :
+						echo '<ul class="stock_list">';
+						foreach ($low_in_stock as $product) :
+							$stock = get_post_meta($product->ID, 'stock', true);
+							if ($stock>$nostockamount) continue;
+							echo '<li><a href="';
+							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
+							echo '"><small>'.$stock.__(' in stock', 'woothemes').'</small> '.$product->post_title.'</a></li>';
+						endforeach;
+						echo '</ul>';
+					else :
+						echo '<p>'.__('No products are out in stock.', 'woothemes').'</p>';
+					endif;
+					?>
+				</div>
+			</div>
+		</div>
+	</div>
 	<?php
 }

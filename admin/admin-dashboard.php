@@ -15,57 +15,7 @@ add_action('right_now_table_end', 'woocommerce_right_now');
 
 function woocommerce_content_right_now() {
 	
-	global $lowinstock, $outofstock, $woocommerce;
-	
-	$lowstockamount = get_option('woocommerce_notify_low_stock_amount');
-	if (!is_numeric($lowstockamount)) $lowstockamount = 1;
-	
-	$nostockamount = get_option('woocommerce_notify_no_stock_amount');
-	if (!is_numeric($nostockamount)) $nostockamount = 1;
-	
-	$outofstock = array();
-	$lowinstock = array();
-	$args = array(
-		'post_type'	=> array('product', 'product_variation'),
-		'post_status' => 'publish',
-		'ignore_sticky_posts'	=> 1,
-		'posts_per_page' => -1
-	);
-	$my_query = new WP_Query($args);
-	if ($my_query->have_posts()) : while ($my_query->have_posts()) : $my_query->the_post(); 
-		
-		if ($my_query->post->post_type == 'product_variation') :
-			$parent = $my_query->post->post_parent;
-			$_product = &new woocommerce_product_variation( $my_query->post->ID );
-		else :
-			$parent = $my_query->post->ID;
-			$_product = &new woocommerce_product( $my_query->post->ID );
-		endif;
-		
-		if (!$_product->managing_stock()) continue;
-
-		$thisitem = '<tr class="first">
-			<td class="first b"><a href="post.php?post='.$parent.'&action=edit">'.$_product->stock.'</a></td>
-			<td class="t"><a href="post.php?post='.$parent.'&action=edit">'.$my_query->post->post_title.'</a></td>
-		</tr>';
-		
-		if ($_product->total_stock<=$nostockamount) :
-			$outofstock[] = $thisitem;
-			continue;
-		endif;
-		
-		if ($_product->total_stock<=$lowstockamount) $lowinstock[] = $thisitem;
-
-	endwhile; endif;
-	wp_reset_query();
-	
-	if (sizeof($lowinstock)==0) :
-		$lowinstock[] = '<tr><td colspan="2">'.__('No products are low in stock.', 'woothemes').'</td></tr>';
-	endif;
-	if (sizeof($outofstock)==0) :
-		$outofstock[] = '<tr><td colspan="2">'.__('No products are out of stock.', 'woothemes').'</td></tr>';
-	endif;
-	
+	global $woocommerce;
 	?>
 	</table>
 	<p class="sub woocommerce_sub"><?php _e('Shop Content', 'woothemes'); ?></p>
@@ -96,17 +46,11 @@ function woocommerce_content_right_now() {
 			?></a></td>
 			<td class="t"><a href="admin.php?page=attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
 		</tr>
-	</table>
-	<p class="sub woocommerce_sub"><?php _e('Low in stock', 'woothemes'); ?></p>
-	<table>
-		<?php echo implode('', $lowinstock); ?>
 	<?php
 }
 
 function woocommerce_right_now() {
 
-	global $outofstock;
-	
 	$woocommerce_orders = &new woocommerce_orders();
 	?>
 	</table>
@@ -128,10 +72,6 @@ function woocommerce_right_now() {
 			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=completed"><span class="total-count"><?php echo $woocommerce_orders->completed_count; ?></span></a></td>
 			<td class="last t"><a class="complete" href="edit.php?post_type=shop_order&shop_order_status=completed"><?php _e('Completed', 'woothemes'); ?></a></td>
 		</tr>
-	</table>
-	<p class="sub woocommerce_sub"><?php _e('Out of Stock/Backorders', 'woothemes'); ?></p>
-	<table>
-		<?php echo implode('', $outofstock); ?>
 	<?php
 }
 

@@ -73,14 +73,16 @@ table.wp-list-table .column-featured,table.wp-list-table .column-is_in_stock{tex
 #dashboard_right_now .complete{color:green;}
 #dashboard_right_now .t,#dashboard_right_now .t a{white-space:normal;}
 #woocommmerce_dashboard_sales h3 a{float:right;margin-left:8px;}
-ul.recent-orders li{overflow:hidden;zoom:1;border-bottom:#ECECEC 1px solid;padding:0 0 8px;margin:0 0 8px;}ul.recent-orders li .order-status{float:right;}
-ul.recent-orders li small{color:#999;}
-ul.recent-orders li .order-cost,ul.recent-orders li .order-customer{margin-left:8px;}
-ul.recent-orders li .completed{color:green;}
-ul.recent-orders li .on-hold{color:red;}
-ul.recent-orders li .processing{color:#21759B;}
-ul.recent-orders li .pending{color:#E66F00;}
-ul.recent-orders li .refunded,ul.recent-orders li .cancelled{color:#999;}
+ul.recent-orders li,ul.stock_list li{overflow:hidden;zoom:1;border-bottom:#ECECEC 1px solid;padding:0 0 8px;margin:0 0 8px;}ul.recent-orders li .order-status,ul.stock_list li .order-status{float:right;}
+ul.recent-orders li small,ul.stock_list li small{color:#999;}
+ul.recent-orders li .order-cost,ul.stock_list li .order-cost,ul.recent-orders li .order-customer,ul.stock_list li .order-customer{margin-left:8px;}
+ul.recent-orders li .completed,ul.stock_list li .completed{color:green;}
+ul.recent-orders li .on-hold,ul.stock_list li .on-hold{color:red;}
+ul.recent-orders li .processing,ul.stock_list li .processing{color:#21759B;}
+ul.recent-orders li .pending,ul.stock_list li .pending{color:#E66F00;}
+ul.recent-orders li .refunded,ul.stock_list li .refunded,ul.recent-orders li .cancelled,ul.stock_list li .cancelled{color:#999;}
+ul.recent-orders.stock_list small,ul.stock_list.stock_list small{float:right;}
+ul.recent-orders.stock_list a,ul.stock_list.stock_list a{text-decoration:none;}
 #woocommmerce_dashboard_recent_reviews li{line-height:1.5em;margin-bottom:12px;}
 #woocommmerce_dashboard_recent_reviews h4.meta{line-height:1.4;margin:-0.2em 0 0 0;font-weight:normal;color:#999;}
 #woocommmerce_dashboard_recent_reviews blockquote{padding:0;margin:0;}
@@ -158,11 +160,14 @@ img.tips{padding:5px 0 0 0;}
 #easyTooltip{padding:5px 10px;border:3px solid #3da5d5;background:#288ab7;color:#fff;font-size:12px;-moz-border-radius:4px;-webkit-border-radius:4px;-o-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;max-width:300px;}
 img.ui-datepicker-trigger{vertical-align:middle;margin-top:-1px;cursor:pointer;}
 .woocommerce_options_panel img.ui-datepicker-trigger{float:left;margin-right:8px;margin-top:4px;margin-left:4px;}
-.woocommerce-reports-wrap{margin-left:300px;padding-top:18px;}.woocommerce-reports-wrap .postbox h3{cursor:default !important;}
+.woocommerce-reports-wrap{margin-left:300px;padding-top:18px;}.woocommerce-reports-wrap.halved{margin:0;overflow:hidden;zoom:1;}
+.woocommerce-reports-wrap .postbox h3{cursor:default !important;}
 .woocommerce-reports-wrap .postbox .stat{font-size:1.5em !important;font-weight:bold;text-align:center;}
 .woocommerce-reports-wrap .postbox .chart{padding:16px;}
 .woocommerce-reports-wrap .woocommerce-reports-main{float:left;min-width:100%;}
 .woocommerce-reports-wrap .woocommerce-reports-sidebar{display:inline;width:281px;margin-left:-300px;clear:both;float:left;}
+.woocommerce-reports-wrap .woocommerce-reports-left{width:49.5%;float:left;}
+.woocommerce-reports-wrap .woocommerce-reports-right{width:49.5%;float:right;}
 #tooltip{color:#fff;font-size:12px;-moz-border-radius:4px;-webkit-border-radius:4px;-o-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;opacity:0.8;}
 table.bar_chart{width:100%;}table.bar_chart thead th{text-align:left;color:#ccc;padding:6px 0;}
 table.bar_chart tbody th{padding:6px 0;width:25%;text-align:left !important;font-weight:normal !important;border-bottom:1px solid #fee;}

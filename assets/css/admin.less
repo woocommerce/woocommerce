@@ -393,7 +393,7 @@ table.wp-list-table {
 	}
 }
 
-ul.recent-orders {
+ul.recent-orders, ul.stock_list {
 	li {
 		overflow: hidden;
 		zoom: 1;
@@ -423,6 +423,14 @@ ul.recent-orders {
 		}
 		.refunded, .cancelled {
 			color: #999;
+		}
+	}
+	&.stock_list {
+		small {
+			float: right;
+		}
+		a {
+			text-decoration: none;
 		}
 	}
 }
@@ -842,6 +850,11 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 .woocommerce-reports-wrap {
 	margin-left: 300px;
 	padding-top: 18px;
+	&.halved {
+		margin: 0;
+		overflow: hidden;
+		zoom: 1;
+	}
 	.postbox {
 		h3 {
 			cursor: default !important;
@@ -865,6 +878,14 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 		margin-left: -300px;
 		clear: both;
 		float: left;
+	}
+	.woocommerce-reports-left {
+		width: 49.5%;
+		float: left;
+	}
+	.woocommerce-reports-right {
+		width: 49.5%;
+		float: right;
 	}
 }
 
