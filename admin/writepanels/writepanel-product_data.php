@@ -103,10 +103,10 @@ function woocommerce_product_data_box() {
 				
 				echo '	<p class="form-field">
 							<label for="'.$field['id'].'_from">'.$field['label'].':</label>
-							<input type="text" class="short date-pick" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
+							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
 				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
 				echo '" placeholder="' . __('From&hellip;', 'woothemes') . '" maxlength="10" />
-							<input type="text" class="short date-pick" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
+							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
 				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
 				echo '" placeholder="' . __('To&hellip;', 'woothemes') . '" maxlength="10" />
 							<span class="description">' . __('Date format', 'woothemes') . ': <code>YYYY-MM-DD</code></span>

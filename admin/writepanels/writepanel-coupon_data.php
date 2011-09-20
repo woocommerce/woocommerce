@@ -67,12 +67,19 @@ function woocommerce_coupon_data_meta_box($post) {
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
 				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) Comma separate product IDs which are required for this coupon to work', 'woothemes') . '</span></p>';
 			
-			// Usage
+			// Usage limit
 			$value = get_post_meta($post->ID, 'usage_limit', true);
 			$field = array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woothemes') );
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
 				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) How many times this coupon can be used before it is void', 'woothemes') . '</span></p>';
+				
+			// Expiry date
+			$value = get_post_meta($post->ID, 'expiry_date', true);
+			$field = array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woothemes') );
+			echo '<p class="form-field">
+				<label for="'.$field['id'].'">'.$field['label'].':</label>
+				<input type="text" class="short date-picker" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woothemes') . '</span></p>';
 
 		?>
 	</div>
@@ -111,6 +118,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$product_ids 	= strip_tags(stripslashes( $_POST['product_ids'] ));
 		$usage_limit 	= (isset($_POST['usage_limit']) && $_POST['usage_limit']>0) ? (int) $_POST['usage_limit'] : '';
 		$individual_use = isset($_POST['individual_use']) ? 1 : 0;
+		$expiry_date 		= strip_tags(stripslashes( $_POST['expiry_date'] ));
 	
 	// Save
 		update_post_meta( $post_id, 'discount_type', $type );
@@ -118,6 +126,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		update_post_meta( $post_id, 'individual_use', $individual_use );
 		update_post_meta( $post_id, 'product_ids', $product_ids );
 		update_post_meta( $post_id, 'usage_limit', $usage_limit );
+		update_post_meta( $post_id, 'expiry_date', $expiry_date );
 	
 	// Error Handling
 		if (sizeof($woocommerce_errors)>0) update_option('woocommerce_errors', $woocommerce_errors);

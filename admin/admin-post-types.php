@@ -25,6 +25,7 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns["products"]	= __("Product IDs", 'woothemes');
 	$columns["usage_limit"] = __("Usage limit", 'woothemes');
 	$columns["usage_count"] = __("Usage count", 'woothemes');
+	$columns["expiry_date"] = __("Expiry date", 'woothemes');
 
 	return $columns;
 }
@@ -44,6 +45,7 @@ function woocommerce_custom_coupon_columns($column) {
 	$product_ids 	= (get_post_meta($post->ID, 'product_ids', true)) ? explode(',', get_post_meta($post->ID, 'product_ids', true)) : array();
 	$usage_limit 	= get_post_meta($post->ID, 'usage_limit', true);
 	$usage_count 	= (int) get_post_meta($post->ID, 'usage_count', true);
+	$expiry_date 	= get_post_meta($post->ID, 'expiry_date', true);
 
 	switch ($column) {
 		case "type" :
@@ -60,6 +62,9 @@ function woocommerce_custom_coupon_columns($column) {
 		break;
 		case "usage_count" :
 			echo $usage_count;
+		break;
+		case "expiry_date" :
+			if ($expiry_date) echo date('F j, Y', strtotime($expiry_date)); else echo '&ndash;';
 		break;
 	}
 }

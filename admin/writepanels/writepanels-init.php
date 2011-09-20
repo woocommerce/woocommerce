@@ -146,7 +146,7 @@ function woocommerce_write_panel_scripts() {
 	
 	$post_type = woocommerce_get_current_post_type();
 	
-	if( $post_type !== 'product' && $post_type !== 'shop_order' ) return;
+	if( $post_type !== 'product' && $post_type !== 'shop_order' && $post_type !== 'shop_coupon' ) return;
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	

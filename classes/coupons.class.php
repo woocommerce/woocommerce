@@ -19,6 +19,7 @@ class woocommerce_coupon {
 	var $product_ids;
 	var $usage_limit;
 	var $usage_count;
+	var $expiry_date;
 	
 	/** get coupon with $code */
 	function woocommerce_coupon( $code ) {
@@ -36,6 +37,7 @@ class woocommerce_coupon {
 			$this->product_ids 		= array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true)));
 			$this->usage_limit 		= get_post_meta($coupon->ID, 'usage_limit', true);
 			$this->usage_count 		= (int) get_post_meta($coupon->ID, 'usage_count', true);
+			$this->expiry_date 		= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
 			
 			if (!$this->amount) return false;
 			
@@ -53,7 +55,7 @@ class woocommerce_coupon {
 	}
 	
 	/** Check coupon is valid */
-	function is_valid($code) {
+	function is_valid() {
 		
 		global $woocommerce;
 		
@@ -71,6 +73,12 @@ class woocommerce_coupon {
 			
 			if ($this->usage_limit>0) :
 				if ($this->usage_count>$this->usage_limit) :
+					return false;
+				endif;
+			endif;
+			
+			if ($this->expiry_date) :
+				if (strtotime('NOW')>$this->expiry_date) :
 					return false;
 				endif;
 			endif;

@@ -226,6 +226,15 @@ jQuery( function($){
 			dates.not( this ).datepicker( "option", option, date );
 		}
 	});
+	
+	jQuery( ".date-picker" ).datepicker({
+		dateFormat: "yy-mm-dd",
+		numberOfMonths: 1,
+		showButtonPanel: true,
+		showOn: "button",
+		buttonImage: woocommerce_writepanel_params.calendar_image,
+		buttonImageOnly: true
+	});
 		
 	
 	// ATTRIBUTE TABLES
