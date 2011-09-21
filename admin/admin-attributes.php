@@ -20,7 +20,7 @@ function woocommerce_attributes() {
 	global $wpdb, $woocommerce;
 	
 	if (isset($_POST['add_new_attribute']) && $_POST['add_new_attribute']) :
-		
+		check_admin_referer( 'woocommerce-add-new_attribute' );
 		$attribute_name = (string) sanitize_title($_POST['attribute_name']);
 		$attribute_type = (string) $_POST['attribute_type'];
 		$attribute_label = (string) $_POST['attribute_label'];
@@ -37,7 +37,7 @@ function woocommerce_attributes() {
 	elseif (isset($_POST['save_attribute']) && $_POST['save_attribute'] && isset($_GET['edit'])) :
 		
 		$edit = absint($_GET['edit']);
-		
+		check_admin_referer( 'woocommerce-save-attribute_' . $edit );
 		if ($edit>0) :
 		
 			$attribute_type = $_POST['attribute_type'];
@@ -51,7 +51,7 @@ function woocommerce_attributes() {
 		exit;
 			
 	elseif (isset($_GET['delete'])) :
-	
+		check_admin_referer( 'woocommerce-delete-attribute_' . absint( $_GET['delete'] ) );
 		$delete = absint($_GET['delete']);
 		
 		if ($delete>0) :
@@ -128,6 +128,7 @@ function woocommerce_edit_attribute() {
 							</div>
 							
 							<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button" value="<?php _e('Save Attribute', 'woothemes'); ?>"></p>
+							<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 	    				</form>
 	    			</div>
 	    		</div>
@@ -171,7 +172,7 @@ function woocommerce_add_attribute() {
 
 				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
 				        					
-				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=attributes') ); ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=attributes') ); ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
+				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=attributes') ); ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
 				        					<td><?php echo ucwords($tax->attribute_label); ?></td>
 				        					<td><?php echo ucwords($tax->attribute_type); ?></td>
@@ -227,6 +228,7 @@ function woocommerce_add_attribute() {
 							</div>
 							
 							<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e('Add Attribute', 'woothemes'); ?>"></p>
+							<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 	    				</form>
 	    			</div>
 	    		</div>
