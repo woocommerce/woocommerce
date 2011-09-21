@@ -254,7 +254,7 @@ if (!function_exists('woocommerce_sharethis_script')) {
  **/
 if (!function_exists('woocommerce_template_single_add_to_cart')) {
 	function woocommerce_template_single_add_to_cart( $post, $_product ) {
-		do_action( $_product->product_type . '_add_to_cart' );
+		do_action( 'woocommerce_' . $_product->product_type . '_add_to_cart' );
 	}
 }
 if (!function_exists('woocommerce_simple_add_to_cart')) {
