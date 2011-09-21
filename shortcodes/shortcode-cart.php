@@ -71,7 +71,7 @@ function woocommerce_cart( $atts ) {
 	
 	if (sizeof($woocommerce->cart->cart_contents)==0) :
 		echo '<p>'.__('Your cart is currently empty.', 'woothemes').'</p>';
-		do_action('woocommerce_empty_cart');
+		do_action('woocommerce_cart_is_empty');
 		echo '<p><a class="button" href="'.get_permalink(get_option('woocommerce_shop_page_id')).'">'.__('&larr; Return To Shop', 'woothemes').'</a></p>';
 		return;
 	endif;
@@ -129,7 +129,7 @@ function woocommerce_cart( $atts ) {
 				endforeach; 
 			endif;
 			
-			do_action( 'woocommerce_shop_table_cart' );
+			do_action( 'woocommerce_cart_contents' );
 			?>
 			<tr>
 				<td colspan="6" class="actions">
@@ -145,7 +145,7 @@ function woocommerce_cart( $atts ) {
 	</form>
 	<div class="cart-collaterals">
 		
-		<?php do_action('cart-collaterals'); ?>
+		<?php do_action('woocommerce_cart_collaterals'); ?>
 		
 		<?php woocommerce_cart_totals(); ?>
 		

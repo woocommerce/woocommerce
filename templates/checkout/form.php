@@ -1,4 +1,4 @@
-<?php do_action('before_checkout_form');
+<?php do_action('woocommerce_before_checkout_form');
 
 global $woocommerce;
 
@@ -26,4 +26,4 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce-
 	
 </form>
 
-<?php do_action('after_checkout_form'); ?>
+<?php do_action('woocommerce_after_checkout_form'); ?>

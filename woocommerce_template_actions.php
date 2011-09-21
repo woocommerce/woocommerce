@@ -40,16 +40,16 @@ add_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_prod
 add_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20);
 
 /* Product Summary Box */
-add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_price', 10, 2);
-add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_excerpt', 20, 2);
-add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_meta', 40, 2);
-add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_sharing', 50, 2);
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10, 2);
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20, 2);
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40, 2);
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 50, 2);
 
 /* After Single Products */
 add_action('woocommerce_after_single_product', 'woocommerce_upsell_display');
 
 /* Product Add to cart */
-add_action( 'woocommerce_template_single_summary', 'woocommerce_template_single_add_to_cart', 30, 2 );
+add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30, 2 );
 add_action( 'simple_add_to_cart', 'woocommerce_simple_add_to_cart' ); 
 add_action( 'virtual_add_to_cart', 'woocommerce_simple_add_to_cart' ); 
 add_action( 'downloadable_add_to_cart', 'woocommerce_downloadable_add_to_cart' ); 
@@ -73,7 +73,7 @@ add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_attributes_pa
 add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_reviews_panel', 30 );
 
 /* Checkout */
-add_action( 'before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
 /* Remove the singular class for woocommerce single product */
@@ -84,7 +84,7 @@ function woocommerce_body_classes_check () {
 }
 
 /* Cart */
-add_action('cart-collaterals', 'woocommerce_cross_sell_display');
+add_action('woocommerce_cart_collaterals', 'woocommerce_cross_sell_display');
 
 /* Footer */
 add_action( 'wp_footer', 'woocommerce_demo_store' );

@@ -192,7 +192,7 @@ class woocommerce_product {
 	}
 	
 	/** Returns whether or not the product has any child product */
-	function has_child () {
+	function has_child() {
 		return sizeof($this->children) ? true : false;
 	}
 	

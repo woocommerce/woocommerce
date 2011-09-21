@@ -14,7 +14,7 @@
 				
 				<h1 class="product_title page-title"><?php the_title(); ?></h1>
 				
-				<?php do_action( 'woocommerce_template_single_summary', $post, $_product ); ?>
+				<?php do_action( 'woocommerce_single_product_summary', $post, $_product ); ?>
 	
 			</div>
 			
