@@ -35,7 +35,7 @@ class woocommerce_moneybookers extends woocommerce_payment_gateway {
 		add_option('woocommerce_moneybookers_email', '');
 		add_option('woocommerce_moneybookers_title', 'moneybookers');
 		
-		add_action('receipt_moneybookers', array(&$this, 'receipt_moneybookers'));
+		add_action('woocommerce_receipt_moneybookers', array(&$this, 'receipt_moneybookers'));
     }
     
 	/**

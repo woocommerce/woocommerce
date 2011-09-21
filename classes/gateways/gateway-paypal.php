@@ -39,7 +39,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		add_option('woocommerce_paypal_testmode', 'no');
 		add_option('woocommerce_paypal_send_shipping', 'no');
 		
-		add_action('receipt_paypal', array(&$this, 'receipt_page'));
+		add_action('woocommerce_receipt_paypal', array(&$this, 'receipt_page'));
     } 
     
 	/**

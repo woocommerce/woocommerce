@@ -120,7 +120,7 @@ function woocommerce_pay() {
 					</li>
 				</ul>
 				
-				<?php do_action( 'receipt_' . $order->payment_method, $order_id ); ?>
+				<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
 				
 				<div class="clear"></div>
 				<?php
