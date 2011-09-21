@@ -321,7 +321,7 @@ class woocommerce_checkout {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
-					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. $this->get_value( $key ).'</textarea>
+					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $this->get_value( $key ) ).'</textarea>
 				</p>'.$after;
 				
 			break;

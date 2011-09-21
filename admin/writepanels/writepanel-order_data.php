@@ -80,7 +80,7 @@ function woocommerce_order_data_meta_box($post) {
 			</select></p>
 			
 			<p class="form-field"><label for="excerpt"><?php _e('Customer Note:', 'woothemes') ?></label>
-			<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo $post->post_excerpt; ?></textarea></p>
+			<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea></p>
 		</div>
 		<div id="order_customer_billing_data" class="panel woocommerce_options_panel"><?php
 			woocommerce_wp_text_input( array( 'id' => '_billing_first_name', 'label' => __('First Name', 'woothemes') ) );
