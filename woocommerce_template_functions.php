@@ -172,12 +172,10 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 if (!function_exists('woocommerce_output_product_data_tabs')) {
 	function woocommerce_output_product_data_tabs() {
 		
-		if (isset($_COOKIE["current_tab"])) $current_tab = $_COOKIE["current_tab"]; else $current_tab = '#tab-description';
-		
 		?>
 		<div class="woocommerce_tabs">
 			<ul class="tabs">
-				<?php do_action('woocommerce_product_tabs', $current_tab); ?>
+				<?php do_action('woocommerce_product_tabs'); ?>
 			</ul>			
 			<?php do_action('woocommerce_product_tab_panels'); ?>
 		</div>
@@ -477,25 +475,24 @@ if (!function_exists('woocommerce_catalog_ordering')) {
  * Product page tabs
  **/
 if (!function_exists('woocommerce_product_description_tab')) {
-	function woocommerce_product_description_tab( $current_tab ) {
+	function woocommerce_product_description_tab() {
 		?>
-		<li <?php if ($current_tab=='#tab-description') echo 'class="active"'; ?>><a href="#tab-description"><?php _e('Description', 'woothemes'); ?></a></li>
+		<li><a href="#tab-description"><?php _e('Description', 'woothemes'); ?></a></li>
 		<?php
 	}
 }
 if (!function_exists('woocommerce_product_attributes_tab')) {
-	function woocommerce_product_attributes_tab( $current_tab ) {
+	function woocommerce_product_attributes_tab() {
 		
 		global $_product;
 		
-		if ($_product->has_attributes()) : ?><li <?php if ($current_tab=='#tab-attributes') echo 'class="active"'; ?>><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
+		if ($_product->has_attributes()) : ?><li><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
 		
 	}
 }
 if (!function_exists('woocommerce_product_reviews_tab')) {
-	function woocommerce_product_reviews_tab( $current_tab ) {
-		
-		if ( comments_open() ) : ?><li <?php if ($current_tab=='#tab-reviews') echo 'class="active"'; ?>><a href="#tab-reviews"><?php _e('Reviews', 'woothemes'); ?><?php echo comments_number(' (0)', ' (1)', ' (%)'); ?></a></li><?php endif;
+	function woocommerce_product_reviews_tab() {
+		if ( comments_open() ) : ?><li class="reviews_tab"><a href="#tab-reviews"><?php _e('Reviews', 'woothemes'); ?><?php echo comments_number(' (0)', ' (1)', ' (%)'); ?></a></li><?php endif;
 		
 	}
 }

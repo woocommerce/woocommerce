@@ -1,10 +1,3 @@
-jQuery.fn.animateHighlight = function(highlightColor, duration) {
-    var highlightBg = highlightColor || "#FFFF9C";
-    var animateMs = duration || 1500;
-    var originalBg = this.css("backgroundColor");
-    this.stop().css("background-color", highlightBg).animate({backgroundColor: originalBg}, animateMs);
-};
-
 jQuery(document).ready(function($) {
 	
 	// Ajax add to cart
@@ -239,15 +232,15 @@ jQuery(document).ready(function($) {
 		$('div.panel', tabs_wrapper).hide();
 		$('div' + href).show();
 		$(this).parent().addClass('active');
-		$.cookie('current_tab', href);
 		
 		return false;	
 	});
 	$('div.woocommerce_tabs').each(function() {
-		if ($('ul.tabs li.active', $(this)).size()==0) {
+		var hash = window.location.hash;
+		if (hash.toLowerCase().indexOf("comment-") >= 0) {
+			$('ul.tabs li.reviews_tab a', $(this)).click();
+		} else {
 			$('ul.tabs li:first a', $(this)).click();
-		} else { 
-			$('ul.tabs li.active a', $(this)).click();
 		}
 	});
 	
