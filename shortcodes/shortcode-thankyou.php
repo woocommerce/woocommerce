@@ -62,7 +62,7 @@ function woocommerce_thankyou() {
 			<?php
 			
 			do_action( 'woocommerce_thankyou', $order_id );
-			do_action( 'thankyou_' . $order->payment_method, $order_id );
+			do_action( 'woocommerce_thankyou_' . $order->payment_method, $order_id );
 			
 		endif;
 		

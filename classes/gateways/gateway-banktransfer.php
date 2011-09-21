@@ -30,7 +30,7 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		add_option('woocommerce_bacs_enabled', 'no');
 		add_option('woocommerce_bacs_title', __('Direct Bank Transfer', 'woothemes'));
 		add_option('woocommerce_bacs_description', __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woothemes'));
-		add_action('thankyou_bacs', array(&$this, 'thankyou_page'));
+		add_action('woocommerce_thankyou_bacs', array(&$this, 'thankyou_page'));
     } 
 
     public function is_available(){

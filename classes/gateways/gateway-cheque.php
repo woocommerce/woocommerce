@@ -25,7 +25,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		add_option('woocommerce_cheque_title', __('Cheque Payment', 'woothemes') );
 		add_option('woocommerce_cheque_description', __('Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woothemes'));
     
-    	add_action('thankyou_cheque', array(&$this, 'thankyou_page'));
+    	add_action('woocommerce_thankyou_cheque', array(&$this, 'thankyou_page'));
     } 
     
 	/**
