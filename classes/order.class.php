@@ -349,8 +349,8 @@ class woocommerce_order {
 			
 			if ( $this->status != $new_status->slug ) :
 				// Status was changed
-				do_action( 'order_status_'.$new_status->slug, $this->id );
-				do_action( 'order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
+				do_action( 'woocommerce_order_status_'.$new_status->slug, $this->id );
+				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
 				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woothemes'), $this->status, $new_status->slug ) );
 				clean_term_cache( '', 'shop_order_status' );
 			endif;

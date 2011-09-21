@@ -32,7 +32,7 @@ function woocommerce_product_data_box() {
 			<li><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
 			<li><a href="#upsell_product_data" title="<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woothemes'); ?>"><?php _e('Up-sells', 'woothemes'); ?></a></li>
 			<li><a href="#crosssell_product_data" title="<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woothemes'); ?>"><?php _e('Cross-sells', 'woothemes'); ?></a></li>
-			<?php do_action('product_write_panel_tabs'); ?>
+			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
@@ -346,7 +346,7 @@ function woocommerce_product_data_box() {
 				<div class="clear"></div>
 			</div>
 		
-		<?php do_action('product_write_panels'); ?>
+		<?php do_action('woocommerce_product_write_panels'); ?>
 		
 	</div>
 	<?php
@@ -590,10 +590,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 		
 	// Do action
-	do_action( 'process_product_meta', $post_id );
+	do_action( 'woocommerce_process_product_meta', $post_id );
 	
 	// Do action for product type
-	do_action( 'process_product_meta_' . $product_type, $post_id );
+	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 		
 	// Save errors
 	update_option('woocommerce_errors', $woocommerce_errors);

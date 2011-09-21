@@ -317,7 +317,7 @@ function variable_product_write_panel_js() {
 	<?php
 	
 }
-add_action('product_write_panel_js', 'variable_product_write_panel_js');
+add_action('woocommerce_product_write_panel_js', 'variable_product_write_panel_js');
 
 
 /**
@@ -607,4 +607,4 @@ function process_product_meta_variable( $post_id ) {
 	endif;
 
 }
-add_action('process_product_meta_variable', 'process_product_meta_variable');
+add_action('woocommerce_process_product_meta_variable', 'process_product_meta_variable');

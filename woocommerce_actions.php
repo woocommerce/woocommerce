@@ -766,7 +766,7 @@ function woocommerce_download_product() {
 /**
  * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
  **/
-add_action('order_status_completed', 'woocommerce_downloadable_product_permissions');
+add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
 
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	

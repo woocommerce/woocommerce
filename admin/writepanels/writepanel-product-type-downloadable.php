@@ -80,7 +80,7 @@ function downloadable_product_write_panel_js() {
 	});
 	<?php
 }
-add_action('product_write_panel_js', 'downloadable_product_write_panel_js');
+add_action('woocommerce_product_write_panel_js', 'downloadable_product_write_panel_js');
 
 add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
 
@@ -115,4 +115,4 @@ function process_product_meta_downloadable( $post_id ) {
 	if (isset($_POST['download_limit'])) update_post_meta( $post_id, 'download_limit', $_POST['download_limit'] );
 
 }
-add_action('process_product_meta_downloadable', 'process_product_meta_downloadable');
+add_action('woocommerce_process_product_meta_downloadable', 'process_product_meta_downloadable');

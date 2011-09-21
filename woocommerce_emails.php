@@ -120,9 +120,9 @@ add_action('woocommerce_product_on_backorder_notification', 'woocommerce_product
 /**
  * New order notification email template
  **/
-add_action('order_status_pending_to_processing', 'woocommerce_new_order_notification');
-add_action('order_status_pending_to_completed', 'woocommerce_new_order_notification');
-add_action('order_status_pending_to_on-hold', 'woocommerce_new_order_notification');
+add_action('woocommerce_order_status_pending_to_processing', 'woocommerce_new_order_notification');
+add_action('woocommerce_order_status_pending_to_completed', 'woocommerce_new_order_notification');
+add_action('woocommerce_order_status_pending_to_on-hold', 'woocommerce_new_order_notification');
 
 function woocommerce_new_order_notification( $id ) {
 	
@@ -152,8 +152,8 @@ function woocommerce_new_order_notification( $id ) {
 /**
  * Processing order notification email template
  **/
-add_action('order_status_pending_to_processing', 'woocommerce_processing_order_customer_notification');
-add_action('order_status_pending_to_on-hold', 'woocommerce_processing_order_customer_notification');
+add_action('woocommerce_order_status_pending_to_processing', 'woocommerce_processing_order_customer_notification');
+add_action('woocommerce_order_status_pending_to_on-hold', 'woocommerce_processing_order_customer_notification');
  
 function woocommerce_processing_order_customer_notification( $id ) {
 	
@@ -184,7 +184,7 @@ function woocommerce_processing_order_customer_notification( $id ) {
 /**
  * Completed order notification email template - this one includes download links for downloadable products
  **/
-add_action('order_status_completed', 'woocommerce_completed_order_customer_notification');
+add_action('woocommerce_order_status_completed', 'woocommerce_completed_order_customer_notification');
  
 function woocommerce_completed_order_customer_notification( $id ) {
 	

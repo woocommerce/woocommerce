@@ -193,7 +193,7 @@ function woocommerce_meta_scripts() {
 	?>
 	<script type="text/javascript">
 		jQuery(function(){
-			<?php do_action('product_write_panel_js'); ?>
+			<?php do_action('woocommerce_product_write_panel_js'); ?>
 		});
 	</script>
 	<?php
