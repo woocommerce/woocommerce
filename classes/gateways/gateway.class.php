@@ -136,7 +136,6 @@ class woocommerce_payment_gateway {
      * @since 1.0.0
      * @uses method_exists()
      */
-    
     function generate_settings_html () {
     	$html = '';
     	foreach ( $this->form_fields as $k => $v ) {
@@ -150,13 +149,13 @@ class woocommerce_payment_gateway {
     	echo $html;
     } // End generate_settings_html()
     
+    
     /**
      * Generate Text Input HTML.
      *
      * @since 1.0.0
      * @return $html string
      */
-    
     function generate_text_html ( $key, $data ) {
     	$html = '';
     	
@@ -167,7 +166,33 @@ class woocommerce_payment_gateway {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input class="input-text wide-input" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . $this->settings[$key] . '" />';
+				$html .= '<input class="input-text wide-input" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . esc_attr($this->settings[$key]) . '" />';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+			$html .= '</fieldset>';
+			$html .= '</td>' . "\n";
+		$html .= '</tr>' . "\n";
+    	
+    	return $html;
+    } // End generate_checkbox_html()
+
+
+    /**
+     * Generate Textarea HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+    function generate_textarea_html( $key, $data ) {
+    	$html = '';
+    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	
+		$html .= '<tr valign="top">' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<td class="forminp">' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
+				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<textarea rows="3" cols="20" class="input-text wide-input" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="width:100%;">'.esc_attr($this->settings[$key]).'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -176,13 +201,13 @@ class woocommerce_payment_gateway {
     	return $html;
     } // End generate_checkbox_html()
     
+        
     /**
      * Generate Checkbox HTML.
      *
      * @since 1.0.0
      * @return $html string
      */
-    
     function generate_checkbox_html ( $key, $data ) {
     	$html = '';
     	
@@ -203,6 +228,7 @@ class woocommerce_payment_gateway {
     	return $html;
     } // End generate_checkbox_html()
     
+    
     /**
      * Validate Settings Field Data.
      *
@@ -211,7 +237,6 @@ class woocommerce_payment_gateway {
      * @since 1.0.0
      * @uses method_exists()
      */
-    
     function validate_settings_fields () {
     	// TO DO: NONCE SECURITY CHECK
     	
@@ -227,6 +252,7 @@ class woocommerce_payment_gateway {
     	}
     } // End validate_settings_fields()
     
+    
     /**
      * Validate Checkbox Field.
      *
@@ -235,7 +261,6 @@ class woocommerce_payment_gateway {
      * @since 1.0.0
      * @return $status string
      */
-     
     function validate_checkbox_field ( $key ) {
     	// TO DO: NONCE SECURITY CHECK
     	
@@ -247,6 +272,7 @@ class woocommerce_payment_gateway {
     	return $status;
     } // End validate_checkbox_field()
     
+    
     /**
      * Validate Text Field.
      *
@@ -255,7 +281,6 @@ class woocommerce_payment_gateway {
      * @since 1.0.0
      * @return $text string
      */
-     
     function validate_text_field ( $key ) {
     	// TO DO: NONCE SECURITY CHECK
     	$text = $this->settings[$key];
@@ -266,4 +291,24 @@ class woocommerce_payment_gateway {
     	
     	return $text;
     } // End validate_text_field()
+    
+    /**
+     * Validate Textarea Field.
+     *
+     * Make sure the data is escaped correctly, etc.
+     * 
+     * @since 1.0.0
+     * @return $text string
+     */
+    function validate_textarea_field ( $key ) {
+    	// TO DO: NONCE SECURITY CHECK
+    	$text = $this->settings[$key];
+    	
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    	}
+    	
+    	return $text;
+    } // End validate_text_field()
+    
 }

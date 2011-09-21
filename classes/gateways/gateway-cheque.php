@@ -2,7 +2,7 @@
 /**
  * Cheque Payment Gateway
  * 
- * Provides a Cheque Payment Gateway for testing purposes. Created by Andrew Benbow (andrew@chromeorange.co.uk)
+ * Provides a Cheque Payment Gateway, mainly for testing purposes.
  *
  * @class 		woocommerce_cheque
  * @package		WooCommerce
@@ -16,52 +16,69 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
         $this->icon 			= '';
         $this->has_fields 		= false;
 		
-		$this->enabled			= get_option('woocommerce_cheque_enabled');
-		$this->title 			= get_option('woocommerce_cheque_title');
-		$this->description 		= get_option('woocommerce_cheque_description');
-
+		// Load the form fields.
+		$this->init_form_fields();
+		
+		// Load the settings.
+		$this->init_settings();
+		
+		// Define user set variables
+		$this->title = $this->settings['title'];
+		$this->description = $this->settings['description'];
+		
+		// Actions
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-		add_option('woocommerce_cheque_enabled', 'yes');
-		add_option('woocommerce_cheque_title', __('Cheque Payment', 'woothemes') );
-		add_option('woocommerce_cheque_description', __('Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woothemes'));
-    
     	add_action('woocommerce_thankyou_cheque', array(&$this, 'thankyou_page'));
     } 
     
 	/**
+     * Initialise Gateway Settings Form Fields
+     */
+    function init_form_fields() {
+    
+    	$this->form_fields = array(
+			'enabled' => array(
+							'title' => __( 'Enable/Disable', 'woothemes' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable Cheque Payment', 'woothemes' ), 
+							'default' => 'yes'
+						), 
+			'title' => array(
+							'title' => __( 'Title', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
+							'default' => __( 'Cheque Payment', 'woothemes' )
+						),
+			'description' => array(
+							'title' => __( 'Customer Message', 'woothemes' ), 
+							'type' => 'textarea', 
+							'description' => __( 'Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes' ), 
+							'default' => 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.'
+						)
+			);
+    
+    } // End init_form_fields()
+    
+	/**
 	 * Admin Panel Options 
 	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 **/
+	 *
+	 * @since 1.0.0
+	 */
 	public function admin_options() {
+
     	?>
     	<h3><?php _e('Cheque Payment', 'woothemes'); ?></h3>
-    	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases without having to use the sandbox area of a payment gateway which is useful for demonstrating to clients and for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></p>
+    	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
-		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
-						<label for="woocommerce_cheque_enabled">
-						<input name="woocommerce_cheque_enabled" id="woocommerce_cheque_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_cheque_enabled'), 'yes'); ?> /> <?php _e('Enable Cheque Payment', 'woothemes') ?></label><br>
-					</fieldset>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
-		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_cheque_title" id="woocommerce_cheque_title" value="<?php if ($value = get_option('woocommerce_cheque_title')) echo $value; else echo 'Cheque Payment'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woothemes') ?></th>
-		        <td class="forminp">
-			        <input class="input-text wide-input" type="text" name="woocommerce_cheque_description" id="woocommerce_cheque_description" value="<?php echo esc_attr( get_option( 'woocommerce_cheque_description' ) ); ?>" /> <span class="description"><?php _e('Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes') ?></span>
-		        </td>
-		    </tr>
-		</table>
     	<?php
-    }
-    
+    		// Generate the HTML For the settings form.
+    		$this->generate_settings_html();
+    	?>
+		</table><!--/.form-table-->
+    	<?php
+    } // End admin_options()
+
 	/**
 	* There are no payment fields for cheques, but we want to show the description if set.
 	**/
@@ -72,18 +89,6 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	function thankyou_page() {
 		if ($this->description) echo wpautop(wptexturize($this->description));
 	}
-    
-	/**
-	 * Admin Panel Options Processing
-	 * - Saves the options to the DB
-	 **/
-    public function process_admin_options() {
-    
-   		if(isset($_POST['woocommerce_cheque_enabled'])) update_option('woocommerce_cheque_enabled', 'yes'); else update_option('woocommerce_cheque_enabled', 'no');
-   		
-   		if(isset($_POST['woocommerce_cheque_title'])) 	update_option('woocommerce_cheque_title', 	woocommerce_clean($_POST['woocommerce_cheque_title'])); else delete_option('woocommerce_cheque_title');
-   		if(isset($_POST['woocommerce_cheque_description'])) 	update_option('woocommerce_cheque_description', 	woocommerce_clean($_POST['woocommerce_cheque_description'])); else delete_option('woocommerce_cheque_description');
-    }
 	
 	/**
 	 * Process the payment and return the result
