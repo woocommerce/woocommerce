@@ -74,7 +74,7 @@ class woocommerce_query {
 		endswitch;
 		
 		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
-		$post__in = array_unique(apply_filters('loop-shop-posts-in', array()));
+		$post__in = array_unique(apply_filters('loop_shop_post_in', array()));
 		
 		// Ordering query vars
 		$q->set( 'orderby', $orderby );

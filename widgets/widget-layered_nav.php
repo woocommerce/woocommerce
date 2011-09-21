@@ -36,7 +36,7 @@ function woocommerce_layered_nav_init() {
 /**
  * Layered Nav post filter
  */
-add_filter('loop-shop-posts-in', 'woocommerce_layered_nav_query');
+add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
 
 function woocommerce_layered_nav_query( $filtered_posts ) {
 	

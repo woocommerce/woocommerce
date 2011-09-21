@@ -51,7 +51,7 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 		if ( $title )
 			echo $before_title . $title . $after_title;
 		echo '<div class="tagcloud">';
-		wp_tag_cloud( apply_filters('widget_product_tag_cloud_args', array('taxonomy' => $current_taxonomy) ) );
+		wp_tag_cloud( apply_filters('woocommerce_product_tag_cloud_widget_args', array('taxonomy' => $current_taxonomy) ) );
 		echo "</div>\n";
 		echo $after_widget;
 	}

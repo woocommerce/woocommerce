@@ -220,7 +220,7 @@ class woocommerce_checkout {
 		// Shipping Details
 		if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only()) :
 			
-			if (!isset($_POST) || !$_POST) $shiptobilling = apply_filters('shiptobilling_default', 1); else $shiptobilling = $this->get_value('shiptobilling');
+			if (!isset($_POST) || !$_POST) $shiptobilling = apply_filters('woocommerce_shiptobilling_default', 1); else $shiptobilling = $this->get_value('shiptobilling');
 
 			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" '.checked($shiptobilling, 1, false).' type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox">'.__('Ship to same address?', 'woothemes').'</label></p>';
 			
@@ -636,7 +636,7 @@ class woocommerce_checkout {
 						endif;
 
 						// Run filter
-						$item_meta = apply_filters('order_item_meta', $item_meta, $values);
+						$item_meta = apply_filters('woocommerce_order_item_meta', $item_meta, $values);
 						
 						$order_items[] = apply_filters('new_order_item', array(
 					 		'id' 			=> $values['product_id'],

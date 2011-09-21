@@ -31,7 +31,7 @@ function woocommerce_price_filter_init() {
 /**
  * Price Filter post filter
  */
-add_filter('loop-shop-posts-in', 'woocommerce_price_filter');
+add_filter('loop_shop_post_in', 'woocommerce_price_filter');
 
 function woocommerce_price_filter( $filtered_posts ) {
 

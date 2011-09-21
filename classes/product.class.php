@@ -488,13 +488,13 @@ class woocommerce_product {
 			
 			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($min_price);	
 			
-			$price = apply_filters('grouped_price_html', $price, $this);
+			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
 		
 			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($this->get_price());
 			
-			$price = apply_filters('variable_price_html', $price, $this);
+			$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 			
 		else :
 			if ($this->price) :
@@ -502,13 +502,13 @@ class woocommerce_product {
 				
 					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
 					
-					$price = apply_filters('sale_price_html', $price, $this);
+					$price = apply_filters('woocommerce_sale_price_html', $price, $this);
 					
 				else :
 				
 					$price .= woocommerce_price($this->get_price());
 					
-					$price = apply_filters('price_html', $price, $this);
+					$price = apply_filters('woocommerce_price_html', $price, $this);
 					
 				endif;
 			elseif ($this->price === '' ) :
@@ -517,7 +517,7 @@ class woocommerce_product {
 			
 				$price = __('Free!', 'woothemes');  
 				
-				$price = apply_filters('free_price_html', $price, $this);
+				$price = apply_filters('woocommerce_free_price_html', $price, $this);
 				
 			endif;
 		endif;

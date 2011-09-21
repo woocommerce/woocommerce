@@ -528,7 +528,7 @@ class woocommerce_countries {
 		$return = '';
 		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
 		else $return = __('to', 'woothemes');
-		$return = apply_filters('shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
+		$return = apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
 		return $return;
 	}
 	
@@ -536,7 +536,7 @@ class woocommerce_countries {
 		global $woocommerce;
 		$return = '';
 		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the ', 'woothemes');
-		$return = apply_filters('estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
+		$return = apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
 		return $return;
 	}
 	

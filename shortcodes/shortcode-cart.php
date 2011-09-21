@@ -113,7 +113,7 @@ function woocommerce_cart( $atts ) {
 								</a>
 							</td>
 							<td class="product-name">
-								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>"><?php echo apply_filters('woocommerce_cart_product_title', $_product->get_title(), $_product); ?></a>
+								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>"><?php echo $_product->get_title(); ?></a>
 								<?php
 									if($_product instanceof woocommerce_product_variation && is_array($values['variation'])) :
                             			echo woocommerce_get_formatted_variation( $values['variation'] );

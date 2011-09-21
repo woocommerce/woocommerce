@@ -512,7 +512,7 @@ if (!function_exists('woocommerce_product_attributes_panel')) {
 	function woocommerce_product_attributes_panel() {
 		global $_product;
 		echo '<div class="panel" id="tab-attributes">';
-		echo '<h2>' . apply_filters('woocommerce_product_description_heading', __('Additional Information', 'woothemes')) . '</h2>';
+		echo '<h2>' . apply_filters('woocommerce_product_additional_information_heading', __('Additional Information', 'woothemes')) . '</h2>';
 		$_product->list_attributes(); 
 		echo '</div>';
 	}
