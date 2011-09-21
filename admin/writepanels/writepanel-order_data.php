@@ -155,7 +155,7 @@ function woocommerce_order_items_meta_box($post) {
 							?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 						</td>
 						<td class="name">
-							<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $item['name']; ?></a>
+							<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $item['name']; ?></a>
 							<?php
 								if (isset($_product->variation_data)) :
 									echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
@@ -272,7 +272,7 @@ function woocommerce_order_actions_meta_box($post) {
 			else
 				$delete_text = __('Move to Trash');
 			?>
-		<a class="submitdelete deletion" href="<?php echo get_delete_post_link($post->ID); ?>"><?php echo $delete_text; ?></a><?php
+		<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
 		} ?>
 		</li>
 	</ul>

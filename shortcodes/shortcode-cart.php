@@ -77,7 +77,7 @@ function woocommerce_cart( $atts ) {
 	endif;
 	
 	?>
-	<form action="<?php echo $woocommerce->cart->get_cart_url(); ?>" method="post">
+	<form action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
 	<table class="shop_table cart" cellspacing="0">
 		<thead>
 			<tr>
@@ -98,9 +98,9 @@ function woocommerce_cart( $atts ) {
 					
 						?>
 						<tr>
-							<td class="product-remove"><a href="<?php echo $woocommerce->cart->get_remove_url($cart_item_key); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
+							<td class="product-remove"><a href="<?php echo esc_url( $woocommerce->cart->get_remove_url($cart_item_key) ); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
 							<td class="product-thumbnail">
-								<a href="<?php echo get_permalink($values['product_id']); ?>">
+								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>">
 								<?php 
 									if ($values['variation_id'] && has_post_thumbnail($values['variation_id'])) :
 										echo get_the_post_thumbnail($values['variation_id'], 'shop_thumbnail'); 
@@ -113,7 +113,7 @@ function woocommerce_cart( $atts ) {
 								</a>
 							</td>
 							<td class="product-name">
-								<a href="<?php echo get_permalink($values['product_id']); ?>"><?php echo apply_filters('woocommerce_cart_product_title', $_product->get_title(), $_product); ?></a>
+								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>"><?php echo apply_filters('woocommerce_cart_product_title', $_product->get_title(), $_product); ?></a>
 								<?php
 									if($_product instanceof woocommerce_product_variation && is_array($values['variation'])) :
                             			echo woocommerce_get_formatted_variation( $values['variation'] );
@@ -137,7 +137,7 @@ function woocommerce_cart( $atts ) {
 						<label for="coupon_code"><?php _e('Coupon', 'woothemes'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woothemes'); ?>" />
 					</div>
 					<?php $woocommerce->nonce_field('cart') ?>
-					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Shopping Cart', 'woothemes'); ?>" /> <a href="<?php echo $woocommerce->cart->get_checkout_url(); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
+					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Shopping Cart', 'woothemes'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
 				</td>
 			</tr>
 		</tbody>

@@ -360,7 +360,7 @@ function woocommerce_duplicate_product_post_button() {
 		$notifyUrl = "admin.php?action=duplicate_product&post=" . $_GET['post'];
 		?>
 		<div id="duplicate-action"><a class="submitduplicate duplication"
-			href="<?php echo $notifyUrl; ?>"><?php _e('Copy to a new draft', 'woothemes'); ?></a>
+			href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woothemes'); ?></a>
 		</div>
 		<?php
 	endif;

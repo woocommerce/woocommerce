@@ -211,7 +211,7 @@ function woocommerce_add_order_item() {
 			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 		</td>
 		<td class="name">
-			<a href="<?php echo admin_url('post.php?post='. $_product->id .'&action=edit'); ?>"><?php echo $_product->get_title(); ?></a>
+			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $_product->get_title(); ?></a>
 			<?php
 				if (isset($_product->variation_data)) :
 					echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );

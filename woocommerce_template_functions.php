@@ -63,7 +63,7 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 			return;
 		endif;
 		
-		?><a href="<?php echo $_product->add_to_cart_url(); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php
+		?><a href="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php
 			switch ($_product->product_type) :
 				case "variable" :
 					echo apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
@@ -270,7 +270,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		// Don't show cart if out of stock
 		if (!$_product->is_in_stock()) return;
 		?>			
-		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 		 	<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
 		 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 		 	<?php do_action('woocommerce_add_to_cart_form'); ?>
@@ -298,7 +298,7 @@ if (!function_exists('woocommerce_downloadable_add_to_cart')) {
 		// Don't show cart if out of stock
 		if (!$_product->is_in_stock()) return;
 		?>						
-		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 			<?php do_action('woocommerce_add_to_cart_form'); ?>
 		</form>
@@ -311,7 +311,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		global $_product;
 		
 		?>
-		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 			<table cellspacing="0" class="group_table">
 				<tbody>
 					<?php foreach ($_product->children as $child) : $child_product = &new woocommerce_product( $child->ID ); $cavailability = $child_product->get_availability(); ?>
@@ -380,7 +380,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
             var product_variations = <?php echo json_encode($available_variations) ?>;
         </script>
 
-		<form action="<?php echo $_product->add_to_cart_url(); ?>" class="variations_form cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post">
 			<table class="variations" cellspacing="0">
 				<tbody>
 				<?php foreach ($attributes as $name => $options) :?>
@@ -592,7 +592,7 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 		global $woocommerce;
 		if ($woocommerce->shipping->enabled && get_option('woocommerce_enable_shipping_calc')=='yes' && $woocommerce->cart->needs_shipping()) : 
 		?>
-		<form class="shipping_calculator" action="<?php echo $woocommerce->cart->get_cart_url(); ?>" method="post">
+		<form class="shipping_calculator" action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
 			<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
 			<section class="shipping-calculator-form">
 			<p class="form-row">
@@ -767,7 +767,7 @@ if (!function_exists('woocommerce_login_form')) {
 			<p class="form-row">
 				<?php $woocommerce->nonce_field('login', 'login') ?>
 				<input type="submit" class="button" name="login" value="<?php _e('Login', 'woothemes'); ?>" />
-				<a class="lost_password" href="<?php echo home_url('wp-login.php?action=lostpassword'); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
+				<a class="lost_password" href="<?php echo esc_url( home_url('wp-login.php?action=lostpassword') ); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
 			</p>
 		</form>
 		<?php

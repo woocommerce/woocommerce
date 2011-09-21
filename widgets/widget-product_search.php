@@ -43,7 +43,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		if ($title) echo $before_title . $title . $after_title;
 		
 		?>
-		<form role="search" method="get" id="searchform" action="<?php echo home_url(); ?>">
+		<form role="search" method="get" id="searchform" action="<?php echo esc_url( home_url() ); ?>">
 			<div>
 				<label class="screen-reader-text" for="s"><?php _e('Search for:', 'woothemes'); ?></label>
 				<input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Search for products', 'woothemes'); ?>" />

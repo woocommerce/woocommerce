@@ -37,7 +37,7 @@ function woocommerce_my_account( $atts ) {
 		<h2><?php _e('Available downloads', 'woothemes'); ?></h2>
 		<ul class="digital-downloads">
 			<?php foreach ($downloads as $download) : ?>
-				<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads Remaining', $download['downloads_remaining'], 'woothemes'); ?></span><?php endif; ?> <a href="<?php echo $download['download_url']; ?>"><?php echo $download['download_name']; ?></a></li>
+				<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads Remaining', $download['downloads_remaining'], 'woothemes'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
 			<?php endforeach; ?>
 		</ul>
 		<?php endif; ?>	
@@ -68,10 +68,10 @@ function woocommerce_my_account( $atts ) {
 						<td><?php echo $order->status; ?></td>
 						<td style="text-align:right; white-space:nowrap;">
 							<?php if ($order->status=='pending') : ?>
-								<a href="<?php echo $order->get_checkout_payment_url(); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
-								<a href="<?php echo $order->get_cancel_order_url(); ?>" class="button cancel"><?php _e('Cancel', 'woothemes'); ?></a>
+								<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
+								<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woothemes'); ?></a>
 							<?php endif; ?>
-							<a href="<?php echo add_query_arg('order', $order->id, get_permalink(get_option('woocommerce_view_order_page_id'))); ?>" class="button"><?php _e('View', 'woothemes'); ?></a>
+							<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(get_option('woocommerce_view_order_page_id'))) ); ?>" class="button"><?php _e('View', 'woothemes'); ?></a>
 						</td>
 					</tr><?php
 				endforeach;
@@ -87,7 +87,7 @@ function woocommerce_my_account( $atts ) {
 			
 				<header class="title">				
 					<h3><?php _e('Billing Address', 'woothemes'); ?></h3>
-					<a href="<?php echo add_query_arg('address', 'billing', get_permalink(get_option('woocommerce_edit_address_page_id'))); ?>" class="edit"><?php _e('Edit', 'woothemes'); ?></a>	
+					<a href="<?php echo esc_url( add_query_arg('address', 'billing', get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" class="edit"><?php _e('Edit', 'woothemes'); ?></a>	
 				</header>
 				<address>
 					<?php
@@ -116,7 +116,7 @@ function woocommerce_my_account( $atts ) {
 			
 				<header class="title">
 					<h3><?php _e('Shipping Address', 'woothemes'); ?></h3>
-					<a href="<?php echo add_query_arg('address', 'shipping', get_permalink(get_option('woocommerce_edit_address_page_id'))); ?>" class="edit"><?php _e('Edit', 'woothemes'); ?></a>
+					<a href="<?php echo esc_url( add_query_arg('address', 'shipping', get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" class="edit"><?php _e('Edit', 'woothemes'); ?></a>
 				</header>
 				<address>
 					<?php
@@ -252,7 +252,7 @@ function woocommerce_edit_address() {
 
 		$woocommerce->show_messages();
 		?>
-		<form action="<?php echo add_query_arg('address', $load_address, get_permalink(get_option('woocommerce_edit_address_page_id'))); ?>" method="post">
+		<form action="<?php echo esc_url( add_query_arg('address', $load_address, get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" method="post">
 	
 			<h3><?php if ($load_address=='billing') _e('Billing Address', 'woothemes'); else _e('Shipping Address', 'woothemes'); ?></h3>
 			
@@ -408,7 +408,7 @@ function woocommerce_change_password() {
 		$woocommerce->show_messages();
 
 		?>
-		<form action="<?php echo get_permalink(get_option('woocommerce_change_password_page_id')); ?>" method="post">
+		<form action="<?php echo esc_url( get_permalink(get_option('woocommerce_change_password_page_id')) ); ?>" method="post">
 	
 			<p class="form-row form-row-first">
 				<label for="password-1"><?php _e('New password', 'woothemes'); ?> <span class="required">*</span></label>
