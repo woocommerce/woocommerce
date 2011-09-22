@@ -341,8 +341,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	        
 	        // Sandbox fix
 	        if ($posted['test_ipn']==1 && $posted['payment_status']=='Pending') $posted['payment_status'] = 'completed';
-			
-			
+	        			
 			if ($order->status !== 'completed') :
 		        // We are here so lets check status and do actions
 		        switch (strtolower($posted['payment_status'])) :
@@ -355,8 +354,8 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		            case 'expired' :
 		            case 'failed' :
 		            case 'voided' :
-		                // Hold order
-		                $order->update_status('on-hold', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower(sanitize($posted['payment_status'])) ) );
+		                // Order failed
+		                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
 		            break;
 		            default:
 		            	// No action

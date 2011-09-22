@@ -280,8 +280,8 @@ function woocommerce_create_pages() {
     	update_option('woocommerce_pay_page_id', $page_found);
     }
     
-    // Thank you Page
-    $slug = esc_sql( _x('thanks', 'page_slug', 'woothemes') );
+    // Thanks Page
+    $slug = esc_sql( _x('order-received', 'page_slug', 'woothemes') );
     $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
 
 	if(!$page_found) {
@@ -292,7 +292,7 @@ function woocommerce_create_pages() {
 	        'post_parent' => get_option('woocommerce_checkout_page_id'),
 	        'post_author' => 1,
 	        'post_name' => $slug,
-	        'post_title' => __('Thank you', 'woothemes'),
+	        'post_title' => __('Order Received', 'woothemes'),
 	        'post_content' => '[woocommerce_thankyou]',
 	        'comment_status' => 'closed'
 	    );
@@ -354,6 +354,11 @@ function woocommerce_tables_install() {
  */
 function woocommerce_default_taxonomies() {
 	
+	if (!taxonomy_exists('product_type')) :
+		register_taxonomy( 'product_type', array('post'));
+		register_taxonomy( 'shop_order_status', array('post'));
+	endif;
+	
 	$product_types = array(
 		'simple',
 		'grouped',
@@ -363,13 +368,14 @@ function woocommerce_default_taxonomies() {
 	);
 	
 	foreach($product_types as $type) {
-		if (!$type_id = get_term_by( 'slug', sanitize_title($type), 'product_type')) {
+		if (!get_term_by( 'slug', sanitize_title($type), 'product_type')) {
 			wp_insert_term($type, 'product_type');
 		}
 	}
 	
 	$order_status = array(
 		'pending',
+		'failed',
 		'on-hold',
 		'processing',
 		'completed',
@@ -378,9 +384,9 @@ function woocommerce_default_taxonomies() {
 	);
 	
 	foreach($order_status as $status) {
-		if (!$status_id = get_term_by( 'slug', sanitize_title($status), 'shop_order_status')) {
+		if (!get_term_by( 'slug', sanitize_title($status), 'shop_order_status')) {
 			wp_insert_term($status, 'shop_order_status');
 		}
 	}
-	
+
 }

@@ -67,7 +67,7 @@ function woocommerce_my_account( $atts ) {
 						<td><?php echo woocommerce_price($order->order_total); ?></td>
 						<td><?php echo $order->status; ?></td>
 						<td style="text-align:right; white-space:nowrap;">
-							<?php if ($order->status=='pending') : ?>
+							<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
 								<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
 								<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woothemes'); ?></a>
 							<?php endif; ?>

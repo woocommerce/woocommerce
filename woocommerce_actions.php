@@ -622,7 +622,7 @@ function woocommerce_cancel_order() {
 		
 		$order = &new woocommerce_order( $order_id );
 
-		if ($order->id == $order_id && $order->order_key == $order_key && $order->status=='pending' && $woocommerce->verify_nonce('cancel_order', '_GET')) :
+		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed')) && $woocommerce->verify_nonce('cancel_order', '_GET')) :
 			
 			// Cancel the order + restore stock
 			$order->cancel_order( __('Order cancelled by customer.', 'woothemes') );

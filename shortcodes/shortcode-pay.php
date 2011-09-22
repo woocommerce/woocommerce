@@ -27,7 +27,7 @@ function woocommerce_pay() {
 		$order_id = (int) $_GET['order_id'];
 		$order = &new woocommerce_order( $order_id );
 		
-		if ($order->id == $order_id && $order->order_key == $order_key && $order->status=='pending') :
+		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 			
 			// Set customer location to order location
 			if ($order->billing_country) $woocommerce->customer->set_country( $order->billing_country );
@@ -70,7 +70,7 @@ function woocommerce_pay() {
 			// Show form
 			woocommerce_pay_for_existing_order( $order );
 		
-		elseif ($order->status!='pending') :
+		elseif (!in_array($order->status, array('pending', 'failed'))) :
 			
 			$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woothemes') );
 			
@@ -94,7 +94,7 @@ function woocommerce_pay() {
 		
 			$order = &new woocommerce_order( $order_id );
 		
-			if ($order->order_key == $order_key && $order->status=='pending') :
+			if ($order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 		
 				?>
 				<ul class="order_details">

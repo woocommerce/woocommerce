@@ -131,6 +131,8 @@ add_action('woocommerce_product_on_backorder_notification', 'woocommerce_product
 add_action('woocommerce_order_status_pending_to_processing', 'woocommerce_new_order_notification');
 add_action('woocommerce_order_status_pending_to_completed', 'woocommerce_new_order_notification');
 add_action('woocommerce_order_status_pending_to_on-hold', 'woocommerce_new_order_notification');
+add_action('woocommerce_order_status_failed_to_processing', 'woocommerce_new_order_notification');
+add_action('woocommerce_order_status_failed_to_completed', 'woocommerce_new_order_notification');
 
 function woocommerce_new_order_notification( $id ) {
 	
