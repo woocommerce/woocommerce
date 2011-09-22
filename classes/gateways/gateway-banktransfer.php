@@ -2,7 +2,7 @@
 /**
  * Bank Transfer Payment Gateway
  * 
- * Provides a Bank Transfer Payment Gateway. Adapted from code by Mike Pepper (https://github.com/takeover/woocommerce-bacs-gateway - mike@takeovermedia.co.uk)
+ * Provides a Bank Transfer Payment Gateway. Based on code by Mike Pepper.
  *
  * @class 		woocommerce_bacs
  * @package		WooCommerce
@@ -12,101 +12,115 @@
 class woocommerce_bacs extends woocommerce_payment_gateway {
 
     public function __construct() { 
-		$this->id				  = 'bacs';
+		$this->id				 = 'bacs';
 		$this->icon 			= '';
-		$this->has_fields = false;
+		$this->has_fields 		= false;
 		
-		$this->enabled			    = get_option('woocommerce_bacs_enabled');
-		$this->title 			      = get_option('woocommerce_bacs_title');
-		$this->description      = get_option('woocommerce_bacs_description');
-		$this->account_name     = get_option('woocommerce_bacs_account_name');
-		$this->account_number   = get_option('woocommerce_bacs_account_number');
-		$this->sort_code        = get_option('woocommerce_bacs_sort_code');
-		$this->bank_name        = get_option('woocommerce_bacs_bank_name');
-		$this->iban             = get_option('woocommerce_bacs_iban');
-		$this->bic              = get_option('woocommerce_bacs_bic');    
+		// Load the form fields.
+		$this->init_form_fields();
 		
+		// Load the settings.
+		$this->init_settings();
+		
+		// Define user set variables
+		$this->title 			= $this->settings['title'];
+		$this->description      = $this->settings['description'];
+		$this->account_name     = $this->settings['account_name'];
+		$this->account_number   = $this->settings['account_number'];
+		$this->sort_code        = $this->settings['sort_code'];
+		$this->bank_name        = $this->settings['bank_name'];
+		$this->iban             = $this->settings['iban'];
+		$this->bic              = $this->settings['bic'];  
+		
+		// Actions
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-		add_option('woocommerce_bacs_enabled', 'no');
-		add_option('woocommerce_bacs_title', __('Direct Bank Transfer', 'woothemes'));
-		add_option('woocommerce_bacs_description', __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woothemes'));
-		add_action('woocommerce_thankyou_bacs', array(&$this, 'thankyou_page'));
+    	add_action('woocommerce_thankyou_bacs', array(&$this, 'thankyou_page'));
     } 
 
-    public function is_available(){
-		return ($this->enabled == 'yes') ? true : false;
-    }
+	/**
+     * Initialise Gateway Settings Form Fields
+     */
+    function init_form_fields() {
+    
+    	$this->form_fields = array(
+			'enabled' => array(
+							'title' => __( 'Enable/Disable', 'woothemes' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable Bank Transfer', 'woothemes' ), 
+							'default' => 'yes'
+						), 
+			'title' => array(
+							'title' => __( 'Title', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
+							'default' => __( 'Direct Bank Transfer', 'woothemes' )
+						),
+			'description' => array(
+							'title' => __( 'Customer Message', 'woothemes' ), 
+							'type' => 'textarea', 
+							'description' => __( 'Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.', 'woothemes' ), 
+							'default' => __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woothemes')
+						),
+			'account_name' => array(
+							'title' => __( 'Account Name', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => '', 
+							'default' => ''
+						),
+			'account_number' => array(
+							'title' => __( 'Account Number', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => '', 
+							'default' => ''
+						),
+			'sort_code' => array(
+							'title' => __( 'Sort Code', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => '', 
+							'default' => ''
+						),
+			'bank_name' => array(
+							'title' => __( 'Bank Name', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => '', 
+							'default' => ''
+						),
+			'iban' => array(
+							'title' => __( 'IBAN', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __('Your bank may require this for international payments','woothemes'), 
+							'default' => ''
+						),
+			'bic' => array(
+							'title' => __( 'BIC (formerly Swift)', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __('Your bank may require this for international payments','woothemes'), 
+							'default' => ''
+						),
 
-    public function set_current(){ true; }
-    public function icon(){}
-    public function validate_fields(){ true; }
+			);
+    
+    } // End init_form_fields()
+    
+	/**
+	 * Admin Panel Options 
+	 * - Options for bits like 'title' and availability on a country-by-country basis
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_options() {
+    	?>
+    	<h3><?php _e('BACS Payment', 'woothemes'); ?></h3>
+    	<p><?php _e('Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer.', 'woothemes'); ?></p>
+    	<table class="form-table">
+    	<?php
+    		// Generate the HTML For the settings form.
+    		$this->generate_settings_html();
+    	?>
+		</table><!--/.form-table-->
+    	<?php
+    } // End admin_options()
 
-    /**
-    * Admin Panel Options 
-    **/
-    public function admin_options() { ?>
-      <h3><?php _e('BACS Payment', 'woothemes'); ?></h3>
-      <p><?php _e('Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer.', 'woothemes'); ?></p>
-      <table class="form-table">
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
-	        <td class="forminp">
-	        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
-					<label for="woocommerce_bacs_enabled">
-					<input name="woocommerce_bacs_enabled" id="woocommerce_bacs_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_bacs_enabled'), 'yes'); ?> /> <?php _e('Enable BACS payment', 'woothemes') ?></label><br>
-				</fieldset>
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><?php _e('Method Title', 'woocommerce') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_title" id="woocommerce_bacs_title" value="<?php if ($value = get_option('woocommerce_bacs_title')) echo $value; else echo 'BACS Payment'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.','woothemes') ?></span>
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><?php _e('Customer Message', 'woocommerce') ?></th>
-	        <td class="forminp">
-	          <input class="input-text wide-input" type="text" name="woocommerce_bacs_description" id="woocommerce_bacs_description" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_description' ) ); ?>" /> <span class="description"><?php _e('Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.','woothemes') ?></span>
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Name', 'woothemes') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_account_name" id="woocommerce_bacs_account_name" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_account_name' ) ); ?>" />
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Account Number', 'woothemes') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_account_number" id="woocommerce_bacs_account_number" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_account_number' ) ); ?>" />
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Sort Code', 'woothemes') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_sort_code" id="woocommerce_bacs_sort_code" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_sort_code' ) ); ?>" />
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><a href="#" tabindex="99"></a><?php _e('Bank Name', 'woothemes') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_bank_name" id="woocommerce_bacs_bank_name" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_bank_name' ) ); ?>" />
-	        </td>
-	      </tr>      
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><?php _e('IBAN', 'woothemes') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_iban" id="woocommerce_bacs_iban" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_iban' ) ); ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
-	        </td>
-	      </tr>
-	      <tr valign="top">
-	        <th scope="row" class="titledesc"><?php _e('BIC (formerly \'Swift\')', 'woocommerce') ?></th>
-	        <td class="forminp">
-	          <input class="input-text" type="text" name="woocommerce_bacs_bic" id="woocommerce_bacs_bic" value="<?php echo esc_attr( get_option( 'woocommerce_bacs_bic' ) ); ?>" /> <span class="description"><?php _e('Your bank may require this for international payments','woothemes') ?></span>
-	        </td>
-	      </tr>
-		</table>
-    <?php }
 
     /**
     * There are no payment fields for bacs, but we want to show the description if set.
@@ -155,24 +169,6 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
         </li>
       <?php }
       echo "</ul>";
-    }
-
-    /**
-    * Admin Panel Options Processing
-    * - Saves the options to the DB
-    **/
-    public function process_admin_options() {
-    
-      if(isset($_POST['woocommerce_bacs_enabled'])) update_option('woocommerce_bacs_enabled', 'yes'); else update_option('woocommerce_bacs_enabled', 'no');
-      
-      if(isset($_POST['woocommerce_bacs_title'])) 	        update_option('woocommerce_bacs_title', 	        woocommerce_clean($_POST['woocommerce_bacs_title']));           else delete_option('woocommerce_bacs_title');
-      if(isset($_POST['woocommerce_bacs_description']))    update_option('woocommerce_bacs_description',  	woocommerce_clean($_POST['woocommerce_bacs_description']));     else delete_option('woocommerce_bacs_description');
-      if(isset($_POST['woocommerce_bacs_account_name']))   update_option('woocommerce_bacs_account_name',   woocommerce_clean($_POST['woocommerce_bacs_account_name']));    else delete_option('woocommerce_bacs_account_name');
-      if(isset($_POST['woocommerce_bacs_account_number'])) update_option('woocommerce_bacs_account_number', woocommerce_clean($_POST['woocommerce_bacs_account_number']));  else delete_option('woocommerce_bacs_account_number');
-      if(isset($_POST['woocommerce_bacs_sort_code']))      update_option('woocommerce_bacs_sort_code',      woocommerce_clean($_POST['woocommerce_bacs_sort_code']));       else delete_option('woocommerce_bacs_sort_code');
-      if(isset($_POST['woocommerce_bacs_bank_name']))      update_option('woocommerce_bacs_bank_name',      woocommerce_clean($_POST['woocommerce_bacs_bank_name']));       else delete_option('woocommerce_bacs_bank_name');
-      if(isset($_POST['woocommerce_bacs_iban']))           update_option('woocommerce_bacs_iban',           woocommerce_clean($_POST['woocommerce_bacs_iban']));            else delete_option('woocommerce_bacs_iban');
-      if(isset($_POST['woocommerce_bacs_bic']))            update_option('woocommerce_bacs_bic',            woocommerce_clean($_POST['woocommerce_bacs_bic']));             else delete_option('woocommerce_bacs_bic');
     }
 
     /**
