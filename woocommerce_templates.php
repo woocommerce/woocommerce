@@ -155,7 +155,8 @@ function woocommerce_page_body_classes() {
 	if (is_checkout()) $woocommerce_body_classes[] = 'woocommerce-checkout';
 	
 	if (is_cart()) $woocommerce_body_classes[] = 'woocommerce-cart';
-		
+	
+	if (is_account_page()) $woocommerce_body_classes[] = 'woocommerce-account';
 }
 add_action('wp_head', 'woocommerce_page_body_classes');
 

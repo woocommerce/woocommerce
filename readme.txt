@@ -1,56 +1,57 @@
 === WooCommerce ===
 Contributors: woothemes
-Tags: ecommerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory, moneybookers
+Tags: ecommerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Requires at least: 3.1
 Tested up to: 3.2
 Stable tag: 1.0
- 
-An open source eCommerce plugin for WordPress created by WooThemes; feature packed and built upon WordPress core functionality ensuring excellent performance and customisability. 
+
+An e-commerce toolkit that helps you sell anything. Beautifully.
 
 == Description ==
 
-WooCommerce is an open source eCommerce plugin for WordPress created by WooThemes; feature packed and built upon WordPress core functionality ensuring excellent performance and customisability. 
+Transform your WordPress website into a thorough-bred online store. Delivering enterprise-level quality & features whilst backed by a name you can trust. Say hello to WooCommerce.
 
-= WooCommerce features: =
+[vimeo http://vimeo.com/29198966]
 
-* Sell your physical/digital products and services
-* Support for both grouped products and product variations
-* Discount codes with optional usage restrictions
-* Related products, upsells and cross sells
-* Product reviews with hreview markup
-* Flexible tax system
-* Extendable shipping and payment system
-* Inventory management
-* Layered navigation + filters
-* Customer accounts and order tracking
-* Order management system
-* Product import and export (WordPress standard XML)
-* Widgets; cart, search, featured products, recent products, price filtering, layered nav
-* Payment Gateways: PayPal standard, Moneybookers, Cheque payments, Bank Transfer
+= STRENGTH & FLEXIBILITY =
+Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer.
+
+= CUSTOMIZABLE =
+Your business is unique, as should your online store. Choose one of our themes or build your own and give it a personal touch using the built in shortcodes and widgets.
+
+= SMART DASHBOARD WIDGETS =
+Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
+
+= FEATURES =
+Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take out word for it, try it for yourself.
+
+Read more about the features and benefits of WooCommerce at http://www.woothemes.com/woocommerce/
+Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
+
+== Installation ==
 
 = Minimum Requirements =
 
 * WordPress 3.1+
 * PHP version 5.2.4 or greater
 * MySQL version 5.0 or greater
-* The mod_rewrite Apache module (for permalink support)
-* fsockopen support (for payment gateway IPN access)
+* Some payment gateways require fsockopen support (for IPN access)
 
-== Installation ==
+= Automatic installation =
 
-= To Install: =
+Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce log in to your WordPress admin panel, navigate to the Plugins menu and click Add New. 
 
-1.  Download the WooCommerce plugin file
-2.  Unzip the file into a folder on your hard drive
-3.  Upload the `/woocommerce/` folder to the `/wp-content/plugins/` folder on your site
-4.  Visit the plugins page in admin and activate it
-5.	Re-save your permalink settings to ensure custom post types are installed correctly
+In the search field type “WooCommerce” and click Search Plugins. Once you’ve found the plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation. 
 
-= Upgrading WooCommerce =
+= Manual installation =
 
-After upgrading WooCommerce plugin files, be sure to re-activate the plugin to ensure new components are installed correctly.
+The manual installation involves downloading the plugin and uploading it to your webserver via your favourite FTP application.
+
+1. Download the plugin file to your computer and unzip it
+2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
+3. Activate the plugin from the Plugins menu within the WordPress admin.
 
 == Changelog ==
 
 = 1.0 = 
-* Initial Release
+* Initial Release. Woo!

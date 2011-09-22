@@ -173,7 +173,7 @@ class woocommerce_payment_gateway {
 		$html .= '</tr>' . "\n";
     	
     	return $html;
-    } // End generate_checkbox_html()
+    } // End generate_text_html()
 
 
     /**
@@ -199,7 +199,7 @@ class woocommerce_payment_gateway {
 		$html .= '</tr>' . "\n";
     	
     	return $html;
-    } // End generate_checkbox_html()
+    } // End generate_textarea_html()
     
         
     /**
@@ -227,6 +227,40 @@ class woocommerce_payment_gateway {
     	
     	return $html;
     } // End generate_checkbox_html()
+
+
+    /**
+     * Generate Select HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+    function generate_select_html ( $key, $data ) {
+    	$html = '';
+    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
+    	
+		$html .= '<tr valign="top">' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<td class="forminp">' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
+				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<select class="select" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;">';
+				
+				foreach ($data['options'] as $option_key => $option_value) :
+					$html .= '<option value="'.$option_key.'" '.selected($option_key, esc_attr($this->settings[$key]), false).'>'.$option_value.'</option>';
+				endforeach;
+
+				$html .= '</select>';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+			$html .= '</fieldset>';
+			$html .= '</td>' . "\n";
+		$html .= '</tr>' . "\n";
+    	
+    	return $html;
+    } // End generate_select_html()
+    
     
     
     /**
@@ -309,6 +343,25 @@ class woocommerce_payment_gateway {
     	}
     	
     	return $text;
-    } // End validate_text_field()
+    } // End validate_textarea_field()
+    
+    /**
+     * Validate Text Field.
+     *
+     * Make sure the data is escaped correctly, etc.
+     * 
+     * @since 1.0.0
+     * @return $text string
+     */
+    function validate_select_field ( $key ) {
+    	// TO DO: NONCE SECURITY CHECK
+    	$value = $this->settings[$key];
+    	
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    		$value = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    	}
+    	
+    	return $value;
+    } // End validate_select_field()
     
 }

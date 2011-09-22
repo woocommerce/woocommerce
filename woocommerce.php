@@ -245,6 +245,10 @@ function is_cart() {
 function is_checkout() {
 	return is_page(get_option('woocommerce_checkout_page_id'));
 }
+function is_account_page() {
+	if ( is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id')) ) return true; else return false;
+	return is_page(get_option('woocommerce_myaccount_page_id'));
+}
 if (!function_exists('is_ajax')) {
 	function is_ajax() {
 		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
