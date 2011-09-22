@@ -490,14 +490,14 @@ function woocommerce_remove_row_actions( $actions ) {
 
 
 /**
- * Order page views
+ * Order page bulk actions
  **/
 add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
 
 function woocommerce_bulk_actions( $actions ) {
 	
 	if (isset($actions['edit'])) unset($actions['edit']);
-	
+
 	return $actions;
 }
 
@@ -560,7 +560,7 @@ add_filter( 'request', 'woocommerce_orders_by_customer_query' );
 
 function woocommerce_orders_by_customer_query( $vars ) {
 	global $typenow, $wp_query;
-    if ($typenow=='shop_order' && isset( $_GET['_customer_user'] )) :
+    if ($typenow=='shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user']>0) :
     
 		$vars['meta_key'] = '_customer_user';
 		$vars['meta_value'] = (int) $_GET['_customer_user'];
