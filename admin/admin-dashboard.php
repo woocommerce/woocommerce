@@ -7,12 +7,17 @@
  * @package 	WooCommerce
  */
 
+// Only hook in admin parts if the user has admin access
+if (current_user_can('manage_woocommerce')) :
+	add_action('right_now_content_table_end', 'woocommerce_content_right_now');
+	add_action('right_now_table_end', 'woocommerce_right_now');
+	add_action('wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
+	add_action('admin_footer', 'woocommmerce_dashboard_sales_js');
+endif;
+
 /**
  * Right now widget hooks/content
  */
-add_action('right_now_content_table_end', 'woocommerce_content_right_now');
-add_action('right_now_table_end', 'woocommerce_right_now');
-
 function woocommerce_content_right_now() {
 	
 	global $woocommerce;
@@ -78,8 +83,6 @@ function woocommerce_right_now() {
 /**
  * Dashboard Widgets - init
  */
-add_action('wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
-
 function woocommerce_init_dashboard_widgets() {
 
 	global $current_month_offset;
@@ -310,7 +313,3 @@ function woocommmerce_dashboard_sales_js() {
 	wp_print_scripts('woocommerce_dashboard_sales');
 	
 }
-add_action('admin_footer', 'woocommmerce_dashboard_sales_js');
-
-
-
