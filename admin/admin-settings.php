@@ -91,6 +91,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __( 'Email template', 'woothemes' ),
+		'desc' 		=> __( 'Enable the WooCommerce email template for <strong>all</strong> WordPress emails.', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_sitewide_mail_template',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
+	),
+	
+	array(  
 		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
 		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
 		'id' 		=> 'woocommerce_sharethis',

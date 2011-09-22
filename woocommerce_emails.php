@@ -9,13 +9,9 @@
  * @author		WooThemes
  */
 
-
 /**
  * Mail from name/email
  **/
-add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-
 function woocommerce_mail_from_name( $name ) {
 	$name = get_bloginfo('name');
 	$name = esc_attr($name);
@@ -30,38 +26,53 @@ function woocommerce_mail_from( $email ) {
 /**
  * HTML email template for standard WordPress emails
  **/
-add_action('phpmailer_init', 'woocommerce_email_template');
+add_action( 'phpmailer_init', 'woocommerce_email_template' );
 
 function woocommerce_email_template( $phpmailer ) {
 	
-	if (!strstr($phpmailer->Body, '<html>')) :
-		
-		// Standard WordPress email
-		global $email_heading;
-		
-		$subject = $phpmailer->Subject;
-		$subject = str_replace('['.get_bloginfo('name').'] ', '', $subject);
-		
-		$email_heading = $subject;
-		
-		$content = nl2br(wptexturize($phpmailer->Body));
-		
-		// Buffer
-		ob_start();
-		
-		// Get mail template
-		woocommerce_email_header();
-		echo $content;
-		woocommerce_email_footer();
-		
-		// Get contents
-		$message = ob_get_clean();
-		
-		$phpmailer->Body = $message;
-		
-	else :
+	if (strstr($phpmailer->Body, '<html>')) :
 		
 		// Email already using custom template
+		add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+		add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+		add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+		
+	else :
+	
+		if (get_option('woocommerce_enable_sitewide_mail_template')=='yes') :
+			
+			// From address
+			add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+			add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+			// HTML content type
+			add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+			// Fix password email
+			add_filter( 'retrieve_password_message', 'woocommerce_retrieve_password_message' );
+			
+			// Standard WordPress email
+			global $email_heading;
+			
+			$subject = $phpmailer->Subject;
+			$subject = str_replace('['.get_bloginfo('name').'] ', '', $subject);
+			
+			$email_heading = $subject;
+			
+			$content = nl2br(wptexturize($phpmailer->Body));
+			
+			// Buffer
+			ob_start();
+			
+			// Get mail template
+			woocommerce_email_header();
+			echo $content;
+			woocommerce_email_footer();
+			
+			// Get contents
+			$message = ob_get_clean();
+			
+			$phpmailer->Body = $message;
+		
+		endif;
 		
 	endif;
 	
@@ -93,8 +104,6 @@ function woocommerce_email_footer() {
 /**
  * HTML email type
  **/
-add_filter('wp_mail_content_type', 'woocommerce_email_content_type');
-
 function woocommerce_email_content_type($content_type){
 	return 'text/html';
 }
@@ -106,7 +115,6 @@ function woocommerce_email_content_type($content_type){
 function woocommerce_retrieve_password_message($content){
 	return htmlspecialchars($content);
 }
-add_filter('retrieve_password_message', 'woocommerce_retrieve_password_message');
 	
 
 /**
