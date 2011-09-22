@@ -224,7 +224,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					jQuery(function(){
 						jQuery("body").block(
 							{ 
-								message: "<img src=\"'.$woocommerce->plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+								message: "<img src=\"'.$woocommerce->plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
 								overlayCSS: 
 								{ 
 									background: "#fff", 
@@ -236,7 +236,8 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 							        color:          "#555", 
 							        border:         "3px solid #aaa", 
 							        backgroundColor:"#fff", 
-							        cursor:         "wait" 
+							        cursor:         "wait",
+							        lineHeight:		"32px"
 							    } 
 							});
 						jQuery("#submit_paypal_payment_form").click();
