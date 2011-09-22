@@ -41,10 +41,10 @@ function woocommerce_content_right_now() {
 			<td class="t"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php _e('Product Tags', 'woothemes'); ?></a></td>
 		</tr>
 		<tr>
-			<td class="first b"><a href="admin.php?page=attributes"><?php 
+			<td class="first b"><a href="admin.php?page=woocommerce_attributes"><?php 
 				echo sizeof($woocommerce->get_attribute_taxonomies());
 			?></a></td>
-			<td class="t"><a href="admin.php?page=attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
+			<td class="t"><a href="admin.php?page=woocommerce_attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
 		</tr>
 	<?php
 }
