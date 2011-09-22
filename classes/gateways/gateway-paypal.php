@@ -17,111 +17,100 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
         $this->id			= 'paypal';
         $this->icon 		= $woocommerce->plugin_url() . '/assets/images/icons/paypal.png';
         $this->has_fields 	= false;
-      	$this->enabled		= get_option('woocommerce_paypal_enabled');
-		$this->title 		= get_option('woocommerce_paypal_title');
-		$this->email 		= get_option('woocommerce_paypal_email');
-		$this->description  = get_option('woocommerce_paypal_description');
-		
-		$this->liveurl 		= 'https://www.paypal.com/webscr';
+        $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
-		$this->testmode		= get_option('woocommerce_paypal_testmode');		
+        
+		// Load the form fields.
+		$this->init_form_fields();
 		
-		$this->send_shipping = get_option('woocommerce_paypal_send_shipping');
+		// Load the settings.
+		$this->init_settings();
 		
+		// Define user set variables
+		$this->title 		= $this->settings['title'];
+		$this->description 	= $this->settings['description'];
+		$this->email 		= $this->settings['email'];
+		$this->testmode		= $this->settings['testmode'];		
+		$this->send_shipping = $this->settings['send_shipping'];
+		
+		// Actions
 		add_action( 'init', array(&$this, 'check_ipn_response') );
 		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
-		
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
-		add_option('woocommerce_paypal_enabled', 'yes');
-		add_option('woocommerce_paypal_email', '');
-		add_option('woocommerce_paypal_title', __('PayPal', 'woothemes') );
-		add_option('woocommerce_paypal_description', __("Pay via PayPal; you can pay with your credit card if you don't have a PayPal account", 'woothemes') );
-		add_option('woocommerce_paypal_testmode', 'no');
-		add_option('woocommerce_paypal_send_shipping', 'no');
-		
 		add_action('woocommerce_receipt_paypal', array(&$this, 'receipt_page'));
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
     } 
+    
+	/**
+     * Initialise Gateway Settings Form Fields
+     */
+    function init_form_fields() {
+    
+    	$this->form_fields = array(
+			'enabled' => array(
+							'title' => __( 'Enable/Disable', 'woothemes' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable PayPal standard', 'woothemes' ), 
+							'default' => 'yes'
+						), 
+			'title' => array(
+							'title' => __( 'Title', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
+							'default' => __( 'PayPal', 'woothemes' )
+						),
+			'description' => array(
+							'title' => __( 'Description', 'woothemes' ), 
+							'type' => 'textarea', 
+							'description' => __( 'This controls the description which the user sees during checkout.', 'woothemes' ), 
+							'default' => __("Pay via PayPal; you can pay with your credit card if you don't have a PayPal account", 'woothemes')
+						),
+			'email' => array(
+							'title' => __( 'PayPal Email', 'woothemes' ), 
+							'type' => 'text', 
+							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woothemes' ), 
+							'default' => ''
+						),
+			'send_shipping' => array(
+							'title' => __( 'Shipping details', 'woothemes' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Send shipping details to PayPal', 'woothemes' ), 
+							'default' => 'no'
+						), 
+			'testmode' => array(
+							'title' => __( 'PayPal sandbox', 'woothemes' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable PayPal sandbox', 'woothemes' ), 
+							'default' => 'yes'
+						)
+			);
+    
+    } // End init_form_fields()
     
 	/**
 	 * Admin Panel Options 
 	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 **/
+	 *
+	 * @since 1.0.0
+	 */
 	public function admin_options() {
+
     	?>
     	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
-    	<p><?php _e('PayPal standard works by sending the user to <a href="https://www.paypal.com/uk/mrb/pal=JFC9L8JJUZZK2">PayPal</a> to enter their payment information.', 'woothemes'); ?></p>
+    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woothemes'); ?></p>
     	<table class="form-table">
-	    	<tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Enable/disable', 'woothemes') ?></th>
-		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Enable/disable', 'woothemes') ?></span></legend>
-						<label for="woocommerce_paypal_enabled">
-						<input name="woocommerce_paypal_enabled" id="woocommerce_paypal_enabled" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_enabled'), 'yes'); ?> /> <?php _e('Enable PayPal standard', 'woothemes') ?></label><br>
-					</fieldset>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Method Title', 'woothemes') ?></th>
-		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_paypal_title" id="woocommerce_paypal_title" style="min-width:50px;" value="<?php if ($value = get_option('woocommerce_paypal_title')) echo $value; else echo 'PayPal'; ?>" /> <span class="description"><?php _e('This controls the title which the user sees during checkout.', 'woothemes') ?></span>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Description', 'woothemes') ?></th>
-		        <td class="forminp">
-			        <input class="input-text wide-input" type="text" name="woocommerce_paypal_description" id="woocommerce_paypal_description" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_paypal_description' ) ); ?>" /> <span class="description"><?php _e('This controls the description which the user sees during checkout.', 'woothemes') ?></span>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('PayPal email address', 'woothemes') ?></th>
-		        <td class="forminp">
-			        <input class="input-text" type="text" name="woocommerce_paypal_email" id="woocommerce_paypal_email" style="min-width:50px;" value="<?php echo esc_attr( get_option( 'woocommerce_paypal_email' ) ); ?>" /> <span class="description"><?php _e('Please enter your PayPal email address; this is needed in order to take payment!', 'woothemes') ?></span>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('Shipping details', 'woothemes') ?></th>
-		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('Shipping details', 'woothemes') ?></span></legend>
-						<label for="woocommerce_paypal_send_shipping">
-						<input name="woocommerce_paypal_send_shipping" id="woocommerce_paypal_send_shipping" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_send_shipping'), 'yes'); ?> /> <?php _e('Send shipping details to PayPal', 'woothemes') ?></label><br>
-					</fieldset>
-		        </td>
-		    </tr>
-		    <tr valign="top">
-		        <th scope="row" class="titledesc"><?php _e('PayPal sandbox', 'woothemes') ?></th>
-		        <td class="forminp">
-		        	<fieldset><legend class="screen-reader-text"><span><?php _e('PayPal sandbox', 'woothemes') ?></span></legend>
-						<label for="woocommerce_paypal_testmode">
-						<input name="woocommerce_paypal_testmode" id="woocommerce_paypal_testmode" type="checkbox" value="1" <?php checked(get_option('woocommerce_paypal_testmode'), 'yes'); ?> /> <?php _e('Enable PayPal sandbox', 'woothemes') ?></label><br>
-					</fieldset>
-		        </td>
-		    </tr>
-		</table>
     	<?php
-    }
+    		// Generate the HTML For the settings form.
+    		$this->generate_settings_html();
+    	?>
+		</table><!--/.form-table-->
+    	<?php
+    } // End admin_options()
     
     /**
 	 * There are no payment fields for paypal, but we want to show the description if set.
 	 **/
     function payment_fields() {
-    	if ($woocommerce_paypal_description = get_option('woocommerce_paypal_description')) echo wpautop(wptexturize($woocommerce_paypal_description));
-    }
-    
-	/**
-	 * Admin Panel Options Processing
-	 * - Saves the options to the DB
-	 **/
-    public function process_admin_options() {
-    
-   		if(isset($_POST['woocommerce_paypal_enabled'])) update_option('woocommerce_paypal_enabled', 'yes'); else update_option('woocommerce_paypal_enabled', 'no');
-   		
-   		if(isset($_POST['woocommerce_paypal_title'])) update_option('woocommerce_paypal_title', woocommerce_clean($_POST['woocommerce_paypal_title'])); else delete_option('woocommerce_paypal_title');
-   		if(isset($_POST['woocommerce_paypal_email'])) update_option('woocommerce_paypal_email', woocommerce_clean($_POST['woocommerce_paypal_email'])); else delete_option('woocommerce_paypal_email');
-   		if(isset($_POST['woocommerce_paypal_description'])) update_option('woocommerce_paypal_description', woocommerce_clean($_POST['woocommerce_paypal_description'])); else delete_option('woocommerce_paypal_description');
-   		
-   		if(isset($_POST['woocommerce_paypal_testmode'])) update_option('woocommerce_paypal_testmode', 'yes'); else update_option('woocommerce_paypal_testmode', 'no');
-   		
-   		if(isset($_POST['woocommerce_paypal_send_shipping'])) update_option('woocommerce_paypal_send_shipping', 'yes'); else update_option('woocommerce_paypal_send_shipping', 'no');
+    	if ($this->description) echo wpautop(wptexturize($this->description));
     }
     
 	/**
@@ -189,9 +178,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	
 				// Payment Info
 				'invoice' 				=> $order->order_key,
-				//'tax'					=> $order->get_total_tax(),
 				'tax_cart'				=> $order->get_total_tax(),
-				//'amount' 				=> $order->order_total,
 				'discount_amount_cart' 	=> $order->order_discount
 			), 
 			$phone_args
@@ -207,8 +194,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		// Cart Contents
 		$item_loop = 0;
 		if (sizeof($order->items)>0) : foreach ($order->items as $item) :
-			$_product = &new woocommerce_product($item['id']);
-			if ($_product->exists() && $item['qty']) :
+			if ($item['qty']) :
 				
 				$item_loop++;
 				

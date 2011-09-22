@@ -245,17 +245,17 @@ jQuery(document).ready(function($) {
 	});
 	
 	/* Shipping calculator */
-	$('.shipping_calculator-form').hide();
+	$('.shipping-calculator-form').hide();
 	
-	$('.shipping_calculator-button').click(function() {
-	  $('.shipping_calculator-form').slideToggle('slow', function() {
+	$('.shipping-calculator-button').click(function() {
+	  $('.shipping-calculator-form').slideToggle('slow', function() {
 	    // Animation complete.
 	 });
 	}); 
 	
 	// Stop anchors moving the viewport
 
-	$(".shipping_calculator-button").click(function() {return false;});
+	$(".shipping-calculator-button").click(function() {return false;});
 	
 	// Variations
 	
