@@ -464,11 +464,22 @@ function woocommerce_view_order() {
 				if ($notes) :
 					?>
 					<h2><?php _e('Order Updates', 'woothemes'); ?></h2>
-					<ul class="notes">
+					<ol class="commentlist notes">	
 						<?php foreach ($notes as $note) : ?>
-							<li><p><strong><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></strong></p><?php echo wpautop(wptexturize($note->comment_content)); ?></li>
+						<li class="comment note">
+							<div class="comment_container">			
+								<div class="comment-text">
+									<p class="meta"><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></p>
+									<div class="description">
+										<?php echo wpautop(wptexturize($note->comment_content)); ?>
+									</div>
+					  				<div class="clear"></div>
+					  			</div>
+								<div class="clear"></div>			
+							</div>
+						</li>
 						<?php endforeach; ?>
-					</ul>
+					</ol>
 					<?php
 				endif;
 			?>
