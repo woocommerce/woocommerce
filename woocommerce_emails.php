@@ -22,6 +22,24 @@ function woocommerce_mail_from( $email ) {
 	return $email;
 }
 
+/**
+ * HTML emails from WooCommerce
+ **/
+function woocommerce_mail( $to, $subject, $message ) {
+	// Hook in content type/from changes
+	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+		
+	// Send the mail	
+	wp_mail( $to, $subject, $message );
+	
+	// Unhook
+	remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+	remove_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+	remove_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+}
+
 
 /**
  * HTML email template for standard WordPress emails
@@ -33,9 +51,6 @@ function woocommerce_email_template( $phpmailer ) {
 	if (strstr($phpmailer->Body, '<html>')) :
 		
 		// Email already using custom template
-		add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-		add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-		add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
 		
 	else :
 	
@@ -154,8 +169,7 @@ function woocommerce_new_order_notification( $id ) {
 	$message = ob_get_clean();
 	
 	// Send the mail	
-	wp_mail( get_option('admin_email'), $subject, $message );
-	
+	woocommerce_mail( get_option('admin_email'), $subject, $message );
 }
 
 
@@ -187,7 +201,7 @@ function woocommerce_processing_order_customer_notification( $id ) {
 	$message = ob_get_clean();
 
 	// Send the mail	
-	wp_mail( $order->billing_email, $subject, $message );
+	woocommerce_mail( $order->billing_email, $subject, $message );
 }
 
 
@@ -218,7 +232,7 @@ function woocommerce_completed_order_customer_notification( $id ) {
 	$message = ob_get_clean();
 
 	// Send the mail	
-	wp_mail( $order->billing_email, $subject, $message );
+	woocommerce_mail( $order->billing_email, $subject, $message );
 }
 
 
@@ -247,7 +261,7 @@ function woocommerce_pay_for_order_customer_notification( $id ) {
 	$message = ob_get_clean();
 
 	// Send the mail	
-	wp_mail( $order->billing_email, $subject, $message );
+	woocommerce_mail( $order->billing_email, $subject, $message );
 }
 
 
