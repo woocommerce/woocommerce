@@ -247,6 +247,61 @@ function woocommerce_add_order_item() {
 }
 
 /**
+ * Add order note via ajax
+ */
+add_action('wp_ajax_woocommerce_add_order_note', 'woocommerce_add_order_note');
+
+function woocommerce_add_order_note() {
+	
+	global $woocommerce;
+
+	check_ajax_referer( 'add-order-note', 'security' );
+	
+	$post_id 	= (int) $_POST['post_id'];
+	$note		= strip_tags(woocommerce_clean($_POST['note']));
+	$note_type	= $_POST['note_type'];
+	
+	$is_customer_note = ($note_type=='customer') ? 1 : 0;
+	
+	if ($post_id>0) :
+		$order = &new woocommerce_order( $post_id );
+		$comment_id = $order->add_order_note( $note, $is_customer_note );
+		
+		echo '<li rel="'.$comment_id.'" class="note ';
+		if ($is_customer_note) echo 'customer-note';
+		echo '"><div class="note_content">';
+		echo wpautop(wptexturize($note));
+		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(strtotime('NOW'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
+		echo '</li>';
+		
+	endif;
+	
+	// Quit out
+	die();
+}
+
+/**
+ * Delete order note via ajax
+ */
+add_action('wp_ajax_woocommerce_delete_order_note', 'woocommerce_delete_order_note');
+
+function woocommerce_delete_order_note() {
+	
+	global $woocommerce;
+
+	check_ajax_referer( 'delete-order-note', 'security' );
+	
+	$note_id 	= (int) $_POST['note_id'];
+	
+	if ($note_id>0) :
+		wp_delete_comment( $note_id );
+	endif;
+	
+	// Quit out
+	die();
+}
+
+/**
  * Search for products for upsells/crosssells
  */
 add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');

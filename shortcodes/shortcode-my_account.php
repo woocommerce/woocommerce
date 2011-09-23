@@ -457,8 +457,23 @@ function woocommerce_view_order() {
 			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $order->status );
 			
 			echo '.</p>';
-			
 			?>
+			
+			<?php
+				$notes = $order->get_customer_order_notes();
+				if ($notes) :
+					?>
+					<h2><?php _e('Order Updates', 'woothemes'); ?></h2>
+					<ul class="notes">
+						<?php foreach ($notes as $note) : ?>
+							<li><p><strong><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></strong></p><?php echo wpautop(wptexturize($note->comment_content)); ?></li>
+						<?php endforeach; ?>
+					</ul>
+					<?php
+				endif;
+			?>
+			
+			<h2><?php _e('Order Details', 'woothemes'); ?></h2>	
 			<table class="shop_table">
 				<thead>
 					<tr>

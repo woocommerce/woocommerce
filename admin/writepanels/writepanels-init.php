@@ -12,6 +12,7 @@
 require_once('writepanel-product_data.php');
 require_once('writepanel-product-types.php');
 require_once('writepanel-order_data.php');
+require_once('writepanel-order_notes.php');
 require_once('writepanel-coupon_data.php');
 
 /**
@@ -29,9 +30,10 @@ function woocommerce_meta_boxes() {
 	add_meta_box( 'woocommerce-order-data', __('Order Data', 'woothemes'), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woothemes'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
 	add_meta_box( 'woocommerce-order-totals', __('Order Totals', 'woothemes'), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
-	
+	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woothemes'), 'woocommerce_order_notes_meta_box', 'shop_order', 'normal', 'default');
 	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woothemes'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'default');
 	
+	remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );
 	remove_meta_box( 'commentstatusdiv', 'shop_order' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_order' , 'normal' );
 	

@@ -1,6 +1,5 @@
-#toplevel_page_woocommerce .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat 0px -32px !important;}
+#toplevel_page_woocommerce .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat 0px -32px !important;}#toplevel_page_woocommerce .wp-menu-image img{display:none;}
 #toplevel_page_woocommerce:hover .wp-menu-image,#toplevel_page_woocommerce.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat 0px 0px !important;}
-#toplevel_page_woocommerce .wp-menu-image img{display:none;}
 #menu-posts-product .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -35px -32px !important;}
 #menu-posts-product:hover .wp-menu-image,#menu-posts-product.wp-has-current-submenu .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -35px 0px !important;}
 #menu-posts-shop_order .wp-menu-image{background:url(../images/icons/menu_icons.png) no-repeat -70px -32px !important;}
@@ -60,6 +59,14 @@ ul.subsubsub li.completed a{color:green;}
 ul.subsubsub li.onhold a{color:red;}
 ul.subsubsub li.cancelled a{color:#dfdfdf;}
 ul.subsubsub li.refunded a{color:#ccc;}
+ul.order_notes{padding:2px 0 0 0;}ul.order_notes li .note_content{padding:10px;background:#efefef;position:relative;}
+ul.order_notes li p.meta{padding:10px;color:#999;font-size:11px;}
+ul.order_notes li a.delete_note{color:red;}
+ul.order_notes li .note_content:after{content:"";display:block;position:absolute;bottom:-15px;left:30px;width:0;height:0;border-width:15px 15px 0 0;border-style:solid;border-color:#efefef transparent;}
+ul.order_notes li.customer-note .note_content{background:#d7cad2;}
+ul.order_notes li.customer-note .note_content:after{border-color:#d7cad2 transparent;}
+.add_note{border-top:1px solid #ddd;padding:10px;}.add_note h4{margin-top:5px !important;}
+.add_note input#add_order_note{width:50%;}
 table.wp-list-table .column-thumb{width:66px;text-align:center;white-space:nowrap;}
 table.wp-list-table .column-sku,table.wp-list-table .column-product_type,table.wp-list-table .column-product_cat,table.wp-list-table .column-product_tags,table.wp-list-table .column-is_in_stock,table.wp-list-table .column-price,table.wp-list-table .column-product_date,table.wp-list-table .column-featured{width:9%;}
 table.wp-list-table img{margin:1px 2px;}

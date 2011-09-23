@@ -306,9 +306,9 @@ class woocommerce_order {
 	 * Adds a note (comment) to the order
 	 *
 	 * @param   string	$note		Note to add
-	 * @param   int		$private	Currently unused
+	 * @param   int		$is_customer_note	Is this a note for the customer?
 	 */
-	function add_order_note( $note, $private = 1 ) {
+	function add_order_note( $note, $is_customer_note = 0 ) {
 		
 		$comment_post_ID = $this->id;
 		$comment_author = 'WooCommerce';
@@ -328,7 +328,9 @@ class woocommerce_order {
 	
 		$comment_id = wp_insert_comment( $commentdata );
 		
-		add_comment_meta($comment_id, 'private', $private);
+		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
+		
+		return $comment_id;
 		
 	}
 
@@ -453,4 +455,32 @@ class woocommerce_order {
 			
 	}
 	
+	/**
+	 * List order notes (public) for the customer
+	 */
+	function get_customer_order_notes() {
+		
+		$notes = array();
+		
+		$args = array(
+			'post_id' => $this->id,
+			'approve' => 'approve',
+			'type' => ''
+		);
+		
+		remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+		
+		$comments = get_comments( $args );
+		
+		foreach ($comments as $comment) :
+			$is_customer_note = get_comment_meta($comment->comment_ID, 'is_customer_note', true);
+			if ($is_customer_note) $notes[] = $comment;
+		endforeach;
+		
+		add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+		
+		return (array) $notes;
+		
+	}
+
 }
