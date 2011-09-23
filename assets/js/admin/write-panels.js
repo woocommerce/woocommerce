@@ -176,10 +176,10 @@ jQuery( function($){
 		// Show option
 		if (select_val=='variable') {
 			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
-			jQuery('.options_group.grouping').val('').hide();
+			jQuery('.options_group.grouping, .sale_price_dates_fields').val('').hide();
 			jQuery('td.enable_variation, th.enable_variation').show();
 		} else if (select_val=='simple') {
-			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing, .sale_price_dates_fields').show();
 			jQuery('.options_group.grouping').show();
 			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='grouped') {
@@ -187,11 +187,11 @@ jQuery( function($){
 			jQuery('.options_group.grouping').val('').hide();
 			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='downloadable') {
-			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing, .sale_price_dates_fields').show();
 			jQuery('.options_group.grouping').show();
 			jQuery('td.enable_variation, th.enable_variation').hide();
 		} else if (select_val=='virtual') {
-			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing').show();
+			jQuery('.stock_fields, .manage_stock_field, .tax_tab, .options_group.pricing, .sale_price_dates_fields').show();
 			jQuery('.options_group.grouping').show();
 			jQuery('td.enable_variation, th.enable_variation').hide();
 		}

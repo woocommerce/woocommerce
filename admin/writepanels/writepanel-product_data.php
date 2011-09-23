@@ -90,10 +90,10 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group pricing">';
 			
 				// Price
-				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
+				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):' ) );
 				
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):', 'placeholder' => '0.00' ) );
+				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):' ) );
 						
 				// Special Price date range
 				$field = array( 'id' => 'sale_price_dates', 'label' => __('Sale Price Dates', 'woothemes') );
@@ -101,7 +101,7 @@ function woocommerce_product_data_box() {
 				$sale_price_dates_from = get_post_meta($thepostid, 'sale_price_dates_from', true);
 				$sale_price_dates_to = get_post_meta($thepostid, 'sale_price_dates_to', true);
 				
-				echo '	<p class="form-field">
+				echo '	<p class="form-field sale_price_dates_fields">
 							<label for="'.$field['id'].'_from">'.$field['label'].':</label>
 							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
 				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
@@ -471,7 +471,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	wp_set_object_terms($post_id, $product_type, 'product_type');
 
 	// Sales and prices
-	if ($product_type!=='grouped') :
+	if ($product_type!=='grouped' && $product_type!=='variable') :
 		
 		$date_from = (isset($_POST['sale_price_dates_from'])) ? $_POST['sale_price_dates_from'] : '';
 		$date_to = (isset($_POST['sale_price_dates_to'])) ? $_POST['sale_price_dates_to'] : '';
@@ -509,7 +509,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			update_post_meta( $post_id, 'sale_price_dates_from', '');
 			update_post_meta( $post_id, 'sale_price_dates_to', '');
 		endif;
-
+		
 	else :
 		
 		update_post_meta( $post_id, 'regular_price', '' );
@@ -520,8 +520,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 	endif;
 	
-	// Update parent if grouped so price sorting works and stays in sync
-	if ($post->post_parent || $product_type=='grouped') :
+	// Update parent if grouped so price sorting works and stays in sync with the cheapest child
+	if ($post->post_parent>0 || $product_type=='grouped') :
 		$post_parent = ($post->post_parent>0) ? $post->post_parent : $post_id;
 		
 		$children_by_price = get_posts( array(
@@ -564,7 +564,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 	
 	// Upsells
-	
 	if (isset($_POST['upsell_ids'])) :
 		$upsells = array();
 		$ids = $_POST['upsell_ids'];
@@ -575,7 +574,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 	
 	// Cross sells
-	
 	if (isset($_POST['crosssell_ids'])) :
 		$crosssells = array();
 		$ids = $_POST['crosssell_ids'];
@@ -584,10 +582,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		endforeach;
 		update_post_meta( $post_id, 'crosssell_ids', $crosssells );
 	endif;
-		
-	// Do action
-	do_action( 'woocommerce_process_product_meta', $post_id );
-	
+			
 	// Do action for product type
 	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 		

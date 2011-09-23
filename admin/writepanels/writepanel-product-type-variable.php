@@ -29,7 +29,7 @@ function variable_product_type_options() {
 	}
 	?>
 	<div id="variable_product_options" class="panel">
-		
+		<p class="bulk_edit"><strong><?php _e('Bulk edit:', 'woothemes'); ?></strong> <a class="button set_all_prices" href="#"><?php _e('Set all prices', 'woocommerce'); ?></a> <a class="button set_all_sale_prices" href="#"><?php _e('Set all sale prices', 'woocommerce'); ?></a> <a class="button set_all_stock" href="#"><?php _e('Set all stock', 'woocommerce'); ?></a></p>
 		<div class="woocommerce_variations">
 			<?php
 			$args = array(
@@ -94,15 +94,15 @@ function variable_product_type_options() {
 							<tr>
 								<td class="upload_image"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php if (isset($variation_data['_thumbnail_id'][0])) echo $variation_data['_thumbnail_id'][0]; ?>" /><input type="button" rel="<?php echo $variation->ID; ?>" class="upload_image_button button" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>
 								
-								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" /></td>
+								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" placeholder="<?php if ($sku = get_post_meta($post->ID, 'sku', true)) echo $sku; else echo $post->ID; ?>" /></td>
 								
-								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" /></td>
+								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, 'weight', true)) echo $value; else echo '0.00'; ?>" /></td>
 								
 								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product\'s stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['stock'][0])) echo $variation_data['stock'][0]; ?>" /></td>
 								
-								<td><label><?php _e('Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
+								<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
 								
-								<td><label><?php _e('Sale Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\'s sale price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
+								<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
 								
 								<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
 							</tr>		
@@ -196,11 +196,16 @@ function variable_product_write_panel_js() {
 						<tbody>\
 							<tr>\
 								<td class="upload_image"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><input type="button" class="upload_image_button button" rel="" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>\
-								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" /></td>\
-								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" /></td>\
-								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product\\\'s stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
-								<td><label><?php _e('Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
-								<td><label><?php _e('Sale Price:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank to use the variable product\\\'s sale price.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" placeholder="<?php _e('e.g. 29.99', 'woothemes'); ?>" /></td>\
+								\
+								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product\\\'s SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" placeholder="<?php if ($sku = get_post_meta($post->ID, 'sku', true)) echo $sku; else echo $post->ID; ?>" /></td>\
+								\
+								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product\\\'s weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, 'weight', true)) echo $value; else echo '0.00'; ?>" /></td>\
+								\
+								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the parent product\\\'s stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
+								\
+								<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[' + loop + ']" /></td>\
+								\
+								<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" /></td>\
 								<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /></td>\
 							</tr>\
 						</tbody>\
@@ -275,6 +280,24 @@ function variable_product_write_panel_js() {
 				}
 				
 			}
+			return false;
+		});
+		
+		jQuery('a.set_all_prices').click(function(){
+			var value = prompt("<?php _e('Enter a price', 'woothemes'); ?>");
+			jQuery('input[name^="variable_price"]').val( value );
+			return false;
+		});
+		
+		jQuery('a.set_all_sale_prices').click(function(){
+			var value = prompt("<?php _e('Enter a price', 'woothemes'); ?>");
+			jQuery('input[name^="variable_sale_price"]').val( value );
+			return false;
+		});
+		
+		jQuery('a.set_all_stock').click(function(){
+			var value = prompt("<?php _e('Enter stock quantity', 'woothemes'); ?>");
+			jQuery('input[name^="variable_stock"]').val( value );
 			return false;
 		});
 		
@@ -555,7 +578,9 @@ function process_product_meta_variable( $post_id ) {
 			foreach ($attributes as $attribute) :
 				if ( $attribute['is_variation'] ) :
 					$value = trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]);
-					if ($value) $title[] = $woocommerce->attribute_label($attribute['name']).': '.$value;
+					if ($value) :
+						$title[] = $woocommerce->attribute_label($attribute['name']).': '.$value;
+					endif;
 				endif;
 			endforeach;
 			
@@ -605,6 +630,25 @@ function process_product_meta_variable( $post_id ) {
 		 	
 		 endfor; 
 		 
+	endif;
+	
+	// Update parent if variable so price sorting works and stays in sync with the cheapest child
+	$post_parent = $post_id;
+	
+	$children_by_price = get_posts( array(
+		'post_parent' 	=> $post_parent,
+		'orderby' 	=> 'meta_value_num',
+		'order'		=> 'asc',
+		'meta_key'	=> 'price',
+		'posts_per_page' => 1,
+		'post_type' 	=> 'product_variation',
+		'fields' 		=> 'ids'
+	));
+	if ($children_by_price) :
+		foreach ($children_by_price as $child) :
+			$child_price = get_post_meta($child, 'price', true);
+			update_post_meta( $post_parent, 'price', $child_price );
+		endforeach;
 	endif;
 
 }

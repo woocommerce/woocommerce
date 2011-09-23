@@ -32,54 +32,21 @@ class woocommerce_query {
 		// Only apply to product categories, the product post archive, the shop page, and product tags
 	    if ( ( isset( $q->query_vars['suppress_filters'] ) && true == $q->query_vars['suppress_filters'] ) || (!$q->is_tax( 'product_cat' ) && !$q->is_post_type_archive( 'product' ) && !$q->is_page( get_option('woocommerce_shop_page_id') ) && !$q->is_tax( 'product_tag' ))) return;
 		
+		// Meta query
 		$meta_query = (array) $q->get( 'meta_query' );
-		
-		// Visibility
-	    if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
-	
-	    $meta_query[] = array(
-	        'key' => 'visibility',
-	        'value' => $in,
-	        'compare' => 'IN'
-	    );
-	    
-	    // In stock
-		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
-			 $meta_query[] = array(
-		        'key' 		=> 'stock_status',
-				'value' 	=> 'instock',
-				'compare' 	=> '='
-		    );
-		endif;
+	    $meta_query[] = $this->visibility_meta_query();
+	    $meta_query[] = $this->stock_status_meta_query();
 		
 		// Ordering
-		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : 'title';
-		
-		switch ($current_order) :
-			case 'date' :
-				$orderby = 'date';
-				$order = 'desc';
-				$meta_key = '';
-			break;
-			case 'price' :
-				$orderby = 'meta_value_num';
-				$order = 'asc';
-				$meta_key = 'price';
-			break;
-			default :
-				$orderby = 'title';
-				$order = 'asc';
-				$meta_key = '';
-			break;
-		endswitch;
+		$ordering = $this->get_catalog_ordering_args();
 		
 		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
 		$post__in = array_unique(apply_filters('loop_shop_post_in', array()));
 		
 		// Ordering query vars
-		$q->set( 'orderby', $orderby );
-		$q->set( 'order', $order );
-		$q->set( 'meta_key', $meta_key );
+		$q->set( 'orderby', $ordering['orderby'] );
+		$q->set( 'order', $ordering['order'] );
+		if (isset($ordering['meta_key'])) $q->set( 'meta_key', $ordering['meta_key'] );
 	
 		// Query vars that affect posts shown
 		$q->set( 'post_type', 'product' );
@@ -142,5 +109,88 @@ class woocommerce_query {
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
 		endif;
 	}
+	
+	/**
+	 * Returns an array of arguments for ordering products based on the selected values
+	 */
+	function get_catalog_ordering_args() {
+		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : 'title';
+		
+		switch ($current_order) :
+			case 'date' :
+				$orderby = 'date';
+				$order = 'desc';
+				$meta_key = '';
+			break;
+			case 'price' :
+				$orderby = 'meta_value_num';
+				$order = 'asc';
+				$meta_key = 'price';
+			break;
+			default :
+				$orderby = 'title';
+				$order = 'asc';
+				$meta_key = '';
+			break;
+		endswitch;
+		
+		$args = array();
+		
+		$args['orderby'] = $orderby;
+		$args['order'] = $order;
+		if ($meta_key) $args['meta_key'] = $meta_key;
+		
+		return $args;
+	}
+	
+	/**
+	 * Returns a meta query to handle product visibility
+	 */
+	function visibility_meta_query( $compare = 'IN' ) {
+		if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
+	
+	    $meta_query = array(
+	        'key' => 'visibility',
+	        'value' => $in,
+	        'compare' => $compare
+	    );
+	    
+	    return $meta_query;
+	}
+	
+	/**
+	 * Returns a meta query to handle product stock status
+	 */
+	function stock_status_meta_query( $status = 'instock' ) {
+		$meta_query = array();
+		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+			 $meta_query = array(
+		        'key' 		=> 'stock_status',
+				'value' 	=> $status,
+				'compare' 	=> '='
+		    );
+		endif;
+		return $meta_query;
+	}
+	
+	/**
+	 * Get a list of product id's which should be hidden from the frontend; useful for custom queries and loops
+	 */
+	function get_hidden_product_ids() {
+		
+		$meta_query = array();
+		$meta_query[] = $this->visibility_meta_query( 'NOT IN' );
+	    $meta_query[] = $this->stock_status_meta_query( 'outofstock' );
+		
+		$hidden_product_ids = get_posts(array(
+			'post_type' 	=> 'product',
+			'numberposts' 	=> -1,
+			'post_status' 	=> 'publish',
+			'meta_query' 	=> $meta_query,
+			'fields' 		=> 'ids'
+		));
+		
+		return (array) $hidden_product_ids;
+	}	
  
 }

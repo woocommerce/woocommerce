@@ -148,6 +148,7 @@ div.multi_select_products_wrapper-alt{float:right;}
 #woocommerce-product-data input.dp-applied{float:left;}
 #grouped_product_options,#virtual_product_options,#simple_product_options{padding:12px;font-style:italic;color:#666;}
 #variable_product_options p.description{float:left;padding:0;margin:0;}
+#variable_product_options p.bulk_edit{background:#ececec;padding:6px;}#variable_product_options p.bulk_edit strong{margin:0 6px 0 0;}
 .woocommerce_variation{background:#ececec;border:1px solid #ececec;margin:0 0 8px;}.woocommerce_variation p{margin:0 !important;}.woocommerce_variation p button{float:right;}
 .woocommerce_variation table td{background:#fff;padding:6px 6px;vertical-align:middle;}.woocommerce_variation table td label{color:#999;font-size:10px;text-transform:uppercase;text-align:left;display:block;line-height:16px;}
 .woocommerce_variation table td input{float:left;width:100%;}
