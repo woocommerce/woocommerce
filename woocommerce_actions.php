@@ -503,7 +503,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 /**
  * Clear cart
  **/
-add_action( 'wp_header', 'woocommerce_clear_cart_on_return' );
+add_action( 'wp', 'woocommerce_clear_cart_on_return' );
 
 function woocommerce_clear_cart_on_return() {
 	global $woocommerce;
@@ -515,7 +515,11 @@ function woocommerce_clear_cart_on_return() {
 		if ($order_id > 0) :
 			$order = &new woocommerce_order( $order_id );
 			if ($order->order_key == $order_key) :
+			
 				$woocommerce->cart->empty_cart();
+				
+				unset($_SESSION['order_awaiting_payment']);
+				
 			endif;
 		endif;
 		
@@ -535,7 +539,7 @@ function woocommerce_clear_cart_after_payment( $url = false ) {
 		
 		$order = &new woocommerce_order($_SESSION['order_awaiting_payment']);
 		
-		if ($order->id > 0 && ($order->status=='completed' || $order->status=='processing')) :
+		if ($order->id > 0 && $order->status!=='pending') :
 			
 			$woocommerce->cart->empty_cart();
 			
