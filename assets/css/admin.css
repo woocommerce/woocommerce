@@ -44,7 +44,6 @@ dl.totals dd input.last{width:49%;float:right;}
 .woocommerce-order-panel textarea,.woocommerce-order-panel input,.woocommerce-order-panel select{margin:0;}
 .woocommerce-order-panel textarea{width:65% !important;float:left;}
 .woocommerce-order-panel input{width:65%;float:left;}
-.widefat th.column-id{width:60px !important;}
 .widefat .column-order_title time{display:block;color:#999;margin:3px 0;}
 .widefat small.meta{display:block;color:#999;font-size:inherit;margin:3px 0;}
 .widefat .column-total_cost,.widefat .column-order_date{width:150px !important;}
@@ -62,7 +61,7 @@ ul.subsubsub li.onhold a{color:red;}
 ul.subsubsub li.cancelled a{color:#dfdfdf;}
 ul.subsubsub li.refunded a{color:#ccc;}
 table.wp-list-table .column-thumb{width:66px;text-align:center;white-space:nowrap;}
-table.wp-list-table .column-title{width:25%;}
+table.wp-list-table .column-sku,table.wp-list-table .column-product_type,table.wp-list-table .column-product_cat,table.wp-list-table .column-product_tags,table.wp-list-table .column-is_in_stock,table.wp-list-table .column-price,table.wp-list-table .column-product_date,table.wp-list-table .column-featured{width:9%;}
 table.wp-list-table img{margin:1px 2px;}
 table.wp-list-table .column-thumb img{padding:2px;margin:0;border:1px solid #dfdfdf;vertical-align:middle;width:42px;height:42px;}
 table.wp-list-table span.na{color:#999;}

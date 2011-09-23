@@ -520,32 +520,28 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 	endif;
 	
-	// Update parent if grouped so price sorting works
+	// Update parent if grouped so price sorting works and stays in sync
 	if ($post->post_parent || $product_type=='grouped') :
-		if ($post->post_parent) :
-			$post_parent = $post->post_parent; 
-		else :
-			$post_parent = $post_id;
-		endif;
-
+		$post_parent = ($post->post_parent>0) ? $post->post_parent : $post_id;
+		
 		$children_by_price = get_posts( array(
 			'post_parent' 	=> $post_parent,
 			'orderby' 	=> 'meta_value_num',
 			'order'		=> 'asc',
 			'meta_key'	=> 'price',
 			'posts_per_page' => 1,
-			'post_type' => 'product'
+			'post_type' 	=> 'product',
+			'fields' 		=> 'ids'
 		));
 		if ($children_by_price) :
-			$children_by_price = $children_by_price[0];
-			$child = $children_by_price->ID;
-			update_post_meta( $post_parent, 'price', get_post_meta($child, 'price', true) );
+			foreach ($children_by_price as $child) :
+				$child_price = get_post_meta($child, 'price', true);
+				update_post_meta( $post_parent, 'price', $child_price );
+			endforeach;
 		endif;
-		
 	endif;
 	
 	// Stock Data
-	
 	if (get_option('woocommerce_manage_stock')=='yes') :
 		// Manage Stock Checkbox
 		if ($product_type!=='grouped' && isset($_POST['manage_stock']) && $_POST['manage_stock']) :

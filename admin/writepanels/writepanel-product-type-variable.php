@@ -604,6 +604,7 @@ function process_product_meta_variable( $post_id ) {
 			endforeach;
 		 	
 		 endfor; 
+		 
 	endif;
 
 }

@@ -87,9 +87,9 @@ class woocommerce_product {
 		
 		$this->get_children();
 		
-		// total_stock
+		// total_stock (stock of parent and children combined)
 		$this->total_stock = $this->stock;
-		if (sizeof($this->children)>0) foreach ($this->children as $child) :
+		if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child) :
 			if (isset($child->product->variation_has_stock)) :
 				if ($child->product->variation_has_stock) :
 					$this->total_stock += $child->product->stock;
@@ -98,6 +98,9 @@ class woocommerce_product {
 				$this->total_stock += $child->product->stock;
 			endif;
 		endforeach;
+		
+		// Check sale
+		$this->check_sale_price();
 		
 		if ($product_custom_fields) :
 			$this->exists = true;		
@@ -123,20 +126,24 @@ class woocommerce_product {
 		
 			$this->children = array();
 			
-			if ($this->is_type('variable')) $child_post_type = 'product_variation'; else $child_post_type = 'product';
-		
-			if ( $children_products =& get_children( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC' ) ) :
-
-				if ($children_products) foreach ($children_products as $child) :
-					
-					if ($this->is_type('variable')) :
-						$child->product = &new woocommerce_product_variation( $child->ID );
-					else :
-						$child->product = &new woocommerce_product( $child->ID );
-					endif;
-					
-				endforeach;
-				$this->children = (array) $children_products;
+			if ($this->is_type('variable') || $this->is_type('grouped')) :
+			
+				if ($this->is_type('variable')) $child_post_type = 'product_variation'; else $child_post_type = 'product';
+			
+				if ( $children_products =& get_children( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC' ) ) :
+	
+					if ($children_products) foreach ($children_products as $child) :
+						
+						if ($this->is_type('variable')) :
+							$child->product = &new woocommerce_product_variation( $child->ID );
+						else :
+							$child->product = &new woocommerce_product( $child->ID );
+						endif;
+						
+					endforeach;
+					$this->children = (array) $children_products;
+				endif;
+				
 			endif;
 			
 		endif;
@@ -193,7 +200,7 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product has any child product */
 	function has_child() {
-		return sizeof($this->children) ? true : false;
+		return sizeof($this->get_children()) ? true : false;
 	}
 	
 	/** Returns whether or not the product post exists */
@@ -392,25 +399,17 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is on sale */
 	function is_on_sale() {
-	
 		if ( $this->has_child() ) :
-		
-			$onsale = false;
 			
-			foreach ($this->children as $child) :
-				if ( $child->product->sale_price==$child->product->price ) :
-					return true;
-				endif;
+			foreach ($this->get_children() as $child) :
+				if ( $child->product->sale_price==$child->product->price ) return true;
 			endforeach;
 			
 		else :
 		
-			if ( $this->sale_price && $this->sale_price==$this->price ) :
-				return true;
-			endif;
+			if ( $this->sale_price && $this->sale_price==$this->price ) return true;
 		
 		endif;
-
 		return false;
 	}
 	
@@ -421,9 +420,7 @@ class woocommerce_product {
 	
 	/** Returns the product's price */
 	function get_price() {
-		
 		return $this->price;
-	
 	}
 	
 	/** Returns the price (excluding tax) */
@@ -475,12 +472,12 @@ class woocommerce_product {
 	/** Returns the price in html format */
 	function get_price_html() {
 		$price = '';
-		if ( $this->has_child() ) :
+		if ($this->is_type('grouped')) :
 			
 			$min_price = '';
 			$max_price = '';
 			
-			foreach ($this->children as $child) :
+			foreach ($this->get_children() as $child) :
 				$child_price = $child->product->get_price();
 				if ($child_price<$min_price || $min_price == '') $min_price = $child_price;
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
@@ -765,8 +762,8 @@ class woocommerce_product {
     			$this->price = $this->sale_price;
     			update_post_meta($this->id, 'price', $this->price);
     			
-    			// Grouped products are affected by children
-    			$this->grouped_product_price_sync();
+    			// Grouped product prices and sale status are affected by children
+    			$this->grouped_product_sync();
     			
     		endif;
 
@@ -784,8 +781,8 @@ class woocommerce_product {
 				update_post_meta($this->id, 'sale_price_dates_from', '');
 				update_post_meta($this->id, 'sale_price_dates_to', '');
 			
-				// Grouped products are affected by children
-    			$this->grouped_product_price_sync();
+				// Grouped product prices and sale status are affected by children
+    			$this->grouped_product_sync();
 			
 			endif;
     		
@@ -795,7 +792,7 @@ class woocommerce_product {
     /**
 	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately)
 	 **/
-	function grouped_product_price_sync() {
+	function grouped_product_sync() {
 		
 		global $wpdb;
 		$post_parent = $wpdb->get_var("SELECT post_parent FROM $wpdb->posts WHERE ID = $this->id;");
@@ -808,12 +805,14 @@ class woocommerce_product {
 			'order'		=> 'asc',
 			'meta_key'	=> 'price',
 			'posts_per_page' => 1,
-			'post_type' => 'product'
+			'post_type' 	=> 'product',
+			'fields' 		=> 'ids'
 		));
 		if ($children_by_price) :
-			$children_by_price = $children_by_price[0];
-			$child = $children_by_price->ID;
-			update_post_meta( $post_parent, 'price', get_post_meta($child, 'price', true) );
+			foreach ($children_by_price as $child) :
+				$child_price = get_post_meta($child, 'price', true);
+				update_post_meta( $post_parent, 'price', $child_price );
+			endforeach;
 		endif;
 	}
 
