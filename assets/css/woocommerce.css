@@ -148,6 +148,8 @@ div.shipping-address{padding:0;clear:left;}
 .order_details li.method{border:none;}
 .addresses .title{overflow:hidden;zoom:1;}.addresses .title h3{float:left;}
 .addresses .title .edit{float:right;}
+ol.commentlist.notes li.note p.meta{font-weight:bold;margin-bottom:0;}
+ol.commentlist.notes li.note .description p:last-child{margin-bottom:0;}
 .widget_price_filter .price_slider_wrapper .button{float:right;margin:0;}
 .widget_price_filter .price_slider_wrapper .price_slider{margin:1em .6em .6em;}.widget_price_filter .price_slider_wrapper .price_slider .ui-slider-handle{outline:0;}
 .widget_price_filter .price_slider_wrapper .price_slider_amount{overflow:hidden;line-height:2em;}
