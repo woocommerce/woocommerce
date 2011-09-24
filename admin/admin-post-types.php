@@ -393,39 +393,39 @@ function woocommerce_custom_order_columns($column) {
            		$user = __('Guest', 'woothemes');
            	endif;
            	
-           	echo '<small class="meta">'.__('Customer: ', 'woothemes').$user.'</small>';
+           	echo '<small class="meta">'.__('Customer: ', 'woothemes').esc_html( $user ).'</small>';
            	
            	if ($order->billing_email) :
-        		echo '<small class="meta">'.__('Email: ', 'woothemes').'<a href="mailto:'.$order->billing_email.'">'.$order->billing_email.'</a></small>';
+        		echo '<small class="meta">'.__('Email: ', 'woothemes').'<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
         	endif;
         	if ($order->billing_phone) :
-        		echo '<small class="meta">'.__('Tel: ', 'woothemes'). $order->billing_phone . '</small>';
+        		echo '<small class="meta">'.__('Tel: ', 'woothemes'). esc_html( $order->billing_phone ) . '</small>';
         	endif;
 						
 		break;
 		case "billing_address" :
-			echo '<strong>'.$order->billing_first_name . ' ' . $order->billing_last_name;
-        	if ($order->billing_company) echo ', '.$order->billing_company;
+			echo '<strong>'.esc_html( $order->billing_first_name . ' ' . $order->billing_last_name );
+        	if ($order->billing_company) echo ', '.esc_html( $order->billing_company );
         	echo '</strong><br/>';
-        	echo '<a target="_blank" href="http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16">'.$order->formatted_billing_address.'</a>';
+        	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16' ) . '">'.esc_html( $order->formatted_billing_address ).'</a>';
         	
         	if ($order->payment_method) :
-        		echo '<small class="meta">' . __('Paid via ', 'woo themes') . $order->payment_method . '</small>';
+        		echo '<small class="meta">' . __('Paid via ', 'woo themes') . esc_html( $order->payment_method ) . '</small>';
         	endif;
         	
 		break;
 		case "shipping_address" :
 			if ($order->formatted_shipping_address) :
-            	echo '<strong>'.$order->shipping_first_name . ' ' . $order->shipping_last_name;
-            	if ($order->shipping_company) : echo ', '.$order->shipping_company; endif;
+            	echo '<strong>'.esc_html( $order->shipping_first_name . ' ' . $order->shipping_last_name );
+            	if ($order->shipping_company) : echo ', '.esc_html( $order->shipping_company ); endif;
             	echo '</strong><br/>';
-            	echo '<a target="_blank" href="http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_shipping_address).'&z=16">'.$order->formatted_shipping_address.'</a>';
+            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_shipping_address).'&z=16' ) .'">'.esc_html( $order->formatted_shipping_address ).'</a>';
         	else :
         		echo '&ndash;';
         	endif;
         	
         	if ($order->shipping_method) :
-        		echo '<small class="meta">' . __('Shipped via ', 'woothemes') . $order->shipping_method . '</small>';
+        		echo '<small class="meta">' . __('Shipped via ', 'woothemes') . esc_html( $order->shipping_method ) . '</small>';
         	endif;
 		break;
 		case "total_cost" :
