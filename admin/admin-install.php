@@ -76,233 +76,79 @@ function woocommerce_default_options() {
 }
 
 /**
+ * Create a page
+ * 
+ * Creates a page
+ */
+function woocommerce_create_page( $slug, $option, $page_title = '', $page_content = '', $post_parent = 0 ) {
+	global $wpdb;
+	 
+	$option_value = get_option($option); 
+	 
+	if ($option_value>0) :
+		if (get_post( $option_value )) :
+			// Page exists
+			return;
+		endif;
+	endif;
+	
+	$page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1;");
+	if ($page_found) :
+		// Page exists
+		return;
+	endif;
+	
+	$page_data = array(
+        'post_status' => 'publish',
+        'post_type' => 'page',
+        'post_author' => 1,
+        'post_name' => $slug,
+        'post_title' => $page_title,
+        'post_content' => $page_content,
+        'post_parent' => $post_parent,
+        'comment_status' => 'closed'
+    );
+    $page_id = wp_insert_post($page_data);
+    
+    update_option($option, $page_id);
+}
+ 
+/**
  * Create pages
  * 
  * Creates pages that the plugin relies on, storing page id's in variables.
  */
 function woocommerce_create_pages() {
-    global $wpdb;
 	
-    $slug = esc_sql( _x('shop', 'page_slug', 'woothemes') );
-	$page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Shop', 'woothemes'),
-	        'post_content' => '',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-
-        update_option('woocommerce_shop_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_shop_page_id', $page_found);
-    }
+	// Shop page
+    woocommerce_create_page( esc_sql( _x('shop', 'page_slug', 'woothemes') ), 'woocommerce_shop_page_id', __('Shop', 'woothemes'), '' );
     
-    $slug = esc_sql( _x('cart', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Cart', 'woothemes'),
-	        'post_content' => '[woocommerce_cart]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-
-        update_option('woocommerce_cart_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_cart_page_id', $page_found);
-    }
+    // Cart page
+    woocommerce_create_page( esc_sql( _x('cart', 'page_slug', 'woothemes') ), 'woocommerce_cart_page_id', __('Cart', 'woothemes'), '[woocommerce_cart]' );
     
-    $slug = esc_sql( _x('checkout', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Checkout', 'woothemes'),
-	        'post_content' => '[woocommerce_checkout]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-
-        update_option('woocommerce_checkout_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_checkout_page_id', $page_found);
-    }
+	// Checkout page
+    woocommerce_create_page( esc_sql( _x('checkout', 'page_slug', 'woothemes') ), 'woocommerce_checkout_page_id', __('Checkout', 'woothemes'), '[woocommerce_checkout]' );
     
-    $slug = esc_sql( _x('order-tracking', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Track your order', 'woothemes'),
-	        'post_content' => '[woocommerce_order_tracking]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-    } 
-    
-    $slug = esc_sql( _x('my-account', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('My Account', 'woothemes'),
-	        'post_content' => '[woocommerce_my_account]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-        
-        update_option('woocommerce_myaccount_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_myaccount_page_id', $page_found);
-    } 
-    
-    $slug = esc_sql( _x('edit-address', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_parent' => get_option('woocommerce_myaccount_page_id'),
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Edit My Address', 'woothemes'),
-	        'post_content' => '[woocommerce_edit_address]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-        
-        update_option('woocommerce_edit_address_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_edit_address_page_id', $page_found);
-    } 
-    
-    $slug = esc_sql( _x('view-order', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_parent' => get_option('woocommerce_myaccount_page_id'),
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('View Order', 'woothemes'),
-	        'post_content' => '[woocommerce_view_order]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-        
-        update_option('woocommerce_view_order_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_view_order_page_id', $page_found);
-    } 
-    
-    $slug = esc_sql( _x('change-password', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_parent' => get_option('woocommerce_myaccount_page_id'),
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Change Password', 'woothemes'),
-	        'post_content' => '[woocommerce_change_password]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-        
-        update_option('woocommerce_change_password_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_change_password_page_id', $page_found);
-    }
-    
-    $slug = esc_sql( _x('pay', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-    if(!$page_found) {
-
-        $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_parent' => get_option('woocommerce_checkout_page_id'),
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Checkout &rarr; Pay', 'woothemes'),
-	        'post_content' => '[woocommerce_pay]',
-	        'comment_status' => 'closed'
-        );
-        $page_id = wp_insert_post($page_data);
-
-        update_option('woocommerce_pay_page_id', $page_id);
-
-    } else {
-    	update_option('woocommerce_pay_page_id', $page_found);
-    }
-    
-    // Thanks Page
-    $slug = esc_sql( _x('order-received', 'page_slug', 'woothemes') );
-    $page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1");
-
-	if(!$page_found) {
+    // Order tracking page
+    woocommerce_create_page( esc_sql( _x('order-tracking', 'page_slug', 'woothemes') ), 'woocommerce_order_tracking_page_id', __('Track your order', 'woothemes'), '[woocommerce_order_tracking]' );
 	
-	    $page_data = array(
-	        'post_status' => 'publish',
-	        'post_type' => 'page',
-	        'post_parent' => get_option('woocommerce_checkout_page_id'),
-	        'post_author' => 1,
-	        'post_name' => $slug,
-	        'post_title' => __('Order Received', 'woothemes'),
-	        'post_content' => '[woocommerce_thankyou]',
-	        'comment_status' => 'closed'
-	    );
-	    $page_id = wp_insert_post($page_data);
-	
-	    update_option('woocommerce_thanks_page_id', $page_id);
-	
-	} else {
-		update_option('woocommerce_thanks_page_id', $page_found);
-	}
+	// My Account page
+    woocommerce_create_page( esc_sql( _x('my-account', 'page_slug', 'woothemes') ), 'woocommerce_myaccount_page_id', __('My Account', 'woothemes'), '[woocommerce_my_account]' );
+
+	// Edit address page
+    woocommerce_create_page( esc_sql( _x('edit-address', 'page_slug', 'woothemes') ), 'woocommerce_edit_address_page_id', __('Edit My Address', 'woothemes'), '[woocommerce_edit_address]', get_option('woocommerce_myaccount_page_id') );
+    
+    // View order page
+    woocommerce_create_page( esc_sql( _x('view-order', 'page_slug', 'woothemes') ), 'woocommerce_view_order_page_id', __('View Order', 'woothemes'), '[woocommerce_view_order]', get_option('woocommerce_myaccount_page_id') );
+
+    // Change password page
+    woocommerce_create_page( esc_sql( _x('change-password', 'page_slug', 'woothemes') ), 'woocommerce_change_password_page_id', __('Change Password', 'woothemes'), '[woocommerce_change_password]', get_option('woocommerce_myaccount_page_id') );
+
+	// Pay page
+    woocommerce_create_page( esc_sql( _x('pay', 'page_slug', 'woothemes') ), 'woocommerce_pay_page_id', __('Checkout &rarr; Pay', 'woothemes'), '[woocommerce_pay]', get_option('woocommerce_checkout_page_id') );
+    
+    // Thanks page
+    woocommerce_create_page( esc_sql( _x('order-received', 'page_slug', 'woothemes') ), 'woocommerce_thanks_page_id', __('Order Received', 'woothemes'), '[woocommerce_thankyou]', get_option('woocommerce_checkout_page_id') );
     
 }
 
