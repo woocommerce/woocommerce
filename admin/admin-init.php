@@ -339,7 +339,7 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 	
 	if (!current_user_can('manage_woocommerce')) return $actions;
 	
-	$actions['duplicate'] = '<a href="admin.php?action=duplicate_product&amp;post=' . $post->ID . '" title="' . __("Make a duplicate from this product", 'woothemes')
+	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woothemes')
 		. '" rel="permalink">' .  __("Duplicate", 'woothemes') . '</a>';
 
 	return $actions;
