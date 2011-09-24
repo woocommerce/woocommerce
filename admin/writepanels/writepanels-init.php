@@ -211,7 +211,7 @@ function woocommerce_wp_text_input( $field ) {
 	if (!isset($field['class'])) $field['class'] = 'short';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
 	
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$field['value'].'" placeholder="'.$field['placeholder'].'" /> ';
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
 	
 	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
 		
