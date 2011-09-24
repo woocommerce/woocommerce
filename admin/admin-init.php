@@ -308,6 +308,7 @@ function woocommerce_duplicate_product_action() {
 
 	// Get the original page
 	$id = (isset($_GET['post']) ? $_GET['post'] : $_POST['post']);
+	check_admin_referer( 'woocommerce-duplicate-product_' . $id );
 	$post = woocommerce_get_product_to_duplicate($id);
 
 	// Copy the page and insert it
@@ -357,7 +358,7 @@ function woocommerce_duplicate_product_post_button() {
 	
 	if ( isset( $_GET['post'] ) ) :
 		global $post;
-		$notifyUrl = "admin.php?action=duplicate_product&post=" . $_GET['post'];
+		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 		?>
 		<div id="duplicate-action"><a class="submitduplicate duplication"
 			href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woothemes'); ?></a>
