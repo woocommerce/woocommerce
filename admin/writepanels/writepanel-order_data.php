@@ -172,7 +172,7 @@ function woocommerce_order_items_meta_box($post) {
 								<tbody class="meta_items">
 								<?php
 									if (isset($item['item_meta']) && is_array($item['item_meta'])) foreach ($item['item_meta'] as $key => $value) :
-										echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$key.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.$value.'" /></td><td><button class="remove_meta button">&times;</button></td></tr>';
+										echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$key.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $value ).'" /></td><td><button class="remove_meta button">&times;</button></td></tr>';
 									endforeach;
 								?>
 								</tbody>

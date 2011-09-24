@@ -214,7 +214,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$paypal_args_array = array();
 
 		foreach ($paypal_args as $key => $value) {
-			$paypal_args_array[] = '<input type="hidden" name="'.$key.'" value="'.$value.'" />';
+			$paypal_args_array[] = '<input type="hidden" name="'.$key.'" value="'.esc_attr( $value ).'" />';
 		}
 		
 		return '<form action="'.$paypal_adr.'" method="post" id="paypal_payment_form">

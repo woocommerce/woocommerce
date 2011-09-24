@@ -49,7 +49,7 @@ function woocommerce_coupon_data_meta_box($post) {
 			$field = array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woothemes') );
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
-				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('Enter an amount e.g. 2.99 or an integer for percentages e.g. 20', 'woothemes') . '</span></p>';
+				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $value ).'" /> <span class="description">' . __('Enter an amount e.g. 2.99 or an integer for percentages e.g. 20', 'woothemes') . '</span></p>';
 				
 			// Individual use
 			$value = get_post_meta($post->ID, 'individual_use', true);
@@ -65,21 +65,21 @@ function woocommerce_coupon_data_meta_box($post) {
 			$field = array( 'id' => 'product_ids', 'label' => __('Product IDs', 'woothemes') );
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
-				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) Comma separate product IDs which are required for this coupon to work', 'woothemes') . '</span></p>';
+				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $value ).'" /> <span class="description">' . __('(optional) Comma separate product IDs which are required for this coupon to work', 'woothemes') . '</span></p>';
 			
 			// Usage limit
 			$value = get_post_meta($post->ID, 'usage_limit', true);
 			$field = array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woothemes') );
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
-				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) How many times this coupon can be used before it is void', 'woothemes') . '</span></p>';
+				<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $value ).'" /> <span class="description">' . __('(optional) How many times this coupon can be used before it is void', 'woothemes') . '</span></p>';
 				
 			// Expiry date
 			$value = get_post_meta($post->ID, 'expiry_date', true);
 			$field = array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woothemes') );
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
-				<input type="text" class="short date-picker" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$value.'" /> <span class="description">' . __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woothemes') . '</span></p>';
+				<input type="text" class="short date-picker" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $value ).'" /> <span class="description">' . __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woothemes') . '</span></p>';
 
 		?>
 	</div>
