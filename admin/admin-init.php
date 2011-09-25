@@ -339,6 +339,8 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 	
 	if (!current_user_can('manage_woocommerce')) return $actions;
 	
+	if ($post->post_type!='product') return $actions;
+	
 	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woothemes')
 		. '" rel="permalink">' .  __("Duplicate", 'woothemes') . '</a>';
 
@@ -351,13 +353,15 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' );
 
 function woocommerce_duplicate_product_post_button() {
+	global $post;
 	
 	if (function_exists('duplicate_post_plugin_activation')) return;
 	
 	if (!current_user_can('manage_woocommerce')) return;
 	
+	if ($post->post_type!='product') return;
+	
 	if ( isset( $_GET['post'] ) ) :
-		global $post;
 		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 		?>
 		<div id="duplicate-action"><a class="submitduplicate duplication"
