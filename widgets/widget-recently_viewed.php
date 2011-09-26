@@ -61,9 +61,9 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		else if ( $number > 15 )
 			$number = 15;
 
-	    $args = array('showposts' => $number, 'nopaging' => 0, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $_SESSION['viewed_products'], 'orderby' => 'rand');
+	    $query_args = array('showposts' => $number, 'nopaging' => 0, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $_SESSION['viewed_products'], 'orderby' => 'rand');
 
-		$r = new WP_Query($args);
+		$r = new WP_Query($query_args);
 		
 		if ($r->have_posts()) :
 ?>

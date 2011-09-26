@@ -61,20 +61,20 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 
     $show_variations = $instance['show_variations'] ? '1' : '0';
 
-    $args = array('showposts' => $number, 'nopaging' => 0, 'post_status' => 'publish', 'post_type' => 'product');
+    $query_args = array('showposts' => $number, 'nopaging' => 0, 'post_status' => 'publish', 'post_type' => 'product');
 
     if($show_variations=='0'){
-      $args['meta_query'] = array(
+      $query_args['meta_query'] = array(
 			  array(
 				  'key' => 'visibility',
 				  'value' => array('catalog', 'visible'),
 				  'compare' => 'IN'
 			  )
 		  );
-		  $args['parent'] = '0';
+		  $query_args['parent'] = '0';
     }
 
-		$r = new WP_Query($args);
+		$r = new WP_Query($query_args);
 		
 		if ($r->have_posts()) :
 ?>

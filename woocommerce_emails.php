@@ -10,6 +10,21 @@
  */
 
 /**
+ * Option for email formatting
+ **/
+if (get_option('woocommerce_enable_sitewide_mail_template')=='yes') add_action('init', 'woocommerce_wpmail_init');
+
+function woocommerce_wpmail_init() {
+	// From address
+	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+	// HTML content type
+	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+	// Fix password email
+	add_filter( 'retrieve_password_message', 'woocommerce_retrieve_password_message' );
+}
+
+/**
  * Mail from name/email
  **/
 function woocommerce_mail_from_name( $name ) {
@@ -23,27 +38,11 @@ function woocommerce_mail_from( $email ) {
 }
 
 /**
- * Option for email formatting
- **/
-if (get_option('woocommerce_enable_sitewide_mail_template')=='yes') :
-	
-	// From address
-	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-	// HTML content type
-	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
-	// Fix password email
-	add_filter( 'retrieve_password_message', 'woocommerce_retrieve_password_message' );
-	
-endif;
-
-/**
  * HTML emails from WooCommerce
  **/
 function woocommerce_mail( $to, $subject, $message ) {
-	
 	// Hook in content type/from changes
-	if (get_option('woocommerce_enable_sitewide_mail_template')=='no') :
+	if (get_option('woocommerce_enable_sitewide_mail_template')!='yes') :
 		add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
 		add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
 		add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
@@ -53,7 +52,7 @@ function woocommerce_mail( $to, $subject, $message ) {
 	wp_mail( $to, $subject, $message );
 	
 	// Unhook
-	if (get_option('woocommerce_enable_sitewide_mail_template')=='no') :
+	if (get_option('woocommerce_enable_sitewide_mail_template')!='yes') :
 		remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
 		remove_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
 		remove_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
@@ -67,7 +66,7 @@ add_action( 'phpmailer_init', 'woocommerce_email_template' );
 
 function woocommerce_email_template( $phpmailer ) {
 	
-	if (strstr($phpmailer->Body, '<html>')) :
+	if (strstr($phpmailer->Body, '<html')) :
 		
 		// Email already using custom template
 		
