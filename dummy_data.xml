@@ -27,13 +27,13 @@
 
 <channel>
 	<title>WooCommerce</title>
-	<link>http://woocommerce.faultpress.com</link>
+	<link>http://demo.woothemes.com/woostore</link>
 	<description>Just another WordPress site</description>
 	<pubDate>Mon, 26 Sep 2011 11:07:36 +0000</pubDate>
 	<language>en</language>
 	<wp:wxr_version>1.1</wp:wxr_version>
-	<wp:base_site_url>http://woocommerce.faultpress.com</wp:base_site_url>
-	<wp:base_blog_url>http://woocommerce.faultpress.com</wp:base_blog_url>
+	<wp:base_site_url>http://demo.woothemes.com/woostore</wp:base_site_url>
+	<wp:base_blog_url>http://demo.woothemes.com/woostore</wp:base_blog_url>
 
 	<wp:author><wp:author_id>8</wp:author_id><wp:author_login>admin</wp:author_login><wp:author_email>jay@woothemes.com</wp:author_email><wp:author_display_name><![CDATA[admin]]></wp:author_display_name><wp:author_first_name><![CDATA[]]></wp:author_first_name><wp:author_last_name><![CDATA[]]></wp:author_last_name></wp:author>
 
@@ -125,7 +125,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide-1/slide1/</link>
 		<pubDate>Mon, 15 Aug 2011 21:33:24 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide1.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slide1.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -141,7 +141,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide1.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slide1.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slide1.jpg]]></wp:meta_value>
@@ -156,7 +156,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide-2/slide2/</link>
 		<pubDate>Mon, 15 Aug 2011 21:33:54 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide2.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slide2.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -172,7 +172,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide2.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slide2.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slide2.jpg]]></wp:meta_value>
@@ -187,7 +187,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide-1/slide-1-2/</link>
 		<pubDate>Tue, 16 Aug 2011 09:21:20 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-1.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slide-1.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -203,7 +203,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-1.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slide-1.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slide-1.jpg]]></wp:meta_value>
@@ -218,7 +218,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide-2/slide-2-2/</link>
 		<pubDate>Tue, 16 Aug 2011 09:21:46 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-2.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slide-2.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -234,7 +234,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-2.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slide-2.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slide-2.jpg]]></wp:meta_value>
@@ -249,7 +249,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide3/slide-3/</link>
 		<pubDate>Wed, 17 Aug 2011 09:57:00 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-3.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slide-3.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -265,7 +265,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slide-3.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slide-3.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slide-3.jpg]]></wp:meta_value>
@@ -280,7 +280,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/rayman-3d/353594ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 16:25:59 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353594ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353594ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -296,7 +296,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353594ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353594ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attachment_metadata</wp:meta_key>
 			<wp:meta_value><![CDATA[a:6:{s:5:"width";s:3:"367";s:6:"height";s:3:"500";s:14:"hwstring_small";s:22:"height='96' width='70'";s:4:"file";s:26:"2011/08/353594ps_500h.jpeg";s:5:"sizes";a:4:{s:9:"thumbnail";a:3:{s:4:"file";s:25:"353594ps_500h-150x150.jpg";s:5:"width";s:3:"150";s:6:"height";s:3:"150";}s:6:"medium";a:3:{s:4:"file";s:25:"353594ps_500h-220x300.jpg";s:5:"width";s:3:"220";s:6:"height";s:3:"300";}s:14:"shop_thumbnail";a:3:{s:4:"file";s:25:"353594ps_500h-300x300.jpg";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}s:12:"shop_catalog";a:3:{s:4:"file";s:25:"353594ps_500h-300x300.jpg";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}}s:10:"image_meta";a:10:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";}}]]></wp:meta_value>
@@ -311,7 +311,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pro-evolution-soccer-3d/353552ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 16:31:37 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353552ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353552ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -327,7 +327,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353552ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353552ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353552ps_500h.jpeg]]></wp:meta_value>
@@ -342,7 +342,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/nintendogs-and-cats-french-bulldog-and-new-friends/353558ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 16:36:02 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353558ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353558ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -358,7 +358,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353558ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353558ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353558ps_500h.jpeg]]></wp:meta_value>
@@ -373,7 +373,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/ridge-racer-3d/353549ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 16:39:16 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353549ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -389,7 +389,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353549ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353549ps_500h.jpeg]]></wp:meta_value>
@@ -404,7 +404,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/ridge-racer-3d/353549ss1_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 16:39:19 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss1_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353549ss1_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -420,7 +420,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss1_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353549ss1_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353549ss1_502w.jpeg]]></wp:meta_value>
@@ -435,7 +435,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/ridge-racer-3d/353549ss2_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 16:39:21 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss2_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353549ss2_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -451,7 +451,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss2_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353549ss2_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353549ss2_502w.jpeg]]></wp:meta_value>
@@ -466,7 +466,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/ridge-racer-3d/353549ss3_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 16:39:23 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss3_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353549ss3_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -482,7 +482,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss3_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353549ss3_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353549ss3_502w.jpeg]]></wp:meta_value>
@@ -497,7 +497,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/ridge-racer-3d/353549ss4_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 16:39:25 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss4_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353549ss4_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -513,7 +513,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353549ss4_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353549ss4_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353549ss4_502w.jpeg]]></wp:meta_value>
@@ -528,7 +528,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pilotwings-resort/353595ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 16:53:02 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353595ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353595ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -544,7 +544,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353595ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353595ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353595ps_500h.jpeg]]></wp:meta_value>
@@ -559,7 +559,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pro-evolution-soccer-6/pes6/</link>
 		<pubDate>Thu, 18 Aug 2011 17:01:55 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pes6.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/pes6.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -575,7 +575,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pes6.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/pes6.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/pes6.gif]]></wp:meta_value>
@@ -590,7 +590,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/super-monkey-ball-3d/353555ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:05:09 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353555ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353555ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -606,7 +606,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353555ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353555ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/353555ps_500h.jpeg]]></wp:meta_value>
@@ -621,7 +621,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/rafa-nadal-tennis/rnt/</link>
 		<pubDate>Thu, 18 Aug 2011 17:06:16 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/rnt.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/rnt.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -637,7 +637,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/rnt.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/rnt.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/rnt.gif]]></wp:meta_value>
@@ -652,7 +652,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/puzzle-bobble-universe-3ds/353744ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:09:07 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353744ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/353744ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -668,7 +668,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/353744ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/353744ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attachment_metadata</wp:meta_key>
 			<wp:meta_value><![CDATA[a:6:{s:5:"width";s:3:"367";s:6:"height";s:3:"500";s:14:"hwstring_small";s:22:"height='96' width='70'";s:4:"file";s:26:"2011/08/353744ps_500h.jpeg";s:5:"sizes";a:4:{s:9:"thumbnail";a:3:{s:4:"file";s:25:"353744ps_500h-150x150.jpg";s:5:"width";s:3:"150";s:6:"height";s:3:"150";}s:6:"medium";a:3:{s:4:"file";s:25:"353744ps_500h-220x300.jpg";s:5:"width";s:3:"220";s:6:"height";s:3:"300";}s:14:"shop_thumbnail";a:3:{s:4:"file";s:25:"353744ps_500h-300x300.jpg";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}s:12:"shop_catalog";a:3:{s:4:"file";s:25:"353744ps_500h-300x300.jpg";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}}s:10:"image_meta";a:10:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";}}]]></wp:meta_value>
@@ -683,7 +683,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/final-fantasy-iv/ff4/</link>
 		<pubDate>Thu, 18 Aug 2011 17:09:47 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/ff4.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/ff4.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -699,7 +699,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/ff4.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/ff4.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/ff4.gif]]></wp:meta_value>
@@ -714,7 +714,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/final-fantasy-tactics-a2-grimoire-of-the-rift/ffta2/</link>
 		<pubDate>Thu, 18 Aug 2011 17:12:11 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/ffta2.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/ffta2.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -730,7 +730,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/ffta2.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/ffta2.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/ffta2.gif]]></wp:meta_value>
@@ -745,7 +745,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/peppa-pig/336327ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:14:00 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/336327ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -761,7 +761,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/336327ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/336327ps_500h.jpeg]]></wp:meta_value>
@@ -776,7 +776,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/peppa-pig/336327ss1_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 17:14:02 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss1_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/336327ss1_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -792,7 +792,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss1_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/336327ss1_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/336327ss1_502w.jpeg]]></wp:meta_value>
@@ -807,7 +807,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/peppa-pig/336327ss2_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 17:14:04 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss2_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/336327ss2_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -823,7 +823,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss2_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/336327ss2_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/336327ss2_502w.jpeg]]></wp:meta_value>
@@ -838,7 +838,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/peppa-pig/336327ss3_502w/</link>
 		<pubDate>Thu, 18 Aug 2011 17:14:05 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss3_502w.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/336327ss3_502w.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -854,7 +854,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/336327ss3_502w.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/336327ss3_502w.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/336327ss3_502w.jpeg]]></wp:meta_value>
@@ -869,7 +869,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pokemon-black-version-white-version/pkmnw/</link>
 		<pubDate>Thu, 18 Aug 2011 17:16:00 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnw.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/pkmnw.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -885,7 +885,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnw.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/pkmnw.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/pkmnw.gif]]></wp:meta_value>
@@ -900,7 +900,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/barbie-fashion-show-an-eye-for-style/337327ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:16:13 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/337327ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/337327ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -916,7 +916,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/337327ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/337327ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/337327ps_500h.jpeg]]></wp:meta_value>
@@ -931,7 +931,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/imagine-fashion-model/335751ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:17:51 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/335751ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/335751ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -947,7 +947,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/335751ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/335751ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/335751ps_500h.jpeg]]></wp:meta_value>
@@ -962,7 +962,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/i-did-it-mum-2-girl/337059ps_500h/</link>
 		<pubDate>Thu, 18 Aug 2011 17:19:12 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/337059ps_500h.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/337059ps_500h.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -978,7 +978,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/337059ps_500h.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/337059ps_500h.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/337059ps_500h.jpeg]]></wp:meta_value>
@@ -993,7 +993,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/new-super-mario-bros/smb/</link>
 		<pubDate>Thu, 18 Aug 2011 17:20:37 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/smb.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/smb.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1009,7 +1009,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/smb.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/smb.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/smb.gif]]></wp:meta_value>
@@ -1024,7 +1024,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/super-mario-64-ds/m64ds/</link>
 		<pubDate>Thu, 18 Aug 2011 17:24:19 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/m64ds.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/m64ds.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1040,7 +1040,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/m64ds.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/m64ds.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/m64ds.gif]]></wp:meta_value>
@@ -1055,7 +1055,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pokemon-black-version-white-version/pokemon-white-version/pkmnw-2/</link>
 		<pubDate>Fri, 19 Aug 2011 11:32:14 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnw1.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/pkmnw1.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1071,7 +1071,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnw1.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/pkmnw1.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/pkmnw1.gif]]></wp:meta_value>
@@ -1086,7 +1086,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pokemon-black-version-white-version/pokemon-black-version/pkmnb/</link>
 		<pubDate>Fri, 19 Aug 2011 11:32:33 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnb.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/pkmnb.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1102,7 +1102,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/pkmnb.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/pkmnb.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/pkmnb.jpg]]></wp:meta_value>
@@ -1117,7 +1117,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/slimer-t-shirt/7963657_500x500_1/</link>
 		<pubDate>Sat, 20 Aug 2011 10:25:58 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/7963657_500x500_1.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/7963657_500x500_1.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1133,7 +1133,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/7963657_500x500_1.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/7963657_500x500_1.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/7963657_500x500_1.jpeg]]></wp:meta_value>
@@ -1148,7 +1148,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/mr-stay-puft-t-shirt/17916630_500x500_1/</link>
 		<pubDate>Sat, 20 Aug 2011 19:52:23 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/17916630_500x500_1.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/17916630_500x500_1.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1164,7 +1164,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/17916630_500x500_1.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/17916630_500x500_1.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/17916630_500x500_1.jpeg]]></wp:meta_value>
@@ -1179,7 +1179,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/asteroids-rock/asteroids/</link>
 		<pubDate>Sat, 20 Aug 2011 20:17:01 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/asteroids.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/asteroids.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1195,7 +1195,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/asteroids.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/asteroids.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attachment_metadata</wp:meta_key>
 			<wp:meta_value><![CDATA[a:6:{s:5:"width";s:3:"569";s:6:"height";s:3:"466";s:14:"hwstring_small";s:23:"height='96' width='117'";s:4:"file";s:21:"2011/08/asteroids.gif";s:5:"sizes";a:4:{s:9:"thumbnail";a:3:{s:4:"file";s:21:"asteroids-150x150.gif";s:5:"width";s:3:"150";s:6:"height";s:3:"150";}s:6:"medium";a:3:{s:4:"file";s:21:"asteroids-300x245.gif";s:5:"width";s:3:"300";s:6:"height";s:3:"245";}s:14:"shop_thumbnail";a:3:{s:4:"file";s:21:"asteroids-300x300.gif";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}s:12:"shop_catalog";a:3:{s:4:"file";s:21:"asteroids-300x300.gif";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}}s:10:"image_meta";a:10:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";}}]]></wp:meta_value>
@@ -1210,7 +1210,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/dont-make-me-go-zelda-on-you/zelda/</link>
 		<pubDate>Sat, 20 Aug 2011 20:22:30 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/zelda.gif</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/zelda.gif</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1226,7 +1226,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/zelda.gif</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/zelda.gif</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/zelda.gif]]></wp:meta_value>
@@ -1241,7 +1241,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/donkey-kong/dk/</link>
 		<pubDate>Sat, 20 Aug 2011 20:25:12 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/dk.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/dk.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1257,7 +1257,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/dk.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/dk.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/dk.jpg]]></wp:meta_value>
@@ -1272,7 +1272,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/1up/1up/</link>
 		<pubDate>Sat, 20 Aug 2011 20:27:06 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/1up.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/1up.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1288,7 +1288,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/1up.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/1up.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/1up.jpg]]></wp:meta_value>
@@ -1303,7 +1303,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/nofriendo/nofriendo/</link>
 		<pubDate>Sat, 20 Aug 2011 20:32:14 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/nofriendo.png</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/nofriendo.png</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1319,7 +1319,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/nofriendo.png</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/nofriendo.png</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attachment_metadata</wp:meta_key>
 			<wp:meta_value><![CDATA[a:6:{s:5:"width";s:3:"378";s:6:"height";s:3:"378";s:14:"hwstring_small";s:22:"height='96' width='96'";s:4:"file";s:21:"2011/08/nofriendo.png";s:5:"sizes";a:4:{s:9:"thumbnail";a:3:{s:4:"file";s:21:"nofriendo-150x150.png";s:5:"width";s:3:"150";s:6:"height";s:3:"150";}s:6:"medium";a:3:{s:4:"file";s:21:"nofriendo-300x300.png";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}s:14:"shop_thumbnail";a:3:{s:4:"file";s:21:"nofriendo-300x300.png";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}s:12:"shop_catalog";a:3:{s:4:"file";s:21:"nofriendo-300x300.png";s:5:"width";s:3:"300";s:6:"height";s:3:"300";}}s:10:"image_meta";a:10:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";}}]]></wp:meta_value>
@@ -1334,7 +1334,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/mario/mario/</link>
 		<pubDate>Sat, 20 Aug 2011 20:34:45 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/mario.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/mario.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1350,7 +1350,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/mario.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/mario.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/mario.jpg]]></wp:meta_value>
@@ -1365,7 +1365,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/addicted-to-woo/addict/</link>
 		<pubDate>Sat, 20 Aug 2011 20:45:03 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/addict.png</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/addict.png</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1381,7 +1381,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/addict.png</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/addict.png</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attachment_metadata</wp:meta_key>
 			<wp:meta_value><![CDATA[a:6:{s:5:"width";s:3:"300";s:6:"height";s:3:"300";s:14:"hwstring_small";s:22:"height='96' width='96'";s:4:"file";s:18:"2011/08/addict.png";s:5:"sizes";a:1:{s:9:"thumbnail";a:3:{s:4:"file";s:18:"addict-150x150.png";s:5:"width";s:3:"150";s:6:"height";s:3:"150";}}s:10:"image_meta";a:10:{s:8:"aperture";s:1:"0";s:6:"credit";s:0:"";s:6:"camera";s:0:"";s:7:"caption";s:0:"";s:17:"created_timestamp";s:1:"0";s:9:"copyright";s:0:"";s:12:"focal_length";s:1:"0";s:3:"iso";s:1:"0";s:13:"shutter_speed";s:1:"0";s:5:"title";s:0:"";}}]]></wp:meta_value>
@@ -1396,7 +1396,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/08/slide-test/slidetest/</link>
 		<pubDate>Tue, 30 Aug 2011 10:36:37 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slidetest.png</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/slidetest.png</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1412,7 +1412,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/slidetest.png</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/slidetest.png</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/slidetest.png]]></wp:meta_value>
@@ -1431,7 +1431,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pro-evolution-soccer-6/f102/</link>
 		<pubDate>Tue, 30 Aug 2011 16:42:05 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f102.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/f102.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1447,7 +1447,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f102.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/f102.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/f102.jpg]]></wp:meta_value>
@@ -1466,7 +1466,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pro-evolution-soccer-6/f112/</link>
 		<pubDate>Tue, 30 Aug 2011 16:42:08 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f112.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/f112.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1482,7 +1482,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f112.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/f112.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/f112.jpg]]></wp:meta_value>
@@ -1501,7 +1501,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/pro-evolution-soccer-6/f113/</link>
 		<pubDate>Tue, 30 Aug 2011 16:42:11 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f113.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/f113.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1517,7 +1517,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/f113.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/f113.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/f113.jpg]]></wp:meta_value>
@@ -1536,7 +1536,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/print-1/attachment/1/</link>
 		<pubDate>Wed, 31 Aug 2011 18:12:39 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/1.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/1.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1552,7 +1552,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/1.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/1.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/1.jpg]]></wp:meta_value>
@@ -1571,7 +1571,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/print-2/attachment/2/</link>
 		<pubDate>Wed, 31 Aug 2011 18:14:14 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/2.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/2.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1587,7 +1587,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/2.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/2.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/2.jpg]]></wp:meta_value>
@@ -1606,7 +1606,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/print-3/attachment/3/</link>
 		<pubDate>Wed, 31 Aug 2011 18:15:12 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/3.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/3.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1622,7 +1622,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/3.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/3.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/3.jpg]]></wp:meta_value>
@@ -1641,7 +1641,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/09/photo1/1-2/</link>
 		<pubDate>Mon, 05 Sep 2011 09:50:10 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/1.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/1.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1657,7 +1657,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/1.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/1.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[924]]></wp:meta_value>
@@ -1676,7 +1676,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/09/photo1/2-2/</link>
 		<pubDate>Mon, 05 Sep 2011 09:50:31 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/2.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/2.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1692,7 +1692,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/2.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/2.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[829]]></wp:meta_value>
@@ -1711,7 +1711,7 @@
 		<link>http://demo.woothemes.com/woostore/files/2011/09/photo1/3-2/</link>
 		<pubDate>Mon, 05 Sep 2011 09:50:35 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/3.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/3.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1727,7 +1727,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/3.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/3.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[928]]></wp:meta_value>
@@ -1746,7 +1746,7 @@
 		<link>http://demo.woothemes.com/woostore/files/?attachment_id=969</link>
 		<pubDate>Wed, 07 Sep 2011 12:53:21 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/Woo-Ninja_joy.png</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/Woo-Ninja_joy.png</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1762,7 +1762,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/Woo-Ninja_joy.png</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/Woo-Ninja_joy.png</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[839]]></wp:meta_value>
@@ -1781,7 +1781,7 @@
 		<link>http://demo.woothemes.com/woostore/files/?attachment_id=974</link>
 		<pubDate>Wed, 07 Sep 2011 14:24:13 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/page.jpeg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/page.jpeg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1797,7 +1797,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/page.jpeg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/page.jpeg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[none]]></wp:meta_value>
@@ -1816,7 +1816,7 @@
 		<link>http://demo.woothemes.com/woostore/files/?attachment_id=975</link>
 		<pubDate>Wed, 07 Sep 2011 14:26:05 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/background.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/background.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1832,7 +1832,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/background.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/background.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>woocommerce_media_product_id</wp:meta_key>
 			<wp:meta_value><![CDATA[none]]></wp:meta_value>
@@ -1851,7 +1851,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/woocommerce-docs/woocommerceuserguide/</link>
 		<pubDate>Tue, 13 Sep 2011 08:57:36 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/WooCommerceUserGuide.pdf</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/WooCommerceUserGuide.pdf</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1867,7 +1867,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/WooCommerceUserGuide.pdf</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/WooCommerceUserGuide.pdf</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/WooCommerceUserGuide.pdf]]></wp:meta_value>
@@ -1886,7 +1886,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/all-systems-go/all-systems-go/</link>
 		<pubDate>Thu, 15 Sep 2011 21:08:18 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/all-systems-go.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/all-systems-go.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1902,7 +1902,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/all-systems-go.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/all-systems-go.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/all-systems-go.jpg]]></wp:meta_value>
@@ -1917,7 +1917,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/australia/australia/</link>
 		<pubDate>Thu, 15 Sep 2011 21:10:25 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/australia.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/australia.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1933,7 +1933,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/australia.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/australia.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/australia.jpg]]></wp:meta_value>
@@ -1948,7 +1948,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/beyond-the-moon/beyond-the-moon/</link>
 		<pubDate>Thu, 15 Sep 2011 21:11:46 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/beyond-the-moon.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/beyond-the-moon.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1964,7 +1964,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/beyond-the-moon.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/beyond-the-moon.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/beyond-the-moon.jpg]]></wp:meta_value>
@@ -1983,7 +1983,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/bloody-mary/bloody-mary/</link>
 		<pubDate>Thu, 15 Sep 2011 21:13:17 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/bloody-mary.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/bloody-mary.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -1999,7 +1999,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/bloody-mary.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/bloody-mary.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/bloody-mary.jpg]]></wp:meta_value>
@@ -2018,7 +2018,7 @@
 		<link>http://demo.woothemes.com/woostore/files/shop/days-end/days-end/</link>
 		<pubDate>Thu, 15 Sep 2011 21:15:07 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/days-end.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/days-end.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -2034,7 +2034,7 @@
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/days-end.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/days-end.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/days-end.jpg]]></wp:meta_value>
@@ -2057,7 +2057,7 @@
 		<description></description>
 		<content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.
 
-<a class="zoom" title="[product_link id=928]" href="http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/3.jpg"><img class="size-medium wp-image-948  alignleft" title="3" src="http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/3-300x251.jpg" alt="" width="300" height="251" /></a>
+<a class="zoom" title="[product_link id=928]" href="http://demo.woothemes.com/woostore/files/2011/09/3.jpg"><img class="size-medium wp-image-948  alignleft" title="3" src="http://demo.woothemes.com/woostore/files/2011/09/3-300x251.jpg" alt="" width="300" height="251" /></a>
 
 Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.
 
@@ -2957,7 +2957,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/elephant/elephant/</link>
 		<pubDate>Thu, 15 Sep 2011 21:18:58 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/elephant.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/elephant.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -2973,7 +2973,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/elephant.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/elephant.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/elephant.jpg]]></wp:meta_value>
@@ -2992,7 +2992,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/grateful-dead/grateful-dead/</link>
 		<pubDate>Thu, 15 Sep 2011 21:20:20 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/grateful-dead.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/grateful-dead.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3008,7 +3008,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/grateful-dead.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/grateful-dead.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/grateful-dead.jpg]]></wp:meta_value>
@@ -3027,7 +3027,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/olympia/olympia/</link>
 		<pubDate>Thu, 15 Sep 2011 21:22:21 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/olympia.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/olympia.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3043,7 +3043,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/olympia.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/olympia.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/olympia.jpg]]></wp:meta_value>
@@ -3062,7 +3062,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/peace/peace/</link>
 		<pubDate>Thu, 15 Sep 2011 21:23:54 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/peace.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/peace.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3078,7 +3078,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/peace.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/peace.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/peace.jpg]]></wp:meta_value>
@@ -3097,7 +3097,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/space-rock/space-rock/</link>
 		<pubDate>Thu, 15 Sep 2011 21:25:58 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/space-rock.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/space-rock.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3113,7 +3113,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/space-rock.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/space-rock.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/space-rock.jpg]]></wp:meta_value>
@@ -3132,7 +3132,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/tron/tron/</link>
 		<pubDate>Thu, 15 Sep 2011 21:27:27 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/tron.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/tron.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3148,7 +3148,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/tron.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/tron.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/tron.jpg]]></wp:meta_value>
@@ -3167,7 +3167,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/berlin/berlin/</link>
 		<pubDate>Thu, 15 Sep 2011 21:38:26 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/berlin.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/09/berlin.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3183,7 +3183,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/berlin.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/09/berlin.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/09/berlin.jpg]]></wp:meta_value>
@@ -3202,7 +3202,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<link>http://demo.woothemes.com/woostore/files/shop/new-super-mario-bros/smb-2/</link>
 		<pubDate>Sat, 24 Sep 2011 18:49:35 +0000</pubDate>
 		<dc:creator>admin</dc:creator>
-		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/smb.jpg</guid>
+		<guid isPermaLink="false">http://demo.woothemes.com/woostore/files/2011/08/smb.jpg</guid>
 		<description></description>
 		<content:encoded><![CDATA[]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
@@ -3218,7 +3218,7 @@ Ribeye meatloaf pork belly, pancetta bacon pork andouille spare ribs short loin 
 		<wp:post_type>attachment</wp:post_type>
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
-		<wp:attachment_url>http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/08/smb.jpg</wp:attachment_url>
+		<wp:attachment_url>http://demo.woothemes.com/woostore/files/2011/08/smb.jpg</wp:attachment_url>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2011/08/smb.jpg]]></wp:meta_value>
@@ -6555,7 +6555,7 @@ Qui magna videntur claritas option ut. Commodo eu amet legunt et in. Futurum fia
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>file_path</wp:meta_key>
-			<wp:meta_value><![CDATA[http://demo.woothemes.com/woostore/files/wp-content/uploads/2011/09/WooCommerceUserGuide.pdf]]></wp:meta_value>
+			<wp:meta_value><![CDATA[http://demo.woothemes.com/woostore/files/2011/09/WooCommerceUserGuide.pdf]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>download_limit</wp:meta_key>
