@@ -27,6 +27,9 @@ function install_woocommerce() {
 	
 	// Update version
 	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );
+	
+	// Update installed variable
+	update_option( "woocommerce_installed", 1 );
 }
 
 /**
@@ -36,8 +39,9 @@ add_action('admin_init', 'install_woocommerce_redirect');
 function install_woocommerce_redirect() {
 	global $pagenow;
 
-	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' ) :
+	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' && get_option( "woocommerce_installed" ) == 1 ) :
 		
+		update_option( "woocommerce_installed", 0 );
 		flush_rewrite_rules( false );
 		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
 		exit;
