@@ -23,23 +23,42 @@ function woocommerce_mail_from( $email ) {
 }
 
 /**
+ * Option for email formatting
+ **/
+if (get_option('woocommerce_enable_sitewide_mail_template')=='yes') :
+	
+	// From address
+	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+	// HTML content type
+	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+	// Fix password email
+	add_filter( 'retrieve_password_message', 'woocommerce_retrieve_password_message' );
+	
+endif;
+
+/**
  * HTML emails from WooCommerce
  **/
 function woocommerce_mail( $to, $subject, $message ) {
+	
 	// Hook in content type/from changes
-	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
-		
+	if (get_option('woocommerce_enable_sitewide_mail_template')=='no') :
+		add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+		add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+		add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+	endif;
+	
 	// Send the mail	
 	wp_mail( $to, $subject, $message );
 	
 	// Unhook
-	remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-	remove_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-	remove_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+	if (get_option('woocommerce_enable_sitewide_mail_template')=='no') :
+		remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
+		remove_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
+		remove_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
+	endif;
 }
-
 
 /**
  * HTML email template for standard WordPress emails
@@ -55,14 +74,6 @@ function woocommerce_email_template( $phpmailer ) {
 	else :
 	
 		if (get_option('woocommerce_enable_sitewide_mail_template')=='yes') :
-			
-			// From address
-			add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
-			add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
-			// HTML content type
-			add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
-			// Fix password email
-			add_filter( 'retrieve_password_message', 'woocommerce_retrieve_password_message' );
 			
 			// Standard WordPress email
 			global $email_heading;
