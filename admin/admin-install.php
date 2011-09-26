@@ -16,9 +16,6 @@ function install_woocommerce() {
 	
 	global $woocommerce_settings;
 	
-	// Include settings so that we can run through defaults
-	include_once( 'admin-settings.php' );
-	
 	// Do install
 	woocommerce_default_options();
 	woocommerce_create_pages();
@@ -57,25 +54,33 @@ function install_woocommerce_redirect() {
  */
 function woocommerce_default_options() {
 	global $woocommerce_settings;
-	foreach ($woocommerce_settings as $value) {
 	
-        if (isset($value['std'])) :
+	// Include settings so that we can run through defaults
+	include_once( 'admin-settings.php' );
+	
+	foreach ($woocommerce_settings as $section) :
+	
+		foreach ($section as $value) :
+	
+	        if (isset($value['std'])) :
+	        
+	        	if ($value['type']=='image_width') :
+	        		
+	        		add_option($value['id'].'_width', $value['std']);
+	        		add_option($value['id'].'_height', $value['std']);
+	        		
+	        	else :
+	        		
+	        		add_option($value['id'], $value['std']);
+	        	
+	        	endif;
+	        	
+	        endif;
         
-        	if ($value['type']=='image_width') :
-        		
-        		add_option($value['id'].'_width', $value['std']);
-        		add_option($value['id'].'_height', $value['std']);
-        		
-        	else :
+        endforeach;
         
-        		add_option($value['id'], $value['std']);
-        	
-        	endif;
-        	
-        endif;
-        
-    }
-    
+    endforeach;
+
     add_option('woocommerce_shop_slug', 'shop');
 }
 
