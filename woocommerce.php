@@ -99,13 +99,6 @@ function woocommerce_init() {
 	
 	woocommerce_post_type();
 
-	// Post thumbnail support
-	if ( !current_theme_supports( 'post-thumbnails' ) ) :
-		add_theme_support( 'post-thumbnails' );
-		remove_post_type_support( 'post', 'thumbnail' );
-		remove_post_type_support( 'page', 'thumbnail' );
-	endif;
-
 	// Image sizes
 	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), 'true' );
 	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), 'true' );
@@ -130,6 +123,21 @@ function woocommerce_init() {
     	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $woocommerce->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
+
+/**
+ * Init WooCommerce
+ **/
+add_action('after_setup_theme', 'woocommerce_init_post_thumbnails');
+
+function woocommerce_init_post_thumbnails() {
+	// Post thumbnail support
+	if ( !current_theme_supports( 'post-thumbnails' ) ) :
+		add_theme_support( 'post-thumbnails' );
+		remove_post_type_support( 'post', 'thumbnail' );
+		remove_post_type_support( 'page', 'thumbnail' );
+	endif;
+}
+
 
 /**
  * Set up Roles & Capabilities
