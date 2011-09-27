@@ -216,7 +216,7 @@ function woocommerce_custom_product_columns($column) {
 					$h_time = mysql2date( __( 'Y/m/d' ), $m_time );
 			endif;
 
-			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post, $column_name, $mode ) . '</abbr><br />';
+			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr><br />';
 			
 			if ( 'publish' == $post->post_status ) :
 				_e( 'Published' );
@@ -448,7 +448,7 @@ function woocommerce_custom_order_columns($column) {
 					$h_time = mysql2date( __( 'Y/m/d' ), $m_time );
 			endif;
 
-			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post, $column_name, $mode ) . '</abbr>';
+			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr>';
 			
 		break;
 	}
