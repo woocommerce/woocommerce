@@ -28,6 +28,11 @@ class woocommerce_payment_gateway {
 	var $errors = array();
 	var $sanitized_fields = array();
 	
+	/**
+	 * Check If The Gateway Is Available For Use
+	 *
+	 * @since 1.0.0
+	 */
 	function is_available() {
 		
 		if ($this->enabled=="yes") :
@@ -39,10 +44,24 @@ class woocommerce_payment_gateway {
 		return false;
 	}
 	
+	/**
+	 * Set As Current Gateway.
+	 *
+	 * Set this as the current gateway.
+	 *
+	 * @since 1.0.0
+	 */
 	function set_current() {
 		$this->chosen = true;
 	}
 	
+	/**
+	 * The Gateway Icon
+	 *
+	 * Display the gateway's icon.
+	 *
+	 * @since 1.0.0
+	 */
 	function icon() {
 		global $woocommerce;
 		if ($this->icon) :
@@ -50,12 +69,42 @@ class woocommerce_payment_gateway {
 		endif;
 	}
 	
+	/**
+	 * Admin Options
+	 *
+	 * Setup the gateway settings screen.
+	 * Override this in your gateway.
+	 *
+	 * @since 1.0.0
+	 */
 	function admin_options() {}
 	
+	/**
+	 * Process Payment
+	 *
+	 * Process the payment. Override this in your gateway.
+	 *
+	 * @since 1.0.0
+	 */
 	function process_payment() {}
 	
+	/**
+	 * Validate Frontend Fields
+	 *
+	 * Validate payment fields on the frontend.
+	 *
+	 * @since 1.0.0
+	 */
 	function validate_fields() { return true; }
 	
+	/**
+	 * Initialise Settings Form Fields
+	 *
+	 * Add an array of fields to be displayed
+	 * on the gateway's settings screen.
+	 *
+	 * @since 1.0.0
+	 */
 	function init_form_fields () { return __( 'This function needs to be overridden by your payment gateway class.', 'woothemes' ); }
 	
 	/**
@@ -65,8 +114,6 @@ class woocommerce_payment_gateway {
 	 * @since 1.0.0
 	 */
     public function process_admin_options() {
-    	// TO DO: NONCE SECURITY CHECK
-    	
     	$this->validate_settings_fields();
     	
     	if ( count( $this->errors ) > 0 ) {
@@ -81,9 +128,7 @@ class woocommerce_payment_gateway {
      *
      * @since 1.0.0
      */
-    function display_errors() {
-    	// TO DO - Generate errors HTML.
-    } // End display_errors()
+    function display_errors() {} // End display_errors()
 	
 	/**
      * Initialise Gateway Settings
@@ -95,7 +140,6 @@ class woocommerce_payment_gateway {
      * @since 1.0.0
      * @uses get_option(), add_option()
      */
-    
     function init_settings () {
     	if ( ! is_array( $this->settings ) ) { return; }
     	
@@ -149,7 +193,6 @@ class woocommerce_payment_gateway {
     	echo $html;
     } // End generate_settings_html()
     
-    
     /**
      * Generate Text Input HTML.
      *
@@ -175,7 +218,6 @@ class woocommerce_payment_gateway {
     	return $html;
     } // End generate_text_html()
 
-
     /**
      * Generate Textarea HTML.
      *
@@ -200,8 +242,7 @@ class woocommerce_payment_gateway {
     	
     	return $html;
     } // End generate_textarea_html()
-    
-        
+         
     /**
      * Generate Checkbox HTML.
      *
@@ -227,7 +268,6 @@ class woocommerce_payment_gateway {
     	
     	return $html;
     } // End generate_checkbox_html()
-
 
     /**
      * Generate Select HTML.
@@ -261,8 +301,6 @@ class woocommerce_payment_gateway {
     	return $html;
     } // End generate_select_html()
     
-    
-    
     /**
      * Validate Settings Field Data.
      *
@@ -272,8 +310,6 @@ class woocommerce_payment_gateway {
      * @uses method_exists()
      */
     function validate_settings_fields () {
-    	// TO DO: NONCE SECURITY CHECK
-    	
     	foreach ( $this->form_fields as $k => $v ) {
     		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
     		
@@ -286,7 +322,6 @@ class woocommerce_payment_gateway {
     	}
     } // End validate_settings_fields()
     
-    
     /**
      * Validate Checkbox Field.
      *
@@ -296,16 +331,13 @@ class woocommerce_payment_gateway {
      * @return $status string
      */
     function validate_checkbox_field ( $key ) {
-    	// TO DO: NONCE SECURITY CHECK
-    	
     	$status = 'no';
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( 1 == $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
     		$status = 'yes';
     	}
     	
     	return $status;
-    } // End validate_checkbox_field()
-    
+    } // End validate_checkbox_field()    
     
     /**
      * Validate Text Field.
@@ -316,7 +348,6 @@ class woocommerce_payment_gateway {
      * @return $text string
      */
     function validate_text_field ( $key ) {
-    	// TO DO: NONCE SECURITY CHECK
     	$text = $this->settings[$key];
     	
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
@@ -335,7 +366,6 @@ class woocommerce_payment_gateway {
      * @return $text string
      */
     function validate_textarea_field ( $key ) {
-    	// TO DO: NONCE SECURITY CHECK
     	$text = $this->settings[$key];
     	
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
@@ -354,7 +384,6 @@ class woocommerce_payment_gateway {
      * @return $text string
      */
     function validate_select_field ( $key ) {
-    	// TO DO: NONCE SECURITY CHECK
     	$value = $this->settings[$key];
     	
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
@@ -363,5 +392,4 @@ class woocommerce_payment_gateway {
     	
     	return $value;
     } // End validate_select_field()
-    
 }
