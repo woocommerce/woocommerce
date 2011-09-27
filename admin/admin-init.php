@@ -33,7 +33,8 @@ function woocommerce_admin_scripts() {
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
-    wp_enqueue_script('woocommerce_admin');
+	wp_enqueue_script('woocommerce_admin');
+	wp_register_script('jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
     
     $screen = get_current_screen();
 
@@ -41,7 +42,7 @@ function woocommerce_admin_scripts() {
     
 	    wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-core');
-		wp_enqueue_script('jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
+		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-threshold', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.threshold'.$suffix.'.js', 'jquery', '1.0' );
