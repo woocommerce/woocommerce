@@ -21,8 +21,8 @@ function variable_product_type_options() {
 	
 	// See if any are set
 	$variation_attribute_found = false;
-	foreach($attributes as $attribute){
-		if ($attribute['is_variation']) :
+	if ($attributes) foreach($attributes as $attribute){
+		if (isset($attribute['is_variation'])) :
 			$variation_attribute_found = true;
 			break;
 		endif;
@@ -64,8 +64,6 @@ function variable_product_type_options() {
 
 								// Get current value for variation (if set)
 								$variation_selected_value = get_post_meta( $variation->ID, 'attribute_' . sanitize_title($attribute['name']), true );
-								
-								if (!is_array($options)) $options = explode(',', $options);
 								
 								// Name will be something like attribute_pa_color
 								echo '<select name="attribute_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';

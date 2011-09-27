@@ -304,7 +304,11 @@ jQuery(document).ready(function($) {
                 var attr_val = attributes[attr_name];
                 
                 if(attr_name == current_attr_name) {
-                    current_attr_select.find('option[value="'+attr_val+'"]').removeAttr('disabled');
+                    if (attr_val) {
+                    	current_attr_select.find('option[value="'+attr_val+'"]').removeAttr('disabled');
+                    } else {
+                    	current_attr_select.find('option').removeAttr('disabled');
+                    }
                 }
             }
         }

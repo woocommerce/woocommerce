@@ -436,7 +436,11 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			 	);
 		 	else :
 		 		// Format values
-		 		$values = trim(htmlspecialchars(stripslashes($attribute_values[$i])));
+		 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
+		 		// Text based, separate by pipe
+		 		$values = explode('|', $values);
+		 		$values = array_map('trim', $values);
+		 		$values = implode('|', $values);
 		 		
 		 		// Custom attribute - Add attribute to array and set the values
 			 	$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
