@@ -152,7 +152,7 @@ function woocommerce_write_panel_scripts() {
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
-	wp_register_script('woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery'));
+	wp_register_script('woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker'));
 	wp_enqueue_script('woocommerce_writepanel');
 	
 	wp_enqueue_script('media-upload');
