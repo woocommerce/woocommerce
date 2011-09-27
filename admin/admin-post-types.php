@@ -393,7 +393,7 @@ function woocommerce_custom_order_columns($column) {
            		$user = __('Guest', 'woothemes');
            	endif;
            	
-           	echo '<small class="meta">'.__('Customer: ', 'woothemes').esc_html( $user ).'</small>';
+           	echo '<small class="meta">' . __('Customer: ', 'woothemes') . $user . '</small>';
            	
            	if ($order->billing_email) :
         		echo '<small class="meta">'.__('Email: ', 'woothemes').'<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
