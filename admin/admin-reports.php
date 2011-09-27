@@ -239,7 +239,6 @@ function woocommerce_sales_overview() {
 	    'order'           => 'DESC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -329,7 +328,7 @@ function woocommerce_sales_overview() {
 	<?php
 	
 	$start_date = strtotime(date('Ymd', strtotime( date('Ym').'01' )));
-	$end_date = strtotime(date('Ymd', strtotime('NOW')));
+	$end_date = strtotime(date('Ymd', current_time('timestamp')));
 	
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_within_range' );
@@ -340,7 +339,6 @@ function woocommerce_sales_overview() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -463,7 +461,7 @@ function woocommerce_daily_sales() {
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
 	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
-	if (!$end_date) $end_date = date('Ymd', strtotime('NOW'));
+	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
@@ -481,7 +479,6 @@ function woocommerce_daily_sales() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -659,7 +656,7 @@ function woocommerce_monthly_sales() {
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
 	if (!$start_date) $start_date = $current_year.'0101';
-	if (!$end_date) $end_date = date('Ym', strtotime('NOW')).'31';
+	if (!$end_date) $end_date = date('Ym', current_time('timestamp')).'31';
 	
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
@@ -677,7 +674,6 @@ function woocommerce_monthly_sales() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -848,7 +844,7 @@ function woocommerce_top_sellers() {
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
 	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
-	if (!$end_date) $end_date = date('Ymd', strtotime('NOW'));
+	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
@@ -862,7 +858,6 @@ function woocommerce_top_sellers() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -940,7 +935,7 @@ function woocommerce_top_earners() {
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
 	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
-	if (!$end_date) $end_date = date('Ymd', strtotime('NOW'));
+	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
@@ -954,7 +949,6 @@ function woocommerce_top_earners() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -1032,7 +1026,7 @@ function woocommerce_product_sales() {
 	
 	if ($chosen_product_id) :
 		$start_date = date('Ym', strtotime( '-12 MONTHS' )).'01';
-		$end_date = date('Ymd', strtotime('NOW'));
+		$end_date = date('Ymd', current_time('timestamp'));
 		
 		$start_date = strtotime($start_date);
 		$end_date = strtotime($end_date);
@@ -1046,7 +1040,6 @@ function woocommerce_product_sales() {
 		    'order'           => 'ASC',
 		    'post_type'       => 'shop_order',
 		    'post_status'     => 'publish' ,
-		    'suppress_filters' => false,
 		    'tax_query' => array(
 		    	array(
 			    	'taxonomy' => 'shop_order_status',
@@ -1162,7 +1155,6 @@ function woocommerce_customer_overview() {
 	    'order'           => 'DESC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -1235,7 +1227,7 @@ function woocommerce_customer_overview() {
 	<?php
 	
 	$start_date = strtotime('-30 days');
-	$end_date = strtotime('NOW');
+	$end_date = current_time('timestamp');
 	$signups = array();
 	
 	// Blank date ranges to begin
@@ -1343,7 +1335,6 @@ function woocommerce_stock_overview() {
 	    'order'           => 'DESC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
-	    'suppress_filters' => false,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
