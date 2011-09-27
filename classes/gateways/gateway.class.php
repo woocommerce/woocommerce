@@ -384,7 +384,7 @@ class woocommerce_payment_gateway {
     function validate_text_field ( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
-    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
     		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
     	}
     	
@@ -402,7 +402,7 @@ class woocommerce_payment_gateway {
     function validate_textarea_field ( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
-    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
     		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
     	}
     	
@@ -420,7 +420,7 @@ class woocommerce_payment_gateway {
     function validate_select_field ( $key ) {
     	$value = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
-    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
     		$value = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
     	}
     	
@@ -438,7 +438,7 @@ class woocommerce_payment_gateway {
     function validate_multiselect_field ( $key ) {
     	$value = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
-    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) && ( '' != $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
     		$value = array_map('esc_attr', array_map('woocommerce_clean', (array) $_POST[$this->plugin_id . $this->id . '_' . $key] ));
     	}
     	
