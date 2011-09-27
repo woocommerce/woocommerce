@@ -382,10 +382,10 @@ function woocommerce_custom_order_columns($column) {
 			
 			if (isset($user_info) && $user_info) : 
 			                    	
-            	$user = '<a href="user-edit.php?user_id='.$user_info->ID.'">';
+            	$user = '<a href="user-edit.php?user_id=' . esc_attr( $user_info->ID ) . '">';
             	
             	if ($user_info->first_name || $user_info->last_name) $user .= $user_info->first_name.' '.$user_info->last_name;
-            	else $user .= $user_info->display_name;
+            	else $user .= esc_html( $user_info->display_name );
             	
             	$user .= '</a>';
 
