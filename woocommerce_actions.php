@@ -462,7 +462,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
                 $taxonomy = 'attribute_' . sanitize_title($attribute['name']);
                 if (!empty($_POST[$taxonomy])) :
-                    $variations[$taxonomy] = $_POST[$taxonomy];
+                    $variations[$taxonomy] = esc_attr(stripslashes($_POST[$taxonomy]));
 				else :
                     $all_variations_set = false;
                 endif;

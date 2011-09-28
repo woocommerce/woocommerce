@@ -575,7 +575,7 @@ function process_product_meta_variable( $post_id ) {
 			
 			foreach ($attributes as $attribute) :
 				if ( $attribute['is_variation'] ) :
-					$value = trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]);
+					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
 					if ($value) :
 						$title[] = $woocommerce->attribute_label($attribute['name']).': '.$value;
 					endif;
@@ -618,7 +618,7 @@ function process_product_meta_variable( $post_id ) {
 							
 				if ( $attribute['is_variation'] ) :
 				
-					$value = trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]);
+					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
 					
 					update_post_meta( $variation_id, 'attribute_' . sanitize_title($attribute['name']), $value );
 				
