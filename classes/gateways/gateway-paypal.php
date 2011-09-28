@@ -130,13 +130,14 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$shipping_name = explode(' ', $order->shipping_method);
 		
 		if (in_array($order->billing_country, array('US','CA'))) :
+			$order->billing_phone = str_replace(array('(', '-', ' ', ')'), '', $order->billing_phone);
 			$phone_args = array(
 				'night_phone_a' => substr($order->billing_phone,0,3),
-				'night_phone_b' => substr($order->billing_phone,0,3),
-				'night_phone_c' => substr($order->billing_phone,0,3),
+				'night_phone_b' => substr($order->billing_phone,3,3),
+				'night_phone_c' => substr($order->billing_phone,6,4),
 				'day_phone_a' 	=> substr($order->billing_phone,0,3),
-				'day_phone_b' 	=> substr($order->billing_phone,0,3),
-				'day_phone_c' 	=> substr($order->billing_phone,0,3)
+				'day_phone_b' 	=> substr($order->billing_phone,3,3),
+				'day_phone_c' 	=> substr($order->billing_phone,6,4)
 			);
 		else :
 			$phone_args = array(
