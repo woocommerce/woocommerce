@@ -267,8 +267,8 @@ function woocommerce_product_data_box() {
 											?>" placeholder="<?php _e('Pipe separate terms', 'woothemes'); ?>" />
 										<?php endif; ?>
 										</td>
-										<td class="center"><input type="checkbox" <?php checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
-										<td class="center enable_variation"><input type="checkbox" <?php checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
+										<td class="center"><input type="checkbox" <?php if (isset($attribute['is_visible'])) checked($attribute['is_visible'], 1); ?> name="attribute_visibility[<?php echo $i; ?>]" value="1" /></td>
+										<td class="center enable_variation"><input type="checkbox" <?php if (isset($attribute['is_variation'])) checked($attribute['is_variation'], 1); ?> name="attribute_variation[<?php echo $i; ?>]" value="1" /></td>
 										<td class="center"><button type="button" class="hide_row button">&times;</button></td>
 									</tr><?php
 						    	endforeach;

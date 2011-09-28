@@ -169,7 +169,7 @@ function variable_product_write_panel_js() {
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
 								
-								if ( !$attribute['is_variation'] ) continue;
+								if ( !isset($attribute['is_variation']) || !$attribute['is_variation'] ) continue;
 								
 								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
