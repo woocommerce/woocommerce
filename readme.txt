@@ -53,5 +53,9 @@ The manual installation involves downloading the plugin and uploading it to your
 
 == Changelog ==
 
+= 1.0.1 = 
+* Fixed notices on product page
+* Variation formatting uses item_meta when showing order items
+
 = 1.0 = 
 * Initial Release. Woo!
