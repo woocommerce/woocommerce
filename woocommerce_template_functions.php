@@ -114,7 +114,7 @@ if (!function_exists('woocommerce_show_product_images')) {
 		if (has_post_thumbnail()) :
 			$thumb_id = get_post_thumbnail_id();
 			$large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
-			echo '<a href="'.wp_get_attachment_url($thumb_id).'" class="zoom" rel="thumbnails">';
+			echo '<a href="'.wp_get_attachment_url($thumb_id).'" class="zoom" rel="thumbnails" title="'.get_the_title().'">';
 			the_post_thumbnail($large_thumbnail_size); 
 			echo '</a>';
 		else : 
