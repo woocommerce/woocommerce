@@ -537,8 +537,8 @@ function woocommerce_view_order() {
 								<tr>
 									<td class="product-name">'.$item['name'];
 							
-							if (isset($_product->variation_data)) :
-								echo woocommerce_get_formatted_variation( $_product->variation_data );
+							if (isset($item['item_meta'])) :
+								echo woocommerce_get_formatted_variation( $item['item_meta'] );
 							endif;
 							
 							echo '	</td>

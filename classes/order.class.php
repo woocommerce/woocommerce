@@ -204,7 +204,7 @@ class woocommerce_order {
 			$return .= ' - ' . strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 )));
 			
 			if (isset($_product->variation_data)) :
-				$return .= PHP_EOL . woocommerce_get_formatted_variation( $_product->variation_data, true );
+				$return .= PHP_EOL . woocommerce_get_formatted_variation( $item['item_meta'], true );
 			endif;
 			
 			if ($show_download_links) :
@@ -241,8 +241,8 @@ class woocommerce_order {
 				$sku = ' (#' . $_product->sku . ')';
 			endif;
 			
-			if (isset($_product->variation_data)) :
-				$variation = '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
+			if (isset($item['item_meta'])) :
+				$variation = '<br/>' . woocommerce_get_formatted_variation( $item['item_meta'], true );
 			endif;
 			
 			if ($show_download_links) :

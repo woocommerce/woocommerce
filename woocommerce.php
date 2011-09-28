@@ -386,6 +386,8 @@ function woocommerce_price( $price, $args = array() ) {
 
 /**
  * Variation Formatting
+ *
+ * Gets a formatted version of variation data or item meta
  **/
 function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 
@@ -402,6 +404,8 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 		$variation_list = array();
 		
 		foreach ($variation as $name => $value) :
+			
+			if (!$value) continue;
 			
 			if ($flat) :
 				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.ucfirst($value);
@@ -424,8 +428,8 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 		return $return;
 		
 	endif;
-}
-
+}	
+	
 /**
  * Clean variables
  **/

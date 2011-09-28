@@ -113,8 +113,8 @@ function woocommerce_order_tracking( $atts ) {
 							echo '<tr>';
 							echo '<td class="product-name">'.$_product->get_title();
 							
-							if (isset($_product->variation_data)) :
-								echo woocommerce_get_formatted_variation( $_product->variation_data );
+							if (isset($item['item_meta'])) :
+								echo woocommerce_get_formatted_variation( $item['item_meta'] );
 							endif;
 							
 							echo '</td>';
