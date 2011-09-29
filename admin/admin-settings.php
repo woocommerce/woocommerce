@@ -599,7 +599,7 @@ function woocommerce_settings() {
     endif;
     
     if (isset($_GET['installed']) && $_GET['installed']) :
-    	echo '<div id="message" class="updated fade"><p><strong>' . __( 'WooCommerce has been installed. Enjoy :)', 'woothemes' ) . '</strong></p></div>';
+    	echo '<div id="message" class="updated fade"><p style="float:right;">' . __( 'Like WooCommerce? <a href="http://wordpress.org/extend/plugins/woocommerce/">Support us by leaving a rating!</a>', 'woothemes' ) . '</p><p><strong>' . __( 'WooCommerce has been installed. Enjoy :)', 'woothemes' ) . '</strong></p></div>';
     	flush_rewrite_rules( false );
     endif;
     ?>
