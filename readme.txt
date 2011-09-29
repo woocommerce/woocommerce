@@ -58,6 +58,8 @@ The manual installation involves downloading the plugin and uploading it to your
 * Variation formatting uses item_meta when showing order items
 * Javascript fixes in admin + correct enqueuing of scripts
 * Added en_GB po file
+* Used dbDelta for installation of tables for better table upgrades/installs
+* Fix for reviews form when fancybox is turned off
 
 = 1.0 = 
 * Initial Release. Woo!
