@@ -15,7 +15,7 @@
 function woocommerce_update_options($options) {
     
     if(!isset($_POST) || !$_POST) return false;
-	
+    
     foreach ($options as $value) {
     	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
     		
@@ -96,9 +96,9 @@ function woocommerce_update_options($options) {
             
         elseif (isset($value['type']) && $value['type']=='image_width') :
             	
-            if(isset($value['id'])) {
-            	update_option($value['id'].'_width', (int) woocommerce_clean($_POST[$value['id'].'_width']));
-            	update_option($value['id'].'_height', (int) woocommerce_clean($_POST[$value['id'].'_height']));
+            if(isset($value['id']) && isset($_POST[$value['id'].'_width'])) {
+              	update_option($value['id'].'_width', woocommerce_clean($_POST[$value['id'].'_width']));
+            	update_option($value['id'].'_height', woocommerce_clean($_POST[$value['id'].'_height']));
             } else {
                 update_option($value['id'].'_width', $value['std']);
             	update_option($value['id'].'_height', $value['std']);
@@ -147,7 +147,7 @@ function woocommerce_admin_fields($options) {
             case 'image_width' :
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><?php _e('Width'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( get_option( $value['id'].'_width') ) echo stripslashes(get_option($value['id'].'_width')); else echo $value['std'] ?>" /> <?php _e('Height'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3"" value="<?php if ( get_option( $value['id'].'_height') ) echo stripslashes(get_option($value['id'].'_height')); else echo $value['std'] ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
+                    <td class="forminp"><?php _e('Width'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" /> <?php _e('Height'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3"" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" /> <span class="description"><?php echo $value['desc'] ?></span></td>
                 </tr><?php
             break;
             case 'select':

@@ -350,7 +350,8 @@ function woocommerce_remove_variation() {
 	
 	check_ajax_referer( 'delete-variation', 'security' );
 	$variation_id = intval( $_POST['variation_id'] );
-	wp_delete_post( $variation_id );
+	$variation = get_post($variation_id);
+	if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
 	die();
 	
 }

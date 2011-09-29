@@ -32,20 +32,28 @@ function woocommerce_admin_scripts() {
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
+	// Register scripts
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
-	wp_enqueue_script('woocommerce_admin');
-	wp_register_script('jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
-    
+	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
+	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
+	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
+	
+	// Get admin screen id
     $screen = get_current_screen();
-
+    
+    // WooCommerce admin pages
+    if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
+    
+    	wp_enqueue_script('woocommerce_admin');
+    
+    endif;
+    
+	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :
     
-	    wp_enqueue_script('jquery');
-		wp_enqueue_script('jquery-ui-core');
-		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
-		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', 'jquery', '1.0' );
-		wp_enqueue_script( 'flot-threshold', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.threshold'.$suffix.'.js', 'jquery', '1.0' );
+		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
 	
 	endif;
 }
@@ -488,14 +496,22 @@ function woocommerce_delete_product_sync( $id ) {
 	
 	if (!current_user_can('delete_posts')) return;
 	
-	if ( $children_products =& get_children( 'post_parent='.$id.'&post_type=product_variation' ) ) :
-
-		if ($children_products) foreach ($children_products as $child) :
+	if ( $id > 0 ) :
+	
+		if ( $children_products =& get_children( 'post_parent='.$id.'&post_type=product_variation' ) ) :
+	
+			if ($children_products) :
 			
-			wp_delete_post( $child->ID, true );
+				foreach ($children_products as $child) :
+					
+					wp_delete_post( $child->ID, true );
+					
+				endforeach;
 			
-		endforeach;
-
+			endif;
+	
+		endif;
+	
 	endif;
 	
 }
