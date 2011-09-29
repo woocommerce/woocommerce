@@ -168,14 +168,16 @@ function woocommerce_add_attribute() {
 				        		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
 				        		if ( $attribute_taxonomies ) :
 				        			foreach ($attribute_taxonomies as $tax) :
+				        				$att_title = $tax->attribute_name;
+				        				if ( isset( $tax->attribute_label ) ) { $att_title = $tax->attribute_label; }
 				        				?><tr>
 
 				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
-				        					<td><?php echo ucwords($tax->attribute_label); ?></td>
-				        					<td><?php echo ucwords($tax->attribute_type); ?></td>
+				        					<td><?php echo ucwords( $att_title ); ?></td>
+				        					<td><?php echo ucwords( $tax->attribute_type ); ?></td>
 				        					<td><?php 
 				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
 					        						$terms_array = array();
