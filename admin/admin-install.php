@@ -175,13 +175,15 @@ function woocommerce_tables_install() {
 		if(!empty($wpdb->collate)) $collate .= " COLLATE $wpdb->collate";
     }
     
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    
     $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "woocommerce_attribute_taxonomies" ." (
         `attribute_id` 			mediumint(9) NOT NULL AUTO_INCREMENT,
         `attribute_name`		varchar(200) NOT NULL,
         `attribute_label`		longtext NULL,
         `attribute_type`		varchar(200) NOT NULL,
         PRIMARY KEY id (`attribute_id`)) $collate;";
-    $wpdb->query($sql);
+    dbDelta($sql);
     
     $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "woocommerce_downloadable_product_permissions" ." (
         `product_id` 			mediumint(9) NOT NULL,
@@ -190,7 +192,7 @@ function woocommerce_tables_install() {
         `order_key`				varchar(200) NOT NULL,
         `downloads_remaining`	varchar(9) NULL,
         PRIMARY KEY id (`product_id`, `order_key`)) $collate;";
-    $wpdb->query($sql);
+    dbDelta($sql);
     
     $sql = "CREATE TABLE IF NOT EXISTS ". $wpdb->prefix . "woocommerce_termmeta" ." (
 		`meta_id` 				bigint(20) NOT NULL AUTO_INCREMENT,
@@ -198,7 +200,7 @@ function woocommerce_tables_install() {
       	`meta_key` 				varchar(255) NULL,
       	`meta_value` 			longtext NULL,
       	PRIMARY KEY id (`meta_id`)) $collate;";
-    $wpdb->query($sql);	
+    dbDelta($sql);
 
 }
 
