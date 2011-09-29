@@ -410,7 +410,7 @@ function woocommerce_custom_order_columns($column) {
         	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16' ) . '">'.esc_html( $order->formatted_billing_address ).'</a>';
         	
         	if ($order->payment_method) :
-        		echo '<small class="meta">' . __('Paid via ', 'woo themes') . esc_html( $order->payment_method ) . '</small>';
+        		echo '<small class="meta">' . __('Paid via ', 'woothemes') . esc_html( $order->payment_method ) . '</small>';
         	endif;
         	
 		break;
