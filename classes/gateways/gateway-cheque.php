@@ -52,7 +52,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 			'description' => array(
 							'title' => __( 'Customer Message', 'woothemes' ), 
 							'type' => 'textarea', 
-							'description' => __( 'Let the customer know the payee and where they should be sending the cheque too and that their order won\'t be shipping until you receive it.', 'woothemes' ), 
+							'description' => __( 'Let the customer know the payee and where they should be sending the cheque to and that their order won\'t be shipping until you receive it.', 'woothemes' ), 
 							'default' => 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.'
 						)
 			);
