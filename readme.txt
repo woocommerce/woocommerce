@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Requires at least: 3.1
 Tested up to: 3.2
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -53,7 +53,10 @@ The manual installation involves downloading the plugin and uploading it to your
 
 == Changelog ==
 
-= 1.0.1 = 
+= 1.0.2 - 30/09/2011 =
+* Fix in woocommerce_templates for when a shop is the front-page
+
+= 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page
 * Variation formatting uses item_meta when showing order items
 * Javascript fixes in admin + correct enqueuing of scripts
@@ -61,5 +64,5 @@ The manual installation involves downloading the plugin and uploading it to your
 * Used dbDelta for installation of tables for better table upgrades/installs
 * Fix for reviews form when fancybox is turned off
 
-= 1.0 = 
+= 1.0 - 27/09/2011 = 
 * Initial Release. Woo!
