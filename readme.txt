@@ -55,6 +55,12 @@ The manual installation involves downloading the plugin and uploading it to your
 
 = 1.0.2 - 30/09/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
+* Added esc_html/esc_attribute in review-order.php
+* Tweaked localised strings in shortcode-thankyou.php
+* Filter added to get_downloadable_products so more advanced rules can be applied. 
+* Fixed required fields in edit shipping address
+* Fixed login link 'jump' on checkout
+* Added Turkish lira currency
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page
