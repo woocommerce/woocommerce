@@ -112,7 +112,7 @@ function woocommerce_edit_attribute() {
 	    			<div class="form-wrap">
 	    				<h3><?php _e('Edit Attribute', 'woothemes') ?></h3>
 	    				<p><?php _e('Attribute taxonomy names cannot be changed; you may only change an attributes type.', 'woothemes') ?></p>
-	    				<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo $edit; ?>" method="post">
+	    				<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 							
 							<div class="form-field">
 								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
@@ -176,8 +176,8 @@ function woocommerce_add_attribute() {
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
-				        					<td><?php echo ucwords( $att_title ); ?></td>
-				        					<td><?php echo ucwords( $tax->attribute_type ); ?></td>
+				        					<td><?php echo esc_html( ucwords( $att_title ) ); ?></td>
+				        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
 				        					<td><?php 
 				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
 					        						$terms_array = array();

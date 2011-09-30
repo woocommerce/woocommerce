@@ -221,17 +221,17 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$paypal_args_array = array();
 
 		foreach ($paypal_args as $key => $value) {
-			$paypal_args_array[] = '<input type="hidden" name="'.$key.'" value="'.esc_attr( $value ).'" />';
+			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 		
-		return '<form action="'.$paypal_adr.'" method="post" id="paypal_payment_form">
+		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
 				' . implode('', $paypal_args_array) . '
-				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.$order->get_cancel_order_url().'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
+				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
 				<script type="text/javascript">
 					jQuery(function(){
 						jQuery("body").block(
 							{ 
-								message: "<img src=\"'.$woocommerce->plugin_url().'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+								message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
 								overlayCSS: 
 								{ 
 									background: "#fff", 
