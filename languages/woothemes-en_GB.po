@@ -256,7 +256,7 @@ msgstr ""
 #: classes/product.class.php:552
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:72
-#: woocommerce.php:480
+#: woocommerce.php:481
 #@ woothemes
 msgid "out of 5"
 msgstr ""
@@ -689,8 +689,8 @@ msgid "Billing"
 msgstr ""
 
 #: admin/admin-post-types.php:353
-#: admin/admin-settings.php:615
-#: shortcodes/shortcode-my_account.php:502
+#: admin/admin-settings.php:616
+#: shortcodes/shortcode-my_account.php:509
 #: shortcodes/shortcode-order_tracking.php:87
 #: templates/checkout/pay_for_order.php:18
 #: templates/checkout/review_order.php:19
@@ -963,7 +963,7 @@ msgstr ""
 #: admin/admin-reports.php:896
 #: admin/admin-reports.php:987
 #: admin/writepanels/writepanels-init.php:46
-#: shortcodes/shortcode-my_account.php:491
+#: shortcodes/shortcode-my_account.php:498
 #: templates/checkout/pay_for_order.php:7
 #: templates/checkout/review_order.php:7
 #: templates/emails/customer_completed_order.php:12
@@ -1101,7 +1101,7 @@ msgid "+ Add Tax Rule"
 msgstr ""
 
 #: admin/admin-settings-forms.php:310
-#: admin/admin-settings.php:712
+#: admin/admin-settings.php:713
 #@ woothemes
 msgid "Select countries/states"
 msgstr ""
@@ -1586,268 +1586,268 @@ msgstr ""
 msgid "Thai Baht"
 msgstr ""
 
-#: admin/admin-settings.php:362
+#: admin/admin-settings.php:363
 #@ woothemes
 msgid "Currency Position"
 msgstr ""
 
-#: admin/admin-settings.php:363
+#: admin/admin-settings.php:364
 #@ woothemes
 msgid "This controls the position of the currency symbol."
 msgstr ""
 
-#: admin/admin-settings.php:370
+#: admin/admin-settings.php:371
 #@ woothemes
 msgid "Left"
 msgstr ""
 
-#: admin/admin-settings.php:371
+#: admin/admin-settings.php:372
 #@ woothemes
 msgid "Right"
 msgstr ""
 
-#: admin/admin-settings.php:372
+#: admin/admin-settings.php:373
 #@ woothemes
 msgid "Left (with space)"
 msgstr ""
 
-#: admin/admin-settings.php:373
+#: admin/admin-settings.php:374
 #@ woothemes
 msgid "Right (with space)"
 msgstr ""
 
-#: admin/admin-settings.php:378
+#: admin/admin-settings.php:379
 #@ woothemes
 msgid "Thousand separator"
 msgstr ""
 
-#: admin/admin-settings.php:379
+#: admin/admin-settings.php:380
 #@ woothemes
 msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 
-#: admin/admin-settings.php:388
+#: admin/admin-settings.php:389
 #@ woothemes
 msgid "Decimal separator"
 msgstr ""
 
-#: admin/admin-settings.php:389
+#: admin/admin-settings.php:390
 #@ woothemes
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 
-#: admin/admin-settings.php:398
+#: admin/admin-settings.php:399
 #@ woothemes
 msgid "Number of decimals"
 msgstr ""
 
-#: admin/admin-settings.php:399
+#: admin/admin-settings.php:400
 #@ woothemes
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr ""
 
-#: admin/admin-settings.php:414
+#: admin/admin-settings.php:415
 #@ woothemes
 msgid "Inventory Options"
 msgstr ""
 
-#: admin/admin-settings.php:417
+#: admin/admin-settings.php:418
 #@ woothemes
 msgid "Manage stock"
 msgstr ""
 
-#: admin/admin-settings.php:418
+#: admin/admin-settings.php:419
 #@ woothemes
 msgid "Enable stock management"
 msgstr ""
 
-#: admin/admin-settings.php:425
+#: admin/admin-settings.php:426
 #@ woothemes
 msgid "Notifications"
 msgstr ""
 
-#: admin/admin-settings.php:426
+#: admin/admin-settings.php:427
 #@ woothemes
 msgid "Enable low stock notifications"
 msgstr ""
 
-#: admin/admin-settings.php:434
+#: admin/admin-settings.php:435
 #@ woothemes
 msgid "Enable out of stock notifications"
 msgstr ""
 
-#: admin/admin-settings.php:442
+#: admin/admin-settings.php:443
 #@ woothemes
 msgid "Low stock threshold"
 msgstr ""
 
-#: admin/admin-settings.php:452
+#: admin/admin-settings.php:453
 #@ woothemes
 msgid "Out of stock threshold"
 msgstr ""
 
-#: admin/admin-settings.php:462
+#: admin/admin-settings.php:463
 #@ woothemes
 msgid "Out of stock visibility"
 msgstr ""
 
-#: admin/admin-settings.php:463
+#: admin/admin-settings.php:464
 #@ woothemes
 msgid "Hide out of stock items from the catalog"
 msgstr ""
 
-#: admin/admin-settings.php:476
+#: admin/admin-settings.php:477
 #@ woothemes
 msgid "Shipping Options"
 msgstr ""
 
-#: admin/admin-settings.php:479
+#: admin/admin-settings.php:480
 #@ woothemes
 msgid "Calculate shipping"
 msgstr ""
 
-#: admin/admin-settings.php:480
+#: admin/admin-settings.php:481
 #@ woothemes
 msgid "Enable shipping/shipping calculations"
 msgstr ""
 
-#: admin/admin-settings.php:487
+#: admin/admin-settings.php:488
 #@ woothemes
 msgid "Shipping calculator"
 msgstr ""
 
-#: admin/admin-settings.php:488
+#: admin/admin-settings.php:489
 #@ woothemes
 msgid "Enable the shipping calculator on the cart page"
 msgstr ""
 
-#: admin/admin-settings.php:495
+#: admin/admin-settings.php:496
 #@ woothemes
 msgid "Ship to billing"
 msgstr ""
 
-#: admin/admin-settings.php:496
+#: admin/admin-settings.php:497
 #@ woothemes
 msgid "Only ship to the users billing address"
 msgstr ""
 
-#: admin/admin-settings.php:509
+#: admin/admin-settings.php:510
 #@ woothemes
 msgid "Tax Options"
 msgstr ""
 
-#: admin/admin-settings.php:512
+#: admin/admin-settings.php:513
 #@ woothemes
 msgid "Calculate Taxes"
 msgstr ""
 
-#: admin/admin-settings.php:513
+#: admin/admin-settings.php:514
 #@ woothemes
 msgid "Enable taxes and tax calculations"
 msgstr ""
 
-#: admin/admin-settings.php:520
+#: admin/admin-settings.php:521
 #@ woothemes
 msgid "Prices inclusive of tax"
 msgstr ""
 
-#: admin/admin-settings.php:521
+#: admin/admin-settings.php:522
 #@ woothemes
 msgid "Catalog Prices include tax"
 msgstr ""
 
-#: admin/admin-settings.php:528
+#: admin/admin-settings.php:529
 #@ woothemes
 msgid "Cart totals display..."
 msgstr ""
 
-#: admin/admin-settings.php:530
+#: admin/admin-settings.php:531
 #@ woothemes
 msgid "Should the subtotal be shown including or excluding tax on the frontend?"
 msgstr ""
 
-#: admin/admin-settings.php:536
+#: admin/admin-settings.php:537
 #@ woothemes
 msgid "price including tax"
 msgstr ""
 
-#: admin/admin-settings.php:537
+#: admin/admin-settings.php:538
 #@ woothemes
 msgid "price excluding tax"
 msgstr ""
 
-#: admin/admin-settings.php:542
+#: admin/admin-settings.php:543
 #@ woothemes
 msgid "Additional Tax classes"
 msgstr ""
 
-#: admin/admin-settings.php:543
+#: admin/admin-settings.php:544
 #@ woothemes
 msgid "List 1 per line. This is in addition to the default <em>Standard Rate</em>."
 msgstr ""
 
-#: admin/admin-settings.php:544
+#: admin/admin-settings.php:545
 #@ woothemes
 msgid "List product and shipping tax classes here, e.g. Zero Tax, Reduced Rate."
 msgstr ""
 
-#: admin/admin-settings.php:552
+#: admin/admin-settings.php:553
 #@ woothemes
 msgid "Tax rates"
 msgstr ""
 
-#: admin/admin-settings.php:553
+#: admin/admin-settings.php:554
 #@ woothemes
 msgid "All fields are required."
 msgstr ""
 
-#: admin/admin-settings.php:554
+#: admin/admin-settings.php:555
 #@ woothemes
 msgid "To avoid rounding errors, insert tax rates with 4 decimal places."
 msgstr ""
 
-#: admin/admin-settings.php:577
+#: admin/admin-settings.php:578
 #: classes/woocommerce.class.php:240
 #@ woothemes
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
-#: admin/admin-settings.php:597
+#: admin/admin-settings.php:598
 #@ woothemes
 msgid "Your settings have been saved."
 msgstr ""
 
-#: admin/admin-settings.php:602
+#: admin/admin-settings.php:603
 #@ woothemes
 msgid "WooCommerce has been installed. Enjoy :)"
 msgstr ""
 
-#: admin/admin-settings.php:611
+#: admin/admin-settings.php:612
 #: admin/writepanels/writepanel-product_data.php:29
 #@ woothemes
 msgid "General"
 msgstr ""
 
-#: admin/admin-settings.php:612
+#: admin/admin-settings.php:613
 #@ woothemes
 msgid "Pages"
 msgstr ""
 
-#: admin/admin-settings.php:613
+#: admin/admin-settings.php:614
 #: admin/writepanels/writepanel-product_data.php:645
 #@ woothemes
 msgid "Catalog"
 msgstr ""
 
-#: admin/admin-settings.php:614
+#: admin/admin-settings.php:615
 #: admin/writepanels/writepanel-product_data.php:31
 #@ woothemes
 msgid "Inventory"
 msgstr ""
 
-#: admin/admin-settings.php:616
+#: admin/admin-settings.php:617
 #: admin/writepanels/writepanel-product_data.php:30
-#: shortcodes/shortcode-my_account.php:506
+#: shortcodes/shortcode-my_account.php:513
 #: shortcodes/shortcode-order_tracking.php:91
 #: templates/checkout/pay_for_order.php:22
 #: templates/checkout/review_order.php:65
@@ -1856,22 +1856,22 @@ msgstr ""
 msgid "Tax"
 msgstr ""
 
-#: admin/admin-settings.php:617
+#: admin/admin-settings.php:618
 #@ woothemes
 msgid "Shipping Methods"
 msgstr ""
 
-#: admin/admin-settings.php:618
+#: admin/admin-settings.php:619
 #@ woothemes
 msgid "Payment Gateways"
 msgstr ""
 
-#: admin/admin-settings.php:684
+#: admin/admin-settings.php:685
 #@ woothemes
 msgid "Save changes"
 msgstr ""
 
-#: admin/admin-settings.php:727
+#: admin/admin-settings.php:728
 #@ woothemes
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
@@ -1972,8 +1972,8 @@ msgstr ""
 #: classes/checkout.class.php:35
 #: classes/checkout.class.php:105
 #: classes/checkout.class.php:106
-#: shortcodes/shortcode-my_account.php:260
-#: shortcodes/shortcode-my_account.php:261
+#: shortcodes/shortcode-my_account.php:267
+#: shortcodes/shortcode-my_account.php:268
 #@ woothemes
 msgid "First Name"
 msgstr ""
@@ -1984,8 +1984,8 @@ msgstr ""
 #: classes/checkout.class.php:41
 #: classes/checkout.class.php:111
 #: classes/checkout.class.php:112
-#: shortcodes/shortcode-my_account.php:264
-#: shortcodes/shortcode-my_account.php:265
+#: shortcodes/shortcode-my_account.php:271
+#: shortcodes/shortcode-my_account.php:272
 #@ woothemes
 msgid "Last Name"
 msgstr ""
@@ -1996,8 +1996,8 @@ msgstr ""
 #: classes/checkout.class.php:47
 #: classes/checkout.class.php:117
 #: classes/checkout.class.php:118
-#: shortcodes/shortcode-my_account.php:270
-#: shortcodes/shortcode-my_account.php:271
+#: shortcodes/shortcode-my_account.php:277
+#: shortcodes/shortcode-my_account.php:278
 #@ woothemes
 msgid "Company"
 msgstr ""
@@ -2016,7 +2016,7 @@ msgstr ""
 #: classes/checkout.class.php:57
 #: classes/checkout.class.php:127
 #: classes/checkout.class.php:128
-#: shortcodes/shortcode-my_account.php:279
+#: shortcodes/shortcode-my_account.php:286
 #@ woothemes
 msgid "Address 2"
 msgstr ""
@@ -2027,8 +2027,8 @@ msgstr ""
 #: classes/checkout.class.php:63
 #: classes/checkout.class.php:133
 #: classes/checkout.class.php:134
-#: shortcodes/shortcode-my_account.php:285
-#: shortcodes/shortcode-my_account.php:286
+#: shortcodes/shortcode-my_account.php:292
+#: shortcodes/shortcode-my_account.php:293
 #@ woothemes
 msgid "City"
 msgstr ""
@@ -2039,7 +2039,7 @@ msgstr ""
 #: classes/checkout.class.php:69
 #: classes/checkout.class.php:139
 #: classes/checkout.class.php:140
-#: shortcodes/shortcode-my_account.php:289
+#: shortcodes/shortcode-my_account.php:296
 #: woocommerce_template_functions.php:635
 #@ woothemes
 msgid "Postcode"
@@ -2049,7 +2049,7 @@ msgstr ""
 #: admin/writepanels/writepanel-order_data.php:108
 #: classes/checkout.class.php:75
 #: classes/checkout.class.php:146
-#: shortcodes/shortcode-my_account.php:295
+#: shortcodes/shortcode-my_account.php:302
 #@ woothemes
 msgid "Country"
 msgstr ""
@@ -2065,7 +2065,7 @@ msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:95
 #: classes/checkout.class.php:89
-#: shortcodes/shortcode-my_account.php:340
+#: shortcodes/shortcode-my_account.php:347
 #@ woothemes
 msgid "Email Address"
 msgstr ""
@@ -2950,7 +2950,7 @@ msgstr ""
 #: classes/cart.class.php:470
 #: classes/cart.class.php:513
 #: classes/order.class.php:148
-#: woocommerce.php:382
+#: woocommerce.php:383
 #@ woothemes
 msgid " <small>(ex. tax)</small>"
 msgstr ""
@@ -2995,19 +2995,19 @@ msgstr ""
 
 #: classes/checkout.class.php:50
 #: classes/checkout.class.php:121
-#: shortcodes/shortcode-my_account.php:275
+#: shortcodes/shortcode-my_account.php:282
 #@ woothemes
 msgid "Address"
 msgstr ""
 
 #: classes/checkout.class.php:90
-#: shortcodes/shortcode-my_account.php:341
+#: shortcodes/shortcode-my_account.php:348
 #@ woothemes
 msgid "you@yourdomain.com"
 msgstr ""
 
 #: classes/checkout.class.php:95
-#: shortcodes/shortcode-my_account.php:345
+#: shortcodes/shortcode-my_account.php:352
 #@ woothemes
 msgid "Phone"
 msgstr ""
@@ -3024,8 +3024,8 @@ msgstr ""
 
 #: classes/checkout.class.php:168
 #: shortcodes/shortcode-my_account.php:89
-#: shortcodes/shortcode-my_account.php:257
-#: shortcodes/shortcode-my_account.php:582
+#: shortcodes/shortcode-my_account.php:264
+#: shortcodes/shortcode-my_account.php:589
 #: shortcodes/shortcode-order_tracking.php:134
 #@ woothemes
 msgid "Billing Address"
@@ -3072,8 +3072,8 @@ msgstr ""
 
 #: classes/checkout.class.php:227
 #: shortcodes/shortcode-my_account.php:118
-#: shortcodes/shortcode-my_account.php:257
-#: shortcodes/shortcode-my_account.php:569
+#: shortcodes/shortcode-my_account.php:264
+#: shortcodes/shortcode-my_account.php:576
 #: shortcodes/shortcode-order_tracking.php:143
 #@ woothemes
 msgid "Shipping Address"
@@ -3090,14 +3090,14 @@ msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
 #: classes/checkout.class.php:283
-#: shortcodes/shortcode-my_account.php:297
+#: shortcodes/shortcode-my_account.php:304
 #: woocommerce_template_functions.php:596
 #@ woothemes
 msgid "Select a country&hellip;"
 msgstr ""
 
 #: classes/checkout.class.php:307
-#: shortcodes/shortcode-my_account.php:322
+#: shortcodes/shortcode-my_account.php:329
 #: woocommerce.php:198
 #: woocommerce_template_functions.php:617
 #@ woothemes
@@ -3151,7 +3151,7 @@ msgid "Please enter an account password."
 msgstr ""
 
 #: classes/checkout.class.php:457
-#: shortcodes/shortcode-my_account.php:394
+#: shortcodes/shortcode-my_account.php:401
 #@ woothemes
 msgid "Passwords do not match."
 msgstr ""
@@ -3339,11 +3339,6 @@ msgstr ""
 #: classes/gateways/gateway-cheque.php:71
 #@ woothemes
 msgid "Cheque Payment"
-msgstr ""
-
-#: classes/gateways/gateway-cheque.php:55
-#@ woothemes
-msgid "Let the customer know the payee and where they should be sending the cheque too and that their order won't be shipping until you receive it."
 msgstr ""
 
 #: classes/gateways/gateway-cheque.php:72
@@ -5213,7 +5208,7 @@ msgid "Pacific"
 msgstr ""
 
 #: shortcodes/shortcode-cart.php:38
-#: shortcodes/shortcode-my_account.php:193
+#: shortcodes/shortcode-my_account.php:197
 #@ woothemes
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
@@ -5386,113 +5381,112 @@ msgstr ""
 msgid "State is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:183
+#: shortcodes/shortcode-my_account.php:186
 #@ woothemes
 msgid "Email is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:184
+#: shortcodes/shortcode-my_account.php:187
 #@ woothemes
 msgid "Phone number is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:187
+#: shortcodes/shortcode-my_account.php:190
 #@ woothemes
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:190
+#: shortcodes/shortcode-my_account.php:193
 #@ woothemes
 msgid "Please enter a valid phone number."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:276
+#: shortcodes/shortcode-my_account.php:283
 #@ woothemes
 msgid "1 Infinite Loop"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:280
+#: shortcodes/shortcode-my_account.php:287
 #@ woothemes
 msgid "Cupertino"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:309
-#: shortcodes/shortcode-my_account.php:332
+#: shortcodes/shortcode-my_account.php:339
 #: woocommerce.php:199
 #: woocommerce_template_functions.php:629
 #@ woothemes
 msgid "state"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:349
+#: shortcodes/shortcode-my_account.php:356
 #@ woothemes
 msgid "Fax"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:355
+#: shortcodes/shortcode-my_account.php:362
 #@ woothemes
 msgid "Save Address"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:400
+#: shortcodes/shortcode-my_account.php:407
 #@ woothemes
 msgid "Please enter your password."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:414
+#: shortcodes/shortcode-my_account.php:421
 #@ woothemes
 msgid "New password"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:418
+#: shortcodes/shortcode-my_account.php:425
 #@ woothemes
 msgid "Re-enter new password"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:423
+#: shortcodes/shortcode-my_account.php:430
 #@ woothemes
 msgid "Save"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:455
+#: shortcodes/shortcode-my_account.php:462
 #, php-format
 #@ woothemes
 msgid "Order <mark>#%s</mark> made on <mark>%s</mark>"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:457
+#: shortcodes/shortcode-my_account.php:464
 #, php-format
 #@ woothemes
 msgid ". Order status: <mark>%s</mark>"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:466
+#: shortcodes/shortcode-my_account.php:473
 #: shortcodes/shortcode-order_tracking.php:50
 #@ woothemes
 msgid "Order Updates"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:487
+#: shortcodes/shortcode-my_account.php:494
 #: shortcodes/shortcode-order_tracking.php:71
 #@ woothemes
 msgid "Order Details"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:492
+#: shortcodes/shortcode-my_account.php:499
 #: templates/checkout/pay_for_order.php:8
 #: templates/checkout/review_order.php:8
 #@ woothemes
 msgid "Qty"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:493
+#: shortcodes/shortcode-my_account.php:500
 #: templates/checkout/pay_for_order.php:9
 #: templates/checkout/review_order.php:9
 #@ woothemes
 msgid "Totals"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:498
+#: shortcodes/shortcode-my_account.php:505
 #: shortcodes/shortcode-order_tracking.php:83
 #: templates/checkout/pay_for_order.php:14
 #: templates/checkout/review_order.php:14
@@ -5502,7 +5496,7 @@ msgstr ""
 msgid "Subtotal"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:510
+#: shortcodes/shortcode-my_account.php:517
 #: shortcodes/shortcode-order_tracking.php:95
 #: templates/checkout/pay_for_order.php:26
 #: templates/checkout/review_order.php:70
@@ -5511,7 +5505,7 @@ msgstr ""
 msgid "Discount"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:514
+#: shortcodes/shortcode-my_account.php:521
 #: shortcodes/shortcode-order_tracking.php:99
 #: templates/checkout/pay_for_order.php:30
 #: templates/checkout/review_order.php:74
@@ -5519,7 +5513,7 @@ msgstr ""
 msgid "Grand Total"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:519
+#: shortcodes/shortcode-my_account.php:526
 #: templates/emails/customer_completed_order.php:45
 #: templates/emails/customer_pay_for_order.php:45
 #: templates/emails/customer_processing_order.php:45
@@ -5528,7 +5522,7 @@ msgstr ""
 msgid "Note:"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:555
+#: shortcodes/shortcode-my_account.php:562
 #: templates/emails/customer_completed_order.php:48
 #: templates/emails/customer_processing_order.php:48
 #: templates/emails/new_order.php:48
@@ -5536,7 +5530,7 @@ msgstr ""
 msgid "Customer details"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:559
+#: shortcodes/shortcode-my_account.php:566
 #: templates/emails/customer_completed_order.php:51
 #: templates/emails/customer_processing_order.php:51
 #: templates/emails/new_order.php:51
@@ -5544,13 +5538,13 @@ msgstr ""
 msgid "Email:"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:560
+#: shortcodes/shortcode-my_account.php:567
 #@ woothemes
 msgid "Telephone:"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:573
-#: shortcodes/shortcode-my_account.php:586
+#: shortcodes/shortcode-my_account.php:580
+#: shortcodes/shortcode-my_account.php:593
 #@ woothemes
 msgid "N/A"
 msgstr ""
@@ -5644,16 +5638,6 @@ msgstr ""
 #: shortcodes/shortcode-thankyou.php:38
 #@ woothemes
 msgid "Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction."
-msgstr ""
-
-#: shortcodes/shortcode-thankyou.php:42
-#@ woothemes
-msgid "Please attempt your purchase again"
-msgstr ""
-
-#: shortcodes/shortcode-thankyou.php:45
-#@ woothemes
-msgid " or go to your account page"
 msgstr ""
 
 #: shortcodes/shortcode-thankyou.php:58
@@ -6163,27 +6147,27 @@ msgstr ""
 msgid "Shop Manager"
 msgstr ""
 
-#: woocommerce.php:457
+#: woocommerce.php:458
 #@ woothemes
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce.php:460
+#: woocommerce.php:461
 #@ woocommerce
 msgid "Please rate the product."
 msgstr ""
 
-#: woocommerce.php:483
+#: woocommerce.php:484
 #@ woothemes
 msgid "Your comment is awaiting approval"
 msgstr ""
 
-#: woocommerce.php:486
+#: woocommerce.php:487
 #@ woothemes
 msgid "Rating by"
 msgstr ""
 
-#: woocommerce.php:486
+#: woocommerce.php:487
 #@ woothemes
 msgid "on"
 msgstr ""
@@ -6866,5 +6850,35 @@ msgstr ""
 #: woocommerce_template_functions.php:1059
 #@ woothemes
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
+msgstr ""
+
+#: admin/admin-settings.php:357
+#@ woothemes
+msgid "Turkish Lira (TL)"
+msgstr ""
+
+#: admin/admin-settings.php:603
+#@ woothemes
+msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
+msgstr ""
+
+#: classes/gateways/gateway-cheque.php:55
+#@ woothemes
+msgid "Let the customer know the payee and where they should be sending the cheque to and that their order won't be shipping until you receive it."
+msgstr ""
+
+#: shortcodes/shortcode-my_account.php:316
+#@ woothemes
+msgid "State"
+msgstr ""
+
+#: shortcodes/shortcode-thankyou.php:43
+#@ woothemes
+msgid "Please attempt your purchase again or go to your account page."
+msgstr ""
+
+#: shortcodes/shortcode-thankyou.php:45
+#@ woothemes
+msgid "Please attempt your purchase again."
 msgstr ""
 
