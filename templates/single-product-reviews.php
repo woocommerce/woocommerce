@@ -100,7 +100,7 @@
 <script type="text/javascript">
 /* <![CDATA[ */
 	jQuery(function(){
-		if($().fancybox) {
+		if(jQuery().fancybox) {
 			jQuery('#review_form_wrapper').hide();
 			jQuery('a.show_review_form').fancybox({
 				'transitionIn'	:	'elastic',
