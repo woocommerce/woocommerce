@@ -38,14 +38,14 @@ function woocommerce_thankyou( $atts ) {
 				echo '<p>' . __('Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction.', 'woothemes') . '</p>';
 
 				echo '<p>';
-				
-					_e('Please attempt your purchase again', 'woothemes');
-					
+
 					if (is_user_logged_in()) :
-						_e(' or go to your account page', 'woothemes');
+						_e('Please attempt your purchase again or go to your account page.', 'woothemes');
+					else :
+						_e('Please attempt your purchase again.', 'woothemes');
 					endif;
 				
-				echo '.</p>';
+				echo '</p>';
 				
 				echo '<a href="'.esc_url( $order->get_checkout_payment_url() ).'" class="button pay">'.__('Pay', 'woothemes').'</a> ';
 				
