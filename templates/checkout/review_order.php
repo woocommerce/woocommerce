@@ -28,11 +28,11 @@
 						
 						foreach ($available_methods as $method ) :
 							
-							echo '<option value="'.$method->id.'" ';
+							echo '<option value="'.esc_attr($method->id).'" ';
 							
 							if ($method->id==$_SESSION['_chosen_shipping_method']) echo 'selected="selected"';
 							
-							echo '>'.$method->title.' &ndash; ';
+							echo '>'.esc_html($method->title).' &ndash; ';
 							
 							if ($method->shipping_total>0) :
 								echo woocommerce_price($method->shipping_total);
