@@ -63,6 +63,7 @@ The manual installation involves downloading the plugin and uploading it to your
 * Added Turkish lira currency
 * Active menu state fix
 * Few minor typos/case changes
+* Tweaked install script so it only redirects after activation
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page

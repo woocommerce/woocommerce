@@ -33,7 +33,7 @@ if (is_admin()) :
 	/**
 	 * Installs and upgrades
 	 **/
-	register_activation_hook( __FILE__, 'install_woocommerce' );
+	register_activation_hook( __FILE__, 'activate_woocommerce' );
 	
 	if (get_site_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) add_action('init', 'install_woocommerce', 0);
 	

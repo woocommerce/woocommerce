@@ -10,6 +10,17 @@
  */
 
 /**
+ * Activate woocommerce
+ */
+function activate_woocommerce() {
+	
+	install_woocommerce();
+	
+	// Update installed variable
+	update_option( "woocommerce_installed", 1 );
+}
+
+/**
  * Install woocommerce
  */
 function install_woocommerce() {
@@ -24,9 +35,6 @@ function install_woocommerce() {
 	
 	// Update version
 	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );
-	
-	// Update installed variable
-	update_option( "woocommerce_installed", 1 );
 }
 
 /**
