@@ -523,6 +523,7 @@ jQuery(document).ready(function($) {
 			
 			$('a.showlogin').click(function(){
 				$('form.login').slideToggle();
+				return false;
 			});
 			
 			/* Update totals */
