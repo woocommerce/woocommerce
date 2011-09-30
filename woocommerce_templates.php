@@ -171,3 +171,39 @@ function woocommerce_body_class($classes) {
 	return $classes;
 }
 add_filter('body_class','woocommerce_body_class');
+
+/**
+ * Fix active class in nav for shop page
+ **/
+function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
+	
+	if (!is_woocommerce()) return $menu_items;
+	
+	$shop_page 		= (int) get_option('woocommerce_shop_page_id');
+	$page_for_posts = (int) get_option( 'page_for_posts' );
+
+	foreach ( (array) $menu_items as $key => $menu_item ) :
+
+		$classes = (array) $menu_item->classes;
+
+		// Unset active class for blog page
+		if ( $page_for_posts == $menu_item->object_id ) :
+			$menu_items[$key]->current = false;
+			unset( $classes[ array_search('current_page_parent', $classes) ] );
+			unset( $classes[ array_search('current-menu-item', $classes) ] );
+
+		// Set active state if this is the shop page link
+		elseif ( is_shop() && $shop_page == $menu_item->object_id ) :
+			$menu_items[$key]->current = true;
+			$classes[] = 'current-menu-item';
+			$classes[] = 'current_page_item';
+		
+		endif;
+
+		$menu_items[$key]->classes = array_unique( $classes );
+	
+	endforeach;
+
+	return $menu_items;
+}
+add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
