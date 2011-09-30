@@ -190,7 +190,7 @@ class woocommerce_customer {
 		
 		endif;
 		
-		return $downloads;
+		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
 		
 	}
 	
