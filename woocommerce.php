@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://woocommerce.com
 Description: An eCommerce plugin for wordpress.
-Version: 1.0.1
+Version: 1.0.2
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -21,7 +21,7 @@ load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) 
  * Constants
  **/
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
-if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0.1");	
+if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0.2");	
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
 
 /**
@@ -329,6 +329,7 @@ function get_woocommerce_currency_symbol() {
 		case 'USD' : $currency_symbol = '&#36;'; break;
 		case 'EUR' : $currency_symbol = '&euro;'; break;
 		case 'JPY' : $currency_symbol = '&yen;'; break;
+		case 'TRY' : $currency_symbol = 'TL'; break;
 		
 		case 'CZK' :
 		case 'DKK' :

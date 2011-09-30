@@ -353,7 +353,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'SEK' => __( 'Swedish Krona', 'woothemes' ),
 			'CHF' => __( 'Swiss Franc', 'woothemes' ),
 			'TWD' => __( 'Taiwan New Dollars', 'woothemes' ),
-			'THB' => __( 'Thai Baht', 'woothemes' ) 
+			'THB' => __( 'Thai Baht', 'woothemes' ), 
+			'TRY' => __( 'Turkish Lira (TL)', 'woothemes' )
 			)
 		)
 	),
