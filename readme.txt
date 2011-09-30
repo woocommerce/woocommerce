@@ -61,6 +61,8 @@ The manual installation involves downloading the plugin and uploading it to your
 * Fixed required fields in edit shipping address
 * Fixed login link 'jump' on checkout
 * Added Turkish lira currency
+* Active menu state fix
+* Few minor typos/case changes
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page

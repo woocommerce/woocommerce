@@ -313,7 +313,7 @@ function woocommerce_edit_address() {
 				</select>
 			</p>
 			<p class="form-row form-row-last">	
-				<label for="address-state"><?php _e('state', 'woothemes'); ?> <span class="required">*</span></label>
+				<label for="address-state"><?php _e('State', 'woothemes'); ?> <span class="required">*</span></label>
 				<?php 
 					$current_cc = $address['country'];
 					if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
