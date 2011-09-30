@@ -118,11 +118,11 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$fields = '';
 		
 		if (get_search_query()) $fields = '<input type="hidden" name="s" value="'.get_search_query().'" />';
-		if (isset($_GET['post_type'])) $fields .= '<input type="hidden" name="post_type" value="'.$_GET['post_type'].'" />';
+		if (isset($_GET['post_type'])) $fields .= '<input type="hidden" name="post_type" value="'.esc_attr( $_GET['post_type'] ).'" />';
 		
 		if ($_chosen_attributes) foreach ($_chosen_attributes as $attribute => $value) :
 		
-			$fields .= '<input type="hidden" name="'.str_replace('pa_', 'filter_', $attribute).'" value="'.implode(',', $value).'" />';
+			$fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'filter_', $attribute) ).'" value="'.esc_attr( implode(',', $value) ).'" />';
 		
 		endforeach;
 		
@@ -139,13 +139,13 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 			)
 		)"));
 		
-		echo '<form method="get" action="'.$_SERVER['REQUEST_URI'].'">
+		echo '<form method="get" action="">
 			<div class="price_slider_wrapper">
 				<div class="price_slider"></div>
 				<div class="price_slider_amount">
 					<button type="submit" class="button">Filter</button>'.__('Price: ', 'woothemes').'<span></span>
-					<input type="hidden" id="max_price" name="max_price" value="'.$max.'" />
-					<input type="hidden" id="min_price" name="min_price" value="'.$min.'" />
+					<input type="hidden" id="max_price" name="max_price" value="'.esc_attr( $max ).'" />
+					<input type="hidden" id="min_price" name="min_price" value="'.esc_attr( $min ).'" />
 					'.$fields.'
 				</div>
 			</div>
