@@ -64,6 +64,8 @@ The manual installation involves downloading the plugin and uploading it to your
 * Active menu state fix
 * Few minor typos/case changes
 * Tweaked install script so it only redirects after activation
+* Removing attributes fix
+* only style mails of WooCommerce - not all mails. This is to prevent conflicts with other plugins.
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page
