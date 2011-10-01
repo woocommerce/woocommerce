@@ -380,7 +380,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	$new_sku = stripslashes( $_POST['sku'] );
 	if ($new_sku!==$sku) :
 		if ($new_sku && !empty($new_sku)) :
-			if ($wpdb->get_var("SELECT * FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='".$new_sku."';") || $wpdb->get_var("SELECT * FROM $wpdb->posts WHERE ID='".$new_sku."' AND ID!=".$post_id.";")) :
+			if (
+				$wpdb->get_var($wpdb->prepare("SELECT * FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='%s';", $new_sku)) || 
+				$wpdb->get_var($wpdb->prepare("SELECT * FROM $wpdb->posts WHERE ID='%s' AND ID!='%s' AND post_type='product';", $new_sku, $post_id))
+				) :
 				$woocommerce_errors[] = __('Product SKU must be unique.', 'woothemes');
 			else :
 				update_post_meta( $post_id, 'sku', $new_sku );

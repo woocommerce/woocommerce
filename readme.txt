@@ -66,6 +66,7 @@ The manual installation involves downloading the plugin and uploading it to your
 * Tweaked install script so it only redirects after activation
 * Removing attributes fix
 * only style mails of WooCommerce - not all mails. This is to prevent conflicts with other plugins.
+* unique sku check only checks products
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page
