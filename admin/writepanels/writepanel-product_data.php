@@ -419,21 +419,26 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			 		$values = explode('|', $values);
 			 		$values = array_map('trim', $values);
 			 	endif;
+			 	
+			 	// Remove empty items in the array
+			 	$values = array_filter( $values );
 		 	
 		 		// Update post terms
 		 		if (taxonomy_exists( $attribute_names[$i] )) :
 		 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
 		 		endif;
-		 		
-		 		// Add attribute to array, but don't set values
-		 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
-			 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
-			 		'value' 		=> '',
-			 		'position' 		=> $attribute_position[$i],
-			 		'is_visible' 	=> $is_visible,
-			 		'is_variation' 	=> $is_variation,
-			 		'is_taxonomy' 	=> $is_taxonomy
-			 	);
+
+		 		if ($values) :
+			 		// Add attribute to array, but don't set values
+			 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
+				 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+				 		'value' 		=> '',
+				 		'position' 		=> $attribute_position[$i],
+				 		'is_visible' 	=> $is_visible,
+				 		'is_variation' 	=> $is_variation,
+				 		'is_taxonomy' 	=> $is_taxonomy
+				 	);
+			 	endif;
 		 	else :
 		 		// Format values
 		 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
