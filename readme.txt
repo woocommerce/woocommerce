@@ -67,6 +67,8 @@ The manual installation involves downloading the plugin and uploading it to your
 * Removing attributes fix
 * only style mails of WooCommerce - not all mails. This is to prevent conflicts with other plugins.
 * unique sku check only checks products
+* More security audit tweaks thanks to Mark Jaquith
+* cart totals update when adding cross-sells to cart
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page

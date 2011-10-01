@@ -41,7 +41,7 @@ jQuery(document).ready(function($) {
 				}
 				
 				// Block widgets and fragments
-				$('.widget_shopping_cart, .shop_table.cart, .updating').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+				$('.widget_shopping_cart, .shop_table.cart, .updating, .cart_totals').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 				
 				// Changes button classes
 				$(thisbutton).addClass('added');
@@ -73,14 +73,20 @@ jQuery(document).ready(function($) {
 					$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
 				}
 				
-				// Cart load
+				// Cart page elements
 				$('.shop_table.cart').load( window.location + ' .shop_table.cart:eq(0) > *', function() {
 					
 					$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 					
 					$('.shop_table.cart').css('opacity', '1').unblock();
 					
-				} );
+				});
+				
+				
+				$('.cart_totals').load( window.location + ' .cart_totals:eq(0) > *', function() {
+					$('.cart_totals').css('opacity', '1').unblock();
+				});
+				
 				
 				// Trigger event so themes can refresh other areas
 				$('body').trigger('added_to_cart');
