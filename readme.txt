@@ -53,7 +53,7 @@ The manual installation involves downloading the plugin and uploading it to your
 
 == Changelog ==
 
-= 1.0.2 - 30/09/2011 =
+= 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
 * Added esc_html/esc_attribute in review-order.php
 * Tweaked localised strings in shortcode-thankyou.php
