@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WooCommerce
-Plugin URI: http://woocommerce.com
+Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An eCommerce plugin for wordpress.
 Version: 1.0.2
 Author: WooThemes

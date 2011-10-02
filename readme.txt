@@ -69,6 +69,8 @@ The manual installation involves downloading the plugin and uploading it to your
 * unique sku check only checks products
 * More security audit tweaks thanks to Mark Jaquith
 * cart totals update when adding cross-sells to cart
+* Removed the 'resave permalinks message' due to it being done automatically
+* Added support to exclude images from product page
 
 = 1.0.1 - 29/09/2011 = 
 * Fixed notices on product page

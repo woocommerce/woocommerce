@@ -130,7 +130,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array(  
 		'name' => __( 'Shop Base Page', 'woothemes' ),
-		'desc' 		=> sprintf( __( 'This sets the base page of your shop. IMPORTANT: You must %1$sre-save your permalinks%2$s for this change to take effect.', 'woothemes' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
+		'desc' 		=> sprintf( __( 'This sets the base page of your shop.', 'woothemes' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
 		'id' 		=> 'woocommerce_shop_page_id',
 		'css' 		=> 'min-width:175px;',
 		'type' 		=> 'single_select_page',

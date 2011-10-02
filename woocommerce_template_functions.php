@@ -136,14 +136,25 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 		
 		$thumb_id = get_post_thumbnail_id();
 		$small_thumbnail_size = apply_filters('single_product_small_thumbnail_size', 'shop_thumbnail');
-		$args = array( 'post_type' => 'attachment', 'numberposts' => -1, 'post_status' => null, 'post_parent' => $post->ID ); 
+		$args = array( 
+			'post_type' 	=> 'attachment', 
+			'numberposts' 	=> -1, 
+			'post_status' 	=> null, 
+			'post_parent' 	=> $post->ID,
+			'post__not_in'	=> array($thumb_id),
+			'meta_query' 	=> array(
+				array(
+					'key' 		=> '_woocommerce_exclude_image',
+					'value'		=> '1',
+					'compare' 	=> '!='
+				)
+			)
+		); 
 		$attachments = get_posts($args);
 		if ($attachments) :
 			$loop = 0;
 			$columns = 3;
 			foreach ( $attachments as $attachment ) : 
-				
-				if ($thumb_id==$attachment->ID) continue;
 				
 				$loop++;
 				

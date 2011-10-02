@@ -32,6 +32,7 @@ function install_woocommerce() {
 	woocommerce_create_pages();
 	woocommerce_tables_install();
 	woocommerce_default_taxonomies();
+	woocommerce_populate_custom_fields();
 	
 	// Update version
 	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );
@@ -54,6 +55,24 @@ function install_woocommerce_redirect() {
 	endif;
 }
 
+/**
+ * Add required post meta so queries work
+ */
+function woocommerce_populate_custom_fields() {
+
+	// Attachment exclusion
+	$args = array( 
+		'post_type' 	=> 'attachment', 
+		'numberposts' 	=> -1, 
+		'post_status' 	=> null, 
+		'fields' 		=> 'ids'
+	); 
+	$attachments = get_posts($args);
+	if ($attachments) foreach ($attachments as $id) :
+		add_post_meta($id, '_woocommerce_exclude_image', 0);
+	endforeach;
+	
+}
 
 /**
  * Default options
