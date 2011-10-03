@@ -234,31 +234,45 @@ function is_woocommerce() {
 	// Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
 	if (is_shop() || is_product_category() || is_product_tag() || is_product()) return true; else return false;
 }
-function is_shop() {
-	if (is_post_type_archive( 'product' ) || is_page(get_option('woocommerce_shop_page_id'))) return true; else return false;
+if (!function_exists('is_shop')) {
+	function is_shop() {
+		if (is_post_type_archive( 'product' ) || is_page(get_option('woocommerce_shop_page_id'))) return true; else return false;
+	}
 }
-function is_product_category() {
-	return is_tax( 'product_cat' );
+if (!function_exists('is_product_category')) {
+	function is_product_category() {
+		return is_tax( 'product_cat' );
+	}
 }
-function is_product_tag() {
-	return is_tax( 'product_tag' );
+if (!function_exists('is_product_tag')) {
+	function is_product_tag() {
+		return is_tax( 'product_tag' );
+	}
 }
-function is_product() {
-	return is_singular( array('product') );
+if (!function_exists('is_product')) {
+	function is_product() {
+		return is_singular( array('product') );
+	}
 }
-function is_cart() {
-	return is_page(get_option('woocommerce_cart_page_id'));
+if (!function_exists('is_cart')) {
+	function is_cart() {
+		return is_page(get_option('woocommerce_cart_page_id'));
+	}
 }
-function is_checkout() {
-	return is_page(get_option('woocommerce_checkout_page_id'));
+if (!function_exists('is_checkout')) {
+	function is_checkout() {
+		return is_page(get_option('woocommerce_checkout_page_id'));
+	}
 }
-function is_account_page() {
-	if ( is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id')) ) return true; else return false;
-	return is_page(get_option('woocommerce_myaccount_page_id'));
-}
-if (!function_exists('is_ajax')) {
-	function is_ajax() {
-		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
+if (!function_exists('is_account_page')) {
+	function is_account_page() {
+		if ( is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id')) ) return true; else return false;
+		return is_page(get_option('woocommerce_myaccount_page_id'));
+	}
+	if (!function_exists('is_ajax')) {
+		function is_ajax() {
+			if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
+		}
 	}
 }
 
