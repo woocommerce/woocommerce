@@ -281,37 +281,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	
 	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 	
-	array(	'name' => __( 'Image Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'image_options' ),
-	
-	array(  
-		'name' => __( 'Catalog images', 'woothemes' ),
-		'desc' 		=> '',
-		'id' 		=> 'woocommerce_catalog_image',
-		'css' 		=> '',
-		'type' 		=> 'image_width',
-		'std' 		=> '150'
-	),
-
-	array(  
-		'name' => __( 'Single product images', 'woothemes' ),
-		'desc' 		=> '',
-		'id' 		=> 'woocommerce_single_image',
-		'css' 		=> '',
-		'type' 		=> 'image_width',
-		'std' 		=> '300'
-	),
-	
-	array(  
-		'name' => __( 'Thumbnail images', 'woothemes' ),
-		'desc' 		=> '',
-		'id' 		=> 'woocommerce_thumbnail_image',
-		'css' 		=> '',
-		'type' 		=> 'image_width',
-		'std' 		=> '90'
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'image_options' ),
-	
 	array(	'name' => __( 'Pricing Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'pricing_options' ),
 	
 	array(  
@@ -398,6 +367,37 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
+	
+	array(	'name' => __( 'Image Options', 'woothemes' ), 'type' => 'title','desc' => __('These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles.', 'woothemes'), 'id' => 'image_options' ),
+	
+	array(  
+		'name' => __( 'Catalog Images', 'woothemes' ),
+		'desc' 		=> __('This size is usually used in product listings', 'woothemes'),
+		'id' 		=> 'woocommerce_catalog_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '150'
+	),
+
+	array(  
+		'name' => __( 'Single Product Image', 'woothemes' ),
+		'desc' 		=> __('This is the size used by the main image on the product page.', 'woothemes'),
+		'id' 		=> 'woocommerce_single_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '300'
+	),
+	
+	array(  
+		'name' => __( 'Product Thumbnails', 'woothemes' ),
+		'desc' 		=> __('This size is usually used for the gallery of images on the product page.', 'woothemes'),
+		'id' 		=> 'woocommerce_thumbnail_image',
+		'css' 		=> '',
+		'type' 		=> 'image_width',
+		'std' 		=> '90'
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'image_options' ),
 
 )); // End catalog settings
 
