@@ -51,6 +51,10 @@ The manual installation involves downloading the plugin and uploading it to your
 2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
 3. Activate the plugin from the Plugins menu within the WordPress admin.
 
+== FAQ ==
+
+For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips.
+
 == Changelog ==
 
 = 1.0.2 - 02/10/2011 =
