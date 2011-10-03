@@ -57,6 +57,9 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
+= 1.0.3 - 02/xx/2011 =
+* Conditionals check for existing function names
+
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
 * Added esc_html/esc_attribute in review-order.php
