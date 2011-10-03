@@ -63,8 +63,8 @@ class woocommerce_coupon {
 		
 			if (sizeof( $this->product_ids )>0) :
 				$valid = false;
-				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
-					if (in_array($item_id, $this->product_ids)) :
+				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $cart_item_key => $cart_item) :
+					if (in_array($cart_item['product_id'], $this->product_ids)) :
 						$valid = true;
 					endif;
 				endforeach; endif;

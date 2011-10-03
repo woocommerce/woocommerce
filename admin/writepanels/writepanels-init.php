@@ -205,8 +205,9 @@ function woocommerce_meta_scripts() {
  * Output write panel form elements
  */
 function woocommerce_wp_text_input( $field ) {
-	global $thepostid;
+	global $thepostid, $post;
 	
+	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['placeholder'])) $field['placeholder'] = '';
 	if (!isset($field['class'])) $field['class'] = 'short';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
@@ -219,8 +220,9 @@ function woocommerce_wp_text_input( $field ) {
 }
 
 function woocommerce_wp_checkbox( $field ) {
-	global $thepostid;
+	global $thepostid, $post;
 	
+	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['class'])) $field['class'] = 'checkbox';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
 	
@@ -236,8 +238,9 @@ function woocommerce_wp_checkbox( $field ) {
 }
 
 function woocommerce_wp_select( $field ) {
-	global $thepostid;
+	global $thepostid, $post;
 	
+	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['class'])) $field['class'] = 'select short';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
 	
