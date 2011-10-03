@@ -30,11 +30,11 @@ function woocommerce_coupon_data_meta_box($post) {
 			$field = array( 'id' => 'discount_type', 'label' => __('Discount type', 'woothemes') );
 			echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label><select name="'.$field['id'].'" id="'.$field['id'].'">';
 			
-			$discount_types = array(
+			$discount_types = apply_filters('woocommerce_coupon_discount_types', array(
     			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
     			'percent' 		=> __('Cart % Discount', 'woothemes'),
     			'fixed_product'	=> __('Product Discount', 'woothemes')
-    		);
+    		));
     		
     		foreach ($discount_types as $type => $label) :
     			echo '<option value="'.$type.'" ';
