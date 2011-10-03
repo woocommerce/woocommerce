@@ -430,6 +430,9 @@ class woocommerce_cart {
 			$this->shipping_tax_total = 0;
 			$this->tax_total = 0;
 		endif;
+		
+		// Allow plugins to hook and alter totals before final total is calculated
+		do_action('woocommerce_calculate_totals', $this);
 				
 		// Total
 		if (get_option('woocommerce_prices_include_tax')=='yes') :
