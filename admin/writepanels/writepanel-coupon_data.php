@@ -80,7 +80,9 @@ function woocommerce_coupon_data_meta_box($post) {
 			echo '<p class="form-field">
 				<label for="'.$field['id'].'">'.$field['label'].':</label>
 				<input type="text" class="short date-picker" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $value ).'" /> <span class="description">' . __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woothemes') . '</span></p>';
-
+			
+			do_action('woocommerce_coupon_options');
+			
 		?>
 	</div>
 	<?php	
