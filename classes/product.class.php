@@ -34,6 +34,8 @@ class woocommerce_product {
 	var $total_stock;
 	var $sale_price_dates_from;
 	var $sale_price_dates_to;
+	var $min_variation_price;
+	var $max_variation_price;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -61,7 +63,11 @@ class woocommerce_product {
 			'tax_status'	=> 'taxable',
 			'tax_class'		=> '',
 			'upsell_ids'	=> array(),
-			'crosssell_ids' => array()
+			'crosssell_ids' => array(),
+			'sale_price_dates_from' => '',
+			'sale_price_dates_to' 	=> '',
+			'min_variation_price'	=> '',
+			'max_variation_price'	=> ''
 		);
 		
 		// Load the data from the custom fields
@@ -488,8 +494,10 @@ class woocommerce_product {
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
-		
-			$price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>' . woocommerce_price($this->get_price());
+			
+			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . __('From: ', 'woothemes') . '</span>';
+			
+			$price .= woocommerce_price($this->get_price());
 			
 			$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 			
