@@ -49,6 +49,9 @@ class woocommerce_order {
 		// Custom fields
 		$this->items 				= (array) get_post_meta( $this->id, '_order_items', true );
 		$this->user_id 				= (int) get_post_meta( $this->id, '_customer_user', true );
+		$this->completed_date		= get_post_meta( $this->id, '_completed_date', true );
+		
+		if (!$this->completed_date) $this->completed_date = $this->modified_date;
 		
 		$order_custom_fields = get_post_custom( $this->id );
 		
@@ -355,6 +358,9 @@ class woocommerce_order {
 				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
 				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woothemes'), $this->status, $new_status->slug ) );
 				clean_term_cache( '', 'shop_order_status' );
+				
+				// Date
+				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
 			endif;
 		
 		endif;
