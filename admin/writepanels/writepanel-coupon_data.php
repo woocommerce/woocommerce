@@ -15,7 +15,8 @@
  * Displays the meta box
  */
 function woocommerce_coupon_data_meta_box($post) {
-
+	global $woocommerce;
+	
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
 	?>
@@ -26,12 +27,7 @@ function woocommerce_coupon_data_meta_box($post) {
 		<?php
 
 			// Type
-			$discount_types = apply_filters('woocommerce_coupon_discount_types', array(
-    			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
-    			'percent' 		=> __('Cart % Discount', 'woothemes'),
-    			'fixed_product'	=> __('Product Discount', 'woothemes')
-    		));
-    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woothemes'), 'options' => $discount_types ) );
+    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woothemes'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 				
 			// Amount
 			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woothemes'), 'placeholder' => __('0.00', 'woothemes'), 'description' => __('Enter an amount e.g. 2.99 or an integer for percentages e.g. 20%', 'woothemes') ) );

@@ -37,7 +37,7 @@ function woocommerce_edit_coupon_columns($columns){
 add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
 
 function woocommerce_custom_coupon_columns($column) {
-	global $post;
+	global $post, $woocommerce;
 	
 	$type 			= get_post_meta($post->ID, 'discount_type', true);
 	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
@@ -49,7 +49,7 @@ function woocommerce_custom_coupon_columns($column) {
 
 	switch ($column) {
 		case "type" :
-			echo $type;
+			echo $woocommerce->get_coupon_discount_type($type);			
 		break;
 		case "amount" :
 			echo $amount;

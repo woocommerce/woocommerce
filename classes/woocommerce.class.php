@@ -206,6 +206,32 @@ class woocommerce {
 	
 			if ($label) return $label; else return ucfirst($name);
 		}
+		
+    /*-----------------------------------------------------------------------------------*/
+	/* Coupons */
+	/*-----------------------------------------------------------------------------------*/ 
+		
+		/**
+		 * Get coupon types
+		 */
+		function get_coupon_discount_types() { 
+			if (!isset($this->coupon_discount_types)) :
+				$this->coupon_discount_types = apply_filters('woocommerce_coupon_discount_types', array(
+	    			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
+	    			'percent' 		=> __('Cart % Discount', 'woothemes'),
+	    			'fixed_product'	=> __('Product Discount', 'woothemes')
+	    		));
+    		endif;
+    		return $this->coupon_discount_types;
+    	}
+    	
+    	/**
+		 * Get a coupon type's name
+		 */
+		function get_coupon_discount_type( $type = '' ) { 
+			$types = (array) $this->get_coupon_discount_types();
+			if (isset($types[$type])) return $types[$type];
+    	}
 	
     /*-----------------------------------------------------------------------------------*/
 	/* Nonce Field Helpers */

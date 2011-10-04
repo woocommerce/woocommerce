@@ -63,6 +63,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Made image size settings clearer
 * Cleaned up coupon code settings/write panel and added a few more hooks
 * Fixed 'product ids' setting in coupons
+* Fixed notices on shop pages due to WP_QUERY
+* Cleaned up discount types and made some helper functions for getting them
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
