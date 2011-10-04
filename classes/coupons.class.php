@@ -34,7 +34,7 @@ class woocommerce_coupon {
 			$this->type 			= get_post_meta($coupon->ID, 'discount_type', true);
 			$this->amount 			= get_post_meta($coupon->ID, 'coupon_amount', true);
 			$this->individual_use 	= get_post_meta($coupon->ID, 'individual_use', true);
-			$this->product_ids 		= array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true)));
+			$this->product_ids 		= array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
 			$this->usage_limit 		= get_post_meta($coupon->ID, 'usage_limit', true);
 			$this->usage_count 		= (int) get_post_meta($coupon->ID, 'usage_count', true);
 			$this->expiry_date 		= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
