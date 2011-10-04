@@ -254,7 +254,7 @@ function woocommerce_wp_select( $field ) {
 		
 	endforeach;
 	
-	echo '</select>';
+	echo '</select> ';
 	
 	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
 		
