@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Requires at least: 3.1
 Tested up to: 3.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -67,6 +67,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Cleaned up discount types and made some helper functions for getting them
 * woocommerce_coupon_is_valid hook
 * Fixed order tracking completed time
+* Sale price affects variable product 'from:' price
+* Variation options (frontend) no longer lose your selections when changing an option
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
