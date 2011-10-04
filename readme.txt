@@ -69,6 +69,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed order tracking completed time
 * Sale price affects variable product 'from:' price
 * Variation options (frontend) no longer lose your selections when changing an option
+* Gallery image field fix
+* Image 'insert into' fix
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page

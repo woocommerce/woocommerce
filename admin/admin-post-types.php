@@ -343,11 +343,11 @@ add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_
 
 function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 	
-	if (!$object->post_parent) return;
+	if (!$object->post_parent) return $fields;
 	
 	$parent = get_post( $object->post_parent );
 	
-	if ($parent->post_type!=='product') return;
+	if ($parent->post_type!=='product') return $fields;
 	
 	$exclude_image = (int) get_post_meta($object->ID, '_woocommerce_exclude_image', true);
 	
