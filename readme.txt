@@ -58,6 +58,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 == Changelog ==
 
 = 1.0.3 - 02/xx/2011 =
+* Several minor fixes/tweaks
 * Conditionals check for existing function names
 * Made image size settings clearer
 * Cleaned up coupon code settings/write panel and added a few more hooks

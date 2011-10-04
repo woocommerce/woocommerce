@@ -33,7 +33,7 @@
 add_action('init', 'woocommerce_update_catalog_ordering');
 
 function woocommerce_update_catalog_ordering() {
-	if (isset($_POST['orderby']) && $_POST['orderby'] != '') $_SESSION['orderby'] = $_POST['orderby'];
+	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
 }
 
 /**

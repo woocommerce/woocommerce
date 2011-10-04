@@ -469,7 +469,7 @@ if (!function_exists('woocommerce_catalog_ordering')) {
 
 		?>
 		<form class="woocommerce_ordering" method="post">
-			<select name="orderby" class="orderby">
+			<select name="catalog_orderby" class="orderby">
 				<option value="title" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'title' ); ?>><?php _e('Alphabetically', 'woo themes'); ?></option>
 				<option value="date" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'date' ); ?>><?php _e('Most Recent', 'woothemes'); ?></option>
 				<option value="price" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'price' ); ?>><?php _e('Price', 'woo themes'); ?></option>
