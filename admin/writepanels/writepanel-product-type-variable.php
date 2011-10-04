@@ -634,21 +634,22 @@ function process_product_meta_variable( $post_id ) {
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
 	$post_parent = $post_id;
 	
-	$children_by_price = get_posts( array(
+	$children = get_posts( array(
 		'post_parent' 	=> $post_parent,
-		'orderby' 	=> 'meta_value_num',
-		'order'		=> 'asc',
-		'meta_key'	=> 'price',
-		'posts_per_page' => 1,
+		'posts_per_page'=> -1,
 		'post_type' 	=> 'product_variation',
 		'fields' 		=> 'ids'
 	));
-	if ($children_by_price) :
-		foreach ($children_by_price as $child) :
+	$lowest_price = '';
+	if ($children) :
+		foreach ($children as $child) :
 			$child_price = get_post_meta($child, 'price', true);
-			update_post_meta( $post_parent, 'price', $child_price );
+			$child_sale_price = get_post_meta($child, 'sale_price', true);
+			if (!is_numeric($lowest_price) || $child_price<$lowest_price) $lowest_price = $child_price;
+			if (!empty($child_sale_price) && $child_sale_price<$lowest_price) $lowest_price = $child_sale_price;
 		endforeach;
 	endif;
+	update_post_meta( $post_parent, 'price', $lowest_price );
 
 }
 add_action('woocommerce_process_product_meta_variable', 'process_product_meta_variable');
