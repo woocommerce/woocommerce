@@ -65,6 +65,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed 'product ids' setting in coupons
 * Fixed notices on shop pages due to WP_QUERY
 * Cleaned up discount types and made some helper functions for getting them
+* woocommerce_coupon_is_valid hook
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page

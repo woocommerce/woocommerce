@@ -58,7 +58,7 @@ class woocommerce_coupon {
 	function is_valid() {
 		
 		global $woocommerce;
-		
+				
 		if ($this->id) :
 		
 			if (sizeof( $this->product_ids )>0) :
@@ -82,6 +82,9 @@ class woocommerce_coupon {
 					return false;
 				endif;
 			endif;
+			
+			$valid = apply_filters('woocommerce_coupon_is_valid', true, $this);
+			if (!$valid) return false;
 			
 			return true;
 		
