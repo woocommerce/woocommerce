@@ -95,7 +95,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
 		'id' 		=> 'woocommerce_sharethis',
 		'type' 		=> 'text',
-		'std' 		=> ''
+		'std' 		=> '',
+        'css'       => ''
 	),
 	
 	array(  
@@ -103,6 +104,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woothemes'),
 		'id' 		=> 'woocommerce_ga_id',
 		'type' 		=> 'text',
+        'css'       => ''
 	),
 	
 	array(  
