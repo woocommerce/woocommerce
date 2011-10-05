@@ -260,7 +260,7 @@ class woocommerce_order {
 					
 			endif;
 			
-			$return = '<tr>
+			$return .= '<tr>
 				<td style="text-align:left;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
 				<td style="text-align:left;">'.$item['qty'].'</td>
 				<td style="text-align:left;">'.strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 ))).'</td>
