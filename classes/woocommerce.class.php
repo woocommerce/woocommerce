@@ -200,9 +200,9 @@ class woocommerce {
 		function attribute_label( $name ) { 
 			global $wpdb;
 			
-			$name = $wpdb->prepare(str_replace('pa_', '', sanitize_title($name)));
+			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
 	
-			$label = $wpdb->get_var("SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = '$name';");
+			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 	
 			if ($label) return $label; else return ucfirst($name);
 		}

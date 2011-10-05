@@ -726,10 +726,10 @@ function woocommerce_download_product() {
 		$downloads_remaining = $wpdb->get_var( $wpdb->prepare("
 			SELECT downloads_remaining 
 			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
-			WHERE user_email = '$email'
-			AND order_key = '$order'
-			AND product_id = '$download_file'
-		;") );
+			WHERE user_email = %s
+			AND order_key = %s
+			AND product_id = %s
+		;", $email, $order, $download_file ) );
 		
 		if ($downloads_remaining=='0') :
 			wp_die( sprintf(__('Sorry, you have reached your download limit for this file. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
