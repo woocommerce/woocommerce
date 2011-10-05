@@ -87,25 +87,6 @@ function woocommerce_get_template($template_name, $require_once = true) {
 	else load_template( $woocommerce->plugin_path() . '/templates/' . $template_name , $require_once);
 }
 
-/**
- * Get other templates (e.g. product attributes) - path
- */
-function woocommerce_get_template_file_url($template_name, $ssl = false) {
-	global $woocommerce;
-	if (file_exists( STYLESHEETPATH . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name )) 
-		$return = get_bloginfo('template_url') . '/' . WOOCOMMERCE_TEMPLATE_URL . $template_name; 
-	elseif (file_exists( STYLESHEETPATH . '/' . $template_name )) 
-		$return = get_bloginfo('template_url') . '/' . $template_name; 
-	else 
-		$return = $woocommerce->plugin_url() . '/templates/' . $template_name;
-	
-	if (get_option('woocommerce_force_ssl_checkout')=='yes' || is_ssl()) :
-		if ($ssl) $return = str_replace('http:', 'https:', $return);
-	endif;
-	
-	return $return;
-}
-
 
 /**
  * Front page archive/shop template
