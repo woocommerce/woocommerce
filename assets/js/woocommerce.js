@@ -375,9 +375,8 @@ jQuery(document).ready(function($) {
 				current_settings[$(this).attr('name')] = '';
 				
 			} else {
-				if ($(this).val().length == 0) {
-	                all_set = false;
-	            }
+				if ($(this).val().length == 0) all_set = false;
+
 	            // Get value
 	            value = $(this).val();
 	            value = value.replace('"', '&quot;');
@@ -407,12 +406,12 @@ jQuery(document).ready(function($) {
         $('.single_variation_wrap').hide();
         $('.single_variation').text('');
 		check_variations();
+		$(this).blur();
 		if($().uniform) $.uniform.update();
 		
 	}).focus(function(){
 		
 		check_variations( $(this).attr('name') );
-		$(this).blur();
 
 	});
 	
