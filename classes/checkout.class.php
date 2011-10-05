@@ -325,6 +325,14 @@ class woocommerce_checkout {
 				</p>'.$after;
 				
 			break;
+			case "checkbox" :
+				
+				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($this->get_value( $key ), 1, false).' />
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
+				</p>'.$after;
+				
+			break;
 			default :
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
