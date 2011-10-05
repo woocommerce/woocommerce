@@ -44,7 +44,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		if ( $title )
 			echo $before_title . $title . $after_title;
 
-		$cat_args = array('orderby' => 'name', 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
+		$cat_args = array('menu_order' => 'asc', 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
 
 		if ( $d ) {
 

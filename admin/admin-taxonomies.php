@@ -13,46 +13,6 @@
  * Categories ordering
  */
 
-/**
- * Add product_cat ordering to get_terms
- * 
- * It enables the support a 'menu_order' parameter to get_terms for the product_cat taxonomy.
- * By default it is 'ASC'. It accepts 'DESC' too
- * 
- * To disable it, set it ot false (or 0)
- * 
- */
-add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3);
-
-function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
-	global $wpdb;
-	
-	// wordpress should give us the taxonomies asked when calling the get_terms function
-	if( !in_array('product_cat', (array)$taxonomies) ) return $clauses;
-	
-	// query order
-	if( isset($args['menu_order']) && !$args['menu_order']) return $clauses; // menu_order is false so we do not add order clause
-	
-	// query fields
-	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
-
-	//query join
-	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = 'order') ";
-	
-	// default to ASC
-	if( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
-
-	$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
-	
-	if ( $clauses['orderby'] ):
-		$clauses['orderby'] = str_replace ('ORDER BY', $order . ',', $clauses['orderby'] );
-	else:
-		$clauses['orderby'] = $order;
-	endif;
-	
-	return $clauses;
-}
-
 
 /**
  * Reorder on category insertion

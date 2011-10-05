@@ -74,6 +74,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * variable products store min and max variation price, so if they match the 'from' text is not displayed
 * Email items list fix
 * Reports chart fix
+* Fixed category ordering in widgets
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page

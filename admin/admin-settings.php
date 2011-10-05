@@ -617,8 +617,9 @@ function woocommerce_settings() {
 						if( $current_tab==$name ) echo 'nav-tab-active';
 						echo '">' . $label . '</a>';
 					endforeach;
+					
+					do_action( 'woocommerce_settings_tabs' ); 
 				?>
-				<?php do_action( 'woocommerce_settings_tabs' ); ?>
 			</h2>
 			<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
 			<?php
