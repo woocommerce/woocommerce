@@ -339,6 +339,7 @@ function woocommerce_sales_overview() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
+	    'suppress_filters'=> 0,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -479,6 +480,7 @@ function woocommerce_daily_sales() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
+	    'suppress_filters'=> 0,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -674,6 +676,7 @@ function woocommerce_monthly_sales() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
+	    'suppress_filters'=> 0,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -858,6 +861,7 @@ function woocommerce_top_sellers() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
+	    'suppress_filters'=> 0,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -949,6 +953,7 @@ function woocommerce_top_earners() {
 	    'order'           => 'ASC',
 	    'post_type'       => 'shop_order',
 	    'post_status'     => 'publish' ,
+	    'suppress_filters'=> 0,
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
@@ -1040,6 +1045,7 @@ function woocommerce_product_sales() {
 		    'order'           => 'ASC',
 		    'post_type'       => 'shop_order',
 		    'post_status'     => 'publish' ,
+		    'suppress_filters'=> 0,
 		    'tax_query' => array(
 		    	array(
 			    	'taxonomy' => 'shop_order_status',

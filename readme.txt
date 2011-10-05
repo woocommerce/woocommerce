@@ -57,7 +57,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
-= 1.0.3 - 02/xx/2011 =
+= 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks
 * Conditionals check for existing function names
 * Made image size settings clearer
@@ -73,6 +73,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Image 'insert into' fix
 * variable products store min and max variation price, so if they match the 'from' text is not displayed
 * Email items list fix
+* Reports chart fix
 
 = 1.0.2 - 02/10/2011 =
 * Fix in woocommerce_templates for when a shop is the front-page
