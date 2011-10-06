@@ -65,7 +65,10 @@ function woocommerce_my_account( $atts ) {
 						<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
 						<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
 						<td><?php echo woocommerce_price($order->order_total); ?></td>
-						<td><?php echo $order->status; ?></td>
+						<td><?php 
+							$status = get_term_by('slug', $order->status, 'shop_order_status');
+							echo $status->name; 
+						?></td>
 						<td style="text-align:right; white-space:nowrap;">
 							<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
 								<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
@@ -461,7 +464,9 @@ function woocommerce_view_order() {
 			
 			echo '<p>' . sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woothemes'), $order->id, date(get_option('date_format'), strtotime($order->order_date)) );
 			
-			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $order->status );
+			$status = get_term_by('slug', $order->status, 'shop_order_status');
+			
+			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $status->name );
 			
 			echo '.</p>';
 			?>

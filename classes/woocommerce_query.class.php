@@ -60,7 +60,7 @@ class woocommerce_query {
 		if (isset($ordering['meta_key'])) $q->set( 'meta_key', $ordering['meta_key'] );
 	
 		// Query vars that affect posts shown
-		$q->set( 'post_type', 'product' );
+		if (!$q->is_tax( 'product_cat' ) && !$q->is_tax( 'product_tag' )) $q->set( 'post_type', 'product' );
 		$q->set( 'meta_query', $meta_query );
 	    $q->set( 'post__in', $post__in );
 	    $q->set( 'posts_per_page', apply_filters('loop_shop_per_page', get_option('posts_per_page')) );

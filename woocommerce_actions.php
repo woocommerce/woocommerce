@@ -780,7 +780,9 @@ function woocommerce_download_product() {
             @ini_set('zlib.output_compression', 'Off');
 			@set_time_limit(0);
 			@set_magic_quotes_runtime(0);
+			
 			@ob_end_clean();
+			if (ob_get_level()) @ob_end_clean(); // Zip corruption fix
 			
 			header("Pragma: no-cache");
 			header("Expires: 0");
@@ -800,7 +802,7 @@ function woocommerce_download_product() {
 			header("Content-Transfer-Encoding: binary");
 							
             if ($size = @filesize($file_path)) header("Content-Length: ".$size);
-            
+
             // Serve it
             if ($remote_file) :
             	

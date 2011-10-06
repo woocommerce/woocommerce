@@ -31,6 +31,7 @@ function woocommerce_post_type() {
         array(
             'hierarchical' => true,
             'update_count_callback' => '_update_post_term_count',
+            'label' => __( 'Categories', 'woothemes'),
             'labels' => array(
                     'name' => __( 'Categories', 'woothemes'),
                     'singular_name' => __( 'Product Category', 'woothemes'),
@@ -53,6 +54,7 @@ function woocommerce_post_type() {
         array('product'),
         array(
             'hierarchical' => false,
+            'label' => __( 'Tags', 'woothemes'),
             'labels' => array(
                     'name' => __( 'Tags', 'woothemes'),
                     'singular_name' => __( 'Product Tag', 'woothemes'),
