@@ -339,8 +339,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	
 	$woocommerce_errors = array();
 	
-	$order = &new woocommerce_order($post_id);
-	
+	// Add key
+		add_post_meta( $post_id, '_order_key', uniqid('order_') );
+
 	// Update post data
 		update_post_meta( $post_id, '_billing_first_name', stripslashes( $_POST['_billing_first_name'] ));
 		update_post_meta( $post_id, '_billing_last_name', stripslashes( $_POST['_billing_last_name'] ));
@@ -420,7 +421,10 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;	
 	
 		update_post_meta( $post_id, '_order_items', $order_items );
-
+	
+	// Order data saved, now get it so we can manipulate status
+		$order = &new woocommerce_order( $post_id );
+		
 	// Order status
 		$order->update_status( $_POST['order_status'] );
 	
