@@ -57,6 +57,9 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
+= 1.0.3 - xx/10/2011 =
+* Added a hook for payment complete order status
+
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks
 * Conditionals check for existing function names

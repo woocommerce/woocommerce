@@ -411,10 +411,14 @@ class woocommerce_order {
 		endforeach;
 		
 		if ($downloadable_order) :
-			$this->update_status('completed');
+			$new_order_status = 'completed';
 		else :
-			$this->update_status('processing');
+			$new_order_status = 'processing';
 		endif;
+		
+		$new_order_status = apply_filters('woocommerce_payment_complete_order_status', $new_order_status, $this->id);
+		
+		$this->update_status($new_order_status);
 		
 		// Payment is complete so reduce stock levels
 		$this->reduce_order_stock();
