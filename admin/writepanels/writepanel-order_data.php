@@ -372,9 +372,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_order_total', stripslashes( $_POST['_order_total'] ));
 		update_post_meta( $post_id, '_customer_user', (int) $_POST['customer_user'] );
 	
-	// Order status
-		$order->update_status( $_POST['order_status'] );
-	
 	// Order items
 		$order_items = array();
 	
@@ -423,7 +420,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;	
 	
 		update_post_meta( $post_id, '_order_items', $order_items );
-	
+
+	// Order status
+		$order->update_status( $_POST['order_status'] );
 	
 	// Handle button actions
 	
