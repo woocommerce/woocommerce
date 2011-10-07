@@ -1050,14 +1050,11 @@ function woocommerce_cross_sell_display() {
 	wp_reset_query();
 }
 
-
 /**
  * Order review table for checkout
  **/
 function woocommerce_order_review() {
-
 	woocommerce_get_template('checkout/review_order.php', false);
-
 }
 
 /**
@@ -1070,3 +1067,77 @@ function woocommerce_demo_store() {
 		echo '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>';
 	endif;
 }
+
+/**
+ * display product sub categories as thumbnails
+ **/
+function woocommerce_product_subcategories() {
+	global $woocommerce, $columns, $loop, $wp_query;
+	
+	if (!is_product_category() && !is_shop()) return;
+	
+	if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
+	if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
+
+	$product_cat_slug 	= get_query_var('product_cat');
+	
+	if ($product_cat_slug) :
+		$product_cat 		= get_term_by('slug', $product_cat_slug, 'product_cat');
+		$parent 			= $product_cat->term_id;
+	else :
+		$parent = 0;
+	endif;
+	
+	$args = array(
+	    'parent'                   => $parent,
+	    'orderby'                  => 'menu_order',
+	    'order'                    => 'ASC',
+	    'hide_empty'               => 1,
+	    'hierarchical'             => 0,
+	    'taxonomy'                 => 'product_cat',
+	    );
+	$categories = get_categories( $args );
+	if ($categories) foreach ($categories as $category) : $loop++;
+			
+		?>
+		<li class="product <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
+			
+			<?php do_action('woocommerce_before_subcategory', $category); ?>
+			
+			<a href="<?php echo get_term_link($category->slug, 'product_cat'); ?>">
+				
+				<?php do_action('woocommerce_before_subcategory_title', $category); ?>
+				
+				<h3><?php echo $category->name; ?> (<?php echo $category->count; ?>)</h3>
+				
+				<?php do_action('woocommerce_after_subcategory_title', $category); ?>
+			
+			</a>
+	
+			<?php do_action('woocommerce_after_subcategory', $category); ?>
+			
+		</li><?php 
+		
+	endforeach;
+	
+}
+
+function woocommerce_subcategory_thumbnail( $category ) {
+	global $woocommerce;
+	
+	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_thumbnail');		
+	$image_width 			= $woocommerce->get_image_size('shop_thumbnail_image_width');
+	$image_height 			= $woocommerce->get_image_size('shop_thumbnail_image_height');
+	
+	$thumbnail_id 	= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+	
+	if ($thumbnail_id) :
+		$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+		$image = $image[0];
+	else :
+		$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+	endif;
+
+	echo '<img src="'.$image.'" alt="'.$category->slug.'" width="'.$image_width.'" height="'.$image_height.'" />';
+}
+

@@ -57,8 +57,11 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
-= 1.0.3 - xx/10/2011 =
+= 1.1 - xx/10/2011 =
 * Added a hook for payment complete order status
+* Added woocommerce term meta api
+* Added ability to upload category thumbnails
+* Added option to show sub-categories when browing categories/the shop page
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

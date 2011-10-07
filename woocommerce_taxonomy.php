@@ -312,3 +312,36 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	
 	return $clauses;
 }
+
+/**
+ * WooCommerce Term Meta API
+ * 
+ * API for working with term meta data. Adapted from 'Term meta API' by Nikolay Karev
+ * 
+ */
+add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+
+function woocommerce_taxonomy_metadata_wpdbfix() {
+	global $wpdb;
+
+	$variable_name = 'woocommerce_termmeta';
+	$wpdb->$variable_name = $wpdb->prefix . $variable_name;	
+	$wpdb->tables[] = $variable_name;
+} 
+
+function update_woocommerce_term_meta($term_id, $meta_key, $meta_value, $prev_value = ''){
+	return update_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value);
+}
+
+function add_woocommerce_term_meta($term_id, $meta_key, $meta_value, $unique = false){
+	return add_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $unique);
+}
+
+function delete_woocommerce_term_meta($term_id, $meta_key, $meta_value = '', $delete_all = false){
+	return delete_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $delete_all);
+}
+
+function get_woocommerce_term_meta($term_id, $key, $single = true){
+	return get_metadata('woocommerce_term', $term_id, $key, $single);
+}

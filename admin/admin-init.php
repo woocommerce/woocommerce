@@ -48,6 +48,13 @@ function woocommerce_admin_scripts() {
     
     endif;
     
+    // Edit product category pages
+    if (in_array( $screen->id, array('edit-product_cat') )) :
+		wp_enqueue_script('media-upload');
+		wp_enqueue_script('thickbox');
+	endif;
+
+    
 	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :
     

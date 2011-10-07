@@ -1,14 +1,14 @@
 <?php
 
-global $columns;
-
-do_action('woocommerce_before_shop_loop');
+global $columns, $loop;
 
 $loop = 0;
 
 if (!isset($columns) || !$columns) $columns = apply_filters('loop_shop_columns', 4);
 
 ob_start();
+
+do_action('woocommerce_before_shop_loop');
 
 if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); if (!$_product->is_visible()) continue; $loop++;
 	

@@ -244,6 +244,23 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(	'name' => __( 'Catalog Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
 
 	array(  
+		'name' => __( 'Sub-categories', 'woothemes' ),
+		'desc' 		=> __( 'Show sub-categories on category pages', 'woothemes' ),
+		'id' 		=> 'woocommerce_show_subcategories',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show sub-categories on the shop page', 'woothemes' ),
+		'id' 		=> 'woocommerce_shop_show_subcategories',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
 		'name' => __( 'Product fields', 'woothemes' ),
 		'desc' 		=> __( 'Enable the SKU field for products', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_sku',

@@ -326,9 +326,7 @@ function variable_product_write_panel_js() {
 			
 			imgurl = jQuery(img).attr('src');
 			imgclass = jQuery(img).attr('class');
-			
-			alert(imgclass);
-			
+
 			imgid = parseInt(imgclass.replace(/\D/g, ''), 10);
 			
 			jQuery('.upload_image_id', current_field_wrapper).val(imgid);
