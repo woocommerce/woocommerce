@@ -461,13 +461,18 @@ class woocommerce_product {
 		return $price;
 	}
 	
+	/** Returns the tax class */
+	function get_tax_class() {
+		return apply_filters('woocommerce_product_tax_class', $this->tax_class, $this);
+	}
+	
 	/** Returns the base tax rate */
 	function get_tax_base_rate() {
 		
 		if ( $this->is_taxable() && get_option('woocommerce_calc_taxes')=='yes') :
 			
 			$_tax = &new woocommerce_tax();
-			$rate = $_tax->get_shop_base_rate( $this->tax_class );
+			$rate = $_tax->get_shop_base_rate( $this->get_tax_class() );
 			
 			return $rate;
 			

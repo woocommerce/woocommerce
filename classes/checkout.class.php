@@ -630,7 +630,7 @@ class woocommerce_checkout {
 						// Calc item tax to store
 						$rate = '';
 						if ( $_product->is_taxable()) :
-							$rate = $_tax->get_rate( $_product->tax_class );
+							$rate = $_tax->get_rate( $_product->get_tax_class() );
 						endif;
 						
 						// Store any item meta data

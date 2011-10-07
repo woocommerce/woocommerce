@@ -343,7 +343,7 @@ class woocommerce_cart {
 					
 					if ( $_product->is_taxable() ) :
 					
-						$rate = $_tax->get_rate( $_product->tax_class );
+						$rate = $_tax->get_rate( $_product->get_tax_class() );
 						
 						if (get_option('woocommerce_prices_include_tax')=='yes') :
 						
@@ -362,7 +362,7 @@ class woocommerce_cart {
 							 *
 							 * Lets get the base rate first
 							 */
-							$base_rate = $_tax->get_shop_base_rate( $_product->tax_class );
+							$base_rate = $_tax->get_shop_base_rate( $_product->get_tax_class() );
 							
 							// Calc tax for base country
 							$base_tax_amount = $_tax->calc_tax( $_product->get_price(), $base_rate, true);

@@ -62,6 +62,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Added woocommerce term meta api
 * Added ability to upload category thumbnails
 * Added option to show sub-categories when browing categories/the shop page
+* Zero tax rate fix
+* Filters for tax rates
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

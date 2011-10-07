@@ -33,7 +33,7 @@ function woocommerce_update_options($options) {
 			
 			for ($i=0; $i<sizeof($tax_classes); $i++) :
 			
-				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && $tax_rate[$i] && is_numeric($tax_rate[$i])) :
+				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && is_numeric($tax_rate[$i])) :
 					
 					$rate = number_format(woocommerce_clean($tax_rate[$i]), 4);
 					$class = woocommerce_clean($tax_classes[$i]);

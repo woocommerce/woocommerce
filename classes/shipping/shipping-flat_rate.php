@@ -65,7 +65,7 @@ class flat_rate extends woocommerce_shipping_method {
 	
 						if ( $_product->is_shipping_taxable() && $this->tax_status=='taxable' ) :
 						
-							$rate = $_tax->get_shipping_tax_rate( $_product->tax_class );
+							$rate = $_tax->get_shipping_tax_rate( $_product->get_tax_class() );
 							
 							if ($rate>0) :
 							
