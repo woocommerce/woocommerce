@@ -26,6 +26,9 @@ class woocommerce_product {
 	var $sale_price;
 	var $regular_price;
 	var $weight;
+	var $length;
+	var $width;
+	var $height;
 	var $tax_status;
 	var $tax_class;
 	var $upsell_ids;
@@ -60,6 +63,9 @@ class woocommerce_product {
 			'sale_price'	=> '',
 			'regular_price' => '',
 			'weight'		=> '',
+			'length'		=> '',
+			'width'		=> '',
+			'height'		=> '',
 			'tax_status'	=> 'taxable',
 			'tax_class'		=> '',
 			'upsell_ids'	=> array(),

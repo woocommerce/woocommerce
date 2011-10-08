@@ -125,7 +125,21 @@ function woocommerce_product_data_box() {
 					echo '<input type="hidden" name="weight" value="'.get_post_meta($thepostid, 'weight', true).'" />';
 				endif;
 				
-				do_action('woocommerce_product_options_weight');
+				// Size fields
+				if( get_option('woocommerce_enable_dimensions', true) !== 'no' ) :
+					?><p class="form-field dimensions_field">
+						<label for"product_length"><?php echo __('Dimensions', 'woothemes') . ' ('.get_option('woocommerce_dimension_unit').')'; ?></label>
+						<input id="product_length" placeholder="<?php _e('Length', 'woothemes'); ?>" class="input-text sized" size="6" type="text" name="length" value="<?php echo get_post_meta( $thepostid, 'length', true ); ?>" />
+						<input placeholder="<?php _e('Width', 'woothemes'); ?>" class="input-text sized" size="6" type="text" name="width" value="<?php echo get_post_meta( $thepostid, 'width', true ); ?>" />
+						<input placeholder="<?php _e('Height', 'woothemes'); ?>" class="input-text sized" size="6" type="text" name="height" value="<?php echo get_post_meta( $thepostid, 'height', true ); ?>" />
+					</p><?php
+				else:
+					echo '<input type="hidden" name="length" value="'.get_post_meta($thepostid, 'length', true).'" />';
+					echo '<input type="hidden" name="width" value="'.get_post_meta($thepostid, 'width', true).'" />';
+					echo '<input type="hidden" name="height" value="'.get_post_meta($thepostid, 'height', true).'" />';
+				endif;
+				
+				do_action('woocommerce_product_options_dimensions');
 			
 			echo '</div>';
 			
@@ -369,6 +383,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'regular_price', stripslashes( $_POST['regular_price'] ) );
 	update_post_meta( $post_id, 'sale_price', stripslashes( $_POST['sale_price'] ) );
 	update_post_meta( $post_id, 'weight', stripslashes( $_POST['weight'] ) );
+	update_post_meta( $post_id, 'length', stripslashes( $_POST['length'] ) );
+	update_post_meta( $post_id, 'width', stripslashes( $_POST['width'] ) );
+	update_post_meta( $post_id, 'height', stripslashes( $_POST['height'] ) );
 	update_post_meta( $post_id, 'tax_status', stripslashes( $_POST['tax_status'] ) );
 	update_post_meta( $post_id, 'tax_class', stripslashes( $_POST['tax_class'] ) );
 	update_post_meta( $post_id, 'stock_status', stripslashes( $_POST['stock_status'] ) );

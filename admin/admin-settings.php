@@ -274,6 +274,14 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_enable_weight',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+
+	array(  
+		'desc' 		=> __( 'Enable the dimension fields for products', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_dimensions',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 	
@@ -287,6 +295,19 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'options' => array( 
 			'kg' => __( 'kg', 'woothemes' ),
 			'lbs' => __( 'lbs', 'woothemes' )
+		)
+	),
+
+	array(  
+		'name' => __( 'Dimensions Unit', 'woothemes' ),
+		'desc' 		=> __( 'This controls what unit you will define lengths in.', 'woothemes' ),
+		'id' 		=> 'woocommerce_dimension_unit',
+		'css' 		=> 'min-width:175px;',
+		'std' 		=> 'GBP',
+		'type' 		=> 'select',
+		'options' => array( 
+			'cm' => __( 'cm', 'woothemes' ),
+			'in' => __( 'in', 'woothemes' )
 		)
 	),
 	
