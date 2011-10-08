@@ -65,6 +65,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Zero tax rate fix
 * Filters for tax rates
 * Fixes to find rate function
+* Product dimension fields
+* Fixed archives being displayed by woocommerce_show_product_images
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

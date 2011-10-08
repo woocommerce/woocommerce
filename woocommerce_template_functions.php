@@ -142,6 +142,7 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 			'post_status' 	=> null, 
 			'post_parent' 	=> $post->ID,
 			'post__not_in'	=> array($thumb_id),
+			'post_mime_type' => 'image',
 			'meta_query' 	=> array(
 				array(
 					'key' 		=> '_woocommerce_exclude_image',
