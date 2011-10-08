@@ -247,6 +247,8 @@ class woocommerce_checkout {
 			'label' => __('Order Notes', 'woothemes'), 
 			'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
 			));
+		
+		do_action('woocommerce_after_order_notes', $this);
 	}
 
 	/**
