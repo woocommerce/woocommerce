@@ -1072,10 +1072,11 @@ function woocommerce_demo_store() {
  * display product sub categories as thumbnails
  **/
 function woocommerce_product_subcategories() {
-	global $woocommerce, $columns, $loop, $wp_query;
+	global $woocommerce, $columns, $loop, $wp_query, $wp_the_query;
+	
+	if ($wp_query !== $wp_the_query) return; // Detect main query
 	
 	if (!is_product_category() && !is_shop()) return;
-	
 	if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
 	if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
 
