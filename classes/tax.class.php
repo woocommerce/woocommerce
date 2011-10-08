@@ -110,6 +110,8 @@ class woocommerce_tax {
 	function get_rate( $tax_class = '' ) {
 		global $woocommerce;
 		
+		$tax_class = sanitize_title($tax_class);
+		
 		/* Checkout uses customer location, otherwise use store base rate */
 		if ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) :
 			

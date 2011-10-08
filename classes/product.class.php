@@ -429,7 +429,7 @@ class woocommerce_product {
 		return $this->price;
 	}
 	
-	/** Returns the price (excluding tax) */
+	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
 	function get_price_excluding_tax() {
 		
 		$price = $this->price;
@@ -472,7 +472,7 @@ class woocommerce_product {
 		if ( $this->is_taxable() && get_option('woocommerce_calc_taxes')=='yes') :
 			
 			$_tax = &new woocommerce_tax();
-			$rate = $_tax->get_shop_base_rate( $this->get_tax_class() );
+			$rate = $_tax->get_shop_base_rate( $this->tax_class ); // Get tax class directly - ignore filters
 			
 			return $rate;
 			
