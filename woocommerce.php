@@ -100,9 +100,13 @@ function woocommerce_init() {
 	woocommerce_post_type();
 
 	// Image sizes
-	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), 'true' );
-	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), 'true' );
-	add_image_size( 'shop_single', $woocommerce->get_image_size('shop_single_image_width'), $woocommerce->get_image_size('shop_single_image_height'), 'true' );
+	$shop_thumbnail_crop 	= (get_option('shop_thumbnail_image_crop')==1) ? 'true' : 'false';
+	$shop_catalog_crop 		= (get_option('shop_catalog_image_crop')==1) ? 'true' : 'false';
+	$shop_single_crop 		= (get_option('shop_single_image_crop')==1) ? 'true' : 'false';
+
+	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
+	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
+	add_image_size( 'shop_single', $woocommerce->get_image_size('shop_single_image_width'), $woocommerce->get_image_size('shop_single_image_height'), $shop_single_crop );
 
 	// Include template functions here so they are pluggable by themes
 	include_once( 'woocommerce_template_functions.php' );
