@@ -1077,6 +1077,7 @@ function woocommerce_product_subcategories() {
 	
 	if ($wp_query !== $wp_the_query) return; // Detect main query
 	
+	if (is_search()) return;
 	if (!is_product_category() && !is_shop()) return;
 	if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
 	if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
