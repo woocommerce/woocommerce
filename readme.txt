@@ -70,6 +70,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Added 'configure terms' button to attributes page to make it clearer
 * Fix for variations when an attribute has been removed
 * Fixed some localisation strings
+* Hard crop option for images
+* Password field type for gateways API
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

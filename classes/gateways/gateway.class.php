@@ -219,6 +219,32 @@ class woocommerce_payment_gateway {
     } // End generate_text_html()
 
     /**
+     * Generate Password Input HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+    function generate_password_html ( $key, $data ) {
+    	$html = '';
+    	
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	
+		$html .= '<tr valign="top">' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<td class="forminp">' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
+				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<input class="input-text wide-input" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . esc_attr($this->settings[$key]) . '" />';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+			$html .= '</fieldset>';
+			$html .= '</td>' . "\n";
+		$html .= '</tr>' . "\n";
+    	
+    	return $html;
+    } // End generate_password_html()
+    
+    
+    /**
      * Generate Textarea HTML.
      *
      * @since 1.0.0
@@ -390,6 +416,25 @@ class woocommerce_payment_gateway {
     	
     	return $text;
     } // End validate_text_field()
+
+    /**
+     * Validate Password Field.
+     *
+     * Make sure the data is escaped correctly, etc.
+     * 
+     * @since 1.0.0
+     * @return $text string
+     */
+    function validate_password_field ( $key ) {
+    	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
+    	
+    	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
+    		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    	}
+    	
+    	return $text;
+    } // End validate_password_field()
+    
     
     /**
      * Validate Textarea Field.
