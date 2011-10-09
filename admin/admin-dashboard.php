@@ -94,10 +94,10 @@ function woocommerce_init_dashboard_widgets() {
 	$sales_heading = '';
 	
 	if ($current_month_offset!=date('m')) : 
-		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($current_month_offset+1).'-2011')).__('  &rarr;', 'woo themes').'</a>';
+		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($current_month_offset+1).'-2011')).__('  &rarr;', 'woothemes').'</a>';
 	endif;
 	
-	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">'.__('&larr; ', 'woo themes').date('F', strtotime('01-'.($current_month_offset-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woothemes').'</span>';
+	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">'.__('&larr; ', 'woothemes').date('F', strtotime('01-'.($current_month_offset-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woothemes').'</span>';
 
 	wp_add_dashboard_widget('woocommmerce_dashboard_sales', $sales_heading, 'woocommmerce_dashboard_sales');
 	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woothemes'), 'woocommmerce_dashboard_recent_orders');

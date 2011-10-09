@@ -29,7 +29,7 @@ function variable_product_type_options() {
 	}
 	?>
 	<div id="variable_product_options" class="panel">
-		<p class="bulk_edit"><strong><?php _e('Bulk edit:', 'woothemes'); ?></strong> <a class="button set_all_prices" href="#"><?php _e('Set all prices', 'woocommerce'); ?></a> <a class="button set_all_sale_prices" href="#"><?php _e('Set all sale prices', 'woocommerce'); ?></a> <a class="button set_all_stock" href="#"><?php _e('Set all stock', 'woocommerce'); ?></a></p>
+		<p class="bulk_edit"><strong><?php _e('Bulk edit:', 'woothemes'); ?></strong> <a class="button set_all_prices" href="#"><?php _e('Set all prices', 'woothemes'); ?></a> <a class="button set_all_sale_prices" href="#"><?php _e('Set all sale prices', 'woothemes'); ?></a> <a class="button set_all_stock" href="#"><?php _e('Set all stock', 'woothemes'); ?></a></p>
 		<div class="woocommerce_variations">
 			<?php
 			$args = array(

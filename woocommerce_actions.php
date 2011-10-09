@@ -327,7 +327,7 @@ function woocommerce_upsell_crosssell_search_products() {
 						
 	endforeach; else : 
 	
-		?><li><?php _e('No products found', 'woocommerce'); ?></li><?php 
+		?><li><?php _e('No products found', 'woothemes'); ?></li><?php 
 		
 	endif; 
 	

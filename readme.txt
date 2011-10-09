@@ -69,6 +69,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed archives being displayed by woocommerce_show_product_images
 * Added 'configure terms' button to attributes page to make it clearer
 * Fix for variations when an attribute has been removed
+* Fixed some localisation strings
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks
