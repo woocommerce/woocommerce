@@ -160,7 +160,7 @@ function woocommerce_add_attribute() {
 				                <th scope="col"><?php _e('Name', 'woothemes') ?></th>
 				                <th scope="col"><?php _e('Label', 'woothemes') ?></th>
 				                <th scope="col"><?php _e('Type', 'woothemes') ?></th>
-				                <th scope="col"><?php _e('Terms', 'woothemes') ?></th>
+				                <th scope="col" colspan="2"><?php _e('Terms', 'woothemes') ?></th>
 				            </tr>
 				        </thead>
 				        <tbody>
@@ -194,10 +194,11 @@ function woocommerce_add_attribute() {
 													echo '<span class="na">&ndash;</span>';
 												endif;
 				        					?></td>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product" class="button alignright"><?php _e('Configure&nbsp;terms', 'woothemes'); ?></a></td>
 				        				</tr><?php
 				        			endforeach;
 				        		else :
-				        			?><tr><td colspan="4"><?php _e('No attributes currently exist.', 'woothemes') ?></td></tr><?php
+				        			?><tr><td colspan="5"><?php _e('No attributes currently exist.', 'woothemes') ?></td></tr><?php
 				        		endif;
 				        	?>
 				        </tbody>

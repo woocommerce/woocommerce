@@ -32,6 +32,7 @@ function woocommerce_my_account( $atts ) {
 		?>
 		<p><?php echo sprintf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woothemes'), $current_user->display_name, get_permalink(get_option('woocommerce_change_password_page_id'))); ?></p>
 		
+		<?php do_action('woocommerce_before_my_account'); ?>
 		
 		<?php if ($downloads = $woocommerce->customer->get_downloadable_products()) : ?>
 		<h2><?php _e('Available downloads', 'woothemes'); ?></h2>
@@ -146,6 +147,7 @@ function woocommerce_my_account( $atts ) {
 		
 		</div><!-- /.col2-set -->
 		<?php
+		do_action('woocommerce_after_my_account');
 		
 	else :
 		

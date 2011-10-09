@@ -700,7 +700,7 @@ class woocommerce_checkout {
 							do_action('woocommerce_new_order', $order_id);
 						endif;
 					endif;
-					
+
 					// Get better formatted shipping method (title/label)
 					$shipping_method = $this->posted['shipping_method'];
 					if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
@@ -748,8 +748,12 @@ class woocommerce_checkout {
 					// Discount code meta
 					if ($woocommerce->cart->applied_coupons) update_post_meta($order_id, 'coupons', implode(', ', $woocommerce->cart->applied_coupons));
 					
+					// Order is saved
+					do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
+					
+					// Process payment
 					$order = &new woocommerce_order($order_id);
-
+					
 					if ($woocommerce->cart->needs_payment()) :
 						
 						// Store Order ID in session so it can be re-used after payment failure
