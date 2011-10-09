@@ -617,6 +617,14 @@ function process_product_meta_variable( $post_id ) {
 			update_post_meta( $variation_id, 'stock', $variable_stock[$i] );
 			update_post_meta( $variation_id, '_thumbnail_id', $upload_image_id[$i] );
 			
+			// Remove old taxnomies attributes so data is kept up to date
+			$variation_custom_fields = get_post_custom( $variation_id );
+			
+			foreach ($variation_custom_fields as $name => $value) :
+				if (!strstr($name, 'attribute_')) continue;
+				delete_post_meta( $variation_id, $name );
+			endforeach;
+		
 			// Update taxonomies
 			foreach ($attributes as $attribute) :
 							
