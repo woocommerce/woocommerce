@@ -15,11 +15,11 @@ if (!session_id()) session_start();
 /**
  * Localisation
  **/
-load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
 
 /**
  * Constants
- **/
+ **/ 
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
 if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.0.3");	
 if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
@@ -100,9 +100,9 @@ function woocommerce_init() {
 	woocommerce_post_type();
 
 	// Image sizes
-	$shop_thumbnail_crop 	= (get_option('shop_thumbnail_image_crop')==1) ? 'true' : 'false';
-	$shop_catalog_crop 		= (get_option('shop_catalog_image_crop')==1) ? 'true' : 'false';
-	$shop_single_crop 		= (get_option('shop_single_image_crop')==1) ? 'true' : 'false';
+	$shop_thumbnail_crop 	= (get_option('shop_thumbnail_image_crop')==1) ? true : false;
+	$shop_catalog_crop 		= (get_option('shop_catalog_image_crop')==1) ? true : false;
+	$shop_single_crop 		= (get_option('shop_single_image_crop')==1) ? true : false;
 
 	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
 	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
