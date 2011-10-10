@@ -74,6 +74,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Password field type for gateways API
 * Front page shop improvements/correct title tags
 * Added option for controlling product permalinks
+* Load admin css only where needed
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

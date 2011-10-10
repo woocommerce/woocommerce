@@ -25,6 +25,27 @@ function woocommerce_admin_init() {
 add_action('admin_init', 'woocommerce_admin_init');
 
 /**
+ * Admin Menus
+ * 
+ * Sets up the admin menus in wordpress.
+ */
+function woocommerce_admin_menu() {
+	global $menu, $woocommerce;
+	
+	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+	
+    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
+    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
+    add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'woocommerce_attributes', 'woocommerce_attributes');
+    
+    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
+    
+    foreach ($print_css_on as $page) add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' ); 
+}
+add_action('admin_menu', 'woocommerce_admin_menu', 9);
+
+/**
  * Admin Scripts
  */
 function woocommerce_admin_scripts() {
@@ -54,7 +75,6 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script('thickbox');
 	endif;
 
-    
 	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :
     
@@ -67,21 +87,23 @@ function woocommerce_admin_scripts() {
 add_action('admin_print_scripts', 'woocommerce_admin_scripts');
 
 /**
- * Admin Menus
- * 
- * Sets up the admin menus in wordpress.
+ * Queue admin CSS
  */
-function woocommerce_admin_menu() {
-	global $menu, $woocommerce;
+function woocommerce_admin_css() {
+	global $woocommerce, $typenow, $post;
+
+	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) $typenow = $post->post_type;
 	
-	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
-	
-    add_menu_page(__('WooCommerce'), __('WooCommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
-    add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
-    add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports');
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'woocommerce_attributes', 'woocommerce_attributes');
+	if ( $typenow=='' || $typenow=="product" || $typenow=="shop_order" || $typenow=="shop_coupon" ) :
+		wp_enqueue_style( 'thickbox' );
+		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
+		wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
+	endif;
 }
 
+/**
+ * Order admin menus
+ */
 function woocommerce_admin_menu_order( $menu_order ) {
 
 	// Initialize our custom order array
@@ -111,14 +133,12 @@ function woocommerce_admin_menu_order( $menu_order ) {
 	// Return order
 	return $woocommerce_menu_order;
 }
+add_action('menu_order', 'woocommerce_admin_menu_order');
 
 function woocommerce_admin_custom_menu_order() {
 	if ( !current_user_can( 'manage_options' ) ) return false;
-
 	return true;
 }
-add_action('admin_menu', 'woocommerce_admin_menu', 9);
-add_action('menu_order', 'woocommerce_admin_menu_order');
 add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');
 
 /**
@@ -127,51 +147,26 @@ add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');
  * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages
  */
 function woocommerce_admin_head() {
+	global $woocommerce;
 	?>
 	<style type="text/css">
+		#toplevel_page_woocommerce .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat 0px -32px !important;}
+		#toplevel_page_woocommerce .wp-menu-image img{display:none;}
+		#toplevel_page_woocommerce:hover .wp-menu-image,#toplevel_page_woocommerce.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat 0px 0px !important;}
+		#menu-posts-product .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -35px -32px !important;}
+		#menu-posts-product:hover .wp-menu-image,#menu-posts-product.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -35px 0px !important;}
+		#menu-posts-shop_order .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -70px -32px !important;}
+		#menu-posts-shop_order:hover .wp-menu-image,#menu-posts-shop_order.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -70px 0px !important;}
 		
 		<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
 			.icon32-posts-product { background-position: -243px -5px !important; }
 		<?php elseif ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_tag' ) : ?>
 			.icon32-posts-product { background-position: -301px -5px !important; }
 		<?php endif; ?>
-
 	</style>
 	<?php
 }
 add_action('admin_head', 'woocommerce_admin_head');
-
-
-/**
- * Feature a product from admin
- */
-function woocommerce_feature_product() {
-
-	if( !is_admin() ) die;
-	
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.') );
-	
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
-	
-	$post_id = isset($_GET['product_id']) && (int)$_GET['product_id'] ? (int)$_GET['product_id'] : '';
-	
-	if(!$post_id) die;
-	
-	$post = get_post($post_id);
-	if(!$post) die;
-	
-	if($post->post_type !== 'product') die;
-	
-	$product = new woocommerce_product($post->ID);
-
-	if ($product->is_featured()) update_post_meta($post->ID, 'featured', 'no');
-	else update_post_meta($post->ID, 'featured', 'yes');
-	
-	$sendback = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() );
-	wp_safe_redirect( $sendback );
-
-}
-add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product');
 
 /**
  * Returns proper post_type
@@ -199,7 +194,7 @@ function woocommerce_get_current_post_type() {
 /**
  * Categories ordering scripts
  */
-function woocommerce_categories_scripts () {
+function woocommerce_categories_scripts() {
 	global $woocommerce;
 	
 	if( !isset($_GET['taxonomy']) || $_GET['taxonomy'] !== 'product_cat') return;
