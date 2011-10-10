@@ -125,7 +125,9 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 )); // End general settings
 
-
+$shop_page_id = get_option('woocommerce_shop_page_id');
+$base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
+	
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
 	array( 'name' => __( 'Page Setup', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'page_options' ),
@@ -137,14 +139,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'css' 		=> 'min-width:175px;',
 		'type' 		=> 'single_select_page',
 		'std' 		=> ''
-	),
-	
-	array(  
-		'name' => __( 'Prepend base page', 'woothemes' ),
-		'desc' 		=> __( 'Prepend shop categories/tags with shop base page', 'woothemes' ),
-		'id' 		=> 'woocommerce_prepend_shop_page_to_urls',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
 	),
 
 	array(  
@@ -158,7 +152,37 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'args'		=> 'show_option_none=' . __('None', 'woothemes'),
 	),
 	
-	array( 'type' => 'sectionend' ),
+	array( 'type' => 'sectionend', 'id' => 'page_options' ),
+	
+	array( 'name' => __( 'Permalinks', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'permalink_options' ),
+	
+	array(  
+		'name' => __( 'Taxonomy base page', 'woothemes' ),
+		'desc' 		=> sprintf(__( 'Prepend shop categories/tags with shop base page (<code>%s</code>)', 'woothemes' ), $base_slug),
+		'id' 		=> 'woocommerce_prepend_shop_page_to_urls',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+	),
+	
+	array(  
+		'name' => __( 'Product base page', 'woothemes' ),
+		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woothemes' ), $base_slug),
+		'id' 		=> 'woocommerce_prepend_shop_page_to_products',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'name' => __( 'Product base category', 'woothemes' ),
+		'desc' 		=> __( 'Prepend product permalinks with product category', 'woothemes' ),
+		'id' 		=> 'woocommerce_prepend_category_to_products',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'permalink_options' ),
 	
 	array( 'name' => __( 'Shop Pages', 'woothemes' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin.', 'woothemes' ) ),
 	

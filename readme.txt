@@ -72,6 +72,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed some localisation strings
 * Hard crop option for images (use regenerate thumbnails after toggling to redo all images)
 * Password field type for gateways API
+* Front page shop improvements/correct title tags
+* Added option for controlling product permalinks
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

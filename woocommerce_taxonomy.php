@@ -20,11 +20,22 @@ function woocommerce_post_type() {
 	
 	$base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
 	
+	$product_base 	= '';
+	$category_base 	= '';
+	
 	if (get_option('woocommerce_prepend_shop_page_to_urls')=="yes") :
 		$category_base = trailingslashit($base_slug);
-	else :
-		$category_base = '';
 	endif;
+	
+	if (get_option('woocommerce_prepend_shop_page_to_products')=='yes') :
+		$product_base = trailingslashit($base_slug);
+	endif;
+	
+	if (get_option('woocommerce_prepend_category_to_products')=='yes') :
+		$product_base .= trailingslashit('%product_cat%');
+	endif;
+	
+	$product_base = untrailingslashit($product_base);
 	
 	register_taxonomy( 'product_cat',
         array('product'),
@@ -134,7 +145,7 @@ function woocommerce_post_type() {
 			'publicly_queryable' => true,
 			'exclude_from_search' => false,
 			'hierarchical' => true,
-			'rewrite' => array( 'slug' => $base_slug, 'with_front' => false ),
+			'rewrite' => array( 'slug' => $product_base, 'with_front' => false ),
 			'query_var' => true,			
 			'supports' => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments'/*, 'page-attributes'*/ ),
 			'has_archive' => $base_slug,
@@ -272,6 +283,41 @@ function woocommerce_post_type() {
 		)
 	);
 } 
+
+
+/**
+ * Filter to allow product_cat in the permalinks for products.
+ *
+ * @since 1.1
+ *
+ * @param string $permalink The existing permalink URL.
+ */
+function woocommerce_product_cat_filter_post_link( $permalink, $post, $leavename, $sample ) {
+    // Abort if post is not a product
+    if ($post->post_type!=='product') return $permalink;
+    
+    // Abort early if the placeholder rewrite tag isn't in the generated URL
+    if ( false === strpos( $permalink, '%product_cat%' ) ) return $permalink;
+    
+    // Sample aborts
+    if ($sample) return $permalink;
+
+    // Get the custom taxonomy terms in use by this post
+    $terms = get_the_terms( $post->ID, 'product_cat' );
+
+    if ( empty( $terms ) ) :
+    	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
+        $permalink = str_replace( '%product_cat%', __('product', 'woothemes'), $permalink );
+    else :
+    	// Replace the placeholder rewrite tag with the first term's slug
+        $first_term = array_shift( $terms );
+        $permalink = str_replace( '%product_cat%', $first_term->slug, $permalink );
+    endif;
+
+    return $permalink;
+}
+add_filter( 'post_type_link', 'woocommerce_product_cat_filter_post_link', 10, 4 );
+
 
 /**
  * Add product_cat ordering to get_terms

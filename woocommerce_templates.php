@@ -96,29 +96,34 @@ if (!function_exists('woocommerce_front_page_archive')) {
 			
 		global $paged, $woocommerce, $wp_the_query, $wp_query;
 		
-		wp_reset_query();
+		if ( defined('SHOP_IS_ON_FRONT') ) :
 		
-		// Only apply to front_page
-		if ( defined('SHOP_IS_ON_FRONT') && $query === $wp_the_query ) :
+			wp_reset_query();
 			
-			if (get_query_var('paged')) :
-				$paged = get_query_var('paged'); 
-			else :
-				$paged = (get_query_var('page')) ? get_query_var('page') : 1;
+			// Only apply to front_page
+			if ( $query === $wp_the_query ) :
+				
+				if (get_query_var('paged')) :
+					$paged = get_query_var('paged'); 
+				else :
+					$paged = (get_query_var('page')) ? get_query_var('page') : 1;
+				endif;
+	
+				// Filter the query
+				add_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') );
+				
+				// Query the products
+				$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
+				
+				// get products in view (for use by widgets)
+				$woocommerce->query->get_products_in_view();
+				
+				// Remove the query manipulation
+				remove_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') ); 
+				remove_action('loop_start', 'woocommerce_front_page_archive', 1);
+	
 			endif;
-
-			// Filter the query
-			add_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') );
-			
-			// Query the products
-			$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
-			
-			// get products in view (for use by widgets)
-			$woocommerce->query->get_products_in_view();
-			
-			// Remove the query manipulation
-			remove_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') ); 
-
+		
 		endif;
 	}
 }
