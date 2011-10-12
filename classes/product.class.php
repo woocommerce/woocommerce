@@ -762,7 +762,7 @@ class woocommerce_product {
                 
                 $values = $options;
             }
-              
+            
             $available_attributes[$attribute['name']] = array_unique($values);
         }
 

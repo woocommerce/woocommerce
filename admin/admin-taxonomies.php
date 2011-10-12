@@ -134,45 +134,39 @@ function woocommerce_category_thumbnail_field_save( $term_id, $tt_id, $taxonomy 
 
 
 /**
- * Categories ordering
+ * Category/Term ordering
  */
 
 /**
- * Reorder on category insertion
- * 
- * @param int $term_id
+ * Reorder on term insertion
  */
-add_action("create_product_cat", 'woocommerce_create_product_cat');
+add_action("create_term", 'woocommerce_create_term');
 
-function woocommerce_create_product_cat ($term_id) {
+function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 	
 	$next_id = null;
 	
-	$term = get_term($term_id, 'product_cat');
+	$term = get_term($term_id, $taxonomy);
 	
 	// gets the sibling terms
-	$siblings = get_terms('product_cat', "parent={$term->parent}&menu_order=ASC&hide_empty=0");
+	$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
 	
 	foreach ($siblings as $sibling) {
 		if( $sibling->term_id == $term_id ) continue;
-		$next_id =  $sibling->term_id; // first sibling term of the hierachy level
+		$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
 		break;
 	}
 
 	// reorder
-	woocommerce_order_categories ( $term, $next_id );
-	
+	woocommerce_order_terms( $term, $next_id, $taxonomy );
 }
-
 
 /**
  * Delete terms metas on deletion
- * 
- * @param int $term_id
  */
-add_action("delete_product_cat", 'woocommerce_delete_product_cat');
+add_action("delete_product_term", 'woocommerce_delete_term');
 
-function woocommerce_delete_product_cat($term_id) {
+function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 	
 	$term_id = (int) $term_id;
 	
@@ -183,18 +177,17 @@ function woocommerce_delete_product_cat($term_id) {
 	
 }
 
-
 /**
- * Move a category before the a	given element of its hierarchy level
+ * Move a term before the a	given element of its hierarchy level
  *
  * @param object $the_term
  * @param int $next_id the id of the next slibling element in save hierachy level
  * @param int $index
  * @param int $terms
  */
-function woocommerce_order_categories ( $the_term, $next_id, $index=0, $terms=null ) {
+function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index=0, $terms=null ) {
 	
-	if( ! $terms ) $terms = get_terms('product_cat', 'menu_order=ASC&hide_empty=0&parent=0');
+	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0');
 	if( empty( $terms ) ) return $index;
 	
 	$id	= $the_term->term_id;
@@ -210,50 +203,50 @@ function woocommerce_order_categories ( $the_term, $next_id, $index=0, $terms=nu
 		// the nextid of our term to order, lets move our term here
 		if(null !== $next_id && $term->term_id == $next_id) { 
 			$index++;
-			$index = woocommerce_set_category_order($id, $index, true);
+			$index = woocommerce_set_term_order($id, $index, $taxonomy, true);
 		}		
 		
 		// set order
 		$index++;
-		$index = woocommerce_set_category_order($term->term_id, $index);
+		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy);
 		
 		// if that term has children we walk through them
-		$children = get_terms('product_cat', "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
+		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
 		if( !empty($children) ) {
-			$index = woocommerce_order_categories ( $the_term, $next_id, $index, $children );	
+			$index = woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index, $children );	
 		}
 	}
 	
 	// no nextid meaning our term is in last position
 	if( $term_in_level && null === $next_id )
-		$index = woocommerce_set_category_order($id, $index+1, true);
+		$index = woocommerce_set_term_order($id, $index+1, $taxonomy, true);
 	
 	return $index;
 	
 }
 
 /**
- * Set the sort order of a category
+ * Set the sort order of a term
  * 
  * @param int $term_id
  * @param int $index
  * @param bool $recursive
  */
-function woocommerce_set_category_order ($term_id, $index, $recursive=false) {
+function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=false) {
 	global $wpdb;
 	
 	$term_id 	= (int) $term_id;
 	$index 		= (int) $index;
 	
-	update_metadata('woocommerce_term', $term_id, 'order', $index);
+	update_woocommerce_term_meta( $term_id, 'order', $index );
 	
 	if( ! $recursive ) return $index;
 	
-	$children = get_terms('product_cat', "parent=$term_id&menu_order=ASC&hide_empty=0");
+	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
 
 	foreach ( $children as $term ) {
 		$index ++;
-		$index = woocommerce_set_category_order ($term->term_id, $index, true);		
+		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy, true);		
 	}
 	
 	return $index;

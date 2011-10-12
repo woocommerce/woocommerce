@@ -395,22 +395,28 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post">
 			<table class="variations" cellspacing="0">
 				<tbody>
-				<?php foreach ($attributes as $name => $options) :?>
+				<?php foreach ($attributes as $name => $options) : ?>
 					<tr>
 						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
 						<td><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
-								<?php foreach ($options as $option) : 
-									$option_term = get_term_by('slug', $option, $name); 
-									if (!is_wp_error($option_term) && isset($option_term->name)) :
-										$term_name = $option_term->name;
+								<?php
+									// Get terms if this is a taxonomy - ordered
+									if (taxonomy_exists(sanitize_title($name))) :
+										$args = array('menu_order' => 'ASC');
+										$terms = get_terms( sanitize_title($name), $args );
+	
+										foreach ($terms as $term) : 
+											if (!in_array($term->slug, $options)) continue;
+											echo '<option value="'.$term->slug.'">'.$term->name.'</option>';
+										endforeach; 
 									else :
-										$term_name = $option;
+										foreach ($options as $option) : 
+											echo '<option value="'.$option.'">'.$option.'</option>';
+										endforeach;
 									endif;
-									?>
-									<?php echo '<option value="'.$option.'">'.$term_name.'</option>'; ?>
-								<?php endforeach; ?>
+								?>
 							<?php endif;?>
 						</td>
 					</tr>

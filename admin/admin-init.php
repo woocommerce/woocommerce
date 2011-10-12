@@ -54,7 +54,7 @@ function woocommerce_admin_scripts() {
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
 	// Register scripts
-	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
+	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget', 'jquery-ui-core'), '1.0' );
 	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), '1.0' );
 	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker') );
 	
@@ -107,6 +107,22 @@ function woocommerce_admin_scripts() {
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
 		
 	endif;
+	
+	// Term ordering
+	if ($screen->id=='edit-product_cat' || strstr($screen->id, 'edit-pa_')) :
+		
+		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable') );
+		wp_enqueue_script( 'woocommerce_term_ordering' );
+		
+		$taxonomy = (isset($_GET['taxonomy'])) ? $_GET['taxonomy'] : '';
+		
+		$woocommerce_term_order_params = array( 
+			'taxonomy' 			=>  $taxonomy
+		 );
+					 
+		wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
+		
+	endif;
 
 	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :
@@ -118,6 +134,7 @@ function woocommerce_admin_scripts() {
 	endif;
 }
 add_action('admin_enqueue_scripts', 'woocommerce_admin_scripts');
+
 
 /**
  * Queue admin CSS
@@ -202,44 +219,31 @@ function woocommerce_admin_head() {
 add_action('admin_head', 'woocommerce_admin_head');
 
 /**
- * Categories ordering scripts
- */
-function woocommerce_categories_scripts() {
-	global $woocommerce;
-	
-	if( !isset($_GET['taxonomy']) || $_GET['taxonomy'] !== 'product_cat') return;
-	
-	wp_register_script('woocommerce-categories-ordering', $woocommerce->plugin_url() . '/assets/js/admin/categories-ordering.js', array('jquery-ui-sortable'));
-	wp_print_scripts('woocommerce-categories-ordering');
-	
-}
-add_action('admin_footer-edit-tags.php', 'woocommerce_categories_scripts');
-
-/**
  * Ajax request handling for categories ordering
  */
-function woocommerce_categories_ordering() {
-
+function woocommerce_term_ordering() {
 	global $wpdb;
 	
-	$id = (int)$_POST['id'];
+	$id = (int) $_POST['id'];
 	$next_id  = isset($_POST['nextid']) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
+	$taxonomy = isset($_POST['thetaxonomy']) ? esc_attr( $_POST['thetaxonomy'] ) : null;
+	$term = get_term_by('id', $id, $taxonomy);
 	
-	if( ! $id || ! $term = get_term_by('id', $id, 'product_cat') ) die(0);
+	if( !$id || !$term || !$taxonomy ) die(0);
 	
-	woocommerce_order_categories( $term, $next_id );
+	woocommerce_order_terms( $term, $next_id, $taxonomy );
 	
-	$children = get_terms('product_cat', "child_of=$id&menu_order=ASC&hide_empty=0");
+	$children = get_terms($taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0");
+	
 	if( $term && sizeof($children) ) {
 		echo 'children';
 		die;	
 	}
-	
 }
-add_action('wp_ajax_woocommerce-categories-ordering', 'woocommerce_categories_ordering');
+add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
 
 /**
- * Search by SKU ro ID for products. Adapted from code by BenIrvin (Admin Search by ID)
+ * Search by SKU or ID for products. Adapted from code by BenIrvin (Admin Search by ID)
  */
 if (is_admin()) :
 	add_action('parse_request', 'woocommerce_admin_product_search');

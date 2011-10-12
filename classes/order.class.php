@@ -272,6 +272,23 @@ class woocommerce_order {
 		
 	}
 	
+	/**  Returns true if the order contains a downloadable product */
+	function has_downloadable_item() {
+		$has_downloadable_item = false;
+		
+		foreach($this->items as $item) : 
+			
+			$_product = $this->get_product_from_item( $item );
+
+			if ($_product->exists && $_product->is_type('downloadable')) :
+				$has_downloadable_item = true;
+			endif;
+			
+		endforeach;	
+		
+		return $has_downloadable_item;
+	}
+	
 	/**  Generates a URL so that a customer can checkout/pay for their (unpaid - pending) order via a link */
 	function get_checkout_payment_url() {
 		
