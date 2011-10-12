@@ -76,6 +76,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Added option for controlling product permalinks
 * Load admin css only where needed
 * Admin JS cleanup
+* Removed error message when clicking buttons to view variations/grouped
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks

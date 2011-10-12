@@ -63,19 +63,22 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 			return;
 		endif;
 		
-		?><a href="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" rel="<?php echo $_product->id; ?>" class="button add_to_cart_button product_type_<?php echo $_product->product_type; ?>"><?php
-			switch ($_product->product_type) :
-				case "variable" :
-					echo apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
-				break;
-				case "grouped" :
-					echo apply_filters('grouped_add_to_cart_text', __('View options', 'woothemes'));
-				break;
-				default :
-					echo apply_filters('add_to_cart_text', __('Add to cart', 'woothemes'));
-				break;
-			endswitch;
-		?></a><?php
+		switch ($_product->product_type) :
+			case "variable" :
+				$link 	= get_permalink($post->ID);
+				$label 	= apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
+			break;
+			case "grouped" :
+				$link 	= get_permalink($post->ID);
+				$label 	= apply_filters('grouped_add_to_cart_text', __('View options', 'woothemes'));
+			break;
+			default :
+				$link 	= esc_url( $_product->add_to_cart_url() );
+				$label 	= apply_filters('add_to_cart_text', __('Add to cart', 'woothemes'));
+			break;
+		endswitch;
+			
+		echo sprintf('<a href="%s" rel="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $_product->id, $_product->product_type, $label);
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
