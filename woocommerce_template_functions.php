@@ -775,7 +775,7 @@ if (!function_exists('woocommerce_login_form')) {
 			<p class="form-row">
 				<?php $woocommerce->nonce_field('login', 'login') ?>
 				<input type="submit" class="button" name="login" value="<?php _e('Login', 'woothemes'); ?>" />
-				<a class="lost_password" href="<?php echo esc_url( home_url('wp-login.php?action=lostpassword') ); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
+				<a class="lost_password" href="<?php echo esc_url( wp_lostpassword_url( home_url() ) ); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
 			</p>
 		</form>
 		<?php
