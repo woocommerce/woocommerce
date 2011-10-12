@@ -134,11 +134,19 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array(  
 		'name' => __( 'Shop Base Page', 'woothemes' ),
-		'desc' 		=> sprintf( __( 'This sets the base page of your shop.', 'woothemes' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
+		'desc' 		=> sprintf( __( 'This sets the base page of your shop. Leave blank to use page title.', 'woothemes' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
 		'id' 		=> 'woocommerce_shop_page_id',
 		'css' 		=> 'min-width:175px;',
 		'type' 		=> 'single_select_page',
 		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __( 'Base Page Title', 'woothemes' ),
+		'desc' 		=> __( 'This title to show on the shop base page.', 'woothemes' ),
+		'id' 		=> 'woocommerce_shop_page_title',
+		'type' 		=> 'text',
+		'std' 		=> __('All Products', 'woothemes')
 	),
 
 	array(  
@@ -177,7 +185,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'name' => __( 'Product base category', 'woothemes' ),
 		'desc' 		=> __( 'Prepend product permalinks with product category', 'woothemes' ),
 		'id' 		=> 'woocommerce_prepend_category_to_products',
-		'std' 		=> 'yes',
+		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
