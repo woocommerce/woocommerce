@@ -139,54 +139,6 @@ function woocommerce_meta_boxes_save_errors() {
 }
 
 /**
- * Enqueue scripts
- * 
- * Enqueue JavaScript used by the meta panels.
- */
-function woocommerce_write_panel_scripts() {
-	global $woocommerce;
-	
-	$post_type = woocommerce_get_current_post_type();
-	
-	if( $post_type !== 'product' && $post_type !== 'shop_order' && $post_type !== 'shop_coupon' ) return;
-	
-	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-	
-	wp_register_script('woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker'));
-	wp_enqueue_script('woocommerce_writepanel');
-	
-	wp_enqueue_script('media-upload');
-	wp_enqueue_script('thickbox');
-	wp_enqueue_style('thickbox');
-	
-	$woocommerce_witepanel_params = array( 
-		'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),
-		'cart_total' 					=> __("Calc totals based on order items, discount amount, and shipping?", 'woothemes'),
-		'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
-		'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
-		'ID' 							=>  __('ID', 'woothemes'),
-		'item_name' 					=> __('Item Name', 'woothemes'),
-		'quantity' 						=> __('Quantity e.g. 2', 'woothemes'),
-		'cost_unit' 					=> __('Cost per unit e.g. 2.99', 'woothemes'),
-		'tax_rate' 						=> __('Tax Rate e.g. 20.0000', 'woothemes'),
-		'meta_name'						=> __('Meta Name', 'woothemes'),
-		'meta_value'					=> __('Meta Value', 'woothemes'),
-		'select_terms'					=> __('Select terms', 'woothemes'),
-		'plugin_url' 					=> $woocommerce->plugin_url(),
-		'ajax_url' 						=> admin_url('admin-ajax.php'),
-		'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
-		'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products"),
-		'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png'
-	 );
-				 
-	wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
-	
-	
-}
-add_action('admin_print_scripts-post.php', 'woocommerce_write_panel_scripts');
-add_action('admin_print_scripts-post-new.php', 'woocommerce_write_panel_scripts');
-
-/**
  * Meta scripts
  * 
  * Outputs JavaScript used by the meta panels.

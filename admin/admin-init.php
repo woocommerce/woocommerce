@@ -55,9 +55,8 @@ function woocommerce_admin_scripts() {
 	
 	// Register scripts
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget'), '1.0' );
-	wp_register_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
-	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core') );
+	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), '1.0' );
+	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker') );
 	
 	// Get admin screen id
     $screen = get_current_screen();
@@ -65,26 +64,60 @@ function woocommerce_admin_scripts() {
     // WooCommerce admin pages
     if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
     
-    	wp_enqueue_script('woocommerce_admin');
+    	wp_enqueue_script( 'woocommerce_admin' );
     
     endif;
     
     // Edit product category pages
     if (in_array( $screen->id, array('edit-product_cat') )) :
-		wp_enqueue_script('media-upload');
-		wp_enqueue_script('thickbox');
+    
+		wp_enqueue_script( 'media-upload' );
+		wp_enqueue_script( 'thickbox' );
+		
+	endif;
+
+	// Product/Coupon/Orders
+	if (in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ))) :
+		
+		wp_enqueue_script( 'woocommerce_writepanel' );
+		wp_enqueue_script( 'jquery-ui-datepicker' );
+		wp_enqueue_script( 'media-upload' );
+		wp_enqueue_script( 'thickbox' );
+		
+		$woocommerce_witepanel_params = array( 
+			'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),
+			'cart_total' 					=> __("Calc totals based on order items, discount amount, and shipping?", 'woothemes'),
+			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
+			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
+			'ID' 							=>  __('ID', 'woothemes'),
+			'item_name' 					=> __('Item Name', 'woothemes'),
+			'quantity' 						=> __('Quantity e.g. 2', 'woothemes'),
+			'cost_unit' 					=> __('Cost per unit e.g. 2.99', 'woothemes'),
+			'tax_rate' 						=> __('Tax Rate e.g. 20.0000', 'woothemes'),
+			'meta_name'						=> __('Meta Name', 'woothemes'),
+			'meta_value'					=> __('Meta Value', 'woothemes'),
+			'select_terms'					=> __('Select terms', 'woothemes'),
+			'plugin_url' 					=> $woocommerce->plugin_url(),
+			'ajax_url' 						=> admin_url('admin-ajax.php'),
+			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
+			'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products"),
+			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png'
+		 );
+					 
+		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
+		
 	endif;
 
 	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :
-    
+
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
 	
 	endif;
 }
-add_action('admin_print_scripts', 'woocommerce_admin_scripts');
+add_action('admin_enqueue_scripts', 'woocommerce_admin_scripts');
 
 /**
  * Queue admin CSS
@@ -167,29 +200,6 @@ function woocommerce_admin_head() {
 	<?php
 }
 add_action('admin_head', 'woocommerce_admin_head');
-
-/**
- * Returns proper post_type
- */
-function woocommerce_get_current_post_type() {
-        
-	global $post, $typenow, $current_screen;
-         
-    if( $current_screen && isset($current_screen->post_type) ) return $current_screen->post_type;
-    
-    if( $typenow ) return $typenow;
-        
-    if( !empty($_REQUEST['post_type']) ) return sanitize_key( $_REQUEST['post_type'] );
-    
-    if ( !empty($post) && !empty($post->post_type) ) return $post->post_type;
-         
-    if( ! empty($_REQUEST['post']) && (int)$_REQUEST['post'] ) {
-    	$p = get_post( $_REQUEST['post'] );
-    	return $p ? $p->post_type : '';
-    }
-    
-    return '';
-}
 
 /**
  * Categories ordering scripts
