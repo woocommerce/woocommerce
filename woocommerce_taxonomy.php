@@ -29,6 +29,8 @@ function woocommerce_post_type() {
 	
 	if (get_option('woocommerce_prepend_shop_page_to_products')=='yes') :
 		$product_base = trailingslashit($base_slug);
+	else :
+		$product_base = trailingslashit(__('product', 'woothemes'));
 	endif;
 	
 	if (get_option('woocommerce_prepend_category_to_products')=='yes') :
