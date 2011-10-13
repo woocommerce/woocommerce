@@ -138,7 +138,7 @@ function woocommerce_order_items_meta_box($post) {
 			<tbody id="order_items_list">	
 				
 				<?php $loop = 0; if (sizeof($order_items)>0 && isset($order_items[0]['id'])) foreach ($order_items as $item) : 
-					
+				
 					if (isset($item['variation_id']) && $item['variation_id'] > 0) :
 						$_product = &new woocommerce_product_variation( $item['variation_id'] );
 					else :

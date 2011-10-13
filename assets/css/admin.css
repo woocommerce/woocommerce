@@ -14,8 +14,8 @@
 #woocommerce-order-items .buttons button{margin:2px 0 0 0;}
 #woocommerce-order-items .buttons-alt{float:right;padding-right:6px;}
 #woocommerce-order-items h3 small{color:#999;}
-dl.totals{margin:6px 6px 0;float:left;}dl.totals dt{float:left;width:100%;font-size:1.2em;font-weight:bold;line-height:2em;}
-dl.totals dd{line-height:2em;font-size:1.2em;float:left;width:100%;}dl.totals dd input{width:100%;vertical-align:middle;float:left;font-size:1em;margin:0 !important;}
+dl.totals{margin:6px 6px 0;float:left;}dl.totals dt{float:left;width:100%;font-size:1.2em;font-weight:bold;line-height:2em;margin:0;padding:0;}
+dl.totals dd{line-height:2em;font-size:1.2em;float:left;width:100%;margin:0;padding:0;}dl.totals dd input{width:100%;vertical-align:middle;float:left;font-size:1em;margin:0 !important;}
 dl.totals dd input.first{width:49%;float:left;}
 dl.totals dd input.last{width:49%;float:right;}
 .woocommerce_order_items_wrapper{margin:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items{width:100%;background:#fff;}.woocommerce_order_items_wrapper table.woocommerce_order_items thead th{background:#ECECEC;padding:8px 8px;font-size:11px;text-align:left;}

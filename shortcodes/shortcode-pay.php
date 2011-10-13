@@ -40,9 +40,7 @@ function woocommerce_pay() {
 				// Update payment method
 				if ($order->order_total > 0 ) : 
 					$payment_method 			= woocommerce_clean($_POST['payment_method']);
-					$data 						= (array) maybe_unserialize( get_post_meta( $order_id, 'order_data', true ) );
-					$data['payment_method']		= $payment_method;
-					update_post_meta( $order_id, 'order_data', $data );
+					update_post_meta( $order_id, '_payment_method', $payment_method);
 			
 					$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				

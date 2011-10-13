@@ -140,9 +140,11 @@ function woocommerce_category_thumbnail_field_save( $term_id, $tt_id, $taxonomy 
 /**
  * Reorder on term insertion
  */
-add_action("create_term", 'woocommerce_create_term');
+add_action("create_term", 'woocommerce_create_term', 5, 3);
 
 function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
+	
+	if (!$taxonomy=='product_cat' && !strstr($taxonomy, 'pa_')) return;
 	
 	$next_id = null;
 	
@@ -164,7 +166,7 @@ function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 /**
  * Delete terms metas on deletion
  */
-add_action("delete_product_term", 'woocommerce_delete_term');
+add_action("delete_product_term", 'woocommerce_delete_term', 5, 3);
 
 function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 	

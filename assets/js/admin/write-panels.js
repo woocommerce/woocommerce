@@ -57,6 +57,7 @@ jQuery( function($){
 					
 					if (!itemCost) itemCost = 0;
 					if (!itemTax) itemTax = 0;
+					if (!itemQty) itemQty = 0;
 					
 					totalItemTax = 0;
 					

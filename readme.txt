@@ -80,6 +80,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Admin JS cleanup
 * Removed error message when clicking buttons to view variations/grouped
 * Drag and drop term ordering (so variation options can be sorted)
+* Pay page after invoicing fix
 
 = 1.0.3 - 06/10/2011 =
 * Several minor fixes/tweaks
