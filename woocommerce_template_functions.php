@@ -1112,7 +1112,7 @@ function woocommerce_product_subcategories() {
 	if ($categories) foreach ($categories as $category) : $loop++;
 			
 		?>
-		<li class="product <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
+		<li class="product sub-category <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
 			
 			<?php do_action('woocommerce_before_subcategory', $category); ?>
 			
