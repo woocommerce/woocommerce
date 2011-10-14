@@ -1120,7 +1120,7 @@ function woocommerce_product_subcategories() {
 				
 				<?php do_action('woocommerce_before_subcategory_title', $category); ?>
 				
-				<h3><?php echo $category->name; ?> (<?php echo $category->count; ?>)</h3>
+				<h3><?php echo $category->name; ?> <mark class="count">(<?php echo $category->count; ?>)</mark></h3>
 				
 				<?php do_action('woocommerce_after_subcategory_title', $category); ?>
 			
