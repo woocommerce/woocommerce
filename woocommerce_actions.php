@@ -379,7 +379,7 @@ function woocommerce_update_cart_action() {
 	global $woocommerce;
 	
 	// Remove from cart
-	if ( isset($_GET['remove_item']) && is_numeric($_GET['remove_item'])  && $woocommerce->verify_nonce('cart', '_GET')) :
+	if ( isset($_GET['remove_item']) && $woocommerce->verify_nonce('cart', '_GET')) :
 	
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 		
