@@ -100,9 +100,9 @@ function woocommerce_init() {
 	woocommerce_post_type();
 
 	// Image sizes
-	$shop_thumbnail_crop 	= (get_option('shop_thumbnail_image_crop')==1) ? true : false;
-	$shop_catalog_crop 		= (get_option('shop_catalog_image_crop')==1) ? true : false;
-	$shop_single_crop 		= (get_option('shop_single_image_crop')==1) ? true : false;
+	$shop_thumbnail_crop 	= (get_option('woocommerce_thumbnail_image_crop')==1) ? true : false;
+	$shop_catalog_crop 		= (get_option('woocommerce_catalog_image_crop')==1) ? true : false;
+	$shop_single_crop 		= (get_option('woocommerce_single_image_crop')==1) ? true : false;
 
 	add_image_size( 'shop_thumbnail', $woocommerce->get_image_size('shop_thumbnail_image_width'), $woocommerce->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
 	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
