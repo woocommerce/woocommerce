@@ -103,7 +103,7 @@ div.taxrows .taxrow label.checkbox{line-height:1.5em;margin:0 8px;}div.taxrows .
 .woocommerce #tabs-wrap table p{margin:0 0 4px !important;overflow:hidden;zoom:1;}
 .woocommerce #tabs-wrap table p a.add{float:left;}
 #product_variation-parent #parent_id{width:100%;}
-#woocommerce-product-data ul.product_data_tabs,.woocommerce ul.tabs{background:#ececec;padding:7px 9px 0;overflow:hidden;zoom:1;line-height:1em;}
+#woocommerce-product-data ul.product_data_tabs,.woocommerce ul.tabs{background:#ececec;padding:7px 9px 0;margin:0;overflow:hidden;zoom:1;line-height:1em;}
 #woocommerce-product-data ul.product_data_tabs li,.woocommerce ul.tabs li{float:left;padding:0;margin:0 5px 0 0;}
 #woocommerce-product-data ul.product_data_tabs li a,.woocommerce ul.tabs li a{padding:0;margin:0;border:0;border:1px solid #d5d5d5;border-bottom:0;float:left;padding:7px 9px;background:#e1e1e1;text-decoration:none;color:#555;-moz-border-radius-topleft:3px;-moz-border-radius-topright:3px;-webkit-border-top-left-radius:3px;-webkit-border-top-right-radius:3px;border-top-left-radius:3px;border-top-right-radius:3px;}
 #woocommerce-product-data ul.product_data_tabs li.active a,.woocommerce ul.tabs li.active a{background:#f8f8f8;border-color:#e1e1e1;color:#333;}
@@ -112,6 +112,7 @@ div.taxrows .taxrow label.checkbox{line-height:1.5em;margin:0 8px;}div.taxrows .
 .woocommerce_page_settings .woocommerce_options_panel,.panel,#woocommerce-product-type .woocommerce_options_panel{padding:0;}
 #woocommerce-product-type-options .panel,#woocommerce-product-specs .inside{padding:9px;margin:0;}
 .woocommerce_options_panel p,#woocommerce-product-type-options .panel p{overflow:hidden;zoom:1;margin:0 0 9px;font-size:12px;padding:5px 9px;line-height:24px;}
+.woocommerce_options_panel p{margin:9px 0 9px;}
 .woocommerce_options_panel label{float:left;width:150px;padding:0;}
 .woocommerce_options_panel label .req{font-weight:bold;font-style:normal;color:red;}
 .woocommerce_options_panel .description{padding:0;margin:0 0 0 7px;}
