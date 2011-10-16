@@ -474,7 +474,7 @@ function woocommerce_check_comment_rating($comment_data) {
 		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woothemes') );
 		
 	elseif ( isset($_POST['rating']) && empty($_POST['rating']) && $comment_data['comment_type']== '' ) {
-		wp_die( __('Please rate the product.',"woocommerce") );
+		wp_die( __('Please rate the product.',"woothemes") );
 		exit;
 	}
 	return $comment_data;
