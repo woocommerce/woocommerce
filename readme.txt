@@ -64,6 +64,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Moved discount above shipping calc
 * Fixed enter key on product edit page
 * Typos
+* Made custom attributes display 'nicely' in cart widgets, instead of santized
 
 = 1.1 - 12/10/2011 =
 * Tested and working with WordPress 3.3 beta-1
