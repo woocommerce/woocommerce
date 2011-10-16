@@ -402,34 +402,30 @@ class woocommerce_cart {
 			endif;
 		endforeach; endif;
 		
-		// Cart Shipping
-		if ($this->needs_shipping()) $woocommerce->shipping->calculate_shipping(); else $woocommerce->shipping->reset_shipping();
-		
-		$this->shipping_total = $woocommerce->shipping->shipping_total;
-		
-		$this->shipping_tax_total = $woocommerce->shipping->shipping_tax;
-		
-		$this->tax_total = $this->cart_contents_tax;
-		
-		// Subtotal
-		$this->subtotal_ex_tax = $this->cart_contents_total_ex_tax;
-		$this->subtotal = $this->cart_contents_total;
+		// Calculate final totals
+		$this->tax_total 			= $this->cart_contents_tax;					// Tax Total
+		$this->subtotal_ex_tax 		= $this->cart_contents_total_ex_tax;		// Subtotal without tax
+		$this->subtotal 			= $this->cart_contents_total;				// Subtotal
 		
 		// Cart Discounts
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
 			if ($coupon->is_valid()) :
-
 				if ($coupon->type=='fixed_cart') : 
 					$this->discount_total = $this->discount_total + $coupon->amount;
 				elseif ($coupon->type=='percent') :
 					$this->discount_total = $this->discount_total + ( $this->subtotal / 100 ) * $coupon->amount;
 				endif;
-			
 			endif;
 		endforeach;
 		
-		// VAT excemption done at this point - so all totals are correct
+		// Cart Shipping
+		if ($this->needs_shipping()) $woocommerce->shipping->calculate_shipping(); else $woocommerce->shipping->reset_shipping();
+		
+		$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
+		$this->shipping_tax_total 	= $woocommerce->shipping->shipping_tax;		// Shipping Tax
+		
+		// VAT excemption done at this point - so all totals are correct before exemption
 		if ($woocommerce->customer->is_vat_exempt()) :
 			$this->shipping_tax_total = 0;
 			$this->tax_total = 0;
@@ -438,7 +434,7 @@ class woocommerce_cart {
 		// Allow plugins to hook and alter totals before final total is calculated
 		do_action('woocommerce_calculate_totals', $this);
 				
-		// Total
+		// Grand Total
 		if (get_option('woocommerce_prices_include_tax')=='yes') :
 			$this->total = $this->subtotal + $this->shipping_tax_total - $this->discount_total + $woocommerce->shipping->shipping_total;
 		else :
