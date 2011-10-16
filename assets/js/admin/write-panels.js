@@ -1,7 +1,7 @@
 jQuery( function($){
 	
 	// Prevent enter submitting post form
-	jQuery("form#post").bind("keypress", function(e) {
+	jQuery("#upsell_product_data").bind("keypress", function(e) {
 		if (e.keyCode == 13) return false;
 	});
 	
