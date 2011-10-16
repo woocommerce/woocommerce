@@ -63,6 +63,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Translation fixes
 * Moved discount above shipping calc
 * Fixed enter key on product edit page
+* Typos
 
 = 1.1 - 12/10/2011 =
 * Tested and working with WordPress 3.3 beta-1
