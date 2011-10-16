@@ -1,8 +1,8 @@
 === WooCommerce - eCommerce plugin for WordPress ===
 Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
-Requires at least: 3.1.0
-Tested up to: 3.3.0
+Requires at least: 3.1
+Tested up to: 3.3
 Stable tag: 1.1
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
@@ -61,6 +61,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Products need a base, regardless of category settings - added base to prevent pages breaking
 * Fixed hard cropping
 * Translation fixes
+* Moved discount above shipping calc
 
 = 1.1 - 12/10/2011 =
 * Tested and working with WordPress 3.3 beta-1
