@@ -32,7 +32,7 @@ Checkout and contribute to the source on GitHub at http://github.com/woothemes/w
 
 = Minimum Requirements =
 
-* WordPress 3.1+
+* WordPress 3.1 or greater
 * PHP version 5.2.4 or greater
 * MySQL version 5.0 or greater
 * Some payment gateways require fsockopen support (for IPN access)
