@@ -60,6 +60,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 = 1.1.1 - xxx =
 * Products need a base, regardless of category settings - added base to prevent pages breaking
 * Fixed hard cropping
+* Translation fixes
 
 = 1.1 - 12/10/2011 =
 * Tested and working with WordPress 3.3 beta-1
