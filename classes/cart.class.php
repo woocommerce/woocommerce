@@ -345,7 +345,13 @@ class woocommerce_cart {
 					
 						$rate = $_tax->get_rate( $_product->get_tax_class() );
 						
-						$tax_amount = $_tax->calc_tax( $_product->get_price(), $rate, true ) * $values['quantity'];
+						if (get_option('woocommerce_prices_include_tax')=='yes') :
+							// Price incldues tax
+							$tax_amount = $_tax->calc_tax( $_product->get_price(), $rate, true ) * $values['quantity'];
+						else :
+							// Price excludes tax
+							$tax_amount = $_tax->calc_tax( $_product->get_price(), $rate, false ) * $values['quantity'];
+						endif;
 						
 						/**
 						 * Checkout calculations when customer is OUTSIDE the shop base country and price INCLUDE tax

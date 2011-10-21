@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -56,6 +56,9 @@ The manual installation involves downloading the plugin and uploading it to your
 For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips.
 
 == Changelog ==
+
+= 1.1.2 - 21/10/2011 =
+* Tax fix for prices excluding tax - issue was caused by 1.1.1 update
 
 = 1.1.1 - 16/10/2011 =
 * Products need a base, regardless of category settings - added base to prevent pages breaking
