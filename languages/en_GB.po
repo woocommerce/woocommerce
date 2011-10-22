@@ -5594,7 +5594,7 @@ msgstr ""
 #: admin/admin-settings.php:149
 #@ woothemes
 msgid "All Products"
-msgstr "WORKS!"
+msgstr ""
 
 #: templates/checkout/form.php:23
 #@ woothemes
