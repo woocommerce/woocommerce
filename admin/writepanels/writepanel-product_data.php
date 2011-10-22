@@ -600,6 +600,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			if ($id && $id>0) $upsells[] = $id;
 		endforeach;
 		update_post_meta( $post_id, 'upsell_ids', $upsells );
+	else :
+		delete_post_meta( $post_id, 'upsell_ids' );
 	endif;
 	
 	// Cross sells
@@ -610,6 +612,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			if ($id && $id>0) $crosssells[] = $id;
 		endforeach;
 		update_post_meta( $post_id, 'crosssell_ids', $crosssells );
+	else :
+		delete_post_meta( $post_id, 'crosssell_ids' );
 	endif;
 			
 	// Do action for product type

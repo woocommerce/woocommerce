@@ -60,6 +60,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 = 1.1.2 - 21/10/2011 =
 * Tax fix for prices excluding tax - issue was caused by 1.1.1 update
 * Coupons can be applied to variations (by ID)
+* Fixed up/cross-sell removal
 
 = 1.1.1 - 16/10/2011 =
 * Products need a base, regardless of category settings - added base to prevent pages breaking
