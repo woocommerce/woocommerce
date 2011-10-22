@@ -424,10 +424,20 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 			
 			if (!$value) continue;
 			
+			// If this is a term slug, get the term's nice name
+            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
+            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
+            	if (!is_wp_error($term) && $term->name) :
+            		$value = $term->name;
+            	endif;
+            else :
+            	$value = ucfirst($value);
+            endif;
+			
 			if ($flat) :
-				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.ucfirst($value);
+				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
 			else :
-				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.ucfirst($value).'</dd>';
+				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
 			endif;
 			
 		endforeach;
