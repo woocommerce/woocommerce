@@ -1100,25 +1100,29 @@ function woocommerce_product_subcategories() {
 		$parent = 0;
 	endif;
 	
+	// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
 	$args = array(
-	    'parent'                   => $parent,
-	    'orderby'                  => 'menu_order',
-	    'order'                    => 'ASC',
-	    'hide_empty'               => 0,
-	    'hierarchical'             => 0,
-	    'taxonomy'                 => 'product_cat',
+	    'child_of'                  => $parent,
+	    'orderby'                  	=> 'menu_order',
+	    'order'                    	=> 'ASC',
+	    'hide_empty'               	=> 0,
+	    'hierarchical'             	=> 1,
+	    'taxonomy'                  => 'product_cat',
+	    'pad_counts'				=> 1
 	    );
 	$categories = get_categories( $args );
 	if ($categories) :
-		
-		if (get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
-			// We are hiding products - disable the loop and pagination
-			$woocommerce_loop['show_products'] = false;
-			$wp_query->max_num_pages = 0;
-		endif;
-		
-		foreach ($categories as $category) : $woocommerce_loop['loop']++;
-				
+	
+		$found = false;
+
+		foreach ($categories as $category) : 
+			
+			if ($category->parent != $parent) continue;
+			
+			$found = true;
+			
+			$woocommerce_loop['loop']++;
+			
 			?>
 			<li class="product sub-category <?php if ($woocommerce_loop['loop']%$woocommerce_loop['columns']==0) echo 'last'; if (($woocommerce_loop['loop']-1)%$woocommerce_loop['columns']==0) echo 'first'; ?>">
 				
@@ -1139,6 +1143,13 @@ function woocommerce_product_subcategories() {
 			</li><?php 
 			
 		endforeach;
+		
+		if ($found==true && get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
+			// We are hiding products - disable the loop and pagination
+			$woocommerce_loop['show_products'] = false;
+			$wp_query->max_num_pages = 0;
+		endif;
+		
 	endif;
 	
 }
