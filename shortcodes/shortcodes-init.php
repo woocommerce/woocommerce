@@ -21,7 +21,7 @@ include_once('shortcode-thankyou.php');
  **/
 function woocommerce_recent_products( $atts ) {
 	
-	global $woocommerce_columns;
+	global $woocommerce_loop;
 	
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',
@@ -29,6 +29,8 @@ function woocommerce_recent_products( $atts ) {
 		'orderby' => 'date',
 		'order' => 'desc'
 	), $atts));
+	
+	$woocommerce_loop['columns'] = $columns;
 	
 	$args = array(
 		'post_type'	=> 'product',
@@ -58,7 +60,7 @@ function woocommerce_recent_products( $atts ) {
  * List multiple products shortcode
  **/
 function woocommerce_products($atts){
-	global $woocommerce_columns;
+	global $woocommerce_loop;
 	
   	if (empty($atts)) return;
   
@@ -67,6 +69,8 @@ function woocommerce_products($atts){
 	  	'orderby'   => 'title',
 	  	'order'     => 'asc'
 		), $atts));
+		
+	$woocommerce_loop['columns'] = $columns;
 	
   	$args = array(
 		'post_type'	=> 'product',
@@ -151,7 +155,7 @@ function woocommerce_product($atts){
  **/
 function woocommerce_featured_products( $atts ) {
 	
-	global $woocommerce_columns;
+	global $woocommerce_loop;
 	
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',
@@ -159,6 +163,8 @@ function woocommerce_featured_products( $atts ) {
 		'orderby' => 'date',
 		'order' => 'desc'
 	), $atts));
+	
+	$woocommerce_loop['columns'] = $columns;
 	
 	$args = array(
 		'post_type'	=> 'product',

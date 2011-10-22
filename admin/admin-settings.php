@@ -276,8 +276,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(	'name' => __( 'Catalog Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
 
 	array(  
-		'name' => __( 'Sub-categories', 'woothemes' ),
-		'desc' 		=> __( 'Show sub-categories on category pages', 'woothemes' ),
+		'name' => __( 'Subcategories', 'woothemes' ),
+		'desc' 		=> __( 'Show subcategories on category pages', 'woothemes' ),
 		'id' 		=> 'woocommerce_show_subcategories',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -285,8 +285,16 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Show sub-categories on the shop page', 'woothemes' ),
+		'desc' 		=> __( 'Show subcategories on the shop page', 'woothemes' ),
 		'id' 		=> 'woocommerce_shop_show_subcategories',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'When showing subcategories, hide products', 'woothemes' ),
+		'id' 		=> 'woocommerce_hide_products_when_showing_subcategories',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'

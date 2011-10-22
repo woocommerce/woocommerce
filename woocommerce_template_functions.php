@@ -157,7 +157,7 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 		$attachments = get_posts($args);
 		if ($attachments) :
 			$loop = 0;
-			$woocommerce_columns = 3;
+			$columns = 3;
 			foreach ( $attachments as $attachment ) : 
 				
 				$loop++;
@@ -168,8 +168,8 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 				$image = wp_get_attachment_image($attachment->ID, $small_thumbnail_size);
 				
 				echo '<a href="'.$url.'" title="'.$post_title.'" rel="thumbnails" class="zoom ';
-				if ($loop==1 || ($loop-1)%$woocommerce_columns==0) echo 'first';
-				if ($loop%$woocommerce_columns==0) echo 'last';
+				if ($loop==1 || ($loop-1)%$columns==0) echo 'first';
+				if ($loop%$columns==0) echo 'last';
 				echo '">'.$image.'</a>';
 				
 			endforeach;
@@ -576,10 +576,10 @@ if (!function_exists('woocommerce_output_related_products')) {
 if (!function_exists('woocommerce_related_products')) {
 	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
 		
-		global $_product, $woocommerce_columns;
+		global $_product, $woocommerce_loop;
 		
 		// Pass vars to loop
-		$woocommerce_columns = $post_columns;
+		$woocommerce_loop['columns'] = $post_columns;
 		
 		$related = $_product->get_related();
 		if (sizeof($related)>0) :
@@ -1040,8 +1040,8 @@ function woocommerce_upsell_display() {
  * Display Cross Sells
  **/
 function woocommerce_cross_sell_display() {
-	global $woocommerce_columns, $woocommerce;
-	$woocommerce_columns = 2;
+	global $woocommerce_loop, $woocommerce;
+	$woocommerce_loop['columns'] = 2;
 	$crosssells = $woocommerce->cart->get_cross_sells();
 	
 	if (sizeof($crosssells)>0) :
@@ -1082,7 +1082,7 @@ function woocommerce_demo_store() {
  * display product sub categories as thumbnails
  **/
 function woocommerce_product_subcategories() {
-	global $woocommerce, $woocommerce_columns, $loop, $wp_query, $wp_the_query;
+	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query;
 	
 	if ($wp_query !== $wp_the_query) return; // Detect main query
 	
@@ -1104,33 +1104,42 @@ function woocommerce_product_subcategories() {
 	    'parent'                   => $parent,
 	    'orderby'                  => 'menu_order',
 	    'order'                    => 'ASC',
-	    'hide_empty'               => 1,
+	    'hide_empty'               => 0,
 	    'hierarchical'             => 0,
 	    'taxonomy'                 => 'product_cat',
 	    );
 	$categories = get_categories( $args );
-	if ($categories) foreach ($categories as $category) : $loop++;
-			
-		?>
-		<li class="product sub-category <?php if ($loop%$woocommerce_columns==0) echo 'last'; if (($loop-1)%$woocommerce_columns==0) echo 'first'; ?>">
-			
-			<?php do_action('woocommerce_before_subcategory', $category); ?>
-			
-			<a href="<?php echo get_term_link($category->slug, 'product_cat'); ?>">
-				
-				<?php do_action('woocommerce_before_subcategory_title', $category); ?>
-				
-				<h3><?php echo $category->name; ?> <mark class="count">(<?php echo $category->count; ?>)</mark></h3>
-				
-				<?php do_action('woocommerce_after_subcategory_title', $category); ?>
-			
-			</a>
-	
-			<?php do_action('woocommerce_after_subcategory', $category); ?>
-			
-		</li><?php 
+	if ($categories) :
 		
-	endforeach;
+		if (get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
+			// We are hiding products - disable the loop and pagination
+			$woocommerce_loop['show_products'] = false;
+			$wp_query->max_num_pages = 0;
+		endif;
+		
+		foreach ($categories as $category) : $woocommerce_loop['loop']++;
+				
+			?>
+			<li class="product sub-category <?php if ($woocommerce_loop['loop']%$woocommerce_loop['columns']==0) echo 'last'; if (($woocommerce_loop['loop']-1)%$woocommerce_loop['columns']==0) echo 'first'; ?>">
+				
+				<?php do_action('woocommerce_before_subcategory', $category); ?>
+				
+				<a href="<?php echo get_term_link($category->slug, 'product_cat'); ?>">
+					
+					<?php do_action('woocommerce_before_subcategory_title', $category); ?>
+					
+					<h3><?php echo $category->name; ?> <?php if ($category->count>0) : ?><mark class="count">(<?php echo $category->count; ?>)</mark><?php endif; ?></h3>
+					
+					<?php do_action('woocommerce_after_subcategory_title', $category); ?>
+				
+				</a>
+		
+				<?php do_action('woocommerce_after_subcategory', $category); ?>
+				
+			</li><?php 
+			
+		endforeach;
+	endif;
 	
 }
 

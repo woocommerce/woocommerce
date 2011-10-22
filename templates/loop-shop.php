@@ -1,19 +1,20 @@
 <?php
 
-global $woocommerce_columns, $loop;
+global $woocommerce_loop;
 
-$loop = 0;
+$woocommerce_loop['loop'] = 0;
+$woocommerce_loop['show_products'] = true;
 
-if (!isset($woocommerce_columns) || !$woocommerce_columns) $woocommerce_columns = apply_filters('loop_shop_columns', 4);
+if (!isset($woocommerce_loop['columns']) || !$woocommerce_loop['columns']) $woocommerce_loop['columns'] = apply_filters('loop_shop_columns', 4);
 
 ob_start();
 
 do_action('woocommerce_before_shop_loop');
 
-if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); if (!$_product->is_visible()) continue; $loop++;
+if ($woocommerce_loop['show_products'] && have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); if (!$_product->is_visible()) continue; $woocommerce_loop['loop']++;
 	
 	?>
-	<li class="product <?php if ($loop%$woocommerce_columns==0) echo 'last'; if (($loop-1)%$woocommerce_columns==0) echo 'first'; ?>">
+	<li class="product <?php if ($woocommerce_loop['loop']%$woocommerce_loop['columns']==0) echo 'last'; if (($woocommerce_loop['loop']-1)%$woocommerce_loop['columns']==0) echo 'first'; ?>">
 		
 		<?php do_action('woocommerce_before_shop_loop_item'); ?>
 		
@@ -33,7 +34,7 @@ if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocomme
 	
 endwhile; endif;
 
-if ($loop==0) :
+if ($woocommerce_loop['loop']==0) :
 
 	echo '<p class="info">'.__('No products found which match your selection.', 'woothemes').'</p>'; 
 	
