@@ -64,7 +64,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed image (zoom) URL after variation selection
 * Fixed category filter in admin
 * Fixed billing/shipping address on my account page
-* Option for hiding products if sub-categories are being shown
+* Option to hide products when sub-cats are shown, and empty cats are shown
 * Renamed $columns global for compatibility
 * Made variation slugs display as term name
 
