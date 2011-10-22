@@ -21,7 +21,7 @@ include_once('shortcode-thankyou.php');
  **/
 function woocommerce_recent_products( $atts ) {
 	
-	global $columns;
+	global $woocommerce_columns;
 	
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',
@@ -58,7 +58,7 @@ function woocommerce_recent_products( $atts ) {
  * List multiple products shortcode
  **/
 function woocommerce_products($atts){
-	global $columns;
+	global $woocommerce_columns;
 	
   	if (empty($atts)) return;
   
@@ -151,7 +151,7 @@ function woocommerce_product($atts){
  **/
 function woocommerce_featured_products( $atts ) {
 	
-	global $columns;
+	global $woocommerce_columns;
 	
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',

@@ -1,10 +1,10 @@
 <?php
 
-global $columns, $loop;
+global $woocommerce_columns, $loop;
 
 $loop = 0;
 
-if (!isset($columns) || !$columns) $columns = apply_filters('loop_shop_columns', 4);
+if (!isset($woocommerce_columns) || !$woocommerce_columns) $woocommerce_columns = apply_filters('loop_shop_columns', 4);
 
 ob_start();
 
@@ -13,7 +13,7 @@ do_action('woocommerce_before_shop_loop');
 if (have_posts()) : while (have_posts()) : the_post(); $_product = &new woocommerce_product( $post->ID ); if (!$_product->is_visible()) continue; $loop++;
 	
 	?>
-	<li class="product <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
+	<li class="product <?php if ($loop%$woocommerce_columns==0) echo 'last'; if (($loop-1)%$woocommerce_columns==0) echo 'first'; ?>">
 		
 		<?php do_action('woocommerce_before_shop_loop_item'); ?>
 		

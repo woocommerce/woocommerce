@@ -157,7 +157,7 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 		$attachments = get_posts($args);
 		if ($attachments) :
 			$loop = 0;
-			$columns = 3;
+			$woocommerce_columns = 3;
 			foreach ( $attachments as $attachment ) : 
 				
 				$loop++;
@@ -168,8 +168,8 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 				$image = wp_get_attachment_image($attachment->ID, $small_thumbnail_size);
 				
 				echo '<a href="'.$url.'" title="'.$post_title.'" rel="thumbnails" class="zoom ';
-				if ($loop==1 || ($loop-1)%$columns==0) echo 'first';
-				if ($loop%$columns==0) echo 'last';
+				if ($loop==1 || ($loop-1)%$woocommerce_columns==0) echo 'first';
+				if ($loop%$woocommerce_columns==0) echo 'last';
 				echo '">'.$image.'</a>';
 				
 			endforeach;
@@ -576,10 +576,10 @@ if (!function_exists('woocommerce_output_related_products')) {
 if (!function_exists('woocommerce_related_products')) {
 	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
 		
-		global $_product, $columns;
+		global $_product, $woocommerce_columns;
 		
 		// Pass vars to loop
-		$columns = $post_columns;
+		$woocommerce_columns = $post_columns;
 		
 		$related = $_product->get_related();
 		if (sizeof($related)>0) :
@@ -1040,8 +1040,8 @@ function woocommerce_upsell_display() {
  * Display Cross Sells
  **/
 function woocommerce_cross_sell_display() {
-	global $columns, $woocommerce;
-	$columns = 2;
+	global $woocommerce_columns, $woocommerce;
+	$woocommerce_columns = 2;
 	$crosssells = $woocommerce->cart->get_cross_sells();
 	
 	if (sizeof($crosssells)>0) :
@@ -1082,7 +1082,7 @@ function woocommerce_demo_store() {
  * display product sub categories as thumbnails
  **/
 function woocommerce_product_subcategories() {
-	global $woocommerce, $columns, $loop, $wp_query, $wp_the_query;
+	global $woocommerce, $woocommerce_columns, $loop, $wp_query, $wp_the_query;
 	
 	if ($wp_query !== $wp_the_query) return; // Detect main query
 	
@@ -1112,7 +1112,7 @@ function woocommerce_product_subcategories() {
 	if ($categories) foreach ($categories as $category) : $loop++;
 			
 		?>
-		<li class="product sub-category <?php if ($loop%$columns==0) echo 'last'; if (($loop-1)%$columns==0) echo 'first'; ?>">
+		<li class="product sub-category <?php if ($loop%$woocommerce_columns==0) echo 'last'; if (($loop-1)%$woocommerce_columns==0) echo 'first'; ?>">
 			
 			<?php do_action('woocommerce_before_subcategory', $category); ?>
 			
