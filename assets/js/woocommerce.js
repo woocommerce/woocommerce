@@ -333,7 +333,7 @@ jQuery(document).ready(function($) {
     //show single variation details (price, stock, image)
     function show_variation(variation) {
         var img = $('div.images img:eq(0)');
-        var link = $('div.images a.zoom');
+        var link = $('div.images a.zoom:eq(0)');
         var o_src = $(img).attr('original-src');
         var o_link = $(link).attr('original-href');
 
