@@ -95,15 +95,15 @@ function woocommerce_my_account( $atts ) {
 				</header>
 				<address>
 					<?php
-						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing-country', true )]; else $country = '';
+						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing_country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'billing_country', true )]; else $country = '';
 						$address = array(
-							get_user_meta( get_current_user_id(), 'billing-first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'billing-last_name', true )
-							,get_user_meta( get_current_user_id(), 'billing-company', true )
-							,get_user_meta( get_current_user_id(), 'billing-address', true )
-							,get_user_meta( get_current_user_id(), 'billing-address-2', true )
-							,get_user_meta( get_current_user_id(), 'billing-city', true )					
-							,get_user_meta( get_current_user_id(), 'billing-state', true )
-							,get_user_meta( get_current_user_id(), 'billing-postcode', true )
+							get_user_meta( get_current_user_id(), 'billing_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'billing_last_name', true )
+							,get_user_meta( get_current_user_id(), 'billing_company', true )
+							,get_user_meta( get_current_user_id(), 'billing_address', true )
+							,get_user_meta( get_current_user_id(), 'billing_address-2', true )
+							,get_user_meta( get_current_user_id(), 'billing_city', true )					
+							,get_user_meta( get_current_user_id(), 'billing_state', true )
+							,get_user_meta( get_current_user_id(), 'billing_postcode', true )
 							,$country
 						);
 						$address = array_map('trim', $address);
@@ -124,15 +124,15 @@ function woocommerce_my_account( $atts ) {
 				</header>
 				<address>
 					<?php
-						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping-country', true )]; else $country = '';
+						if (isset($woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping_country', true )])) $country = $woocommerce->countries->countries->countries[get_user_meta( get_current_user_id(), 'shipping_country', true )]; else $country = '';
 						$address = array(
-							get_user_meta( get_current_user_id(), 'shipping-first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'shipping-last_name', true )
-							,get_user_meta( get_current_user_id(), 'shipping-company', true )
-							,get_user_meta( get_current_user_id(), 'shipping-address', true )
-							,get_user_meta( get_current_user_id(), 'shipping-address-2', true )
-							,get_user_meta( get_current_user_id(), 'shipping-city', true )					
-							,get_user_meta( get_current_user_id(), 'shipping-state', true )
-							,get_user_meta( get_current_user_id(), 'shipping-postcode', true )
+							get_user_meta( get_current_user_id(), 'shipping_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'shipping_last_name', true )
+							,get_user_meta( get_current_user_id(), 'shipping_company', true )
+							,get_user_meta( get_current_user_id(), 'shipping_address', true )
+							,get_user_meta( get_current_user_id(), 'shipping_address-2', true )
+							,get_user_meta( get_current_user_id(), 'shipping_city', true )					
+							,get_user_meta( get_current_user_id(), 'shipping_state', true )
+							,get_user_meta( get_current_user_id(), 'shipping_postcode', true )
 							,$country
 						);
 						$address = array_map('trim', $address);
