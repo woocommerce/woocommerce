@@ -307,6 +307,8 @@ function woocommerce_products_by_category() {
 		foreach($terms as $term) :
 			if ( isset( $wp_query->query['product_cat'] ) ) :
 				$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$term->name ($term->count)</option>";
+			else :
+				$output .="<option value='$term->slug'>$term->name ($term->count)</option>";
 			endif;
 		endforeach;
 		$output .="</select>";
