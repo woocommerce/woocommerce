@@ -57,7 +57,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
-= 1.1.2 - 21/10/2011 =
+= 1.1.2 - 23/10/2011 =
 * Coupons can be applied to variations (by ID)
 * Fixed up/cross-sell removal
 * Fixed image (zoom) URL after variation selection
