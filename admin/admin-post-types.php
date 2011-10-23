@@ -301,7 +301,7 @@ add_action('restrict_manage_posts','woocommerce_products_by_category');
 function woocommerce_products_by_category() {
     global $typenow, $wp_query;
     if ($typenow=='product') :
-		$terms = get_terms('product_cat');
+		$terms = get_terms('product_cat', 'pad_counts=1&hierarchal=1');
 		$output = "<select name='product_cat' id='dropdown_product_cat'>";
 		$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
 		foreach($terms as $term) :
@@ -315,6 +315,7 @@ function woocommerce_products_by_category() {
 		echo $output;
     endif;
 }
+
 
 /**
  * Filter products by type

@@ -27,6 +27,30 @@ class woocommerce_payment_gateway {
 	var $form_fields = array();
 	var $errors = array();
 	var $sanitized_fields = array();
+
+	
+	/**
+	 * Get the return url (thank you page)
+	 *
+	 * @since 1.1.2
+	 */
+	function get_return_url( $order = '' ) {
+		
+		$thanks_page_id = get_option('woocommerce_thanks_page_id');
+		if ($thanks_page_id) :
+			$return_url = get_permalink($thanks_page_id);
+		else :
+			$return_url = home_url();
+		endif;
+		
+		if ( $order ) :
+			$return_url = add_query_arg('key', $order->order_key, add_query_arg('order', $order->id, $return_url));
+		endif;
+		
+		if (is_ssl() || get_option('woocommerce_force_ssl_checkout')=='yes') $return_url = str_replace('http:', 'https:', $return_url);
+		
+		return $return_url;
+	}
 	
 	/**
 	 * Check If The Gateway Is Available For Use

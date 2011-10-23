@@ -58,15 +58,16 @@ For further documentation on using WooCommerce, please sign up for free at http:
 == Changelog ==
 
 = 1.1.2 - 21/10/2011 =
-* Tax fix for prices excluding tax - issue was caused by 1.1.1 update
 * Coupons can be applied to variations (by ID)
 * Fixed up/cross-sell removal
 * Fixed image (zoom) URL after variation selection
 * Fixed category filter in admin
 * Fixed billing/shipping address on my account page
+* Tax fix for prices excluding tax - issue was in the 1.1.1 update
 * Option to hide products when sub-cats are shown, and empty cats are shown
-* Renamed $columns global for compatibility
+* Renamed $columns global for compatibility with certain themes
 * Made variation slugs display as term name
+* Added a helper function to get the return url (for gateways) - fixes https return url
 
 = 1.1.1 - 16/10/2011 =
 * Products need a base, regardless of category settings - added base to prevent pages breaking

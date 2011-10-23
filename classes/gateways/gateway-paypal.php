@@ -155,7 +155,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				'charset' 				=> 'UTF-8',
 				'rm' 					=> 2,
 				'upload' 				=> 1,
-				'return' 				=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id')))),
+				'return' 				=> $this->get_return_url( $order ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
 				//'cancel_return'			=> home_url(),
 				

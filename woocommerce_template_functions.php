@@ -218,7 +218,7 @@ if (!function_exists('woocommerce_template_single_meta')) {
 	function woocommerce_template_single_meta( $post, $_product ) {
 		
 		?>
-		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span class="sku">SKU: <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Posted in', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tagged as', 'woothemes').' ', '.</span>'); ?></div>
+		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Posted in', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tagged as', 'woothemes').' ', '.</span>'); ?></div>
 		<?php
 		
 	}
@@ -1105,7 +1105,7 @@ function woocommerce_product_subcategories() {
 	    'child_of'                  => $parent,
 	    'orderby'                  	=> 'menu_order',
 	    'order'                    	=> 'ASC',
-	    'hide_empty'               	=> 0,
+	    'hide_empty'               	=> 1,
 	    'hierarchical'             	=> 1,
 	    'taxonomy'                  => 'product_cat',
 	    'pad_counts'				=> 1
