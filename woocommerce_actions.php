@@ -618,10 +618,10 @@ function woocommerce_process_login() {
 			if ( is_wp_error($user) ) :
 				$woocommerce->add_error( $user->get_error_message() );
 			else :
-				if ( isset($_SERVER['HTTP_REFERER'])) {
+				if ( isset($_SERVER['HTTP_REFERER'])) :
 					wp_safe_redirect($_SERVER['HTTP_REFERER']);
 					exit;
-				}
+				endif;
 				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
 				exit;
 			endif;
