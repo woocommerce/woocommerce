@@ -115,6 +115,11 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+#: admin/admin-attributes.php:197
+#@ woothemes
+msgid "Configure&nbsp;terms"
+msgstr ""
+
 #: admin/admin-attributes.php:201
 #@ woothemes
 msgid "No attributes currently exist."
@@ -246,7 +251,7 @@ msgstr ""
 #: classes/product.class.php:571
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:72
-#: woocommerce.php:507
+#: woocommerce.php:508
 #@ woothemes
 msgid "out of 5"
 msgstr ""
@@ -320,14 +325,66 @@ msgstr ""
 msgid "Reports"
 msgstr ""
 
-#: admin/admin-post-types.php:683
-#@ default
-msgid "You do not have sufficient permissions to access this page."
+#: admin/admin-init.php:88
+#@ woothemes
+msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
 msgstr ""
 
-#: admin/admin-post-types.php:685
+#: admin/admin-init.php:89
 #@ woothemes
-msgid "You have taken too long. Please go back and retry."
+msgid "Calc totals based on order items, discount amount, and shipping?"
+msgstr ""
+
+#: admin/admin-init.php:90
+#@ woothemes
+msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
+msgstr ""
+
+#: admin/admin-init.php:92
+#: admin/admin-post-types.php:84
+#: admin/admin-post-types.php:133
+#: admin/writepanels/writepanel-order_data.php:128
+#@ woothemes
+msgid "ID"
+msgstr ""
+
+#: admin/admin-init.php:93
+#@ woothemes
+msgid "Item Name"
+msgstr ""
+
+#: admin/admin-init.php:94
+#: admin/writepanels/writepanel-order_data.php:182
+#: woocommerce_actions.php:212
+#@ woothemes
+msgid "Quantity e.g. 2"
+msgstr ""
+
+#: admin/admin-init.php:95
+#@ woothemes
+msgid "Cost per unit e.g. 2.99"
+msgstr ""
+
+#: admin/admin-init.php:96
+#: admin/writepanels/writepanel-order_data.php:184
+#: woocommerce_actions.php:214
+#@ woothemes
+msgid "Tax Rate e.g. 20.0000"
+msgstr ""
+
+#: admin/admin-init.php:97
+#@ woothemes
+msgid "Meta Name"
+msgstr ""
+
+#: admin/admin-init.php:98
+#@ woothemes
+msgid "Meta Value"
+msgstr ""
+
+#: admin/admin-init.php:99
+#@ woothemes
+msgid "Select terms"
 msgstr ""
 
 #: admin/admin-init.php:301
@@ -483,7 +540,6 @@ msgstr ""
 
 #: admin/admin-install.php:187
 #: woocommerce_emails.php:131
-#: woocommerce_emails.php:133
 #@ woothemes
 msgid "Order Received"
 msgstr ""
@@ -530,14 +586,6 @@ msgstr ""
 #: admin/admin-post-types.php:83
 #@ woothemes
 msgid "Thumb"
-msgstr ""
-
-#: admin/admin-init.php:92
-#: admin/admin-post-types.php:84
-#: admin/admin-post-types.php:133
-#: admin/writepanels/writepanel-order_data.php:128
-#@ woothemes
-msgid "ID"
 msgstr ""
 
 #: admin/admin-post-types.php:86
@@ -661,6 +709,16 @@ msgstr ""
 msgid "Show all types"
 msgstr ""
 
+#: admin/admin-post-types.php:357
+#@ woothemes
+msgid "Exclude image"
+msgstr ""
+
+#: admin/admin-post-types.php:366
+#@ woothemes
+msgid "Enabling this option will hide it from the product page image gallery."
+msgstr ""
+
 #: admin/admin-post-types.php:394
 #: shortcodes/shortcode-my_account.php:56
 #@ woothemes
@@ -770,6 +828,16 @@ msgstr ""
 #: admin/admin-post-types.php:669
 #@ woothemes
 msgid "Order draft updated."
+msgstr ""
+
+#: admin/admin-post-types.php:683
+#@ default
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: admin/admin-post-types.php:685
+#@ woothemes
+msgid "You have taken too long. Please go back and retry."
 msgstr ""
 
 #: admin/admin-reports.php:16
@@ -1072,6 +1140,11 @@ msgstr ""
 msgid "Height"
 msgstr ""
 
+#: admin/admin-settings-forms.php:162
+#@ woothemes
+msgid "Hard Crop"
+msgstr ""
+
 #: admin/admin-settings-forms.php:287
 #: admin/admin-settings-forms.php:313
 #@ woothemes
@@ -1247,6 +1320,26 @@ msgstr ""
 msgid "Shop Base Page"
 msgstr ""
 
+#: admin/admin-settings.php:137
+#@ woothemes
+msgid "This sets the base page of your shop."
+msgstr ""
+
+#: admin/admin-settings.php:145
+#@ woothemes
+msgid "Base Page Title"
+msgstr ""
+
+#: admin/admin-settings.php:146
+#@ woothemes
+msgid "This title to show on the shop base page. Leave blank to use the page title."
+msgstr ""
+
+#: admin/admin-settings.php:149
+#@ woothemes
+msgid "All Products"
+msgstr ""
+
 #: admin/admin-settings.php:153
 #@ woothemes
 msgid "Terms page ID"
@@ -1262,6 +1355,43 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:123
 #@ woothemes
 msgid "None"
+msgstr ""
+
+#: admin/admin-settings.php:165
+#@ woothemes
+msgid "Permalinks"
+msgstr ""
+
+#: admin/admin-settings.php:168
+#@ woothemes
+msgid "Taxonomy base page"
+msgstr ""
+
+#: admin/admin-settings.php:169
+#, php-format
+#@ woothemes
+msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
+msgstr ""
+
+#: admin/admin-settings.php:176
+#@ woothemes
+msgid "Product base page"
+msgstr ""
+
+#: admin/admin-settings.php:177
+#, php-format
+#@ woothemes
+msgid "Prepend product permalinks with shop base page (<code>%s</code>)"
+msgstr ""
+
+#: admin/admin-settings.php:185
+#@ woothemes
+msgid "Product base category"
+msgstr ""
+
+#: admin/admin-settings.php:186
+#@ woothemes
+msgid "Prepend product permalinks with product category"
 msgstr ""
 
 #: admin/admin-settings.php:195
@@ -1359,6 +1489,26 @@ msgstr ""
 msgid "Catalog Options"
 msgstr ""
 
+#: admin/admin-settings.php:279
+#@ woothemes
+msgid "Subcategories"
+msgstr ""
+
+#: admin/admin-settings.php:280
+#@ woothemes
+msgid "Show subcategories on category pages"
+msgstr ""
+
+#: admin/admin-settings.php:288
+#@ woothemes
+msgid "Show subcategories on the shop page"
+msgstr ""
+
+#: admin/admin-settings.php:296
+#@ woothemes
+msgid "When showing subcategories, hide products"
+msgstr ""
+
 #: admin/admin-settings.php:304
 #@ woothemes
 msgid "Product fields"
@@ -1372,6 +1522,11 @@ msgstr ""
 #: admin/admin-settings.php:313
 #@ woothemes
 msgid "Enable the weight field for products"
+msgstr ""
+
+#: admin/admin-settings.php:321
+#@ woothemes
+msgid "Enable the dimension fields for products"
 msgstr ""
 
 #: admin/admin-settings.php:329
@@ -1394,6 +1549,26 @@ msgstr ""
 msgid "lbs"
 msgstr ""
 
+#: admin/admin-settings.php:342
+#@ woothemes
+msgid "Dimensions Unit"
+msgstr ""
+
+#: admin/admin-settings.php:343
+#@ woothemes
+msgid "This controls what unit you will define lengths in."
+msgstr ""
+
+#: admin/admin-settings.php:349
+#@ woothemes
+msgid "cm"
+msgstr ""
+
+#: admin/admin-settings.php:350
+#@ woothemes
+msgid "in"
+msgstr ""
+
 #: admin/admin-settings.php:355
 #@ woothemes
 msgid "Cart redirect"
@@ -1402,11 +1577,6 @@ msgstr ""
 #: admin/admin-settings.php:356
 #@ woothemes
 msgid "Redirect to cart after adding a product to the cart (on single product pages)"
-msgstr ""
-
-#: admin/admin-settings.php:451
-#@ woothemes
-msgid "Image Options"
 msgstr ""
 
 #: admin/admin-settings.php:364
@@ -1540,6 +1710,11 @@ msgstr ""
 msgid "Thai Baht"
 msgstr ""
 
+#: admin/admin-settings.php:398
+#@ woothemes
+msgid "Turkish Lira (TL)"
+msgstr ""
+
 #: admin/admin-settings.php:404
 #@ woothemes
 msgid "Currency Position"
@@ -1598,6 +1773,46 @@ msgstr ""
 #: admin/admin-settings.php:441
 #@ woothemes
 msgid "This sets the number of decimal points shown in displayed prices."
+msgstr ""
+
+#: admin/admin-settings.php:451
+#@ woothemes
+msgid "Image Options"
+msgstr ""
+
+#: admin/admin-settings.php:451
+#@ woothemes
+msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles."
+msgstr ""
+
+#: admin/admin-settings.php:454
+#@ woothemes
+msgid "Catalog Images"
+msgstr ""
+
+#: admin/admin-settings.php:455
+#@ woothemes
+msgid "This size is usually used in product listings"
+msgstr ""
+
+#: admin/admin-settings.php:463
+#@ woothemes
+msgid "Single Product Image"
+msgstr ""
+
+#: admin/admin-settings.php:464
+#@ woothemes
+msgid "This is the size used by the main image on the product page."
+msgstr ""
+
+#: admin/admin-settings.php:472
+#@ woothemes
+msgid "Product Thumbnails"
+msgstr ""
+
+#: admin/admin-settings.php:473
+#@ woothemes
+msgid "This size is usually used for the gallery of images on the product page."
 msgstr ""
 
 #: admin/admin-settings.php:487
@@ -1773,6 +1988,11 @@ msgstr ""
 
 #: admin/admin-settings.php:675
 #@ woothemes
+msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
+msgstr ""
+
+#: admin/admin-settings.php:675
+#@ woothemes
 msgid "WooCommerce has been installed. Enjoy :)"
 msgstr ""
 
@@ -1830,24 +2050,37 @@ msgstr ""
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 
+#: admin/admin-taxonomies.php:22
+#: admin/admin-taxonomies.php:79
+#@ woothemes
+msgid "Thumbnail"
+msgstr ""
+
+#: admin/admin-taxonomies.php:26
+#: admin/admin-taxonomies.php:84
+#@ woothemes
+msgid "Upload/Add image"
+msgstr ""
+
+#: admin/admin-taxonomies.php:27
+#: admin/admin-taxonomies.php:85
+#@ woothemes
+msgid "Remove image"
+msgstr ""
+
 #: admin/writepanels/writepanel-coupon_data.php:30
 #@ woothemes
 msgid "Discount type"
 msgstr ""
 
-#: classes/woocommerce.class.php:226
+#: admin/writepanels/writepanel-coupon_data.php:33
 #@ woothemes
-msgid "Cart Discount"
+msgid "0.00"
 msgstr ""
 
-#: classes/woocommerce.class.php:227
+#: admin/writepanels/writepanel-coupon_data.php:33
 #@ woothemes
-msgid "Cart % Discount"
-msgstr ""
-
-#: classes/woocommerce.class.php:228
-#@ woothemes
-msgid "Product Discount"
+msgid "Enter an amount e.g. 2.99 or an integer for percentages e.g. 20%"
 msgstr ""
 
 #: admin/writepanels/writepanel-coupon_data.php:36
@@ -1855,9 +2088,36 @@ msgstr ""
 msgid "Individual use"
 msgstr ""
 
+#: admin/writepanels/writepanel-coupon_data.php:36
+#@ woothemes
+msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#: shortcodes/shortcode-my_account.php:587
+#: shortcodes/shortcode-my_account.php:600
+#@ woothemes
+msgid "N/A"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#@ woothemes
+msgid "(optional) Comma separate product IDs which need to be in the cart to use this coupon, or for \"Product Discounts\" are discounted."
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:42
+#@ woothemes
+msgid "Unlimited usage"
+msgstr ""
+
 #: admin/writepanels/writepanel-coupon_data.php:42
 #@ woothemes
 msgid "(optional) How many times this coupon can be used before it is void"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:45
+#@ woothemes
+msgid "Never expire"
 msgstr ""
 
 #: admin/writepanels/writepanel-coupon_data.php:45
@@ -1873,6 +2133,11 @@ msgstr ""
 #: admin/writepanels/writepanel-coupon_data.php:78
 #@ woothemes
 msgid "Coupon amount is required"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:79
+#@ woothemes
+msgid "Product discount coupons require you to set \"Product IDs\" to work."
 msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:53
@@ -2078,24 +2343,10 @@ msgstr ""
 msgid "Add&nbsp;meta"
 msgstr ""
 
-#: admin/admin-init.php:94
-#: admin/writepanels/writepanel-order_data.php:182
-#: woocommerce_actions.php:212
-#@ woothemes
-msgid "Quantity e.g. 2"
-msgstr ""
-
 #: admin/writepanels/writepanel-order_data.php:183
 #: woocommerce_actions.php:213
 #@ woothemes
 msgid "Cost per unit ex. tax e.g. 2.99"
-msgstr ""
-
-#: admin/admin-init.php:96
-#: admin/writepanels/writepanel-order_data.php:184
-#: woocommerce_actions.php:214
-#@ woothemes
-msgid "Tax Rate e.g. 20.0000"
 msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:199
@@ -2595,6 +2846,16 @@ msgstr ""
 msgid "Date format"
 msgstr ""
 
+#: admin/writepanels/writepanel-product_data.php:131
+#@ woothemes
+msgid "Dimensions"
+msgstr ""
+
+#: admin/writepanels/writepanel-product_data.php:132
+#@ woothemes
+msgid "Length"
+msgstr ""
+
 #: admin/writepanels/writepanel-product_data.php:155
 #: classes/shipping/shipping-flat_rate.php:119
 #@ woothemes
@@ -2812,46 +3073,6 @@ msgstr ""
 msgid "(no parent)"
 msgstr ""
 
-#: admin/admin-init.php:88
-#@ woothemes
-msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
-msgstr ""
-
-#: admin/admin-init.php:89
-#@ woothemes
-msgid "Calc totals based on order items, discount amount, and shipping?"
-msgstr ""
-
-#: admin/admin-init.php:90
-#@ woothemes
-msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
-msgstr ""
-
-#: admin/admin-init.php:93
-#@ woothemes
-msgid "Item Name"
-msgstr ""
-
-#: admin/admin-init.php:95
-#@ woothemes
-msgid "Cost per unit e.g. 2.99"
-msgstr ""
-
-#: admin/admin-init.php:97
-#@ woothemes
-msgid "Meta Name"
-msgstr ""
-
-#: admin/admin-init.php:98
-#@ woothemes
-msgid "Meta Value"
-msgstr ""
-
-#: admin/admin-init.php:99
-#@ woothemes
-msgid "Select terms"
-msgstr ""
-
 #: classes/cart.class.php:143
 #@ woothemes
 msgid "This product cannot be purchased - the price is not yet announced"
@@ -2890,7 +3111,7 @@ msgstr ""
 #: classes/cart.class.php:479
 #: classes/cart.class.php:522
 #: classes/order.class.php:151
-#: woocommerce.php:399
+#: woocommerce.php:400
 #@ woothemes
 msgid " <small>(ex. tax)</small>"
 msgstr ""
@@ -3038,7 +3259,7 @@ msgstr ""
 
 #: classes/checkout.class.php:309
 #: shortcodes/shortcode-my_account.php:334
-#: woocommerce.php:200
+#: woocommerce.php:201
 #: woocommerce_template_functions.php:638
 #@ woothemes
 msgid "Select a state&hellip;"
@@ -3279,6 +3500,11 @@ msgstr ""
 #: classes/gateways/gateway-cheque.php:71
 #@ woothemes
 msgid "Cheque Payment"
+msgstr ""
+
+#: classes/gateways/gateway-cheque.php:55
+#@ woothemes
+msgid "Let the customer know the payee and where they should be sending the cheque to and that their order won't be shipping until you receive it."
 msgstr ""
 
 #: classes/gateways/gateway-cheque.php:72
@@ -3544,6 +3770,21 @@ msgstr ""
 #: classes/shipping/shipping-free_shipping.php:57
 #@ woothemes
 msgid "Users will need to spend this amount to get free shipping. Leave blank to disable."
+msgstr ""
+
+#: classes/woocommerce.class.php:226
+#@ woothemes
+msgid "Cart Discount"
+msgstr ""
+
+#: classes/woocommerce.class.php:227
+#@ woothemes
+msgid "Cart % Discount"
+msgstr ""
+
+#: classes/woocommerce.class.php:228
+#@ woothemes
+msgid "Product Discount"
 msgstr ""
 
 #: languages/country_translation.php:13
@@ -5351,8 +5592,13 @@ msgstr ""
 msgid "Cupertino"
 msgstr ""
 
+#: shortcodes/shortcode-my_account.php:321
+#@ woothemes
+msgid "State"
+msgstr ""
+
 #: shortcodes/shortcode-my_account.php:344
-#: woocommerce.php:201
+#: woocommerce.php:202
 #: woocommerce_template_functions.php:650
 #@ woothemes
 msgid "state"
@@ -5483,13 +5729,6 @@ msgstr ""
 msgid "Telephone:"
 msgstr ""
 
-#: admin/writepanels/writepanel-coupon_data.php:39
-#: shortcodes/shortcode-my_account.php:587
-#: shortcodes/shortcode-my_account.php:600
-#@ woothemes
-msgid "N/A"
-msgstr ""
-
 #: shortcodes/shortcode-order_tracking.php:33
 #@ woothemes
 msgid "You have taken too long. Please refresh the page and retry."
@@ -5581,6 +5820,16 @@ msgstr ""
 msgid "Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction."
 msgstr ""
 
+#: shortcodes/shortcode-thankyou.php:43
+#@ woothemes
+msgid "Please attempt your purchase again or go to your account page."
+msgstr ""
+
+#: shortcodes/shortcode-thankyou.php:45
+#@ woothemes
+msgid "Please attempt your purchase again."
+msgstr ""
+
 #: shortcodes/shortcode-thankyou.php:58
 #: shortcodes/shortcode-thankyou.php:95
 #@ woothemes
@@ -5590,11 +5839,6 @@ msgstr ""
 #: templates/archive-product.php:12
 #@ woothemes
 msgid "Search Results:"
-msgstr ""
-
-#: admin/admin-settings.php:149
-#@ woothemes
-msgid "All Products"
 msgstr ""
 
 #: templates/checkout/form.php:23
@@ -6078,37 +6322,37 @@ msgstr ""
 msgid "Top Rated Products"
 msgstr ""
 
-#: woocommerce.php:157
+#: woocommerce.php:158
 #@ woothemes
 msgid "Customer"
 msgstr ""
 
-#: woocommerce.php:164
+#: woocommerce.php:165
 #@ woothemes
 msgid "Shop Manager"
 msgstr ""
 
-#: woocommerce.php:484
+#: woocommerce.php:485
 #@ woothemes
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce.php:487
+#: woocommerce.php:488
 #@ woothemes
 msgid "Please rate the product."
 msgstr ""
 
-#: woocommerce.php:510
+#: woocommerce.php:511
 #@ woothemes
 msgid "Your comment is awaiting approval"
 msgstr ""
 
-#: woocommerce.php:513
+#: woocommerce.php:514
 #@ woothemes
 msgid "Rating by"
 msgstr ""
 
-#: woocommerce.php:513
+#: woocommerce.php:514
 #@ woothemes
 msgid "on"
 msgstr ""
@@ -6214,15 +6458,33 @@ msgstr ""
 msgid "[%s] New Customer Order (# %s)"
 msgstr ""
 
-#: woocommerce_emails.php:165
+#: woocommerce_emails.php:133
+#, php-format
 #@ woothemes
-msgid "Order Complete"
+msgid "[%s] Order Received"
+msgstr ""
+
+#: woocommerce_emails.php:163
+#, php-format
+#@ woothemes
+msgid "[%s] Order Complete/Download Links"
+msgstr ""
+
+#: woocommerce_emails.php:165
+#, php-format
+#@ woothemes
+msgid "[%s] Order Complete"
 msgstr ""
 
 #: woocommerce_emails.php:197
-#: woocommerce_emails.php:199
 #@ woothemes
 msgid "Pay for Order"
+msgstr ""
+
+#: woocommerce_emails.php:199
+#, php-format
+#@ woothemes
+msgid "[%s] Pay for Order"
 msgstr ""
 
 #: woocommerce_emails.php:220
@@ -6258,6 +6520,12 @@ msgstr ""
 #: woocommerce_emails.php:245
 #@ woothemes
 msgid "have been backordered."
+msgstr ""
+
+#: woocommerce_taxonomy.php:33
+#: woocommerce_taxonomy.php:309
+#@ woothemes
+msgid "product"
 msgstr ""
 
 #: woocommerce_taxonomy.php:50
@@ -6643,6 +6911,16 @@ msgstr ""
 msgid "Add to cart"
 msgstr ""
 
+#: woocommerce_template_functions.php:221
+#@ woothemes
+msgid "Posted in"
+msgstr ""
+
+#: woocommerce_template_functions.php:221
+#@ woothemes
+msgid "Tagged as"
+msgstr ""
+
 #: woocommerce_template_functions.php:402
 #@ woothemes
 msgid "Choose an option"
@@ -6790,271 +7068,5 @@ msgstr ""
 #: woocommerce_template_functions.php:1077
 #@ woothemes
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
-msgstr ""
-
-#: admin/admin-settings.php:398
-#@ woothemes
-msgid "Turkish Lira (TL)"
-msgstr ""
-
-#: admin/admin-settings.php:675
-#@ woothemes
-msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
-msgstr ""
-
-#: classes/gateways/gateway-cheque.php:55
-#@ woothemes
-msgid "Let the customer know the payee and where they should be sending the cheque to and that their order won't be shipping until you receive it."
-msgstr ""
-
-#: shortcodes/shortcode-my_account.php:321
-#@ woothemes
-msgid "State"
-msgstr ""
-
-#: shortcodes/shortcode-thankyou.php:43
-#@ woothemes
-msgid "Please attempt your purchase again or go to your account page."
-msgstr ""
-
-#: shortcodes/shortcode-thankyou.php:45
-#@ woothemes
-msgid "Please attempt your purchase again."
-msgstr ""
-
-#: admin/admin-attributes.php:197
-#@ woothemes
-msgid "Configure&nbsp;terms"
-msgstr ""
-
-#: admin/admin-post-types.php:357
-#@ woothemes
-msgid "Exclude image"
-msgstr ""
-
-#: admin/admin-post-types.php:366
-#@ woothemes
-msgid "Enabling this option will hide it from the product page image gallery."
-msgstr ""
-
-#: admin/admin-settings-forms.php:162
-#@ woothemes
-msgid "Hard Crop"
-msgstr ""
-
-#: admin/admin-settings.php:145
-#@ woothemes
-msgid "Base Page Title"
-msgstr ""
-
-#: admin/admin-settings.php:165
-#@ woothemes
-msgid "Permalinks"
-msgstr ""
-
-#: admin/admin-settings.php:168
-#@ woothemes
-msgid "Taxonomy base page"
-msgstr ""
-
-#: admin/admin-settings.php:169
-#, php-format
-#@ woothemes
-msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
-msgstr ""
-
-#: admin/admin-settings.php:176
-#@ woothemes
-msgid "Product base page"
-msgstr ""
-
-#: admin/admin-settings.php:177
-#, php-format
-#@ woothemes
-msgid "Prepend product permalinks with shop base page (<code>%s</code>)"
-msgstr ""
-
-#: admin/admin-settings.php:185
-#@ woothemes
-msgid "Product base category"
-msgstr ""
-
-#: admin/admin-settings.php:186
-#@ woothemes
-msgid "Prepend product permalinks with product category"
-msgstr ""
-
-#: admin/admin-settings.php:321
-#@ woothemes
-msgid "Enable the dimension fields for products"
-msgstr ""
-
-#: admin/admin-settings.php:342
-#@ woothemes
-msgid "Dimensions Unit"
-msgstr ""
-
-#: admin/admin-settings.php:343
-#@ woothemes
-msgid "This controls what unit you will define lengths in."
-msgstr ""
-
-#: admin/admin-settings.php:349
-#@ woothemes
-msgid "cm"
-msgstr ""
-
-#: admin/admin-settings.php:350
-#@ woothemes
-msgid "in"
-msgstr ""
-
-#: admin/admin-settings.php:451
-#@ woothemes
-msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles."
-msgstr ""
-
-#: admin/admin-settings.php:454
-#@ woothemes
-msgid "Catalog Images"
-msgstr ""
-
-#: admin/admin-settings.php:455
-#@ woothemes
-msgid "This size is usually used in product listings"
-msgstr ""
-
-#: admin/admin-settings.php:463
-#@ woothemes
-msgid "Single Product Image"
-msgstr ""
-
-#: admin/admin-settings.php:464
-#@ woothemes
-msgid "This is the size used by the main image on the product page."
-msgstr ""
-
-#: admin/admin-settings.php:472
-#@ woothemes
-msgid "Product Thumbnails"
-msgstr ""
-
-#: admin/admin-settings.php:473
-#@ woothemes
-msgid "This size is usually used for the gallery of images on the product page."
-msgstr ""
-
-#: admin/admin-taxonomies.php:22
-#: admin/admin-taxonomies.php:79
-#@ woothemes
-msgid "Thumbnail"
-msgstr ""
-
-#: admin/admin-taxonomies.php:26
-#: admin/admin-taxonomies.php:84
-#@ woothemes
-msgid "Upload/Add image"
-msgstr ""
-
-#: admin/admin-taxonomies.php:27
-#: admin/admin-taxonomies.php:85
-#@ woothemes
-msgid "Remove image"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:33
-#@ woothemes
-msgid "0.00"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:33
-#@ woothemes
-msgid "Enter an amount e.g. 2.99 or an integer for percentages e.g. 20%"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:36
-#@ woothemes
-msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:39
-#@ woothemes
-msgid "(optional) Comma separate product IDs which need to be in the cart to use this coupon, or for \"Product Discounts\" are discounted."
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:42
-#@ woothemes
-msgid "Unlimited usage"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:45
-#@ woothemes
-msgid "Never expire"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:79
-#@ woothemes
-msgid "Product discount coupons require you to set \"Product IDs\" to work."
-msgstr ""
-
-#: admin/writepanels/writepanel-product_data.php:131
-#@ woothemes
-msgid "Dimensions"
-msgstr ""
-
-#: admin/writepanels/writepanel-product_data.php:132
-#@ woothemes
-msgid "Length"
-msgstr ""
-
-#: woocommerce_emails.php:163
-#@ woothemes
-msgid "Order Complete/Download Links"
-msgstr ""
-
-#: woocommerce_taxonomy.php:33
-#: woocommerce_taxonomy.php:309
-#@ woothemes
-msgid "product"
-msgstr ""
-
-#: admin/admin-settings.php:137
-#@ woothemes
-msgid "This sets the base page of your shop."
-msgstr ""
-
-#: admin/admin-settings.php:146
-#@ woothemes
-msgid "This title to show on the shop base page. Leave blank to use the page title."
-msgstr ""
-
-#: admin/admin-settings.php:279
-#@ woothemes
-msgid "Subcategories"
-msgstr ""
-
-#: admin/admin-settings.php:280
-#@ woothemes
-msgid "Show subcategories on category pages"
-msgstr ""
-
-#: admin/admin-settings.php:288
-#@ woothemes
-msgid "Show subcategories on the shop page"
-msgstr ""
-
-#: admin/admin-settings.php:296
-#@ woothemes
-msgid "When showing subcategories, hide products"
-msgstr ""
-
-#: woocommerce_template_functions.php:221
-#@ woothemes
-msgid "Posted in"
-msgstr ""
-
-#: woocommerce_template_functions.php:221
-#@ woothemes
-msgid "Tagged as"
 msgstr ""
 

@@ -16,6 +16,7 @@ if (!session_id()) session_start();
  * Localisation
  **/
 load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
 
 /**
  * Constants
