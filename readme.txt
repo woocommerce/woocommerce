@@ -57,6 +57,9 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
+= 1.1.3 - xx/10/2011 =
+* Updated some localisation strings in email subject lines
+
 = 1.1.2 - 23/10/2011 =
 * Coupons can be applied to variations (by ID)
 * Fixed up/cross-sell removal

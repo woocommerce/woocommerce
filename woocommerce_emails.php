@@ -130,7 +130,7 @@ function woocommerce_processing_order_customer_notification( $id ) {
 	
 	$email_heading = __('Order Received', 'woothemes');
 	
-	$subject = '[' . get_bloginfo('name') . '] ' . __('Order Received', 'woothemes');
+	$subject = sprintf(__('[%s] Order Received', 'woothemes'), get_bloginfo('name'));
 	
 	// Buffer
 	ob_start();
@@ -160,14 +160,14 @@ function woocommerce_completed_order_customer_notification( $id ) {
 	$order = &new woocommerce_order( $order_id );
 	
 	if ($order->has_downloadable_item()) :
-		$email_heading = __('Order Complete/Download Links', 'woothemes');
+		$email_heading = __('[%s] Order Complete/Download Links', 'woothemes');
 	else :
-		$email_heading = __('Order Complete', 'woothemes');
+		$email_heading = __('[%s] Order Complete', 'woothemes');
 	endif;
 	
 	$email_heading = apply_filters('woocommerce_completed_order_customer_notification_subject', $email_heading);
 
-	$subject = '[' . get_bloginfo('name') . '] ' . $email_heading;
+	$subject = sprintf($email_heading, get_bloginfo('name'));
 	
 	// Buffer
 	ob_start();
@@ -196,7 +196,7 @@ function woocommerce_pay_for_order_customer_notification( $id ) {
 	
 	$email_heading = __('Pay for Order', 'woothemes');
 
-	$subject = '[' . get_bloginfo('name') . '] ' . __('Pay for Order', 'woothemes');
+	$subject = sprintf(__('[%s] Pay for Order', 'woothemes'), get_bloginfo('name'));
 
 	// Buffer
 	ob_start();
