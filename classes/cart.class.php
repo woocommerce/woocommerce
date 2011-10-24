@@ -400,7 +400,7 @@ class woocommerce_cart {
 				// Product Discounts
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 					$coupon = &new woocommerce_coupon( $code );
-					if ($coupon->type=='fixed_product' && in_array($values['product_id'], $coupon->product_ids)) :
+					if ($coupon->type=='fixed_product' && (in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids))) :
 						$this->discount_total = $this->discount_total + ( $coupon->amount * $values['quantity'] );
 					endif;
 				endforeach;
