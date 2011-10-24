@@ -61,6 +61,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Updated some localisation strings in email subject lines
 * Fixed variation coupons
 * Fixed edit address via my account
+* Support for localisations in wp-content/languages/woocommerce
 
 = 1.1.2 - 23/10/2011 =
 * Coupons can be applied to variations (by ID)
