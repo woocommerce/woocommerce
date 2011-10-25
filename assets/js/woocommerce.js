@@ -537,7 +537,7 @@ jQuery(document).ready(function($) {
 			$('#shipping_method').live('change', function(){
 				clearTimeout(updateTimer);
 				update_checkout();
-			}).change();
+			});
 			$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 				clearTimeout(updateTimer);
 				updateTimer = setTimeout("update_checkout()", '1000');
@@ -546,6 +546,9 @@ jQuery(document).ready(function($) {
 				clearTimeout(updateTimer);
 				update_checkout();
 			});
+			
+			// Update on page load
+			update_checkout();
 			
 			/* AJAX Form Submission */
 			$('form.checkout').submit(function(){

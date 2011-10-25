@@ -68,13 +68,13 @@ class woocommerce_checkout {
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-last') 
+				'class'			=> array('form-row-last update_totals_on_change') 
 				),
 			'billing_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first'), 
+				'class' 		=> array('form-row-first update_totals_on_change'), 
 				'rel' 			=> 'billing_state' 
 				),
 			'billing_state' 	=> array( 
@@ -82,7 +82,7 @@ class woocommerce_checkout {
 				'name'			=>'billing_state', 
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last'), 
+				'class' 		=> array('form-row-last update_totals_on_change'), 
 				'rel' 			=> 'billing_country' 
 				),
 			'billing_email' 	=> array( 
@@ -139,20 +139,20 @@ class woocommerce_checkout {
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
+				'class' 		=> array('form-row-last update_totals_on_change') 
 				),
 			'shipping_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first'), 
+				'class' 		=> array('form-row-first update_totals_on_change'), 
 				'rel' 			=> 'shipping_state' 
 				),
 			'shipping_state' 	=> array( 
 				'type'			=> 'state', 
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last'), 
+				'class' 		=> array('form-row-last update_totals_on_change'), 
 				'rel' 			=> 'shipping_country' 
 				)
 		));
@@ -384,7 +384,7 @@ class woocommerce_checkout {
 			
 			if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 1;
 			
-			// Update shipping method to posted method
+			// Update customer shipping method to posted method
 			$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
 			
 			// Update cart totals
@@ -449,6 +449,14 @@ class woocommerce_checkout {
 				endforeach;
 			
 			endif;
+			
+			// Update customer location to posted location so we can correctly check available shipping methods
+			$woocommerce->customer->set_country( $this->posted['billing_country'] );
+			$woocommerce->customer->set_state( $this->posted['billing_state'] );
+			$woocommerce->customer->set_postcode( $this->posted['billing_postcode'] );
+			$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
+			$woocommerce->customer->set_shipping_state( $this->posted['shipping_state'] );
+			$woocommerce->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
 
 			if (is_user_logged_in()) :
 				$this->creating_account = false;
@@ -486,6 +494,7 @@ class woocommerce_checkout {
 			
 				// Shipping Method
 				$available_methods = $woocommerce->shipping->get_available_shipping_methods();
+				
 				if (!isset($available_methods[$this->posted['shipping_method']])) :
 					$woocommerce->add_error( __('Invalid shipping method.', 'woothemes') );
 				endif;	
