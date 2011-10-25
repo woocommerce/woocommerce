@@ -5,30 +5,34 @@
         
         <title><?php echo get_bloginfo('name'); ?></title>
 		<style type="text/css">
-			/* Client-specific Styles */
+			/* Client-specific/Reset Styles */
 			#outlook a{padding:0;} /* Force Outlook to provide a "view in browser" button. */
-			body{width:100% !important;} /* Force Hotmail to display emails at full width */
-			body{-webkit-text-size-adjust:none;} /* Prevent Webkit platforms from changing default text sizes. */
-
-			/* Reset Styles */
-			body{margin:0; padding:0;}
+			body{
+				width:100% !important; /* Force Hotmail to display emails at full width */
+				-webkit-text-size-adjust:none; /* Prevent Webkit platforms from changing default text sizes. */
+				margin:0; 
+				padding:0;
+			}
 			img{border:none; font-size:14px; font-weight:bold; height:auto; line-height:100%; outline:none; text-decoration:none; text-transform:capitalize;}
 			#backgroundTable{height:100% !important; margin:0; padding:0; width:100% !important;}
 
 			/* Template Styles */
 
 			body {
-				background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAPElEQVQIHU2KMQoAMAjErDg6+P9XOjgKbe+o0Awajqx9kUdV0XSGzKR2tyyUU2B1d9G/wADUzCgRwY9zAKJ1GcVQulAXAAAAAElFTkSuQmCC);
+				background: <?php echo get_option('woocommerce_email_background_color'); ?> url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAOklEQVQYGWP8//8/AyHAREgBIyOjMQPIJFwYaIAxSI6RbOvAViC7A90qmBXI4qRZh2EFunXYrEC2DgDc+VH0jS2AGAAAAABJRU5ErkJggg==);
 			}
 			
 			#templateContainer{
-				border: 1px solid #DDDDDD;
+				border: 1px solid <?php echo woocommerce_hex_darker(get_option('woocommerce_email_background_color'), 20); ?>;
 				-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.1);
 				-webkit-border-radius:6px;
 			}
 
-			h1, .h1{
-				color:#202020;
+			h1, .h1,
+			h2, .h2,
+			h3, .h3,
+			h4, .h4 {
+				color:<?php echo woocommerce_hex_darker(get_option('woocommerce_email_text_color'), 50); ?>;
 				display:block;
 				font-family:Arial;
 				font-size:34px;
@@ -43,79 +47,34 @@
 			}
 
 			h2, .h2{
-				color:#202020;
-				display:block;
-				font-family:Arial;
 				font-size:30px;
-				font-weight:bold;
-				line-height:100%;
-				margin-top:0;
-				margin-right:0;
-				margin-bottom:10px;
-				margin-left:0;
-				text-align:left;
-				line-height: 1.5;
 			}
 
 			h3, .h3{
-				color:#202020;
-				display:block;
-				font-family:Arial;
 				font-size:26px;
-				font-weight:bold;
-				line-height:100%;
-				margin-top:0;
-				margin-right:0;
-				margin-bottom:10px;
-				margin-left:0;
-				text-align:left;
-				line-height: 1.5;
 			}
 
 			h4, .h4{
-				color:#202020;
-				display:block;
-				font-family:Arial;
 				font-size:22px;
-				font-weight:bold;
-				line-height:100%;
-				margin-top:0;
-				margin-right:0;
-				margin-bottom:10px;
-				margin-left:0;
-				text-align:left;
-				line-height: 1.5;
 			}
 
 			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: HEADER /\/\/\/\/\/\/\/\/\/\ */
 
 			#templateHeader{
-				background-color:#557da1;
-				background: -webkit-linear-gradient(#7496b5, #557da1);
+				background-color: <?php echo get_option('woocommerce_email_base_color'); ?>;
+				background: -webkit-linear-gradient(<?php echo woocommerce_hex_lighter(get_option('woocommerce_email_base_color'), 20); ?>, <?php echo get_option('woocommerce_email_base_color'); ?>);
 				border-bottom:0;
 				-webkit-border-top-left-radius:6px;
 				-webkit-border-top-right-radius:6px;
 			}
 
 			.headerContent{
-				color:#202020;
-				font-family:Arial;
-				font-size:34px;
-				font-weight:bold;
-				line-height:100%;
 				padding:24px;
 				vertical-align:middle;
 			}
-			
-			.headerContent h1.h1 {
-				color:#fff;
-				margin:0;
-				text-shadow:0 1px 0 #436380;
-				line-height: 1.5;
-			}
 
 			.headerContent a:link, .headerContent a:visited{
-				color:#fff;
+				color:<?php echo woocommerce_light_or_dark(get_option('woocommerce_email_base_color'), '#202020', '#ffffff'); ?>;
 				font-weight:normal;
 				text-decoration:underline;
 			}
@@ -123,12 +82,12 @@
 			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: MAIN BODY /\/\/\/\/\/\/\/\/\/\ */
 
 			#templateContainer, .bodyContent{
-				background-color:#FDFDFD;
+				background-color:<?php echo get_option('woocommerce_email_body_background_color'); ?>;
 				-webkit-border-radius:6px;
 			}
 
 			.bodyContent div{
-				color:#505050;
+				color: <?php echo woocommerce_hex_lighter(get_option('woocommerce_email_text_color'), 20); ?>;
 				font-family:Arial;
 				font-size:14px;
 				line-height:150%;
@@ -136,7 +95,7 @@
 			}
 
 			.bodyContent div a:link, .bodyContent div a:visited{
-				color:#336699;
+				color: <?php echo get_option('woocommerce_email_text_color'); ?>;
 				font-weight:normal;
 				text-decoration:underline;
 			}
@@ -145,22 +104,16 @@
 				display:inline;
 				height:auto;
 			}
-			
-			.bodyContent quote {
-				font-style: italic;
-				color: #999;
-			}
 
 			/* /\/\/\/\/\/\/\/\/\/\ STANDARD STYLING: FOOTER /\/\/\/\/\/\/\/\/\/\ */
 
 			#templateFooter{
-				background-color:#FDFDFD;
 				border-top:0;
 				-webkit-border-radius:6px;
 			}
 
 			.footerContent div{
-				color:#707070;
+				color:<?php echo woocommerce_hex_lighter(get_option('woocommerce_email_text_color'), 40); ?>;
 				font-family:Arial;
 				font-size:12px;
 				line-height:125%;
@@ -168,7 +121,7 @@
 			}
 
 			.footerContent div a:link, .footerContent div a:visited{
-				color:#336699;
+				color:<?php echo woocommerce_hex_lighter(get_option('woocommerce_email_text_color'), 40); ?>;
 				font-weight:normal;
 				text-decoration:underline;
 			}
@@ -178,9 +131,8 @@
 			}
 
 			#credit {
-				background-color:#FAFAFA;
 				border:0;
-				color:#707070;
+				color:<?php echo woocommerce_hex_lighter(get_option('woocommerce_email_text_color'), 40); ?>;
 				font-family:Arial;
 				font-size:12px;
 				line-height:125%;
@@ -189,24 +141,24 @@
 
 		</style>
 	</head>
-    <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" style="background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAPElEQVQIHU2KMQoAMAjErDg6+P9XOjgKbe+o0Awajqx9kUdV0XSGzKR2tyyUU2B1d9G/wADUzCgRwY9zAKJ1GcVQulAXAAAAAElFTkSuQmCC);">
+    <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" style="background: <?php echo get_option('woocommerce_email_background_color'); ?> url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAOklEQVQYGWP8//8/AyHAREgBIyOjMQPIJFwYaIAxSI6RbOvAViC7A90qmBXI4qRZh2EFunXYrEC2DgDc+VH0jS2AGAAAAABJRU5ErkJggg==);">
     	<center style="padding: 70px 0 0 0;">
         	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable">
             	<tr>
                 	<td align="center" valign="top">
                         
                         <!-- // End Template Preheader \\ -->
-                    	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateContainer" style="-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025); -webkit-border-radius:6px;background-color:#FDFDFD;">
+                    	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateContainer" style="-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025); -webkit-border-radius:6px;background-color:<?php echo get_option('woocommerce_email_body_background_color'); ?>;">
                         	<tr>
                             	<td align="center" valign="top">
                                     <!-- // Begin Template Header \\ -->
-                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateHeader" style="background-color:#557da1; -webkit-border-top-left-radius:6px; -webkit-border-top-right-radius:6px; color:#202020; font-family:Arial; font-weight:bold; line-height:100%; vertical-align:middle;">
+                                	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateHeader" style="background-color:<?php echo get_option('woocommerce_email_base_color'); ?>; -webkit-border-top-left-radius:6px; -webkit-border-top-right-radius:6px; color:<?php echo woocommerce_light_or_dark(get_option('woocommerce_email_base_color'), '#202020', '#ffffff'); ?>; font-family:Arial; font-weight:bold; line-height:100%; vertical-align:middle;">
                                 	
                                         <tr>
                                             <td class="headerContent" style="padding:24px; ">
 
                                             	<!-- // Begin Module: Standard Header Image \\ -->
-                                            	<h1 class="h1" style="color:#fff !important; margin:0; text-shadow:0 1px 0 #215a6b;"><?php
+                                            	<h1 class="h1" style="color:<?php echo woocommerce_light_or_dark(get_option('woocommerce_email_base_color'), '#202020', '#ffffff'); ?> !important; margin:0; text-shadow:0 1px 0 <?php echo woocommerce_hex_lighter(get_option('woocommerce_email_base_color'), 20); ?>;"><?php
                                             		global $email_heading;
                                             		echo $email_heading;
                                             	?></h1>

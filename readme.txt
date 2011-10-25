@@ -62,6 +62,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Fixed variation coupons
 * Fixed edit address via my account
 * Support for localisations in wp-content/languages/woocommerce
+* Added ability to change email template colors and from name/address from the settings panel
 
 = 1.1.2 - 23/10/2011 =
 * Coupons can be applied to variations (by ID)

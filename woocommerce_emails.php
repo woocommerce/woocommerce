@@ -13,10 +13,10 @@
  * Mail from name/email
  **/
 function woocommerce_mail_from_name( $name ) {
-	return esc_attr(get_bloginfo('name'));
+	return get_option('woocommerce_email_from_name');
 }
 function woocommerce_mail_from( $email ) {
-	return get_option('admin_email');
+	return get_option('woocommerce_email_from_address');
 }
 
 /**
@@ -108,7 +108,7 @@ function woocommerce_new_order_notification( $id ) {
 	
 	// Get contents
 	$message = ob_get_clean();
-	
+
 	// Send the mail	
 	woocommerce_mail( get_option('admin_email'), $subject, $message );
 }

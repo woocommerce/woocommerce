@@ -3,7 +3,6 @@
                                                     </tr>
                                                 </table>
                                                 <!-- // End Module: Standard Content \\ -->
-                                                
                                             </td>
                                         </tr>
                                     </table>
@@ -18,7 +17,7 @@
                                         	<td valign="top" class="footerContent">
                                                 <table border="0" cellpadding="10" cellspacing="0" width="100%">
                                                     <tr>
-                                                        <td colspan="2" valign="middle" id="credit" style="background-color:#FAFAFA; border:0; color:#707070; font-family:Arial; font-size:12px; line-height:125%; text-align:center;"><?php echo apply_filters('woocommerce_email_footer_text', get_bloginfo('name') . ' - ' . __('Powered by WooCommerce', 'woothemes')); ?></td>
+                                                        <td colspan="2" valign="middle" id="credit" style="border:0; color:<?php echo woocommerce_hex_lighter(get_option('woocommerce_email_text_color'), 40); ?>; font-family:Arial; font-size:12px; line-height:125%; text-align:center;"><?php echo apply_filters('woocommerce_email_footer_text', get_option('woocommerce_email_footer_text')); ?></td>
                                                     </tr>
                                                    
                                                 </table>

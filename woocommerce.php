@@ -588,3 +588,63 @@ function woocommerce_prevent_sidebar_cache() {
 	echo '<!--mfunc get_sidebar() --><!--/mfunc-->';
 }
 add_action('get_sidebar', 'woocommerce_prevent_sidebar_cache');
+
+/**
+ * Hex darker/lighter/contrast functions for colours
+ **/
+if (!function_exists('woocommerce_hex_darker')) {
+	function woocommerce_hex_darker( $color, $factor = 30 ) {
+		$color = str_replace('#', '', $color);
+		
+		$base['R'] = hexdec($color{0}.$color{1});
+		$base['G'] = hexdec($color{2}.$color{3});
+		$base['B'] = hexdec($color{4}.$color{5});
+		
+		$color = '#';
+		
+		foreach ($base as $k => $v) :
+	        $amount = $v / 100;
+	        $amount = round($amount * $factor);
+	        $new_decimal = $v - $amount;
+	
+	        $new_hex_component = dechex($new_decimal);
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component;
+		endforeach;
+		        
+		return $color;        
+	}
+}
+if (!function_exists('woocommerce_hex_lighter')) {
+	function woocommerce_hex_lighter( $color, $factor = 30 ) {
+		$color = str_replace('#', '', $color);
+		
+		$base['R'] = hexdec($color{0}.$color{1});
+		$base['G'] = hexdec($color{2}.$color{3});
+		$base['B'] = hexdec($color{4}.$color{5});
+		
+		$color = '#';
+	     
+	    foreach ($base as $k => $v) :
+	        $amount = 255 - $v; 
+	        $amount = $amount / 100; 
+	        $amount = round($amount * $factor); 
+	        $new_decimal = $v + $amount; 
+	     
+	        $new_hex_component = dechex($new_decimal); 
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component; 
+	   	endforeach;
+	         
+	   	return $color;          
+	}
+}
+if (!function_exists('woocommerce_light_or_dark')) {
+	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
+	    return (hexdec($color) > 0xffffff/2) ? $dark : $light;
+	}
+}

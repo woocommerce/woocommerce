@@ -65,6 +65,7 @@ function woocommerce_admin_scripts() {
     if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
     
     	wp_enqueue_script( 'woocommerce_admin' );
+    	wp_enqueue_script('farbtastic');
     
     endif;
     
@@ -149,6 +150,8 @@ function woocommerce_admin_css() {
 		wp_enqueue_style( 'woocommerce_admin_styles', $woocommerce->plugin_url() . '/assets/css/admin.css' );
 		wp_enqueue_style( 'jquery-ui-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css' );
 	endif;
+	
+	wp_enqueue_style('farbtastic');
 	
 	do_action('woocommerce_admin_css');
 }

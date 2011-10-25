@@ -635,6 +635,74 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 )); // End tax settings
 
+$woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', array(
+
+	array(	'name' => __( 'Email Options', 'woothemes' ), 'type' => 'title', '', 'id' => 'email_options' ),
+	
+	array(  
+		'name' => __( '"From" name', 'woothemes' ),
+		'desc' 		=> __( 'The sender name for WooCommerce emails.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_from_name',
+		'type' 		=> 'text',
+		'std' 		=> esc_attr(get_bloginfo('name'))
+	),
+	
+	array(  
+		'name' => __( '"From" email address', 'woothemes' ),
+		'desc' 		=> __( 'The sender email address for WooCommerce emails.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_from_address',
+		'type' 		=> 'text',
+		'std' 		=> get_option('admin_email')
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'email_options' ),
+	
+	array(	'name' => __( 'Email template', 'woothemes' ), 'type' => 'title', 'desc' => __('This section lets you customise the WooCommerce emails. For more advanced control copy woocommerce/templates/emails/ to yourtheme/woocommmerce/emails/', 'woothemes'), 'id' => 'email_template_options' ),
+	
+	array(  
+		'name' => __( 'Email footer text', 'woothemes' ),
+		'desc' 		=> __( 'The text to appear in the footer of WooCommerce emails.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_footer_text',
+		'type' 		=> 'text',
+		'std' 		=> get_bloginfo('name') . ' - ' . __('Powered by WooCommerce', 'woothemes')
+	),
+	
+	array(  
+		'name' => __( 'Base colour', 'woothemes' ),
+		'desc' 		=> __( 'The base colour for WooCommerce email templates. Default <code>#557da1</code>.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_base_color',
+		'type' 		=> 'color',
+		'std' 		=> '#557da1'
+	),
+	
+	array(  
+		'name' => __( 'Background colour', 'woothemes' ),
+		'desc' 		=> __( 'The background colour for WooCommerce email templates. Default <code>#eeeeee</code>.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_background_color',
+		'type' 		=> 'color',
+		'std' 		=> '#eeeeee'
+	),
+	
+	array(  
+		'name' => __( 'Email body background colour', 'woothemes' ),
+		'desc' 		=> __( 'The main body background colour. Default <code>#fdfdfd</code>.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_body_background_color',
+		'type' 		=> 'color',
+		'std' 		=> '#fdfdfd'
+	),
+	
+	array(  
+		'name' => __( 'Email body text colour', 'woothemes' ),
+		'desc' 		=> __( 'The main body text colour. Default <code>#505050</code>.', 'woothemes' ),
+		'id' 		=> 'woocommerce_email_text_color',
+		'type' 		=> 'color',
+		'std' 		=> '#505050'
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'email_template_options' ),
+
+)); // End email settings
+
 /**
  * Settings page
  * 
@@ -656,6 +724,7 @@ function woocommerce_settings() {
 			case "inventory" :
 			case "shipping" :
 			case "tax" :
+			case "email" :
 				woocommerce_update_options( $woocommerce_settings[$current_tab] );
 			break;
 		endswitch;
@@ -688,7 +757,8 @@ function woocommerce_settings() {
 						'shipping' => __( 'Shipping', 'woothemes' ),
 						'tax' => __( 'Tax', 'woothemes'),
 						'shipping_methods' => __( 'Shipping Methods', 'woothemes' ),
-						'payment_gateways' => __( 'Payment Gateways', 'woothemes' )
+						'payment_gateways' => __( 'Payment Gateways', 'woothemes' ),
+						'email' => __( 'Emails', 'woothemes' ),
 					);
 					foreach ($tabs as $name => $label) :
 						echo '<a href="' . admin_url( 'admin.php?page=woocommerce&tab=' . $name ) . '" class="nav-tab ';
@@ -708,6 +778,7 @@ function woocommerce_settings() {
 					case "inventory" :
 					case "shipping" :
 					case "tax" :
+					case "email" :
 						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 					break;
 					case "shipping_methods" : 	
@@ -785,6 +856,18 @@ function woocommerce_settings() {
 			jQuery(".country_multiselect").multiselect({
 				noneSelectedText: '<?php _e( 'Select countries/states', 'woothemes' ); ?>',
 				selectedList: 4
+			});
+			
+			// Color picker
+			jQuery('.colorpick').each(function(){
+				jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
+				jQuery(this).click(function() {
+					if ( jQuery(this).val() == "" ) jQuery(this).val('#');
+					jQuery('.colorpickdiv', jQuery(this).parent() ).show();
+				});	
+			});
+			jQuery(document).mousedown(function(){
+				jQuery('.colorpickdiv').hide();
 			});
 			
 			// Edit prompt
