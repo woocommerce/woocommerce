@@ -70,6 +70,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Given shop_manager role capabilities of an editor
 * Fixed menu order when logged in as a shop manager
 * Added SKU column to order data
+* Removed output buffering from loop
 * Lots of other minor fixes
 
 = 1.1.2 - 23/10/2011 =

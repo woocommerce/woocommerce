@@ -157,7 +157,7 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 		$attachments = get_posts($args);
 		if ($attachments) :
 			$loop = 0;
-			$columns = 3;
+			$columns = apply_filters('woocommerce_product_thumbnails_columns', 3);
 			foreach ( $attachments as $attachment ) : 
 				
 				$loop++;
