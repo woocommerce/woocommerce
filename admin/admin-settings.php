@@ -660,6 +660,14 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	array(	'name' => __( 'Email template', 'woothemes' ), 'type' => 'title', 'desc' => __('This section lets you customise the WooCommerce emails. For more advanced control copy woocommerce/templates/emails/ to yourtheme/woocommmerce/emails/', 'woothemes'), 'id' => 'email_template_options' ),
 	
 	array(  
+		'name' => __( 'Header image', 'woothemes' ),
+		'desc' 		=> sprintf(__( 'Enter a URL to an image you want to show in the email\'s header. Upload your image using the <a href="%s">media uploader</a>.', 'woothemes' ), admin_url('media-new.php')),
+		'id' 		=> 'woocommerce_email_header_image',
+		'type' 		=> 'text',
+		'std' 		=> ''
+	),
+	
+	array(  
 		'name' => __( 'Email footer text', 'woothemes' ),
 		'desc' 		=> __( 'The text to appear in the footer of WooCommerce emails.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_footer_text',

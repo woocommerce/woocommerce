@@ -146,6 +146,12 @@
         	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable">
             	<tr>
                 	<td align="center" valign="top">
+                	
+                		<?php
+                			if ($img = get_option('woocommerce_email_header_image')) :
+                				echo '<p style="margin-top:0;"><img src="'.$img.'" alt="'.get_bloginfo('name').'" /></p>';
+                			endif;
+                		?>
                         
                         <!-- // End Template Preheader \\ -->
                     	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateContainer" style="-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025); -webkit-border-radius:6px;background-color:<?php echo get_option('woocommerce_email_body_background_color'); ?>;">
