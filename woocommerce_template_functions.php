@@ -984,7 +984,7 @@ if (!function_exists('woocommerce_breadcrumb')) {
 			elseif ( is_author() ) :
 			
 				$userdata = get_userdata($author);
-				echo $before . __('Author: ', 'woothemes') . $userdata->display_name . $after;
+				echo $before . __('Author:', 'woothemes') . ' ' . $userdata->display_name . $after;
 	     	
 		    endif;
 	 

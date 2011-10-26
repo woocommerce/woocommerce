@@ -40,7 +40,7 @@ function woocommerce_order_tracking( $atts ) {
 		
 				echo '<p>'.sprintf( __('Order #%s which was made %s has the status &ldquo;%s&rdquo;', 'woothemes'), $order->id, human_time_diff(strtotime($order->order_date), current_time('timestamp')).__(' ago', 'woothemes'), $status->name );
 			
-				if ($order->status == 'completed') echo __(' and was completed ', 'woothemes').human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woothemes');
+				if ($order->status == 'completed') echo ' ' . __('and was completed', 'woothemes') . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woothemes');
 			
 				echo '.</p>';
 				?>

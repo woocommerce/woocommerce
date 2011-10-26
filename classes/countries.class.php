@@ -535,7 +535,7 @@ class woocommerce_countries {
 	function estimated_for_prefix() {
 		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the ', 'woothemes');
+		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
 		$return = apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
 		return $return;
 	}

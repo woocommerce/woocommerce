@@ -143,7 +143,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider"></div>
 				<div class="price_slider_amount">
-					<button type="submit" class="button">'.__('Filter', 'woothemes').'</button>'.__('Price: ', 'woothemes').'<span></span>
+					<button type="submit" class="button">'.__('Filter', 'woothemes').'</button>'.__('Price:', 'woothemes').' <span></span>
 					<input type="hidden" id="max_price" name="max_price" value="'.esc_attr( $max ).'" />
 					<input type="hidden" id="min_price" name="min_price" value="'.esc_attr( $min ).'" />
 					'.$fields.'

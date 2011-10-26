@@ -282,7 +282,7 @@ __('Saskatchewan', 'woothemes');
 __('Yukon Territory', 'woothemes');
 			
 __('Alabama', 'woothemes');
-__('Alaska ', 'woothemes');
+__('Alaska', 'woothemes');
 __('Arizona', 'woothemes');
 __('Arkansas', 'woothemes');
 __('California', 'woothemes');

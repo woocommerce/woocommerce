@@ -161,7 +161,7 @@ class woocommerce_order {
 
 			$shipping = woocommerce_price($this->order_shipping);
 			if ($this->order_shipping_tax > 0) :
-				$tax_text = __('(ex. tax) ', 'woothemes'); 
+				$tax_text = __('(ex. tax)', 'woothemes') . ' '; 
 			else :
 				$tax_text = '';
 			endif;

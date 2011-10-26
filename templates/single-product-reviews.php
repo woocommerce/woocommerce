@@ -59,7 +59,7 @@
 		
 	else : 
 
-		$title_reply = __('Be the first to review ', 'woothemes').'&ldquo;'.$post->post_title.'&rdquo;';
+		$title_reply = __('Be the first to review', 'woothemes').' &ldquo;'.$post->post_title.'&rdquo;';
 		
 		echo '<p>'.__('There are no reviews yet, would you like to <a href="#review_form" class="inline show_review_form">submit yours</a>?', 'woothemes').'</p>';
 	

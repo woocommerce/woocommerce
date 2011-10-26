@@ -66,7 +66,7 @@ function variable_product_type_options() {
 								$variation_selected_value = get_post_meta( $variation->ID, 'attribute_' . sanitize_title($attribute['name']), true );
 								
 								// Name will be something like attribute_pa_color
-								echo '<select name="attribute_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
+								echo '<select name="attribute_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any', 'woothemes') . ' ' . $woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
 								// Get terms for attribute taxonomy or value if its a custom attribute
 								if ($attribute['is_taxonomy']) :
@@ -171,7 +171,7 @@ function variable_product_write_panel_js() {
 								
 								if ( !isset($attribute['is_variation']) || !$attribute['is_variation'] ) continue;
 								
-								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any ', 'woothemes').$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
+								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any', 'woothemes') . ' ' .$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
 								// Get terms for attribute taxonomy or value if its a custom attribute
 								if ($attribute['is_taxonomy']) :

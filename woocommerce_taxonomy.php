@@ -103,14 +103,14 @@ function woocommerce_post_type() {
 			            'labels' => array(
 			                    'name' => $label,
 			                    'singular_name' => $label,
-			                    'search_items' =>  __( 'Search ', 'woothemes') . $label,
-			                    'all_items' => __( 'All ', 'woothemes') . $label,
-			                    'parent_item' => __( 'Parent ', 'woothemes') . $label,
-			                    'parent_item_colon' => __( 'Parent ', 'woothemes') . $label . ':',
-			                    'edit_item' => __( 'Edit ', 'woothemes') . $label,
-			                    'update_item' => __( 'Update ', 'woothemes') . $label,
-			                    'add_new_item' => __( 'Add New ', 'woothemes') . $label,
-			                    'new_item_name' => __( 'New ', 'woothemes') . $label
+			                    'search_items' =>  __( 'Search', 'woothemes') . ' ' . $label,
+			                    'all_items' => __( 'All', 'woothemes') . ' ' . $label,
+			                    'parent_item' => __( 'Parent', 'woothemes') . ' ' . $label,
+			                    'parent_item_colon' => __( 'Parent', 'woothemes') . ' ' . $label . ':',
+			                    'edit_item' => __( 'Edit', 'woothemes') . ' ' . $label,
+			                    'update_item' => __( 'Update', 'woothemes') . ' ' . $label,
+			                    'add_new_item' => __( 'Add New', 'woothemes') . ' ' . $label,
+			                    'new_item_name' => __( 'New', 'woothemes') . ' ' . $label
 			            ),
 			            'show_ui' => false,
 			            'query_var' => true,

@@ -543,7 +543,7 @@ class woocommerce_cart {
 	function get_cart_shipping_title() {
 		global $woocommerce;
 		if (isset($woocommerce->shipping->shipping_label)) :
-			return __('via ', 'woothemes') . $woocommerce->shipping->shipping_label;
+			return __('via', 'woothemes') . ' ' . $woocommerce->shipping->shipping_label;
 		endif;
 		return false;
 	}
