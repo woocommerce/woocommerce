@@ -11,7 +11,6 @@
  */
 class woocommerce_product_variation extends woocommerce_product {
 	
-	var $variation;
 	var $variation_data;
 	var $variation_id;
 	var $variation_has_weight;
@@ -25,11 +24,13 @@ class woocommerce_product_variation extends woocommerce_product {
 	 *
 	 * @param   int		$id		ID of the product to load
 	 */
-	function woocommerce_product_variation( $variation_id ) {
+	function woocommerce_product_variation( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
 		
 		$this->variation_id = $variation_id;
 	
 		$product_custom_fields = get_post_custom( $this->variation_id );
+		
+		$this->exists = (sizeof($product_custom_fields)>0) ? true : false;
 		
 		$this->variation_data = array();
 		
@@ -41,14 +42,11 @@ class woocommerce_product_variation extends woocommerce_product {
 			
 		endforeach;
 
-		$this->get_variation_post_data();
-		
 		/* Get main product data from parent */
-		$this->id = $this->variation->post_parent;
+		$this->id = ($parent_id>0) ? $parent_id : wp_get_post_parent_id( $this->variation_id );
+		if (!$parent_custom_fields) $parent_custom_fields = get_post_custom( $this->id );
 		
-		$parent_custom_fields = get_post_custom( $this->id );
-		
-		// Define the data we're going to load: Key => Default value
+		// Define the data we're going to load from the parent: Key => Default value
 		$load_data = array(
 			'sku'			=> $this->id,
 			'price' 		=> 0,
@@ -68,24 +66,13 @@ class woocommerce_product_variation extends woocommerce_product {
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :
-			if (isset($parent_custom_fields[$key][0]) && !empty($parent_custom_fields[$key][0])) :
-				$this->$key = $parent_custom_fields[$key][0];
-			else :
-				$this->$key = $default;
-			endif;
+			$this->$key = (isset($product_custom_fields[$key][0]) && $product_custom_fields[$key][0]!=='') ? $product_custom_fields[$key][0] : $default;
 		endforeach;
 		
 		// Load serialised data, unserialise twice to fix WP bug
 		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $product_custom_fields['product_attributes'][0] )); else $this->attributes = array();	
 
-		
 		$this->product_type = 'variable';
-			
-		if ($parent_custom_fields) :
-			$this->exists = true;		
-		else :
-			$this->exists = false;	
-		endif;
 		
 		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
@@ -119,14 +106,6 @@ class woocommerce_product_variation extends woocommerce_product {
 		endif;
 		
 		$this->total_stock = $this->stock;
-	}
-
-	/** Get the product's post data */
-	function get_variation_post_data() {
-		if (empty($this->variation)) :
-			$this->variation = get_post( $this->variation_id );
-		endif;
-		return $this->variation;
 	}
 	
 	/**

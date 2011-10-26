@@ -285,11 +285,11 @@ function woocommerce_edit_address() {
 			
 			<p class="form-row form-row-first">
 				<label for="address_address"><?php _e('Address', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_address" id="address_address" placeholder="<?php _e('1 Infinite Loop', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address'] ); ?>" />
+				<input type="text" class="input-text" name="address_address" id="address_address" placeholder="<?php _e('Address line 1', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address'] ); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="address_address2" class="hidden"><?php _e('Address 2', 'woothemes'); ?></label>
-				<input type="text" class="input-text" name="address_address2" id="address_address2" placeholder="<?php _e('Cupertino', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address2'] ); ?>" />
+				<input type="text" class="input-text" name="address_address2" id="address_address2" placeholder="<?php _e('Address line 2', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address2'] ); ?>" />
 			</p>
 			<div class="clear"></div>
 			

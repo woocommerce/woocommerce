@@ -361,7 +361,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
             
             if($variation instanceof woocommerce_product_variation) {
                         	
-            	if ($variation->variation->post_status != 'publish') continue; // Disabled
+            	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
             
                 $variation_attributes = $variation->get_variation_attributes();
                 $availability = $variation->get_availability();

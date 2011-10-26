@@ -12,6 +12,7 @@
 class woocommerce_product {
 	
 	var $id;
+	var $product_custom_fields;
 	var $exists;
 	var $attributes;
 	var $children;
@@ -49,8 +50,10 @@ class woocommerce_product {
 		
 		$this->id = (int) $id;
 
-		$product_custom_fields = get_post_custom( $this->id );
+		$this->product_custom_fields = get_post_custom( $this->id );
 		
+		$this->exists = (sizeof($this->product_custom_fields)>0) ? true : false;
+
 		// Define the data we're going to load: Key => Default value
 		$load_data = array(
 			'sku'			=> $this->id,
@@ -78,26 +81,15 @@ class woocommerce_product {
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :
-			if (isset($product_custom_fields[$key][0]) && $product_custom_fields[$key][0]!=='') :
-				$this->$key = $product_custom_fields[$key][0];
-			else :
-				$this->$key = $default;
-			endif;
+			$this->$key = (isset($this->product_custom_fields[$key][0]) && $this->product_custom_fields[$key][0]!=='') ? $this->product_custom_fields[$key][0] : $default;
 		endforeach;
 		
 		// Load serialised data, unserialise twice to fix WP bug
-		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $product_custom_fields['product_attributes'][0] )); else $this->attributes = array();		
+		if (isset($this->product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['product_attributes'][0] )); else $this->attributes = array();		
 						
 		// Get product type
-		$terms = wp_get_object_terms( $id, 'product_type' );
-		if (!is_wp_error($terms) && $terms) :
-			$term = current($terms);
-			$this->product_type = $term->slug; 
-		else :
-			$this->product_type = 'simple';
-		endif;
-		
-		$this->get_children();
+		$terms = wp_get_object_terms( $id, 'product_type', array('fields' => 'names') );
+		$this->product_type = (isset($terms[0])) ? sanitize_title($terms[0]) : 'simple';
 		
 		// total_stock (stock of parent and children combined)
 		$this->total_stock = $this->stock;
@@ -113,12 +105,6 @@ class woocommerce_product {
 		
 		// Check sale
 		$this->check_sale_price();
-		
-		if ($product_custom_fields) :
-			$this->exists = true;		
-		else :
-			$this->exists = false;	
-		endif;
 	}
 	
 	/**
@@ -140,14 +126,14 @@ class woocommerce_product {
 			
 			if ($this->is_type('variable') || $this->is_type('grouped')) :
 			
-				if ($this->is_type('variable')) $child_post_type = 'product_variation'; else $child_post_type = 'product';
+				$child_post_type = ($this->is_type('variable')) ? 'product_variation' : 'product';
 			
 				if ( $children_products =& get_children( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC' ) ) :
 	
 					if ($children_products) foreach ($children_products as $child) :
 						
 						if ($this->is_type('variable')) :
-							$child->product = &new woocommerce_product_variation( $child->ID );
+							$child->product = &new woocommerce_product_variation( $child->ID, $this->id, $this->product_custom_fields );
 						else :
 							$child->product = &new woocommerce_product( $child->ID );
 						endif;
@@ -730,7 +716,7 @@ class woocommerce_product {
 
                 if ($variation instanceof woocommerce_product_variation) {
                 	
-                	if ($variation->variation->post_status != 'publish') continue; // Disabled
+                	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
                 	
                     $vattributes = $variation->get_variation_attributes();
 
