@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -57,7 +57,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 == Changelog ==
 
-= 1.1.3 - xx/10/2011 =
+= 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
 * Updated some localisation strings in email subject lines
 * Fixed variation coupons
