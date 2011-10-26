@@ -181,7 +181,8 @@ class woocommerce_customer {
 								'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $user_info->user_email, home_url()))),
 								'product_id' => $result->product_id,
 								'download_name' => $download_name,
-								'order_key' => $result->order_key,
+								'order_id' => $order->id,
+								'order_key' => $order->order_key,
 								'downloads_remaining' => $result->downloads_remaining
 							);
 					endforeach;
