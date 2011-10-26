@@ -49,7 +49,7 @@
 						
 					else :
 						
-						if ( !$woocommerce->customer->get_country() ) :
+						if ( !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
 							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woothemes').'</p>';
 						else :
 							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
