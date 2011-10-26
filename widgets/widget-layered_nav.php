@@ -192,6 +192,12 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				// Current Filter = this widget
 				if (isset( $_chosen_attributes[$taxonomy] ) && is_array($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy])) :
 					$class = 'class="chosen"';
+					
+					// Remove this term is $current_filter has more than 1 term filtered
+					if (sizeof($current_filter)>1) :
+						$current_filter_without_this = array_diff($current_filter, array($term->term_id));
+						$link = add_query_arg( $arg, implode(',', $current_filter_without_this), $link );
+					endif;
 				else :
 					$link = add_query_arg( $arg, implode(',', $current_filter), $link );
 				endif;
