@@ -421,6 +421,11 @@ class woocommerce_checkout {
 				
 			endforeach;
 			
+			// Update customer location to posted location so we can correctly check available shipping methods
+			$woocommerce->customer->set_country( $this->posted['billing_country'] );
+			$woocommerce->customer->set_state( $this->posted['billing_state'] );
+			$woocommerce->customer->set_postcode( $this->posted['billing_postcode'] );
+			
 			// Shipping Information
 			if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only() && empty($this->posted['shiptobilling'])) :
 				
@@ -447,16 +452,21 @@ class woocommerce_checkout {
 					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . __(' (shipping) is a required field.', 'woothemes') );
 					
 				endforeach;
+				
+				// Update customer location to posted location so we can correctly check available shipping methods
+				$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
+				$woocommerce->customer->set_shipping_state( $this->posted['shipping_state'] );  
+				$woocommerce->customer->set_shipping_postcode( $this->posted['shipping_postcode'] ); 
+				
+			else :
 			
+				// Update customer location to posted location so we can correctly check available shipping methods
+				$woocommerce->customer->set_shipping_country( $this->posted['billing_country'] );
+				$woocommerce->customer->set_shipping_state( $this->posted['billing_state'] );
+				$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
+				
 			endif;
-			
-			// Update customer location to posted location so we can correctly check available shipping methods
-			$woocommerce->customer->set_country( $this->posted['billing_country'] );
-			$woocommerce->customer->set_state( $this->posted['billing_state'] );
-			$woocommerce->customer->set_postcode( $this->posted['billing_postcode'] );
-			$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
-			$woocommerce->customer->set_shipping_state( $this->posted['shipping_state'] );
-			$woocommerce->customer->set_shipping_postcode( $this->posted['shipping_postcode'] );
+
 
 			if (is_user_logged_in()) :
 				$this->creating_account = false;

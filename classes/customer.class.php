@@ -27,10 +27,10 @@ class woocommerce_customer {
 			$data = array(
 				'country' 			=> $country,
 				'state' 			=> $state,
-				'postcode' 			=> false,
+				'postcode' 			=> '',
 				'shipping_country' 	=> $country,
 				'shipping_state' 	=> $state,
-				'shipping_postcode' => false,
+				'shipping_postcode' => '',
 				'is_vat_exempt' 	=> false
 			);			
 			$_SESSION['customer'] = $data;
@@ -67,37 +67,31 @@ class woocommerce_customer {
 	/** Gets the state from the current session */
 	function get_state() {
 		if (isset($_SESSION['customer']['state'])) return $_SESSION['customer']['state'];
-		return false;
 	}
 	
 	/** Gets the country from the current session */
 	function get_country() {
 		if (isset($_SESSION['customer']['country'])) return $_SESSION['customer']['country'];
-		return false;
 	}
 	
 	/** Gets the postcode from the current session */
 	function get_postcode() {
 		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return strtolower(str_replace(' ', '', $_SESSION['customer']['postcode']));
-		return false;
 	}
 	
 	/** Gets the state from the current session */
 	function get_shipping_state() {
 		if (isset($_SESSION['customer']['shipping_state'])) return $_SESSION['customer']['shipping_state'];
-		return false;
 	}
 	
 	/** Gets the country from the current session */
 	function get_shipping_country() {
 		if (isset($_SESSION['customer']['shipping_country'])) return $_SESSION['customer']['shipping_country'];
-		return false;
 	}
 	
 	/** Gets the postcode from the current session */
 	function get_shipping_postcode() {
-		if (isset($_SESSION['customer']['shipping_postcode']) && $_SESSION['customer']['shipping_postcode'] !== false) return strtolower(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
-		return false;
+		if (isset($_SESSION['customer']['shipping_postcode'])) return strtolower(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
 	}
 	
 	/** Sets session data for the location */

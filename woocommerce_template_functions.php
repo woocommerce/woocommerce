@@ -677,7 +677,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 		?>
 		<div class="cart_totals">
 		<?php
-		if ($available_methods || $woocommerce->customer->get_shipping_country() === false || $woocommerce->customer->get_shipping_state() === false || $woocommerce->customer->get_shipping_postcode() === false || !$woocommerce->shipping->enabled ) : 
+		if ($available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() || !$woocommerce->shipping->enabled ) : 
 			// Hide totals if customer has set location and there are no methods going there
 			?>
 			<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
