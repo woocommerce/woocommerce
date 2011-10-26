@@ -337,6 +337,26 @@ function woocommerce_force_ssl_images( $content ) {
 }
 
 /**
+ * Force SSL for stylsheet/script urls etc. Modified code by Chris Black (http://cjbonline.org)
+ **/
+add_filter('option_siteurl', 'woocommerce_force_ssl_urls');
+add_filter('option_home', 'woocommerce_force_ssl_urls');
+add_filter('option_url', 'woocommerce_force_ssl_urls');
+add_filter('option_wpurl', 'woocommerce_force_ssl_urls');
+add_filter('option_stylesheet_url', 'woocommerce_force_ssl_urls');
+add_filter('option_template_url', 'woocommerce_force_ssl_urls');
+add_filter('script_loader_src', 'woocommerce_force_ssl_urls');
+add_filter('style_loader_src', 'woocommerce_force_ssl_urls');
+
+function woocommerce_force_ssl_urls( $url ) {
+	if (is_ssl()) :
+		$url = str_replace('http:', 'https:', $url);
+	endif;
+	return $url;
+}
+
+
+/**
  * IIS compatability fix/fallback
  **/
 if (!isset($_SERVER['REQUEST_URI'])) {

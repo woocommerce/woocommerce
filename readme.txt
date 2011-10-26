@@ -58,6 +58,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 == Changelog ==
 
 = 1.1.3 - xx/10/2011 =
+* Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
 * Updated some localisation strings in email subject lines
 * Fixed variation coupons
 * Fixed edit address via my account
