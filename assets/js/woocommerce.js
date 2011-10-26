@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
 		// AJAX add to cart request
 		var thisbutton = $(this);
 		
-		if (thisbutton.is('.product_type_simple')) {
+		if (thisbutton.is('.product_type_simple, .product_type_downloadable, .product_type_virtual')) {
 	
 			$(thisbutton).addClass('loading');
 			
