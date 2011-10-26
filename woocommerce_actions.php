@@ -190,6 +190,7 @@ function woocommerce_add_order_item() {
 				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 		</td>
+		<td class="sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
 		<td class="name">
 			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $_product->get_title(); ?></a>
 			<?php

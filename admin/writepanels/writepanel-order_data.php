@@ -126,6 +126,7 @@ function woocommerce_order_items_meta_box($post) {
 			<thead>
 				<tr>
 					<th class="product-id" width="1%"><?php _e('ID', 'woothemes'); ?></th>
+					<th class="sku"><?php _e('SKU', 'woothemes'); ?></th>
 					<th class="name"><?php _e('Name', 'woothemes'); ?></th>
 					<th class="meta" width="1%"><?php _e('Item Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
@@ -154,6 +155,7 @@ function woocommerce_order_items_meta_box($post) {
 								echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 							?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 						</td>
+						<td class="sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
 						<td class="name">
 							<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $item['name']; ?></a>
 							<?php

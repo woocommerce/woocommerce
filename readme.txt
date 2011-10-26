@@ -68,6 +68,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Made cart page hide the 'no shipping methods found' message unless the user has calculated shipping.
 * Given shop_manager role capabilities of an editor
 * Fixed menu order when logged in as a shop manager
+* Added SKU column to order data
 
 = 1.1.2 - 23/10/2011 =
 * Coupons can be applied to variations (by ID)
