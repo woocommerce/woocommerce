@@ -30,16 +30,18 @@ function woocommerce_add_category_thumbnail_field() {
 			
 				window.send_to_termmeta = function(html) {
 					
-					var img = jQuery(html).find('img');
-				
-					imgurl = jQuery(img).attr('src');
-					imgclass = jQuery(img).attr('class');
-		
-					imgid = parseInt(imgclass.replace(/\D/g, ''), 10);
+					jQuery('body').append('<div id="temp_image">' + html + '</div>');
+					
+					var img = jQuery('#temp_image').find('img');
+					
+					imgurl 		= img.attr('src');
+					imgclass 	= img.attr('class');
+					imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
 					
 					jQuery('#product_cat_thumbnail_id').val(imgid);
 					jQuery('#product_cat_thumbnail img').attr('src', imgurl);
-	
+					jQuery('#temp_image').remove();
+					
 					tb_remove();
 				}
 				
