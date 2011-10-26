@@ -156,18 +156,43 @@ function woocommerce_init_roles() {
 		
 		// Customer role
 		add_role('customer', __('Customer', 'woothemes'), array(
-		    'read' => true,
-		    'edit_posts' => false,
-		    'delete_posts' => false
+		    'read' 						=> true,
+		    'edit_posts' 				=> false,
+		    'delete_posts' 				=> false
 		));
 	
 		// Shop manager role
 		add_role('shop_manager', __('Shop Manager', 'woothemes'), array(
-		    'read' 			=> true,
-		    'edit_posts' 	=> true,
-		    'delete_posts' 	=> true,
+		    'read' 						=> true,
+		    'read_private_pages'		=> true,
+		    'read_private_posts'		=> true,
+		    'edit_posts' 				=> true,
+		    'edit_pages' 				=> true,
+		    'edit_published_posts'		=> true,
+		    'edit_published_pages'		=> true,
+		    'edit_private_pages'		=> true,
+		    'edit_private_posts'		=> true,
+		    'edit_others_posts' 		=> true,
+		    'edit_others_pages' 		=> true,
+		    'publish_posts' 			=> true,
+		    'publish_pages'				=> true,
+		    'delete_posts' 				=> true,
+		    'delete_pages' 				=> true,
+		    'delete_private_pages'		=> true,
+		    'delete_private_posts'		=> true,
+		    'delete_published_pages'	=> true,
+		    'delete_published_posts'	=> true,
+		    'delete_others_posts' 		=> true,
+		    'delete_others_pages' 		=> true,
+		    'manage_categories' 		=> true,
+		    'manage_links'				=> true,
+		    'moderate_comments'			=> true,
+		    'unfiltered_html'			=> true,
+		    'upload_files'				=> true,
+		   	'export'					=> true,
+			'import'					=> true,
 		));
-
+		
 		// Main Shop capabilities
 		$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
 		$wp_roles->add_cap( 'shop_manager', 'manage_woocommerce' );

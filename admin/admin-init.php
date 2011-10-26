@@ -191,7 +191,7 @@ function woocommerce_admin_menu_order( $menu_order ) {
 add_action('menu_order', 'woocommerce_admin_menu_order');
 
 function woocommerce_admin_custom_menu_order() {
-	if ( !current_user_can( 'manage_options' ) ) return false;
+	if ( !current_user_can( 'manage_woocommerce' ) ) return false;
 	return true;
 }
 add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');

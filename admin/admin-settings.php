@@ -663,7 +663,8 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'name' => __( 'Email footer text', 'woothemes' ),
 		'desc' 		=> __( 'The text to appear in the footer of WooCommerce emails.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_footer_text',
-		'type' 		=> 'text',
+		'css' 		=> 'width:100%; height: 75px;',
+		'type' 		=> 'textarea',
 		'std' 		=> get_bloginfo('name') . ' - ' . __('Powered by WooCommerce', 'woothemes')
 	),
 	
