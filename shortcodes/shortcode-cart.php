@@ -115,9 +115,13 @@ function woocommerce_cart( $atts ) {
 							<td class="product-name">
 								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>"><?php echo $_product->get_title(); ?></a>
 								<?php
+									// Variation data
 									if($_product instanceof woocommerce_product_variation && is_array($values['variation'])) :
                             			echo woocommerce_get_formatted_variation( $values['variation'] );
                        				endif;
+                       				
+                       				// Backorder notification
+                       				if ($_product->backorders_require_notification() && $_product->total_stock<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woothemes').'</p>';
 								?>
 							</td>
 							<td class="product-price"><?php echo woocommerce_price($_product->get_price()); ?></td>
