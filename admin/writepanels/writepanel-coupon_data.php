@@ -30,7 +30,7 @@ function woocommerce_coupon_data_meta_box($post) {
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woothemes'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 				
 			// Amount
-			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woothemes'), 'placeholder' => __('0.00', 'woothemes'), 'description' => __('Enter an amount e.g. 2.99 or an integer for percentages e.g. 20%', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woothemes'), 'placeholder' => __('0.00', 'woothemes'), 'description' => __('Enter an amount e.g. 2.99', 'woothemes') ) );
 				
 			// Individual use
 			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woothemes'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woothemes') ) );

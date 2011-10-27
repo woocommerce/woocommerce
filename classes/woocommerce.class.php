@@ -225,7 +225,8 @@ class woocommerce {
 				$this->coupon_discount_types = apply_filters('woocommerce_coupon_discount_types', array(
 	    			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
 	    			'percent' 		=> __('Cart % Discount', 'woothemes'),
-	    			'fixed_product'	=> __('Product Discount', 'woothemes')
+	    			'fixed_product'	=> __('Product Discount', 'woothemes'),
+	    			'percent_product'	=> __('Product % Discount', 'woothemes')
 	    		));
     		endif;
     		return $this->coupon_discount_types;
