@@ -1082,9 +1082,11 @@ function woocommerce_demo_store() {
  * display product sub categories as thumbnails
  **/
 function woocommerce_product_subcategories() {
-	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query;
+	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes;
 	
 	if ($wp_query !== $wp_the_query) return; // Detect main query
+	
+	if (sizeof($_chosen_attributes)>0 || (isset($_GET['max_price']) && isset($_GET['min_price']))) return; // Don't show when filtering
 	
 	if (is_search()) return;
 	if (!is_product_category() && !is_shop()) return;
