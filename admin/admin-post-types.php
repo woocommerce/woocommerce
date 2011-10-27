@@ -371,11 +371,14 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 
 function woocommerce_exclude_image_from_product_page_field_save( $post, $attachment ) {
 
-	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) 
+	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) :
+		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
 		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 1);
-	else 
+	else :
+		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
 		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 0);
-				
+	endif;
+		
 	return $post;
 				
 }
