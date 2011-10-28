@@ -4,7 +4,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: Stefan Johansson <steppo.j@gmail.com>\n"
+"Last-Translator: Stefan Johansson <stefan@dreamrooms.se>\n"
 "Language-Team: StefanJson <stefan@dreamrooms.se>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6892,4 +6892,159 @@ msgstr "Var vänlig och försök genomföra ditt köp igen eller go till ditt ko
 #: shortcodes/shortcode-thankyou.php:45
 msgid "Please attempt your purchase again."
 msgstr "Var vänlig och försök genomföra ditt köp igen."
+
+#@ woothemes
+#: admin/admin-settings.php:640
+msgid "Email Options"
+msgstr "E-postalternativ"
+
+#@ woothemes
+#: admin/admin-settings.php:643
+msgid "\"From\" name"
+msgstr "\"Från\" namn"
+
+#@ woothemes
+#: admin/admin-settings.php:644
+msgid "The sender name for WooCommerce emails."
+msgstr "Avsändare för e-post från WooCommerce"
+
+#@ woothemes
+#: admin/admin-settings.php:651
+msgid "\"From\" email address"
+msgstr "\"Från\" e-postadress"
+
+#@ woothemes
+#: admin/admin-settings.php:652
+msgid "The sender email address for WooCommerce emails."
+msgstr "Avsändares e-postadress för e-post från WooCommerce"
+
+#@ woothemes
+#: admin/admin-settings.php:660
+msgid "Email-template"
+msgstr "E-postmall"
+
+#@ woothemes
+#: admin/admin-settings.php:660
+msgid "This section lets you customise the WooCommerce emails. For more advanced control copy woocommerce/templates/emails/ to yourtheme/woocommmerce/emails/"
+msgstr "Den här sektionen låter dig ändra e-postmallarna i WooCommerce. För mer avancerad kontroll, kopiera woocommerce/templates/emails/ till ditttema/woocommmerce/emails/"
+
+#@ woothemes
+#: admin/admin-settings.php:663
+msgid "Header image"
+msgstr "Bild för sidhuvud"
+
+#@ woothemes
+#: admin/admin-settings.php:664
+#, php-format
+msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
+msgstr "Skriv in en URL till en bild du vill använda för e-postmeddelandets sidhuvud. Ladd upp din bild till <a href=\"%s\">mediabiblioteket</a>."
+
+#@ woothemes
+#: admin/admin-settings.php:671
+msgid "Email footer text"
+msgstr "Sidfotstext för e-postmeddelande"
+
+#@ woothemes
+#: admin/admin-settings.php:672
+msgid "The text to appear in the footer of WooCommerce emails."
+msgstr "Text som kommer att visas i sidfoten i WooCommerce e-postmeddelanden."
+
+#@ woothemes
+#: admin/admin-settings.php:680
+msgid "Base colour"
+msgstr "Basfärg"
+
+#@ woothemes
+#: admin/admin-settings.php:681
+msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
+msgstr "Basfärg för e-postmallar i WooCommerce. Standard <code>#557da1</code>."
+
+#@ woothemes
+#: admin/admin-settings.php:688
+msgid "Background colour"
+msgstr "Bakgrundsfärg"
+
+#@ woothemes
+#: admin/admin-settings.php:689
+msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
+msgstr "Bakgrundsfärg för e-postmallar i WooCommerce. Standard <code>#eeeeee</code>."
+
+#@ woothemes
+#: admin/admin-settings.php:696
+msgid "Email body background colour"
+msgstr "Bakgrundsfärg för body"
+
+#@ woothemes
+#: admin/admin-settings.php:697
+msgid "The main body background colour. Default <code>#fdfdfd</code>."
+msgstr "Bakgrundsfärg för body. Standard <code>#fdfdfd</code>."
+
+#@ woothemes
+#: admin/admin-settings.php:704
+msgid "Email body text colour"
+msgstr "Färg på text i e-postmeddelande"
+
+#@ woothemes
+#: admin/admin-settings.php:705
+msgid "The main body text colour. Default <code>#505050</code>."
+msgstr "Färg på text i e-postmeddelande. Standard <code>#505050</code>."
+
+#@ woothemes
+#: admin/admin-settings.php:770
+msgid "Emails"
+msgstr "E-postmeddelanden"
+
+#@ woothemes
+#: woocommerce_emails.php:133
+#, php-format
+msgid "[%s] Order Received"
+msgstr "[%s] Order mottagen"
+
+#@ woothemes
+#: woocommerce_emails.php:163
+#, php-format
+msgid "[%s] Order Complete/Download Links"
+msgstr "[%s] Order slutförd/Nedladdningslänkar"
+
+#@ woothemes
+#: woocommerce_emails.php:165
+#, php-format
+msgid "[%s] Order Complete"
+msgstr "[%s] Order slutförd"
+
+#@ woothemes
+#: woocommerce_emails.php:199
+#, php-format
+msgid "[%s] Pay for Order"
+msgstr "[%s] Betala för order"
+
+#@ woothemes
+#: admin/admin-post-types.php:457
+msgid "Paid via"
+msgstr "Betald via"
+
+#@ woothemes
+#: admin/admin-post-types.php:472
+msgid "Shipped via"
+msgstr "Leverans via"
+
+#@ woothemes
+#: classes/cart.class.php:546
+msgid "via"
+msgstr "via"
+
+#@ woothemes
+#: shortcodes/shortcode-my_account.php:288
+msgid "Address line 1"
+msgstr "Adress 1"
+
+#@ woothemes
+#: shortcodes/shortcode-order_tracking.php:43
+msgid "and was completed"
+msgstr "och slutfördes"
+
+#@ woothemes
+#: woocommerce_template_functions.php:987
+msgid "Author:"
+msgstr "Författare:"
 
