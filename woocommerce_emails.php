@@ -160,14 +160,16 @@ function woocommerce_completed_order_customer_notification( $id ) {
 	$order = &new woocommerce_order( $order_id );
 	
 	if ($order->has_downloadable_item()) :
-		$email_heading = __('[%s] Order Complete/Download Links', 'woothemes');
+		$subject		= __('[%s] Order Complete/Download Links', 'woothemes');
+		$email_heading 	= __('Order Complete/Download Links', 'woothemes');
 	else :
-		$email_heading = __('[%s] Order Complete', 'woothemes');
+		$subject		= __('[%s] Order Complete', 'woothemes');
+		$email_heading 	= __('Order Complete', 'woothemes');
 	endif;
 	
 	$email_heading = apply_filters('woocommerce_completed_order_customer_notification_subject', $email_heading);
 
-	$subject = sprintf($email_heading, get_bloginfo('name'));
+	$subject = sprintf($subject, get_bloginfo('name'));
 	
 	// Buffer
 	ob_start();

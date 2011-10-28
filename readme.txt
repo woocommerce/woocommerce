@@ -59,6 +59,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 = 1.1.4 - xx/10/2011 =
 * Edit category - image fix
+* Order Complete email heading fix
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
