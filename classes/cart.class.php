@@ -390,10 +390,9 @@ class woocommerce_cart {
 					
 				endif;
 
-				$tax_amount 				= ( isset($tax_amount) ? $tax_amount : 0 );
+				$tax_amount = ( isset($tax_amount) ? $tax_amount : 0 );
 				
-				$this->cart_contents_tax = $this->cart_contents_tax + $tax_amount;
-								
+				$this->cart_contents_tax = $this->cart_contents_tax + $tax_amount;			
 				$this->cart_contents_total = $this->cart_contents_total + $total_item_price;
 				$this->cart_contents_total_ex_tax = $this->cart_contents_total_ex_tax + ($_product->get_price_excluding_tax()*$values['quantity']);
 				
@@ -422,9 +421,17 @@ class woocommerce_cart {
 			$coupon = &new woocommerce_coupon( $code );
 			if ($coupon->is_valid()) :
 				if ($coupon->type=='fixed_cart') : 
+				
 					$this->discount_total = $this->discount_total + $coupon->amount;
+					
 				elseif ($coupon->type=='percent') :
-					$this->discount_total = $this->discount_total + ( $this->subtotal / 100 ) * $coupon->amount;
+
+					if (get_option('woocommerce_prices_include_tax')=='yes') :
+						$this->discount_total = $this->discount_total + ( $this->subtotal / 100 ) * $coupon->amount;
+					else :
+						$this->discount_total = $this->discount_total + ( ($this->subtotal + $this->cart_contents_tax) / 100 ) * $coupon->amount;
+					endif;
+					
 				endif;
 			endif;
 		endforeach;
