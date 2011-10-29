@@ -402,7 +402,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	$meta_values = $item_meta_values[$i];
 			 	
 			 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
-			 		$key = sanitize_title($meta_names[$ii]);
+			 		$key = esc_attr( $meta_names[$ii] );
 			 		if ($key && $meta_values[$ii]) :
 			 			$item_meta[$key] = woocommerce_clean( $meta_values[$ii] );
 			 		endif;
