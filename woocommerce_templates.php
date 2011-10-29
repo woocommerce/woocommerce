@@ -220,3 +220,18 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 	return $menu_items;
 }
 add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
+
+
+/**
+ * Add logout link to my account menu
+ **/
+add_filter( 'wp_nav_menu_items', 'woocommerce_nav_menu_items', 10, 2 );
+
+function woocommerce_nav_menu_items( $items, $args ) {
+	
+	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(get_option('woocommerce_myaccount_page_id'))) && is_user_logged_in() ) :
+		$items .= '<li><a href="'. wp_logout_url() .'">'.__('Logout', 'woothemes').'</a></li>';
+	endif;
+	
+    return $items;
+}

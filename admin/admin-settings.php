@@ -160,6 +160,14 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'args'		=> 'show_option_none=' . __('None', 'woothemes'),
 	),
 	
+	array(  
+		'name' => __( 'Logout link', 'woothemes' ),
+		'desc' 		=> sprintf(__( 'Append a logout link to menus containing "My Account"', 'woothemes' ), $base_slug),
+		'id' 		=> 'woocommerce_menu_logout_link',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+	),
+	
 	array( 'type' => 'sectionend', 'id' => 'page_options' ),
 	
 	array( 'name' => __( 'Permalinks', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'permalink_options' ),
