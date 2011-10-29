@@ -733,7 +733,7 @@ function woocommerce_download_product() {
 			// Get the downloads URL and try to replace the url with a path
 			$file_path = get_post_meta($download_file, 'file_path', true);	
 			
-			$file_path = str_replace(trailingslashit(home_url()), ABSPATH, $file_path);
+			$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
 			
 			// See if its local or remote
 			if (strstr($file_path, 'http:') || strstr($file_path, 'https:') || strstr($file_path, 'ftp:')) :

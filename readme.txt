@@ -61,6 +61,7 @@ For further documentation on using WooCommerce, please sign up for free at http:
 * Edit category - image fix
 * Order Complete email heading fix
 * 100% discount when price excludes tax logic fix
+* Download urls use site_url instead of home_url so installs in subdirectories are handled correctly
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
