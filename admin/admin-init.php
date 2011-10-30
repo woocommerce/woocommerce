@@ -66,7 +66,7 @@ function woocommerce_admin_scripts() {
     
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
-    
+
     endif;
     
     // Edit product category pages

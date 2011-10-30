@@ -447,38 +447,42 @@ class woocommerce_order {
 	 */
 	function reduce_order_stock() {
 		
-		// Reduce stock levels and do any other actions with products in the cart
-		if (sizeof($this->items)>0) foreach ($this->items as $item) :
+		if (get_option('woocommerce_manage_stock')=='yes' && sizeof($this->items)>0) :
 		
-			if ($item['id']>0) :
-				$_product = $this->get_product_from_item( $item );
-				
-				if ( $_product->exists && $_product->managing_stock() ) :
-				
-					$old_stock = $_product->stock;
+			// Reduce stock levels and do any other actions with products in the cart
+			foreach ($this->items as $item) :
+			
+				if ($item['id']>0) :
+					$_product = $this->get_product_from_item( $item );
 					
-					$new_quantity = $_product->reduce_stock( $item['qty'] );
+					if ( $_product->exists && $_product->managing_stock() ) :
 					
-					$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $item['id'], $old_stock, $new_quantity) );
+						$old_stock = $_product->stock;
 						
-					if ($new_quantity<0) :
-						do_action('woocommerce_product_on_backorder_notification', $item['id'], $item['qty']);
-					endif;
-					
-					// stock status notifications
-					if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-						do_action('woocommerce_no_stock_notification', $item['id']);
-					elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-						do_action('woocommerce_low_stock_notification', $item['id']);
+						$new_quantity = $_product->reduce_stock( $item['qty'] );
+						
+						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $item['id'], $old_stock, $new_quantity) );
+							
+						if ($new_quantity<0) :
+							do_action('woocommerce_product_on_backorder_notification', $item['id'], $item['qty']);
+						endif;
+						
+						// stock status notifications
+						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
+							do_action('woocommerce_no_stock_notification', $item['id']);
+						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
+							do_action('woocommerce_low_stock_notification', $item['id']);
+						endif;
+						
 					endif;
 					
 				endif;
-				
-			endif;
-		 	
-		endforeach;
+			 	
+			endforeach;
+			
+			$this->add_order_note( __('Order item stock reduced successfully.', 'woothemes') );
 		
-		$this->add_order_note( __('Order item stock reduced successfully.', 'woothemes') );
+		endif;
 			
 	}
 	
