@@ -248,3 +248,32 @@ function woocommerce_product_on_backorder_notification( $product, $amount ) {
 	$message = wordwrap( html_entity_decode( strip_tags( $message ) ), 70 );
 	wp_mail( get_option('admin_email'), $subject, $message );
 }
+
+/**
+ * Preview Emails
+ **/
+add_action('admin_init', 'woocommerce_preview_emails');
+
+function woocommerce_preview_emails() {
+	if (isset($_GET['preview_woocommerce_mail'])) :
+		$nonce = $_REQUEST['_wpnonce'];
+		if (!wp_verify_nonce($nonce, 'preview-mail') ) die('Security check'); 
+		
+		global $email_heading;
+	
+		$email_heading = __('Email preview', 'woothemes');
+		
+		do_action('woocommerce_email_header');
+		
+		echo '<h2>WooCommerce sit amet</h2>';
+		
+		echo wpautop('Ut ut est qui euismod parum. Dolor veniam tation nihil assum mazim. Possim fiant habent decima et claritatem. Erat me usus gothica laoreet consequat. Clari facer litterarum aliquam insitam dolor. 
+
+Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam aliquip litterarum. Lius videntur nisl facilisis claritatem nunc. Praesent in iusto me tincidunt iusto. Dolore lectores sed putamus exerci est. ');
+		
+		do_action('woocommerce_email_footer');
+		
+		exit;
+		
+	endif;
+}
