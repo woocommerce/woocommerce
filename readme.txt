@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added order details to thankyou page
 * Added basic rss feeds for products and product categories
 * Added functions which show tax/vat conditionally
+* Fixed variations - Incorrectly used instead $product_custom_fields of $parent_custom_fields
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
