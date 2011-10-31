@@ -678,7 +678,10 @@ class woocommerce_product {
 					endforeach;
 					echo implode(', ', $values);
 				else :
-					echo wpautop(wptexturize($attribute['value']));
+					// Convert pipes to commas
+					$value = explode('|', $attribute['value']);
+					$value = implode(', ', $value);
+					echo wpautop(wptexturize($value));
 				endif;
 				
 				echo '</td></tr>';
