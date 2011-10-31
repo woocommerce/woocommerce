@@ -66,7 +66,7 @@ class woocommerce_product_variation extends woocommerce_product {
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :
-			$this->$key = (isset($product_custom_fields[$key][0]) && $product_custom_fields[$key][0]!=='') ? $product_custom_fields[$key][0] : $default;
+			$this->$key = (isset($parent_custom_fields[$key][0]) && $parent_custom_fields[$key][0]!=='') ? $parent_custom_fields[$key][0] : $default;
 		endforeach;
 		
 		// Load serialised data, unserialise twice to fix WP bug

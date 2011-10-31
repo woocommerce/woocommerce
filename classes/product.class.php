@@ -305,7 +305,7 @@ class woocommerce_product {
 	function has_enough_stock( $quantity ) {
 		
 		if (!$this->managing_stock()) return true;
-		
+
 		if ($this->backorders_allowed()) return true;
 		
 		if ($this->stock >= $quantity) :
