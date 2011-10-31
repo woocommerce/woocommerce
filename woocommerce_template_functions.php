@@ -1156,6 +1156,9 @@ function woocommerce_product_subcategories() {
 	
 }
 
+/**
+ * Show subcategory thumbnail
+ **/
 function woocommerce_subcategory_thumbnail( $category ) {
 	global $woocommerce;
 	
@@ -1175,3 +1178,122 @@ function woocommerce_subcategory_thumbnail( $category ) {
 	echo '<img src="'.$image.'" alt="'.$category->slug.'" width="'.$image_width.'" height="'.$image_height.'" />';
 }
 
+/**
+ * Display an orders details in a table
+ **/
+function woocommerce_order_details_table( $order_id ) {
+	
+	if (!$order_id) return;
+	
+	$order = &new woocommerce_order( $order_id );
+	?>	
+	<h2><?php _e('Order Details', 'woothemes'); ?></h2>	
+	<table class="shop_table">
+		<thead>
+			<tr>
+				<th><?php _e('Product', 'woothemes'); ?></th>
+				<th><?php _e('Qty', 'woothemes'); ?></th>
+				<th><?php _e('Totals', 'woothemes'); ?></th>
+			</tr>
+		</thead>
+		<tfoot>
+			<tr>
+				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
+				<td><?php echo $order->get_subtotal_to_display(); ?></td>
+			</tr>
+			<?php if ($order->order_shipping>0) : ?><tr>
+				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
+				<td><?php echo $order->get_shipping_to_display(); ?></small></td>
+			</tr><?php endif; ?>
+			<?php if ($order->get_total_tax()>0) : ?><tr>
+				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
+				<td><?php echo woocommerce_price($order->get_total_tax()); ?></td>
+			</tr><?php endif; ?>
+			<?php if ($order->order_discount>0) : ?><tr class="discount">
+				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
+				<td>-<?php echo woocommerce_price($order->order_discount); ?></td>
+			</tr><?php endif; ?>
+			<tr>
+				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
+				<td><strong><?php echo woocommerce_price($order->order_total); ?></strong></td>
+			</tr>
+			<?php if ($order->customer_note) : ?>
+			<tr>
+				<td><?php _e('Note:', 'woothemes'); ?></td>
+				<td colspan="2"><?php echo wpautop(wptexturize($order->customer_note)); ?></td>
+			</tr>
+			<?php endif; ?>
+		</tfoot>
+		<tbody>
+			<?php
+			if (sizeof($order->items)>0) : 
+			
+				foreach($order->items as $item) : 
+				
+					if (isset($item['variation_id']) && $item['variation_id'] > 0) :
+						$_product = &new woocommerce_product_variation( $item['variation_id'] );
+					else :
+						$_product = &new woocommerce_product( $item['id'] );
+					endif;
+				
+					echo '
+						<tr>
+							<td class="product-name">'.$item['name'];
+					
+					if (isset($item['item_meta'])) :
+						echo woocommerce_get_formatted_variation( $item['item_meta'] );
+					endif;
+					
+					echo '	</td>
+							<td>'.$item['qty'].'</td>
+							<td>'.woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1) ).'</td>
+						</tr>';
+				endforeach; 
+			endif;
+			?>
+		</tbody>
+	</table>
+	
+	<header>
+		<h2><?php _e('Customer details', 'woothemes'); ?></h2>
+	</header>
+	<dl>
+	<?php
+		if ($order->billing_email) echo '<dt>'.__('Email:', 'woothemes').'</dt><dd>'.$order->billing_email.'</dd>';
+		if ($order->billing_phone) echo '<dt>'.__('Telephone:', 'woothemes').'</dt><dd>'.$order->billing_phone.'</dd>';
+	?>
+	</dl>
+	
+	<div class="col2-set addresses">
+
+		<div class="col-1">
+		
+			<header class="title">
+				<h3><?php _e('Shipping Address', 'woothemes'); ?></h3>
+			</header>
+			<address><p>
+				<?php
+					if (!$order->formatted_shipping_address) _e('N/A', 'woothemes'); else echo $order->formatted_shipping_address;
+				?>
+			</p></address>
+		
+		</div><!-- /.col-1 -->
+		
+		<div class="col-2">
+		
+			<header class="title">				
+				<h3><?php _e('Billing Address', 'woothemes'); ?></h3>
+			</header>
+			<address><p>
+				<?php
+					if (!$order->formatted_billing_address) _e('N/A', 'woothemes'); else echo $order->formatted_billing_address;
+				?>
+			</p></address>
+		
+		</div><!-- /.col-2 -->
+	
+	</div><!-- /.col2-set -->
+	
+	<div class="clear"></div>
+	<?php
+}

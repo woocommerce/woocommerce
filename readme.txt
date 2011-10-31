@@ -89,6 +89,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Download urls use site_url instead of home_url so installs in subdirectories are handled correctly
 * Option to add logout link to my account menu
 * Ability to preview email templates
+* Added order details to thankyou page
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 

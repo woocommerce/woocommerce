@@ -52,7 +52,7 @@ function woocommerce_thankyou( $atts ) {
 				if (is_user_logged_in()) :
 					echo '<a href="'.esc_url( get_permalink(get_option('woocommerce_myaccount_page_id')) ).'" class="button pay">'.__('My Account', 'woothemes').'</a>';
 				endif;
-				
+
 			else :
 				
 				echo '<p>' . __('Thank you. Your order has been received.', 'woothemes') . '</p>';
@@ -85,8 +85,8 @@ function woocommerce_thankyou( $atts ) {
 			
 			endif;
 			
-			do_action( 'woocommerce_thankyou', $order_id );
 			do_action( 'woocommerce_thankyou_' . $order->payment_method, $order_id );
+			do_action( 'woocommerce_thankyou', $order_id );
 			
 		endif;
 	

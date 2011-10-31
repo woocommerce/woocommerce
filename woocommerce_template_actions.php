@@ -92,3 +92,7 @@ add_action('woocommerce_cart_collaterals', 'woocommerce_cross_sell_display');
 
 /* Footer */
 add_action( 'wp_footer', 'woocommerce_demo_store' );
+
+/* Order details */
+add_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
+add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
