@@ -36,7 +36,7 @@
 							
 							if ($method->shipping_total>0) :
 								echo woocommerce_price($method->shipping_total);
-								if ($method->shipping_tax>0) : __(' (ex. tax)', 'woothemes'); endif;
+								if ($method->shipping_tax>0) : ' ' . $woocommerce->countries->ex_tax_or_vat(); endif;
 							else :
 								echo __('Free', 'woothemes');
 							endif;

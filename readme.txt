@@ -91,6 +91,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Ability to preview email templates
 * Added order details to thankyou page
 * Added basic rss feeds for products and product categories
+* Added functions which show tax/vat conditionally
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 

@@ -242,6 +242,7 @@ class woocommerce_countries {
 		'UG' => 'Uganda',
 		'UM' => 'United States Minor Outlying Islands',
 		'US' => 'United States',
+		'USAF' => 'US Armed Forces', 
 		'UY' => 'Uruguay',
 		'UZ' => 'Uzbekistan',
 		'VA' => 'Vatican',
@@ -257,9 +258,7 @@ class woocommerce_countries {
 		'YT' => 'Mayotte',
 		'ZA' => 'South Africa',
 		'ZM' => 'Zambia',
-		'ZW' => 'Zimbabwe',
-	  	'USAF' => 'US Armed Forces' , 
-		'VE' => 'Venezuela',
+		'ZW' => 'Zimbabwe'
 	);
 	
 	var $states = array(
@@ -522,22 +521,51 @@ class woocommerce_countries {
 		return $allowed_countries;
 	}
 	
+	/** Gets an array of countries in the EU */
+	function get_european_union_countries() {
+		return array('AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK');
+	}
+	
 	/** Gets the correct string for shipping - ether 'to the' or 'to' */
 	function shipping_to_prefix() {
 		global $woocommerce;
 		$return = '';
 		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
 		else $return = __('to', 'woothemes');
-		$return = apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
-		return $return;
+		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
 	}
 	
+	/** Prefix certain countries with 'the' */
 	function estimated_for_prefix() {
 		global $woocommerce;
 		$return = '';
 		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
-		$return = apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
-		return $return;
+		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
+	}
+	
+	/** Correctly name tax in some countries VAT on the frontend */
+	function tax_or_vat() {
+		global $woocommerce;
+		
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('VAT', 'woothemes') : __('tax', 'woothemes');
+		
+		return apply_filters('woocommerce_countries_tax_or_vat', $return);
+	}
+	
+	function inc_tax_or_vat() {
+		global $woocommerce;
+		
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(inc. VAT)', 'woothemes') : __('(inc. tax)', 'woothemes');
+		
+		return apply_filters('woocommerce_countries_inc_tax_or_vat', $return);
+	}
+	
+	function ex_tax_or_vat() {
+		global $woocommerce;
+		
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(ex. VAT)', 'woothemes') : __('(ex. tax)', 'woothemes');
+		
+		return apply_filters('woocommerce_countries_ex_tax_or_vat', $return);
 	}
 	
 	/** get states */
@@ -554,9 +582,6 @@ class woocommerce_countries {
 		if ( $countries ) foreach ( $countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
-    				/*echo '<option value="'.$key.'"';
-    				if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    				echo '>'.$value.' &mdash; '.__('All states', 'woothemes').'</option>';*/
     				foreach ($states as $state_key=>$state_value) :
     					echo '<option value="'.$key.':'.$state_key.'"';
     					

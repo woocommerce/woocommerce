@@ -473,6 +473,7 @@ class woocommerce_cart {
 	
 	/** gets the sub total (after calculation) */
 	function get_cart_subtotal() {
+		global $woocommerce;
 		
 		if (get_option('woocommerce_display_totals_tax')=='excluding' || ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT )) :
 			
@@ -487,7 +488,7 @@ class woocommerce_cart {
 			endif;
 			
 			if ($this->tax_total>0) :
-				$return .= __(' <small>(ex. tax)</small>', 'woothemes');
+				$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 			endif;
 			return $return;
 			
@@ -504,7 +505,7 @@ class woocommerce_cart {
 			endif;
 			
 			if ($this->tax_total>0) :
-				$return .= __(' <small>(inc. tax)</small>', 'woothemes');
+				$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 			endif;
 			return $return;
 		
@@ -530,7 +531,7 @@ class woocommerce_cart {
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total);
 					if ($this->shipping_tax_total>0) :
-						$return .= __(' <small>(ex. tax)</small>', 'woothemes');
+						$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 					endif;
 					return $return;
 					
@@ -538,7 +539,7 @@ class woocommerce_cart {
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total + $woocommerce->shipping->shipping_tax);
 					if ($this->shipping_tax_total>0) :
-						$return .= __(' <small>(inc. tax)</small>', 'woothemes');
+						$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 					endif;
 					return $return;
 				

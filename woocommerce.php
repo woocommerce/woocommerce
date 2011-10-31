@@ -416,6 +416,7 @@ function get_woocommerce_currency_symbol() {
  * Price Formatting
  **/
 function woocommerce_price( $price, $args = array() ) {
+	global $woocommerce;
 	
 	extract(shortcode_atts(array(
 		'ex_tax_label' 	=> '0'
@@ -442,7 +443,7 @@ function woocommerce_price( $price, $args = array() ) {
 		break;
 	endswitch;
 	
-	if ($ex_tax_label && get_option('woocommerce_calc_taxes')=='yes') $return .= __(' <small>(ex. tax)</small>', 'woothemes');
+	if ($ex_tax_label && get_option('woocommerce_calc_taxes')=='yes') $return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 	
 	return $return;
 }

@@ -705,14 +705,14 @@ if (!function_exists('woocommerce_cart_totals')) {
 					
 												echo woocommerce_price($method->shipping_total);
 												if ($method->shipping_tax>0) :
-													_e(' (ex. tax)', 'woothemes');
+													echo ' ' . $woocommerce->countries->ex_tax_or_vat();
 												endif;
 												
 											else :
 												
 												echo woocommerce_price($method->shipping_total + $method->shipping_tax);
 												if ($method->shipping_tax>0) :
-													_e(' (inc. tax)', 'woothemes');
+													echo ' ' . $woocommerce->countries->inc_tax_or_vat();
 												endif;
 											
 											endif;

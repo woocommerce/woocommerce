@@ -144,11 +144,12 @@ class woocommerce_order {
 	
 	/** Gets subtotal */
 	function get_subtotal_to_display() {
+		global $woocommerce;
 		
 		$subtotal = woocommerce_price($this->order_subtotal);
 		
 		if ($this->order_tax>0) :
-			$subtotal .= __(' <small>(ex. tax)</small>', 'woothemes');
+			$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 		endif;
 		
 		return $subtotal;
@@ -156,12 +157,13 @@ class woocommerce_order {
 	
 	/** Gets shipping */
 	function get_shipping_to_display() {
+		global $woocommerce;
 		
 		if ($this->order_shipping > 0) :
 
 			$shipping = woocommerce_price($this->order_shipping);
 			if ($this->order_shipping_tax > 0) :
-				$tax_text = __('(ex. tax)', 'woothemes') . ' '; 
+				$tax_text = $woocommerce->countries->ex_tax_or_vat() . ' '; 
 			else :
 				$tax_text = '';
 			endif;
