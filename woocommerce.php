@@ -199,13 +199,6 @@ function woocommerce_init_roles() {
 	endif;
 }
 
-add_filter('woocommerce_shop_manager_capabilities', 'custom_shop_manager_capabilities');
-
-function custom_shop_manager_capabilities( $caps ) {
-	$caps['manage_woocommerce'] = false;
-	return $caps;
-}
-
 /**
  * Enqueue frontend scripts
  **/
