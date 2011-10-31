@@ -400,6 +400,7 @@ function woocommerce_edit_order_columns($columns){
 	$columns["shipping_address"] = __("Shipping", 'woothemes');
 	$columns["total_cost"] = __("Order Total", 'woothemes');
 	$columns["order_date"] = __("Date", 'woothemes');
+	$columns["order_actions"] = __("Actions", 'woothemes');
 	
 	return $columns;
 }
@@ -496,6 +497,15 @@ function woocommerce_custom_order_columns($column) {
 			endif;
 
 			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr>';
+			
+		break;
+		case "order_actions" :
+			
+			?><p>
+				<?php if (in_array($order->status, array('pending', 'on-hold'))) : ?><a class="button" href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID) ); ?>"><?php _e('Processing', 'woothemes'); ?></a><?php endif; ?>
+				<?php if (in_array($order->status, array('pending', 'on-hold', 'processing'))) : ?><a class="button" href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID) ); ?>"><?php _e('Complete', 'woothemes'); ?></a><?php endif; ?>
+				<a class="button" href="<?php echo admin_url('post.php?post='.$post->ID.'&action=edit'); ?>"><?php _e('View', 'woothemes'); ?></a>
+			</p><?php
 			
 		break;
 	}
@@ -674,6 +684,45 @@ function woocommerce_post_updated_messages( $messages ) {
    	endif;
     return $messages;
 }
+
+
+/**
+ * Mark an order as complete
+ */
+function woocommerce_mark_order_complete() {
+
+	if( !is_admin() ) die;
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.') );
+	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
+	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
+	if(!$order_id) die;
+	
+	$order = &new woocommerce_order( $order_id );
+	$order->update_status( 'completed' );
+	
+	wp_safe_redirect( wp_get_referer() );
+
+}
+add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_complete');
+
+/**
+ * Mark an order as processing
+ */
+function woocommerce_mark_order_processing() {
+
+	if( !is_admin() ) die;
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.') );
+	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
+	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
+	if(!$order_id) die;
+	
+	$order = &new woocommerce_order( $order_id );
+	$order->update_status( 'processing' );
+	
+	wp_safe_redirect( wp_get_referer() );
+
+}
+add_action('wp_ajax_woocommerce-mark-order-processing', 'woocommerce_mark_order_processing');
 
 
 /**

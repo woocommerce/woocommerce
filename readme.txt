@@ -96,6 +96,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made use of transients to store average ratings and improve performance
 * Adding cart item resets shipping - so free shipping etc is selected when going over a threshold
 * Changes to shipping calc - if no rates are found, but the user did not enter a state/postcode, it asks them to do so. 
+* Added quick status change buttons (processing/complete) to orders panel
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
