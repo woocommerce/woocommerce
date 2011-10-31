@@ -677,7 +677,8 @@ if (!function_exists('woocommerce_cart_totals')) {
 		?>
 		<div class="cart_totals">
 		<?php
-		if ($available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() || !$woocommerce->shipping->enabled ) : 
+		//if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
+		if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) : 
 			// Hide totals if customer has set location and there are no methods going there
 			?>
 			<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
@@ -751,7 +752,12 @@ if (!function_exists('woocommerce_cart_totals')) {
 			<p><small><?php _e('Note: Tax and shipping totals are estimated and will be updated during checkout based on your billing information.', 'woothemes'); ?></small></p>
 			<?php
 		else :
-			echo '<p>'.__('Sorry, it seems that there are no available shipping methods to your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
+			?>
+			<div class="woocommerce_error">
+				<p><?php if (!$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode()) : ?><?php _e('No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure their are no other available methods for your location.', 'woothemes'); ?><?php else : ?><?php printf(__('Sorry, it seems that there are no available shipping methods for your location (%s).', 'woothemes'), $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ]); ?><?php endif; ?></p>
+				<p><?php _e('If you require assistance or wish to make alternate arrangements please contact us.', 'woothemes'); ?></p>
+			</div>
+			<?php
 		endif;
 		?>
 		</div>

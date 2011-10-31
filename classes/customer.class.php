@@ -34,6 +34,7 @@ class woocommerce_customer {
 				'is_vat_exempt' 	=> false
 			);			
 			$_SESSION['customer'] = $data;
+			$_SESSION['calculated_shipping'] = false;
 			
 		endif;
 		
