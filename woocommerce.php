@@ -515,8 +515,10 @@ function woocommerce_clean( $var ) {
  **/
 function woocommerce_add_comment_rating($comment_id) {
 	if ( isset($_POST['rating']) ) :
+		global $post;
 		if (!$_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0) $_POST['rating'] = 5; 
-		add_comment_meta( $comment_id, 'rating', $_POST['rating'], true );
+		add_comment_meta( $comment_id, 'rating', esc_attr($_POST['rating']), true );
+		delete_transient( esc_attr($post->ID) . '_woocommerce_average_rating' );
 	endif;
 }
 add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
