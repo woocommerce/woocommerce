@@ -20,6 +20,7 @@
  *		- Order Status completed - allow customer to access Downloadable product
  *		- Google Analytics standard tracking
  *		- Google Analytics eCommerce tracking
+ *		- Products RSS Feed
  *
  * @package		WooCommerce
  * @category	Actions
@@ -989,3 +990,35 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 	</script>
 	<?php
 } 
+
+/* Products RSS Feed */
+add_action( 'wp_head', 'woocommerce_products_rss_feed' );
+
+function woocommerce_products_rss_feed() {
+	
+	// Product RSS
+	if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) :
+		
+		$feed = get_post_type_archive_feed_link( 'product' );
+
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . __('New products', 'woothemes') . '" href="' . $feed . '" />';
+	
+	elseif ( is_tax( 'product_cat' ) ) :
+		
+		$term = get_term_by('slug', get_query_var('product_cat'), 'product_cat');
+		
+		$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
+		
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products added to %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
+		
+	elseif ( is_tax( 'product_tag' ) ) :
+		
+		$term = get_term_by('slug', get_query_var('product_tag'), 'product_tag');
+		
+		$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
+		
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products tagged %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
+		
+	endif;
+
+}
