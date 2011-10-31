@@ -79,10 +79,15 @@ class woocommerce_cart {
 	/** sets the php session data for the cart and coupon */
 	function set_session() {
 		$cart = array();
-
-		$_SESSION['cart'] = $this->cart_contents;
 		
+		// Set cart and coupon session data
+		$_SESSION['cart'] = $this->cart_contents;
 		$_SESSION['coupons'] = $this->applied_coupons;
+		
+		// Cart contents change so reset shipping
+		unset($_SESSION['_chosen_shipping_method']);
+		
+		// Calculate totals
 		$this->calculate_totals();
 	}
 	
