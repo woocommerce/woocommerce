@@ -1,6 +1,7 @@
 === WooCommerce - eCommerce plugin for WordPress ===
 Contributors: woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
 Stable tag: 1.1.3
@@ -51,9 +52,33 @@ The manual installation involves downloading the plugin and uploading it to your
 2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
 3. Activate the plugin from the Plugins menu within the WordPress admin.
 
-== FAQ ==
+== Frequently Asked Questions == 
 
-For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips.
+= Where can I find WooCommerce documentation and user guides =
+
+For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips. 
+
+The codex for WooCommerce can be found here: http://www.woothemes.com/woocommerce-codex/
+
+Clients and beginners will appreciate the user guide here: http://www.woothemes.com/woocommerce-codex/woocommerce-user-guide/
+
+= Where can I request new features and extensions? =
+
+You can vote on and request new features and extensions in our WooIdeas board - http://ideas.woothemes.com/forums/133476-woocommerce
+
+= Where can I report bugs or contribute to the project? =
+
+Bugs can be reported either in our support forum or preferably at the WooCommerce GitHub repository (https://github.com/woothemes/woocommerce/issues)
+
+= WooCommerce is awesome! Can I contribute? =
+
+Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/woocommerce/
+
+== Screenshots ==
+
+1. The slick WooCommerce settings panel
+2. WooCommerce products admin
+3. WooCommerce sales reports
 
 == Changelog ==
 
@@ -180,3 +205,8 @@ For further documentation on using WooCommerce, please sign up for free at http:
 
 = 1.0 - 27/09/2011 = 
 * Initial Release. Woo!
+
+== Upgrade Notice ==
+
+= 1.1.4 =
+Minor bug fixes and improvements to keep WooCommerce running smoothly :)
