@@ -32,12 +32,12 @@ add_action('admin_init', 'woocommerce_admin_init');
 function woocommerce_admin_menu() {
 	global $menu, $woocommerce;
 	
-	$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+	if ( current_user_can( 'manage_woocommerce' ) ) $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
     add_menu_page(__('WooCommerce', 'woothemes'), __('WooCommerce', 'woothemes'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
     add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports');
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_woocommerce', 'woocommerce_attributes', 'woocommerce_attributes');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_categories', 'woocommerce_attributes', 'woocommerce_attributes');
     
     $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     
@@ -160,7 +160,7 @@ function woocommerce_admin_css() {
  * Order admin menus
  */
 function woocommerce_admin_menu_order( $menu_order ) {
-
+	
 	// Initialize our custom order array
 	$woocommerce_menu_order = array();
 
@@ -203,6 +203,8 @@ add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');
  */
 function woocommerce_admin_head() {
 	global $woocommerce;
+	
+	if ( !current_user_can( 'manage_woocommerce' ) ) return false;
 	?>
 	<style type="text/css">
 		#toplevel_page_woocommerce .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat 0px -32px !important;}

@@ -191,13 +191,19 @@ function woocommerce_init_roles() {
 		    'upload_files'				=> true,
 		   	'export'					=> true,
 			'import'					=> true,
+			'manage_woocommerce'		=> true
 		));
 		
-		// Main Shop capabilities
+		// Main Shop capabilities for admin
 		$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
-		$wp_roles->add_cap( 'shop_manager', 'manage_woocommerce' );
-		
 	endif;
+}
+
+add_filter('woocommerce_shop_manager_capabilities', 'custom_shop_manager_capabilities');
+
+function custom_shop_manager_capabilities( $caps ) {
+	$caps['manage_woocommerce'] = false;
+	return $caps;
 }
 
 /**
