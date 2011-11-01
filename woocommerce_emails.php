@@ -277,3 +277,32 @@ Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam al
 		
 	endif;
 }
+
+/**
+ * Add order meta to email templates
+ **/
+add_action('woocommerce_email_after_order_table', 'woocommerce_email_order_meta', 10, 2);
+
+function woocommerce_email_order_meta( $order, $sent_to_admin ) {
+	
+	$meta = array();
+	$show_fields = apply_filters('woocommerce_email_order_meta_keys', array('coupons'), $sent_to_admin);
+
+	if ($order->customer_note) :
+		$meta[__('Note:', 'woothemes')] = wptexturize($order->customer_note);
+	endif;
+	
+	if ($show_fields) foreach ($show_fields as $field) :
+		
+		$value = get_post_meta( $order->id, $field, true );
+		if ($value) $meta[ucwords(esc_attr($field))] = wptexturize($value);
+		
+	endforeach;
+	
+	if (sizeof($meta)>0) :
+		echo '<h2>'.__('Order information', 'woothemes').'</h2>';
+		foreach ($meta as $key=>$value) :
+			echo '<p><strong>'.$key.':</strong> '.$value.'</p>';
+		endforeach;
+	endif;
+}

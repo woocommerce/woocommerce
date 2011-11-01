@@ -83,20 +83,21 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.1.4 - xx/10/2011 =
+* Added quick status change buttons (processing/complete) to orders panel
+* Ability to preview email templates
+* Option to add logout link to my account menu
+* Added ability to show meta (custom fields) on order emails - useful for plugins
+* Added order details to thankyou page
+* Added basic rss feeds for products and product categories
+* Added functions which show tax/vat conditionally
+* Made use of transients to store average ratings and improve performance
 * Edit category - image fix
 * Order Complete email heading fix
 * 100% discount when price excludes tax logic fix
 * Download urls use site_url instead of home_url so installs in subdirectories are handled correctly
-* Option to add logout link to my account menu
-* Ability to preview email templates
-* Added order details to thankyou page
-* Added basic rss feeds for products and product categories
-* Added functions which show tax/vat conditionally
 * Fixed variations - Incorrectly used instead $product_custom_fields of $parent_custom_fields
-* Made use of transients to store average ratings and improve performance
 * Adding cart item resets shipping - so free shipping etc is selected when going over a threshold
 * Changes to shipping calc - if no rates are found, but the user did not enter a state/postcode, it asks them to do so. 
-* Added quick status change buttons (processing/complete) to orders panel
 * Fix for adding sites in multisite
 * Dashboard chart now ignores 'pending' orders
 * Fixed dashboard report range

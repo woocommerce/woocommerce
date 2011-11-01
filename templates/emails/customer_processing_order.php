@@ -41,9 +41,7 @@
 	</tbody>
 </table>
 
-<?php if ($order->customer_note) : ?>
-	<p><strong><?php _e('Note:', 'woothemes'); ?></strong> <?php echo $order->customer_note; ?></p>
-<?php endif; ?>
+<?php do_action('woocommerce_email_after_order_table', $order, false); ?>
 
 <h2><?php _e('Customer details', 'woothemes'); ?></h2>
 
