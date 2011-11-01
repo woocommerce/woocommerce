@@ -644,8 +644,28 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 )); // End tax settings
 
 $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', array(
-
-	array(	'name' => __( 'Email Options', 'woothemes' ), 'type' => 'title', '', 'id' => 'email_options' ),
+	
+	array(	'name' => __( 'Email Recipient Options', 'woothemes' ), 'type' => 'title', '', 'id' => 'email_recipient_options' ),
+	
+	array(  
+		'name' => __( 'New order notifications', 'woothemes' ),
+		'desc' 		=> __( 'The recipient of new order emails. Defaults to the admin email.', 'woothemes' ),
+		'id' 		=> 'woocommerce_new_order_email_recipient',
+		'type' 		=> 'text',
+		'std' 		=> esc_attr(get_option('admin_email'))
+	),
+	
+	array(  
+		'name' => __( 'Inventory notifications', 'woothemes' ),
+		'desc' 		=> __( 'The recipient of stock emails. Defaults to the admin email.', 'woothemes' ),
+		'id' 		=> 'woocommerce_stock_email_recipient',
+		'type' 		=> 'text',
+		'std' 		=> esc_attr(get_option('admin_email'))
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
+	
+	array(	'name' => __( 'Email Sender Options', 'woothemes' ), 'type' => 'title', '', 'id' => 'email_options' ),
 	
 	array(  
 		'name' => __( '"From" name', 'woothemes' ),

@@ -110,7 +110,7 @@ function woocommerce_new_order_notification( $id ) {
 	$message = ob_get_clean();
 
 	// Send the mail	
-	woocommerce_mail( get_option('admin_email'), $subject, $message );
+	woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), $subject, $message );
 }
 
 
@@ -222,7 +222,7 @@ function woocommerce_low_stock_notification( $product ) {
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product low in stock', 'woothemes');
 	$message = '#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woothemes');
 	$message = wordwrap( html_entity_decode( strip_tags( $message ) ), 70 );
-	wp_mail( get_option('admin_email'), $subject, $message );
+	wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 }
 
 
@@ -234,7 +234,7 @@ function woocommerce_no_stock_notification( $product ) {
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product out of stock', 'woothemes');
 	$message = '#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woothemes');
 	$message = wordwrap( html_entity_decode( strip_tags( $message ) ), 70 );
-	wp_mail( get_option('admin_email'), $subject, $message );
+	wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 }
 
 
@@ -246,7 +246,7 @@ function woocommerce_product_on_backorder_notification( $product, $amount ) {
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product Backorder', 'woothemes');
 	$message = $amount . __(' units of #', 'woothemes') . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('have been backordered.', 'woothemes');
 	$message = wordwrap( html_entity_decode( strip_tags( $message ) ), 70 );
-	wp_mail( get_option('admin_email'), $subject, $message );
+	wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 }
 
 /**
