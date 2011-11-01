@@ -238,7 +238,7 @@ function woocommerce_sales_overview() {
 	    'orderby'         => 'post_date',
 	    'order'           => 'DESC',
 	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
+	    'post_status'     => 'publish',
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
