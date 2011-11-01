@@ -214,7 +214,7 @@ function orders_within_range( $where = '' ) {
 	global $start_date, $end_date;
 	
 	$after = date('Y-m-d', $start_date);
-	$before = date('Y-m-d', $end_date);
+	$before = date('Y-m-d', strtotime('+1 day', $end_date));
 	
 	$where .= " AND post_date > '$after'";
 	$where .= " AND post_date < '$before'";
@@ -357,6 +357,7 @@ function woocommerce_sales_overview() {
 	// Blank date ranges to begin
 	$count = 0;
 	$days = ($end_date - $start_date) / (60 * 60 * 24);
+	if ($days==0) $days = 1;
 
 	while ($count < $days) :
 		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
@@ -498,6 +499,7 @@ function woocommerce_daily_sales() {
 	// Blank date ranges to begin
 	$count = 0;
 	$days = ($end_date - $start_date) / (60 * 60 * 24);
+	if ($days==0) $days = 1;
 
 	while ($count < $days) :
 		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
@@ -1239,6 +1241,7 @@ function woocommerce_customer_overview() {
 	// Blank date ranges to begin
 	$count = 0;
 	$days = ($end_date - $start_date) / (60 * 60 * 24);
+	if ($days==0) $days = 1;
 
 	while ($count < $days) :
 		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
