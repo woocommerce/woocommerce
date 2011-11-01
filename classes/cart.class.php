@@ -93,6 +93,21 @@ class woocommerce_cart {
 	
 	/** Empty the cart */
 	function empty_cart() {
+	
+		$this->cart_contents = array();
+		$this->total = 0;
+		$this->cart_contents_total = 0;
+		$this->cart_contents_total_ex_tax = 0;
+		$this->cart_contents_weight = 0;
+		$this->cart_contents_count = 0;
+		$this->cart_contents_tax = 0;
+		$this->tax_total = 0;
+		$this->shipping_tax_total = 0;
+		$this->subtotal = 0;
+		$this->subtotal_ex_tax = 0;
+		$this->discount_total = 0;
+		$this->shipping_total = 0;
+		
 		unset($_SESSION['cart']);
 		unset($_SESSION['coupons']);
 	}
