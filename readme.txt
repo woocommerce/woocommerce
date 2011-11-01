@@ -91,6 +91,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added basic rss feeds for products and product categories
 * Added functions which show tax/vat conditionally
 * Made use of transients to store average ratings and improve performance
+* Custom field for product total_sales when sold
+* Best sellers widget based on new total_sales field
 * Edit category - image fix
 * Order Complete email heading fix
 * 100% discount when price excludes tax logic fix

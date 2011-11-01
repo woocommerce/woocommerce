@@ -379,7 +379,15 @@ class woocommerce_order {
 				clean_term_cache( '', 'shop_order_status' );
 				
 				// Date
-				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+				if ($new_status->slug=='completed') :
+					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+				endif;
+				
+				// Sales
+				if ($this->status == 'on-hold' && ($new_status->slug=='processing' || $new_status->slug=='completed')) :
+					$this->record_product_sales();
+				endif;
+				
 			endif;
 		
 		endif;
@@ -405,6 +413,7 @@ class woocommerce_order {
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items
 	 * If the cart contains only downloadable items then the order is 'complete' since the admin needs to take no action
 	 * Stock levels are reduced at this point
+	 * Sales are also recorded for products
 	 */
 	function payment_complete() {
 		
@@ -415,6 +424,7 @@ class woocommerce_order {
 		if (sizeof($this->items)>0) foreach ($this->items as $item) :
 		
 			if ($item['id']>0) :
+			
 				$_product = $this->get_product_from_item( $item );
 				
 				if ( $_product->exists && $_product->is_type('downloadable') ) :
@@ -439,8 +449,24 @@ class woocommerce_order {
 		
 		$this->update_status($new_order_status);
 		
-		// Payment is complete so reduce stock levels
+		// Payment is complete so reduce stock levels and record sales
+		$this->record_product_sales();
 		$this->reduce_order_stock();
+		
+	}
+	
+	/**
+	 * Record sales
+	 */
+	function record_product_sales() {
+	
+		if (sizeof($this->items)>0) foreach ($this->items as $item) :
+			if ($item['id']>0) :
+				$sales 	= (int) get_post_meta( $item['id'], 'total_sales', true );
+				$sales += (int) $item['qty'];
+				if ($sales) update_post_meta( $item['id'], 'total_sales', $sales );
+			endif;
+		endforeach;
 		
 	}
 	
