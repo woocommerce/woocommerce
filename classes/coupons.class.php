@@ -30,14 +30,15 @@ class woocommerce_coupon {
 		
 		if ($coupon && $coupon->post_status == 'publish') :
 			
-			$this->id				= $coupon->ID;
-			$this->type 			= get_post_meta($coupon->ID, 'discount_type', true);
-			$this->amount 			= get_post_meta($coupon->ID, 'coupon_amount', true);
-			$this->individual_use 	= get_post_meta($coupon->ID, 'individual_use', true);
-			$this->product_ids 		= array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
-			$this->usage_limit 		= get_post_meta($coupon->ID, 'usage_limit', true);
-			$this->usage_count 		= (int) get_post_meta($coupon->ID, 'usage_count', true);
-			$this->expiry_date 		= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
+			$this->id					= $coupon->ID;
+			$this->type 				= get_post_meta($coupon->ID, 'discount_type', true);
+			$this->amount 				= get_post_meta($coupon->ID, 'coupon_amount', true);
+			$this->individual_use 		= get_post_meta($coupon->ID, 'individual_use', true);
+			$this->product_ids 			= array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
+			$this->exclude_product_ids	= array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'exclude_product_ids', true))));
+			$this->usage_limit 			= get_post_meta($coupon->ID, 'usage_limit', true);
+			$this->usage_count 			= (int) get_post_meta($coupon->ID, 'usage_count', true);
+			$this->expiry_date 			= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
 			
 			if (!$this->amount) return false;
 			
@@ -60,12 +61,24 @@ class woocommerce_coupon {
 		global $woocommerce;
 				
 		if ($this->id) :
-		
+			
+			// Product ids
 			if (sizeof( $this->product_ids )>0) :
 				$valid = false;
 				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $cart_item_key => $cart_item) :
 					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
 						$valid = true;
+					endif;
+				endforeach; endif;
+				if (!$valid) return false;
+			endif;
+			
+			// Exclude product ids
+			if (sizeof( $this->exclude_product_ids )>0) :
+				$valid = true;
+				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $cart_item_key => $cart_item) :
+					if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
+						$valid = false;
 					endif;
 				endforeach; endif;
 				if (!$valid) return false;

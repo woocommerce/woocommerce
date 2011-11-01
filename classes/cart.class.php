@@ -419,13 +419,44 @@ class woocommerce_cart {
 				// Product Discounts
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 					$coupon = &new woocommerce_coupon( $code );
-					if ((in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids))) :
+					
+					$this_item_is_discounted = false;
+					
+					// Specific product ID's get the discount
+					if (sizeof($coupon->product_ids)>0) :
+						
+						if ((in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids))) :
+							$this_item_is_discounted = true;
+						endif;
+					
+					else :
+						
+						// No product ids - all items discounted
+						$this_item_is_discounted = true;
+					
+					endif;
+					
+					// Specific product ID's excluded from the discount
+					if (sizeof($coupon->exclude_product_ids)>0) :
+						
+						if ((in_array($values['product_id'], $coupon->exclude_product_ids) || in_array($values['variation_id'], $coupon->exclude_product_ids))) :
+							$this_item_is_discounted = false;
+						endif;
+						
+					endif;
+					
+					// Apply filter
+					$this_item_is_discounted = apply_filters( 'woocommerce_item_is_discounted', $this_item_is_discounted, $values );
+					
+					// Apply the discount
+					if ($this_item_is_discounted) :
 						if ($coupon->type=='fixed_product') :
 							$this->discount_total = $this->discount_total + ( $coupon->amount * $values['quantity'] );
 						elseif ($coupon->type=='percent_product') :
 							$this->discount_total = $this->discount_total + ( $total_item_price / 100 ) * $coupon->amount;
 						endif;
 					endif;
+					
 				endforeach;
 				
 			endif;

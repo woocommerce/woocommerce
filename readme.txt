@@ -93,6 +93,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made use of transients to store average ratings and improve performance
 * Custom field for product total_sales when sold
 * Best sellers widget based on new total_sales field
+* Ability to exclude product ids
 * Edit category - image fix
 * Order Complete email heading fix
 * 100% discount when price excludes tax logic fix
