@@ -394,6 +394,9 @@ jQuery(document).ready(function($) {
         	if (variation) {
             	$('form input[name=variation_id]').val(variation.variation_id);
             	show_variation(variation);
+            } else {
+            	// Nothing found - reset fields
+            	$('.variations select').val('');
             }
         } else {
             update_variation_values(matching_variations);
@@ -407,13 +410,15 @@ jQuery(document).ready(function($) {
         $('.single_variation').text('');
 		check_variations();
 		$(this).blur();
-		if($().uniform) $.uniform.update();
+		if($.isFunction($.uniform.update)) {
+			$.uniform.update();
+		}
 		
 	}).focus(function(){
 		
 		check_variations( $(this).attr('name') );
 
-	});
+	}).change();
 	
 	if (woocommerce_params.is_cart==1) {
 	

@@ -95,6 +95,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Best sellers widget based on new total_sales field
 * Ability to exclude product ids
 * Option for the recipient of order/stock emails
+* Options to define default attribute selections in variations
 * Edit category - image fix
 * Order Complete email heading fix
 * 100% discount when price excludes tax logic fix

@@ -352,6 +352,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		global $post, $_product, $woocommerce;
 		
 		$attributes = $_product->get_available_attribute_variations();
+		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
 
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
         $available_variations = array();
@@ -402,6 +403,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
 								<?php
+									$selected_value = (isset($default_attributes[sanitize_title($name)])) ? $default_attributes[sanitize_title($name)] : '';
 									// Get terms if this is a taxonomy - ordered
 									if (taxonomy_exists(sanitize_title($name))) :
 										$args = array('menu_order' => 'ASC');
@@ -409,11 +411,11 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 	
 										foreach ($terms as $term) : 
 											if (!in_array($term->slug, $options)) continue;
-											echo '<option value="'.$term->slug.'">'.$term->name.'</option>';
+											echo '<option value="'.$term->slug.'" '.selected($selected_value, $term->slug).'>'.$term->name.'</option>';
 										endforeach; 
 									else :
 										foreach ($options as $option) : 
-											echo '<option value="'.$option.'">'.$option.'</option>';
+											echo '<option value="'.$option.'" '.selected($selected_value, $option).'>'.$option.'</option>';
 										endforeach;
 									endif;
 								?>

@@ -30,6 +30,7 @@ function variable_product_type_options() {
 	?>
 	<div id="variable_product_options" class="panel">
 		<p class="bulk_edit"><strong><?php _e('Bulk edit:', 'woothemes'); ?></strong> <a class="button set_all_prices" href="#"><?php _e('Set all prices', 'woothemes'); ?></a> <a class="button set_all_sale_prices" href="#"><?php _e('Set all sale prices', 'woothemes'); ?></a> <a class="button set_all_stock" href="#"><?php _e('Set all stock', 'woothemes'); ?></a></p>
+
 		<div class="woocommerce_variations">
 			<?php
 			$args = array(
@@ -109,6 +110,46 @@ function variable_product_type_options() {
 				</div>
 			<?php $loop++; endforeach; ?>
 		</div>
+		
+		<?php
+			if ($variation_attribute_found) :
+				?>
+				<p class="default_variation">
+					<strong><?php _e('Default variation selections:', 'woothemes'); ?></strong>
+					<?php
+						$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
+						foreach ($attributes as $attribute) :
+							
+							// Only deal with attributes that are variations
+							if ( !$attribute['is_variation'] ) continue;
+
+							// Get current value for variation (if set)
+							$variation_selected_value = (isset($default_attributes[sanitize_title($attribute['name'])])) ? $default_attributes[sanitize_title($attribute['name'])] : '';
+							
+							// Name will be something like attribute_pa_color
+							echo '<select name="default_attribute_' . sanitize_title($attribute['name']).'"><option value="">'.__('No default', 'woothemes') . ' ' . $woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
+							
+							// Get terms for attribute taxonomy or value if its a custom attribute
+							if ($attribute['is_taxonomy']) :
+								$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
+								foreach ($post_terms as $term) :
+									echo '<option '.selected($variation_selected_value, $term->slug, false).' value="'.$term->slug.'">'.$term->name.'</option>';
+								endforeach;
+							else :
+								$options = explode('|', $attribute['value']);
+								foreach ($options as $option) :
+									echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst($option).'</option>';
+								endforeach;
+							endif;
+								
+							echo '</select>';
+
+						endforeach;
+					?>
+				</p>
+				<?php
+			endif;
+		?>
 
 		<button type="button" class="button button-primary add_variation" <?php disabled($variation_attribute_found, false); ?>><?php _e('Add Variation', 'woothemes'); ?></button>
 		<button type="button" class="button link_all_variations" <?php disabled($variation_attribute_found, false); ?>><?php _e('Link all variations', 'woothemes'); ?></button>
@@ -675,9 +716,24 @@ function process_product_meta_variable( $post_id ) {
 			
 		endforeach;
 	endif;
+	
 	update_post_meta( $post_parent, 'price', $lowest_price );
 	update_post_meta( $post_parent, 'min_variation_price', $lowest_price );
 	update_post_meta( $post_parent, 'max_variation_price', $highest_price );
+	
+	// Update default attribute options setting
+	$default_attributes = array();
+	
+	foreach ($attributes as $attribute) :
+		if ( $attribute['is_variation'] ) :
+			$value = esc_attr(trim($_POST[ 'default_attribute_' . sanitize_title($attribute['name']) ]));
+			if ($value) :
+				$default_attributes[sanitize_title($attribute['name'])] = $value;
+			endif;
+		endif;
+	endforeach;
+	
+	update_post_meta( $post_parent, '_default_attributes', $default_attributes );
 
 }
 add_action('woocommerce_process_product_meta_variable', 'process_product_meta_variable');
