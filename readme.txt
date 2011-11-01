@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.1.3
+Stable tag: 1.2
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.1.4 - xx/10/2011 =
+= 1.2 - xx/10/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
 * Ability to preview email templates
 * Option to add logout link to my account menu
