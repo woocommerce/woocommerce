@@ -29,6 +29,9 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		// Actions
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
     	add_action('woocommerce_thankyou_cheque', array(&$this, 'thankyou_page'));
+    	
+    	// Customer Emails
+    	add_action('woocommerce_email_before_order_table', array(&$this, 'email_instructions'), 10, 2);
     } 
     
 	/**
@@ -87,6 +90,16 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	}
 	
 	function thankyou_page() {
+		if ($this->description) echo wpautop(wptexturize($this->description));
+	}
+	
+	function email_instructions( $order, $sent_to_admin ) {
+    	if ( $sent_to_admin ) return;
+    	
+    	if ( $order->status !== 'on-hold') return;
+    	
+    	if ( $order->payment_method !== 'cheque') return;
+    	
 		if ($this->description) echo wpautop(wptexturize($this->description));
 	}
 	

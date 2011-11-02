@@ -4,6 +4,8 @@
 
 <p><?php _e("Your order is complete. Your order's details are below:", 'woothemes'); ?></p>
 
+<?php do_action('woocommerce_email_before_order_table', $order, false); ?>
+
 <h2><?php echo __('Order #:', 'woothemes') . ' ' . $order->id; ?></h2>
 
 <table cellspacing="0" cellpadding="2" style="width: 100%;">

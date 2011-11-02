@@ -35,6 +35,9 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		// Actions
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
     	add_action('woocommerce_thankyou_bacs', array(&$this, 'thankyou_page'));
+    	
+    	// Customer Emails
+    	add_action('woocommerce_email_before_order_table', array(&$this, 'email_instructions'), 10, 2);
     } 
 
 	/**
@@ -130,45 +133,55 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
     }
 
     function thankyou_page() {
-      if ($this->description) echo wpautop(wptexturize($this->description));
-      ?><h2><?php _e('Our Details', 'woothemes') ?></h2><ul class="order_details bacs_details"><?php
-      if ($this->account_name) { ?>
-        <li class="account_name">
-          <?php _e('Account Name', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->account_name) ?></strong>
-        </li>
-      <?php }
-      if ($this->account_number) { ?>
-        <li class="account_number">
-          <?php _e('Account Number', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->account_number) ?></strong>
-        </li>
-      <?php }
-      if ($this->sort_code) { ?>
-        <li class="sort_code">
-          <?php _e('Sort Code', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->sort_code) ?></strong>
-        </li>
-      <?php }
-      if ($this->bank_name) { ?>
-        <li class="bank_name">
-          <?php _e('Bank Name', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->bank_name) ?></strong>
-        </li>
-      <?php }
-      if ($this->iban) { ?>
-        <li class="iban">
-          <?php _e('IBAN', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->iban) ?></strong>
-        </li>
-      <?php }
-      if ($this->bic) { ?>
-        <li class="bic">
-          <?php _e('BIC', 'woothemes') ?>:
-          <strong><?php echo wptexturize($this->bic) ?></strong>
-        </li>
-      <?php }
-      echo "</ul>";
+		if ($this->description) echo wpautop(wptexturize($this->description));
+		
+		?><h2><?php _e('Our Details', 'woothemes') ?></h2><ul class="order_details bacs_details"><?php
+		
+		$fields = array(
+			'account_name' 	=> __('Account Name', 'woothemes'), 
+			'account_number'=> __('Account Number', 'woothemes'),  
+			'sort_code'		=> __('Sort Code', 'woothemes'),  
+			'bank_name'		=> __('Bank Name', 'woothemes'),  
+			'iban'			=> __('IBAN', 'woothemes'), 
+			'bic'			=> __('BIC', 'woothemes')
+		);
+		
+		foreach ($fields as $key=>$value) :
+			echo '<li class="'.$key.'">'.$key.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		endforeach;
+		
+		?></ul><?php
+    }
+    
+    /**
+    * Add text to user email
+    **/
+    function email_instructions( $order, $sent_to_admin ) {
+    	
+    	if ( $sent_to_admin ) return;
+    	
+    	if ( $order->status !== 'on-hold') return;
+    	
+    	if ( $order->payment_method !== 'bacs') return;
+    	
+		if ($this->description) echo wpautop(wptexturize($this->description));
+		
+		?><h2><?php _e('Our Details', 'woothemes') ?></h2><ul class="order_details bacs_details"><?php
+		
+		$fields = array(
+			'account_name' 	=> __('Account Name', 'woothemes'), 
+			'account_number'=> __('Account Number', 'woothemes'),  
+			'sort_code'		=> __('Sort Code', 'woothemes'),  
+			'bank_name'		=> __('Bank Name', 'woothemes'),  
+			'iban'			=> __('IBAN', 'woothemes'), 
+			'bic'			=> __('BIC', 'woothemes')
+		);
+		
+		foreach ($fields as $key=>$value) :
+			echo '<li class="'.$key.'">'.$key.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		endforeach;
+		
+		?></ul><?php
     }
 
     /**

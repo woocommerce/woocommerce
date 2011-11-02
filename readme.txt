@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added functions which show tax/vat conditionally
 * Made use of transients to store average ratings and improve performance
 * Added page installer on installation to make it optional (you may want to import your pages)
+* BACS and Cheque gateways now contain payment instructions
 * Custom field for product total_sales when sold
 * Best sellers widget based on new total_sales field
 * Ability to exclude product ids

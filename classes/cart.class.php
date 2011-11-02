@@ -29,17 +29,14 @@ class woocommerce_cart {
 	
 	/** constructor */
 	function __construct() {
-		add_action('init', array(&$this, 'init'), 1);
+		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
+		add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page
 	}
     
     function init () {
   		$this->applied_coupons = array();
-		
 		$this->get_cart_from_session();
-		
 		if ( isset($_SESSION['coupons']) ) $this->applied_coupons = $_SESSION['coupons'];
-		
-		$this->calculate_totals();
     }
 	
 	/** Gets the cart data from the PHP session */
@@ -466,6 +463,9 @@ class woocommerce_cart {
 		$this->tax_total 			= $this->cart_contents_tax;					// Tax Total
 		$this->subtotal_ex_tax 		= $this->cart_contents_total_ex_tax;		// Subtotal without tax
 		$this->subtotal 			= $this->cart_contents_total;				// Subtotal
+		
+		// Only go beyond this point if on the cart/checkout
+		if (!is_checkout() && !is_cart() && !defined('WOOCOMMERCE_CHECKOUT') && !is_ajax()) return;
 		
 		// Cart Discounts
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :

@@ -2,7 +2,9 @@
 
 <?php do_action('woocommerce_email_header'); ?>
 
-<p><?php _e("Thank you, we are now processing your order. Your order's details are below:", 'woothemes'); ?></p>
+<p><?php _e("Thank you, we are now processing your order. Your order's details are below.", 'woothemes'); ?></p>
+
+<?php do_action('woocommerce_email_before_order_table', $order, false); ?>
 
 <h2><?php echo __('Order #:', 'woothemes') . ' ' . $order->id; ?></h2>
 

@@ -444,7 +444,7 @@ jQuery(document).ready(function($) {
 	
 	}
 	
-	if (woocommerce_params.is_checkout==1) {
+	if (woocommerce_params.is_checkout==1 || woocommerce_params.is_pay_page==1) {
 	
 		var updateTimer;
 		
@@ -553,7 +553,7 @@ jQuery(document).ready(function($) {
 			});
 			
 			// Update on page load
-			update_checkout();
+			if (woocommerce_params.is_checkout==1) update_checkout();
 			
 			/* AJAX Form Submission */
 			$('form.checkout').submit(function(){

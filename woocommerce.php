@@ -237,10 +237,16 @@ function woocommerce_frontend_scripts() {
 	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];
 	if (isset($_SESSION['max_price'])) $woocommerce_params['max_price'] = $_SESSION['max_price'];
 		
-	if ( is_page(get_option('woocommerce_checkout_page_id')) || is_page(get_option('woocommerce_pay_page_id')) ) :
+	if ( is_page(get_option('woocommerce_checkout_page_id')) ) :
 		$woocommerce_params['is_checkout'] = 1;
 	else :
 		$woocommerce_params['is_checkout'] = 0;
+	endif;
+	
+	if (is_page(get_option('woocommerce_pay_page_id'))) :
+		$woocommerce_params['is_pay_page'] = 1;
+	else :
+		$woocommerce_params['is_pay_page'] = 0;
 	endif;
 	
 	if ( is_cart() ) :

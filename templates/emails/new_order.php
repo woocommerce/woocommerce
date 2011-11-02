@@ -4,6 +4,8 @@
 
 <p><?php echo __('You have received an order from', 'woothemes') . ' ' . $order->billing_first_name . ' ' . $order->billing_last_name . __(". Their order is as follows:", 'woothemes'); ?></p>
 
+<?php do_action('woocommerce_email_before_order_table', $order, true); ?>
+
 <h2><?php echo __('Order #:', 'woothemes') . ' ' . $order->id; ?></h2>
 
 <table cellspacing="0" cellpadding="2" style="width: 100%;">
