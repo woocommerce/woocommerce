@@ -226,6 +226,7 @@ function woocommerce_admin_fields($options) {
             				   'id'		=> $value['id']. '" style="width: 200px;',
             				   'sort_column' 	=> 'menu_order',
             				   'sort_order'		=> 'ASC',
+            				   'show_option_none' => __('Select a page...', 'woothemes'),
             				   'selected'		=> $page_setting);
             	
             	if( isset($value['args']) ) $args = wp_parse_args($value['args'], $args);

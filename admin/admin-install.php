@@ -18,6 +18,7 @@ function activate_woocommerce() {
 	
 	// Update installed variable
 	update_option( "woocommerce_installed", 1 );
+	update_option( 'skip_install_woocommerce_pages', 0 );
 }
 
 /**
@@ -29,7 +30,7 @@ function install_woocommerce() {
 	
 	// Do install
 	woocommerce_default_options();
-	woocommerce_create_pages();
+	//woocommerce_create_pages();
 	woocommerce_tables_install();
 	woocommerce_default_taxonomies();
 	woocommerce_populate_custom_fields();
@@ -131,6 +132,7 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 	$page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1;");
 	if ($page_found) :
 		// Page exists
+		if (!$option_value)  update_option($option, $page_found);
 		return;
 	endif;
 	
