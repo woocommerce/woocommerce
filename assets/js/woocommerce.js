@@ -447,11 +447,13 @@ jQuery(document).ready(function($) {
 	if (woocommerce_params.is_checkout==1 || woocommerce_params.is_pay_page==1) {
 	
 		var updateTimer;
+		var xhr;
 		
 		function update_checkout() {
 		
+			if (xhr) xhr.abort();
+		
 			var method = $('#shipping_method').val();
-			
 			var country 	= $('#billing_country').val();
 			var state 		= $('#billing_state').val();
 			var postcode 	= $('input#billing_postcode').val();
@@ -481,13 +483,16 @@ jQuery(document).ready(function($) {
 				s_postcode: 		s_postcode,
 				post_data:			$('form.checkout').serialize()
 			};
-				
-			$.post( woocommerce_params.ajax_url, data, function(response) {
 			
-				$('#order_methods, #order_review').remove();
-				$('#order_review_heading').after(response);
-				$('#order_review input[name=payment_method]:checked').click();
-			
+			xhr = $.ajax({
+				type: 		'POST',
+				url: 		woocommerce_params.ajax_url,
+				data: 		data,
+				success: 	function( response ) {
+					$('#order_methods, #order_review').remove();
+					$('#order_review_heading').after(response);
+					$('#order_review input[name=payment_method]:checked').click();
+				}
 			});
 		
 		}
