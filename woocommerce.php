@@ -288,7 +288,7 @@ if (!function_exists('is_cart')) {
 }
 if (!function_exists('is_checkout')) {
 	function is_checkout() {
-		return is_page(get_option('woocommerce_checkout_page_id'));
+		if (is_page(get_option('woocommerce_checkout_page_id')) || is_page(get_option('woocommerce_pay_page_id'))) return true; else return false;
 	}
 }
 if (!function_exists('is_account_page')) {
@@ -296,10 +296,10 @@ if (!function_exists('is_account_page')) {
 		if ( is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id')) ) return true; else return false;
 		return is_page(get_option('woocommerce_myaccount_page_id'));
 	}
-	if (!function_exists('is_ajax')) {
-		function is_ajax() {
-			if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
-		}
+}
+if (!function_exists('is_ajax')) {
+	function is_ajax() {
+		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
 	}
 }
 
@@ -310,8 +310,12 @@ if (get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp', 'wooc
 
 function woocommerce_force_ssl() {
 	if (is_checkout() && !is_ssl()) :
-		wp_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
+		wp_safe_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
 		exit;
+	/*// Break out of SSL if we leave the checkout
+	elseif (is_ssl() && $_SERVER['REQUEST_URI'] && !is_checkout() && (is_cart() || is_single() || is_archive() || is_product() || is_shop() || is_home() || is_front_page() || is_tax() || is_404() || is_account_page())) :
+		wp_safe_redirect( str_replace('https:', 'http:', home_url($_SERVER['REQUEST_URI']) ) );
+		exit;*/
 	endif;
 }
 
