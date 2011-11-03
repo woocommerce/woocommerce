@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.2 - xx/10/2011 =
+= 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
 * Ability to preview email templates
 * Option to add logout link to my account menu
@@ -228,5 +228,5 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Upgrade Notice ==
 
-= 1.3 =
-new features, bug fixes and improvements to keep WooCommerce running smoothly :)
+= 1.2 =
+New features, bug fixes and improvements to keep WooCommerce running smoothly.
