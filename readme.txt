@@ -109,6 +109,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Dashboard chart now ignores 'pending' orders
 * Fixed dashboard report range
 * Added hooks to gateway icons
+* Added Dutch translation by [Ramoonus](http://www.ramoonus.nl/)
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
