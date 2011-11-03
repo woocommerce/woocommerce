@@ -52,15 +52,15 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __( 'Guest checkout', 'woothemes' ),
-		'desc' 		=> __( 'Allow guest users to checkout without an account', 'woothemes' ),
+		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'	
 	),
 	
 	array(  
-		'name' => __( 'Force SSL', 'woothemes' ),
-		'desc' 		=> __( 'Force SSL on the checkout for added security (SSL Certificate required).', 'woothemes' ),
+		'name' => __( 'Force SSL/HTTPS', 'woothemes' ),
+		'desc' 		=> __( 'Force the checkout/pay pages to be sent over https for added security (An SSL Certificate is required)', 'woothemes' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox'
@@ -75,7 +75,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Lightbox', 'woothemes' ),
+		'name' => __( 'Product image lightbox', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce lightbox?', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'std' 		=> 'yes',
@@ -83,21 +83,29 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Demo store', 'woothemes' ),
+		'name' => __( 'Demo store notice', 'woothemes' ),
 		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
 		'id' 		=> 'woocommerce_demo_store',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox'
 	),
-		
+	
+	array( 'type' => 'sectionend', 'id' => 'general_options'),
+	
+	array( 'name' => __( 'ShareThis', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'share_this' ),
+
 	array(  
 		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
-		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
+		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
 		'id' 		=> 'woocommerce_sharethis',
 		'type' 		=> 'text',
 		'std' 		=> '',
         'css'       => ''
 	),
+	
+	array( 'type' => 'sectionend', 'id' => 'share_this'),
+	
+	array( 'name' => __( 'Google Analytics', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'google_analytics' ),
 	
 	array(  
 		'name' => __('Google Analytics ID', 'woothemes'),
@@ -108,20 +116,22 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Google Analytics tracking', 'woothemes'),
-		'desc' 		=> __('Adds standard tracking code to the footer. You don\'t need to enable this if using a 3rd party google analytics plugin.', 'woothemes'),
+		'name' => __('Tracking code', 'woothemes'),
+		'desc' 		=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woothemes'),
 		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
-		'name' => __('Google Analytics eCommerce tracking', 'woothemes'),
-		'desc' 		=> __('Adds eCommerce tracking code to the thankyou page.', 'woothemes'),
+		'name' => __('Tracking code', 'woothemes'),
+		'desc' 		=> __('Add eCommerce tracking code to the thankyou page', 'woothemes'),
 		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 					
-	array( 'type' => 'sectionend', 'id' => 'general_options'),
+	array( 'type' => 'sectionend', 'id' => 'google_analytics'),
 
 )); // End general settings
 
