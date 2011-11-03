@@ -15,7 +15,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		global $woocommerce;
 		
         $this->id			= 'paypal';
-        $this->icon 		= $woocommerce->plugin_url() . '/assets/images/icons/paypal.png';
+        $this->icon 		= apply_filters('woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png');
         $this->has_fields 	= false;
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';

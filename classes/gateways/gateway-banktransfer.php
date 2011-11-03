@@ -12,8 +12,8 @@
 class woocommerce_bacs extends woocommerce_payment_gateway {
 
     public function __construct() { 
-		$this->id				 = 'bacs';
-		$this->icon 			= '';
+		$this->id				= 'bacs';
+		$this->icon 			= apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields 		= false;
 		
 		// Load the form fields.

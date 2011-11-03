@@ -108,6 +108,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fix for adding sites in multisite
 * Dashboard chart now ignores 'pending' orders
 * Fixed dashboard report range
+* Added hooks to gateway icons
 
 = 1.1.3 - 27/10/2011 =
 * Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 

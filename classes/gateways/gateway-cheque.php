@@ -13,7 +13,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		
 	public function __construct() { 
         $this->id				= 'cheque';
-        $this->icon 			= '';
+        $this->icon 			= apply_filters('woocommerce_cheque_icon', '');
         $this->has_fields 		= false;
 		
 		// Load the form fields.
