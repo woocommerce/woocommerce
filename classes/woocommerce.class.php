@@ -316,5 +316,17 @@ class woocommerce {
 			call_user_func($function, $atts);
 			return $this->cache( $function . '-shortcode', ob_get_clean(), $atts);
 		}
+		
+		
+    /*-----------------------------------------------------------------------------------*/
+	/* Transients */
+	/*-----------------------------------------------------------------------------------*/ 
+	
+		/**
+		 * Clear Product Transients
+		 */
+		function clear_product_transients() {
+			delete_transient('woocommerce_products_onsale');
+		}
 	
 }

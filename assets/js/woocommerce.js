@@ -173,7 +173,7 @@ jQuery(document).ready(function($) {
 	
 	$(".minus").live('click', function() {
 	    var currentVal = parseInt($(this).next(".qty").val());
-	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 0;
+	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 1;
 	    if (currentVal > 1)  $(this).next(".qty").val(currentVal - 1);
 	});
 	

@@ -618,6 +618,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			
 	// Do action for product type
 	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
+	
+	// Clear cache/transients
+	$woocommerce->clear_product_transients();
 		
 	// Save errors
 	update_option('woocommerce_errors', $woocommerce_errors);

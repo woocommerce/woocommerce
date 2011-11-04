@@ -773,7 +773,8 @@ class woocommerce_product {
      * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price
      */  
     function check_sale_price() {
-
+		global $woocommerce;
+		
     	if ($this->sale_price_dates_from && $this->sale_price_dates_from < strtotime('NOW')) :
     		
     		if ($this->sale_price && $this->price!==$this->sale_price) :
@@ -783,6 +784,9 @@ class woocommerce_product {
     			
     			// Grouped product prices and sale status are affected by children
     			$this->grouped_product_sync();
+    			
+    			// Clear transient
+    			$woocommerce->clear_product_transients();
     			
     		endif;
 
@@ -802,6 +806,9 @@ class woocommerce_product {
 			
 				// Grouped product prices and sale status are affected by children
     			$this->grouped_product_sync();
+    			
+    			// Clear transient
+    			$woocommerce->clear_product_transients();
 			
 			endif;
     		
