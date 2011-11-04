@@ -17,6 +17,88 @@ include_once('shortcode-pay.php');
 include_once('shortcode-thankyou.php');
 
 /**
+ * Shortcode button in post editor
+ **/
+add_action( 'init', 'woocommerce_add_shortcode_button' );
+add_filter( 'tiny_mce_version', 'woocommerce_refresh_mce' );
+
+function woocommerce_add_shortcode_button() {
+	if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') ) return;
+	if ( get_user_option('rich_editing') == 'true') :
+		add_filter('mce_external_plugins', 'woocommerce_add_shortcode_tinymce_plugin');
+		add_filter('mce_buttons', 'woocommerce_register_shortcode_button');
+	endif;
+}
+
+function woocommerce_register_shortcode_button($buttons) {
+	array_push($buttons, "|", "woocommerce_shortcodes_button");
+	return $buttons;
+}
+
+function woocommerce_add_shortcode_tinymce_plugin($plugin_array) {
+	global $woocommerce;
+	$plugin_array['WooCommerceShortcodes'] = $woocommerce->plugin_url() . '/assets/js/admin/editor_plugin.js';
+	return $plugin_array;
+}
+
+function woocommerce_refresh_mce($ver) {
+	$ver += 3;
+	return $ver;
+}
+
+/**
+ * List products in a category shortcode
+ **/
+function woocommerce_product_catagory($atts){
+	global $woocommerce_loop;
+	
+  	if (empty($atts)) return;
+  
+	extract(shortcode_atts(array(
+		'per_page' 		=> '12',
+		'columns' 		=> '4',
+	  	'orderby'   	=> 'title',
+	  	'order'     	=> 'asc',
+	  	'category'		=> ''
+		), $atts));
+		
+	if (!$category) return;
+		
+	$woocommerce_loop['columns'] = $columns;
+	
+  	$args = array(
+		'post_type'	=> 'product',
+		'post_status' => 'publish',
+		'ignore_sticky_posts'	=> 1,
+		'orderby' => $orderby,
+		'order' => $order,
+		'posts_per_page' => $per_page,
+		'meta_query' => array(
+			array(
+				'key' => 'visibility',
+				'value' => array('catalog', 'visible'),
+				'compare' => 'IN'
+			)
+		),
+		'tax_query' => array(
+	    	array(
+		    	'taxonomy' => 'product_cat',
+				'terms' => array( esc_attr($category) ),
+				'field' => 'slug',
+				'operator' => 'IN'
+			)
+	    )
+	);
+	
+  	query_posts($args);
+	
+  	ob_start();
+	woocommerce_get_template_part( 'loop', 'shop' );
+	wp_reset_query();
+	return ob_get_clean();
+}
+
+/**
  * Recent Products shortcode
  **/
 function woocommerce_recent_products( $atts ) {
@@ -196,6 +278,7 @@ function woocommerce_featured_products( $atts ) {
 /**
  * Shortcode creation
  **/
+add_shortcode('product_category', 'woocommerce_product_catagory');
 add_shortcode('product', 'woocommerce_product');
 add_shortcode('products', 'woocommerce_products');
 add_shortcode('recent_products', 'woocommerce_recent_products');

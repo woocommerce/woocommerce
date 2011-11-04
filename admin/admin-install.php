@@ -30,7 +30,6 @@ function install_woocommerce() {
 	
 	// Do install
 	woocommerce_default_options();
-	//woocommerce_create_pages();
 	woocommerce_tables_install();
 	woocommerce_default_taxonomies();
 	woocommerce_populate_custom_fields();
@@ -114,8 +113,6 @@ function woocommerce_default_options() {
 
 /**
  * Create a page
- * 
- * Creates a page
  */
 function woocommerce_create_page( $slug, $option, $page_title = '', $page_content = '', $post_parent = 0 ) {
 	global $wpdb;
