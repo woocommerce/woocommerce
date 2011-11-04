@@ -4,7 +4,7 @@
  * 
  * Provides a PayPal Standard Payment Gateway.
  *
- * @class 		woocommerce_moneybookers
+ * @class 		woocommerce_paypal
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
