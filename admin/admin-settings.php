@@ -29,6 +29,43 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __( 'Currency', 'woothemes' ),
+		'desc' 		=> __("This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woothemes' ),
+		'tip' 		=> '',
+		'id' 		=> 'woocommerce_currency',
+		'css' 		=> 'min-width:175px;',
+		'std' 		=> 'GBP',
+		'type' 		=> 'select',
+		'options' => apply_filters('woocommerce_currencies', array( 
+			'USD' => __( 'US Dollars (&#36;)', 'woothemes' ),
+			'EUR' => __( 'Euros (&euro;)', 'woothemes' ),
+			'GBP' => __( 'Pounds Sterling (&pound;)', 'woothemes' ),
+			'AUD' => __( 'Australian Dollars (&#36;)', 'woothemes' ),
+			'BRL' => __( 'Brazilian Real (&#36;)', 'woothemes' ),
+			'CAD' => __( 'Canadian Dollars (&#36;)', 'woothemes' ),
+			'CZK' => __( 'Czech Koruna', 'woothemes' ),
+			'DKK' => __( 'Danish Krone', 'woothemes' ),
+			'HKD' => __( 'Hong Kong Dollar (&#36;)', 'woothemes' ),
+			'HUF' => __( 'Hungarian Forint', 'woothemes' ),
+			'ILS' => __( 'Israeli Shekel', 'woothemes' ),
+			'JPY' => __( 'Japanese Yen (&yen;)', 'woothemes' ),
+			'MYR' => __( 'Malaysian Ringgits', 'woothemes' ),
+			'MXN' => __( 'Mexican Peso (&#36;)', 'woothemes' ),
+			'NZD' => __( 'New Zealand Dollar (&#36;)', 'woothemes' ),
+			'NOK' => __( 'Norwegian Krone', 'woothemes' ),
+			'PHP' => __( 'Philippine Pesos', 'woothemes' ),
+			'PLN' => __( 'Polish Zloty', 'woothemes' ),
+			'SGD' => __( 'Singapore Dollar (&#36;)', 'woothemes' ),
+			'SEK' => __( 'Swedish Krona', 'woothemes' ),
+			'CHF' => __( 'Swiss Franc', 'woothemes' ),
+			'TWD' => __( 'Taiwan New Dollars', 'woothemes' ),
+			'THB' => __( 'Thai Baht', 'woothemes' ), 
+			'TRY' => __( 'Turkish Lira (TL)', 'woothemes' )
+			)
+		)
+	),	
+	
+	array(  
 		'name' => __( 'Allowed Countries', 'woothemes' ),
 		'desc' 		=> __( 'These are countries that you are willing to ship to.', 'woothemes' ),
 		'id' 		=> 'woocommerce_allowed_countries',
@@ -390,43 +427,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 	
 	array(	'name' => __( 'Pricing Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'pricing_options' ),
-	
-	array(  
-		'name' => __( 'Currency', 'woothemes' ),
-		'desc' 		=> sprintf( __("This controls what currency prices are listed at in the catalog, and which currency PayPal, and other gateways, will take payments in. See the list of supported <a target='_new' href='%s'>PayPal currencies</a>.", 'woothemes'), 'https://www.paypal.com/cgi-bin/webscr?cmd=p/sell/mc/mc_intro-outside' ),
-		'tip' 		=> '',
-		'id' 		=> 'woocommerce_currency',
-		'css' 		=> 'min-width:175px;',
-		'std' 		=> 'GBP',
-		'type' 		=> 'select',
-		'options' => apply_filters('woocommerce_currencies', array( 
-			'USD' => __( 'US Dollars (&#36;)', 'woothemes' ),
-			'EUR' => __( 'Euros (&euro;)', 'woothemes' ),
-			'GBP' => __( 'Pounds Sterling (&pound;)', 'woothemes' ),
-			'AUD' => __( 'Australian Dollars (&#36;)', 'woothemes' ),
-			'BRL' => __( 'Brazilian Real (&#36;)', 'woothemes' ),
-			'CAD' => __( 'Canadian Dollars (&#36;)', 'woothemes' ),
-			'CZK' => __( 'Czech Koruna', 'woothemes' ),
-			'DKK' => __( 'Danish Krone', 'woothemes' ),
-			'HKD' => __( 'Hong Kong Dollar (&#36;)', 'woothemes' ),
-			'HUF' => __( 'Hungarian Forint', 'woothemes' ),
-			'ILS' => __( 'Israeli Shekel', 'woothemes' ),
-			'JPY' => __( 'Japanese Yen (&yen;)', 'woothemes' ),
-			'MYR' => __( 'Malaysian Ringgits', 'woothemes' ),
-			'MXN' => __( 'Mexican Peso (&#36;)', 'woothemes' ),
-			'NZD' => __( 'New Zealand Dollar (&#36;)', 'woothemes' ),
-			'NOK' => __( 'Norwegian Krone', 'woothemes' ),
-			'PHP' => __( 'Philippine Pesos', 'woothemes' ),
-			'PLN' => __( 'Polish Zloty', 'woothemes' ),
-			'SGD' => __( 'Singapore Dollar (&#36;)', 'woothemes' ),
-			'SEK' => __( 'Swedish Krona', 'woothemes' ),
-			'CHF' => __( 'Swiss Franc', 'woothemes' ),
-			'TWD' => __( 'Taiwan New Dollars', 'woothemes' ),
-			'THB' => __( 'Thai Baht', 'woothemes' ), 
-			'TRY' => __( 'Turkish Lira (TL)', 'woothemes' )
-			)
-		)
-	),
 	
 	array(  
 		'name' => __( 'Currency Position', 'woothemes' ),
