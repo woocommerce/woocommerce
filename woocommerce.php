@@ -231,7 +231,8 @@ function woocommerce_frontend_scripts() {
 		'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
 		'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
 		'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
-		'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout')
+		'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout'),
+		'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart')
 	);
 	
 	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];

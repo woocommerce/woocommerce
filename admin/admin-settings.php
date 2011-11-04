@@ -122,6 +122,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( 'Enable AJAX add to cart buttons on product archives', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_ajax_add_to_cart',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Enable WooCommerce lightbox on the product page', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'std' 		=> 'yes',
