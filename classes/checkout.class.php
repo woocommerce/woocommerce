@@ -176,7 +176,7 @@ class woocommerce_checkout {
 		do_action('woocommerce_after_checkout_billing_form', $this);
 		
 		// Registration Form Fields
-		if (!is_user_logged_in()) :
+		if (!is_user_logged_in() && get_option('woocommerce_enable_signup_and_login_from_checkout')=="yes") :
 		
 			if (get_option('woocommerce_enable_guest_checkout')=='yes') :
 				

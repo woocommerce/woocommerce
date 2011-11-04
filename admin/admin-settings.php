@@ -51,35 +51,45 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Guest checkout', 'woothemes' ),
+		'name' => __( 'Checkout', 'woothemes' ),
 		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'	
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
-		'name' => __( 'Force SSL/HTTPS', 'woothemes' ),
-		'desc' 		=> __( 'Force the checkout/pay pages to be sent over https for added security (An SSL Certificate is required)', 'woothemes' ),
+		'desc' 		=> __( 'Allow users to create an account and login from the checkout page', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS (an SSL Certificate is required)', 'woothemes' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
-		'name' => __( 'WooCommerce CSS', 'woothemes' ),
-		'desc' 		=> __( 'Enable WooCommerce frontend CSS styles', 'woothemes' ),
+		'name' => __( 'Shop Styling', 'woothemes' ),
+		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
-		'name' => __( 'Product image lightbox', 'woothemes' ),
-		'desc' 		=> __( 'Enable WooCommerce lightbox?', 'woothemes' ),
+		'desc' 		=> __( 'Enable WooCommerce lightbox on the product page', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
@@ -567,23 +577,25 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 	array(	'name' => __( 'Shipping Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'shipping_options' ),
 	
 	array(  
-		'name' 		=> __( 'Calculate shipping', 'woothemes' ),
-		'desc' 		=> __( 'Enable shipping/shipping calculations', 'woothemes' ),
+		'name' 		=> __( 'Shipping calculations', 'woothemes' ),
+		'desc' 		=> __( 'Enable shipping', 'woothemes' ),
 		'id' 		=> 'woocommerce_calc_shipping',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
-		'name' 		=> __( 'Shipping calculator', 'woothemes' ),
+		'name' 		=> __( 'Shipping calculations', 'woothemes' ),
 		'desc' 		=> __( 'Enable the shipping calculator on the cart page', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_shipping_calc',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
-		'name' 		=> __( 'Ship to billing', 'woothemes' ),
+		'name' 		=> __( 'Shipping destination', 'woothemes' ),
 		'desc' 		=> __( 'Only ship to the users billing address', 'woothemes' ),
 		'id' 		=> 'woocommerce_ship_to_billing_address_only',
 		'std' 		=> 'no',

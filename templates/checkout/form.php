@@ -2,6 +2,12 @@
 
 global $woocommerce;
 
+// If checkout registration is disabled and not logged in, the user cannot checkout
+if (get_option('woocommerce_enable_signup_and_login_from_checkout')=="no" && get_option('woocommerce_enable_guest_checkout')=="no" && !is_user_logged_in()) :
+	echo apply_filters('woocommerce_checkout_must_be_logged_in_message', __('You must be logged in to checkout.', 'woothemes'));
+	return;
+endif;
+
 // filter hook for include new pages inside the payment method
 $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce->cart->get_checkout_url() ); ?>
 
