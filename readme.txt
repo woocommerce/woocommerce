@@ -83,6 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.2.1 =
+* Option to enable/disable ajax add to cart buttons
 * Signup/login can be turned off for checkout
 * Paypal remote post now has 'sslverify' => false to prevent errors with CURL
 * Minor admin settings tidyup
