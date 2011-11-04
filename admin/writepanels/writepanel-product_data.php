@@ -29,9 +29,9 @@ function woocommerce_product_data_box() {
 			<li class="active"><a href="#general_product_data"><?php _e('General', 'woothemes'); ?></a></li>
 			<li class="tax_tab"><a href="#tax_product_data"><?php _e('Tax', 'woothemes'); ?></a></li>
 			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab"><a href="#inventory_product_data"><?php _e('Inventory', 'woothemes'); ?></a></li><?php endif; ?>
-			<li><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
-			<li><a href="#upsell_product_data" title="<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woothemes'); ?>"><?php _e('Up-sells', 'woothemes'); ?></a></li>
-			<li><a href="#crosssell_product_data" title="<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woothemes'); ?>"><?php _e('Cross-sells', 'woothemes'); ?></a></li>
+			<li class="attributes_tab"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
+			<li class="upsell_tab"><a href="#upsell_product_data" title="<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woothemes'); ?>"><?php _e('Up-sells', 'woothemes'); ?></a></li>
+			<li class="crosssell_tab"><a href="#crosssell_product_data" title="<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woothemes'); ?>"><?php _e('Cross-sells', 'woothemes'); ?></a></li>
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
 		</ul>
