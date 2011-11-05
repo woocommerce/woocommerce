@@ -537,7 +537,9 @@ class woocommerce_product {
 					
 				endif;
 			elseif ($this->price === '' ) :
-				return false;
+				
+				$price = apply_filters('woocommerce_empty_price_html', '', $this);
+				
 			elseif ($this->price === '0' ) :
 			
 				$price = __('Free!', 'woothemes');  
