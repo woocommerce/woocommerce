@@ -654,7 +654,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 		
 		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		?>
-		<div class="cart_totals">
+		<div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
 		<?php
 		//if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
 		if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) : 
