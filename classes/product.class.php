@@ -17,6 +17,8 @@ class woocommerce_product {
 	var $attributes;
 	var $children;
 	var $post;
+	var $downloadable;
+	var $virtual;
 	var $sku;
 	var $price;
 	var $visibility;
@@ -57,6 +59,8 @@ class woocommerce_product {
 		// Define the data we're going to load: Key => Default value
 		$load_data = array(
 			'sku'			=> $this->id,
+			'downloadable' 	=> 'no',
+			'virtual' 		=> 'no',
 			'price' 		=> '',
 			'visibility'	=> 'hidden',
 			'stock'			=> 0,
@@ -187,13 +191,32 @@ class woocommerce_product {
 	
 	/**
 	 * Checks the product type
-	 *
-	 * @param   string		$type		Type to check against
 	 */
 	function is_type( $type ) {
 		if (is_array($type) && in_array($this->product_type, $type)) return true;
 		elseif ($this->product_type==$type) return true;
 		return false;
+	}
+	
+	/**
+	 * Checks if a product is downloadable
+	 */
+	function is_downloadable() {
+		if ( $this->downloadable=='yes' ) return true; else return false;
+	}
+	
+	/**
+	 * Checks if a product is virtual (has no shipping)
+	 */
+	function is_virtual() {
+		if ( $this->virtual=='yes' ) return true; else return false;
+	}
+	
+	/**
+	 * Checks if a product needs shipping
+	 */
+	function needs_shipping() {
+		if ($this->is_virtual()) return false; else return true;
 	}
 	
 	/** Returns whether or not the product has any child product */

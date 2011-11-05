@@ -59,7 +59,7 @@ class flat_rate extends woocommerce_shipping_method {
 					$item_shipping_price = ($this->cost + $this->get_fee( $this->fee, $_product->get_price() )) * $values['quantity'];
 					
 					// Only count 'psysical' products
-					if ($_product->is_type( 'simple' ) || $_product->is_type( 'variable' )) :
+					if ( $_product->needs_shipping() ) :
 						
 						$this->shipping_total = $this->shipping_total + $item_shipping_price;
 	

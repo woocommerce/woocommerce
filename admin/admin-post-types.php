@@ -379,18 +379,52 @@ add_action('restrict_manage_posts', 'woocommerce_products_by_type');
 function woocommerce_products_by_type() {
     global $typenow, $wp_query;
     if ($typenow=='product') :
+    	
+    	// Types
 		$terms = get_terms('product_type');
 		$output = "<select name='product_type' id='dropdown_product_type'>";
-		$output .= '<option value="">'.__('Show all types', 'woothemes').'</option>';
+		$output .= '<option value="">'.__('Show all product types', 'woothemes').'</option>';
 		foreach($terms as $term) :
 			$output .="<option value='$term->slug' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
-			$output .=">$term->name ($term->count)</option>";
+			$output .=">".ucfirst($term->name)." ($term->count)</option>";
 		endforeach;
 		$output .="</select>";
+		
+		// Downloadable/virtual
+		$output .= "<select name='product_subtype' id='dropdown_product_subtype'>";
+		$output .= '<option value="">'.__('Show all sub-types', 'woothemes').'</option>';
+		
+		$output .="<option value='downloadable' ";
+		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('downloadable', $_GET['product_subtype'], false);
+		$output .=">".__('Downloadable', 'woothemes')."</option>";
+		
+		$output .="<option value='virtual' ";
+		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('virtual', $_GET['product_subtype'], false);
+		$output .=">".__('Virtual', 'woothemes')."</option>";
+
+		$output .="</select>";
+		
 		echo $output;
     endif;
 }
+
+add_filter( 'parse_query', 'woocommerce_products_subtype_query' );
+
+function woocommerce_products_subtype_query($query) {
+	global $typenow, $wp_query;
+    if ($typenow=='product' && isset($_GET['product_subtype']) && $_GET['product_subtype']) :
+    	if ($_GET['product_subtype']=='downloadable') :
+        	$query->query_vars['meta_value'] 	= 'yes';
+        	$query->query_vars['meta_key'] 		= 'downloadable';
+        endif;
+        if ($_GET['product_subtype']=='virtual') :
+        	$query->query_vars['meta_value'] 	= 'yes';
+        	$query->query_vars['meta_key'] 		= 'virtual';
+        endif;
+	endif;
+}
+
 
 /**
  * Add functionality to the image uploader on product pages to exlcude an image

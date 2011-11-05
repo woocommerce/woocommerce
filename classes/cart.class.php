@@ -281,7 +281,7 @@ class woocommerce_cart {
 		
 		foreach ($this->cart_contents as $cart_item_key => $values) :
 			$_product = $values['data'];
-			if ( $_product->is_type( 'simple' ) || $_product->is_type( 'variable' ) ) :
+			if ( $_product->needs_shipping() ) :
 				$needs_shipping = true;
 			endif;
 		endforeach;

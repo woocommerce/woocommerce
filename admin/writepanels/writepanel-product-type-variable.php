@@ -8,6 +8,19 @@
  * @category 	Admin Write Panels
  * @package 	WooCommerce
  */
+
+/**
+ * Product Options Tab
+ * 
+ * Product Options tab for the variable product type
+ */
+function variable_product_type_options_tab() {
+	?>
+	<li class="variations_tab show_if_variable"><a href="#variable_product_options" title="<?php _e('Variations for variable products are defined here.', 'woothemes'); ?>"><?php _e('Variations', 'woothemes'); ?></a></li>
+	<?php
+}
+
+add_action('woocommerce_product_write_panel_tabs', 'variable_product_type_options_tab'); 
  
 /**
  * Product Options
@@ -160,7 +173,7 @@ function variable_product_type_options() {
 	</div>
 	<?php
 }
-add_action('woocommerce_product_type_options_box', 'variable_product_type_options');
+add_action('woocommerce_product_write_panels', 'variable_product_type_options');
 
  
 /**
@@ -582,7 +595,7 @@ function woocommerce_link_all_variations() {
  * Adds this product type to the product type selector in the product options meta box
  */
 function variable_product_type_selector( $types, $product_type ) {
-	$types['variable'] = __('Variable', 'woothemes');
+	$types['variable'] = __('Variable product', 'woothemes');
 	return $types;
 }
 add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);

@@ -55,8 +55,6 @@ add_action('woocommerce_after_single_product', 'woocommerce_upsell_display');
 /* Product Add to cart */
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30, 2 );
 add_action( 'woocommerce_simple_add_to_cart', 'woocommerce_simple_add_to_cart' ); 
-add_action( 'woocommerce_virtual_add_to_cart', 'woocommerce_simple_add_to_cart' ); 
-add_action( 'woocommerce_downloadable_add_to_cart', 'woocommerce_downloadable_add_to_cart' ); 
 add_action( 'woocommerce_grouped_add_to_cart', 'woocommerce_grouped_add_to_cart' ); 
 add_action( 'woocommerce_variable_add_to_cart', 'woocommerce_variable_add_to_cart' ); 
 

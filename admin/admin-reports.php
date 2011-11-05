@@ -1395,7 +1395,7 @@ function woocommerce_stock_overview() {
 			array(
 				'taxonomy' 	=> 'product_type',
 				'field' 	=> 'slug',
-				'terms' 	=> array('simple', 'downloadable', 'virtual'),
+				'terms' 	=> array('simple'),
 				'operator' 	=> 'IN'
 			)
 		)

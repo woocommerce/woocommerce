@@ -216,7 +216,7 @@ class woocommerce_order {
 				
 				if ($_product->exists) :
 			
-					if ($_product->is_type('downloadable')) :
+					if ($_product->is_downloadable()) :
 						$return .= PHP_EOL . ' - ' . $this->get_downloadable_file_url( $item['id'] ) . '';
 					endif;
 		
@@ -254,7 +254,7 @@ class woocommerce_order {
 				
 				if ($_product->exists) :
 			
-					if ($_product->is_type('downloadable')) :
+					if ($_product->is_downloadable()) :
 						$file = '<br/>' . $this->get_downloadable_file_url( $item['id'] ) . '';
 					endif;
 		
@@ -282,7 +282,7 @@ class woocommerce_order {
 			
 			$_product = $this->get_product_from_item( $item );
 
-			if ($_product->exists && $_product->is_type('downloadable')) :
+			if ($_product->exists && $_product->is_downloadable()) :
 				$has_downloadable_item = true;
 			endif;
 			
@@ -427,7 +427,7 @@ class woocommerce_order {
 			
 				$_product = $this->get_product_from_item( $item );
 				
-				if ( $_product->exists && $_product->is_type('downloadable') ) :
+				if ( $_product->exists && $_product->is_downloadable() && $_product->is_virtual() ) :
 					$downloadable_order = true;
 					continue;
 				endif;

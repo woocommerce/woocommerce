@@ -10,7 +10,6 @@
  */
 
 require_once('writepanel-product_data.php');
-require_once('writepanel-product-types.php');
 require_once('writepanel-order_data.php');
 require_once('writepanel-order_notes.php');
 require_once('writepanel-coupon_data.php');
@@ -25,7 +24,6 @@ add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
 function woocommerce_meta_boxes() {
 	add_meta_box( 'woocommerce-product-type', __('Product Type &amp; Visibility', 'woothemes'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woothemes'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
-	add_meta_box( 'woocommerce-product-type-options', __('Product Type Options', 'woothemes'), 'woocommerce_product_type_options_box', 'product', 'normal', 'high' );
 	
 	add_meta_box( 'woocommerce-order-data', __('Order Data', 'woothemes'), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woothemes'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
@@ -176,9 +174,10 @@ function woocommerce_wp_checkbox( $field ) {
 	
 	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['class'])) $field['class'] = 'checkbox';
+	if (!isset($field['wrapper_class'])) $field['wrapper_class'] = '';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
 	
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" ';
+	echo '<p class="form-field '.$field['id'].'_field '.$field['wrapper_class'].'"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" ';
 	
 	checked($field['value'], 'yes');
 	

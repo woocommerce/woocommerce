@@ -237,17 +237,31 @@ function woocommerce_tables_install() {
  */
 function woocommerce_default_taxonomies() {
 	
+	if (!post_type_exists('product')) :
+		register_post_type('product',
+			array(
+				'public' => true,
+				'show_ui' => true,
+				'capability_type' => 'post',
+				'publicly_queryable' => true,
+				'exclude_from_search' => false,
+				'hierarchical' => true,
+				'query_var' => true,			
+				'supports' => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
+				'show_in_nav_menus' => false,
+			)
+		);
+	endif;
+	
 	if (!taxonomy_exists('product_type')) :
-		register_taxonomy( 'product_type', array('post'));
-		register_taxonomy( 'shop_order_status', array('post'));
+		register_taxonomy( 'product_type', array('post', 'product'));
+		register_taxonomy( 'shop_order_status', array('post', 'product'));
 	endif;
 	
 	$product_types = array(
 		'simple',
 		'grouped',
-		'variable',
-		'downloadable',
-		'virtual'
+		'variable'
 	);
 	
 	foreach($product_types as $type) {
@@ -271,5 +285,26 @@ function woocommerce_default_taxonomies() {
 			wp_insert_term($status, 'shop_order_status');
 		}
 	}
+	
+	// Upgrade from old downloadable/virtual product types 
+	$downloadable_type = get_term_by('slug', 'downloadable', 'product_type');
+	if ($downloadable_type) :
+		$products = get_objects_in_term( $downloadable_type->term_id, 'product_type' );
+		foreach ($products as $product) :
+			update_post_meta( $product, 'downloadable', 'yes' );
+			update_post_meta( $product, 'virtual', 'yes' );
+			wp_set_object_terms( $product, 'simple', 'product_type');
+		endforeach;
+	endif;
+	
+	$virtual_type = get_term_by('slug', 'virtual', 'product_type');
+	if ($virtual_type) :
+		$products = get_objects_in_term( $virtual_type->term_id, 'product_type' );
+		foreach ($products as $product) :
+			update_post_meta( $product, 'downloadable', 'no' );
+			update_post_meta( $product, 'virtual', 'yes' );
+			wp_set_object_terms( $product, 'simple', 'product_type');
+		endforeach;
+	endif;
 
 }

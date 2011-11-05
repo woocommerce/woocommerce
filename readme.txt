@@ -83,6 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.2.1 =
+* Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
 * Added shortcode insertion button to the post editor
 * Shortcode for products by category (slug)
 * Option to enable/disable ajax add to cart buttons
