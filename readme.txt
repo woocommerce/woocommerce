@@ -91,6 +91,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Signup/login can be turned off for checkout
 * Paypal remote post now has 'sslverify' => false to prevent errors with CURL
 * Minor admin settings tidyup
+* Dutch translation has been updated
+* Added German translation (partial complete)
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
