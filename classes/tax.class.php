@@ -188,7 +188,7 @@ class woocommerce_tax {
 			$found_shipping_rates = array();
 			
 			// Loop cart and find the highest tax band
-			if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item) :
+			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item) :
 				
 				if ($item['data']->tax_class) :
 					

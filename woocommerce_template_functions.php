@@ -282,16 +282,24 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		
 		// Don't show cart if out of stock
 		if (!$_product->is_in_stock()) return;
-		?>			
+		?>
+		<?php do_action('woocommerce_before_add_to_cart_form'); ?>
+			
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 		 	
+		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
+
 		 	<?php if (!$_product->is_virtual()) : ?>
 		 		<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
 		 	<?php endif; ?>
-		 	
+
 		 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
-		 	<?php do_action('woocommerce_add_to_cart_form'); ?>
+		 	
+		 	<?php do_action('woocommerce_after_add_to_cart_button'); ?>
+		 	
 		</form>
+		
+		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
 		<?php
 	}
 }
@@ -301,6 +309,8 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		global $_product;
 		
 		?>
+		<?php do_action('woocommerce_before_add_to_cart_form'); ?>
+
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 			<table cellspacing="0" class="group_table">
 				<tbody>
@@ -317,9 +327,16 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+			
+			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			
 			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
-			<?php do_action('woocommerce_add_to_cart_form'); ?>
+			
+			<?php do_action('woocommerce_after_add_to_cart_button'); ?>
+			
 		</form>
+		
+		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
 		<?php
 	}
 }
@@ -369,6 +386,8 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
         <script type="text/javascript">
             var product_variations = <?php echo json_encode($available_variations) ?>;
         </script>
+        
+        <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post">
 			<table class="variations" cellspacing="0">
@@ -402,6 +421,9 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
                 <?php endforeach;?>
 				</tbody>
 			</table>
+			
+			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			
 			<div class="single_variation_wrap" style="display:none;">
 				<div class="single_variation"></div>
 				<div class="variations_button">
@@ -411,8 +433,12 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				</div>
 			</div>
 			<div><input type="hidden" name="product_id" value="<?php echo esc_attr( $post->ID ); ?>" /></div>
-			<?php do_action('woocommerce_add_to_cart_form'); ?>
+			
+			<?php do_action('woocommerce_after_add_to_cart_button'); ?>
+
 		</form>
+		
+		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
 		<?php
 	}
 }

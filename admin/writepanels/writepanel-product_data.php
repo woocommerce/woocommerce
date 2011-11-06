@@ -39,9 +39,9 @@ function woocommerce_product_data_box() {
 			
 			<li class="attributes_tab"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woothemes'); ?></a></li>
 			
-			<li class="show_if_simple"><a href="#grouping_product_data"><?php _e('Grouping', 'woothemes'); ?></a></li>
+			<li class="grouping_tab show_if_simple"><a href="#grouping_product_data"><?php _e('Grouping', 'woothemes'); ?></a></li>
 			
-			<li class="show_if_downloadable"><a href="#downloadable_product_data"><?php _e('Downloads', 'woothemes'); ?></a></li>
+			<li class="downloads_tab show_if_downloadable"><a href="#downloadable_product_data"><?php _e('Downloads', 'woothemes'); ?></a></li>
 			
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
@@ -64,10 +64,10 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group pricing show_if_simple">';
 			
 				// Price
-				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):' ) );
+				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')' ) );
 				
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().'):' ) );
+				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')' ) );
 						
 				// Special Price date range
 				$field = array( 'id' => 'sale_price_dates', 'label' => __('Sale Price Dates', 'woothemes') );
@@ -76,7 +76,7 @@ function woocommerce_product_data_box() {
 				$sale_price_dates_to = get_post_meta($thepostid, 'sale_price_dates_to', true);
 				
 				echo '	<p class="form-field sale_price_dates_fields">
-							<label for="'.$field['id'].'_from">'.$field['label'].':</label>
+							<label for="'.$field['id'].'_from">'.$field['label'].'</label>
 							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
 				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
 				echo '" placeholder="' . __('From&hellip;', 'woothemes') . '" maxlength="10" />
@@ -693,7 +693,7 @@ function woocommerce_product_selection_list_remove( $posts_to_display, $name ) {
 		
 		$SKU = get_post_meta($related_post->ID, 'sku', true);
 		
-		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">X</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[]" value="<?php echo esc_attr( $related_post->ID ); ?>" /></li><?php 
+		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">&times;</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[]" value="<?php echo esc_attr( $related_post->ID ); ?>" /></li><?php 
 
 	endforeach; endif;
 }

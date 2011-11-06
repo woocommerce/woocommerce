@@ -19,7 +19,7 @@ function woocommerce_checkout( $atts ) {
 	
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
-	if (sizeof($woocommerce->cart->cart_contents)==0) :
+	if (sizeof($woocommerce->cart->get_cart())==0) :
 		wp_redirect(get_permalink(get_option('woocommerce_cart_page_id')));
 		exit;
 	endif;

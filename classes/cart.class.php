@@ -12,12 +12,16 @@
  */
 class woocommerce_cart {
 	
+	/* Public Variables */
+	var $cart_contents;
+	var $applied_coupons;
+	
 	var $cart_contents_total;
 	var $cart_contents_total_ex_tax;
 	var $cart_contents_weight;
 	var $cart_contents_count;
 	var $cart_contents_tax;
-	var $cart_contents;
+	
 	var $total;
 	var $subtotal;
 	var $subtotal_ex_tax;
@@ -25,43 +29,50 @@ class woocommerce_cart {
 	var $discount_total;
 	var $shipping_total;
 	var $shipping_tax_total;
-	var $applied_coupons;
 	
-	/** constructor */
+	/**
+	 * Constructor
+	 */
 	function __construct() {
 		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
 		add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page
 	}
     
-    function init () {
+    /**
+	 * Loads the cart data from the session during WordPress init
+	 */
+    function init() {
   		$this->applied_coupons = array();
 		$this->get_cart_from_session();
 		if ( isset($_SESSION['coupons']) ) $this->applied_coupons = $_SESSION['coupons'];
     }
 	
-	/** Gets the cart data from the PHP session */
+	/**
+	 * Get the cart data from the PHP session
+	 */
 	function get_cart_from_session() {
 
-		if ( isset($_SESSION['cart']) && is_array($_SESSION['cart']) ) :
+		if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) :
 			$cart = $_SESSION['cart'];
 			
-			foreach ($cart as $values) :
+			foreach ($cart as $key => $values) :
 			
-				if ($values['variation_id']>0) :
+				if ($values['variation_id'] > 0) :
 					$_product = &new woocommerce_product_variation($values['variation_id']);
 				else :
 					$_product = &new woocommerce_product($values['product_id']);
 				endif;
 				
 				if ($_product->exists && $values['quantity']>0) :
-				
-					$this->cart_contents[] = array(
+					
+					// Put session data into array. Run through filter so other plugins can load their own session data
+					$this->cart_contents[$key] = apply_filters('woocommerce_get_cart_item_from_session', array(
 						'product_id'	=> $values['product_id'],
 						'variation_id'	=> $values['variation_id'],
 						'variation' 	=> $values['variation'],
 						'quantity' 		=> $values['quantity'],
 						'data'			=> $_product
-					);
+					), $values);
 
 				endif;
 			endforeach;
@@ -73,7 +84,9 @@ class woocommerce_cart {
 		if (!is_array($this->cart_contents)) $this->cart_contents = array();
 	}
 	
-	/** sets the php session data for the cart and coupon */
+	/**
+	 * Sets the php session data for the cart and coupons
+	 */
 	function set_session() {
 		$cart = array();
 		
@@ -88,9 +101,10 @@ class woocommerce_cart {
 		$this->calculate_totals();
 	}
 	
-	/** Empty the cart */
+	/**
+	 * Empty the cart data and destroy the session
+	 */
 	function empty_cart() {
-	
 		$this->cart_contents = array();
 		$this->total = 0;
 		$this->cart_contents_total = 0;
@@ -104,7 +118,6 @@ class woocommerce_cart {
 		$this->subtotal_ex_tax = 0;
 		$this->discount_total = 0;
 		$this->shipping_total = 0;
-		
 		unset($_SESSION['cart']);
 		unset($_SESSION['coupons']);
 	}
@@ -112,27 +125,40 @@ class woocommerce_cart {
 	/**
      * Check if product is in the cart and return cart item key
      * 
-     * @param int $product_id
-     * @param int $variation_id optional variation id
-     * @param array $variation array of attributre values
-     * @return int|null
+     * Cart item key will be unique based on the item and its properties, such as variations
      */
-	function find_product_in_cart($product_id, $variation_id, $variation = array()) {
-
-        foreach ($this->cart_contents as $cart_item_key => $cart_item) :
-        
-            if (empty($variation_id) && $cart_item['product_id'] == $product_id) :
-				return $cart_item_key;
-            elseif ($cart_item['product_id'] == $product_id && $cart_item['variation_id'] == $variation_id) :
-                if($variation == $cart_item['variation']) :
-					return $cart_item_key;
-                endif;
-            endif;
-        
-        endforeach;
-        
-        return NULL;
+    function find_product_in_cart( $cart_id = false ) {
+        if ($cart_id !== false) foreach ($this->cart_contents as $cart_item_key => $cart_item) if ($cart_item_key == $cart_id) return $cart_item_key;
     }
+	
+	/**
+     * Generate a unique ID for the cart item being added
+     */
+    function generate_cart_id( $product_id, $variation_id = '', $variation = '', $cart_item_data = '' ) {
+        
+        $id_parts = array( $product_id );
+        
+        if ($variation_id) $id_parts[] = $variation_id;
+ 
+        if (is_array($variation)) :
+            $variation_key = '';
+            foreach ($variation as $key => $value) :
+                $variation_key .= trim($key) . trim($value);
+            endforeach;
+            $id_parts[] = $variation_key;
+        endif;
+        
+        if (is_array($cart_item_data)) :
+            $cart_item_data_key = '';
+            foreach ($cart_item_data as $key => $value) :
+            	if (is_array($value)) $value = http_build_query($value);
+                $cart_item_data_key .= trim($key) . trim($value);
+            endforeach;
+            $id_parts[] = $cart_item_data_key;
+        endif;
+
+        return md5( implode('_', $id_parts) );
+    }	
 	
 	/**
 	 * Add a product to the cart
@@ -142,12 +168,19 @@ class woocommerce_cart {
 	 * @param   int     variation_id
 	 * @param   array   variation attribute values
 	 */
-	function add_to_cart( $product_id, $quantity = 1, $variation = '', $variation_id = '' ) {
+	function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '' ) {
 		global $woocommerce;
 		
-		if ($quantity < 1) $quantity = 1;
+		if ($quantity < 1) return false;
 		
-		$found_cart_item_key = $this->find_product_in_cart($product_id, $variation_id, $variation);
+		// Load cart item data - may be added by other plugins
+		$cart_item_data = (array) apply_filters('woocommerce_add_cart_item_data', array(), $product_id);
+		
+		// Generate a ID based on product ID, variation ID, variation data, and other cart item data
+		$cart_id = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
+		
+		// See if this product and its options is already in the cart
+		$cart_item_key = $this->find_product_in_cart($cart_id);
 		
 		if ($variation_id>0) :
 			$product_data = &new woocommerce_product_variation( $variation_id );
@@ -157,10 +190,10 @@ class woocommerce_cart {
 		
 		// Price set check
 		if( $product_data->get_price() === '' ) :
-			$woocommerce->add_error( __('This product cannot be purchased - the price is not yet announced', 'woothemes') );
+			$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set', 'woothemes') );
 			return false; 
 		endif;
-		
+
 		// Stock check - only check if we're managing stock and backorders are not allowed
 		if ( !$product_data->has_enough_stock( $quantity ) ) :
 			$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woothemes'), $product_data->get_stock_quantity() ));
@@ -169,40 +202,87 @@ class woocommerce_cart {
 			$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
 			return false;
 		endif;
+		
+		if ($cart_item_key) :
 
-		// Add it
-		if (is_numeric($found_cart_item_key)) :
-			
-			$quantity = $quantity + $this->cart_contents[$found_cart_item_key]['quantity'];
+			$quantity = $quantity + $this->cart_contents[$cart_item_key]['quantity'];
 			
 			// Stock check - this time accounting for whats already in-cart
 			if ( !$product_data->has_enough_stock( $quantity ) ) :
-				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woothemes'), $product_data->get_stock_quantity(), $this->cart_contents[$found_cart_item_key]['quantity'] ));
+				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woothemes'), $product_data->get_stock_quantity(), $this->cart_contents[$cart_item_key]['quantity'] ));
 				return false; 
 			elseif ( !$product_data->is_in_stock() ) :
 				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
 				return false;
 			endif;
 
-			$this->cart_contents[$found_cart_item_key]['quantity'] = $quantity;
-			
+			$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
+
 		else :
 			
-			$cart_item_key = sizeof($this->cart_contents);
-				
-			$this->cart_contents[$cart_item_key] = array(
+			// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item
+			$this->cart_contents[$cart_id] = apply_filters('woocommerce_add_cart_item', array_merge( $cart_item_data, array(
 				'product_id'	=> $product_id,
 				'variation_id'	=> $variation_id,
 				'variation' 	=> $variation,
 				'quantity' 		=> $quantity,
 				'data'			=> $product_data
-			);
-			
-		endif;
+			)));
 		
+		endif;
+
 		$this->set_session();
 		
 		return true;
+	}
+
+	/**
+	 * Applies a coupon code
+	 *
+	 * @param   string	code	The code to apply
+	 * @return   bool	True if the coupon is applied, false if it does not exist or cannot be applied
+	 */
+	function add_discount( $coupon_code ) {
+		global $woocommerce;
+		
+		$the_coupon = &new woocommerce_coupon($coupon_code);
+		
+		if ($the_coupon->id) :
+			
+			// Check if applied
+			if ($woocommerce->cart->has_discount($coupon_code)) :
+				$woocommerce->add_error( __('Discount code already applied!', 'woothemes') );
+				return false;
+			endif;	
+			
+			// Check it can be used with cart
+			if (!$the_coupon->is_valid()) :
+				$woocommerce->add_error( __('Invalid coupon.', 'woothemes') );
+				return false;
+			endif;
+			
+			// If its individual use then remove other coupons
+			if ($the_coupon->individual_use=='yes') :
+				$this->applied_coupons = array();
+			endif;
+			
+			foreach ($this->applied_coupons as $code) :
+				$coupon = &new woocommerce_coupon($code);
+				if ($coupon->individual_use=='yes') :
+					$this->applied_coupons = array();
+				endif;
+			endforeach;
+			
+			$this->applied_coupons[] = $coupon_code;
+			$this->set_session();
+			$woocommerce->add_message( __('Discount code applied successfully.', 'woothemes') );
+			return true;
+		
+		else :
+			$woocommerce->add_error( __('Coupon does not exist!', 'woothemes') );
+			return false;
+		endif;
+		return false;
 	}
 	
 	/**
@@ -211,123 +291,19 @@ class woocommerce_cart {
 	 * @param   string	cart_item_key	contains the id of the cart item
 	 * @param   string	quantity	contains the quantity of the item
 	 */
-	function set_quantity( $cart_item, $quantity = 1 ) {
+	function set_quantity( $cart_item_key, $quantity = 1 ) {
 		if ($quantity==0 || $quantity<0) :
-			unset($this->cart_contents[$cart_item]);
+			unset($this->cart_contents[$cart_item_key]);
 		else :
-			$this->cart_contents[$cart_item]['quantity'] = $quantity;
+			$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
 		endif;
 
 		$this->set_session();
 	}
 	
-	/**
-	 * Returns the contents of the cart
-	 *
-	 * @return   array	cart_contents
+	/** 
+	 * calculate totals for the items in the cart 
 	 */
-	function get_cart() {
-		return $this->cart_contents;
-	}
-	
-	/**
-	 * Gets cross sells based on the items in the cart
-	 *
-	 * @return   array	cross_sells	item ids of cross sells
-	 */
-	function get_cross_sells() {
-		$cross_sells = array();
-		$in_cart = array();
-		if (sizeof($this->cart_contents)>0) : foreach ($this->cart_contents as $cart_item_key => $values) :
-			if ($values['quantity']>0) :
-				$cross_sells = array_merge($values['data']->get_cross_sells(), $cross_sells);
-				$in_cart[] = $values['product_id'];
-			endif;
-		endforeach; endif;
-		$cross_sells = array_diff($cross_sells, $in_cart);
-		return $cross_sells;
-	}
-	
-	/** gets the url to the cart page */
-	function get_cart_url() {
-		$cart_page_id = get_option('woocommerce_cart_page_id');
-		if ($cart_page_id) return get_permalink($cart_page_id);
-	}
-	
-	/** gets the url to the checkout page */
-	function get_checkout_url() {
-		$checkout_page_id = get_option('woocommerce_checkout_page_id');
-		if ($checkout_page_id) :
-			if (is_ssl()) return str_replace('http:', 'https:', get_permalink($checkout_page_id));
-			return get_permalink($checkout_page_id);
-		endif;
-	}
-	
-	/** gets the url to remove an item from the cart */
-	function get_remove_url( $cart_item_key ) {
-		global $woocommerce;
-		$cart_page_id = get_option('woocommerce_cart_page_id');
-		if ($cart_page_id) return $woocommerce->nonce_url( 'cart', add_query_arg('remove_item', $cart_item_key, get_permalink($cart_page_id)));
-	}
-	
-	/** looks through the cart to see if shipping is actually required */
-	function needs_shipping() {
-		global $woocommerce;
-		
-		if (!$woocommerce->shipping->enabled) return false;
-		if (!is_array($this->cart_contents)) return false;
-	
-		$needs_shipping = false;
-		
-		foreach ($this->cart_contents as $cart_item_key => $values) :
-			$_product = $values['data'];
-			if ( $_product->needs_shipping() ) :
-				$needs_shipping = true;
-			endif;
-		endforeach;
-		
-		return $needs_shipping;
-	}
-	
-	/** Sees if we need a shipping address */
-	function ship_to_billing_address_only() {
-	
-		$ship_to_billing_address_only = get_option('woocommerce_ship_to_billing_address_only');
-		
-		if ($ship_to_billing_address_only=='yes') return true;
-		
-		return false;
-	}
-	
-	/** looks at the totals to see if payment is actually required */
-	function needs_payment() {
-		if ( $this->total > 0 ) return true;
-		return false;
-	}
-	
-	/** looks through the cart to check each item is in stock */
-	function check_cart_item_stock() {
-		$error = new WP_Error();
-		foreach ($this->cart_contents as $cart_item_key => $values) :
-			$_product = $values['data'];
-			if ($_product->managing_stock()) :
-				if ($_product->is_in_stock() && $_product->has_enough_stock( $values['quantity'] )) :
-					// :)
-				else :
-					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title(), $_product->stock ) );
-					return $error;
-				endif;
-			else :
-				if (!$_product->is_in_stock()) :
-					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
-					return $error;
-				endif;
-			endif;
-		endforeach;
-		return true;
-	}
-	
-	/** calculate totals for the items in the cart */
 	function calculate_totals() {
 		global $woocommerce;
 		
@@ -347,7 +323,10 @@ class woocommerce_cart {
 		$this->shipping_total = 0;
 		
 		if (sizeof($this->cart_contents)>0) : foreach ($this->cart_contents as $cart_item_key => $values) :
+			
+			// Get product from cart data
 			$_product = $values['data'];
+			
 			if ($_product->exists() && $values['quantity']>0) :
 				
 				$this->cart_contents_count = $this->cart_contents_count + $values['quantity'];
@@ -512,30 +491,220 @@ class woocommerce_cart {
 		if ($this->total < 0) $this->total = 0;
 	}
 	
-	/** gets the total (after calculation) */
+	/** 
+	 *returns whether or not a discount has been applied 
+	 */
+	function has_discount( $code ) {
+		if (in_array($code, $this->applied_coupons)) return true;
+		return false;
+	}
+	
+	/** 
+	 * looks through the cart to see if shipping is actually required 
+	 */
+	function needs_shipping() {
+		global $woocommerce;
+		
+		if (!$woocommerce->shipping->enabled) return false;
+		if (!is_array($this->cart_contents)) return false;
+	
+		$needs_shipping = false;
+		
+		foreach ($this->cart_contents as $cart_item_key => $values) :
+			$_product = $values['data'];
+			if ( $_product->needs_shipping() ) :
+				$needs_shipping = true;
+			endif;
+		endforeach;
+		
+		return $needs_shipping;
+	}
+	
+	/** 
+	 * Sees if we need a shipping address 
+	 */
+	function ship_to_billing_address_only() {
+		if (get_option('woocommerce_ship_to_billing_address_only')=='yes') return true; else return false;
+	}
+	
+	/** 
+	 * looks at the totals to see if payment is actually required 
+	 */
+	function needs_payment() {
+		if ( $this->total > 0 ) return true; else return false;
+	}
+	
+	/** 
+	 * looks through the cart to check each item is in stock 
+	 */
+	function check_cart_item_stock() {
+		$error = new WP_Error();
+		foreach ($this->cart_contents as $cart_item_key => $values) :
+			$_product = $values['data'];
+			if ($_product->managing_stock()) :
+				if ($_product->is_in_stock() && $_product->has_enough_stock( $values['quantity'] )) :
+					// :)
+				else :
+					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title(), $_product->stock ) );
+					return $error;
+				endif;
+			else :
+				if (!$_product->is_in_stock()) :
+					$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+					return $error;
+				endif;
+			endif;
+		endforeach;
+		return true;
+	}
+	
+	/**
+	 * Gets and formats a list of cart item data + variations for display on the frontend
+	 */
+	function get_item_data( $cart_item, $flat = false ) {
+		global $woocommerce;
+		
+		if (!$flat) $return = '<dl class="variation">';
+		
+		// Variation data
+		if($cart_item['data'] instanceof woocommerce_product_variation && is_array($cart_item['variation'])) :
+		
+			$variation_list = array();
+			
+			foreach ($cart_item['variation'] as $name => $value) :
+				
+				if (!$value) continue;
+				
+				// If this is a term slug, get the term's nice name
+	            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
+	            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
+	            	if (!is_wp_error($term) && $term->name) :
+	            		$value = $term->name;
+	            	endif;
+	            else :
+	            	$value = ucfirst($value);
+	            endif;
+				
+				if ($flat) :
+					$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+				else :
+					$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+				endif;
+				
+			endforeach;
+			
+			if ($flat) :
+				$return .= implode(', ', $variation_list);
+			else :
+				$return .= implode('', $variation_list);
+			endif;
+		
+		endif;
+		
+		// Other data - returned as array with name/value values
+		$other_data = apply_filters('woocommerce_get_item_data', array(), $cart_item);
+		
+		if ($other_data && is_array($other_data) && sizeof($other_data)>0) :
+			
+			$data_list = array();
+			
+			foreach ($other_data as $data) :
+				
+				if ($flat) :
+					$data_list[] = $data['name'].': '.$data['value'];
+				else :
+					$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$data['value'].'</dd>';
+				endif;
+				
+			endforeach;
+			
+			if ($flat) :
+				$return .= implode(', ', $data_list);
+			else :
+				$return .= implode('', $data_list);
+			endif;
+			
+		endif;
+		
+		if (!$flat) $return .= '</dl>';
+		
+		return $return;
+   				
+	}
+
+	/**
+	 * Gets cross sells based on the items in the cart
+	 *
+	 * @return   array	cross_sells	item ids of cross sells
+	 */
+	function get_cross_sells() {
+		$cross_sells = array();
+		$in_cart = array();
+		if (sizeof($this->cart_contents)>0) : foreach ($this->cart_contents as $cart_item_key => $values) :
+			if ($values['quantity']>0) :
+				$cross_sells = array_merge($values['data']->get_cross_sells(), $cross_sells);
+				$in_cart[] = $values['product_id'];
+			endif;
+		endforeach; endif;
+		$cross_sells = array_diff($cross_sells, $in_cart);
+		return $cross_sells;
+	}
+	
+	/** gets the url to the cart page */
+	function get_cart_url() {
+		$cart_page_id = get_option('woocommerce_cart_page_id');
+		if ($cart_page_id) return get_permalink($cart_page_id);
+	}
+	
+	/** gets the url to the checkout page */
+	function get_checkout_url() {
+		$checkout_page_id = get_option('woocommerce_checkout_page_id');
+		if ($checkout_page_id) :
+			if (is_ssl()) return str_replace('http:', 'https:', get_permalink($checkout_page_id));
+			return get_permalink($checkout_page_id);
+		endif;
+	}
+	
+	/** gets the url to remove an item from the cart */
+	function get_remove_url( $cart_item_key ) {
+		global $woocommerce;
+		$cart_page_id = get_option('woocommerce_cart_page_id');
+		if ($cart_page_id) return $woocommerce->nonce_url( 'cart', add_query_arg('remove_item', $cart_item_key, get_permalink($cart_page_id)));
+	}
+	
+	/**
+	 * Returns the contents of the cart
+	 */
+	function get_cart() {
+		return $this->cart_contents;
+	}	
+	
+	/**
+	 * gets the total (after calculation)
+	 */
 	function get_total() {
 		return woocommerce_price($this->total);
 	}
 	
-	/** gets the cart contens total (after calculation) */
+	/**
+	 * gets the cart contens total (after calculation)
+	 */
 	function get_cart_total() {
 		return woocommerce_price($this->cart_contents_total);
 	}
 	
-	/** gets the sub total (after calculation) */
+	/**
+	 * gets the sub total (after calculation)
+	 */
 	function get_cart_subtotal() {
 		global $woocommerce;
 		
 		if (get_option('woocommerce_display_totals_tax')=='excluding' || ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT )) :
 			
 			if (get_option('woocommerce_prices_include_tax')=='yes') :
-				
 				$return = woocommerce_price($this->subtotal - $this->tax_total);
-				
 			else :
-				
 				$return = woocommerce_price($this->subtotal);
-				
 			endif;
 			
 			if ($this->tax_total>0) :
@@ -546,13 +715,9 @@ class woocommerce_cart {
 		else :
 			
 			if (get_option('woocommerce_prices_include_tax')=='yes') :
-				
 				$return = woocommerce_price($this->subtotal);
-				
 			else :
-				
 				$return = woocommerce_price($this->subtotal + $this->tax_total);
-				
 			endif;
 			
 			if ($this->tax_total>0) :
@@ -564,14 +729,18 @@ class woocommerce_cart {
 
 	}
 	
-	/** gets the cart tax (after calculation) */
+	/**
+	 * gets the cart tax (after calculation)
+	 */
 	function get_cart_tax() {
 		$cart_total_tax = $this->tax_total + $this->shipping_tax_total;
 		if ($cart_total_tax > 0) return woocommerce_price( $cart_total_tax );
 		return false;
 	}
 	
-	/** gets the shipping total (after calculation) */
+	/**
+	 * gets the shipping total (after calculation)
+	 */
 	function get_cart_shipping_total() {
 		global $woocommerce;
 		
@@ -602,83 +771,29 @@ class woocommerce_cart {
 		endif;
 	}
 	
-	/** gets title of the chosen shipping method */
+	/**
+	 * gets title of the chosen shipping method
+	 */
 	function get_cart_shipping_title() {
 		global $woocommerce;
 		if (isset($woocommerce->shipping->shipping_label)) :
 			return __('via', 'woothemes') . ' ' . $woocommerce->shipping->shipping_label;
 		endif;
 		return false;
-	}
+	}	
 	
 	/**
-	 * Applies a coupon code
-	 *
-	 * @param   string	code	The code to apply
-	 * @return   bool	True if the coupon is applied, false if it does not exist or cannot be applied
+	 * gets the total discount amount
 	 */
-	function add_discount( $coupon_code ) {
-		global $woocommerce;
-		
-		$the_coupon = &new woocommerce_coupon($coupon_code);
-		
-		if ($the_coupon->id) :
-			
-			// Check if applied
-			if ($woocommerce->cart->has_discount($coupon_code)) :
-				$woocommerce->add_error( __('Discount code already applied!', 'woothemes') );
-				return false;
-			endif;	
-			
-			// Check it can be used with cart
-			if (!$the_coupon->is_valid()) :
-				$woocommerce->add_error( __('Invalid coupon.', 'woothemes') );
-				return false;
-			endif;
-			
-			// If its individual use then remove other coupons
-			if ($the_coupon->individual_use=='yes') :
-				$this->applied_coupons = array();
-			endif;
-			
-			foreach ($this->applied_coupons as $code) :
-				$coupon = &new woocommerce_coupon($code);
-				if ($coupon->individual_use=='yes') :
-					$this->applied_coupons = array();
-				endif;
-			endforeach;
-			
-			$this->applied_coupons[] = $coupon_code;
-			$this->set_session();
-			$woocommerce->add_message( __('Discount code applied successfully.', 'woothemes') );
-			return true;
-		
-		else :
-			$woocommerce->add_error( __('Coupon does not exist!', 'woothemes') );
-			return false;
-		endif;
-		return false;
-		
-	}
-	
-	/** returns whether or not a discount has been applied */
-	function has_discount( $code ) {
-		if (in_array($code, $this->applied_coupons)) return true;
-		return false;
-	}
-	
-	/** gets the total discount amount */
 	function get_total_discount() {
 		if ($this->discount_total) return woocommerce_price($this->discount_total); else return false;
 	}
 	
-	/** clears the cart/coupon data and re-calcs totals */
-	function clear_cache() {
-		$this->cart_contents = array();
-		$this->applied_coupons = array();
-		unset( $_SESSION['cart'] );
-		unset( $_SESSION['coupons'] );
-		$this->calculate_totals();
+	/**
+	 * gets the array of applied coupon codes
+	 */
+	function get_applied_coupons() {
+		return (array) $this->applied_coupons;
 	}
 	
 }

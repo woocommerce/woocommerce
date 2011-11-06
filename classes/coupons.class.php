@@ -65,7 +65,7 @@ class woocommerce_coupon {
 			// Product ids
 			if (sizeof( $this->product_ids )>0) :
 				$valid = false;
-				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $cart_item_key => $cart_item) :
+				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
 					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
 						$valid = true;
 					endif;
@@ -76,7 +76,7 @@ class woocommerce_coupon {
 			// Exclude product ids
 			if (sizeof( $this->exclude_product_ids )>0) :
 				$valid = true;
-				if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $cart_item_key => $cart_item) :
+				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
 					if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
 						$valid = false;
 					endif;

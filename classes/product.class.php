@@ -439,6 +439,13 @@ class woocommerce_product {
 		if ($this->weight) return $this->weight;
 	}
 	
+	/** Adjust a products price dynamically */
+	function adjust_price( $price ) {
+		if ($price>0) :
+			$this->price += $price;
+		endif;
+	}
+	
 	/** Returns the product's price */
 	function get_price() {
 		return $this->price;

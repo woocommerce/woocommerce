@@ -77,8 +77,8 @@
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof($woocommerce->cart->cart_contents)>0) : 
-				foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
+			if (sizeof($woocommerce->cart->get_cart())>0) : 
+				foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 					$_product = $values['data'];
 					if ($_product->exists() && $values['quantity']>0) :
 						echo '

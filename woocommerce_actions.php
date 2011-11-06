@@ -70,7 +70,7 @@ function woocommerce_ajax_update_order_review() {
 	
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
-	if (sizeof($woocommerce->cart->cart_contents)==0) :
+	if (sizeof($woocommerce->cart->get_cart())==0) :
 		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
 		die();
 	endif;
@@ -130,7 +130,7 @@ add_action('woocommerce_new_order', 'woocommerce_increase_coupon_counts');
 
 function woocommerce_increase_coupon_counts() {
 	global $woocommerce;
-	if ($woocommerce->cart->applied_coupons) foreach ($woocommerce->cart->applied_coupons as $code) :
+	if ($applied_coupons = $woocommerce->cart->get_applied_coupons()) foreach ($applied_coupons as $code) :
 		$coupon = &new woocommerce_coupon( $code );
 		$coupon->inc_usage_count();
 	endforeach;
@@ -361,7 +361,7 @@ function woocommerce_update_cart_action() {
 	global $woocommerce;
 	
 	// Remove from cart
-	if ( isset($_GET['remove_item']) && is_numeric($_GET['remove_item'])  && $woocommerce->verify_nonce('cart', '_GET')) :
+	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->verify_nonce('cart', '_GET')) :
 	
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 		
@@ -377,8 +377,8 @@ function woocommerce_update_cart_action() {
 		
 		$cart_totals = $_POST['cart'];
 		
-		if (sizeof($woocommerce->cart->cart_contents)>0) : 
-			foreach ($woocommerce->cart->cart_contents as $cart_item_key => $values) :
+		if (sizeof($woocommerce->cart->get_cart())>0) : 
+			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 				
 				if (isset($cart_totals[$cart_item_key]['qty'])) $woocommerce->cart->set_quantity( $cart_item_key, $cart_totals[$cart_item_key]['qty'] );
 				
@@ -457,7 +457,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
             if ($all_variations_set && $variation_id > 0) :
                 
                 // Add to cart
-				if ($woocommerce->cart->add_to_cart($product_id, $quantity, $variations, $variation_id)) :
+				if ($woocommerce->cart->add_to_cart($product_id, $quantity, $variation_id, $variations)) :
 				
 					if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
 						$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );

@@ -52,7 +52,7 @@ class flat_rate extends woocommerce_shipping_method {
 			endif;
 		else :
 			// Shipping per item
-			if (sizeof($woocommerce->cart->cart_contents)>0) : foreach ($woocommerce->cart->cart_contents as $item_id => $values) :
+			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 				$_product = $values['data'];
 				if ($_product->exists() && $values['quantity']>0) :
 					

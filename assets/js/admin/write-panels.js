@@ -185,6 +185,7 @@ jQuery( function($){
 		}
 		
 		$('ul.tabs li:visible').eq(0).find('a').click();
+		$('input#manage_stock').change();
 		
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
 		
@@ -198,10 +199,19 @@ jQuery( function($){
 			$('.show_if_downloadable').show();
 		}
 		
-		$('ul.tabs li:visible').eq(0).find('a').click();
+		if ($('.downloads_tab').is('.active')) $('ul.tabs li:visible').eq(0).find('a').click();
 		
 	}).change();
 	
+	$('input#virtual').change(function(){
+	
+		$('.show_if_virtual').hide();
+		
+		if ($('input#virtual').is(':checked')) {
+			$('.show_if_virtual').show();
+		}
+		
+	}).change();
 
 	// STOCK OPTIONS
 	$('input#manage_stock').change(function(){
@@ -368,7 +378,7 @@ jQuery( function($){
 			
 			var cloned_item = button.parent().clone();
 			
-			cloned_item.find('button:eq(0)').html('X');
+			cloned_item.find('button:eq(0)').html('&times;');
 			cloned_item.find('button:eq(1)').remove();
 			cloned_item.find('input').val( button.parent().attr('rel') );
 			cloned_item.find('.product_id').attr('name', product_id_field_name);

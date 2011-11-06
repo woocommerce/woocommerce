@@ -365,7 +365,7 @@ class woocommerce_checkout {
 
 			$woocommerce->verify_nonce('process_checkout');
 
-			if (sizeof($woocommerce->cart->cart_contents)==0) :
+			if (sizeof($woocommerce->cart->get_cart())==0) :
 				$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woothemes'), home_url()) );
 			endif;
 			
@@ -644,7 +644,7 @@ class woocommerce_checkout {
 					// Cart items
 					$order_items = array();
 					
-					foreach ($woocommerce->cart->cart_contents as $cart_item_key => $values) :
+					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 						
 						$_product = $values['data'];
 			
@@ -765,7 +765,7 @@ class woocommerce_checkout {
 					wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
 						
 					// Discount code meta
-					if ($woocommerce->cart->applied_coupons) update_post_meta($order_id, 'coupons', implode(', ', $woocommerce->cart->applied_coupons));
+					if ($applied_coupons = $woocommerce->cart->get_applied_coupons()) update_post_meta($order_id, 'coupons', implode(', ', $applied_coupons));
 					
 					// Order is saved
 					do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
