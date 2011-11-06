@@ -1255,9 +1255,8 @@ function woocommerce_order_details_table( $order_id ) {
 						<tr>
 							<td class="product-name">'.$item['name'];
 					
-					if (isset($item['item_meta'])) :
-						echo woocommerce_get_formatted_variation( $item['item_meta'] );
-					endif;
+					$item_meta = &new order_item_meta( $item['item_meta'] );					
+					$item_meta->display();
 					
 					echo '	</td>
 							<td>'.$item['qty'].'</td>

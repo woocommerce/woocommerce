@@ -208,9 +208,8 @@ class woocommerce_order {
 			
 			$return .= ' - ' . strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 )));
 			
-			if (isset($_product->variation_data)) :
-				$return .= PHP_EOL . woocommerce_get_formatted_variation( $item['item_meta'], true );
-			endif;
+			$item_meta = &new order_item_meta( $item['item_meta'] );					
+			$return .= PHP_EOL . $item_meta->display( true, true );
 			
 			if ($show_download_links) :
 				
@@ -246,9 +245,8 @@ class woocommerce_order {
 				$sku = ' (#' . $_product->sku . ')';
 			endif;
 			
-			if (isset($item['item_meta'])) :
-				$variation = '<br/>' . woocommerce_get_formatted_variation( $item['item_meta'], true );
-			endif;
+			$item_meta = &new order_item_meta( $item['item_meta'] );					
+			$variation = '<br/>' . $item_meta->display( true, true );
 			
 			if ($show_download_links) :
 				
@@ -542,4 +540,94 @@ class woocommerce_order {
 		
 	}
 
+}
+
+
+/**
+ * Order Item Meta
+ * 
+ * A Simple class for managing order item meta so plugins add it in the correct format
+ */
+class order_item_meta {
+	
+	var $meta;
+	
+	/**
+	 * Constructor
+	 */
+	function __construct( $item_meta = '' ) {
+		$this->meta = array();
+		
+		if ($item_meta) $this->meta = $item_meta;
+	}
+	
+	/**
+	 * Load item meta
+	 */
+	function new_order_item( $item ) {
+		if ($item) :
+			do_action('woocommerce_order_item_meta', &$this, $item);
+		endif;
+	}
+	
+	/**
+	 * Add meta
+	 */
+	function add( $name, $value ) {
+		$this->meta[] = array(
+			'meta_name' 		=> $name, 
+			'meta_value' 	=> $value
+		);
+	}
+	
+	/**
+	 * Display meta in a formatted list
+	 */
+	function display( $flat = false, $return = false ) {
+		global $woocommerce;
+		
+		if ($this->meta && is_array($this->meta)) :
+			
+			if (!$flat) $output = '<dl class="variation">'; else $output = '';
+			
+			$meta_list = array();
+			
+			foreach ($this->meta as $meta) :
+				
+				$name 	= $meta['meta_name'];
+				$value	= $meta['meta_value'];
+				
+				if (!$value) continue;
+				
+				// If this is a term slug, get the term's nice name
+	            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
+	            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
+	            	if (!is_wp_error($term) && $term->name) :
+	            		$value = $term->name;
+	            	endif;
+	            else :
+	            	$value = ucfirst($value);
+	            endif;
+				
+				if ($flat) :
+					$meta_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+				else :
+					$meta_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+				endif;
+				
+			endforeach;
+			
+			if ($flat) :
+				$output .= implode(', ', $meta_list);
+			else :
+				$output .= implode('', $meta_list);
+			endif;
+			
+			if (!$flat) $output .= '</dl>';
+
+			if ($return) return $output; else echo $output;
+			
+		endif;
+	}
+	
 }

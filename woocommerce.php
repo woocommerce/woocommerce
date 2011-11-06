@@ -456,62 +456,6 @@ function woocommerce_price( $price, $args = array() ) {
 	if ($ex_tax_label && get_option('woocommerce_calc_taxes')=='yes') $return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 	
 	return $return;
-}
-
-/**
- * Variation Formatting
- *
- * Gets a formatted version of variation data or item meta
- **/
-function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
-
-	global $woocommerce;
-	
-	if ($variation && is_array($variation)) :
-		
-		$return = '';
-		
-		if (!$flat) :
-			$return = '<dl class="variation">';
-		endif;
-		
-		$variation_list = array();
-		
-		foreach ($variation as $name => $value) :
-			
-			if (!$value) continue;
-			
-			// If this is a term slug, get the term's nice name
-            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
-            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
-            	if (!is_wp_error($term) && $term->name) :
-            		$value = $term->name;
-            	endif;
-            else :
-            	$value = ucfirst($value);
-            endif;
-			
-			if ($flat) :
-				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-			else :
-				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
-			endif;
-			
-		endforeach;
-		
-		if ($flat) :
-			$return .= implode(', ', $variation_list);
-		else :
-			$return .= implode('', $variation_list);
-		endif;
-		
-		if (!$flat) :
-			$return .= '</dl>';
-		endif;
-		
-		return $return;
-		
-	endif;
 }	
 	
 /**
@@ -705,4 +649,53 @@ if (!function_exists('woocommerce_light_or_dark')) {
 	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
 	    return (hexdec($color) > 0xffffff/2) ? $dark : $light;
 	}
+}
+
+/**
+ * Variation Formatting
+ *
+ * Gets a formatted version of variation data or item meta
+ **/
+function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
+	global $woocommerce;
+
+	if (is_array($variation)) :
+
+		if (!$flat) $return = '<dl class="variation">'; else $return = '';
+
+		$variation_list = array();
+
+		foreach ($variation as $name => $value) :
+
+			if (!$value) continue;
+
+			// If this is a term slug, get the term's nice name
+            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
+            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
+            	if (!is_wp_error($term) && $term->name) :
+            		$value = $term->name;
+            	endif;
+            else :
+            	$value = ucfirst($value);
+            endif;
+
+			if ($flat) :
+				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
+			else :
+				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
+			endif;
+
+		endforeach;
+
+		if ($flat) :
+			$return .= implode(', ', $variation_list);
+		else :
+			$return .= implode('', $variation_list);
+		endif;
+
+		if (!$flat) $return .= '</dl>';
+
+		return $return;
+
+	endif;
 }

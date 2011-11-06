@@ -654,18 +654,17 @@ class woocommerce_checkout {
 							$rate = $_tax->get_rate( $_product->get_tax_class() );
 						endif;
 						
-						// Store any item meta data
-						$item_meta = array();
+						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
+						$item_meta = &new order_item_meta();
 						
-						// Variations meta
+						$item_meta->new_order_item( $values );
+						
+						// Store variation data in meta so admin can view it
 						if ($values['variation'] && is_array($values['variation'])) :
 							foreach ($values['variation'] as $key => $value) :
-								$item_meta[ esc_attr(str_replace('attribute_', '', $key)) ] = $value;
+								$item_meta->add( esc_attr(str_replace('attribute_', '', $key)), $value );
 							endforeach;
 						endif;
-
-						// Run filter
-						$item_meta = apply_filters('woocommerce_order_item_meta', $item_meta, $values);
 						
 						$order_items[] = apply_filters('new_order_item', array(
 					 		'id' 			=> $values['product_id'],
@@ -674,7 +673,7 @@ class woocommerce_checkout {
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'cost' 			=> $_product->get_price_excluding_tax(),
 					 		'taxrate' 		=> $rate,
-					 		'item_meta'		=> $item_meta
+					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
 					 	
 					 	// Check stock levels

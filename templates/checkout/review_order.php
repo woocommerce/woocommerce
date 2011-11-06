@@ -83,7 +83,7 @@
 					if ($_product->exists() && $values['quantity']>0) :
 						echo '
 							<tr>
-								<td class="product-name">'.$_product->get_title().woocommerce_get_formatted_variation( $values['variation'] ).'</td>
+								<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
 								<td>'.$values['quantity'].'</td>
 								<td>'.woocommerce_price($_product->get_price_excluding_tax()*$values['quantity'], array('ex_tax_label' => 1)).'</td>
 							</tr>';

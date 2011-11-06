@@ -159,9 +159,7 @@ function woocommerce_order_items_meta_box($post) {
 						<td class="name">
 							<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $item['name']; ?></a>
 							<?php
-								if (isset($_product->variation_data)) :
-									echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
-								endif;
+								if (isset($_product->variation_data)) echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
 							?>
 						</td>
 						<td>
@@ -173,8 +171,18 @@ function woocommerce_order_items_meta_box($post) {
 								</tfoot>
 								<tbody class="meta_items">
 								<?php
-									if (isset($item['item_meta']) && is_array($item['item_meta'])) foreach ($item['item_meta'] as $key => $value) :
-										echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$key.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $value ).'" /></td><td><button class="remove_meta button">&times;</button></td></tr>';
+									if (isset($item['item_meta']) && is_array($item['item_meta'])) foreach ($item['item_meta'] as $key => $meta) :
+									
+										// Backwards compatibility
+										if (is_array($meta) && isset($meta['meta_name'])) :
+											$meta_name = $meta['meta_name'];
+											$meta_value = $meta['meta_value'];
+										else :
+											$meta_name = $key;
+											$meta_value = $meta;
+										endif;
+
+										echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$meta_name.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $meta_value ).'" /></td><td><button class="remove_meta button">&times;</button></td></tr>';
 									endforeach;
 								?>
 								</tbody>
@@ -397,14 +405,15 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	if (!isset($item_tax_rate[$i])) continue;
 			 	
 			 	// Meta
-			 	$item_meta = array();
-			 	$meta_names = $item_meta_names[$i];
-			 	$meta_values = $item_meta_values[$i];
+			 	$item_meta 		= &new order_item_meta();
+			 	$meta_names 	= $item_meta_names[$i];
+			 	$meta_values 	= $item_meta_values[$i];
 			 	
 			 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
-			 		$key = esc_attr( $meta_names[$ii] );
-			 		if ($key && $meta_values[$ii]) :
-			 			$item_meta[$key] = woocommerce_clean( $meta_values[$ii] );
+			 		$meta_name 		= esc_attr( $meta_names[$ii] );
+			 		$meta_value 	= esc_attr( $meta_values[$ii] );
+			 		if ($meta_name && $meta_value) :
+			 			$item_meta->add( $meta_name, $meta_value );
 			 		endif;
 			 	endfor;
 			 	
@@ -416,7 +425,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'qty' 			=> (int) $item_quantity[$i],
 			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
-			 		'item_meta'		=> $item_meta
+			 		'item_meta'		=> $item_meta->meta
 			 	));
 			 	
 			 endfor; 

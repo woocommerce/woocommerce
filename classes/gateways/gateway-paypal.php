@@ -201,10 +201,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				
 				$item_name = $item['name'];
 				
-				if (isset($item['item_meta'])) :
-					if ($meta = woocommerce_get_formatted_variation( $item['item_meta'], true )) :
-						$item_name .= ' ('.$meta.')';
-					endif;
+				$item_meta = &new order_item_meta( $item['item_meta'] );					
+				if ($meta = $item_meta->display( true, true )) :
+					$item_name .= ' ('.$meta.')';
 				endif;
 				
 				$paypal_args['item_name_'.$item_loop] = $item_name;
