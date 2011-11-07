@@ -19,8 +19,10 @@
 							});
 							
 							var a=this;d.onRenderMenu.add(function(c,b){
-							
-								a.addImmediate(b,"Product by ID", '[product id=""]');
+								
+								
+								a.addImmediate(b,"Product price/cart button", '[add_to_cart id="" sku=""]');
+								a.addImmediate(b,"Product by SKU/ID", '[product id="" sku=""]');
 								a.addImmediate(b,"Products by SKU/ID", '[product ids="" skus=""]');
 								a.addImmediate(b,"Products by category slug", '[product_category category="" per_page="12" columns="4" orderby="date" order="desc"]');
 								

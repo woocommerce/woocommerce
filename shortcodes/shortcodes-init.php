@@ -232,6 +232,66 @@ function woocommerce_product($atts){
 	return ob_get_clean();  
 }
 
+
+/**
+ * Display a single prodcut price + cart button
+ **/
+function woocommerce_product_add_to_cart($atts){
+  	if (empty($atts)) return;
+  
+  	$args = array(
+    	'post_type' => 'product',
+    	'posts_per_page' => 1,
+    	'post_status' => 'publish',
+    	'meta_query' => array(
+			array(
+				'key' => 'visibility',
+				'value' => array('catalog', 'visible'),
+				'compare' => 'IN'
+			)
+		)
+  	);
+  
+  	if(isset($atts['sku'])){
+    	$args['meta_query'][] = array(
+      		'key' => 'sku',
+      		'value' => $atts['sku'],
+      		'compare' => '='
+    	);
+  	}
+  
+  	if(isset($atts['id'])){
+    	$args['p'] = $atts['id'];
+  	}
+  	
+  	if (!$atts['style']) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+  
+  	query_posts($args);
+	
+  	ob_start();
+
+	if (have_posts()) : while (have_posts()) : the_post(); 
+	
+		$_product = &new woocommerce_product( $post->ID ); 
+		
+		if (!$_product->is_visible()) continue; 
+
+		?>
+		<p class="product" style="<?php echo $atts['style']; ?>">
+		
+			<?php echo $_product->get_price_html(); ?>
+			
+			<?php woocommerce_template_loop_add_to_cart( $post, $_product ); ?>
+						
+		</p><?php 
+		
+	endwhile; endif;
+	
+	wp_reset_query();
+	return ob_get_clean();  
+}
+
+
 /**
  * Output featured products
  **/
@@ -280,6 +340,7 @@ function woocommerce_featured_products( $atts ) {
  **/
 add_shortcode('product_category', 'woocommerce_product_catagory');
 add_shortcode('product', 'woocommerce_product');
+add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
 add_shortcode('products', 'woocommerce_products');
 add_shortcode('recent_products', 'woocommerce_recent_products');
 add_shortcode('featured_products', 'woocommerce_featured_products');
