@@ -44,7 +44,7 @@ function woocommerce_order_tracking( $atts ) {
 				
 				$order_status_text .= '.';
 				
-				echo wpautop(apply_filters('woocommerce_order_tracking_status', $order_status_text, $status));
+				echo wpautop(apply_filters('woocommerce_order_tracking_status', $order_status_text, $order));
 				?>
 				
 				<?php
