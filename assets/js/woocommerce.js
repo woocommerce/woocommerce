@@ -394,7 +394,7 @@ jQuery(document).ready(function($) {
         $('.single_variation').text('');
 		check_variations();
 		$(this).blur();
-		if($.isFunction($.uniform.update)) {
+		if( $().uniform && $.isFunction($.uniform.update) ) {
 			$.uniform.update();
 		}
 		
