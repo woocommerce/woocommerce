@@ -109,6 +109,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Un-force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS when leaving the checkout', 'woothemes' ),
+		'id' 		=> 'woocommerce_unforce_ssl_checkout',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 	

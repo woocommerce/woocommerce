@@ -313,16 +313,16 @@ if (!function_exists('is_ajax')) {
 /**
  * Force SSL (if enabled)
  **/
-if (get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp', 'woocommerce_force_ssl');
+if (!is_admin() && get_option('woocommerce_force_ssl_checkout')=='yes') add_action( 'wp', 'woocommerce_force_ssl');
 
 function woocommerce_force_ssl() {
 	if (is_checkout() && !is_ssl()) :
 		wp_safe_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
 		exit;
-	/*// Break out of SSL if we leave the checkout
-	elseif (is_ssl() && $_SERVER['REQUEST_URI'] && !is_checkout() && (is_cart() || is_single() || is_archive() || is_product() || is_shop() || is_home() || is_front_page() || is_tax() || is_404() || is_account_page())) :
+	// Break out of SSL if we leave the checkout (anywhere but thanks page)
+	elseif (get_option('woocommerce_unforce_ssl_checkout')=='yes' && is_ssl() && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(get_option('woocommerce_thanks_page_id')) && !is_ajax()) :
 		wp_safe_redirect( str_replace('https:', 'http:', home_url($_SERVER['REQUEST_URI']) ) );
-		exit;*/
+		exit;
 	endif;
 }
 
