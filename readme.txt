@@ -98,6 +98,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fix for 0 quanitiy
 * add_to_cart shortcode
 * Improved order search
+* Option to unforce SSL checkout
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
@@ -245,6 +246,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+This version has improved product types - ensure you de/re-activate the theme to ensure existing products get converted correctly.
 
 = 1.2 =
 New features, bug fixes and improvements to keep WooCommerce running smoothly.
