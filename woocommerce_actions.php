@@ -759,14 +759,22 @@ function woocommerce_download_product() {
                 case "jpe": case "jpeg": case "jpg": $ctype="image/jpg"; break;
                 default: $ctype="application/force-download";
             endswitch;
+            
+            if (get_option('woocommerce_mod_xsendfile_enabled')=='yes') :
+            
+				header("X-Accel-Redirect: $file_path");
+				header("X-Sendfile: $file_path");
+				header("Content-Type: $ctype");
+				header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
+				exit;
 
-            // Headers
+            endif;
+            
             @session_write_close();
             if (function_exists('apache_setenv')) @apache_setenv('no-gzip', 1);
             @ini_set('zlib.output_compression', 'Off');
 			@set_time_limit(0);
 			@set_magic_quotes_runtime(0);
-			
 			@ob_end_clean();
 			if (ob_get_level()) @ob_end_clean(); // Zip corruption fix
 			
@@ -776,15 +784,7 @@ function woocommerce_download_product() {
 			header("Robots: none");
 			header("Content-Type: ".$ctype."");
 			header("Content-Description: File Transfer");	
-							
-          	if (strstr($_SERVER['HTTP_USER_AGENT'], "MSIE")) {
-			    // workaround for IE filename bug with multiple periods / multiple dots in filename
-			    $iefilename = preg_replace('/\./', '%2e', basename($file_path), substr_count(basename($file_path), '.') - 1);
-			    header("Content-Disposition: attachment; filename=\"".$iefilename."\";");
-			} else {
-			    header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
-			}
-
+			header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");	
 			header("Content-Transfer-Encoding: binary");
 							
             if ($size = @filesize($file_path)) header("Content-Length: ".$size);
@@ -796,8 +796,6 @@ function woocommerce_download_product() {
             	
             else :
             	
-            	if (!file_exists($file_path)) wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
-            	 
             	@readfile_chunked("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
 			
             endif;

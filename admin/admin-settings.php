@@ -153,6 +153,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox'
 	),
 	
+	array(  
+		'name' => __('File downloads', 'woothemes'),
+		'desc' 		=> __('Use <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> to serve downloads (server requires <code>mod_xsendfile</code>)', 'woothemes'),
+		'id' 		=> 'woocommerce_mod_xsendfile_enabled',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'no',
+	),
+	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
 	array( 'name' => __( 'ShareThis', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'share_this' ),
