@@ -745,6 +745,13 @@ div.taxrows {
 	border-bottom: 1px solid #DFDFDF;
 }
 
+#woocommerce_attributes td.handle {
+	vertical-align: middle;
+	width: 14px;
+	background: url(../images/handle.png) no-repeat right center;
+	cursor: move;
+	padding-right: 0;
+}
 #woocommerce_attributes, #variable_product_options {
 	padding: 12px;
 }
@@ -754,6 +761,7 @@ div.taxrows {
 }
 table.woocommerce_attributes, table.woocommerce_variable_attributes {
 	width: 100%;
+	position: relative;
 }
 table.woocommerce_attributes thead th, table.woocommerce_variable_attributes thead th {
 	background: #ececec;
@@ -766,7 +774,6 @@ table.woocommerce_attributes td, table.woocommerce_variable_attributes td {
 	text-align: left;
 	vertical-align: middle;
 	border-bottom: 1px dotted #ececec;
-	cursor: move;
 }
 table.woocommerce_attributes td input, table.woocommerce_variable_attributes td input, table.woocommerce_variable_attributes td textarea {
 	width: 100%;

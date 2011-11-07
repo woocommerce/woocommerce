@@ -131,11 +131,12 @@ div.taxrows .taxrow label.checkbox{line-height:1.5em;margin:0 8px;}div.taxrows .
 .woocommerce_options_panel .short{width:20%;}
 .woocommerce_options_panel .sized{width:auto !important;margin-right:6px;}
 .woocommerce_options_panel .options_group{border-top:1px solid white;border-bottom:1px solid #DFDFDF;}
+#woocommerce_attributes td.handle{vertical-align:middle;width:14px;background:url(../images/handle.png) no-repeat right center;cursor:move;padding-right:0;}
 #woocommerce_attributes,#variable_product_options{padding:12px;}
 .woocommerce_attributes_wrapper,.woocommerce_variable_attributes_wrapper{margin-bottom:7px;border:1px solid #ececec;}
-table.woocommerce_attributes,table.woocommerce_variable_attributes{width:100%;}
+table.woocommerce_attributes,table.woocommerce_variable_attributes{width:100%;position:relative;}
 table.woocommerce_attributes thead th,table.woocommerce_variable_attributes thead th{background:#ececec;padding:7px 9px;font-size:11px;text-align:left;}
-table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding:2px 9px;text-align:left;vertical-align:middle;border-bottom:1px dotted #ececec;cursor:move;}
+table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding:2px 9px;text-align:left;vertical-align:middle;border-bottom:1px dotted #ececec;}
 table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{width:100%;}
 table.woocommerce_attributes td select{width:100%;}
 table.woocommerce_attributes td select.multiselect{height:8em !important;}

@@ -295,7 +295,7 @@ jQuery( function($){
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 				
 				// Add custom attribute row
-				$('table.woocommerce_attributes tbody').append('<tr><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
+				$('table.woocommerce_attributes tbody').append('<tr><td class="handle"></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
 				
 			} else {
 				
@@ -335,11 +335,13 @@ jQuery( function($){
 			items:'tr',
 			cursor:'move',
 			axis:'y',
+			handle: '.handle',
 			scrollSensitivity:40,
 			helper:function(e,ui){
 				ui.children().each(function(){
 					$(this).width($(this).width());
 				});
+				ui.css('left', '0');
 				return ui;
 			},
 			start:function(event,ui){
