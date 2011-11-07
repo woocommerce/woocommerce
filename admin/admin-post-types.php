@@ -753,7 +753,6 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 	return $vars;
 }
 
-
 /**
  * Order messages
  **/
@@ -843,3 +842,138 @@ function woocommerce_feature_product() {
 
 }
 add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product');
+
+
+/**
+ * Search by SKU or ID for products. Adapted from code by BenIrvin (Admin Search by ID)
+ */
+if (is_admin()) :
+	add_action( 'parse_request', 'woocommerce_admin_product_search' );
+	add_filter( 'get_search_query', 'woocommerce_admin_product_search_label' );
+endif;
+
+function woocommerce_admin_product_search( $wp ) {
+    global $pagenow, $wpdb;
+	
+	if( 'edit.php' != $pagenow ) return;
+	if( !isset( $wp->query_vars['s'] ) ) return;
+	if ($wp->query_vars['post_type']!='product') return;
+
+	if( '#' == substr( $wp->query_vars['s'], 0, 1 ) ) :
+
+		$id = absint( substr( $wp->query_vars['s'], 1 ) );
+			
+		if( !$id ) return; 
+		
+		unset( $wp->query_vars['s'] );
+		$wp->query_vars['p'] = $id;
+		
+		var_dump(1);
+		
+	elseif( 'SKU:' == substr( $wp->query_vars['s'], 0, 4 ) ) :
+		
+		$sku = trim( substr( $wp->query_vars['s'], 4 ) );
+			
+		if( !$sku ) return; 
+		
+		$id = $wpdb->get_var('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key="sku" AND meta_value LIKE "%'.$sku.'%";');
+		
+		if( !$id ) return; 
+
+		unset( $wp->query_vars['s'] );
+		$wp->query_vars['p'] = $id;
+		$wp->query_vars['sku'] = $sku;
+		var_dump(1);
+		
+	endif;
+}
+
+function woocommerce_admin_product_search_label($query) {
+	global $pagenow, $typenow, $wp;
+
+    if ( 'edit.php' != $pagenow ) return $query;
+    if ( $typenow!='product' ) return $query;
+	
+	$s = get_query_var( 's' );
+	if ($s) return $query;
+	
+	$sku = get_query_var( 'sku' );
+	if($sku) {
+		$post_type = get_post_type_object($wp->query_vars['post_type']);
+		return sprintf(__("[%s with SKU of %s]", 'woothemes'), $post_type->labels->singular_name, $sku);
+	}
+	
+	$p = get_query_var( 'p' );
+	if ($p) {
+		$post_type = get_post_type_object($wp->query_vars['post_type']);
+		return sprintf(__("[%s with ID of %d]", 'woothemes'), $post_type->labels->singular_name, $p);
+	}
+	
+	return $query;
+}
+
+/**
+ * Order custom field search
+ **/
+if (is_admin()) :
+	add_filter( 'parse_query', 'woocommerce_shop_order_search_custom_fields' );
+	add_filter( 'get_search_query', 'woocommerce_shop_order_search_label' );
+endif;
+
+function woocommerce_shop_order_search_custom_fields( $wp ) {
+	global $pagenow, $wpdb;
+   
+	if( 'edit.php' != $pagenow ) return $query;
+	if( !isset( $wp->query_vars['s'] ) || !$wp->query_vars['s'] ) return $query;
+	if ($wp->query_vars['post_type']!='shop_order') return $query;
+	
+	$search_fields = array(
+		'_billing_first_name',
+		'_billing_last_name',
+		'_billing_company', 
+		'_billing_address_1', 
+		'_billing_address_2',
+		'_billing_city',
+		'_billing_postcode', 
+		'_billing_country',
+		'_billing_state',
+		'_billing_email',
+		'_order_items'
+	);
+	
+	// Query matching custom fields - this seems faster than meta_query
+	$post_ids = $wpdb->get_col($wpdb->prepare('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key IN ('.'"'.implode('","', $search_fields).'"'.') AND meta_value LIKE "%%%s%%"', esc_attr($_GET['s']) ));
+	
+	// Add ID
+	if (is_numeric($_GET['s'])) $post_ids[] = $_GET['s'];
+	
+	// Remove s - we don't want to search order name
+	unset( $wp->query_vars['s'] );
+	
+	// so we know we're doing this
+	$wp->query_vars['shop_order_search'] = true;
+	
+	// Search by found posts
+	$wp->query_vars['post__in'] = $post_ids;
+}
+
+function woocommerce_shop_order_search_label($query) {
+	global $pagenow, $typenow;
+
+    if( 'edit.php' != $pagenow ) return $query;
+    if ( $typenow!='shop_order' ) return $query;
+	if ( !get_query_var('shop_order_search')) return $query;
+	
+	return $_GET['s'];
+}
+
+/**
+ * Query vars for custom searches
+ **/
+add_filter('query_vars', 'woocommerce_add_custom_query_var');
+
+function woocommerce_add_custom_query_var($public_query_vars) {
+	$public_query_vars[] = 'sku';
+	$public_query_vars[] = 'shop_order_search';
+	return $public_query_vars;
+}
