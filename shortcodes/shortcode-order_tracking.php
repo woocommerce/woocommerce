@@ -38,11 +38,13 @@ function woocommerce_order_tracking( $atts ) {
 			
 				$status = get_term_by('slug', $order->status, 'shop_order_status');
 		
-				echo '<p>'.sprintf( __('Order #%s which was made %s has the status &ldquo;%s&rdquo;', 'woothemes'), $order->id, human_time_diff(strtotime($order->order_date), current_time('timestamp')).__(' ago', 'woothemes'), $status->name );
-			
-				if ($order->status == 'completed') echo ' ' . __('and was completed', 'woothemes') . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woothemes');
-			
-				echo '.</p>';
+				$order_status_text = sprintf( __('Order #%s which was made %s has the status &ldquo;%s&rdquo;', 'woothemes'), $order->id, human_time_diff(strtotime($order->order_date), current_time('timestamp')).__(' ago', 'woothemes'), $status->name );
+				
+				if ($order->status == 'completed') $order_status_text .= ' ' . __('and was completed', 'woothemes') . ' ' . human_time_diff(strtotime($order->completed_date)).__(' ago', 'woothemes');
+				
+				$order_status_text .= '.';
+				
+				echo wpautop(apply_filters('woocommerce_order_tracking_status', $order_status_text, $status));
 				?>
 				
 				<?php
