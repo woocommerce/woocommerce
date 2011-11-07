@@ -238,56 +238,36 @@ function woocommerce_product($atts){
  **/
 function woocommerce_product_add_to_cart($atts){
   	if (empty($atts)) return;
-  
-  	$args = array(
-    	'post_type' => 'product',
-    	'posts_per_page' => 1,
-    	'post_status' => 'publish',
-    	'meta_query' => array(
-			array(
-				'key' => 'visibility',
-				'value' => array('catalog', 'visible'),
-				'compare' => 'IN'
-			)
-		)
-  	);
-  
-  	if(isset($atts['sku'])){
-    	$args['meta_query'][] = array(
-      		'key' => 'sku',
-      		'value' => $atts['sku'],
-      		'compare' => '='
-    	);
-  	}
-  
-  	if(isset($atts['id'])){
-    	$args['p'] = $atts['id'];
-  	}
+  	
+  	global $wpdb;
   	
   	if (!$atts['style']) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
-  
-  	query_posts($args);
+  	
+  	if ($atts['id']) :
+  		$product_data = get_post( $atts['id'] );
+	elseif ($atts['sku']) :
+		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
+		$product_data = get_post( $product_id );
+	else :
+		return;
+	endif;
 	
-  	ob_start();
-
-	if (have_posts()) : while (have_posts()) : the_post(); 
+	if ($product_data->post_type!=='product') return;
 	
-		$_product = &new woocommerce_product( $post->ID ); 
+	$_product = &new woocommerce_product( $product_data->ID ); 
 		
-		if (!$_product->is_visible()) continue; 
-
-		?>
-		<p class="product" style="<?php echo $atts['style']; ?>">
-		
-			<?php echo $_product->get_price_html(); ?>
-			
-			<?php woocommerce_template_loop_add_to_cart( $post, $_product ); ?>
-						
-		</p><?php 
-		
-	endwhile; endif;
+	if (!$_product->is_visible()) continue; 
 	
-	wp_reset_query();
+	ob_start();
+	?>
+	<p class="product" style="<?php echo $atts['style']; ?>">
+	
+		<?php echo $_product->get_price_html(); ?>
+		
+		<?php woocommerce_template_loop_add_to_cart( $product_data, $_product ); ?>
+					
+	</p><?php 
+	
 	return ob_get_clean();  
 }
 
