@@ -96,6 +96,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added German translation (partial complete)
 * Cart is now more robust and supports custom data being stored, such as addons
 * Fix for 0 quanitiy
+* add_to_cart shortcode
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
