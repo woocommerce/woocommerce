@@ -549,7 +549,8 @@ class woocommerce_checkout {
 		                    wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
 		
 		                    // send the user a confirmation and their login details
-		                    wp_new_user_notification( $user_id, $user_pass );
+		                    woocommerce_customer_new_account( $user_id, $user_pass );
+		                    //wp_new_user_notification( $user_id, $user_pass );
 		
 		                    // set the WP login cookie
 		                    $secure_cookie = is_ssl() ? true : false;

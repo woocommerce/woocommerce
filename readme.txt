@@ -100,6 +100,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved order search
 * Option to unforce SSL checkout
 * Support for X-Accel-Redirect / X-Sendfile for downloads
+* Customer new account email when signing up from the checkout
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
