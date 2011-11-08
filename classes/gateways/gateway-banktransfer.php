@@ -147,7 +147,9 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		);
 		
 		foreach ($fields as $key=>$value) :
-			echo '<li class="'.$key.'">'.$key.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		    if(!empty($this->$key)) :
+		    	echo '<li class="'.$key.'">'.$value.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		    endif;
 		endforeach;
 		
 		?></ul><?php
@@ -178,7 +180,9 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		);
 		
 		foreach ($fields as $key=>$value) :
-			echo '<li class="'.$key.'">'.$key.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		    if(!empty($this->$key)) :
+		    	echo '<li class="'.$key.'">'.$value.': <strong>'.wptexturize($this->$key).'</strong></li>';
+		    endif;
 		endforeach;
 		
 		?></ul><?php
