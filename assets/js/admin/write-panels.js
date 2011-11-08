@@ -169,14 +169,16 @@ jQuery( function($){
 		// Get value
 		var select_val = $(this).val();
 		
-		$('.show_if_simple, .show_if_variable, .show_if_grouped').hide();
+		$('.show_if_simple, .show_if_variable, .show_if_grouped, .show_if_external').hide();
 		
 		if (select_val=='simple') {
 			$('.show_if_simple').show();
+			$('input#manage_stock').change();
 		}
 		
 		else if (select_val=='variable') {
 			$('.show_if_variable').show();
+			$('input#manage_stock').change();
 		}
 		
 		else if (select_val=='grouped') {
@@ -184,8 +186,12 @@ jQuery( function($){
 			$('input#downloadable').removeAttr('checked').change();
 		}
 		
+		else if (select_val=='external') {
+			$('.show_if_external').show();
+			$('input#downloadable').removeAttr('checked').change();
+		}
+		
 		$('ul.tabs li:visible').eq(0).find('a').click();
-		$('input#manage_stock').change();
 		
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
 		

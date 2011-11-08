@@ -29,11 +29,11 @@ function woocommerce_product_data_box() {
 	
 		<ul class="product_data_tabs tabs" style="display:none;">
 			
-			<li class="active show_if_simple show_if_variable"><a href="#general_product_data"><?php _e('General', 'woothemes'); ?></a></li>
+			<li class="active show_if_simple show_if_variable show_if_external"><a href="#general_product_data"><?php _e('General', 'woothemes'); ?></a></li>
 			
 			<li class="tax_tab show_if_simple show_if_variable"><a href="#tax_product_data"><?php _e('Tax', 'woothemes'); ?></a></li>
 			
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab"><a href="#inventory_product_data"><?php _e('Inventory', 'woothemes'); ?></a></li><?php endif; ?>
+			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab show_if_simple show_if_variable show_if_grouped"><a href="#inventory_product_data"><?php _e('Inventory', 'woothemes'); ?></a></li><?php endif; ?>
 			
 			<li class="upsells_and_crosssells_tab"><a href="#upsells_and_crosssells_product_data"><?php _e('Up-sells &amp; Cross-sells', 'woothemes'); ?></a></li>
 			
@@ -60,8 +60,14 @@ function woocommerce_product_data_box() {
 				do_action('woocommerce_product_options_sku');
 			
 			echo '</div>';
-						
-			echo '<div class="options_group pricing show_if_simple">';
+			
+			echo '<div class="options_group show_if_external">';
+				// External URL
+				woocommerce_wp_text_input( array( 'id' => 'product_url', 'label' => __('Product URL', 'woothemes'), 'placeholder' => 'http://', 'description' => __('Enter the external URL to the product.', 'woothemes') ) );
+			
+			echo '</div>';
+				
+			echo '<div class="options_group pricing show_if_simple show_if_external">';
 			
 				// Price
 				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')' ) );
@@ -540,7 +546,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'virtual', $is_virtual );
 
 	// Sales and prices
-	if ($product_type=='simple') :
+	if ($product_type=='simple' || $product_type=='external') :
 		
 		$date_from = (isset($_POST['sale_price_dates_from'])) ? $_POST['sale_price_dates_from'] : '';
 		$date_to = (isset($_POST['sale_price_dates_to'])) ? $_POST['sale_price_dates_to'] : '';
@@ -623,12 +629,19 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				update_post_meta( $post_id, 'stock_status', 'outofstock' );
 			endif;
 			
-		else :
+		elseif ($product_type!=='external') :
 			
 			update_post_meta( $post_id, 'stock', '0' );
 			update_post_meta( $post_id, 'manage_stock', 'no' );
 			update_post_meta( $post_id, 'backorders', 'no' );
-						
+		
+		else :
+		
+			update_post_meta( $post_id, 'stock_status', 'instock' );
+			update_post_meta( $post_id, 'stock', '0' );
+			update_post_meta( $post_id, 'manage_stock', 'no' );
+			update_post_meta( $post_id, 'backorders', 'no' );
+				
 		endif;
 	endif;
 	
@@ -659,8 +672,15 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	// Downloadable options
 	if ($is_downloadable=='yes') :
 		
-		if (isset($_POST['file_path']) && $_POST['file_path']) update_post_meta( $post_id, 'file_path', $_POST['file_path'] );
-		if (isset($_POST['download_limit'])) update_post_meta( $post_id, 'download_limit', $_POST['download_limit'] );
+		if (isset($_POST['file_path']) && $_POST['file_path']) update_post_meta( $post_id, 'file_path', esc_attr($_POST['file_path']) );
+		if (isset($_POST['download_limit'])) update_post_meta( $post_id, 'download_limit', esc_attr($_POST['download_limit']) );
+		
+	endif;
+	
+	// Product url
+	if ($product_type=='external') :
+		
+		if (isset($_POST['product_url']) && $_POST['product_url']) update_post_meta( $post_id, 'product_url', esc_attr($_POST['product_url']) );
 		
 	endif;
 			
@@ -717,7 +737,8 @@ function woocommerce_product_type_box() {
 	
 	woocommerce_wp_select( array( 'id' => 'product-type', 'label' => __('Product Type', 'woothemes'), 'value' => $product_type, 'options' => apply_filters('product_type_selector', array(
 		'simple' => __('Simple product', 'woothemes'),
-		'grouped' => __('Grouped product', 'woothemes')
+		'grouped' => __('Grouped product', 'woothemes'),
+		'external' => __('External/Affiliate product', 'woothemes')
 	), $product_type) ) );
 	
 	// Visibility

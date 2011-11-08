@@ -261,7 +261,8 @@ function woocommerce_default_taxonomies() {
 	$product_types = array(
 		'simple',
 		'grouped',
-		'variable'
+		'variable',
+		'external'
 	);
 	
 	foreach($product_types as $type) {

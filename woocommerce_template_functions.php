@@ -56,7 +56,7 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 	function woocommerce_template_loop_add_to_cart( $post, $_product ) {
 	
 		// No price set - so no button
-		if( $_product->get_price() === '') return;
+		if( $_product->get_price() === '' && $_product->product_type!=='external') return;
 		
 		if (!$_product->is_in_stock()) :
 			echo '<a href="'.get_permalink($post->ID).'" class="button">'.__('Read More', 'woothemes').'</a>';
@@ -71,6 +71,10 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 			case "grouped" :
 				$link 	= get_permalink($post->ID);
 				$label 	= apply_filters('grouped_add_to_cart_text', __('View options', 'woothemes'));
+			break;
+			case "external" :
+				$link 	= get_permalink($post->ID);
+				$label 	= apply_filters('external_add_to_cart_text', __('Read More', 'woothemes'));
 			break;
 			default :
 				$link 	= esc_url( $_product->add_to_cart_url() );
@@ -439,6 +443,25 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		</form>
 		
 		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
+		<?php
+	}
+}
+if (!function_exists('woocommerce_external_add_to_cart')) {
+	function woocommerce_external_add_to_cart() {
+
+		global $_product;
+		
+		$product_url = get_post_meta( $_product->id, 'product_url', true );
+		if (!$product_url) return;
+		
+		?>
+			
+		<?php do_action('woocommerce_before_to_cart_button'); ?>
+		
+		<p class="cart"><a href="<?php echo $product_url; ?>" rel="nofollow" class="button alt"><?php _e('Buy product', 'woothemes'); ?></a></p>
+		
+		<?php do_action('woocommerce_after_add_to_cart_button'); ?>
+		
 		<?php
 	}
 }
