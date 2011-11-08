@@ -97,7 +97,9 @@ function woocommerce_post_type() {
 	    	if ($name) :
 	    	
 	    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
-
+				
+				$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', false, $name);
+				
 	    		register_taxonomy( $name,
 			        array('product'),
 			        array(
@@ -116,7 +118,7 @@ function woocommerce_post_type() {
 			            ),
 			            'show_ui' => false,
 			            'query_var' => true,
-			            'show_in_nav_menus' => false,
+			            'show_in_nav_menus' => $show_in_nav_menus,
 			            'rewrite' => array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
 			        )
 			    );

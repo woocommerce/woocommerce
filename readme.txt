@@ -101,6 +101,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Option to unforce SSL checkout
 * Support for X-Accel-Redirect / X-Sendfile for downloads
 * Customer new account email when signing up from the checkout
+* Attributes can be added to nav bar via filter
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
