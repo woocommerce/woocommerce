@@ -163,7 +163,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __('Localisation', 'woothemes'),
-		'desc' 		=> __('Use informal localisation file if it exists.', 'woothemes'),
+		'desc' 		=> __('Use informal localisation file if it exists', 'woothemes'),
 		'id' 		=> 'woocommerce_informal_localisation_type',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
