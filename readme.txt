@@ -93,7 +93,6 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Paypal remote post now has 'sslverify' => false to prevent errors with CURL
 * Minor admin settings tidyup
 * Dutch translation has been updated
-* Added German translation (partial complete)
 * Cart is now more robust and supports custom data being stored, such as addons
 * Fix for 0 quanitiy
 * add_to_cart shortcode
@@ -107,6 +106,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Support for informal/formal localisations
 * Directory changed for uploading file downloads - uploads/woocommerce_files
 * Download directory created on install as well as htaccess for denying access
+* Formal and informal German translations - thanks to stefahn, jessor, Ramoonus , owcv and deckerweb 
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
