@@ -69,7 +69,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		<?php foreach ($featured_posts as $r) : $_product = &new woocommerce_product( $r->ID ); ?>
 		
 		<li><a href="<?php echo esc_url( get_permalink( $r->ID ) ); ?>" title="<?php echo esc_attr($r->post_title ? $r->post_title : $r->ID); ?>">
-			<?php if (has_post_thumbnail( $r->ID )) echo get_the_post_thumbnail($r->ID, 'shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />'; ?>
+			<?php echo $_product->get_image(); ?>
 			<?php if ( $r->post_title ) echo get_the_title( $r->ID ); else echo $r->ID; ?>			
 		</a> <?php echo $_product->get_price_html(); ?></li>
 		

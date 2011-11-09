@@ -74,10 +74,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				
 				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
 				
-				if (has_post_thumbnail( $comment->comment_post_ID )) 
-					echo get_the_post_thumbnail($comment->comment_post_ID, 'shop_thumbnail'); 
-				else 
-					echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />';
+				echo $_product->get_image();
 				
 				echo get_the_title($comment->comment_post_ID).'</a>';
 				

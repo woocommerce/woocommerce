@@ -102,13 +102,7 @@ function woocommerce_cart( $atts ) {
 							<td class="product-thumbnail">
 								<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>">
 								<?php 
-									if ($values['variation_id'] && has_post_thumbnail($values['variation_id'])) :
-										echo get_the_post_thumbnail($values['variation_id'], 'shop_thumbnail'); 
-									elseif (has_post_thumbnail($values['product_id'])) :
-										echo get_the_post_thumbnail($values['product_id'], 'shop_thumbnail'); 
-									else :
-										echo '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />'; 
-									endif;
+									echo $_product->get_image();
 								?>
 								</a>
 							</td>
