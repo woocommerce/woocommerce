@@ -107,6 +107,18 @@ class woocommerce_product_variation extends woocommerce_product {
 			if ($this->sale_price < $this->price) $this->price = $this->sale_price;
 		endif;
 		
+		if (isset($product_custom_fields['downloadable'][0]) && $product_custom_fields['downloadable'][0]=='yes') :
+			$this->downloadable = 'yes';
+		else :
+			$this->downloadable = 'no';
+		endif;
+		
+		if (isset($product_custom_fields['virtual'][0]) && $product_custom_fields['virtual'][0]=='yes') :
+			$this->virtual = 'yes';
+		else :
+			$this->virtual = 'no';
+		endif;
+		
 		$this->total_stock = $this->stock;
 	}
 	

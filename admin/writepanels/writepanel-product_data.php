@@ -389,7 +389,7 @@ function woocommerce_product_data_box() {
 				$file_path = get_post_meta($post->ID, 'file_path', true);
 				$field = array( 'id' => 'file_path', 'label' => __('File path', 'woothemes') );
 				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woothemes').'" />
+					<input type="text" class="short file_path" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woothemes').'" />
 					<input type="button"  class="upload_file_button button" value="'.__('Upload a file', 'woothemes').'" />
 				</p>';
 					
@@ -398,7 +398,7 @@ function woocommerce_product_data_box() {
 				$field = array( 'id' => 'download_limit', 'label' => __('Download Limit', 'woothemes') );
 				echo '<p class="form-field">
 					<label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$download_limit.'" /> <span class="description">' . __('Leave blank for unlimited re-downloads.', 'woothemes') . '</span></p>';
+					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$download_limit.'" placeholder="'.__('Unlimited', 'woothemes').'" /> <span class="description">' . __('Leave blank for unlimited re-downloads.', 'woothemes') . '</span></p>';
 	
 			?>
 		</div>
@@ -749,9 +749,9 @@ function woocommerce_product_type_box() {
 		'hidden' => __('Hidden', 'woothemes')
 	) ) );
 	
-	woocommerce_wp_checkbox( array( 'id' => 'virtual', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Virtual', 'woothemes'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woothemes') ) );
+	woocommerce_wp_checkbox( array( 'id' => 'virtual', 'wrapper_class' => 'show_if_simple', 'label' => __('Virtual', 'woothemes'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woothemes') ) );
 	
-	woocommerce_wp_checkbox( array( 'id' => 'downloadable', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Downloadable', 'woothemes'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woothemes') ) );
+	woocommerce_wp_checkbox( array( 'id' => 'downloadable', 'wrapper_class' => 'show_if_simple', 'label' => __('Downloadable', 'woothemes'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woothemes') ) );
 	
 	// Featured
 	woocommerce_wp_checkbox( array( 'id' => 'featured', 'label' => __('Featured', 'woothemes'), 'description' => __('Enable this option to feature this product', 'woothemes') ) );
@@ -761,46 +761,8 @@ function woocommerce_product_type_box() {
 }
 
 /**
- * Product Type Javascript
- * 
- * Javascript for the downloadable product type
+ * Change label for insert buttons
  */
-add_action('woocommerce_product_write_panel_js', 'downloadable_product_write_panel_js');
-
-function downloadable_product_write_panel_js() {
-	global $post;
-	?>
-	jQuery(function(){
-
-		window.send_to_editor_default = window.send_to_editor;
-
-		jQuery('.upload_file_button').live('click', function(){
-			
-			var post_id = <?php echo $post->ID; ?>;
-			
-			formfield = jQuery('#file_path').attr('name');
-			
-			window.send_to_editor = window.send_to_download_url;
-			
-			tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=file&amp;from=wc01&amp;TB_iframe=true');
-			return false;
-		});
-
-		window.send_to_download_url = function(html) {
-			
-			file_url = jQuery(html).attr('href');
-			if (file_url) {
-				jQuery('#file_path').val(file_url);
-			}
-			tb_remove();
-			window.send_to_editor = window.send_to_editor_default;
-			
-		}
-		
-	});
-	<?php
-}
-
 add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
 
 function woocommerce_change_insert_into_post( $translation, $original ) {

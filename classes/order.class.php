@@ -216,7 +216,7 @@ class woocommerce_order {
 				if ($_product->exists) :
 			
 					if ($_product->is_downloadable()) :
-						$return .= PHP_EOL . ' - ' . $this->get_downloadable_file_url( $item['id'] ) . '';
+						$return .= PHP_EOL . ' - ' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '';
 					endif;
 		
 				endif;	
@@ -253,7 +253,7 @@ class woocommerce_order {
 				if ($_product->exists) :
 			
 					if ($_product->is_downloadable()) :
-						$file = '<br/>' . $this->get_downloadable_file_url( $item['id'] ) . '';
+						$file = '<br/>' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '';
 					endif;
 		
 				endif;	
@@ -308,7 +308,9 @@ class woocommerce_order {
 	
 	
 	/** Gets a downloadable products file url */
-	function get_downloadable_file_url( $item_id ) {
+	function get_downloadable_file_url( $item_id, $variation_id ) {
+	 	
+	 	$download_id = ($variation_id>0) ? $variation_id : $item_id;
 	 	
 	 	$user_email = $this->billing_email;
 				
@@ -319,7 +321,7 @@ class woocommerce_order {
 			endif;
 		endif;
 				
-	 	return add_query_arg('download_file', $item_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, trailingslashit( home_url() ))));
+	 	return add_query_arg('download_file', $download_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, trailingslashit( home_url() ))));
 	 }
 	 
 	/**

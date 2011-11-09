@@ -734,6 +734,8 @@ function woocommerce_download_product() {
 			// Get the downloads URL and try to replace the url with a path
 			$file_path = get_post_meta($download_file, 'file_path', true);	
 			
+			if (!$file_path) exit;
+			
 			$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
 			
 			// See if its local or remote
@@ -822,9 +824,11 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 	if (sizeof($order->items)>0) foreach ($order->items as $item) :
 	
 		if ($item['id']>0) :
-			$_product = &new woocommerce_product( $item['id'] );
+			$_product = $order->get_product_from_item( $item );
 			
 			if ( $_product->exists && $_product->is_downloadable() ) :
+			
+				$download_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['id'];
 				
 				$user_email = $order->billing_email;
 				
@@ -837,7 +841,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 					$order->user_id = 0;
 				endif;
 				
-				$limit = trim(get_post_meta($_product->id, 'download_limit', true));
+				$limit = trim(get_post_meta($download_id, 'download_limit', true));
 				
 				if (!empty($limit)) :
 					$limit = (int) $limit;
@@ -847,7 +851,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 				
 				// Downloadable product - give access to the customer
 				$wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
-					'product_id' => $_product->id, 
+					'product_id' => $download_id, 
 					'user_id' => $order->user_id,
 					'user_email' => $user_email,
 					'order_key' => $order->order_key,

@@ -293,7 +293,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		 	
 		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
 
-		 	<?php if (!$_product->is_virtual()) : ?>
+		 	<?php if (!$_product->is_downloadable()) : ?>
 		 		<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
 		 	<?php endif; ?>
 

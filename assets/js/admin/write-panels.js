@@ -179,16 +179,20 @@ jQuery( function($){
 		else if (select_val=='variable') {
 			$('.show_if_variable').show();
 			$('input#manage_stock').change();
+			$('input#downloadable').prop('checked', false).change();
+			$('input#virtual').removeAttr('checked').change();
 		}
 		
 		else if (select_val=='grouped') {
 			$('.show_if_grouped').show();
-			$('input#downloadable').removeAttr('checked').change();
+			$('input#downloadable').prop('checked', false).change();
+			$('input#virtual').removeAttr('checked').change();
 		}
 		
 		else if (select_val=='external') {
 			$('.show_if_external').show();
-			$('input#downloadable').removeAttr('checked').change();
+			$('input#downloadable').prop('checked', false).change();
+			$('input#virtual').removeAttr('checked').change();
 		}
 		
 		$('ul.tabs li:visible').eq(0).find('a').click();
@@ -434,5 +438,33 @@ jQuery( function($){
 		});
  			
 	});
+	
+	// Uploading files
+	var file_path_field;
+	
+	window.send_to_editor_default = window.send_to_editor;
+
+	jQuery('.upload_file_button').live('click', function(){
+		
+		file_path_field = jQuery(this).parent().find('.file_path');
+		
+		formfield = jQuery(file_path_field).attr('name');
+		
+		window.send_to_editor = window.send_to_download_url;
+		
+		tb_show('', 'media-upload.php?post_id=' + woocommerce_writepanel_params.post_id + '&amp;type=file&amp;from=wc01&amp;TB_iframe=true');
+		return false;
+	});
+
+	window.send_to_download_url = function(html) {
+		
+		file_url = jQuery(html).attr('href');
+		if (file_url) {
+			jQuery(file_path_field).val(file_url);
+		}
+		tb_remove();
+		window.send_to_editor = window.send_to_editor_default;
+		
+	}
 
 });

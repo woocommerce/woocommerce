@@ -80,6 +80,8 @@ function woocommerce_admin_scripts() {
 	// Product/Coupon/Orders
 	if (in_array( $screen->id, array( 'shop_coupon', 'shop_order', 'product' ))) :
 		
+		global $post;
+		
 		wp_enqueue_script( 'woocommerce_writepanel' );
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'media-upload' );
@@ -102,7 +104,8 @@ function woocommerce_admin_scripts() {
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
 			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
 			'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products"),
-			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png'
+			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
+			'post_id'						=> $post->ID
 		 );
 					 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );

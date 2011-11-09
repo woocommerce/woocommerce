@@ -172,7 +172,15 @@ class woocommerce_customer {
 					$results = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE order_key = \"".$order->order_key."\" AND user_id = ".get_current_user_id().";" );
 					$user_info = get_userdata(get_current_user_id());
 					if ($results) foreach ($results as $result) :
-							$_product = &new woocommerce_product( $result->product_id );
+							
+							$product_post = get_post( $result->product_id );
+
+							if ($product_post->post_type=='product_variation') :
+								$_product = &new woocommerce_product_variation( $result->product_id );
+							else :
+								$_product = &new woocommerce_product( $result->product_id );
+							endif;					
+							
 							if ($_product->exists) :
 								$download_name = $_product->get_title();
 							else :
