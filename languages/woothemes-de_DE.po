@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2011-11-08 02:20+0200\n"
+"PO-Revision-Date: 2011-11-09 05:54+0200\n"
 "Last-Translator: Daniel Kay <daniel@enthusiasm.cc>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr "Attribut bearbeiten"
 #@ woothemes
 #: admin/admin-attributes.php:114
 msgid "Attribute taxonomy names cannot be changed; you may only change an attributes type."
-msgstr ""
+msgstr "Taxonomie-Namen von Attributen können nicht geändert werden; Sie haben lediglich die Möglichkeit die Attribut-Art zu ändern."
 
 #@ woothemes
 #: admin/admin-attributes.php:118
@@ -52,7 +52,7 @@ msgstr "Benennung des Attributs (angezeigt im front-end)"
 #: admin/admin-attributes.php:123
 #: admin/admin-attributes.php:225
 msgid "Attribute type"
-msgstr "Attribut Art"
+msgstr "Attribut Typ"
 
 #@ woothemes
 #: admin/admin-attributes.php:125
@@ -96,7 +96,7 @@ msgstr "Art"
 #@ woothemes
 #: admin/admin-attributes.php:163
 msgid "Terms"
-msgstr "Bedingungen (AGB)"
+msgstr "Allgemeine Gesch&auml;ftsbedingungen (AGB)"
 
 #@ woothemes
 #: admin/admin-attributes.php:177
@@ -119,7 +119,7 @@ msgstr "L&ouml;schen"
 #@ woothemes
 #: admin/admin-attributes.php:197
 msgid "Configure&nbsp;terms"
-msgstr "AGB konfigurieren"
+msgstr "AGB&nbsp;konfigurieren"
 
 #@ woothemes
 #: admin/admin-attributes.php:201
@@ -134,7 +134,7 @@ msgstr "Neues Attribut hinzuf&uuml;gen"
 #@ woothemes
 #: admin/admin-attributes.php:212
 msgid "Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the \"layered nav\" widgets. Please note: you cannot rename an attribute later on."
-msgstr ""
+msgstr "Mit Attributen k&ouml;nnen Sie zus&auml;tzliche Produkteigenschaften wie Gr&ouml;ße oder Farbe bestimmen. Diese Attribute k&ouml;nnen Sie in der Shop-Sidebar mit dem Widget \"Layer-Navigation\" verwenden. Bitte beachten Sie: Attribute k&ouml;nnen nicht nachtr&auml;glich umbenannt werden."
 
 #@ woothemes
 #: admin/admin-attributes.php:215
@@ -150,7 +150,7 @@ msgstr "Der einzelne Name / Bezeichnung des Attributs kann bis zu 28 Zeichen bet
 #@ woothemes
 #: admin/admin-attributes.php:230
 msgid "Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>."
-msgstr ""
+msgstr "Hier bestimmen Sie, wie Attribute f&uuml;r Produkte ausgew&auml;hlt werden. <strong>Text</strong> erm&ouml;glicht Ihnen die manuelle Eingabe &uuml;ber die Produktseite, w&auml;hrend Sie mit <strong>Ausw&auml;hlen</strong> Attributbezeichnungen definieren. M&ouml;chten Sie Attribute f&uuml;r Varianten verwenden, nutzen Sie <strong>Ausw&auml;hlen</strong>."
 
 #@ woothemes
 #: admin/admin-attributes.php:233
@@ -190,7 +190,7 @@ msgstr "Produkt Schlagw&ouml;rter"
 #@ woothemes
 #: admin/admin-dashboard.php:52
 msgid "Attribute taxonomies"
-msgstr "Attributklassifizierung"
+msgstr "Attribut-Klassifizierung"
 
 #@ woothemes
 #: admin/admin-dashboard.php:62
@@ -201,12 +201,12 @@ msgstr "Bestellungen"
 #@ woothemes
 #: admin/admin-dashboard.php:66
 msgid "Pending"
-msgstr "## bevorstehend / unerledingt"
+msgstr "Unerledingt"
 
 #@ woothemes
 #: admin/admin-dashboard.php:70
 msgid "On-Hold"
-msgstr ""
+msgstr "Wartend"
 
 #@ woothemes
 #: admin/admin-dashboard.php:74
@@ -233,7 +233,7 @@ msgstr "WooCommerce K&uuml;rzlich aufgegebene Bestellungen"
 #@ woothemes
 #: admin/admin-dashboard.php:104
 msgid "WooCommerce recent reviews"
-msgstr "WooCommerce k&uuml;rzliche Bewertung"
+msgstr "WooCommerce k&uuml;rzlich abgegebene Bewertungen"
 
 #@ woothemes
 #: admin/admin-dashboard.php:129
@@ -290,7 +290,7 @@ msgstr "Alle"
 #: woocommerce_taxonomy.php:110
 #: woocommerce_taxonomy.php:111
 msgid "Parent"
-msgstr "Vorg&auml;nger"
+msgstr "&Uuml;bergeordnet"
 
 #@ woothemes
 #: admin/admin-import.php:65
@@ -333,12 +333,12 @@ msgstr "Berichte"
 #@ woothemes
 #: admin/admin-init.php:89
 msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
-msgstr "## Diesen Artikel entfernen? Wenn Sie vorher den Bestand des Artikels reduziert haben oder diese Bestellung von einem Kunden eingereicht wurde, muss der Bestand manuell erh&ouml;ht werden."
+msgstr "Diesen Artikel entfernen? Wenn Sie vorher den Bestand des Artikels reduziert haben oder diese Bestellung von einem Kunden eingereicht wurde, muss der Bestand manuell erh&ouml;ht werden."
 
 #@ woothemes
 #: admin/admin-init.php:90
 msgid "Calc totals based on order items, discount amount, and shipping?"
-msgstr "## Der zu berechnede Betrag beruht auf den bestellten Artikeln, Betrag berechnen, mit Versand?"
+msgstr "Der errechnete Betrag basiert auf den bestellten Artikeln, der H&ouml;he des Rabatts und der Versandkosten?"
 
 #@ woothemes
 #: admin/admin-init.php:91
@@ -368,14 +368,14 @@ msgstr "Anzahl z.B.: 2"
 #@ woothemes
 #: admin/admin-init.php:96
 msgid "Cost per unit e.g. 2.99"
-msgstr "St&uuml;ckpreis z. B.: 2,99"
+msgstr "St&uuml;ckpreis z.B.: 2.99"
 
 #@ woothemes
 #: admin/admin-init.php:97
 #: admin/writepanels/writepanel-order_data.php:186
 #: woocommerce_actions.php:216
 msgid "Tax Rate e.g. 20.0000"
-msgstr "##Steuersatz z. B.: 20,0000"
+msgstr "Steuersatz z.B.: 20.0000"
 
 #@ woothemes
 #: admin/admin-init.php:98
@@ -385,7 +385,7 @@ msgstr "Meta-Name"
 #@ woothemes
 #: admin/admin-init.php:99
 msgid "Meta Value"
-msgstr "Meta-Betrag"
+msgstr "Meta-Wert"
 
 #@ woothemes
 #: admin/admin-init.php:100
@@ -396,18 +396,18 @@ msgstr "AGB ansehen"
 #: admin/admin-init.php:306
 #, php-format
 msgid "[%s with SKU of %s]"
-msgstr "##"
+msgstr "[%s mit Art.-Nr. von %s]"
 
 #@ woothemes
 #: admin/admin-init.php:314
 #, php-format
 msgid "[%s with ID of %d]"
-msgstr "##"
+msgstr "[%s mit ID von %d]"
 
 #@ woothemes
 #: admin/admin-init.php:338
 msgid "No product to duplicate has been supplied!"
-msgstr "Kein Produkt zum Duplizieren wurde geliefert!"
+msgstr "Kein Produkt zum Duplizieren vorhanden!"
 
 #@ woothemes
 #: admin/admin-init.php:358
@@ -557,19 +557,19 @@ msgstr "Code"
 #@ woothemes
 #: admin/admin-post-types.php:23
 msgid "Coupon type"
-msgstr "Kouponart"
+msgstr "Gutscheinart"
 
 #@ woothemes
 #: admin/admin-post-types.php:24
 #: admin/writepanels/writepanel-coupon_data.php:33
 msgid "Coupon amount"
-msgstr "Kouponbetrag"
+msgstr "Gutscheinbetrag"
 
 #@ woothemes
 #: admin/admin-post-types.php:25
 #: admin/writepanels/writepanel-coupon_data.php:39
 msgid "Product IDs"
-msgstr "Produkt ID"
+msgstr "Produkt-IDs"
 
 #@ woothemes
 #: admin/admin-post-types.php:26
@@ -591,13 +591,13 @@ msgstr "Ablaufdatum"
 #@ woothemes
 #: admin/admin-post-types.php:83
 msgid "Thumb"
-msgstr "## einl&ouml;sen"
+msgstr "Miniaturbild"
 
 #@ woothemes
 #: admin/admin-post-types.php:86
 #: woocommerce_taxonomy.php:143
 msgid "Parent Product"
-msgstr "vorheriges Produkt"
+msgstr "&Uuml;bergeordnetes Produkt"
 
 #@ woothemes
 #: admin/admin-post-types.php:130
@@ -621,7 +621,7 @@ msgstr "Schlagw&ouml;rter"
 #@ woothemes
 #: admin/admin-post-types.php:138
 msgid "Featured"
-msgstr "Gestaltet"
+msgstr "Empfohlen"
 
 #@ woothemes
 #: admin/admin-post-types.php:141
@@ -657,52 +657,52 @@ msgstr "&Auml;ndern"
 #: admin/admin-reports.php:1472
 #: admin/admin-reports.php:1494
 msgid " in stock"
-msgstr "vorr&auml;tig"
+msgstr " vorr&auml;tig"
 
 #@ default
 #: admin/admin-post-types.php:204
 #: admin/admin-post-types.php:538
 msgid "Unpublished"
-msgstr ""
+msgstr "Nicht veröffentlicht"
 
 #@ default
 #: admin/admin-post-types.php:207
 #: admin/admin-post-types.php:541
 msgid "Y/m/d g:i:s A"
-msgstr ""
+msgstr "Y/m/d g:i:s A"
 
 #@ default
 #: admin/admin-post-types.php:214
 #: admin/admin-post-types.php:548
 #, php-format
 msgid "%s ago"
-msgstr ""
+msgstr "vor %s"
 
 #@ default
 #: admin/admin-post-types.php:216
 #: admin/admin-post-types.php:550
 msgid "Y/m/d"
-msgstr ""
+msgstr "Y/m/d"
 
 #@ default
 #: admin/admin-post-types.php:222
 msgid "Published"
-msgstr ""
+msgstr "Ver&ouml;ffentlicht"
 
 #@ default
 #: admin/admin-post-types.php:225
 msgid "Missed schedule"
-msgstr ""
+msgstr "Termin verpasst"
 
 #@ default
 #: admin/admin-post-types.php:227
 msgid "Scheduled"
-msgstr ""
+msgstr "Geplant"
 
 #@ default
 #: admin/admin-post-types.php:230
 msgid "Last Modified"
-msgstr ""
+msgstr "Zuletzt ge&auml;ndert"
 
 #@ woothemes
 #: admin/admin-post-types.php:306
@@ -717,12 +717,12 @@ msgstr "Alle Arten anzeigen"
 #@ woothemes
 #: admin/admin-post-types.php:411
 msgid "Exclude image"
-msgstr "Bild schlie&szlig;en"
+msgstr "Bild ausschlie&szlig;en"
 
 #@ woothemes
 #: admin/admin-post-types.php:420
 msgid "Enabling this option will hide it from the product page image gallery."
-msgstr "Einstellen dieser Option wird es in der Produktseitengalerie verbergen."
+msgstr "Aktivieren dieser Option wird es in der Produktseitengalerie verbergen."
 
 #@ woothemes
 #: admin/admin-post-types.php:451
@@ -740,7 +740,7 @@ msgstr "Bestellung"
 #@ woothemes
 #: admin/admin-post-types.php:453
 msgid "Billing"
-msgstr "Berechnen"
+msgstr "Rechnung"
 
 #@ woothemes
 #: admin/admin-post-types.php:454
@@ -762,13 +762,13 @@ msgstr "Bestellung gesamt"
 #: admin/admin-post-types.php:476
 #, php-format
 msgid "<mark class=\"%s\">%s</mark>"
-msgstr ""
+msgstr "<mark class=\"%s\">%s</mark>"
 
 #@ woothemes
 #: admin/admin-post-types.php:481
 #, php-format
 msgid "Order #%s"
-msgstr ""
+msgstr "Bestellung #%s"
 
 #@ woothemes
 #: admin/admin-post-types.php:495
@@ -792,7 +792,7 @@ msgstr "Kunde:"
 #: templates/emails/new_order.php:51
 #: woocommerce_template_functions.php:1270
 msgid "Email:"
-msgstr "Email:"
+msgstr "E-Mail:"
 
 #@ woothemes
 #: admin/admin-post-types.php:504
@@ -815,7 +815,7 @@ msgstr "Versand durch"
 #@ woothemes
 #: admin/admin-post-types.php:625
 msgid "Show all statuses"
-msgstr "Alle Statuse anzeigen"
+msgstr "Jeden Status anzeigen"
 
 #@ woothemes
 #: admin/admin-post-types.php:654
@@ -831,7 +831,7 @@ msgstr "Bestellung aktualisiert."
 #@ woothemes
 #: admin/admin-post-types.php:733
 msgid "Order published."
-msgstr ""
+msgstr "Bestellung ver&ouml;ffentlicht."
 
 #@ woothemes
 #: admin/admin-post-types.php:735
@@ -848,7 +848,7 @@ msgstr "Bestell&uuml;bersicht aktualisiert."
 #: admin/admin-post-types.php:768
 #: admin/admin-post-types.php:789
 msgid "You do not have sufficient permissions to access this page."
-msgstr ""
+msgstr "Sie haben nicht die erforderlichen Rechte, um auf diese Seite zuzugreifen."
 
 #@ woothemes
 #: admin/admin-post-types.php:750
@@ -897,7 +897,7 @@ msgstr "Kunden"
 #@ woothemes
 #: admin/admin-reports.php:57
 msgid "stock"
-msgstr "##"
+msgstr "Lager"
 
 #@ woothemes
 #: admin/admin-reports.php:263
@@ -924,7 +924,7 @@ msgstr "Gesamtumsatz"
 #: admin/admin-reports.php:1216
 #: admin/admin-reports.php:1222
 msgid "n/a"
-msgstr ""
+msgstr "n/a"
 
 #@ woothemes
 #: admin/admin-reports.php:269
@@ -936,7 +936,7 @@ msgstr "Gesamtbestellungen"
 #: admin/admin-reports.php:557
 #: admin/admin-reports.php:757
 msgid " items"
-msgstr "Posten"
+msgstr " Artikel"
 
 #@ woothemes
 #: admin/admin-reports.php:275
@@ -956,7 +956,7 @@ msgstr "Die letzten 5 Bestellungen"
 #@ woothemes
 #: admin/admin-reports.php:321
 msgid "This months sales"
-msgstr "Umsatz dieses Monats"
+msgstr "Umsatz diesen Monats"
 
 #@ woothemes
 #: admin/admin-reports.php:543
@@ -965,14 +965,14 @@ msgstr "Umsatz dieses Monats"
 #: classes/product.class.php:489
 #: classes/product.class.php:495
 msgid "From:"
-msgstr "Von:"
+msgstr "Ab:"
 
 #@ woothemes
 #: admin/admin-reports.php:543
 #: admin/admin-reports.php:897
 #: admin/admin-reports.php:989
 msgid "To:"
-msgstr "An:"
+msgstr "Bis:"
 
 #@ woothemes
 #: admin/admin-reports.php:543
@@ -1036,7 +1036,7 @@ msgstr "Durchschnittliche Produktbestellung pro Jahr"
 #@ woothemes
 #: admin/admin-reports.php:775
 msgid "Monthly sales for year"
-msgstr ""
+msgstr "Monatliche Ums&auml;tze pro Jahr"
 
 #@ woothemes
 #: admin/admin-reports.php:902
@@ -1074,7 +1074,7 @@ msgstr "Produkt:"
 #@ woothemes
 #: admin/admin-reports.php:1089
 msgid "Choose an product&hellip;"
-msgstr ""
+msgstr "W&auml;hlen Sie ein Produkt&hellip;"
 
 #@ woothemes
 #: admin/admin-reports.php:1117
@@ -1162,13 +1162,13 @@ msgstr "H&ouml;he"
 #@ woothemes
 #: admin/admin-settings-forms.php:168
 msgid "Hard Crop"
-msgstr ""
+msgstr "Exakt beschneiden"
 
 #@ woothemes
 #: admin/admin-settings-forms.php:294
 #: admin/admin-settings-forms.php:320
 msgid "Standard Rate"
-msgstr "Standardrate"
+msgstr "Standardsteuersatz"
 
 #@ woothemes
 #: admin/admin-settings-forms.php:303
@@ -1191,7 +1191,7 @@ msgstr "+ Steuersatz hinzuf&uuml;gen"
 #: admin/admin-settings-forms.php:331
 #: admin/admin-settings.php:943
 msgid "Select countries/states"
-msgstr "Land/ Region ausw&auml;hlen"
+msgstr "Land/Region ausw&auml;hlen"
 
 #@ woothemes
 #: admin/admin-settings-forms.php:339
@@ -1201,17 +1201,17 @@ msgstr "Diese Regel l&ouml;schen?"
 #@ woothemes
 #: admin/admin-settings.php:20
 msgid "General Options"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
 #@ woothemes
 #: admin/admin-settings.php:23
 msgid "Base Country/Region"
-msgstr "Land/ Region festlegen"
+msgstr "Land/Region festlegen"
 
 #@ woothemes
 #: admin/admin-settings.php:24
 msgid "This is the base country for your business. Tax rates will be based on this country."
-msgstr "Dies ist das  von Ihnen festgelegte Land. Steuers&auml;tze werden auf Grundlage dieser Angabe berechnet."
+msgstr "Dies ist das von Ihnen festgelegte Land. Steuers&auml;tze werden auf Grundlage dieser Angabe berechnet."
 
 #@ woothemes
 #: admin/admin-settings.php:32
@@ -1241,7 +1241,7 @@ msgstr "Ausgew&auml;hlte L&auml;nder"
 #@ woothemes
 #: admin/admin-settings.php:54
 msgid "Guest checkout"
-msgstr "Gast Abmeldung"
+msgstr "Gast Kasse"
 
 #@ woothemes
 #: admin/admin-settings.php:55
@@ -1256,7 +1256,7 @@ msgstr "SSL forcieren"
 #@ woothemes
 #: admin/admin-settings.php:63
 msgid "Force SSL on the checkout for added security (SSL Certificate required)."
-msgstr ""
+msgstr "F&uuml;r erh&ouml;hte Sicherheit an der Kasse SSL erzwingen (ein SSL-Zertifikat ben&ouml;tigt)."
 
 #@ woothemes
 #: admin/admin-settings.php:70
@@ -1266,38 +1266,38 @@ msgstr "WooCommerce CSS"
 #@ woothemes
 #: admin/admin-settings.php:71
 msgid "Enable WooCommerce frontend CSS styles"
-msgstr "WooCommerce CCS Stil im Frontend erlauben"
+msgstr "WooCommerce CSS-Stile im Frontend erlauben"
 
 #@ woothemes
 #: admin/admin-settings.php:78
 msgid "Lightbox"
-msgstr ""
+msgstr "Lightbox"
 
 #@ woothemes
 #: admin/admin-settings.php:79
 msgid "Enable WooCommerce lightbox?"
-msgstr ""
+msgstr "Aktiviere WooCommerce Lightbox-Effekt?"
 
 #@ woothemes
 #: admin/admin-settings.php:86
 msgid "Demo store"
-msgstr "##Test Gesch&auml;ft"
+msgstr "Demo Shop"
 
 #@ woothemes
 #: admin/admin-settings.php:87
 msgid "Enable the \"Demo Store\" notice on your site"
-msgstr ""
+msgstr "Aktiviert den Hinweis \"Demo Shop\" auf Ihrer Seite"
 
 #@ woothemes
 #: admin/admin-settings.php:94
 msgid "ShareThis Publisher ID"
-msgstr "Diese Ver&ouml;ffentlicher-ID teilen"
+msgstr "Ihre ShareThis-ID"
 
 #@ woothemes
 #: admin/admin-settings.php:95
 #, php-format
 msgid "Enter your %1$sShareThis publisher ID%2$s to show ShareThis on product pages."
-msgstr ""
+msgstr "Geben Sie Ihre %1$sShareThis publisher ID%2$s an, um ShareThis auf Ihren Produktseiten anzuzeigen."
 
 #@ woothemes
 #: admin/admin-settings.php:103
@@ -1312,22 +1312,22 @@ msgstr "Bei Google Analytics anmelden, um die ID zu finden. z.B.:  <code>UA-XXXX
 #@ woothemes
 #: admin/admin-settings.php:111
 msgid "Google Analytics tracking"
-msgstr "Google Analytics verfolgen"
+msgstr "Mit Google Analytics verfolgen"
 
 #@ woothemes
 #: admin/admin-settings.php:112
 msgid "Adds standard tracking code to the footer. You don't need to enable this if using a 3rd party google analytics plugin."
-msgstr "F&uuml;gt den normalen Verfolgungscode in die Fu&szlig;zeile ein. Sie m&uuml;ssen dies nicht aktivieren, wenn ein 3rd party google analytics plugin genutzt wird."
+msgstr "F&uuml;gt den Verfolgungscode in die Fu&szlig;zeile ein. Sie m&uuml;ssen dies nicht aktivieren, wenn Sie ein Third Party Google Analytics Plugin verwenden."
 
 #@ woothemes
 #: admin/admin-settings.php:118
 msgid "Google Analytics eCommerce tracking"
-msgstr ""
+msgstr "Nutze Google Analytics eCommerce Tracking"
 
 #@ woothemes
 #: admin/admin-settings.php:119
 msgid "Adds eCommerce tracking code to the thankyou page."
-msgstr "F&uuml;gr den eCommerce Verfolgungscode zur Dankesseite hinzu."
+msgstr "F&uuml;ge den eCommerce Verfolgungscode zur Dankesseite hinzu."
 
 #@ woothemes
 #: admin/admin-settings.php:133
@@ -1379,13 +1379,13 @@ msgstr "Permalinks"
 #@ woothemes
 #: admin/admin-settings.php:176
 msgid "Taxonomy base page"
-msgstr ""
+msgstr "Taxonomie-Hauptseite"
 
 #@ woothemes
 #: admin/admin-settings.php:177
 #, php-format
 msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
-msgstr "Verbindet Shop Kategorien/ Schlagw&ouml;rter mit der Hauptseite.  (<code>%s</code>)"
+msgstr "Verbindet Shop-Kategorien und Schlagw&ouml;rter mit der Hauptseite. (<code>%s</code>)"
 
 #@ woothemes
 #: admin/admin-settings.php:184
@@ -1396,12 +1396,12 @@ msgstr "Produkthauptseite"
 #: admin/admin-settings.php:185
 #, php-format
 msgid "Prepend product permalinks with shop base page (<code>%s</code>)"
-msgstr "Verbindert Produktpermalinks mit der Hauptseite  (<code>%s</code>)"
+msgstr "Verbindet Produktpermalinks mit der Hauptseite (<code>%s</code>)"
 
 #@ woothemes
 #: admin/admin-settings.php:193
 msgid "Product base category"
-msgstr "Produkoberkategorien"
+msgstr "Produktoberkategorien"
 
 #@ woothemes
 #: admin/admin-settings.php:194
@@ -1416,7 +1416,7 @@ msgstr "Shopseiten"
 #@ woothemes
 #: admin/admin-settings.php:203
 msgid "The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin."
-msgstr ""
+msgstr "Die folgenden Seiten m&uuml;ssen verkn&uuml;pft werden, damit WooCommerce wei&uml;, wie diese jeweils zuzuordnen sind. Diese Seiten sollten bei der Installation des Plugins automatisch erzeugt worden sein."
 
 #@ woothemes
 #: admin/admin-settings.php:206
@@ -1491,7 +1491,7 @@ msgstr "Seiteninhalt: [woocommerce_view_order] vorherige: \"Mein Konto\""
 #@ woothemes
 #: admin/admin-settings.php:269
 msgid "Change Password Page"
-msgstr "Seite Passwort &auml;ndern"
+msgstr "Passwort &auml;ndern Seite"
 
 #@ woothemes
 #: admin/admin-settings.php:270
@@ -1531,7 +1531,7 @@ msgstr "Produktgruppen"
 #@ woothemes
 #: admin/admin-settings.php:313
 msgid "Enable the SKU field for products"
-msgstr "Aktivieren des SKU Feldes f&uuml;r Produkte"
+msgstr "Aktivieren des Artikelnummernfeldes f&uuml;r Produkte"
 
 #@ woothemes
 #: admin/admin-settings.php:321
@@ -1571,7 +1571,7 @@ msgstr "Abmessungseinheit"
 #@ woothemes
 #: admin/admin-settings.php:351
 msgid "This controls what unit you will define lengths in."
-msgstr "Dies kontrolliert welche L&auml;nge festgelegt wird"
+msgstr "Dies bestimmt, in welcher Einheit L&auml;ngen angegeben werden."
 
 #@ woothemes
 #: admin/admin-settings.php:357
@@ -1591,7 +1591,7 @@ msgstr "Zur&uuml;ck zum Warenkorb"
 #@ woothemes
 #: admin/admin-settings.php:364
 msgid "Redirect to cart after adding a product to the cart (on single product pages)"
-msgstr "Zur&uuml;ck zum Warenkorb nachdem ein Produkt hinzugef&uuml;gt wurde (bei einer Einzelproduktansicht)"
+msgstr "Zur&uuml;ck zum Warenkorb leiten, nachdem ein Produkt hinzugef&uuml;gt wurde (bei einer Einzelproduktansicht)"
 
 #@ woothemes
 #: admin/admin-settings.php:372
@@ -1607,7 +1607,7 @@ msgstr "W&auml;hrung"
 #: admin/admin-settings.php:376
 #, php-format
 msgid "This controls what currency prices are listed at in the catalog, and which currency PayPal, and other gateways, will take payments in. See the list of supported <a target='_new' href='%s'>PayPal currencies</a>."
-msgstr "Dies legt fest, in welcher W&auml;hrung Preise im Katalog aufgelistet werden und in welcher W&auml;hrung PayPal oder andere Anbieter Zahlungen annehmen. Liste der Unerst&uuml;tzten <a target='_new' href='%s'>PayPal currencies</a>."
+msgstr "Dies legt fest, in welcher W&auml;hrung Preise im Katalog aufgelistet werden und in welcher W&auml;hrung PayPal oder andere Anbieter Zahlungen annehmen. Beachten Sie die Liste der Unterst&uuml;tzten <a target='_new' href='%s'>PayPal W&auml;hrungen</a>."
 
 #@ woothemes
 #: admin/admin-settings.php:383
@@ -1732,7 +1732,7 @@ msgstr "T&uuml;rkische Lira"
 #@ woothemes
 #: admin/admin-settings.php:412
 msgid "Currency Position"
-msgstr "Weitere W&auml;hrung"
+msgstr "W&auml;hrungssymbol Position"
 
 #@ woothemes
 #: admin/admin-settings.php:413
@@ -1767,17 +1767,17 @@ msgstr "Tausenderstellenabstand"
 #@ woothemes
 #: admin/admin-settings.php:429
 msgid "This sets the thousand separator of displayed prices."
-msgstr "Dies setzt den Tausenderstellenabstand bei angezeigten Preisen."
+msgstr "Dies setzt das Trennzeichen f&uuml;r die Tausenderstellen bei angezeigten Preisen."
 
 #@ woothemes
 #: admin/admin-settings.php:438
 msgid "Decimal separator"
-msgstr "Dezimalstellenabstand"
+msgstr "Dezimalstellen-Trennzeichen"
 
 #@ woothemes
 #: admin/admin-settings.php:439
 msgid "This sets the decimal separator of displayed prices."
-msgstr "Dies setz den Dezimalstellenabstand bei angezeigten Preisen."
+msgstr "Dies setzt das Trennzeichen f&uuml;r Dezimalstellen bei angezeigten Preisen."
 
 #@ woothemes
 #: admin/admin-settings.php:448
@@ -1797,7 +1797,7 @@ msgstr "Bilderoptionen"
 #@ woothemes
 #: admin/admin-settings.php:459
 msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles."
-msgstr "Diese Einstellungen betrifft die tats&auml;chlichen Ausma&szlig;e der Bilder in Deinem Katalog - Die Anzeige im Frontend wird aber weiterhin per CSS gesteuert."
+msgstr "Diese Einstellungen betrifft die tats&auml;chlichen Abmessungen der Bilder in Ihrem Katalog. Die Anzeige im Frontend wird aber weiterhin per CSS gesteuert."
 
 #@ woothemes
 #: admin/admin-settings.php:462
@@ -1817,17 +1817,17 @@ msgstr "Einzelansicht vom Produkt"
 #@ woothemes
 #: admin/admin-settings.php:472
 msgid "This is the size used by the main image on the product page."
-msgstr "Dies ist die Gr&ouml;&szlig;e f&uuml;r das Hauptbild auf der Produktseite"
+msgstr "Dies ist die Gr&ouml;&szlig;e f&uuml;r das Hauptbild auf der Produktseite."
 
 #@ woothemes
 #: admin/admin-settings.php:480
 msgid "Product Thumbnails"
-msgstr "Produktvorschaubild "
+msgstr "Produktvorschaubild"
 
 #@ woothemes
 #: admin/admin-settings.php:481
 msgid "This size is usually used for the gallery of images on the product page."
-msgstr "Diese Gr&ouml;&szlig;e wird gew&ouml;hnlicher Weise f&uuml;r die Bildergalerie auf der Produktseite genutzt."
+msgstr "Diese Gr&ouml;&szlig;e wird gew&ouml;hnlicherweise f&uuml;r die Bildergalerie auf der Produktseite genutzt."
 
 #@ woothemes
 #: admin/admin-settings.php:495
@@ -1837,12 +1837,12 @@ msgstr "Inventaroptionen"
 #@ woothemes
 #: admin/admin-settings.php:498
 msgid "Manage stock"
-msgstr "Bestand &uuml;berpr&uuml;fen"
+msgstr "Bestand verwalten"
 
 #@ woothemes
 #: admin/admin-settings.php:499
 msgid "Enable stock management"
-msgstr "Bestandmanagement aktivieren"
+msgstr "Bestandsmanagement aktivieren"
 
 #@ woothemes
 #: admin/admin-settings.php:506
@@ -1867,17 +1867,17 @@ msgstr "Grenzwert f&uuml;r geringen Bestand"
 #@ woothemes
 #: admin/admin-settings.php:533
 msgid "Out of stock threshold"
-msgstr "Grenzwert f&uuml;r nicht vorr&auml;tig"
+msgstr "Grenzwert f&uuml;r Nichtvorr&auml;tigkeit"
 
 #@ woothemes
 #: admin/admin-settings.php:543
 msgid "Out of stock visibility"
-msgstr "Sichtbarkeit von nicht vorr&auml;tig"
+msgstr "Sichtbarkeit von Nichtvorr&auml;tigkeit"
 
 #@ woothemes
 #: admin/admin-settings.php:544
 msgid "Hide out of stock items from the catalog"
-msgstr "Verstecke Artikel im Katalog, die nicht vorr&auml;tig sind"
+msgstr "Artikel, die nicht vorr&auml;tig sind, im Katalog verstecken"
 
 #@ woothemes
 #: admin/admin-settings.php:557
@@ -1902,12 +1902,12 @@ msgstr "Versandrechner"
 #@ woothemes
 #: admin/admin-settings.php:569
 msgid "Enable the shipping calculator on the cart page"
-msgstr "Aktiviere den Versandrechner auf der Warenkorb Seite"
+msgstr "Versandkostenberechnung auf der Warenkorb Seite aktivieren"
 
 #@ woothemes
 #: admin/admin-settings.php:576
 msgid "Ship to billing"
-msgstr "An Rechnungsadresse versenden"
+msgstr "Versand an Rechnungsadresse"
 
 #@ woothemes
 #: admin/admin-settings.php:577
@@ -1927,7 +1927,7 @@ msgstr "Berechne die Mehrwertsteuer"
 #@ woothemes
 #: admin/admin-settings.php:594
 msgid "Enable taxes and tax calculations"
-msgstr "Aktiviere die Mehrwertsteuersatzberechnung"
+msgstr "Mehrwertsteuersatzberechnung aktivieren"
 
 #@ woothemes
 #: admin/admin-settings.php:601
@@ -1947,7 +1947,7 @@ msgstr "Warenkorbgesamtsumme"
 #@ woothemes
 #: admin/admin-settings.php:611
 msgid "Should the subtotal be shown including or excluding tax on the frontend?"
-msgstr "Soll die Zwischensumme inkl. oder exklu. Mehrwertsteuer im Frontend angezeigt werden?"
+msgstr "Soll die Zwischensumme inkl. oder exkl. Mehrwertsteuer im Frontend angezeigt werden?"
 
 #@ woothemes
 #: admin/admin-settings.php:617
@@ -1967,12 +1967,12 @@ msgstr "Zus&auml;tzliche Steuers&auml;tze"
 #@ woothemes
 #: admin/admin-settings.php:624
 msgid "List 1 per line. This is in addition to the default <em>Standard Rate</em>."
-msgstr "Zeige 1 pro Zeile. Dies erfolgt zus&auml;tzlich zu der <em>Standardrate</em>."
+msgstr "1 pro Zeile zeigen. Dies erfolgt zus&auml;tzlich zum voreingestellten <em>Standardsteuersatz</em>."
 
 #@ woothemes
 #: admin/admin-settings.php:625
 msgid "List product and shipping tax classes here, e.g. Zero Tax, Reduced Rate."
-msgstr "Produkt, Versand und Steuersatz hier aufz&auml;hlen, z.B.: 19% Mehrwertsteuer, reduzierte Raten"
+msgstr "Produkt, Versand und Steuersatz hier aufz&auml;hlen, z.B.: 19% Mehrwertsteuer, erm&auml;ssigter Satz."
 
 #@ woothemes
 #: admin/admin-settings.php:633
@@ -1997,43 +1997,43 @@ msgstr "\"From\" Absender"
 #@ woothemes
 #: admin/admin-settings.php:672
 msgid "The sender name for WooCommerce emails."
-msgstr "Absendername f&uuml;r WooCommerce Emails."
+msgstr "Absendername f&uuml;r WooCommerce E-Mails."
 
 #@ woothemes
 #: admin/admin-settings.php:679
 msgid "\"From\" email address"
-msgstr "Emailadresse des Absenders"
+msgstr "\"Von\" E-Mail-Adresse des Absenders"
 
 #@ woothemes
 #: admin/admin-settings.php:680
 msgid "The sender email address for WooCommerce emails."
-msgstr "Absenderadresse f&uuml;r WooCommerce Emails"
+msgstr "Absenderadresse f&uuml;r WooCommerce E-Mails"
 
 #@ woothemes
 #: admin/admin-settings.php:688
 msgid "Email template"
-msgstr "Emailvorlage"
+msgstr "E-Mail-Vorlage"
 
 #@ woothemes
 #: admin/admin-settings.php:691
 msgid "Header image"
-msgstr "Kopfzeilenbild"
+msgstr "Headerbild"
 
 #@ woothemes
 #: admin/admin-settings.php:692
 #, php-format
 msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
-msgstr "Geben Sie eine URL von einem Bild an, welches sie in der Kopfzeile der Email einf&uuml;gen wollen. Zum Hochladen bitte den Uploader nutzen <a href=\"%s\">media uploader</a>."
+msgstr "Geben Sie eine URL von einem Bild an, welches Sie im Header der E-Mail einfügen wollen. Zum Hochladen bitte den <a href=\"%s\">Media-Uploader</a> verwenden."
 
 #@ woothemes
 #: admin/admin-settings.php:699
 msgid "Email footer text"
-msgstr "Text f&uuml;r die Emailfu&szlig;zeile"
+msgstr "Text f&uuml;r den E-Mail-Footer"
 
 #@ woothemes
 #: admin/admin-settings.php:700
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "Hier den Text eingeben, der in der Fu&szlig;zeile der WooCommerce Emails erscheinen soll."
+msgstr "Hier den Text eingeben, der in dem Footer der WooCommerce E-Mails erscheinen soll."
 
 #@ woothemes
 #: admin/admin-settings.php:704
@@ -2048,7 +2048,7 @@ msgstr "Grundfarbe"
 #@ woothemes
 #: admin/admin-settings.php:709
 msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
-msgstr "Die Grundfarbe f&uuml;r WooCommerce Emailvorlagen. Vorgabe <code>#557da1</code>."
+msgstr "Die Grundfarbe f&uuml;r WooCommerce E-Mail-Vorlagen. Vorgabe <code>#557da1</code>."
 
 #@ woothemes
 #: admin/admin-settings.php:716
@@ -2058,12 +2058,12 @@ msgstr "Hintergrundfarbe"
 #@ woothemes
 #: admin/admin-settings.php:717
 msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
-msgstr "Die Hintergrundfarbe f&uuml;r WooCommerce Emails. Vorgabe <code>#eeeeee</code>."
+msgstr "Die Hintergrundfarbe f&uuml;r WooCommerce E-Mails. Vorgabe <code>#eeeeee</code>."
 
 #@ woothemes
 #: admin/admin-settings.php:724
 msgid "Email body background colour"
-msgstr "Hintergrundfarbe der Email"
+msgstr "Hintergrundfarbe der E-Mail"
 
 #@ woothemes
 #: admin/admin-settings.php:725
@@ -2073,7 +2073,7 @@ msgstr "Die Haupthintergrundfarbe Vorgabe <code>#fdfdfd</code>."
 #@ woothemes
 #: admin/admin-settings.php:732
 msgid "Email body text colour"
-msgstr "Textfarbe der Email"
+msgstr "Textfarbe der E-Mail"
 
 #@ woothemes
 #: admin/admin-settings.php:733
@@ -2094,13 +2094,13 @@ msgstr "Ihre Einstellungen wurden gespeichert."
 #@ woothemes
 #: admin/admin-settings.php:826
 msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
-msgstr "Ihene gef&auml;llt WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Unterst&uuml;tzen Sie uns, indem Sie uns bewerten!</a>"
+msgstr "Ihnen gef&auml;llt WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Unterst&uuml;tzen Sie uns, indem Sie uns bewerten!</a>"
 
 #@ woothemes
 #: admin/admin-settings.php:839
 #: admin/writepanels/writepanel-product_data.php:29
 msgid "General"
-msgstr "allgemein"
+msgstr "Allgemein"
 
 #@ woothemes
 #: admin/admin-settings.php:840
@@ -2133,7 +2133,7 @@ msgstr "Mehrwertsteuer"
 #@ woothemes
 #: admin/admin-settings.php:845
 msgid "Shipping Methods"
-msgstr "Versandm&ouml;glichkeiten"
+msgstr "Versandarten"
 
 #@ woothemes
 #: admin/admin-settings.php:846
@@ -2143,12 +2143,12 @@ msgstr "Zahlungsweisen"
 #@ woothemes
 #: admin/admin-settings.php:847
 msgid "Emails"
-msgstr "Emails"
+msgstr "E-Mails"
 
 #@ woothemes
 #: admin/admin-settings.php:915
 msgid "Save changes"
-msgstr "Speichere &Auml;nderungen"
+msgstr "&Auml;nderungen speichern"
 
 #@ woothemes
 #: admin/admin-settings.php:970
@@ -2165,7 +2165,7 @@ msgstr "Vorschaubild"
 #: admin/admin-taxonomies.php:26
 #: admin/admin-taxonomies.php:86
 msgid "Upload/Add image"
-msgstr "Hochladen/ Bild hinzuf&uuml;gen"
+msgstr "Hochladen/Bild hinzuf&uuml;gen"
 
 #@ woothemes
 #: admin/admin-taxonomies.php:27
@@ -2181,7 +2181,7 @@ msgstr "Rabatt-Typ"
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:33
 msgid "0.00"
-msgstr ""
+msgstr "0.00"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:33
@@ -2196,7 +2196,7 @@ msgstr "Individueller Gebrauch"
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:36
 msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
-msgstr "Wenn der Gutschein nicht in Verbindung mit anderen Gutscheinen verwendet werden darf, m&uuml;ssen Sie hier ein H&auml;ckchen setzen"
+msgstr "Setzen Sie hier ein H&auml;kchen, wenn der Gutschein nicht in Verbindung mit anderen Gutscheinen verwendet werden darf"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:39
@@ -2204,7 +2204,7 @@ msgstr "Wenn der Gutschein nicht in Verbindung mit anderen Gutscheinen verwendet
 #: woocommerce_template_functions.php:1284
 #: woocommerce_template_functions.php:1297
 msgid "N/A"
-msgstr "nicht lieferbar"
+msgstr "N/A"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:45
@@ -2234,12 +2234,12 @@ msgstr "Gutscheincode"
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:81
 msgid "Coupon amount is required"
-msgstr "Gutscheinwert wird ben&ouml;tigt"
+msgstr "Gutscheinbetrag wird ben&ouml;tigt"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:82
 msgid "Product discount coupons require you to set \"Product IDs\" to work."
-msgstr "F&uuml;r Rabattgutscheine auf Artikel ist es erforderlich die \"Artikel IDs\" daf&uuml;r zu setzen."
+msgstr "F&uuml;r Rabattgutscheine auf Artikel ist es erforderlich die \"Produkt IDs\" daf&uuml;r zu setzen."
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:53
@@ -2425,7 +2425,7 @@ msgstr "Entfernen"
 #: admin/writepanels/writepanel-order_data.php:153
 #: woocommerce_actions.php:189
 msgid "Product ID:"
-msgstr "Artikel-ID:"
+msgstr "Produkt-ID:"
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:154
@@ -2484,7 +2484,7 @@ msgstr "Reduziere Lagerbestand"
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:264
 msgid "- Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as complete/processing after payment."
-msgstr "- Reduziert den Lagerbestand f&uuml;r jeden Artikel in der Bestellung; n&uuml;tzlich wenn man eine Bestellung manuell erstellt hat oder wenn man eine Bestellung nach der Bezahlung als Fertig/in Bearbeitung markiert."
+msgstr "- Reduziert den Lagerbestand f&uuml;r jeden Artikel in der Bestellung; n&uuml;tzlich wenn man eine Bestellung manuell erstellt hat oder diese nach der Bezahlung als fertig/in Bearbeitung markieren m&ouml;chte."
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:265
@@ -2494,12 +2494,12 @@ msgstr "Lagerbestand wiederherstellen"
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:265
 msgid "- Restores stock for each item in the order; useful after refunding or canceling the entire order."
-msgstr "- Stellt den Lagerbestand wieder her f&uuml;r jeden Artikel in der Bestellung; n&uuml;tzlich nach R&uuml;ckerstattung oder Abbruch einer ganzen Bestellung"
+msgstr "- Stellt den Lagerbestand f&uuml;r jeden Artikel in der Bestellung wiederher; n&uuml;tzlich nach R&uuml;ckerstattung oder Abbruch einer ganzen Bestellung."
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:267
 msgid "Email invoice"
-msgstr "E-Mail-Rechnung"
+msgstr "E-Mail Rechnung"
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:267
@@ -2509,12 +2509,12 @@ msgstr "- Sendet dem Kunden die Details der Bestellung und einen Zahlungslink pe
 #@ default
 #: admin/writepanels/writepanel-order_data.php:273
 msgid "Delete Permanently"
-msgstr ""
+msgstr "Dauerhaft l&ouml;schen"
 
 #@ default
 #: admin/writepanels/writepanel-order_data.php:275
 msgid "Move to Trash"
-msgstr ""
+msgstr "In den Papierkorb verschieben"
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_data.php:294
@@ -2636,17 +2636,17 @@ msgstr "Mitteilung hinzuf&uuml;gen"
 #@ woothemes
 #: admin/writepanels/writepanel-order_notes.php:48
 msgid "Add a note for your reference, or add a customer note that the customer can view on their view order and track order pages."
-msgstr "EIne Mitteilung hinzuf&uuml;gen f&uuml;r Sie als Betreff, oder eine Mitteilung an den Kunden, die dieser einsehen kann auf seinen Seiten zur Bestell&uuml;bersicht und Sendungsverfolgung."
+msgstr "Eine Notiz hinzuf&uuml;gen, entweder f&uuml;r die interne Abwicklung oder f&uuml;r den Kunden, der diese auf der Bestell&uuml;bersicht sowie der Sendungsverfolgung sehen wird."
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_notes.php:51
 msgid "Customer note"
-msgstr "Kundenmitteilung"
+msgstr "Notiz an Kunde"
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_notes.php:52
 msgid "Private note"
-msgstr "Internamitteilung"
+msgstr "Notiz intern"
 
 #@ woothemes
 #: admin/writepanels/writepanel-order_notes.php:54
@@ -2725,7 +2725,7 @@ msgstr "Jeder"
 #: admin/writepanels/writepanel-product-type-variable.php:94
 #: admin/writepanels/writepanel-product-type-variable.php:237
 msgid "Product Image"
-msgstr "Artikelbild"
+msgstr "Produktbild"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:96
@@ -2737,7 +2737,7 @@ msgstr "Art.-Nr.:"
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:96
 msgid "Enter a SKU for this variation or leave blank to use the parent product's SKU."
-msgstr "Geben Sie eine Artikelnummer f&uuml;r diese Variante ein oder lassen Sie sie leer, um die Artikelnummer des &uuml;bergeordneten Artikels zu verwenden."
+msgstr "Geben Sie eine Artikelnummer f&uuml;r diese Variante ein oder lassen Sie das Feld leer, um die Artikelnummer des &uuml;bergeordneten Artikels zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:98
@@ -2749,7 +2749,7 @@ msgstr "Gewicht"
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:98
 msgid "Enter a weight for this variation or leave blank to use the parent product's weight."
-msgstr "Geben Sie das Gewicht f&uuml;r diese Variante ein oder lassen Sie es leer, um das Gewicht des &uuml;bergeordneten Artikels zu verwenden."
+msgstr "Geben Sie das Gewicht f&uuml;r diese Variante ein oder lassen Sie das Feld leer, um das Gewicht des &uuml;bergeordneten Artikels zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:100
@@ -2800,22 +2800,22 @@ msgstr "F&uuml;gen Sie (optionale) Angaben f&uuml;r Ihre Artikelvarianten hinzu.
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:182
 msgid "You must add some attributes via the \"Product Data\" panel and save before adding a new variation."
-msgstr "Sie m&uuml;ssen Attribute &uuml;ber das Feld  \"Product Data\" hinzuf&uuml;gen and speichern, bevor Sie eine neue Variante hinzuf&uuml;gen k&ouml;nnen."
+msgstr "Sie m&uuml;ssen Attribute &uuml;ber das Feld  \"Produkt Daten\" hinzuf&uuml;gen and speichern, bevor Sie eine neue Variante hinzuf&uuml;gen k&ouml;nnen."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:239
 msgid "Enter a SKU for this variation or leave blank to use the parent product\\'s SKU."
-msgstr "Geben Sie eine Artikelnummer f&uuml;r diese Variante ein oder lassen Sie sie leer, um die Artikelnummer des &uuml;bergeordneten Artikels zu verwenden."
+msgstr "Geben Sie eine Artikelnummer f&uuml;r diese Variante ein oder lassen Sie das Feld leer, um die Artikelnummer des &uuml;bergeordneten Artikels zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:241
 msgid "Enter a weight for this variation or leave blank to use the parent product\\'s weight."
-msgstr "Geben Sie ein Gewicht f&uuml;r diese Variante ein oder leer lassen, um das Gewicht des &uuml;bergeordneten Produkts zu verwenden."
+msgstr "Geben Sie ein Gewicht f&uuml;r diese Variante ein oder lassen Sie das Feld leer, um das Gewicht des &uuml;bergeordneten Produkts zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:243
 msgid "Enter a quantity to manage stock for this variation, or leave blank to use the parent product\\'s stock options."
-msgstr "Geben Sie eine Menge ein, um den Lagerbestand f&uuml;r diese Variante zu verwalten oder leer lassen, um die Lagerbestandsoptionen des &uuml;bergeordneten Produkts zu verwenden."
+msgstr "Geben Sie eine Menge ein, um den Lagerbestand f&uuml;r diese Variante zu verwalten oder lassen Sie das Feld leer, um die Lagerbestandsoptionen des &uuml;bergeordneten Produkts zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product-type-variable.php:265
@@ -2881,7 +2881,7 @@ msgstr "Up-Sells"
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:34
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
-msgstr "Cross-Sells sind Produkte, welche Sie bei Ansicht des Warenkorbs empfehlen, basierend auf dem Produkt im Warenkorb."
+msgstr "Cross-Sells sind Produkte, welche Sie bei Ansicht des Warenkorbs basierend auf dem Produkt im Warenkorb empfehlen."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:34
@@ -3036,22 +3036,22 @@ msgstr "Aktivieren Sie dies, um die Attribute auf der Produktseite anzuzeigen."
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:217
 msgid "Variation?"
-msgstr ""
+msgstr "Variante?"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:217
 msgid "Enable to use this attribute for variations."
-msgstr ""
+msgstr "Aktivieren, um dieses Attribut für Varianten zu verwenden."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:281
 msgid "Pipe separate terms"
-msgstr ""
+msgstr "Pipe-separierte Ausdr&uuml;cke"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:317
 msgid "Custom product attribute"
-msgstr ""
+msgstr "Benutzerdefiniertes Produkt-Attribut"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:333
@@ -3072,130 +3072,138 @@ msgstr "Cross-Sells"
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:404
 msgid "Product SKU must be unique."
-msgstr ""
+msgstr "Artikelnummern m&uuml;ssen eindeutig sein."
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:667
 msgid "Product Type"
-msgstr ""
+msgstr "Produkt-Art"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:668
 msgid "Simple"
-msgstr ""
+msgstr "Einfach"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:672
 msgid "Visibility"
-msgstr ""
+msgstr "Sichtbarkeit"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:673
 msgid "Catalog &amp; Search"
-msgstr ""
+msgstr "Katalog &amp; Suche"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:676
 msgid "Hidden"
-msgstr "Unsichtbar"
+msgstr "Versteckt"
 
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:680
 msgid "Featured?"
-msgstr "Sonderartikel?"
+msgstr "Empfohlen?"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:26
 msgid "Product Type &amp; Visibility"
-msgstr ""
+msgstr "Produkt-Art &amp; Sichtbarkeit"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:27
 msgid "Product Data"
-msgstr ""
+msgstr "Produktangaben"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:28
 msgid "Product Type Options"
-msgstr ""
+msgstr "Produkt-Art Optionen"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:30
 msgid "Order Data"
-msgstr ""
+msgstr "Bestelldaten"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:31
 msgid "Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item's stock levels.</small>"
-msgstr ""
+msgstr "Bestellte Artikel <small>&ndash; Hinweis: Wenn Sie die Menge bestellter Artikel ändern oder Artikel entfernen, dann müssen Sie deren jeweiligen Lagerbestand entsprechend von Hand anpassen.</small>"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:32
 msgid "Order Totals"
-msgstr ""
+msgstr "Gesamtsumme der Bestellung"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:33
 #: classes/checkout.class.php:247
 msgid "Order Notes"
-msgstr "Bestellnotizen"
+msgstr "Hinweise zur Bestellung"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:34
 msgid "Order Actions"
-msgstr ""
+msgstr "Auftragst&auml;tigkeiten"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:40
 msgid "Coupon Data"
-msgstr ""
+msgstr "Gutscheindaten"
 
 #@ default
 #: admin/writepanels/writepanels-init.php:55
 msgid "(no parent)"
-msgstr ""
+msgstr "(nicht &uuml;bergeordnet)"
 
 #@ woothemes
 #: classes/cart.class.php:160
 msgid "This product cannot be purchased - the price is not yet announced"
-msgstr ""
+msgstr "Dieses Produkt kann nicht gekauft werden, der Preis wurde bisher nicht bekanntgegeben"
 
 #@ woothemes
 #: classes/cart.class.php:166
 #, php-format
 msgid "You cannot add that amount to the cart since there is not enough stock. We have %s in stock."
-msgstr ""
+msgstr "Sie können diese Menge nicht zum Einkaufswagen hinzufügen, da diese nicht vorrätig ist. Wir haben %s Artikel auf Lager."
 
 #@ woothemes
 #: classes/cart.class.php:169
 #: classes/cart.class.php:183
 msgid "You cannot add that product to the cart since the product is out of stock."
-msgstr ""
+msgstr "Sie können dieses Produkt nicht dem Einkaufswagen hinzufügen, da es nicht vorrätig ist."
 
 #@ woothemes
 #: classes/cart.class.php:180
 #, php-format
 msgid "You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart."
-msgstr ""
+msgstr "Sie können diese Menge nicht zum Einkaufswagen hinzufügen, da diese nicht vorrätig ist. Wir haben %s Artikel auf Lager und Sie haben bereits %s Artikel in Ihrem Warenkorb."
 
 #@ woothemes
 #: classes/cart.class.php:317
 #, php-format
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
-msgstr ""
+msgstr "Entschuldigung, wir haben nicht ausreichend \"%s\" auf Lager, um Ihre Bestellung auszuführen (%s auf Lager). Bitte bearbeiten Sie Ihren Warenkorb und versuchen Sie es erneut. Wir bedauern die Unannehmlichkeiten die hierdurch verursacht wurden."
 
 #@ woothemes
 #: classes/cart.class.php:322
 #, php-format
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused."
-msgstr ""
+msgstr "Entschuldigung, wir haben nicht ausreichend \"%s\" auf Lager, um Ihre Bestellung auszuführen. Bitte bearbeiten Sie Ihren Warenkorb und versuchen Sie es erneut. Wir bedauern die Unannehmlichkeiten die hierdurch verursacht wurden."
+
+#: classes/cart.class.php:483
+#: classes/cart.class.php:526
+#: classes/order.class.php:151
+#: woocommerce.php:445
+#@ woothemes
+msgid " <small>(ex. tax)</small>"
+msgstr " <small>(exkl. MwSt.)</small>"
 
 #@ woothemes
 #: classes/cart.class.php:600
 #: classes/order.class.php:173
 #: classes/product.class.php:520
 msgid "Free!"
-msgstr "kostenlos!"
+msgstr "Gratis!"
 
 #@ woothemes
 #: classes/cart.class.php:609
@@ -3205,7 +3213,7 @@ msgstr "&uuml;ber"
 #@ woothemes
 #: classes/cart.class.php:629
 msgid "Discount code already applied!"
-msgstr ""
+msgstr "Gutscheincode bereits angewandt!"
 
 #@ woothemes
 #: classes/cart.class.php:635
@@ -3215,7 +3223,7 @@ msgstr "Ung&uuml;ltiger Gutschein."
 #@ woothemes
 #: classes/cart.class.php:653
 msgid "Discount code applied successfully."
-msgstr ""
+msgstr "Gutscheincode wurde erfolgreich verarbeitet."
 
 #@ woothemes
 #: classes/cart.class.php:657
@@ -3244,7 +3252,7 @@ msgstr "Telefon"
 #@ woothemes
 #: classes/checkout.class.php:96
 msgid "Phone number"
-msgstr ""
+msgstr "Telefonnummer"
 
 #@ woothemes
 #: classes/checkout.class.php:166
@@ -3263,41 +3271,41 @@ msgstr "Rechnungsadresse"
 #@ woothemes
 #: classes/checkout.class.php:183
 msgid "Create an account?"
-msgstr ""
+msgstr "Kundenkonto anlegen?"
 
 #@ woothemes
 #: classes/checkout.class.php:189
 msgid "Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page."
-msgstr ""
+msgstr "Füllen Sie die Angaben unten aus und legen Sie damit ein Kundenkonto an. Wenn Sie bereits Kunde bei uns sind, melden Sie sich bitte mit Ihren vorhandenen Login-Daten an."
 
 #@ woothemes
 #: classes/checkout.class.php:193
 msgid "Account username"
-msgstr ""
+msgstr "Konto-Benutzername"
 
 #@ woothemes
 #: classes/checkout.class.php:194
 #: woocommerce_template_functions.php:783
 msgid "Username"
-msgstr ""
+msgstr "Benutzername"
 
 #@ woothemes
 #: classes/checkout.class.php:198
 #: classes/checkout.class.php:204
 msgid "Account password"
-msgstr ""
+msgstr "Konto-Passwort"
 
 #@ woothemes
 #: classes/checkout.class.php:199
 #: classes/checkout.class.php:205
 #: woocommerce_template_functions.php:787
 msgid "Password"
-msgstr ""
+msgstr "Passwort"
 
 #@ woothemes
 #: classes/checkout.class.php:225
 msgid "Ship to same address?"
-msgstr "An gleiche Adresse liefern?"
+msgstr "Lieferung an selbe Adresse?"
 
 #@ woothemes
 #: classes/checkout.class.php:227
@@ -3311,19 +3319,19 @@ msgstr "Lieferadresse"
 #@ woothemes
 #: classes/checkout.class.php:241
 msgid "Notes/Comments"
-msgstr "Notizen/Kommentare"
+msgstr "Hinweise/Kommentare"
 
 #@ woothemes
 #: classes/checkout.class.php:248
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "Kommentare zur Bestellung, zum Beispiel besondere Hinweise zur Lieferung."
+msgstr "Hinweise zu Ihrer Bestellung, z.B. spezielle Wünsche zur Lieferung."
 
 #@ woothemes
 #: classes/checkout.class.php:285
 #: shortcodes/shortcode-my_account.php:309
 #: woocommerce_template_functions.php:619
 msgid "Select a country&hellip;"
-msgstr "W&auml;hle ein Land&hellip;"
+msgstr "Land auswählen&hellip;"
 
 #@ woothemes
 #: classes/checkout.class.php:309
@@ -3331,13 +3339,13 @@ msgstr "W&auml;hle ein Land&hellip;"
 #: woocommerce.php:225
 #: woocommerce_template_functions.php:640
 msgid "Select a state&hellip;"
-msgstr "W&auml;hlen Sie ein Bundesland&hellip;"
+msgstr "Bundesland auswählen&hellip;"
 
 #@ woothemes
 #: classes/checkout.class.php:369
 #, php-format
 msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
-msgstr "Sorry, Ihre Sitzung ist leider abgelaufen. <a href=\"%s\">Zur&uuml;ck zur Startseite &rarr;</a>"
+msgstr "Entschuldigung, Ihre Sitzung ist abgelaufen. <a href=\"%s\">Zur&uuml;ck zur Startseite &rarr;</a>"
 
 #@ woothemes
 #: classes/checkout.class.php:406
@@ -3377,7 +3385,7 @@ msgstr "Bitte geben Sie einen Benutzernamen ein."
 #@ woothemes
 #: classes/checkout.class.php:484
 msgid "Please enter an account password."
-msgstr "Bitte geben Sie ein Nutzerkennwort ein."
+msgstr "Bitte geben Sie ein Passwort für das Konto ein."
 
 #@ woothemes
 #: classes/checkout.class.php:485
@@ -3388,7 +3396,7 @@ msgstr "Passw&ouml;rter stimmen nicht &uuml;berein."
 #@ woothemes
 #: classes/checkout.class.php:489
 msgid "Invalid email/username."
-msgstr "Ung&uuml;ltiger E-Mail/Benutzername."
+msgstr "E-Mail/Benutzername ungültig."
 
 #@ woothemes
 #: classes/checkout.class.php:491
@@ -3398,12 +3406,12 @@ msgstr "Mit diesem Benutzernamen ist bereits ein Konto verkn&uuml;pft. Bitte w&a
 #@ woothemes
 #: classes/checkout.class.php:496
 msgid "An account is already registered with your email address. Please login."
-msgstr "F&uuml;r diese E-Mail-Adresse ist bereits ein Konto vorhanden. Bitte melden Sie sich an."
+msgstr "F&uuml;r diese E-Mail-Adresse ist bereits ein Konto vorhanden. Bitte loggen Sie sich ein."
 
 #@ woothemes
 #: classes/checkout.class.php:501
 msgid "You must accept our Terms &amp; Conditions."
-msgstr "Sie m&uuml;ssen unsere AGB und Widerrufsbelehrung akzeptieren."
+msgstr "Die Zustimmung zu unseren Allgemeinen Geschäftsbedingungen (AGB) ist erforderlich."
 
 #@ woothemes
 #: classes/checkout.class.php:509
@@ -3419,41 +3427,41 @@ msgstr "Ung&uuml;ltige Zahlungsart."
 #: classes/checkout.class.php:544
 #, php-format
 msgid "<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href=\"mailto:%s\">webmaster</a> !"
-msgstr ""
+msgstr "<strong>FEHLER</strong>: Registrierung nicht möglich... Bitte informieren Sie den <a href=\"mailto:%s\">Webmaster</a> !"
 
 #@ woothemes
 #: classes/checkout.class.php:684
 #: classes/checkout.class.php:692
 #, php-format
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused."
-msgstr ""
+msgstr "Entschuldigung, aber wir haben \"%s\" nicht in gewünschter Anzahl vorrätig. Bitte ändern Sie die Bestellmenge im Einkaufswagen und versuchen Sie es erneut. Bitte entschuldigen Sie die damit verursachten Unannehmlichkeiten."
 
 #@ woothemes
 #: classes/countries.class.php:533
 msgid "to the"
-msgstr ""
+msgstr "zum"
 
 #@ woothemes
 #: classes/countries.class.php:534
 msgid "to"
-msgstr ""
+msgstr "nach"
 
 #@ woothemes
 #: classes/countries.class.php:542
 msgid "the"
-msgstr ""
+msgstr "das"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:50
 #: classes/gateways/gateway-cheque.php:44
 #: classes/gateways/gateway-paypal.php:50
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Aktivieren/Deaktivieren"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:52
 msgid "Enable Bank Transfer"
-msgstr ""
+msgstr "Überweisung erlauben"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:56
@@ -3461,7 +3469,7 @@ msgstr ""
 #: classes/gateways/gateway-paypal.php:56
 #: shortcodes/shortcode-order_tracking.php:77
 msgid "Title"
-msgstr ""
+msgstr "Anrede"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:58
@@ -3470,7 +3478,7 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:105
 #: classes/shipping/shipping-free_shipping.php:51
 msgid "This controls the title which the user sees during checkout."
-msgstr ""
+msgstr "Dies steuert die Anrede, die der Benutzer während des Bestellablaufs sieht."
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:59
@@ -3486,7 +3494,7 @@ msgstr "Kundennachricht"
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:64
 msgid "Give the customer instructions for paying via BACS, and let them know that their order won't be shipping until the money is received."
-msgstr ""
+msgstr "Informieren Sie den Kunden über Ihre Zahlungsmodalitäten für die Rechnungsbegleichung per Überweisung und achten Sie darauf anzugeben, das die Bestellung erst ausgeführt wird, nachdem das Geld überwiesen wurde."
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:65
@@ -3498,62 +3506,62 @@ msgstr "&Uuml;berweisen Sie den Rechnungsbetrag direkt auf unser Bankkonto. Bitt
 #: classes/gateways/gateway-banktransfer.php:141
 #: classes/gateways/gateway-banktransfer.php:172
 msgid "Account Name"
-msgstr ""
+msgstr "Kontoinhaber"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:74
 #: classes/gateways/gateway-banktransfer.php:142
 #: classes/gateways/gateway-banktransfer.php:173
 msgid "Account Number"
-msgstr ""
+msgstr "Kontonummer"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:80
 #: classes/gateways/gateway-banktransfer.php:143
 #: classes/gateways/gateway-banktransfer.php:174
 msgid "Sort Code"
-msgstr ""
+msgstr "Bankleitzahl"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:86
 #: classes/gateways/gateway-banktransfer.php:144
 #: classes/gateways/gateway-banktransfer.php:175
 msgid "Bank Name"
-msgstr ""
+msgstr "Name der Bank"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:92
 #: classes/gateways/gateway-banktransfer.php:145
 #: classes/gateways/gateway-banktransfer.php:176
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:94
 #: classes/gateways/gateway-banktransfer.php:100
 msgid "Your bank may require this for international payments"
-msgstr ""
+msgstr "Ihre Bank wird dies für den Internationalen Zahlungsverkehr benötigen"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:98
 msgid "BIC (formerly Swift)"
-msgstr ""
+msgstr "BIC (fr&uuml;her Swift)"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:116
 msgid "BACS Payment"
-msgstr "&Uuml;berweisung"
+msgstr "Zahlung per Überweisung"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:117
 msgid "Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Erlauben Sie Zahlungen per Überweisung bzw. Direktüberweisung."
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:138
 #: classes/gateways/gateway-banktransfer.php:169
 msgid "Our Details"
-msgstr "Unsere Details"
+msgstr "Unsere Angaben"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:146
@@ -3564,7 +3572,7 @@ msgstr "BIC"
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:196
 msgid "Awaiting BACS payment"
-msgstr ""
+msgstr "Warte auf Überweisung"
 
 #@ woothemes
 #: classes/gateways/gateway-cheque.php:46
@@ -3580,38 +3588,38 @@ msgstr "Scheckzahlung"
 #@ woothemes
 #: classes/gateways/gateway-cheque.php:58
 msgid "Let the customer know the payee and where they should be sending the cheque to and that their order won't be shipping until you receive it."
-msgstr ""
+msgstr "Informieren Sie den Kunden über den Scheckbegünstigten und wohin der Scheck zu senden ist und das die Lieferung erst nach Erhalt desselben erfolgt."
 
 #@ woothemes
 #: classes/gateways/gateway-cheque.php:75
 msgid "Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn't but it does allow you to make test purchases for testing order emails and the 'success' pages etc."
-msgstr ""
+msgstr "Erlauben Sie die Bezahlung per Scheck. Warum sollten Sie heutzutage noch Schecks annehmen? Nun gut, wahrscheinlich wollen Sie das nicht, aber Sie können damit Testkäufe durchführen, um z.B. die Bestellmails oder die Seite über den erfolgreichen Abschluß der Bestellung zu testen."
 
 #@ woothemes
 #: classes/gateways/gateway-cheque.php:115
 msgid "Awaiting cheque payment"
-msgstr ""
+msgstr "Warte auf Scheckeingang"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:52
 msgid "Enable PayPal standard"
-msgstr ""
+msgstr "PayPal Standard erm&ouml;glichen"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:59
 msgid "PayPal"
-msgstr ""
+msgstr "PayPal"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:62
 #: woocommerce_template_functions.php:502
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:64
 msgid "This controls the description which the user sees during checkout."
-msgstr ""
+msgstr "Dies steuert die Beschreibung, welche der Benutzer während des Bestellablaufs sieht."
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:65
@@ -3641,12 +3649,12 @@ msgstr "Versanddetails an PayPal &uuml;bermitteln"
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:80
 msgid "PayPal sandbox"
-msgstr "PayPal Sandkasten"
+msgstr "PayPal-Testumgebung"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:82
 msgid "Enable PayPal sandbox"
-msgstr "PayPal Sandkasten aktivieren"
+msgstr "PayPal-Testumgebung aktivieren"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:98
@@ -3656,7 +3664,7 @@ msgstr "PayPal Standard"
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:99
 msgid "PayPal standard works by sending the user to PayPal to enter their payment information."
-msgstr "Bei PayPal Standard wird der Nutzer zur Eingabe der Zahlungsdetails an PayPal weitergeleitet."
+msgstr "PayPal-Standard leitet den Benutzer an PayPal weiter, um die Zahlungsinformationen einzugeben."
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:219
@@ -3697,63 +3705,63 @@ msgstr "Zahlung %s via IPN."
 #@ woothemes
 #: classes/gateways/gateway.class.php:132
 msgid "This function needs to be overridden by your payment gateway class."
-msgstr ""
+msgstr "Diese Funktion kann die Klasse Ihrer Bezahlschnittstelle nicht berücksichtigen."
 
 #@ woothemes
 #: classes/order.class.php:170
 #, php-format
 msgid " <small>%svia %s</small>"
-msgstr ""
+msgstr " <small>%süber %s</small>"
 
 #@ woothemes
 #: classes/order.class.php:378
 #, php-format
 msgid "Order status changed from %s to %s."
-msgstr ""
+msgstr "Status der Bestellung von %s auf %s geändert."
 
 #@ woothemes
 #: classes/order.class.php:511
 msgid "Order item stock reduced successfully."
-msgstr ""
+msgstr "Lagerbestand der bestellten Artikel erfolgreich reduziert."
 
 #@ woothemes
 #: classes/product.class.php:340
 #: classes/product.class.php:345
 msgid "available"
-msgstr ""
+msgstr "verfügbar"
 
 #@ woothemes
 #: classes/product.class.php:341
 msgid " (backorders allowed)"
-msgstr ""
+msgstr " (Auftragsrückstand gestattet)"
 
 #@ woothemes
 #: classes/product.class.php:352
 #: classes/product.class.php:364
 msgid "Available on backorder"
-msgstr ""
+msgstr "Verfügbar bei Nachlieferung"
 
 #@ woothemes
 #: classes/product.class.php:568
 #: templates/single-product-reviews.php:29
 #, php-format
 msgid "Rated %s out of 5"
-msgstr ""
+msgstr "Bewertet mit %s von 5"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:16
 msgid "Flat rate"
-msgstr ""
+msgstr "Versandkostenpauschale"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:90
 msgid "Flat Rates"
-msgstr ""
+msgstr "Versandkostenpauschalen"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:91
 msgid "Flat rates let you define a standard rate per item, or per order."
-msgstr ""
+msgstr "Mit Versandkostenpauschalen können Sie Standardbeträge pro Artikel oder pro Bestellung definieren."
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:94
@@ -3761,100 +3769,100 @@ msgstr ""
 #: classes/shipping/shipping-free_shipping.php:40
 #: classes/shipping/shipping-free_shipping.php:42
 msgid "Enable/disable"
-msgstr ""
+msgstr "Aktivieren/Deaktivieren"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:98
 msgid "Enable Flat Rate"
-msgstr ""
+msgstr "Versandkostenpauschale aktivieren"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:103
 #: classes/shipping/shipping-free_shipping.php:49
 msgid "Method Title"
-msgstr ""
+msgstr "Bezeichnung der Versandart"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:112
 msgid "Per Order"
-msgstr ""
+msgstr "je Bestellung"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:113
 msgid "Per Item"
-msgstr ""
+msgstr "pro Artikel"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:130
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
-msgstr ""
+msgstr "Kosten exklusive Mehrwertsteuer. Geben Sie einen Wert ein, z.B. 2.50."
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:134
 msgid "Handling Fee"
-msgstr ""
+msgstr "Bearbeitungsgebühr"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:136
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
-msgstr ""
+msgstr "Gebühr exklusive Mehrwertsteuer. Geben Sie einen Wert ein, z.B. 2.50, oder einen Prozentsatz, z.B. 5%. Zum Deaktivieren leer lassen."
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:140
 #: classes/shipping/shipping-free_shipping.php:61
 msgid "Method availability"
-msgstr ""
+msgstr "Verfügbarkeit der Versandart"
 
 #@ woothemes
 #: classes/shipping/shipping-flat_rate.php:143
 #: classes/shipping/shipping-free_shipping.php:64
 msgid "All allowed countries"
-msgstr ""
+msgstr "Alle zugelassenen Länder"
 
 #@ woothemes
 #: classes/shipping/shipping-free_shipping.php:16
 msgid "Free shipping"
-msgstr ""
+msgstr "Kostenfreier Versand"
 
 #@ woothemes
 #: classes/shipping/shipping-free_shipping.php:37
 msgid "Free Shipping"
-msgstr ""
+msgstr "Kostenfreier Versand"
 
 #@ woothemes
 #: classes/shipping/shipping-free_shipping.php:44
 msgid "Enable Free Shipping"
-msgstr ""
+msgstr "Kostenfreien Versand aktivieren"
 
 #@ woothemes
 #: classes/shipping/shipping-free_shipping.php:55
 msgid "Minimum Order Amount"
-msgstr ""
+msgstr "Mindestbestellsumme"
 
 #@ woothemes
 #: classes/shipping/shipping-free_shipping.php:57
 msgid "Users will need to spend this amount to get free shipping. Leave blank to disable."
-msgstr ""
+msgstr "Dieser Betrag muss erreicht werden, um kostenlosen Versand zu erhalten. Zum Deaktivieren leer lassen."
 
 #@ woothemes
 #: classes/woocommerce.class.php:226
 msgid "Cart Discount"
-msgstr ""
+msgstr "Einkaufswagen Rabatt"
 
 #@ woothemes
 #: classes/woocommerce.class.php:227
 msgid "Cart % Discount"
-msgstr ""
+msgstr "Einkaufswagen % Rabatt"
 
 #@ woothemes
 #: classes/woocommerce.class.php:228
 msgid "Product Discount"
-msgstr ""
+msgstr "Produktrabatt"
 
 #@ woothemes
 #: classes/woocommerce.class.php:229
 msgid "Product % Discount"
-msgstr ""
+msgstr "Produkt % Rabatt"
 
 #@ woothemes
 #: languages/country_translation.php:13
@@ -5120,332 +5128,332 @@ msgstr "Tasmanien"
 #@ woothemes
 #: languages/country_translation.php:267
 msgid "Victoria"
-msgstr ""
+msgstr "Victoria"
 
 #@ woothemes
 #: languages/country_translation.php:268
 msgid "Western Australia"
-msgstr ""
+msgstr "Westaustralien"
 
 #@ woothemes
 #: languages/country_translation.php:270
 msgid "Alberta"
-msgstr ""
+msgstr "Alberta"
 
 #@ woothemes
 #: languages/country_translation.php:271
 msgid "British Columbia"
-msgstr ""
+msgstr "Britisch-Kolumbien"
 
 #@ woothemes
 #: languages/country_translation.php:272
 msgid "Manitoba"
-msgstr ""
+msgstr "Manitoba"
 
 #@ woothemes
 #: languages/country_translation.php:273
 msgid "New Brunswick"
-msgstr ""
+msgstr "New Brunswick"
 
 #@ woothemes
 #: languages/country_translation.php:274
 msgid "Newfoundland"
-msgstr ""
+msgstr "Neufundland"
 
 #@ woothemes
 #: languages/country_translation.php:275
 msgid "Northwest Territories"
-msgstr ""
+msgstr "Nordwest-Territorien"
 
 #@ woothemes
 #: languages/country_translation.php:276
 msgid "Nova Scotia"
-msgstr ""
+msgstr "Neuschottland"
 
 #@ woothemes
 #: languages/country_translation.php:277
 msgid "Nunavut"
-msgstr ""
+msgstr "Nunavut"
 
 #@ woothemes
 #: languages/country_translation.php:278
 msgid "Ontario"
-msgstr ""
+msgstr "Ontario"
 
 #@ woothemes
 #: languages/country_translation.php:279
 msgid "Prince Edward Island"
-msgstr ""
+msgstr "Prinz-Edward-Insel"
 
 #@ woothemes
 #: languages/country_translation.php:280
 msgid "Quebec"
-msgstr ""
+msgstr "Quebec"
 
 #@ woothemes
 #: languages/country_translation.php:281
 msgid "Saskatchewan"
-msgstr ""
+msgstr "Saskatchewan"
 
 #@ woothemes
 #: languages/country_translation.php:282
 msgid "Yukon Territory"
-msgstr ""
+msgstr "Yukon"
 
 #@ woothemes
 #: languages/country_translation.php:284
 msgid "Alabama"
-msgstr ""
+msgstr "Alabama"
 
 #@ woothemes
 #: languages/country_translation.php:285
 msgid "Alaska"
-msgstr ""
+msgstr "Alaska"
 
 #@ woothemes
 #: languages/country_translation.php:286
 msgid "Arizona"
-msgstr ""
+msgstr "Arizona"
 
 #@ woothemes
 #: languages/country_translation.php:287
 msgid "Arkansas"
-msgstr ""
+msgstr "Arkansas"
 
 #@ woothemes
 #: languages/country_translation.php:288
 msgid "California"
-msgstr ""
+msgstr "Kalifornien"
 
 #@ woothemes
 #: languages/country_translation.php:289
 msgid "Colorado"
-msgstr ""
+msgstr "Colorado"
 
 #@ woothemes
 #: languages/country_translation.php:290
 msgid "Connecticut"
-msgstr ""
+msgstr "Connecticut"
 
 #@ woothemes
 #: languages/country_translation.php:291
 msgid "Delaware"
-msgstr ""
+msgstr "Delaware"
 
 #@ woothemes
 #: languages/country_translation.php:292
 msgid "District Of Columbia"
-msgstr ""
+msgstr "District Of Columbia"
 
 #@ woothemes
 #: languages/country_translation.php:293
 msgid "Florida"
-msgstr ""
+msgstr "Florida"
 
 #@ woothemes
 #: languages/country_translation.php:295
 msgid "Hawaii"
-msgstr ""
+msgstr "Hawaii"
 
 #@ woothemes
 #: languages/country_translation.php:296
 msgid "Idaho"
-msgstr ""
+msgstr "Idaho"
 
 #@ woothemes
 #: languages/country_translation.php:297
 msgid "Illinois"
-msgstr ""
+msgstr "Illinois"
 
 #@ woothemes
 #: languages/country_translation.php:298
 msgid "Indiana"
-msgstr ""
+msgstr "Indiana"
 
 #@ woothemes
 #: languages/country_translation.php:299
 msgid "Iowa"
-msgstr ""
+msgstr "Iowa"
 
 #@ woothemes
 #: languages/country_translation.php:300
 msgid "Kansas"
-msgstr ""
+msgstr "Kansas"
 
 #@ woothemes
 #: languages/country_translation.php:301
 msgid "Kentucky"
-msgstr ""
+msgstr "Kentucky"
 
 #@ woothemes
 #: languages/country_translation.php:302
 msgid "Louisiana"
-msgstr ""
+msgstr "Louisiana"
 
 #@ woothemes
 #: languages/country_translation.php:303
 msgid "Maine"
-msgstr ""
+msgstr "Maine"
 
 #@ woothemes
 #: languages/country_translation.php:304
 msgid "Maryland"
-msgstr ""
+msgstr "Maryland"
 
 #@ woothemes
 #: languages/country_translation.php:305
 msgid "Massachusetts"
-msgstr ""
+msgstr "Massachusetts"
 
 #@ woothemes
 #: languages/country_translation.php:306
 msgid "Michigan"
-msgstr ""
+msgstr "Michigan"
 
 #@ woothemes
 #: languages/country_translation.php:307
 msgid "Minnesota"
-msgstr ""
+msgstr "Minnesota"
 
 #@ woothemes
 #: languages/country_translation.php:308
 msgid "Mississippi"
-msgstr ""
+msgstr "Mississippi"
 
 #@ woothemes
 #: languages/country_translation.php:309
 msgid "Missouri"
-msgstr ""
+msgstr "Missouri"
 
 #@ woothemes
 #: languages/country_translation.php:310
 msgid "Montana"
-msgstr ""
+msgstr "Montana"
 
 #@ woothemes
 #: languages/country_translation.php:311
 msgid "Nebraska"
-msgstr ""
+msgstr "Nebraska"
 
 #@ woothemes
 #: languages/country_translation.php:312
 msgid "Nevada"
-msgstr ""
+msgstr "Nevada"
 
 #@ woothemes
 #: languages/country_translation.php:313
 msgid "New Hampshire"
-msgstr ""
+msgstr "New Hampshire"
 
 #@ woothemes
 #: languages/country_translation.php:314
 msgid "New Jersey"
-msgstr ""
+msgstr "New Jersey"
 
 #@ woothemes
 #: languages/country_translation.php:315
 msgid "New Mexico"
-msgstr ""
+msgstr "New Mexico"
 
 #@ woothemes
 #: languages/country_translation.php:316
 msgid "New York"
-msgstr ""
+msgstr "New York"
 
 #@ woothemes
 #: languages/country_translation.php:317
 msgid "North Carolina"
-msgstr ""
+msgstr "North Carolina"
 
 #@ woothemes
 #: languages/country_translation.php:318
 msgid "North Dakota"
-msgstr ""
+msgstr "North Dakota"
 
 #@ woothemes
 #: languages/country_translation.php:319
 msgid "Ohio"
-msgstr ""
+msgstr "Ohio"
 
 #@ woothemes
 #: languages/country_translation.php:320
 msgid "Oklahoma"
-msgstr ""
+msgstr "Oklahoma"
 
 #@ woothemes
 #: languages/country_translation.php:321
 msgid "Oregon"
-msgstr ""
+msgstr "Oregon"
 
 #@ woothemes
 #: languages/country_translation.php:322
 msgid "Pennsylvania"
-msgstr ""
+msgstr "Pennsylvania"
 
 #@ woothemes
 #: languages/country_translation.php:323
 msgid "Rhode Island"
-msgstr ""
+msgstr "Rhode Island"
 
 #@ woothemes
 #: languages/country_translation.php:324
 msgid "South Carolina"
-msgstr ""
+msgstr "South Carolina"
 
 #@ woothemes
 #: languages/country_translation.php:325
 msgid "South Dakota"
-msgstr ""
+msgstr "South Dakota"
 
 #@ woothemes
 #: languages/country_translation.php:326
 msgid "Tennessee"
-msgstr ""
+msgstr "Tennessee"
 
 #@ woothemes
 #: languages/country_translation.php:327
 msgid "Texas"
-msgstr ""
+msgstr "Texas"
 
 #@ woothemes
 #: languages/country_translation.php:328
 msgid "Utah"
-msgstr ""
+msgstr "Utah"
 
 #@ woothemes
 #: languages/country_translation.php:329
 msgid "Vermont"
-msgstr ""
+msgstr "Vermont"
 
 #@ woothemes
 #: languages/country_translation.php:330
 msgid "Virginia"
-msgstr ""
+msgstr "Virginia"
 
 #@ woothemes
 #: languages/country_translation.php:331
 msgid "Washington"
-msgstr ""
+msgstr "Washington"
 
 #@ woothemes
 #: languages/country_translation.php:332
 msgid "West Virginia"
-msgstr ""
+msgstr "West Virginia"
 
 #@ woothemes
 #: languages/country_translation.php:333
 msgid "Wisconsin"
-msgstr ""
+msgstr "Wisconsin"
 
 #@ woothemes
 #: languages/country_translation.php:334
 msgid "Wyoming"
-msgstr ""
+msgstr "Wyoming"
 
 #@ woothemes
 #: languages/country_translation.php:336
 msgid "Americas"
-msgstr ""
+msgstr "Amerika"
 
 #@ woothemes
 #: languages/country_translation.php:337
@@ -5455,34 +5463,34 @@ msgstr "Europa"
 #@ woothemes
 #: languages/country_translation.php:338
 msgid "Pacific"
-msgstr ""
+msgstr "Pazifik"
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:38
 #: shortcodes/shortcode-my_account.php:202
 msgid "Please enter a valid postcode/ZIP."
-msgstr ""
+msgstr "Bitte geben Sie eine gültige Postleitzahl ein."
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:53
 #: shortcodes/shortcode-cart.php:59
 msgid "Shipping costs updated."
-msgstr ""
+msgstr "Versandkosten aktualisiert."
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:73
 msgid "Your cart is currently empty."
-msgstr ""
+msgstr "Ihr Warenkorb ist leer."
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:75
 msgid "&larr; Return To Shop"
-msgstr ""
+msgstr "&larr; Zurück zum Shop"
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:86
 msgid "Product Name"
-msgstr "Artikelbezeichnung"
+msgstr "Produktbezeichnung"
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:87
@@ -5492,12 +5500,12 @@ msgstr "Einzelpreis"
 #@ woothemes
 #: shortcodes/shortcode-cart.php:101
 msgid "Remove this item"
-msgstr "Artikel entfernen"
+msgstr "Diesen Artikel entfernen"
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:124
 msgid "Available on backorder."
-msgstr ""
+msgstr "Verfügbar bei Auftrag im Rückstand."
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:141
@@ -5508,7 +5516,7 @@ msgstr "Gutschein"
 #@ woothemes
 #: shortcodes/shortcode-cart.php:141
 msgid "Apply Coupon"
-msgstr "Gutschein l&ouml;sen"
+msgstr "Gutschein anwenden"
 
 #@ woothemes
 #: shortcodes/shortcode-cart.php:144
@@ -5523,215 +5531,215 @@ msgstr "Weiter zur Kasse &rarr;"
 #@ woothemes
 #: shortcodes/shortcode-checkout.php:37
 msgid "The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page."
-msgstr ""
+msgstr "Der Gesamtbetrag der Bestellung wurde aktualisiert. Bitte bestätigen Sie Ihre Bestellung, indem Sie den Bestellung ausführen-Button am Ende der Seite klicken."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:33
 #, php-format
 msgid "Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href=\"%s\">change your password</a>."
-msgstr ""
+msgstr "Hallo, <strong>%s</strong>. Mit Ihrem Konto haben Sie die Möglichkeit Ihre vergangenen Bestellungen abzurufen, Ihre Liefer- und Rechnungsadresse zu verwalten und Ihr <a href=\"%s\">Passwort zu ändern</a>."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:38
 msgid "Available downloads"
-msgstr ""
+msgstr "Verfügbare Downloads"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:41
 msgid " download Remaining"
 msgid_plural " downloads Remaining"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Download verbleibend"
+msgstr[1] "Downloads verbleibend"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:47
 msgid "Recent Orders"
-msgstr ""
+msgstr "Vergangene Bestellungen"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:52
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:54
 msgid "Ship to"
-msgstr "Liefern an"
+msgstr "Lieferung an"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:55
 #: widgets/widget-cart.php:73
 #: woocommerce_template_functions.php:749
 msgid "Total"
-msgstr ""
+msgstr "Summe"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:75
 #: shortcodes/shortcode-thankyou.php:50
 msgid "Pay"
-msgstr ""
+msgstr "Bezahlen"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:76
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #@ woothemes
 #: admin/admin-post-types.php:561
 #: shortcodes/shortcode-my_account.php:78
 msgid "View"
-msgstr ""
+msgstr "Anzeigen"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:86
 msgid "My Addresses"
-msgstr ""
+msgstr "Meine Adressen"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:87
 msgid "The following addresses will be used on the checkout page by default."
-msgstr ""
+msgstr "Die folgenden Adressen werden in der Bestellabwicklung als Voreinstellung genutzt."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:113
 msgid "You have not set up a billing address yet."
-msgstr ""
+msgstr "Sie haben bisher keine Rechnungsadresse hinterlegt."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:142
 msgid "You have not set up a shipping address yet."
-msgstr ""
+msgstr "Sie haben bisher keine Lieferadresse angegeben."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:181
 msgid "First name is a required field."
-msgstr ""
+msgstr "Vorname ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:182
 msgid "Last name is a required field."
-msgstr ""
+msgstr "Nachname ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:183
 msgid "Address is a required field."
-msgstr ""
+msgstr "Adresse ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:184
 msgid "City is a required field."
-msgstr ""
+msgstr "Ort ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:185
 msgid "Postcode is a required field."
-msgstr ""
+msgstr "Postleitzahl ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:186
 msgid "Country is a required field."
-msgstr ""
+msgstr "Land ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:187
 msgid "State is a required field."
-msgstr ""
+msgstr "Bundesland ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:191
 msgid "Email is a required field."
-msgstr ""
+msgstr "E-Mail ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:192
 msgid "Phone number is a required field."
-msgstr ""
+msgstr "Telefonnummer ist ein Pflichtfeld."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:195
 msgid "Please enter a valid email address."
-msgstr ""
+msgstr "Bitte geben Sie eine gültige E-Mailadresse ein."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:198
 msgid "Please enter a valid phone number."
-msgstr ""
+msgstr "Bitte geben Sie eine gültige Telefonnummer ein."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:288
 msgid "Address line 1"
-msgstr ""
+msgstr "Adresszeile 1"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:292
 msgid "Address line 2"
-msgstr ""
+msgstr "Adresszeile 2"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:321
 msgid "State"
-msgstr ""
+msgstr "Bundesland"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:344
 #: woocommerce.php:226
 #: woocommerce_template_functions.php:652
 msgid "state"
-msgstr ""
+msgstr "Bundesland"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:361
 msgid "Fax"
-msgstr ""
+msgstr "Fax"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:367
 msgid "Save Address"
-msgstr ""
+msgstr "Adresse speichern"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:412
 msgid "Please enter your password."
-msgstr ""
+msgstr "Bitte geben Sie Ihr Passwort ein."
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:426
 msgid "New password"
-msgstr ""
+msgstr "Neues Passwort"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:430
 msgid "Re-enter new password"
-msgstr ""
+msgstr "Neues Passwort bestätigen"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:435
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:467
 #, php-format
 msgid "Order <mark>#%s</mark> made on <mark>%s</mark>"
-msgstr ""
+msgstr "Bestellung <mark>#%s</mark> vom <mark>%s</mark>"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:471
 #, php-format
 msgid ". Order status: <mark>%s</mark>"
-msgstr ""
+msgstr ". Status der Bestellung: <mark>%s</mark>"
 
 #@ woothemes
 #: shortcodes/shortcode-my_account.php:478
 #: shortcodes/shortcode-order_tracking.php:52
 msgid "Order Updates"
-msgstr ""
+msgstr "Aktualisierungen zur Bestellung"
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:73
 #: woocommerce_template_functions.php:1198
 msgid "Order Details"
-msgstr "Auftragsdetails"
+msgstr "Details der Bestellung"
 
 #@ woothemes
 #: templates/checkout/pay_for_order.php:8
@@ -5796,13 +5804,13 @@ msgstr "Telefon:"
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:33
 msgid "You have taken too long. Please refresh the page and retry."
-msgstr ""
+msgstr "Sie haben zu lange benötigt. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut."
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:41
 #, php-format
 msgid "Order #%s which was made %s has the status &ldquo;%s&rdquo;"
-msgstr ""
+msgstr "Bestellung #%s vom %s hat den Status &ldquo;%s&rdquo;"
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:41
@@ -5813,27 +5821,27 @@ msgstr "vorher"
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:43
 msgid "and was completed"
-msgstr ""
+msgstr "und wurde abgeschlossen"
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:78
 msgid "sku"
-msgstr ""
+msgstr "Art.-Nr."
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:168
 msgid "To track your order please enter your Order ID in the box below and press return. This was given to you on your receipt and in the confirmation email you should have received."
-msgstr ""
+msgstr "Um den Stand Ihrer Bestellung zu verfolgen, geben Sie bitte Ihre Bestell-ID in das Feld unten ein und bestätigen mit Enter. Die Bestell-ID finden Sie in der Auftragsbestätigung bzw. Bestätigungsmail, welche Sie dazu erhalten haben."
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:170
 msgid "Order ID"
-msgstr ""
+msgstr "Bestell-ID"
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:170
 msgid "Found in your order confirmation email."
-msgstr ""
+msgstr "Gefunden in Ihrer Bestellbestätigungsmail."
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:171
@@ -5843,29 +5851,29 @@ msgstr "Rechnungs E-Mail"
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:171
 msgid "Email you used during checkout."
-msgstr ""
+msgstr "Die E-Mail, welche Sie bei der Bestellabwicklung verwendet haben."
 
 #@ woothemes
 #: shortcodes/shortcode-order_tracking.php:173
 msgid "Track\""
-msgstr ""
+msgstr "Verfolgen\""
 
 #@ woothemes
 #: shortcodes/shortcode-pay.php:73
 msgid "Your order has already been paid for. Please contact us if you need assistance."
-msgstr ""
+msgstr "Ihre Bestellung wurde bereits bezahlt. Bitte nehmen Sie mit uns Kontakt auf, wenn Sie Hilfe benötigen."
 
 #@ woothemes
 #: shortcodes/shortcode-pay.php:79
 #: woocommerce_actions.php:684
 msgid "Invalid order."
-msgstr ""
+msgstr "Ungültige Bestellung."
 
 #@ woothemes
 #: shortcodes/shortcode-pay.php:100
 #: shortcodes/shortcode-thankyou.php:63
 msgid "Order:"
-msgstr "Auftrag:"
+msgstr "Bestellung:"
 
 #@ woothemes
 #: shortcodes/shortcode-pay.php:104
@@ -5882,17 +5890,17 @@ msgstr "Zahlart:"
 #@ woothemes
 #: shortcodes/shortcode-thankyou.php:38
 msgid "Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction."
-msgstr ""
+msgstr "Unglücklicherweise kann Ihre Bestellung nicht weiter verarbeitet werden, da Ihre ausführende Bank/Händler die Transaktion abgelehnt hat."
 
 #@ woothemes
 #: shortcodes/shortcode-thankyou.php:43
 msgid "Please attempt your purchase again or go to your account page."
-msgstr ""
+msgstr "Bitte versuchen Sie den Kauf nocheinmal oder gehen Sie zurück zu Ihrem Kundenkonto."
 
 #@ woothemes
 #: shortcodes/shortcode-thankyou.php:45
 msgid "Please attempt your purchase again."
-msgstr ""
+msgstr "Bitte versuchen Sie, Ihren Kauf erneut auszuführen."
 
 #@ woothemes
 #: shortcodes/shortcode-thankyou.php:58
@@ -5903,7 +5911,7 @@ msgstr "Vielen Dank. Ihre Bestellung ist eingegangen."
 #@ woothemes
 #: templates/archive-product.php:12
 msgid "Search Results:"
-msgstr ""
+msgstr "Suchergebnisse:"
 
 #@ woothemes
 #: templates/checkout/form.php:23
@@ -5913,48 +5921,48 @@ msgstr "Ihre Bestellung"
 #@ woothemes
 #: templates/checkout/pay_for_order.php:75
 msgid "Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements."
-msgstr ""
+msgstr "Entschuldigung, aber es sind keine Zahlungsarten für Ihr Land verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie alternative Absprachen treffen möchten."
 
 #@ woothemes
 #: templates/checkout/pay_for_order.php:84
 msgid "Pay for order"
-msgstr ""
+msgstr "Für Bestellung bezahlen"
 
 #@ woothemes
 #: templates/checkout/review_order.php:41
 #: woocommerce_template_functions.php:724
 msgid "Free"
-msgstr ""
+msgstr "Kostenfrei"
 
 #@ woothemes
 #: templates/checkout/review_order.php:53
 msgid "Please fill in your details above to see available shipping methods."
-msgstr "Bitte geben Sie oben Ihre Daten ein, damit wir Ihnen die verf&uuml;gbare Versandarten anzeigen k&ouml;nnen."
+msgstr "Bitte füllen Sie die Angaben oben aus, um die verfügbaren Versandarten anzuzeigen."
 
 #@ woothemes
 #: templates/checkout/review_order.php:55
 msgid "Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
-msgstr ""
+msgstr "Entschuldigung, aber es sind keine Zahlungsarten für Ihr Bundesland/Region verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie alternative Absprachen treffen möchten."
 
 #@ woothemes
 #: templates/checkout/review_order.php:123
 msgid "Please fill in your details above to see available payment methods."
-msgstr ""
+msgstr "Bitte füllen Sie die Angaben oben aus, um die verfügbaren Zahlungsarten abzurufen."
 
 #@ woothemes
 #: templates/checkout/review_order.php:125
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
-msgstr ""
+msgstr "Entschuldigung, aber es sind keine Zahlungsarten für Ihr Bundesland/Region verfügbar. Bitte kontaktieren Sie uns für weitere Hilfe oder wenn Sie alternative Absprachen treffen möchten."
 
 #@ woothemes
 #: templates/checkout/review_order.php:135
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
-msgstr ""
+msgstr "Sollte Ihr Browser kein JavaScript unterstützen, oder wenn dieses deaktiviert wurde, stellen Sie bitte sicher, das Sie den Button <em>Gesamtbetrag aktualisieren</em> klicken, bevor Sie Ihre Bestellung abschicken. Wenn Sie das nicht tun, könnte es möglich sein, das Sie mehr bezahlen müssen, als oben angegeben ist."
 
 #@ woothemes
 #: templates/checkout/review_order.php:135
 msgid "Update totals"
-msgstr ""
+msgstr "Gesamtbetrag aktualisieren"
 
 #@ woothemes
 #: templates/checkout/review_order.php:141
@@ -5969,7 +5977,7 @@ msgstr "Ich akzeptiere die"
 #@ woothemes
 #: templates/checkout/review_order.php:145
 msgid "terms &amp; conditions"
-msgstr "allgemeinen Liefer- und Zahlungsbedingungen sowie die Widerrufsbelehrung"
+msgstr "allgemeinen Liefer- und Zahlungsbedingungen (AGB)"
 
 #@ woothemes
 #: templates/emails/customer_completed_order.php:5
@@ -5982,7 +5990,7 @@ msgstr "Ihre Bestellung ist abgeschlossen. Die Details lauten wie folgt:"
 #: templates/emails/customer_processing_order.php:9
 #: templates/emails/new_order.php:9
 msgid "Order #:"
-msgstr "Auftrag #:"
+msgstr "Bestellung #:"
 
 #@ woothemes
 #: templates/emails/customer_completed_order.php:25
@@ -5990,7 +5998,7 @@ msgstr "Auftrag #:"
 #: templates/emails/customer_processing_order.php:25
 #: templates/emails/new_order.php:25
 msgid "Shipping:"
-msgstr "Versand"
+msgstr "Versand:"
 
 #@ woothemes
 #: templates/emails/customer_completed_order.php:38
@@ -6018,7 +6026,7 @@ msgstr "Lieferadresse"
 #: templates/emails/customer_pay_for_order.php:5
 #, php-format
 msgid "An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: %s"
-msgstr ""
+msgstr "Es wurde eine Bestellung für Sie angelegt auf &ldquo;%s&rdquo;. Um diese zu bezahlen, nutzen Sie bitte den folgenden Link: %s"
 
 #@ woothemes
 #: templates/emails/new_order.php:5
@@ -6033,119 +6041,119 @@ msgstr " erhalten. Sie lautet wie folgt:"
 #@ woothemes
 #: templates/loop-shop.php:49
 msgid "No products found which match your selection."
-msgstr ""
+msgstr "Es wurden keine Produkte gefunden, die Ihrer Auswahl entsprechen."
 
 #@ woothemes
 #: templates/single-product-reviews.php:31
 #, php-format
 msgid "%s review for %s"
 msgid_plural "%s reviews for %s"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s Bewertung für %s"
+msgstr[1] "%s Bewertungen für %s"
 
 #@ woothemes
 #: templates/single-product-reviews.php:36
 #: woocommerce_template_functions.php:517
 msgid "Reviews"
-msgstr ""
+msgstr "Bewertungen"
 
 #@ woothemes
 #: templates/single-product-reviews.php:51
 #: woocommerce_template_functions.php:466
 msgid "<span class=\"meta-nav\">&larr;</span> Previous"
-msgstr ""
+msgstr "<span class=\"meta-nav\">&larr;</span> Vorherige Seite"
 
 #@ woothemes
 #: templates/single-product-reviews.php:52
 #: woocommerce_template_functions.php:465
 msgid "Next <span class=\"meta-nav\">&rarr;</span>"
-msgstr ""
+msgstr "Nächste Seite <span class=\"meta-nav\">&rarr;</span>"
 
 #@ woothemes
 #: templates/single-product-reviews.php:56
 msgid "Add Review"
-msgstr ""
+msgstr "Bewertung abgeben"
 
 #@ woothemes
 #: templates/single-product-reviews.php:58
 msgid "Add a review"
-msgstr ""
+msgstr "Fügen Sie Ihre Bewertung hinzu"
 
 #@ woothemes
 #: templates/single-product-reviews.php:62
 msgid "Be the first to review"
-msgstr ""
+msgstr "Seien Sie der erste Rezensent von"
 
 #@ woothemes
 #: templates/single-product-reviews.php:64
 msgid "There are no reviews yet, would you like to <a href=\"#review_form\" class=\"inline show_review_form\">submit yours</a>?"
-msgstr ""
+msgstr "Es gibt bisher noch keine Bewertungen. Wollen Sie Ihre jetzt <a href=\"#review_form\" class=\"inline show_review_form\">übermitteln</a>?"
 
 #@ default
 #: templates/single-product-reviews.php:79
 msgid "Email"
-msgstr ""
+msgstr "E-Mail"
 
 #@ woothemes
 #: templates/single-product-reviews.php:82
 msgid "Submit Review"
-msgstr ""
+msgstr "Bewertung senden"
 
 #@ woothemes
 #: templates/single-product-reviews.php:85
 msgid "Rating"
-msgstr ""
+msgstr "Einstufung"
 
 #@ woothemes
 #: templates/single-product-reviews.php:86
 msgid "Rate..."
-msgstr ""
+msgstr "Bewerten..."
 
 #@ woothemes
 #: templates/single-product-reviews.php:87
 msgid "Perfect"
-msgstr ""
+msgstr "Ausgezeichnet"
 
 #@ woothemes
 #: templates/single-product-reviews.php:88
 msgid "Good"
-msgstr ""
+msgstr "Gut"
 
 #@ woothemes
 #: templates/single-product-reviews.php:89
 msgid "Average"
-msgstr ""
+msgstr "Durchschnittlich"
 
 #@ woothemes
 #: templates/single-product-reviews.php:90
 msgid "Not that bad"
-msgstr ""
+msgstr "Nicht so schlecht"
 
 #@ woothemes
 #: templates/single-product-reviews.php:91
 msgid "Very Poor"
-msgstr ""
+msgstr "Sehr schlecht"
 
 #@ default
 #: templates/single-product-reviews.php:93
 msgctxt "noun"
 msgid "Your Review"
-msgstr ""
+msgstr "Ihre Bewertung"
 
 #@ woothemes
 #: widgets/widget-cart.php:24
 msgid "Display the users Shopping Cart in the sidebar."
-msgstr ""
+msgstr "Zeige den Einkaufswagen des Benutzers in der Sidebar an."
 
 #@ woothemes
 #: widgets/widget-cart.php:26
 msgid "WooCommerce Shopping Cart"
-msgstr ""
+msgstr "WooCommerce Warenkorb"
 
 #@ woothemes
 #: widgets/widget-cart.php:66
 msgid "No products in the cart."
-msgstr ""
+msgstr "Es befinden sich keine Produkte im Warenkorb."
 
 #@ woothemes
 #: widgets/widget-cart.php:84
@@ -6171,22 +6179,22 @@ msgstr "Kasse &rarr;"
 #: widgets/widget-recently_viewed.php:116
 #: widgets/widget-top_rated_products.php:135
 msgid "Title:"
-msgstr ""
+msgstr "Bezeichnung:"
 
 #@ woothemes
 #: widgets/widget-featured_products.php:24
 msgid "Display a list of featured products on your site."
-msgstr ""
+msgstr "Gibt eine Übersicht empfohlener Produkte auf Ihrer Seite aus."
 
 #@ woothemes
 #: widgets/widget-featured_products.php:26
 msgid "WooCommerce Featured Products"
-msgstr ""
+msgstr "WooCommerce Empfohlene Produkte"
 
 #@ woothemes
 #: widgets/widget-featured_products.php:55
 msgid "Featured Products"
-msgstr ""
+msgstr "Empfohlene Produkte"
 
 #@ woothemes
 #: widgets/widget-best_sellers.php:120
@@ -6196,224 +6204,224 @@ msgstr ""
 #: widgets/widget-recently_viewed.php:119
 #: widgets/widget-top_rated_products.php:138
 msgid "Number of products to show:"
-msgstr ""
+msgstr "Anzahl der Produkte, die angezeigt werden sollen:"
 
 #@ woothemes
 #: widgets/widget-layered_nav.php:103
 msgid "Shows a custom attribute in a widget which lets you narrow down the list of products when viewing product categories."
-msgstr ""
+msgstr "Zeigt ein benutzerdefiniertes Attribut in einem Widget an, welches die angezeigte Produktübersicht eingrenzt, wenn man Produktkategorien betrachtet."
 
 #@ woothemes
 #: widgets/widget-layered_nav.php:105
 msgid "WooCommerce Layered Nav"
-msgstr ""
+msgstr "WooCommerce Layer-Navigation"
 
 #@ woothemes
 #: widgets/widget-layered_nav.php:258
 msgid "Attribute:"
-msgstr ""
+msgstr "Attribut:"
 
 #@ woothemes
 #: widgets/widget-price_filter.php:93
 msgid "Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories."
-msgstr ""
+msgstr "Zeigt einen Preisfilter-Schieberegler in einem Widget an, mit welchem Sie die angezeigten Produkte eingrenzen können, wenn Sie bestimmte Produktkategorien betrachten."
 
 #@ woothemes
 #: widgets/widget-price_filter.php:95
 msgid "WooCommerce Price Filter"
-msgstr ""
+msgstr "WooCommerce Preisfilter"
 
 #@ woothemes
 #: widgets/widget-price_filter.php:146
 msgid "Filter"
-msgstr ""
+msgstr "Filter"
 
 #@ woothemes
 #: widgets/widget-price_filter.php:159
 msgid "Filter by price"
-msgstr ""
+msgstr "Preisfilter"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:23
 msgid "A list or dropdown of product categories."
-msgstr ""
+msgstr "Liste oder Drop-Down-Menü der Produktkategorien"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:25
 msgid "WooCommerce Product Categories"
-msgstr ""
+msgstr "WooCommerce Produkt-Kategorien"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:53
 msgid "Select Category"
-msgstr ""
+msgstr "Kategorie auswählen"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:114
 msgid "Show as dropdown"
-msgstr ""
+msgstr "Als Drop-Down-Menü anzeigen"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:117
 msgid "Show post counts"
-msgstr ""
+msgstr "Artikelanzahl anzeigen"
 
 #@ woothemes
 #: widgets/widget-product_categories.php:120
 msgid "Show hierarchy"
-msgstr ""
+msgstr "Hierarchie anzeigen"
 
 #@ woothemes
 #: widgets/widget-product_search.php:23
 msgid "A Search box for products only."
-msgstr ""
+msgstr "Ein Suchfeld nur für Produkte."
 
 #@ woothemes
 #: widgets/widget-product_search.php:25
 msgid "WooCommerce Product Search"
-msgstr ""
+msgstr "WooCommerce Produkt-Suche"
 
 #@ woothemes
 #: widgets/widget-product_search.php:48
 msgid "Search for:"
-msgstr ""
+msgstr "Suche nach:"
 
 #@ woothemes
 #: widgets/widget-product_search.php:49
 msgid "Search for products"
-msgstr ""
+msgstr "Suche nach Produkten"
 
 #@ woothemes
 #: widgets/widget-product_tag_cloud.php:23
 msgid "Your most used product tags in cloud format."
-msgstr ""
+msgstr "Ihre am häufigsten verwendeten Produktschlagwörter als Wolke dargestellt."
 
 #@ woothemes
 #: widgets/widget-product_tag_cloud.php:25
 msgid "WooCommerce Product Tags"
-msgstr ""
+msgstr "WooCommerce Produkt-Schlagwörter"
 
 #@ woothemes
 #: widgets/widget-recent_products.php:23
 msgid "Display a list of your most recent products on your site."
-msgstr ""
+msgstr "Zeigt eine Liste der erst kürzlich erschienenen Produkte auf Ihrer Seite an."
 
 #@ woothemes
 #: widgets/widget-recent_products.php:25
 msgid "WooCommerce Recent Products"
-msgstr ""
+msgstr "WooCommerce Neueste Produkte"
 
 #@ woothemes
 #: widgets/widget-recent_products.php:54
 msgid "New Products"
-msgstr ""
+msgstr "Neue Produkte"
 
 #@ woothemes
 #: widgets/widget-recent_products.php:136
 msgid "Show hidden product variations"
-msgstr ""
+msgstr "Zeige versteckte Produktvarianten"
 
 #@ woothemes
 #: widgets/widget-recent_reviews.php:23
 msgid "Display a list of your most recent reviews on your site."
-msgstr ""
+msgstr "Stellt eine Übersicht der kürzlich abgegebenen Rezensionen auf Ihrer Seite bereit."
 
 #@ woothemes
 #: widgets/widget-recent_reviews.php:25
 msgid "WooCommerce Recent Reviews"
-msgstr ""
+msgstr "WooCommerce Neueste Bewertungen"
 
 #@ woothemes
 #: widgets/widget-recent_reviews.php:55
 msgid "Recent Reviews"
-msgstr ""
+msgstr "Neue Bewertungen"
 
 #@ default
 #: widgets/widget-recent_reviews.php:86
 #, php-format
 msgctxt "woothemes"
 msgid "by %1$s"
-msgstr ""
+msgstr "von %1$s"
 
 #@ woothemes
 #: widgets/widget-recently_viewed.php:23
 msgid "Display a list of recently viewed products."
-msgstr ""
+msgstr "Gib eine Liste der kürzlich angesehenen Produkte aus."
 
 #@ woothemes
 #: widgets/widget-recently_viewed.php:25
 msgid "WooCommerce Recently Viewed Products"
-msgstr ""
+msgstr "WooCommerce Produktverlauf"
 
 #@ woothemes
 #: widgets/widget-recently_viewed.php:56
 msgid "Recently viewed"
-msgstr ""
+msgstr "Zuletzt angesehen"
 
 #@ woothemes
 #: widgets/widget-top_rated_products.php:24
 msgid "Display a list of top rated products on your site."
-msgstr ""
+msgstr "Zeige eine Liste der als am besten bewerteten Produkte an."
 
 #@ woothemes
 #: widgets/widget-top_rated_products.php:26
 msgid "WooCommerce Top Rated Products"
-msgstr ""
+msgstr "WooCommerce Bestbewertete Produkte"
 
 #@ woothemes
 #: widgets/widget-top_rated_products.php:55
 msgid "Top Rated Products"
-msgstr ""
+msgstr "Bestbewertete Produkte"
 
 #@ woothemes
 #: woocommerce.php:158
 msgid "Customer"
-msgstr ""
+msgstr "Kunde"
 
 #@ woothemes
 #: woocommerce.php:165
 msgid "Shop Manager"
-msgstr ""
+msgstr "Shop-Manager"
 
 #@ woothemes
 #: woocommerce.php:542
 msgid "You have taken too long. Please go back and refresh the page."
-msgstr ""
+msgstr "Sie haben zu lange gebraucht. Bitte gehen Sie zurück und aktualisieren Sie die Seite."
 
 #@ woothemes
 #: woocommerce.php:545
 msgid "Please rate the product."
-msgstr ""
+msgstr "Bitte bewerten Sie das Produkt."
 
 #@ woothemes
 #: woocommerce.php:568
 msgid "Your comment is awaiting approval"
-msgstr ""
+msgstr "Ihr Kommentar wartet auf Freischaltung"
 
 #@ woothemes
 #: woocommerce.php:571
 msgid "Rating by"
-msgstr ""
+msgstr "Bewertet von"
 
 #@ woothemes
 #: woocommerce.php:571
 msgid "on"
-msgstr ""
+msgstr "am"
 
 #@ woothemes
 #: woocommerce_actions.php:74
 msgid "Sorry, your session has expired."
-msgstr ""
+msgstr "Entschuldigung, Ihre Sitzung ist abgelaufen."
 
 #@ woothemes
 #: woocommerce_actions.php:74
 msgid "Return to homepage &rarr;"
-msgstr ""
+msgstr "Zurück zur Startseite &rarr;"
 
 #@ woothemes
 #: woocommerce_actions.php:332
 msgid "No products found"
-msgstr ""
+msgstr "Keine Produkte gefunden"
 
 #@ woothemes
 #: woocommerce_actions.php:368
@@ -6426,7 +6434,7 @@ msgstr "Warenkorb aktualisiert."
 #: woocommerce_actions.php:463
 #: woocommerce_actions.php:491
 msgid "Product successfully added to your cart."
-msgstr ""
+msgstr "Produkt in den Warenkorb gelegt."
 
 #@ woothemes
 #: woocommerce_actions.php:417
@@ -6434,61 +6442,61 @@ msgstr ""
 #: woocommerce_actions.php:493
 #, php-format
 msgid "<a href=\"%s\" class=\"button\">View Cart &rarr;</a> Product successfully added to your cart."
-msgstr ""
+msgstr "<a href=\"%s\" class=\"button\">Zum Warenkorb &rarr;</a> Produkt in den Warenkorb gelegt."
 
 #@ woothemes
 #: woocommerce_actions.php:427
 #: woocommerce_actions.php:471
 msgid "Please choose product options&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie aus den Produktoptionen&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:503
 msgid "Please choose a quantity&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie die Anzahl aus&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:509
 msgid "Please choose a product&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie ein Produkt aus&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:609
 msgid "Username is required."
-msgstr ""
+msgstr "Benutzername ist erforderlich."
 
 #@ woothemes
 #: woocommerce_actions.php:610
 msgid "Password is required."
-msgstr ""
+msgstr "Kennwort ist erforderlich."
 
 #@ woothemes
 #: woocommerce_actions.php:673
 msgid "Order cancelled by customer."
-msgstr ""
+msgstr "Bestellung von Kunde storniert."
 
 #@ woothemes
 #: woocommerce_actions.php:676
 msgid "Your order was cancelled."
-msgstr ""
+msgstr "Ihre Bestellung wurde storniert."
 
 #@ woothemes
 #: woocommerce_actions.php:680
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
-msgstr ""
+msgstr "Ihre Bestellung hat die Warteschleife bereits verlassen und konnte daher nicht mehr abgebrochen werden. Bitte kontaktieren Sie uns, wenn Sie weitere Hilfestellung benötigen."
 
 #@ woothemes
 #: woocommerce_actions.php:721
 #, php-format
 msgid "Sorry, you have reached your download limit for this file. <a href=\"%s\">Go to homepage &rarr;</a>"
-msgstr ""
+msgstr "Entschuldigung, Sie haben das Download-Limit für diese Datei überschritten. <a href=\"%s\">Zur Startseite &rarr;</a>"
 
 #@ woothemes
 #: woocommerce_actions.php:799
 #: woocommerce_actions.php:801
 #, php-format
 msgid "File not found. <a href=\"%s\">Go to homepage &rarr;</a>"
-msgstr ""
+msgstr "Datei nicht gefunden. <a href=\"%s\">Zur Startseite &rarr;</a>"
 
 #@ woothemes
 #: woocommerce_emails.php:99
@@ -6505,19 +6513,19 @@ msgstr "[%s] Neue Kundenbestellung (# %s)"
 #: woocommerce_emails.php:133
 #, php-format
 msgid "[%s] Order Received"
-msgstr "[%s] Bestellung eingegangen"
+msgstr "[%s] Bestellung erhalten"
 
 #@ woothemes
 #: woocommerce_emails.php:163
 #, php-format
 msgid "[%s] Order Complete/Download Links"
-msgstr "[%s] Auftrag abgeschlossen/Download Links"
+msgstr "[%s] Bestellung abgeschlossen/Download-Links"
 
 #@ woothemes
 #: woocommerce_emails.php:166
 #, php-format
 msgid "[%s] Order Complete"
-msgstr "[%s] Auftrag abgeschlossen"
+msgstr "[%s] Bestellung abgeschlossen"
 
 #@ woothemes
 #: woocommerce_emails.php:199
@@ -6553,125 +6561,125 @@ msgstr "ist nicht lieferbar."
 #@ woothemes
 #: woocommerce_emails.php:246
 msgid "Product Backorder"
-msgstr ""
+msgstr "Produkt Lieferrückstand"
 
 #@ woothemes
 #: woocommerce_emails.php:247
 msgid " units of #"
-msgstr ""
+msgstr " Einheiten von #"
 
 #@ woothemes
 #: woocommerce_emails.php:247
 msgid "have been backordered."
-msgstr ""
+msgstr "wurden nachgeliefert."
 
 #@ woothemes
 #: woocommerce_taxonomy.php:33
 #: woocommerce_taxonomy.php:311
 msgid "product"
-msgstr ""
+msgstr "Produkt"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:52
 msgid "Product Category"
-msgstr ""
+msgstr "Produktkategorie"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:53
 msgid "Search Product Categories"
-msgstr ""
+msgstr "Produktkategorien durchsuchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:54
 msgid "All Product Categories"
-msgstr ""
+msgstr "Alle Produktkategorien"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:55
 msgid "Parent Product Category"
-msgstr ""
+msgstr "Übergeordnete Produktkategorie"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:56
 msgid "Parent Product Category:"
-msgstr ""
+msgstr "Übergeordnete Produktkategorie:"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:57
 msgid "Edit Product Category"
-msgstr ""
+msgstr "Produktkategorie bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:58
 msgid "Update Product Category"
-msgstr ""
+msgstr "Produktkategorie aktualisieren"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:59
 msgid "Add New Product Category"
-msgstr ""
+msgstr "Produktkategorie hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:60
 msgid "New Product Category Name"
-msgstr ""
+msgstr "Neuer Produktkategoriename"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:64
 msgctxt "slug"
 msgid "product-category"
-msgstr "produkt-kategorie"
+msgstr "Produkt-Kategorie"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:75
 msgid "Product Tag"
-msgstr ""
+msgstr "Produktschlagwort"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:76
 msgid "Search Product Tags"
-msgstr ""
+msgstr "Produktschlagwörter durchsuchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:77
 msgid "All Product Tags"
-msgstr ""
+msgstr "Alle Produktschlagwörter"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:78
 msgid "Parent Product Tag"
-msgstr ""
+msgstr "Übergeordnetes Produktschlagwort"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:79
 msgid "Parent Product Tag:"
-msgstr ""
+msgstr "Übergeordnetes Produktschlagwort:"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:80
 msgid "Edit Product Tag"
-msgstr ""
+msgstr "Produktschlagwort bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:81
 msgid "Update Product Tag"
-msgstr ""
+msgstr "Produktschlagwort aktualisieren"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:82
 msgid "Add New Product Tag"
-msgstr ""
+msgstr "Neues Produktschlagwort hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:83
 msgid "New Product Tag Name"
-msgstr ""
+msgstr "Neuer Produktschlagwortname"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:87
 msgctxt "slug"
 msgid "product-tag"
-msgstr "produkt-schlagwort"
+msgstr "Produktschlagwort"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:133
@@ -6681,189 +6689,189 @@ msgstr "Produkt hinzuf&uuml;gen"
 #@ woothemes
 #: woocommerce_taxonomy.php:134
 msgid "Add New Product"
-msgstr ""
+msgstr "Neues Produkt hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:136
 msgid "Edit Product"
-msgstr ""
+msgstr "Produkt bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:137
 msgid "New Product"
-msgstr ""
+msgstr "Neues Produkt"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:138
 #: woocommerce_taxonomy.php:139
 msgid "View Product"
-msgstr ""
+msgstr "Produkt anzeigen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:140
 msgid "Search Products"
-msgstr ""
+msgstr "Produkte suchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:141
 msgid "No Products found"
-msgstr ""
+msgstr "Keine Produkte gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:142
 msgid "No Products found in trash"
-msgstr ""
+msgstr "Keine Produkte im Papierkorb gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:145
 msgid "This is where you can add new products to your store."
-msgstr ""
+msgstr "Hier können Sie neue Produkte zu Ihrem Shop hinzufügen."
 
 #@ woothemes
 #: woocommerce_taxonomy.php:163
 msgid "Variations"
-msgstr ""
+msgstr "Varianten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:164
 msgid "Variation"
-msgstr ""
+msgstr "Variante"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:166
 msgid "Add New Variation"
-msgstr ""
+msgstr "Neue Variante hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:168
 msgid "Edit Variation"
-msgstr ""
+msgstr "Variante bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:169
 msgid "New Variation"
-msgstr ""
+msgstr "Neue Variante"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:170
 #: woocommerce_taxonomy.php:171
 msgid "View Variation"
-msgstr ""
+msgstr "Variante anzeigen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:172
 msgid "Search Variations"
-msgstr ""
+msgstr "Varianten durchsuchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:173
 msgid "No Variations found"
-msgstr ""
+msgstr "Keine Varianten gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:174
 msgid "No Variations found in trash"
-msgstr ""
+msgstr "Keine Varianten im Papierkorb gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:175
 msgid "Parent Variation"
-msgstr ""
+msgstr "Übergeordnete Variante"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:206
 msgid "Add Order"
-msgstr ""
+msgstr "Bestellung hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:207
 msgid "Add New Order"
-msgstr ""
+msgstr "Neue Bestellung hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:209
 msgid "Edit Order"
-msgstr ""
+msgstr "Bestellung bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:210
 msgid "New Order"
-msgstr ""
+msgstr "Neue Bestellung"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:213
 msgid "Search Orders"
-msgstr ""
+msgstr "Bestellungen suchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:214
 msgid "No Orders found"
-msgstr ""
+msgstr "Keine Bestellungen gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:215
 msgid "No Orders found in trash"
-msgstr ""
+msgstr "Keine Bestellungen im Papierkorb gefunden"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:216
 msgid "Parent Orders"
-msgstr ""
+msgstr "Übergeordnete Bestellungen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:218
 msgid "This is where store orders are stored."
-msgstr ""
+msgstr "Hier werden die Bestellungen des Shops gespeichert."
 
 #@ woothemes
 #: woocommerce_taxonomy.php:240
 msgid "Order statuses"
-msgstr ""
+msgstr "Bestellung Status (alle)"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:241
 msgid "Order status"
-msgstr ""
+msgstr "Bestellung Status"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:242
 msgid "Search Order statuses"
-msgstr ""
+msgstr "Die Bestellstatus durchsuchen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:243
 msgid "All  Order statuses"
-msgstr ""
+msgstr "Alle Bestellstatus"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:244
 msgid "Parent Order status"
-msgstr ""
+msgstr "Übergeordneter Bestellstatus"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:245
 msgid "Parent Order status:"
-msgstr ""
+msgstr "Übergeordneter Bestellstatus:"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:246
 msgid "Edit Order status"
-msgstr ""
+msgstr "Bestellstatus bearbeiten"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:247
 msgid "Update Order status"
-msgstr ""
+msgstr "Bestellstatus aktualisieren"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:248
 msgid "Add New Order status"
-msgstr ""
+msgstr "Neuen Bestellstatus hinzufügen"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:249
 msgid "New Order status Name"
-msgstr ""
+msgstr "Neuer Name für Bestellstatus"
 
 #@ woothemes
 #: woocommerce_taxonomy.php:261
@@ -7003,7 +7011,7 @@ msgstr "Versandkosten berechnen"
 #@ woothemes
 #: woocommerce_template_functions.php:658
 msgid "Postcode/Zip"
-msgstr "Postleitzahl/PLZ"
+msgstr "Postleitzahl"
 
 #@ woothemes
 #: woocommerce_template_functions.php:661
@@ -7049,7 +7057,7 @@ msgstr "Klicken Sie hier, um sich einzuloggen"
 #@ woothemes
 #: woocommerce_template_functions.php:812
 msgid "If you have shopped with us before, please enter your username and password in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section."
-msgstr ""
+msgstr "Wenn Sie bereits bei uns eingekauft haben, geben Sie bitte in die Felder oben Ihren Benutzernamen und Ihr Passwort ein. Wenn Sie ein neuer Kunde sind, fahren Sie bitte fort mit dem Abschnitt Rechnung &amp; Lieferung."
 
 #@ woothemes
 #: woocommerce_template_functions.php:824
@@ -7131,12 +7139,12 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:648
 msgid "Email Recipient Options"
-msgstr ""
+msgstr "E-Mail Empf&auml;nger Einstellungen"
 
 #@ woothemes
 #: admin/admin-settings.php:651
 msgid "New order notifications"
-msgstr ""
+msgstr "Bestelleingangsbenachrichtigungen"
 
 #@ woothemes
 #: admin/admin-settings.php:652
@@ -7146,7 +7154,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:659
 msgid "Inventory notifications"
-msgstr ""
+msgstr "Bestandswarnungen"
 
 #@ woothemes
 #: admin/admin-settings.php:660
@@ -7156,7 +7164,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:668
 msgid "Email Sender Options"
-msgstr ""
+msgstr "E-Mail Absender Einstellungen"
 
 #@ woothemes
 #: admin/admin-settings.php:688
@@ -7167,7 +7175,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:818
 msgid "Welcome to WooCommerce!"
-msgstr ""
+msgstr "Willkommen bei WooCommerce!"
 
 #@ woothemes
 #: admin/admin-settings.php:819
@@ -7177,17 +7185,17 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:820
 msgid "Automatically add pages"
-msgstr ""
+msgstr "Automatisch Seiten hinzuf&uuml;gen"
 
 #@ woothemes
 #: admin/admin-settings.php:820
 msgid "Skip setup"
-msgstr ""
+msgstr "Einrichtung &uuml;berspringen"
 
 #@ woothemes
 #: admin/admin-settings.php:827
 msgid "WooCommerce has been installed and setup. Enjoy :)"
-msgstr ""
+msgstr "WooCommerce ist installiert und eingerichtet. Viel Spa&szlig; :)"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:39
