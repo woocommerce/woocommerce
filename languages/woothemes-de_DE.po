@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2011-11-08 02:20+0200\n"
+"PO-Revision-Date: 2011-11-08 04:10+0200\n"
 "Last-Translator: Daniel Kay <daniel@enthusiasm.cc>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -621,7 +621,7 @@ msgstr "Schlagw&ouml;rter"
 #@ woothemes
 #: admin/admin-post-types.php:138
 msgid "Featured"
-msgstr "Gestaltet"
+msgstr "Empfohlen"
 
 #@ woothemes
 #: admin/admin-post-types.php:141
@@ -956,7 +956,7 @@ msgstr "Die letzten 5 Bestellungen"
 #@ woothemes
 #: admin/admin-reports.php:321
 msgid "This months sales"
-msgstr "Umsatz dieses Monats"
+msgstr "Umsatz diesen Monats"
 
 #@ woothemes
 #: admin/admin-reports.php:543
@@ -965,14 +965,14 @@ msgstr "Umsatz dieses Monats"
 #: classes/product.class.php:489
 #: classes/product.class.php:495
 msgid "From:"
-msgstr "Von:"
+msgstr "Ab:"
 
 #@ woothemes
 #: admin/admin-reports.php:543
 #: admin/admin-reports.php:897
 #: admin/admin-reports.php:989
 msgid "To:"
-msgstr "An:"
+msgstr "Bis:"
 
 #@ woothemes
 #: admin/admin-reports.php:543
@@ -1997,7 +1997,7 @@ msgstr "\"From\" Absender"
 #@ woothemes
 #: admin/admin-settings.php:672
 msgid "The sender name for WooCommerce emails."
-msgstr "Absendername f&uuml;r WooCommerce Emails."
+msgstr "Absendername f&uuml;r WooCommerce E-Mails."
 
 #@ woothemes
 #: admin/admin-settings.php:679
@@ -2007,7 +2007,7 @@ msgstr "Emailadresse des Absenders"
 #@ woothemes
 #: admin/admin-settings.php:680
 msgid "The sender email address for WooCommerce emails."
-msgstr "Absenderadresse f&uuml;r WooCommerce Emails"
+msgstr "Absenderadresse f&uuml;r WooCommerce E-Mails"
 
 #@ woothemes
 #: admin/admin-settings.php:688
@@ -2033,7 +2033,7 @@ msgstr "Text f&uuml;r die Emailfu&szlig;zeile"
 #@ woothemes
 #: admin/admin-settings.php:700
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "Hier den Text eingeben, der in der Fu&szlig;zeile der WooCommerce Emails erscheinen soll."
+msgstr "Hier den Text eingeben, der in der Fu&szlig;zeile der WooCommerce E-Mails erscheinen soll."
 
 #@ woothemes
 #: admin/admin-settings.php:704
@@ -2058,7 +2058,7 @@ msgstr "Hintergrundfarbe"
 #@ woothemes
 #: admin/admin-settings.php:717
 msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
-msgstr "Die Hintergrundfarbe f&uuml;r WooCommerce Emails. Vorgabe <code>#eeeeee</code>."
+msgstr "Die Hintergrundfarbe f&uuml;r WooCommerce E-Mails. Vorgabe <code>#eeeeee</code>."
 
 #@ woothemes
 #: admin/admin-settings.php:724
@@ -2100,7 +2100,7 @@ msgstr "Ihene gef&auml;llt WooCommerce? <a href=\"http://wordpress.org/extend/pl
 #: admin/admin-settings.php:839
 #: admin/writepanels/writepanel-product_data.php:29
 msgid "General"
-msgstr "allgemein"
+msgstr "Allgemein"
 
 #@ woothemes
 #: admin/admin-settings.php:840
@@ -2143,12 +2143,12 @@ msgstr "Zahlungsweisen"
 #@ woothemes
 #: admin/admin-settings.php:847
 msgid "Emails"
-msgstr "Emails"
+msgstr "E-Mails"
 
 #@ woothemes
 #: admin/admin-settings.php:915
 msgid "Save changes"
-msgstr "Speichere &Auml;nderungen"
+msgstr "&Auml;nderungen speichern"
 
 #@ woothemes
 #: admin/admin-settings.php:970
@@ -3102,7 +3102,7 @@ msgstr "Unsichtbar"
 #@ woothemes
 #: admin/writepanels/writepanel-product_data.php:680
 msgid "Featured?"
-msgstr "Sonderartikel?"
+msgstr "Empfohlen?"
 
 #@ woothemes
 #: admin/writepanels/writepanels-init.php:26
@@ -3448,12 +3448,12 @@ msgstr ""
 #: classes/gateways/gateway-cheque.php:44
 #: classes/gateways/gateway-paypal.php:50
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Aktivieren/Deaktivieren"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:52
 msgid "Enable Bank Transfer"
-msgstr ""
+msgstr "Bank&uuml;berweisung erlauben"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:56
@@ -3481,7 +3481,7 @@ msgstr "&Uuml;berweisung"
 #: classes/gateways/gateway-banktransfer.php:62
 #: classes/gateways/gateway-cheque.php:56
 msgid "Customer Message"
-msgstr "Kundennachricht"
+msgstr "Kundenhinweis"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:64
@@ -3498,35 +3498,35 @@ msgstr "&Uuml;berweisen Sie den Rechnungsbetrag direkt auf unser Bankkonto. Bitt
 #: classes/gateways/gateway-banktransfer.php:141
 #: classes/gateways/gateway-banktransfer.php:172
 msgid "Account Name"
-msgstr ""
+msgstr "Kontoinhaber"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:74
 #: classes/gateways/gateway-banktransfer.php:142
 #: classes/gateways/gateway-banktransfer.php:173
 msgid "Account Number"
-msgstr ""
+msgstr "Kontonummer"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:80
 #: classes/gateways/gateway-banktransfer.php:143
 #: classes/gateways/gateway-banktransfer.php:174
 msgid "Sort Code"
-msgstr ""
+msgstr "Bankleitzahl"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:86
 #: classes/gateways/gateway-banktransfer.php:144
 #: classes/gateways/gateway-banktransfer.php:175
 msgid "Bank Name"
-msgstr ""
+msgstr "Name der Bank"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:92
 #: classes/gateways/gateway-banktransfer.php:145
 #: classes/gateways/gateway-banktransfer.php:176
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:94
@@ -3537,7 +3537,7 @@ msgstr ""
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:98
 msgid "BIC (formerly Swift)"
-msgstr ""
+msgstr "BIC (fr&uuml;her Swift)"
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:116
@@ -3547,7 +3547,7 @@ msgstr "&Uuml;berweisung"
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:117
 msgid "Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Erm&ouml;glicht Zahlung per &Uuml;berweisung."
 
 #@ woothemes
 #: classes/gateways/gateway-banktransfer.php:138
@@ -3595,7 +3595,7 @@ msgstr ""
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:52
 msgid "Enable PayPal standard"
-msgstr ""
+msgstr "PayPal Standard erm&ouml;glichen"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:59
@@ -3606,7 +3606,7 @@ msgstr ""
 #: classes/gateways/gateway-paypal.php:62
 #: woocommerce_template_functions.php:502
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #@ woothemes
 #: classes/gateways/gateway-paypal.php:64
@@ -6033,7 +6033,7 @@ msgstr " erhalten. Sie lautet wie folgt:"
 #@ woothemes
 #: templates/loop-shop.php:49
 msgid "No products found which match your selection."
-msgstr ""
+msgstr "Keine Produkte entsprechen der Suchauswahl."
 
 #@ woothemes
 #: templates/single-product-reviews.php:31
@@ -6145,7 +6145,7 @@ msgstr ""
 #@ woothemes
 #: widgets/widget-cart.php:66
 msgid "No products in the cart."
-msgstr ""
+msgstr "Noch nichts im Warenkorb."
 
 #@ woothemes
 #: widgets/widget-cart.php:84
@@ -6176,17 +6176,17 @@ msgstr ""
 #@ woothemes
 #: widgets/widget-featured_products.php:24
 msgid "Display a list of featured products on your site."
-msgstr ""
+msgstr "Zeigen Sie eine Liste von empfohlenen Produkten auf Ihrer Seite."
 
 #@ woothemes
 #: widgets/widget-featured_products.php:26
 msgid "WooCommerce Featured Products"
-msgstr ""
+msgstr "WooCommerce empfohlene Produkte"
 
 #@ woothemes
 #: widgets/widget-featured_products.php:55
 msgid "Featured Products"
-msgstr ""
+msgstr "Empfohlene Produkte"
 
 #@ woothemes
 #: widgets/widget-best_sellers.php:120
@@ -6426,7 +6426,7 @@ msgstr "Warenkorb aktualisiert."
 #: woocommerce_actions.php:463
 #: woocommerce_actions.php:491
 msgid "Product successfully added to your cart."
-msgstr ""
+msgstr "Produkt in den Warenkorb gelegt."
 
 #@ woothemes
 #: woocommerce_actions.php:417
@@ -6434,43 +6434,43 @@ msgstr ""
 #: woocommerce_actions.php:493
 #, php-format
 msgid "<a href=\"%s\" class=\"button\">View Cart &rarr;</a> Product successfully added to your cart."
-msgstr ""
+msgstr "<a href=\"%s\" class=\"button\">Zum Warenkorb &rarr;</a> Produkt in den Warenkorb gelegt."
 
 #@ woothemes
 #: woocommerce_actions.php:427
 #: woocommerce_actions.php:471
 msgid "Please choose product options&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie aus den Produktoptionen&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:503
 msgid "Please choose a quantity&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie die Anzahl aus&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:509
 msgid "Please choose a product&hellip;"
-msgstr ""
+msgstr "Bitte w&auml;hlen Sie ein Produkt aus&hellip;"
 
 #@ woothemes
 #: woocommerce_actions.php:609
 msgid "Username is required."
-msgstr ""
+msgstr "Benutzername ist erforderlich."
 
 #@ woothemes
 #: woocommerce_actions.php:610
 msgid "Password is required."
-msgstr ""
+msgstr "Kennwort ist erforderlich."
 
 #@ woothemes
 #: woocommerce_actions.php:673
 msgid "Order cancelled by customer."
-msgstr ""
+msgstr "Bestellung von Kunde storniert."
 
 #@ woothemes
 #: woocommerce_actions.php:676
 msgid "Your order was cancelled."
-msgstr ""
+msgstr "Ihre Bestellung wurde storniert."
 
 #@ woothemes
 #: woocommerce_actions.php:680
@@ -7131,12 +7131,12 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:648
 msgid "Email Recipient Options"
-msgstr ""
+msgstr "E-Mail Empf&auml;nger Einstellungen"
 
 #@ woothemes
 #: admin/admin-settings.php:651
 msgid "New order notifications"
-msgstr ""
+msgstr "Bestelleingangsbenachrichtigungen"
 
 #@ woothemes
 #: admin/admin-settings.php:652
@@ -7146,7 +7146,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:659
 msgid "Inventory notifications"
-msgstr ""
+msgstr "Bestandswarnungen"
 
 #@ woothemes
 #: admin/admin-settings.php:660
@@ -7156,7 +7156,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:668
 msgid "Email Sender Options"
-msgstr ""
+msgstr "E-Mail Absender Einstellungen"
 
 #@ woothemes
 #: admin/admin-settings.php:688
@@ -7167,7 +7167,7 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:818
 msgid "Welcome to WooCommerce!"
-msgstr ""
+msgstr "Willkommen bei WooCommerce!"
 
 #@ woothemes
 #: admin/admin-settings.php:819
@@ -7177,17 +7177,17 @@ msgstr ""
 #@ woothemes
 #: admin/admin-settings.php:820
 msgid "Automatically add pages"
-msgstr ""
+msgstr "Automatisch Seiten hinzuf&uuml;gen"
 
 #@ woothemes
 #: admin/admin-settings.php:820
 msgid "Skip setup"
-msgstr ""
+msgstr "Einrichtung &uuml;berspringen"
 
 #@ woothemes
 #: admin/admin-settings.php:827
 msgid "WooCommerce has been installed and setup. Enjoy :)"
-msgstr ""
+msgstr "WooCommerce ist installiert und eingerichtet. Viel Spa&szlig; :)"
 
 #@ woothemes
 #: admin/writepanels/writepanel-coupon_data.php:39
