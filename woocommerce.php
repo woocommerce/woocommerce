@@ -20,10 +20,8 @@ load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) 
 
 if (get_option('woocommerce_informal_localisation_type')=='yes') :
 	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/informal');
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce/informal');
 else :
 	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/formal');
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce/formal');
 endif;
 
 /**
