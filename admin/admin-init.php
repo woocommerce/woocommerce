@@ -463,3 +463,33 @@ function woocommerce_delete_product_sync( $id ) {
 	endif;
 	
 }
+
+/**
+ * Directory for uploads
+ * 
+ */
+add_filter('upload_dir', 'woocommerce_downloads_upload_dir');
+
+function woocommerce_downloads_upload_dir( $pathdata ) {
+	
+	if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER']) :
+		
+		$args = wp_parse_args( $_SERVER['HTTP_REFERER'] );
+		extract( $args, EXTR_SKIP );
+		
+		if ($from =='wc01') :
+			
+			// Uploading a downloadable file
+			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
+		 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
+		 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
+			$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
+			return $pathdata;
+			
+		endif;
+		
+	endif;
+	
+	return $pathdata;
+
+}

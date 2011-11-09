@@ -105,6 +105,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * External/Affiliate product type
 * Added Spanish translation by lluis masachs
 * Support for informal/formal localisations
+* Directory changed for uploading file downloads - uploads/woocommerce_files
+* Download directory created on install as well as htaccess for denying access
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
