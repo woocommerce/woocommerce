@@ -169,6 +169,9 @@ div.multi_select_countries{border:1px solid #ececec;height:200px;overflow:auto;w
 .woocommerce_variation table td input{float:left;width:100%;}
 .woocommerce_variation table td.upload_image{width:1%;white-space:nowrap;}.woocommerce_variation table td.upload_image img{float:none;margin-right:6px;vertical-align:middle;}
 .woocommerce_variation table td.upload_image .button{margin:0;padding:4px 10px;width:auto;float:none;vertical-align:middle;}
+.woocommerce_variation table td.upload_image .upload_image_button{display:block;position:relative;}.woocommerce_variation table td.upload_image .upload_image_button .overlay{display:none;width:60px;height:60px;position:absolute;top:0;left:0;margin:0;padding:0;opacity:0.5;background:#eeeeee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAXklEQVQYGW2OUQrAMAhDFy8+dnKnwiuh2I+aJulDZebDkfSie1b28Q7EXWrfvSm60RQnkQUC8ja7owpmL6d4GdDZ0cNNHyIhZEj4QYCxze6orsluAh8AnR0xKPR07weXJi8JGd3qqwAAAABJRU5ErkJggg==) no-repeat center center;}
+.woocommerce_variation table td.upload_image .upload_image_button:hover .overlay{display:block;}
+.woocommerce_variation table td.upload_image .upload_image_button.remove .overlay{background:#eeeeee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWElEQVQYGY2OUQ6AMAxCZdm9jSev65K3YKNm+6EFBlVEHDxJJ3Pi0C72xlBNyTs3jU7wEUTTIB51GCp2CL8HLpHEdaOLb/N2dfuq9NT0zOo/M9q6EaImsd/uViMLVuD4KAAAAABJRU5ErkJggg==) no-repeat center center;}
 .widefat .product-cat-placeholder{outline:1px dotted #A0C443;height:60px;background:#000;}
 .tips{cursor:help;text-decoration:none;}
 img.tips{padding:5px 0 0 0;}

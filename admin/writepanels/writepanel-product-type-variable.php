@@ -61,7 +61,10 @@ function variable_product_type_options() {
 				$variation_data = get_post_custom( $variation->ID );
 				$image = '';
 				if (isset($variation_data['_thumbnail_id'][0])) :
+					$image_id = $variation_data['_thumbnail_id'][0];
 					$image = wp_get_attachment_url( $variation_data['_thumbnail_id'][0] );
+				else :
+					$image_id = 0;
 				endif;
 				
 				if (!$image) $image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
@@ -104,7 +107,7 @@ function variable_product_type_options() {
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">
 						<tbody>	
 							<tr>
-								<td class="upload_image"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php if (isset($variation_data['_thumbnail_id'][0])) echo $variation_data['_thumbnail_id'][0]; ?>" /><input type="button" rel="<?php echo $variation->ID; ?>" class="upload_image_button button" value="<?php _e('Product Image', 'woothemes'); ?>" /></td>
+								<td class="upload_image"><a href="#" class="upload_image_button <?php if ($image_id>0) echo 'remove'; ?>" rel="<?php echo $variation->ID; ?>"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a></td>
 								
 								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" placeholder="<?php if ($sku = get_post_meta($post->ID, 'sku', true)) echo $sku; else echo $post->ID; ?>" /></td>
 								
@@ -362,15 +365,23 @@ function variable_product_write_panel_js() {
 		jQuery('.upload_image_button').live('click', function(){
 			
 			var post_id = jQuery(this).attr('rel');
-			
 			var parent = jQuery(this).parent();
-			
 			current_field_wrapper = parent;
 			
-			window.send_to_editor = window.send_to_cproduct;
+			if (jQuery(this).is('.remove')) {
+				
+				jQuery('.upload_image_id', current_field_wrapper).val('');
+				jQuery('img', current_field_wrapper).attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
+				jQuery(this).removeClass('remove');
+				
+			} else {
+				
+				window.send_to_editor = window.send_to_cproduct;
+				formfield = jQuery('.upload_image_id', parent).attr('name');
+				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
 			
-			formfield = jQuery('.upload_image_id', parent).attr('name');
-			tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
+			}
+			
 			return false;
 		});
 
@@ -384,6 +395,7 @@ function variable_product_write_panel_js() {
 			imgid = parseInt(imgclass.replace(/\D/g, ''), 10);
 			
 			jQuery('.upload_image_id', current_field_wrapper).val(imgid);
+			jQuery('.upload_image_button', current_field_wrapper).addClass('remove');
 
 			jQuery('img', current_field_wrapper).attr('src', imgurl);
 			tb_remove();
