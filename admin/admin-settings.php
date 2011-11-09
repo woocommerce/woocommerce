@@ -161,6 +161,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> 'no',
 	),
 	
+	array(  
+		'name' => __('Localisation', 'woothemes'),
+		'desc' 		=> __('Use informal localisation file if it exists.', 'woothemes'),
+		'id' 		=> 'woocommerce_informal_localisation_type',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'no',
+	),
+	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
 	array( 'name' => __( 'ShareThis', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'share_this' ),

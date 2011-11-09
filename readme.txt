@@ -104,6 +104,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Attributes can be added to nav bar via filter
 * External/Affiliate product type
 * Added Spanish translation by lluis masachs
+* Support for informal/formal localisations
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel
