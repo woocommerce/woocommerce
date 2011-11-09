@@ -188,9 +188,15 @@ class woocommerce_cart {
 			$product_data = &new woocommerce_product( $product_id );
 		endif;
 		
+		// Type check
+		if ( $product_data->is_type('external') ) :
+			$woocommerce->add_error( __('This product cannot be purchased.', 'woothemes') );
+			return false; 
+		endif;
+		
 		// Price set check
 		if( $product_data->get_price() === '' ) :
-			$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set', 'woothemes') );
+			$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set.', 'woothemes') );
 			return false; 
 		endif;
 
