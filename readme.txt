@@ -107,6 +107,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Directory changed for uploading file downloads - uploads/woocommerce_files
 * Download directory created on install as well as htaccess for denying access
 * Formal and informal German translations - thanks to stefahn, jessor, Ramoonus , owcv and deckerweb 
+* Hook for checking cart contents during cart/checkout - used for plugins too
 
 = 1.2 - 03/11/2011 =
 * Added quick status change buttons (processing/complete) to orders panel

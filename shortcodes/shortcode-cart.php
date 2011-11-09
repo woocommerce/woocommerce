@@ -62,10 +62,7 @@ function woocommerce_cart( $atts ) {
 			
 	endif;
 	
-	$result = $woocommerce->cart->check_cart_item_stock();
-	if (is_wp_error($result)) :
-		$woocommerce->add_error( $result->get_error_message() );
-	endif;
+	do_action('woocommerce_check_cart_items');
 	
 	$woocommerce->show_messages();
 	

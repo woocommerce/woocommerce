@@ -30,9 +30,7 @@ function woocommerce_checkout( $atts ) {
 	
 	$woocommerce_checkout->process_checkout();
 	
-	$result = $woocommerce->cart->check_cart_item_stock();
-	
-	if (is_wp_error($result)) $woocommerce->add_error( $result->get_error_message() );
+	do_action('woocommerce_check_cart_items');
 	
 	if ( $woocommerce->error_count()==0 && $non_js_checkout) $woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woothemes') );
 	

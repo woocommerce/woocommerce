@@ -45,6 +45,8 @@ class woocommerce_cart {
   		$this->applied_coupons = array();
 		$this->get_cart_from_session();
 		if ( isset($_SESSION['coupons']) ) $this->applied_coupons = $_SESSION['coupons'];
+		
+		add_action('woocommerce_check_cart_items', array(&$this, 'check_cart_items'), 1);
     }
 	
 	/**
@@ -538,6 +540,17 @@ class woocommerce_cart {
 	 */
 	function needs_payment() {
 		if ( $this->total > 0 ) return true; else return false;
+	}
+
+
+	/**
+	 * Check cart items for errors
+	 */
+	function check_cart_items() {
+	
+		$result = $this->check_cart_item_stock();
+		if (is_wp_error($result)) $woocommerce->add_error( $result->get_error_message() );
+	
 	}
 	
 	/** 

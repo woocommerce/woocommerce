@@ -677,24 +677,8 @@ class woocommerce_checkout {
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
 					 	
-					 	// Check stock levels
-					 	if ($_product->managing_stock()) :
-							if (!$_product->is_in_stock() || !$_product->has_enough_stock( $values['quantity'] )) :
-								
-								$woocommerce->add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
-		                		break;
-								
-							endif;
-						else :
-						
-							if (!$_product->is_in_stock()) :
-							
-								$woocommerce->add_error( sprintf(__('Sorry, we do not have enough "%s" in stock to fulfil your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
-		                		break;
-
-							endif;
-							
-						endif;
+					 	// Check cart items for errors
+					 	do_action('woocommerce_check_cart_items');
 					 	
 					endforeach;
 					
