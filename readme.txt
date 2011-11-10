@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.2
+Stable tag: 1.2.1
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.2.1 =
+= 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
 * My account/login widget
 * Added shortcode insertion button to the post editor
@@ -94,7 +94,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Minor admin settings tidyup
 * Dutch translation has been updated
 * Cart is now more robust and supports custom data being stored, such as addons
-* Fix for 0 quanitiy
+* Fix for 0 quantity
 * add_to_cart shortcode
 * Improved order search
 * Option to unforce SSL checkout
