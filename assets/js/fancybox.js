@@ -14,20 +14,6 @@
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  */
- 
-jQuery(function(){
-
-	// Lightbox
-	jQuery('a.zoom').fancybox({
-		'transitionIn'	:	'elastic',
-		'transitionOut'	:	'elastic',
-		'speedIn'		:	600, 
-		'speedOut'		:	200, 
-		'overlayShow'	:	true
-	});
-
-});
-
 ;(function($) {
 	var tmp, loading, overlay, wrap, outer, content, close, title, nav_left, nav_right,
 
@@ -1167,3 +1153,16 @@ jQuery(function(){
 	});
 
 })(jQuery);
+
+jQuery(function(){
+
+	// Lightbox
+	jQuery('a.zoom').fancybox({
+		'transitionIn'	:	'elastic',
+		'transitionOut'	:	'elastic',
+		'speedIn'		:	600, 
+		'speedOut'		:	200, 
+		'overlayShow'	:	true
+	});
+
+});
