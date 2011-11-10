@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2011-11-10 03:36+0200\n"
-"Last-Translator: Stefan Seidner <info@interspirit.de>\n"
+"PO-Revision-Date: 2011-11-10 12:58+0200\n"
+"Last-Translator: Daniel Kay <daniel@enthusiasm.cc>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -623,7 +623,7 @@ msgstr "Schlagw&ouml;rter"
 #: admin/writepanels/writepanel-product_data.php:757
 #@ woothemes
 msgid "Featured"
-msgstr "Hervorheben"
+msgstr "Featured"
 
 #: admin/admin-post-types.php:141
 #@ woothemes
@@ -678,7 +678,7 @@ msgstr "Y/m/d g:i:s A"
 #, php-format
 #@ default
 msgid "%s ago"
-msgstr "%s vorher"
+msgstr "vor %s"
 
 #: admin/admin-post-types.php:216
 #: admin/admin-post-types.php:584
@@ -1159,7 +1159,7 @@ msgstr "H&ouml;he"
 #: admin/admin-settings-forms.php:168
 #@ woothemes
 msgid "Hard Crop"
-msgstr "Exakt beschneiden"
+msgstr "Hart beschneiden"
 
 #: admin/admin-settings-forms.php:294
 #: admin/admin-settings-forms.php:320
@@ -1171,7 +1171,7 @@ msgstr "Standardsteuersatz"
 #: admin/admin-settings-forms.php:325
 #@ woothemes
 msgid "Rate"
-msgstr "Rate"
+msgstr "Satz"
 
 #: admin/admin-settings-forms.php:304
 #: admin/admin-settings-forms.php:326
@@ -1347,7 +1347,7 @@ msgstr "The folgenden Seiten m&uuml;ssen ausgew&auml;hlt werden, damit WooCommer
 #: admin/admin-settings.php:295
 #@ woothemes
 msgid "Cart Page"
-msgstr "Warenkorbseite"
+msgstr "Warenkorb"
 
 #: admin/admin-settings.php:296
 #@ woothemes
@@ -1357,7 +1357,7 @@ msgstr "Seiteninhalt: [woocommerce_cart]"
 #: admin/admin-settings.php:304
 #@ woothemes
 msgid "Checkout Page"
-msgstr "Abmeldeseite"
+msgstr "Kasse"
 
 #: admin/admin-settings.php:305
 #@ woothemes
@@ -1367,27 +1367,27 @@ msgstr "Seiteninhalt: [woocommerce_checkout]"
 #: admin/admin-settings.php:313
 #@ woothemes
 msgid "Pay Page"
-msgstr "Kassenseite"
+msgstr "Bezahlung"
 
 #: admin/admin-settings.php:314
 #@ woothemes
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
-msgstr "Seiteninhalt: [woocommerce_pay] Vorherige: \"Abmelden\""
+msgstr "Seiteninhalt: [woocommerce_pay] &Uuml;bergeordnet: \"Kasse\""
 
 #: admin/admin-settings.php:322
 #@ woothemes
 msgid "Thanks Page"
-msgstr "Dankesseite"
+msgstr "Dankes"
 
 #: admin/admin-settings.php:323
 #@ woothemes
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
-msgstr "Seiteninhalt: [woocommerce_thankyou] vorherige: \"Abmelden\""
+msgstr "Seiteninhalt: [woocommerce_thankyou] &Uuml;bergeordnet: \"Kasse\""
 
 #: admin/admin-settings.php:331
 #@ woothemes
 msgid "My Account Page"
-msgstr "Mein Konto Seite"
+msgstr "Mein Konto"
 
 #: admin/admin-settings.php:332
 #@ woothemes
@@ -1397,32 +1397,32 @@ msgstr "Seiteninhalt: [woocommerce_my_account]"
 #: admin/admin-settings.php:340
 #@ woothemes
 msgid "Edit Address Page"
-msgstr "Adresse &auml;ndern Seite"
+msgstr "Adresse &auml;ndern"
 
 #: admin/admin-settings.php:341
 #@ woothemes
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
-msgstr "Seiteninhalt: [woocommerce_edit_address] vorherige: \"Mein Konto\""
+msgstr "Seiteninhalt: [woocommerce_edit_address] &Uuml;bergeordnet: \"Mein Konto\""
 
 #: admin/admin-settings.php:349
 #@ woothemes
 msgid "View Order Page"
-msgstr "Seite Bestellungen ansehen"
+msgstr "Bestellungen ansehen"
 
 #: admin/admin-settings.php:350
 #@ woothemes
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
-msgstr "Seiteninhalt: [woocommerce_view_order] vorherige: \"Mein Konto\""
+msgstr "Seiteninhalt: [woocommerce_view_order] &Uuml;bergeordnet: \"Mein Konto\""
 
 #: admin/admin-settings.php:358
 #@ woothemes
 msgid "Change Password Page"
-msgstr "Seite Passwort &auml;ndern"
+msgstr "Passwort &auml;ndern"
 
 #: admin/admin-settings.php:359
 #@ woothemes
 msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
-msgstr "Seiteninhalt:  [woocommerce_change_password] Vorherige: \"Mein Konto\""
+msgstr "Seiteninhalt:  [woocommerce_change_password] &Uuml;bergeordnet: \"Mein Konto\""
 
 #: admin/admin-settings.php:373
 #@ woothemes
@@ -1452,17 +1452,17 @@ msgstr "Wenn die Unterkategorien angezeigt werden, die Produkte verbergen"
 #: admin/admin-settings.php:401
 #@ woothemes
 msgid "Product fields"
-msgstr "Produktgruppen"
+msgstr "Produktfelder"
 
 #: admin/admin-settings.php:402
 #@ woothemes
 msgid "Enable the SKU field for products"
-msgstr "Aktivieren des Artikelnummernfeldes f&uuml;r Produkte"
+msgstr "Aktiviere das Artikelnummernfeld f&uuml;r Produkte"
 
 #: admin/admin-settings.php:410
 #@ woothemes
 msgid "Enable the weight field for products"
-msgstr "Aktivieren des Gewichtsfeldes f&uuml;r Produkte"
+msgstr "Aktiviere das Gewichtsfeld f&uuml;r Produkte"
 
 #: admin/admin-settings.php:418
 #@ woothemes
@@ -1477,7 +1477,7 @@ msgstr "Gewichtseinheit"
 #: admin/admin-settings.php:427
 #@ woothemes
 msgid "This controls what unit you will define weights in."
-msgstr "Dies kontrolliert, in welcher Einheit Gewichte festgelegt werden."
+msgstr "Bestimmt, in welcher Einheit Gewichte festgelegt werden."
 
 #: admin/admin-settings.php:433
 #@ woothemes
@@ -1497,7 +1497,7 @@ msgstr "Abmessungseinheit"
 #: admin/admin-settings.php:440
 #@ woothemes
 msgid "This controls what unit you will define lengths in."
-msgstr "Dies kontrolliert welche L&auml;nge festgelegt wird"
+msgstr "Bestimmt, welche L&auml;nge festgelegt wird"
 
 #: admin/admin-settings.php:446
 #@ woothemes
@@ -1517,7 +1517,7 @@ msgstr "Zur&uuml;ck zum Warenkorb"
 #: admin/admin-settings.php:453
 #@ woothemes
 msgid "Redirect to cart after adding a product to the cart (on single product pages)"
-msgstr "Zur&uuml;ck zum Warenkorb nachdem ein Produkt hinzugef&uuml;gt wurde (bei einer Einzelproduktansicht)"
+msgstr "Zur&uuml;ck zum Warenkorb leiten, nachdem ein Produkt hinzugef&uuml;gt wurde (bei einer Einzelproduktansicht)"
 
 #: admin/admin-settings.php:461
 #@ woothemes
@@ -1772,12 +1772,12 @@ msgstr "Anzeigen"
 #: admin/admin-settings.php:559
 #@ woothemes
 msgid "Enable low stock notifications"
-msgstr "Aktivierung um geringen Bestand anzuzeigen"
+msgstr "Aktivieren, um geringen Bestand anzuzeigen"
 
 #: admin/admin-settings.php:567
 #@ woothemes
 msgid "Enable out of stock notifications"
-msgstr "Aktivierung um leeren Bestand anzuzeigen"
+msgstr "Aktivieren, um leeren Bestand anzuzeigen"
 
 #: admin/admin-settings.php:575
 #@ woothemes
@@ -1787,12 +1787,12 @@ msgstr "Grenzwert f&uuml;r geringen Bestand"
 #: admin/admin-settings.php:585
 #@ woothemes
 msgid "Out of stock threshold"
-msgstr "Grenzwert f&uuml;r nicht vorr&auml;tig"
+msgstr "Grenzwert f&uuml;r Nichtlieferbarkeit"
 
 #: admin/admin-settings.php:595
 #@ woothemes
 msgid "Out of stock visibility"
-msgstr "Sichtbarkeit von nicht vorr&auml;tig"
+msgstr "Sichtbarkeit von Nichtlieferbarkeit"
 
 #: admin/admin-settings.php:596
 #@ woothemes
@@ -1812,7 +1812,7 @@ msgstr "Aktiviere den Versandkosten-Rechner auf der Seite Warenkorb"
 #: admin/admin-settings.php:631
 #@ woothemes
 msgid "Only ship to the users billing address"
-msgstr "Nur an die Rechnungsadresse versenden"
+msgstr "Ausschliesslich an die Rechnungsadresse versenden"
 
 #: admin/admin-settings.php:644
 #@ woothemes
@@ -3266,8 +3266,8 @@ msgstr "Anrede"
 #: classes/shipping/shipping-flat_rate.php:105
 #: classes/shipping/shipping-free_shipping.php:51
 #@ woothemes
-msgid "This controls the title which the user sees During checkout."
-msgstr "Dies steuert die Anrede, die der Benutzer w&auml;hrend des Bestellablaufs sieht."
+msgid "This controls the title which the user sees during checkout."
+msgstr "Dies steuert die Bezeichnung, die der Benutzer an der Kasse sieht."
 
 #: classes/gateways/gateway-banktransfer.php:59
 #@ woothemes
@@ -3407,7 +3407,7 @@ msgstr "Beschreibung"
 
 #: classes/gateways/gateway-paypal.php:64
 #@ woothemes
-msgid "This controls the description which the user sees During checkout."
+msgid "This controls the description which the user sees during checkout."
 msgstr "Dies steuert die Beschreibung, welche der Benutzer w&auml;hrend des Bestellablaufs sieht."
 
 #: classes/gateways/gateway-paypal.php:65
@@ -3631,7 +3631,7 @@ msgstr "Untergrenze Bestellsumme"
 #: classes/shipping/shipping-free_shipping.php:57
 #@ woothemes
 msgid "Users will need to spend this amount to get free shipping. Leave blank to disable."
-msgstr "Dieser Betrag muss erreicht werden, um kostenlosen Versand zu erhalten. Zum Deaktivieren leer lassen."
+msgstr "Dieser Gesamtbetrag muss vom Kunden erreicht werden, um kostenlosen Versand zu erhalten. Zum Deaktivieren leer lassen."
 
 #: classes/woocommerce.class.php:226
 #@ woothemes
@@ -5387,7 +5387,7 @@ msgstr "Meine Adressen"
 #: shortcodes/shortcode-my_account.php:87
 #@ woothemes
 msgid "The following addresses will be used on the checkout page by default."
-msgstr "Die folgenden Adressen werden in der Bestellabwicklung als Voreinstellung genutzt."
+msgstr "Die folgenden Adressen werden an der Kasse als Voreinstellung genutzt."
 
 #: shortcodes/shortcode-my_account.php:113
 #@ woothemes
@@ -5605,7 +5605,7 @@ msgstr "Bestellung #%s vom %s hat den Status &ldquo;%s&rdquo;"
 #: shortcodes/shortcode-order_tracking.php:43
 #@ woothemes
 msgid " ago"
-msgstr "vorher"
+msgstr " vorher"
 
 #: shortcodes/shortcode-order_tracking.php:43
 #@ woothemes
@@ -5639,8 +5639,8 @@ msgstr "E-Mail Rechnung"
 
 #: shortcodes/shortcode-order_tracking.php:172
 #@ woothemes
-msgid "Email you used During checkout."
-msgstr "Die E-Mail-Adresse welche Du bei der Bestellabwicklung verwendet hast."
+msgid "Email you used during checkout."
+msgstr "Die E-Mail-Adresse welche Du an der Kasse angegeben hast."
 
 #: shortcodes/shortcode-order_tracking.php:174
 #@ woothemes
@@ -5721,7 +5721,7 @@ msgstr "F&uuml;r Bestellung bezahlen"
 #: woocommerce_template_functions.php:750
 #@ woothemes
 msgid "Free"
-msgstr "Kostenlos"
+msgstr "Kostenfrei"
 
 #: templates/checkout/review_order.php:53
 #@ woothemes
@@ -5974,12 +5974,12 @@ msgstr "Zeigt eine Liste von hervorgehobenen Produkten auf Deiner Seite."
 #: widgets/widget-featured_products.php:26
 #@ woothemes
 msgid "WooCommerce Featured Products"
-msgstr "WooCommerce Besondere Produkte"
+msgstr "WooCommerce Feature Produkte"
 
 #: widgets/widget-featured_products.php:55
 #@ woothemes
 msgid "Featured Products"
-msgstr "Hervorgehobene Produkte"
+msgstr "Feature Produkte"
 
 #: widgets/widget-best_sellers.php:120
 #: widgets/widget-featured_products.php:113
@@ -6817,7 +6817,7 @@ msgstr "gesch&auml;tzt f&uuml;r %s"
 
 #: woocommerce_template_functions.php:780
 #@ woothemes
-msgid "Note: Tax and shipping totals are estimated and will be updated During checkout based on your billing information."
+msgid "Note: Tax and shipping totals are estimated and will be updated during checkout based on your billing information."
 msgstr "Hinweis: Die Betr&auml;ge f&uuml;r Mehrwertsteuer und Versand sind gesch&auml;tzt und werden bei der Bestellabwicklung gem&auml;&szlig; Deiner Rechnungsadresse aktualisiert."
 
 #: woocommerce_template_functions.php:820
@@ -6849,7 +6849,7 @@ msgstr "Wenn Du bereits bei uns eingekauft hast, gebe bitte in die Felder oben D
 #@ woothemes
 msgctxt "breadcrumb"
 msgid "Home"
-msgstr "Home"
+msgstr "Startseite"
 
 #: woocommerce_template_functions.php:908
 #@ woothemes
@@ -6930,7 +6930,7 @@ msgstr "Steuert, welche W&auml;hrung bei der Preisanzeige im Katalog und bei den
 #: admin/admin-settings.php:92
 #@ woothemes
 msgid "Allow users to checkout without signing up for an account"
-msgstr "Erlaubt das platzieren von Bestellungen ohne Benutzerkonto"
+msgstr "Erlaubt das Platzieren von Bestellungen ohne Benutzerkonto"
 
 #: admin/admin-settings.php:100
 #@ woothemes
@@ -7290,22 +7290,22 @@ msgstr "Aktiviere diese Option, wenn ein Produkt nicht versandt wird oder keine 
 #: admin/writepanels/writepanel-product_data.php:754
 #@ woothemes
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
-msgstr ""
+msgstr "Aktiviere diese Option, wenn nach dem Kauf der Zugriff auf eine herunterladbare Datei freigegeben wird."
 
 #: admin/writepanels/writepanel-product_data.php:757
 #@ woothemes
 msgid "Enable this option to feature this product"
-msgstr ""
+msgstr "Aktiviere diese Option, um dieses Produkt zu featurn"
 
 #: classes/cart.class.php:195
 #@ woothemes
 msgid "This product cannot be purchased."
-msgstr ""
+msgstr "Dieses Produkt kann nicht erworben werben."
 
 #: classes/cart.class.php:201
 #@ woothemes
 msgid "This product cannot be purchased - the price is not yet set."
-msgstr ""
+msgstr "Dieses Produkt kann nicht erworben werden, weil noch kein Preis hinterlegt ist."
 
 #: classes/countries.class.php:550
 #@ woothemes
@@ -7458,17 +7458,17 @@ msgstr "<strong>FEHLER</strong>: Bitte gib ein Passwort ein."
 #: widgets/widget-onsale.php:23
 #@ woothemes
 msgid "Display a list of your on-sale products on your site."
-msgstr ""
+msgstr "Zeige eine Liste von Produkten, die sich im Angebot befinden, auf Deiner Seite."
 
 #: widgets/widget-onsale.php:25
 #@ woothemes
 msgid "WooCommerce On-sale"
-msgstr ""
+msgstr "WooCommerce Im Angebot"
 
 #: widgets/widget-onsale.php:54
 #@ woothemes
 msgid "On Sale"
-msgstr ""
+msgstr "Im Angebot"
 
 #: woocommerce_actions.php:327
 #@ woothemes
@@ -7483,7 +7483,7 @@ msgstr ""
 #: woocommerce_actions.php:1006
 #@ woothemes
 msgid "New products"
-msgstr ""
+msgstr "Neue Produkte"
 
 #: woocommerce_actions.php:1014
 #, php-format
@@ -7536,16 +7536,16 @@ msgstr "Produkt kaufen"
 #: woocommerce_template_functions.php:785
 #@ woothemes
 msgid "No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure their are no other available methods for your location."
-msgstr ""
+msgstr "Es wurden keine Versandarten gefunden. Bitte berechne die Lieferung neu und mache Angaben zum Bundesland sowie der Postleitzahl, damit die Berechnung stattfinden kann."
 
 #: woocommerce_template_functions.php:785
 #, php-format
 #@ woothemes
 msgid "Sorry, it seems that there are no available shipping methods for your location (%s)."
-msgstr ""
+msgstr "Sorry, es gibt keine verf&uuml;gbaren Versandarten zu Deiner Adresse (%s)."
 
 #: woocommerce_template_functions.php:786
 #@ woothemes
 msgid "If you require assistance or wish to make alternate arrangements please contact us."
-msgstr ""
+msgstr "Wenn Du Hilfe ben&ouml;tigst oder weitere Absprachen treffen m&ouml;chtest, dann kontaktiere uns bitte."
 
