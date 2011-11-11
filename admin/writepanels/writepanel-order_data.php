@@ -272,7 +272,7 @@ function woocommerce_order_actions_meta_box($post) {
 		<li><input type="submit" class="button" name="reduce_stock" value="<?php _e('Reduce stock', 'woothemes'); ?>" /> <?php _e('- Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as complete/processing after payment.', 'woothemes'); ?></li>
 		<li><input type="submit" class="button" name="restore_stock" value="<?php _e('Restore stock', 'woothemes'); ?>" /> <?php _e('- Restores stock for each item in the order; useful after refunding or canceling the entire order.', 'woothemes'); ?></li>
 		
-		<li><input type="submit" class="button" name="invoice" value="<?php _e('Email invoice', 'woothemes'); ?>" /> <?php _e('- Emails the customer order details and a payment link.', 'woothemes'); ?></li>
+		<li><input type="submit" class="button" name="invoice" value="<?php _e('Email invoice', 'woothemes'); ?>" /> <?php _e('- Emails the customer order details and a payment link (if the order is pending/unpaid).', 'woothemes'); ?></li>
 		
 		<li>
 		<?php
@@ -515,7 +515,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		elseif (isset($_POST['invoice']) && $_POST['invoice']) :
 			
 			// Mail link to customer
-			woocommerce_pay_for_order_customer_notification( $order->id );
+			woocommerce_pay_for_order_customer_notification( $order );
 			
 		endif;
 	
