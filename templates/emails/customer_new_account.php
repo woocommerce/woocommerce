@@ -1,3 +1,5 @@
+<?php if (!defined('ABSPATH')) exit; ?>
+
 <?php global $user_login, $user_pass, $blogname; ?>
 
 <?php do_action('woocommerce_email_header'); ?>
