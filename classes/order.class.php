@@ -453,6 +453,7 @@ class woocommerce_order {
 		$this->record_product_sales();
 		$this->reduce_order_stock();
 		
+		do_action( 'woocommerce_payment_complete', $this->id );
 	}
 	
 	/**
