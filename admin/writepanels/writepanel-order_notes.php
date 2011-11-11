@@ -34,7 +34,7 @@ function woocommerce_order_notes_meta_box() {
 			if ($customer_note) echo 'customer-note';
 			echo '"><div class="note_content">';
 			echo wpautop(wptexturize($note->comment_content));
-			echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(strtotime($note->comment_date))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
+			echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(strtotime($note->comment_date), current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
 			echo '</li>';
 		endforeach;
 	else :

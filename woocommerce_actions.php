@@ -253,7 +253,7 @@ function woocommerce_add_order_note() {
 		if ($is_customer_note) echo 'customer-note';
 		echo '"><div class="note_content">';
 		echo wpautop(wptexturize($note));
-		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(strtotime('NOW'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
+		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
 		echo '</li>';
 		
 	endif;
