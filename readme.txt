@@ -83,6 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.2.2 =
+* Tweaked 'pay' emails
 * Check at top of email templates to make sure they are not accessed directly
 
 = 1.2.1 - 10/11/2011 =
