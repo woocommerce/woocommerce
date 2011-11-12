@@ -134,7 +134,7 @@ function woocommerce_init() {
 }
 
 /**
- * Init WooCommerce
+ * Init WooCommerce Thumbnails after theme setup
  **/
 add_action('after_setup_theme', 'woocommerce_init_post_thumbnails');
 
@@ -147,6 +147,14 @@ function woocommerce_init_post_thumbnails() {
 	endif;
 }
 
+/**
+ * Output generator to aid debugging
+ **/
+add_action('wp_head', 'woocommerce_generator');
+
+function woocommerce_generator() {
+	echo '<meta name="generator" content="WooCommerce ' . WOOCOMMERCE_VERSION . '">';
+}
 
 /**
  * Set up Roles & Capabilities
@@ -530,16 +538,24 @@ function woocommerce_comments($comment, $args, $depth) {
 	<?php
 }
 
+
 /**
- * Exclude order comments from front end
+ * Exclude order comments from queries
+ *
+ * This code should exclude shop_order comments from queries. Some queries (like the recent comments widget on the dashboard) are hardcoded
+ * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and
+ * shop managers can view orders anyway.
+ *
+ * The frontend view order pages get around this filter by using remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
  **/
 function woocommerce_exclude_order_comments( $clauses ) {
+	global $wpdb, $typenow;
 	
-	global $wpdb;
+	var_dump($clauses);
 	
-	$clauses['join'] = "
-		LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID
-	";
+	if (is_admin() && $typenow=='shop_order') return $clauses; // Don't hide when viewing orders in admin
+	
+	$clauses['join'] = "LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID";
 	
 	if ($clauses['where']) $clauses['where'] .= ' AND ';
 	
@@ -550,7 +566,23 @@ function woocommerce_exclude_order_comments( $clauses ) {
 	return $clauses;	
 
 }
-if (!is_admin()) add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
+add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
+
+
+/**
+ * Exclude order comments from comments RSS
+ **/
+function woocommerce_exclude_order_comments_from_feed( $where ) {
+	global $wpdb;
+	
+    if ($where) $where .= ' AND ';
+	
+	$where .= "$wpdb->posts.post_type NOT IN ('shop_order')";
+    
+    return $where;
+}
+add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed' );
+
 
 /**
  * readfile_chunked
