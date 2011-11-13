@@ -190,9 +190,10 @@ function woocommerce_completed_order_customer_notification( $id ) {
  **/
 function woocommerce_pay_for_order_customer_notification( $order ) {
 	
-	global $order_id, $email_heading;
+	global $order_id, $the_order, $email_heading;
 	
 	$order_id = $order->id;
+	$the_order = $order;
 	
 	$email_heading = sprintf(__('Invoice for Order #%s', 'woothemes'), $order_id);
 
