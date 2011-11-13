@@ -42,6 +42,7 @@ class woocommerce_product {
 	var $sale_price_dates_to;
 	var $min_variation_price;
 	var $max_variation_price;
+	var $featured;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -80,7 +81,8 @@ class woocommerce_product {
 			'sale_price_dates_from' => '',
 			'sale_price_dates_to' 	=> '',
 			'min_variation_price'	=> '',
-			'max_variation_price'	=> ''
+			'max_variation_price'	=> '',
+			'featured'		=> 'no'
 		);
 		
 		// Load the data from the custom fields
@@ -117,16 +119,27 @@ class woocommerce_product {
         
         if (is_null($this->total_stock)) :
         
-	        $this->total_stock = $this->stock;
-			if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child) :
-				if (isset($child->product->variation_has_stock)) :
-					if ($child->product->variation_has_stock) :
-						$this->total_stock += $child->product->stock;
+        	$transient_name = 'woocommerce_product_total_stock_' . $this->id;
+        
+        	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) :
+        
+		        $this->total_stock = $this->stock;
+		        
+				if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child_id) :
+					
+					$stock = get_post_meta($child_id, 'stock', true);
+					
+					if ( $stock!='' ) :
+					
+						$this->total_stock += $stock;
+	
 					endif;
-				else :
-					$this->total_stock += $child->product->stock;
-				endif;
-			endforeach;
+					
+				endforeach;
+				
+				set_transient( $transient_name, $this->total_stock );
+				
+			endif;
 		
 		endif;
 		
@@ -143,26 +156,31 @@ class woocommerce_product {
 			if ($this->is_type('variable') || $this->is_type('grouped')) :
 			
 				$child_post_type = ($this->is_type('variable')) ? 'product_variation' : 'product';
-			
-				if ( $children_products =& get_children( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC' ) ) :
-	
-					if ($children_products) foreach ($children_products as $child) :
-						
-						if ($this->is_type('variable')) :
-							$child->product = &new woocommerce_product_variation( $child->ID, $this->id, $this->product_custom_fields );
-						else :
-							$child->product = &new woocommerce_product( $child->ID );
-						endif;
-						
-					endforeach;
-					$this->children = (array) $children_products;
-				endif;
 				
+				$transient_name = 'woocommerce_product_children_ids_' . $this->id;
+        
+	        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
+	        
+			        $this->children = get_posts( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC&fields=ids&post_status=any' );
+					
+					set_transient( $transient_name, $this->children );
+					
+				endif;
+
 			endif;
 			
 		endif;
 		
 		return (array) $this->children;
+	}
+	
+	function get_child( $child_id ) {
+		if ($this->is_type('variable')) :
+			$child = &new woocommerce_product_variation( $child_id, $this->id, $this->product_custom_fields );
+		else :
+			$child = &new woocommerce_product( $child_id );
+		endif;
+		return $child;
 	}
 
 	/**
@@ -179,7 +197,7 @@ class woocommerce_product {
 			// Out of stock attribute
 			if (!$this->is_in_stock()) :
 				update_post_meta($this->id, 'stock_status', 'outofstock');
-    			$woocommerce->clear_product_transients(); // Clear transient
+    			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 			endif;
 			
 			return $this->stock;
@@ -412,8 +430,7 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is featured */
 	function is_featured() {
-		if (get_post_meta($this->id, 'featured', true)=='yes') return true;
-		return false;
+		if ($this->featured=='yes') return true; else return false;
 	}
 	
 	/** Returns whether or not the product is visible */
@@ -437,8 +454,8 @@ class woocommerce_product {
 	function is_on_sale() {
 		if ( $this->has_child() ) :
 			
-			foreach ($this->get_children() as $child) :
-				if ( $child->product->sale_price==$child->product->price ) return true;
+			foreach ($this->get_children() as $child_id) :
+				if ( get_post_meta( $child_id, 'price', true) == $child->price ) return true;
 			endforeach;
 			
 		else :
@@ -525,8 +542,8 @@ class woocommerce_product {
 			$min_price = '';
 			$max_price = '';
 			
-			foreach ($this->get_children() as $child) :
-				$child_price = $child->product->get_price();
+			foreach ($this->get_children() as $child_id) :
+				$child_price = get_post_meta( $child_id, 'price', true);
 				if ($child_price<$min_price || $min_price == '') $min_price = $child_price;
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
@@ -773,7 +790,6 @@ class woocommerce_product {
         if(!is_array($attributes)) return array();
         
         $available_attributes = array();
-        $children = $this->get_children();
         
         foreach ($attributes as $attribute) {
             if (!$attribute['is_variation']) continue;
@@ -781,21 +797,18 @@ class woocommerce_product {
             $values = array();
             $attribute_field_name = 'attribute_'.sanitize_title($attribute['name']);
 
-            foreach ($children as $child) {
-                /* @var $variation woocommerce_product_variation */
-                $variation = $child->product;
+            foreach ($this->get_children() as $child_id) {
+            
+                if (get_post_status( $child_id ) != 'publish') continue; // Disabled
+            	
+            	$child = $this->get_child( $child_id );
+            	
+                $vattributes = $child->get_variation_attributes();
 
-                if ($variation instanceof woocommerce_product_variation) {
-                	
-                	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
-                	
-                    $vattributes = $variation->get_variation_attributes();
-
-                    if (is_array($vattributes)) {
-                        foreach ($vattributes as $name => $value) {
-                            if ($name == $attribute_field_name) {
-                                $values[] = $value;
-                            }
+                if (is_array($vattributes)) {
+                    foreach ($vattributes as $name => $value) {
+                        if ($name == $attribute_field_name) {
+                            $values[] = $value;
                         }
                     }
                 }
@@ -858,7 +871,7 @@ class woocommerce_product {
     			$this->grouped_product_sync();
     			
     			// Clear transient
-    			$woocommerce->clear_product_transients();
+    			$woocommerce->clear_product_transients( $this->id );
     			
     		endif;
 
@@ -880,7 +893,7 @@ class woocommerce_product {
     			$this->grouped_product_sync();
     			
     			// Clear transient
-    			$woocommerce->clear_product_transients();
+    			$woocommerce->clear_product_transients( $this->id );
 			
 			endif;
     		

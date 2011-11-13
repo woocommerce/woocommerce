@@ -198,13 +198,13 @@ class woocommerce_product_variation extends woocommerce_product {
 						if (!$parent_product->backorders_allowed()) :
 							if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
 								update_post_meta($this->id, 'stock_status', 'outofstock');
-								$woocommerce->clear_product_transients(); // Clear transient
+								$woocommerce->clear_product_transients( $this->id ); // Clear transient
 							endif;
 						endif;
 					else :
 						if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
 							update_post_meta($this->id, 'stock_status', 'outofstock');
-							$woocommerce->clear_product_transients(); // Clear transient
+							$woocommerce->clear_product_transients( $this->id ); // Clear transient
 						endif;
 					endif;
 

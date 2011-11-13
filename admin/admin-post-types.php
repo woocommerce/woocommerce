@@ -868,8 +868,6 @@ function woocommerce_admin_product_search( $wp ) {
 		unset( $wp->query_vars['s'] );
 		$wp->query_vars['p'] = $id;
 		
-		var_dump(1);
-		
 	elseif( 'SKU:' == substr( $wp->query_vars['s'], 0, 4 ) ) :
 		
 		$sku = trim( substr( $wp->query_vars['s'], 4 ) );
@@ -883,7 +881,6 @@ function woocommerce_admin_product_search( $wp ) {
 		unset( $wp->query_vars['s'] );
 		$wp->query_vars['p'] = $id;
 		$wp->query_vars['sku'] = $sku;
-		var_dump(1);
 		
 	endif;
 }

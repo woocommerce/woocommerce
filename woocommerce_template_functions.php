@@ -318,7 +318,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 			<table cellspacing="0" class="group_table">
 				<tbody>
-					<?php foreach ($_product->get_children() as $child) : $child_product = $child->product; $cavailability = $child_product->get_availability(); ?>
+					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
 						<tr>
 							<td><div class="quantity"><input name="quantity[<?php echo $child->ID; ?>]" value="0" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 							<td><label for="product-<?php echo $child_product->id; ?>"><?php 
@@ -355,8 +355,9 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
         $available_variations = array();
         
-        foreach($_product->get_children() as $child) {
-            $variation = $child->product;
+        foreach($_product->get_children() as $child_id) {
+
+            $variation = $_product->get_child( $child_id );
             
             if($variation instanceof woocommerce_product_variation) {
                         	
