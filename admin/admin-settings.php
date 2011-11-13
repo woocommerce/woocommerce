@@ -900,6 +900,9 @@ function woocommerce_settings() {
 						'payment_gateways' => __( 'Payment Gateways', 'woothemes' ),
 						'email' => __( 'Emails', 'woothemes' ),
 					);
+					
+					$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
+					
 					foreach ($tabs as $name => $label) :
 						echo '<a href="' . admin_url( 'admin.php?page=woocommerce&tab=' . $name ) . '" class="nav-tab ';
 						if( $current_tab==$name ) echo 'nav-tab-active';
