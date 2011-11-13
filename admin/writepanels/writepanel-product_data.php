@@ -544,6 +544,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	wp_set_object_terms($post_id, $product_type, 'product_type');
 	update_post_meta( $post_id, 'downloadable', $is_downloadable );
 	update_post_meta( $post_id, 'virtual', $is_virtual );
+	
+	// Set transient for product type
+	set_transient( 'woocommerce_product_type_' . $post_id, $product_type );
 
 	// Sales and prices
 	if ($product_type=='simple' || $product_type=='external') :

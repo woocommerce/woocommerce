@@ -110,7 +110,7 @@ function woocommerce_cart( $atts ) {
 									echo $woocommerce->cart->get_item_data( $values );
                        				
                        				// Backorder notification
-                       				if ($_product->backorders_require_notification() && $_product->total_stock<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woothemes').'</p>';
+                       				if ($_product->backorders_require_notification() && $_product->get_total_stock()<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woothemes').'</p>';
 								?>
 							</td>
 							<td class="product-price"><?php echo woocommerce_price($_product->get_price()); ?></td>

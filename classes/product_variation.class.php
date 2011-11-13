@@ -67,12 +67,7 @@ class woocommerce_product_variation extends woocommerce_product {
 		);
 		
 		// Load the data from the custom fields
-		foreach ($load_data as $key => $default) :
-			$this->$key = (isset($parent_custom_fields[$key][0]) && $parent_custom_fields[$key][0]!=='') ? $parent_custom_fields[$key][0] : $default;
-		endforeach;
-		
-		// Load serialised data, unserialise twice to fix WP bug
-		if (isset($product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $product_custom_fields['product_attributes'][0] )); else $this->attributes = array();	
+		foreach ($load_data as $key => $default) $this->$key = (isset($parent_custom_fields[$key][0]) && $parent_custom_fields[$key][0]!=='') ? $parent_custom_fields[$key][0] : $default;
 
 		$this->product_type = 'variable';
 		
@@ -190,7 +185,7 @@ class woocommerce_product_variation extends woocommerce_product {
 			if ($this->managing_stock()) :
 				
 				$this->stock = $this->stock - $by;
-				$this->total_stock = $this->total_stock - $by;
+				$this->total_stock = $this->get_total_stock() - $by;
 				update_post_meta($this->variation_id, 'stock', $this->stock);
 				
 				// Parents out of stock attribute
@@ -201,13 +196,15 @@ class woocommerce_product_variation extends woocommerce_product {
 					
 					if ($parent_product->managing_stock()) :
 						if (!$parent_product->backorders_allowed()) :
-							if ($parent_product->total_stock==0 || $parent_product->total_stock<0) :
+							if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
 								update_post_meta($this->id, 'stock_status', 'outofstock');
+								$woocommerce->clear_product_transients(); // Clear transient
 							endif;
 						endif;
 					else :
-						if ($parent_product->total_stock==0 || $parent_product->total_stock<0) :
+						if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
 							update_post_meta($this->id, 'stock_status', 'outofstock');
+							$woocommerce->clear_product_transients(); // Clear transient
 						endif;
 					endif;
 
@@ -230,7 +227,7 @@ class woocommerce_product_variation extends woocommerce_product {
 			if ($this->managing_stock()) :
 
 				$this->stock = $this->stock + $by;
-				$this->total_stock = $this->total_stock + $by;
+				$this->total_stock = $this->get_total_stock() + $by;
 				update_post_meta($this->variation_id, 'stock', $this->stock);
 				
 				// Parents out of stock attribute

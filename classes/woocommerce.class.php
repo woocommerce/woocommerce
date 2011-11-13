@@ -326,7 +326,13 @@ class woocommerce {
 		 * Clear Product Transients
 		 */
 		function clear_product_transients() {
+			global $wpdb;
+			
 			delete_transient('woocommerce_products_onsale');
+			delete_transient('woocommerce_hidden_product_ids');
+			delete_transient('woocommerce_hidden_from_search_product_ids');
+			
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_unfiltered_product_ids_%')");
 		}
 	
 }

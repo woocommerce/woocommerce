@@ -84,30 +84,18 @@ class woocommerce_product {
 		);
 		
 		// Load the data from the custom fields
-		foreach ($load_data as $key => $default) :
-			$this->$key = (isset($this->product_custom_fields[$key][0]) && $this->product_custom_fields[$key][0]!=='') ? $this->product_custom_fields[$key][0] : $default;
-		endforeach;
-		
-		// Load serialised data, unserialise twice to fix WP bug
-		if (isset($this->product_custom_fields['product_attributes'][0])) $this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['product_attributes'][0] )); else $this->attributes = array();		
-						
+		foreach ($load_data as $key => $default) $this->$key = (isset($this->product_custom_fields[$key][0]) && $this->product_custom_fields[$key][0]!=='') ? $this->product_custom_fields[$key][0] : $default;
+			
 		// Get product type
-		$terms = wp_get_object_terms( $id, 'product_type', array('fields' => 'names') );
-		$this->product_type = (isset($terms[0])) ? sanitize_title($terms[0]) : 'simple';
+		$transient_name = 'woocommerce_product_type_' . $this->id;
 		
-		// total_stock (stock of parent and children combined)
-		$this->total_stock = $this->stock;
-		if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child) :
-			if (isset($child->product->variation_has_stock)) :
-				if ($child->product->variation_has_stock) :
-					$this->total_stock += $child->product->stock;
-				endif;
-			else :
-				$this->total_stock += $child->product->stock;
-			endif;
-		endforeach;
-		
-		// Check sale
+		if ( false === ( $this->product_type = get_transient( $transient_name ) ) ) :
+			$terms = wp_get_object_terms( $id, 'product_type', array('fields' => 'names') );
+			$this->product_type = (isset($terms[0])) ? sanitize_title($terms[0]) : 'simple';
+			set_transient( $transient_name, $this->product_type );
+		endif;
+
+		// Check sale dates
 		$this->check_sale_price();
 	}
 	
@@ -120,6 +108,30 @@ class woocommerce_product {
         return $this->sku;
     }
     
+    /**
+     * Get total stock
+     * 
+     * This is the stock of parent and children combined
+     */
+    function get_total_stock() {
+        
+        if (is_null($this->total_stock)) :
+        
+	        $this->total_stock = $this->stock;
+			if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child) :
+				if (isset($child->product->variation_has_stock)) :
+					if ($child->product->variation_has_stock) :
+						$this->total_stock += $child->product->stock;
+					endif;
+				else :
+					$this->total_stock += $child->product->stock;
+				endif;
+			endforeach;
+		
+		endif;
+		
+		return (int) $this->total_stock;
+    }
     
 	/** Returns the product's children */
 	function get_children() {
@@ -161,11 +173,14 @@ class woocommerce_product {
 	function reduce_stock( $by = 1 ) {
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock - $by;
-			$this->total_stock = $this->total_stock - $by;
+			$this->total_stock = $this->get_total_stock() - $by;
 			update_post_meta($this->id, 'stock', $this->stock);
 			
 			// Out of stock attribute
-			if (!$this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'outofstock');
+			if (!$this->is_in_stock()) :
+				update_post_meta($this->id, 'stock_status', 'outofstock');
+    			$woocommerce->clear_product_transients(); // Clear transient
+			endif;
 			
 			return $this->stock;
 		endif;
@@ -179,7 +194,7 @@ class woocommerce_product {
 	function increase_stock( $by = 1 ) {
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock + $by;
-			$this->total_stock = $this->total_stock + $by;
+			$this->total_stock = $this->get_total_stock() + $by;
 			update_post_meta($this->id, 'stock', $this->stock);
 			
 			// Out of stock attribute
@@ -288,7 +303,7 @@ class woocommerce_product {
 	function is_in_stock() {
 		if ($this->managing_stock()) :
 			if (!$this->backorders_allowed()) :
-				if ($this->total_stock==0 || $this->total_stock<0) :
+				if ($this->get_total_stock()==0 || $this->get_total_stock()<0) :
 					return false;
 				else :
 					if ($this->stock_status=='instock') return true;
@@ -354,7 +369,7 @@ class woocommerce_product {
 			endif;
 		else :
 			if ($this->is_in_stock()) :
-				if ($this->total_stock > 0) :
+				if ($this->get_total_stock() > 0) :
 					$availability = __('In stock', 'woothemes');
 					
 					if ($this->backorders_allowed()) :
@@ -683,13 +698,23 @@ class woocommerce_product {
 	
 	/** Returns product attributes */
 	function get_attributes() {
-		return $this->attributes;
+		
+		if (!is_array($this->attributes)) :
+	
+			if (isset($this->product_custom_fields['product_attributes'][0])) 
+				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['product_attributes'][0] )); 
+			else 
+				$this->attributes = array();	
+		
+		endif;
+	
+		return (array) $this->attributes;
 	}
 	
 	/** Returns whether or not the product has any attributes set */
 	function has_attributes() {
-		if (isset($this->attributes) && sizeof($this->attributes)>0) :
-			foreach ($this->attributes as $attribute) :
+		if (sizeof($this->get_attributes())>0) :
+			foreach ($this->get_attributes() as $attribute) :
 				if ($attribute['is_visible']) return true;
 			endforeach;
 		endif;

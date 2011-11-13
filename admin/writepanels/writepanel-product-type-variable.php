@@ -547,7 +547,7 @@ function woocommerce_link_all_variations() {
 	$_product = &new woocommerce_product( $post_id );
 		
 	// Put variation attributes into an array
-	foreach ($_product->attributes as $attribute) :
+	foreach ($_product->get_attributes() as $attribute) :
 								
 		if ( !$attribute['is_variation'] ) continue;
 		

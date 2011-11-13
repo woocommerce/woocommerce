@@ -81,27 +81,40 @@ class woocommerce_query {
 	}
 	
 	/**
-	 * Get an unpaginated list all product ID's (both filtered and unfiltered)
+	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
 	 */
 	function get_products_in_view() {
-		
 		global $wp_query;
 		
 		$unfiltered_product_ids = array();
 		
-		// Get all visible posts, regardless of filters
-	    $unfiltered_product_ids = get_posts(
-			array_merge( 
-				$wp_query->query,
-				array(
-					'post_type' 	=> 'product',
-					'numberposts' 	=> -1,
-					'post_status' 	=> 'publish',
-					'meta_query' 	=> $this->meta_query,
-					'fields' 		=> 'ids'
+		// Get WP Query for current page (without 'paged')
+		$current_wp_query = $wp_query->query;
+		unset($current_wp_query['paged']);
+		
+		// Generate a transient name based on current query
+		$transient_name = 'woocommerce_unfiltered_product_ids_' . sanitize_key( http_build_query($current_wp_query) );
+		$transient_name = (is_search()) ? $transient_name . '_search' : $transient_name;
+		
+		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
+
+			// Get all visible posts, regardless of filters
+		    $unfiltered_product_ids = get_posts(
+				array_merge( 
+					$current_wp_query,
+					array(
+						'post_type' 	=> 'product',
+						'numberposts' 	=> -1,
+						'post_status' 	=> 'publish',
+						'meta_query' 	=> $this->meta_query,
+						'fields' 		=> 'ids',
+						'no_found_rows' => true
+					)
 				)
-			)
-		);
+			);
+		
+			set_transient( $transient_name, $unfiltered_product_ids );
+		}
 		
 		// Store the variable
 		$this->unfiltered_product_ids = $unfiltered_product_ids;
@@ -185,22 +198,30 @@ class woocommerce_query {
 	}
 	
 	/**
-	 * Get a list of product id's which should be hidden from the frontend; useful for custom queries and loops
+	 * Get a list of product id's which should be hidden from the frontend; useful for custom queries and loops. Makes use of transients.
 	 */
 	function get_hidden_product_ids() {
 		
-		$meta_query = array();
-		$meta_query[] = $this->visibility_meta_query( 'NOT IN' );
-	    $meta_query[] = $this->stock_status_meta_query( 'outofstock' );
+		$transient_name = (is_search()) ? 'woocommerce_hidden_from_search_product_ids' : 'woocommerce_hidden_product_ids';
 		
-		$hidden_product_ids = get_posts(array(
-			'post_type' 	=> 'product',
-			'numberposts' 	=> -1,
-			'post_status' 	=> 'publish',
-			'meta_query' 	=> $meta_query,
-			'fields' 		=> 'ids'
-		));
-		
+		if ( false === ( $hidden_product_ids = get_transient( $transient_name ) ) ) {
+			
+			$meta_query = array();
+			$meta_query[] = $this->visibility_meta_query( 'NOT IN' );
+	    	$meta_query[] = $this->stock_status_meta_query( 'outofstock' );
+			
+			$hidden_product_ids = get_posts(array(
+				'post_type' 	=> 'product',
+				'numberposts' 	=> -1,
+				'post_status' 	=> 'publish',
+				'meta_query' 	=> $meta_query,
+				'fields' 		=> 'ids',
+				'no_found_rows' => true
+			));
+			
+			set_transient( $transient_name, $hidden_product_ids );
+		}
+				
 		return (array) $hidden_product_ids;
 	}	
  
