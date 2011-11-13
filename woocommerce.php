@@ -144,6 +144,8 @@ function woocommerce_init_post_thumbnails() {
 		add_theme_support( 'post-thumbnails' );
 		remove_post_type_support( 'post', 'thumbnail' );
 		remove_post_type_support( 'page', 'thumbnail' );
+	else :
+		add_post_type_support( 'product', 'thumbnail' );
 	endif;
 }
 
