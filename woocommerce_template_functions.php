@@ -1131,6 +1131,7 @@ function woocommerce_product_subcategories() {
 	if (!is_product_category() && !is_shop()) return;
 	if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
 	if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
+	if (is_paged()) return;
 
 	$product_cat_slug 	= get_query_var('product_cat');
 	

@@ -280,14 +280,13 @@ class woocommerce_product {
 		if (empty($this->post)) :
 			$this->post = get_post( $this->id );
 		endif;
-		
 		return $this->post;
 	}
 	
 	/** Get the title of the post */
 	function get_title() {
 		$this->get_post_data();
-		return apply_filters('woocommerce_product_title', get_the_title($this->post->ID), $this);
+		return apply_filters('woocommerce_product_title', apply_filters('the_title', $this->post->post_title), $this);
 	}
 
 	
@@ -354,7 +353,7 @@ class woocommerce_product {
      * @return int
      */
     function get_stock_quantity() {
-        return (int)$this->stock;
+        return (int) $this->stock;
     }
 
 	/** Returns whether or not the product has enough stock for the order */
