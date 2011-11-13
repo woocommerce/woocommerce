@@ -657,60 +657,49 @@ class woocommerce_product {
 	
 	/** Get and return related products */
 	function get_related( $limit = 5 ) {
-		global $wpdb, $all_post_ids;
+		global $woocommerce;
+		
 		// Related products are found from category and tag
 		$tags_array = array(0);
 		$cats_array = array(0);
-		$tags = '';
-		$cats = '';
 		
 		// Get tags
 		$terms = wp_get_post_terms($this->id, 'product_tag');
-		foreach ($terms as $term) {
-			$tags_array[] = $term->term_id;
-		}
-		$tags = implode(',', $tags_array);
+		foreach ($terms as $term) $tags_array[] = $term->term_id;
 		
 		$terms = wp_get_post_terms($this->id, 'product_cat');
-		foreach ($terms as $term) {
-			$cats_array[] = $term->term_id;
-		}
-		$cats = implode(',', $cats_array);
-
-		$q = "
-			SELECT p.ID
-			FROM $wpdb->term_taxonomy AS tt, $wpdb->term_relationships AS tr, $wpdb->posts AS p, $wpdb->postmeta AS pm
-			WHERE 
-				p.ID != $this->id
-				AND p.post_status = 'publish'
-				AND p.post_date_gmt < NOW()
-				AND p.post_type = 'product'
-				AND pm.meta_key = 'visibility'
-				AND pm.meta_value IN ('visible', 'catalog')
-				AND pm.post_id = p.ID
-				AND
-				(
-					(
-						tt.taxonomy ='product_cat'
-						AND tt.term_taxonomy_id = tr.term_taxonomy_id
-						AND tr.object_id  = p.ID
-						AND tt.term_id IN ($cats)
-					)
-					OR 
-					(
-						tt.taxonomy ='product_tag'
-						AND tt.term_taxonomy_id = tr.term_taxonomy_id
-						AND tr.object_id  = p.ID
-						AND tt.term_id IN ($tags)
-					)
-				)
-			GROUP BY tr.object_id
-			ORDER BY RAND()
-			LIMIT $limit;";
- 
-		$related = $wpdb->get_col($q);
+		foreach ($terms as $term) $cats_array[] = $term->term_id;
 		
-		return $related;
+		// Meta query
+		$meta_query = array();
+		$meta_query[] = $woocommerce->query->visibility_meta_query();
+	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+		
+		// Get the posts
+		$related_posts = get_posts(array(
+			'orderby' 		=> 'rand',
+			'posts_per_page'=> $limit,
+			'post_type' 	=> 'product',
+			'fields' 		=> 'ids',
+			'meta_query' 	=> $meta_query,
+			'tax_query' 	=> array(
+				'relation' => 'OR',
+				array(
+					'taxonomy' 	=> 'product_cat',
+					'field' 	=> 'id',
+					'terms' 	=> $cats_array
+				),
+				array(
+					'taxonomy' 	=> 'product_tag',
+					'field' 	=> 'id',
+					'terms' 	=> $tags_array
+				)
+			)
+		));
+		
+		$related_posts = array_diff(array($this->id), $related_posts);
+		
+		return $related_posts;
 	}
 	
 	/** Returns product attributes */
