@@ -245,11 +245,9 @@ jQuery(document).ready(function($) {
 	$('.shipping-calculator-form').hide();
 	
 	$('.shipping-calculator-button').click(function() {
-	  $('.shipping-calculator-form').slideToggle('slow');
+		$('.shipping-calculator-form').slideToggle('slow');
+		return false;
 	}); 
-	
-	// Stop anchors moving the viewport
-	$(".shipping-calculator-button").click(function() {return false;});
 	
 	// Variations
 	
