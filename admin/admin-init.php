@@ -34,7 +34,7 @@ function woocommerce_admin_menu() {
 	
 	if ( current_user_can( 'manage_woocommerce' ) ) $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
-    add_menu_page(__('WooCommerce', 'woothemes'), __('WooCommerce', 'woothemes'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icons.png', 55);
+    add_menu_page(__('WooCommerce', 'woothemes'), __('WooCommerce', 'woothemes'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
     add_submenu_page('woocommerce', __('General Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings');
     add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_categories', 'woocommerce_attributes', 'woocommerce_attributes');
@@ -210,14 +210,6 @@ function woocommerce_admin_head() {
 	if ( !current_user_can( 'manage_woocommerce' ) ) return false;
 	?>
 	<style type="text/css">
-		#toplevel_page_woocommerce .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat 0px -32px !important;}
-		#toplevel_page_woocommerce .wp-menu-image img{display:none;}
-		#toplevel_page_woocommerce:hover .wp-menu-image,#toplevel_page_woocommerce.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat 0px 0px !important;}
-		#menu-posts-product .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -35px -32px !important;}
-		#menu-posts-product:hover .wp-menu-image,#menu-posts-product.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -35px 0px !important;}
-		#menu-posts-shop_order .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -70px -32px !important;}
-		#menu-posts-shop_order:hover .wp-menu-image,#menu-posts-shop_order.wp-has-current-submenu .wp-menu-image{background:url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/icons/menu_icons.png) no-repeat -70px 0px !important;}
-		
 		<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
 			.icon32-posts-product { background-position: -243px -5px !important; }
 		<?php elseif ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_tag' ) : ?>

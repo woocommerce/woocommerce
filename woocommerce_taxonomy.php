@@ -55,6 +55,7 @@ function woocommerce_post_type() {
 			'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
 			'has_archive' 			=> $base_slug,
 			'show_in_nav_menus' 	=> false,
+			'menu_icon'				=> $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_products.png'
 		)
 	);
 	
