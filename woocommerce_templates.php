@@ -224,6 +224,28 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 }
 add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
 
+/**
+ * Fix active class in wp_list_pages for shop page
+ *
+ * Suggested by jessor - https://github.com/woothemes/woocommerce/issues/177
+ **/
+function woocommerce_list_pages($pages){
+    global $post;
+
+    if (is_woocommerce() || is_cart() || is_checkout() || is_page(get_option('woocommerce_thanks_page_id'))) {
+        $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
+        $shop_page = 'page-item-' . get_option('woocommerce_shop_page_id'); // find shop_page_id through woocommerce options
+        
+        if (is_shop()) :
+        	$pages = str_replace($shop_page, $shop_page . ' current_page_item', $pages); // add current_page_item class to shop page
+    	else :
+    		$pages = str_replace($shop_page, $shop_page . ' current_page_parent', $pages); // add current_page_parent class to shop page
+    	endif;
+    }
+    return $pages;
+}
+
+add_filter('wp_list_pages', 'woocommerce_list_pages');
 
 /**
  * Add logout link to my account menu
