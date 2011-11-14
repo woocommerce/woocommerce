@@ -92,7 +92,9 @@ if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
 }
 if (!function_exists('woocommerce_template_loop_price')) {
 	function woocommerce_template_loop_price( $post, $_product ) {
-		?><span class="price"><?php echo $_product->get_price_html(); ?></span><?php
+		$price_html = $_product->get_price_html();
+		if (!$price_html) return;
+		?><span class="price"><?php echo $price_html; ?></span><?php
 	}
 }
 
