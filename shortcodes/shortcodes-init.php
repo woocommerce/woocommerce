@@ -49,7 +49,7 @@ function woocommerce_refresh_mce($ver) {
 /**
  * List products in a category shortcode
  **/
-function woocommerce_product_catagory($atts){
+function woocommerce_product_category($atts){
 	global $woocommerce_loop;
 	
   	if (empty($atts)) return;
@@ -318,7 +318,7 @@ function woocommerce_featured_products( $atts ) {
 /**
  * Shortcode creation
  **/
-add_shortcode('product_category', 'woocommerce_product_catagory');
+add_shortcode('product_category', 'woocommerce_product_category');
 add_shortcode('product', 'woocommerce_product');
 add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
 add_shortcode('products', 'woocommerce_products');

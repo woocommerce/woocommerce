@@ -48,16 +48,8 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
 		if ( $d ) {
 
-			$terms = get_terms('product_cat');
-			$output = "<select name='product_cat' id='dropdown_product_cat'>";
-			$output .= '<option value="">'.__('Select Category', 'woothemes').'</option>';
-			foreach($terms as $term){
-				$term_slug=$term->slug;
-				$term_name =$term->name;
-				$output .="<option value='".$term_slug."'>".$term_name."</option>";
-			}
-			$output .="</select>";
-			echo $output;
+			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
+			woocommerce_product_dropdown_categories( $c, $h );
 			
 			?>
 			<script type='text/javascript'>

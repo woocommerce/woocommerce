@@ -390,3 +390,88 @@ function delete_woocommerce_term_meta($term_id, $meta_key, $meta_value = '', $de
 function get_woocommerce_term_meta($term_id, $key, $single = true){
 	return get_metadata('woocommerce_term', $term_id, $key, $single);
 }
+
+
+/**
+ * WooCommerce Dropdown categories
+ * 
+ * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
+ */
+function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
+	$terms = get_terms('product_cat', 'pad_counts=1&hierarchal='.$hierarchal.'&hide_empty=1&child_of=0');
+	$output = "<select name='product_cat' id='dropdown_product_cat'>";
+	$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
+	foreach($terms as $term) :
+		if ($hierarchal && $term->parent!=0) continue;
+	
+		if ($hierarchal) $depth = woocommerce_get_product_category_depth($term->term_id);
+		
+		if ( isset( $wp_query->query['product_cat'] ) ) :
+			$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$depth$term->name";
+			if ($show_counts) $output .= " ($term->count)";
+			$output .= "</option>";
+		else :
+			$output .="<option value='$term->slug'>$depth$term->name";
+			if ($show_counts) $output .= " ($term->count)";
+			$output .= "</option>";
+		endif;
+		
+		if ($hierarchal) $output .= woocommerce_get_product_category_children($term->term_id, $show_counts);
+		
+	endforeach;
+	$output .="</select>";
+	echo $output;
+}
+
+function woocommerce_get_product_category_depth( $id = '', $depth = '', $i = '', $show_counts = 1 ) {
+	global $wpdb, $term_taxonomy;
+	
+	if( $depth == '' ) :
+			
+		if( $id == '' ) $id = $term_taxonomy->term_id;			
+			
+		$depth = $wpdb->get_var($wpdb->prepare("SELECT parent FROM $wpdb->term_taxonomy WHERE term_id = '%s'", $id));
+		return woocommerce_get_product_category_depth($id, $depth, $i);
+			
+	elseif( $depth == "0" ) :
+	
+		return $i;
+		
+	else :
+		
+		$depth = $wpdb->get_var($wpdb->prepare("SELECT parent FROM $wpdb->term_taxonomy WHERE term_id = '%s'", $depth));
+		$i .='&nbsp;&nbsp;&nbsp;';
+		return woocommerce_get_product_category_depth($id, $depth, $i);
+		
+	endif;
+}
+
+function woocommerce_get_product_category_children( $id = '', $show_counts = 1 ) {
+	global $wp_query;
+	
+	if (!$id) return;
+	
+	$output = '';
+	
+	$terms = get_terms('product_cat', 'pad_counts=1&hierarchal=1&hide_empty=1&child_of='.esc_attr($id));
+
+	foreach( $terms as $term ) :
+		if ($term->parent!=$id) continue;
+		
+		$depth = woocommerce_get_product_category_depth($term->term_id);
+		
+		if ( isset( $wp_query->query['product_cat'] ) ) :
+			$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$depth$term->name";
+			if ($show_counts) $output .= " ($term->count)";
+			$output .= "</option>";
+		else :
+			$output .="<option value='$term->slug'>$depth$term->name";
+			if ($show_counts) $output .= " ($term->count)";
+			$output .= "</option>";
+		endif;
+		$output .= woocommerce_get_product_category_children($term->term_id);
+		
+	endforeach;
+
+	return $output;
+}
