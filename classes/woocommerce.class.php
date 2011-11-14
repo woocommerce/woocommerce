@@ -333,11 +333,12 @@ class woocommerce {
 			delete_transient('woocommerce_hidden_from_search_product_ids');
 			
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_unfiltered_product_ids_%')");
-			
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_layered_nav_count_%')");
+
 			if ($post_id>0) :
 				$post_id = (int) $post_id;
-				$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_total_stock_".$post_id."')");
-				$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_children_ids_".$post_id."')");
+				delete_transient('woocommerce_product_total_stock_'.$post_id);
+				delete_transient('woocommerce_product_children_ids_'.$post_id);
 			endif;
 		}
 	

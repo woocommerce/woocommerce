@@ -36,7 +36,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	function widget( $args, $instance ) {
 		global $woocommerce;
 		
-		if (is_cart()) return;
+		if (is_cart() || is_checkout()) return;
 		
 		extract($args);
 		if ( !empty($instance['title']) ) $title = $instance['title']; else $title = __('Cart', 'woothemes');

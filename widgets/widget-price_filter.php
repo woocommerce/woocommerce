@@ -107,7 +107,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $woocommerce;
+		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query;
 		
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
@@ -127,7 +127,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		endforeach;
 		
 		$min = 0;
-		
+
 		$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
 		FROM $wpdb->posts
 		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id

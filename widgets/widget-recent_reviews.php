@@ -63,20 +63,22 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 			echo '<ul class="product_list_widget">';
 		
 			foreach ( (array) $comments as $comment) :
-			
+				
 				$_product = &new woocommerce_product( $comment->comment_post_ID );
 				
 				$star_size = apply_filters('woocommerce_star_rating_size_recent_reviews', 16);
 				
-				$rating_html = '<div class="star-rating" title="'.get_comment_meta( $comment->comment_ID, 'rating', true ).'">
-					<span style="width:'.(get_comment_meta( $comment->comment_ID, 'rating', true )*$star_size).'px">'.get_comment_meta( $comment->comment_ID, 'rating', true ).' '.__('out of 5', 'woothemes').'</span>
+				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
+				
+				$rating_html = '<div class="star-rating" title="'.$rating.'">
+					<span style="width:'.($rating*$star_size).'px">'.$rating.' '.__('out of 5', 'woothemes').'</span>
 				</div>';
 				
 				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
 				
 				echo $_product->get_image();
 				
-				echo get_the_title($comment->comment_post_ID).'</a>';
+				echo $_product->get_title().'</a>';
 				
 				echo $rating_html;
 				

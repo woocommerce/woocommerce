@@ -14,7 +14,7 @@ add_action('init', 'woocommerce_layered_nav_init', 1);
 
 function woocommerce_layered_nav_init() {
 
-	global $_chosen_attributes, $wpdb, $woocommerce;
+	global $_chosen_attributes, $woocommerce;
 	
 	$_chosen_attributes = array();
 	
@@ -40,7 +40,7 @@ add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
 
 function woocommerce_layered_nav_query( $filtered_posts ) {
 	
-	global $_chosen_attributes, $wpdb, $woocommerce;
+	global $_chosen_attributes, $woocommerce;
 	
 	if (sizeof($_chosen_attributes)>0) :
 		
@@ -117,7 +117,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
 		
-		global $_chosen_attributes, $wpdb, $woocommerce;
+		global $_chosen_attributes, $woocommerce, $wp_query;
 				
 		$title = $instance['title'];
 		$taxonomy = $woocommerce->attribute_taxonomy_name($instance['attribute']);
@@ -144,8 +144,16 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			if (array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
 			
 			foreach ($terms as $term) {
-			
-				$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
+				
+				// Get count based on current view - uses transients
+				$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
+				
+				if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
+		
+					$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
+				
+					set_transient( $transient_name, $_products_in_term );
+				}
 				
 				$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
 
@@ -250,7 +258,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 	/** @see WP_Widget->form */
 	function form( $instance ) {
-		global $wpdb, $woocommerce;
+		global $woocommerce;
 		?>
 			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes') ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
