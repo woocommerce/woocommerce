@@ -633,6 +633,101 @@ function woocommerce_process_login() {
 	endif;	
 }
 
+
+/**
+ * Process the registration form
+ **/
+add_action('init', 'woocommerce_process_registration');
+ 
+function woocommerce_process_registration() {
+	
+	global $woocommerce;
+	
+	if (isset($_POST['register']) && $_POST['register']) :
+	
+		$woocommerce->verify_nonce('register');
+		
+		// Get fields
+		$sanitized_user_login 	= (isset($_POST['username'])) ? sanitize_user(trim($_POST['username'])) : '';
+		$user_email 		= (isset($_POST['email'])) ? esc_attr(trim($_POST['email'])) : '';
+		$password	= (isset($_POST['password'])) ? esc_attr(trim($_POST['password'])) : '';
+		$password2 	= (isset($_POST['password2'])) ? esc_attr(trim($_POST['password2'])) : '';
+		
+		$user_email = apply_filters( 'user_registration_email', $user_email );
+		
+		// Check the username
+		if ( $sanitized_user_login == '' ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.' ) );
+		} elseif ( ! validate_username( $_POST['username'] ) ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.' ) );
+			$sanitized_user_login = '';
+		} elseif ( username_exists( $sanitized_user_login ) ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.' ) );
+		}
+	
+		// Check the e-mail address
+		if ( $user_email == '' ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.' ) );
+		} elseif ( ! is_email( $user_email ) ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.' ) );
+			$user_email = '';
+		} elseif ( email_exists( $user_email ) ) {
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.' ) );
+		}
+	
+		// Password
+		if ( !$password ) $woocommerce->add_error( __('Password is required.', 'woothemes') );
+		if ( !$password2 ) $woocommerce->add_error( __('Re-enter your password.', 'woothemes') );
+		if ( $password != $password2 ) $woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
+		
+		// Spam trap
+		if (isset($_POST['email_2']) && $_POST['email_2']) $woocommerce->add_error( __('Anti-spam field was filled in.', 'woothemes') );
+		
+		if ($woocommerce->error_count()==0) :
+			
+			$reg_errors = new WP_Error();
+			do_action('register_post', $sanitized_user_login, $user_email, $reg_errors);
+			$reg_errors = apply_filters( 'registration_errors', $reg_errors, $sanitized_user_login, $user_email );
+	
+            // if there are no errors, let's create the user account
+			if ( !$reg_errors->get_error_code() ) :
+
+                $user_id 	= wp_create_user( $sanitized_user_login, $password, $user_email );
+                
+                if ( !$user_id ) {
+                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woothemes'), get_option('admin_email')));
+                    return;
+                }
+
+                // Change role
+                wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
+
+                // send the user a confirmation and their login details
+                woocommerce_customer_new_account( $user_id, $password );
+
+                // set the WP login cookie
+                $secure_cookie = is_ssl() ? true : false;
+                wp_set_auth_cookie($user_id, true, $secure_cookie);
+                
+                // Redirect
+                if ( isset($_SERVER['HTTP_REFERER'])) :
+					wp_safe_redirect($_SERVER['HTTP_REFERER']);
+					exit;
+				endif;
+				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+				exit;
+			
+			else :
+				$woocommerce->add_error( $reg_errors->get_error_message() );
+            	return;                 
+			endif;
+			
+		endif;
+	
+	endif;	
+}
+
+
 /**
  * Process ajax checkout form
  */

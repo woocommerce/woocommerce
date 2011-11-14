@@ -121,6 +121,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __( 'My Account', 'woothemes' ),
+		'desc' 		=> __( 'Allow unregistered users to register from the My Account page', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_myaccount_registration',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+	),
+	
+	array(  
 		'name' => __( 'Shop Styling', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',

@@ -532,8 +532,8 @@ class woocommerce_checkout {
 					if ($this->creating_account && !$user_id) :
 				
 						$reg_errors = new WP_Error();
-						do_action('register_post', $this->posted['billing_email'], $this->posted['billing_email'], $reg_errors);
-						$errors = apply_filters( 'registration_errors', $reg_errors, $this->posted['billing_email'], $this->posted['billing_email'] );
+						do_action('register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors);
+						$errors = apply_filters( 'registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
 				
 		                // if there are no errors, let's create the user account
 						if ( !$reg_errors->get_error_code() ) :

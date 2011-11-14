@@ -829,7 +829,7 @@ if (!function_exists('woocommerce_login_form')) {
 }
 
 /**
- * WooCommerce Login Form
+ * WooCommerce Checkout Login Form
  **/
 if (!function_exists('woocommerce_checkout_login_form')) {
 	function woocommerce_checkout_login_form() {

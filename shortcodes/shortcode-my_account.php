@@ -44,44 +44,52 @@ function woocommerce_my_account( $atts ) {
 		<?php endif; ?>	
 		
 		
-		<h2><?php _e('Recent Orders', 'woothemes'); ?></h2>		
-		<table class="shop_table my_account_orders">
-		
-			<thead>
-				<tr>
-					<th><span class="nobr"><?php _e('#', 'woothemes'); ?></span></th>
-					<th><span class="nobr"><?php _e('Date', 'woothemes'); ?></span></th>
-					<th><span class="nobr"><?php _e('Ship to', 'woothemes'); ?></span></th>
-					<th><span class="nobr"><?php _e('Total', 'woothemes'); ?></span></th>
-					<th colspan="2"><span class="nobr"><?php _e('Status', 'woothemes'); ?></span></th>
-				</tr>
-			</thead>
+		<h2><?php _e('Recent Orders', 'woothemes'); ?></h2>
+		<?php
+		$woocommerce_orders = &new woocommerce_orders();
+		$woocommerce_orders->get_customer_orders( get_current_user_id(), $recent_orders );
+		if ($woocommerce_orders->orders) :
+		?>
+			<table class="shop_table my_account_orders">
 			
-			<tbody><?php
-				$woocommerce_orders = &new woocommerce_orders();
-				$woocommerce_orders->get_customer_orders( get_current_user_id(), $recent_orders );
-				if ($woocommerce_orders->orders) foreach ($woocommerce_orders->orders as $order) :
-					?><tr class="order">
-						<td><?php echo $order->id; ?></td>
-						<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
-						<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
-						<td><?php echo woocommerce_price($order->order_total); ?></td>
-						<td><?php 
-							$status = get_term_by('slug', $order->status, 'shop_order_status');
-							echo $status->name; 
-						?></td>
-						<td style="text-align:right; white-space:nowrap;">
-							<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
-								<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
-								<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woothemes'); ?></a>
-							<?php endif; ?>
-							<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(get_option('woocommerce_view_order_page_id'))) ); ?>" class="button"><?php _e('View', 'woothemes'); ?></a>
-						</td>
-					</tr><?php
-				endforeach;
-			?></tbody>
-		
-		</table>
+				<thead>
+					<tr>
+						<th><span class="nobr"><?php _e('#', 'woothemes'); ?></span></th>
+						<th><span class="nobr"><?php _e('Date', 'woothemes'); ?></span></th>
+						<th><span class="nobr"><?php _e('Ship to', 'woothemes'); ?></span></th>
+						<th><span class="nobr"><?php _e('Total', 'woothemes'); ?></span></th>
+						<th colspan="2"><span class="nobr"><?php _e('Status', 'woothemes'); ?></span></th>
+					</tr>
+				</thead>
+				
+				<tbody><?php
+					foreach ($woocommerce_orders->orders as $order) :
+						?><tr class="order">
+							<td><?php echo $order->id; ?></td>
+							<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
+							<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
+							<td><?php echo woocommerce_price($order->order_total); ?></td>
+							<td><?php 
+								$status = get_term_by('slug', $order->status, 'shop_order_status');
+								echo $status->name; 
+							?></td>
+							<td style="text-align:right; white-space:nowrap;">
+								<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
+									<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woothemes'); ?></a>
+									<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woothemes'); ?></a>
+								<?php endif; ?>
+								<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(get_option('woocommerce_view_order_page_id'))) ); ?>" class="button"><?php _e('View', 'woothemes'); ?></a>
+							</td>
+						</tr><?php
+					endforeach;
+				?></tbody>
+			
+			</table>
+		<?php
+		else : 
+			_e('You have no recent orders.', 'woothemes');
+		endif;
+		?>
 		
 		<h2><?php _e('My Addresses', 'woothemes'); ?></h2>	
 		<p><?php _e('The following addresses will be used on the checkout page by default.', 'woothemes'); ?></p>
@@ -151,7 +159,8 @@ function woocommerce_my_account( $atts ) {
 		
 	else :
 		
-		woocommerce_login_form();
+		// Login/register template
+		woocommerce_get_template( 'myaccount/login.php' );
 		
 	endif;
 		
@@ -377,7 +386,7 @@ function woocommerce_edit_address() {
 	endif;
 }
 
-function get_woocommerce_change_password () {
+function get_woocommerce_change_password() {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_change_password'); 
 }	
