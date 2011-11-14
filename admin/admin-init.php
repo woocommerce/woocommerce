@@ -480,7 +480,7 @@ function woocommerce_downloads_upload_dir( $pathdata ) {
 		$args = wp_parse_args( $_SERVER['HTTP_REFERER'] );
 		extract( $args, EXTR_SKIP );
 		
-		if ($from =='wc01') :
+		if (isset($from) && $from =='wc01') :
 			
 			// Uploading a downloadable file
 			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];

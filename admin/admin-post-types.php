@@ -855,9 +855,9 @@ endif;
 function woocommerce_shop_order_search_custom_fields( $wp ) {
 	global $pagenow, $wpdb;
    
-	if( 'edit.php' != $pagenow ) return $query;
-	if( !isset( $wp->query_vars['s'] ) || !$wp->query_vars['s'] ) return $query;
-	if ($wp->query_vars['post_type']!='shop_order') return $query;
+	if( 'edit.php' != $pagenow ) return $wp;
+	if( !isset( $wp->query_vars['s'] ) || !$wp->query_vars['s'] ) return $wp;
+	if ($wp->query_vars['post_type']!='shop_order') return $wp;
 	
 	$search_fields = array(
 		'_billing_first_name',

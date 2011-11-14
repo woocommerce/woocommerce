@@ -454,7 +454,7 @@ class woocommerce_product {
 		if ( $this->has_child() ) :
 			
 			foreach ($this->get_children() as $child_id) :
-				if ( get_post_meta( $child_id, 'price', true) == $child->price ) return true;
+				if ( get_post_meta( $child_id, 'price', true) == $this->price ) return true;
 			endforeach;
 			
 		else :
@@ -720,7 +720,7 @@ class woocommerce_product {
 	function has_attributes() {
 		if (sizeof($this->get_attributes())>0) :
 			foreach ($this->get_attributes() as $attribute) :
-				if ($attribute['is_visible']) return true;
+				if (isset($attribute['is_visible']) && $attribute['is_visible']) return true;
 			endforeach;
 		endif;
 		return false;
@@ -736,7 +736,7 @@ class woocommerce_product {
 			echo '<table cellspacing="0" class="shop_attributes">';
 			$alt = 1;
 			foreach ($attributes as $attribute) :
-				if (!$attribute['is_visible']) continue;
+				if (!isset($attribute['is_visible']) || !$attribute['is_visible']) continue;
 				
 				$alt = $alt*-1;
 				echo '<tr class="';
