@@ -427,6 +427,14 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_enable_dimensions',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show weight and dimension fields in product attributes tab', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_dimension_product_attributes',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 	

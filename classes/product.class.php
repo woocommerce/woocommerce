@@ -731,10 +731,55 @@ class woocommerce_product {
 		global $woocommerce;
 		
 		$attributes = $this->get_attributes();
-		if ($attributes && sizeof($attributes)>0) :
+		
+		$show_dimensions 	= false;
+		$has_dimensions 	= false;
+		
+		if (get_option('woocommerce_enable_dimension_product_attributes')=='yes') :
+			
+			$show_dimensions 	= true;
+			$weight 			= '';
+			$dimensions 		= '';
+			
+			$length = $this->length;
+			$width = $this->width;
+			$height = $this->height;
+			
+			if ($this->get_weight()) $weight = $this->get_weight() . get_option('woocommerce_weight_unit');
+			
+			if (($length && $width && $height)) $dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
+			
+			if ($weight || $dimensions) $has_dimensions = true;
+			
+		endif;	
+		
+		if (sizeof($attributes)>0 || ($show_dimensions && $has_dimensions)) :
 			
 			echo '<table cellspacing="0" class="shop_attributes">';
 			$alt = 1;
+			
+			if (($show_dimensions && $has_dimensions)) :
+				
+				if ($weight) :
+					
+					$alt = $alt*-1;
+					echo '<tr class="';
+					if ($alt==1) echo 'alt';
+					echo '"><th>'.__('Weight', 'woothemes').'</th><td>'.$weight.'</td></tr>';
+					
+				endif;
+				
+				if ($dimensions) :
+					
+					$alt = $alt*-1;
+					echo '<tr class="';
+					if ($alt==1) echo 'alt';
+					echo '"><th>'.__('Dimensions', 'woothemes').'</th><td>'.$dimensions.'</td></tr>';
+					
+				endif;
+				
+			endif;
+			
 			foreach ($attributes as $attribute) :
 				if (!isset($attribute['is_visible']) || !$attribute['is_visible']) continue;
 				
