@@ -170,6 +170,9 @@ function woocommerce_page_body_classes() {
 	if (is_cart()) $woocommerce_body_classes[] = 'woocommerce-cart';
 	
 	if (is_account_page()) $woocommerce_body_classes[] = 'woocommerce-account';
+	
+	if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || get_page(get_option('woocommerce_order_tracking_page_id')) || get_page(get_option('woocommerce_thanks_page_id'))) $woocommerce_body_classes[] = 'woocommerce-page';
+	
 }
 add_action('wp_head', 'woocommerce_page_body_classes');
 

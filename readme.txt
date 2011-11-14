@@ -90,6 +90,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved products class and get_related function
 * Removed subcats when paged
 * Category widget now supports hierarchy/counts
+* woocommerce-page body class for *all* woocommerce pages
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
