@@ -976,6 +976,7 @@ function woocommerce_google_tracking() {
 	global $woocommerce;
 	
 	if (!get_option('woocommerce_ga_standard_tracking_enabled')) return;
+	if (is_admin()) return; // Don't track admin
 	
 	$tracking_id = get_option('woocommerce_ga_id');
 	
@@ -1022,6 +1023,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
 	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
+	if (is_admin()) return; // Don't track admin
 	
 	$tracking_id = get_option('woocommerce_ga_id');
 	
