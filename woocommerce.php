@@ -242,7 +242,7 @@ function woocommerce_frontend_scripts() {
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
 		'plugin_url' 					=> $woocommerce->plugin_url(),
-		'ajax_url' 						=> admin_url('admin-ajax.php'),
+		'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),
 		'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
 		'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
 		'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
