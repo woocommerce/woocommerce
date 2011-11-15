@@ -9,11 +9,11 @@
  */
 class woocommerce_query {
 	
-	var $unfiltered_product_ids 	= array(); // Unfilted product ids (before layered nav etc)
-	var $filtered_product_ids 		= array(); // Filted product ids (after layered nav)
-	var $post__in 					= array(); // Product id's that match the layered nav + price filter
+	var $unfiltered_product_ids 	= array(); 	// Unfiltered product ids (before layered nav etc)
+	var $filtered_product_ids 		= array(); 	// Filtered product ids (after layered nav)
+	var $post__in 					= array(); 	// Product id's that match the layered nav + price filter
 	var $meta_query 				= ''; 		// The meta query for the page
-	var $layered_nav_post__in 		= array(); // posts matching layered nav only
+	var $layered_nav_post__in 		= array(); 	// posts matching layered nav only
 	var $layered_nav_product_ids 	= array();	// Stores posts matching layered nav, so price filter can find max price in view
 	
 	/** constructor */

@@ -105,10 +105,10 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	function widget( $args, $instance ) {
 		extract($args);
 		
-		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
-		
 		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query;
 		
+		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
+
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
 		
@@ -120,24 +120,36 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		if (get_search_query()) $fields = '<input type="hidden" name="s" value="'.get_search_query().'" />';
 		if (isset($_GET['post_type'])) $fields .= '<input type="hidden" name="post_type" value="'.esc_attr( $_GET['post_type'] ).'" />';
 		
-		if ($_chosen_attributes) foreach ($_chosen_attributes as $attribute => $value) :
+		if ($_chosen_attributes) foreach ($_chosen_attributes as $attribute => $data) :
 		
-			$fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'filter_', $attribute) ).'" value="'.esc_attr( implode(',', $value) ).'" />';
+			$fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'filter_', $attribute) ).'" value="'.esc_attr( implode(',', $data['terms']) ).'" />';
+			if ($data['query_type']=='or') $fields .= '<input type="hidden" name="'.esc_attr( str_replace('pa_', 'query_type_', $attribute) ).'" value="or" />';
 		
 		endforeach;
 		
 		$min = 0;
+		
+		if (sizeof($woocommerce->query->layered_nav_product_ids)==0) :
 
-		$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
-		FROM $wpdb->posts
-		LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-		WHERE meta_key = 'price' AND (
-			$wpdb->posts.ID IN (".implode(',', $woocommerce->query->layered_nav_product_ids).") 
-			OR (
-				$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")
-				AND $wpdb->posts.post_parent != 0
-			)
-		)"));
+			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
+			FROM $wpdb->posts
+			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
+			WHERE meta_key = 'price'"));
+
+		else :
+		
+			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
+			FROM $wpdb->posts
+			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
+			WHERE meta_key = 'price' AND (
+				$wpdb->posts.ID IN (".implode(',', $woocommerce->query->layered_nav_product_ids).") 
+				OR (
+					$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")
+					AND $wpdb->posts.post_parent != 0
+				)
+			)"));
+		
+		endif;
 		
 		echo '<form method="get" action="">
 			<div class="price_slider_wrapper">
