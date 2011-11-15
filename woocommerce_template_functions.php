@@ -352,7 +352,8 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		global $post, $_product, $woocommerce;
 		
 		$attributes = $_product->get_available_attribute_variations();
-		$default_attributes = apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true )));
+		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
+		$selected_attributes = apply_filters( 'woocommerce_product_default_attributes', $default_attributes );
 
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
         $available_variations = array();
@@ -406,7 +407,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
 							<?php if(is_array($options)) : ?>
 								<?php
-									$selected_value = (isset($default_attributes[sanitize_title($name)])) ? $default_attributes[sanitize_title($name)] : '';
+									$selected_value = (isset($selected_attributes[sanitize_title($name)])) ? $selected_attributes[sanitize_title($name)] : '';
 									// Get terms if this is a taxonomy - ordered
 									if (taxonomy_exists(sanitize_title($name))) :
 										$args = array('menu_order' => 'ASC');
