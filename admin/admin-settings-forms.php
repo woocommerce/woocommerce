@@ -146,6 +146,7 @@ function woocommerce_admin_fields($options) {
             case 'sectionend':
             	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']).'_end');
             	echo '</table>';
+            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']).'_after');
             break;
             case 'text':
             	?><tr valign="top">

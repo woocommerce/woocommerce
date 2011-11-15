@@ -95,6 +95,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fix active class in wp_list_pages for shop page
 * Ability to register from my account page
 * Option to show size/weight on attributes tab
+* Added logger class for debugging
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
