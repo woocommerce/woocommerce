@@ -98,7 +98,7 @@ ul.recent-orders.stock_list a,ul.stock_list.stock_list a{text-decoration:none;}
 .woocommerce table.shippingrows tbody .check-column{padding:0;}.woocommerce table.shippingrows tbody .check-column input{margin:0 0 0 8px;}
 .woocommerce table.shippingrows td.country{width:300px;}.woocommerce table.shippingrows td.country p{line-height:21px;margin:0;color:#666;}
 .woocommerce table.shippingrows td.country button.edit_options{float:right;margin:0;}
-.woocommerce table.shippingrows td.country select{margin:9px 0;width:100%;height:160px;}
+.woocommerce table.shippingrows td.country select{margin:9px 0;width:100%;height:160px !important;}
 div.taxrows .taxrow{padding-bottom:8px;}div.taxrows .taxrow select{width:125px;}
 div.taxrows .taxrow input.text{width:60px;}
 div.taxrows .taxrow label.checkbox{line-height:1.5em;margin:0 8px;}div.taxrows .taxrow label.checkbox input{margin:0 4px 0 0;}
