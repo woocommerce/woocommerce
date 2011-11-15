@@ -404,6 +404,8 @@ class woocommerce_cart {
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 					$coupon = &new woocommerce_coupon( $code );
 					
+					if ($coupon->type!='fixed_product' && $coupon->type!='percent_product') continue;
+					
 					$this_item_is_discounted = false;
 					
 					// Specific product ID's get the discount

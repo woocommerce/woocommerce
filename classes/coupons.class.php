@@ -62,28 +62,6 @@ class woocommerce_coupon {
 				
 		if ($this->id) :
 			
-			// Product ids
-			if (sizeof( $this->product_ids )>0) :
-				$valid = false;
-				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
-					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
-						$valid = true;
-					endif;
-				endforeach; endif;
-				if (!$valid) return false;
-			endif;
-			
-			// Exclude product ids
-			if (sizeof( $this->exclude_product_ids )>0) :
-				$valid = true;
-				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
-					if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
-						$valid = false;
-					endif;
-				endforeach; endif;
-				if (!$valid) return false;
-			endif;
-			
 			if ($this->usage_limit>0) :
 				if ($this->usage_count>$this->usage_limit) :
 					return false;
@@ -94,6 +72,32 @@ class woocommerce_coupon {
 				if (strtotime('NOW')>$this->expiry_date) :
 					return false;
 				endif;
+			endif;
+			
+			// Product ids - If a product included is found in the cart then its valid
+			if (sizeof( $this->product_ids )>0) :
+				$valid = false;
+				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
+					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
+						$valid = true;
+					endif;
+				endforeach; endif;
+				if (!$valid) return false;
+			endif;
+			
+			// Cart discounts cannot be added if non-eligble product is found in cart
+			if ($this->type!='fixed_product' && $this->type!='percent_product') : 
+
+				if (sizeof( $this->exclude_product_ids )>0) :
+					$valid = true;
+					if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
+						if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
+							$valid = false;
+						endif;
+					endforeach; endif;
+					if (!$valid) return false;
+				endif;
+			
 			endif;
 			
 			$valid = apply_filters('woocommerce_coupon_is_valid', true, $this);
