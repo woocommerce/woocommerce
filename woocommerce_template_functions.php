@@ -352,7 +352,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		global $post, $_product, $woocommerce;
 		
 		$attributes = $_product->get_available_attribute_variations();
-		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
+		$default_attributes = apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true )));
 
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
         $available_variations = array();
