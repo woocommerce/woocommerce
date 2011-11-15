@@ -34,6 +34,7 @@ class woocommerce {
 		$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
 		$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways class. loads and stores payment methods
 		$this->countries 		= &new woocommerce_countries();			// Countries class
+		$this->log			 	= &new woocommerce_logger();			// Logger class
 		
 		// Load messages
 		$this->load_messages();

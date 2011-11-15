@@ -72,6 +72,7 @@ include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
 include_once( 'classes/validation.class.php' ); 
 include_once( 'classes/woocommerce_query.class.php' );
+include_once( 'classes/woocommerce_logger.class.php' );
 include_once( 'classes/woocommerce.class.php' );
 
 /**
