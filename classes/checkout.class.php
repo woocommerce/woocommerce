@@ -237,16 +237,24 @@ class woocommerce_checkout {
 								
 			echo '</div>';
 		
-		elseif ($woocommerce->cart->ship_to_billing_address_only()) :
-			echo '<h3>'.__('Notes/Comments', 'woothemes').'</h3>';
 		endif;
 		
-		$this->checkout_form_field( 'order_comments', array( 
-			'type' => 'textarea', 
-			'class' => array('notes'), 
-			'label' => __('Order Notes', 'woothemes'), 
-			'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
-			));
+		do_action('woocommerce_before_order_notes', $this);
+		
+		if (get_option('woocommerce_enable_order_comments')!='no') :
+		
+			if ($woocommerce->cart->ship_to_billing_address_only()) :
+				echo '<h3>'.__('Additional Information', 'woothemes').'</h3>';
+			endif;
+			
+			$this->checkout_form_field( 'order_comments', array( 
+				'type' => 'textarea', 
+				'class' => array('notes'), 
+				'label' => __('Order Notes', 'woothemes'), 
+				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
+				));
+					
+		endif;
 		
 		do_action('woocommerce_after_order_notes', $this);
 	}

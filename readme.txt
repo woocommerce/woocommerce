@@ -100,6 +100,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Ability to make layered nav an "OR" query so you can expand your search rather than filter it
 * Tweaked coupon logic. Excluded coupons (for product discounts) don't get a product discount, but valid products do
 * Prevent checkout being submitted twice
+* Made order notes optional
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
