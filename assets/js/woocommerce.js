@@ -203,16 +203,15 @@ jQuery(document).ready(function($) {
 			}
 			if ($(state_box).is('input')) {
 				// Change for select
-				$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '"><option value="">' + woocommerce_params.select_state_text + '</option></select>');
+				$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '"></select>');
 				state_box = $('#' + $(this).attr('rel'));
 			}
-			$(state_box).html(options);
+			$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
 			
 			$(state_box).val(value);
 		} else {
 			if ($(state_box).is('select')) {
 				$(state_box).replaceWith('<input type="text" class="input-text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
-				state_box = $('#' + $(this).attr('rel'));
 			}
 		}
 		
