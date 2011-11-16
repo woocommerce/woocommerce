@@ -90,8 +90,6 @@ class woocommerce_cart {
 	 * Sets the php session data for the cart and coupons
 	 */
 	function set_session() {
-		$cart = array();
-		
 		// Set cart and coupon session data
 		$_SESSION['cart'] = $this->cart_contents;
 		$_SESSION['coupons'] = $this->applied_coupons;

@@ -828,6 +828,8 @@ class woocommerce_checkout {
 	
 	/** Gets the value either from the posted data, or from the users meta data */
 	function get_value( $input ) {
+		global $woocommerce;
+		
 		if (isset( $this->posted[$input] ) && !empty($this->posted[$input])) :
 			return $this->posted[$input];
 		elseif (is_user_logged_in()) :
@@ -842,6 +844,16 @@ class woocommerce_checkout {
 				break;
 				
 			endswitch;
+		else :
+			
+			switch ( $input ) :
+				
+				case "billing_country" :
+					return $woocommerce->countries->get_base_country();
+				break;
+				
+			endswitch;
+			
 		endif;
 	}
 }

@@ -104,6 +104,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * PayPal standard stores payer email address
 * Added handling for paypal reversal and refunded statuses
 * Downloads check order status is completed before allowing access - to do this we've added a new column to the permissions table (order id). Existing rows will be updated upon activation.
+* Formatted address shows full state name
+* State field shows 'select a state by default'
+* Country defaults to base country on checkout
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible

@@ -99,12 +99,16 @@ class woocommerce_order {
 	
 		// Formatted Addresses
 		$formatted_address = array();
+		
 		$country = ($this->billing_country && isset($woocommerce->countries->countries[$this->billing_country])) ? $woocommerce->countries->countries[$this->billing_country] : $this->billing_country;
+		
+		$state = ($this->billing_country && $this->billing_state && isset($woocommerce->countries->states[$this->billing_country][$this->billing_state])) ? $woocommerce->countries->states[$this->billing_country][$this->billing_state] : $this->billing_state;
+		
 		$address =  array_map('trim', array(
 			$this->billing_address_1,
 			$this->billing_address_2,
 			$this->billing_city,						
-			$this->billing_state,
+			$state,
 			$this->billing_postcode,
 			$country
 		));
@@ -113,12 +117,16 @@ class woocommerce_order {
 		
 		if ($this->shipping_address_1) :
 			$formatted_address = array();
+			
 			$country = ($this->shipping_country && isset($woocommerce->countries->countries[$this->shipping_country])) ? $woocommerce->countries->countries[$this->shipping_country] : $this->shipping_country;
+			
+			$state = ($this->shipping_country && $this->shipping_state && isset($woocommerce->countries->states[$this->shipping_country][$this->shipping_state])) ? $woocommerce->countries->states[$this->shipping_country][$this->shipping_state] : $this->shipping_state;
+
 			$address = array_map('trim', array(
 				$this->shipping_address_1,
 				$this->shipping_address_2,
 				$this->shipping_city,						
-				$this->shipping_state,
+				$state,
 				$this->shipping_postcode,
 				$country
 			));
