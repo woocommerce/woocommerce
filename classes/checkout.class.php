@@ -266,7 +266,7 @@ class woocommerce_checkout {
 		global $woocommerce;
 		
 		$defaults = array(
-			'type' => 'input',
+			'type' => 'text',
 			'label' => '',
 			'placeholder' => '',
 			'required' => false,
@@ -347,7 +347,7 @@ class woocommerce_checkout {
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
-					<input type="'.$args['type'].'" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $this->get_value( $key ).'" />
+					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $this->get_value( $key ).'" />
 				</p>'.$after;
 				
 			break;
