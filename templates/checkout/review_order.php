@@ -150,6 +150,8 @@
 			<?php do_action( 'woocommerce_review_order_after_submit' ); ?>
 			
 		</div>
+		
+		<div class="clear"></div>
 
 	</div>
 	

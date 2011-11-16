@@ -549,7 +549,10 @@ jQuery(document).ready(function($) {
 			/* AJAX Form Submission */
 			$('form.checkout').submit(function(){
 				var form = this;
-				$(form).block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+				
+				if ($(form).is('.processing')) return false;
+				
+				$(form).addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 				$.ajax({
 					type: 		'POST',
 					url: 		woocommerce_params.checkout_url,
@@ -562,7 +565,7 @@ jQuery(document).ready(function($) {
 							}
 							catch(err) {
 							  	$(form).prepend( code );
-								$(form).unblock(); 
+								$(form).removeClass('processing').unblock(); 
 								
 								$('html, body').animate({
 								    scrollTop: ($('form.checkout').offset().top - 100)
