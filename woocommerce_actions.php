@@ -806,10 +806,6 @@ function woocommerce_download_product() {
 			wp_die( sprintf(__('Invalid email address. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
 		endif;
 		
-		if (!is_email($email)) :
-				
-		endif;
-		
 		$download_result = $wpdb->get_row( $wpdb->prepare("
 			SELECT order_id, downloads_remaining 
 			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
@@ -828,7 +824,7 @@ function woocommerce_download_product() {
 		
 		if ($order_id) :
 			$order = &new woocommerce_order( $order_id );
-			if ($order->status!='completed' && order->status!='processing') :
+			if ($order->status!='completed' && $order->status!='processing') :
 				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
 				exit;
 			endif;
