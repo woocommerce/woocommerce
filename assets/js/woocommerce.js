@@ -211,7 +211,7 @@ jQuery(document).ready(function($) {
 			$(state_box).val(value);
 		} else {
 			if ($(state_box).is('select')) {
-				$(state_box).replaceWith('<input type="text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
+				$(state_box).replaceWith('<input type="text" class="input-text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
 				state_box = $('#' + $(this).attr('rel'));
 			}
 		}
