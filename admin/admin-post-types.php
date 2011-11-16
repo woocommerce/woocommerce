@@ -860,6 +860,7 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 	if ($wp->query_vars['post_type']!='shop_order') return $wp;
 	
 	$search_fields = array(
+		'_order_key',
 		'_billing_first_name',
 		'_billing_last_name',
 		'_billing_company', 
@@ -870,14 +871,41 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 		'_billing_country',
 		'_billing_state',
 		'_billing_email',
-		'_order_items'
+		'_order_items',
+		'_billing_phone'
 	);
 	
 	// Query matching custom fields - this seems faster than meta_query
 	$post_ids = $wpdb->get_col($wpdb->prepare('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key IN ('.'"'.implode('","', $search_fields).'"'.') AND meta_value LIKE "%%%s%%"', esc_attr($_GET['s']) ));
 	
+	// Query matching excerpts and titles
+	$post_ids = array_merge($post_ids, $wpdb->get_col($wpdb->prepare('
+		SELECT '.$wpdb->posts.'.ID 
+		FROM '.$wpdb->posts.' 
+		LEFT JOIN '.$wpdb->postmeta.' ON '.$wpdb->posts.'.ID = '.$wpdb->postmeta.'.post_id
+		LEFT JOIN '.$wpdb->users.' ON '.$wpdb->postmeta.'.meta_value = '.$wpdb->users.'.ID
+		WHERE 
+			post_excerpt 	LIKE "%%%1$s%%" OR
+			post_title 		LIKE "%%%1$s%%" OR
+			(
+				meta_key		= "_customer_user" AND
+				(
+					user_login		LIKE "%%%1$s%%" OR
+					user_nicename	LIKE "%%%1$s%%" OR
+					user_email		LIKE "%%%1$s%%" OR
+					display_name	LIKE "%%%1$s%%"
+				)
+			)
+		', 
+		esc_attr($_GET['s']) 
+		)));
+	
 	// Add ID
-	if (is_numeric($_GET['s'])) $post_ids[] = $_GET['s'];
+	$search_order_id = str_replace('Order #', '', $_GET['s']);
+	if (is_numeric($search_order_id)) $post_ids[] = $search_order_id;
+	
+	// Add blank ID so not all results are returned if the search finds nothing
+	$post_ids[] = 0;
 	
 	// Remove s - we don't want to search order name
 	unset( $wp->query_vars['s'] );
