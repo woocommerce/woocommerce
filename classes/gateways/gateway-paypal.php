@@ -378,6 +378,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		            	// Payment completed
 		                $order->add_order_note( __('IPN payment completed', 'woothemes') );
 		                $order->payment_complete();
+		                
+		                // Store paypal address
+		                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
 		            break;
 		            case 'denied' :
 		            case 'expired' :
