@@ -524,7 +524,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	
 	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 	
-	array(	'name' => __( 'Image Options', 'woothemes' ), 'type' => 'title','desc' => __('These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles.', 'woothemes'), 'id' => 'image_options' ),
+	array(	'name' => __( 'Image Options', 'woothemes' ), 'type' => 'title','desc' => sprintf(__('These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woothemes'), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
 	
 	array(  
 		'name' => __( 'Catalog Images', 'woothemes' ),
