@@ -389,6 +389,11 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		                // Order failed
 		                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
 		            break;
+		            case "refunded" :
+		            case "reversed" :
+		            	// Mark order as refunded
+		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+		            break;
 		            default:
 		            	// No action
 		            break;
