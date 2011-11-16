@@ -83,7 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.2.2 =
-* Lots of minor fixes and optimisations
+* Minor fixes and optimisations
 * Tweaked 'pay' emails
 * Check at top of email templates to make sure they are not accessed directly
 * Fixes for hiding order notes from feeds etc
@@ -277,6 +277,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.2.2 =
+Bug fixes. Due to some changes in the plugin, if you are using any of our extensions please ensure you check the changelogs and download any updates from your account - especially if using 2CO, iDeal or authorize.net.
 
 = 1.2.1 =
 This version has improved product types - ensure you de/re-activate the theme to ensure existing products get converted correctly.
