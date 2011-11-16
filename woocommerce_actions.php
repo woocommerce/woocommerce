@@ -799,18 +799,40 @@ function woocommerce_download_product() {
 		global $wpdb;
 		
 		$download_file = (int) urldecode($_GET['download_file']);
-		$order = urldecode( $_GET['order'] );
+		$order_key = urldecode( $_GET['order'] );
 		$email = urldecode( $_GET['email'] );
 		
-		if (!is_email($email)) wp_safe_redirect( home_url() );
+		if (!is_email($email)) :
+			wp_die( sprintf(__('Invalid email address. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+		endif;
 		
-		$downloads_remaining = $wpdb->get_var( $wpdb->prepare("
-			SELECT downloads_remaining 
+		if (!is_email($email)) :
+				
+		endif;
+		
+		$download_result = $wpdb->get_row( $wpdb->prepare("
+			SELECT order_id, downloads_remaining 
 			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
 			AND product_id = %s
-		;", $email, $order, $download_file ) );
+		;", $email, $order_key, $download_file ) );
+		
+		if (!$download_result) :
+			wp_die( sprintf(__('Invalid download. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			exit;
+		endif;
+		
+		$order_id = $download_result->order_id;
+		$downloads_remaining = $download_result->downloads_remaining;
+		
+		if ($order_id) :
+			$order = &new woocommerce_order( $order_id );
+			if ($order->status!=='completed') :
+				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+				exit;
+			endif;
+		endif;
 		
 		if ($downloads_remaining=='0') :
 			wp_die( sprintf(__('Sorry, you have reached your download limit for this file. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
@@ -821,7 +843,7 @@ function woocommerce_download_product() {
 					'downloads_remaining' => $downloads_remaining - 1, 
 				), array( 
 					'user_email' => $email,
-					'order_key' => $order,
+					'order_key' => $order_key,
 					'product_id' => $download_file 
 				), array( '%d' ), array( '%s', '%s', '%d' ) );
 			endif;
@@ -949,6 +971,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 					'product_id' => $download_id, 
 					'user_id' => $order->user_id,
 					'user_email' => $user_email,
+					'order_id' => $order->id,
 					'order_key' => $order->order_key,
 					'downloads_remaining' => $limit
 				), array( 

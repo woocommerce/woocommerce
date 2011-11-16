@@ -164,38 +164,44 @@ class woocommerce_customer {
 		$downloads = array();
 		
 		if (is_user_logged_in()) :
-		
-			$woocommerce_orders = &new woocommerce_orders();
-			$woocommerce_orders->get_customer_orders( get_current_user_id() );
-			if ($woocommerce_orders->orders) foreach ($woocommerce_orders->orders as $order) :
-				if ( $order->status == 'completed' ) {
-					$results = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE order_key = \"".$order->order_key."\" AND user_id = ".get_current_user_id().";" );
-					$user_info = get_userdata(get_current_user_id());
-					if ($results) foreach ($results as $result) :
-							
-							$product_post = get_post( $result->product_id );
+			
+			$user_info = get_userdata(get_current_user_id());
 
-							if ($product_post->post_type=='product_variation') :
-								$_product = &new woocommerce_product_variation( $result->product_id );
-							else :
-								$_product = &new woocommerce_product( $result->product_id );
-							endif;					
-							
-							if ($_product->exists) :
-								$download_name = $_product->get_title();
-							else :
-								$download_name = '#' . $result->product_id;
-							endif;
-							$downloads[] = array(
-								'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $user_info->user_email, home_url()))),
-								'product_id' => $result->product_id,
-								'download_name' => $download_name,
-								'order_id' => $order->id,
-								'order_key' => $order->order_key,
-								'downloads_remaining' => $result->downloads_remaining
-							);
-					endforeach;
-				}
+			$results = $wpdb->get_results( $wpdb->prepare("SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE user_id = '%s';", get_current_user_id()) );
+			
+			if ($results) foreach ($results as $result) :
+				
+				if (isset($result->order_id) && $result->order_id>0) :
+				
+					$order = &new woocommerce_order( $result->order_id );
+					
+					if ( $order->status != 'completed' ) continue;
+						
+					$product_post = get_post( $result->product_id );
+	
+					if ($product_post->post_type=='product_variation') :
+						$_product = &new woocommerce_product_variation( $result->product_id );
+					else :
+						$_product = &new woocommerce_product( $result->product_id );
+					endif;					
+					
+					if ($_product->exists) :
+						$download_name = $_product->get_title();
+					else :
+						$download_name = '#' . $result->product_id;
+					endif;
+					
+					$downloads[] = array(
+						'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $user_info->user_email, home_url()))),
+						'product_id' => $result->product_id,
+						'download_name' => $download_name,
+						'order_id' => $order->id,
+						'order_key' => $order->order_key,
+						'downloads_remaining' => $result->downloads_remaining
+					);
+				
+				endif;
+				
 			endforeach;
 		
 		endif;

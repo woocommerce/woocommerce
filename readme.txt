@@ -103,6 +103,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made order notes optional
 * PayPal standard stores payer email address
 * Added handling for paypal reversal and refunded statuses
+* Downloads check order status is completed before allowing access - to do this we've added a new column to the permissions table (order id). Existing rows will be updated upon activation.
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible
@@ -279,7 +280,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Upgrade Notice ==
 
 = 1.2.2 =
-Bug fixes. Due to some changes in the plugin, if you are using any of our extensions please ensure you check the changelogs and download any updates from your account - especially if using 2CO, iDeal or authorize.net.
+Due to some changes in the plugin, if you are using any of our extensions please ensure you check the changelogs and download any updates from your account - especially if using 2CO, iDeal or authorize.net. This version also updates the download permissions table so please ensure you backup your database before upgrading.
 
 = 1.2.1 =
 This version has improved product types - ensure you de/re-activate the theme to ensure existing products get converted correctly.
