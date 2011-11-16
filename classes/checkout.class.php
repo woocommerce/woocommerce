@@ -313,7 +313,7 @@ class woocommerce_checkout {
 					$field .= '</select>';
 				else :
 					// Input
-					$field .= '<input type="text" class="input-text" value="'.$current_r.'" placeholder="'.__('State/County', 'woothemes').'" name="'.$key.'" id="'.$key.'" />';
+					$field .= '<input type="input" class="input-text" value="'.$current_r.'" placeholder="'.__('State/County', 'woothemes').'" name="'.$key.'" id="'.$key.'" />';
 				endif;
 	
 				$field .= '</p>'.$after;
