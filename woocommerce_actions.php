@@ -828,7 +828,7 @@ function woocommerce_download_product() {
 		
 		if ($order_id) :
 			$order = &new woocommerce_order( $order_id );
-			if ($order->status!=='completed') :
+			if ($order->status!='completed' && order->status!='processing') :
 				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
 				exit;
 			endif;

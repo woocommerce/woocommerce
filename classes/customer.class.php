@@ -175,7 +175,7 @@ class woocommerce_customer {
 				
 					$order = &new woocommerce_order( $result->order_id );
 					
-					if ( $order->status != 'completed' ) continue;
+					if ( $order->status!='completed' && order->status!='processing' ) continue;
 						
 					$product_post = get_post( $result->product_id );
 	
