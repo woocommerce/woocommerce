@@ -916,7 +916,9 @@ function woocommerce_top_sellers() {
 						$product_name = __('Product does not exist', 'woothemes');
 					endif;
 					
-					echo '<tr><th>'.$product_name.'</th><td><span style="width:'.$width.'%"><span>'.$sales.'</span></span></td></tr>';
+					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
+					
+					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.$sales.'</span></a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -1008,7 +1010,9 @@ function woocommerce_top_earners() {
 						$product_name = __('Product does not exist', 'woothemes');
 					endif;
 					
-					echo '<tr><th>'.$product_name.'</th><td><span style="width:'.$width.'%"><span>'.woocommerce_price($sales).'</span></span></td></tr>';
+					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
+					
+					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.woocommerce_price($sales).'</span></a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -1123,8 +1127,10 @@ function woocommerce_product_sales() {
 				if (sizeof($product_sales)>0) foreach ($product_sales as $date => $sales) :
 					$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
 					$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
-
-					echo '<tr><th>'.date('F', strtotime($date.'01')).'</th><td>
+	
+					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
+	
+					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th><td>
 						<span style="width:'.$width.'%"><span>'.$sales.'</span></span>
 						<span class="alt" style="width:'.$width2.'%"><span>'.woocommerce_price($product_totals[$date]).'</span></span>
 					</td></tr>';

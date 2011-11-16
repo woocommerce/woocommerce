@@ -157,7 +157,7 @@ function woocommerce_post_type() {
 	/**
 	 * Taxonomies
 	 **/
-	$product_type_query_var = (is_admin()) ? true : false;
+	$admin_only_query_var = (is_admin()) ? true : false;
 	  
 	register_taxonomy( 'product_type',
         array('product'),
@@ -165,7 +165,7 @@ function woocommerce_post_type() {
             'hierarchical' 			=> false,
             'show_ui' 				=> false,
             'show_in_nav_menus' 	=> false,
-            'query_var' 			=> $product_type_query_var,
+            'query_var' 			=> $admin_only_query_var,
             'rewrite'				=> false
         )
     );
@@ -235,7 +235,7 @@ function woocommerce_post_type() {
            	 ),
             'show_ui' 				=> false,
             'show_in_nav_menus' 	=> false,
-            'query_var' 			=> false,
+            'query_var' 			=> $admin_only_query_var,
             'rewrite' 				=> false,
         )
     );
