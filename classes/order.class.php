@@ -569,7 +569,7 @@ class order_item_meta {
 	 */
 	function new_order_item( $item ) {
 		if ($item) :
-			do_action('woocommerce_order_item_meta', &$this, $item);
+			do_action('woocommerce_order_item_meta', $this, $item);
 		endif;
 	}
 	
