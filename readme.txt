@@ -96,6 +96,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Ability to register from my account page
 * Option to show size/weight on attributes tab
 * Added logger class for debugging
+* Logs folder added upon install with htaccess added to prevent access
 * Ability to make layered nav an "OR" query so you can expand your search rather than filter it
 * Tweaked coupon logic. Excluded coupons (for product discounts) don't get a product discount, but valid products do
 * Prevent checkout being submitted twice
