@@ -9,12 +9,14 @@ jQuery(document).ready(function($) {
 			var thisbutton = $(this);
 			
 			if (thisbutton.is('.product_type_simple, .product_type_downloadable, .product_type_virtual')) {
-		
+				
+				if (!$(thisbutton).attr('data-product_id')) return true;
+				
 				$(thisbutton).addClass('loading');
 				
 				var data = {
 					action: 		'woocommerce_add_to_cart',
-					product_id: 	$(thisbutton).attr('rel'),
+					product_id: 	$(thisbutton).attr('data-product_id'),
 					security: 		woocommerce_params.add_to_cart_nonce
 				};
 				

@@ -72,7 +72,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		<ul class="product_list_widget">
 		<?php  while ($r->have_posts()) : $r->the_post(); $_product = &new woocommerce_product(get_the_ID()); ?>
 		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
-			<?php if (has_post_thumbnail()) the_post_thumbnail('shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'px" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'px" />'; ?>
+			<?php if (has_post_thumbnail()) the_post_thumbnail('shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />'; ?>
 			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>
 		</a> <?php echo $_product->get_price_html(); ?></li>
 		<?php endwhile; ?>

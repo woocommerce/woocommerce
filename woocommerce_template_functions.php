@@ -82,7 +82,7 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 			break;
 		endswitch;
 			
-		echo sprintf('<a href="%s" rel="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $_product->id, $_product->product_type, $label);
+		echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $_product->id, $_product->product_type, $label);
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
