@@ -975,6 +975,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 					'%s', 
 					'%s', 
 					'%s', 
+					'%s',
 					'%s'
 				) );	
 				

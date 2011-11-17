@@ -43,7 +43,7 @@ function woocommerce_order_data_meta_box($post) {
 	endif;
 	?>
 	<style type="text/css">
-		#titlediv, #major-publishing-actions, #minor-publishing-actions { display:none }
+		#titlediv, #major-publishing-actions, #minor-publishing-actions, #visibility { display:none }
 	</style>
 	<div class="panel-wrap woocommerce">
 		<input name="post_title" type="hidden" value="<?php echo esc_attr( $order_title ); ?>" />

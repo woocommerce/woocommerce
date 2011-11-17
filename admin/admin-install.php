@@ -223,6 +223,7 @@ function woocommerce_tables_install() {
     
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     
+    // Table for storing attribute taxonomies - these are user defined
     $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies" ." (
         attribute_id 		mediumint(9) NOT NULL AUTO_INCREMENT,
         attribute_name		varchar(200) NOT NULL,
@@ -231,16 +232,26 @@ function woocommerce_tables_install() {
         PRIMARY KEY id (attribute_id)) $collate;";
     dbDelta($sql);
     
-    $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions" ." (
+    // Table for storing user and guest download permissions
+    $downloadable_products_table = $wpdb->prefix . "woocommerce_downloadable_product_permissions";
+   
+    // Drop primary key first
+    if ($wpdb->get_var("SHOW TABLES LIKE '$downloadable_products_table'") == $downloadable_products_table) {
+		$wpdb->query("ALTER TABLE $downloadable_products_table DROP PRIMARY KEY");
+	}
+
+    // Now create it
+    $sql = "CREATE TABLE ". $downloadable_products_table ." (
         product_id 			mediumint(9) NOT NULL,
+        order_id			mediumint(9) NOT NULL DEFAULT 0,
+        order_key			varchar(200) NOT NULL,
         user_email			varchar(200) NOT NULL,
         user_id				mediumint(9) NULL,
-        order_id			mediumint(9) NULL,
-        order_key			varchar(200) NOT NULL,
         downloads_remaining	varchar(9) NULL,
-        PRIMARY KEY id (product_id,order_key)) $collate;";
+        PRIMARY KEY id (product_id,order_id,order_key)) $collate;";
     dbDelta($sql);
     
+    // Term meta table - sadly WordPress does not have termmeta so we need our own
     $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta" ." (
 		meta_id 			bigint(20) NOT NULL AUTO_INCREMENT,
       	woocommerce_term_id bigint(20) NOT NULL,
@@ -250,7 +261,7 @@ function woocommerce_tables_install() {
     dbDelta($sql);
     
     // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
-    $results = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE order_id IS NULL;" );
+    $results = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
 	
 	if ($results) foreach ($results as $result) :
 		

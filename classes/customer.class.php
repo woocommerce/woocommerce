@@ -171,7 +171,7 @@ class woocommerce_customer {
 			
 			if ($results) foreach ($results as $result) :
 				
-				if (isset($result->order_id) && $result->order_id>0) :
+				if ($result->order_id>0) :
 				
 					$order = &new woocommerce_order( $result->order_id );
 					
