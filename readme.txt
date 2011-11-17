@@ -86,6 +86,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fix for sale price logic
 * Related products array_diff fix
 * Fixed Produkt-Kategorie in formal german translation
+* Variations limit fix
+* Transients cleared on install
 
 = 1.2.2 - 17/11/2011 =
 * Minor fixes and optimisations

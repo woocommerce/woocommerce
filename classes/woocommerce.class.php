@@ -340,6 +340,9 @@ class woocommerce {
 				$post_id = (int) $post_id;
 				delete_transient('woocommerce_product_total_stock_'.$post_id);
 				delete_transient('woocommerce_product_children_ids_'.$post_id);
+			else :
+				$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_children_ids_%')");
+				$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_total_stock_%')");
 			endif;
 		}
 	

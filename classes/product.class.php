@@ -161,7 +161,7 @@ class woocommerce_product {
         
 	        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
 	        
-			        $this->children = get_posts( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC&fields=ids&post_status=any' );
+			        $this->children = get_posts( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 					
 					set_transient( $transient_name, $this->children );
 					
