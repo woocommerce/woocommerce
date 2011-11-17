@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.2.2 =
+= 1.2.2 - 17/11/2011 =
 * Minor fixes and optimisations
 * Tweaked 'pay' emails
 * Check at top of email templates to make sure they are not accessed directly
@@ -91,7 +91,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved products class and get_related function
 * Removed subcats when paged
 * Category widget now supports hierarchy/counts
-* woocommerce-page body class for *all* woocommerce pages
+* woocommerce-page body class for all woocommerce pages
 * Fix active class in wp_list_pages for shop page
 * Ability to register from my account page
 * Option to show size/weight on attributes tab
