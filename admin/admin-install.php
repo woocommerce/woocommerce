@@ -35,7 +35,7 @@ function install_woocommerce() {
 	
 	// Install folder for uploading files and prevent hotlinking
 	$upload_dir 	=  wp_upload_dir();
-	$downloads_url 	= $upload_dir['basedir'] . '/woocommerce_files';
+	$downloads_url 	= $upload_dir['basedir'] . '/woocommerce_uploads';
 	if ( wp_mkdir_p($downloads_url) && !file_exists($downloads_url.'/.htaccess') ) :
 		if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
 			fwrite($file_handle, 'deny from all');
