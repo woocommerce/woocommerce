@@ -26,6 +26,134 @@ function woocommerce_post_type() {
 	
 	if (current_user_can('manage_woocommerce')) $show_in_menu = 'woocommerce'; else $show_in_menu = true;
 
+	/**
+	 * Taxonomies
+	 **/
+	$admin_only_query_var = (is_admin()) ? true : false;
+	  
+	register_taxonomy( 'product_type',
+        array('product'),
+        array(
+            'hierarchical' 			=> false,
+            'show_ui' 				=> false,
+            'show_in_nav_menus' 	=> false,
+            'query_var' 			=> $admin_only_query_var,
+            'rewrite'				=> false
+        )
+    );
+	register_taxonomy( 'product_cat',
+        array('product'),
+        array(
+            'hierarchical' 			=> true,
+            'update_count_callback' => '_update_post_term_count',
+            'label' 				=> __( 'Categories', 'woothemes'),
+            'labels' => array(
+                    'name' 				=> __( 'Categories', 'woothemes'),
+                    'singular_name' 	=> __( 'Product Category', 'woothemes'),
+                    'search_items' 		=>  __( 'Search Product Categories', 'woothemes'),
+                    'all_items' 		=> __( 'All Product Categories', 'woothemes'),
+                    'parent_item' 		=> __( 'Parent Product Category', 'woothemes'),
+                    'parent_item_colon' => __( 'Parent Product Category:', 'woothemes'),
+                    'edit_item' 		=> __( 'Edit Product Category', 'woothemes'),
+                    'update_item' 		=> __( 'Update Product Category', 'woothemes'),
+                    'add_new_item' 		=> __( 'Add New Product Category', 'woothemes'),
+                    'new_item_name' 	=> __( 'New Product Category Name', 'woothemes')
+            	),
+            'show_ui' 				=> true,
+            'query_var' 			=> true,
+            'rewrite' 				=> array( 'slug' => $category_base . _x('product-category', 'slug', 'woothemes'), 'with_front' => false ),
+        )
+    );
+    
+    register_taxonomy( 'product_tag',
+        array('product'),
+        array(
+            'hierarchical' 			=> false,
+            'label' 				=> __( 'Tags', 'woothemes'),
+            'labels' => array(
+                    'name' 				=> __( 'Tags', 'woothemes'),
+                    'singular_name' 	=> __( 'Product Tag', 'woothemes'),
+                    'search_items' 		=>  __( 'Search Product Tags', 'woothemes'),
+                    'all_items' 		=> __( 'All Product Tags', 'woothemes'),
+                    'parent_item' 		=> __( 'Parent Product Tag', 'woothemes'),
+                    'parent_item_colon' => __( 'Parent Product Tag:', 'woothemes'),
+                    'edit_item' 		=> __( 'Edit Product Tag', 'woothemes'),
+                    'update_item' 		=> __( 'Update Product Tag', 'woothemes'),
+                    'add_new_item' 		=> __( 'Add New Product Tag', 'woothemes'),
+                    'new_item_name' 	=> __( 'New Product Tag Name', 'woothemes')
+            	),
+            'show_ui' 				=> true,
+            'query_var' 			=> true,
+            'rewrite' 				=> array( 'slug' => $category_base . _x('product-tag', 'slug', 'woothemes'), 'with_front' => false ),
+        )
+    );
+    
+    register_taxonomy( 'shop_order_status',
+        array('shop_order'),
+        array(
+            'hierarchical' 			=> true,
+            'update_count_callback' => '_update_post_term_count',
+            'labels' => array(
+                    'name' 				=> __( 'Order statuses', 'woothemes'),
+                    'singular_name' 	=> __( 'Order status', 'woothemes'),
+                    'search_items' 		=>  __( 'Search Order statuses', 'woothemes'),
+                    'all_items' 		=> __( 'All  Order statuses', 'woothemes'),
+                    'parent_item' 		=> __( 'Parent Order status', 'woothemes'),
+                    'parent_item_colon' => __( 'Parent Order status:', 'woothemes'),
+                    'edit_item' 		=> __( 'Edit Order status', 'woothemes'),
+                    'update_item' 		=> __( 'Update Order status', 'woothemes'),
+                    'add_new_item' 		=> __( 'Add New Order status', 'woothemes'),
+                    'new_item_name' 	=> __( 'New Order status Name', 'woothemes')
+           	 ),
+            'show_ui' 				=> false,
+            'show_in_nav_menus' 	=> false,
+            'query_var' 			=> $admin_only_query_var,
+            'rewrite' 				=> false,
+        )
+    );
+    
+    $attribute_taxonomies = $woocommerce->get_attribute_taxonomies();    
+	if ( $attribute_taxonomies ) :
+		foreach ($attribute_taxonomies as $tax) :
+	    	
+	    	$name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
+	    	$hierarchical = true;
+	    	if ($name) :
+	    	
+	    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
+				
+				$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', false, $name);
+				
+	    		register_taxonomy( $name,
+			        array('product'),
+			        array(
+			            'hierarchical' 				=> $hierarchical,
+			            'labels' => array(
+			                    'name' 						=> $label,
+			                    'singular_name' 			=> $label,
+			                    'search_items' 				=>  __( 'Search', 'woothemes') . ' ' . $label,
+			                    'all_items' 				=> __( 'All', 'woothemes') . ' ' . $label,
+			                    'parent_item' 				=> __( 'Parent', 'woothemes') . ' ' . $label,
+			                    'parent_item_colon' 		=> __( 'Parent', 'woothemes') . ' ' . $label . ':',
+			                    'edit_item' 				=> __( 'Edit', 'woothemes') . ' ' . $label,
+			                    'update_item' 				=> __( 'Update', 'woothemes') . ' ' . $label,
+			                    'add_new_item' 				=> __( 'Add New', 'woothemes') . ' ' . $label,
+			                    'new_item_name' 			=> __( 'New', 'woothemes') . ' ' . $label
+			            	),
+			            'show_ui' 					=> false,
+			            'query_var' 				=> true,
+			            'show_in_nav_menus' 		=> $show_in_nav_menus,
+			            'rewrite' 					=> array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
+			        )
+			    );
+	    		
+	    	endif;
+	    endforeach;    	
+    endif;
+    
+    /**
+	 * Post Types
+	 **/
 	register_post_type( "product",
 		array(
 			'labels' => array(
@@ -153,131 +281,7 @@ function woocommerce_post_type() {
 			'show_in_nav_menus'		=> false,
 		)
 	);
-	
-	/**
-	 * Taxonomies
-	 **/
-	$admin_only_query_var = (is_admin()) ? true : false;
-	  
-	register_taxonomy( 'product_type',
-        array('product'),
-        array(
-            'hierarchical' 			=> false,
-            'show_ui' 				=> false,
-            'show_in_nav_menus' 	=> false,
-            'query_var' 			=> $admin_only_query_var,
-            'rewrite'				=> false
-        )
-    );
-	register_taxonomy( 'product_cat',
-        array('product'),
-        array(
-            'hierarchical' 			=> true,
-            'update_count_callback' => '_update_post_term_count',
-            'label' 				=> __( 'Categories', 'woothemes'),
-            'labels' => array(
-                    'name' 				=> __( 'Categories', 'woothemes'),
-                    'singular_name' 	=> __( 'Product Category', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Categories', 'woothemes'),
-                    'all_items' 		=> __( 'All Product Categories', 'woothemes'),
-                    'parent_item' 		=> __( 'Parent Product Category', 'woothemes'),
-                    'parent_item_colon' => __( 'Parent Product Category:', 'woothemes'),
-                    'edit_item' 		=> __( 'Edit Product Category', 'woothemes'),
-                    'update_item' 		=> __( 'Update Product Category', 'woothemes'),
-                    'add_new_item' 		=> __( 'Add New Product Category', 'woothemes'),
-                    'new_item_name' 	=> __( 'New Product Category Name', 'woothemes')
-            	),
-            'show_ui' 				=> true,
-            'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-category', 'slug', 'woothemes'), 'with_front' => false ),
-        )
-    );
-    
-    register_taxonomy( 'product_tag',
-        array('product'),
-        array(
-            'hierarchical' 			=> false,
-            'label' 				=> __( 'Tags', 'woothemes'),
-            'labels' => array(
-                    'name' 				=> __( 'Tags', 'woothemes'),
-                    'singular_name' 	=> __( 'Product Tag', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Tags', 'woothemes'),
-                    'all_items' 		=> __( 'All Product Tags', 'woothemes'),
-                    'parent_item' 		=> __( 'Parent Product Tag', 'woothemes'),
-                    'parent_item_colon' => __( 'Parent Product Tag:', 'woothemes'),
-                    'edit_item' 		=> __( 'Edit Product Tag', 'woothemes'),
-                    'update_item' 		=> __( 'Update Product Tag', 'woothemes'),
-                    'add_new_item' 		=> __( 'Add New Product Tag', 'woothemes'),
-                    'new_item_name' 	=> __( 'New Product Tag Name', 'woothemes')
-            	),
-            'show_ui' 				=> true,
-            'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-tag', 'slug', 'woothemes'), 'with_front' => false ),
-        )
-    );
-    
-    register_taxonomy( 'shop_order_status',
-        array('shop_order'),
-        array(
-            'hierarchical' 			=> true,
-            'update_count_callback' => '_update_post_term_count',
-            'labels' => array(
-                    'name' 				=> __( 'Order statuses', 'woothemes'),
-                    'singular_name' 	=> __( 'Order status', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Order statuses', 'woothemes'),
-                    'all_items' 		=> __( 'All  Order statuses', 'woothemes'),
-                    'parent_item' 		=> __( 'Parent Order status', 'woothemes'),
-                    'parent_item_colon' => __( 'Parent Order status:', 'woothemes'),
-                    'edit_item' 		=> __( 'Edit Order status', 'woothemes'),
-                    'update_item' 		=> __( 'Update Order status', 'woothemes'),
-                    'add_new_item' 		=> __( 'Add New Order status', 'woothemes'),
-                    'new_item_name' 	=> __( 'New Order status Name', 'woothemes')
-           	 ),
-            'show_ui' 				=> false,
-            'show_in_nav_menus' 	=> false,
-            'query_var' 			=> $admin_only_query_var,
-            'rewrite' 				=> false,
-        )
-    );
-    
-    $attribute_taxonomies = $woocommerce->get_attribute_taxonomies();    
-	if ( $attribute_taxonomies ) :
-		foreach ($attribute_taxonomies as $tax) :
-	    	
-	    	$name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
-	    	$hierarchical = true;
-	    	if ($name) :
-	    	
-	    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
-				
-				$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', false, $name);
-				
-	    		register_taxonomy( $name,
-			        array('product'),
-			        array(
-			            'hierarchical' 				=> $hierarchical,
-			            'labels' => array(
-			                    'name' 						=> $label,
-			                    'singular_name' 			=> $label,
-			                    'search_items' 				=>  __( 'Search', 'woothemes') . ' ' . $label,
-			                    'all_items' 				=> __( 'All', 'woothemes') . ' ' . $label,
-			                    'parent_item' 				=> __( 'Parent', 'woothemes') . ' ' . $label,
-			                    'parent_item_colon' 		=> __( 'Parent', 'woothemes') . ' ' . $label . ':',
-			                    'edit_item' 				=> __( 'Edit', 'woothemes') . ' ' . $label,
-			                    'update_item' 				=> __( 'Update', 'woothemes') . ' ' . $label,
-			                    'add_new_item' 				=> __( 'Add New', 'woothemes') . ' ' . $label,
-			                    'new_item_name' 			=> __( 'New', 'woothemes') . ' ' . $label
-			            	),
-			            'show_ui' 					=> false,
-			            'query_var' 				=> true,
-			            'show_in_nav_menus' 		=> $show_in_nav_menus,
-			            'rewrite' 					=> array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
-			        )
-			    );
-	    		
-	    	endif;
-	    endforeach;    	
-    endif;
+
 } 
 
 
