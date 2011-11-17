@@ -164,7 +164,7 @@ class woocommerce_query {
 		$args['order'] = $order;
 		if ($meta_key) $args['meta_key'] = $meta_key;
 		
-		return $args;
+		return apply_filters('woocommerce_get_catalog_ordering_args', $args);
 	}
 	
 	/**
