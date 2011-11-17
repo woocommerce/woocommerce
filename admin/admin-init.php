@@ -461,30 +461,28 @@ function woocommerce_delete_product_sync( $id ) {
 
 /**
  * Directory for uploads
- * 
  */
 add_filter('upload_dir', 'woocommerce_downloads_upload_dir');
 
 function woocommerce_downloads_upload_dir( $pathdata ) {
-	
-	if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER']) :
+
+	if (isset($_POST['type']) && $_POST['type'] == 'downloadable_product') :
 		
-		$args = wp_parse_args( $_SERVER['HTTP_REFERER'] );
-		extract( $args, EXTR_SKIP );
-		
-		if (isset($from) && $from =='wc01') :
-			
-			// Uploading a downloadable file
-			$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
-		 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
-		 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
-			$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
-			return $pathdata;
-			
-		endif;
+		// Uploading a downloadable file
+		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
+	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
+	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
+		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
+		return $pathdata;
 		
 	endif;
 	
 	return $pathdata;
 
+}
+
+add_action('media_upload_downloadable_product', 'woocommerce_media_upload_downloadable_product');
+
+function woocommerce_media_upload_downloadable_product() {
+	do_action('media_upload_file');
 }
