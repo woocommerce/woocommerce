@@ -699,7 +699,7 @@ class woocommerce_product {
 			)
 		));
 		
-		$related_posts = array_diff(array($this->id), $related_posts);
+		$related_posts = array_diff( $related_posts, array($this->id) );
 		
 		return $related_posts;
 	}

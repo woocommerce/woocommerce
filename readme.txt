@@ -84,6 +84,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
+* Related products array_diff fix
 
 = 1.2.2 - 17/11/2011 =
 * Minor fixes and optimisations
