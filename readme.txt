@@ -82,6 +82,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.2.3 - 17/11/2011 =
+* Fix for sale price logic
+
 = 1.2.2 - 17/11/2011 =
 * Minor fixes and optimisations
 * Tweaked 'pay' emails
@@ -283,6 +286,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.2.3 =
+Fixes minor issues in 1.2.2 - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
 
 = 1.2.2 =
 Due to some changes in the plugin, if you are using any of our extensions please ensure you check the changelogs and download any updates from your account - especially if using 2CO, iDeal or authorize.net. This version also updates the download permissions table so please ensure you backup your database before upgrading.
