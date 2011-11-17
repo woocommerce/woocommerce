@@ -224,10 +224,12 @@ class woocommerce_product {
 	
 	/**
 	 * Checks the product type
+	 *
+	 * Backwards compat with downloadable/virtual
 	 */
 	function is_type( $type ) {
 		if (is_array($type) && in_array($this->product_type, $type)) return true;
-		elseif ($this->product_type==$type) return true;
+		if ($this->product_type==$type) return true;
 		return false;
 	}
 	
