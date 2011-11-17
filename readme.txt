@@ -107,6 +107,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Formatted address shows full state name
 * State field shows 'select a state by default'
 * Country defaults to base country on checkout
+* Fixed upload directory
+* Added customer note email notifications
 
 = 1.2.1 - 10/11/2011 =
 * Reworked downloadable and virtual products - now variations can be downloadable/virtual too making it more flexible

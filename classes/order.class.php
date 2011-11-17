@@ -360,6 +360,10 @@ class woocommerce_order {
 		
 		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
 		
+		if ($is_customer_note) :
+			do_action( 'woocommerce_new_customer_note', $this->id, $note );
+		endif;
+		
 		return $comment_id;
 		
 	}

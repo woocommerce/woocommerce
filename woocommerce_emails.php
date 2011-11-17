@@ -212,6 +212,39 @@ function woocommerce_pay_for_order_customer_notification( $order ) {
 	woocommerce_mail( $order->billing_email, $subject, $message );
 }
 
+/**
+ * Customer note notification
+ **/
+add_action('woocommerce_new_customer_note', 'woocommerce_customer_note_notification', 10, 2);
+
+function woocommerce_customer_note_notification( $id, $note ) {
+	
+	global $order_id, $email_heading, $customer_note;
+	
+	$order_id = $id;
+	$customer_note = $note;
+	
+	$order = &new woocommerce_order( $order_id );
+	
+	if (!$customer_note) return;
+	
+	$email_heading = __('A note has been added to your order', 'woothemes');
+	
+	$subject = sprintf(__('[%s] A note has been added to your order', 'woothemes'), get_bloginfo('name'));
+	
+	// Buffer
+	ob_start();
+	
+	// Get mail template
+	woocommerce_get_template('emails/customer_note_notification.php', false);
+	
+	// Get contents
+	$message = ob_get_clean();
+
+	// Send the mail	
+	woocommerce_mail( $order->billing_email, $subject, $message );
+}
+
 
 /**
  * Low stock notification email
