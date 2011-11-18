@@ -84,7 +84,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
-* Clear cache on upgrade
+* Clear cache on upgrade/install
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
