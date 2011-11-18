@@ -4,6 +4,7 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
+ *		- Prevent non-admin access to backend
  *		- Update catalog ordering if posted
  *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
@@ -26,6 +27,21 @@
  * @category	Actions
  * @author		WooThemes
  */
+
+
+/**
+ * Prevent non-admin access to backend
+ */
+if (get_option('woocommerce_lock_down_admin')=='yes') add_action('admin_init', 'woocommerce_prevent_admin_access');
+
+function woocommerce_prevent_admin_access() {
+	
+	if ( is_admin() && !is_ajax() && !current_user_can('edit_posts') ) :
+		wp_safe_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+		exit;
+	endif;
+	
+}
 
 /**
  * Update catalog ordering if posted

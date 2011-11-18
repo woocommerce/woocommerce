@@ -91,6 +91,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made record_product_sales trigger once only
 * Payment complete only when on-hold/pending
 * More logging in paypal gateway
+* Feature to prevent admin access to customers (optional)
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
