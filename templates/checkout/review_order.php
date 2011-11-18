@@ -138,7 +138,7 @@
 			
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 			
-			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php _e('Place order', 'woothemes'); ?>" />
+			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php echo apply_filters('woocommerce_order_button_text', __('Place order', 'woothemes')); ?>" />
 			
 			<?php if (get_option('woocommerce_terms_page_id')>0) : ?>
 			<p class="form-row terms">

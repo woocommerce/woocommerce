@@ -529,6 +529,8 @@ class woocommerce_checkout {
 					$available_gateways[$this->posted['payment_method']]->validate_fields();
 				endif;
 			endif;
+			
+			do_action( 'woocommerce_after_checkout_validation', $this->posted );
 					
 			if (!isset($_POST['update_totals']) && $woocommerce->error_count()==0) :
 				
