@@ -62,7 +62,7 @@ function woocommerce_order_data_meta_box($post) {
 					foreach ($statuses as $status) :
 						echo '<option value="'.$status->slug.'" ';
 						if ($status->slug==$order_status) echo 'selected="selected"';
-						echo '>'.$status->name.'</option>';
+						echo '>'.__($status->name, 'woothemes').'</option>';
 					endforeach;
 				?>
 			</select></p>

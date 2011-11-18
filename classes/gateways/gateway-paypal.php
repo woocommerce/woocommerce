@@ -134,6 +134,8 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_adr = $this->liveurl . '?';		
 		endif;
 		
+		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
+		
 		$shipping_name = explode(' ', $order->shipping_method);
 		
 		if (in_array($order->billing_country, array('US','CA'))) :
@@ -170,7 +172,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				'custom'				=> $order_id,
 				
 				// IPN
-				'notify_url'			=> trailingslashit(get_bloginfo('wpurl')).'?paypalListener=paypal_standard_IPN',
+				'notify_url'			=> trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN',
 				
 				// Address info
 				'first_name'			=> $order->billing_first_name,

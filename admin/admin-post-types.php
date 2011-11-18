@@ -442,7 +442,7 @@ function woocommerce_custom_order_columns($column) {
 	switch ($column) {
 		case "order_status" :
 			
-			echo sprintf( __('<mark class="%s">%s</mark>', 'woothemes'), sanitize_title($order->status), $order->status );
+			echo sprintf( __('<mark class="%s">%s</mark>', 'woothemes'), sanitize_title($order->status), __($order->status, 'woothemes') );
 			
 		break;
 		case "order_title" :
@@ -595,7 +595,7 @@ function woocommerce_orders_by_status() {
 		foreach($terms as $term) :
 			$output .="<option value='$term->slug' ";
 			if ( isset( $wp_query->query['shop_order_status'] ) ) $output .=selected($term->slug, $wp_query->query['shop_order_status'], false);
-			$output .=">$term->name ($term->count)</option>";
+			$output .=">".__($term->name, 'woothemes')." ($term->count)</option>";
 		endforeach;
 		$output .="</select>";
 		echo $output;

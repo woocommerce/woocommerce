@@ -137,6 +137,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __( 'Admin access', 'woothemes' ),
+		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woothemes' ),
+		'id' 		=> 'woocommerce_lock_down_admin',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox'
+	),
+	
+	array(  
 		'name' => __( 'Shop Styling', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
