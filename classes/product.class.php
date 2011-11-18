@@ -670,8 +670,12 @@ class woocommerce_product {
 		$terms = wp_get_post_terms($this->id, 'product_tag');
 		foreach ($terms as $term) $tags_array[] = $term->term_id;
 		
+		// Get categories
 		$terms = wp_get_post_terms($this->id, 'product_cat');
 		foreach ($terms as $term) $cats_array[] = $term->term_id;
+		
+		// Don't bother if none are set
+		if ( sizeof($cats_array)==1 && sizeof($tags_array)==1 ) return array();
 		
 		// Meta query
 		$meta_query = array();
