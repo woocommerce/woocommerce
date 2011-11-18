@@ -431,48 +431,53 @@ class woocommerce_order {
 		
 		unset($_SESSION['order_awaiting_payment']);
 		
-		$downloadable_order = false;
+		if ( $this->status=='on-hold' || $this->status=='pending' ) :
 		
-		if (sizeof($this->items)>0) foreach ($this->items as $item) :
-		
-			if ($item['id']>0) :
+			$downloadable_order = false;
 			
-				$_product = $this->get_product_from_item( $item );
+			if (sizeof($this->items)>0) foreach ($this->items as $item) :
+			
+				if ($item['id']>0) :
 				
-				if ( $_product->exists && $_product->is_downloadable() && $_product->is_virtual() ) :
-					$downloadable_order = true;
-					continue;
+					$_product = $this->get_product_from_item( $item );
+					
+					if ( $_product->exists && $_product->is_downloadable() && $_product->is_virtual() ) :
+						$downloadable_order = true;
+						continue;
+					endif;
+					
 				endif;
 				
+				$downloadable_order = false;
+				break;
+			
+			endforeach;
+			
+			if ($downloadable_order) :
+				$new_order_status = 'completed';
+			else :
+				$new_order_status = 'processing';
 			endif;
 			
-			$downloadable_order = false;
-			break;
+			$new_order_status = apply_filters('woocommerce_payment_complete_order_status', $new_order_status, $this->id);
+			
+			$this->update_status($new_order_status);
+			
+			// Payment is complete so reduce stock levels
+			$this->reduce_order_stock();
+			
+			do_action( 'woocommerce_payment_complete', $this->id );
 		
-		endforeach;
-		
-		if ($downloadable_order) :
-			$new_order_status = 'completed';
-		else :
-			$new_order_status = 'processing';
 		endif;
-		
-		$new_order_status = apply_filters('woocommerce_payment_complete_order_status', $new_order_status, $this->id);
-		
-		$this->update_status($new_order_status);
-		
-		// Payment is complete so reduce stock levels and record sales
-		$this->record_product_sales();
-		$this->reduce_order_stock();
-		
-		do_action( 'woocommerce_payment_complete', $this->id );
 	}
 	
 	/**
 	 * Record sales
 	 */
 	function record_product_sales() {
-	
+		
+		if ( get_post_meta( $this->id, '_recorded_sales', true )=='yes' ) return;
+		
 		if (sizeof($this->items)>0) foreach ($this->items as $item) :
 			if ($item['id']>0) :
 				$sales 	= (int) get_post_meta( $item['id'], 'total_sales', true );
@@ -480,6 +485,8 @@ class woocommerce_order {
 				if ($sales) update_post_meta( $item['id'], 'total_sales', $sales );
 			endif;
 		endforeach;
+		
+		update_post_meta( $this->id, '_recorded_sales', 'yes' );
 		
 	}
 	
