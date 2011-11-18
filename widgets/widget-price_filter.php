@@ -40,7 +40,10 @@ function woocommerce_price_filter( $filtered_posts ) {
 		$matched_products = array();
 		
 		$matched_products_query = get_posts(array(
-			'post_type' => 'product',
+			'post_type' => array(
+				'product_variation',
+				'product'
+			),
 			'post_status' => 'publish',
 			'posts_per_page' => -1,
 			'meta_query' => array(
@@ -55,8 +58,9 @@ function woocommerce_price_filter( $filtered_posts ) {
 
 		if ($matched_products_query) :
 			foreach ($matched_products_query as $product) :
-				$matched_products[] = $product->ID;
-				if ($product->post_parent>0) $matched_products[] = $product->post_parent;
+				if ($product->post_type == 'product') $matched_products[] = $product->ID;
+				if ($product->post_parent>0 && !in_array($product->post_parent, $matched_products))
+					$matched_products[] = $product->post_parent;
 			endforeach;
 		endif;
 		
