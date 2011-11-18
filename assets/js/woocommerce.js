@@ -275,6 +275,9 @@ jQuery(document).ready(function($) {
         	var variation = product_variations[i];
         	var variation_id = variation.variation_id;
         	
+        	//console.debug(variation.attributes);
+        	//console.debug(settings);
+        	
 			if(variations_match(variation.attributes, settings)) {
                 matching.push(variation);
             }
@@ -305,7 +308,17 @@ jQuery(document).ready(function($) {
 	                
 	                if(attr_name == current_attr_name) {
 	                    if (attr_val) {
+	                    	
+	                    	// Decode entities
+	                    	attr_val = $("<div/>").html( attr_val ).text();
+	                    	
+	                    	// Add slashes
+	                    	attr_val = attr_val.replace(/'/g, "\\'");
+	                    	attr_val = attr_val.replace(/"/g, "\\\"");
+	                    	
+	                    	// Compare the meercat
 	                    	current_attr_select.find('option[value="'+attr_val+'"]').removeAttr('disabled');
+	                    	
 	                    } else {
 	                    	current_attr_select.find('option').removeAttr('disabled');
 	                    }
@@ -364,10 +377,14 @@ jQuery(document).ready(function($) {
 			} else {
 				if ($(this).val().length == 0) all_set = false;
 
-	            // Get value
-	            value = $(this).val();
-	            value = value.replace('"', '&quot;');
-				
+            	// Encode entities
+            	value = $(this).val()
+		            .replace(/&/g, '&amp;')
+		            .replace(/"/g, '&quot;')
+		            .replace(/'/g, '&#039;')
+		            .replace(/</g, '&lt;')
+		            .replace(/>/g, '&gt;');
+
 				// Add to settings array
 				current_settings[$(this).attr('name')] = value;
 			}

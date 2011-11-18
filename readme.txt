@@ -94,6 +94,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Feature to prevent admin access to customers (optional)
 * Fixed quick edit
 * text/html email headers
+* Fixed variation issue with quote symbols using esc_html
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
