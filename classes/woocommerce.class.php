@@ -326,7 +326,7 @@ class woocommerce {
 		/**
 		 * Clear Product Transients
 		 */
-		function clear_product_transients( $post_id = null ) {
+		function clear_product_transients( $post_id = 0 ) {
 			global $wpdb;
 			
 			delete_transient('woocommerce_products_onsale');

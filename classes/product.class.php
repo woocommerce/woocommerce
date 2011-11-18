@@ -161,7 +161,7 @@ class woocommerce_product {
         
 	        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
 	        
-			        $this->children = get_posts( 'post_parent='.$this->id.'&post_type='.$child_post_type.'&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
+			        $this->children = get_posts( 'post_parent=' . $this->id . '&post_type=' . $child_post_type . '&orderby=menu_order&order=ASC&fields=ids&post_status=any&numberposts=-1' );
 					
 					set_transient( $transient_name, $this->children );
 					
@@ -456,8 +456,9 @@ class woocommerce_product {
 		if ( $this->has_child() ) :
 			
 			foreach ($this->get_children() as $child_id) :
-				$sale_price = get_post_meta( $child_id, 'sale_price', true);
-				if ( $sale_price > 0 && $sale_price == $this->price ) return true;
+				$sale_price 	= get_post_meta( $child_id, 'sale_price', true );
+				$regular_price 	= get_post_meta( $child_id, 'price', true );
+				if ( $sale_price > 0 && $sale_price < $regular_price ) return true;
 			endforeach;
 			
 		else :

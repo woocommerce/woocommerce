@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -81,6 +81,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 3. WooCommerce sales reports
 
 == Changelog ==
+
+= 1.2.4 - 18/11/2011 =
+* More sale price logic fixes for variations. Now correctly compares variation's prices.
+* Clear cache on upgrade
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
