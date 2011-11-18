@@ -529,6 +529,9 @@ class woocommerce_checkout {
 					$available_gateways[$this->posted['payment_method']]->validate_fields();
 				endif;
 			endif;
+			
+			// hook, to be able to use the validation, but to be able to do something different afterwards
+			do_action( 'woocommerce_after_checkout_validation', $this->posted, $_POST, jigoshop::error_count() );
 					
 			if (!isset($_POST['update_totals']) && $woocommerce->error_count()==0) :
 				
