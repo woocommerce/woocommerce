@@ -29,7 +29,8 @@ function woocommerce_mail( $to, $subject, $message ) {
 	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
 	
 	// Send the mail	
-	wp_mail( $to, $subject, $message );
+	$headers = "Content-Type: text/html" . "\r\n";
+	wp_mail( $to, $subject, $message, $headers );
 	
 	// Unhook
 	remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
