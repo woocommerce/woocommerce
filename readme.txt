@@ -87,6 +87,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Clear cache on upgrade/install
 * Related product fix when no categories are set
 * Fix for price filter + variations with multiple prices
+* Grouped product link/quantity fix
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic
