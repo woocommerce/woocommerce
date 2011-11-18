@@ -156,7 +156,7 @@ function woocommerce_init_post_thumbnails() {
 add_action('wp_head', 'woocommerce_generator');
 
 function woocommerce_generator() {
-	echo '<meta name="generator" content="WooCommerce ' . WOOCOMMERCE_VERSION . '" />' . "\n";
+	echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . WOOCOMMERCE_VERSION . '" />' . "\n\n";
 }
 
 /**
