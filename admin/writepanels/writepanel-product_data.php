@@ -617,6 +617,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				update_post_meta( $post_parent, 'price', $child_price );
 			endforeach;
 		endif;
+		
+		// Clear cache/transients
+		$woocommerce->clear_product_transients( $post_parent );
 	endif;
 	
 	// Stock Data

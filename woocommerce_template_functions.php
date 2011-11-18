@@ -322,9 +322,9 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 				<tbody>
 					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
 						<tr>
-							<td><div class="quantity"><input name="quantity[<?php echo $child->ID; ?>]" value="0" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
+							<td><div class="quantity"><input name="quantity[<?php echo $child_product->id; ?>]" value="0" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 							<td><label for="product-<?php echo $child_product->id; ?>"><?php 
-								if ($child_product->is_visible()) echo '<a href="'.get_permalink($child->ID).'">';
+								if ($child_product->is_visible()) echo '<a href="'.get_permalink($child_product->id).'">';
 								echo $child_product->get_title(); 
 								if ($child_product->is_visible()) echo '</a>';
 							?></label></td>
