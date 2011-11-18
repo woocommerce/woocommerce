@@ -531,7 +531,7 @@ class woocommerce_checkout {
 			endif;
 			
 			// hook, to be able to use the validation, but to be able to do something different afterwards
-			do_action( 'woocommerce_after_checkout_validation', $this->posted, $_POST, jigoshop::error_count() );
+			do_action( 'woocommerce_after_checkout_validation', $this->posted, $_POST, $woocommerce->error_count() );
 					
 			if (!isset($_POST['update_totals']) && $woocommerce->error_count()==0) :
 				
