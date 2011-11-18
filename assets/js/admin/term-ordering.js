@@ -3,11 +3,10 @@ jQuery(document).ready(function($) {
 
 	$('table.widefat.wp-list-table tbody th, table.widefat tbody td').css('cursor','move');
 		
-	$("table.widefat.wp-list-table tbody").sortable({
-		items: 'tr:not(.inline-edit-row)',
+	$("table.widefat.wp-list-table").sortable({
+		items: 'tbody tr:not(.inline-edit-row)',
 		cursor: 'move',
 		axis: 'y',
-		//containment: 'table.widefat',
 		placeholder: 'product-cat-placeholder',
 		scrollSensitivity: 40,
 		helper: function(e, ui) {					
