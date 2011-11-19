@@ -145,10 +145,18 @@ class woocommerce_order {
 			
 	}
 	
+	
 	/** Gets shipping and product tax */
 	function get_total_tax() {
 		return $this->order_tax + $this->order_shipping_tax;
 	}
+	
+	
+	/** Gets total discount */
+	function get_total_discount() {
+		return $this->order_discount;
+	}
+
 	
 	/** Gets subtotal */
 	function get_subtotal_to_display() {

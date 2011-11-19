@@ -745,7 +745,7 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->discount_total, 2, '.', ''));
+					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_discount_total(), 2, '.', ''));
 					update_post_meta( $order_id, '_order_tax', 				number_format($woocommerce->cart->tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping_tax', 	number_format($woocommerce->cart->shipping_tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_total', 			number_format($woocommerce->cart->total, 2, '.', ''));

@@ -505,7 +505,7 @@ class woocommerce_product {
 					
 					// Round
 					$price = round( $price * 100 ) / 100;
-
+					
 					// Format
 					$price = number_format($price, 2, '.', '');
 					

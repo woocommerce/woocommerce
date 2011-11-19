@@ -15,6 +15,11 @@
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 			
+			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
+				<td colspan="2"><?php _e('Product Discounts', 'woothemes'); ?></td>
+				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
+			</tr><?php endif; ?>
+			
 			<?php  if ($woocommerce->cart->needs_shipping()) : ?>
 				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
 				<td>
@@ -66,10 +71,11 @@
 				<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 			</tr><?php endif; ?>
 
-			<?php if ($woocommerce->cart->get_total_discount()) : ?><tr class="discount">
+			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
 				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
-				<td>-<?php echo $woocommerce->cart->get_total_discount(); ?></td>
+				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr><?php endif; ?>
+			
 			<tr>
 				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>

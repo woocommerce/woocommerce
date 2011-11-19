@@ -730,6 +730,11 @@ if (!function_exists('woocommerce_cart_totals')) {
 						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 					</tr>
 					
+					<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
+						<th><?php _e('Product Discounts', 'woothemes'); ?></th>
+						<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
+					</tr><?php endif; ?>
+					
 					<?php if ($woocommerce->cart->get_cart_shipping_total()) : ?><tr>
 						<th><?php _e('Shipping', 'woothemes'); ?> <small><?php echo $woocommerce->countries->shipping_to_prefix().' '.__($woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ], 'woothemes'); ?></small></th>
 						<td>
@@ -772,7 +777,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 							?>
 						</td>
 					</tr><?php endif; ?>
-					
+
 					<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
 						<th><?php _e('Tax', 'woothemes'); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
 						<td><?php 
@@ -780,10 +785,11 @@ if (!function_exists('woocommerce_cart_totals')) {
 						?></td>
 					</tr><?php endif; ?>
 					
-					<?php if ($woocommerce->cart->get_total_discount()) : ?><tr class="discount">
+					<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
 						<th><?php _e('Discount', 'woothemes'); ?></th>
-						<td>-<?php echo $woocommerce->cart->get_total_discount(); ?></td>
+						<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 					</tr><?php endif; ?>
+					
 					<tr>
 						<th><strong><?php _e('Total', 'woothemes'); ?></strong></th>
 						<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>

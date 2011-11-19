@@ -89,7 +89,7 @@ function woocommerce_admin_scripts() {
 		
 		$woocommerce_witepanel_params = array( 
 			'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),
-			'cart_total' 					=> __("Calc totals based on order items, discount amount, and shipping?", 'woothemes'),
+			'cart_total' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to calculate discounts before tax manually.", 'woothemes'),
 			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
 			'ID' 							=>  __('ID', 'woothemes'),
