@@ -82,6 +82,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.2.5 - 18/11/2011 =
+* Schema.org markup for products and reviews
+
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
 * Clear cache on upgrade/install

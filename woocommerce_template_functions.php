@@ -59,7 +59,7 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 		if( $_product->get_price() === '' && $_product->product_type!=='external') return;
 		
 		if (!$_product->is_in_stock()) :
-			echo '<a href="'.get_permalink($post->ID).'" class="button">'.__('Read More', 'woothemes').'</a>';
+			echo '<a href="'.get_permalink($post->ID).'" class="button">'. apply_filters('out_of_stock_add_to_cart_text', __('Read More', 'woothemes')).'</a>';
 			return;
 		endif;
 		
