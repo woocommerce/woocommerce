@@ -155,7 +155,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		endif;
 		
-		echo '<form method="get" action="">
+		echo '<form method="get">
 			<div class="price_slider_wrapper">
 				<div class="price_slider"></div>
 				<div class="price_slider_amount">

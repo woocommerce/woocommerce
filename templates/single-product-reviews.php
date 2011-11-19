@@ -24,16 +24,18 @@
 		
 		$average = number_format($rating / $count, 2);
 		
-		echo '<div class="hreview-aggregate">';
+		echo '<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
 		
-		echo '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'woothemes'),$average).'"><span style="width:'.($average*16).'px"><span class="rating">'.$average.'</span> '.__('out of 5', 'woothemes').'</span></div>';
+		echo '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'woothemes'), $average).'"><span style="width:'.($average*16).'px"><span itemprop="ratingValue" class="rating">'.$average.'</span> '.__('out of 5', 'woothemes').'</span></div>';
 		
-		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woothemes'), '<span class="count">'.$count.'</span>', '<span class="item fn">'.wptexturize($post->post_title).'</span>' ).'</h2>';
+		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'woothemes'), '<span itemprop="ratingCount" class="count">'.$count.'</span>', wptexturize($post->post_title) ).'</h2>';
 
 		echo '</div>';
 		
 	else :
+	
 		echo '<h2>'.__('Reviews', 'woothemes').'</h2>';
+		
 	endif;
 
 	$title_reply = '';

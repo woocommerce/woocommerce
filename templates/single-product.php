@@ -6,13 +6,13 @@
 		
 		<?php do_action('woocommerce_before_single_product', $post, $_product); ?>
 	
-		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+		<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 			
 			<?php do_action('woocommerce_before_single_product_summary', $post, $_product); ?>
 			
 			<div class="summary">
 				
-				<h1 class="product_title page-title"><?php the_title(); ?></h1>
+				<h1 itemprop="name" class="product_title page-title"><?php the_title(); ?></h1>
 				
 				<?php do_action( 'woocommerce_single_product_summary', $post, $_product ); ?>
 	

@@ -517,23 +517,26 @@ add_filter('preprocess_comment', 'woocommerce_check_comment_rating', 0);
 function woocommerce_comments($comment, $args, $depth) {
 	$GLOBALS['comment'] = $comment; global $post; ?>
 	
-	<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+	<li itemprop="reviews" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 		<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
   			<?php echo get_avatar( $comment, $size='60' ); ?>
 			
 			<div class="comment-text">
-				<div class="star-rating" title="<?php echo esc_attr( get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>">
-					<span style="width:<?php echo get_comment_meta( $comment->comment_ID, 'rating', true )*16; ?>px"><?php echo get_comment_meta( $comment->comment_ID, 'rating', true ); ?> <?php _e('out of 5', 'woothemes'); ?></span>
+			
+				<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating" class="star-rating" title="<?php echo esc_attr( get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>">
+					<span style="width:<?php echo get_comment_meta( $comment->comment_ID, 'rating', true )*16; ?>px"><span itemprop="ratingValue"><?php echo get_comment_meta( $comment->comment_ID, 'rating', true ); ?></span> <?php _e('out of 5', 'woothemes'); ?></span>
 				</div>
+				
 				<?php if ($comment->comment_approved == '0') : ?>
 					<p class="meta"><em><?php _e('Your comment is awaiting approval', 'woothemes'); ?></em></p>
 				<?php else : ?>
 					<p class="meta">
-						<?php _e('Rating by', 'woothemes'); ?> <strong class="reviewer vcard"><span class="fn"><?php comment_author(); ?></span></strong> <?php _e('on', 'woothemes'); ?> <?php echo get_comment_date('M jS Y'); ?>:
+						<?php _e('Rating by', 'woothemes'); ?> <strong itemprop="author"><?php comment_author(); ?></strong> <?php _e('on', 'woothemes'); ?> <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date('M jS Y'); ?></time>:
 					</p>
 				<?php endif; ?>
-  				<div class="description"><?php comment_text(); ?></div>
+				
+  				<div itemprop="description" class="description"><?php comment_text(); ?></div>
   				<div class="clear"></div>
   			</div>
 			<div class="clear"></div>			

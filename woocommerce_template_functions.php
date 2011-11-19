@@ -119,13 +119,13 @@ if (!function_exists('woocommerce_show_product_images')) {
 
 		echo '<div class="images">';
 
-		$thumb_id = 0;
 		if (has_post_thumbnail()) :
+		
 			$thumb_id = get_post_thumbnail_id();
 			$large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
-			echo '<a href="'.wp_get_attachment_url($thumb_id).'" class="zoom" rel="thumbnails" title="'.get_the_title().'">';
-			the_post_thumbnail($large_thumbnail_size); 
-			echo '</a>';
+			
+			echo '<a itemprop="image" href="'.wp_get_attachment_url($thumb_id).'" class="zoom" rel="thumbnails">' . get_the_post_thumbnail($post->ID, $large_thumbnail_size) . '</a>';
+			
 		else : 
 			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" />'; 
 		endif; 
@@ -210,13 +210,13 @@ if (!function_exists('woocommerce_output_product_data_tabs')) {
  **/
 if (!function_exists('woocommerce_template_single_price')) {
 	function woocommerce_template_single_price( $post, $_product ) {
-		?><p class="price"><?php echo $_product->get_price_html(); ?></p><?php
+		?><p itemprop="price" class="price"><?php echo $_product->get_price_html(); ?></p><?php
 	}
 }
 
 if (!function_exists('woocommerce_template_single_excerpt')) {
 	function woocommerce_template_single_excerpt( $post, $_product ) {
-		if ($post->post_excerpt) echo wpautop(wptexturize($post->post_excerpt));
+		if ($post->post_excerpt) echo '<div itemprop="description">' . wpautop(wptexturize($post->post_excerpt)) . '</div>';
 	}
 }
 
@@ -224,7 +224,7 @@ if (!function_exists('woocommerce_template_single_meta')) {
 	function woocommerce_template_single_meta( $post, $_product ) {
 		
 		?>
-		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Posted in', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tagged as', 'woothemes').' ', '.</span>'); ?></div>
+		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span itemprop="productID" class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Posted in', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tagged as', 'woothemes').' ', '.</span>'); ?></div>
 		<?php
 		
 	}
@@ -284,13 +284,21 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		// No price set - so no button
 		if( $_product->get_price() === '') return;
 
-		if ($availability['availability']) : ?><p class="stock <?php echo $availability['class'] ?>"><?php echo $availability['availability']; ?></p><?php endif;
+		if ($availability['availability']) : ?>
+			<p class="stock <?php echo $availability['class'] ?>"><?php echo $availability['availability']; ?></p>
+		<?php endif;
 		
 		// Don't show cart if out of stock
-		if (!$_product->is_in_stock()) return;
+		if (!$_product->is_in_stock()) :
+			echo '<link itemprop="availability" href="http://schema.org/OutOfStock">';
+			return;
+		endif;
+		
+		echo '<link itemprop="availability" href="http://schema.org/InStock">';
+		
+		do_action('woocommerce_before_add_to_cart_form'); 
+		
 		?>
-		<?php do_action('woocommerce_before_add_to_cart_form'); ?>
-			
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
 		 	
 		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
@@ -304,9 +312,10 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		 	<?php do_action('woocommerce_after_add_to_cart_button'); ?>
 		 	
 		</form>
+		<?php 
 		
-		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
-		<?php
+		do_action('woocommerce_after_add_to_cart_form');
+		
 	}
 }
 if (!function_exists('woocommerce_grouped_add_to_cart')) {
@@ -1063,7 +1072,7 @@ function woocommerce_upsell_display() {
 	global $_product;
 	$upsells = $_product->get_upsells();
 	if (sizeof($upsells)>0) :
-		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2><ul>';
+		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
 		$args = array(
 			'post_type'	=> 'product',
 			'ignore_sticky_posts'	=> 1,
