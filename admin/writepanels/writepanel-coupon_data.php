@@ -70,7 +70,6 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	$woocommerce_errors = array();
 	
 	if (!$_POST['coupon_amount']) $woocommerce_errors[] = __('Coupon amount is required', 'woothemes');
-	if ($_POST['discount_type']=='fixed_product' && !$_POST['product_ids']) $woocommerce_errors[] = __('Product discount coupons require you to set "Product IDs" to work.', 'woothemes');
 
 	// Add/Replace data to array
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
