@@ -20,6 +20,7 @@ class woocommerce_coupon {
 	var $usage_limit;
 	var $usage_count;
 	var $expiry_date;
+	var $apply_before_tax;
 	
 	/** get coupon with $code */
 	function woocommerce_coupon( $code ) {
@@ -39,6 +40,7 @@ class woocommerce_coupon {
 			$this->usage_limit 			= get_post_meta($coupon->ID, 'usage_limit', true);
 			$this->usage_count 			= (int) get_post_meta($coupon->ID, 'usage_count', true);
 			$this->expiry_date 			= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
+			$this->apply_before_tax 	= get_post_meta($coupon->ID, 'apply_before_tax', true);
 			
 			if (!$this->amount) return false;
 			
@@ -47,6 +49,11 @@ class woocommerce_coupon {
 		endif;
 		
 		return false;
+	}
+	
+	/** Check if coupon needs applying before tax **/
+	function apply_before_tax() {
+		if ($this->apply_before_tax=='yes') return true; else return false;
 	}
 	
 	/** Increase usage count */

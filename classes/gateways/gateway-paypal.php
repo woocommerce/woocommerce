@@ -166,7 +166,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				'upload' 				=> 1,
 				'return' 				=> $this->get_return_url( $order ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
-				//'cancel_return'			=> home_url(),
 				
 				// Order key
 				'custom'				=> $order_id,
@@ -189,7 +188,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				// Payment Info
 				'invoice' 				=> $order->order_key,
 				'tax_cart'				=> $order->get_total_tax(),
-				'discount_amount_cart' 	=> $order->order_discount
+				'discount_amount_cart' 	=> $order->get_total_discount()
 			), 
 			$phone_args
 		);

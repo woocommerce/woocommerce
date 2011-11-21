@@ -35,6 +35,9 @@ function woocommerce_coupon_data_meta_box($post) {
 			// Individual use
 			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woothemes'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woothemes') ) );
 			
+			// Apply before tax
+			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply coupon before tax?', 'woothemes'), 'description' => __('Check this box if the coupon should be applied before calculating a product\'s tax', 'woothemes') ) );
+			
 			// Product ids
 			woocommerce_wp_text_input( array( 'id' => 'product_ids', 'label' => __('Product IDs', 'woothemes'), 'placeholder' => __('N/A', 'woothemes'), 'description' => __('(optional) Comma separate IDs which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woothemes') ) );
 			
@@ -55,18 +58,6 @@ function woocommerce_coupon_data_meta_box($post) {
 }
 
 /**
- * Coupon data meta box
- * 
- * Displays the meta box
- */
-add_filter('enter_title_here', 'woocommerce_coupon_enter_title_here', 1, 2);
-
-function woocommerce_coupon_enter_title_here( $text, $post ) {
-	if ($post->post_type=='shop_coupon') return __('Coupon code', 'woothemes');
-	return $text;
-}
-
-/**
  * Coupon Data Save
  * 
  * Function for processing and storing all coupon data.
@@ -79,7 +70,6 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	$woocommerce_errors = array();
 	
 	if (!$_POST['coupon_amount']) $woocommerce_errors[] = __('Coupon amount is required', 'woothemes');
-	if ($_POST['discount_type']=='fixed_product' && !$_POST['product_ids']) $woocommerce_errors[] = __('Product discount coupons require you to set "Product IDs" to work.', 'woothemes');
 
 	// Add/Replace data to array
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
@@ -89,6 +79,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$usage_limit 	= (isset($_POST['usage_limit']) && $_POST['usage_limit']>0) ? (int) $_POST['usage_limit'] : '';
 		$individual_use = isset($_POST['individual_use']) ? 'yes' : 'no';
 		$expiry_date 	= strip_tags(stripslashes( $_POST['expiry_date'] ));
+		$apply_before_tax = isset($_POST['apply_before_tax']) ? 'yes' : 'no';
 	
 	// Save
 		update_post_meta( $post_id, 'discount_type', $type );
@@ -98,6 +89,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		update_post_meta( $post_id, 'exclude_product_ids', $exclude_product_ids );
 		update_post_meta( $post_id, 'usage_limit', $usage_limit );
 		update_post_meta( $post_id, 'expiry_date', $expiry_date );
+		update_post_meta( $post_id, 'apply_before_tax', $apply_before_tax );
 		
 		do_action('woocommerce_coupon_options');
 	

@@ -504,7 +504,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			 	endif;
 		 	else :
 		 		// Format values
-		 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
+		 		$values = esc_html(stripslashes($attribute_values[$i]));
 		 		// Text based, separate by pipe
 		 		$values = explode('|', $values);
 		 		$values = array_map('trim', $values);

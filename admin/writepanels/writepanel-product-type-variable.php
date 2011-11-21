@@ -254,7 +254,7 @@ function variable_product_write_panel_js() {
 								if ($attribute['is_taxonomy']) :
 									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
 									foreach ($post_terms as $term) :
-										echo '<option value="'.$term->slug.'">'.$term->name.'</option>';
+										echo '<option value="'.$term->slug.'">'.esc_html($term->name).'</option>';
 									endforeach;
 								else :
 									$options = explode('|', $attribute['value']);

@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -82,6 +82,12 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.3 - 18/11/2011 =
+* Schema.org markup for products and reviews
+* Option to apply coupons before tax
+* Rewritten cart calculations to support coupons before tax and after tax (optional)
+* 2 lines of discounts on total tables - 1 for product discounts, 1 for after tax discounts (e.g. store credit)
+
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
 * Clear cache on upgrade/install
@@ -94,6 +100,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Feature to prevent admin access to customers (optional)
 * Fixed quick edit
 * text/html email headers
+* Fixed variation issue with quote symbols using esc_html
 
 = 1.2.3 - 17/11/2011 =
 * Fix for sale price logic

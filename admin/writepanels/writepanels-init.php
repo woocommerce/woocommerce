@@ -45,6 +45,17 @@ function woocommerce_meta_boxes() {
 }
 
 /**
+ * Title boxes
+ */
+add_filter('enter_title_here', 'woocommerce_enter_title_here', 1, 2);
+
+function woocommerce_enter_title_here( $text, $post ) {
+	if ($post->post_type=='shop_coupon') return __('Coupon code', 'woothemes');
+	if ($post->post_type=='product') return __('Product name', 'woothemes');
+	return $text;
+}
+
+/**
  * Let variations have a product as the parent
  */
 function variations_product_meta_box($post) {

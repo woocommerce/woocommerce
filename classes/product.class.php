@@ -505,7 +505,7 @@ class woocommerce_product {
 					
 					// Round
 					$price = round( $price * 100 ) / 100;
-
+					
 					// Format
 					$price = number_format($price, 2, '.', '');
 					
@@ -763,7 +763,7 @@ class woocommerce_product {
 		
 		if (sizeof($attributes)>0 || ($show_dimensions && $has_dimensions)) :
 			
-			echo '<table cellspacing="0" class="shop_attributes">';
+			echo '<table class="shop_attributes">';
 			$alt = 1;
 			
 			if (($show_dimensions && $has_dimensions)) :

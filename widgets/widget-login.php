@@ -85,7 +85,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			// Get redirect URL
 			$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(get_option('woocommerce_myaccount_page_id')) );
 			?>
-			<form method="post" action="">
+			<form method="post">
 			
 				<p><label for="user_login"><?php _e('Username', 'woothemes'); ?></label> <input name="log" value="<?php if (isset($_POST['log'])) echo esc_attr(stripslashes($_POST['log'])); ?>" class="input-text" id="user_login" type="text" /></p>
 				
