@@ -374,7 +374,7 @@ class woocommerce_cart {
 								
 							elseif ($coupon->type=='percent_product') :
 							
-								$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
+								$percent_discount = ( $values['data']->get_price_excluding_tax( false ) / 100 ) * $coupon->amount;
 								
 								$this->discount_product = $this->discount_product + ( $percent_discount * $values['quantity'] );
 								
@@ -407,7 +407,7 @@ class woocommerce_cart {
 					case "percent" :
 					
 						// Get % off each item - this works out the same as doing the whole cart
-						$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
+						$percent_discount = ( $values['data']->get_price_excluding_tax( false ) / 100 ) * $coupon->amount;
 								
 						$this->discount_product = $this->discount_product + ( $percent_discount * $values['quantity'] );
 						
@@ -420,7 +420,7 @@ class woocommerce_cart {
 			endif;
 		endforeach;
 		
-		return $price;
+		return apply_filters( 'woocommerce_get_discounted_price_', $price, $values, $this );
 	}
 	
 	/** 
@@ -430,6 +430,8 @@ class woocommerce_cart {
 		
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
+			
+			do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );
 			
 			if ($coupon->type!='fixed_product' && $coupon->type!='percent_product') continue;
 			
@@ -484,6 +486,8 @@ class woocommerce_cart {
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
 			
+			do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
+			
 			if ( !$coupon->apply_before_tax() && $coupon->is_valid() ) :
 				
 				switch ($coupon->type) :
@@ -503,7 +507,7 @@ class woocommerce_cart {
 					break;
 					
 				endswitch;
-				
+
 			endif;
 		endforeach;
 	}
