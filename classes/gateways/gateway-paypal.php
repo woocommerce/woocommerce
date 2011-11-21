@@ -187,7 +187,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	
 				// Payment Info
 				'invoice' 				=> $order->order_key,
-				'tax_cart'				=> $order->get_total_tax(),
 				'discount_amount_cart' 	=> $order->get_total_discount()
 			), 
 			$phone_args
@@ -198,6 +197,12 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_args['address_override'] = 1;
 		else :
 			$paypal_args['no_shipping'] = 1;
+		endif;
+		
+		if (get_option('woocommerce_prices_include_tax')=='yes') :
+			// Don't pass - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing.
+		else :
+			$paypal_args['tax_cart'] = $order->get_total_tax();
 		endif;
 		
 		// Cart Contents
@@ -216,11 +221,14 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				
 				if (get_option('woocommerce_prices_include_tax')=='yes') :
 					
-					// Since prices include tax we must send the totals per line, otherwise we will get rounding errors when paypal re-calcs the totals
+					// Since prices include tax we cannot send lines, otherwise we will get rounding errors when paypal re-calcs the totals
+					// Paypal also incorrectly calculates discounts when prices are tax inclusive because coupons are removed from the tax inclusive price
 					$paypal_args['item_name_'.$item_loop] = $item['qty'] . ' x ' . $item_name;
-					//$paypal_args['quantity_'.$item_loop] = $item['qty'];
-					$paypal_args['amount_'.$item_loop] = number_format(($item['cost'] * $item['qty']), 2, '.', '');
-
+					$paypal_args['quantity_'.$item_loop] = 1;
+					
+					// Add tax to this cost for paypal for the entire row to prevent rounding issues
+					$paypal_args['amount_'.$item_loop] = number_format( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
+					
 				else :
 					
 					$paypal_args['item_name_'.$item_loop] = $item_name;
