@@ -21,7 +21,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_shopping_cart';
-		$this->woo_widget_description = __( 'Display the users Shopping Cart in the sidebar.', 'woothemes' );
+		$this->woo_widget_description = __( "Display the user's Shopping Cart in the sidebar.", 'woothemes' );
 		$this->woo_widget_idbase = 'woocommerce_shopping_cart';
 		$this->woo_widget_name = __('WooCommerce Shopping Cart', 'woothemes' );
 		
