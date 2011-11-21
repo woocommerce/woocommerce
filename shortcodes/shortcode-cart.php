@@ -28,7 +28,7 @@ function woocommerce_cart( $atts ) {
 	// Remvoe Discount Codes
 	elseif (isset($_GET['remove_discounts'])) :
 		
-		$woocommerce->cart->remove_coupons();
+		$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
 		
 		// Re-calc price
 		$woocommerce->cart->calculate_totals();

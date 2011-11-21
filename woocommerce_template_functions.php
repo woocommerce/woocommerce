@@ -786,7 +786,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 					</tr><?php endif; ?>
 					
 					<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-						<th><?php _e('Discount', 'woothemes'); ?> <?php _e('[Remove]', 'woothemes'); ?></th>
+						<th><?php _e('Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 						<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 					</tr><?php endif; ?>
 					

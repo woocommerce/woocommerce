@@ -500,7 +500,7 @@ class woocommerce_cart {
 					
 					case "percent" :
 						
-						$percent_discount = round( ( ($this->cart_contents_total + $this->tax_total) / 100) * $coupon->amount , 2);
+						$percent_discount = (round( $this->cart_contents_total + $this->tax_total , 2) / 100 ) * $coupon->amount;
 						
 						$this->discount_total = $this->discount_total + $percent_discount;
 						
@@ -1080,9 +1080,24 @@ class woocommerce_cart {
 	/**
 	 * gets the array of applied coupon codes
 	 */
-	function remove_coupons() {
-		unset($_SESSION['coupons']);
-		$this->applied_coupons = array();
+	function remove_coupons( $type = 0 ) {
+	
+		if ($type == 1) :
+			if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
+				$coupon = &new woocommerce_coupon( $code );
+				if ( $coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+			endforeach;
+			$_SESSION['coupons'] = $this->applied_coupons;
+		elseif ($type == 2) :
+			if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
+				$coupon = &new woocommerce_coupon( $code );
+				if ( !$coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+			endforeach;
+			$_SESSION['coupons'] = $this->applied_coupons;
+		else :
+			unset($_SESSION['coupons']);
+			$this->applied_coupons = array();
+		endif;
 	}
 	
 }
