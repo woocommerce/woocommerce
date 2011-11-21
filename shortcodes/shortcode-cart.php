@@ -24,7 +24,15 @@ function woocommerce_cart( $atts ) {
 	
 		$coupon_code = stripslashes(trim($_POST['coupon_code']));
 		$woocommerce->cart->add_discount($coupon_code);
-
+	
+	// Remvoe Discount Codes
+	elseif (isset($_GET['remove_discounts'])) :
+		
+		$woocommerce->cart->remove_coupons();
+		
+		// Re-calc price
+		$woocommerce->cart->calculate_totals();
+	
 	// Update Shipping
 	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && $woocommerce->verify_nonce('cart')) :
 		
@@ -59,7 +67,7 @@ function woocommerce_cart( $atts ) {
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
 			
 		endif;
-			
+
 	endif;
 	
 	do_action('woocommerce_check_cart_items');

@@ -189,6 +189,8 @@ class woocommerce_product {
 	 * @param   int		$by		Amount to reduce by
 	 */
 	function reduce_stock( $by = 1 ) {
+		global $woocommerce;
+		
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock - $by;
 			$this->total_stock = $this->get_total_stock() - $by;
@@ -499,7 +501,7 @@ class woocommerce_product {
 					
 					$_tax = &new woocommerce_tax();
 
-					$tax_amount = $_tax->calc_tax( $price, $rate, true );
+					$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
 					
 					$price = $price - $tax_amount;
 					
@@ -508,7 +510,7 @@ class woocommerce_product {
 					
 					// Format
 					$price = number_format($price, 2, '.', '');
-					
+
 				endif;
 				
 			endif;

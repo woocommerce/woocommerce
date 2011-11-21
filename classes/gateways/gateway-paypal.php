@@ -214,18 +214,31 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					$item_name .= ' ('.$meta.')';
 				endif;
 				
-				$paypal_args['item_name_'.$item_loop] = $item_name;
-				$paypal_args['quantity_'.$item_loop] = $item['qty'];
-				$paypal_args['amount_'.$item_loop] = $item['cost'];
+				if (get_option('woocommerce_prices_include_tax')=='yes') :
+					
+					// Since prices include tax we must send the totals per line, otherwise we will get rounding errors when paypal re-calcs the totals
+					$paypal_args['item_name_'.$item_loop] = $item['qty'] . ' x ' . $item_name;
+					//$paypal_args['quantity_'.$item_loop] = $item['qty'];
+					$paypal_args['amount_'.$item_loop] = number_format(($item['cost'] * $item['qty']), 2, '.', '');
+
+				else :
+					
+					$paypal_args['item_name_'.$item_loop] = $item_name;
+					$paypal_args['quantity_'.$item_loop] = $item['qty'];
+					$paypal_args['amount_'.$item_loop] = number_format($item['cost'], 2, '.', '');
+					
+				endif;
 				
 			endif;
 		endforeach; endif;
 		
 		// Shipping Cost
-		$item_loop++;
-		$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
-		$paypal_args['quantity_'.$item_loop] = '1';
-		$paypal_args['amount_'.$item_loop] = number_format($order->order_shipping, 2);
+		if ($order->order_shipping>0) :
+			$item_loop++;
+			$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
+			$paypal_args['quantity_'.$item_loop] = '1';
+			$paypal_args['amount_'.$item_loop] = number_format($order->order_shipping, 2);
+		endif;
 		
 		$paypal_args_array = array();
 
