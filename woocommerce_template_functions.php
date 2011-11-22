@@ -564,7 +564,8 @@ if (!function_exists('woocommerce_product_reviews_tab')) {
 if (!function_exists('woocommerce_product_description_panel')) {
 	function woocommerce_product_description_panel() {
 		echo '<div class="panel" id="tab-description">';
-		echo '<h2>' . apply_filters('woocommerce_product_description_heading', __('Product Description', 'woothemes')) . '</h2>';
+		$heading = apply_filters('woocommerce_product_description_heading', __('Product Description', 'woothemes'));
+		if ($heading) echo '<h2>' . $heading . '</h2>';
 		the_content();
 		echo '</div>';
 	}
