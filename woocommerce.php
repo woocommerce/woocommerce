@@ -244,10 +244,13 @@ function woocommerce_frontend_scripts() {
 	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_script('fancybox');
     	
 	/* Script variables */
+	$states = json_encode( $woocommerce->countries->states );
+	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
+	
 	$woocommerce_params = array(
 		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
 		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
-		'countries' 					=> json_encode($woocommerce->countries->states),
+		'countries' 					=> $states,
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
 		'plugin_url' 					=> $woocommerce->plugin_url(),
