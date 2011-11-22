@@ -6,7 +6,7 @@
 			
 	<h1 class="page-title"><?php echo wptexturize($term->name); ?></h1>
 		
-	<?php echo wpautop(wptexturize($term->description)); ?>
+	<?php if ($term->description) : ?><div class="term_description"><?php echo wpautop(wptexturize($term->description)); ?></div><?php endif; ?>
 	
 	<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
 	
