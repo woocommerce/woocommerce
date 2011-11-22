@@ -244,7 +244,14 @@ function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=fals
 	$term_id 	= (int) $term_id;
 	$index 		= (int) $index;
 	
-	update_woocommerce_term_meta( $term_id, 'order', $index );
+	// Meta name
+	if (strstr($taxonomy, 'pa_')) :
+		$meta_name =  'order_' . esc_attr($taxonomy);
+	else :
+		$meta_name = 'order';
+	endif;
+	
+	update_woocommerce_term_meta( $term_id, $meta_name, $index );
 	
 	if( ! $recursive ) return $index;
 	

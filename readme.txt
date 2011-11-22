@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Stored ex. prices with higher precision to prevent rounding errors 
 * Rewritten options for tax display - cart items can be shown without tax now
 * Fixed ordering of custom attributes in variation select boxes
+* Support for ordering attributes with the same ID (but different taxonomies)
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
