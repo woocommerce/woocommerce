@@ -981,8 +981,8 @@ class woocommerce_cart {
 	 */
 	function get_product_subtotal( $price, $tax_rate, $quantity ) {
 		global $woocommerce;
-		
-		if ( $this->prices_include_tax && get_option('woocommerce_calc_taxes')=='yes' && $tax_rate>0 ) :
+				
+		if ( get_option('woocommerce_calc_taxes')=='yes' && $tax_rate>0 && (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes' || !$this->prices_include_tax) ) :
 									
 			$tax_amount 	= $this->tax->calc_tax( $price * $quantity, $tax_rate, true );
 			$row_price 		= ( $price * $quantity ) - round($tax_amount, 2);

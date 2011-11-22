@@ -674,14 +674,6 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 	array(	'name' => __( 'Tax Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
-	
-	array(  
-		'name' => __( 'Prices inclusive of tax', 'woothemes' ),
-		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
-		'id' 		=> 'woocommerce_prices_include_tax',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
-	),
 
 	array(  
 		'name' => __( 'Tax calculations', 'woothemes' ),
@@ -690,6 +682,14 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_prices_include_tax',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
 	),
 	
 	array(  
