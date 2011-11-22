@@ -91,7 +91,15 @@
 							<tr>
 								<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
 								<td>'.$values['quantity'].'</td>
-								<td>'.woocommerce_price($_product->get_price_excluding_tax()*$values['quantity'], array('ex_tax_label' => 1)).'</td>
+								<td>';
+						
+						if (get_option('woocommerce_prices_include_tax')=='yes') :
+							echo woocommerce_price($_product->get_price()*$values['quantity']);	
+						else :
+							echo woocommerce_price($_product->get_price()*$values['quantity']);
+						endif;
+							
+						echo '</td>
 							</tr>';
 					endif;
 				endforeach; 

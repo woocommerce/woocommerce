@@ -324,6 +324,8 @@ class woocommerce_cart {
 	 */
 	function get_discounted_price( $values, $price ) {
 		
+		$this->discount_product = 0;
+		
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
 			
@@ -372,7 +374,7 @@ class woocommerce_cart {
 								
 							elseif ($coupon->type=='percent_product') :
 							
-								$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
+								$percent_discount = ( $values['data']->get_price_excluding_tax( false ) / 100 ) * $coupon->amount;
 								
 								$this->discount_product = $this->discount_product + ( $percent_discount * $values['quantity'] );
 								
@@ -405,7 +407,7 @@ class woocommerce_cart {
 					case "percent" :
 					
 						// Get % off each item - this works out the same as doing the whole cart
-						$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
+						$percent_discount = ( $values['data']->get_price_excluding_tax( false ) / 100 ) * $coupon->amount;
 								
 						$this->discount_product = $this->discount_product + ( $percent_discount * $values['quantity'] );
 						
@@ -418,7 +420,7 @@ class woocommerce_cart {
 			endif;
 		endforeach;
 		
-		return $price;
+		return apply_filters( 'woocommerce_get_discounted_price_', $price, $values, $this );
 	}
 	
 	/** 
@@ -428,6 +430,8 @@ class woocommerce_cart {
 		
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
+			
+			do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );
 			
 			if ($coupon->type!='fixed_product' && $coupon->type!='percent_product') continue;
 			
@@ -482,6 +486,8 @@ class woocommerce_cart {
 		if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
 			$coupon = &new woocommerce_coupon( $code );
 			
+			do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
+			
 			if ( !$coupon->apply_before_tax() && $coupon->is_valid() ) :
 				
 				switch ($coupon->type) :
@@ -494,14 +500,14 @@ class woocommerce_cart {
 					
 					case "percent" :
 						
-						$percent_discount = round( ( ($this->cart_contents_total + $this->tax_total) / 100) * $coupon->amount , 2);
+						$percent_discount = (round( $this->cart_contents_total + $this->tax_total , 2) / 100 ) * $coupon->amount;
 						
 						$this->discount_total = $this->discount_total + $percent_discount;
 						
 					break;
 					
 				endswitch;
-				
+
 			endif;
 		endforeach;
 	}
@@ -514,54 +520,185 @@ class woocommerce_cart {
 		
 		$this->reset_totals();
 		
-		// Get count of all items
-		if (sizeof($this->cart_contents)>0) foreach ($this->cart_contents as $cart_item_key => $values) $this->cart_contents_count 	= $this->cart_contents_count + $values['quantity'];
-		
-		// Calc totals for items
+		// Get count of all items + weights
 		if (sizeof($this->cart_contents)>0) foreach ($this->cart_contents as $cart_item_key => $values) :
-			
-			$_product = $values['data'];
-				
-			$this->cart_contents_weight = $this->cart_contents_weight + ($_product->get_weight() * $values['quantity']);
-			
-			// Base Price (i.e. no tax, regardless of region)
-			$base_price 				= $_product->get_price_excluding_tax();
-			
-			// Discounted Price (base price with any pre-tax discounts applied
-			$discounted_price 			= $this->get_discounted_price( $values, $base_price );
-			
-			// Tax Amount (For the line, based on discounted, ex.tax price)
-			if ( get_option('woocommerce_calc_taxes')=='yes' && $_product->is_taxable() ) :
-				
-				$tax_rate 				= $this->tax->get_rate( $_product->get_tax_class() );
-				$tax_amount 			= $this->tax->calc_tax( $base_price, $tax_rate, false ) * $values['quantity'];
-				$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price, $tax_rate, false ) * $values['quantity'];
-
-			else :
-				
-				$tax_amount 			= 0;
-				$discounted_tax_amount 	= 0;
-				
-			endif;
-			
-			// Total item price (discounted price + tax * quantity)
-			$total_item_price 			= ($discounted_price*$values['quantity']) + $discounted_tax_amount;
-			
-			// Add any product discounts (after tax)
-			$this->apply_product_discounts_after_tax( $values, $total_item_price );
-			
-			// Sub total is based on base prices (without discounts)
-			$this->subtotal 			= $this->subtotal							+ ($base_price*$values['quantity']) + $tax_amount;
-			$this->subtotal_ex_tax 		= $this->subtotal_ex_tax					+ ($base_price*$values['quantity']);
-		
-			// Cart contents total is based on discounted prices and is used for the final total calculation
-			$this->cart_contents_total 			= $this->cart_contents_total 		+ ($discounted_price*$values['quantity']);
-			
-			// Cart tax is based on discounted amounts
-			$this->tax_total 					= $this->tax_total 					+ $discounted_tax_amount;
-
+			$this->cart_contents_weight = $this->cart_contents_weight + ($values['data']->get_weight() * $values['quantity']);
+			$this->cart_contents_count 	= $this->cart_contents_count + $values['quantity'];
 		endforeach;
+		
+		if (get_option('woocommerce_prices_include_tax')=='yes') :
+		
+			/** 
+			 * Calculate totals for items
+			 */
+			if (sizeof($this->cart_contents)>0) : foreach ($this->cart_contents as $cart_item_key => $values) :
+				
+				/** 
+				 * Prices include tax
+				 *
+				 * To prevent rounding issues we need to work with the inclusive price where possible
+				 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would
+				 * be 8.325 leading to totals being 1p off
+				 *
+				 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated
+				 * afterwards.
+				 *
+				 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that
+				 *
+				 * Used this excellent article for reference:
+				 *	http://developer.practicalecommerce.com/articles/1473-Coding-for-Tax-Calculations-Everything-You-Never-Wanted-to-Know-Part-2
+				 */
+				$_product = $values['data'];
+					
+				// Base Price (inlusive of tax for now)
+				$base_price 			= $_product->get_price();
+				
+				// Discounted Price (price with any pre-tax discounts applied)
+				$discounted_price 		= $this->get_discounted_price( $values, $base_price );
+				
+				// Base Price Adjustment
+				if ( get_option('woocommerce_calc_taxes')=='yes' && $_product->is_taxable() ) :
+					
+					// Get tax rate for base - we will handle customer's outside base later
+					$tax_rate 				= $this->tax->get_shop_base_rate( $_product->get_tax_class() );
+					
+					/**
+					 * Regular tax calculation (customer inside base and the tax class is unmodified
+					 */
+					$tax_amount 			= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rate, true );				
+					$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rate, true );
+					
+					/**
+					 * ADJUST TAX - Checkout calculations when customer is OUTSIDE the shop base country and prices INCLUDE tax
+					 */
+					if ( $woocommerce->customer->is_customer_outside_base() && defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) :
+						
+						// Get rate
+						$rate			 		= $this->tax->get_rate( $_product->get_tax_class() );
+						
+						// Get the price ex. Vat (unrounded)
+						$adjusted_price 		= $_product->get_price_excluding_tax( false );
+						
+						// Get tax amount				
+						$adjusted_tax 			= $this->tax->calc_tax( $adjusted_price, $rate, false );	
+	
+						// Discounted Price (price with any pre-tax discounts applied)
+						$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price + $adjusted_tax );
+						
+						// Discounted tax amount			
+						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
 
+					/**
+					 * ADJUST TAX - Checkout calculations when a tax class is modified
+					 */
+					elseif ( $_product->get_tax_class() !== $_product->tax_class ) :
+						
+						// Get rates
+						$original_rate			= $this->tax->get_rate( $_product->get_tax_class() );
+						$new_rate			 	= $this->tax->get_rate( $_product->tax_class );
+						
+						// Calc tax for original rate
+						$original_tax_amount	= $this->tax->calc_tax( $_product->get_price(), $original_rate, true );
+						
+						// Now calc tax for new rate (which now excludes tax)
+						$adjusted_tax 			= $this->tax->calc_tax( ( $_product->get_price() - $original_tax_amount ), $new_rate, false );
+						
+						// Discounted Price (price with any pre-tax discounts applied)
+						$discounted_price 		= $this->get_discounted_price( $values, ( $_product->get_price() - $original_tax_amount ) + $adjusted_tax );
+						
+						// Discounted tax amount			
+						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $new_rate, true );
+					
+					endif;
+					
+					// Rounding
+					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+						$tax_amount 			= round( $tax_amount, 2 );
+						$discounted_tax_amount	= round( $discounted_tax_amount, 2 );
+					endif;
+				
+				else :
+					
+					$tax_amount = $discounted_tax_amount = 0;
+				
+				endif;			
+				
+				// Total item price (price, discount and quantity) - round tax so price is correctly calculated
+				$total_item_price 			= ($discounted_price * $values['quantity']) - round($discounted_tax_amount, 2);	
+										
+				// Add any product discounts (after tax)
+				$this->apply_product_discounts_after_tax( $values, $total_item_price + $discounted_tax_amount );
+				
+				// Tax Totals
+				$this->tax_total 			= $this->tax_total + $discounted_tax_amount;
+					
+				// Cart contents total is based on discounted prices and is used for the final total calculation
+				$this->cart_contents_total 	= $this->cart_contents_total 		+ $total_item_price;
+				
+				// Sub total is based on base prices (without discounts)
+				$this->subtotal 			= $this->subtotal + ( $base_price * $values['quantity'] );
+				$this->subtotal_ex_tax 		= $this->subtotal_ex_tax + ( $base_price * $values['quantity'] ) - round($tax_amount, 2);
+				
+			endforeach; endif;
+		
+		else :
+		
+			if (sizeof($this->cart_contents)>0) : foreach ($this->cart_contents as $cart_item_key => $values) :
+			
+				/** 
+				 * Prices exclude tax
+				 *
+				 * This calculation is simpler - work with the base, untaxed price.
+				 */
+				$_product = $values['data'];
+
+				// Base Price (i.e. no tax, regardless of region)
+				$base_price 				= $_product->get_price_excluding_tax();
+	
+				// Discounted Price (base price with any pre-tax discounts applied
+				$discounted_price 			= $this->get_discounted_price( $values, $base_price );
+							
+				// Tax Amount (For the line, based on discounted, ex.tax price)
+				if ( get_option('woocommerce_calc_taxes')=='yes' && $_product->is_taxable() ) :
+					
+					// Now calc product rates
+					$tax_rate 				= $this->tax->get_rate( $_product->get_tax_class() );				
+					$tax_amount 			= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rate, false );				
+					$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rate, false );
+	
+					// Rounding
+					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+						$tax_amount 			= round( $tax_amount, 2 );
+						$discounted_tax_amount	= round( $discounted_tax_amount, 2 );
+					endif;
+	
+				else :
+					$tax_amount = $discounted_tax_amount = 0;
+				endif;
+				
+				// Total item price (price, discount and quantity)
+				$total_item_price 			= $discounted_price * $values['quantity'];		
+										
+				// Add any product discounts (after tax)
+				$this->apply_product_discounts_after_tax( $values, $total_item_price + $discounted_tax_amount );
+				
+				// Tax Totals
+				$this->tax_total 			= $this->tax_total + $discounted_tax_amount;
+					
+				// Cart contents total is based on discounted prices and is used for the final total calculation
+				$this->cart_contents_total 	= $this->cart_contents_total 		+ $total_item_price;
+				
+				// Sub total is based on base prices (without discounts)
+				$this->subtotal 			= $this->subtotal + ( $base_price * $values['quantity'] ) + $tax_amount;
+				$this->subtotal_ex_tax 		= $this->subtotal_ex_tax + $base_price * $values['quantity'];
+			
+			endforeach; endif;
+		
+		endif;
+		
+		// Rounding
+		if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes' ) $this->tax_total 	= round( $this->tax_total, 2 );
+			
 		// Cart Discounts (after tax)
 		$this->apply_cart_discounts_after_tax();
 		
@@ -578,7 +715,7 @@ class woocommerce_cart {
 		$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 		$this->shipping_tax_total 	= $woocommerce->shipping->shipping_tax;		// Shipping Tax
 		
-		// VAT excemption done at this point - so all totals are correct before exemption
+		// VAT exemption done at this point - so all totals are correct before exemption
 		if ($woocommerce->customer->is_vat_exempt()) :
 			$this->shipping_tax_total = $this->tax_total = 0;
 		endif;
@@ -811,10 +948,14 @@ class woocommerce_cart {
 	}
 	
 	/**
-	 * gets the cart contens total (after calculation)
+	 * gets the cart contents total (after calculation)
 	 */
 	function get_cart_total() {
-		return woocommerce_price($this->cart_contents_total);
+		if (get_option('woocommerce_prices_include_tax')=='no') :
+			return woocommerce_price($this->cart_contents_total);
+		else :
+			return woocommerce_price($this->cart_contents_total + $this->tax_total);
+		endif;
 	}
 	
 	/**
@@ -823,11 +964,11 @@ class woocommerce_cart {
 	function get_cart_subtotal() {
 		global $woocommerce;
 		
-		if (get_option('woocommerce_display_totals_tax')=='excluding' || ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT )) :
+		if (get_option('woocommerce_display_totals_tax')=='excluding') :
 			
 			$return = woocommerce_price( $this->subtotal_ex_tax );
 			
-			if ($this->tax_total>0) :
+			if ($this->tax_total>0 && get_option('woocommerce_prices_include_tax')=='yes') :
 				$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 			endif;
 			return $return;
@@ -836,7 +977,7 @@ class woocommerce_cart {
 			
 			$return = woocommerce_price( $this->subtotal );
 			
-			if ($this->tax_total>0) :
+			if ($this->tax_total>0 && get_option('woocommerce_prices_include_tax')=='no') :
 				$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 			endif;
 			return $return;
@@ -866,7 +1007,7 @@ class woocommerce_cart {
 				if (get_option('woocommerce_display_totals_tax')=='excluding') :
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total);
-					if ($this->shipping_tax_total>0) :
+					if ($this->shipping_tax_total>0 && get_option('woocommerce_prices_include_tax')=='yes') :
 						$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 					endif;
 					return $return;
@@ -874,7 +1015,7 @@ class woocommerce_cart {
 				else :
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total + $woocommerce->shipping->shipping_tax);
-					if ($this->shipping_tax_total>0) :
+					if ($this->shipping_tax_total>0 && get_option('woocommerce_prices_include_tax')=='no') :
 						$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 					endif;
 					return $return;
@@ -934,6 +1075,29 @@ class woocommerce_cart {
 	 */
 	function get_applied_coupons() {
 		return (array) $this->applied_coupons;
+	}
+	
+	/**
+	 * gets the array of applied coupon codes
+	 */
+	function remove_coupons( $type = 0 ) {
+	
+		if ($type == 1) :
+			if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
+				$coupon = &new woocommerce_coupon( $code );
+				if ( $coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+			endforeach;
+			$_SESSION['coupons'] = $this->applied_coupons;
+		elseif ($type == 2) :
+			if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
+				$coupon = &new woocommerce_coupon( $code );
+				if ( !$coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+			endforeach;
+			$_SESSION['coupons'] = $this->applied_coupons;
+		else :
+			unset($_SESSION['coupons']);
+			$this->applied_coupons = array();
+		endif;
 	}
 	
 }

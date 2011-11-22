@@ -676,14 +676,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	array(	'name' => __( 'Tax Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 	
 	array(  
-		'name' => __( 'Calculate Taxes', 'woothemes' ),
-		'desc' 		=> __( 'Enable taxes and tax calculations', 'woothemes' ),
-		'id' 		=> 'woocommerce_calc_taxes',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
-	),
-	
-	array(  
 		'name' => __( 'Prices inclusive of tax', 'woothemes' ),
 		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
 		'id' 		=> 'woocommerce_prices_include_tax',
@@ -703,6 +695,23 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 			'including' => __( 'price including tax', 'woothemes' ),
 			'excluding'  => __( 'price excluding tax', 'woothemes' )
 		)
+	),
+	
+	array(  
+		'name' => __( 'Tax calculations', 'woothemes' ),
+		'desc' 		=> __( 'Enable taxes and tax calculations', 'woothemes' ),
+		'id' 		=> 'woocommerce_calc_taxes',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Round tax at subtotal level, instead of per line', 'woothemes' ),
+		'id' 		=> 'woocommerce_tax_round_at_subtotal',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 
 	array(  

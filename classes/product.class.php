@@ -189,6 +189,8 @@ class woocommerce_product {
 	 * @param   int		$by		Amount to reduce by
 	 */
 	function reduce_stock( $by = 1 ) {
+		global $woocommerce;
+		
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock - $by;
 			$this->total_stock = $this->get_total_stock() - $by;
@@ -487,7 +489,7 @@ class woocommerce_product {
 	}
 	
 	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
-	function get_price_excluding_tax() {
+	function get_price_excluding_tax( $round = true ) {
 		
 		$price = $this->price;
 			
@@ -499,16 +501,25 @@ class woocommerce_product {
 					
 					$_tax = &new woocommerce_tax();
 
-					$tax_amount = $_tax->calc_tax( $price, $rate, true );
+					if ($round) :
+						
+						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
 					
-					$price = $price - $tax_amount;
+						$price = $price - $tax_amount;
 					
-					// Round
-					$price = round( $price * 100 ) / 100;
+						// Round
+						$price = round( $price * 100 ) / 100;
+						
+						// Format
+						$price = number_format($price, 2, '.', '');
 					
-					// Format
-					$price = number_format($price, 2, '.', '');
+					else :
 					
+						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ), 4);
+					
+						$price = $price - $tax_amount;
+					
+					endif;
 				endif;
 				
 			endif;

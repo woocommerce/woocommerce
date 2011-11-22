@@ -82,11 +82,14 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.3 - 18/11/2011 =
+= 1.3 - xx/11/2011 =
+* Minor bug fixes
 * Schema.org markup for products and reviews
-* Option to apply coupons before tax
-* Rewritten cart calculations to support coupons before tax and after tax (optional)
+* Option to apply coupons before tax (per coupon)
+* Rewritten cart tax calculations to support coupons before tax and after tax
 * 2 lines of discounts on total tables - 1 for product discounts, 1 for after tax discounts (e.g. store credit)
+* Tweaked paypal to work with tax inclusive prices without screwing up rounding
+* Stored ex. prices with higher precision to prevent rounding errors 
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.

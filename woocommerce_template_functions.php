@@ -731,8 +731,8 @@ if (!function_exists('woocommerce_cart_totals')) {
 					</tr>
 					
 					<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
-						<th><?php _e('Product Discounts', 'woothemes'); ?></th>
-						<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
+						<th><?php _e('Product Discounts', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
+						<td>&ndash;<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 					</tr><?php endif; ?>
 					
 					<?php if ($woocommerce->cart->get_cart_shipping_total()) : ?><tr>
@@ -786,7 +786,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 					</tr><?php endif; ?>
 					
 					<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-						<th><?php _e('Discount', 'woothemes'); ?></th>
+						<th><?php _e('Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 						<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 					</tr><?php endif; ?>
 					

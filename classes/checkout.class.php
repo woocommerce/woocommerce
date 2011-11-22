@@ -682,7 +682,7 @@ class woocommerce_checkout {
 					 		'variation_id' 	=> $values['variation_id'],
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
-					 		'cost' 			=> $_product->get_price_excluding_tax(),
+					 		'cost' 			=> $_product->get_price_excluding_tax( false ),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
