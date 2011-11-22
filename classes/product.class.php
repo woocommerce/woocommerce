@@ -864,21 +864,8 @@ class woocommerce_product {
                         }
                     }
                 }
-
-                // Order custom attributes (non taxonomy) as defined
-                if (!$attribute['is_taxonomy']) :
-                	
-                	$options = explode('|', $attribute['value']);
-                	$options = array_map('trim', $options);
-                	
-                	$values = array_intersect( $options, $values );
-                	
-                endif;
-                
-                $values = array_unique($values);
-                
             }
-            
+
             // empty value indicates that all options for given attribute are available
             if(in_array('', $values)) {
             	
@@ -896,6 +883,17 @@ class woocommerce_product {
 				$options = array_map('trim', $options);
                 
                 $values = array_unique($options);
+            } else {
+            	
+            	// Order custom attributes (non taxonomy) as defined
+	            if (!$attribute['is_taxonomy']) :
+	            	$options = explode('|', $attribute['value']);
+	            	$options = array_map('trim', $options);
+	            	$values = array_intersect( $options, $values );
+	            endif;
+	            
+	            $values = array_unique($values);
+            	
             }
             
             $available_attributes[$attribute['name']] = array_unique($values);
