@@ -293,7 +293,7 @@ function woocommerce_post_type() {
 				'delete_post' 		=> 'manage_woocommerce',
 				'read_post' 		=> 'manage_woocommerce',
 			),
-			'publicly_queryable' 	=> true,
+			'publicly_queryable' 	=> false,
 			'exclude_from_search' 	=> true,
 			'show_in_menu' 			=> $show_in_menu,
 			'hierarchical' 			=> false,

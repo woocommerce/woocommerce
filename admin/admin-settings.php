@@ -674,29 +674,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 	array(	'name' => __( 'Tax Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
-	
-	array(  
-		'name' => __( 'Prices inclusive of tax', 'woothemes' ),
-		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
-		'id' 		=> 'woocommerce_prices_include_tax',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox'
-	),
-	
-	array(  
-		'name' => __( 'Cart totals display...', 'woothemes' ),
-		'desc' 		=> '',
-		'tip' 		=> __( 'Should the subtotal be shown including or excluding tax on the frontend?', 'woothemes' ),
-		'id' 		=> 'woocommerce_display_totals_tax',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'excluding',
-		'type' 		=> 'select',
-		'options' => array(  
-			'including' => __( 'price including tax', 'woothemes' ),
-			'excluding'  => __( 'price excluding tax', 'woothemes' )
-		)
-	),
-	
+
 	array(  
 		'name' => __( 'Tax calculations', 'woothemes' ),
 		'desc' 		=> __( 'Enable taxes and tax calculations', 'woothemes' ),
@@ -707,9 +685,34 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 	
 	array(  
+		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_prices_include_tax',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Round tax at subtotal level, instead of per line', 'woothemes' ),
 		'id' 		=> 'woocommerce_tax_round_at_subtotal',
 		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Frontend Tax display', 'woothemes' ),
+		'desc' 		=> __( 'Always display cart contents excluding tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_display_cart_prices_excluding_tax',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(  
+		'desc' 		=> __( 'Always display cart totals excluding tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_display_totals_excluding_tax',
+		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),

@@ -11,12 +11,12 @@
 		</thead>
 		<tfoot>
 			<tr>
-				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
+				<td colspan="2"><?php _e('Cart Subtotal', 'woothemes'); ?></td>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 			
 			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Product Discounts', 'woothemes'); ?></td>
+				<td colspan="2"><?php _e('Cart Discount', 'woothemes'); ?></td>
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 			</tr><?php endif; ?>
 			
@@ -72,12 +72,12 @@
 			</tr><?php endif; ?>
 
 			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
+				<td colspan="2"><?php _e('Order Discount', 'woothemes'); ?></td>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr><?php endif; ?>
 			
 			<tr>
-				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
+				<td colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></td>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 			</tr>
 		</tfoot>
@@ -92,12 +92,9 @@
 								<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
 								<td>'.$values['quantity'].'</td>
 								<td>';
-						
-						if (get_option('woocommerce_prices_include_tax')=='yes') :
-							echo woocommerce_price($_product->get_price()*$values['quantity']);	
-						else :
-							echo woocommerce_price($_product->get_price()*$values['quantity']);
-						endif;
+								
+								if ($_product->is_taxable()) $rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->get_tax_class() ); else $rate = 0;
+								echo $woocommerce->cart->get_product_subtotal( $_product->get_price(), $rate, $values['quantity'] );
 							
 						echo '</td>
 							</tr>';

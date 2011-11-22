@@ -564,7 +564,8 @@ if (!function_exists('woocommerce_product_reviews_tab')) {
 if (!function_exists('woocommerce_product_description_panel')) {
 	function woocommerce_product_description_panel() {
 		echo '<div class="panel" id="tab-description">';
-		echo '<h2>' . apply_filters('woocommerce_product_description_heading', __('Product Description', 'woothemes')) . '</h2>';
+		$heading = apply_filters('woocommerce_product_description_heading', __('Product Description', 'woothemes'));
+		if ($heading) echo '<h2>' . $heading . '</h2>';
 		the_content();
 		echo '</div>';
 	}
@@ -726,12 +727,12 @@ if (!function_exists('woocommerce_cart_totals')) {
 			<table cellspacing="0" cellpadding="0">
 				<tbody>
 					<tr>
-						<th><?php _e('Subtotal', 'woothemes'); ?></th>
+						<th><?php _e('Cart Subtotal', 'woothemes'); ?></th>
 						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 					</tr>
 					
 					<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
-						<th><?php _e('Product Discounts', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
+						<th><?php _e('Cart Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 						<td>&ndash;<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 					</tr><?php endif; ?>
 					
@@ -748,7 +749,7 @@ if (!function_exists('woocommerce_cart_totals')) {
 										echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &ndash; ';
 										if ($method->shipping_total>0) :
 										
-											if (get_option('woocommerce_display_totals_tax')=='excluding') :
+											if (get_option('woocommerce_display_totals_excluding_tax')=='yes') :
 					
 												echo woocommerce_price($method->shipping_total);
 												if ($method->shipping_tax>0) :
@@ -779,19 +780,19 @@ if (!function_exists('woocommerce_cart_totals')) {
 					</tr><?php endif; ?>
 
 					<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
-						<th><?php _e('Tax', 'woothemes'); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
+						<th><?php echo $woocommerce->countries->tax_or_vat(); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
 						<td><?php 
 							echo $woocommerce->cart->get_cart_tax(); 
 						?></td>
 					</tr><?php endif; ?>
 					
 					<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-						<th><?php _e('Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
+						<th><?php _e('Order Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 						<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 					</tr><?php endif; ?>
 					
 					<tr>
-						<th><strong><?php _e('Total', 'woothemes'); ?></strong></th>
+						<th><strong><?php _e('Order Total', 'woothemes'); ?></strong></th>
 						<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 					</tr>
 				</tbody>

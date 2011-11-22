@@ -587,7 +587,7 @@ class woocommerce_countries {
 	function tax_or_vat() {
 		global $woocommerce;
 		
-		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('VAT', 'woothemes') : __('tax', 'woothemes');
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('VAT', 'woothemes') : __('Tax', 'woothemes');
 		
 		return apply_filters('woocommerce_countries_tax_or_vat', $return);
 	}
