@@ -682,21 +682,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
 	),
-	
-	array(  
-		'name' => __( 'Cart totals display...', 'woothemes' ),
-		'desc' 		=> '',
-		'tip' 		=> __( 'Should the subtotal be shown including or excluding tax on the frontend?', 'woothemes' ),
-		'id' 		=> 'woocommerce_display_totals_tax',
-		'css' 		=> 'min-width:100px;',
-		'std' 		=> 'excluding',
-		'type' 		=> 'select',
-		'options' => array(  
-			'including' => __( 'price including tax', 'woothemes' ),
-			'excluding'  => __( 'price excluding tax', 'woothemes' )
-		)
-	),
-	
+
 	array(  
 		'name' => __( 'Tax calculations', 'woothemes' ),
 		'desc' 		=> __( 'Enable taxes and tax calculations', 'woothemes' ),
@@ -710,6 +696,23 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'desc' 		=> __( 'Round tax at subtotal level, instead of per line', 'woothemes' ),
 		'id' 		=> 'woocommerce_tax_round_at_subtotal',
 		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Frontend Tax display', 'woothemes' ),
+		'desc' 		=> __( 'Always display cart contents excluding tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_display_cart_prices_excluding_tax',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(  
+		'desc' 		=> __( 'Always display cart totals excluding tax', 'woothemes' ),
+		'id' 		=> 'woocommerce_display_totals_excluding_tax',
+		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),

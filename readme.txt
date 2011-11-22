@@ -90,6 +90,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * 2 lines of discounts on total tables - 1 for product discounts, 1 for after tax discounts (e.g. store credit)
 * Tweaked paypal to work with tax inclusive prices without screwing up rounding
 * Stored ex. prices with higher precision to prevent rounding errors 
+* Rewritten options for tax display - cart items can be shown without tax now
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.

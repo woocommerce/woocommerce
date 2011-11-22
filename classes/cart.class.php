@@ -38,6 +38,8 @@ class woocommerce_cart {
 	 */
 	function __construct() {
 		$this->tax = &new woocommerce_tax();
+		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
+		$this->display_totals_ex_tax = get_option('woocommerce_display_totals_excluding_tax') ? true : false;
 		
 		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
 		add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page
@@ -526,7 +528,7 @@ class woocommerce_cart {
 			$this->cart_contents_count 	= $this->cart_contents_count + $values['quantity'];
 		endforeach;
 		
-		if (get_option('woocommerce_prices_include_tax')=='yes') :
+		if ($this->prices_include_tax) :
 		
 			/** 
 			 * Calculate totals for items
@@ -576,16 +578,9 @@ class woocommerce_cart {
 						// Get rate
 						$rate			 		= $this->tax->get_rate( $_product->get_tax_class() );
 						
-						// Get the price ex. Vat (unrounded)
-						$adjusted_price 		= $_product->get_price_excluding_tax( false );
+						// Work out new price based on region
+						$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
 						
-						// Get tax amount				
-						$adjusted_tax 			= $this->tax->calc_tax( $adjusted_price, $rate, false );	
-	
-						// Discounted Price (price with any pre-tax discounts applied)
-						$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price + $adjusted_tax );
-						
-						// Discounted tax amount			
 						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
 
 					/**
@@ -593,22 +588,14 @@ class woocommerce_cart {
 					 */
 					elseif ( $_product->get_tax_class() !== $_product->tax_class ) :
 						
-						// Get rates
-						$original_rate			= $this->tax->get_rate( $_product->get_tax_class() );
-						$new_rate			 	= $this->tax->get_rate( $_product->tax_class );
+						// Get rate
+						$rate			 		= $this->tax->get_rate( $_product->tax_class );
 						
-						// Calc tax for original rate
-						$original_tax_amount	= $this->tax->calc_tax( $_product->get_price(), $original_rate, true );
+						// Work out new price based on region
+						$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
 						
-						// Now calc tax for new rate (which now excludes tax)
-						$adjusted_tax 			= $this->tax->calc_tax( ( $_product->get_price() - $original_tax_amount ), $new_rate, false );
-						
-						// Discounted Price (price with any pre-tax discounts applied)
-						$discounted_price 		= $this->get_discounted_price( $values, ( $_product->get_price() - $original_tax_amount ) + $adjusted_tax );
-						
-						// Discounted tax amount			
-						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $new_rate, true );
-					
+						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
+
 					endif;
 					
 					// Rounding
@@ -951,7 +938,7 @@ class woocommerce_cart {
 	 * gets the cart contents total (after calculation)
 	 */
 	function get_cart_total() {
-		if (get_option('woocommerce_prices_include_tax')=='no') :
+		if (!$this->prices_include_tax) :
 			return woocommerce_price($this->cart_contents_total);
 		else :
 			return woocommerce_price($this->cart_contents_total + $this->tax_total);
@@ -964,11 +951,12 @@ class woocommerce_cart {
 	function get_cart_subtotal() {
 		global $woocommerce;
 		
-		if (get_option('woocommerce_display_totals_tax')=='excluding') :
+		// Display ex tax if the option is set, or prices exclude tax
+		if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
 			
 			$return = woocommerce_price( $this->subtotal_ex_tax );
 			
-			if ($this->tax_total>0 && get_option('woocommerce_prices_include_tax')=='yes') :
+			if ($this->tax_total>0 && $this->prices_include_tax) :
 				$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 			endif;
 			return $return;
@@ -977,13 +965,40 @@ class woocommerce_cart {
 			
 			$return = woocommerce_price( $this->subtotal );
 			
-			if ($this->tax_total>0 && get_option('woocommerce_prices_include_tax')=='no') :
+			if ($this->tax_total>0 && !$this->prices_include_tax) :
 				$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 			endif;
 			return $return;
 		
 		endif;
 
+	}
+	
+	/** 
+	 * Get the product row subtotal
+	 *
+	 * Gets the tax etc to avoid rounding issues
+	 */
+	function get_product_subtotal( $price, $tax_rate, $quantity ) {
+		global $woocommerce;
+		
+		if ( $this->prices_include_tax && get_option('woocommerce_calc_taxes')=='yes' && $tax_rate>0 ) :
+									
+			$tax_amount 	= $this->tax->calc_tax( $price * $quantity, $tax_rate, true );
+			$row_price 		= ( $price * $quantity ) - round($tax_amount, 2);
+			
+			$return = woocommerce_price( $row_price );
+			$return .= ' <small class="tax_label">'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+
+		else :
+		
+			$row_price 		= $price * $quantity;
+			$return = woocommerce_price( $row_price );
+		
+		endif;
+		
+		return $return; 
+		
 	}
 	
 	/**
@@ -1004,10 +1019,11 @@ class woocommerce_cart {
 		if (isset($woocommerce->shipping->shipping_label)) :
 			if ($woocommerce->shipping->shipping_total>0) :
 			
-				if (get_option('woocommerce_display_totals_tax')=='excluding') :
+				// Display ex tax if the option is set, or prices exclude tax
+				if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total);
-					if ($this->shipping_tax_total>0 && get_option('woocommerce_prices_include_tax')=='yes') :
+					if ($this->shipping_tax_total>0 && $this->prices_include_tax) :
 						$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 					endif;
 					return $return;
@@ -1015,7 +1031,7 @@ class woocommerce_cart {
 				else :
 					
 					$return = woocommerce_price($woocommerce->shipping->shipping_total + $woocommerce->shipping->shipping_tax);
-					if ($this->shipping_tax_total>0 && get_option('woocommerce_prices_include_tax')=='no') :
+					if ($this->shipping_tax_total>0 && !$this->prices_include_tax) :
 						$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
 					endif;
 					return $return;

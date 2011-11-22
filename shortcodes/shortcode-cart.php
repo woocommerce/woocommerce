@@ -121,9 +121,21 @@ function woocommerce_cart( $atts ) {
                        				if ($_product->backorders_require_notification() && $_product->get_total_stock()<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woothemes').'</p>';
 								?>
 							</td>
-							<td class="product-price"><?php echo woocommerce_price($_product->get_price()); ?></td>
+							<td class="product-price"><?php 
+							
+								if (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') :
+									echo woocommerce_price( $_product->get_price_excluding_tax() ); 
+								else :
+									echo woocommerce_price( $_product->get_price() ); 
+								endif;
+								
+							?></td>
 							<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
-							<td class="product-subtotal"><?php echo woocommerce_price($_product->get_price()*$values['quantity']); ?></td>
+							<td class="product-subtotal"><?php 
+
+								if ($_product->is_taxable()) $rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->get_tax_class() ); else $rate = 0;
+								echo $woocommerce->cart->get_product_subtotal( $_product->get_price(), $rate, $values['quantity'] );								
+							?></td>
 						</tr>
 						<?php
 					endif;
