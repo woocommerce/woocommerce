@@ -83,7 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.3 - xx/11/2011 =
-* Minor bug fixes
+* Minor bug fixes + localisations
 * Schema.org markup for products and reviews
 * Option to apply coupons before tax (per coupon)
 * Rewritten cart tax calculations to support coupons before tax and after tax
