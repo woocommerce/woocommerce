@@ -263,10 +263,7 @@ jQuery( function($){
 	// ATTRIBUTE TABLES
 		
 		// Multiselect attributes
-		$("#attributes_list select.multiselect").multiselect({
-			noneSelectedText: woocommerce_writepanel_params.select_terms,
-			selectedList: 4
-		});	
+		$("#attributes_list select.multiselect").chosen();	
 		
 		// Initial order
 		var woocommerce_attributes_table_items = $('#attributes_list').children('tr').get();

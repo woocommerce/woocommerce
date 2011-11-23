@@ -237,7 +237,7 @@ function woocommerce_product_data_box() {
 										</td>
 										<td class="values">
 										<?php if ($tax->attribute_type=="select") : ?>
-											<select multiple="multiple" class="multiselect" name="attribute_values[<?php echo $i; ?>][]">
+											<select multiple="multiple" data-placeholder="<?php _e('Select terms', 'woothemes'); ?>" class="multiselect" name="attribute_values[<?php echo $i; ?>][]">
 												<?php
 					        					$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
 				        						if ($all_terms) :

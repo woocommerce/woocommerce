@@ -1060,12 +1060,6 @@ function woocommerce_settings() {
 				}
 			}).change();
 			
-			// Country Multiselect boxes
-			jQuery(".country_multiselect").multiselect({
-				noneSelectedText: '<?php _e( 'Select countries/states', 'woothemes' ); ?>',
-				selectedList: 4
-			});
-			
 			// Color picker
 			jQuery('.colorpick').each(function(){
 				jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
@@ -1101,17 +1095,12 @@ function woocommerce_settings() {
 				});
 			});
 			
-			
 			// Chosen selects
 			jQuery("select.chosen_select").chosen();
 			
 			jQuery("select.chosen_select_nostd").chosen({
 				allow_single_deselect: 'true'
 			});
-			
-			
-			
-			
 		</script>
 	</div>
 	<?php
