@@ -252,9 +252,9 @@ function woocommerce_admin_fields($options) {
             		$country = $country_setting;
             		$state = '*';
             	endif;
-            	?><tr valign="top" class="multi_select_countries">
+            	?><tr valign="top">
                     <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="width:350px;" data-placeholder="<?php _e('Choose a country&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e('Choose a country&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 			        </select> <span class="description"><?php echo $value['desc'] ?></span>
                		</td>
@@ -264,18 +264,16 @@ function woocommerce_admin_fields($options) {
             	$countries = $woocommerce->countries->countries;
             	asort($countries);
             	$selections = (array) get_option($value['id']);
-            	?><tr valign="top" class="multi_select_countries">
+            	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-                    	<div class="multi_select_countries"><ul><?php
-	            			if ($countries) foreach ($countries as $key=>$val) :
-                    			                    			
-	            				echo '<li><label><input type="checkbox" name="'. $value['id'] .'[]" value="'. $key .'" ';
-	            				if (in_array($key, $selections)) echo 'checked="checked"';
-	            				echo ' />'. $val .'</label></li>';
- 
-                    		endforeach;
-               			?></ul></div>
+	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e('Choose countries&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
+				        	<?php
+				        		if ($countries) foreach ($countries as $key=>$val) :
+	                    			echo '<option value="'.$key.'" '.selected( in_array($key, $selections), true, false ).'>'.$val.'</option>';   			
+	                    		endforeach;   
+	                    	?>     
+				        </select>
                		</td>
                	</tr><?php		            	
             break;

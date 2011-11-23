@@ -843,25 +843,6 @@ div.multi_select_products_wrapper-alt {
 	border-bottom: 0;
 }
 
-div.multi_select_countries {
-	border: 1px solid #ececec;
-	height: 200px;
-	overflow: auto;
-	width: 100%;
-	float: left;
-}
-.multi_select_countries li {
-	padding: 3px 9px;
-	margin: 0;
-	line-height: 2em;
-	border-bottom: 1px dotted #ececec;
-}
-.multi_select_countries li label {
-	display: block;
-}
-.multi_select_countries li label input {
-	margin: 0 4px 0 0;
-}
 .multi_select_products button {
 	float: right;
 	vertical-align: middle;
@@ -1178,7 +1159,9 @@ table.bar_chart {
 
 
 
-
+#woocommerce_allowed_countries_chzn .chzn-search {
+	display: none;
+}
 
 /* @group Base */
 .chzn-container {
@@ -1224,8 +1207,8 @@ table.bar_chart {
   overflow: hidden;
   white-space: nowrap;
   position: relative;
-  height: 26px;
-  line-height: 26px;
+  height: 23px;
+  line-height: 23px;
   padding: 0 0 0 8px;
   color: #444;
   text-decoration: none;
@@ -1275,7 +1258,7 @@ table.bar_chart {
   width: 18px;
 }
 .chzn-container-single .chzn-single div b {
-  background: url('../images/chosen-sprite.png') no-repeat 0 1px;
+  background: url('../images/chosen-sprite.png') no-repeat 0 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -1301,6 +1284,10 @@ table.bar_chart {
   border: 1px solid #aaa;
   font-family: sans-serif;
   font-size: 1em;
+  width: 100% !important;
+   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
 }
 .chzn-container-single .chzn-drop {
   -webkit-border-radius: 0 0 4px 4px;
