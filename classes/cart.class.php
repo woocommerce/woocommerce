@@ -434,7 +434,7 @@ class woocommerce_cart {
 						
 						// Add coupon to discount total (once, since this is a fixed cart discount and we don't want rounding issues)
 						$this->discount_product = $this->discount_product + (($discount_amount*$values['quantity']) / 100);
-						
+
 					break;
 					
 					case "percent" :
@@ -731,7 +731,7 @@ class woocommerce_cart {
 					// Now calc product rates
 					$tax_rate 				= $this->tax->get_rate( $_product->get_tax_class() );				
 					$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rate, false );
-	
+				
 					// Rounding
 					if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
 						$discounted_tax_amount	= round( $discounted_tax_amount, 2 );
