@@ -70,10 +70,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'name' => __( 'Allowed Countries', 'woothemes' ),
 		'desc' 		=> __( 'These are countries that you are willing to ship to.', 'woothemes' ),
 		'id' 		=> 'woocommerce_allowed_countries',
-		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'all',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
+		'css' 		=> 'min-width:300px;',
 		'options' => array(  
 			'all'  => __( 'All Countries', 'woothemes' ),
 			'specific' => __( 'Specific Countries', 'woothemes' )			
@@ -251,9 +251,10 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'name' => __( 'Shop Base Page', 'woothemes' ),
 		'desc' 		=> sprintf( __( 'This sets the base page of your shop.', 'woothemes' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
 		'id' 		=> 'woocommerce_shop_page_id',
-		'css' 		=> 'min-width:175px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
@@ -261,6 +262,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'desc' 		=> __( 'This title to show on the shop base page. Leave blank to use the page title.', 'woothemes' ),
 		'id' 		=> 'woocommerce_shop_page_title',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'All Products' // Default value for the page title - changed in settings
 	),
 
@@ -269,10 +271,10 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woothemes' ),
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_terms_page_id',
-		'css' 		=> 'min-width:50px;',
 		'std' 		=> '',
-		'type' 		=> 'single_select_page',
-		'args'		=> 'show_option_none=' . __('None', 'woothemes'),
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
+		'type' 		=> 'single_select_page'
 	),
 	
 	array(  
@@ -321,72 +323,80 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'name' => __( 'Cart Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_cart]', 'woothemes' ),
 		'id' 		=> 'woocommerce_cart_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'Checkout Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_checkout]', 'woothemes' ),
 		'id' 		=> 'woocommerce_checkout_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'Pay Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_pay] Parent: "Checkout"', 'woothemes' ),
 		'id' 		=> 'woocommerce_pay_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __('Thanks Page', 'woothemes'),
 		'desc' 		=> __( 'Page contents: [woocommerce_thankyou] Parent: "Checkout"', 'woothemes' ),
 		'id' 		=> 'woocommerce_thanks_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'My Account Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_my_account]', 'woothemes' ),
 		'id' 		=> 'woocommerce_myaccount_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'Edit Address Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_edit_address] Parent: "My Account"', 'woothemes' ),
 		'id' 		=> 'woocommerce_edit_address_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'View Order Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_view_order] Parent: "My Account"', 'woothemes' ),
 		'id' 		=> 'woocommerce_view_order_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
 		'name' => __( 'Change Password Page', 'woothemes' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_change_password] Parent: "My Account"', 'woothemes' ),
 		'id' 		=> 'woocommerce_change_password_page_id',
-		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'single_select_page',
-		'std' 		=> ''
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
 	),	
 	
 	array( 'type' => 'sectionend', 'id' => 'page_options'),
@@ -460,7 +470,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'name' => __( 'Weight Unit', 'woothemes' ),
 		'desc' 		=> __( 'This controls what unit you will define weights in.', 'woothemes' ),
 		'id' 		=> 'woocommerce_weight_unit',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:150px;',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'options' => array( 
@@ -473,7 +483,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'name' => __( 'Dimensions Unit', 'woothemes' ),
 		'desc' 		=> __( 'This controls what unit you will define lengths in.', 'woothemes' ),
 		'id' 		=> 'woocommerce_dimension_unit',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:150px;',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'options' => array( 
@@ -499,7 +509,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'desc' 		=> __( 'This controls the position of the currency symbol.', 'woothemes' ),
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency_pos',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:150px;',
 		'std' 		=> 'left',
 		'type' 		=> 'select',
 		'options' => array( 
@@ -610,7 +620,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'desc' 		=> '',
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_notify_low_stock_amount',
-		'css' 		=> 'min-width:50px;',
+		'css' 		=> 'width:30px;',
 		'type' 		=> 'text',
 		'std' 		=> '2'
 	),
@@ -620,7 +630,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'desc' 		=> '',
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_notify_no_stock_amount',
-		'css' 		=> 'min-width:50px;',
+		'css' 		=> 'width:30px;',
 		'type' 		=> 'text',
 		'std' 		=> '0'
 	),
@@ -752,6 +762,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The recipient of new order emails. Defaults to the admin email.', 'woothemes' ),
 		'id' 		=> 'woocommerce_new_order_email_recipient',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> esc_attr(get_option('admin_email'))
 	),
 	
@@ -760,6 +771,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The recipient of stock emails. Defaults to the admin email.', 'woothemes' ),
 		'id' 		=> 'woocommerce_stock_email_recipient',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> esc_attr(get_option('admin_email'))
 	),
 	
@@ -772,6 +784,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The sender name for WooCommerce emails.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_from_name',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> esc_attr(get_bloginfo('name'))
 	),
 	
@@ -780,6 +793,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The sender email address for WooCommerce emails.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_from_address',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> get_option('admin_email')
 	),
 	
@@ -792,6 +806,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> sprintf(__( 'Enter a URL to an image you want to show in the email\'s header. Upload your image using the <a href="%s">media uploader</a>.', 'woothemes' ), admin_url('media-new.php')),
 		'id' 		=> 'woocommerce_email_header_image',
 		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> ''
 	),
 	
@@ -809,6 +824,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The base colour for WooCommerce email templates. Default <code>#557da1</code>.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_base_color',
 		'type' 		=> 'color',
+		'css' 		=> 'width:6em;',
 		'std' 		=> '#557da1'
 	),
 	
@@ -817,6 +833,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The background colour for WooCommerce email templates. Default <code>#eeeeee</code>.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_background_color',
 		'type' 		=> 'color',
+		'css' 		=> 'width:6em;',
 		'std' 		=> '#eeeeee'
 	),
 	
@@ -825,6 +842,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The main body background colour. Default <code>#fdfdfd</code>.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_body_background_color',
 		'type' 		=> 'color',
+		'css' 		=> 'width:6em;',
 		'std' 		=> '#fdfdfd'
 	),
 	
@@ -833,6 +851,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'desc' 		=> __( 'The main body text colour. Default <code>#505050</code>.', 'woothemes' ),
 		'id' 		=> 'woocommerce_email_text_color',
 		'type' 		=> 'color',
+		'css' 		=> 'width:6em;',
 		'std' 		=> '#505050'
 	),
 	
@@ -1085,6 +1104,12 @@ function woocommerce_settings() {
 			
 			// Chosen selects
 			jQuery("select.chosen_select").chosen();
+			
+			jQuery("select.chosen_select_nostd").chosen({
+				allow_single_deselect: 'true'
+			});
+			
+			
 			
 			
 		</script>

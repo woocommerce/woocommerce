@@ -136,6 +136,8 @@ function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
     foreach ($options as $value) :
+    	if (!isset( $value['class'] )) $value['class'] = '';
+    	if (!isset( $value['css'] )) $value['css'] = '';
         switch($value['type']) :
             case 'title':
             	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
@@ -226,19 +228,21 @@ function woocommerce_admin_fields($options) {
             case 'single_select_page' :
             	$page_setting = (int) get_option($value['id']);
             	
-            	$args = array( 'name'	=> $value['id'],
-            				   'id'		=> $value['id']. '" style="width: 200px;',
-            				   'sort_column' 	=> 'menu_order',
-            				   'sort_order'		=> 'ASC',
-            				   'show_option_none' => __('Select a page...', 'woothemes'),
-            				   'selected'		=> $page_setting);
+            	$args = array( 'name'				=> $value['id'],
+            				   'id'					=> $value['id'],
+            				   'sort_column' 		=> 'menu_order',
+            				   'sort_order'			=> 'ASC',
+            				   'show_option_none' 	=> ' ',
+            				   'class'				=> $value['class'],
+            				   'echo' 				=> false,
+            				   'selected'			=> $page_setting);
             	
             	if( isset($value['args']) ) $args = wp_parse_args($value['args'], $args);
             	
             	?><tr valign="top" class="single_select_page">
                     <th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-			        	<?php wp_dropdown_pages($args); ?> <span class="description"><?php echo $value['desc'] ?></span>        
+			        	<?php echo str_replace(' id=', " data-placeholder='".__('Select a page...', 'woothemes')."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <span class="description"><?php echo $value['desc'] ?></span>        
 			        </td>
                	</tr><?php	
             break;
