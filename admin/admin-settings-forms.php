@@ -288,74 +288,246 @@ function woocommerce_admin_fields($options) {
             	
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp" id="tax_rates">
-                    	<div class="taxrows">
-							
-							<?php $i = -1; if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) : $i++; ?>
-							<div class="taxrow">
-	               				<select name="tax_country[<?php echo $i; ?>][]" title="Country" class="country_multiselect" size="10" multiple="multiple">
-				                   <?php echo $woocommerce->countries->country_multiselect_options( $rate['countries'] ); ?>
-				                </select>
-				                <select name="tax_class[<?php echo $i; ?>]" title="Tax Class">
-					                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
-					                <?php
-			                    		if ($tax_classes) foreach ($tax_classes as $class) :
-					                        echo '<option value="'.sanitize_title($class).'"';
-					                        selected($rate['class'], sanitize_title($class));
-					                        echo '>'.$class.'</option>';
-					                    endforeach;
-				                    ?>
-			                    </select>
-			                    <input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% 
-			                    <label class="checkbox"><input type="checkbox" name="tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> /> <?php _e('Apply to shipping', 'woothemes'); ?></label><a href="#" class="remove button">&times;</a>
-               				</div>
-               				<?php endforeach; ?>
-               				
-                        </div>
-                        <p><a href="#" class="add button"><?php _e('+ Add Tax Rule', 'woothemes'); ?></a></p>
-                        
-                        <script type="text/javascript">
-                        	jQuery(function() {
-                        		// Tax
-								jQuery('#tax_rates a.add').live('click', function(){
-									var size = jQuery('.taxrows .taxrow').size();
-									
-									// Add the row
-									jQuery('<div class="taxrow">\
-						   				<select name="tax_country[' + size + '][]" title="Country" class="country_multiselect" size="10" multiple="multiple"><?php echo $woocommerce->countries->country_multiselect_options('',true); ?></select>\
-						                <select name="tax_class[' + size + ']" title="Tax Class"><option value=""><?php _e('Standard Rate', 'woothemes'); ?></option><?php
-						                		if ($tax_classes) foreach ($tax_classes as $class) :
-							                        echo '<option value="'.esc_attr( sanitize_title($class) ).'">'.$class.'</option>';
+                    <td class="forminp">
+                    
+                    	<table class="taxrows widefat" cellspacing="0">
+		            		<thead>
+		            			<tr>
+		            				<th class="check-column"><input type="checkbox"></th>
+		            				<th class="country"><?php _e('Countries/states', 'woothemes'); ?></th>
+		            				<th><?php _e('Tax Class', 'woothemes'); ?></th>
+		            				<th><?php _e('Rate', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woothemes'); ?>">[?]</a></th>
+		            				<th><?php _e('Apply to shipping', 'woothemes'); ?> <a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woothemes'); ?>">[?]</a></th>
+		            			</tr>
+		            		</thead>
+		            		<tfoot>
+		            			<tr>
+		            				<th colspan="2"><a href="#" class="add button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
+		            				<th colspan="3"><a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a></th>
+		            			</tr>
+		            		</tfoot>
+		            		<tbody id="tax_rates">
+		            			
+		            			<?php $i = -1; if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) : $i++; ?>
+		            			<tr class="tax_rate">
+	            					<td class="check-column"><input type="checkbox" name="select" /></td>
+		                			<td class="country">
+		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php echo woocommerce_tax_row_label( $rate['countries'] ); ?></label></p>
+		                				<div class="options" style="display:none">
+		                					<select name="tax_country[<?php echo $i; ?>][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="chosen_select select" size="10" multiple="multiple">
+						                   		<?php echo $woocommerce->countries->country_multiselect_options( $rate['countries'] ); ?>
+						                	</select>
+				                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>
+				                		</div>
+				               		</td>
+				               		<td class="tax_class">
+				               			<select name="tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
+							                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
+							                <?php
+					                    		if ($tax_classes) foreach ($tax_classes as $class) :
+							                        echo '<option value="'.sanitize_title($class).'"';
+							                        selected($rate['class'], sanitize_title($class));
+							                        echo '>'.$class.'</option>';
 							                    endforeach;
-						                ?></select>\
-						                <input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />% \
-						                <label class="checkbox"><input type="checkbox" name="tax_shipping[' + size + ']" checked="checked" /> <?php _e('Apply to shipping', 'woothemes'); ?></label><a href="#" class="remove button">&times;</a>\
-										</div>').appendTo('#tax_rates div.taxrows');
-										
-										// Multiselect
-										jQuery(".country_multiselect").multiselect({
-										noneSelectedText: '<?php _e('Select countries/states', 'woothemes'); ?>',
-										selectedList: 4
+						                    ?>
+					                    </select>
+				               		</td>
+		            				<td class="rate">
+		            					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />%
+		            				</td>
+		            				<td class="apply_to_shipping">
+		            					<input type="checkbox" class="checkbox" name="tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> />
+		            				</td>
+		            			</tr>
+		            			<?php endforeach; ?>
+		            			
+		            		</tbody>
+		            	</table>
+                        
+				       	<script type="text/javascript">
+						jQuery(function() {
+						
+							jQuery('tr.tax_rate .edit_options').live('click', function(){
+								jQuery(this).closest('td').find('.options').slideToggle();
+								if (jQuery(this).text()=='<?php _e('Edit', 'woothemes'); ?>') {
+									jQuery(this).text('<?php _e('Done', 'woothemes'); ?>');
+								} else {
+									jQuery(this).text('<?php _e('Edit', 'woothemes'); ?>');
+								}
+								return false;
+							});
+							
+							jQuery('tr.tax_rate .select_all').live('click', function(){
+								jQuery(this).closest('td').find('select option').attr("selected","selected");
+								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								return false;
+							});
+							
+							jQuery('tr.tax_rate .select_none').live('click', function(){
+								jQuery(this).closest('td').find('select option').removeAttr("selected");
+								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								return false;
+							});
+		
+							jQuery('tr.tax_rate .select_us_states').live('click', function(){
+								jQuery(this).closest('td').find('select optgroup[label="United States"] option').attr("selected","selected");
+								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								return false;
+							});
+							
+							jQuery('tr.tax_rate .options select').live('change', function(){
+								jQuery(this).trigger("liszt:updated");
+								jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + '<?php _e(' countries/states selected', 'woothemes') ?>' );
+							});
+							
+							jQuery('tr.tax_rate .select_europe').live('click', function(){
+								jQuery(this).closest('td').find('option[value="AL"], option[value="AD"], option[value="AM"], option[value="AT"], option[value="BY"], option[value="BE"], option[value="BA"], option[value="BG"], option[value="CH"], option[value="CY"], option[value="CZ"], option[value="DE"], option[value="DK"], option[value="EE"], option[value="ES"], option[value="FO"], option[value="FI"], option[value="FR"], option[value="GB"], option[value="GE"], option[value="GI"], option[value="GR"], option[value="HU"], option[value="HR"], option[value="IE"], option[value="IS"], option[value="IT"], option[value="LT"], option[value="LU"], option[value="LV"], option[value="MC"], option[value="MK"], option[value="MT"], option[value="NO"], option[value="NL"], option[value="PO"], option[value="PT"], option[value="RO"], option[value="RU"], option[value="SE"], option[value="SI"], option[value="SK"], option[value="SM"], option[value="TR"], option[value="UA"], option[value="VA"]').attr("selected","selected");
+								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								return false;
+							});
+						
+							jQuery('.taxrows a.add').live('click', function(){
+								var size = jQuery('#tax_rates tr').size();
+								
+								// Add the row
+								jQuery('<tr class="tax_rate">\
+	            					<td class="check-column"><input type="checkbox" name="select" /></td>\
+		                			<td class="country">\
+		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php _e('No countries selected', 'woothemes'); ?></label></p>\
+		                				<div class="options" style="display:none">\
+		                					<select name="tax_country[' + size + '][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="chosen_select select" size="10" multiple="multiple">\
+						                   		<?php echo $woocommerce->countries->country_multiselect_options(); ?>\
+						                	</select>\
+				                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>\
+				                		</div>\
+				               		</td>\
+				               		<td class="tax_class">\
+				               			<select name="tax_class[' + size + ']" title="Tax Class" class="select">\
+							                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>\
+							                <?php
+					                    		if ($tax_classes) foreach ($tax_classes as $class) :
+							                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
+							                    endforeach;
+						                    ?>
+					                    </select>\
+				               		</td>\
+		            				<td class="rate">\
+		            					<input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />%\
+		            				</td>\
+		            				<td class="apply_to_shipping">\
+		            					<input type="checkbox" class="checkbox" name="tax_shipping[' + size + ']" />\
+		            				</td>\
+		            			</tr>').appendTo('#tax_rates');
+									
+								jQuery("select.chosen_select").chosen();
+									
+								return false;
+							});
+							
+							// Remove row
+							jQuery('.taxrows a.remove').live('click', function(){
+								var answer = confirm("<?php _e('Delete the selected rates?', 'woothemes'); ?>")
+								if (answer) {
+									jQuery('table.taxrows tbody tr td.check-column input:checked').each(function(i, el){
+										jQuery(el).closest('tr').find('input.text, input.checkbox, select.select').val('');
+										jQuery(el).closest('tr').hide();
 									});
+								}
+								return false;
+							});
+							
+							// Dupe row
+							jQuery('.taxrows a.dupe').live('click', function(){
+								var answer = confirm("<?php _e('Duplicate the selected rates?', 'woothemes'); ?>")
+								if (answer) {
+									jQuery('table.taxrows tbody tr td.check-column input:checked').each(function(i, el){
+										var dupe = jQuery(el).closest('tr').clone()
 										
-									return false;
-								});
-								
-								jQuery('#tax_rates a.remove').live('click', function(){
-									var answer = confirm("<?php _e('Delete this rule?', 'woothemes'); ?>");
-									if (answer) {
-										jQuery('input', jQuery(this).parent()).val('');
-										jQuery(this).parent().hide();
-									}
-									return false;
-								});
-								
-                        	});
-                        </script>
+										// Remove chosen selector
+										dupe.find('.chzn-done').removeClass('chzn-done').removeAttr('id').removeAttr('style');
+										dupe.find('.chzn-container').remove();
+										
+										// Append
+										jQuery('table.taxrows tbody').append( dupe );
+									});
+									
+									// Re-index keys
+									var loop = 0;
+									jQuery('#tax_rates tr.tax_rate').each(function( index, row ){
+										jQuery('input.text, input.checkbox, select.select', row).each(function( i, el ){
+											
+											var t = jQuery(el);
+											alert(t.attr('name'));
+											t.attr('name', t.attr('name').replace(/\[([^[]*)\]/, "[" + loop + "]"));
+											
+										});
+										loop++;
+									});
+									
+									// Chosen
+									jQuery("select.chosen_select").chosen();
+								}
+								return false;
+							});
+							
+						});
+						</script>   
                     </td>
                 </tr>
                 <?php
             break;
         endswitch;
     endforeach;
+}
+
+
+/**
+ * Tax Row Label
+ * 
+ * Show a label based on user selections
+ */
+function woocommerce_tax_row_label( $selected ) {
+	global $woocommerce;
+	
+	$return = '';
+	
+	// Get counts/countries
+	$counties_array = array();
+	$states_count = 0;
+	
+	if ($selected) foreach ($selected as $country => $value) :
+		
+		$country = woocommerce_clean($country);
+
+		if (sizeof($value)>1) :
+			$states_count+=sizeof($value);
+		endif;
+		
+		if (!in_array($country, $counties_array)) $counties_array[] = $woocommerce->countries->countries[$country];
+		
+	endforeach;
+	
+	$states_text = '';
+	$countries_text = implode(', ', $counties_array);
+
+	// Show label
+	if (sizeof($counties_array)==0) :
+	
+		$return .= __('No countries selected', 'woothemes');
+		
+	elseif ( sizeof($counties_array) < 6 ) :
+	
+		if ($states_count>0) $states_text = sprintf(_n('(1 state)', '(%s states)', $states_count, 'woothemes'), $states_count);
+
+		$return .= sprintf(__('%s', 'woothemes'), $countries_text) . ' ' . $states_text;
+		
+	else :
+		
+		if ($states_count>0) $states_text = sprintf(_n('and 1 state', 'and %s states', $states_count, 'woothemes'), $states_count);
+		
+		$return .= sprintf(_n('1 country', '%1$s countries', sizeof($counties_array), 'woothemes'), sizeof($counties_array)) . ' ' . $states_text;
+	
+	endif;
+	
+	return $return;
 }

@@ -520,58 +520,66 @@ ul.recent-orders, ul.stock_list {
 }
 
 /* Settings */
-.woocommerce table.shippingrows td, .woocommerce table.shippingrows th {
-	vertical-align: middle;
-}
-.woocommerce table.shippingrows td a.remove {
-	margin: 0 !important;
-}
-.woocommerce table.shippingrows .dupe, .woocommerce table.shippingrows .remove {
-	float: right;
-	margin-left: 9px;
-}
-.woocommerce table.shippingrows tbody .check-column {
-	padding: 0;
-	input {
-		margin: 0 0 0 8px;
+.woocommerce table.shippingrows, .woocommerce table.taxrows {
+	td, th {
+		vertical-align: top;
+		line-height: 25px;
 	}
-}
-.woocommerce table.shippingrows td.country {
-	width: 300px;
-	p {
-		line-height: 21px;
-		margin: 0;
-		color: #666;
+	a.remove {
+		margin: 0 !important;
 	}
-	button.edit_options {
+	.dupe, .remove {
 		float: right;
-		margin: 0;
+		margin-left: 9px;
 	}
-	select {
-		margin: 9px 0;
-		width: 100%;
-		height: 160px !important;
+	tbody .check-column {
+		padding-top: 8px;
+		input {
+			margin: 0 0 0 8px;
+		}
 	}
-}
-
-div.taxrows {
-	.taxrow {
-		padding-bottom: 8px;
+	td.apply_to_shipping {
+		padding-top: 8px;
+	}
+	td.rate {
+		input {
+			width: 100px;
+		}
+	}
+	td.country {
+		overflow: visible !important;
+		p {
+			line-height: 25px;
+			margin: 0;
+			color: #666;
+		}
+		button.edit_options {
+			float: right;
+		}
 		select {
-			width: 125px;
+			margin: 9px 0;
+			width: 100%;
+			height: 160px !important;
 		}
-		input.text {
-			width: 60px;
+		p.edit, .options {
+			min-width: 400px;
 		}
-		label.checkbox {
-			line-height: 1.5em;
-			margin: 0 8px;
-			input {
-				margin: 0 4px 0 0;
+		.chzn-container {
+			width: 100% !important;
+			margin: 9px 0 5px;
+			.chzn-drop {
+				width: 100% !important;
+				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+				box-sizing: border-box;         /* Opera/IE 8+ */
+			}
+			.search-field input {
+				width: 150px !important;
 			}
 		}
 	}
 }
+
 
 .woocommerce table.widefat {
 	table.coupon_rows {
