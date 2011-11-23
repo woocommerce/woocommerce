@@ -314,7 +314,7 @@ function woocommerce_admin_fields($options) {
 		                			<td class="country">
 		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php echo woocommerce_tax_row_label( $rate['countries'] ); ?></label></p>
 		                				<div class="options" style="display:none">
-		                					<select name="tax_country[<?php echo $i; ?>][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="chosen_select select" size="10" multiple="multiple">
+		                					<select name="tax_country[<?php echo $i; ?>][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">
 						                   		<?php echo $woocommerce->countries->country_multiselect_options( $rate['countries'] ); ?>
 						                	</select>
 				                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>
@@ -350,7 +350,11 @@ function woocommerce_admin_fields($options) {
 							jQuery('tr.tax_rate .edit_options').live('click', function(){
 								jQuery(this).closest('td').find('.options').slideToggle();
 								if (jQuery(this).text()=='<?php _e('Edit', 'woothemes'); ?>') {
+									
+									jQuery(this).closest('tr').find("select.tax_chosen_select").chosen();
+									
 									jQuery(this).text('<?php _e('Done', 'woothemes'); ?>');
+								
 								} else {
 									jQuery(this).text('<?php _e('Edit', 'woothemes'); ?>');
 								}
@@ -359,19 +363,19 @@ function woocommerce_admin_fields($options) {
 							
 							jQuery('tr.tax_rate .select_all').live('click', function(){
 								jQuery(this).closest('td').find('select option').attr("selected","selected");
-								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 								return false;
 							});
 							
 							jQuery('tr.tax_rate .select_none').live('click', function(){
 								jQuery(this).closest('td').find('select option').removeAttr("selected");
-								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 								return false;
 							});
 		
 							jQuery('tr.tax_rate .select_us_states').live('click', function(){
 								jQuery(this).closest('td').find('select optgroup[label="United States"] option').attr("selected","selected");
-								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 								return false;
 							});
 							
@@ -382,7 +386,7 @@ function woocommerce_admin_fields($options) {
 							
 							jQuery('tr.tax_rate .select_europe').live('click', function(){
 								jQuery(this).closest('td').find('option[value="AL"], option[value="AD"], option[value="AM"], option[value="AT"], option[value="BY"], option[value="BE"], option[value="BA"], option[value="BG"], option[value="CH"], option[value="CY"], option[value="CZ"], option[value="DE"], option[value="DK"], option[value="EE"], option[value="ES"], option[value="FO"], option[value="FI"], option[value="FR"], option[value="GB"], option[value="GE"], option[value="GI"], option[value="GR"], option[value="HU"], option[value="HR"], option[value="IE"], option[value="IS"], option[value="IT"], option[value="LT"], option[value="LU"], option[value="LV"], option[value="MC"], option[value="MK"], option[value="MT"], option[value="NO"], option[value="NL"], option[value="PO"], option[value="PT"], option[value="RO"], option[value="RU"], option[value="SE"], option[value="SI"], option[value="SK"], option[value="SM"], option[value="TR"], option[value="UA"], option[value="VA"]').attr("selected","selected");
-								jQuery(this).closest('td').find('select.chosen_select').trigger("change");
+								jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 								return false;
 							});
 						
@@ -390,12 +394,12 @@ function woocommerce_admin_fields($options) {
 								var size = jQuery('#tax_rates tr').size();
 								
 								// Add the row
-								jQuery('<tr class="tax_rate">\
+								jQuery('<tr class="tax_rate new_rate">\
 	            					<td class="check-column"><input type="checkbox" name="select" /></td>\
 		                			<td class="country">\
 		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php _e('No countries selected', 'woothemes'); ?></label></p>\
 		                				<div class="options" style="display:none">\
-		                					<select name="tax_country[' + size + '][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="chosen_select select" size="10" multiple="multiple">\
+		                					<select name="tax_country[' + size + '][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">\
 						                   		<?php echo $woocommerce->countries->country_multiselect_options(); ?>\
 						                	</select>\
 				                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>\
@@ -419,7 +423,8 @@ function woocommerce_admin_fields($options) {
 		            				</td>\
 		            			</tr>').appendTo('#tax_rates');
 									
-								jQuery("select.chosen_select").chosen();
+								jQuery(".new_rate select.tax_chosen_select").chosen();
+								jQuery(".new_rate").removeClass('new_rate');
 									
 								return false;
 							});
@@ -457,15 +462,11 @@ function woocommerce_admin_fields($options) {
 										jQuery('input.text, input.checkbox, select.select', row).each(function( i, el ){
 											
 											var t = jQuery(el);
-											alert(t.attr('name'));
 											t.attr('name', t.attr('name').replace(/\[([^[]*)\]/, "[" + loop + "]"));
 											
 										});
 										loop++;
 									});
-									
-									// Chosen
-									jQuery("select.chosen_select").chosen();
 								}
 								return false;
 							});
