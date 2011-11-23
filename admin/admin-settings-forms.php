@@ -177,7 +177,7 @@ function woocommerce_admin_fields($options) {
             case 'select':
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>">
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>">
                         <?php
                         foreach ($value['options'] as $key => $val) {
                         ?>
@@ -254,7 +254,7 @@ function woocommerce_admin_fields($options) {
             	endif;
             	?><tr valign="top" class="multi_select_countries">
                     <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" title="Country" style="width: 175px;">	
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="width:350px;" data-placeholder="<?php _e('Choose a country&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 			        </select> <span class="description"><?php echo $value['desc'] ?></span>
                		</td>
@@ -347,6 +347,7 @@ function woocommerce_admin_fields($options) {
 									}
 									return false;
 								});
+								
                         	});
                         </script>
                     </td>

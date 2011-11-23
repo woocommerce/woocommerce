@@ -36,6 +36,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'css' 		=> 'min-width:175px;',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
+		'class'		=> 'chosen_select',
 		'options' => apply_filters('woocommerce_currencies', array( 
 			'USD' => __( 'US Dollars (&#36;)', 'woothemes' ),
 			'EUR' => __( 'Euros (&euro;)', 'woothemes' ),
@@ -1079,6 +1080,14 @@ function woocommerce_settings() {
 					window.onbeforeunload = '';
 				});
 			});
+			
+			
+			// Chosen selects
+			jQuery(function(){
+				jQuery("select.chosen_select").chosen();
+			});
+			
+			
 		</script>
 	</div>
 	<?php
