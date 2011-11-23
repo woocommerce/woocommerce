@@ -39,7 +39,7 @@ class woocommerce_cart {
 	function __construct() {
 		$this->tax = &new woocommerce_tax();
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
-		$this->display_totals_ex_tax = get_option('woocommerce_display_totals_excluding_tax') ? true : false;
+		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		
 		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
 		add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page

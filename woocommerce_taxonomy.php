@@ -361,6 +361,13 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 		endif;
 	endforeach;
 	if (!$found) return $clauses;
+	
+	// Meta name
+	if (strstr($taxonomies[0], 'pa_')) :
+		$meta_name =  'order_' . esc_attr($taxonomies[0]);
+	else :
+		$meta_name = 'order';
+	endif;
 		
 	// query order
 	if( isset($args['menu_order']) && !$args['menu_order']) return $clauses; // menu_order is false so we do not add order clause
@@ -369,7 +376,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
 
 	//query join
-	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = 'order') ";
+	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '". $meta_name ."') ";
 	
 	// default to ASC
 	if( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
@@ -377,7 +384,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
 	
 	if ( $clauses['orderby'] ):
-		$clauses['orderby'] = str_replace ('ORDER BY', $order . ',', $clauses['orderby'] );
+		$clauses['orderby'] = str_replace('ORDER BY', $order . ',', $clauses['orderby'] );
 	else:
 		$clauses['orderby'] = $order;
 	endif;

@@ -23,7 +23,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'name' => __( 'Base Country/Region', 'woothemes' ),
 		'desc' 		=> __( 'This is the base country for your business. Tax rates will be based on this country.', 'woothemes' ),
 		'id' 		=> 'woocommerce_default_country',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GB',
 		'type' 		=> 'single_select_country'
 	),
@@ -33,9 +33,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'desc' 		=> __("This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woothemes' ),
 		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
+		'class'		=> 'chosen_select',
 		'options' => apply_filters('woocommerce_currencies', array( 
 			'USD' => __( 'US Dollars (&#36;)', 'woothemes' ),
 			'EUR' => __( 'Euros (&euro;)', 'woothemes' ),
@@ -69,9 +70,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'name' => __( 'Allowed Countries', 'woothemes' ),
 		'desc' 		=> __( 'These are countries that you are willing to ship to.', 'woothemes' ),
 		'id' 		=> 'woocommerce_allowed_countries',
-		'css' 		=> 'min-width:175px;',
+		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'all',
 		'type' 		=> 'select',
+		'class'		=> 'chosen_select',
 		'options' => array(  
 			'all'  => __( 'All Countries', 'woothemes' ),
 			'specific' => __( 'Specific Countries', 'woothemes' )			
@@ -203,7 +205,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_sharethis',
 		'type' 		=> 'text',
 		'std' 		=> '',
-        'css'       => ''
+        'css' 		=> 'min-width:300px;',
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'share_this'),
@@ -215,7 +217,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woothemes'),
 		'id' 		=> 'woocommerce_ga_id',
 		'type' 		=> 'text',
-        'css'       => ''
+        'css' 		=> 'min-width:300px;',
 	),
 	
 	array(  
@@ -1033,9 +1035,9 @@ function woocommerce_settings() {
 			// Countries
 			jQuery('select#woocommerce_allowed_countries').change(function(){
 				if (jQuery(this).val()=="specific") {
-					jQuery(this).parent().parent().next('tr.multi_select_countries').show();
+					jQuery(this).parent().parent().next('tr').show();
 				} else {
-					jQuery(this).parent().parent().next('tr.multi_select_countries').hide();
+					jQuery(this).parent().parent().next('tr').hide();
 				}
 			}).change();
 			
@@ -1079,6 +1081,12 @@ function woocommerce_settings() {
 					window.onbeforeunload = '';
 				});
 			});
+			
+			
+			// Chosen selects
+			jQuery("select.chosen_select").chosen();
+			
+			
 		</script>
 	</div>
 	<?php

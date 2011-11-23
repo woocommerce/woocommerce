@@ -224,7 +224,7 @@ if (!function_exists('woocommerce_template_single_meta')) {
 	function woocommerce_template_single_meta( $post, $_product ) {
 		
 		?>
-		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span itemprop="productID" class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Posted in', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tagged as', 'woothemes').' ', '.</span>'); ?></div>
+		<div class="product_meta"><?php if ($_product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?><span itemprop="productID" class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $_product->sku; ?>.</span><?php endif; ?><?php echo $_product->get_categories( ', ', ' <span class="posted_in">'.__('Category:', 'woothemes').' ', '.</span>'); ?><?php echo $_product->get_tags( ', ', ' <span class="tagged_as">'.__('Tags:', 'woothemes').' ', '.</span>'); ?></div>
 		<?php
 		
 	}
@@ -521,9 +521,19 @@ if (!function_exists('woocommerce_catalog_ordering')) {
 		?>
 		<form class="woocommerce_ordering" method="post">
 			<select name="catalog_orderby" class="orderby">
-				<option value="title" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'title' ); ?>><?php _e('Alphabetically', 'woothemes'); ?></option>
-				<option value="date" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'date' ); ?>><?php _e('Most Recent', 'woothemes'); ?></option>
-				<option value="price" <?php if (isset($_SESSION['orderby'])) selected( $_SESSION['orderby'], 'price' ); ?>><?php _e('Price', 'woothemes'); ?></option>
+				<?php
+					$catalog_orderby = apply_filters('woocommerce_catalog_orderby', array(
+						'title' 	=> __('Alphabetically', 'woothemes'),
+						'date' 		=> __('Most Recent', 'woothemes'),
+						'price' 	=> __('Price', 'woothemes')
+					));
+					
+					foreach ($catalog_orderby as $id => $name) :
+						
+						echo '<option value="'.$id.'" '.selected( $_SESSION['orderby'], $id, false ).'>'.$name.'</option>';
+						
+					endforeach;
+				?>
 			</select>
 		</form>
 		<?php

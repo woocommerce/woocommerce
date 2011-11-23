@@ -116,9 +116,6 @@ function woocommerce_init() {
 	add_image_size( 'shop_catalog', $woocommerce->get_image_size('shop_catalog_image_width'), $woocommerce->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );
 	add_image_size( 'shop_single', $woocommerce->get_image_size('shop_single_image_width'), $woocommerce->get_image_size('shop_single_image_height'), $shop_single_crop );
 
-	// Include template functions here so they are pluggable by themes
-	include_once( 'woocommerce_template_functions.php' );
-	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
     if (!is_admin()) :
@@ -133,6 +130,18 @@ function woocommerce_init() {
     	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $woocommerce->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
+
+/**
+ * Init WooCommerce Tempalte Functions
+ *
+ * This makes them pluggable by plugins and themes
+ **/
+add_action('init', 'include_template_functions', 99);
+
+function include_template_functions() {
+	include_once( 'woocommerce_template_functions.php' );
+}
+
 
 /**
  * Init WooCommerce Thumbnails after theme setup
@@ -235,10 +244,13 @@ function woocommerce_frontend_scripts() {
 	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_script('fancybox');
     	
 	/* Script variables */
+	$states = json_encode( $woocommerce->countries->states );
+	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
+	
 	$woocommerce_params = array(
 		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
 		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
-		'countries' 					=> json_encode($woocommerce->countries->states),
+		'countries' 					=> $states,
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
 		'plugin_url' 					=> $woocommerce->plugin_url(),

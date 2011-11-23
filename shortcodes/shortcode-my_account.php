@@ -71,7 +71,7 @@ function woocommerce_my_account( $atts ) {
 							<td><?php echo woocommerce_price($order->order_total); ?></td>
 							<td><?php 
 								$status = get_term_by('slug', $order->status, 'shop_order_status');
-								echo $status->name; 
+								echo __($status->name, 'woothemes'); 
 							?></td>
 							<td style="text-align:right; white-space:nowrap;">
 								<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
@@ -477,7 +477,7 @@ function woocommerce_view_order() {
 			
 			$status = get_term_by('slug', $order->status, 'shop_order_status');
 			
-			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $status->name );
+			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), __($status->name, 'woothemes') );
 			
 			echo '.</p>';
 

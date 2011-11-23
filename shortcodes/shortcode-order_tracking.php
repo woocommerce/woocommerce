@@ -38,7 +38,7 @@ function woocommerce_order_tracking( $atts ) {
 			
 				$status = get_term_by('slug', $order->status, 'shop_order_status');
 		
-				$order_status_text = sprintf( __('Order #%s which was made %s has the status &ldquo;%s&rdquo;', 'woothemes'), $order->id, human_time_diff(strtotime($order->order_date), current_time('timestamp')).__(' ago', 'woothemes'), $status->name );
+				$order_status_text = sprintf( __('Order #%s which was made %s has the status &ldquo;%s&rdquo;', 'woothemes'), $order->id, human_time_diff(strtotime($order->order_date), current_time('timestamp')).__(' ago', 'woothemes'), __($status->name, 'woothemes') );
 				
 				if ($order->status == 'completed') $order_status_text .= ' ' . __('and was completed', 'woothemes') . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woothemes');
 				
@@ -155,10 +155,10 @@ function woocommerce_order_tracking( $atts ) {
 				<?php
 				
 			else :
-				echo '<p>'.__('Sorry, we could not find that order id in our database. <a href="'.get_permalink($post->ID).'">Want to retry?</a>', 'woothemes').'</p>';
+				echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
 			endif;
 		else :
-			echo '<p>'.__('Sorry, we could not find that order id in our database. <a href="'.get_permalink($post->ID).'">Want to retry?</a>', 'woothemes').'</p>';
+			echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
 		endif;	
 	
 	else :

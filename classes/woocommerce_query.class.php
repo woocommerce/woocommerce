@@ -138,7 +138,7 @@ class woocommerce_query {
 	 * Returns an array of arguments for ordering products based on the selected values
 	 */
 	function get_catalog_ordering_args() {
-		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : 'title';
+		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : apply_filters('woocommerce_default_catalog_orderby', 'title');
 		
 		switch ($current_order) :
 			case 'date' :

@@ -22,15 +22,14 @@ function woocommerce_mail_from( $email ) {
 /**
  * HTML emails from WooCommerce
  **/
-function woocommerce_mail( $to, $subject, $message ) {
+function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 	
 	add_filter( 'wp_mail_from', 'woocommerce_mail_from' );
 	add_filter( 'wp_mail_from_name', 'woocommerce_mail_from_name' );
 	add_filter( 'wp_mail_content_type', 'woocommerce_email_content_type' );
 	
 	// Send the mail	
-	$headers = "Content-Type: text/html" . "\r\n";
-	wp_mail( $to, $subject, $message, $headers );
+	wp_mail( $to, $subject, $message, $headers, $attachments );
 	
 	// Unhook
 	remove_filter( 'wp_mail_from', 'woocommerce_mail_from' );
