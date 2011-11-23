@@ -155,10 +155,10 @@ function woocommerce_order_tracking( $atts ) {
 				<?php
 				
 			else :
-				echo '<p>'.__('Sorry, we could not find that order id in our database. <a href="'.get_permalink($post->ID).'">'.__('Want to retry?', 'woothemes').'</a>', 'woothemes').'</p>';
+				echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
 			endif;
 		else :
-			echo '<p>'.__('Sorry, we could not find that order id in our database. <a href="'.get_permalink($post->ID).'">'.__('Want to retry?', 'woothemes').'</a>', 'woothemes').'</p>';
+			echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
 		endif;	
 	
 	else :
