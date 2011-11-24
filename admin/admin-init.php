@@ -142,7 +142,6 @@ function woocommerce_admin_scripts() {
 }
 add_action('admin_enqueue_scripts', 'woocommerce_admin_scripts');
 
-
 /**
  * Queue admin CSS
  */

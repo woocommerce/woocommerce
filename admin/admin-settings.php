@@ -37,7 +37,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
-		'options' => apply_filters('woocommerce_currencies', array( 
+		'options' => array_unique(apply_filters('woocommerce_currencies', array( 
 			'USD' => __( 'US Dollars (&#36;)', 'woothemes' ),
 			'EUR' => __( 'Euros (&euro;)', 'woothemes' ),
 			'GBP' => __( 'Pounds Sterling (&pound;)', 'woothemes' ),
@@ -61,8 +61,9 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 			'CHF' => __( 'Swiss Franc', 'woothemes' ),
 			'TWD' => __( 'Taiwan New Dollars', 'woothemes' ),
 			'THB' => __( 'Thai Baht', 'woothemes' ), 
-			'TRY' => __( 'Turkish Lira (TL)', 'woothemes' )
-			)
+			'TRY' => __( 'Turkish Lira (TL)', 'woothemes' ),
+			'ZAR' => __( 'South African rand (R)', 'woothemes' ),
+			))
 		)
 	),	
 	

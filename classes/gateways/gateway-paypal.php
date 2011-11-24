@@ -39,7 +39,48 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
 		add_action('woocommerce_receipt_paypal', array(&$this, 'receipt_page'));
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+		
+		if ( !$this->is_valid_for_use() ) $this->enabled = false;
     } 
+    
+     /**
+     * Check if this gateway is enabled and available in the user's country
+     */
+    function is_valid_for_use() {
+        if (!in_array(get_option('woocommerce_currency'), array('AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP'))) return false;
+
+        return true;
+    }
+    
+	/**
+	 * Admin Panel Options 
+	 * - Options for bits like 'title' and availability on a country-by-country basis
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_options() {
+
+    	?>
+    	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
+    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woothemes'); ?></p>
+    	<table class="form-table">
+    	<?php
+    		if ( $this->is_valid_for_use() ) :
+    	
+    			// Generate the HTML For the settings form.
+    			$this->generate_settings_html();
+    		
+    		else :
+    		
+    			?>
+            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woothemes' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
+        		<?php
+        		
+    		endif;
+    	?>
+		</table><!--/.form-table-->
+    	<?php
+    } // End admin_options()
     
 	/**
      * Initialise Gateway Settings Form Fields
@@ -92,26 +133,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			);
     
     } // End init_form_fields()
-    
-	/**
-	 * Admin Panel Options 
-	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @since 1.0.0
-	 */
-	public function admin_options() {
-
-    	?>
-    	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
-    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woothemes'); ?></p>
-    	<table class="form-table">
-    	<?php
-    		// Generate the HTML For the settings form.
-    		$this->generate_settings_html();
-    	?>
-		</table><!--/.form-table-->
-    	<?php
-    } // End admin_options()
     
     /**
 	 * There are no payment fields for paypal, but we want to show the description if set.
