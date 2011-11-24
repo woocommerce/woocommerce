@@ -95,6 +95,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Support for ordering attributes with the same ID (but different taxonomies)
 * Made catalog ordering filterable
 * Enhanced admin with http://harvesthq.github.com/chosen/
+* Added ZAR currency
+* Fixed product (single) visibility
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
