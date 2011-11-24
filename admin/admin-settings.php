@@ -889,7 +889,7 @@ function woocommerce_settings() {
 		do_action( 'woocommerce_update_options' );
 		do_action( 'woocommerce_update_options_' . $current_tab );
 		flush_rewrite_rules( false );
-		wp_redirect( add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) ) );
+		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
     endif;
     
     if (isset($_GET['saved']) && $_GET['saved']) :
@@ -1035,7 +1035,10 @@ function woocommerce_settings() {
 					break;
 				endswitch;
 			?>
-	        <p class="submit"><input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woothemes' ); ?>" /></p>
+	        <p class="submit">
+	        	<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woothemes' ); ?>" />
+	        	<input type="hidden" name="subtab" id="last_tab" />
+	        </p>
 		</form>
 		
 		<script type="text/javascript">
@@ -1049,8 +1052,11 @@ function woocommerce_settings() {
 				jQuery(this).addClass('current');
 				jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
 				jQuery( jQuery(this).attr('href') ).show();
+				jQuery('#last_tab').val( jQuery(this).attr('href') );
 				return false;
 			});
+			
+			<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
 			
 			// Countries
 			jQuery('select#woocommerce_allowed_countries').change(function(){
