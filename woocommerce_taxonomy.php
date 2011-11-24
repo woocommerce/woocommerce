@@ -433,6 +433,7 @@ function get_woocommerce_term_meta($term_id, $key, $single = true){
  */
 function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
 	$terms = get_terms('product_cat', 'pad_counts=1&hierarchal='.$hierarchal.'&hide_empty=1&child_of=0');
+	if (!$terms) return;
 	$output = "<select name='product_cat' id='dropdown_product_cat'>";
 	$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
 	foreach($terms as $term) :
