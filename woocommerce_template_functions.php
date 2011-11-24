@@ -433,7 +433,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 									endif;
 								?>
 							<?php endif;?>
-						</td>
+						</select></td>
 					</tr>
                 <?php endforeach;?>
 				</tbody>
