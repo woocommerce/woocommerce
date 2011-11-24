@@ -887,8 +887,8 @@ function woocommerce_top_sellers() {
 	endif;
 
 	asort($found_products);
-	$found_products = array_slice($found_products, 0, 25, true);
 	$found_products = array_reverse($found_products, true);
+	$found_products = array_slice($found_products, 0, 25, true);
 	reset($found_products);
 	
 	remove_filter( 'posts_where', 'orders_within_range' );
@@ -981,8 +981,8 @@ function woocommerce_top_earners() {
 	endif;
 
 	asort($found_products);
-	$found_products = array_slice($found_products, 0, 25, true);
 	$found_products = array_reverse($found_products, true);
+	$found_products = array_slice($found_products, 0, 25, true);
 	reset($found_products);
 	
 	remove_filter( 'posts_where', 'orders_within_range' );
