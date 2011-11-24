@@ -433,7 +433,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 									endif;
 								?>
 							<?php endif;?>
-						</td>
+						</select></td>
 					</tr>
                 <?php endforeach;?>
 				</tbody>
@@ -1272,7 +1272,7 @@ function woocommerce_order_details_table( $order_id ) {
 			</tr>
 			<?php if ($order->order_shipping>0) : ?><tr>
 				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
-				<td><?php echo $order->get_shipping_to_display(); ?></small></td>
+				<td><?php echo $order->get_shipping_to_display(); ?></td>
 			</tr><?php endif; ?>
 			<?php if ($order->get_total_tax()>0) : ?><tr>
 				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>

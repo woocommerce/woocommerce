@@ -520,58 +520,66 @@ ul.recent-orders, ul.stock_list {
 }
 
 /* Settings */
-.woocommerce table.shippingrows td, .woocommerce table.shippingrows th {
-	vertical-align: middle;
-}
-.woocommerce table.shippingrows td a.remove {
-	margin: 0 !important;
-}
-.woocommerce table.shippingrows .dupe, .woocommerce table.shippingrows .remove {
-	float: right;
-	margin-left: 9px;
-}
-.woocommerce table.shippingrows tbody .check-column {
-	padding: 0;
-	input {
-		margin: 0 0 0 8px;
+.woocommerce table.shippingrows, .woocommerce table.taxrows {
+	td, th {
+		vertical-align: top;
+		line-height: 25px;
 	}
-}
-.woocommerce table.shippingrows td.country {
-	width: 300px;
-	p {
-		line-height: 21px;
-		margin: 0;
-		color: #666;
+	a.remove {
+		margin: 0 !important;
 	}
-	button.edit_options {
+	.dupe, .remove {
 		float: right;
-		margin: 0;
+		margin-left: 9px;
 	}
-	select {
-		margin: 9px 0;
-		width: 100%;
-		height: 160px !important;
+	tbody .check-column {
+		padding-top: 8px;
+		input {
+			margin: 0 0 0 8px;
+		}
 	}
-}
-
-div.taxrows {
-	.taxrow {
-		padding-bottom: 8px;
+	td.apply_to_shipping {
+		padding-top: 8px;
+	}
+	td.rate {
+		input {
+			width: 100px;
+		}
+	}
+	td.country {
+		overflow: visible !important;
+		p {
+			line-height: 25px;
+			margin: 0;
+			color: #666;
+		}
+		button.edit_options {
+			float: right;
+		}
 		select {
-			width: 125px;
+			margin: 9px 0;
+			width: 100%;
+			height: 160px !important;
 		}
-		input.text {
-			width: 60px;
+		p.edit, .options {
+			min-width: 400px;
 		}
-		label.checkbox {
-			line-height: 1.5em;
-			margin: 0 8px;
-			input {
-				margin: 0 4px 0 0;
+		.chzn-container {
+			width: 100% !important;
+			margin: 9px 0 5px;
+			.chzn-drop {
+				width: 100% !important;
+				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+				box-sizing: border-box;         /* Opera/IE 8+ */
+			}
+			.search-field input {
+				width: 150px !important;
 			}
 		}
 	}
 }
+
 
 .woocommerce table.widefat {
 	table.coupon_rows {
@@ -800,6 +808,17 @@ table.woocommerce_attributes .taxonomy td.name {
 }
 table.woocommerce_attributes .taxonomy  td.values {
 	position: relative;
+	.chzn-container {
+		width: 100% !important;
+		margin: 0 1px;
+		display: block;
+		.chzn-drop {
+			width: 100% !important;
+			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+			box-sizing: border-box;         /* Opera/IE 8+ */
+		}
+	}
 }
 table.woocommerce_attributes .center {
 	text-align: center;
@@ -1123,42 +1142,8 @@ table.bar_chart {
 	}
 }
 
-/* Multiselect
+/* Chosen multiselect enhancement
 ----------------------------------*/
-.ui-multiselect { padding:3px 0 3px 4px; text-align:left; margin: 1px; vertical-align: middle; height: 24px; }
-.ui-multiselect span.ui-icon { float:right }
-.ui-multiselect-single .ui-multiselect-checkboxes input { position:absolute !important; top: auto !important; left:-9999px; }
-.ui-multiselect-single .ui-multiselect-checkboxes label { padding:5px !important; }
-
-.woocommerce .panel .ui-multiselect { width: 225px !important; }
-#attributes_list td.values .ui-multiselect { width: 100% !important; }
-#attributes_list td.values .ui-multiselect-menu { width: auto !important; right: 9px; }
-
-.ui-multiselect-header { margin-bottom:3px; padding:3px 0 3px 4px }
-.ui-multiselect-header ul { font-size:0.9em }
-.ui-multiselect-header ul li { float:left; padding:0 10px 0 0; margin: 0; }
-.ui-multiselect-header a { text-decoration:none }
-.ui-multiselect-header a:hover { text-decoration:underline }
-.ui-multiselect-header span.ui-icon { float:left }
-.ui-multiselect-header li.ui-multiselect-close { float:right; text-align:right; padding-right:0 }
-
-.ui-multiselect-menu { display:none; padding:3px; position:absolute; z-index:10000 }
-.ui-multiselect-checkboxes { position:relative /* fixes bug in IE6/7 */; overflow-y:scroll }
-.ui-multiselect-checkboxes label { cursor:default; display:block; border:1px solid transparent; padding:3px 1px; }
-.ui-multiselect-checkboxes label input { position:relative; top:0; vertical-align: middle; }
-.ui-multiselect-checkboxes label span { padding-left: 4px; }
-.ui-multiselect-checkboxes li { clear:both; font-size:0.9em; padding-right:3px }
-.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { text-align:center; font-weight:bold; border-bottom:1px solid }
-.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a { display:block; padding:3px; margin:1px 0; text-decoration:none }
-
-.ui-multiselect-checkboxes li.ui-multiselect-optgroup-last { border-bottom:1px solid }
-
-/* remove label borders in IE6 because IE6 does not support transparency */
-* html .ui-multiselect-checkboxes label { border:none }
-
-
-
-
 #woocommerce_allowed_countries_chzn .chzn-search {
 	display: none;
 }
@@ -1226,7 +1211,7 @@ table.bar_chart {
   display: block;
   position: absolute;
   right: 26px;
-  top: 8px;
+  top: 6px;
   width: 12px;
   height: 13px;
   font-size: 1px;
@@ -1258,7 +1243,7 @@ table.bar_chart {
   width: 18px;
 }
 .chzn-container-single .chzn-single div b {
-  background: url('../images/chosen-sprite.png') no-repeat 0 0;
+  background: url('../images/chosen-sprite.png') no-repeat 0 -1px;
   display: block;
   width: 100%;
   height: 100%;
@@ -1313,7 +1298,7 @@ table.bar_chart {
   background-image: -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
   background-image: -ms-linear-gradient(top, #ffffff 85%,#eeeeee 99%);
   background-image: linear-gradient(top, #ffffff 85%,#eeeeee 99%);
-  border: 1px solid #aaa;
+  border: 1px solid #dfdfdf;
   margin: 0;
   padding: 0;
   cursor: text;
@@ -1321,6 +1306,11 @@ table.bar_chart {
   height: auto !important;
   height: 1%;
   position: relative;
+  -moz-border-radius:3px;
+		-webkit-border-radius:3px;
+		-o-border-radius:3px;
+		-khtml-border-radius:3px;
+		border-radius:3px;
 }
 .chzn-container-multi .chzn-choices li {
   float: left;
