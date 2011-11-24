@@ -285,7 +285,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		if( $_product->get_price() === '') return;
 
 		if ($availability['availability']) :
-	      echo apply_filters( 'woocommerce_stock_html', 'woocommerce_simple_add_to_cart', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
+	      echo apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
 	    endif;
 
 		// Don't show cart if out of stock
@@ -338,7 +338,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 								if ($child_product->is_visible()) echo '</a>';
 							?></label></td>
 							<td class="price"><?php echo $child_product->get_price_html(); ?>
-							<?php echo apply_filters( 'woocommerce_stock_html', 'woocommerce_grouped_add_to_cart',
+							<?php echo apply_filters( 'woocommerce_stock_html',
 							  '<small class="stock '.$cavailability['class'].'">'.$cavailability['availability'].'</small>', $cavailability['availability'] ); ?>
 							</td>
 						</tr>
@@ -380,8 +380,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 
                 $variation_attributes = $variation->get_variation_attributes();
                 $availability = $variation->get_availability();
-                $availability_html = (!empty($availability['availability'])) ? apply_filters( 'woocommerce_stock_html', 'woocommerce_variable_add_to_cart',
-                    '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>', $availability['availability'] ) : '';
+                $availability_html = (!empty($availability['availability'])) ? apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>', $availability['availability'] ) : '';
 
                 if (has_post_thumbnail($variation->get_variation_id())) {
                     $attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
