@@ -80,7 +80,7 @@ jQuery( function($){
 					totalItemTax 		= 0;
 					
 					// Calculate tax and discounts
-					cart_discount = cart_discount + itemDiscount;
+					cart_discount = parseFloat( cart_discount + itemDiscount );
 
 					if (itemTax && itemTax>0) {
 						

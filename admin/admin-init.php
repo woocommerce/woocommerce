@@ -95,6 +95,7 @@ function woocommerce_admin_scripts() {
 			'cart_total' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to calculate discounts before tax manually.", 'woothemes'),
 			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
+			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
 			'ID' 							=>  __('ID', 'woothemes'),
 			'item_name' 					=> __('Item Name', 'woothemes'),
 			'quantity' 						=> __('Quantity e.g. 2', 'woothemes'),
