@@ -103,9 +103,10 @@ if (!function_exists('woocommerce_template_loop_price')) {
  **/
 if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility( $post, $_product ) {
-		if (!$_product->is_visible() && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
-
-		if (!$_product->is_visible()) : wp_safe_redirect(home_url()); exit; endif;
+	
+		if (!$_product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
+		if (!$_product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
+		
 	}
 }
 
@@ -285,7 +286,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		if( $_product->get_price() === '') return;
 
 		if ($availability['availability']) :
-	      echo apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
+			echo apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
 	    endif;
 
 		// Don't show cart if out of stock
@@ -338,8 +339,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 								if ($child_product->is_visible()) echo '</a>';
 							?></label></td>
 							<td class="price"><?php echo $child_product->get_price_html(); ?>
-							<?php echo apply_filters( 'woocommerce_stock_html',
-							  '<small class="stock '.$cavailability['class'].'">'.$cavailability['availability'].'</small>', $cavailability['availability'] ); ?>
+							<?php echo apply_filters( 'woocommerce_stock_html', '<small class="stock '.$cavailability['class'].'">'.$cavailability['availability'].'</small>', $cavailability['availability'] ); ?>
 							</td>
 						</tr>
 					<?php endforeach; ?>

@@ -437,7 +437,7 @@ class woocommerce_product {
 	}
 	
 	/** Returns whether or not the product is visible */
-	function is_visible() {
+	function is_visible( $single = false ) {
 	
 		// Out of stock visibility
 		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
@@ -447,6 +447,10 @@ class woocommerce_product {
 		// visibility setting
 		if ($this->visibility=='hidden') return false;
 		if ($this->visibility=='visible') return true;
+		
+		if ($single) return true;
+		
+		// Visibility in loop
 		if ($this->visibility=='search' && is_search()) return true;
 		if ($this->visibility=='search' && !is_search()) return false;
 		if ($this->visibility=='catalog' && is_search()) return false;

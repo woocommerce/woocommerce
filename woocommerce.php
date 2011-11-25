@@ -431,13 +431,14 @@ function get_woocommerce_currency_symbol() {
 		case 'EUR' : $currency_symbol = '&euro;'; break;
 		case 'JPY' : $currency_symbol = '&yen;'; break;
 		case 'TRY' : $currency_symbol = 'TL'; break;
+		case 'NOK' : $currency_symbol = 'kr'; break;
+		case 'ZAR' : $currency_symbol = 'R'; break;
 		
 		case 'CZK' :
 		case 'DKK' :
 		case 'HUF' :
 		case 'ILS' :
 		case 'MYR' :
-		case 'NOK' :
 		case 'PHP' :
 		case 'PLN' :
 		case 'SEK' :
