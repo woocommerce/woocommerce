@@ -80,7 +80,7 @@ jQuery( function($){
 					totalItemTax 		= 0;
 					
 					// Calculate tax and discounts
-					cart_discount = cart_discount + (itemDiscount * itemQty);
+					cart_discount = cart_discount + itemDiscount;
 
 					if (itemTax && itemTax>0) {
 						
@@ -89,39 +89,37 @@ jQuery( function($){
 							taxRate = ( itemTax/100 ) + 1;
 							
 							// Discount worked out from tax inc. price then tax worked out backwards
-							price_in_tax = itemCost * taxRate;
+							price_in_tax = ( itemCost * taxRate ) * itemQty;
 							
 							discounted_price = price_in_tax - itemDiscount;
 							
-							totalItemTax = ( (discounted_price*itemQty) - ( (discounted_price*itemQty) / taxRate ) ) * 100;
+							totalItemTax = ( discounted_price - ( discounted_price / taxRate ) ) * 100;
 							
 							totalItemTax = totalItemTax.toFixed(2);
 							
 							totalItemTax = Math.round( totalItemTax ) / 100;
 							
-							discounted_price = (discounted_price*itemQty) - totalItemTax;
+							discounted_price = discounted_price - totalItemTax;
 							
 						} else {
 							
 							taxRate = ( itemTax/100 );
 
 							// Discount worked out from ex. price and tax worked out forwards
-							discounted_price = itemCost - itemDiscount;
+							discounted_price = ( itemCost * taxRate ) - itemDiscount;
 							
-							totalItemTax = ( (discounted_price*itemQty) * taxRate ) * 100;
+							totalItemTax = ( discounted_price * taxRate ) * 100;
 							
 							totalItemTax = totalItemTax.toFixed(2);
 							
 							totalItemTax = Math.round( totalItemTax ) / 100;
-							
-							discounted_price = (discounted_price*itemQty);
 							
 						}
 						
 						
 					} else {
 						
-						discounted_price = (itemCost - itemDiscount) *itemQty;
+						discounted_price = (itemCost * itemQty ) - itemDiscount;
 						
 					}
 					

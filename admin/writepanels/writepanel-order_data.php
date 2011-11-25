@@ -169,7 +169,7 @@ function woocommerce_order_items_meta_box($post) {
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
 					<th class="cost"><?php _e('Cost', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?></th>
-					<th class="cost"><?php _e('Discount', 'woothemes'); ?></th>
+					<th class="cost"><?php _e('Row Discount', 'woothemes'); ?></th>
 					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
@@ -242,7 +242,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						
 						<td class="discount">
-								<input type="text" name="item_discount[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['discount'])) echo esc_attr( $item['discount'] ); ?>" />
+								<input type="text" name="item_discount[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['row_discount'])) echo esc_attr( $item['row_discount'] ); ?>" />
 						</td>
 						
 						<td class="tax">
@@ -503,7 +503,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
 			 		'cost' 			=> woocommerce_clean($item_cost[$i]),
-			 		'discount'		=> number_format(woocommerce_clean($item_discount[$i]), 4, '.', ''),
+			 		'row_discount'	=> number_format(woocommerce_clean($item_discount[$i]), 4, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
 			 		'item_meta'		=> $item_meta->meta
 			 	));
