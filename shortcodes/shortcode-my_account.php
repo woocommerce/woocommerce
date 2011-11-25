@@ -215,6 +215,7 @@ function woocommerce_edit_address() {
 			
 			/* Save */
 			if ($user_id>0 && $woocommerce->verify_nonce('edit_address') && $woocommerce->error_count() == 0 ) :
+				
 				update_user_meta( $user_id, $load_address . '_first_name', $_POST['address_first_name'] );
 				update_user_meta( $user_id, $load_address . '_last_name', $_POST['address_last_name'] );
 				update_user_meta( $user_id, $load_address . '_company', $_POST['address_company'] );
@@ -230,6 +231,8 @@ function woocommerce_edit_address() {
 					update_user_meta( $user_id, $load_address . '_phone', $_POST['address_phone'] );
 					update_user_meta( $user_id, $load_address . '_fax', $_POST['address_fax'] );
 				endif;
+				
+				do_action('woocommerce_customer_save_address', $user_id);
 				
 				wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
 				exit;
