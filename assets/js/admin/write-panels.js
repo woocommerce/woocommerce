@@ -55,7 +55,9 @@ jQuery( function($){
 			var shipping_tax = parseFloat($('input#_order_shipping_tax').val());
 			var tax = 0;
 			var itemTotal = 0;
+			var subtotal = 0;
 			var total = 0;
+			var cart_discount = 0;
 			
 			if (!discount) discount = 0;
 			if (!shipping) shipping = 0;
@@ -65,44 +67,79 @@ jQuery( function($){
 			if (item_count>0) {
 				for (i=0; i<item_count; i++) {
 					
-					itemCost 	= $('input[name^=item_cost]:eq(' + i + ')').val();
-					itemQty 	= parseInt($('input[name^=item_quantity]:eq(' + i + ')').val());
-					itemTax		= $('input[name^=item_tax_rate]:eq(' + i + ')').val();
+					itemCost 			= $('input[name^=item_cost]:eq(' + i + ')').val();
+					itemQty 			= parseInt($('input[name^=item_quantity]:eq(' + i + ')').val());
+					itemDiscount 		= $('input[name^=item_discount]:eq(' + i + ')').val();
+					itemTax				= $('input[name^=item_tax_rate]:eq(' + i + ')').val();
 					
-					if (!itemCost) itemCost = 0;
-					if (!itemTax) itemTax = 0;
-					if (!itemQty) itemQty = 0;
+					if (!itemCost) 		itemCost = 0;
+					if (!itemTax) 		itemTax = 0;
+					if (!itemQty) 		itemQty = 0;
+					if (!itemDiscount) 	itemDiscount = 0;
 					
-					totalItemTax = 0;
+					totalItemTax 		= 0;
 					
-					totalItemCost = itemCost * itemQty;
-					
+					// Calculate tax and discounts
+					cart_discount = cart_discount + (itemDiscount * itemQty);
+
 					if (itemTax && itemTax>0) {
 						
-						taxRate = itemTax/100;
+						if (woocommerce_writepanel_params.prices_include_tax == 'yes') {
+							
+							taxRate = ( itemTax/100 ) + 1;
+							
+							// Discount worked out from tax inc. price then tax worked out backwards
+							price_in_tax = itemCost * taxRate;
+							
+							discounted_price = price_in_tax - itemDiscount;
+							
+							totalItemTax = ( (discounted_price*itemQty) - ( (discounted_price*itemQty) / taxRate ) ) * 100;
+							
+							totalItemTax = totalItemTax.toFixed(2);
+							
+							totalItemTax = Math.round( totalItemTax ) / 100;
+							
+							discounted_price = (discounted_price*itemQty) - totalItemTax;
+							
+						} else {
+							
+							taxRate = ( itemTax/100 );
+
+							// Discount worked out from ex. price and tax worked out forwards
+							discounted_price = itemCost - itemDiscount;
+							
+							totalItemTax = ( (discounted_price*itemQty) * taxRate ) * 100;
+							
+							totalItemTax = totalItemTax.toFixed(2);
+							
+							totalItemTax = Math.round( totalItemTax ) / 100;
+							
+							discounted_price = (discounted_price*itemQty);
+							
+						}
 						
-						itemTaxAmount = ((itemCost * taxRate) * 100 );
 						
-						itemTaxAmount = itemTaxAmount.toFixed(2);
+					} else {
 						
-						totalItemTax = Math.round( itemTaxAmount ) / 100;
-						
-						totalItemTax = totalItemTax * itemQty;
+						discounted_price = (itemCost - itemDiscount) *itemQty;
 						
 					}
 					
-					itemTotal = itemTotal + totalItemCost;
+					totalItemCost 	= parseFloat( discounted_price );
 					
-					tax = tax + totalItemTax;
+					itemTotal 		= parseFloat( itemTotal + totalItemCost );
+					
+					subtotal 		= parseFloat( subtotal + (itemCost*itemQty) );
+				
+					tax 			= parseFloat( tax + totalItemTax );
 				}
 			}
 			
-			subtotal = itemTotal;
-			
-			total = parseFloat(subtotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
+			total = parseFloat(itemTotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
 			
 			if (total < 0 ) total = 0;
-
+			
+			$('input#_cart_discount').val( cart_discount.toFixed(2) );
 			$('input#_order_subtotal').val( subtotal.toFixed(2) );
 			$('input#_order_tax').val( tax.toFixed(2) );
 			$('input#_order_shipping_tax').val( shipping_tax.toFixed(2) );

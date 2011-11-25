@@ -643,19 +643,11 @@ class woocommerce_cart {
 				// Base Price (inlusive of tax for now)
 				$base_price 			= $_product->get_price();
 				
-				// Discounted Price (price with any pre-tax discounts applied)
-				$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
-				
 				// Base Price Adjustment
 				if ( get_option('woocommerce_calc_taxes')=='yes' && $_product->is_taxable() ) :
 					
 					// Get tax rate for base - we will handle customer's outside base later
 					$tax_rate 				= $this->tax->get_shop_base_rate( $_product->get_tax_class() );
-					
-					/**
-					 * Regular tax calculation (customer inside base and the tax class is unmodified
-					 */			
-					$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rate, true );
 					
 					/**
 					 * ADJUST TAX - Checkout calculations when customer is OUTSIDE the shop base country and prices INCLUDE tax
@@ -666,9 +658,15 @@ class woocommerce_cart {
 						$rate			 		= $this->tax->get_rate( $_product->get_tax_class() );
 						
 						// Work out new price based on region
-						$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
+						$adjusted_price 		= ( $base_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
+
+						// Apply discounts
+						$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
 						
 						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
+						
+						//$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
+						//$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
 
 					/**
 					 * ADJUST TAX - Checkout calculations when a tax class is modified
@@ -678,11 +676,24 @@ class woocommerce_cart {
 						// Get rate
 						$rate			 		= $this->tax->get_rate( $_product->tax_class );
 						
-						// Work out new price based on region
-						$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
+						// Work out new price based on tax class
+						$adjusted_price 		= ( $base_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
 						
+						// Apply discounts
+						$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
 						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
-
+						
+						//$discounted_price		= ( $discounted_price / ( 1 + ( $tax_rate / 100 ) ) ) * ( 1 + ( $rate / 100 ) );
+						//$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $rate, true );
+					
+					/**
+					 * Regular tax calculation (customer inside base and the tax class is unmodified
+					 */
+					else :
+						
+						$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
+						$discounted_tax_amount	= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rate, true );
+						
 					endif;
 					
 					// Rounding
@@ -691,10 +702,13 @@ class woocommerce_cart {
 					endif;
 				
 				else :
+				
+					// Discounted Price (price with any pre-tax discounts applied)
+					$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
 					
 					$discounted_tax_amount = 0;
 				
-				endif;			
+				endif;	
 				
 				// Total item price (price, discount and quantity) - round tax so price is correctly calculated
 				$total_item_price 			= ($discounted_price * $values['quantity']) - round($discounted_tax_amount, 2);	

@@ -242,7 +242,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						
 						<td class="discount">
-								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['discount'])) echo esc_attr( $item['discount'] ); ?>" />
+								<input type="text" name="item_discount[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['discount'])) echo esc_attr( $item['discount'] ); ?>" />
 						</td>
 						
 						<td class="tax">
@@ -454,6 +454,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
 		update_post_meta( $post_id, '_order_subtotal', stripslashes( $_POST['_order_subtotal'] ));
 		update_post_meta( $post_id, '_order_shipping', stripslashes( $_POST['_order_shipping'] ));
+		update_post_meta( $post_id, '_cart_discount', stripslashes( $_POST['_cart_discount'] ));
 		update_post_meta( $post_id, '_order_discount', stripslashes( $_POST['_order_discount'] ));
 		update_post_meta( $post_id, '_order_tax', stripslashes( $_POST['_order_tax'] ));
 		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
@@ -469,6 +470,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 $item_name 		= $_POST['item_name'];
 			 $item_quantity 	= $_POST['item_quantity'];
 			 $item_cost 		= $_POST['item_cost'];
+			 $item_discount		= $_POST['item_discount'];
 			 $item_tax_rate 	= $_POST['item_tax_rate'];
 			 $item_meta_names 	= $_POST['meta_name'];
 			 $item_meta_values 	= $_POST['meta_value'];
@@ -500,7 +502,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'variation_id' 	=> (int) $item_variation[$i],
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
-			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 2, '.', ''),
+			 		'cost' 			=> woocommerce_clean($item_cost[$i]),
+			 		'discount'		=> number_format(woocommerce_clean($item_discount[$i]), 4, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
 			 		'item_meta'		=> $item_meta->meta
 			 	));

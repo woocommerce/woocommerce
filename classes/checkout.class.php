@@ -684,8 +684,8 @@ class woocommerce_checkout {
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'cost' 			=> $_product->get_price_excluding_tax( false ),
 					 		'discount'		=> number_format( 
-					 			($_product->get_price() - $woocommerce->cart->get_discounted_price( $values, $_product->get_price() )), 2, '.', '' 
-					 			),
+					 			( $_product->get_price()-$woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) )
+					 			, 4, '.', '' ),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
