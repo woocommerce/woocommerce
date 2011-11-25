@@ -82,6 +82,7 @@ class woocommerce_order {
 			'payment_method'		=> '',
 			'order_subtotal'		=> '',
 			'order_discount'		=> '',
+			'cart_discount'			=> '',
 			'order_tax'				=> '',
 			'order_shipping'		=> '',
 			'order_shipping_tax'	=> '',

@@ -97,6 +97,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Enhanced admin with http://harvesthq.github.com/chosen/
 * Added ZAR currency
 * Fixed product (single) visibility
+* Improved orders interface
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.

@@ -20,6 +20,21 @@ jQuery( function($){
 	});
 	
 	// ORDERS
+	$('a.edit_address').click(function(){
+		
+		$(this).hide();
+		$(this).closest('.order_data').find('div.address').hide();
+		$(this).closest('.order_data').find('div.edit_address').show();
+
+	});
+	
+	// Chosen selects
+	jQuery("select.chosen_select").chosen();
+			
+	jQuery("select.chosen_select_nostd").chosen({
+		allow_single_deselect: 'true'
+	});
+	
 	$('#order_items_list button.remove_row').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){

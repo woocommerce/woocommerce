@@ -683,6 +683,9 @@ class woocommerce_checkout {
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'cost' 			=> $_product->get_price_excluding_tax( false ),
+					 		'discount'		=> number_format( 
+					 			($_product->get_price() - $woocommerce->cart->get_discounted_price( $values, $_product->get_price() )), 2, '.', '' 
+					 			),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
@@ -745,7 +748,8 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_discount_total(), 2, '.', ''));
+					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
+					update_post_meta( $order_id, '_cart_discount', 			number_format($woocommerce->cart->get_cart_discount_total(), 2, '.', ''));
 					update_post_meta( $order_id, '_order_tax', 				number_format($woocommerce->cart->tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping_tax', 	number_format($woocommerce->cart->shipping_tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_total', 			number_format($woocommerce->cart->total, 2, '.', ''));

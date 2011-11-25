@@ -168,7 +168,8 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="meta" width="1%"><?php _e('Item&nbsp;Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost"><?php _e('Cost', 'woothemes'); ?></th>
+					<th class="cost"><?php _e('Cost', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?></th>
+					<th class="cost"><?php _e('Discount', 'woothemes'); ?></th>
 					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
@@ -233,15 +234,19 @@ function woocommerce_order_items_meta_box($post) {
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
 						
 						<td class="quantity">
-								<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="<?php echo esc_attr( $item['qty'] ); ?>" />
+								<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="<?php echo esc_attr( $item['qty'] ); ?>" />
 						</td>
 						
 						<td class="cost">
-								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo esc_attr( $item['cost'] ); ?>" />
+								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $item['cost'] ); ?>" />
+						</td>
+						
+						<td class="discount">
+								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['discount'])) echo esc_attr( $item['discount'] ); ?>" />
 						</td>
 						
 						<td class="tax">
-								<input type="text" name="item_tax_rate[<?php echo $loop; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $item['taxrate'] ); ?>" />
+								<input type="text" name="item_tax_rate[<?php echo $loop; ?>]" placeholder="<?php _e('0.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $item['taxrate'] ); ?>" />
 						</td>
 						
 						<td class="center">
@@ -383,9 +388,9 @@ function woocommerce_order_totals_meta_box($post) {
 		</li>
 		
 		<li class="left">
-			<label><?php _e('Product Discount:', 'woothemes'); ?></label>
-			<input type="text" id="_product_discount" name="_product_discount" placeholder="0.00" value="<?php 
-			if (isset($data['_product_discount'][0])) echo $data['_product_discount'][0];
+			<label><?php _e('Cart Discount:', 'woothemes'); ?></label>
+			<input type="text" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php 
+			if (isset($data['_cart_discount'][0])) echo $data['_cart_discount'][0];
 			?>" />
 		</li>
 		
