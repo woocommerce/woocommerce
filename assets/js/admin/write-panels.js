@@ -106,7 +106,7 @@ jQuery( function($){
 							
 							discounted_price = discounted_price - totalItemTax;
 							
-							subtotal 		= subtotal + parseFloat( price_in_tax - ( Math.round( (itemCost*(itemTax/100))*100 ) / 100 ) * itemQty );
+							subtotal 		= subtotal + parseFloat( (itemCost * itemQty) );
 							
 						} else {
 							
@@ -146,7 +146,7 @@ jQuery( function($){
 					
 				}
 			}
-			
+				
 			if (woocommerce_writepanel_params.round_at_subtotal == 'yes') {
 						
 				tax = tax * 100;
@@ -156,6 +156,15 @@ jQuery( function($){
 			}
 			
 			total = parseFloat(itemTotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
+			
+			// Rounding
+			subtotal = subtotal * 100;
+			subtotal = subtotal.toFixed(2);
+			subtotal = Math.round( subtotal ) / 100;
+			
+			total = total * 100;
+			total = total.toFixed(2);
+			total = Math.round( total ) / 100;
 			
 			if (total < 0 ) total = 0;
 			
