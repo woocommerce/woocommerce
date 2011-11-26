@@ -734,6 +734,13 @@ class woocommerce_product {
 		return $related_posts;
 	}
 	
+	/** Returns a single product attribute */
+	function get_attribute( $attr ) {
+		$attributes = $this->get_attributes();
+		
+		if ( isset($attributes[$attr]) ) return $attributes[$attr]['value']; else return false;
+	}
+	
 	/** Returns product attributes */
 	function get_attributes() {
 		

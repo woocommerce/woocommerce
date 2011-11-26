@@ -103,6 +103,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Updated German Lang (formal) thanks @owcv
 * Sale date uses current_time('timestamp') instead of strtotime
 * Fixed variations loading dimensions
+* Product get_attribute function
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
