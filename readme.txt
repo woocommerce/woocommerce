@@ -105,6 +105,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed variations loading dimensions
 * Product get_attribute function
 * Option to clear cart on logout
+* Made cheque/bacs gateways reduce stock levels upon ordering
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
