@@ -937,7 +937,7 @@ class woocommerce_product {
     function check_sale_price() {
 		global $woocommerce;
 		
-    	if ($this->sale_price_dates_from && $this->sale_price_dates_from < strtotime('NOW')) :
+    	if ($this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp')) :
     		
     		if ($this->sale_price && $this->price!==$this->sale_price) :
     			
@@ -954,7 +954,7 @@ class woocommerce_product {
 
     	endif;
     	
-    	if ($this->sale_price_dates_to && $this->sale_price_dates_to < strtotime('NOW')) :
+    	if ($this->sale_price_dates_to && $this->sale_price_dates_to < current_time('timestamp')) :
     		
     		if ($this->regular_price && $this->price!==$this->regular_price) :
     			

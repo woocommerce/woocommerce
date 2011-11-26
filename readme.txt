@@ -100,6 +100,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved orders interface
 * On orders screen you can load customer details is on file
 * Fixed address_1 address_2 names
+* Updated German Lang (formal) thanks @owcv
+* Sale data uses current_time('timestamp') instead of strtotime
+
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
