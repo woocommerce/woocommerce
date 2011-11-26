@@ -132,19 +132,28 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'My Account', 'woothemes' ),
+		'name' => __( 'Customer Accounts', 'woothemes' ),
 		'desc' 		=> __( 'Allow unregistered users to register from the My Account page', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_myaccount_registration',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
-		'name' => __( 'Admin access', 'woothemes' ),
+		'desc' 		=> __( 'Clear cart when logging out', 'woothemes' ),
+		'id' 		=> 'woocommerce_clear_cart_on_logout',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woothemes' ),
 		'id' 		=> 'woocommerce_lock_down_admin',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  

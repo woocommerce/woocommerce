@@ -5,6 +5,7 @@
  * Actions/functions/hooks for WooCommerce related events.
  *
  *		- Prevent non-admin access to backend
+ *		- Clear cart on logout
  *		- Update catalog ordering if posted
  *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
@@ -41,6 +42,22 @@ function woocommerce_prevent_admin_access() {
 		exit;
 	endif;
 	
+}
+
+/**
+ * Clear cart on logout
+ */
+add_action('wp_logout', 'woocommerce_clear_cart_on_logout');
+
+function woocommerce_clear_cart_on_logout() {
+	
+	if (get_option('woocommerce_clear_cart_on_logout')=='yes') :
+		
+		global $woocommerce;
+		
+		$woocommerce->cart->empty_cart();
+		
+	endif;
 }
 
 /**
