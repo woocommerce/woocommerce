@@ -22,7 +22,7 @@
 #order_data .order_data_right .form-field{float:left;width:50%;padding:0;margin:9px 0 0 0;}#order_data .order_data_right .form-field label{display:block;padding:0 0 3px;}
 #order_data .order_data_right .form-field input{width:95%;}
 #order_data .order_data_right ._billing_company_field,#order_data .order_data_right ._shipping_company_field{clear:both;width:100%;}#order_data .order_data_right ._billing_company_field input,#order_data .order_data_right ._shipping_company_field input{width:97.5%;}
-#order_data .order_data_right div.edit_address{display:none;}
+#order_data .order_data_right div.edit_address{display:none;overflow:hidden;zoom:1;}
 .order_actions{color:#999;font-size:11px;margin:0;overflow:hidden;zoom:1;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px 0;margin:0;line-height:1.6em;float:left;width:50%;text-align:center;}.order_actions li a{float:none;text-align:center;}
 .order_actions li.wide{width:auto;float:none;clear:both;padding:6px;text-align:left;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}

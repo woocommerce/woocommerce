@@ -95,7 +95,7 @@ function woocommerce_order_data_meta_box($post) {
 					</div>
 					<div class="edit_address">
 						<p>
-							<button class="button load_shipping"><?php _e('Load customer billing address', 'woothemes'); ?></button>
+							<button class="button load_customer_billing"><?php _e('Load customer billing address', 'woothemes'); ?></button>
 						</p>
 						<?php
 						woocommerce_wp_text_input( array( 'id' => '_billing_first_name', 'label' => __('First Name', 'woothemes') ) );
@@ -123,7 +123,7 @@ function woocommerce_order_data_meta_box($post) {
 					</div>
 					<div class="edit_address">
 						<p>
-							<button class="button load_shipping"><?php _e('Load customer shipping address', 'woothemes'); ?></button>
+							<button class="button load_customer_shipping"><?php _e('Load customer shipping address', 'woothemes'); ?></button>
 							<button class="button billing-same-as-shipping"><?php _e('Copy from billing information', 'woothemes'); ?></button>
 						</p>
 						<?php

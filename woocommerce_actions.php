@@ -153,6 +153,41 @@ function woocommerce_increase_coupon_counts() {
 }
 
 /**
+ * Get customer details via ajax
+ */
+add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');
+
+function woocommerce_get_customer_details() {
+	
+	global $woocommerce;
+
+	check_ajax_referer( 'get-customer-details', 'security' );
+
+	$user_id = (int) trim(stripslashes($_POST['user_id']));
+	$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
+	
+	$customer_data = array(
+		$type_to_load . '_first_name' => get_user_meta( $user_id, $type_to_load . '_first_name', true ),
+		$type_to_load . '_last_name' => get_user_meta( $user_id, $type_to_load . '_last_name', true ),
+		$type_to_load . '_company' => get_user_meta( $user_id, $type_to_load . '_company', true ),
+		$type_to_load . '_address_1' => get_user_meta( $user_id, $type_to_load . '_address_1', true ),
+		$type_to_load . '_address_2' => get_user_meta( $user_id, $type_to_load . '_address_2', true ),
+		$type_to_load . '_city' => get_user_meta( $user_id, $type_to_load . '_city', true ),
+		$type_to_load . '_postcode' => get_user_meta( $user_id, $type_to_load . '_postcode', true ),
+		$type_to_load . '_country' => get_user_meta( $user_id, $type_to_load . '_country', true ),
+		$type_to_load . '_state' => get_user_meta( $user_id, $type_to_load . '_state', true ),
+		$type_to_load . '_email' => get_user_meta( $user_id, $type_to_load . '_email', true ),
+		$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
+	);
+	
+	echo json_encode($customer_data);
+	
+	// Quit out
+	die();
+	
+}
+
+/**
  * Add order item via ajax
  */
 add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
