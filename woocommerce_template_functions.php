@@ -302,7 +302,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		?>
 		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 
-		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
+		 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 		 	<?php if (!$_product->is_downloadable()) : ?>
 		 		<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
@@ -346,7 +346,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 				</tbody>
 			</table>
 
-			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 
@@ -442,7 +442,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				</tbody>
 			</table>
 
-			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 			<div class="single_variation_wrap" style="display:none;">
 				<div class="single_variation"></div>
@@ -472,7 +472,7 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
 
 		?>
 
-		<?php do_action('woocommerce_before_to_cart_button'); ?>
+		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 		<p class="cart"><a href="<?php echo $product_url; ?>" rel="nofollow" class="button alt"><?php _e('Buy product', 'woothemes'); ?></a></p>
 

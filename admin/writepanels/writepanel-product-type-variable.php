@@ -301,7 +301,11 @@ function variable_product_write_panel_js() {
 					</table>\
 				</div>');
 				
-				jQuery(".tips").easyTooltip();
+				jQuery(".tips").tipTip({
+			    	'attribute' : 'tip',
+			    	'fadeIn' : 50,
+			    	'fadeOut' : 50
+			    });
 				jQuery('.woocommerce_variations').unblock();
 
 			});

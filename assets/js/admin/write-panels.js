@@ -191,8 +191,11 @@ jQuery( function($){
 				$('table.woocommerce_order_items tbody#order_items_list').append( response );
 				$('table.woocommerce_order_items').unblock();
 				$('select.add_item_id').css('border-color', '').val('');
-				$(".tips").easyTooltip();
-				
+				    jQuery(".tips").tipTip({
+				    	'attribute' : 'tip',
+				    	'fadeIn' : 50,
+				    	'fadeOut' : 50
+				    });				
 			});
 
 		} else {
