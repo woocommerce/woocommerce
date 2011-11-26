@@ -23,6 +23,9 @@ class woocommerce_order {
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
 	function woocommerce_order( $id='' ) {
+		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
+		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
+		
 		if ($id>0) $this->get_order( $id );
 	}
 	
@@ -146,33 +149,79 @@ class woocommerce_order {
 			
 	}
 	
-	
 	/** Gets shipping and product tax */
 	function get_total_tax() {
 		return $this->order_tax + $this->order_shipping_tax;
 	}
 	
-	
-	/** Gets total discount */
-	function get_total_discount() {
-		return $this->order_discount;
+	/**
+	 * gets the total (product) discount amount - these are applied before tax
+	 */
+	function get_cart_discount() {
+		return $this->cart_discount; 
 	}
-
+	
+	/**
+	 * gets the total (product) discount amount - these are applied before tax
+	 */
+	function get_order_discount() {
+		return $this->order_discount; 
+	}
+	
+	/**
+	 * gets the total discount amount - both kinds
+	 */
+	function get_total_discount() {
+		if ($this->order_discount || $this->cart_discount) :
+			return $this->order_discount + $this->cart_discount; 
+		endif;
+	}
+	
+	/** Gets shipping */
+	function get_shipping() {
+		return $this->order_shipping;
+	}
+	
+	/** Gets order total */
+	function get_order_total() {
+		return $this->order_total;
+	}
 	
 	/** Gets subtotal */
 	function get_subtotal_to_display() {
 		global $woocommerce;
 		
-		$subtotal = woocommerce_price($this->order_subtotal);
+		if ($this->display_totals_ex_tax) :
+			
+			$subtotal = woocommerce_price($this->order_subtotal);
+			
+			if ($this->order_tax>0 && $this->prices_include_tax) :
+				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+			endif;
 		
-		if ($this->order_tax>0) :
-			$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+		else :
+			
+			// Calculate subtotal inc. tax
+			$subtotal = 0;
+			
+			foreach ($this->items as $item) :
+				
+				$subtotal += round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2);
+				
+			endforeach;
+
+			$subtotal = woocommerce_price( $subtotal );
+			
+			if ($this->order_tax>0 && !$this->prices_include_tax) :
+				$subtotal .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
+			endif;
+		
 		endif;
 		
 		return $subtotal;
 	}
-	
-	/** Gets shipping */
+
+	/** Gets shipping (formatted) */
 	function get_shipping_to_display() {
 		global $woocommerce;
 		
@@ -263,14 +312,14 @@ class woocommerce_order {
 			endif;
 			
 			$item_meta = &new order_item_meta( $item['item_meta'] );					
-			$variation = '<br/>' . $item_meta->display( true, true );
+			$variation = '<br/><small>' . $item_meta->display( true, true ) . '</small>';
 			
 			if ($show_download_links) :
 				
 				if ($_product->exists) :
 			
 					if ($_product->is_downloadable()) :
-						$file = '<br/>' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '';
+						$file = '<br/><small>' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</small>';
 					endif;
 		
 				endif;	
@@ -280,7 +329,23 @@ class woocommerce_order {
 			$return .= '<tr>
 				<td style="text-align:left;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
 				<td style="text-align:left;">'.$item['qty'].'</td>
-				<td style="text-align:left;">'.strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 ))).'</td>
+				<td style="text-align:left;">';
+				
+				
+				if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
+				
+					if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
+				
+					$return .= woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
+				
+				else :
+				
+					$return .= woocommerce_price( round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
+				
+				endif;
+			
+			$return .= '	
+				</td>
 			</tr>';
 			
 		endforeach;	

@@ -188,12 +188,12 @@ function woocommerce_completed_order_customer_notification( $id ) {
 /**
  * Pay for order notification email template - this one includes a payment link
  **/
-function woocommerce_pay_for_order_customer_notification( $order ) {
+function woocommerce_pay_for_order_customer_notification( $the_order ) {
 	
-	global $order_id, $the_order, $email_heading;
+	global $order_id, $order, $email_heading;
 	
+	$order = $the_order;
 	$order_id = $order->id;
-	$the_order = $order;
 	
 	$email_heading = sprintf(__('Invoice for Order #%s', 'woothemes'), $order_id);
 

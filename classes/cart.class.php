@@ -1179,7 +1179,7 @@ class woocommerce_cart {
 	}
 	
 	/**
-	 * gets the total (product) discount amount - these are applied before tax
+	 * gets the order discount amount - these are applied after tax
 	 */
 	function get_discounts_after_tax() {
 		if ($this->discount_total) :
