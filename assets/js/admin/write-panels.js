@@ -80,7 +80,7 @@ jQuery( function($){
 					totalItemTax 		= 0;
 					
 					// Calculate tax and discounts
-					cart_discount = parseFloat( cart_discount + itemDiscount );
+					cart_discount = cart_discount + parseFloat( itemDiscount );
 
 					if (itemTax && itemTax>0) {
 						
@@ -89,30 +89,43 @@ jQuery( function($){
 							taxRate = ( itemTax/100 ) + 1;
 							
 							// Discount worked out from tax inc. price then tax worked out backwards
-							price_in_tax = ( itemCost * taxRate ) * itemQty;
+							price_in_tax = ( itemCost * taxRate );
 							
-							discounted_price = price_in_tax - itemDiscount;
+							discounted_price = ( price_in_tax * itemQty ) - itemDiscount;
 							
-							totalItemTax = ( discounted_price - ( discounted_price / taxRate ) ) * 100;
+							// Total item tax (after discount)
+							totalItemTax = ( discounted_price - ( discounted_price / taxRate ) );
 							
-							totalItemTax = totalItemTax.toFixed(2);
+							if (woocommerce_writepanel_params.round_at_subtotal == 'no') {
+								
+								totalItemTax = totalItemTax * 100;
+								totalItemTax = totalItemTax.toFixed(2);
+								totalItemTax = Math.round( totalItemTax ) / 100;
 							
-							totalItemTax = Math.round( totalItemTax ) / 100;
+							}
 							
 							discounted_price = discounted_price - totalItemTax;
+							
+							subtotal 		= subtotal + parseFloat( price_in_tax - ( Math.round( (itemCost*(itemTax/100))*100 ) / 100 ) * itemQty );
 							
 						} else {
 							
 							taxRate = ( itemTax/100 );
 
 							// Discount worked out from ex. price and tax worked out forwards
-							discounted_price = ( itemCost * taxRate ) - itemDiscount;
+							discounted_price = (itemCost * itemQty) - itemDiscount;
 							
-							totalItemTax = ( discounted_price * taxRate ) * 100;
+							totalItemTax = ( discounted_price * taxRate );
 							
-							totalItemTax = totalItemTax.toFixed(2);
+							if (woocommerce_writepanel_params.round_at_subtotal == 'no') {
+								
+								totalItemTax = totalItemTax * 100;
+								totalItemTax = totalItemTax.toFixed(2);
+								totalItemTax = Math.round( totalItemTax ) / 100;
 							
-							totalItemTax = Math.round( totalItemTax ) / 100;
+							}
+							
+							subtotal 		= subtotal + parseFloat( (itemCost * itemQty) );
 							
 						}
 						
@@ -121,16 +134,25 @@ jQuery( function($){
 						
 						discounted_price = (itemCost * itemQty ) - itemDiscount;
 						
+						subtotal 		= subtotal + parseFloat( (itemCost*itemQty) );
+						
 					}
 					
 					totalItemCost 	= parseFloat( discounted_price );
 					
-					itemTotal 		= parseFloat( itemTotal + totalItemCost );
-					
-					subtotal 		= parseFloat( subtotal + (itemCost*itemQty) );
+					itemTotal 		= itemTotal + parseFloat( totalItemCost );
 				
-					tax 			= parseFloat( tax + totalItemTax );
+					tax 			= tax + parseFloat( totalItemTax );
+					
 				}
+			}
+			
+			if (woocommerce_writepanel_params.round_at_subtotal == 'yes') {
+						
+				tax = tax * 100;
+				tax = tax.toFixed(2);
+				tax = Math.round( tax ) / 100;
+			
 			}
 			
 			total = parseFloat(itemTotal) + parseFloat(tax) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
@@ -197,18 +219,116 @@ jQuery( function($){
 		return false;
 	});
 	
+	$('button.load_customer_billing').live('click', function(){
+		
+		var answer = confirm(woocommerce_writepanel_params.load_billing);
+		if (answer){
+		
+			// Get user ID to load data for
+			var user_id = $('#customer_user').val();
+			
+			if (!user_id) {
+				alert(woocommerce_writepanel_params.no_customer_selected);
+				return false;
+			}
+			
+			var data = {
+				user_id: 			user_id,
+				type_to_load: 		'billing',
+				action: 			'woocommerce_get_customer_details',
+				security: 			woocommerce_writepanel_params.get_customer_details_nonce
+			};
+			
+			$(this).closest('.edit_address').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			$.ajax({
+				url: woocommerce_writepanel_params.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					var info = jQuery.parseJSON(response);
+					
+					if (info) {
+						$('input#_billing_first_name').val( info.billing_first_name );
+						$('input#_billing_last_name').val( info.billing_last_name );
+						$('input#_billing_company').val( info.billing_company );
+						$('input#_billing_address_1').val( info.billing_address_1 );
+						$('input#_billing_address_2').val( info.billing_address_2 );
+						$('input#_billing_city').val( info.billing_city );
+						$('input#_billing_postcode').val( info.billing_postcode );
+						$('input#_billing_country').val( info.billing_country );
+						$('input#_billing_state').val( info.billing_state );
+						$('input#_billing_email').val( info.billing_email );
+						$('input#_billing_phone').val( info.billing_phone );
+					}
+					
+					$('.edit_address').unblock();
+				}
+			});
+		}
+		return false;
+	});
+	
+	$('button.load_customer_shipping').live('click', function(){
+		
+		var answer = confirm(woocommerce_writepanel_params.load_shipping);
+		if (answer){
+		
+			// Get user ID to load data for
+			var user_id = $('#customer_user').val();
+			
+			if (!user_id) {
+				alert(woocommerce_writepanel_params.no_customer_selected);
+				return false;
+			}
+			
+			var data = {
+				user_id: 			user_id,
+				type_to_load: 		'shipping',
+				action: 			'woocommerce_get_customer_details',
+				security: 			woocommerce_writepanel_params.get_customer_details_nonce
+			};
+			
+			$(this).closest('.edit_address').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			$.ajax({
+				url: woocommerce_writepanel_params.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					var info = jQuery.parseJSON(response);
+					
+					if (info) {
+						$('input#_shipping_first_name').val( info.shipping_first_name );
+						$('input#_shipping_last_name').val( info.shipping_last_name );
+						$('input#_shipping_company').val( info.shipping_company );
+						$('input#_shipping_address_1').val( info.shipping_address_1 );
+						$('input#_shipping_address_2').val( info.shipping_address_2 );
+						$('input#_shipping_city').val( info.shipping_city );
+						$('input#_shipping_postcode').val( info.shipping_postcode );
+						$('input#_shipping_country').val( info.shipping_country );
+						$('input#_shipping_state').val( info.shipping_state );
+					}
+					
+					$('.edit_address').unblock();
+				}
+			});
+		}
+		return false;
+	});
+	
 	$('button.billing-same-as-shipping').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.copy_billing);
 		if (answer){
-			$('input#shipping_first_name').val( $('input#billing_first_name').val() );
-			$('input#shipping_last_name').val( $('input#billing_last_name').val() );
-			$('input#shipping_company').val( $('input#billing_company').val() );
-			$('input#shipping_address_1').val( $('input#billing_address_1').val() );
-			$('input#shipping_address_2').val( $('input#billing_address_2').val() );
-			$('input#shipping_city').val( $('input#billing_city').val() );
-			$('input#shipping_postcode').val( $('input#billing_postcode').val() );
-			$('input#shipping_country').val( $('input#billing_country').val() );
-			$('input#shipping_state').val( $('input#billing_state').val() );			
+			$('input#_shipping_first_name').val( $('input#_billing_first_name').val() );
+			$('input#_shipping_last_name').val( $('input#_billing_last_name').val() );
+			$('input#_shipping_company').val( $('input#_billing_company').val() );
+			$('input#_shipping_address_1').val( $('input#_billing_address_1').val() );
+			$('input#_shipping_address_2').val( $('input#_billing_address_2').val() );
+			$('input#_shipping_city').val( $('input#_billing_city').val() );
+			$('input#_shipping_postcode').val( $('input#_billing_postcode').val() );
+			$('input#_shipping_country').val( $('input#_billing_country').val() );
+			$('input#_shipping_state').val( $('input#_billing_state').val() );			
 		}
 		return false;
 	});
