@@ -300,7 +300,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		do_action('woocommerce_before_add_to_cart_form');
 
 		?>
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 
 		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
 
@@ -327,7 +327,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		?>
 		<?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 			<table cellspacing="0" class="group_table">
 				<tbody>
 					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
@@ -409,7 +409,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 
         <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
 			<table class="variations" cellspacing="0">
 				<tbody>
 				<?php foreach ($attributes as $name => $options) : ?>
