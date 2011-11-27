@@ -71,7 +71,7 @@ function woocommerce_my_account( $atts ) {
 							<td><?php echo woocommerce_price($order->order_total); ?></td>
 							<td><?php 
 								$status = get_term_by('slug', $order->status, 'shop_order_status');
-								echo __($status->name, 'woothemes'); 
+								echo $status->name; 
 							?></td>
 							<td style="text-align:right; white-space:nowrap;">
 								<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
@@ -107,8 +107,8 @@ function woocommerce_my_account( $atts ) {
 						$address = array(
 							get_user_meta( get_current_user_id(), 'billing_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'billing_last_name', true )
 							,get_user_meta( get_current_user_id(), 'billing_company', true )
-							,get_user_meta( get_current_user_id(), 'billing_address_1', true )
-							,get_user_meta( get_current_user_id(), 'billing_address_2', true )
+							,get_user_meta( get_current_user_id(), 'billing_address', true )
+							,get_user_meta( get_current_user_id(), 'billing_address-2', true )
 							,get_user_meta( get_current_user_id(), 'billing_city', true )					
 							,get_user_meta( get_current_user_id(), 'billing_state', true )
 							,get_user_meta( get_current_user_id(), 'billing_postcode', true )
@@ -136,8 +136,8 @@ function woocommerce_my_account( $atts ) {
 						$address = array(
 							get_user_meta( get_current_user_id(), 'shipping_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'shipping_last_name', true )
 							,get_user_meta( get_current_user_id(), 'shipping_company', true )
-							,get_user_meta( get_current_user_id(), 'shipping_address_1', true )
-							,get_user_meta( get_current_user_id(), 'shipping_address_1', true )
+							,get_user_meta( get_current_user_id(), 'shipping_address', true )
+							,get_user_meta( get_current_user_id(), 'shipping_address-2', true )
 							,get_user_meta( get_current_user_id(), 'shipping_city', true )					
 							,get_user_meta( get_current_user_id(), 'shipping_state', true )
 							,get_user_meta( get_current_user_id(), 'shipping_postcode', true )
@@ -170,223 +170,160 @@ function get_woocommerce_edit_address () {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_edit_address'); 
 }	
+
+/**
+ * Edit Address Shortcode.
+ *
+ * @todo Address fields should be loaded using the array defined in 
+ * the checkout class, and the fields should be built off of that.
+ *
+ * @package WooCommerce
+ * @since 1.2.4
+ */
 function woocommerce_edit_address() {
+	global $woocommerce, $address, $load_address;
+	
+	if ( ! is_user_logged_in() ) {
+		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		exit;
+	}
+	
+	$user_id      = get_current_user_id();
+	$load_address = woocommerce_get_address_to_edit();
+	
+	$address = array(
+		'first_name' => get_user_meta( $user_id, $load_address . '_first_name', true ),
+		'last_name'  => get_user_meta( $user_id, $load_address . '_last_name', true ),
+		'company'    => get_user_meta( $user_id, $load_address . '_company', true ),
+		'email'      => get_user_meta( $user_id, $load_address . '_email', true ),
+		'phone'      => get_user_meta( $user_id, $load_address . '_phone', true ),
+		'fax'        => get_user_meta( $user_id, $load_address . '_fax', true ),
+		'address'    => get_user_meta( $user_id, $load_address . '_address', true ),
+		'address2'   => get_user_meta( $user_id, $load_address . '_address2', true ),
+		'city'       => get_user_meta( $user_id, $load_address . '_city', true ),		
+		'state'      => get_user_meta( $user_id, $load_address . '_state', true ),
+		'postcode'   => get_user_meta( $user_id, $load_address . '_postcode', true ),
+		'country'    => get_user_meta( $user_id, $load_address . '_country', true )
+	);
+	
+	woocommerce_get_template( 'myaccount/edit-address.php' );
+}
+
+/**
+ * Save and and update a billing or shipping address if the
+ * form was submitted through the user account page.
+ *
+ * @todo Address fields should be loaded using the array defined in 
+ * the checkout class.
+ *
+ * @package WooCommerce
+ * @since 1.2.4
+ */
+function woocommerce_save_address() {
 	global $woocommerce;
 	
-	$validation = &new woocommerce_validation();
+	if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) )
+		return;
+	
+	if ( empty( $_POST[ 'action' ] ) || ( 'edit_address' !== $_POST[ 'action' ] ) )
+		return;
+		
+	$woocommerce->verify_nonce( 'edit_address' );
+	
 	$user_id = get_current_user_id();
 	
-	if (is_user_logged_in()) :
-		
-		if (isset($_GET['address'])) $load_address = $_GET['address']; else $load_address = 'billing';
-		if ($load_address == 'billing') $load_address = 'billing'; else $load_address = 'shipping';
-		
-		if ($_POST) :
-			
-			/* Validate */
-			$_POST = array_map('woocommerce_clean', $_POST);
-			
-			// Required Fields
-			if (empty($_POST['address_first_name'])) : $woocommerce->add_error( __('First name is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_last_name'])) : $woocommerce->add_error( __('Last name is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_address_1'])) : $woocommerce->add_error( __('Address is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_city'])) : $woocommerce->add_error( __('City is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_postcode'])) : $woocommerce->add_error( __('Postcode is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_country'])) : $woocommerce->add_error( __('Country is a required field.', 'woothemes') ); endif;
-			if (empty($_POST['address_state'])) : $woocommerce->add_error( __('State is a required field.', 'woothemes') ); endif;
-			
-			// Billing only
-			if ($load_address == 'billing') :
-				if (empty($_POST['address_email'])) : $woocommerce->add_error( __('Email is a required field.', 'woothemes') ); endif;
-				if (empty($_POST['address_phone'])) : $woocommerce->add_error( __('Phone number is a required field.', 'woothemes') ); endif;
-						
-				// Email
-				if (!$validation->is_email( $_POST['address_email'] )) : $woocommerce->add_error( __('Please enter a valid email address.', 'woothemes') ); endif;
-				
-				// Phone
-				if (!$validation->is_phone( $_POST['address_phone'] )) : $woocommerce->add_error( __('Please enter a valid phone number.', 'woothemes') ); endif;
-			endif;
-			
-			// Postcode
-			if (!$validation->is_postcode( $_POST['address_postcode'], $_POST['address_country'] )) : $woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
-			else :
-				$_POST['address_postcode'] = $validation->format_postcode( $_POST['address_postcode'], $_POST['address_country'] );
-			endif;
-			
-			/* Save */
-			if ($user_id>0 && $woocommerce->verify_nonce('edit_address') && $woocommerce->error_count() == 0 ) :
-				
-				update_user_meta( $user_id, $load_address . '_first_name', $_POST['address_first_name'] );
-				update_user_meta( $user_id, $load_address . '_last_name', $_POST['address_last_name'] );
-				update_user_meta( $user_id, $load_address . '_company', $_POST['address_company'] );
-				update_user_meta( $user_id, $load_address . '_address_1', $_POST['address_address_1'] );
-				update_user_meta( $user_id, $load_address . '_address_2', $_POST['address_address_2'] );
-				update_user_meta( $user_id, $load_address . '_city', $_POST['address_city'] );
-				update_user_meta( $user_id, $load_address . '_postcode', $_POST['address_postcode'] );
-				update_user_meta( $user_id, $load_address . '_country', $_POST['address_country'] );
-				update_user_meta( $user_id, $load_address . '_state', $_POST['address_state'] );
-				
-				if ($load_address == 'billing') :
-					update_user_meta( $user_id, $load_address . '_email', $_POST['address_email'] );
-					update_user_meta( $user_id, $load_address . '_phone', $_POST['address_phone'] );
-					update_user_meta( $user_id, $load_address . '_fax', $_POST['address_fax'] );
-				endif;
-				
-				do_action('woocommerce_customer_save_address', $user_id);
-				
-				wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
-				exit;
-			else :
-			
-				$address = array(
-					'first_name' => $_POST['address_first_name'],
-					'last_name' => $_POST['address_last_name'],
-					'company' => $_POST['address_company'],
-					'email' => $_POST['address_email'],
-					'phone' => $_POST['address_phone'],
-					'fax' => $_POST['address_fax'],
-					'address_1' => $_POST['address_address_1'],
-					'address_2' => $_POST['address_address_2'],
-					'city' => $_POST['address_city'],		
-					'state' => $_POST['address_state'],
-					'postcode' => $_POST['address_postcode'],
-					'country' => $_POST['address_country']
-				);
-			
-			endif;
-		
-		else :
-		
-			$address = array(
-				'first_name' => get_user_meta( get_current_user_id(), $load_address . '_first_name', true ),
-				'last_name' => get_user_meta( get_current_user_id(), $load_address . '_last_name', true ),
-				'company' => get_user_meta( get_current_user_id(), $load_address . '_company', true ),
-				'email' => get_user_meta( get_current_user_id(), $load_address . '_email', true ),
-				'phone' => get_user_meta( get_current_user_id(), $load_address . '_phone', true ),
-				'fax' => get_user_meta( get_current_user_id(), $load_address . '_fax', true ),
-				'address_1' => get_user_meta( get_current_user_id(), $load_address . '_address_1', true ),
-				'address_2' => get_user_meta( get_current_user_id(), $load_address . '_address_2', true ),
-				'city' => get_user_meta( get_current_user_id(), $load_address . '_city', true ),		
-				'state' => get_user_meta( get_current_user_id(), $load_address . '_state', true ),
-				'postcode' => get_user_meta( get_current_user_id(), $load_address . '_postcode', true ),
-				'country' => get_user_meta( get_current_user_id(), $load_address . '_country', true )
-			);
-		
-		endif;
+	if ( $user_id <= 0 )
+		return;
 
-		$woocommerce->show_messages();
-		?>
-		<form action="<?php echo esc_url( add_query_arg('address', $load_address, get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" method="post">
+	$load_address = woocommerce_get_address_to_edit();
+	$validation   = &new woocommerce_validation();
+		
+	$_POST = array_map( 'woocommerce_clean', $_POST );
 	
-			<h3><?php if ($load_address=='billing') _e('Billing Address', 'woothemes'); else _e('Shipping Address', 'woothemes'); ?></h3>
-			
-			<p class="form-row form-row-first">
-				<label for="address_first_name"><?php _e('First Name', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_first_name" id="address_first_name" placeholder="<?php _e('First Name', 'woothemes'); ?>" value="<?php echo esc_attr( $address['first_name'] ); ?>" />
-			</p>
-			<p class="form-row form-row-last">
-				<label for="address_last_name"><?php _e('Last Name', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_last_name" id="address_last_name" placeholder="<?php _e('Last Name', 'woothemes'); ?>" value="<?php echo esc_attr( $address['last_name'] ); ?>" />
-			</p>
-			<div class="clear"></div>
-			
-			<p class="form-row columned">
-				<label for="address_company"><?php _e('Company', 'woothemes'); ?></label>
-				<input type="text" class="input-text" name="address_company" id="address_company" placeholder="<?php _e('Company', 'woothemes'); ?>" value="<?php echo esc_attr( $address['company'] ); ?>" />
-			</p>
-			
-			<p class="form-row form-row-first">
-				<label for="address_address_1"><?php _e('Address', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_address_1" id="address_address_1" placeholder="<?php _e('Address line 1', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address_1'] ); ?>" />
-			</p>
-			<p class="form-row form-row-last">
-				<label for="address_address_2" class="hidden"><?php _e('Address 2', 'woothemes'); ?></label>
-				<input type="text" class="input-text" name="address_address_2" id="address_address_2" placeholder="<?php _e('Address line 2', 'woothemes'); ?>" value="<?php echo esc_attr( $address['address_2'] ); ?>" />
-			</p>
-			<div class="clear"></div>
-			
-			<p class="form-row form-row-first">
-				<label for="address_city"><?php _e('City', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_city" id="address_city" placeholder="<?php _e('City', 'woothemes'); ?>" value="<?php echo esc_attr( $address['city'] ); ?>" />
-			</p>
-			<p class="form-row form-row-last">
-				<label for="address_postcode"><?php _e('Postcode', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="address_postcode" id="address_postcode" placeholder="123456" value="<?php echo esc_attr( $address['postcode'] ); ?>" />
-			</p>
-			<div class="clear"></div>
-			
-			<p class="form-row form-row-first">
-				<label for="address_country"><?php _e('Country', 'woothemes'); ?> <span class="required">*</span></label>
-				<select name="address_country" id="address_country" class="country_to_state" rel="address_state">
-					<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
-					<?php						
-						foreach($woocommerce->countries->countries as $key=>$value) :
-							echo '<option value="'.$key.'"';
-							if ($address['country']==$key) echo 'selected="selected"';
-							elseif (!$address['country'] && $woocommerce->customer->get_country()==$key) echo 'selected="selected"';
-							echo '>'.$value.'</option>';
-						endforeach;
-					?>
-				</select>
-			</p>
-			<p class="form-row form-row-last">	
-				<label for="address_state"><?php _e('State', 'woothemes'); ?> <span class="required">*</span></label>
-				<?php 
-					$current_cc = $address['country'];
-					if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
-					
-					$current_r = $address['state'];
-					if (!$current_r) $current_r = $woocommerce->customer->get_state();
-					
-					$states = $woocommerce->countries->states;
-					
-					if (isset( $states[$current_cc][$current_r] )) :
-						// Dropdown
-						?>
-						<select name="address_state" id="address_state"><option value=""><?php _e('Select a state&hellip;', 'woothemes'); ?></option><?php
-								foreach($states[$current_cc] as $key=>$value) :
-									echo '<option value="'.$key.'"';
-									if ($current_r==$key) echo 'selected="selected"';
-									echo '>'.$value.'</option>';
-								endforeach;
-						?></select>
-						<?php
-					else :
-						// Input
-						?><input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="address_state" id="address_state" /><?php
-					endif;
-				?>
-			</p>
-			<div class="clear"></div>
-			
-			<?php if ($load_address=='billing') : ?>
-				<p class="form-row columned">
-					<label for="address_email"><?php _e('Email Address', 'woothemes'); ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="address_email" id="address_email" placeholder="<?php _e('you@yourdomain.com', 'woothemes'); ?>" value="<?php echo esc_attr( $address['email'] ); ?>" />
-				</p>
+	if ( empty( $_POST[ 'address_first_name' ] ) )
+		$woocommerce->add_error( __( 'First name is a required field.', 'woothemes' ) );
+		
+	if ( empty( $_POST[ 'address_last_name' ] ) )
+		$woocommerce->add_error( __( 'Last name is a required field.', 'woothemes') );
+	
+	if ( empty( $_POST[ 'address_address' ] ) )
+		$woocommerce->add_error( __( 'Address is a required field.', 'woothemes') );
+	
+	if ( empty( $_POST[ 'address_city' ] ) )
+		$woocommerce->add_error( __( 'City is a required field.', 'woothemes') );
+	
+	if ( empty( $_POST[ 'address_postcode' ] ) )
+		$woocommerce->add_error( __( 'Postcode is a required field.', 'woothemes') );
+	
+	if ( empty( $_POST[ 'address_country' ] ) )
+		$woocommerce->add_error( __( 'Country is a required field.', 'woothemes' ) );
+	
+	if ( empty( $_POST[ 'address_state' ] ) )
+		$woocommerce->add_error( __( 'State is a required field.', 'woothemes' ) );
+		
+	// Billing only
+	if ( $load_address == 'billing' ) {
+		if ( empty( $_POST[ 'address_email' ] ) )
+			$woocommerce->add_error( __( 'Email is a required field.', 'woothemes' ) ); 
+		
+		if ( empty( $_POST[ 'address_phone' ] ) )
+			$woocommerce->add_error( __( 'Phone number is a required field.', 'woothemes' ) );
+						
+		if ( ! $validation->is_email( $_POST[ 'address_email' ] ) )
+			$woocommerce->add_error( __( 'Please enter a valid email address.', 'woothemes' ) );
 				
-				<p class="form-row form-row-first">
-					<label for="address_phone"><?php _e('Phone', 'woothemes'); ?> <span class="required">*</span></label>
-					<input type="text" class="input-text" name="address_phone" id="address_phone" placeholder="0123456789" value="<?php echo esc_attr( $address['phone'] ); ?>" />
-				</p>
-				<p class="form-row form-row-last">	
-					<label for="address_fax"><?php _e('Fax', 'woothemes'); ?></label>
-					<input type="text" class="input-text" name="address_fax" id="address_fax" placeholder="0123456789" value="<?php echo esc_attr( $address['fax'] ); ?>" />
-				</p>
-				<div class="clear"></div>
-			<?php endif; ?>
-			<?php $woocommerce->nonce_field('edit_address') ?>
-			<input type="submit" class="button" name="save_address" value="<?php _e('Save Address', 'woothemes'); ?>" />
+		if ( ! $validation->is_phone( $_POST[ 'address_phone' ] ) )
+			$woocommerce->add_error( __( 'Please enter a valid phone number.', 'woothemes' ) );
+	}
 	
-		</form>
-		<?php
+	if ( ! $validation->is_postcode( $_POST[ 'address_postcode' ], $_POST[ 'address_country' ] ) )
+		$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woothemes' ) ); 
+	else
+		$_POST[ 'address_postcode' ] = $validation->format_postcode( $_POST[ 'address_postcode' ], $_POST[ 'address_country' ] );
+	
+	if ( $woocommerce->error_count() == 0 ) {
+		update_user_meta( $user_id, $load_address . '_first_name', $_POST[ 'address_first_name' ] );
+		update_user_meta( $user_id, $load_address . '_last_name', $_POST[ 'address_last_name' ] );
+		update_user_meta( $user_id, $load_address . '_company', $_POST[ 'address_company' ] );
+		update_user_meta( $user_id, $load_address . '_address_1', $_POST[ 'address_address_1' ] );
+		update_user_meta( $user_id, $load_address . '_address_2', $_POST[ 'address_address_2' ] );
+		update_user_meta( $user_id, $load_address . '_city', $_POST[ 'address_city' ] );
+		update_user_meta( $user_id, $load_address . '_postcode', $_POST[ 'address_postcode' ] );
+		update_user_meta( $user_id, $load_address . '_country', $_POST[ 'address_country' ] );
+		update_user_meta( $user_id, $load_address . '_state', $_POST[ 'address_state' ] );
 		
-	else :
-	
-		wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
+		if ( $load_address == 'billing' ) {
+			update_user_meta( $user_id, $load_address . '_email', $_POST['address_email'] );
+			update_user_meta( $user_id, $load_address . '_phone', $_POST['address_phone'] );
+			update_user_meta( $user_id, $load_address . '_fax', $_POST['address_fax'] );
+		}
+		
+		do_action( 'woocommerce_customer_save_address', $user_id );
+		
+		wp_safe_redirect( get_permalink( get_option( 'woocommerce_edit_address_page_id' ) ) );
 		exit;
+	}
+}
+add_action( 'template_redirect', 'woocommerce_save_address' );
+
+/**
+ * Figure out which address is being viewed/edited.
+ *
+ * @package WooCommerce
+ * @since 1.2.4
+ */
+function woocommerce_get_address_to_edit() {
+	$load_address = 'billing';
+	
+	if ( isset( $_GET[ 'address' ] ) )
+		$load_address = esc_attr( $_GET[ 'address' ] );
 		
-	endif;
+	if ( $load_address == 'billing' )
+		$load_address = 'billing'; 
+	else 
+		$load_address = 'shipping';
+		
+	return $load_address;
 }
 
 function get_woocommerce_change_password() {
@@ -480,7 +417,7 @@ function woocommerce_view_order() {
 			
 			$status = get_term_by('slug', $order->status, 'shop_order_status');
 			
-			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), __($status->name, 'woothemes') );
+			echo sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), $status->name );
 			
 			echo '.</p>';
 
