@@ -192,9 +192,6 @@ function woocommerce_order_items_meta_box($post) {
 								echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($item['variation_id']) echo $item['variation_id']; else echo '-';
 								echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 							?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
-							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['id'] ); ?>" />
-							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['name'] ); ?>" />
-							<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['variation_id'] ); ?>" />
 						</td>
 						<td class="sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
 						<td class="name">
@@ -251,6 +248,9 @@ function woocommerce_order_items_meta_box($post) {
 						
 						<td class="center">
 							<button type="button" class="remove_row button">&times;</button>
+							<input type="hidden" name="item_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['id'] ); ?>" />
+							<input type="hidden" name="item_name[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['name'] ); ?>" />
+							<input type="hidden" name="item_variation[<?php echo $loop; ?>]" value="<?php echo esc_attr( $item['variation_id'] ); ?>" />
 						</td>
 						
 					</tr>
