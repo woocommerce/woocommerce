@@ -25,6 +25,7 @@ class woocommerce_order {
 	function woocommerce_order( $id='' ) {
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
+		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
 		
 		if ($id>0) $this->get_order( $id );
 	}
@@ -191,7 +192,7 @@ class woocommerce_order {
 	function get_subtotal_to_display() {
 		global $woocommerce;
 		
-		if ($this->display_totals_ex_tax) :
+		if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
 			
 			$subtotal = woocommerce_price($this->order_subtotal);
 			
@@ -226,15 +227,29 @@ class woocommerce_order {
 		global $woocommerce;
 		
 		if ($this->order_shipping > 0) :
+			
+			$tax_text = '';
+			
+			if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
 
-			$shipping = woocommerce_price($this->order_shipping);
-			if ($this->order_shipping_tax > 0) :
-				$tax_text = $woocommerce->countries->ex_tax_or_vat() . ' '; 
+				// Show shipping excluding tax
+				$shipping = woocommerce_price($this->order_shipping);
+				if ($this->order_shipping_tax > 0 && $this->prices_include_tax) :
+					$tax_text = $woocommerce->countries->ex_tax_or_vat() . ' '; 
+				endif;
+			
 			else :
-				$tax_text = '';
+			
+				// Show shipping including tax
+				$shipping = woocommerce_price($this->order_shipping + $this->order_shipping_tax);
+				if ($this->order_shipping_tax > 0 && !$this->prices_include_tax) :
+					$tax_text = $woocommerce->countries->inc_tax_or_vat() . ' '; 
+				endif;
+			
 			endif;
+			
 			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method));
-
+			
 		else :
 			$shipping = __('Free!', 'woothemes');
 		endif;
@@ -331,11 +346,9 @@ class woocommerce_order {
 				<td style="text-align:left;">'.$item['qty'].'</td>
 				<td style="text-align:left;">';
 				
-				
-				if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
+				if ($this->display_cart_ex_tax || !$this->prices_include_tax) :
 				
 					if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-				
 					$return .= woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
 				
 				else :

@@ -507,15 +507,19 @@ class woocommerce_product {
 
 					if ($round) :
 						
-						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
+						//$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
 					
-						$price = $price - $tax_amount;
+						//$price = $price - $tax_amount;
 					
 						// Round
-						$price = round( $price * 100 ) / 100;
+						//$price = round( $price * 100 ) / 100;
 						
 						// Format
-						$price = number_format($price, 2, '.', '');
+						//$price = number_format($price, 2, '.', '');
+						
+						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ), 4);
+					
+						$price = round( $price - $tax_amount, 2);
 					
 					else :
 					

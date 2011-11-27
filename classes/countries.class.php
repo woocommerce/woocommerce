@@ -595,7 +595,7 @@ class woocommerce_countries {
 	function inc_tax_or_vat( $rate = false ) {
 		global $woocommerce;
 		
-		if ( $rate > 0 || $rate == 0 ) :
+		if ( $rate > 0 || $rate === 0 ) :
 			$rate = trim(trim($rate, '0'), '.');
 			if (!$rate) $rate = 0;
 			$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? sprintf(__('(inc. %s%% VAT)', 'woothemes'), $rate) : sprintf(__('(inc. %s%% tax)', 'woothemes'), $rate);

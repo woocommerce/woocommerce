@@ -40,6 +40,7 @@ class woocommerce_cart {
 		$this->tax = &new woocommerce_tax();
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
+		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
 		
 		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
 		add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page
@@ -1079,7 +1080,7 @@ class woocommerce_cart {
 		// Taxable
 		if ( $taxable && get_option('woocommerce_calc_taxes')=='yes' ) :
 
-			if ( $this->display_totals_ex_tax && $this->prices_include_tax ) :
+			if ( $this->display_cart_ex_tax && $this->prices_include_tax ) :
 						
 				$base_tax_amount 	= $this->tax->calc_tax( $price * $quantity, $base_tax_rate, true );
 				//$row_price 			= ( $price * $quantity ) - round($base_tax_amount, 2); // does show 9.99 price rounded correct at 20%, but not when 0% vat modified rate
@@ -1088,7 +1089,7 @@ class woocommerce_cart {
 				$return = woocommerce_price( $row_price );
 				$return .= ' <small class="tax_label">'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 			
-			elseif ( !$this->display_totals_ex_tax && $base_tax_rate !== $tax_rate && $this->prices_include_tax ) :
+			elseif ( !$this->display_cart_ex_tax && $base_tax_rate !== $tax_rate && $this->prices_include_tax ) :
 			
 				$row_price 		= ( ( $price * $quantity ) / ( 1 + ( $base_tax_rate / 100 ) ) ) * ( 1 + ( $tax_rate / 100 ) );
 				
