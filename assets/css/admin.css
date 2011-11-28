@@ -113,6 +113,8 @@ ul.recent-orders.stock_list a,ul.stock_list.stock_list a{text-decoration:none;}
 .woocommerce table.shippingrows td.country .chzn-container .search-field input,.woocommerce table.taxrows td.country .chzn-container .search-field input{width:150px !important;}
 .woocommerce table.widefat table.coupon_rows{border:0 !important;width:100%;}.woocommerce table.widefat table.coupon_rows thead th{padding:1px;border:0;font-weight:normal;font-size:11px;color:#999;}
 .woocommerce table.widefat table.coupon_rows tbody td{padding:3px 3px 0 0;border:0;vertical-align:middle;}.woocommerce table.widefat table.coupon_rows tbody td input.text{width:95px;}
+.woocommerce table.form-table textarea.input-text{height:100%;min-width:150px;}
+.woocommerce table.form-table textarea.wide-input{width:100%;}
 .woocommerce #tabs-wrap table a.remove{margin-left:4px;}
 .woocommerce #tabs-wrap table p{margin:0 0 4px !important;overflow:hidden;zoom:1;}
 .woocommerce #tabs-wrap table p a.add{float:left;}

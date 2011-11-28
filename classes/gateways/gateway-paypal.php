@@ -215,7 +215,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 		if ($this->send_shipping=='yes') :
 			$paypal_args['no_shipping'] = 0;
-			$paypal_args['address_override'] = 1;
+			$paypal_args['address_override'] = 0;
 		else :
 			$paypal_args['no_shipping'] = 1;
 		endif;
