@@ -22,26 +22,31 @@ require_once('writepanel-coupon_data.php');
 add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
 
 function woocommerce_meta_boxes() {
+	
+	// Products
 	add_meta_box( 'woocommerce-product-type', __('Product Type &amp; Visibility', 'woothemes'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woothemes'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
 	
+	// Orders
 	add_meta_box( 'woocommerce-order-data', __('Order Data', 'woothemes'), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woothemes'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
 	add_meta_box( 'woocommerce-order-totals', __('Order Totals', 'woothemes'), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
-	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woothemes'), 'woocommerce_order_notes_meta_box', 'shop_order', 'normal', 'default');
-	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woothemes'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woothemes'), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woothemes'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'high');
 	
 	remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );
+	remove_meta_box( 'woothemes-settings', 'shop_order' , 'normal' );
 	remove_meta_box( 'commentstatusdiv', 'shop_order' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_order' , 'normal' );
 	
+	// Coupons
 	add_meta_box( 'woocommerce-coupon-data', __('Coupon Data', 'woothemes'), 'woocommerce_coupon_data_meta_box', 'shop_coupon', 'normal', 'high');
 	
 	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
 	
-	remove_meta_box('pageparentdiv', 'product_variation', 'side');
-	add_meta_box('product_variation-parent', __('Product', 'woothemes'), 'variations_product_meta_box', 'product_variation', 'side', 'default');
+	//remove_meta_box('pageparentdiv', 'product_variation', 'side');
+	//add_meta_box('product_variation-parent', __('Product', 'woothemes'), 'variations_product_meta_box', 'product_variation', 'side', 'default');
 }
 
 /**
@@ -57,7 +62,7 @@ function woocommerce_enter_title_here( $text, $post ) {
 
 /**
  * Let variations have a product as the parent
- */
+ 
 function variations_product_meta_box($post) {
 	$post_type_object = get_post_type_object($post->post_type);
 	if ( $post_type_object->hierarchical ) {
@@ -66,7 +71,7 @@ function variations_product_meta_box($post) {
 			echo $pages;
 		} // end empty pages check
 	} // end hierarchical check.
-}
+}*/
 
 /**
  * Save meta boxes

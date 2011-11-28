@@ -401,51 +401,53 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	function successful_request( $posted ) {
 		
 		// Custom holds post ID
-	    if ( !empty($posted['txn_type']) && !empty($posted['invoice']) ) {
+	    if ( !empty($posted['custom']) && !empty($posted['invoice']) ) {
 	
-	        $accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
-	
-	        if (!in_array(strtolower($posted['txn_type']), $accepted_types)) exit;
-			
 			$order = new woocommerce_order( (int) $posted['custom'] );
-	
 	        if ($order->order_key!==$posted['invoice']) exit;
 	        
 	        // Sandbox fix
 	        if ($posted['test_ipn']==1 && $posted['payment_status']=='Pending') $posted['payment_status'] = 'completed';
-	        			
-			if ($order->status !== 'completed') :
-		        // We are here so lets check status and do actions
-		        switch (strtolower($posted['payment_status'])) :
-		            case 'completed' :
-		            	// Payment completed
-		                $order->add_order_note( __('IPN payment completed', 'woothemes') );
-		                $order->payment_complete();
-		                
-		                // Store PP Details
-		                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
-		                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
-		                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
-		                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
-		                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
-		            break;
-		            case 'denied' :
-		            case 'expired' :
-		            case 'failed' :
-		            case 'voided' :
-		                // Order failed
-		                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
-		            break;
-		            case "refunded" :
-		            case "reversed" :
-		            	// Mark order as refunded
-		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
-		            break;
-		            default:
-		            	// No action
-		            break;
-		        endswitch;
-			endif;
+	        
+	        // We are here so lets check status and do actions
+	        switch (strtolower($posted['payment_status'])) :
+	            case 'completed' :
+	            	
+	            	// Check order not already completed
+	            	if ($order->status == 'completed') exit;
+	            	
+	            	// Check valid txn_type
+	            	$accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
+					if (!in_array(strtolower($posted['txn_type']), $accepted_types)) exit;
+	            	
+	            	// Payment completed
+	                $order->add_order_note( __('IPN payment completed', 'woothemes') );
+	                $order->payment_complete();
+	                
+	                // Store PP Details
+	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
+	                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
+	                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
+	                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
+	                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
+	                
+	            break;
+	            case 'denied' :
+	            case 'expired' :
+	            case 'failed' :
+	            case 'voided' :
+	                // Order failed
+	                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+	            break;
+	            case "refunded" :
+	            case "reversed" :
+	            	// Mark order as refunded
+	            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+	            break;
+	            default:
+	            	// No action
+	            break;
+	        endswitch;
 			
 			exit;
 			

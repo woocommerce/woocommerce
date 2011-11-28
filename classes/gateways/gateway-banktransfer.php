@@ -199,6 +199,9 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
 		// Mark as on-hold (we're awaiting the payment)
 		$order->update_status('on-hold', __('Awaiting BACS payment', 'woothemes'));
 		
+		// Reduce stock levels
+		$order->reduce_order_stock();
+
 		// Remove cart
 		$woocommerce->cart->empty_cart();
 		

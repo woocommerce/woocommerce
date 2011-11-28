@@ -97,6 +97,16 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Enhanced admin with http://harvesthq.github.com/chosen/
 * Added ZAR currency
 * Fixed product (single) visibility
+* Improved orders interface
+* On orders screen you can load customer details is on file
+* Fixed address_1 address_2 names
+* Updated German Lang (formal) thanks @owcv
+* Sale date uses current_time('timestamp') instead of strtotime
+* Fixed variations loading dimensions
+* Product get_attribute function
+* Option to clear cart on logout
+* Made cheque/bacs gateways reduce stock levels upon ordering
+* Continue shopping button when directing user to cart after adding a product to the cart
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.

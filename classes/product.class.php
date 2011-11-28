@@ -507,15 +507,19 @@ class woocommerce_product {
 
 					if ($round) :
 						
-						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
+						//$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
 					
-						$price = $price - $tax_amount;
+						//$price = $price - $tax_amount;
 					
 						// Round
-						$price = round( $price * 100 ) / 100;
+						//$price = round( $price * 100 ) / 100;
 						
 						// Format
-						$price = number_format($price, 2, '.', '');
+						//$price = number_format($price, 2, '.', '');
+						
+						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ), 4);
+					
+						$price = round( $price - $tax_amount, 2);
 					
 					else :
 					
@@ -734,6 +738,13 @@ class woocommerce_product {
 		return $related_posts;
 	}
 	
+	/** Returns a single product attribute */
+	function get_attribute( $attr ) {
+		$attributes = $this->get_attributes();
+		
+		if ( isset($attributes[$attr]) ) return $attributes[$attr]['value']; else return false;
+	}
+	
 	/** Returns product attributes */
 	function get_attributes() {
 		
@@ -937,7 +948,7 @@ class woocommerce_product {
     function check_sale_price() {
 		global $woocommerce;
 		
-    	if ($this->sale_price_dates_from && $this->sale_price_dates_from < strtotime('NOW')) :
+    	if ($this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp')) :
     		
     		if ($this->sale_price && $this->price!==$this->sale_price) :
     			
@@ -954,7 +965,7 @@ class woocommerce_product {
 
     	endif;
     	
-    	if ($this->sale_price_dates_to && $this->sale_price_dates_to < strtotime('NOW')) :
+    	if ($this->sale_price_dates_to && $this->sale_price_dates_to < current_time('timestamp')) :
     		
     		if ($this->regular_price && $this->price!==$this->regular_price) :
     			

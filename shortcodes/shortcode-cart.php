@@ -133,8 +133,8 @@ function woocommerce_cart( $atts ) {
 							<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 							<td class="product-subtotal"><?php 
 
-								if ($_product->is_taxable()) $rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->get_tax_class() ); else $rate = 0;
-								echo $woocommerce->cart->get_product_subtotal( $_product->get_price(), $rate, $values['quantity'] );								
+								echo $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] )	;
+														
 							?></td>
 						</tr>
 						<?php

@@ -300,9 +300,9 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 		do_action('woocommerce_before_add_to_cart_form');
 
 		?>
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 
-		 	<?php do_action('woocommerce_before_to_cart_button'); ?>
+		 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 		 	<?php if (!$_product->is_downloadable()) : ?>
 		 		<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
@@ -327,7 +327,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 		?>
 		<?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 			<table cellspacing="0" class="group_table">
 				<tbody>
 					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
@@ -346,7 +346,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 				</tbody>
 			</table>
 
-			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 
@@ -409,7 +409,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 
         <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post">
+		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
 			<table class="variations" cellspacing="0">
 				<tbody>
 				<?php foreach ($attributes as $name => $options) : ?>
@@ -442,7 +442,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				</tbody>
 			</table>
 
-			<?php do_action('woocommerce_before_to_cart_button'); ?>
+			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 			<div class="single_variation_wrap" style="display:none;">
 				<div class="single_variation"></div>
@@ -472,7 +472,7 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
 
 		?>
 
-		<?php do_action('woocommerce_before_to_cart_button'); ?>
+		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
 		<p class="cart"><a href="<?php echo $product_url; ?>" rel="nofollow" class="button alt"><?php _e('Buy product', 'woothemes'); ?></a></p>
 
@@ -1254,7 +1254,8 @@ function woocommerce_subcategory_thumbnail( $category ) {
  * Display an orders details in a table
  **/
 function woocommerce_order_details_table( $order_id ) {
-
+	global $woocommerce; 
+	
 	if (!$order_id) return;
 
 	$order = &new woocommerce_order( $order_id );
@@ -1270,24 +1271,28 @@ function woocommerce_order_details_table( $order_id ) {
 		</thead>
 		<tfoot>
 			<tr>
-				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
+				<th scope="row" colspan="2"><?php _e('Cart Subtotal:', 'woothemes'); ?></th>
 				<td><?php echo $order->get_subtotal_to_display(); ?></td>
 			</tr>
-			<?php if ($order->order_shipping>0) : ?><tr>
-				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
+			<?php if ($order->get_cart_discount() > 0) : ?><tr>
+				<th scope="row" colspan="2"><?php _e('Cart Discount:', 'woothemes'); ?></th>
+				<td><?php echo woocommerce_price($order->get_cart_discount()); ?></td>
+			</tr><?php endif; ?>
+			<?php if ($order->get_shipping() > 0) : ?><tr>
+				<th scope="row" colspan="2"><?php _e('Shipping:', 'woothemes'); ?></th>
 				<td><?php echo $order->get_shipping_to_display(); ?></td>
 			</tr><?php endif; ?>
-			<?php if ($order->get_total_tax()>0) : ?><tr>
-				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
+			<?php if ($order->get_total_tax() > 0) : ?><tr>
+				<th scope="row" colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
 				<td><?php echo woocommerce_price($order->get_total_tax()); ?></td>
 			</tr><?php endif; ?>
-			<?php if ($order->order_discount>0) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
-				<td>-<?php echo woocommerce_price($order->order_discount); ?></td>
+			<?php if ($order->get_order_discount() > 0) : ?><tr>
+				<th scope="row" colspan="2"><?php _e('Order Discount:', 'woothemes'); ?></th>
+				<td><?php echo woocommerce_price($order->get_order_discount()); ?></td>
 			</tr><?php endif; ?>
 			<tr>
-				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
-				<td><strong><?php echo woocommerce_price($order->order_total); ?></strong></td>
+				<th scope="row" colspan="2"><?php _e('Order Total:', 'woothemes'); ?></th>
+				<td><?php echo woocommerce_price($order->get_order_total()); ?></td>
 			</tr>
 			<?php if ($order->customer_note) : ?>
 			<tr>
@@ -1317,7 +1322,20 @@ function woocommerce_order_details_table( $order_id ) {
 
 					echo '	</td>
 							<td>'.$item['qty'].'</td>
-							<td>'.woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1) ).'</td>
+							<td>';
+							
+					if ($order->display_cart_ex_tax || !$order->prices_include_tax) :
+					
+						if ($order->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
+						echo woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
+					
+					else :
+					
+						echo woocommerce_price( round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
+					
+					endif;
+
+					echo '</td>
 						</tr>';
 				endforeach;
 			endif;

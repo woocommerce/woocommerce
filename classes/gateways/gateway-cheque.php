@@ -114,6 +114,9 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 		// Mark as on-hold (we're awaiting the cheque)
 		$order->update_status('on-hold', __('Awaiting cheque payment', 'woothemes'));
 		
+		// Reduce stock levels
+		$order->reduce_order_stock();
+		
 		// Remove cart
 		$woocommerce->cart->empty_cart();
 		

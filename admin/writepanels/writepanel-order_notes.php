@@ -45,12 +45,12 @@ function woocommerce_order_notes_meta_box() {
 	?>
 	<div class="add_note">
 		<h4><?php _e('Add note', 'woothemes'); ?></h4>
-		<p><?php _e('Add a note for your reference, or add a customer note that the customer can view on their view order and track order pages.', 'woothemes'); ?></p>
-		<input type="text" name="order_note" id="add_order_note" class="input-text" />
+		<p><?php _e('Add a note for your reference, or add a customer note (the user will be notified).', 'woothemes'); ?></p>
+		<p><input type="text" name="order_note" id="add_order_note" class="input-text" />
 		<select name="order_note_type" id="order_note_type">
 			<option value="customer"><?php _e('Customer note', 'woothemes'); ?></option>
 			<option value=""><?php _e('Private note', 'woothemes'); ?></option>
-		</select>
+		</select></p>
 		<a href="#" class="add_note button"><?php _e('Add', 'woothemes'); ?></a>
 	</div>
 	<script type="text/javascript">

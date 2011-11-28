@@ -46,13 +46,13 @@ class woocommerce_checkout {
 				'label' 		=> __('Company', 'woothemes'), 
 				'placeholder' 	=> __('Company', 'woothemes') 
 				),
-			'billing_address' 	=> array( 
+			'billing_address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
 				'placeholder' 	=> __('Address 1', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first') 
 				),
-			'billing_address-2' => array( 
+			'billing_address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
 				'placeholder' 	=> __('Address 2', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
@@ -117,13 +117,13 @@ class woocommerce_checkout {
 				'label' 		=> __('Company', 'woothemes'), 
 				'placeholder' 	=> __('Company', 'woothemes') 
 				),
-			'shipping_address' 	=> array( 
+			'shipping_address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
 				'placeholder' 	=> __('Address 1', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first') 
 				),
-			'shipping_address-2' => array( 
+			'shipping_address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
 				'placeholder' 	=> __('Address 2', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
@@ -579,8 +579,8 @@ class woocommerce_checkout {
 						$shipping_first_name = $this->posted['billing_first_name'];
 						$shipping_last_name = $this->posted['billing_last_name'];
 						$shipping_company = $this->posted['billing_company'];
-						$shipping_address_1 = $this->posted['billing_address'];
-						$shipping_address_2 = $this->posted['billing_address-2'];
+						$shipping_address_1 = $this->posted['billing_address_1'];
+						$shipping_address_2 = $this->posted['billing_address_2'];
 						$shipping_city = $this->posted['billing_city'];							
 						$shipping_state = $this->posted['billing_state'];
 						$shipping_postcode = $this->posted['billing_postcode'];	
@@ -591,8 +591,8 @@ class woocommerce_checkout {
 						$shipping_first_name = $this->posted['shipping_first_name'];
 						$shipping_last_name = $this->posted['shipping_last_name'];
 						$shipping_company = $this->posted['shipping_company'];
-						$shipping_address_1 = $this->posted['shipping_address'];
-						$shipping_address_2 = $this->posted['shipping_address-2'];
+						$shipping_address_1 = $this->posted['shipping_address_1'];
+						$shipping_address_2 = $this->posted['shipping_address_2'];
 						$shipping_city = $this->posted['shipping_city'];							
 						$shipping_state = $this->posted['shipping_state'];
 						$shipping_postcode = $this->posted['shipping_postcode'];	
@@ -607,8 +607,8 @@ class woocommerce_checkout {
 						update_user_meta( $user_id, 'billing_last_name', $this->posted['billing_last_name'] );
 						update_user_meta( $user_id, 'billing_company', $this->posted['billing_company'] );
 						update_user_meta( $user_id, 'billing_email', $this->posted['billing_email'] );
-						update_user_meta( $user_id, 'billing_address', $this->posted['billing_address'] );
-						update_user_meta( $user_id, 'billing_address-2', $this->posted['billing_address-2'] );
+						update_user_meta( $user_id, 'billing_address_1', $this->posted['billing_address_1'] );
+						update_user_meta( $user_id, 'billing_address_2', $this->posted['billing_address_2'] );
 						update_user_meta( $user_id, 'billing_city', $this->posted['billing_city'] );
 						update_user_meta( $user_id, 'billing_postcode', $this->posted['billing_postcode'] );
 						update_user_meta( $user_id, 'billing_country', $this->posted['billing_country'] );
@@ -619,8 +619,8 @@ class woocommerce_checkout {
 							update_user_meta( $user_id, 'shipping_first_name', $this->posted['shipping_first_name'] );
 							update_user_meta( $user_id, 'shipping_last_name', $this->posted['shipping_last_name'] );
 							update_user_meta( $user_id, 'shipping_company', $this->posted['shipping_company'] );
-							update_user_meta( $user_id, 'shipping_address', $this->posted['shipping_address'] );
-							update_user_meta( $user_id, 'shipping_address-2', $this->posted['shipping_address-2'] );
+							update_user_meta( $user_id, 'shipping_address_1', $this->posted['shipping_address_1'] );
+							update_user_meta( $user_id, 'shipping_address_2', $this->posted['shipping_address_2'] );
 							update_user_meta( $user_id, 'shipping_city', $this->posted['shipping_city'] );
 							update_user_meta( $user_id, 'shipping_postcode', $this->posted['shipping_postcode'] );
 							update_user_meta( $user_id, 'shipping_country', $this->posted['shipping_country'] );
@@ -629,8 +629,8 @@ class woocommerce_checkout {
 							update_user_meta( $user_id, 'shipping_first_name', $this->posted['billing_first_name'] );
 							update_user_meta( $user_id, 'shipping_last_name', $this->posted['billing_last_name'] );
 							update_user_meta( $user_id, 'shipping_company', $this->posted['billing_company'] );
-							update_user_meta( $user_id, 'shipping_address', $this->posted['billing_address'] );
-							update_user_meta( $user_id, 'shipping_address-2', $this->posted['billing_address-2'] );
+							update_user_meta( $user_id, 'shipping_address_1', $this->posted['billing_address_1'] );
+							update_user_meta( $user_id, 'shipping_address_2', $this->posted['billing_address_2'] );
 							update_user_meta( $user_id, 'shipping_city', $this->posted['billing_city'] );
 							update_user_meta( $user_id, 'shipping_postcode', $this->posted['billing_postcode'] );
 							update_user_meta( $user_id, 'shipping_country', $this->posted['billing_country'] );
@@ -683,6 +683,9 @@ class woocommerce_checkout {
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'cost' 			=> $_product->get_price_excluding_tax( false ),
+					 		'row_discount'	=> number_format( 
+					 			( ( $_product->get_price()-$woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) ) * $values['quantity'] )
+					 			, 4, '.', '' ),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
@@ -724,8 +727,8 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_billing_first_name', 	$this->posted['billing_first_name']);
 					update_post_meta( $order_id, '_billing_last_name', 		$this->posted['billing_last_name']);
 					update_post_meta( $order_id, '_billing_company', 		$this->posted['billing_company']);
-					update_post_meta( $order_id, '_billing_address_1', 		$this->posted['billing_address']);
-					update_post_meta( $order_id, '_billing_address_2', 		$this->posted['billing_address-2']);
+					update_post_meta( $order_id, '_billing_address_1', 		$this->posted['billing_address_1']);
+					update_post_meta( $order_id, '_billing_address_2', 		$this->posted['billing_address_2']);
 					update_post_meta( $order_id, '_billing_city', 			$this->posted['billing_city']);
 					update_post_meta( $order_id, '_billing_postcode', 		$this->posted['billing_postcode']);
 					update_post_meta( $order_id, '_billing_country', 		$this->posted['billing_country']);
@@ -745,7 +748,8 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
-					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_discount_total(), 2, '.', ''));
+					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
+					update_post_meta( $order_id, '_cart_discount', 			number_format($woocommerce->cart->get_cart_discount_total(), 2, '.', ''));
 					update_post_meta( $order_id, '_order_tax', 				number_format($woocommerce->cart->tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping_tax', 	number_format($woocommerce->cart->shipping_tax_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_total', 			number_format($woocommerce->cart->total, 2, '.', ''));

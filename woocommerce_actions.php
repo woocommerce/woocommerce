@@ -5,6 +5,7 @@
  * Actions/functions/hooks for WooCommerce related events.
  *
  *		- Prevent non-admin access to backend
+ *		- Clear cart on logout
  *		- Update catalog ordering if posted
  *		- AJAX update shipping method on cart page
  *		- AJAX update order review on checkout
@@ -41,6 +42,22 @@ function woocommerce_prevent_admin_access() {
 		exit;
 	endif;
 	
+}
+
+/**
+ * Clear cart on logout
+ */
+add_action('wp_logout', 'woocommerce_clear_cart_on_logout');
+
+function woocommerce_clear_cart_on_logout() {
+	
+	if (get_option('woocommerce_clear_cart_on_logout')=='yes') :
+		
+		global $woocommerce;
+		
+		$woocommerce->cart->empty_cart();
+		
+	endif;
 }
 
 /**
@@ -153,6 +170,41 @@ function woocommerce_increase_coupon_counts() {
 }
 
 /**
+ * Get customer details via ajax
+ */
+add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');
+
+function woocommerce_get_customer_details() {
+	
+	global $woocommerce;
+
+	check_ajax_referer( 'get-customer-details', 'security' );
+
+	$user_id = (int) trim(stripslashes($_POST['user_id']));
+	$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
+	
+	$customer_data = array(
+		$type_to_load . '_first_name' => get_user_meta( $user_id, $type_to_load . '_first_name', true ),
+		$type_to_load . '_last_name' => get_user_meta( $user_id, $type_to_load . '_last_name', true ),
+		$type_to_load . '_company' => get_user_meta( $user_id, $type_to_load . '_company', true ),
+		$type_to_load . '_address_1' => get_user_meta( $user_id, $type_to_load . '_address_1', true ),
+		$type_to_load . '_address_2' => get_user_meta( $user_id, $type_to_load . '_address_2', true ),
+		$type_to_load . '_city' => get_user_meta( $user_id, $type_to_load . '_city', true ),
+		$type_to_load . '_postcode' => get_user_meta( $user_id, $type_to_load . '_postcode', true ),
+		$type_to_load . '_country' => get_user_meta( $user_id, $type_to_load . '_country', true ),
+		$type_to_load . '_state' => get_user_meta( $user_id, $type_to_load . '_state', true ),
+		$type_to_load . '_email' => get_user_meta( $user_id, $type_to_load . '_email', true ),
+		$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
+	);
+	
+	echo json_encode($customer_data);
+	
+	// Quit out
+	die();
+	
+}
+
+/**
  * Add order item via ajax
  */
 add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
@@ -227,9 +279,10 @@ function woocommerce_add_order_item() {
 			</table>
 		</td>
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
-		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('Quantity e.g. 2', 'woothemes'); ?>" value="1" /></td>
-		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('Cost per unit ex. tax e.g. 2.99', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax() ); ?>" /></td>
-		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('Tax Rate e.g. 20.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_tax_base_rate() ); ?>" /></td>
+		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="1" /></td>
+		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" /></td>
+		<td class="discount"><input type="text" name="item_discount[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" /></td>
+		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('0.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_tax_base_rate() ); ?>" /></td>
 		<td class="center">
 			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
 			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
@@ -383,8 +436,8 @@ function woocommerce_update_cart_action() {
 		
 		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
 		
-		if ( isset($_SERVER['HTTP_REFERER'])) :
-			wp_safe_redirect($_SERVER['HTTP_REFERER']);
+		if ( wp_get_referer() ) :
+			wp_safe_redirect( wp_get_referer() );
 			exit;
 		endif;
 	
@@ -425,14 +478,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		
 		// Add to the cart
 		if ($woocommerce->cart->add_to_cart($_GET['add-to-cart'], $quantity)) :
-		
-			// Output success messages
-			if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-				$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
-			else :
-				$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
-			endif;
-		
+			woocommerce_add_to_cart_message();
 		endif;
 	
 	elseif ($_GET['add-to-cart']=='variation') :
@@ -474,13 +520,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
                 
                 // Add to cart
 				if ($woocommerce->cart->add_to_cart($product_id, $quantity, $variation_id, $variations)) :
-				
-					if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-						$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
-					else :
-						$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
-					endif;
-				
+					woocommerce_add_to_cart_message();
 				endif;
 
             else :
@@ -502,13 +542,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				if ($quantity>0) :
 					
 					if ($woocommerce->cart->add_to_cart($item, $quantity)) :
-					
-						if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
-							$woocommerce->add_message( __('Product successfully added to your cart.', 'woothemes') );
-						else :
-							$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
-						endif;
-						
+						woocommerce_add_to_cart_message();
 					endif;
 					
 					$total_quantity = $total_quantity + $quantity;
@@ -545,8 +579,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
 	}
 	
 	// Otherwise redirect to where they came
-	elseif ( isset($_SERVER['HTTP_REFERER'])) {
-		wp_safe_redirect($_SERVER['HTTP_REFERER']);
+	elseif ( wp_get_referer() ) {
+		wp_safe_redirect( wp_get_referer() );
 		exit;
 	}
 	
@@ -556,6 +590,27 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		exit;
 	}	
 }
+
+/**
+ * Add to cart messages
+ **/
+add_action( 'init', 'woocommerce_add_to_cart_action' );
+
+function woocommerce_add_to_cart_message() {
+	global $woocommerce;
+	
+	// Output success messages
+	if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+		
+		$return_to = (wp_get_referer()) ? wp_get_referer() : home_url();
+
+		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">Continue Shopping &rarr;</a> Product successfully added to your cart.', 'woothemes'), $return_to ));
+	
+	else :
+		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
+	endif;
+}
+
 
 /**
  * Clear cart
@@ -636,8 +691,8 @@ function woocommerce_process_login() {
 			if ( is_wp_error($user) ) :
 				$woocommerce->add_error( $user->get_error_message() );
 			else :
-				if ( isset($_SERVER['HTTP_REFERER'])) :
-					wp_safe_redirect($_SERVER['HTTP_REFERER']);
+				if ( wp_get_referer() ) :
+					wp_safe_redirect( wp_get_referer() );
 					exit;
 				endif;
 				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
@@ -726,8 +781,8 @@ function woocommerce_process_registration() {
                 wp_set_auth_cookie($user_id, true, $secure_cookie);
                 
                 // Redirect
-                if ( isset($_SERVER['HTTP_REFERER'])) :
-					wp_safe_redirect($_SERVER['HTTP_REFERER']);
+                if ( wp_get_referer() ) :
+					wp_safe_redirect( wp_get_referer() );
 					exit;
 				endif;
 				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));

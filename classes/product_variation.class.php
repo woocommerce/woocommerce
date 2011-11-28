@@ -49,8 +49,6 @@ class woocommerce_product_variation extends woocommerce_product {
 		// Define the data we're going to load from the parent: Key => Default value
 		$load_data = array(
 			'sku'			=> $this->id,
-			//'downloadable' 	=> 'no',
-			//'virtual' 		=> 'no',
 			'price' 		=> 0,
 			'visibility'	=> 'hidden',
 			'stock'			=> 0,
@@ -60,6 +58,9 @@ class woocommerce_product_variation extends woocommerce_product {
 			'sale_price'	=> '',
 			'regular_price' => '',
 			'weight'		=> '',
+			'length'		=> '',
+			'width'			=> '',
+			'height'		=> '',
 			'tax_status'	=> 'taxable',
 			'tax_class'		=> '',
 			'upsell_ids'	=> array(),

@@ -91,12 +91,7 @@
 							<tr>
 								<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
 								<td>'.$values['quantity'].'</td>
-								<td>';
-								
-								if ($_product->is_taxable()) $rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->get_tax_class() ); else $rate = 0;
-								echo $woocommerce->cart->get_product_subtotal( $_product->get_price(), $rate, $values['quantity'] );
-							
-						echo '</td>
+								<td>' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
 							</tr>';
 					endif;
 				endforeach; 
