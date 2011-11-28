@@ -796,7 +796,7 @@ class woocommerce_cart {
 		 *
 		 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 		 */
-		$this->total = $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $woocommerce->shipping->shipping_total - $this->discount_total;
+		$this->total = $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total;
 		
 		if ($this->total < 0) $this->total = 0;
 	}
