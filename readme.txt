@@ -24,7 +24,7 @@ Your business is unique, as should your online store. Choose one of our themes o
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
 
 = FEATURES =
-Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take out word for it, try it for yourself.
+Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
 Read more about the features and benefits of WooCommerce at http://www.woothemes.com/woocommerce/
 Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
