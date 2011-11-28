@@ -27,6 +27,7 @@ class free_shipping extends woocommerce_shipping_method {
 		$this->min_amount 	= $this->settings['min_amount'];
 		$this->availability = $this->settings['availability'];
 		$this->countries 	= $this->settings['countries'];
+		$this->requires_coupon 	= $this->settings['requires_coupon'];
 		
 		// Actions
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
@@ -56,6 +57,13 @@ class free_shipping extends woocommerce_shipping_method {
 							'type' 			=> 'text', 
 							'description' 	=> __('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes'),
 							'default' 		=> ''
+						),
+			'requires_coupon' => array(
+							'title' 		=> __( 'Coupon', 'woothemes' ), 
+							'type' 			=> 'checkbox', 
+							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woothemes' ), 
+							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method.', 'woothemes'),
+							'default' 		=> 'no'
 						),
 			'availability' => array(
 							'title' 		=> __( 'Method availability', 'woothemes' ), 
@@ -100,6 +108,45 @@ class free_shipping extends woocommerce_shipping_method {
     	<?php
     } // End admin_options()
     
+
+    function is_available() {
+    	global $woocommerce;
+    	
+    	if ($this->enabled=="no") return false;
+    	
+		if (isset($woocommerce->cart->cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total) return false;
+		
+		$ship_to_countries = '';
+		
+		if ($this->availability == 'specific') :
+			$ship_to_countries = $this->countries;
+		else :
+			if (get_option('woocommerce_allowed_countries')=='specific') :
+				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
+			endif;
+		endif; 
+		
+		if (is_array($ship_to_countries)) :
+			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
+		endif;
+		
+		if ($this->requires_coupon=="yes") :
+		
+			if ($woocommerce->cart->applied_coupons) : foreach ($woocommerce->cart->applied_coupons as $code) :
+				$coupon = &new woocommerce_coupon( $code );
+				
+				if ( $coupon->enable_free_shipping() ) :
+					return true;
+				endif;
+				
+			endforeach; endif;
+			
+			return false;
+			
+		endif;
+		
+		return true;
+    } 
     
     function calculate_shipping() {
 		$this->shipping_total 	= 0;

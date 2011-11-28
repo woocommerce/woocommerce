@@ -21,6 +21,7 @@ class woocommerce_coupon {
 	var $usage_count;
 	var $expiry_date;
 	var $apply_before_tax;
+	var $free_shipping;
 	
 	/** get coupon with $code */
 	function woocommerce_coupon( $code ) {
@@ -41,6 +42,7 @@ class woocommerce_coupon {
 			$this->usage_count 			= (int) get_post_meta($coupon->ID, 'usage_count', true);
 			$this->expiry_date 			= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
 			$this->apply_before_tax 	= get_post_meta($coupon->ID, 'apply_before_tax', true);
+			$this->free_shipping 		= get_post_meta($coupon->ID, 'free_shipping', true);
 			
 			return true;
 			
@@ -52,6 +54,10 @@ class woocommerce_coupon {
 	/** Check if coupon needs applying before tax **/
 	function apply_before_tax() {
 		if ($this->apply_before_tax=='yes') return true; else return false;
+	}
+	
+	function enable_free_shipping() {
+		if ($this->free_shipping=='yes') return true; else return false;
 	}
 	
 	/** Increase usage count */
