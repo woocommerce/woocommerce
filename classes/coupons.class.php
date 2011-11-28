@@ -42,8 +42,6 @@ class woocommerce_coupon {
 			$this->expiry_date 			= ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
 			$this->apply_before_tax 	= get_post_meta($coupon->ID, 'apply_before_tax', true);
 			
-			if (!$this->amount) return false;
-			
 			return true;
 			
 		endif;
