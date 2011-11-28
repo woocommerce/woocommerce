@@ -146,10 +146,8 @@ ul.recent-orders.stock_list a,ul.stock_list.stock_list a{text-decoration:none;}
 table.woocommerce_attributes,table.woocommerce_variable_attributes{width:100%;position:relative;}
 table.woocommerce_attributes thead th,table.woocommerce_variable_attributes thead th{background:#ececec;padding:7px 9px;font-size:11px;text-align:left;}
 table.woocommerce_attributes td,table.woocommerce_variable_attributes td{padding:2px 9px;text-align:left;vertical-align:middle;border-bottom:1px dotted #ececec;}
-table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{width:100%;}
+table.woocommerce_attributes td input,table.woocommerce_attributes td textarea,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{width:100%;margin:0;display:block;}
 table.woocommerce_attributes td select{width:100%;}
-table.woocommerce_attributes td select.multiselect{height:8em !important;}
-table.woocommerce_attributes td .ui-multiselect-checkboxes input{width:auto;}
 table.woocommerce_attributes td input,table.woocommerce_variable_attributes td input,table.woocommerce_variable_attributes td textarea{font-size:14px;padding:4px;color:#555;}
 table.woocommerce_attributes .taxonomy td.name{padding:10px 15px;font-size:14px;color:#555;}
 table.woocommerce_attributes .taxonomy td.values{position:relative;}table.woocommerce_attributes .taxonomy td.values .chzn-container{width:100% !important;margin:0 1px;display:block;}table.woocommerce_attributes .taxonomy td.values .chzn-container .chzn-drop{width:100% !important;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
