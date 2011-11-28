@@ -13,6 +13,9 @@ class woocommerce_product_variation extends woocommerce_product {
 	
 	var $variation_data;
 	var $variation_id;
+	var $variation_has_length;
+	var $variation_has_width;
+	var $variation_has_height;
 	var $variation_has_weight;
 	var $variation_has_price;
 	var $variation_has_sale_price;
@@ -72,7 +75,7 @@ class woocommerce_product_variation extends woocommerce_product {
 
 		$this->product_type = 'variable';
 		
-		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_price = $this->variation_has_sale_price = false;
+		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
 		/* Override parent data with variation */
 		if (isset($product_custom_fields['sku'][0]) && !empty($product_custom_fields['sku'][0])) :
@@ -89,6 +92,21 @@ class woocommerce_product_variation extends woocommerce_product {
 		if (isset($product_custom_fields['weight'][0]) && $product_custom_fields['weight'][0]!=='') :
 			$this->variation_has_weight = true;
 			$this->weight = $product_custom_fields['weight'][0];
+		endif;
+		
+		if (isset($product_custom_fields['length'][0]) && $product_custom_fields['length'][0]!=='') :
+			$this->variation_has_length = true;
+			$this->length = $product_custom_fields['length'][0];
+		endif;
+		
+		if (isset($product_custom_fields['width'][0]) && $product_custom_fields['width'][0]!=='') :
+			$this->variation_has_width = true;
+			$this->width = $product_custom_fields['width'][0];
+		endif;
+		
+		if (isset($product_custom_fields['height'][0]) && $product_custom_fields['height'][0]!=='') :
+			$this->variation_has_height = true;
+			$this->height = $product_custom_fields['height'][0];
 		endif;
 		
 		if (isset($product_custom_fields['price'][0]) && $product_custom_fields['price'][0]!=='') :
