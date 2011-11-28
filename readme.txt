@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.3 - xx/11/2011 =
+= 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
 * Schema.org markup for products and reviews
 * Option to apply coupons before tax (per coupon)
