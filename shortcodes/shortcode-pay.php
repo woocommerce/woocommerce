@@ -2,7 +2,7 @@
 /**
  * Pay Shortcode
  * 
- * The page page. Used for form based gateways to show payment forms and order info.
+ * The pay page. Used for form based gateways to show payment forms and order info.
  *
  * @package		WooCommerce
  * @category	Shortcode
