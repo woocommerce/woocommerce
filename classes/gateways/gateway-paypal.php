@@ -441,8 +441,19 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	            break;
 	            case "refunded" :
 	            case "reversed" :
+	            case "chargeback" :
+	            	
 	            	// Mark order as refunded
 	            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+	            	
+					$message = woocommerce_mail_template( 
+						__('Order refunded/reversed', 'woothemes'),
+						sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woothemes'), $order->id, $posted['reason_code'] )
+					);
+				
+					// Send the mail
+					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed'), $order->id), $message );
+	            	
 	            break;
 	            default:
 	            	// No action

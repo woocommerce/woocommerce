@@ -38,6 +38,29 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 }
 
 /**
+ * Wraps a message in the woocommerce mail template
+ **/
+function woocommerce_mail_template( $heading, $message ) {
+	global $email_heading;
+	
+	$email_heading = $heading;
+	
+	// Buffer
+	ob_start();
+
+	do_action('woocommerce_email_header');
+	
+	echo wpautop(wptexturize( $message ));
+	
+	do_action('woocommerce_email_footer');
+	
+	// Get contents
+	$message = ob_get_clean();
+	
+	return $message;
+}
+
+/**
  * Email Header
  **/
 add_action('woocommerce_email_header', 'woocommerce_email_header');
@@ -250,25 +273,14 @@ function woocommerce_customer_note_notification( $id, $note ) {
  * Low stock notification email
  **/
 function woocommerce_low_stock_notification( $product ) {
-	global $email_heading;
-	
 	$_product = &new woocommerce_product($product);
-	
-	$email_heading = __('Product low in stock', 'woothemes');
-	
+
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product low in stock', 'woothemes');
 	
-	// Buffer
-	ob_start();
-
-	do_action('woocommerce_email_header');
-	
-	echo wpautop(wptexturize( '#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woothemes') ));
-	
-	do_action('woocommerce_email_footer');
-	
-	// Get contents
-	$message = ob_get_clean();
+	$message = woocommerce_mail_template( 
+		__('Product low in stock', 'woothemes'),
+		'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woothemes')
+	);
 
 	// Send the mail
 	woocommerce_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
@@ -278,25 +290,14 @@ function woocommerce_low_stock_notification( $product ) {
  * No stock notification email
  **/
 function woocommerce_no_stock_notification( $product ) {
-	global $email_heading;
-	
 	$_product = &new woocommerce_product($product);
-	
-	$email_heading = __('Product out of stock', 'woothemes');
 	
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product out of stock', 'woothemes');
 	
-	// Buffer
-	ob_start();
-
-	do_action('woocommerce_email_header');
-	
-	echo wpautop(wptexturize( '#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woothemes') ));
-	
-	do_action('woocommerce_email_footer');
-	
-	// Get contents
-	$message = ob_get_clean();
+	$message = woocommerce_mail_template( 
+		__('Product out of stock', 'woothemes'),
+		'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woothemes')
+	);
 
 	// Send the mail
 	woocommerce_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
@@ -307,25 +308,14 @@ function woocommerce_no_stock_notification( $product ) {
  * Backorder notification email
  **/
 function woocommerce_product_on_backorder_notification( $product, $amount ) {
-	global $email_heading;
-	
 	$_product = &new woocommerce_product($product);
-	
-	$email_heading = __('Product Backorder', 'woothemes');
 	
 	$subject = '[' . get_bloginfo('name') . '] ' . __('Product Backorder', 'woothemes');
 
-	// Buffer
-	ob_start();
-
-	do_action('woocommerce_email_header');
-	
-	echo wpautop(wptexturize( $amount . __(' units of #', 'woothemes') . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('have been backordered.', 'woothemes') ));
-	
-	do_action('woocommerce_email_footer');
-	
-	// Get contents
-	$message = ob_get_clean();
+	$message = woocommerce_mail_template( 
+		__('Product Backorder', 'woothemes'),
+		$amount . __(' units of #', 'woothemes') . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('have been backordered.', 'woothemes')
+	);
 
 	// Send the mail
 	woocommerce_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
