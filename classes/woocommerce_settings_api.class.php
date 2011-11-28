@@ -8,7 +8,7 @@
  * @author		WooThemes
  */
 class woocommerce_settings_api {
-
+	
 	var $plugin_id = 'woocommerce_';
 	var $settings = array();
 	var $form_fields = array();
@@ -70,18 +70,27 @@ class woocommerce_settings_api {
      */
     function init_settings () {
     	if ( ! is_array( $this->settings ) ) { return; }
-    	
+
     	$settings = array();
     	$existing_settings = get_option( $this->plugin_id . $this->id . '_settings' );
     	
     	$defaults = array();
     	
     	foreach ( $this->form_fields as $k => $v ) {
-    		if ( isset( $v['default'] ) ) {
-    			$defaults[$k] = $v['default'];
-    		} else {
-    			$defaults[$k] = '';
-    		}
+    		
+    		// Backwards compatibility
+    		if ( $value = get_option( $this->plugin_id . $this->id . '_' . $k ) ) :
+    			$defaults[$k] = $value;
+    		else :
+    		
+	    		if ( isset( $v['default'] ) ) {
+	    			$defaults[$k] = $v['default'];
+	    		} else {
+	    			$defaults[$k] = '';
+	    		}
+    		
+    		endif;
+    		
     	}
     	
     	if ( ! $existing_settings ) {
@@ -131,13 +140,15 @@ class woocommerce_settings_api {
     	$html = '';
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input class="input-text wide-input" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . esc_attr($this->settings[$key]) . '" />';
+				$html .= '<input class="input-text wide-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . esc_attr($this->settings[$key]) . '" />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -156,13 +167,15 @@ class woocommerce_settings_api {
     	$html = '';
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input class="input-text wide-input" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;" value="' . esc_attr($this->settings[$key]) . '" />';
+				$html .= '<input class="input-text wide-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . esc_attr($this->settings[$key]) . '" />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -170,7 +183,6 @@ class woocommerce_settings_api {
     	
     	return $html;
     } // End generate_password_html()
-    
     
     /**
      * Generate Textarea HTML.
@@ -182,13 +194,15 @@ class woocommerce_settings_api {
     	$html = '';
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<textarea rows="3" cols="20" class="input-text wide-input" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="width:100%;">'.esc_attr($this->settings[$key]).'</textarea>';
+				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'.esc_attr($this->settings[$key]).'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -208,13 +222,15 @@ class woocommerce_settings_api {
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title'];
     	if ( isset( $data['label'] ) && $data['label'] != '' ) $label = $data['label']; else $label = $data['title'];
-    	    	
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' /> ' . $label . '</label><br />' . "\n";
+				$html .= '<input style="'.$data['css'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="'.$data['class'].'" /> ' . $label . '</label><br />' . "\n";
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -234,13 +250,15 @@ class woocommerce_settings_api {
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<select class="select" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="min-width:50px;">';
+				$html .= '<select name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" class="select '.$data['class'].'">';
 				
 				foreach ($data['options'] as $option_key => $option_value) :
 					$html .= '<option value="'.$option_key.'" '.selected($option_key, esc_attr($this->settings[$key]), false).'>'.$option_value.'</option>';
@@ -266,13 +284,15 @@ class woocommerce_settings_api {
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<select multiple="multiple" style="min-width:25%;height:100px;vertical-align:top;" class="multiselect" name="' . $this->plugin_id . $this->id . '_' . $key . '[]" id="' . $this->plugin_id . $this->id . '_' . $key . '">';
+				$html .= '<select multiple="multiple" style="'.$data['css'].'" class="multiselect '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '[]" id="' . $this->plugin_id . $this->id . '_' . $key . '">';
 				
 				foreach ($data['options'] as $option_key => $option_value) :
 					$html .= '<option value="'.$option_key.'" ';

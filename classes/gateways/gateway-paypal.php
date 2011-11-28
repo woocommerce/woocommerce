@@ -31,7 +31,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$this->description 	= $this->settings['description'];
 		$this->email 		= $this->settings['email'];
 		$this->testmode		= $this->settings['testmode'];		
-		$this->send_shipping = $this->settings['send_shipping'];
+		$this->send_shipping= $this->settings['send_shipping'];
 		$this->debug		= $this->settings['debug'];	
 		
 		// Actions

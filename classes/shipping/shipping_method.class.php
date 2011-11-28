@@ -9,7 +9,7 @@
  * @category	Shipping
  * @author		WooThemes
  */  
-class woocommerce_shipping_method {
+class woocommerce_shipping_method extends woocommerce_settings_api {
 	
 	var $id;
 	var $method_title;
@@ -48,7 +48,6 @@ class woocommerce_shipping_method {
 		endif;
 		
 		return true;
-		
     } 
     
     function get_fee( $fee, $total ) {
@@ -58,9 +57,5 @@ class woocommerce_shipping_method {
 			return $fee;
 		endif;
 	}
-	    
-    function admin_options() {}
-    
-    function process_admin_options() {}
     	
 }

@@ -110,6 +110,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Refund/Reverse notification in paypal gateway
 * Made stock notifications use email template
 * Added dimensions to individual variations
+* Added settings API to be used by Shipping Methods and Payment Gateways
+* Free shipping/Flat rate uses setting API
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
