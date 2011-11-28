@@ -108,6 +108,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( '"Ship to same address option" checked by default', 'woothemes' ),
+		'id' 		=> 'woocommerce_ship_to_same_address',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Show order comments section', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_order_comments',
 		'std' 		=> 'yes',

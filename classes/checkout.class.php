@@ -220,7 +220,16 @@ class woocommerce_checkout {
 		// Shipping Details
 		if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only()) :
 			
-			if (!isset($_POST) || !$_POST) $shiptobilling = apply_filters('woocommerce_shiptobilling_default', 1); else $shiptobilling = $this->get_value('shiptobilling');
+			if (!isset($_POST) || !$_POST) :
+			
+				$shiptobilling = (get_option('woocommerce_ship_to_same_address')=='yes') ? 1 : 0;
+				$shiptobilling = apply_filters('woocommerce_shiptobilling_default', $shiptobilling);
+			
+			else :
+			
+				$shiptobilling = $this->get_value('shiptobilling');
+			
+			endif;
 
 			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" '.checked($shiptobilling, 1, false).' type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox">'.__('Ship to same address?', 'woothemes').'</label></p>';
 			
