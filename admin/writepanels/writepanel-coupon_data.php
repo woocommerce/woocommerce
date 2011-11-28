@@ -36,7 +36,7 @@ function woocommerce_coupon_data_meta_box($post) {
 			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woothemes'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woothemes') ) );
 			
 			// Apply before tax
-			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply coupon before tax?', 'woothemes'), 'description' => __('Check this box if the coupon should be applied before calculating a product\'s tax', 'woothemes') ) );
+			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply before tax', 'woothemes'), 'description' => __('Check this box if the coupon should be applied before calculating cart tax', 'woothemes') ) );
 			
 			// Free Shipping
 			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woothemes'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woothemes'), admin_url('admin.php?page=woocommerce&tab=shipping_methods&subtab=shipping-free_shipping')) ) );
