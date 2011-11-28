@@ -115,7 +115,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			'send_shipping' => array(
 							'title' => __( 'Shipping details', 'woothemes' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal', 'woothemes' ), 
+							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woothemes' ), 
 							'default' => 'no'
 						), 
 			'testmode' => array(
@@ -208,14 +208,14 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	
 				// Payment Info
 				'invoice' 				=> $order->order_key,
-				'discount_amount_cart' 	=> $order->get_total_discount()
+				'discount_amount_cart' 	=> $order->get_order_discount()
 			), 
 			$phone_args
 		);
 		
 		if ($this->send_shipping=='yes') :
 			$paypal_args['no_shipping'] = 0;
-			$paypal_args['address_override'] = 0;
+			$paypal_args['address_override'] = 1;
 		else :
 			$paypal_args['no_shipping'] = 1;
 		endif;
@@ -248,7 +248,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					$paypal_args['quantity_'.$item_loop] = 1;
 					
 					// Add tax to this cost for paypal for the entire row to prevent rounding issues
-					$paypal_args['amount_'.$item_loop] = number_format( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
+					$paypal_args['amount_'.$item_loop] = $order->get_row_cost( $item, true );
 					
 				else :
 					

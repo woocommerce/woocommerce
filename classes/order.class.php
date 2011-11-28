@@ -188,6 +188,25 @@ class woocommerce_order {
 		return $this->order_total;
 	}
 	
+	/** Calculate row cost - useful for gateways */
+	function get_row_cost( $item, $inc_tax = false ) {
+		
+		if ($inc_tax) :
+			
+			if ($this->prices_include_tax) :
+				return number_format( ( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) - $item['row_discount'] ) , 2, '.', '');
+			else :
+				return number_format( (($item['cost'] * $item['qty']) - $item['row_discount']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
+			endif;
+			
+		else :
+		
+			return number_format( (($item['cost'] * $item['qty']) - $item['row_discount']) );
+		
+		endif;
+	}
+	
+	
 	/** Gets subtotal */
 	function get_subtotal_to_display() {
 		global $woocommerce;
