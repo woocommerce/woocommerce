@@ -339,6 +339,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Upgrade Notice ==
 
+= 1.3 =
+This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
+
 = 1.2.3 =
 Fixes minor issues in 1.2.2 - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
 
