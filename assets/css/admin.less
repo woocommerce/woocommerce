@@ -649,28 +649,39 @@ ul.recent-orders, ul.stock_list {
 }
 
 
-.woocommerce table.widefat {
-	table.coupon_rows {
-		border: 0 !important;
-		width: 100%;
-		thead {
-			th {
-				padding: 1px;
-				border: 0;
-				font-weight: normal;
-				font-size: 11px;
-				color: #999;
-			}
-		}
-		tbody {
-			td {
-				padding: 3px 3px 0 0;
-				border: 0;
-				vertical-align: middle;
-				input.text {
-					width: 95px;
+.woocommerce {
+	table.widefat {
+		table.coupon_rows {
+			border: 0 !important;
+			width: 100%;
+			thead {
+				th {
+					padding: 1px;
+					border: 0;
+					font-weight: normal;
+					font-size: 11px;
+					color: #999;
 				}
 			}
+			tbody {
+				td {
+					padding: 3px 3px 0 0;
+					border: 0;
+					vertical-align: middle;
+					input.text {
+						width: 95px;
+					}
+				}
+			}
+		}
+	}
+	table.form-table {
+		textarea.input-text {
+			height: 100%;
+			min-width: 150px;
+		}
+		textarea.wide-input {
+			width: 100%;
 		}
 	}
 }

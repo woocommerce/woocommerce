@@ -359,7 +359,7 @@ jQuery(document).ready(function($) {
             $(link).attr('href', o_link);
         }
 
-        $('.single_variation_wrap').slideDown('200');
+        $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown');
     }
 	
 	//when one of attributes is changed - check everything to show only valid options

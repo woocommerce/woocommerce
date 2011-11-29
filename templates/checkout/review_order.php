@@ -40,8 +40,19 @@
 							echo '>'.esc_html($method->title).' &ndash; ';
 							
 							if ($method->shipping_total>0) :
-								echo woocommerce_price($method->shipping_total);
-								if ($method->shipping_tax>0) : ' ' . $woocommerce->countries->ex_tax_or_vat(); endif;
+							
+								if (get_option('woocommerce_display_totals_excluding_tax')=='yes') :
+									
+									echo woocommerce_price( $method->shipping_total );
+									if ($method->shipping_tax>0) : echo ' ' . $woocommerce->countries->ex_tax_or_vat(); endif;
+									
+								else :
+									
+									echo woocommerce_price( $method->shipping_total + $method->shipping_tax );
+									if ($method->shipping_tax>0) : echo ' ' . $woocommerce->countries->inc_tax_or_vat(); endif;
+								
+								endif;
+								
 							else :
 								echo __('Free', 'woothemes');
 							endif;

@@ -31,7 +31,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$this->description 	= $this->settings['description'];
 		$this->email 		= $this->settings['email'];
 		$this->testmode		= $this->settings['testmode'];		
-		$this->send_shipping = $this->settings['send_shipping'];
+		$this->send_shipping= $this->settings['send_shipping'];
 		$this->debug		= $this->settings['debug'];	
 		
 		// Actions
@@ -115,7 +115,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			'send_shipping' => array(
 							'title' => __( 'Shipping details', 'woothemes' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal', 'woothemes' ), 
+							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woothemes' ), 
 							'default' => 'no'
 						), 
 			'testmode' => array(
@@ -208,7 +208,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	
 				// Payment Info
 				'invoice' 				=> $order->order_key,
-				'discount_amount_cart' 	=> $order->get_total_discount()
+				'discount_amount_cart' 	=> $order->get_order_discount()
 			), 
 			$phone_args
 		);
@@ -248,7 +248,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					$paypal_args['quantity_'.$item_loop] = 1;
 					
 					// Add tax to this cost for paypal for the entire row to prevent rounding issues
-					$paypal_args['amount_'.$item_loop] = number_format( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
+					$paypal_args['amount_'.$item_loop] = $order->get_row_cost( $item, true );
 					
 				else :
 					

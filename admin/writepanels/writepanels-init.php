@@ -42,6 +42,7 @@ function woocommerce_meta_boxes() {
 	// Coupons
 	add_meta_box( 'woocommerce-coupon-data', __('Coupon Data', 'woothemes'), 'woocommerce_coupon_data_meta_box', 'shop_coupon', 'normal', 'high');
 	
+	remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
 	

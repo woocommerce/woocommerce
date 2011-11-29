@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.2.4
+Stable tag: 1.3
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -24,7 +24,7 @@ Your business is unique, as should your online store. Choose one of our themes o
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
 
 = FEATURES =
-Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take out word for it, try it for yourself.
+Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
 Read more about the features and benefits of WooCommerce at http://www.woothemes.com/woocommerce/
 Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
@@ -110,6 +110,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Refund/Reverse notification in paypal gateway
 * Made stock notifications use email template
 * Added dimensions to individual variations
+* Added settings API to be used by Shipping Methods and Payment Gateways
+* Free shipping/Flat rate uses setting API
+* Free shipping coupons
+* Ship to billing default option
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
@@ -334,6 +338,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.3 =
+This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
 
 = 1.2.3 =
 Fixes minor issues in 1.2.2 - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
