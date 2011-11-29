@@ -46,9 +46,9 @@ function woocommerce_post_type() {
         array(
             'hierarchical' 			=> true,
             'update_count_callback' => '_update_post_term_count',
-            'label' 				=> __( 'Categories', 'woothemes'),
+            'label' 				=> __( 'Product Categories', 'woothemes'),
             'labels' => array(
-                    'name' 				=> __( 'Categories', 'woothemes'),
+                    'name' 				=> __( 'Product Categories', 'woothemes'),
                     'singular_name' 	=> __( 'Product Category', 'woothemes'),
                     'search_items' 		=>  __( 'Search Product Categories', 'woothemes'),
                     'all_items' 		=> __( 'All Product Categories', 'woothemes'),
@@ -69,9 +69,9 @@ function woocommerce_post_type() {
         array('product'),
         array(
             'hierarchical' 			=> false,
-            'label' 				=> __( 'Tags', 'woothemes'),
+            'label' 				=> __( 'Product Tags', 'woothemes'),
             'labels' => array(
-                    'name' 				=> __( 'Tags', 'woothemes'),
+                    'name' 				=> __( 'Product Tags', 'woothemes'),
                     'singular_name' 	=> __( 'Product Tag', 'woothemes'),
                     'search_items' 		=>  __( 'Search Product Tags', 'woothemes'),
                     'all_items' 		=> __( 'All Product Tags', 'woothemes'),
