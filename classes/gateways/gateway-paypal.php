@@ -221,52 +221,56 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		endif;
 		
 		if (get_option('woocommerce_prices_include_tax')=='yes') :
-			// Don't pass - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing.
-		else :
+			
+			// Tax
 			$paypal_args['tax_cart'] = $order->get_total_tax();
-		endif;
-		
-		// Cart Contents
-		$item_loop = 0;
-		if (sizeof($order->items)>0) : foreach ($order->items as $item) :
-			if ($item['qty']) :
-				
-				$item_loop++;
-				
-				$item_name = $item['name'];
-				
-				$item_meta = &new order_item_meta( $item['item_meta'] );					
-				if ($meta = $item_meta->display( true, true )) :
-					$item_name .= ' ('.$meta.')';
-				endif;
-				
-				if (get_option('woocommerce_prices_include_tax')=='yes') :
+			
+			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
+			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woothemes'), $order->id);
+			$paypal_args['quantity_1'] 		= 1;
+			$paypal_args['amount_1'] 		= number_format($order->order_total - $order->order_shipping - $order->get_total_tax(), 2, '.', '');
+			
+			// Shipping Cost
+			if ($order->order_shipping>0) :
+				$paypal_args['item_name_2'] = __('Shipping cost', 'woothemes');
+				$paypal_args['quantity_2'] 	= '1';
+				$paypal_args['amount_2'] 	= number_format($order->order_shipping, 2);
+			endif;
 					
-					// Since prices include tax we cannot send lines, otherwise we will get rounding errors when paypal re-calcs the totals
-					// Paypal also incorrectly calculates discounts when prices are tax inclusive because coupons are removed from the tax inclusive price
-					$paypal_args['item_name_'.$item_loop] = $item['qty'] . ' x ' . $item_name;
-					$paypal_args['quantity_'.$item_loop] = 1;
+		else :
+			
+			// Tax
+			$paypal_args['tax_cart'] = $order->get_total_tax();
+
+			// Cart Contents
+			$item_loop = 0;
+			if (sizeof($order->items)>0) : foreach ($order->items as $item) :
+				if ($item['qty']) :
 					
-					// Add tax to this cost for paypal for the entire row to prevent rounding issues
-					$paypal_args['amount_'.$item_loop] = $order->get_row_cost( $item, true );
+					$item_loop++;
 					
-				else :
+					$item_name = $item['name'];
 					
+					$item_meta = &new order_item_meta( $item['item_meta'] );					
+					if ($meta = $item_meta->display( true, true )) :
+						$item_name .= ' ('.$meta.')';
+					endif;
+						
 					$paypal_args['item_name_'.$item_loop] = $item_name;
 					$paypal_args['quantity_'.$item_loop] = $item['qty'];
 					$paypal_args['amount_'.$item_loop] = number_format($item['cost'], 2, '.', '');
 					
 				endif;
-				
-			endif;
-		endforeach; endif;
+			endforeach; endif;
 		
-		// Shipping Cost
-		if ($order->order_shipping>0) :
-			$item_loop++;
-			$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
-			$paypal_args['quantity_'.$item_loop] = '1';
-			$paypal_args['amount_'.$item_loop] = number_format($order->order_shipping, 2);
+			// Shipping Cost
+			if ($order->order_shipping>0) :
+				$item_loop++;
+				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
+				$paypal_args['quantity_'.$item_loop] = '1';
+				$paypal_args['amount_'.$item_loop] = number_format($order->order_shipping, 2);
+			endif;
+		
 		endif;
 		
 		$paypal_args_array = array();

@@ -688,7 +688,8 @@ class woocommerce_checkout {
 						
 						// Calculate discounted price ex. vat
 						if (get_option('woocommerce_prices_include_tax')=='yes') :
-							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($rate/100) + 1);
+							$base_rate = $_tax->get_shop_base_rate( $this->tax_class );
+							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
 						else :
 							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
 						endif;
