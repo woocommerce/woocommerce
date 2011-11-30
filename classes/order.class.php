@@ -190,37 +190,19 @@ class woocommerce_order {
 	
 	/** Calculate item cost - useful for gateways */
 	function get_item_cost( $item, $inc_tax = false ) {
-		
 		if ($inc_tax) :
-			
-			if ($this->prices_include_tax) :
-				return number_format( ($item['cost'] * (1 + ($item['taxrate']/100)) - ( $item['row_discount'] / $item['qty'] )) , 2, '.', '');
-			else :
-				return number_format( ($item['cost'] - ( $item['row_discount'] / $item['qty'] )) * (1 + ($item['taxrate']/100)) , 2, '.', '');
-			endif;
-			
+			return number_format( $item['cost'] * (1 + ($item['taxrate']/100)) , 2, '.', '');
 		else :
-		
-			return number_format( $item['cost'] - ( $item['row_discount'] / $item['qty'] ) );
-		
+			return number_format( $item['cost'] , 2, '.', '');
 		endif;
 	}
 	
 	/** Calculate row cost - useful for gateways */
 	function get_row_cost( $item, $inc_tax = false ) {
-		
 		if ($inc_tax) :
-			
-			if ($this->prices_include_tax) :
-				return number_format( ( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) - $item['row_discount'] ) , 2, '.', '');
-			else :
-				return number_format( (($item['cost'] * $item['qty']) - $item['row_discount']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
-			endif;
-			
+			return number_format( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
 		else :
-		
-			return number_format( (($item['cost'] * $item['qty']) - $item['row_discount']) );
-		
+			return number_format( $item['cost'] * $item['qty'] , 2, '.', '');
 		endif;
 	}
 	
@@ -244,7 +226,9 @@ class woocommerce_order {
 			
 			foreach ($this->items as $item) :
 				
-				$subtotal += round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2);
+				if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
+				
+				$subtotal += round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2);
 				
 			endforeach;
 
@@ -383,16 +367,14 @@ class woocommerce_order {
 				<td style="text-align:left;">'.$item['qty'].'</td>
 				<td style="text-align:left;">';
 				
-				if ($this->display_cart_ex_tax || !$this->prices_include_tax) :
-				
-					if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-					$return .= woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
-				
-				else :
-				
-					$return .= woocommerce_price( round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
-				
-				endif;
+					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
+							
+					if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
+						if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
+						$return .= woocommerce_price( $item['base_cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
+					else :
+						$return .= woocommerce_price( round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
+					endif;
 			
 			$return .= '	
 				</td>

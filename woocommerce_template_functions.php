@@ -1323,16 +1323,14 @@ function woocommerce_order_details_table( $order_id ) {
 					echo '	</td>
 							<td>'.$item['qty'].'</td>
 							<td>';
+					
+					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
 							
-					if ($order->display_cart_ex_tax || !$order->prices_include_tax) :
-					
+					if ($order->display_cart_ex_tax || !$order->prices_include_tax) :	
 						if ($order->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-						echo woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
-					
+						echo woocommerce_price( $item['base_cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
 					else :
-					
-						echo woocommerce_price( round(($item['cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
-					
+						echo woocommerce_price( round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
 					endif;
 
 					echo '</td>
