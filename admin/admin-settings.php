@@ -717,7 +717,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	array(  
 		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
 		'id' 		=> 'woocommerce_prices_include_tax',
-		'std' 		=> 'yes',
+		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
