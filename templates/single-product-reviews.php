@@ -92,7 +92,7 @@
 				<option value="2">'.__('Not that bad', 'woothemes').'</option>
 				<option value="1">'.__('Very Poor', 'woothemes').'</option>
 			</select></p>
-			<p class="comment-form-comment"><label for="comment">' . _x( 'Your Review', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'
+			<p class="comment-form-comment"><label for="comment">' . __( 'Your Review', 'woothemes' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'
 			. $woocommerce->nonce_field('comment_rating', true, false)
 	)); 
 
