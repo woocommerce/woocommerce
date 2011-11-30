@@ -150,7 +150,8 @@ function woocommerce_cart( $atts ) {
 						<label for="coupon_code"><?php _e('Coupon', 'woothemes'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woothemes'); ?>" />
 					</div>
 					<?php $woocommerce->nonce_field('cart') ?>
-					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Shopping Cart', 'woothemes'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
+					<input type="submit" class="button" name="update_cart" value="<?php _e('Update Cart', 'woothemes'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
+					<?php do_action('woocommerce_proceed_to_checkout'); ?>
 				</td>
 			</tr>
 		</tbody>
