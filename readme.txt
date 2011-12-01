@@ -114,6 +114,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Free shipping/Flat rate uses setting API
 * Free shipping coupons
 * Ship to billing default option
+* Trim zeros off prices (optional)
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.

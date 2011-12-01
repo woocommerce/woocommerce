@@ -700,7 +700,7 @@ class woocommerce_checkout {
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'base_cost' 	=> $_product->get_price_excluding_tax( false ),
-					 		'cost'			=> trim(trim(number_format($cost, 4, '.', ''), '0'), '.'),
+					 		'cost'			=> rtrim(rtrim(number_format($cost, 4, '.', ''), '0'), '.'),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
