@@ -717,7 +717,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	array(  
 		'desc' 		=> __( 'Catalog Prices include tax', 'woothemes' ),
 		'id' 		=> 'woocommerce_prices_include_tax',
-		'std' 		=> 'yes',
+		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
@@ -731,7 +731,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 	
 	array(  
-		'name' => __( 'Frontend Tax display', 'woothemes' ),
+		'name' => __( 'Tax display (cart totals)', 'woothemes' ),
 		'desc' 		=> __( 'Always display cart contents excluding tax', 'woothemes' ),
 		'id' 		=> 'woocommerce_display_cart_prices_excluding_tax',
 		'std' 		=> 'yes',

@@ -168,8 +168,8 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="meta" width="1%"><?php _e('Item&nbsp;Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost"><?php _e('Cost', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?></th>
-					<th class="cost"><?php _e('Row Discount', 'woothemes'); ?></th>
+					<th class="cost"><?php _e('Base&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
+					<th class="cost"><?php _e('Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Final cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
 					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
@@ -235,11 +235,11 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						
 						<td class="cost">
-								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $item['cost'] ); ?>" />
+								<input type="text" name="base_item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['base_cost'])) echo esc_attr( $item['base_cost'] ); else echo esc_attr( $item['cost'] ); ?>" />
 						</td>
 						
-						<td class="discount">
-								<input type="text" name="item_discount[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['row_discount'])) echo esc_attr( $item['row_discount'] ); ?>" />
+						<td class="cost">
+								<input type="text" name="item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $item['cost'] ); ?>" />
 						</td>
 						
 						<td class="tax">
@@ -470,7 +470,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 $item_name 		= $_POST['item_name'];
 			 $item_quantity 	= $_POST['item_quantity'];
 			 $item_cost 		= $_POST['item_cost'];
-			 $item_discount		= $_POST['item_discount'];
+			 $base_item_cost	= $_POST['base_item_cost'];
 			 $item_tax_rate 	= $_POST['item_tax_rate'];
 			 $item_meta_names 	= $_POST['meta_name'];
 			 $item_meta_values 	= $_POST['meta_value'];
@@ -502,8 +502,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'variation_id' 	=> (int) $item_variation[$i],
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
-			 		'cost' 			=> woocommerce_clean($item_cost[$i]),
-			 		'row_discount'	=> number_format(woocommerce_clean($item_discount[$i]), 4, '.', ''),
+			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 4, '.', ''),
+			 		'base_cost'		=> number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''),
 			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
 			 		'item_meta'		=> $item_meta->meta
 			 	));

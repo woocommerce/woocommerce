@@ -686,15 +686,21 @@ class woocommerce_checkout {
 							endforeach;
 						endif;
 						
+						// Calculate discounted price ex. vat
+						if (get_option('woocommerce_prices_include_tax')=='yes') :
+							$base_rate = $_tax->get_shop_base_rate( $this->tax_class );
+							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
+						else :
+							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
+						endif;
+						
 						$order_items[] = apply_filters('new_order_item', array(
 					 		'id' 			=> $values['product_id'],
 					 		'variation_id' 	=> $values['variation_id'],
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
-					 		'cost' 			=> $_product->get_price_excluding_tax( false ),
-					 		'row_discount'	=> number_format( 
-					 			( ( $_product->get_price()-$woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) ) * $values['quantity'] )
-					 			, 4, '.', '' ),
+					 		'base_cost' 	=> $_product->get_price_excluding_tax( false ),
+					 		'cost'			=> trim(trim(number_format($cost, 4, '.', ''), '0'), '.'),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
