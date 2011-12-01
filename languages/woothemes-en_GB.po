@@ -774,7 +774,7 @@ msgid "Shipping"
 msgstr ""
 
 #: admin/admin-post-types.php:424
-#: templates/checkout/review_order.php:80
+#: templates/checkout/review_order.php:91
 #: woocommerce_template_functions.php:808
 #@ woothemes
 msgid "Order Total"
@@ -792,6 +792,7 @@ msgid "<mark class=\"%s\">%s</mark>"
 msgstr ""
 
 #: admin/admin-post-types.php:450
+#: classes/gateways/gateway-paypal.php:229
 #, php-format
 #@ woothemes
 msgid "Order #%s"
@@ -817,7 +818,7 @@ msgstr ""
 #: templates/emails/customer_note_notification.php:61
 #: templates/emails/customer_processing_order.php:57
 #: templates/emails/new_order.php:57
-#: woocommerce_template_functions.php:1351
+#: woocommerce_template_functions.php:1349
 #@ woothemes
 msgid "Email:"
 msgstr ""
@@ -2173,11 +2174,6 @@ msgstr ""
 msgid "Round tax at subtotal level, instead of per line"
 msgstr ""
 
-#: admin/admin-settings.php:734
-#@ woothemes
-msgid "Frontend Tax display"
-msgstr ""
-
 #: admin/admin-settings.php:735
 #@ woothemes
 msgid "Always display cart contents excluding tax"
@@ -2346,7 +2342,7 @@ msgid "The main body text colour. Default <code>#505050</code>."
 msgstr ""
 
 #: admin/admin-settings.php:892
-#: classes/woocommerce.class.php:274
+#: classes/woocommerce.class.php:280
 #@ woothemes
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
@@ -2413,7 +2409,7 @@ msgstr ""
 #: admin/writepanels/writepanel-product_data.php:34
 #: classes/countries.class.php:590
 #: templates/checkout/pay_for_order.php:22
-#: templates/checkout/review_order.php:70
+#: templates/checkout/review_order.php:81
 #@ woothemes
 msgid "Tax"
 msgstr ""
@@ -2490,16 +2486,6 @@ msgstr ""
 msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
 msgstr ""
 
-#: admin/writepanels/writepanel-coupon_data.php:39
-#@ woothemes
-msgid "Apply coupon before tax?"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:39
-#@ woothemes
-msgid "Check this box if the coupon should be applied before calculating a product's tax"
-msgstr ""
-
 #: admin/writepanels/writepanel-coupon_data.php:42
 #@ woothemes
 msgid "Enable free shipping"
@@ -2513,8 +2499,8 @@ msgstr ""
 
 #: admin/writepanels/writepanel-coupon_data.php:45
 #: admin/writepanels/writepanel-coupon_data.php:48
-#: woocommerce_template_functions.php:1365
-#: woocommerce_template_functions.php:1378
+#: woocommerce_template_functions.php:1363
+#: woocommerce_template_functions.php:1376
 #@ woothemes
 msgid "N/A"
 msgstr ""
@@ -2580,7 +2566,7 @@ msgstr ""
 #: shortcodes/shortcode-my_account.php:101
 #: shortcodes/shortcode-my_account.php:281
 #: shortcodes/shortcode-order_tracking.php:78
-#: woocommerce_template_functions.php:1374
+#: woocommerce_template_functions.php:1372
 #@ woothemes
 msgid "Billing Address"
 msgstr ""
@@ -2709,7 +2695,7 @@ msgstr ""
 #: shortcodes/shortcode-my_account.php:130
 #: shortcodes/shortcode-my_account.php:281
 #: shortcodes/shortcode-order_tracking.php:87
-#: woocommerce_template_functions.php:1361
+#: woocommerce_template_functions.php:1359
 #@ woothemes
 msgid "Shipping Address"
 msgstr ""
@@ -2751,15 +2737,10 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: admin/writepanels/writepanel-order_data.php:171
+#: admin/writepanels/writepanel-order_data.php:172
 #: classes/shipping/shipping-flat_rate.php:78
 #@ woothemes
 msgid "Cost"
-msgstr ""
-
-#: admin/writepanels/writepanel-order_data.php:172
-#@ woothemes
-msgid "Row Discount"
 msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:173
@@ -3683,7 +3664,7 @@ msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Pleas
 msgstr ""
 
 #: classes/cart.class.php:1156
-#: classes/order.class.php:273
+#: classes/order.class.php:275
 #: classes/product.class.php:608
 #: classes/product.class.php:614
 #@ woothemes
@@ -5906,61 +5887,62 @@ msgstr ""
 msgid "Enable logging (<code>woocommerce/logs/paypal.txt</code>)"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:267
+#: classes/gateways/gateway-paypal.php:235
+#: classes/gateways/gateway-paypal.php:269
 #@ woothemes
 msgid "Shipping cost"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:280
+#: classes/gateways/gateway-paypal.php:284
 #@ woothemes
 msgid "Pay via PayPal"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:280
+#: classes/gateways/gateway-paypal.php:284
 #@ woothemes
 msgid "Cancel order &amp; restore cart"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:285
+#: classes/gateways/gateway-paypal.php:289
 #@ woothemes
 msgid "Thank you for your order. We are now redirecting you to PayPal to make payment."
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:327
+#: classes/gateways/gateway-paypal.php:331
 #@ woothemes
 msgid "Thank you for your order, please click the button below to pay with PayPal."
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:424
+#: classes/gateways/gateway-paypal.php:428
 #@ woothemes
 msgid "IPN payment completed"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:440
-#: classes/gateways/gateway-paypal.php:447
+#: classes/gateways/gateway-paypal.php:444
+#: classes/gateways/gateway-paypal.php:451
 #, php-format
 #@ woothemes
 msgid "Payment %s via IPN."
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:450
+#: classes/gateways/gateway-paypal.php:454
 #@ woothemes
 msgid "Order refunded/reversed"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:451
+#: classes/gateways/gateway-paypal.php:455
 #, php-format
 #@ woothemes
 msgid "Order #%s has been marked as refunded - PayPal reason code: %s"
 msgstr ""
 
-#: classes/gateways/gateway-paypal.php:455
+#: classes/gateways/gateway-paypal.php:459
 #, php-format
 #@ default
 msgid "Payment for order #%s refunded/reversed"
 msgstr ""
 
-#: classes/order.class.php:270
+#: classes/order.class.php:272
 #, php-format
 #@ woothemes
 msgid " <small>%svia %s</small>"
@@ -6117,24 +6099,24 @@ msgstr ""
 msgid "Free Shipping - does what it says on the tin."
 msgstr ""
 
-#: classes/woocommerce.class.php:227
+#: classes/woocommerce.class.php:233
 #: templates/checkout/review_order.php:19
 #: woocommerce_template_functions.php:748
 #@ woothemes
 msgid "Cart Discount"
 msgstr ""
 
-#: classes/woocommerce.class.php:228
+#: classes/woocommerce.class.php:234
 #@ woothemes
 msgid "Cart % Discount"
 msgstr ""
 
-#: classes/woocommerce.class.php:229
+#: classes/woocommerce.class.php:235
 #@ woothemes
 msgid "Product Discount"
 msgstr ""
 
-#: classes/woocommerce.class.php:230
+#: classes/woocommerce.class.php:236
 #@ woothemes
 msgid "Product % Discount"
 msgstr ""
@@ -6224,11 +6206,6 @@ msgstr ""
 #: shortcodes/shortcode-cart.php:150
 #@ woothemes
 msgid "Apply Coupon"
-msgstr ""
-
-#: shortcodes/shortcode-cart.php:153
-#@ woothemes
-msgid "Update Shopping Cart"
 msgstr ""
 
 #: shortcodes/shortcode-cart.php:153
@@ -6611,59 +6588,59 @@ msgstr ""
 msgid "Cart Subtotal"
 msgstr ""
 
-#: templates/checkout/review_order.php:46
+#: templates/checkout/review_order.php:57
 #: woocommerce_template_functions.php:782
 #@ woothemes
 msgid "Free"
 msgstr ""
 
-#: templates/checkout/review_order.php:58
+#: templates/checkout/review_order.php:69
 #@ woothemes
 msgid "Please fill in your details above to see available shipping methods."
 msgstr ""
 
-#: templates/checkout/review_order.php:60
+#: templates/checkout/review_order.php:71
 #@ woothemes
 msgid "Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr ""
 
-#: templates/checkout/review_order.php:75
+#: templates/checkout/review_order.php:86
 #: woocommerce_template_functions.php:803
 #@ woothemes
 msgid "Order Discount"
 msgstr ""
 
-#: templates/checkout/review_order.php:129
+#: templates/checkout/review_order.php:140
 #@ woothemes
 msgid "Please fill in your details above to see available payment methods."
 msgstr ""
 
-#: templates/checkout/review_order.php:131
+#: templates/checkout/review_order.php:142
 #@ woothemes
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr ""
 
-#: templates/checkout/review_order.php:141
+#: templates/checkout/review_order.php:152
 #@ woothemes
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
 msgstr ""
 
-#: templates/checkout/review_order.php:141
+#: templates/checkout/review_order.php:152
 #@ woothemes
 msgid "Update totals"
 msgstr ""
 
-#: templates/checkout/review_order.php:147
+#: templates/checkout/review_order.php:158
 #@ woothemes
 msgid "Place order"
 msgstr ""
 
-#: templates/checkout/review_order.php:151
+#: templates/checkout/review_order.php:162
 #@ woothemes
 msgid "I accept the"
 msgstr ""
 
-#: templates/checkout/review_order.php:151
+#: templates/checkout/review_order.php:162
 #@ woothemes
 msgid "terms &amp; conditions"
 msgstr ""
@@ -6695,7 +6672,7 @@ msgstr ""
 #: templates/emails/customer_note_notification.php:58
 #: templates/emails/customer_processing_order.php:54
 #: templates/emails/new_order.php:54
-#: woocommerce_template_functions.php:1347
+#: woocommerce_template_functions.php:1345
 #@ woothemes
 msgid "Customer details"
 msgstr ""
@@ -6898,12 +6875,6 @@ msgstr ""
 msgid "Very Poor"
 msgstr ""
 
-#: templates/single-product-reviews.php:95
-#@ default
-msgctxt "noun"
-msgid "Your Review"
-msgstr ""
-
 #: widgets/widget-best_sellers.php:23
 #@ woothemes
 msgid "Display a list of your best selling products on your site."
@@ -7057,7 +7028,7 @@ msgid "Logout"
 msgstr ""
 
 #: widgets/widget-login.php:94
-#@ woothemse
+#@ woothemes
 msgid "Login &raquo;"
 msgstr ""
 
@@ -8128,8 +8099,54 @@ msgstr ""
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr ""
 
-#: woocommerce_template_functions.php:1352
+#: woocommerce_template_functions.php:1350
 #@ woothemes
 msgid "Telephone:"
+msgstr ""
+
+#: admin/admin-settings.php:734
+#@ woothemes
+msgid "Tax display (cart totals)"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#@ woothemes
+msgid "Apply before tax"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#@ woothemes
+msgid "Check this box if the coupon should be applied before calculating cart tax"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:171
+#@ woothemes
+msgid "Base&nbsp;Cost"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:171
+#@ woothemes
+msgid "Cost before discounts"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:171
+#: admin/writepanels/writepanel-order_data.php:172
+#@ woothemes
+msgid "Up to 4 decimals are allowed for precision."
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:172
+#@ woothemes
+msgid "Final cost after discount"
+msgstr ""
+
+#: shortcodes/shortcode-cart.php:153
+#@ woothemes
+msgid "Update Cart"
+msgstr ""
+
+#: templates/single-product-reviews.php:95
+#@ woothemes
+msgid "Your Review"
 msgstr ""
 

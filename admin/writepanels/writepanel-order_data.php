@@ -168,8 +168,8 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="meta" width="1%"><?php _e('Item&nbsp;Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost"><?php _e('Base&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
-					<th class="cost"><?php _e('Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Final cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
+					<th class="cost"><?php _e('Base&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>. <?php _e('Up to 4 decimals are allowed for precision.', 'woothemes'); ?>" href="#">[?]</a></th>
+					<th class="cost"><?php _e('Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Final cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>. <?php _e('Up to 4 decimals are allowed for precision.', 'woothemes'); ?>" href="#">[?]</a></th>
 					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
