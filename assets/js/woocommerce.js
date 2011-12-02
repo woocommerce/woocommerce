@@ -120,56 +120,7 @@ jQuery(document).ready(function($) {
 		$star.addClass('active');
 		return false;
 	});
-
-	// Price slider (only if jquery UI exists)
-	if ($.slider) {
-		var min_price = $('.price_slider_amount #min_price').val();
-		var max_price = $('.price_slider_amount #max_price').val();
-		
-		current_min_price = parseInt(min_price);
-		current_max_price = parseInt(max_price);
-		
-		if (woocommerce_params.min_price) current_min_price = parseInt(woocommerce_params.min_price);
-		if (woocommerce_params.max_price) current_max_price = parseInt(woocommerce_params.max_price);
-		
-		$('.price_slider').slider({
-			range: true,
-			animate: true,
-			min: min_price,
-			max: max_price,
-			values: [current_min_price,current_max_price],
-			create : function( event, ui ) {
 	
-				if (woocommerce_params.currency_pos == "left"){
-					$( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + current_min_price + " - " + woocommerce_params.currency_symbol + current_max_price );
-				} else if (woocommerce_params.currency_pos == "left_space") {
-					$( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + " " + current_min_price + " - " + woocommerce_params.currency_symbol + " " + current_max_price );
-				} else if (woocommerce_params.currency_pos == "right") {
-					$( ".price_slider_amount span" ).html( current_min_price + woocommerce_params.currency_symbol + " - " + current_max_price + woocommerce_params.currency_symbol );
-				} else if (woocommerce_params.currency_pos == "right_space") {
-					$( ".price_slider_amount span" ).html( current_min_price + " " + woocommerce_params.currency_symbol + " - " + current_max_price + " " + woocommerce_params.currency_symbol );
-				}
-				
-				$( ".price_slider_amount #min_price" ).val(current_min_price);
-				$( ".price_slider_amount #max_price" ).val(current_max_price);
-			},
-			slide: function( event, ui ) {
-				
-				if (woocommerce_params.currency_pos == "left"){
-					$( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + ui.values[ 0 ] + " - " + woocommerce_params.currency_symbol + ui.values[ 1 ] );
-				} else if (woocommerce_params.currency_pos == "left_space") {
-					$( ".price_slider_amount span" ).html( woocommerce_params.currency_symbol + " " + ui.values[ 0 ] + " - " + woocommerce_params.currency_symbol + " " + ui.values[ 1 ] );
-				} else if (woocommerce_params.currency_pos == "right") {
-					$( ".price_slider_amount span" ).html( ui.values[ 0 ] + woocommerce_params.currency_symbol + " - " + ui.values[ 1 ] + woocommerce_params.currency_symbol );
-				} else if (woocommerce_params.currency_pos == "right_space") {
-					$( ".price_slider_amount span" ).html( ui.values[ 0 ] + " " + woocommerce_params.currency_symbol + " - " + ui.values[ 1 ] + " " + woocommerce_params.currency_symbol );
-				}
-				$( "input#min_price" ).val(ui.values[ 0 ]);
-				$( "input#max_price" ).val(ui.values[ 1 ]);
-			}
-		});
-	}
-			
 	// Quantity buttons
 	$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 	

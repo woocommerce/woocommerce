@@ -251,7 +251,20 @@ function woocommerce_frontend_scripts() {
 	
 	if ($jquery_ui_en) :
 		wp_register_script( 'jqueryui', $woocommerce->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+		wp_register_script( 'wc_price_slider', $woocommerce->plugin_url() . '/assets/js/price_slider'.$suffix.'.js', 'jqueryui', '1.0', $scripts_position );
+		
 		wp_enqueue_script( 'jqueryui' );
+		wp_enqueue_script( 'wc_price_slider' );
+		
+		$woocommerce_price_slider_params = array(
+			'currency_symbol' 				=> get_woocommerce_currency_symbol(),
+			'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
+		);
+		
+		if (isset($_SESSION['min_price'])) $woocommerce_price_slider_params['min_price'] = $_SESSION['min_price'];
+		if (isset($_SESSION['max_price'])) $woocommerce_price_slider_params['max_price'] = $_SESSION['max_price'];
+		
+		wp_localize_script( 'wc_price_slider', 'woocommerce_price_slider_params', $woocommerce_price_slider_params );
 	endif;
     	
 	/* Script variables */
@@ -259,8 +272,6 @@ function woocommerce_frontend_scripts() {
 	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
 	
 	$woocommerce_params = array(
-		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
-		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
 		'countries' 					=> $states,
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
@@ -275,9 +286,6 @@ function woocommerce_frontend_scripts() {
 		'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart')
 	);
 	
-	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];
-	if (isset($_SESSION['max_price'])) $woocommerce_params['max_price'] = $_SESSION['max_price'];
-		
 	$woocommerce_params['is_checkout'] = ( is_page(get_option('woocommerce_checkout_page_id')) ) ? 1 : 0;
 	$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
 	$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;

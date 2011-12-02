@@ -198,7 +198,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-	    'desc'     => __( 'Output JavaScript in the footer (<code>wp_footer</code>)', 'woothemes' ),
+	    'desc'     => __( 'Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)', 'woothemes' ),
 	    'id'     => 'woocommerce_scripts_position',
 	    'std'     => 'yes',
 	    'type'     => 'checkbox',
