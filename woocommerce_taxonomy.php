@@ -50,7 +50,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Product Categories', 'woothemes'),
                     'singular_name' 	=> __( 'Product Category', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Categories', 'woothemes'),
+                    'search_items' 		=> __( 'Search Product Categories', 'woothemes'),
                     'all_items' 		=> __( 'All Product Categories', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Product Category', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Product Category:', 'woothemes'),
@@ -73,7 +73,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Product Tags', 'woothemes'),
                     'singular_name' 	=> __( 'Product Tag', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Tags', 'woothemes'),
+                    'search_items' 		=> __( 'Search Product Tags', 'woothemes'),
                     'all_items' 		=> __( 'All Product Tags', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Product Tag', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Product Tag:', 'woothemes'),
@@ -88,6 +88,31 @@ function woocommerce_post_type() {
         )
     );
     
+	register_taxonomy( 'product_shipping_class',
+        array('product'),
+        array(
+            'hierarchical' 			=> true,
+            'update_count_callback' => '_update_post_term_count',
+            'label' 				=> __( 'Shipping Classes', 'woothemes'),
+            'labels' => array(
+                    'name' 				=> __( 'Shipping Classes', 'woothemes'),
+                    'singular_name' 	=> __( 'Shipping Class', 'woothemes'),
+                    'search_items' 		=> __( 'Search Shipping Classes', 'woothemes'),
+                    'all_items' 		=> __( 'All Shipping Classes', 'woothemes'),
+                    'parent_item' 		=> __( 'Parent Shipping Class', 'woothemes'),
+                    'parent_item_colon' => __( 'Parent Shipping Class:', 'woothemes'),
+                    'edit_item' 		=> __( 'Edit Shipping Class', 'woothemes'),
+                    'update_item' 		=> __( 'Update Shipping Class', 'woothemes'),
+                    'add_new_item' 		=> __( 'Add New Shipping Class', 'woothemes'),
+                    'new_item_name' 	=> __( 'New Shipping Class Name', 'woothemes')
+            	),
+            'show_ui' 				=> true,
+            'show_in_nav_menus' 	=> false,
+            'query_var' 			=> $admin_only_query_var,
+            'rewrite' 				=> false,
+        )
+    );
+    
     register_taxonomy( 'shop_order_status',
         array('shop_order'),
         array(
@@ -96,7 +121,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Order statuses', 'woothemes'),
                     'singular_name' 	=> __( 'Order status', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Order statuses', 'woothemes'),
+                    'search_items' 		=> __( 'Search Order statuses', 'woothemes'),
                     'all_items' 		=> __( 'All  Order statuses', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Order status', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Order status:', 'woothemes'),
@@ -131,7 +156,7 @@ function woocommerce_post_type() {
 			            'labels' => array(
 			                    'name' 						=> $label,
 			                    'singular_name' 			=> $label,
-			                    'search_items' 				=>  __( 'Search', 'woothemes') . ' ' . $label,
+			                    'search_items' 				=> __( 'Search', 'woothemes') . ' ' . $label,
 			                    'all_items' 				=> __( 'All', 'woothemes') . ' ' . $label,
 			                    'parent_item' 				=> __( 'Parent', 'woothemes') . ' ' . $label,
 			                    'parent_item_colon' 		=> __( 'Parent', 'woothemes') . ' ' . $label . ':',

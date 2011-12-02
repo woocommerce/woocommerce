@@ -83,6 +83,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.3.1 =
+* Added a 'Shipping class' taxonomy for grouping products
+* Enhanced Flat Rate shipping to give a flat rate to each shipping class
 * Made jquery UI optional and improved javascript
 * Javascript can be loaded in the footer
 

@@ -31,8 +31,12 @@ class flat_rate extends woocommerce_shipping_method {
 		$this->cost 		= $this->settings['cost'];
 		$this->fee 			= $this->settings['fee']; 
 		
+		// Flat rates
+		$this->get_flat_rates();
+		
 		// Actions
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_flat_rates'));
     } 
 
 	/**
@@ -54,38 +58,6 @@ class flat_rate extends woocommerce_shipping_method {
 							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
 							'default'		=> __( 'Flat Rate', 'woothemes' )
 						),
-			'type' => array(
-							'title' 		=> __( 'Type', 'woothemes' ), 
-							'type' 			=> 'select', 
-							'description' 	=> '', 
-							'default' 		=> 'order',
-							'options' 		=> array(
-								'order' 	=> __('Per Order', 'woothemes'),
-								'item' 		=> __('Per Item', 'woothemes')
-							)
-						),
-			'tax_status' => array(
-							'title' 		=> __( 'Tax Status', 'woothemes' ), 
-							'type' 			=> 'select', 
-							'description' 	=> '', 
-							'default' 		=> 'taxable',
-							'options'		=> array(
-								'taxable' 	=> __('Taxable', 'woothemes'),
-								'none' 		=> __('None', 'woothemes')
-							)
-						),
-			'cost' => array(
-							'title' 		=> __( 'Cost', 'woothemes' ), 
-							'type' 			=> 'text', 
-							'description'	=> __('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes'),
-							'default' 		=> ''
-						), 
-			'fee' => array(
-							'title' 		=> __( 'Handling Fee', 'woothemes' ), 
-							'type' 			=> 'text', 
-							'description'	=> __('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes'),
-							'default'		=> ''
-						),
 			'availability' => array(
 							'title' 		=> __( 'Method availability', 'woothemes' ), 
 							'type' 			=> 'select', 
@@ -100,10 +72,43 @@ class flat_rate extends woocommerce_shipping_method {
 							'title' 		=> __( 'Specific Countries', 'woothemes' ), 
 							'type' 			=> 'multiselect', 
 							'class'			=> 'chosen_select',
-							'css'			=> 'width:50%;',
+							'css'			=> 'width: 450px;',
 							'default' 		=> '',
 							'options'		=> $woocommerce->countries->countries
-						)	
+						),
+			'type' => array(
+							'title' 		=> __( 'Calculation Type', 'woothemes' ), 
+							'type' 			=> 'select', 
+							'description' 	=> '', 
+							'default' 		=> 'order',
+							'options' 		=> array(
+								'order' 	=> __('Per Order - charge shipping for the entire order as a whole', 'woothemes'),
+								'item' 		=> __('Per Item - charge shipping for each item individually', 'woothemes'),
+								'class' 	=> __('Per Class - charge shipping for each shipping class in an order', 'woothemes')
+							)
+						),
+			'tax_status' => array(
+							'title' 		=> __( 'Tax Status', 'woothemes' ), 
+							'type' 			=> 'select', 
+							'description' 	=> '', 
+							'default' 		=> 'taxable',
+							'options'		=> array(
+								'taxable' 	=> __('Taxable', 'woothemes'),
+								'none' 		=> __('None', 'woothemes')
+							)
+						),
+			'cost' => array(
+							'title' 		=> __( 'Default Cost', 'woothemes' ), 
+							'type' 			=> 'text', 
+							'description'	=> __('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woothemes'),
+							'default' 		=> ''
+						), 
+			'fee' => array(
+							'title' 		=> __( 'Default Handling Fee', 'woothemes' ), 
+							'type' 			=> 'text', 
+							'description'	=> __('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woothemes'),
+							'default'		=> ''
+						),
 			);
     
     } // End init_form_fields()
@@ -170,7 +175,7 @@ class flat_rate extends woocommerce_shipping_method {
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
-
+		global $woocommerce;
     	?>
     	<h3><?php _e('Flat Rates', 'woothemes'); ?></h3>
     	<p><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woothemes'); ?></p>
@@ -178,10 +183,141 @@ class flat_rate extends woocommerce_shipping_method {
     	<?php
     		// Generate the HTML For the settings form.
     		$this->generate_settings_html();
-    	?>
+    		?>
+	    	<tr valign="top">
+	            <th scope="row" class="titledesc"><?php _e('Flat Rates', 'woothemes'); ?>:</th>
+	            <td class="forminp" id="flat_rates">
+	            	<table class="shippingrows widefat" cellspacing="0">
+	            		<thead>
+	            			<tr>
+	            				<th class="check-column"><input type="checkbox"></th>
+	            				<th class="shipping_class"><?php _e('Shipping Class', 'woothemes'); ?></th>
+	        	            	<th><?php _e('Cost', 'woothemes'); ?> <a class="tips" tip="<?php _e('Cost, excluding tax.', 'woothemes'); ?>">[?]</a></th>
+	        	            	<th><?php _e('Handling Fee', 'woothemes'); ?> <a class="tips" tip="<?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%.', 'woothemes'); ?>">[?]</a></th>
+	            			</tr>
+	            		</thead>
+	            		<tfoot>
+	            			<tr>
+	            				<th colspan="2"><a href="#" class="add button"><?php _e('+ Add Flat Rate', 'woothemes'); ?></a></th>
+	            				<th colspan="2"><small><?php _e('Add rates for shipping classes here &mdash; they will override the default costs defined above.', 'woothemes'); ?></small> <a href="#" class="remove button"><?php _e('Delete selected rates', 'woothemes'); ?></a></th>
+	            			</tr>
+	            		</tfoot>
+	            		<tbody class="flat_rates">
+	                	<?php
+	                	$i = -1; if ($this->flat_rates) foreach( $this->flat_rates as $class => $rate ) : $i++;
+
+	                		echo '<tr class="flat_rate">
+	                			<td class="check-column"><input type="checkbox" name="select" /></td>
+	                			<td class="flat_rate_class">
+	                					<select name="flat_rate_class['.$i.']" class="select">';
+	                					
+	                		if ($woocommerce->shipping->get_shipping_classes()) :
+		                		foreach ($woocommerce->shipping->get_shipping_classes() as $shipping_class) :
+		                			echo '<option value="'.$shipping_class->slug.'" '.selected($shipping_class->slug, $class, false).'>'.$shipping_class->name.'</option>';
+		                		endforeach;
+	                		else :
+	                			echo '<option value="">'.__('Select a class&hellip;', 'woothemes').'</option>';
+	                		endif;
+			               	
+			                echo '</select>
+			               		</td>
+			                    <td><input type="text" value="'.$rate['cost'].'" name="flat_rate_cost['.$i.']" placeholder="'.__('0.00', 'woothemes').'" size="4" /></td>
+			                    <td><input type="text" value="'.$rate['fee'].'" name="flat_rate_fee['.$i.']" placeholder="'.__('0.00', 'woothemes').'" size="4" /></td>
+		                    </tr>';
+	                	endforeach;
+	                	?>
+	                	</tbody>		                    	
+	                </table>
+	            </td>
+	        </tr>
 		</table><!--/.form-table-->
+       	<script type="text/javascript">
+			jQuery(function() {
+			
+				jQuery('#flat_rates a.add').live('click', function(){
+					
+					var size = jQuery('tbody.flat_rates .flat_rate').size();
+					
+					jQuery('<tr class="flat_rate">\
+						<td class="check-column"><input type="checkbox" name="select" /></td>\
+            			<td class="flat_rate_class">\
+            				<select name="flat_rate_class[' + size + ']" class="select">\
+	               				<?php 
+	               				if ($woocommerce->shipping->get_shipping_classes()) :
+			                		foreach ($woocommerce->shipping->get_shipping_classes() as $class) :
+			                			echo '<option value="'.$class->slug.'">'.$class->name.'</option>';
+			                		endforeach;
+		                		else :
+		                			echo '<option value="">'.__('Select a class&hellip;', 'woothemes').'</option>';
+		                		endif;
+	               				?>\
+	               			</select>\
+	               		</td>\
+	                    <td><input type="text" name="flat_rate_cost[' + size + ']" placeholder="<?php _e('0.00', 'wc_table_rate'); ?>" size="4" /></td>\
+	                    <td><input type="text" name="flat_rate_fee[' + size + ']" placeholder="<?php _e('0.00', 'wc_table_rate'); ?>" size="4" /></td>\
+                    </tr>').appendTo('#flat_rates table tbody');
+					
+					return false;
+				});
+				
+				// Remove row
+				jQuery('#flat_rates a.remove').live('click', function(){
+					var answer = confirm("<?php _e('Delete the selected rates?', 'wc_table_rate'); ?>")
+					if (answer) {
+						jQuery('#flat_rates table tbody tr td.check-column input:checked').each(function(i, el){
+							jQuery(el).closest('tr').remove();
+						});
+					}
+					return false;
+				});
+				
+			});
+		</script>
     	<?php
     } // End admin_options()
+    
+    function process_flat_rates() {
+   		
+		// Save the rates
+		$flat_rate_class = array();
+		$flat_rate_cost = array();
+		$flat_rate_fee = array();
+		$flat_rates = array();
+		
+		if (isset($_POST['flat_rate_class']))	$flat_rate_class	= array_map('woocommerce_clean', $_POST['flat_rate_class']);
+		if (isset($_POST['flat_rate_cost'])) 	$flat_rate_cost 	= array_map('woocommerce_clean', $_POST['flat_rate_cost']);
+		if (isset($_POST['flat_rate_fee'])) 	$flat_rate_fee 		= array_map('woocommerce_clean', $_POST['flat_rate_fee']);
+		
+		// Get max key
+		$values = $flat_rate_class;
+		ksort($values);   
+		$value = end($values);  
+		$key = key($values);
+		
+		for ($i=0; $i<=$key; $i++) :
+		
+			if (isset($flat_rate_class[$i]) && isset($flat_rate_cost[$i]) && isset($flat_rate_fee[$i])) :
+				
+				$flat_rate_cost[$i] = number_format($flat_rate_cost[$i], 2,  '.', '');
+				
+				// Add to flat rates array
+				$flat_rates[ sanitize_title($flat_rate_class[$i]) ] = array(
+					'cost' 				=> $flat_rate_cost[$i],
+					'fee' 				=> $flat_rate_fee[$i]
+				);  
+				
+			endif;
+
+		endfor;
+		
+		update_option('woocommerce_flat_rates', $flat_rates);
+		
+		$this->get_flat_rates();
+    }
+    
+    function get_flat_rates() {
+    	$this->flat_rates = array_filter((array) get_option('woocommerce_flat_rates'));
+    }
 
 }
 
