@@ -318,6 +318,8 @@ function woocommerce_duplicate_product_post_button() {
 	
 	if (!current_user_can('manage_woocommerce')) return;
 	
+	if( !is_object( $post ) ) return;
+	
 	if ($post->post_type!='product') return;
 	
 	if ( isset( $_GET['post'] ) ) :
