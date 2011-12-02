@@ -99,20 +99,4 @@
 	echo '</div></div>';
 	
 ?><div class="clear"></div></div>
-<script type="text/javascript">
-/* <![CDATA[ */
-	jQuery(function(){
-		if(jQuery().fancybox) {
-			jQuery('#review_form_wrapper').hide();
-			jQuery('a.show_review_form').fancybox({
-				'transitionIn'	:	'elastic',
-				'transitionOut'	:	'elastic',
-				'speedIn'		:	600, 
-				'speedOut'		:	200, 
-				'overlayShow'	:	true
-			});
-		}
-	});
-/* ]]> */
-</script>
 <?php endif; ?>

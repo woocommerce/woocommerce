@@ -165,7 +165,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Shop Styling', 'woothemes' ),
+		'name' => __( 'Scripts &amp; Styling', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
 		'std' 		=> 'yes',
@@ -186,17 +186,25 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> ''
 	),
 	
-  array(  
-    'name' => __( 'Javascript', 'woothemes' ),
-    'desc'     => __( 'Enable Output of JavaScript in the footer?', 'woothemes' ),
-    'id'     => 'woocommerce_scripts_position',
-    'std'     => 'yes',
-    'type'     => 'checkbox'
-  ),
+	array(  
+		'desc' 		=> __( 'Enable jQuery UI (used by the price slider widget)', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_jquery_ui',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
 	
+	array(  
+	    'desc'     => __( 'Output JavaScript in the footer (<code>wp_footer</code>)', 'woothemes' ),
+	    'id'     => 'woocommerce_scripts_position',
+	    'std'     => 'yes',
+	    'type'     => 'checkbox',
+	    'checkboxgroup'		=> 'end'
+	),
+
 	array(  
 		'name' => __( 'Demo store notice', 'woothemes' ),
 		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),

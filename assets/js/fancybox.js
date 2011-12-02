@@ -1155,9 +1155,12 @@
 })(jQuery);
 
 jQuery(function(){
-
+	
+	// Hide review form - it will be in a lightbox
+	jQuery('#review_form_wrapper').hide();
+	
 	// Lightbox
-	jQuery('a.zoom').fancybox({
+	jQuery('a.zoom, a.show_review_form').fancybox({
 		'transitionIn'	:	'elastic',
 		'transitionOut'	:	'elastic',
 		'speedIn'		:	600, 

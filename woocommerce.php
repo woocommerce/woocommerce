@@ -230,21 +230,29 @@ function woocommerce_init_roles() {
  * Enqueue frontend scripts
  **/
 function woocommerce_frontend_scripts() {
-	
 	global $woocommerce;
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-	$lightbox_en = (get_option('woocommerce_enable_lightbox')=='yes') ? 0 : 1;
+	$lightbox_en = (get_option('woocommerce_enable_lightbox')=='yes') ? true : false;
+	$jquery_ui_en = (get_option('woocommerce_enable_jquery_ui')=='yes') ? true : false;
 	$scripts_position = (get_option('woocommerce_scripts_position') == 'yes') ? true : false;
 
 	wp_register_script( 'woocommerce', $woocommerce->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
 	wp_register_script( 'woocommerce_plugins', $woocommerce->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
-	if $lightbox_en wp_register_script( 'fancybox', $woocommerce->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
-
-	wp_enqueue_script('jquery');
-	wp_enqueue_script('woocommerce_plugins');
-	wp_enqueue_script('woocommerce');
-	if $lightbox_en wp_enqueue_script('fancybox');
+	
+	wp_enqueue_script( 'jquery' );
+	wp_enqueue_script( 'woocommerce_plugins' );
+	wp_enqueue_script( 'woocommerce' );
+	
+	if ($lightbox_en) :
+		wp_register_script( 'fancybox', $woocommerce->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+		wp_enqueue_script( 'fancybox' );
+	endif;
+	
+	if ($jquery_ui_en) :
+		wp_register_script( 'jqueryui', $woocommerce->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+		wp_enqueue_script( 'jqueryui' );
+	endif;
     	
 	/* Script variables */
 	$states = json_encode( $woocommerce->countries->states );
@@ -270,23 +278,9 @@ function woocommerce_frontend_scripts() {
 	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];
 	if (isset($_SESSION['max_price'])) $woocommerce_params['max_price'] = $_SESSION['max_price'];
 		
-	if ( is_page(get_option('woocommerce_checkout_page_id')) ) :
-		$woocommerce_params['is_checkout'] = 1;
-	else :
-		$woocommerce_params['is_checkout'] = 0;
-	endif;
-	
-	if (is_page(get_option('woocommerce_pay_page_id'))) :
-		$woocommerce_params['is_pay_page'] = 1;
-	else :
-		$woocommerce_params['is_pay_page'] = 0;
-	endif;
-	
-	if ( is_cart() ) :
-		$woocommerce_params['is_cart'] = 1;
-	else :
-		$woocommerce_params['is_cart'] = 0;
-	endif;
+	$woocommerce_params['is_checkout'] = ( is_page(get_option('woocommerce_checkout_page_id')) ) ? 1 : 0;
+	$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
+	$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
 	
 	wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
 	
