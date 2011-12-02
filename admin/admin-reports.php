@@ -327,7 +327,7 @@ function woocommerce_sales_overview() {
 	</div>
 	<?php
 	
-	$start_date = strtotime(date('Ymd', strtotime( date('Ym').'01' )));
+	$start_date = strtotime(date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' )));
 	$end_date = strtotime(date('Ymd', current_time('timestamp')));
 	
 	// Get orders to display in widget
@@ -462,7 +462,7 @@ function woocommerce_daily_sales() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -654,7 +654,7 @@ function woocommerce_monthly_sales() {
 	$first_year = $wpdb->get_var("SELECT post_date FROM $wpdb->posts ORDER BY post_date ASC LIMIT 1;");
 	if ($first_year) $first_year = date('Y', strtotime($first_year)); else $first_year = date('Y');
 	
-	$current_year = (isset($_POST['show_year'])) ? $_POST['show_year'] : date('Y');
+	$current_year = (isset($_POST['show_year'])) ? $_POST['show_year'] : date('Y', current_time('timestamp'));
 	
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
@@ -848,7 +848,7 @@ function woocommerce_top_sellers() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -942,7 +942,7 @@ function woocommerce_top_earners() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -1036,7 +1036,7 @@ function woocommerce_product_sales() {
 	$chosen_product_id = (isset($_POST['product_id'])) ? $_POST['product_id'] : '';
 	
 	if ($chosen_product_id) :
-		$start_date = date('Ym', strtotime( '-12 MONTHS' )).'01';
+		$start_date = date('Ym', strtotime( '-12 MONTHS', current_time('timestamp') )).'01';
 		$end_date = date('Ymd', current_time('timestamp'));
 		
 		$start_date = strtotime($start_date);
@@ -1240,7 +1240,7 @@ function woocommerce_customer_overview() {
 	</div>
 	<?php
 	
-	$start_date = strtotime('-30 days');
+	$start_date = strtotime('-30 days', current_time('timestamp'));
 	$end_date = current_time('timestamp');
 	$signups = array();
 	
