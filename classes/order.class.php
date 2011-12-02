@@ -363,9 +363,9 @@ class woocommerce_order {
 			endif;
 			
 			$return .= '<tr>
-				<td style="text-align:left;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
-				<td style="text-align:left;">'.$item['qty'].'</td>
-				<td style="text-align:left;">';
+				<td style="text-align:left; border: 1px solid #eee;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
+				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
+				<td style="text-align:left; border: 1px solid #eee;">';
 				
 					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
 							

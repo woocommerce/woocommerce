@@ -181,7 +181,7 @@
                                     <!-- // Begin Template Body \\ -->
                                 	<table border="0" cellpadding="0" cellspacing="0" width="600" id="templateBody">
                                     	<tr>
-                                            <td valign="top" class="bodyContent">
+                                            <td valign="top" class="bodyContent" style="background-color:<?php echo get_option('woocommerce_email_body_background_color'); ?>;">
                                 
                                                 <!-- // Begin Module: Standard Content \\ -->
                                                 <table border="0" cellpadding="20" cellspacing="0" width="100%">
