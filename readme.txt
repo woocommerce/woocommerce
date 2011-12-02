@@ -82,6 +82,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.3.1 =
+* Made jquery UI optional and improved javascript
+* Javascript can be loaded in the footer
+
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
 * Schema.org markup for products and reviews
