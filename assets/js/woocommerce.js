@@ -177,7 +177,7 @@ jQuery(document).ready(function($) {
 	$('div.woocommerce_tabs ul.tabs li a').click(function(){
 		
 		var $tab = $(this);
-		var $tabs_wrapper = tab.closest('div.woocommerce_tabs');
+		var $tabs_wrapper = $tab.closest('div.woocommerce_tabs');
 		
 		$('ul.tabs li', $tabs_wrapper).removeClass('active');
 		$('div.panel', $tabs_wrapper).hide();

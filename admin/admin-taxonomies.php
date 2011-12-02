@@ -273,7 +273,5 @@ add_action('product_shipping_class_pre_add_form', 'woocommerce_shipping_class_de
 function woocommerce_shipping_class_description() {
 
 	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
-	
-	echo wpautop(__('You can drag and drop to re-order your shipping classes - if an order contains items with multiple classes, the top most class will be used if the shipping cost is per-order.', 'woothemes'));
 
 }

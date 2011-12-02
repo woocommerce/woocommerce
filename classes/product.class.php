@@ -43,6 +43,7 @@ class woocommerce_product {
 	var $min_variation_price;
 	var $max_variation_price;
 	var $featured;
+	var $shipping_class;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -685,6 +686,15 @@ class woocommerce_product {
 	/** Returns the product tags */
 	function get_tags( $sep = ', ', $before = '', $after = '' ) {
 		return get_the_term_list($this->id, 'product_tag', $before, $sep, $after);
+	}
+	
+	/** Returns the product shipping class */
+	function get_shipping_class() {
+		if (!$this->shipping_class) :
+			$classes = get_the_terms( $this->id, 'product_shipping_class' );
+			$this->shipping_class = (isset($classes[0])) ? $classes[0]->slug : '';
+		endif;
+		return $this->shipping_class;
 	}
 	
 	/** Get and return related products */

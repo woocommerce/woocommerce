@@ -122,19 +122,59 @@ class flat_rate extends woocommerce_shipping_method {
 		$this->shipping_tax 	= 0;
     	
     	if ($this->type=='order') :
+    		
+    		$cost 	= null;
+	    	$fee 	= null;
+	    		
+    		if (sizeof($this->flat_rates)>0) :
+    		
+	    		$found_shipping_classes = array();
+	    		
+	    		// Find shipping class
+	    		if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) : $found_shipping_classes[] = $values['data']->get_shipping_class(); endforeach; endif;
+	
+	    		$found_shipping_classes = array_unique($found_shipping_classes);
+	    		
+	    		// Find most expensive class (if found)
+	    		foreach ($found_shipping_classes as $shipping_class) :
+	    			if (isset($this->flat_rates[$shipping_class])) :
+	    				if ($this->flat_rates[$shipping_class]['cost'] > $cost) :
+	    					$cost 	= $this->flat_rates[$shipping_class]['cost'];
+	    					$fee	= $this->flat_rates[$shipping_class]['fee'];
+	    				endif;
+	    			else :
+	    				// No matching classes so use defaults
+	    				if ($this->cost > $cost) :
+	    					$cost 	= $this->cost;
+	    					$fee	= $this->fee;
+	    				endif;
+	    			endif;
+	    		endforeach;
+
+    		endif;
+    		
+    		// Default rates
+    		if (is_null($cost)) :
+    			$cost = $this->cost;
+    			$fee = $this->fee;
+    		endif;
+    		
 			// Shipping for whole order
-			$this->shipping_total = $this->cost + $this->get_fee( $this->fee, $woocommerce->cart->cart_contents_total );
+			$this->shipping_total = $cost + $this->get_fee( $fee, $woocommerce->cart->cart_contents_total );
 			
 			if ( get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
-				
 				$rate = $_tax->get_shipping_tax_rate();
 				if ($rate>0) :
 					$tax_amount = $_tax->calc_shipping_tax( $this->shipping_total, $rate );
-
 					$this->shipping_tax = $this->shipping_tax + $tax_amount;
 				endif;
 			endif;
-		else :
+			
+		elseif ($this->type=='class') :
+			// Shipping per class
+			$cost = 0;
+
+		elseif ($this->type=='item') :
 			// Shipping per item
 			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 				$_product = $values['data'];
