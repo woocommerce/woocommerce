@@ -189,6 +189,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup'		=> 'end'
 	),
 	
+  array(  
+    'name' => __( 'Javascript', 'woothemes' ),
+    'desc'     => __( 'Enable Output of JavaScript in the footer?', 'woothemes' ),
+    'id'     => 'woocommerce_scripts_position',
+    'std'     => 'yes',
+    'type'     => 'checkbox'
+  ),
+	
 	array(  
 		'name' => __( 'Demo store notice', 'woothemes' ),
 		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
