@@ -21,12 +21,12 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_sales_overview'
 			),
 			array(
-				'title' => __('Daily Sales', 'woothemes'),
+				'title' => __('Sales by day', 'woothemes'),
 				'description' => '',
 				'function' => 'woocommerce_daily_sales'
 			),
 			array(
-				'title' => __('Monthly Sales', 'woothemes'),
+				'title' => __('Sales by month', 'woothemes'),
 				'description' => '',
 				'function' => 'woocommerce_monthly_sales'
 			),
