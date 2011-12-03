@@ -104,7 +104,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			
 			</form>
 			<script type="text/javascript">
-				jQuery(function(){
+				(function($) {
 					// Ajax Login
 					jQuery('.widget_login form').submit(function(){
 						
@@ -139,7 +139,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 						
 						return false;
 					});
-				});
+				})(jQuery);
 			</script>
 			<?php 
 			do_action('woocommerce_login_widget_logged_out_after_form');			

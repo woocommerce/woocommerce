@@ -283,7 +283,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 				' . implode('', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
 				<script type="text/javascript">
-					jQuery(function(){
+					(function($) {
 						jQuery("body").block(
 							{ 
 								message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
@@ -303,7 +303,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 							    } 
 							});
 						jQuery("#submit_paypal_payment_form").click();
-					});
+					})(jQuery);
 				</script>
 			</form>';
 		

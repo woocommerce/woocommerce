@@ -130,8 +130,14 @@ class flat_rate extends woocommerce_shipping_method {
     		
 	    		$found_shipping_classes = array();
 	    		
-	    		// Find shipping class
-	    		if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) : $found_shipping_classes[] = $values['data']->get_shipping_class(); endforeach; endif;
+	    		// Find shipping classes for products in the cart
+	    		if (sizeof($woocommerce->cart->get_cart())>0) : 
+	    			foreach ($woocommerce->cart->get_cart() as $item_id => $values) : 
+	    				if ( $values['data']->needs_shipping() ) :
+	    					$found_shipping_classes[] = $values['data']->get_shipping_class(); 
+	    				endif;
+	    			endforeach; 
+	    		endif;
 	
 	    		$found_shipping_classes = array_unique($found_shipping_classes);
 	    		
@@ -172,32 +178,78 @@ class flat_rate extends woocommerce_shipping_method {
 			
 		elseif ($this->type=='class') :
 			// Shipping per class
-			$cost = 0;
+    		$cost 	= null;
+	    	$fee 	= null;
+	    		
+    		if (sizeof($this->flat_rates)>0) :
+    		
+	    		$found_shipping_classes = array();
+	    		
+	    		// Find shipping classes for products in the cart
+	    		if (sizeof($woocommerce->cart->get_cart())>0) : 
+	    			foreach ($woocommerce->cart->get_cart() as $item_id => $values) : 
+	    				if ( $values['data']->needs_shipping() ) :
+	    					$found_shipping_classes[] = $values['data']->get_shipping_class(); 
+	    				endif;
+	    			endforeach; 
+	    		endif;
+	
+	    		$found_shipping_classes = array_unique($found_shipping_classes);
+	    		
+	    		// For each found class, add up the costs and fees
+	    		foreach ($found_shipping_classes as $shipping_class) :
+	    			if (isset($this->flat_rates[$shipping_class])) :
+	    				$cost 	+= $this->flat_rates[$shipping_class]['cost'];
+	    				$fee	+= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $woocommerce->cart->cart_contents_total );
+	    			else :
+	    				// Class not set so we use default rate
+	    				$cost 	+= $this->cost;
+	    				$fee	+= $this->get_fee( $this->fee, $woocommerce->cart->cart_contents_total );
+	    			endif;
+	    		endforeach;
+
+    		endif;
+ 			
+ 			// Total
+ 			$this->shipping_total = $cost + $fee;
+
+			if ( get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
+				$rate = $_tax->get_shipping_tax_rate();
+				if ($rate>0) :
+					$tax_amount = $_tax->calc_shipping_tax( $this->shipping_total, $rate );
+					$this->shipping_tax = $this->shipping_tax + $tax_amount;
+				endif;
+			endif;
 
 		elseif ($this->type=='item') :
 			// Shipping per item
 			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+				
 				$_product = $values['data'];
-				if ($_product->exists() && $values['quantity']>0) :
+				
+				if ($values['quantity']>0 && $_product->needs_shipping()) :
 					
-					$item_shipping_price = ($this->cost + $this->get_fee( $this->fee, $_product->get_price() )) * $values['quantity'];
+					if (isset($this->flat_rates[$_product->get_shipping_class()])) :
+						$cost 	= $this->flat_rates[$shipping_class]['cost'];
+	    				$fee	= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $_product->get_price() );
+					else :
+						$cost 	= $this->cost;
+						$fee	= $this->get_fee( $this->fee, $_product->get_price() );
+					endif;
 					
-					// Only count 'psysical' products
-					if ( $_product->needs_shipping() ) :
+					$item_shipping_price = ( $cost + $fee ) * $values['quantity'];
+					
+					$this->shipping_total = $this->shipping_total + $item_shipping_price;
 						
-						$this->shipping_total = $this->shipping_total + $item_shipping_price;
-	
-						if ( $_product->is_shipping_taxable() && $this->tax_status=='taxable' ) :
+					if ( $_product->is_shipping_taxable() && $this->tax_status=='taxable' ) :
+					
+						$rate = $_tax->get_shipping_tax_rate( $_product->get_tax_class() );
 						
-							$rate = $_tax->get_shipping_tax_rate( $_product->get_tax_class() );
-							
-							if ($rate>0) :
-							
-								$tax_amount = $_tax->calc_shipping_tax( $item_shipping_price, $rate );
-							
-								$this->shipping_tax = $this->shipping_tax + $tax_amount;
-							
-							endif;
+						if ($rate>0) :
+						
+							$tax_amount = $_tax->calc_shipping_tax( $item_shipping_price, $rate );
+						
+							$this->shipping_tax = $this->shipping_tax + $tax_amount;
 						
 						endif;
 					
