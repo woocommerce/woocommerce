@@ -185,11 +185,15 @@ class flat_rate extends woocommerce_shipping_method {
     		
 	    		$found_shipping_classes = array();
 	    		
-	    		// Find shipping classes for products in the cart
+	    		// Find shipping classes for products in the cart. Store prices too, so we can calc a fee for the class.
 	    		if (sizeof($woocommerce->cart->get_cart())>0) : 
 	    			foreach ($woocommerce->cart->get_cart() as $item_id => $values) : 
 	    				if ( $values['data']->needs_shipping() ) :
-	    					$found_shipping_classes[] = $values['data']->get_shipping_class(); 
+	    					if (isset($found_shipping_classes[$values['data']->get_shipping_class()])) :
+	    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']) + $found_shipping_classes[$values['data']->get_shipping_class()];
+	    					else :
+	    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']);
+	    					endif;
 	    				endif;
 	    			endforeach; 
 	    		endif;
@@ -197,14 +201,14 @@ class flat_rate extends woocommerce_shipping_method {
 	    		$found_shipping_classes = array_unique($found_shipping_classes);
 	    		
 	    		// For each found class, add up the costs and fees
-	    		foreach ($found_shipping_classes as $shipping_class) :
+	    		foreach ($found_shipping_classes as $shipping_class => $class_price) :
 	    			if (isset($this->flat_rates[$shipping_class])) :
 	    				$cost 	+= $this->flat_rates[$shipping_class]['cost'];
-	    				$fee	+= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $woocommerce->cart->cart_contents_total );
+	    				$fee	+= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $class_price );
 	    			else :
 	    				// Class not set so we use default rate
 	    				$cost 	+= $this->cost;
-	    				$fee	+= $this->get_fee( $this->fee, $woocommerce->cart->cart_contents_total );
+	    				$fee	+= $this->get_fee( $this->fee, $class_price );
 	    			endif;
 	    		endforeach;
 
@@ -228,8 +232,10 @@ class flat_rate extends woocommerce_shipping_method {
 				$_product = $values['data'];
 				
 				if ($values['quantity']>0 && $_product->needs_shipping()) :
+				
+					$shipping_class = $_product->get_shipping_class();
 					
-					if (isset($this->flat_rates[$_product->get_shipping_class()])) :
+					if (isset($this->flat_rates[$shipping_class])) :
 						$cost 	= $this->flat_rates[$shipping_class]['cost'];
 	    				$fee	= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $_product->get_price() );
 					else :
