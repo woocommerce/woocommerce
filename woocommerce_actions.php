@@ -920,7 +920,11 @@ function woocommerce_download_product() {
 			
 			if (!$file_path) exit;
 			
-			$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
+			if (!is_multisite()) :
+				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
+			else :
+				$file_path = str_replace(trailingslashit(network_admin_url()), ABSPATH, $file_path);
+			endif;
 			
 			// See if its local or remote
 			if (strstr($file_path, 'http:') || strstr($file_path, 'https:') || strstr($file_path, 'ftp:')) :
