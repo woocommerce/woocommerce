@@ -73,28 +73,31 @@ class woocommerce_settings_api {
 
     	$settings = array();
     	$existing_settings = get_option( $this->plugin_id . $this->id . '_settings' );
-    	
-    	$defaults = array();
-    	
-    	foreach ( $this->form_fields as $k => $v ) {
-    		
-    		// Backwards compatibility
-    		if ( $value = get_option( $this->plugin_id . $this->id . '_' . $k ) ) :
-    			$defaults[$k] = $value;
-    		else :
-    		
-	    		if ( isset( $v['default'] ) ) {
-	    			$defaults[$k] = $v['default'];
-	    		} else {
-	    			$defaults[$k] = '';
-	    		}
-    		
-    		endif;
-    		
-    	}
-    	
+
     	if ( ! $existing_settings ) {
+    	
+	    	// Get defaults
+	    	$defaults = array();
+	    	
+	    	foreach ( $this->form_fields as $k => $v ) {
+	    		
+	    		// Backwards compatibility
+	    		if ( $value = get_option( $this->plugin_id . $this->id . '_' . $k ) ) :
+	    			$defaults[$k] = $value;
+	    		else :
+	    		
+		    		if ( isset( $v['default'] ) ) {
+		    			$defaults[$k] = $v['default'];
+		    		} else {
+		    			$defaults[$k] = '';
+		    		}
+	    		
+	    		endif;
+	    		
+	    	}
+    	
     		$existing_settings = $defaults;
+    		
     	} else {
     		// Prevent "undefined index" errors.
     		foreach ( $existing_settings as $k => $v ) {
