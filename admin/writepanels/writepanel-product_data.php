@@ -568,21 +568,21 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		endif;
 		
 		if ($date_to && !$date_from) :
-			update_post_meta( $post_id, 'sale_price_dates_from', strtotime('NOW') );
+			update_post_meta( $post_id, 'sale_price_dates_from', strtotime('NOW', current_time('timestamp')) );
 		endif;
 
 		// Update price if on sale
-		if ($_POST['sale_price'] && $date_to == '' && $date_from == '') :
+		if ($_POST['sale_price'] != '' && $date_to == '' && $date_from == '') :
 			update_post_meta( $post_id, 'price', stripslashes($_POST['sale_price']) );
 		else :
 			update_post_meta( $post_id, 'price', stripslashes($_POST['regular_price']) );
 		endif;	
 
-		if ($date_from && strtotime($date_from) < strtotime('NOW')) :
+		if ($date_from && strtotime($date_from) < strtotime('NOW', current_time('timestamp'))) :
 			update_post_meta( $post_id, 'price', stripslashes($_POST['sale_price']) );
 		endif;
 		
-		if ($date_to && strtotime($date_to) < strtotime('NOW')) :
+		if ($date_to && strtotime($date_to) < strtotime('NOW', current_time('timestamp'))) :
 			update_post_meta( $post_id, 'price', stripslashes($_POST['regular_price']) );
 			update_post_meta( $post_id, 'sale_price_dates_from', '');
 			update_post_meta( $post_id, 'sale_price_dates_to', '');
