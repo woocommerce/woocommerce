@@ -1177,8 +1177,7 @@ function woocommerce_product_subcategories() {
 	// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
 	$args = array(
 	    'child_of'                  => $parent,
-	    'orderby'                  	=> 'menu_order',
-	    'order'                    	=> 'ASC',
+	    'menu_order'                => 'ASC',
 	    'hide_empty'               	=> 1,
 	    'hierarchical'             	=> 1,
 	    'taxonomy'                  => 'product_cat',

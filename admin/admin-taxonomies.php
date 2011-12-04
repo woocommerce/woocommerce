@@ -265,8 +265,21 @@ function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=fals
 	return $index;
 }
 
+
 /**
- * Description to shipping class page
+ * Description for product_cat page
+ */
+add_action('product_cat_pre_add_form', 'woocommerce_product_cat_description');
+
+function woocommerce_product_cat_description() {
+
+	echo wpautop(__('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woothemes'));
+
+}
+
+
+/**
+ * Description for shipping class page
  */
 add_action('product_shipping_class_pre_add_form', 'woocommerce_shipping_class_description');
 

@@ -88,6 +88,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Enhanced Flat Rate shipping to give a flat rate to each shipping class
 * Made jquery UI optional and improved javascript
 * Javascript can be loaded in the footer
+* Reworked term ordering system to make it more flexible and easier to manage
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations

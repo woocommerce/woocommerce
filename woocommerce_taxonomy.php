@@ -376,7 +376,16 @@ add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3);
 
 function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	global $wpdb, $woocommerce;
+
+	// No sorting when menu_order is false
+	if ( isset($args['menu_order']) && $args['menu_order'] == false ) return $clauses;
 	
+	// No sorting when orderby is non default
+	if ( isset($args['orderby']) && $args['orderby'] != 'name' ) return $clauses;
+	
+	// No sorting in admin when sorting by a column
+	if ( isset($_GET['orderby']) ) return $clauses;
+
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
 	foreach ((array) $taxonomies as $taxonomy) :
@@ -393,10 +402,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	else :
 		$meta_name = 'order';
 	endif;
-		
-	// query order
-	if( isset($args['menu_order']) && !$args['menu_order']) return $clauses; // menu_order is false so we do not add order clause
-	
+
 	// query fields
 	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
 

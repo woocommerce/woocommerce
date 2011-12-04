@@ -120,8 +120,8 @@ function woocommerce_admin_scripts() {
 		
 	endif;
 	
-	// Term ordering
-	if ($screen->id=='edit-product_cat' || strstr($screen->id, 'edit-pa_')) :
+	// Term ordering - only when sorting by menu_order (our custom meta)
+	if (($screen->id=='edit-product_cat' || strstr($screen->id, 'edit-pa_')) && !isset($_GET['orderby'])) :
 		
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable') );
 		wp_enqueue_script( 'woocommerce_term_ordering' );
