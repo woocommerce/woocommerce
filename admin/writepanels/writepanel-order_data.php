@@ -502,9 +502,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'variation_id' 	=> (int) $item_variation[$i],
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
-			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 4, '.', ''),
-			 		'base_cost'		=> number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''),
-			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
+			 		'cost' 			=> rtrim(rtrim(number_format(woocommerce_clean($item_cost[$i]), 4, '.', ''), '0'), '.'),
+			 		'base_cost'		=> rtrim(rtrim(number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''), '0'), '.'),
+			 		'taxrate' 		=> rtrim(rtrim(number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''), '0'), '.'),
 			 		'item_meta'		=> $item_meta->meta
 			 	));
 			 	
