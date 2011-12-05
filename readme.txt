@@ -90,6 +90,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Javascript can be loaded in the footer
 * Reworked term ordering system to make it more flexible and easier to manage
 * add_to_cart_url shortcode
+* French translation
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
