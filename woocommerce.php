@@ -438,8 +438,8 @@ function get_woocommerce_currency_symbol() {
 		case 'TRY' : $currency_symbol = 'TL'; break;
 		case 'NOK' : $currency_symbol = 'kr'; break;
 		case 'ZAR' : $currency_symbol = 'R'; break;
-		
-		case 'CZK' :
+		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
+
 		case 'DKK' :
 		case 'HUF' :
 		case 'ILS' :
