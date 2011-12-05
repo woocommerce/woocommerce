@@ -1071,7 +1071,7 @@ function woocommerce_settings() {
 					break;
 					case "payment_gateways" : 	
 					
-						$links = array();
+						$links = array( '<a href="#gateway-order">'.__('Gateways', 'woothemes').'</a>' );
             	
 		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 		            		$title = ( isset( $gateway->method_title ) && $gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
