@@ -273,6 +273,31 @@ function woocommerce_product_add_to_cart($atts){
 
 
 /**
+ * Get the add to cart URL for a product
+ **/
+function woocommerce_product_add_to_cart_url( $atts ){
+  	if (empty($atts)) return;
+  	
+  	global $wpdb;
+  	  	
+  	if ($atts['id']) :
+  		$product_data = get_post( $atts['id'] );
+	elseif ($atts['sku']) :
+		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
+		$product_data = get_post( $product_id );
+	else :
+		return;
+	endif;
+	
+	if ($product_data->post_type!=='product') return;
+	
+	$_product = &new woocommerce_product( $product_data->ID ); 
+		
+	return esc_url( $_product->add_to_cart_url() );
+}
+
+
+/**
  * Output featured products
  **/
 function woocommerce_featured_products( $atts ) {
@@ -321,6 +346,7 @@ function woocommerce_featured_products( $atts ) {
 add_shortcode('product_category', 'woocommerce_product_category');
 add_shortcode('product', 'woocommerce_product');
 add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
+add_shortcode('add_to_cart_url', 'woocommerce_product_add_to_cart_url');
 add_shortcode('products', 'woocommerce_products');
 add_shortcode('recent_products', 'woocommerce_recent_products');
 add_shortcode('featured_products', 'woocommerce_featured_products');

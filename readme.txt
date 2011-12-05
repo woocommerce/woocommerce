@@ -89,6 +89,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made jquery UI optional and improved javascript
 * Javascript can be loaded in the footer
 * Reworked term ordering system to make it more flexible and easier to manage
+* add_to_cart_url shortcode
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
