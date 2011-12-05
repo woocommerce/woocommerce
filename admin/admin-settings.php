@@ -332,6 +332,24 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 	
 	array(  
+		'name' => __( 'Product category slug', 'woothemes' ),
+		'desc' 		=> __( 'Shows in the product category URLs. Leave blank to use the default slug.', 'woothemes' ),
+		'id' 		=> 'woocommerce_product_category_slug',
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __( 'Product tag slug', 'woothemes' ),
+		'desc' 		=> __( 'Shows in the product tag URLs. Leave blank to use the default slug.', 'woothemes' ),
+		'id' 		=> 'woocommerce_product_tag_slug',
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
+		'std' 		=> ''
+	),
+	
+	array(  
 		'name' => __( 'Product base page', 'woothemes' ),
 		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woothemes' ), $base_slug),
 		'id' 		=> 'woocommerce_prepend_shop_page_to_products',

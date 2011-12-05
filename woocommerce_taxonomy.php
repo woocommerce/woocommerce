@@ -20,6 +20,9 @@ function woocommerce_post_type() {
 	
 	$category_base = (get_option('woocommerce_prepend_shop_page_to_urls')=="yes") ? trailingslashit($base_slug) : '';
 	
+	$category_slug = (get_option('woocommerce_product_category_slug')) ? get_option('woocommerce_product_category_slug') : _x('product-category', 'slug', 'woothemes');
+	$tag_slug = (get_option('woocommerce_product_tag_slug')) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woothemes');
+	
 	$product_base = (get_option('woocommerce_prepend_shop_page_to_products')=='yes') ? trailingslashit($base_slug) : trailingslashit(__('product', 'woothemes'));
 	if (get_option('woocommerce_prepend_category_to_products')=='yes') $product_base .= trailingslashit('%product_cat%');
 	$product_base = untrailingslashit($product_base);
@@ -61,7 +64,7 @@ function woocommerce_post_type() {
             	),
             'show_ui' 				=> true,
             'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-category', 'slug', 'woothemes'), 'with_front' => false ),
+            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false ),
         )
     );
     
@@ -84,7 +87,7 @@ function woocommerce_post_type() {
             	),
             'show_ui' 				=> true,
             'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-tag', 'slug', 'woothemes'), 'with_front' => false ),
+            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
         )
     );
     
