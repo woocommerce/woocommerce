@@ -918,7 +918,7 @@ function woocommerce_top_sellers() {
 					
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
-					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.$sales.'</span></a></td></tr>';
+					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.$sales.'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -994,7 +994,7 @@ function woocommerce_top_earners() {
 		<thead>
 			<tr>
 				<th><?php _e('Product', 'woothemes'); ?></th>
-				<th><?php _e('Sales', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Sales', 'woothemes'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1007,12 +1007,12 @@ function woocommerce_top_earners() {
 					if ($product) :
 						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
 					else :
-						$product_name = __('Product does not exist', 'woothemes');
+						$product_name = __('Product no longer exists', 'woothemes');
 					endif;
 					
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
-					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.woocommerce_price($sales).'</span></a></td></tr>';
+					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.woocommerce_price($sales).'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -1119,7 +1119,7 @@ function woocommerce_product_sales() {
 		<thead>
 			<tr>
 				<th><?php _e('Month', 'woothemes'); ?></th>
-				<th><?php _e('Sales', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Sales', 'woothemes'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1130,11 +1130,13 @@ function woocommerce_product_sales() {
 	
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
 	
-					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th><td>
-						<span style="width:'.$width.'%"><span>'.$sales.'</span></span>
-						<span class="alt" style="width:'.$width2.'%"><span>'.woocommerce_price($product_totals[$date]).'</span></span>
+					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th>
+					<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
+					<td class="bars">
+						<span style="width:'.$width.'%">&nbsp;</span>
+						<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
 					</td></tr>';
-				endforeach; else echo '<tr><td colspan="2">'.__('No sales :(', 'woothemes').'</td></tr>';
+				endforeach; else echo '<tr><td colspan="3">'.__('No sales :(', 'woothemes').'</td></tr>';
 			?>
 		</tbody>
 	</table>
