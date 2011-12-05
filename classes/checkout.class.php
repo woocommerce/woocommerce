@@ -731,11 +731,17 @@ class woocommerce_checkout {
 							do_action('woocommerce_new_order', $order_id);
 						endif;
 					endif;
-
-					// Get better formatted shipping method (title/label)
+					
+					// Get better formatted billing method (title)
 					$shipping_method = $this->posted['shipping_method'];
 					if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
 						$shipping_method = $available_methods[$this->posted['shipping_method']]->title;
+					endif;
+					
+					// Get better formatted shipping method (title/label)
+					$payment_method = $this->posted['payment_method'];
+					if (isset($available_gateways) && isset($available_gateways[$this->posted['payment_method']])) :
+						$payment_method = $available_gateways[$this->posted['payment_method']]->title;
 					endif;
 					
 					// Update order meta
@@ -760,7 +766,7 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
 					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
 					update_post_meta( $order_id, '_shipping_method', 		$shipping_method);
-					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
+					update_post_meta( $order_id, '_payment_method', 		$payment_method);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
