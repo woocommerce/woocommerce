@@ -520,7 +520,7 @@ if (!function_exists('woocommerce_pagination')) {
  **/
 if (!function_exists('woocommerce_catalog_ordering')) {
 	function woocommerce_catalog_ordering() {
-
+		if (!isset($_SESSION['orderby'])) $_SESSION['orderby'] = apply_filters('woocommerce_default_catalog_orderby', 'title');
 		?>
 		<form class="woocommerce_ordering" method="post">
 			<select name="catalog_orderby" class="orderby">
