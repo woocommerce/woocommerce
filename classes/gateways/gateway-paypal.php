@@ -157,8 +157,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
 		
-		$shipping_name = explode(' ', $order->shipping_method);
-		
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace(array('(', '-', ' ', ')'), '', $order->billing_phone);
 			$phone_args = array(

@@ -80,8 +80,8 @@ function woocommerce_custom_order_columns($column) {
         	echo '</strong><br/>';
         	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16' ) . '">'.esc_html( $order->formatted_billing_address ).'</a>';
         	
-        	if ($order->payment_method) :
-        		echo '<small class="meta">' . __('Paid via', 'woothemes') . ' ' . esc_html( $order->payment_method ) . '</small>';
+        	if ($order->payment_method_title) :
+        		echo '<small class="meta">' . __('Paid via', 'woothemes') . ' ' . esc_html( $order->payment_method_title ) . '</small>';
         	endif;
         	
 		break;
@@ -95,8 +95,8 @@ function woocommerce_custom_order_columns($column) {
         		echo '&ndash;';
         	endif;
         	
-        	if ($order->shipping_method) :
-        		echo '<small class="meta">' . __('Shipped via', 'woothemes') . ' ' . esc_html( $order->shipping_method ) . '</small>';
+        	if ($order->shipping_method_title) :
+        		echo '<small class="meta">' . __('Shipped via', 'woothemes') . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
         	endif;
 		break;
 		case "total_cost" :

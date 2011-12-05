@@ -111,9 +111,7 @@ function woocommerce_pay() {
 					<li class="method">
 						<?php _e('Payment method:', 'woothemes'); ?>
 						<strong><?php 
-							$gateways = $woocommerce->payment_gateways->payment_gateways();
-							if (isset($gateways[$order->payment_method])) echo $gateways[$order->payment_method]->title;
-							else echo $order->payment_method; 
+							echo $order->payment_method_title; 
 						?></strong>
 					</li>
 				</ul>

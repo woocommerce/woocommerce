@@ -83,7 +83,9 @@ class woocommerce_order {
 			'shipping_country'		=> '',
 			'shipping_state'		=> '',
 			'shipping_method'		=> '',
+			'shipping_method_title'	=> '',
 			'payment_method'		=> '',
+			'payment_method_title' 	=> '',
 			'order_subtotal'		=> '',
 			'order_discount'		=> '',
 			'cart_discount'			=> '',
@@ -269,7 +271,7 @@ class woocommerce_order {
 			
 			endif;
 			
-			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method));
+			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method_title));
 			
 		else :
 			$shipping = __('Free!', 'woothemes');

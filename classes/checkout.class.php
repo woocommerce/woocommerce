@@ -765,8 +765,10 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_shipping_postcode', 		$shipping_postcode);
 					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
 					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
-					update_post_meta( $order_id, '_shipping_method', 		$shipping_method);
-					update_post_meta( $order_id, '_payment_method', 		$payment_method);
+					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
+					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
+					update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
+					update_post_meta( $order_id, '_payment_method_title', 	$payment_method);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
