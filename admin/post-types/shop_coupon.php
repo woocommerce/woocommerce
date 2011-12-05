@@ -1,0 +1,68 @@
+<?php
+/**
+ * Admin functions for the shop_coupon post type
+ *
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce
+ */
+ 
+/**
+ * Columns for Coupons page
+ **/
+add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
+
+function woocommerce_edit_coupon_columns($columns){
+	
+	$columns = array();
+	
+	$columns["cb"] 			= "<input type=\"checkbox\" />";
+	$columns["title"] 		= __("Code", 'woothemes');
+	$columns["type"] 		= __("Coupon type", 'woothemes');
+	$columns["amount"] 		= __("Coupon amount", 'woothemes');
+	$columns["products"]	= __("Product IDs", 'woothemes');
+	$columns["usage_limit"] = __("Usage limit", 'woothemes');
+	$columns["usage_count"] = __("Usage count", 'woothemes');
+	$columns["expiry_date"] = __("Expiry date", 'woothemes');
+
+	return $columns;
+}
+
+
+/**
+ * Custom Columns for Coupons page
+ **/
+add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
+
+function woocommerce_custom_coupon_columns($column) {
+	global $post, $woocommerce;
+	
+	$type 			= get_post_meta($post->ID, 'discount_type', true);
+	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
+	$individual_use = get_post_meta($post->ID, 'individual_use', true);
+	$product_ids 	= (get_post_meta($post->ID, 'product_ids', true)) ? explode(',', get_post_meta($post->ID, 'product_ids', true)) : array();
+	$usage_limit 	= get_post_meta($post->ID, 'usage_limit', true);
+	$usage_count 	= (int) get_post_meta($post->ID, 'usage_count', true);
+	$expiry_date 	= get_post_meta($post->ID, 'expiry_date', true);
+
+	switch ($column) {
+		case "type" :
+			echo $woocommerce->get_coupon_discount_type($type);			
+		break;
+		case "amount" :
+			echo $amount;
+		break;
+		case "products" :
+			if (sizeof($product_ids)>0) echo implode(', ', $product_ids); else echo '&ndash;';
+		break;
+		case "usage_limit" :
+			if ($usage_limit) echo $usage_limit; else echo '&ndash;';
+		break;
+		case "usage_count" :
+			echo $usage_count;
+		break;
+		case "expiry_date" :
+			if ($expiry_date) echo date('F j, Y', strtotime($expiry_date)); else echo '&ndash;';
+		break;
+	}
+}
