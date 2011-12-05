@@ -138,6 +138,7 @@ function woocommerce_admin_fields($options) {
     foreach ($options as $value) :
     	if (!isset( $value['class'] )) $value['class'] = '';
     	if (!isset( $value['css'] )) $value['css'] = '';
+    	if (!isset( $value['std'] )) $value['std'] = '';
         switch($value['type']) :
             case 'title':
             	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
