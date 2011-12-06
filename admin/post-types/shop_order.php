@@ -289,26 +289,6 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 }
 
 /**
- * Order messages
- **/
-add_filter( 'post_updated_messages', 'woocommerce_post_updated_messages' );
-
-function woocommerce_post_updated_messages( $messages ) {
-	if( get_post_type() === 'shop_order' ) :
-    	
-    	$messages['post'][1] = sprintf( __('Order updated.', 'woothemes') );
-    	$messages['post'][4] = sprintf( __('Order updated.', 'woothemes') );
-		$messages['post'][6] = sprintf( __('Order published.', 'woothemes') );
-		
-		$messages['post'][8] = sprintf( __('Order submitted.', 'woothemes') );
-		$messages['post'][10] = sprintf( __('Order draft updated.', 'woothemes') );
-	
-   	endif;
-    return $messages;
-}
-
-
-/**
  * Mark an order as complete
  */
 function woocommerce_mark_order_complete() {
