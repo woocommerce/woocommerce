@@ -94,6 +94,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Customer note field quote fix
 * Moved product-category and tag slugs to settings (page)
 * % coupon fix
+* Tax rates based on shipping address
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
