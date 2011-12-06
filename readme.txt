@@ -84,6 +84,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 = 1.3.1 =
 * Many Minor bug fixes
+* Ability to re-order payment gateways and choose a default
 * Added a 'Shipping class' taxonomy for grouping products
 * Enhanced Flat Rate shipping to give a flat rate to each shipping class
 * Made jQuery UI optional and improved Javascript

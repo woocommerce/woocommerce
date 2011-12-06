@@ -17,11 +17,29 @@ class woocommerce_payment_gateways {
     	
     	$load_gateways = apply_filters('woocommerce_payment_gateways', array());
 		
-		foreach ($load_gateways as $gateway) :
+		// Get order option
+		$ordering 	= (array) get_option('woocommerce_gateway_order');
+		$order_end 	= 999;
 		
-			$this->payment_gateways[] = &new $gateway();
+		// Load gateways in order
+		foreach ($load_gateways as $gateway) :
+			
+			$load_gateway = &new $gateway();
+			
+			if (isset($ordering[$load_gateway->id]) && is_numeric($ordering[$load_gateway->id])) :
+				// Add in position
+				$this->payment_gateways[$ordering[$load_gateway->id]] = $load_gateway;
+			else :
+				// Add to end of the array
+				$this->payment_gateways[$order_end] = $load_gateway;
+				$order_end++;
+			endif;
 			
 		endforeach;
+		
+		ksort($this->payment_gateways);
+		
+		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
     	
     }
 
@@ -53,4 +71,24 @@ class woocommerce_payment_gateways {
 		return $_available_gateways;
 	}
 	
+	function process_admin_options() {
+		
+		$default_gateway = (isset($_POST['default_gateway'])) ? esc_attr($_POST['default_gateway']) : '';
+		$gateway_order = (isset($_POST['gateway_order'])) ? $_POST['gateway_order'] : '';
+		
+		$order = array();
+		
+		if (is_array($gateway_order) && sizeof($gateway_order)>0) :
+			$loop = 0;
+			foreach ($gateway_order as $gateway_id) :
+				$order[$gateway_id] = $loop;
+				$loop++;
+			endforeach;
+		endif;
+		
+		update_option( 'woocommerce_default_gateway', $default_gateway );
+		update_option( 'woocommerce_gateway_order', $order );
+		
+	}
+		
 }

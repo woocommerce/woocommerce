@@ -1071,7 +1071,7 @@ function woocommerce_settings() {
 					break;
 					case "payment_gateways" : 	
 					
-						$links = array( '<a href="#gateway-order">'.__('Gateways', 'woothemes').'</a>' );
+						$links = array( '<a href="#gateway-order">'.__('Payment Gateways', 'woothemes').'</a>' );
             	
 		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 		            		$title = ( isset( $gateway->method_title ) && $gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
@@ -1079,7 +1079,55 @@ function woocommerce_settings() {
 						endforeach;
 						
 						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
-		            
+		            	
+		            	// Gateway ordering
+		            	echo '<div class="section" id="gateway-order">';
+		            	
+		            	?>
+		            	<h3><?php _e('Payment Gateways', 'woothemes'); ?></h3>
+		            	<p><?php _e('Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout.', 'woothemes'); ?></p>
+		            	<table class="wc_gateways widefat" cellspacing="0">
+		            		<thead>
+		            			<tr>
+		            				<th width="1%"><?php _e('Default', 'woothemes'); ?></th>
+		            				<th><?php _e('Gateway', 'woothemes'); ?></th>
+		            				<th><?php _e('Status', 'woothemes'); ?></th>
+		            			</tr>
+		            		</thead>
+		            		<tbody>
+				            	<?php
+				            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
+				            		
+				            		$default_gateway = get_option('woocommerce_default_gateway');
+				            		
+				            		echo '<tr>
+				            			<td width="1%" class="radio">
+				            				<input type="radio" name="default_gateway" value="'.$gateway->id.'" '.checked($default_gateway, $gateway->id, false).' />
+				            				<input type="hidden" name="gateway_order[]" value="'.$gateway->id.'" />
+				            			</td>
+				            			<td>
+				            				<p><strong>'.$gateway->title.'</strong><br/>
+				            				<small>'.__('Gateway ID', 'woothemes').': '.$gateway->id.'</small></p>
+				            			</td>
+				            			<td>';
+				            		
+				            		if ($gateway->enabled == 'yes') 
+				            			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
+									else 
+										echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';	
+				            			
+				            		echo '</td>
+				            		</tr>';
+				            		
+				            	endforeach; 
+				            	?>
+		            		</tbody>
+		            	</table>
+		            	<?php
+		            	
+		            	echo '</div>';
+		            	
+		            	// Specific gateway options
 		            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
 		            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
 		            		$gateway->admin_options();
@@ -1101,71 +1149,96 @@ function woocommerce_settings() {
 		</form>
 		
 		<script type="text/javascript">
-
-			// Subsubsub tabs
-			jQuery('ul.subsubsub li a:eq(0)').addClass('current');
-			jQuery('.subsubsub_section .section:gt(0)').hide();
+			jQuery(window).load(function(){
 			
-			jQuery('ul.subsubsub li a').click(function(){
-				jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
-				jQuery(this).addClass('current');
-				jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
-				jQuery( jQuery(this).attr('href') ).show();
-				jQuery('#last_tab').val( jQuery(this).attr('href') );
-				return false;
-			});
-			
-			<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
-			
-			// Countries
-			jQuery('select#woocommerce_allowed_countries').change(function(){
-				if (jQuery(this).val()=="specific") {
-					jQuery(this).parent().parent().next('tr').show();
-				} else {
-					jQuery(this).parent().parent().next('tr').hide();
-				}
-			}).change();
-			
-			// Color picker
-			jQuery('.colorpick').each(function(){
-				jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
-				jQuery(this).click(function() {
-					if ( jQuery(this).val() == "" ) jQuery(this).val('#');
-					jQuery('.colorpickdiv', jQuery(this).parent() ).show();
-				});	
-			});
-			jQuery(document).mousedown(function(){
-				jQuery('.colorpickdiv').hide();
-			});
-			
-			// Edit prompt
-			jQuery(function(){
-				var changed = false;
+				// Subsubsub tabs
+				jQuery('ul.subsubsub li a:eq(0)').addClass('current');
+				jQuery('.subsubsub_section .section:gt(0)').hide();
 				
-				jQuery('input, textarea, select, checkbox').change(function(){
-					changed = true;
+				jQuery('ul.subsubsub li a').click(function(){
+					jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
+					jQuery(this).addClass('current');
+					jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
+					jQuery( jQuery(this).attr('href') ).show();
+					jQuery('#last_tab').val( jQuery(this).attr('href') );
+					return false;
 				});
 				
-				jQuery('.woo-nav-tab-wrapper a').click(function(){
-					if (changed) {
-						window.onbeforeunload = function() {
-						    return '<?php echo __( 'The changes you made will be lost if you navigate away from this page.', 'woothemes' ); ?>';
-						}
+				<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
+				
+				// Countries
+				jQuery('select#woocommerce_allowed_countries').change(function(){
+					if (jQuery(this).val()=="specific") {
+						jQuery(this).parent().parent().next('tr').show();
 					} else {
+						jQuery(this).parent().parent().next('tr').hide();
+					}
+				}).change();
+				
+				// Color picker
+				jQuery('.colorpick').each(function(){
+					jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
+					jQuery(this).click(function() {
+						if ( jQuery(this).val() == "" ) jQuery(this).val('#');
+						jQuery('.colorpickdiv', jQuery(this).parent() ).show();
+					});	
+				});
+				jQuery(document).mousedown(function(){
+					jQuery('.colorpickdiv').hide();
+				});
+				
+				// Edit prompt
+				jQuery(function(){
+					var changed = false;
+					
+					jQuery('input, textarea, select, checkbox').change(function(){
+						changed = true;
+					});
+					
+					jQuery('.woo-nav-tab-wrapper a').click(function(){
+						if (changed) {
+							window.onbeforeunload = function() {
+							    return '<?php echo __( 'The changes you made will be lost if you navigate away from this page.', 'woothemes' ); ?>';
+							}
+						} else {
+							window.onbeforeunload = '';
+						}
+					});
+					
+					jQuery('.submit input').click(function(){
 						window.onbeforeunload = '';
+					});
+				});
+				
+				// Sorting
+				jQuery('table.wc_gateways tbody').sortable({
+					items:'tr',
+					cursor:'move',
+					axis:'y',
+					handle: 'td',
+					scrollSensitivity:40,
+					helper:function(e,ui){
+						ui.children().each(function(){
+							jQuery(this).width(jQuery(this).width());
+						});
+						ui.css('left', '0');
+						return ui;
+					},
+					start:function(event,ui){
+						ui.item.css('background-color','#f6f6f6');
+					},
+					stop:function(event,ui){
+						ui.item.removeAttr('style');
 					}
 				});
 				
-				jQuery('.submit input').click(function(){
-					window.onbeforeunload = '';
+				// Chosen selects
+				jQuery("select.chosen_select").chosen();
+				
+				jQuery("select.chosen_select_nostd").chosen({
+					allow_single_deselect: 'true'
 				});
-			});
-			
-			// Chosen selects
-			jQuery("select.chosen_select").chosen();
-			
-			jQuery("select.chosen_select_nostd").chosen({
-				allow_single_deselect: 'true'
+				
 			});
 		</script>
 	</div>
