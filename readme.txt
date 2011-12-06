@@ -86,7 +86,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Many Minor bug fixes
 * Added a 'Shipping class' taxonomy for grouping products
 * Enhanced Flat Rate shipping to give a flat rate to each shipping class
-* Made jquery UI optional and improved javascript
+* Made jQuery UI optional and improved Javascript
 * Javascript can be loaded in the footer
 * Reworked term ordering system to make it more flexible and easier to manage
 * add_to_cart_url shortcode
