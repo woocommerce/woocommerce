@@ -1240,9 +1240,9 @@ function woocommerce_product_subcategories() {
 function woocommerce_subcategory_thumbnail( $category ) {
 	global $woocommerce;
 
-	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_thumbnail');
-	$image_width 			= $woocommerce->get_image_size('shop_thumbnail_image_width');
-	$image_height 			= $woocommerce->get_image_size('shop_thumbnail_image_height');
+	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_catalog');
+	$image_width 			= $woocommerce->get_image_size('shop_catalog_image_width');
+	$image_height 			= $woocommerce->get_image_size('shop_catalog_image_height');
 
 	$thumbnail_id 	= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 
