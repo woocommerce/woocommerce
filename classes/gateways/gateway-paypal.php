@@ -454,7 +454,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					);
 				
 					// Send the mail
-					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed'), $order->id), $message );
+					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woothemes'), $order->id), $message );
 	            	
 	            break;
 	            default:

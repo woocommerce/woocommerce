@@ -336,9 +336,9 @@ function woocommerce_order_actions_meta_box($post) {
 		<?php
 		if ( current_user_can( "delete_post", $post->ID ) ) {
 			if ( !EMPTY_TRASH_DAYS )
-				$delete_text = __('Delete Permanently');
+				$delete_text = __('Delete Permanently', 'woothemes');
 			else
-				$delete_text = __('Move to Trash');
+				$delete_text = __('Move to Trash', 'woothemes');
 			?>
 		<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
 		} ?>

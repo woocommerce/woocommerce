@@ -62,19 +62,6 @@ function woocommerce_enter_title_here( $text, $post ) {
 }
 
 /**
- * Let variations have a product as the parent
- 
-function variations_product_meta_box($post) {
-	$post_type_object = get_post_type_object($post->post_type);
-	if ( $post_type_object->hierarchical ) {
-			$pages = wp_dropdown_pages(array('post_type' => 'product', 'selected' => $post->post_parent, 'name' => 'parent_id', 'show_option_none' => __('(no parent)'), 'sort_column'=> 'menu_order, post_title', 'echo' => 0));
-		if ( ! empty($pages) ) {
-			echo $pages;
-		} // end empty pages check
-	} // end hierarchical check.
-}*/
-
-/**
  * Save meta boxes
  * 
  * Runs when a post is saved and does an action which the write panel save scripts can hook into.

@@ -104,19 +104,19 @@ function woocommerce_custom_order_columns($column) {
 		break;
 		case "order_date" :
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
-				$t_time = $h_time = __( 'Unpublished' );
+				$t_time = $h_time = __( 'Unpublished', 'woothemes' );
 				$time_diff = 0;
 			else :
-				$t_time = get_the_time( __( 'Y/m/d g:i:s A' ) );
+				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woothemes' ) );
 				$m_time = $post->post_date;
 				$time = get_post_time( 'G', true, $post );
 
 				$time_diff = time() - $time;
 
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
-					$h_time = sprintf( __( '%s ago' ), human_time_diff( $time ) );
+					$h_time = sprintf( __( '%s ago', 'woothemes' ), human_time_diff( $time ) );
 				else
-					$h_time = mysql2date( __( 'Y/m/d' ), $m_time );
+					$h_time = mysql2date( __( 'Y/m/d', 'woothemes' ), $m_time );
 			endif;
 
 			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr>';
@@ -294,7 +294,7 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 function woocommerce_mark_order_complete() {
 
 	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.') );
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
 	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
@@ -313,7 +313,7 @@ add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_co
 function woocommerce_mark_order_processing() {
 
 	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.') );
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
 	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;

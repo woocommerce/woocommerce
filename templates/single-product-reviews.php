@@ -76,9 +76,9 @@
 		'comment_notes_before' => '',
 		'comment_notes_after' => '',
 		'fields' => array(
-			'author' => '<p class="comment-form-author">' . '<label for="author">' . __( 'Name' ) . '</label> ' . '<span class="required">*</span>' .
+			'author' => '<p class="comment-form-author">' . '<label for="author">' . __( 'Name', 'woothemes' ) . '</label> ' . '<span class="required">*</span>' .
 			            '<input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30" aria-required="true" /></p>',
-			'email'  => '<p class="comment-form-email"><label for="email">' . __( 'Email' ) . '</label> ' . '<span class="required">*</span>' .
+			'email'  => '<p class="comment-form-email"><label for="email">' . __( 'Email', 'woothemes' ) . '</label> ' . '<span class="required">*</span>' .
 			            '<input id="email" name="email" type="text" value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30" aria-required="true" /></p>',
 		),
 		'label_submit' => __('Submit Review', 'woothemes'),

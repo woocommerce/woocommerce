@@ -728,22 +728,22 @@ function woocommerce_process_registration() {
 		
 		// Check the username
 		if ( $sanitized_user_login == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.', 'woothemes' ) );
 		} elseif ( ! validate_username( $_POST['username'] ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.', 'woothemes' ) );
 			$sanitized_user_login = '';
 		} elseif ( username_exists( $sanitized_user_login ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.', 'woothemes' ) );
 		}
 	
 		// Check the e-mail address
 		if ( $user_email == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.', 'woothemes' ) );
 		} elseif ( ! is_email( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'woothemes' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'woothemes' ) );
 		}
 	
 		// Password
