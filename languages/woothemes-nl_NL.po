@@ -2873,7 +2873,7 @@ msgstr "Korting Type"
 #: woocommerce_actions.php:283
 #: woocommerce_actions.php:284
 #@ woothemes
-#@ wc_table_rate
+#@ woothemes
 msgid "0.00"
 msgstr "0.00"
 
@@ -6963,7 +6963,7 @@ msgstr ""
 #: admin/admin-settings-forms.php:436
 #: classes/shipping/shipping-flat_rate.php:363
 #@ woothemes
-#@ wc_table_rate
+#@ woothemes
 msgid "Delete the selected rates?"
 msgstr "Verwijderd de geselecteerde tarieven?"
 

@@ -351,8 +351,8 @@ class flat_rate extends woocommerce_shipping_method {
 	               				?>\
 	               			</select>\
 	               		</td>\
-	                    <td><input type="text" name="flat_rate_cost[' + size + ']" placeholder="<?php _e('0.00', 'wc_table_rate'); ?>" size="4" /></td>\
-	                    <td><input type="text" name="flat_rate_fee[' + size + ']" placeholder="<?php _e('0.00', 'wc_table_rate'); ?>" size="4" /></td>\
+	                    <td><input type="text" name="flat_rate_cost[' + size + ']" placeholder="<?php _e('0.00', 'woothemes'); ?>" size="4" /></td>\
+	                    <td><input type="text" name="flat_rate_fee[' + size + ']" placeholder="<?php _e('0.00', 'woothemes'); ?>" size="4" /></td>\
                     </tr>').appendTo('#flat_rates table tbody');
 					
 					return false;
@@ -360,7 +360,7 @@ class flat_rate extends woocommerce_shipping_method {
 				
 				// Remove row
 				jQuery('#flat_rates a.remove').live('click', function(){
-					var answer = confirm("<?php _e('Delete the selected rates?', 'wc_table_rate'); ?>")
+					var answer = confirm("<?php _e('Delete the selected rates?', 'woothemes'); ?>")
 					if (answer) {
 						jQuery('#flat_rates table tbody tr td.check-column input:checked').each(function(i, el){
 							jQuery(el).closest('tr').remove();
