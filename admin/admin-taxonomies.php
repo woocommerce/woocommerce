@@ -288,23 +288,3 @@ function woocommerce_shipping_class_description() {
 	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
 
 }
-
-
-/**
- * Description for shipping class page
- */
- add_action('pa_genre_pre_add_form', 'woocommerce_stestass_description');
-add_action('pa_image-size_pre_add_form', 'woocommerce_stestass_description');
-
-function woocommerce_stestass_description() {
-
-global $wp_current_screen_options;
-	
-	var_dump($wp_current_screen_options);
-	
-	 $screen = get_current_screen();
-	 
-	 var_dump($screen);
-
-}
-
