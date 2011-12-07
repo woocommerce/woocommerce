@@ -165,7 +165,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Scripts &amp; Styling', 'woothemes' ),
+		'name' => __( 'Styling', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
 		'std' 		=> 'yes',
@@ -174,11 +174,20 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
+		'id' 		=> 'woocommerce_demo_store',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Scripts', 'woothemes' ),
 		'desc' 		=> __( 'Enable AJAX add to cart buttons on product archives', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_ajax_add_to_cart',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
@@ -206,19 +215,18 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(  
-		'name' => __( 'Demo store notice', 'woothemes' ),
-		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
-		'id' 		=> 'woocommerce_demo_store',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
-	),
-	
-	array(  
-		'name' => __('File downloads', 'woothemes'),
-		'desc' 		=> __('Use <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> to serve downloads (server requires <code>mod_xsendfile</code>)', 'woothemes'),
-		'id' 		=> 'woocommerce_mod_xsendfile_enabled',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
+		'name' => __('File download method', 'woothemes'),
+		'desc' 		=> __('Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woothemes'),
+		'id' 		=> 'woocommerce_file_download_method',
+		'type' 		=> 'select',
+		'class'		=> 'chosen_select',
+		'css' 		=> 'min-width:300px;',
+		'std'		=> 'force',
+		'options' => array(  
+			'force'  	=> __( 'Force Downloads', 'woothemes' ),
+			'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woothemes' ),
+			'redirect'  => __( 'Redirect only', 'woothemes' ),	
+		)
 	),
 	
 	array(  

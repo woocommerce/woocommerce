@@ -920,6 +920,15 @@ function woocommerce_download_product() {
 			
 			if (!$file_path) exit;
 			
+			$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $download_file);
+			
+			if ($file_download_method=='redirect') :
+				
+				header('Location: '.$file_path);
+				exit;
+				
+			endif;
+			
 			if (!is_multisite()) :	
 				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
 			else :
@@ -956,7 +965,7 @@ function woocommerce_download_product() {
                 default: $ctype="application/force-download";
             endswitch;
             
-            if (get_option('woocommerce_mod_xsendfile_enabled')=='yes') :
+            if ($file_download_method=='xsendfile') :
             
 				header("X-Accel-Redirect: $file_path");
 				header("X-Sendfile: $file_path");

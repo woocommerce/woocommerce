@@ -98,6 +98,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Tax rates based on shipping address
 * Helpers for outputting JS in the footer
 * Fixed sale widget
+* File download method option so force download can be switched off
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
