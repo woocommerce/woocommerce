@@ -96,6 +96,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Moved product-category and tag slugs to settings (page)
 * % coupon fix
 * Tax rates based on shipping address
+* Helpers for outputting JS in the footer
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
