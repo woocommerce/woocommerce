@@ -920,10 +920,16 @@ function woocommerce_download_product() {
 			
 			if (!$file_path) exit;
 			
-			if (!is_multisite()) :
+			if (!is_multisite()) :	
 				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
 			else :
+				$upload_dir = wp_upload_dir();
+				
+				// Try to replace network url
 				$file_path = str_replace(trailingslashit(network_admin_url()), ABSPATH, $file_path);
+				
+				// Now try to replace upload URL
+				$file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_path);
 			endif;
 			
 			// See if its local or remote
