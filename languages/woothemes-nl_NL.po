@@ -112,12 +112,12 @@ msgstr "Product SKU:"
 msgid "Add&nbsp;meta"
 msgstr "Toevoegen&nbsp;meta"
 
-#: admin/admin-init.php:103
+#: admin/admin-init.php:104
 #@ woothemes
 msgid "Quantity e.g. 2"
 msgstr "Hoeveelheid bijv. 2"
 
-#: admin/admin-init.php:105
+#: admin/admin-init.php:106
 #@ woothemes
 msgid "Tax Rate e.g. 20.0000"
 msgstr "BTW tarief in procenten (bv 19.0)"
@@ -201,13 +201,13 @@ msgid "Invalid order."
 msgstr "Foutieve order."
 
 #: woocommerce_actions.php:905
-#, php-format, php-format, php-format, php-format, php-format
+#, php-format, php-format, php-format, php-format, php-format, php-format
 #@ woothemes
 msgid "Sorry, you have reached your download limit for this file. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Sorry, je hebt het maximale aantal downloads voor dit bestand bereikt. <a href=\"%s\">Keer terug naar de homepage &rarr;</a>"
 
 #: woocommerce_actions.php:989
-#, php-format, php-format, php-format, php-format, php-format
+#, php-format, php-format, php-format, php-format, php-format, php-format
 #@ woothemes
 msgid "File not found. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Pagina niet gevonden. <a href=\"%s\">Keer terug naar de homepage &rarr;</a>"
@@ -239,7 +239,7 @@ msgid "Order Received"
 msgstr "Bestelling ontvangen"
 
 #: woocommerce_emails.php:156
-#, php-format, php-format, php-format, php-format, php-format
+#, php-format, php-format, php-format, php-format, php-format, php-format
 #@ woothemes
 msgid "[%s] Order Received"
 msgstr "[%s] Bestelling ontvangen"
@@ -251,13 +251,13 @@ msgid "[%s] Order Complete/Download Links"
 msgstr "[%s] Bestelling Compleet/Download Links"
 
 #: woocommerce_emails.php:189
-#, php-format, php-format, php-format, php-format, php-format
+#, php-format, php-format, php-format, php-format, php-format, php-format
 #@ woothemes
 msgid "[%s] Order Complete"
 msgstr "[%s] Bestelling afgerond"
 
 #: woocommerce_emails.php:223
-#, php-format, php-format, php-format, php-format, php-format
+#, php-format, php-format, php-format, php-format, php-format, php-format
 #@ woothemes
 msgid "[%s] Pay for Order"
 msgstr "[%s]  Betaal voor bestelling"
@@ -1145,7 +1145,6 @@ msgstr "Eigenschap opslaan"
 #: admin/writepanels/writepanel-order_data.php:167
 #: templates/single-product-reviews.php:79
 #@ woothemes
-#@ default
 msgid "Name"
 msgstr "Naam"
 
@@ -1314,44 +1313,44 @@ msgstr "Instellingen"
 msgid "Reports"
 msgstr "Rapporten"
 
-#: admin/admin-init.php:94
+#: admin/admin-init.php:95
 #@ woothemes
 msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
 msgstr "Verwijder dit product? Als u eerder de voorraad verlaagd, of deze opdracht werd ingediend door een klant, moet u handmatig  de voorraad herstellen."
 
-#: admin/admin-init.php:96
+#: admin/admin-init.php:97
 #@ woothemes
 msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
 msgstr "Kopieer factuurgegevens voor de verzendgegevens? Dit verwijdert alle momenteel ingevoerde verzendgegevens."
 
-#: admin/admin-init.php:101
+#: admin/admin-init.php:102
 #: admin/post-types/product.php:23
 #: admin/writepanels/writepanel-order_data.php:165
 #@ woothemes
 msgid "ID"
 msgstr "ID"
 
-#: admin/admin-init.php:102
+#: admin/admin-init.php:103
 #@ woothemes
 msgid "Item Name"
 msgstr "Product Naam"
 
-#: admin/admin-init.php:104
+#: admin/admin-init.php:105
 #@ woothemes
 msgid "Cost per unit e.g. 2.99"
 msgstr "Prijs per stuk"
 
-#: admin/admin-init.php:106
+#: admin/admin-init.php:107
 #@ woothemes
 msgid "Meta Name"
 msgstr "Meta Naam"
 
-#: admin/admin-init.php:107
+#: admin/admin-init.php:108
 #@ woothemes
 msgid "Meta Value"
 msgstr "Meta Waarde"
 
-#: admin/admin-init.php:108
+#: admin/admin-init.php:109
 #: admin/writepanels/writepanel-product_data.php:240
 #@ woothemes
 msgid "Select terms"
@@ -1369,32 +1368,32 @@ msgstr "[%s met SKU van %s]"
 msgid "[%s with ID of %d]"
 msgstr "[%s met ID van %d]"
 
-#: admin/admin-init.php:265
+#: admin/admin-init.php:266
 #@ woothemes
 msgid "No product to duplicate has been supplied!"
 msgstr "Er is geen product om te dupliceren gespecificeerd."
 
-#: admin/admin-init.php:285
+#: admin/admin-init.php:286
 #@ woothemes
 msgid "Product creation failed, could not find original product:"
 msgstr "Product aanmaken mislukt, kan het originele product niet vinden:"
 
-#: admin/admin-init.php:303
+#: admin/admin-init.php:304
 #@ woothemes
 msgid "Make a duplicate from this product"
 msgstr "Maak een duplicaat van dit product"
 
-#: admin/admin-init.php:304
+#: admin/admin-init.php:305
 #@ woothemes
 msgid "Duplicate"
 msgstr "Duplicaat"
 
-#: admin/admin-init.php:329
+#: admin/admin-init.php:330
 #@ woothemes
 msgid "Copy to a new draft"
 msgstr "Kopieer naar een draft"
 
-#: admin/admin-init.php:365
+#: admin/admin-init.php:366
 #@ woothemes
 msgid " (Copy)"
 msgstr "(Kopie)"
@@ -1578,26 +1577,26 @@ msgstr "op voorraad"
 
 #: admin/post-types/product.php:94
 #: admin/post-types/shop_order.php:107
-#@ default
+#@ woothemes
 msgid "Unpublished"
 msgstr "Niet gepubliceerd"
 
 #: admin/post-types/product.php:97
 #: admin/post-types/shop_order.php:110
-#@ default
+#@ woothemes
 msgid "Y/m/d g:i:s A"
 msgstr "Y/m/d H:i:s"
 
 #: admin/post-types/product.php:104
 #: admin/post-types/shop_order.php:117
 #, php-format
-#@ default
+#@ woothemes
 msgid "%s ago"
 msgstr "%s geleden"
 
 #: admin/post-types/product.php:106
 #: admin/post-types/shop_order.php:119
-#@ default
+#@ woothemes
 msgid "Y/m/d"
 msgstr "d-m-Y"
 
@@ -1607,7 +1606,7 @@ msgid "Published"
 msgstr "Gepubliceerd"
 
 #: admin/post-types/product.php:115
-#@ default
+#@ woothemes
 msgid "Missed schedule"
 msgstr "Schema publicatie gemist"
 
@@ -1636,6 +1635,7 @@ msgstr "Uit te sluiten afbeelding"
 msgid "Enabling this option will hide it from the product page image gallery."
 msgstr "Inschakelen van deze optie activeert het verbergen van het product pagina-afbeelding galerij."
 
+#: admin/admin-settings.php:1094
 #: admin/post-types/shop_order.php:20
 #: shortcodes/shortcode-my_account.php:61
 #@ woothemes
@@ -1715,7 +1715,7 @@ msgstr "Laat alle klanten zien"
 #: admin/post-types/product.php:306
 #: admin/post-types/shop_order.php:297
 #: admin/post-types/shop_order.php:316
-#@ default
+#@ woothemes
 msgid "You do not have sufficient permissions to access this page."
 msgstr "Je hoeft niet voldoende rechten om deze pagina te bekijken."
 
@@ -1995,14 +1995,12 @@ msgstr "Er zijn geen producten uitverkocht."
 
 #: admin/admin-settings-forms.php:172
 #: admin/writepanels/writepanel-product_data.php:113
-#@ default
 #@ woothemes
 msgid "Width"
 msgstr "Breedte"
 
 #: admin/admin-settings-forms.php:174
 #: admin/writepanels/writepanel-product_data.php:114
-#@ default
 #@ woothemes
 msgid "Height"
 msgstr "Hoogte"
@@ -2821,6 +2819,8 @@ msgid "Shipping Methods"
 msgstr "Verzend mogelijkheden"
 
 #: admin/admin-settings.php:1025
+#: admin/admin-settings.php:1074
+#: admin/admin-settings.php:1087
 #@ woothemes
 msgid "Payment Gateways"
 msgstr "Betalings gateways"
@@ -2830,12 +2830,12 @@ msgstr "Betalings gateways"
 msgid "Emails"
 msgstr "Emails"
 
-#: admin/admin-settings.php:1098
+#: admin/admin-settings.php:1146
 #@ woothemes
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 
-#: admin/admin-settings.php:1152
+#: admin/admin-settings.php:1201
 #@ woothemes
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "De wijzigingen die u gemaakt zullen verloren gaan als u naar een andere pagina toe gaat."
@@ -2872,7 +2872,6 @@ msgstr "Korting Type"
 #: classes/shipping/shipping-flat_rate.php:355
 #: woocommerce_actions.php:283
 #: woocommerce_actions.php:284
-#@ woothemes
 #@ woothemes
 msgid "0.00"
 msgstr "0.00"
@@ -3109,12 +3108,12 @@ msgid "Email invoice"
 msgstr "Email factuur"
 
 #: admin/writepanels/writepanel-order_data.php:339
-#@ default
+#@ woothemes
 msgid "Delete Permanently"
 msgstr "Permanent verwijderen"
 
 #: admin/writepanels/writepanel-order_data.php:341
-#@ default
+#@ woothemes
 msgid "Move to Trash"
 msgstr "naar de prullenbak verplaatsen"
 
@@ -6246,7 +6245,6 @@ msgstr "Er zijn nog geen reviews. Wil je een <a href=\"#review_form\" class=\"in
 #: templates/myaccount/login.php:46
 #: templates/single-product-reviews.php:81
 #@ woothemes
-#@ default
 msgid "Email"
 msgstr "Email"
 
@@ -6315,37 +6313,37 @@ msgstr "Vult u alstublieft hierboven uw details in om de beschikbare verzendmeth
 msgid "Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr "Onze excuses, het lijkt er op dat er geen verzend mogelijkheden beschikbaar zijn voor uw verblijfplaats. Neemt u alstublieft contact op met ons als u hulp nodig heeft, of om te kijken naar alternatieve mogelijkheden."
 
-#: templates/checkout/review_order.php:140
+#: templates/checkout/review_order.php:147
 #@ woothemes
 msgid "Please fill in your details above to see available payment methods."
 msgstr "Vult u alstublieft hierboven uw details in om de beschikbare betalingsmethoden te zien."
 
-#: templates/checkout/review_order.php:142
+#: templates/checkout/review_order.php:149
 #@ woothemes
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr "Onze excuses. Het lijkt er op dat er geen betalingsmogelijkheden zijn voor uw verblijfplaats. Neem alstublieft contact met ons op om te kijken naar alternatieve mogelijkheden."
 
-#: templates/checkout/review_order.php:152
+#: templates/checkout/review_order.php:159
 #@ woothemes
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
 msgstr "Omdat je browser geen JavaScript ondersteund, of JavaScript uit staat, controleer of je de <em>Werk totalen bij</em> knop hebt ingedrukt voor je je bestelling plaatst. Anders kan  het zijn dat er meer kosten in rekening worden gebracht dan dat hierboven staat."
 
-#: templates/checkout/review_order.php:152
+#: templates/checkout/review_order.php:159
 #@ woothemes
 msgid "Update totals"
 msgstr "Werk totalen bij"
 
-#: templates/checkout/review_order.php:158
+#: templates/checkout/review_order.php:165
 #@ woothemes
 msgid "Place order"
 msgstr "Plaats bestelling"
 
-#: templates/checkout/review_order.php:162
+#: templates/checkout/review_order.php:169
 #@ woothemes
 msgid "I accept the"
 msgstr "I accepteer de"
 
-#: templates/checkout/review_order.php:162
+#: templates/checkout/review_order.php:169
 #@ woothemes
 msgid "terms &amp; conditions"
 msgstr "Algemene Voorwaarden"
@@ -6846,22 +6844,22 @@ msgstr "Log uit"
 msgid "WooCommerce Settings"
 msgstr ""
 
-#: admin/admin-init.php:95
+#: admin/admin-init.php:96
 #@ woothemes
 msgid "Calculate totals based on order items, discount amount, and shipping? Note, you will need to calculate discounts before tax manually."
 msgstr ""
 
-#: admin/admin-init.php:97
+#: admin/admin-init.php:98
 #@ woothemes
 msgid "Load the customer's billing information? This will remove any currently entered billing information."
 msgstr ""
 
-#: admin/admin-init.php:98
+#: admin/admin-init.php:99
 #@ woothemes
 msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
 msgstr ""
 
-#: admin/admin-init.php:109
+#: admin/admin-init.php:110
 #@ woothemes
 msgid "No customer selected"
 msgstr ""
@@ -6962,7 +6960,6 @@ msgstr ""
 
 #: admin/admin-settings-forms.php:436
 #: classes/shipping/shipping-flat_rate.php:363
-#@ woothemes
 #@ woothemes
 msgid "Delete the selected rates?"
 msgstr "Verwijderd de geselecteerde tarieven?"
@@ -7762,7 +7759,7 @@ msgstr ""
 
 #: classes/gateways/gateway-paypal.php:457
 #, php-format
-#@ default
+#@ woothemes
 msgid "Payment for order #%s refunded/reversed"
 msgstr ""
 
@@ -7945,13 +7942,13 @@ msgstr ""
 
 #: templates/emails/customer_new_account.php:10
 #, php-format
-#@ default
+#@ woothemes
 msgid "Username: %s"
 msgstr "Gebruikersnaam: %s"
 
 #: templates/emails/customer_new_account.php:11
 #, php-format
-#@ default
+#@ woothemes
 msgid "Password: %s"
 msgstr "Wachtwoord: %s"
 
@@ -8068,7 +8065,6 @@ msgstr ""
 #: widgets/widget-login.php:283
 #: woocommerce_actions.php:731
 #@ woothemes
-#@ default
 msgid "<strong>ERROR</strong>: Please enter a username."
 msgstr ""
 
@@ -8119,27 +8115,27 @@ msgid "<a href=\"%s\" class=\"button\">Continue Shopping &rarr;</a> Product succ
 msgstr ""
 
 #: woocommerce_actions.php:733
-#@ default
+#@ woothemes
 msgid "<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username."
 msgstr ""
 
 #: woocommerce_actions.php:736
-#@ default
+#@ woothemes
 msgid "<strong>ERROR</strong>: This username is already registered, please choose another one."
 msgstr ""
 
 #: woocommerce_actions.php:741
-#@ default
+#@ woothemes
 msgid "<strong>ERROR</strong>: Please type your e-mail address."
 msgstr ""
 
 #: woocommerce_actions.php:743
-#@ default
+#@ woothemes
 msgid "<strong>ERROR</strong>: The email address isn&#8217;t correct."
 msgstr ""
 
 #: woocommerce_actions.php:746
-#@ default
+#@ woothemes
 msgid "<strong>ERROR</strong>: This email is already registered, please choose another one."
 msgstr ""
 
@@ -8296,11 +8292,6 @@ msgstr ""
 msgid "Shows in the product tag URLs. Leave blank to use the default slug."
 msgstr ""
 
-#: admin/admin-settings.php:1074
-#@ woothemes
-msgid "Gateways"
-msgstr ""
-
 #: admin/admin-taxonomies.php:276
 #@ woothemes
 msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
@@ -8336,7 +8327,7 @@ msgstr ""
 
 #: woocommerce_taxonomy.php:360
 #, php-format
-#@ default
+#@ woothemes
 msgid "%s published. <a href=\"%s\">View %s</a>"
 msgstr ""
 
@@ -8359,7 +8350,7 @@ msgid "%s scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s
 msgstr ""
 
 #: woocommerce_taxonomy.php:363
-#@ default
+#@ woothemes
 msgid "M j, Y @ G:i"
 msgstr ""
 
@@ -8367,5 +8358,25 @@ msgstr ""
 #, php-format
 #@ woothemes
 msgid "%s draft updated. <a target=\"_blank\" href=\"%s\">Preview %s</a>"
+msgstr ""
+
+#: admin/admin-settings.php:1088
+#@ woothemes
+msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
+msgstr ""
+
+#: admin/admin-settings.php:1092
+#@ woothemes
+msgid "Default"
+msgstr ""
+
+#: admin/admin-settings.php:1093
+#@ woothemes
+msgid "Gateway"
+msgstr ""
+
+#: admin/admin-settings.php:1110
+#@ woothemes
+msgid "Gateway ID"
 msgstr ""
 
