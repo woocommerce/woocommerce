@@ -713,14 +713,29 @@ class woocommerce_checkout {
 					if ($woocommerce->error_count()>0) break;
 					
 					// Insert or update the post data
+					$create_new_order = true;
+					
 					if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
 						
 						$order_id = (int) $_SESSION['order_awaiting_payment'];
-						$order_data['ID'] = $order_id;
-						wp_update_post( $order_data );
-						do_action('woocommerce_resume_order', $order_id);
 						
-					else :
+						/* Check order is unpaid */
+						$order = &new woocommerce_order( $order_id );
+						
+						if ( $order->status == 'pending' ) :
+							
+							// Resume the unpaid order
+							$order_data['ID'] = $order_id;
+							wp_update_post( $order_data );
+							do_action('woocommerce_resume_order', $order_id);
+							
+							$create_new_order = false;
+						
+						endif;
+						
+					endif;
+					
+					if ($create_new_order) :
 						$order_id = wp_insert_post( $order_data );
 						
 						if (is_wp_error($order_id)) :
