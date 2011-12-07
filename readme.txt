@@ -97,6 +97,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * % coupon fix
 * Tax rates based on shipping address
 * Helpers for outputting JS in the footer
+* Fixed sale widget
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations

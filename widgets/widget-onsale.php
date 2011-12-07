@@ -63,8 +63,6 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		if ( false === ( $product_ids_on_sale = get_transient( 'woocommerce_products_onsale' ) ) ) :
 		
 			$meta_query = array();
-			$meta_query[] = $woocommerce->query->visibility_meta_query();
-		    $meta_query[] = $woocommerce->query->stock_status_meta_query();
 		    $meta_query[] = array(
 		    	'key' => 'sale_price',
 		        'value' 	=> 0,
@@ -85,13 +83,20 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 			set_transient( 'woocommerce_products_onsale', $product_ids_on_sale );
 					
 		endif;
-
+		
+		$product_ids_on_sale[] = 0;
+		
+		$meta_query = array();
+		$meta_query[] = $woocommerce->query->visibility_meta_query();
+	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+		    
     	$query_args = array(
     		'showposts' 	=> $number, 
     		'nopaging' 		=> 0, 
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
     		'orderby' 		=> 'rand',
+    		'meta_query' 	=> $meta_query,
     		'post__in'		=> $product_ids_on_sale
     	);
 
