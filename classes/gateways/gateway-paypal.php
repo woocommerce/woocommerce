@@ -277,7 +277,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 		
-		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
+		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="paypal">
 				' . implode('', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
 				<script type="text/javascript">
