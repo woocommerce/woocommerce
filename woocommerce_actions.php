@@ -6,10 +6,6 @@
  *
  *		- Clear cart on logout
  *		- Update catalog ordering if posted
- *		- AJAX update shipping method on cart page
- *		- AJAX update order review on checkout
- *		- AJAX add to cart
- *		- AJAX add to cart fragments
  *		- Increase coupon usage count
  *		- When default permalinks are enabled, redirect shop page to post type archive url
  *		- Add to Cart
@@ -52,91 +48,7 @@ function woocommerce_update_catalog_ordering() {
 	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
 }
 
-/**
- * AJAX update shipping method on cart page
- */
-add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
-add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
 
-function woocommerce_ajax_update_shipping_method() {
-	global $woocommerce;
-	
-	check_ajax_referer( 'update-shipping-method', 'security' );
-	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
-	
-	$woocommerce->cart->calculate_totals();
-	
-	woocommerce_cart_totals();
-	
-	die();
-}
-
-
-/**
- * AJAX update order review on checkout
- */
-add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-
-function woocommerce_ajax_update_order_review() {
-	global $woocommerce;
-	
-	check_ajax_referer( 'update-order-review', 'security' );
-	
-	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
-	
-	if (sizeof($woocommerce->cart->get_cart())==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
-		die();
-	endif;
-	
-	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
-	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
-	if (isset($_POST['country'])) $woocommerce->customer->set_country( $_POST['country'] );
-	if (isset($_POST['state'])) $woocommerce->customer->set_state( $_POST['state'] );
-	if (isset($_POST['postcode'])) $woocommerce->customer->set_postcode( $_POST['postcode'] );
-	if (isset($_POST['s_country'])) $woocommerce->customer->set_shipping_country( $_POST['s_country'] );
-	if (isset($_POST['s_state'])) $woocommerce->customer->set_shipping_state( $_POST['s_state'] );
-	if (isset($_POST['s_postcode'])) $woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
-	
-	$woocommerce->cart->calculate_totals();
-	
-	do_action('woocommerce_checkout_order_review'); // Display review order table
-
-	die();
-}
-
-/**
- * AJAX add to cart
- */
-add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-
-function woocommerce_ajax_add_to_cart() {
-	
-	global $woocommerce;
-	
-	check_ajax_referer( 'add-to-cart', 'security' );
-	
-	$product_id = (int) $_POST['product_id'];
-
-	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
-		// Return html fragments
-		$data = apply_filters('add_to_cart_fragments', array());
-	else :
-		// Return error
-		$data = array(
-			'error' => $woocommerce->errors[0]
-		);
-		$woocommerce->clear_messages();
-	endif;
-	
-	echo json_encode( $data );
-	
-	die();
-}
 
 /**
  * Increase coupon usage count
@@ -542,22 +454,6 @@ function woocommerce_process_registration() {
 		endif;
 	
 	endif;	
-}
-
-
-/**
- * Process ajax checkout form
- */
-add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
-add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
-
-function woocommerce_process_checkout () {
-	global $woocommerce, $woocommerce_checkout;
-	
-	$woocommerce_checkout = $woocommerce->checkout();
-	$woocommerce_checkout->process_checkout();
-	
-	die(0);
 }
 
 

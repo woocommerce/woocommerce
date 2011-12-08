@@ -27,15 +27,12 @@ load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) 
 load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' . $variable_lang );
 
 /**
- * Include admin files
+ * Admin init + activation hooks
  **/
-if (is_admin()) :
+if (is_admin() && !defined('DOING_AJAX') ) :
 
 	require_once( 'admin/admin-init.php' );
 
-	/**
-	 * Installs and upgrades
-	 **/
 	register_activation_hook( __FILE__, 'activate_woocommerce' );
 	
 	if (get_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) : add_action('init', 'install_woocommerce', 0); endif;
@@ -43,22 +40,20 @@ if (is_admin()) :
 endif;
 
 /**
- * Include Front-end files
+ * Include core files
  **/
+if (defined('DOING_AJAX')) :
+	include_once( 'woocommerce_ajax.php' );
+endif;
+
 if ( !is_admin() || defined('DOING_AJAX') ) :
-	
 	include_once( 'woocommerce_templates.php' );
 	include_once( 'woocommerce_template_actions.php' );
 	include_once( 'shortcodes/shortcodes-init.php' );
 	include_once( 'classes/woocommerce_query.class.php' );
-	
-	add_action('init', 'include_template_functions', 99);
-
+	add_action( 'init', 'include_template_functions', 99 );
 endif;
 
-/**
- * Include core files
- **/
 include_once( 'woocommerce_taxonomy.php' );
 include_once( 'widgets/widgets-init.php' );
 include_once( 'woocommerce_actions.php' );

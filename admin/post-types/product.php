@@ -296,37 +296,6 @@ function woocommerce_exclude_image_from_product_page_field_save( $post, $attachm
 				
 }
 
-/**
- * Feature a product from admin
- */
-function woocommerce_feature_product() {
-
-	if( !is_admin() ) die;
-	
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
-	
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
-	
-	$post_id = isset($_GET['product_id']) && (int)$_GET['product_id'] ? (int)$_GET['product_id'] : '';
-	
-	if(!$post_id) die;
-	
-	$post = get_post($post_id);
-	if(!$post) die;
-	
-	if($post->post_type !== 'product') die;
-	
-	$product = new woocommerce_product($post->ID);
-
-	if ($product->is_featured()) update_post_meta($post->ID, 'featured', 'no');
-	else update_post_meta($post->ID, 'featured', 'yes');
-	
-	$sendback = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() );
-	wp_safe_redirect( $sendback );
-
-}
-add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product');
-
 
 /**
  * Search by SKU or ID for products. Adapted from code by BenIrvin (Admin Search by ID)
