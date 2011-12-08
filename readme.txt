@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.3
+Stable tag: 1.3.1
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -100,6 +100,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed sale widget
 * File download method option so force download can be switched off
 * Improved product cat dropdowns
+* Czech translation by Martin Nečas
+* Turkish translation by Ercan
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations

@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An eCommerce plugin for wordpress.
-Version: 1.3
+Version: 1.3.1
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -15,7 +15,7 @@ if (!session_id()) session_start();
 /**
  * Constants
  **/ 
-define("WOOCOMMERCE_VERSION", "1.3");
+define("WOOCOMMERCE_VERSION", "1.3.1");
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');	
 
 /**
