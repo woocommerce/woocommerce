@@ -243,6 +243,16 @@ function woocommerce_prevent_admin_access() {
 }
 
 /**
+ * Fix 'insert into post' buttons for images
+ **/
+add_filter('get_media_item_args', 'woocommerce_allow_img_insertion');
+
+function woocommerce_allow_img_insertion($vars) {
+    $vars['send'] = true; // 'send' as in "Send to Editor"
+    return($vars);
+}
+
+/**
  * Duplicate a product action
  *
  * Based on 'Duplicate Post' (http://www.lopo.it/duplicate-post-plugin/) by Enrico Battocchi
