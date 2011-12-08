@@ -100,7 +100,6 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed sale widget
 * File download method option so force download can be switched off
 * Improved product cat dropdowns
-* Optimisations to shipping + payment methods
 
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations

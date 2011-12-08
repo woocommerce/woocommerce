@@ -29,13 +29,13 @@ class woocommerce {
 	function __construct() {
 		
 		// Load class instances
+		$this->payment_gateways 	= &new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
 		$this->countries 			= &new woocommerce_countries();			// Countries class
 		
 		// Non-admin and ajax requests
 		if ( !is_admin() || defined('DOING_AJAX') ) :
 			
 			// Class instances
-			$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN 
 			$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
 			$this->customer 		= &new woocommerce_customer();			// Customer class, sorts out session data such as location
 			$this->query			= &new woocommerce_query();				// Query class, handles front-end queries and loops
@@ -48,9 +48,10 @@ class woocommerce {
 			add_action( 'woocommerce_before_single_product', array(&$this, 'show_messages'), 10);
 			add_action( 'woocommerce_before_shop_loop', array(&$this, 'show_messages'), 10);
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
-			add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
 			
 		endif;
+		
+		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
 	}
 	
     /*-----------------------------------------------------------------------------------*/
@@ -63,16 +64,6 @@ class woocommerce {
 		function init_shipping() {
 			if (!$this->shipping) :
 				$this->shipping = &new woocommerce_shipping();					// Shipping class. loads and stores shipping methods
-			endif;
-		}
-		 
-		/**
-		 * Init payment gateways
-		 */
-		function init_payment_gateways() {
-			if (!$this->payment_gateways) :
-				$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways class. loads and stores payment methods
-				$this->payment_gateways->init();								// Init manually
 			endif;
 		}
 		 

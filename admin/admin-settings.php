@@ -938,7 +938,6 @@ function woocommerce_settings() {
     
     // Init shipping and gateways so we can save/update options
     $woocommerce->init_shipping();
-    $woocommerce->init_payment_gateways();
     
     $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
     
