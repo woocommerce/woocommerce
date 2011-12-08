@@ -25,8 +25,6 @@
 				<td>
 				<?php
 					
-					$woocommerce->init_shipping();
-					
 					$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 					if (sizeof($available_methods)>0) :

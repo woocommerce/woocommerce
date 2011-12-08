@@ -934,8 +934,6 @@ class woocommerce_cart {
 		function calculate_shipping() {
 			global $woocommerce;
 			
-			$woocommerce->init_shipping();
-			
 			if ($this->needs_shipping()) :
 				$woocommerce->shipping->calculate_shipping();
 			else :

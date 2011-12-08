@@ -936,9 +936,6 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
-    // Init shipping and gateways so we can save/update options
-    $woocommerce->init_shipping();
-    
     $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
     
     if( isset( $_POST ) && $_POST ) :

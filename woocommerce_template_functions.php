@@ -735,8 +735,6 @@ if (!function_exists('woocommerce_cart_totals')) {
 	function woocommerce_cart_totals() {
 		global $woocommerce;
 		
-		$woocommerce->init_shipping();
-		
 		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		?>
 		<div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">

@@ -19,7 +19,7 @@ class woocommerce_shipping {
 	var $shipping_label		= null;
 	var $shipping_classes;
 	
-    function woocommerce_shipping() {
+    function init() {
 		
 		if (get_option('woocommerce_calc_shipping')!='no') $this->enabled = true; 
 		

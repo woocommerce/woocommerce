@@ -30,6 +30,7 @@ class woocommerce {
 		
 		// Load class instances
 		$this->payment_gateways 	= &new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->shipping 			= &new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
 		$this->countries 			= &new woocommerce_countries();			// Countries class
 		
 		// Non-admin and ajax requests
@@ -48,25 +49,18 @@ class woocommerce {
 			add_action( 'woocommerce_before_single_product', array(&$this, 'show_messages'), 10);
 			add_action( 'woocommerce_before_shop_loop', array(&$this, 'show_messages'), 10);
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
-			
+		
+		else :
 		endif;
 		
+		add_action( 'plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some more may be added by plugins
 		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
 	}
 	
     /*-----------------------------------------------------------------------------------*/
 	/* Instance Loaders - loaded only when needed */
 	/*-----------------------------------------------------------------------------------*/ 
-		
-		/**
-		 * Init shipping
-		 */
-		function init_shipping() {
-			if (!$this->shipping) :
-				$this->shipping = &new woocommerce_shipping();					// Shipping class. loads and stores shipping methods
-			endif;
-		}
-		 
+				 
 		/**
 		 * Validation Class
 		 */

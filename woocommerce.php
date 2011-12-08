@@ -27,7 +27,7 @@ load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) 
 load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' . $variable_lang );
 
 /**
- * Include admin area
+ * Include admin files
  **/
 if (is_admin()) :
 
@@ -43,32 +43,26 @@ if (is_admin()) :
 endif;
 
 /**
- * Include Front-end scripts
+ * Include Front-end files
  **/
 if ( !is_admin() || defined('DOING_AJAX') ) :
 	
 	include_once( 'woocommerce_templates.php' );
 	include_once( 'woocommerce_template_actions.php' );
+	include_once( 'shortcodes/shortcodes-init.php' );
+	include_once( 'classes/woocommerce_query.class.php' );
 	
 	add_action('init', 'include_template_functions', 99);
 
 endif;
 
 /**
- * Include other core files
+ * Include core files
  **/
 include_once( 'woocommerce_taxonomy.php' );
 include_once( 'widgets/widgets-init.php' );
-include_once( 'shortcodes/shortcodes-init.php' );
 include_once( 'woocommerce_actions.php' );
 include_once( 'woocommerce_emails.php' );
-
-
-include_once( 'classes/woocommerce_settings_api.class.php' );
-include_once( 'classes/gateways/gateways.class.php' );
-include_once( 'classes/gateways/gateway.class.php' );
-include_once( 'classes/shipping/shipping.class.php' );
-include_once( 'classes/shipping/shipping_method.class.php' );
 include_once( 'classes/cart.class.php' );
 include_once( 'classes/countries.class.php' );
 include_once( 'classes/coupons.class.php' );
@@ -78,13 +72,16 @@ include_once( 'classes/orders.class.php' );
 include_once( 'classes/product.class.php' );
 include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
-include_once( 'classes/woocommerce_query.class.php' );
-include_once( 'classes/woocommerce_logger.class.php' );
 include_once( 'classes/woocommerce.class.php' );
 
 /**
- * Include core shipping modules and gateways
+ * Include shipping modules and gateways
  */
+include_once( 'classes/woocommerce_settings_api.class.php' );
+include_once( 'classes/gateways/gateways.class.php' );
+include_once( 'classes/gateways/gateway.class.php' );
+include_once( 'classes/shipping/shipping.class.php' );
+include_once( 'classes/shipping/shipping_method.class.php' );
 include_once( 'classes/shipping/shipping-flat_rate.php' );
 include_once( 'classes/shipping/shipping-free_shipping.php' );
 include_once( 'classes/gateways/gateway-banktransfer.php' );

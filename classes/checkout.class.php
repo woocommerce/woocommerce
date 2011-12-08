@@ -518,8 +518,6 @@ class woocommerce_checkout {
 			
 			if ($woocommerce->cart->needs_shipping()) :
 				
-				$woocommerce->init_shipping();
-				
 				// Shipping Method
 				$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
