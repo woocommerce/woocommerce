@@ -26,7 +26,7 @@ function woocommerce_checkout( $atts ) {
 	
 	$non_js_checkout = (isset($_POST['update_totals']) && $_POST['update_totals']) ? true : false;
 	
-	$woocommerce_checkout = &new woocommerce_checkout();
+	$woocommerce_checkout = $woocommerce->checkout();
 	
 	$woocommerce_checkout->process_checkout();
 	

@@ -13,28 +13,24 @@ Tested up to: 3.3
 if (!session_id()) session_start();
 
 /**
- * Localisation
- **/
-load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
-load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
-
-if (get_option('woocommerce_informal_localisation_type')=='yes') :
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/informal');
-else :
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/formal');
-endif;
-
-/**
  * Constants
  **/ 
-if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
-if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.3");	
-if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
+define("WOOCOMMERCE_VERSION", "1.3");
+if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');	
+
+/**
+ * Localisation
+ **/
+$variable_lang = (get_option('woocommerce_informal_localisation_type')=='yes') ? 'informal' : 'formal';
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' . $variable_lang );
 
 /**
  * Include admin area
  **/
 if (is_admin()) :
+
 	require_once( 'admin/admin-init.php' );
 
 	/**
@@ -42,27 +38,38 @@ if (is_admin()) :
 	 **/
 	register_activation_hook( __FILE__, 'activate_woocommerce' );
 	
-	if (get_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) add_action('init', 'install_woocommerce', 0);
-	
+	if (get_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) : add_action('init', 'install_woocommerce', 0); endif;
+
 endif;
 
 /**
- * Include core files
+ * Include Front-end scripts
+ **/
+if ( !is_admin() || defined('DOING_AJAX') ) :
+	
+	include_once( 'woocommerce_templates.php' );
+	include_once( 'woocommerce_template_actions.php' );
+	
+	add_action('init', 'include_template_functions', 99);
+
+endif;
+
+/**
+ * Include other core files
  **/
 include_once( 'woocommerce_taxonomy.php' );
 include_once( 'widgets/widgets-init.php' );
 include_once( 'shortcodes/shortcodes-init.php' );
 include_once( 'woocommerce_actions.php' );
 include_once( 'woocommerce_emails.php' );
-include_once( 'woocommerce_template_actions.php' );
-include_once( 'woocommerce_templates.php' );
+
+
 include_once( 'classes/woocommerce_settings_api.class.php' );
 include_once( 'classes/gateways/gateways.class.php' );
 include_once( 'classes/gateways/gateway.class.php' );
 include_once( 'classes/shipping/shipping.class.php' );
 include_once( 'classes/shipping/shipping_method.class.php' );
 include_once( 'classes/cart.class.php' );
-include_once( 'classes/checkout.class.php' );
 include_once( 'classes/countries.class.php' );
 include_once( 'classes/coupons.class.php' );
 include_once( 'classes/customer.class.php' ); 
@@ -71,23 +78,25 @@ include_once( 'classes/orders.class.php' );
 include_once( 'classes/product.class.php' );
 include_once( 'classes/product_variation.class.php' );
 include_once( 'classes/tax.class.php' );
-include_once( 'classes/validation.class.php' ); 
 include_once( 'classes/woocommerce_query.class.php' );
 include_once( 'classes/woocommerce_logger.class.php' );
 include_once( 'classes/woocommerce.class.php' );
 
 /**
- * Include core shipping modules
+ * Include core shipping modules and gateways
  */
 include_once( 'classes/shipping/shipping-flat_rate.php' );
 include_once( 'classes/shipping/shipping-free_shipping.php' );
-
-/**
- * Include core payment gateways
- */
 include_once( 'classes/gateways/gateway-banktransfer.php' );
 include_once( 'classes/gateways/gateway-cheque.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
+
+/**
+ * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes
+ **/
+function include_template_functions() {
+	include_once( 'woocommerce_template_functions.php' );
+}
 
 /**
  * Init woocommerce class
@@ -131,18 +140,6 @@ function woocommerce_init() {
     	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $woocommerce->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
-
-/**
- * Init WooCommerce Template Functions
- *
- * This makes them pluggable by plugins and themes
- **/
-add_action('init', 'include_template_functions', 99);
-
-function include_template_functions() {
-	include_once( 'woocommerce_template_functions.php' );
-}
-
 
 /**
  * Init WooCommerce Thumbnails after theme setup
@@ -269,7 +266,6 @@ function woocommerce_frontend_scripts() {
     	
 	/* Script variables */
 	$states = json_encode( $woocommerce->countries->states );
-	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
 	
 	$woocommerce_params = array(
 		'countries' 					=> $states,
@@ -340,6 +336,7 @@ if (!function_exists('is_account_page')) {
 }
 if (!function_exists('is_ajax')) {
 	function is_ajax() {
+		if ( defined('DOING_AJAX') ) return true;
 		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
 	}
 }

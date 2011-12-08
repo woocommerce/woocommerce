@@ -669,7 +669,7 @@ if (!function_exists('woocommerce_related_products')) {
 if (!function_exists('woocommerce_shipping_calculator')) {
 	function woocommerce_shipping_calculator() {
 		global $woocommerce;
-		if ($woocommerce->shipping->enabled && get_option('woocommerce_enable_shipping_calc')=='yes' && $woocommerce->cart->needs_shipping()) :
+		if (get_option('woocommerce_enable_shipping_calc')=='yes' && $woocommerce->cart->needs_shipping()) :
 		?>
 		<form class="shipping_calculator" action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
 			<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
@@ -734,12 +734,13 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 if (!function_exists('woocommerce_cart_totals')) {
 	function woocommerce_cart_totals() {
 		global $woocommerce;
-
+		
+		$woocommerce->init_shipping();
+		
 		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		?>
 		<div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
 		<?php
-		//if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) :
 		if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) :
 			// Hide totals if customer has set location and there are no methods going there
 			?>

@@ -173,7 +173,7 @@ function get_woocommerce_edit_address () {
 function woocommerce_edit_address() {
 	global $woocommerce;
 	
-	$validation = &new woocommerce_validation();
+	$validation = $woocommerce->validation();
 	$user_id = get_current_user_id();
 	
 	if (is_user_logged_in()) :

@@ -29,7 +29,6 @@
  * @author		WooThemes
  */
 
-
 /**
  * Prevent non-admin access to backend
  */
@@ -808,9 +807,7 @@ add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout'
 function woocommerce_process_checkout () {
 	global $woocommerce, $woocommerce_checkout;
 	
-	include_once($woocommerce->plugin_path() . '/classes/checkout.class.php');
-	
-	$woocommerce_checkout = &new woocommerce_checkout();
+	$woocommerce_checkout = $woocommerce->checkout();
 	$woocommerce_checkout->process_checkout();
 	
 	die(0);

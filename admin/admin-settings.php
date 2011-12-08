@@ -936,6 +936,10 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
+    // Init shipping and gateways so we can save/update options
+    $woocommerce->init_shipping();
+    $woocommerce->init_payment_gateways();
+    
     $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
     
     if( isset( $_POST ) && $_POST ) :
@@ -1060,7 +1064,7 @@ function woocommerce_settings() {
 					case "shipping_methods" : 	
 						
 						$links = array();
-		            	
+
 		            	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
 		            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
 		            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
@@ -1080,7 +1084,7 @@ function woocommerce_settings() {
 					case "payment_gateways" : 	
 					
 						$links = array( '<a href="#gateway-order">'.__('Payment Gateways', 'woothemes').'</a>' );
-            	
+            			
 		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 		            		$title = ( isset( $gateway->method_title ) && $gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
 		            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';

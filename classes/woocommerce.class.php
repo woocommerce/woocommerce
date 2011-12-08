@@ -29,28 +29,80 @@ class woocommerce {
 	function __construct() {
 		
 		// Load class instances
-		$this->query			= &new woocommerce_query();				// Query class, handles front-end queries and loops
-		$this->customer 		= &new woocommerce_customer();			// Customer class, sorts out session data such as location
-		$this->shipping 		= &new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
-		$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
-		$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways class. loads and stores payment methods
-		$this->countries 		= &new woocommerce_countries();			// Countries class
-		$this->log			 	= &new woocommerce_logger();			// Logger class
+		$this->countries 			= &new woocommerce_countries();			// Countries class
 		
-		// Load messages
-		$this->load_messages();
-		
-		// Hooks
-		add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
-		add_action( 'woocommerce_before_single_product', array(&$this, 'show_messages'), 10);
-		add_action( 'woocommerce_before_shop_loop', array(&$this, 'show_messages'), 10);
-		add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
-
-		// Queue shipping and payment gateways
-		add_action('plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some may be added by plugins
-		add_action('plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some may be added by plugins
+		// Non-admin and ajax requests
+		if ( !is_admin() || defined('DOING_AJAX') ) :
+			
+			// Class instances
+			$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN 
+			$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
+			$this->customer 		= &new woocommerce_customer();			// Customer class, sorts out session data such as location
+			$this->query			= &new woocommerce_query();				// Query class, handles front-end queries and loops
+			
+			// Load messages
+			$this->load_messages();
+			
+			// Hooks
+			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
+			add_action( 'woocommerce_before_single_product', array(&$this, 'show_messages'), 10);
+			add_action( 'woocommerce_before_shop_loop', array(&$this, 'show_messages'), 10);
+			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
+			add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
+			
+		endif;
 	}
-
+	
+    /*-----------------------------------------------------------------------------------*/
+	/* Instance Loaders - loaded only when needed */
+	/*-----------------------------------------------------------------------------------*/ 
+		
+		/**
+		 * Init shipping
+		 */
+		function init_shipping() {
+			if (!$this->shipping) :
+				$this->shipping = &new woocommerce_shipping();					// Shipping class. loads and stores shipping methods
+			endif;
+		}
+		 
+		/**
+		 * Init payment gateways
+		 */
+		function init_payment_gateways() {
+			if (!$this->payment_gateways) :
+				$this->payment_gateways = &new woocommerce_payment_gateways();	// Payment gateways class. loads and stores payment methods
+				$this->payment_gateways->init();								// Init manually
+			endif;
+		}
+		 
+		/**
+		 * Validation Class
+		 */
+		function validation() { 
+			if ( !class_exists('woocommerce_validation') ) include_once( 'validation.class.php' );
+			
+			return new woocommerce_validation();
+		}
+		
+		/**
+		 * Checkout Class
+		 */
+		function checkout() { 
+			if ( !class_exists('woocommerce_checkout') ) include_once( 'checkout.class.php' );
+			
+			return new woocommerce_checkout();
+		}
+		
+		/**
+		 * Logging Class
+		 */
+		function logger() { 
+			if ( !class_exists('woocommerce_logger') ) include_once( 'woocommerce_logger.class.php' );
+			
+			return new woocommerce_logger();
+		}
+	
     /*-----------------------------------------------------------------------------------*/
 	/* Helper functions */
 	/*-----------------------------------------------------------------------------------*/ 

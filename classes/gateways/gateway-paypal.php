@@ -34,6 +34,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$this->send_shipping= $this->settings['send_shipping'];
 		$this->debug		= $this->settings['debug'];	
 		
+		// Logs
+		if ($this->debug=='yes') $this->log = $woocommerce->logger();
+		
 		// Actions
 		add_action( 'init', array(&$this, 'check_ipn_response') );
 		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
@@ -155,7 +158,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_adr = $this->liveurl . '?';		
 		endif;
 		
-		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
+		if ($this->debug=='yes') $this->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
 		
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace(array('(', '-', ' ', ')'), '', $order->billing_phone);
@@ -336,7 +339,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 		
-		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Checking IPN response is valid...' );
+		if ($this->debug=='yes') $this->log->add( 'paypal', 'Checking IPN response is valid...' );
     
     	 // Add cmd to the post array
         $_POST['cmd'] = '_notify-validate';
@@ -362,14 +365,14 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
         
         // check to see if the request was valid
         if ( !is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && (strcmp( $response['body'], "VERIFIED") == 0)) {
-            if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Received valid response from PayPal' );
+            if ($this->debug=='yes') $this->log->add( 'paypal', 'Received valid response from PayPal' );
             return true;
         } 
         
         if ($this->debug=='yes') :
-        	$woocommerce->log->add( 'paypal', 'Received invalid response from PayPal' );
+        	$this->log->add( 'paypal', 'Received invalid response from PayPal' );
         	if (is_wp_error($response)) :
-        		$woocommerce->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
+        		$this->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
         	endif;
         endif;
         
