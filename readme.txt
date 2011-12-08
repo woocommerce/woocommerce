@@ -82,6 +82,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.3.2 = 
+* Fixed error when adding an order manaully
+* Dumped the orders class (hardly used)
+
 = 1.3.1 - 08/12/2011 =
 * Many Minor bug fixes
 * Ability to re-order payment gateways and choose a default

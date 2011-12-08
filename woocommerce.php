@@ -43,31 +43,30 @@ endif;
  * Include core files
  **/
 if (defined('DOING_AJAX')) :
-	include_once( 'woocommerce_ajax.php' );
+	include_once( 'woocommerce_ajax.php' );					// Ajax functions for admin and the front-end
 endif;
 
 if ( !is_admin() || defined('DOING_AJAX') ) :
-	include_once( 'woocommerce_templates.php' );
-	include_once( 'woocommerce_template_actions.php' );
-	include_once( 'shortcodes/shortcodes-init.php' );
-	include_once( 'classes/woocommerce_query.class.php' );
-	add_action( 'init', 'include_template_functions', 99 );
+	include_once( 'woocommerce_template_actions.php' );		// Template actions used on the front-end
+	include_once( 'shortcodes/shortcodes-init.php' );		// Init the shortcodes
+	include_once( 'classes/woocommerce_query.class.php' );	// The main store queries
+	include_once( 'classes/cart.class.php' );				// The main cart class
+	include_once( 'classes/coupons.class.php' );			// Coupons class
+	include_once( 'classes/customer.class.php' ); 			// Customer class
+	add_action( 'init', 'include_template_functions', 99 );	// Defer loading template functions so functions are pluggable by themes
 endif;
 
-include_once( 'woocommerce_taxonomy.php' );
-include_once( 'widgets/widgets-init.php' );
-include_once( 'woocommerce_actions.php' );
-include_once( 'woocommerce_emails.php' );
-include_once( 'classes/cart.class.php' );
-include_once( 'classes/countries.class.php' );
-include_once( 'classes/coupons.class.php' );
-include_once( 'classes/customer.class.php' ); 
-include_once( 'classes/order.class.php' );
-include_once( 'classes/orders.class.php' );
-include_once( 'classes/product.class.php' );
-include_once( 'classes/product_variation.class.php' );
-include_once( 'classes/tax.class.php' );
-include_once( 'classes/woocommerce.class.php' );
+include_once( 'woocommerce_templates.php' );			// Loads template files - used in admin and front-end
+include_once( 'woocommerce_taxonomy.php' );				// Defines post formats and taxonomies
+include_once( 'widgets/widgets-init.php' );				// Widget classes
+include_once( 'woocommerce_actions.php' );				// Contains action hooks and functions for various events
+include_once( 'woocommerce_emails.php' );				// Email template handlers
+include_once( 'classes/countries.class.php' );			// Defines countries and states
+include_once( 'classes/order.class.php' );				// Single order class
+include_once( 'classes/product.class.php' );			// Product class
+include_once( 'classes/product_variation.class.php' );	// Product variation class
+include_once( 'classes/tax.class.php' );				// Tax class - used in admin and on the front-end
+include_once( 'classes/woocommerce.class.php' );		// Main WooCommerce class
 
 /**
  * Include shipping modules and gateways

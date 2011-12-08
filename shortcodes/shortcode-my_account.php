@@ -46,9 +46,15 @@ function woocommerce_my_account( $atts ) {
 		
 		<h2><?php _e('Recent Orders', 'woothemes'); ?></h2>
 		<?php
-		$woocommerce_orders = &new woocommerce_orders();
-		$woocommerce_orders->get_customer_orders( get_current_user_id(), $recent_orders );
-		if ($woocommerce_orders->orders) :
+		$args = array(
+		    'numberposts'     => $recent_orders,
+		    'meta_key'        => '_customer_user',
+		    'meta_value'	  => get_current_user_id(),
+		    'post_type'       => 'shop_order',
+		    'post_status'     => 'publish' 
+		);
+		$customer_orders = get_posts($args);
+		if ($customer_orders) :
 		?>
 			<table class="shop_table my_account_orders">
 			
@@ -63,7 +69,9 @@ function woocommerce_my_account( $atts ) {
 				</thead>
 				
 				<tbody><?php
-					foreach ($woocommerce_orders->orders as $order) :
+					foreach ($customer_orders as $customer_order) :
+						$order = &new woocommerce_order();
+						$order->populate($customer_order);
 						?><tr class="order">
 							<td><?php echo $order->id; ?></td>
 							<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
