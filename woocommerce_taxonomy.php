@@ -20,6 +20,9 @@ function woocommerce_post_type() {
 	
 	$category_base = (get_option('woocommerce_prepend_shop_page_to_urls')=="yes") ? trailingslashit($base_slug) : '';
 	
+	$category_slug = (get_option('woocommerce_product_category_slug')) ? get_option('woocommerce_product_category_slug') : _x('product-category', 'slug', 'woothemes');
+	$tag_slug = (get_option('woocommerce_product_tag_slug')) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woothemes');
+	
 	$product_base = (get_option('woocommerce_prepend_shop_page_to_products')=='yes') ? trailingslashit($base_slug) : trailingslashit(__('product', 'woothemes'));
 	if (get_option('woocommerce_prepend_category_to_products')=='yes') $product_base .= trailingslashit('%product_cat%');
 	$product_base = untrailingslashit($product_base);
@@ -50,7 +53,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Product Categories', 'woothemes'),
                     'singular_name' 	=> __( 'Product Category', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Categories', 'woothemes'),
+                    'search_items' 		=> __( 'Search Product Categories', 'woothemes'),
                     'all_items' 		=> __( 'All Product Categories', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Product Category', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Product Category:', 'woothemes'),
@@ -61,7 +64,7 @@ function woocommerce_post_type() {
             	),
             'show_ui' 				=> true,
             'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-category', 'slug', 'woothemes'), 'with_front' => false ),
+            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false ),
         )
     );
     
@@ -73,7 +76,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Product Tags', 'woothemes'),
                     'singular_name' 	=> __( 'Product Tag', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Product Tags', 'woothemes'),
+                    'search_items' 		=> __( 'Search Product Tags', 'woothemes'),
                     'all_items' 		=> __( 'All Product Tags', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Product Tag', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Product Tag:', 'woothemes'),
@@ -84,7 +87,32 @@ function woocommerce_post_type() {
             	),
             'show_ui' 				=> true,
             'query_var' 			=> true,
-            'rewrite' 				=> array( 'slug' => $category_base . _x('product-tag', 'slug', 'woothemes'), 'with_front' => false ),
+            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
+        )
+    );
+    
+	register_taxonomy( 'product_shipping_class',
+        array('product'),
+        array(
+            'hierarchical' 			=> true,
+            'update_count_callback' => '_update_post_term_count',
+            'label' 				=> __( 'Shipping Classes', 'woothemes'),
+            'labels' => array(
+                    'name' 				=> __( 'Shipping Classes', 'woothemes'),
+                    'singular_name' 	=> __( 'Shipping Class', 'woothemes'),
+                    'search_items' 		=> __( 'Search Shipping Classes', 'woothemes'),
+                    'all_items' 		=> __( 'All Shipping Classes', 'woothemes'),
+                    'parent_item' 		=> __( 'Parent Shipping Class', 'woothemes'),
+                    'parent_item_colon' => __( 'Parent Shipping Class:', 'woothemes'),
+                    'edit_item' 		=> __( 'Edit Shipping Class', 'woothemes'),
+                    'update_item' 		=> __( 'Update Shipping Class', 'woothemes'),
+                    'add_new_item' 		=> __( 'Add New Shipping Class', 'woothemes'),
+                    'new_item_name' 	=> __( 'New Shipping Class Name', 'woothemes')
+            	),
+            'show_ui' 				=> true,
+            'show_in_nav_menus' 	=> false,
+            'query_var' 			=> $admin_only_query_var,
+            'rewrite' 				=> false,
         )
     );
     
@@ -96,7 +124,7 @@ function woocommerce_post_type() {
             'labels' => array(
                     'name' 				=> __( 'Order statuses', 'woothemes'),
                     'singular_name' 	=> __( 'Order status', 'woothemes'),
-                    'search_items' 		=>  __( 'Search Order statuses', 'woothemes'),
+                    'search_items' 		=> __( 'Search Order statuses', 'woothemes'),
                     'all_items' 		=> __( 'All  Order statuses', 'woothemes'),
                     'parent_item' 		=> __( 'Parent Order status', 'woothemes'),
                     'parent_item_colon' => __( 'Parent Order status:', 'woothemes'),
@@ -131,7 +159,7 @@ function woocommerce_post_type() {
 			            'labels' => array(
 			                    'name' 						=> $label,
 			                    'singular_name' 			=> $label,
-			                    'search_items' 				=>  __( 'Search', 'woothemes') . ' ' . $label,
+			                    'search_items' 				=> __( 'Search', 'woothemes') . ' ' . $label,
 			                    'all_items' 				=> __( 'All', 'woothemes') . ' ' . $label,
 			                    'parent_item' 				=> __( 'Parent', 'woothemes') . ' ' . $label,
 			                    'parent_item_colon' 		=> __( 'Parent', 'woothemes') . ' ' . $label . ':',
@@ -306,6 +334,41 @@ function woocommerce_post_type() {
 
 } 
 
+/**
+ * Replaces "Post" in the update messages for custom post types on the "Edit" post screen.
+ *
+ * For example "Post updated. View Post." becomes "Product updated. View Product".
+ *
+ * @since 1.1
+ *
+ * @param array $messages The default WordPress messages.
+ */
+function woocommerce_custom_update_messages( $messages ) {
+	global $post, $post_ID;
+
+	$post_types = get_post_types( array( 'show_ui' => true, '_builtin' => false ), 'objects' );
+
+	foreach( $post_types as $post_type => $post_object ) {
+
+		$messages[$post_type] = array(
+			0 => '', // Unused. Messages start at index 1.
+			1 => sprintf( __( '%s updated. <a href="%s">View %s</a>', 'woothemes' ), $post_object->labels->singular_name, esc_url( get_permalink( $post_ID ) ), $post_object->labels->singular_name ),
+			2 => __( 'Custom field updated.', 'woothemes' ),
+			3 => __( 'Custom field deleted.', 'woothemes' ),
+			4 => sprintf( __( '%s updated.', 'woothemes' ), $post_object->labels->singular_name ),
+			5 => isset( $_GET['revision'] ) ? sprintf( __( '%s restored to revision from %s', 'woothemes' ), $post_object->labels->singular_name, wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6 => sprintf( __( '%s published. <a href="%s">View %s</a>', 'woothemes' ), $post_object->labels->singular_name, esc_url( get_permalink( $post_ID ) ), $post_object->labels->singular_name ),
+			7 => sprintf( __( '%s saved.', 'woothemes' ), $post_object->labels->singular_name ),
+			8 => sprintf( __( '%s submitted. <a target="_blank" href="%s">Preview %s</a>', 'woothemes' ), $post_object->labels->singular_name, esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ), $post_object->labels->singular_name ),
+			9 => sprintf( __( '%s scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview %s</a>', 'woothemes' ), $post_object->labels->singular_name, date_i18n( __( 'M j, Y @ G:i', 'woothemes' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ), $post_object->labels->singular_name ),
+			10 => sprintf( __( '%s draft updated. <a target="_blank" href="%s">Preview %s</a>', 'woothemes' ), $post_object->labels->singular_name, esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ), $post_object->labels->singular_name ),
+			);
+	}
+
+	return $messages;
+}
+add_filter( 'post_updated_messages', 'woocommerce_custom_update_messages' );
+
 
 /**
  * Filter to allow product_cat in the permalinks for products.
@@ -351,7 +414,16 @@ add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3);
 
 function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	global $wpdb, $woocommerce;
+
+	// No sorting when menu_order is false
+	if ( isset($args['menu_order']) && $args['menu_order'] == false ) return $clauses;
 	
+	// No sorting when orderby is non default
+	if ( isset($args['orderby']) && $args['orderby'] != 'name' ) return $clauses;
+	
+	// No sorting in admin when sorting by a column
+	if ( isset($_GET['orderby']) ) return $clauses;
+
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
 	foreach ((array) $taxonomies as $taxonomy) :
@@ -368,10 +440,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	else :
 		$meta_name = 'order';
 	endif;
-		
-	// query order
-	if( isset($args['menu_order']) && !$args['menu_order']) return $clauses; // menu_order is false so we do not add order clause
-	
+
 	// query fields
 	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
 
@@ -425,88 +494,66 @@ function get_woocommerce_term_meta($term_id, $key, $single = true){
 	return get_metadata('woocommerce_term', $term_id, $key, $single);
 }
 
-
 /**
  * WooCommerce Dropdown categories
  * 
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
+ * We use a custom walker, just like WordPress does it
  */
 function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
-	$terms = get_terms('product_cat', 'pad_counts=1&hierarchal='.$hierarchal.'&hide_empty=1&child_of=0');
-	if (!$terms) return;
-	$output = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
-	foreach($terms as $term) :
-		if ($hierarchal && $term->parent!=0) continue;
+	global $wp_query;
 	
-		if ($hierarchal) $depth = woocommerce_get_product_category_depth($term->term_id);
-		
-		if ( isset( $wp_query->query['product_cat'] ) ) :
-			$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$depth$term->name";
-			if ($show_counts) $output .= " ($term->count)";
-			$output .= "</option>";
-		else :
-			$output .="<option value='$term->slug'>$depth$term->name";
-			if ($show_counts) $output .= " ($term->count)";
-			$output .= "</option>";
-		endif;
-		
-		if ($hierarchal) $output .= woocommerce_get_product_category_children($term->term_id, $show_counts);
-		
-	endforeach;
+	$r = array();
+	$r['pad_counts'] = 1;
+	$r['hierarchal'] = $hierarchal;
+	$r['hide_empty'] = 1;
+	$r['show_count'] = 1;
+	$r['selected'] = (isset($wp_query->query['product_cat'])) ? $wp_query->query['product_cat'] : '';
+	
+	$terms = get_terms( 'product_cat', $r );
+	if (!$terms) return;
+	
+	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
+	$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
+	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
 	$output .="</select>";
+	
 	echo $output;
 }
 
-function woocommerce_get_product_category_depth( $id = '', $depth = '', $i = '', $show_counts = 1 ) {
-	global $wpdb, $term_taxonomy;
-	
-	if( $depth == '' ) :
-			
-		if( $id == '' ) $id = $term_taxonomy->term_id;			
-			
-		$depth = $wpdb->get_var($wpdb->prepare("SELECT parent FROM $wpdb->term_taxonomy WHERE term_id = '%s'", $id));
-		return woocommerce_get_product_category_depth($id, $depth, $i);
-			
-	elseif( $depth == "0" ) :
-	
-		return $i;
-		
-	else :
-		
-		$depth = $wpdb->get_var($wpdb->prepare("SELECT parent FROM $wpdb->term_taxonomy WHERE term_id = '%s'", $depth));
-		$i .='&nbsp;&nbsp;&nbsp;';
-		return woocommerce_get_product_category_depth($id, $depth, $i);
-		
-	endif;
+/**
+ * Walk the Product Categories.
+ */
+function woocommerce_walk_category_dropdown_tree() {
+	$args = func_get_args();
+	// the user's options are the third parameter
+	if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') )
+		$walker = new Woocommerce_Walker_CategoryDropdown;
+	else
+		$walker = $args[2]['walker'];
+
+	return call_user_func_array(array( &$walker, 'walk' ), $args );
 }
 
-function woocommerce_get_product_category_children( $id = '', $show_counts = 1 ) {
-	global $wp_query;
-	
-	if (!$id) return;
-	
-	$output = '';
-	
-	$terms = get_terms('product_cat', 'pad_counts=1&hierarchal=1&hide_empty=1&child_of='.esc_attr($id));
+/**
+ * Create HTML dropdown list of Product Categories.
+ */
+class Woocommerce_Walker_CategoryDropdown extends Walker {
 
-	foreach( $terms as $term ) :
-		if ($term->parent!=$id) continue;
-		
-		$depth = woocommerce_get_product_category_depth($term->term_id);
-		
-		if ( isset( $wp_query->query['product_cat'] ) ) :
-			$output .="<option value='$term->slug' ".selected($term->slug, $wp_query->query['product_cat'], false).">$depth$term->name";
-			if ($show_counts) $output .= " ($term->count)";
-			$output .= "</option>";
-		else :
-			$output .="<option value='$term->slug'>$depth$term->name";
-			if ($show_counts) $output .= " ($term->count)";
-			$output .= "</option>";
-		endif;
-		$output .= woocommerce_get_product_category_children($term->term_id);
-		
-	endforeach;
+	var $tree_type = 'category';
+	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
-	return $output;
+	function start_el(&$output, $category, $depth, $args) {
+		$pad = str_repeat('&nbsp;', $depth * 3);
+
+		$cat_name = apply_filters('list_product_cats', $category->name, $category);
+		$output .= "\t<option class=\"level-$depth\" value=\"".$category->slug."\"";
+		if ( $category->slug == $args['selected'] )
+			$output .= ' selected="selected"';
+		$output .= '>';
+		$output .= $pad.$cat_name;
+		if ( $args['show_count'] )
+			$output .= '&nbsp;('. $category->count .')';
+		$output .= "</option>\n";
+	}
 }

@@ -133,7 +133,7 @@ function woocommerce_init() {
 }
 
 /**
- * Init WooCommerce Tempalte Functions
+ * Init WooCommerce Template Functions
  *
  * This makes them pluggable by plugins and themes
  **/
@@ -230,27 +230,48 @@ function woocommerce_init_roles() {
  * Enqueue frontend scripts
  **/
 function woocommerce_frontend_scripts() {
-	
 	global $woocommerce;
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+	$lightbox_en = (get_option('woocommerce_enable_lightbox')=='yes') ? true : false;
+	$jquery_ui_en = (get_option('woocommerce_enable_jquery_ui')=='yes') ? true : false;
+	$scripts_position = (get_option('woocommerce_scripts_position') == 'yes') ? true : false;
+
+	wp_register_script( 'woocommerce', $woocommerce->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+	wp_register_script( 'woocommerce_plugins', $woocommerce->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
 	
-	wp_register_script( 'woocommerce', $woocommerce->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'woocommerce_plugins', $woocommerce->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0' );
-	wp_register_script( 'fancybox', $woocommerce->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0' );
+	wp_enqueue_script( 'jquery' );
+	wp_enqueue_script( 'woocommerce_plugins' );
+	wp_enqueue_script( 'woocommerce' );
 	
-	wp_enqueue_script('jquery');
-	wp_enqueue_script('woocommerce_plugins');
-	wp_enqueue_script('woocommerce');
-	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_script('fancybox');
+	if ($lightbox_en) :
+		wp_register_script( 'fancybox', $woocommerce->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+		wp_enqueue_script( 'fancybox' );
+	endif;
+	
+	if ($jquery_ui_en) :
+		wp_register_script( 'jqueryui', $woocommerce->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
+		wp_register_script( 'wc_price_slider', $woocommerce->plugin_url() . '/assets/js/price_slider'.$suffix.'.js', 'jqueryui', '1.0', $scripts_position );
+		
+		wp_enqueue_script( 'jqueryui' );
+		wp_enqueue_script( 'wc_price_slider' );
+		
+		$woocommerce_price_slider_params = array(
+			'currency_symbol' 				=> get_woocommerce_currency_symbol(),
+			'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
+		);
+		
+		if (isset($_SESSION['min_price'])) $woocommerce_price_slider_params['min_price'] = $_SESSION['min_price'];
+		if (isset($_SESSION['max_price'])) $woocommerce_price_slider_params['max_price'] = $_SESSION['max_price'];
+		
+		wp_localize_script( 'wc_price_slider', 'woocommerce_price_slider_params', $woocommerce_price_slider_params );
+	endif;
     	
 	/* Script variables */
 	$states = json_encode( $woocommerce->countries->states );
 	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
 	
 	$woocommerce_params = array(
-		'currency_symbol' 				=> get_woocommerce_currency_symbol(),
-		'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
 		'countries' 					=> $states,
 		'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
 		'state_text' 					=> __('state', 'woothemes'),
@@ -265,26 +286,9 @@ function woocommerce_frontend_scripts() {
 		'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart')
 	);
 	
-	if (isset($_SESSION['min_price'])) $woocommerce_params['min_price'] = $_SESSION['min_price'];
-	if (isset($_SESSION['max_price'])) $woocommerce_params['max_price'] = $_SESSION['max_price'];
-		
-	if ( is_page(get_option('woocommerce_checkout_page_id')) ) :
-		$woocommerce_params['is_checkout'] = 1;
-	else :
-		$woocommerce_params['is_checkout'] = 0;
-	endif;
-	
-	if (is_page(get_option('woocommerce_pay_page_id'))) :
-		$woocommerce_params['is_pay_page'] = 1;
-	else :
-		$woocommerce_params['is_pay_page'] = 0;
-	endif;
-	
-	if ( is_cart() ) :
-		$woocommerce_params['is_cart'] = 1;
-	else :
-		$woocommerce_params['is_cart'] = 0;
-	endif;
+	$woocommerce_params['is_checkout'] = ( is_page(get_option('woocommerce_checkout_page_id')) ) ? 1 : 0;
+	$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
+	$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
 	
 	wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
 	
@@ -434,8 +438,8 @@ function get_woocommerce_currency_symbol() {
 		case 'TRY' : $currency_symbol = 'TL'; break;
 		case 'NOK' : $currency_symbol = 'kr'; break;
 		case 'ZAR' : $currency_symbol = 'R'; break;
-		
-		case 'CZK' :
+		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
+
 		case 'DKK' :
 		case 'HUF' :
 		case 'ILS' :
@@ -469,6 +473,12 @@ function woocommerce_price( $price, $args = array() ) {
 	$currency_symbol = get_woocommerce_currency_symbol();
 	$price = number_format( (double) $price, $num_decimals, get_option('woocommerce_price_decimal_sep'), get_option('woocommerce_price_thousand_sep') );
 	
+	if (get_option('woocommerce_price_trim_zeros')=='yes') :
+		$trimmed_price = rtrim(rtrim($price, '0'), get_option('woocommerce_price_decimal_sep'));
+		$after_decimal = explode(get_option('woocommerce_price_decimal_sep'), $trimmed_price);
+		if (!isset($after_decimal[1]) || (isset($after_decimal[1]) && (strlen($after_decimal[1]) == 0 && strlen($after_decimal[1]) == $num_decimals))) $price = $trimmed_price;
+	endif;
+	
 	switch ($currency_pos) :
 		case 'left' :
 			$return = $currency_symbol . $price;
@@ -483,7 +493,7 @@ function woocommerce_price( $price, $args = array() ) {
 			$return = $price . ' ' . $currency_symbol;
 		break;
 	endswitch;
-	
+
 	if ($ex_tax_label && get_option('woocommerce_calc_taxes')=='yes') $return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 	
 	return $return;

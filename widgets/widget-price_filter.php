@@ -131,7 +131,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		endforeach;
 		
-		$min = 0;
+		$min = $max = 0;
+		$post_min = $post_max = '';
 		
 		if (sizeof($woocommerce->query->layered_nav_product_ids)==0) :
 
@@ -155,14 +156,21 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		endif;
 		
+		if (isset($_SESSION['min_price'])) $post_min = $_SESSION['min_price'];
+		if (isset($_SESSION['max_price'])) $post_max = $_SESSION['max_price'];
+		
 		echo '<form method="get">
 			<div class="price_slider_wrapper">
-				<div class="price_slider"></div>
+				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
-					<button type="submit" class="button">'.__('Filter', 'woothemes').'</button>'.__('Price:', 'woothemes').' <span></span>
-					<input type="hidden" id="max_price" name="max_price" value="'.esc_attr( $max ).'" />
-					<input type="hidden" id="min_price" name="min_price" value="'.esc_attr( $min ).'" />
+					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $post_min ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woothemes').'" />
+					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $post_max ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__('Max price', 'woothemes').'" />
+					<button type="submit" class="button">'.__('Filter', 'woothemes').'</button>
+					<div class="price_label" style="display:none;">
+						'.__('Price:', 'woothemes').' <span></span>
+					</div>
 					'.$fields.'
+					<div class="clear"></div>
 				</div>
 			</div>
 		</form>';

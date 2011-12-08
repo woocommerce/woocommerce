@@ -97,8 +97,8 @@
 	position: absolute;
 	top: -15px;
 	right: -15px;
-	width: 30px;
-	height: 30px;
+	width: 25px;
+	height: 25px;
 	background: transparent url('../images/fancybox/fancybox.png') -40px 0px;
 	cursor: pointer;
 	z-index: 1103;

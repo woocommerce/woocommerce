@@ -21,12 +21,12 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_sales_overview'
 			),
 			array(
-				'title' => __('Daily Sales', 'woothemes'),
+				'title' => __('Sales by day', 'woothemes'),
 				'description' => '',
 				'function' => 'woocommerce_daily_sales'
 			),
 			array(
-				'title' => __('Monthly Sales', 'woothemes'),
+				'title' => __('Sales by month', 'woothemes'),
 				'description' => '',
 				'function' => 'woocommerce_monthly_sales'
 			),
@@ -327,7 +327,7 @@ function woocommerce_sales_overview() {
 	</div>
 	<?php
 	
-	$start_date = strtotime(date('Ymd', strtotime( date('Ym').'01' )));
+	$start_date = strtotime(date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' )));
 	$end_date = strtotime(date('Ymd', current_time('timestamp')));
 	
 	// Get orders to display in widget
@@ -462,7 +462,7 @@ function woocommerce_daily_sales() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -654,7 +654,7 @@ function woocommerce_monthly_sales() {
 	$first_year = $wpdb->get_var("SELECT post_date FROM $wpdb->posts ORDER BY post_date ASC LIMIT 1;");
 	if ($first_year) $first_year = date('Y', strtotime($first_year)); else $first_year = date('Y');
 	
-	$current_year = (isset($_POST['show_year'])) ? $_POST['show_year'] : date('Y');
+	$current_year = (isset($_POST['show_year'])) ? $_POST['show_year'] : date('Y', current_time('timestamp'));
 	
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
@@ -848,7 +848,7 @@ function woocommerce_top_sellers() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -918,7 +918,7 @@ function woocommerce_top_sellers() {
 					
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
-					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.$sales.'</span></a></td></tr>';
+					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.$sales.'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -942,7 +942,7 @@ function woocommerce_top_earners() {
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
 	
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym').'01' ));
+	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
 	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
 	
 	$start_date = strtotime($start_date);
@@ -994,7 +994,7 @@ function woocommerce_top_earners() {
 		<thead>
 			<tr>
 				<th><?php _e('Product', 'woothemes'); ?></th>
-				<th><?php _e('Sales', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Sales', 'woothemes'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1007,12 +1007,12 @@ function woocommerce_top_earners() {
 					if ($product) :
 						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
 					else :
-						$product_name = __('Product does not exist', 'woothemes');
+						$product_name = __('Product no longer exists', 'woothemes');
 					endif;
 					
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
-					echo '<tr><th>'.$product_name.'</th><td><a href="'.$orders_link.'" style="width:'.$width.'%"><span>'.woocommerce_price($sales).'</span></a></td></tr>';
+					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.woocommerce_price($sales).'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 
 			?>
 		</tbody>
@@ -1036,7 +1036,7 @@ function woocommerce_product_sales() {
 	$chosen_product_id = (isset($_POST['product_id'])) ? $_POST['product_id'] : '';
 	
 	if ($chosen_product_id) :
-		$start_date = date('Ym', strtotime( '-12 MONTHS' )).'01';
+		$start_date = date('Ym', strtotime( '-12 MONTHS', current_time('timestamp') )).'01';
 		$end_date = date('Ymd', current_time('timestamp'));
 		
 		$start_date = strtotime($start_date);
@@ -1119,7 +1119,7 @@ function woocommerce_product_sales() {
 		<thead>
 			<tr>
 				<th><?php _e('Month', 'woothemes'); ?></th>
-				<th><?php _e('Sales', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Sales', 'woothemes'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1130,11 +1130,13 @@ function woocommerce_product_sales() {
 	
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
 	
-					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th><td>
-						<span style="width:'.$width.'%"><span>'.$sales.'</span></span>
-						<span class="alt" style="width:'.$width2.'%"><span>'.woocommerce_price($product_totals[$date]).'</span></span>
+					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th>
+					<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
+					<td class="bars">
+						<span style="width:'.$width.'%">&nbsp;</span>
+						<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
 					</td></tr>';
-				endforeach; else echo '<tr><td colspan="2">'.__('No sales :(', 'woothemes').'</td></tr>';
+				endforeach; else echo '<tr><td colspan="3">'.__('No sales :(', 'woothemes').'</td></tr>';
 			?>
 		</tbody>
 	</table>
@@ -1240,7 +1242,7 @@ function woocommerce_customer_overview() {
 	</div>
 	<?php
 	
-	$start_date = strtotime('-30 days');
+	$start_date = strtotime('-30 days', current_time('timestamp'));
 	$end_date = current_time('timestamp');
 	$signups = array();
 	

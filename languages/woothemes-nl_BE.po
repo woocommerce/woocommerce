@@ -3,15 +3,15 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2011-11-28 17:15+0000\n"
-"Last-Translator: admin <jay@woothemes.com>\n"
+"PO-Revision-Date: 2011-12-06 11:04+0000\n"
+"Last-Translator: admin <shop@ramoonus.nl>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Poedit-Language: English\n"
-"X-Poedit-Country: UNITED KINGDOM\n"
+"X-Poedit-Language: Dutch\n"
+"X-Poedit-Country: BELGIUM\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
 "X-Poedit-Basepath: ../\n"
@@ -118,7 +118,7 @@ msgstr ""
 #: admin/admin-attributes.php:177
 #@ woothemes
 msgid "Delete"
-msgstr "Delete"
+msgstr ""
 
 #: admin/admin-attributes.php:197
 #@ woothemes
@@ -552,333 +552,6 @@ msgstr ""
 msgid "Order Received"
 msgstr ""
 
-#: admin/post-types/shop_coupon.php:20
-#@ woothemes
-msgid "Code"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:21
-#@ woothemes
-msgid "Coupon type"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:22
-#: admin/writepanels/writepanel-coupon_data.php:33
-#@ woothemes
-msgid "Coupon amount"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:23
-#: admin/writepanels/writepanel-coupon_data.php:45
-#@ woothemes
-msgid "Product IDs"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:24
-#: admin/writepanels/writepanel-coupon_data.php:51
-#@ woothemes
-msgid "Usage limit"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:25
-#@ woothemes
-msgid "Usage count"
-msgstr ""
-
-#: admin/post-types/shop_coupon.php:26
-#: admin/writepanels/writepanel-coupon_data.php:54
-#@ woothemes
-msgid "Expiry date"
-msgstr ""
-
-#: woocommerce_taxonomy.php:200
-#@ woothemes
-msgid "Parent Product"
-msgstr ""
-
-#: admin/post-types/product.php:20
-#@ woothemes
-msgid "Image"
-msgstr ""
-
-#: admin/post-types/product.php:26
-#@ woothemes
-msgid "Categories"
-msgstr ""
-
-#: admin/post-types/product.php:27
-#@ woothemes
-msgid "Tags"
-msgstr ""
-
-#: admin/post-types/product.php:28
-#: admin/writepanels/writepanel-product_data.php:763
-#@ woothemes
-msgid "Featured"
-msgstr ""
-
-#: admin/post-types/product.php:31
-#@ woothemes
-msgid "In Stock?"
-msgstr ""
-
-#: admin/post-types/product.php:34
-#: shortcodes/shortcode-cart.php:94
-#: templates/emails/customer_completed_order.php:18
-#: templates/emails/customer_note_notification.php:22
-#: templates/emails/customer_pay_for_order.php:22
-#: templates/emails/customer_processing_order.php:18
-#: templates/emails/new_order.php:18
-#: woocommerce_template_functions.php:538
-#@ woothemes
-msgid "Price"
-msgstr ""
-
-#: admin/post-types/product.php:35
-#: admin/post-types/shop_order.php:25
-#: shortcodes/shortcode-my_account.php:58
-#@ woothemes
-msgid "Date"
-msgstr ""
-
-#: admin/post-types/product.php:74
-#@ woothemes
-msgid "Change"
-msgstr ""
-
-#: admin/admin-reports.php:1480
-#: admin/admin-reports.php:1502
-#: admin/post-types/product.php:86
-#@ woothemes
-msgid " in stock"
-msgstr ""
-
-#: admin/post-types/product.php:94
-#: admin/post-types/shop_order.php:107
-#@ woothemes
-msgid "Unpublished"
-msgstr ""
-
-#: admin/post-types/product.php:97
-#: admin/post-types/shop_order.php:110
-#@ woothemes
-msgid "Y/m/d g:i:s A"
-msgstr ""
-
-#: admin/post-types/product.php:104
-#: admin/post-types/shop_order.php:117
-#, php-format
-#@ woothemes
-msgid "%s ago"
-msgstr ""
-
-#: admin/post-types/product.php:106
-#: admin/post-types/shop_order.php:119
-#@ woothemes
-msgid "Y/m/d"
-msgstr ""
-
-#: admin/post-types/product.php:112
-#@ default
-msgid "Published"
-msgstr ""
-
-#: admin/post-types/product.php:115
-#@ woothemes
-msgid "Missed schedule"
-msgstr ""
-
-#: admin/post-types/product.php:117
-#@ default
-msgid "Scheduled"
-msgstr ""
-
-#: admin/post-types/product.php:120
-#@ default
-msgid "Last Modified"
-msgstr ""
-
-#: admin/post-types/product.php:211
-#@ woothemes
-msgid "Show all product types"
-msgstr ""
-
-#: admin/post-types/product.php:221
-#@ woothemes
-msgid "Show all sub-types"
-msgstr ""
-
-#: admin/post-types/product.php:225
-#: admin/writepanels/writepanel-product-type-variable.php:50
-#: admin/writepanels/writepanel-product-type-variable.php:137
-#: admin/writepanels/writepanel-product-type-variable.php:303
-#: admin/writepanels/writepanel-product_data.php:760
-#@ woothemes
-msgid "Downloadable"
-msgstr ""
-
-#: admin/post-types/product.php:229
-#: admin/writepanels/writepanel-product-type-variable.php:50
-#: admin/writepanels/writepanel-product-type-variable.php:139
-#: admin/writepanels/writepanel-product-type-variable.php:305
-#: admin/writepanels/writepanel-product_data.php:758
-#@ woothemes
-msgid "Virtual"
-msgstr ""
-
-#: admin/post-types/product.php:270
-#@ woothemes
-msgid "Exclude image"
-msgstr ""
-
-#: admin/post-types/product.php:279
-#@ woothemes
-msgid "Enabling this option will hide it from the product page image gallery."
-msgstr ""
-
-#: admin/admin-settings.php:1094
-#: admin/post-types/shop_order.php:20
-#: shortcodes/shortcode-my_account.php:61
-#@ woothemes
-msgid "Status"
-msgstr ""
-
-#: admin/post-types/shop_order.php:21
-#: woocommerce_taxonomy.php:252
-#@ woothemes
-msgid "Order"
-msgstr ""
-
-#: admin/post-types/shop_order.php:22
-#@ woothemes
-msgid "Billing"
-msgstr ""
-
-#: admin/admin-settings.php:1022
-#: admin/post-types/shop_order.php:23
-#: templates/checkout/pay_for_order.php:18
-#: templates/checkout/review_order.php:24
-#: woocommerce_template_functions.php:760
-#@ woothemes
-msgid "Shipping"
-msgstr ""
-
-#: admin/post-types/shop_order.php:24
-#: templates/checkout/review_order.php:91
-#: woocommerce_template_functions.php:815
-#@ woothemes
-msgid "Order Total"
-msgstr ""
-
-#: admin/post-types/shop_order.php:26
-#@ woothemes
-msgid "Actions"
-msgstr ""
-
-#: admin/post-types/shop_order.php:45
-#, php-format
-#@ woothemes
-msgid "<mark class=\"%s\">%s</mark>"
-msgstr ""
-
-#: admin/post-types/shop_order.php:50
-#: classes/gateways/gateway-paypal.php:227
-#, php-format
-#@ woothemes
-msgid "Order #%s"
-msgstr ""
-
-#: admin/admin-reports.php:301
-#: admin/post-types/shop_order.php:64
-#: admin/writepanels/writepanel-order_data.php:73
-#: woocommerce_actions.php:1087
-#: woocommerce_actions.php:1140
-#@ woothemes
-msgid "Guest"
-msgstr ""
-
-#: admin/post-types/shop_order.php:67
-#: admin/writepanels/writepanel-order_data.php:71
-#@ woothemes
-msgid "Customer:"
-msgstr ""
-
-#: admin/post-types/shop_order.php:70
-#: templates/emails/customer_completed_order.php:57
-#: templates/emails/customer_note_notification.php:61
-#: templates/emails/customer_processing_order.php:57
-#: templates/emails/new_order.php:57
-#: woocommerce_template_functions.php:1355
-#@ woothemes
-msgid "Email:"
-msgstr ""
-
-#: admin/post-types/shop_order.php:73
-#: templates/emails/customer_completed_order.php:60
-#: templates/emails/customer_note_notification.php:64
-#: templates/emails/customer_processing_order.php:60
-#: templates/emails/new_order.php:60
-#@ woothemes
-msgid "Tel:"
-msgstr ""
-
-#: admin/post-types/shop_order.php:84
-#@ woothemes
-msgid "Paid via"
-msgstr ""
-
-#: admin/post-types/shop_order.php:99
-#@ woothemes
-msgid "Shipped via"
-msgstr ""
-
-#: admin/post-types/shop_order.php:129
-#@ woothemes
-msgid "Complete"
-msgstr ""
-
-#: admin/post-types/shop_order.php:130
-#: shortcodes/shortcode-my_account.php:81
-#@ woothemes
-msgid "View"
-msgstr ""
-
-#: admin/post-types/shop_order.php:194
-#@ woothemes
-msgid "Show all statuses"
-msgstr ""
-
-#: admin/post-types/shop_order.php:223
-#@ woothemes
-msgid "Show all customers"
-msgstr ""
-
-#: admin/post-types/product.php:306
-#: admin/post-types/shop_order.php:297
-#: admin/post-types/shop_order.php:316
-#@ woothemes
-msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-
-#: admin/post-types/product.php:308
-#: admin/post-types/shop_order.php:298
-#: admin/post-types/shop_order.php:317
-#@ woothemes
-msgid "You have taken too long. Please go back and retry."
-msgstr ""
-
-#: admin/post-types/product.php:384
-#, php-format
-#@ woothemes
-msgid "[%s with SKU of %s]"
-msgstr ""
-
-#: admin/post-types/product.php:390
-#, php-format
-#@ woothemes
-msgid "[%s with ID of %d]"
-msgstr ""
-
 #: admin/admin-reports.php:16
 #@ woothemes
 msgid "sales"
@@ -889,6 +562,16 @@ msgstr ""
 #: admin/admin-reports.php:59
 #@ woothemes
 msgid "Overview"
+msgstr ""
+
+#: admin/admin-reports.php:24
+#@ woothemes
+msgid "Sales by day"
+msgstr ""
+
+#: admin/admin-reports.php:29
+#@ woothemes
+msgid "Sales by month"
 msgstr ""
 
 #: admin/admin-reports.php:34
@@ -968,6 +651,15 @@ msgstr ""
 #: admin/admin-reports.php:287
 #@ woothemes
 msgid "Last 5 orders"
+msgstr ""
+
+#: admin/admin-reports.php:301
+#: admin/post-types/shop_order.php:64
+#: admin/writepanels/writepanel-order_data.php:73
+#: woocommerce_actions.php:1087
+#: woocommerce_actions.php:1140
+#@ woothemes
+msgid "Guest"
 msgstr ""
 
 #: admin/admin-reports.php:321
@@ -1082,6 +774,11 @@ msgstr ""
 msgid "Product does not exist"
 msgstr ""
 
+#: admin/admin-reports.php:1010
+#@ woothemes
+msgid "Product no longer exists"
+msgstr ""
+
 #: admin/admin-reports.php:1090
 #@ woothemes
 msgid "Product:"
@@ -1140,6 +837,13 @@ msgstr ""
 #: admin/admin-reports.php:1470
 #@ woothemes
 msgid "Low stock"
+msgstr ""
+
+#: admin/admin-reports.php:1480
+#: admin/admin-reports.php:1502
+#: admin/post-types/product.php:86
+#@ woothemes
+msgid " in stock"
 msgstr ""
 
 #: admin/admin-reports.php:1484
@@ -1385,6 +1089,11 @@ msgstr ""
 msgid "Canadian Dollars (&#36;)"
 msgstr ""
 
+#: admin/admin-settings.php:47
+#@ woothemes
+msgid "Czech Koruna (&#75;&#269;)"
+msgstr ""
+
 #: admin/admin-settings.php:48
 #@ woothemes
 msgid "Danish Krone"
@@ -1550,6 +1259,11 @@ msgstr ""
 msgid "Prevent customers from accessing WordPress admin"
 msgstr ""
 
+#: admin/admin-settings.php:168
+#@ woothemes
+msgid "Scripts &amp; Styling"
+msgstr ""
+
 #: admin/admin-settings.php:169
 #@ woothemes
 msgid "Enable WooCommerce CSS styles"
@@ -1563,6 +1277,16 @@ msgstr ""
 #: admin/admin-settings.php:185
 #@ woothemes
 msgid "Enable WooCommerce lightbox on the product page"
+msgstr ""
+
+#: admin/admin-settings.php:193
+#@ woothemes
+msgid "Enable jQuery UI (used by the price slider widget)"
+msgstr ""
+
+#: admin/admin-settings.php:201
+#@ woothemes
+msgid "Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)"
 msgstr ""
 
 #: admin/admin-settings.php:209
@@ -1701,6 +1425,26 @@ msgstr ""
 #, php-format
 #@ woothemes
 msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
+msgstr ""
+
+#: admin/admin-settings.php:335
+#@ woothemes
+msgid "Product category slug"
+msgstr ""
+
+#: admin/admin-settings.php:336
+#@ woothemes
+msgid "Shows in the product category URLs. Leave blank to use the default slug."
+msgstr ""
+
+#: admin/admin-settings.php:344
+#@ woothemes
+msgid "Product tag slug"
+msgstr ""
+
+#: admin/admin-settings.php:345
+#@ woothemes
+msgid "Shows in the product tag URLs. Leave blank to use the default slug."
 msgstr ""
 
 #: admin/admin-settings.php:353
@@ -1979,6 +1723,16 @@ msgstr ""
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr ""
 
+#: admin/admin-settings.php:606
+#@ woothemes
+msgid "Trim zeros"
+msgstr ""
+
+#: admin/admin-settings.php:607
+#@ woothemes
+msgid "Trim zeros after the decimal point when displaying prices"
+msgstr ""
+
 #: admin/admin-settings.php:615
 #@ woothemes
 msgid "Image Options"
@@ -2124,6 +1878,11 @@ msgstr ""
 #: admin/admin-settings.php:768
 #@ woothemes
 msgid "Round tax at subtotal level, instead of per line"
+msgstr ""
+
+#: admin/admin-settings.php:776
+#@ woothemes
+msgid "Tax display (cart totals)"
 msgstr ""
 
 #: admin/admin-settings.php:777
@@ -2357,6 +2116,15 @@ msgstr ""
 msgid "Inventory"
 msgstr ""
 
+#: admin/admin-settings.php:1022
+#: admin/post-types/shop_order.php:23
+#: templates/checkout/pay_for_order.php:18
+#: templates/checkout/review_order.php:24
+#: woocommerce_template_functions.php:760
+#@ woothemes
+msgid "Shipping"
+msgstr ""
+
 #: admin/admin-settings.php:1023
 #: admin/writepanels/writepanel-product_data.php:34
 #: classes/countries.class.php:590
@@ -2381,6 +2149,33 @@ msgstr ""
 #: admin/admin-settings.php:1026
 #@ woothemes
 msgid "Emails"
+msgstr ""
+
+#: admin/admin-settings.php:1088
+#@ woothemes
+msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
+msgstr ""
+
+#: admin/admin-settings.php:1092
+#@ woothemes
+msgid "Default"
+msgstr ""
+
+#: admin/admin-settings.php:1093
+#@ woothemes
+msgid "Gateway"
+msgstr ""
+
+#: admin/admin-settings.php:1094
+#: admin/post-types/shop_order.php:20
+#: shortcodes/shortcode-my_account.php:61
+#@ woothemes
+msgid "Status"
+msgstr ""
+
+#: admin/admin-settings.php:1110
+#@ woothemes
+msgid "Gateway ID"
 msgstr ""
 
 #: admin/admin-settings.php:1146
@@ -2409,6 +2204,306 @@ msgstr ""
 #: admin/admin-taxonomies.php:87
 #@ woothemes
 msgid "Remove image"
+msgstr ""
+
+#: admin/admin-taxonomies.php:276
+#@ woothemes
+msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
+msgstr ""
+
+#: admin/admin-taxonomies.php:288
+#@ woothemes
+msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
+msgstr ""
+
+#: admin/post-types/product.php:20
+#@ woothemes
+msgid "Image"
+msgstr ""
+
+#: admin/post-types/product.php:26
+#@ woothemes
+msgid "Categories"
+msgstr ""
+
+#: admin/post-types/product.php:27
+#@ woothemes
+msgid "Tags"
+msgstr ""
+
+#: admin/post-types/product.php:28
+#: admin/writepanels/writepanel-product_data.php:763
+#@ woothemes
+msgid "Featured"
+msgstr ""
+
+#: admin/post-types/product.php:31
+#@ woothemes
+msgid "In Stock?"
+msgstr ""
+
+#: admin/post-types/product.php:34
+#: shortcodes/shortcode-cart.php:94
+#: templates/emails/customer_completed_order.php:18
+#: templates/emails/customer_note_notification.php:22
+#: templates/emails/customer_pay_for_order.php:22
+#: templates/emails/customer_processing_order.php:18
+#: templates/emails/new_order.php:18
+#: woocommerce_template_functions.php:538
+#@ woothemes
+msgid "Price"
+msgstr ""
+
+#: admin/post-types/product.php:35
+#: admin/post-types/shop_order.php:25
+#: shortcodes/shortcode-my_account.php:58
+#@ woothemes
+msgid "Date"
+msgstr ""
+
+#: admin/post-types/product.php:74
+#@ woothemes
+msgid "Change"
+msgstr ""
+
+#: admin/post-types/product.php:94
+#: admin/post-types/shop_order.php:107
+#@ woothemes
+msgid "Unpublished"
+msgstr ""
+
+#: admin/post-types/product.php:97
+#: admin/post-types/shop_order.php:110
+#@ woothemes
+msgid "Y/m/d g:i:s A"
+msgstr ""
+
+#: admin/post-types/product.php:104
+#: admin/post-types/shop_order.php:117
+#, php-format
+#@ woothemes
+msgid "%s ago"
+msgstr ""
+
+#: admin/post-types/product.php:106
+#: admin/post-types/shop_order.php:119
+#@ woothemes
+msgid "Y/m/d"
+msgstr ""
+
+#: admin/post-types/product.php:112
+#@ default
+msgid "Published"
+msgstr ""
+
+#: admin/post-types/product.php:115
+#@ woothemes
+msgid "Missed schedule"
+msgstr ""
+
+#: admin/post-types/product.php:117
+#@ default
+msgid "Scheduled"
+msgstr ""
+
+#: admin/post-types/product.php:120
+#@ default
+msgid "Last Modified"
+msgstr ""
+
+#: admin/post-types/product.php:211
+#@ woothemes
+msgid "Show all product types"
+msgstr ""
+
+#: admin/post-types/product.php:221
+#@ woothemes
+msgid "Show all sub-types"
+msgstr ""
+
+#: admin/post-types/product.php:225
+#: admin/writepanels/writepanel-product-type-variable.php:50
+#: admin/writepanels/writepanel-product-type-variable.php:137
+#: admin/writepanels/writepanel-product-type-variable.php:303
+#: admin/writepanels/writepanel-product_data.php:760
+#@ woothemes
+msgid "Downloadable"
+msgstr ""
+
+#: admin/post-types/product.php:229
+#: admin/writepanels/writepanel-product-type-variable.php:50
+#: admin/writepanels/writepanel-product-type-variable.php:139
+#: admin/writepanels/writepanel-product-type-variable.php:305
+#: admin/writepanels/writepanel-product_data.php:758
+#@ woothemes
+msgid "Virtual"
+msgstr ""
+
+#: admin/post-types/product.php:270
+#@ woothemes
+msgid "Exclude image"
+msgstr ""
+
+#: admin/post-types/product.php:279
+#@ woothemes
+msgid "Enabling this option will hide it from the product page image gallery."
+msgstr ""
+
+#: admin/post-types/product.php:306
+#: admin/post-types/shop_order.php:297
+#: admin/post-types/shop_order.php:316
+#@ woothemes
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: admin/post-types/product.php:308
+#: admin/post-types/shop_order.php:298
+#: admin/post-types/shop_order.php:317
+#@ woothemes
+msgid "You have taken too long. Please go back and retry."
+msgstr ""
+
+#: admin/post-types/product.php:384
+#, php-format
+#@ woothemes
+msgid "[%s with SKU of %s]"
+msgstr ""
+
+#: admin/post-types/product.php:390
+#, php-format
+#@ woothemes
+msgid "[%s with ID of %d]"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:20
+#@ woothemes
+msgid "Code"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:21
+#@ woothemes
+msgid "Coupon type"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:22
+#: admin/writepanels/writepanel-coupon_data.php:33
+#@ woothemes
+msgid "Coupon amount"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:23
+#: admin/writepanels/writepanel-coupon_data.php:45
+#@ woothemes
+msgid "Product IDs"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:24
+#: admin/writepanels/writepanel-coupon_data.php:51
+#@ woothemes
+msgid "Usage limit"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:25
+#@ woothemes
+msgid "Usage count"
+msgstr ""
+
+#: admin/post-types/shop_coupon.php:26
+#: admin/writepanels/writepanel-coupon_data.php:54
+#@ woothemes
+msgid "Expiry date"
+msgstr ""
+
+#: admin/post-types/shop_order.php:21
+#: woocommerce_taxonomy.php:252
+#@ woothemes
+msgid "Order"
+msgstr ""
+
+#: admin/post-types/shop_order.php:22
+#@ woothemes
+msgid "Billing"
+msgstr ""
+
+#: admin/post-types/shop_order.php:24
+#: templates/checkout/review_order.php:91
+#: woocommerce_template_functions.php:815
+#@ woothemes
+msgid "Order Total"
+msgstr ""
+
+#: admin/post-types/shop_order.php:26
+#@ woothemes
+msgid "Actions"
+msgstr ""
+
+#: admin/post-types/shop_order.php:45
+#, php-format
+#@ woothemes
+msgid "<mark class=\"%s\">%s</mark>"
+msgstr ""
+
+#: admin/post-types/shop_order.php:50
+#: classes/gateways/gateway-paypal.php:227
+#, php-format
+#@ woothemes
+msgid "Order #%s"
+msgstr ""
+
+#: admin/post-types/shop_order.php:67
+#: admin/writepanels/writepanel-order_data.php:71
+#@ woothemes
+msgid "Customer:"
+msgstr ""
+
+#: admin/post-types/shop_order.php:70
+#: templates/emails/customer_completed_order.php:57
+#: templates/emails/customer_note_notification.php:61
+#: templates/emails/customer_processing_order.php:57
+#: templates/emails/new_order.php:57
+#: woocommerce_template_functions.php:1355
+#@ woothemes
+msgid "Email:"
+msgstr ""
+
+#: admin/post-types/shop_order.php:73
+#: templates/emails/customer_completed_order.php:60
+#: templates/emails/customer_note_notification.php:64
+#: templates/emails/customer_processing_order.php:60
+#: templates/emails/new_order.php:60
+#@ woothemes
+msgid "Tel:"
+msgstr ""
+
+#: admin/post-types/shop_order.php:84
+#@ woothemes
+msgid "Paid via"
+msgstr ""
+
+#: admin/post-types/shop_order.php:99
+#@ woothemes
+msgid "Shipped via"
+msgstr ""
+
+#: admin/post-types/shop_order.php:129
+#@ woothemes
+msgid "Complete"
+msgstr ""
+
+#: admin/post-types/shop_order.php:130
+#: shortcodes/shortcode-my_account.php:81
+#@ woothemes
+msgid "View"
+msgstr ""
+
+#: admin/post-types/shop_order.php:194
+#@ woothemes
+msgid "Show all statuses"
+msgstr ""
+
+#: admin/post-types/shop_order.php:223
+#@ woothemes
+msgid "Show all customers"
 msgstr ""
 
 #: admin/writepanels/writepanel-coupon_data.php:30
@@ -2442,6 +2537,16 @@ msgstr ""
 #: admin/writepanels/writepanel-coupon_data.php:36
 #@ woothemes
 msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#@ woothemes
+msgid "Apply before tax"
+msgstr ""
+
+#: admin/writepanels/writepanel-coupon_data.php:39
+#@ woothemes
+msgid "Check this box if the coupon should be applied before calculating cart tax"
 msgstr ""
 
 #: admin/writepanels/writepanel-coupon_data.php:42
@@ -2695,10 +2800,31 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
+#: admin/writepanels/writepanel-order_data.php:171
+#@ woothemes
+msgid "Base&nbsp;Cost"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:171
+#@ woothemes
+msgid "Cost before discounts"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:171
+#: admin/writepanels/writepanel-order_data.php:172
+#@ woothemes
+msgid "Up to 4 decimals are allowed for precision."
+msgstr ""
+
 #: admin/writepanels/writepanel-order_data.php:172
 #: classes/shipping/shipping-flat_rate.php:293
 #@ woothemes
 msgid "Cost"
+msgstr ""
+
+#: admin/writepanels/writepanel-order_data.php:172
+#@ woothemes
+msgid "Final cost after discount"
 msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:173
@@ -5962,21 +6088,6 @@ msgstr ""
 msgid "Flat Rate"
 msgstr ""
 
-#: classes/shipping/shipping-flat_rate.php:103
-#@ woothemes
-msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:294
-#@ woothemes
-msgid "Handling Fee"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:109
-#@ woothemes
-msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
-msgstr ""
-
 #: classes/shipping/shipping-flat_rate.php:62
 #: classes/shipping/shipping-free_shipping.php:69
 #@ woothemes
@@ -5989,6 +6100,46 @@ msgstr ""
 msgid "All allowed countries"
 msgstr ""
 
+#: classes/shipping/shipping-flat_rate.php:80
+#@ woothemes
+msgid "Calculation Type"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:85
+#@ woothemes
+msgid "Per Order - charge shipping for the entire order as a whole"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:86
+#@ woothemes
+msgid "Per Item - charge shipping for each item individually"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:87
+#@ woothemes
+msgid "Per Class - charge shipping for each shipping class in an order"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:101
+#@ woothemes
+msgid "Default Cost"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:103
+#@ woothemes
+msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:107
+#@ woothemes
+msgid "Default Handling Fee"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:109
+#@ woothemes
+msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
+msgstr ""
+
 #: classes/shipping/shipping-flat_rate.php:278
 #: classes/shipping/shipping-flat_rate.php:286
 #@ woothemes
@@ -5998,6 +6149,48 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:279
 #@ woothemes
 msgid "Flat rates let you define a standard rate per item, or per order."
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:292
+#: woocommerce_taxonomy.php:102
+#@ woothemes
+msgid "Shipping Class"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:293
+#@ woothemes
+msgid "Cost, excluding tax."
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:294
+#@ woothemes
+msgid "Handling Fee"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:294
+#@ woothemes
+msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:299
+#@ woothemes
+msgid "+ Add Flat Rate"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:300
+#@ woothemes
+msgid "Add rates for shipping classes here &mdash; they will override the default costs defined above."
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:300
+#@ woothemes
+msgid "Delete selected rates"
+msgstr ""
+
+#: classes/shipping/shipping-flat_rate.php:317
+#: classes/shipping/shipping-flat_rate.php:349
+#@ woothemes
+msgid "Select a class&hellip;"
 msgstr ""
 
 #: classes/shipping/shipping-free_shipping.php:16
@@ -6155,6 +6348,11 @@ msgstr ""
 #: shortcodes/shortcode-cart.php:150
 #@ woothemes
 msgid "Apply Coupon"
+msgstr ""
+
+#: shortcodes/shortcode-cart.php:153
+#@ woothemes
+msgid "Update Cart"
 msgstr ""
 
 #: shortcodes/shortcode-cart.php:153
@@ -6823,6 +7021,11 @@ msgstr ""
 msgid "Very Poor"
 msgstr ""
 
+#: templates/single-product-reviews.php:95
+#@ woothemes
+msgid "Your Review"
+msgstr ""
+
 #: widgets/widget-best_sellers.php:23
 #@ woothemes
 msgid "Display a list of your best selling products on your site."
@@ -6864,6 +7067,11 @@ msgstr ""
 #: widgets/widget-top_rated_products.php:138
 #@ woothemes
 msgid "Number of products to show:"
+msgstr ""
+
+#: widgets/widget-cart.php:24
+#@ woothemes
+msgid "Display the user's Shopping Cart in the sidebar."
 msgstr ""
 
 #: widgets/widget-cart.php:26
@@ -7024,6 +7232,16 @@ msgstr ""
 #: widgets/widget-price_filter.php:99
 #@ woothemes
 msgid "WooCommerce Price Filter"
+msgstr ""
+
+#: widgets/widget-price_filter.php:166
+#@ woothemes
+msgid "Min price"
+msgstr ""
+
+#: widgets/widget-price_filter.php:167
+#@ woothemes
+msgid "Max price"
 msgstr ""
 
 #: widgets/widget-price_filter.php:168
@@ -7492,6 +7710,18 @@ msgstr ""
 msgid "Your account details"
 msgstr ""
 
+#: woocommerce_taxonomy.php:23
+#@ woothemes
+msgctxt "slug"
+msgid "product-category"
+msgstr ""
+
+#: woocommerce_taxonomy.php:24
+#@ woothemes
+msgctxt "slug"
+msgid "product-tag"
+msgstr ""
+
 #: woocommerce_taxonomy.php:26
 #: woocommerce_taxonomy.php:392
 #@ woothemes
@@ -7543,12 +7773,6 @@ msgstr ""
 msgid "New Product Category Name"
 msgstr ""
 
-#: woocommerce_taxonomy.php:23
-#@ woothemes
-msgctxt "slug"
-msgid "product-category"
-msgstr ""
-
 #: woocommerce_taxonomy.php:78
 #@ woothemes
 msgid "Product Tag"
@@ -7594,10 +7818,50 @@ msgstr ""
 msgid "New Product Tag Name"
 msgstr ""
 
-#: woocommerce_taxonomy.php:24
+#: woocommerce_taxonomy.php:99
+#: woocommerce_taxonomy.php:101
 #@ woothemes
-msgctxt "slug"
-msgid "product-tag"
+msgid "Shipping Classes"
+msgstr ""
+
+#: woocommerce_taxonomy.php:103
+#@ woothemes
+msgid "Search Shipping Classes"
+msgstr ""
+
+#: woocommerce_taxonomy.php:104
+#@ woothemes
+msgid "All Shipping Classes"
+msgstr ""
+
+#: woocommerce_taxonomy.php:105
+#@ woothemes
+msgid "Parent Shipping Class"
+msgstr ""
+
+#: woocommerce_taxonomy.php:106
+#@ woothemes
+msgid "Parent Shipping Class:"
+msgstr ""
+
+#: woocommerce_taxonomy.php:107
+#@ woothemes
+msgid "Edit Shipping Class"
+msgstr ""
+
+#: woocommerce_taxonomy.php:108
+#@ woothemes
+msgid "Update Shipping Class"
+msgstr ""
+
+#: woocommerce_taxonomy.php:109
+#@ woothemes
+msgid "Add New Shipping Class"
+msgstr ""
+
+#: woocommerce_taxonomy.php:110
+#@ woothemes
+msgid "New Shipping Class Name"
 msgstr ""
 
 #: woocommerce_taxonomy.php:125
@@ -7689,6 +7953,11 @@ msgstr ""
 #: woocommerce_taxonomy.php:199
 #@ woothemes
 msgid "No Products found in trash"
+msgstr ""
+
+#: woocommerce_taxonomy.php:200
+#@ woothemes
+msgid "Parent Product"
 msgstr ""
 
 #: woocommerce_taxonomy.php:202
@@ -7845,6 +8114,69 @@ msgstr ""
 #: woocommerce_taxonomy.php:309
 #@ woothemes
 msgid "This is where you can add new coupons that customers can use in your store."
+msgstr ""
+
+#: woocommerce_taxonomy.php:355
+#, php-format
+#@ woothemes
+msgid "%s updated. <a href=\"%s\">View %s</a>"
+msgstr ""
+
+#: woocommerce_taxonomy.php:356
+#@ woothemes
+msgid "Custom field updated."
+msgstr ""
+
+#: woocommerce_taxonomy.php:357
+#@ woothemes
+msgid "Custom field deleted."
+msgstr ""
+
+#: woocommerce_taxonomy.php:358
+#, php-format
+#@ woothemes
+msgid "%s updated."
+msgstr ""
+
+#: woocommerce_taxonomy.php:359
+#, php-format
+#@ woothemes
+msgid "%s restored to revision from %s"
+msgstr ""
+
+#: woocommerce_taxonomy.php:360
+#, php-format
+#@ woothemes
+msgid "%s published. <a href=\"%s\">View %s</a>"
+msgstr ""
+
+#: woocommerce_taxonomy.php:361
+#, php-format
+#@ woothemes
+msgid "%s saved."
+msgstr ""
+
+#: woocommerce_taxonomy.php:362
+#, php-format
+#@ woothemes
+msgid "%s submitted. <a target=\"_blank\" href=\"%s\">Preview %s</a>"
+msgstr ""
+
+#: woocommerce_taxonomy.php:363
+#, php-format
+#@ woothemes
+msgid "%s scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview %s</a>"
+msgstr ""
+
+#: woocommerce_taxonomy.php:363
+#@ woothemes
+msgid "M j, Y @ G:i"
+msgstr ""
+
+#: woocommerce_taxonomy.php:364
+#, php-format
+#@ woothemes
+msgid "%s draft updated. <a target=\"_blank\" href=\"%s\">Preview %s</a>"
 msgstr ""
 
 #: woocommerce_taxonomy.php:507
@@ -8044,337 +8376,5 @@ msgstr ""
 #: woocommerce_template_functions.php:1356
 #@ woothemes
 msgid "Telephone:"
-msgstr ""
-
-#: admin/admin-settings.php:776
-#@ woothemes
-msgid "Tax display (cart totals)"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:39
-#@ woothemes
-msgid "Apply before tax"
-msgstr ""
-
-#: admin/writepanels/writepanel-coupon_data.php:39
-#@ woothemes
-msgid "Check this box if the coupon should be applied before calculating cart tax"
-msgstr ""
-
-#: admin/writepanels/writepanel-order_data.php:171
-#@ woothemes
-msgid "Base&nbsp;Cost"
-msgstr ""
-
-#: admin/writepanels/writepanel-order_data.php:171
-#@ woothemes
-msgid "Cost before discounts"
-msgstr ""
-
-#: admin/writepanels/writepanel-order_data.php:171
-#: admin/writepanels/writepanel-order_data.php:172
-#@ woothemes
-msgid "Up to 4 decimals are allowed for precision."
-msgstr ""
-
-#: admin/writepanels/writepanel-order_data.php:172
-#@ woothemes
-msgid "Final cost after discount"
-msgstr ""
-
-#: shortcodes/shortcode-cart.php:153
-#@ woothemes
-msgid "Update Cart"
-msgstr ""
-
-#: templates/single-product-reviews.php:95
-#@ woothemes
-msgid "Your Review"
-msgstr ""
-
-#: admin/admin-reports.php:24
-#@ woothemes
-msgid "Sales by day"
-msgstr ""
-
-#: admin/admin-reports.php:29
-#@ woothemes
-msgid "Sales by month"
-msgstr ""
-
-#: admin/admin-reports.php:1010
-#@ woothemes
-msgid "Product no longer exists"
-msgstr ""
-
-#: admin/admin-settings.php:47
-#@ woothemes
-msgid "Czech Koruna (&#75;&#269;)"
-msgstr ""
-
-#: admin/admin-settings.php:168
-#@ woothemes
-msgid "Scripts &amp; Styling"
-msgstr ""
-
-#: admin/admin-settings.php:193
-#@ woothemes
-msgid "Enable jQuery UI (used by the price slider widget)"
-msgstr ""
-
-#: admin/admin-settings.php:201
-#@ woothemes
-msgid "Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)"
-msgstr ""
-
-#: admin/admin-settings.php:335
-#@ woothemes
-msgid "Product category slug"
-msgstr ""
-
-#: admin/admin-settings.php:336
-#@ woothemes
-msgid "Shows in the product category URLs. Leave blank to use the default slug."
-msgstr ""
-
-#: admin/admin-settings.php:344
-#@ woothemes
-msgid "Product tag slug"
-msgstr ""
-
-#: admin/admin-settings.php:345
-#@ woothemes
-msgid "Shows in the product tag URLs. Leave blank to use the default slug."
-msgstr ""
-
-#: admin/admin-settings.php:606
-#@ woothemes
-msgid "Trim zeros"
-msgstr ""
-
-#: admin/admin-settings.php:607
-#@ woothemes
-msgid "Trim zeros after the decimal point when displaying prices"
-msgstr ""
-
-#: admin/admin-taxonomies.php:276
-#@ woothemes
-msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
-msgstr ""
-
-#: admin/admin-taxonomies.php:288
-#@ woothemes
-msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:80
-#@ woothemes
-msgid "Calculation Type"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:85
-#@ woothemes
-msgid "Per Order - charge shipping for the entire order as a whole"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:86
-#@ woothemes
-msgid "Per Item - charge shipping for each item individually"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:87
-#@ woothemes
-msgid "Per Class - charge shipping for each shipping class in an order"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:101
-#@ woothemes
-msgid "Default Cost"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:107
-#@ woothemes
-msgid "Default Handling Fee"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:292
-#: woocommerce_taxonomy.php:102
-#@ woothemes
-msgid "Shipping Class"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:293
-#@ woothemes
-msgid "Cost, excluding tax."
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:294
-#@ woothemes
-msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:299
-#@ woothemes
-msgid "+ Add Flat Rate"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:300
-#@ woothemes
-msgid "Add rates for shipping classes here &mdash; they will override the default costs defined above."
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:300
-#@ woothemes
-msgid "Delete selected rates"
-msgstr ""
-
-#: classes/shipping/shipping-flat_rate.php:317
-#: classes/shipping/shipping-flat_rate.php:349
-#@ woothemes
-msgid "Select a class&hellip;"
-msgstr ""
-
-#: widgets/widget-cart.php:24
-#@ woothemes
-msgid "Display the user's Shopping Cart in the sidebar."
-msgstr ""
-
-#: widgets/widget-price_filter.php:166
-#@ woothemes
-msgid "Min price"
-msgstr ""
-
-#: widgets/widget-price_filter.php:167
-#@ woothemes
-msgid "Max price"
-msgstr ""
-
-#: woocommerce_taxonomy.php:99
-#: woocommerce_taxonomy.php:101
-#@ woothemes
-msgid "Shipping Classes"
-msgstr ""
-
-#: woocommerce_taxonomy.php:103
-#@ woothemes
-msgid "Search Shipping Classes"
-msgstr ""
-
-#: woocommerce_taxonomy.php:104
-#@ woothemes
-msgid "All Shipping Classes"
-msgstr ""
-
-#: woocommerce_taxonomy.php:105
-#@ woothemes
-msgid "Parent Shipping Class"
-msgstr ""
-
-#: woocommerce_taxonomy.php:106
-#@ woothemes
-msgid "Parent Shipping Class:"
-msgstr ""
-
-#: woocommerce_taxonomy.php:107
-#@ woothemes
-msgid "Edit Shipping Class"
-msgstr ""
-
-#: woocommerce_taxonomy.php:108
-#@ woothemes
-msgid "Update Shipping Class"
-msgstr ""
-
-#: woocommerce_taxonomy.php:109
-#@ woothemes
-msgid "Add New Shipping Class"
-msgstr ""
-
-#: woocommerce_taxonomy.php:110
-#@ woothemes
-msgid "New Shipping Class Name"
-msgstr ""
-
-#: woocommerce_taxonomy.php:355
-#, php-format
-#@ woothemes
-msgid "%s updated. <a href=\"%s\">View %s</a>"
-msgstr ""
-
-#: woocommerce_taxonomy.php:356
-#@ woothemes
-msgid "Custom field updated."
-msgstr ""
-
-#: woocommerce_taxonomy.php:357
-#@ woothemes
-msgid "Custom field deleted."
-msgstr ""
-
-#: woocommerce_taxonomy.php:358
-#, php-format
-#@ woothemes
-msgid "%s updated."
-msgstr ""
-
-#: woocommerce_taxonomy.php:359
-#, php-format
-#@ woothemes
-msgid "%s restored to revision from %s"
-msgstr ""
-
-#: woocommerce_taxonomy.php:360
-#, php-format
-#@ woothemes
-msgid "%s published. <a href=\"%s\">View %s</a>"
-msgstr ""
-
-#: woocommerce_taxonomy.php:361
-#, php-format
-#@ woothemes
-msgid "%s saved."
-msgstr ""
-
-#: woocommerce_taxonomy.php:362
-#, php-format
-#@ woothemes
-msgid "%s submitted. <a target=\"_blank\" href=\"%s\">Preview %s</a>"
-msgstr ""
-
-#: woocommerce_taxonomy.php:363
-#, php-format
-#@ woothemes
-msgid "%s scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview %s</a>"
-msgstr ""
-
-#: woocommerce_taxonomy.php:363
-#@ woothemes
-msgid "M j, Y @ G:i"
-msgstr ""
-
-#: woocommerce_taxonomy.php:364
-#, php-format
-#@ woothemes
-msgid "%s draft updated. <a target=\"_blank\" href=\"%s\">Preview %s</a>"
-msgstr ""
-
-#: admin/admin-settings.php:1088
-#@ woothemes
-msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
-msgstr ""
-
-#: admin/admin-settings.php:1092
-#@ woothemes
-msgid "Default"
-msgstr ""
-
-#: admin/admin-settings.php:1093
-#@ woothemes
-msgid "Gateway"
-msgstr ""
-
-#: admin/admin-settings.php:1110
-#@ woothemes
-msgid "Gateway ID"
 msgstr ""
 

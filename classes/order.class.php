@@ -83,7 +83,9 @@ class woocommerce_order {
 			'shipping_country'		=> '',
 			'shipping_state'		=> '',
 			'shipping_method'		=> '',
+			'shipping_method_title'	=> '',
 			'payment_method'		=> '',
+			'payment_method_title' 	=> '',
 			'order_subtotal'		=> '',
 			'order_discount'		=> '',
 			'cart_discount'			=> '',
@@ -269,7 +271,7 @@ class woocommerce_order {
 			
 			endif;
 			
-			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method));
+			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method_title));
 			
 		else :
 			$shipping = __('Free!', 'woothemes');
@@ -363,9 +365,9 @@ class woocommerce_order {
 			endif;
 			
 			$return .= '<tr>
-				<td style="text-align:left;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
-				<td style="text-align:left;">'.$item['qty'].'</td>
-				<td style="text-align:left;">';
+				<td style="text-align:left; border: 1px solid #eee;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
+				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
+				<td style="text-align:left; border: 1px solid #eee;">';
 				
 					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
 							

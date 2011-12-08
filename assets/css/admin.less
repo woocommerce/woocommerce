@@ -647,6 +647,18 @@ ul.recent-orders, ul.stock_list {
 		}
 	}
 }
+table.wc_gateways {
+	td {
+		vertical-align: middle;
+		cursor: move;
+		p {
+			margin: 0 0 2px;
+		}
+	}
+	.radio {
+		text-align: center;
+	}
+}
 
 
 .woocommerce {
@@ -1236,9 +1248,23 @@ table.bar_chart {
 			border-bottom: 1px solid #fee;
 		}
 		td {
+			text-align: right;
+			line-height: 24px;
+			padding: 6px 6px 6px 0;
+			border-bottom: 1px solid #fee;
+			span {
+				color: #8a4b75;
+				display: block;
+			}
+			span.alt {
+				color: #47a03e;
+				margin-top: 6px;
+			}
+		}
+		td.bars {
 			position: relative;
 			text-align: left;
-			padding: 6px 0 6px 0;
+			padding: 6px 6px 6px 0;
 			border-bottom: 1px solid #fee;
 			span, a {
 				text-decoration: none;
@@ -1248,25 +1274,15 @@ table.bar_chart {
 				display: block;
 				line-height: 24px;
 				height: 24px;
-				-moz-border-radius:4px;
-				-webkit-border-radius:4px;
-				-o-border-radius:4px;
-				-khtml-border-radius:4px;
-				border-radius:4px;
-				span {
-					position: absolute;
-					left: 8px;
-					color: #dec3d5 !important;
-					font-size: 11px;
-					text-shadow: 0 1px 0 #8a4b75;
-					height: auto;
-					background: transparent;
-				}
+				-moz-border-radius:3px;
+				-webkit-border-radius:3px;
+				-o-border-radius:3px;
+				-khtml-border-radius:3px;
+				border-radius:3px;
 			}
 			span.alt {
 				clear: both;
 				background: #47a03e;
-				margin-top: 6px;
 				span {
 					margin: 0;
 					color: #c5dec2 !important;
@@ -1280,8 +1296,10 @@ table.bar_chart {
 
 /* Chosen multiselect enhancement
 ----------------------------------*/
-#woocommerce_allowed_countries_chzn .chzn-search {
-	display: none;
+#woocommerce_allowed_countries_chzn, #woocommerce_file_download_method_chzn {
+	.chzn-search {
+		display: none;
+	}
 }
 
 /* @group Base */

@@ -44,7 +44,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 			'AUD' => __( 'Australian Dollars (&#36;)', 'woothemes' ),
 			'BRL' => __( 'Brazilian Real (&#36;)', 'woothemes' ),
 			'CAD' => __( 'Canadian Dollars (&#36;)', 'woothemes' ),
-			'CZK' => __( 'Czech Koruna', 'woothemes' ),
+			'CZK' => __( 'Czech Koruna (&#75;&#269;)', 'woothemes' ),
 			'DKK' => __( 'Danish Krone', 'woothemes' ),
 			'HKD' => __( 'Hong Kong Dollar (&#36;)', 'woothemes' ),
 			'HUF' => __( 'Hungarian Forint', 'woothemes' ),
@@ -165,7 +165,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Shop Styling', 'woothemes' ),
+		'name' => __( 'Styling', 'woothemes' ),
 		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woothemes' ),
 		'id' 		=> 'woocommerce_frontend_css',
 		'std' 		=> 'yes',
@@ -174,11 +174,20 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
+		'id' 		=> 'woocommerce_demo_store',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Scripts', 'woothemes' ),
 		'desc' 		=> __( 'Enable AJAX add to cart buttons on product archives', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_ajax_add_to_cart',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
@@ -186,23 +195,38 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_lightbox',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> ''
 	),
 	
 	array(  
-		'name' => __( 'Demo store notice', 'woothemes' ),
-		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woothemes' ),
-		'id' 		=> 'woocommerce_demo_store',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
-	),
-	
-	array(  
-		'name' => __('File downloads', 'woothemes'),
-		'desc' 		=> __('Use <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> to serve downloads (server requires <code>mod_xsendfile</code>)', 'woothemes'),
-		'id' 		=> 'woocommerce_mod_xsendfile_enabled',
+		'desc' 		=> __( 'Enable jQuery UI (used by the price slider widget)', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_jquery_ui',
+		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+	    'desc'     => __( 'Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)', 'woothemes' ),
+	    'id'     => 'woocommerce_scripts_position',
+	    'std'     => 'yes',
+	    'type'     => 'checkbox',
+	    'checkboxgroup'		=> 'end'
+	),
+
+	array(  
+		'name' => __('File download method', 'woothemes'),
+		'desc' 		=> __('Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woothemes'),
+		'id' 		=> 'woocommerce_file_download_method',
+		'type' 		=> 'select',
+		'class'		=> 'chosen_select',
+		'css' 		=> 'min-width:300px;',
+		'std'		=> 'force',
+		'options' => array(  
+			'force'  	=> __( 'Force Downloads', 'woothemes' ),
+			'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woothemes' ),
+			'redirect'  => __( 'Redirect only', 'woothemes' ),	
+		)
 	),
 	
 	array(  
@@ -313,6 +337,24 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_prepend_shop_page_to_urls',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
+	),
+	
+	array(  
+		'name' => __( 'Product category slug', 'woothemes' ),
+		'desc' 		=> __( 'Shows in the product category URLs. Leave blank to use the default slug.', 'woothemes' ),
+		'id' 		=> 'woocommerce_product_category_slug',
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
+		'std' 		=> ''
+	),
+	
+	array(  
+		'name' => __( 'Product tag slug', 'woothemes' ),
+		'desc' 		=> __( 'Shows in the product tag URLs. Leave blank to use the default slug.', 'woothemes' ),
+		'id' 		=> 'woocommerce_product_tag_slug',
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
+		'std' 		=> ''
 	),
 	
 	array(  
@@ -502,7 +544,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'desc' 		=> __( 'This controls what unit you will define lengths in.', 'woothemes' ),
 		'id' 		=> 'woocommerce_dimension_unit',
 		'css' 		=> 'min-width:150px;',
-		'std' 		=> 'GBP',
+		'std' 		=> 'cm',
 		'type' 		=> 'select',
 		'options' => array( 
 			'cm' => __( 'cm', 'woothemes' ),
@@ -566,6 +608,14 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'css' 		=> 'width:30px;',
 		'std' 		=> '2',
 		'type' 		=> 'text',
+	),
+	
+	array(  
+		'name'		=> __( 'Trim zeros', 'woothemes' ),
+		'desc' 		=> __( 'Trim zeros after the decimal point when displaying prices', 'woothemes' ),
+		'id' 		=> 'woocommerce_price_trim_zeros',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
@@ -1029,7 +1079,7 @@ function woocommerce_settings() {
 					break;
 					case "payment_gateways" : 	
 					
-						$links = array();
+						$links = array( '<a href="#gateway-order">'.__('Payment Gateways', 'woothemes').'</a>' );
             	
 		            	foreach ($woocommerce->payment_gateways->payment_gateways() as $gateway) :
 		            		$title = ( isset( $gateway->method_title ) && $gateway->method_title) ? ucwords($gateway->method_title) : ucwords($gateway->id);
@@ -1037,7 +1087,55 @@ function woocommerce_settings() {
 						endforeach;
 						
 						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
-		            
+		            	
+		            	// Gateway ordering
+		            	echo '<div class="section" id="gateway-order">';
+		            	
+		            	?>
+		            	<h3><?php _e('Payment Gateways', 'woothemes'); ?></h3>
+		            	<p><?php _e('Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout.', 'woothemes'); ?></p>
+		            	<table class="wc_gateways widefat" cellspacing="0">
+		            		<thead>
+		            			<tr>
+		            				<th width="1%"><?php _e('Default', 'woothemes'); ?></th>
+		            				<th><?php _e('Gateway', 'woothemes'); ?></th>
+		            				<th><?php _e('Status', 'woothemes'); ?></th>
+		            			</tr>
+		            		</thead>
+		            		<tbody>
+				            	<?php
+				            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
+				            		
+				            		$default_gateway = get_option('woocommerce_default_gateway');
+				            		
+				            		echo '<tr>
+				            			<td width="1%" class="radio">
+				            				<input type="radio" name="default_gateway" value="'.$gateway->id.'" '.checked($default_gateway, $gateway->id, false).' />
+				            				<input type="hidden" name="gateway_order[]" value="'.$gateway->id.'" />
+				            			</td>
+				            			<td>
+				            				<p><strong>'.$gateway->title.'</strong><br/>
+				            				<small>'.__('Gateway ID', 'woothemes').': '.$gateway->id.'</small></p>
+				            			</td>
+				            			<td>';
+				            		
+				            		if ($gateway->enabled == 'yes') 
+				            			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
+									else 
+										echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';	
+				            			
+				            		echo '</td>
+				            		</tr>';
+				            		
+				            	endforeach; 
+				            	?>
+		            		</tbody>
+		            	</table>
+		            	<?php
+		            	
+		            	echo '</div>';
+		            	
+		            	// Specific gateway options
 		            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
 		            		echo '<div class="section" id="gateway-'.$gateway->id.'">';
 		            		$gateway->admin_options();
@@ -1059,71 +1157,96 @@ function woocommerce_settings() {
 		</form>
 		
 		<script type="text/javascript">
-
-			// Subsubsub tabs
-			jQuery('ul.subsubsub li a:eq(0)').addClass('current');
-			jQuery('.subsubsub_section .section:gt(0)').hide();
+			jQuery(window).load(function(){
 			
-			jQuery('ul.subsubsub li a').click(function(){
-				jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
-				jQuery(this).addClass('current');
-				jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
-				jQuery( jQuery(this).attr('href') ).show();
-				jQuery('#last_tab').val( jQuery(this).attr('href') );
-				return false;
-			});
-			
-			<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
-			
-			// Countries
-			jQuery('select#woocommerce_allowed_countries').change(function(){
-				if (jQuery(this).val()=="specific") {
-					jQuery(this).parent().parent().next('tr').show();
-				} else {
-					jQuery(this).parent().parent().next('tr').hide();
-				}
-			}).change();
-			
-			// Color picker
-			jQuery('.colorpick').each(function(){
-				jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
-				jQuery(this).click(function() {
-					if ( jQuery(this).val() == "" ) jQuery(this).val('#');
-					jQuery('.colorpickdiv', jQuery(this).parent() ).show();
-				});	
-			});
-			jQuery(document).mousedown(function(){
-				jQuery('.colorpickdiv').hide();
-			});
-			
-			// Edit prompt
-			jQuery(function(){
-				var changed = false;
+				// Subsubsub tabs
+				jQuery('ul.subsubsub li a:eq(0)').addClass('current');
+				jQuery('.subsubsub_section .section:gt(0)').hide();
 				
-				jQuery('input, textarea, select, checkbox').change(function(){
-					changed = true;
+				jQuery('ul.subsubsub li a').click(function(){
+					jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
+					jQuery(this).addClass('current');
+					jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
+					jQuery( jQuery(this).attr('href') ).show();
+					jQuery('#last_tab').val( jQuery(this).attr('href') );
+					return false;
 				});
 				
-				jQuery('.woo-nav-tab-wrapper a').click(function(){
-					if (changed) {
-						window.onbeforeunload = function() {
-						    return '<?php echo __( 'The changes you made will be lost if you navigate away from this page.', 'woothemes' ); ?>';
-						}
+				<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
+				
+				// Countries
+				jQuery('select#woocommerce_allowed_countries').change(function(){
+					if (jQuery(this).val()=="specific") {
+						jQuery(this).parent().parent().next('tr').show();
 					} else {
+						jQuery(this).parent().parent().next('tr').hide();
+					}
+				}).change();
+				
+				// Color picker
+				jQuery('.colorpick').each(function(){
+					jQuery('.colorpickdiv', jQuery(this).parent()).farbtastic(this);
+					jQuery(this).click(function() {
+						if ( jQuery(this).val() == "" ) jQuery(this).val('#');
+						jQuery('.colorpickdiv', jQuery(this).parent() ).show();
+					});	
+				});
+				jQuery(document).mousedown(function(){
+					jQuery('.colorpickdiv').hide();
+				});
+				
+				// Edit prompt
+				jQuery(function(){
+					var changed = false;
+					
+					jQuery('input, textarea, select, checkbox').change(function(){
+						changed = true;
+					});
+					
+					jQuery('.woo-nav-tab-wrapper a').click(function(){
+						if (changed) {
+							window.onbeforeunload = function() {
+							    return '<?php echo __( 'The changes you made will be lost if you navigate away from this page.', 'woothemes' ); ?>';
+							}
+						} else {
+							window.onbeforeunload = '';
+						}
+					});
+					
+					jQuery('.submit input').click(function(){
 						window.onbeforeunload = '';
+					});
+				});
+				
+				// Sorting
+				jQuery('table.wc_gateways tbody').sortable({
+					items:'tr',
+					cursor:'move',
+					axis:'y',
+					handle: 'td',
+					scrollSensitivity:40,
+					helper:function(e,ui){
+						ui.children().each(function(){
+							jQuery(this).width(jQuery(this).width());
+						});
+						ui.css('left', '0');
+						return ui;
+					},
+					start:function(event,ui){
+						ui.item.css('background-color','#f6f6f6');
+					},
+					stop:function(event,ui){
+						ui.item.removeAttr('style');
 					}
 				});
 				
-				jQuery('.submit input').click(function(){
-					window.onbeforeunload = '';
+				// Chosen selects
+				jQuery("select.chosen_select").chosen();
+				
+				jQuery("select.chosen_select_nostd").chosen({
+					allow_single_deselect: 'true'
 				});
-			});
-			
-			// Chosen selects
-			jQuery("select.chosen_select").chosen();
-			
-			jQuery("select.chosen_select_nostd").chosen({
-				allow_single_deselect: 'true'
+				
 			});
 		</script>
 	</div>

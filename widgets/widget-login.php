@@ -91,7 +91,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 				
 				<p><label for="user_pass"><?php _e('Password', 'woothemes'); ?></label> <input name="pwd" class="input-text" id="user_pass" type="password" /></p>		
 				
-				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &raquo;', 'woothemse'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woothemes'); ?></a></p>
+				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &raquo;', 'woothemes'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woothemes'); ?></a></p>
 				
 				<div>
 					<input type="hidden" name="redirect_to" class="redirect_to" value="<?php echo $redirect_to; ?>" />
@@ -103,47 +103,46 @@ class WooCommerce_Widget_Login extends WP_Widget {
 				<?php do_action('woocommerce_login_widget_logged_out_form'); ?>
 			
 			</form>
-			<script type="text/javascript">
-				jQuery(function(){
-					// Ajax Login
-					jQuery('.widget_login form').submit(function(){
-						
-						var thisform = this;
-						
-						jQuery(thisform).block({ message: null, overlayCSS: { 
-					        backgroundColor: '#fff', 
-					        opacity:         0.6 
-					    } });
-					    
-					    var data = {
-							action: 		'woocommerce_sidebar_login_process',
-							security: 		'<?php echo wp_create_nonce("woocommerce-sidebar-login-action"); ?>',
-							user_login: 	jQuery('input[name="log"]', thisform).val(),
-							user_password: 	jQuery('input[name="pwd"]', thisform).val(),
-							redirect_to:	jQuery('.redirect_to:eq(0)', thisform).val()
-						};
-
-						// Ajax action
-						jQuery.post( '<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-							jQuery('.woocommerce_error').remove();
-							
-							result = jQuery.parseJSON( response );
-							
-							if (result.success==1) {
-								window.location = result.redirect;
-							} else {
-								jQuery(thisform).prepend('<div class="woocommerce_error">' + result.error + '</div>');
-								jQuery(thisform).unblock();
-							}
-						});
-						
-						return false;
-					});
-				});
-			</script>
 			<?php 
-			do_action('woocommerce_login_widget_logged_out_after_form');			
-
+			do_action('woocommerce_login_widget_logged_out_after_form');	
+			
+			$woocommerce->add_inline_js("
+				// Ajax Login
+				jQuery('.widget_login form').submit(function(){
+					
+					var thisform = this;
+					
+					jQuery(thisform).block({ message: null, overlayCSS: { 
+				        backgroundColor: '#fff', 
+				        opacity:         0.6 
+				    } });
+				    
+				    var data = {
+						action: 		'woocommerce_sidebar_login_process',
+						security: 		'".wp_create_nonce("woocommerce-sidebar-login-action")."',
+						user_login: 	jQuery('input[name=\"log\"]', thisform).val(),
+						user_password: 	jQuery('input[name=\"pwd\"]', thisform).val(),
+						redirect_to:	jQuery('.redirect_to:eq(0)', thisform).val()
+					};
+				
+					// Ajax action
+					jQuery.post( '".admin_url('admin-ajax.php')."', data, function(response) {
+						jQuery('.woocommerce_error').remove();
+						
+						result = jQuery.parseJSON( response );
+						
+						if (result.success==1) {
+							window.location = result.redirect;
+						} else {
+							jQuery(thisform).prepend('<div class=\"woocommerce_error\">' + result.error + '</div>');
+							jQuery(thisform).unblock();
+						}
+					});
+					
+					return false;
+				});
+			");
+					
 			$links = apply_filters( 'woocommerce_login_widget_logged_out_links', array());
 			
 			if (sizeof($links>0)) :
@@ -207,7 +206,7 @@ function woocommerce_sidebar_login_ajax_process() {
 	// If the user wants ssl but the session is not ssl, force a secure cookie.
 	if ( !empty($_POST['log']) && !force_ssl_admin() ) {
 		$user_name = sanitize_user($_POST['log']);
-		if ( $user = get_userdatabylogin($user_name) ) {
+		if ( $user = get_user_by('login', $user_name) ) {
 			if ( get_user_option('use_ssl', $user->ID) ) {
 				$secure_cookie = true;
 				force_ssl_admin(true);
@@ -260,7 +259,7 @@ function woocommerce_sidebar_login_process() {
 		// If the user wants ssl but the session is not ssl, force a secure cookie.
 		if ( !empty($_POST['log']) && !force_ssl_admin() ) {
 			$user_name = sanitize_user($_POST['log']);
-			if ( $user = get_userdatabylogin($user_name) ) {
+			if ( $user = get_user_by('login', $user_name) ) {
 				if ( get_user_option('use_ssl', $user->ID) ) {
 					$secure_cookie = true;
 					force_ssl_admin(true);

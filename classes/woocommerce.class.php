@@ -15,6 +15,7 @@ class woocommerce {
 	var $attribute_taxonomies; // Stores the attribute taxonomies used in the store
 	var $plugin_url;
 	var $plugin_path;
+	var $inline_js = '';
 	
 	// Class instances
 	var $query;
@@ -40,9 +41,10 @@ class woocommerce {
 		$this->load_messages();
 		
 		// Hooks
-		add_filter('wp_redirect', array(&$this, 'redirect'), 1, 2);
+		add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
 		add_action( 'woocommerce_before_single_product', array(&$this, 'show_messages'), 10);
 		add_action( 'woocommerce_before_shop_loop', array(&$this, 'show_messages'), 10);
+		add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
 
 		// Queue shipping and payment gateways
 		add_action('plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some may be added by plugins
@@ -351,5 +353,29 @@ class woocommerce {
 				$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_total_stock_%')");
 			endif;
 		}
-	
+
+    /*-----------------------------------------------------------------------------------*/
+	/* Inline JavaScript Helper (for adding it to the footer) */
+	/*-----------------------------------------------------------------------------------*/ 
+		
+		function add_inline_js( $code ) {
+		
+			$this->inline_js .= "\n" . $code . "\n";
+		
+		}
+		
+		function output_inline_js() {
+			
+			if ($this->inline_js) :
+				
+				echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
+				
+				echo $this->inline_js;
+				
+				echo "});\n</script>\n";
+				
+			endif;
+			
+		}
+		
 }

@@ -728,22 +728,22 @@ function woocommerce_process_registration() {
 		
 		// Check the username
 		if ( $sanitized_user_login == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.', 'woothemes' ) );
 		} elseif ( ! validate_username( $_POST['username'] ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.', 'woothemes' ) );
 			$sanitized_user_login = '';
 		} elseif ( username_exists( $sanitized_user_login ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.', 'woothemes' ) );
 		}
 	
 		// Check the e-mail address
 		if ( $user_email == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.', 'woothemes' ) );
 		} elseif ( ! is_email( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'woothemes' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'woothemes' ) );
 		}
 	
 		// Password
@@ -920,7 +920,26 @@ function woocommerce_download_product() {
 			
 			if (!$file_path) exit;
 			
-			$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
+			$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $download_file);
+			
+			if ($file_download_method=='redirect') :
+				
+				header('Location: '.$file_path);
+				exit;
+				
+			endif;
+			
+			if (!is_multisite()) :	
+				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
+			else :
+				$upload_dir = wp_upload_dir();
+				
+				// Try to replace network url
+				$file_path = str_replace(trailingslashit(network_admin_url()), ABSPATH, $file_path);
+				
+				// Now try to replace upload URL
+				$file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_path);
+			endif;
 			
 			// See if its local or remote
 			if (strstr($file_path, 'http:') || strstr($file_path, 'https:') || strstr($file_path, 'ftp:')) :
@@ -946,7 +965,7 @@ function woocommerce_download_product() {
                 default: $ctype="application/force-download";
             endswitch;
             
-            if (get_option('woocommerce_mod_xsendfile_enabled')=='yes') :
+            if ($file_download_method=='xsendfile') :
             
 				header("X-Accel-Redirect: $file_path");
 				header("X-Sendfile: $file_path");

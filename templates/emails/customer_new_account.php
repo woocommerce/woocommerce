@@ -7,8 +7,8 @@
 <p><?php echo sprintf(__("Thanks for registering on %s. Your login details are below:", 'woothemes'), $blogname); ?></p>
 
 <ul>
-	<li><?php echo sprintf(__('Username: %s'), $user_login); ?></li>
-	<li><?php echo sprintf(__('Password: %s'), $user_pass); ?></li>
+	<li><?php echo sprintf(__('Username: %s', 'woothemes'), $user_login); ?></li>
+	<li><?php echo sprintf(__('Password: %s', 'woothemes'), $user_pass); ?></li>
 </ul>
 
 <p><?php echo sprintf(__("You can login to your account area here: %s.", 'woothemes'), get_permalink(get_option('woocommerce_myaccount_page_id'))); ?></p>

@@ -81,7 +81,7 @@ function woocommerce_order_data_meta_box($post) {
 				</select></p>
 				
 				<p class="form-field form-field-wide"><label for="excerpt"><?php _e('Customer Note:', 'woothemes') ?></label>
-				<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea></p>
+				<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woothemes'); ?>"><?php echo $post->post_excerpt; ?></textarea></p>
 			
 			</div>
 			<div class="order_data_right">
@@ -168,8 +168,8 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="meta" width="1%"><?php _e('Item&nbsp;Meta', 'woothemes'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-					<th class="cost"><?php _e('Base&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
-					<th class="cost"><?php _e('Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Final cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>" href="#">[?]</a></th>
+					<th class="cost"><?php _e('Base&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>. <?php _e('Up to 4 decimals are allowed for precision.', 'woothemes'); ?>" href="#">[?]</a></th>
+					<th class="cost"><?php _e('Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Final cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>. <?php _e('Up to 4 decimals are allowed for precision.', 'woothemes'); ?>" href="#">[?]</a></th>
 					<th class="tax"><?php _e('Tax Rate', 'woothemes'); ?></th>
 					<th class="center" width="1%"><?php _e('Remove', 'woothemes'); ?></th>
 				</tr>
@@ -336,9 +336,9 @@ function woocommerce_order_actions_meta_box($post) {
 		<?php
 		if ( current_user_can( "delete_post", $post->ID ) ) {
 			if ( !EMPTY_TRASH_DAYS )
-				$delete_text = __('Delete Permanently');
+				$delete_text = __('Delete Permanently', 'woothemes');
 			else
-				$delete_text = __('Move to Trash');
+				$delete_text = __('Move to Trash', 'woothemes');
 			?>
 		<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
 		} ?>
@@ -502,9 +502,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'variation_id' 	=> (int) $item_variation[$i],
 			 		'name' 			=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 			=> (int) $item_quantity[$i],
-			 		'cost' 			=> number_format(woocommerce_clean($item_cost[$i]), 4, '.', ''),
-			 		'base_cost'		=> number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''),
-			 		'taxrate' 		=> number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''),
+			 		'cost' 			=> rtrim(rtrim(number_format(woocommerce_clean($item_cost[$i]), 4, '.', ''), '0'), '.'),
+			 		'base_cost'		=> rtrim(rtrim(number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''), '0'), '.'),
+			 		'taxrate' 		=> rtrim(rtrim(number_format(woocommerce_clean($item_tax_rate[$i]), 4, '.', ''), '0'), '.'),
 			 		'item_meta'		=> $item_meta->meta
 			 	));
 			 	
@@ -512,7 +512,15 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;	
 	
 		update_post_meta( $post_id, '_order_items', $order_items );
-	
+
+	// Give a password - not used, but can protect the content/comments from theme functions
+		if ($post->post_password=='') :
+			$order_post = array();
+			$order_post['ID'] = $post_id;
+			$order_post['post_password'] = uniqid('order_');
+			wp_update_post( $order_post );
+		endif;
+		
 	// Order data saved, now get it so we can manipulate status
 		$order = &new woocommerce_order( $post_id );
 		

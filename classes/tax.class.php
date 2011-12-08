@@ -117,8 +117,8 @@ class woocommerce_tax {
 		/* Checkout uses customer location, otherwise use store base rate */
 		if ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) :
 			
-			$country 	= $woocommerce->customer->get_country();
-			$state 		= $woocommerce->customer->get_state();
+			$country 	= $woocommerce->customer->get_shipping_country();
+			$state 		= $woocommerce->customer->get_shipping_state();
 			
 			$rate = $this->find_rate( $country, $state, $tax_class );
 			
@@ -160,8 +160,8 @@ class woocommerce_tax {
 		global $woocommerce;
 		
 		if (defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT) :
-			$country 	= $woocommerce->customer->get_country();
-			$state 		= $woocommerce->customer->get_state();
+			$country 	= $woocommerce->customer->get_shipping_country();
+			$state 		= $woocommerce->customer->get_shipping_state();
 		else :
 			$country 	= $woocommerce->countries->get_base_country();
 			$state 		= $woocommerce->countries->get_base_state();

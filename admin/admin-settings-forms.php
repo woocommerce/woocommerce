@@ -136,8 +136,10 @@ function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
     foreach ($options as $value) :
+    	if (!isset( $value['name'] ) ) $value['name'] = '';
     	if (!isset( $value['class'] )) $value['class'] = '';
     	if (!isset( $value['css'] )) $value['css'] = '';
+    	if (!isset( $value['std'] )) $value['std'] = '';
         switch($value['type']) :
             case 'title':
             	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
@@ -167,9 +169,9 @@ function woocommerce_admin_fields($options) {
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
                     	
-                    	<?php _e('Width'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
+                    	<?php _e('Width', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
                     	
-                    	<?php _e('Height'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
+                    	<?php _e('Height', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
                     	
                     	<label><?php _e('Hard Crop', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php if (get_option( $value['id'].'_crop')!='') checked(get_option( $value['id'].'_crop'), 1); else checked(1); ?> /></label> 
                     	

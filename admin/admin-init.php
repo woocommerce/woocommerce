@@ -17,7 +17,7 @@ function woocommerce_admin_init() {
 	include_once( 'admin-attributes.php' );
 	include_once( 'admin-dashboard.php' );
 	include_once( 'admin-import.php' );
-	include_once( 'admin-post-types.php' );
+	include_once( 'post-types/post-types-init.php' );
 	include_once( 'admin-reports.php' );
 	include_once( 'admin-taxonomies.php' );
 	include_once( 'writepanels/writepanels-init.php' );	
@@ -68,6 +68,7 @@ function woocommerce_admin_scripts() {
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
     	wp_enqueue_script('chosen');
+    	wp_enqueue_script('jquery-ui-sortable');
 
     endif;
     
@@ -120,8 +121,8 @@ function woocommerce_admin_scripts() {
 		
 	endif;
 	
-	// Term ordering
-	if ($screen->id=='edit-product_cat' || strstr($screen->id, 'edit-pa_')) :
+	// Term ordering - only when sorting by menu_order (our custom meta)
+	if (($screen->id=='edit-product_cat' || strstr($screen->id, 'edit-pa_')) && !isset($_GET['orderby'])) :
 		
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable') );
 		wp_enqueue_script( 'woocommerce_term_ordering' );
@@ -317,6 +318,8 @@ function woocommerce_duplicate_product_post_button() {
 	if (function_exists('duplicate_post_plugin_activation')) return;
 	
 	if (!current_user_can('manage_woocommerce')) return;
+	
+	if( !is_object( $post ) ) return;
 	
 	if ($post->post_type!='product') return;
 	

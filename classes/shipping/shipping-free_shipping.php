@@ -79,7 +79,7 @@ class free_shipping extends woocommerce_shipping_method {
 							'title' 		=> __( 'Specific Countries', 'woothemes' ), 
 							'type' 			=> 'multiselect', 
 							'class'			=> 'chosen_select',
-							'css'			=> 'width:50%;',
+							'css'			=> 'width: 450px;',
 							'default' 		=> '',
 							'options'		=> $woocommerce->countries->countries
 						)	
@@ -113,8 +113,18 @@ class free_shipping extends woocommerce_shipping_method {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
+
+    	if (isset($woocommerce->cart->cart_contents_total)) :
     	
-		if (isset($woocommerce->cart->cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total) return false;
+	    	if ($woocommerce->cart->prices_include_tax) :
+	    		$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
+	    	else :
+	    		$total = $woocommerce->cart->cart_contents_total;
+	    	endif;
+	    	
+	    	if (isset($this->min_amount) && $this->min_amount && $this->min_amount > $total) return false;
+    	
+    	endif;
 		
 		$ship_to_countries = '';
 		

@@ -506,6 +506,8 @@ class woocommerce_countries {
 				'AP' => __('Pacific', 'woothemes') 
 			)
 		);
+		
+		asort($this->countries);
 
 	}
 	
@@ -541,8 +543,6 @@ class woocommerce_countries {
 	function get_allowed_countries() {
 	
 		$countries = $this->countries;
-		
-		asort($countries);
 		
 		if (get_option('woocommerce_allowed_countries')!=='specific') return $countries;
 
@@ -596,7 +596,7 @@ class woocommerce_countries {
 		global $woocommerce;
 		
 		if ( $rate > 0 || $rate === 0 ) :
-			$rate = trim(trim($rate, '0'), '.');
+			$rate = rtrim(rtrim($rate, '0'), '.');
 			if (!$rate) $rate = 0;
 			$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? sprintf(__('(inc. %s%% VAT)', 'woothemes'), $rate) : sprintf(__('(inc. %s%% tax)', 'woothemes'), $rate);
 		else :
@@ -623,7 +623,6 @@ class woocommerce_countries {
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
 		$countries = $this->countries;
-		asort($countries);
 		
 		if ( $countries ) foreach ( $countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
@@ -648,7 +647,6 @@ class woocommerce_countries {
 	function country_multiselect_options( $selected_countries = '', $escape=false ) {
 		
 		$countries = $this->countries;
-		asort($countries);
 		
 		if ( $countries ) foreach ( $countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :

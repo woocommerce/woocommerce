@@ -82,6 +82,25 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.3.1 =
+* Many Minor bug fixes
+* Ability to re-order payment gateways and choose a default
+* Added a 'Shipping class' taxonomy for grouping products
+* Enhanced Flat Rate shipping to give a flat rate to each shipping class
+* Made jQuery UI optional and improved Javascript
+* Javascript can be loaded in the footer
+* Reworked term ordering system to make it more flexible and easier to manage
+* add_to_cart_url shortcode
+* French translation
+* Customer note field quote fix
+* Moved product-category and tag slugs to settings (page)
+* % coupon fix
+* Tax rates based on shipping address
+* Helpers for outputting JS in the footer
+* Fixed sale widget
+* File download method option so force download can be switched off
+* Improved product cat dropdowns
+
 = 1.3 - 01/12/2011 =
 * Minor bug fixes + localisations
 * Schema.org markup for products and reviews
@@ -114,6 +133,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Free shipping/Flat rate uses setting API
 * Free shipping coupons
 * Ship to billing default option
+* Trim zeros off prices (optional)
 
 = 1.2.4 - 18/11/2011 =
 * More sale price logic fixes for variations. Now correctly compares variation's prices.
@@ -340,7 +360,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Upgrade Notice ==
 
 = 1.3 =
-This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.
+This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
 
 = 1.2.3 =
 Fixes minor issues in 1.2.2 - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins.

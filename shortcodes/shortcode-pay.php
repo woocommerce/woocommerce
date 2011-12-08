@@ -40,15 +40,21 @@ function woocommerce_pay() {
 				// Update payment method
 				if ($order->order_total > 0 ) : 
 					$payment_method 			= woocommerce_clean($_POST['payment_method']);
-					update_post_meta( $order_id, '_payment_method', $payment_method);
-			
-					$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-				
-					$result = $available_gateways[$payment_method]->process_payment( $order_id );
 					
+					$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+					
+					// Update meta
+					update_post_meta( $order_id, '_payment_method', $payment_method);
+					if (isset($available_gateways) && isset($available_gateways[$payment_method])) :
+						$payment_method_title = $available_gateways[$payment_method]->title;
+					endif;
+					update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
+
+					$result = $available_gateways[$payment_method]->process_payment( $order_id );
+
 					// Redirect to success/confirmation/payment page
 					if ($result['result']=='success') :
-						wp_safe_redirect( $result['redirect'] );
+						wp_redirect( $result['redirect'] );
 						exit;
 					endif;
 				else :
@@ -111,9 +117,7 @@ function woocommerce_pay() {
 					<li class="method">
 						<?php _e('Payment method:', 'woothemes'); ?>
 						<strong><?php 
-							$gateways = $woocommerce->payment_gateways->payment_gateways();
-							if (isset($gateways[$order->payment_method])) echo $gateways[$order->payment_method]->title;
-							else echo $order->payment_method; 
+							echo $order->payment_method_title; 
 						?></strong>
 					</li>
 				</ul>

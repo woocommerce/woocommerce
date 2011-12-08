@@ -73,7 +73,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     		else :
     		
     			?>
-            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woothemes' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
+            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woothemes' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woothemes' ); ?></p></div>
         		<?php
         		
     		endif;
@@ -156,8 +156,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		endif;
 		
 		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
-		
-		$shipping_name = explode(' ', $order->shipping_method);
 		
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace(array('(', '-', ' ', ')'), '', $order->billing_phone);
@@ -279,32 +277,30 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 		
+		$woocommerce->add_inline_js('
+			jQuery("body").block({ 
+					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+					overlayCSS: 
+					{ 
+						background: "#fff", 
+						opacity: 0.6 
+					},
+					css: { 
+				        padding:        20, 
+				        textAlign:      "center", 
+				        color:          "#555", 
+				        border:         "3px solid #aaa", 
+				        backgroundColor:"#fff", 
+				        cursor:         "wait",
+				        lineHeight:		"32px"
+				    } 
+				});
+			jQuery("#submit_paypal_payment_form").click();
+		');
+		
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
 				' . implode('', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
-				<script type="text/javascript">
-					jQuery(function(){
-						jQuery("body").block(
-							{ 
-								message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
-								overlayCSS: 
-								{ 
-									background: "#fff", 
-									opacity: 0.6 
-								},
-								css: { 
-							        padding:        20, 
-							        textAlign:      "center", 
-							        color:          "#555", 
-							        border:         "3px solid #aaa", 
-							        backgroundColor:"#fff", 
-							        cursor:         "wait",
-							        lineHeight:		"32px"
-							    } 
-							});
-						jQuery("#submit_paypal_payment_form").click();
-					});
-				</script>
 			</form>';
 		
 	}
@@ -456,7 +452,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					);
 				
 					// Send the mail
-					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed'), $order->id), $message );
+					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woothemes'), $order->id), $message );
 	            	
 	            break;
 	            default:

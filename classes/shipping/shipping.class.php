@@ -17,6 +17,7 @@ class woocommerce_shipping {
 	var $shipping_total 	= 0;
 	var $shipping_tax 		= 0;
 	var $shipping_label		= null;
+	var $shipping_classes;
 	
     function init() {
 		
@@ -32,6 +33,22 @@ class woocommerce_shipping {
 			
 		endforeach;
 		
+	}
+	
+	function get_shipping_classes() {
+		
+		if (!is_array($this->shipping_classes)) :
+			
+			$args = array(
+				'hide_empty' => '1'
+			);
+			$classes = get_terms( 'product_shipping_class', $args );
+			
+			$this->shipping_classes = ($classes) ? $classes : array();
+				
+		endif;
+		
+		return (array) $this->shipping_classes;
 	}
 
 	function get_available_shipping_methods() {

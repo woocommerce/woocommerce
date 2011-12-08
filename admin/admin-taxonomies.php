@@ -263,5 +263,65 @@ function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=fals
 	}
 	
 	return $index;
+}
+
+
+/**
+ * Description for product_cat page
+ */
+add_action('product_cat_pre_add_form', 'woocommerce_product_cat_description');
+
+function woocommerce_product_cat_description() {
+
+	echo wpautop(__('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woothemes'));
 
 }
+
+
+/**
+ * Description for shipping class page
+ */
+add_action('product_shipping_class_pre_add_form', 'woocommerce_shipping_class_description');
+
+function woocommerce_shipping_class_description() {
+
+	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
+
+}
+
+
+/**
+ * Fix for per_page option
+ * Trac: http://core.trac.wordpress.org/ticket/19465
+ */
+add_filter('edit_posts_per_page', 'woocommerce_fix_edit_posts_per_page', 1, 2);
+
+function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
+	
+	if ($post_type!=='product') return $per_page;
+	
+	$screen = get_current_screen();
+	
+	if (strstr($screen->id, '-')) {
+	
+		$option = 'edit_' . str_replace('edit-', '', $screen->id) . '_per_page';
+		
+		if (isset($_POST['wp_screen_options']['option']) && $_POST['wp_screen_options']['option'] == $option ) :
+			
+			update_user_meta( get_current_user_id(), $option, $_POST['wp_screen_options']['value'] );
+			
+			wp_redirect( remove_query_arg( array('pagenum', 'apage', 'paged'), wp_get_referer() ) );
+			exit;
+
+		endif;
+		
+		$user_per_page = (int) get_user_meta( get_current_user_id(), $option, true );
+		
+		if ($user_per_page) $per_page = $user_per_page;
+		
+	}
+	
+	return $per_page;
+	
+}
+

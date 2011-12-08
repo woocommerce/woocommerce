@@ -53,7 +53,8 @@ class woocommerce_customer {
         		$state = '';
         	endif;
         	
-			if ($country!==$_SESSION['customer']['country']) return true;
+			if ($country!==$_SESSION['customer']['shipping_country']) return true;
+			if ($state && $state!==$_SESSION['customer']['shipping_state']) return true;
 			
 		endif;
 		return false;

@@ -304,9 +304,7 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 
 		 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
-		 	<?php if (!$_product->is_downloadable()) : ?>
-		 		<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
-		 	<?php endif; ?>
+		 	<?php if (!$_product->is_downloadable()) woocommerce_quantity_input(); ?>
 
 		 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 
@@ -332,7 +330,7 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 				<tbody>
 					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
 						<tr>
-							<td><div class="quantity"><input name="quantity[<?php echo $child_product->id; ?>]" value="0" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
+							<td><?php woocommerce_quantity_input( 'quantity['.$child_product->id.']' ); ?></td>
 							<td><label for="product-<?php echo $child_product->id; ?>"><?php
 								if ($child_product->is_visible()) echo '<a href="'.get_permalink($child_product->id).'">';
 								echo $child_product->get_title();
@@ -448,7 +446,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 				<div class="single_variation"></div>
 				<div class="variations_button">
 					<input type="hidden" name="variation_id" value="" />
-					<div class="quantity"><input name="quantity" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
+					<?php woocommerce_quantity_input(); ?>
 					<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 				</div>
 			</div>
@@ -482,6 +480,15 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
 	}
 }
 
+/**
+ * Quantity inputs
+ **/
+if (!function_exists('woocommerce_quantity_input')) {
+	function woocommerce_quantity_input( $name = 'quantity' ) {
+		echo '<div class="quantity"><input name="'.$name.'" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>';
+	}
+}
+	
 
 /**
  * Product Add to Cart forms
@@ -520,7 +527,7 @@ if (!function_exists('woocommerce_pagination')) {
  **/
 if (!function_exists('woocommerce_catalog_ordering')) {
 	function woocommerce_catalog_ordering() {
-
+		if (!isset($_SESSION['orderby'])) $_SESSION['orderby'] = apply_filters('woocommerce_default_catalog_orderby', 'title');
 		?>
 		<form class="woocommerce_ordering" method="post">
 			<select name="catalog_orderby" class="orderby">
@@ -1177,8 +1184,7 @@ function woocommerce_product_subcategories() {
 	// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
 	$args = array(
 	    'child_of'                  => $parent,
-	    'orderby'                  	=> 'menu_order',
-	    'order'                    	=> 'ASC',
+	    'menu_order'                => 'ASC',
 	    'hide_empty'               	=> 1,
 	    'hierarchical'             	=> 1,
 	    'taxonomy'                  => 'product_cat',
@@ -1234,9 +1240,9 @@ function woocommerce_product_subcategories() {
 function woocommerce_subcategory_thumbnail( $category ) {
 	global $woocommerce;
 
-	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_thumbnail');
-	$image_width 			= $woocommerce->get_image_size('shop_thumbnail_image_width');
-	$image_height 			= $woocommerce->get_image_size('shop_thumbnail_image_height');
+	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_catalog');
+	$image_width 			= $woocommerce->get_image_size('shop_catalog_image_width');
+	$image_height 			= $woocommerce->get_image_size('shop_catalog_image_height');
 
 	$thumbnail_id 	= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
 

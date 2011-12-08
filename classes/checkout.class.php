@@ -688,7 +688,7 @@ class woocommerce_checkout {
 						
 						// Calculate discounted price ex. vat
 						if (get_option('woocommerce_prices_include_tax')=='yes') :
-							$base_rate = $_tax->get_shop_base_rate( $this->tax_class );
+							$base_rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->tax_class );
 							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
 						else :
 							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
@@ -700,7 +700,7 @@ class woocommerce_checkout {
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'base_cost' 	=> $_product->get_price_excluding_tax( false ),
-					 		'cost'			=> trim(trim(number_format($cost, 4, '.', ''), '0'), '.'),
+					 		'cost'			=> rtrim(rtrim(number_format($cost, 4, '.', ''), '0'), '.'),
 					 		'taxrate' 		=> $rate,
 					 		'item_meta'		=> $item_meta->meta
 					 	), $values);
@@ -713,14 +713,29 @@ class woocommerce_checkout {
 					if ($woocommerce->error_count()>0) break;
 					
 					// Insert or update the post data
+					$create_new_order = true;
+					
 					if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
 						
 						$order_id = (int) $_SESSION['order_awaiting_payment'];
-						$order_data['ID'] = $order_id;
-						wp_update_post( $order_data );
-						do_action('woocommerce_resume_order', $order_id);
 						
-					else :
+						/* Check order is unpaid */
+						$order = &new woocommerce_order( $order_id );
+						
+						if ( $order->status == 'pending' ) :
+							
+							// Resume the unpaid order
+							$order_data['ID'] = $order_id;
+							wp_update_post( $order_data );
+							do_action('woocommerce_resume_order', $order_id);
+							
+							$create_new_order = false;
+						
+						endif;
+						
+					endif;
+					
+					if ($create_new_order) :
 						$order_id = wp_insert_post( $order_data );
 						
 						if (is_wp_error($order_id)) :
@@ -731,11 +746,17 @@ class woocommerce_checkout {
 							do_action('woocommerce_new_order', $order_id);
 						endif;
 					endif;
-
-					// Get better formatted shipping method (title/label)
+					
+					// Get better formatted billing method (title)
 					$shipping_method = $this->posted['shipping_method'];
 					if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
 						$shipping_method = $available_methods[$this->posted['shipping_method']]->title;
+					endif;
+					
+					// Get better formatted shipping method (title/label)
+					$payment_method = $this->posted['payment_method'];
+					if (isset($available_gateways) && isset($available_gateways[$this->posted['payment_method']])) :
+						$payment_method = $available_gateways[$this->posted['payment_method']]->title;
 					endif;
 					
 					// Update order meta
@@ -759,8 +780,10 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_shipping_postcode', 		$shipping_postcode);
 					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
 					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
-					update_post_meta( $order_id, '_shipping_method', 		$shipping_method);
+					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
+					update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
+					update_post_meta( $order_id, '_payment_method_title', 	$payment_method);
 					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
