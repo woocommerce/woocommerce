@@ -23,11 +23,7 @@ if (!function_exists('woocommerce_output_content_wrapper')) {
 }
 if (!function_exists('woocommerce_output_content_wrapper_end')) {
 	function woocommerce_output_content_wrapper_end() {
-		if ( get_option('template') === 'twentyeleven' ) :
-			echo  '</div></div>';
-		else :
-			echo '</div></div>';
-		endif;
+		echo '</div></div>';
 	}
 }
 
@@ -113,10 +109,8 @@ if (!function_exists('woocommerce_template_loop_price')) {
  **/
 if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility( $post, $_product ) {
-	
 		if (!$_product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
 		if (!$_product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
-		
 	}
 }
 
@@ -203,16 +197,7 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
  **/
 if (!function_exists('woocommerce_output_product_data_tabs')) {
 	function woocommerce_output_product_data_tabs() {
-
-		?>
-		<div class="woocommerce_tabs">
-			<ul class="tabs">
-				<?php do_action('woocommerce_product_tabs'); ?>
-			</ul>
-			<?php do_action('woocommerce_product_tab_panels'); ?>
-		</div>
-		<?php
-
+		woocommerce_get_template('single-product/tabs.php', false);
 	}
 }
 
@@ -294,158 +279,62 @@ if (!function_exists('woocommerce_simple_add_to_cart')) {
 }
 if (!function_exists('woocommerce_grouped_add_to_cart')) {
 	function woocommerce_grouped_add_to_cart( $post, $_product ) {
-
-		do_action('woocommerce_before_add_to_cart_form'); ?>
-
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
-			<table cellspacing="0" class="group_table">
-				<tbody>
-					<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
-						<tr>
-							<td><?php woocommerce_quantity_input( 'quantity['.$child_product->id.']' ); ?></td>
-							<td><label for="product-<?php echo $child_product->id; ?>"><?php
-								if ($child_product->is_visible()) echo '<a href="'.get_permalink($child_product->id).'">';
-								echo $child_product->get_title();
-								if ($child_product->is_visible()) echo '</a>';
-							?></label></td>
-							<td class="price"><?php echo $child_product->get_price_html(); ?>
-							<?php echo apply_filters( 'woocommerce_stock_html', '<small class="stock '.$cavailability['class'].'">'.$cavailability['availability'].'</small>', $cavailability['availability'] ); ?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-
-			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
-
-			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
-
-			<?php do_action('woocommerce_after_add_to_cart_button'); ?>
-
-		</form>
-
-		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
-		<?php
+		woocommerce_get_template('single-product/add-to-cart/grouped.php', false);
 	}
 }
 if (!function_exists('woocommerce_variable_add_to_cart')) {
 	function woocommerce_variable_add_to_cart( $post, $_product ) {
-		global $woocommerce;
+		global $woocommerce, $available_variations, $attributes, $selected_attributes;
 
 		$attributes = $_product->get_available_attribute_variations();
 		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
 		$selected_attributes = apply_filters( 'woocommerce_product_default_attributes', $default_attributes );
-
+		
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
-        $available_variations = array();
-
-        foreach($_product->get_children() as $child_id) {
-
-            $variation = $_product->get_child( $child_id );
-
-            if($variation instanceof woocommerce_product_variation) {
-
-            	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
-
-                $variation_attributes = $variation->get_variation_attributes();
-                $availability = $variation->get_availability();
-                $availability_html = (!empty($availability['availability'])) ? apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>', $availability['availability'] ) : '';
-
-                if (has_post_thumbnail($variation->get_variation_id())) {
-                    $attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-                    $large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
-                    $image = current(wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size ));
-                    $image_link = current(wp_get_attachment_image_src( $attachment_id, 'full' ));
-                } else {
-                    $image = '';
-                    $image_link = '';
-                }
-
-                $available_variations[] = array(
-                    'variation_id' => $variation->get_variation_id(),
-                    'attributes' => $variation_attributes,
-                    'image_src' => $image,
-                    'image_link' => $image_link,
-                    'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
-                    'availability_html' => $availability_html,
-                );
-            }
-        }
-		?>
-        <script type="text/javascript">
-            var product_variations = <?php echo json_encode($available_variations) ?>;
-        </script>
-
-        <?php do_action('woocommerce_before_add_to_cart_form'); ?>
-
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
-			<table class="variations" cellspacing="0">
-				<tbody>
-				<?php foreach ($attributes as $name => $options) : ?>
-					<tr>
-						<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
-						<td><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
-							<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
-							<?php if(is_array($options)) : ?>
-								<?php
-									$selected_value = (isset($selected_attributes[sanitize_title($name)])) ? $selected_attributes[sanitize_title($name)] : '';
-									// Get terms if this is a taxonomy - ordered
-									if (taxonomy_exists(sanitize_title($name))) :
-										$args = array('menu_order' => 'ASC');
-										$terms = get_terms( sanitize_title($name), $args );
-
-										foreach ($terms as $term) :
-											if (!in_array($term->slug, $options)) continue;
-											echo '<option value="'.$term->slug.'" '.selected($selected_value, $term->slug).'>'.$term->name.'</option>';
-										endforeach;
-									else :
-										foreach ($options as $option) :
-											echo '<option value="'.$option.'" '.selected($selected_value, $option).'>'.$option.'</option>';
-										endforeach;
-									endif;
-								?>
-							<?php endif;?>
-						</td>
-					</tr>
-                <?php endforeach;?>
-				</tbody>
-			</table>
-
-			<?php do_action('woocommerce_before_add_to_cart_button'); ?>
-
-			<div class="single_variation_wrap" style="display:none;">
-				<div class="single_variation"></div>
-				<div class="variations_button">
-					<input type="hidden" name="variation_id" value="" />
-					<?php woocommerce_quantity_input(); ?>
-					<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
-				</div>
-			</div>
-			<div><input type="hidden" name="product_id" value="<?php echo esc_attr( $post->ID ); ?>" /></div>
-
-			<?php do_action('woocommerce_after_add_to_cart_button'); ?>
-
-		</form>
-
-		<?php do_action('woocommerce_after_add_to_cart_form'); ?>
-		<?php
+		$available_variations = array();
+		
+		foreach($_product->get_children() as $child_id) {
+		
+		    $variation = $_product->get_child( $child_id );
+		
+		    if($variation instanceof woocommerce_product_variation) {
+		
+		    	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
+		
+		        $variation_attributes = $variation->get_variation_attributes();
+		        $availability = $variation->get_availability();
+		        $availability_html = (!empty($availability['availability'])) ? apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'. $availability['availability'].'</p>', $availability['availability'] ) : '';
+		
+		        if (has_post_thumbnail($variation->get_variation_id())) {
+		            $attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
+		            $large_thumbnail_size = apply_filters('single_product_large_thumbnail_size', 'shop_single');
+		            $image = current(wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size ));
+		            $image_link = current(wp_get_attachment_image_src( $attachment_id, 'full' ));
+		        } else {
+		            $image = '';
+		            $image_link = '';
+		        }
+		
+		        $available_variations[] = array(
+		            'variation_id' => $variation->get_variation_id(),
+		            'attributes' => $variation_attributes,
+		            'image_src' => $image,
+		            'image_link' => $image_link,
+		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
+		            'availability_html' => $availability_html,
+		        );
+		    }
+		}
+		
+		woocommerce_get_template('single-product/add-to-cart/variable.php', false);
 	}
 }
 if (!function_exists('woocommerce_external_add_to_cart')) {
 	function woocommerce_external_add_to_cart( $post, $_product ) {
-
+		global $product_url;
+		
 		$product_url = get_post_meta( $_product->id, 'product_url', true );
-		if (!$product_url) return;
-
-		?>
-
-		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
-
-		<p class="cart"><a href="<?php echo $product_url; ?>" rel="nofollow" class="button alt"><?php _e('Buy product', 'woothemes'); ?></a></p>
-
-		<?php do_action('woocommerce_after_add_to_cart_button'); ?>
-
-		<?php
+		if ($product_url) woocommerce_get_template('single-product/add-to-cart/external.php', false);
 	}
 }
 
@@ -474,7 +363,6 @@ if (!function_exists('woocommerce_add_to_cart_form_nonce')) {
  **/
 if (!function_exists('woocommerce_pagination')) {
 	function woocommerce_pagination() {
-
 		global $wp_query;
 
 		if (  $wp_query->max_num_pages > 1 ) :
@@ -485,10 +373,8 @@ if (!function_exists('woocommerce_pagination')) {
 			</div>
 			<?php
 		endif;
-
 	}
 }
-
 
 
 /**
