@@ -82,8 +82,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.3.2 = 
-* Fixed error when adding an order manaully
+= 1.3.2 - 09/12/2011 = 
+* Fixed error when adding an order manually
 * Dumped the orders class (hardly used)
 * Shipping classes can be set up without assigning products first
 * Product reports: Combines children so grouped products have stats
