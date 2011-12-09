@@ -19,7 +19,7 @@ class woocommerce_query {
 	/** constructor */
 	function __construct() {
 		add_filter( 'parse_query', array( &$this, 'parse_query') );
-		add_action('wp', array( &$this, 'remove_parse_query') );
+		add_action( 'wp', array( &$this, 'remove_parse_query') );
 	}
 	
 	/**
@@ -27,8 +27,6 @@ class woocommerce_query {
 	 */
 	function parse_query( $q ) {
 
-		if (is_admin()) return;
-		      
 		// Only apply to product categories, the product post archive, the shop page, and product tags
 	    if 	( 
 	    		(

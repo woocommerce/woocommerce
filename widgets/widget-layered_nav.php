@@ -10,7 +10,7 @@
 /**
  * Layered Nav Init
  */
-add_action('init', 'woocommerce_layered_nav_init', 1);
+if (!is_admin()) add_action('init', 'woocommerce_layered_nav_init', 1);
 
 function woocommerce_layered_nav_init() {
 

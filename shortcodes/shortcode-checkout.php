@@ -34,8 +34,6 @@ function woocommerce_checkout( $atts ) {
 	
 	if ( $woocommerce->error_count()==0 && $non_js_checkout) $woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woothemes') );
 	
-	$woocommerce->show_messages();
-	
 	woocommerce_get_template('checkout/form.php', false);
 	
 }

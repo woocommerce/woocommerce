@@ -13,7 +13,6 @@
  *		- Restore an order via a link
  *		- Cancel a pending order
  *		- Download a file
- *		- Order Status completed - allow customer to access Downloadable product
  *		- Google Analytics standard tracking
  *		- Google Analytics eCommerce tracking
  *		- Products RSS Feed
@@ -48,8 +47,6 @@ function woocommerce_update_catalog_ordering() {
 	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
 }
 
-
-
 /**
  * Increase coupon usage count
  */
@@ -63,19 +60,17 @@ function woocommerce_increase_coupon_counts() {
 	endforeach;
 }
 
-
 /**
  * When default permalinks are enabled, redirect shop page to post type archive url
  **/
-if (get_option( 'permalink_structure' )=="") add_action( 'init', 'woocommerce_shop_page_archive_redirect' );
+add_action( 'init', 'woocommerce_shop_page_archive_redirect' );
 
 function woocommerce_shop_page_archive_redirect() {
 	
-	if ( isset($_GET['page_id']) && $_GET['page_id'] == get_option('woocommerce_shop_page_id') ) :
+	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == get_option('woocommerce_shop_page_id') ) :
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	endif;
-	
 }
 
 /**
@@ -269,7 +264,6 @@ function woocommerce_add_to_cart_message() {
 	endif;
 }
 
-
 /**
  * Clear cart
  **/
@@ -321,7 +315,6 @@ function woocommerce_clear_cart_after_payment( $url = false ) {
 	
 }
 
-
 /**
  * Process the login form
  **/
@@ -361,7 +354,6 @@ function woocommerce_process_login() {
 	
 	endif;	
 }
-
 
 /**
  * Process the registration form
@@ -456,7 +448,6 @@ function woocommerce_process_registration() {
 	endif;	
 }
 
-
 /**
  * Cancel a pending order - hook into init function
  **/
@@ -496,7 +487,6 @@ function woocommerce_cancel_order() {
 		
 	endif;
 }
-
 
 /**
  * Download a file - hook into init function
@@ -652,71 +642,6 @@ function woocommerce_download_product() {
 	endif;
 }
 
-
-/**
- * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
- **/
-add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
-
-function woocommerce_downloadable_product_permissions( $order_id ) {
-	
-	global $wpdb;
-	
-	$order = &new woocommerce_order( $order_id );
-	
-	if (sizeof($order->items)>0) foreach ($order->items as $item) :
-	
-		if ($item['id']>0) :
-			$_product = $order->get_product_from_item( $item );
-			
-			if ( $_product->exists && $_product->is_downloadable() ) :
-			
-				$download_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['id'];
-				
-				$user_email = $order->billing_email;
-				
-				if ($order->user_id>0) :
-					$user_info = get_userdata($order->user_id);
-					if ($user_info->user_email) :
-						$user_email = $user_info->user_email;
-					endif;
-				else :
-					$order->user_id = 0;
-				endif;
-				
-				$limit = trim(get_post_meta($download_id, 'download_limit', true));
-				
-				if (!empty($limit)) :
-					$limit = (int) $limit;
-				else :
-					$limit = '';
-				endif;
-				
-				// Downloadable product - give access to the customer
-				$wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
-					'product_id' => $download_id, 
-					'user_id' => $order->user_id,
-					'user_email' => $user_email,
-					'order_id' => $order->id,
-					'order_key' => $order->order_key,
-					'downloads_remaining' => $limit
-				), array( 
-					'%s', 
-					'%s', 
-					'%s', 
-					'%s', 
-					'%s',
-					'%s'
-				) );	
-				
-			endif;
-			
-		endif;
-	
-	endforeach;
-}
-
-
 /**
  * Google Analytics standard tracking
  **/
@@ -762,7 +687,6 @@ function woocommerce_google_tracking() {
 	</script>
 	<?php
 }
-			
 			
 /**
  * Google Analytics eCommerce tracking
@@ -869,5 +793,4 @@ function woocommerce_products_rss_feed() {
 		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products tagged %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
 		
 	endif;
-
 }

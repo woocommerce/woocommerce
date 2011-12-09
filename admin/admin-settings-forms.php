@@ -284,8 +284,7 @@ function woocommerce_admin_fields($options) {
                	</tr><?php		            	
             break;
             case 'tax_rates' :
-            	$_tax = new woocommerce_tax();
-            	$tax_classes = $_tax->get_tax_classes();
+            	$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
             	$tax_rates = get_option('woocommerce_tax_rates');
             	
             	?><tr valign="top">

@@ -13,7 +13,7 @@
  */
 function woocommerce_template_loader( $template ) {
 	global $woocommerce;
-	
+
 	if ( is_single() && get_post_type() == 'product' ) {
 		
 		$template = locate_template( array( 'single-product.php', WOOCOMMERCE_TEMPLATE_URL . 'single-product.php' ) );
@@ -42,7 +42,6 @@ function woocommerce_template_loader( $template ) {
 	}
 	
 	return $template;
-
 }
 add_filter( 'template_include', 'woocommerce_template_loader' );
 

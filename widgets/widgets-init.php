@@ -8,7 +8,6 @@
  * @category	Widgets
  * @author		WooThemes
  */
- 
 include_once('widget-cart.php');
 include_once('widget-featured_products.php');
 include_once('widget-layered_nav.php');

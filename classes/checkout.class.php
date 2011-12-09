@@ -371,7 +371,6 @@ class woocommerce_checkout {
 	 */
 	function process_checkout() {
 		global $wpdb, $woocommerce;
-		$validation = $woocommerce->validation();
 		
 		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 
@@ -419,16 +418,16 @@ class woocommerce_checkout {
 					case "billing_postcode" :
 						$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 						
-						if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
+						if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
 						else :
-							$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+							$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 						endif;
 					break;
 					case "billing_phone" :
-						if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
+						if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
 					break;
 					case "billing_email" :
-						if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
+						if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
 					break;
 				endswitch;
 				
@@ -457,9 +456,9 @@ class woocommerce_checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$validation->is_postcode( $this->posted[$key], $this->posted['shipping_country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
+							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $this->posted['shipping_country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
 							else :
-								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $this->posted['shipping_country'] );
+								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $this->posted['shipping_country'] );
 							endif;
 						break;
 					endswitch;

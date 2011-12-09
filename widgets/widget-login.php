@@ -184,64 +184,6 @@ class WooCommerce_Widget_Login extends WP_Widget {
 
 } // class WooCommerce_Widget_Login
 
-/**
- * Process ajax login
- */
-add_action('wp_ajax_nopriv_woocommerce_sidebar_login_process', 'woocommerce_sidebar_login_ajax_process');
-
-function woocommerce_sidebar_login_ajax_process() {
-
-	check_ajax_referer( 'woocommerce-sidebar-login-action', 'security' );
-	
-	// Get post data
-	$creds = array();
-	$creds['user_login'] 	= esc_attr($_POST['user_login']);
-	$creds['user_password'] = esc_attr($_POST['user_password']);
-	$creds['remember'] 		= 'forever';
-	$redirect_to 			= esc_attr($_POST['redirect_to']);
-	
-	// Check for Secure Cookie
-	$secure_cookie = '';
-	
-	// If the user wants ssl but the session is not ssl, force a secure cookie.
-	if ( !empty($_POST['log']) && !force_ssl_admin() ) {
-		$user_name = sanitize_user($_POST['log']);
-		if ( $user = get_user_by('login', $user_name) ) {
-			if ( get_user_option('use_ssl', $user->ID) ) {
-				$secure_cookie = true;
-				force_ssl_admin(true);
-			}
-		}
-	}
-	
-	if ( !$secure_cookie && is_ssl() && force_ssl_login() && !force_ssl_admin() && ( 0 !== strpos($redirect_to, 'https') ) && ( 0 === strpos($redirect_to, 'http') ) )
-	$secure_cookie = false;
-
-	// Login
-	$user = wp_signon($creds, $secure_cookie);
-	
-	// Redirect filter
-	if ( $secure_cookie && false !== strpos($redirect_to, 'wp-admin') ) $redirect_to = preg_replace('|^http://|', 'https://', $redirect_to);
-
-	// Result
-	$result = array();
-	
-	if ( !is_wp_error($user) ) :
-		$result['success'] = 1;
-		$result['redirect'] = $redirect_to;
-	else :
-		$result['success'] = 0;
-		foreach ($user->errors as $error) {
-			$result['error'] = $error[0];
-			break;
-		}
-	endif;
-	
-	echo json_encode($result);
-
-	die();
-}
-
 add_action('init', 'woocommerce_sidebar_login_process', 0);
 
 function woocommerce_sidebar_login_process() {

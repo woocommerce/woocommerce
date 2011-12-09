@@ -6,7 +6,6 @@
  * @category	Widgets
  * @author		WooThemes
  */
-
 class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
 	/** Variables to setup the widget. */

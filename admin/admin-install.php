@@ -56,7 +56,7 @@ function install_woocommerce() {
 	if ( $woocommerce instanceof woocommerce ) $woocommerce->clear_product_transients();
 	
 	// Update version
-	update_option( "woocommerce_db_version", WOOCOMMERCE_VERSION );
+	update_option( "woocommerce_db_version", $woocommerce->version );
 }
 
 /**

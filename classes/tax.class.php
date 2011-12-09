@@ -7,7 +7,6 @@
  * @category	Class
  * @author		WooThemes
  */
-
 class woocommerce_tax {
 	
 	var $rates;
@@ -19,22 +18,6 @@ class woocommerce_tax {
 	 */
 	function woocommerce_tax() {
 		$this->rates = $this->get_tax_rates();
-	}
-	
-	/**
-	 * Get an array of tax classes
-	 *
-	 * @return  array
-	 */
-	function get_tax_classes() {
-		$classes = get_option('woocommerce_tax_classes');
-		$classes = explode("\n", $classes);
-		$classes = array_map('trim', $classes);
-		$classes_array = array();
-		if (sizeof($classes)>0) foreach ($classes as $class) :
-			if ($class) $classes_array[] = $class;
-		endforeach;
-		return $classes_array;
 	}
 	
 	/**
