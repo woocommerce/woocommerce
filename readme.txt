@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -85,6 +85,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 = 1.3.2 = 
 * Fixed error when adding an order manaully
 * Dumped the orders class (hardly used)
+* Shipping classes can be set up without assigning products first
+* Product reports: Combines children so grouped products have stats
 
 = 1.3.1 - 08/12/2011 =
 * Many Minor bug fixes
