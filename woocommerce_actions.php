@@ -2,20 +2,7 @@
 /**
  * WooCommerce Actions
  * 
- * Actions/functions/hooks for WooCommerce related events.
- *
- *		- Clear cart on logout
- *		- Update catalog ordering if posted
- *		- Increase coupon usage count
- *		- When default permalinks are enabled, redirect shop page to post type archive url
- *		- Add to Cart
- *		- Clear cart
- *		- Restore an order via a link
- *		- Cancel a pending order
- *		- Download a file
- *		- Google Analytics standard tracking
- *		- Google Analytics eCommerce tracking
- *		- Products RSS Feed
+ * Hooked-in core functions for WooCommerce related events on the front-end.
  *
  * @package		WooCommerce
  * @category	Actions
@@ -23,26 +10,143 @@
  */
 
 /**
- * Clear cart on logout
- */
-add_action('wp_logout', 'woocommerce_clear_cart_on_logout');
+ * When default permalinks are enabled, redirect shop page to post type archive url
+ **/
+function woocommerce_shop_page_archive_redirect() {
+	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == get_option('woocommerce_shop_page_id') ) :
+		wp_safe_redirect( get_post_type_archive_link('product') );
+		exit;
+	endif;
+}
 
-function woocommerce_clear_cart_on_logout() {
+/**
+ * Fix active class in nav for shop page
+ **/
+function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 	
-	if (get_option('woocommerce_clear_cart_on_logout')=='yes') :
+	if (!is_woocommerce()) return $menu_items;
+	
+	$shop_page 		= (int) get_option('woocommerce_shop_page_id');
+	$page_for_posts = (int) get_option( 'page_for_posts' );
+
+	foreach ( (array) $menu_items as $key => $menu_item ) :
+
+		$classes = (array) $menu_item->classes;
+
+		// Unset active class for blog page
+		if ( $page_for_posts == $menu_item->object_id ) :
+			$menu_items[$key]->current = false;
+			unset( $classes[ array_search('current_page_parent', $classes) ] );
+			unset( $classes[ array_search('current-menu-item', $classes) ] );
+
+		// Set active state if this is the shop page link
+		elseif ( is_shop() && $shop_page == $menu_item->object_id ) :
+			$menu_items[$key]->current = true;
+			$classes[] = 'current-menu-item';
+			$classes[] = 'current_page_item';
 		
-		global $woocommerce;
+		endif;
+
+		$menu_items[$key]->classes = array_unique( $classes );
+	
+	endforeach;
+
+	return $menu_items;
+}
+
+/**
+ * Detect frontpage shop and fix pagination on static front page
+ **/
+function woocommerce_front_page_archive_paging_fix() {
 		
-		$woocommerce->cart->empty_cart();
+	if ( is_front_page() && is_page( get_option('woocommerce_shop_page_id') )) :
+		
+		if (get_query_var('paged')) :
+			$paged = get_query_var('paged'); 
+		else :
+			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
+		endif;
+			
+		query_posts( array( 'page_id' => get_option('woocommerce_shop_page_id'), 'is_paged' => true, 'paged' => $paged ) );
+		
+		define('SHOP_IS_ON_FRONT', true);
 		
 	endif;
 }
 
 /**
+ * Front page archive/shop template applied to main loop
+ */
+function woocommerce_front_page_archive( $query ) {
+		
+	global $paged, $woocommerce, $wp_the_query, $wp_query;
+	
+	if ( defined('SHOP_IS_ON_FRONT') ) :
+	
+		wp_reset_query();
+		
+		// Only apply to front_page
+		if ( $query === $wp_the_query ) :
+			
+			if (get_query_var('paged')) :
+				$paged = get_query_var('paged'); 
+			else :
+				$paged = (get_query_var('page')) ? get_query_var('page') : 1;
+			endif;
+
+			// Filter the query
+			add_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') );
+			
+			// Query the products
+			$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
+			
+			// get products in view (for use by widgets)
+			$woocommerce->query->get_products_in_view();
+			
+			// Remove the query manipulation
+			remove_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') ); 
+			remove_action('loop_start', 'woocommerce_front_page_archive', 1);
+
+		endif;
+	
+	endif;
+}
+
+/**
+ * Fix active class in wp_list_pages for shop page
+ *
+ * Suggested by jessor - https://github.com/woothemes/woocommerce/issues/177
+ **/
+function woocommerce_list_pages($pages){
+    global $post;
+
+    if (is_woocommerce() || is_cart() || is_checkout() || is_page(get_option('woocommerce_thanks_page_id'))) {
+        $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
+        $shop_page = 'page-item-' . get_option('woocommerce_shop_page_id'); // find shop_page_id through woocommerce options
+        
+        if (is_shop()) :
+        	$pages = str_replace($shop_page, $shop_page . ' current_page_item', $pages); // add current_page_item class to shop page
+    	else :
+    		$pages = str_replace($shop_page, $shop_page . ' current_page_parent', $pages); // add current_page_parent class to shop page
+    	endif;
+    }
+    return $pages;
+}
+
+/**
+ * Add logout link to my account menu
+ **/
+function woocommerce_nav_menu_items( $items, $args ) {
+	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(get_option('woocommerce_myaccount_page_id'))) && is_user_logged_in() ) :
+		$items .= '<li><a href="'. wp_logout_url() .'">'.__('Logout', 'woothemes').'</a></li>';
+	endif;
+	
+    return $items;
+}
+
+/**
  * Update catalog ordering if posted
  */
-add_action('init', 'woocommerce_update_catalog_ordering');
-
 function woocommerce_update_catalog_ordering() {
 	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
 }
@@ -50,8 +154,6 @@ function woocommerce_update_catalog_ordering() {
 /**
  * Increase coupon usage count
  */
-add_action('woocommerce_new_order', 'woocommerce_increase_coupon_counts');
-
 function woocommerce_increase_coupon_counts() {
 	global $woocommerce;
 	if ($applied_coupons = $woocommerce->cart->get_applied_coupons()) foreach ($applied_coupons as $code) :
@@ -61,25 +163,9 @@ function woocommerce_increase_coupon_counts() {
 }
 
 /**
- * When default permalinks are enabled, redirect shop page to post type archive url
- **/
-add_action( 'init', 'woocommerce_shop_page_archive_redirect' );
-
-function woocommerce_shop_page_archive_redirect() {
-	
-	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == get_option('woocommerce_shop_page_id') ) :
-		wp_safe_redirect( get_post_type_archive_link('product') );
-		exit;
-	endif;
-}
-
-/**
  * Remove from cart/update
  **/
-add_action( 'init', 'woocommerce_update_cart_action' );
-
 function woocommerce_update_cart_action() {
-	
 	global $woocommerce;
 	
 	// Remove from cart
@@ -110,14 +196,11 @@ function woocommerce_update_cart_action() {
 		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
 		
 	endif;
-
 }
 
 /**
  * Add to cart
  **/
-add_action( 'init', 'woocommerce_add_to_cart_action' );
-
 function woocommerce_add_to_cart_action( $url = false ) {
 	
 	global $woocommerce;
@@ -247,8 +330,6 @@ function woocommerce_add_to_cart_action( $url = false ) {
 /**
  * Add to cart messages
  **/
-add_action( 'init', 'woocommerce_add_to_cart_action' );
-
 function woocommerce_add_to_cart_message() {
 	global $woocommerce;
 	
@@ -265,11 +346,9 @@ function woocommerce_add_to_cart_message() {
 }
 
 /**
- * Clear cart
+ * Clear cart after payment
  **/
-add_action( 'wp', 'woocommerce_clear_cart_on_return' );
-
-function woocommerce_clear_cart_on_return() {
+function woocommerce_clear_cart_after_payment() {
 	global $woocommerce;
 	
 	if (is_page(get_option('woocommerce_thanks_page_id'))) :
@@ -288,16 +367,6 @@ function woocommerce_clear_cart_on_return() {
 		endif;
 		
 	endif;
-
-}
-
-/**
- * Clear the cart after payment - order will be processing or complete
- **/
-add_action( 'init', 'woocommerce_clear_cart_after_payment' );
-
-function woocommerce_clear_cart_after_payment( $url = false ) {
-	global $woocommerce;
 	
 	if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
 		
@@ -312,14 +381,11 @@ function woocommerce_clear_cart_after_payment( $url = false ) {
 		endif;
 		
 	endif;
-	
 }
 
 /**
  * Process the login form
  **/
-add_action('init', 'woocommerce_process_login');
- 
 function woocommerce_process_login() {
 	
 	global $woocommerce;
@@ -358,8 +424,6 @@ function woocommerce_process_login() {
 /**
  * Process the registration form
  **/
-add_action('init', 'woocommerce_process_registration');
- 
 function woocommerce_process_registration() {
 	
 	global $woocommerce;
@@ -449,10 +513,8 @@ function woocommerce_process_registration() {
 }
 
 /**
- * Cancel a pending order - hook into init function
+ * Cancel a pending order
  **/
-add_action('init', 'woocommerce_cancel_order');
-
 function woocommerce_cancel_order() {
 	
 	global $woocommerce;
@@ -491,8 +553,6 @@ function woocommerce_cancel_order() {
 /**
  * Download a file - hook into init function
  **/
-add_action('init', 'woocommerce_download_product');
-
 function woocommerce_download_product() {
 	
 	if ( isset($_GET['download_file']) && isset($_GET['order']) && isset($_GET['email']) ) :
@@ -604,7 +664,44 @@ function woocommerce_download_product() {
 				exit;
 
             endif;
-            
+
+			/**
+			 * readfile_chunked
+			 *
+			 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
+			 *
+			 * @access   public
+			 * @param    string    file
+			 * @param    boolean    return bytes of file
+			 * @return   void
+			 */
+			if ( ! function_exists('readfile_chunked')) {
+			    function readfile_chunked($file, $retbytes=TRUE) {
+			    
+					$chunksize = 1 * (1024 * 1024);
+					$buffer = '';
+					$cnt = 0;
+					
+					$handle = fopen($file, 'r');
+					if ($handle === FALSE) return FALSE;
+							
+					while (!feof($handle)) :
+					   $buffer = fread($handle, $chunksize);
+					   echo $buffer;
+					   ob_flush();
+					   flush();
+					
+					   if ($retbytes) $cnt += strlen($buffer);
+					endwhile;
+					
+					$status = fclose($handle);
+					
+					if ($retbytes AND $status) return $cnt;
+					
+					return $status;
+			    }
+			}
+
             @session_write_close();
             if (function_exists('apache_setenv')) @apache_setenv('no-gzip', 1);
             @ini_set('zlib.output_compression', 'Off');
@@ -645,8 +742,6 @@ function woocommerce_download_product() {
 /**
  * Google Analytics standard tracking
  **/
-add_action('wp_footer', 'woocommerce_google_tracking');
-
 function woocommerce_google_tracking() {
 	global $woocommerce;
 	
@@ -691,8 +786,6 @@ function woocommerce_google_tracking() {
 /**
  * Google Analytics eCommerce tracking
  **/
-add_action('woocommerce_thankyou', 'woocommerce_ecommerce_tracking');
-
 function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
@@ -765,10 +858,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 } 
 
 /* Products RSS Feed */
-add_action( 'wp_head', 'woocommerce_products_rss_feed' );
-
 function woocommerce_products_rss_feed() {
-	
 	// Product RSS
 	if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) :
 		
@@ -793,4 +883,30 @@ function woocommerce_products_rss_feed() {
 		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products tagged %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
 		
 	endif;
+}
+
+/**
+ * Rating field for comments
+ **/
+function woocommerce_add_comment_rating($comment_id) {
+	if ( isset($_POST['rating']) ) :
+		global $post;
+		if (!$_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0) $_POST['rating'] = 5; 
+		add_comment_meta( $comment_id, 'rating', esc_attr($_POST['rating']), true );
+		delete_transient( esc_attr($post->ID) . '_woocommerce_average_rating' );
+	endif;
+}
+
+function woocommerce_check_comment_rating($comment_data) {
+	global $woocommerce;
+	
+	// If posting a comment (not trackback etc) and not logged in
+	if ( isset($_POST['rating']) && !$woocommerce->verify_nonce('comment_rating') )
+		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woothemes') );
+		
+	elseif ( isset($_POST['rating']) && empty($_POST['rating']) && $comment_data['comment_type']== '' ) {
+		wp_die( __('Please rate the product.',"woothemes") );
+		exit;
+	}
+	return $comment_data;
 }

@@ -41,7 +41,6 @@ function woocommerce_before_single_product( $post, $product ) {
 	if (is_null($_product)) $_product = $product;
 }
 
-
 /**
  * Sale Flash
  **/
@@ -290,42 +289,7 @@ if (!function_exists('woocommerce_template_single_add_to_cart')) {
 }
 if (!function_exists('woocommerce_simple_add_to_cart')) {
 	function woocommerce_simple_add_to_cart( $post, $_product ) {
-
-		$availability = $_product->get_availability();
-
-		// No price set - so no button
-		if( $_product->get_price() === '') return;
-
-		if ($availability['availability']) :
-			echo apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
-	    endif;
-
-		// Don't show cart if out of stock
-		if (!$_product->is_in_stock()) :
-			echo '<link itemprop="availability" href="http://schema.org/OutOfStock">';
-			return;
-		endif;
-
-		echo '<link itemprop="availability" href="http://schema.org/InStock">';
-
-		do_action('woocommerce_before_add_to_cart_form');
-
-		?>
-		<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
-
-		 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
-
-		 	<?php if (!$_product->is_downloadable()) woocommerce_quantity_input(); ?>
-
-		 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
-
-		 	<?php do_action('woocommerce_after_add_to_cart_button'); ?>
-
-		</form>
-		<?php
-
-		do_action('woocommerce_after_add_to_cart_form');
-
+		woocommerce_get_template('single-product/add-to-cart/simple.php', false);
 	}
 }
 if (!function_exists('woocommerce_grouped_add_to_cart')) {
@@ -1080,19 +1044,6 @@ if (!function_exists('woocommerce_breadcrumb')) {
 }
 
 /**
- * Remove the singular class for woocommerce single product
- **/
-function woocommerce_body_classes ($classes) {
-
-	if( ! is_singular('product') ) return $classes;
-
-	$key = array_search('singular', $classes);
-	if ( $key !== false ) unset($classes[$key]);
-	return $classes;
-
-}
-
-/**
  * Display Up Sells
  **/
 function woocommerce_upsell_display() {
@@ -1389,4 +1340,44 @@ function woocommerce_order_details_table( $order_id ) {
 
 	<div class="clear"></div>
 	<?php
+}	
+
+/**
+ * Review comments template
+ **/
+function woocommerce_comments($comment, $args, $depth) {
+	$GLOBALS['comment'] = $comment; global $post; ?>
+	
+	<li itemprop="reviews" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+		<div id="comment-<?php comment_ID(); ?>" class="comment_container">
+
+  			<?php echo get_avatar( $comment, $size='60' ); ?>
+			
+			<div class="comment-text">
+			
+				<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating" class="star-rating" title="<?php echo esc_attr( get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>">
+					<span style="width:<?php echo get_comment_meta( $comment->comment_ID, 'rating', true )*16; ?>px"><span itemprop="ratingValue"><?php echo get_comment_meta( $comment->comment_ID, 'rating', true ); ?></span> <?php _e('out of 5', 'woothemes'); ?></span>
+				</div>
+				
+				<?php if ($comment->comment_approved == '0') : ?>
+					<p class="meta"><em><?php _e('Your comment is awaiting approval', 'woothemes'); ?></em></p>
+				<?php else : ?>
+					<p class="meta">
+						<?php _e('Rating by', 'woothemes'); ?> <strong itemprop="author"><?php comment_author(); ?></strong> <?php _e('on', 'woothemes'); ?> <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date('M jS Y'); ?></time>:
+					</p>
+				<?php endif; ?>
+				
+  				<div itemprop="description" class="description"><?php comment_text(); ?></div>
+  				<div class="clear"></div>
+  			</div>
+			<div class="clear"></div>			
+		</div>
+	<?php
+}
+
+/**
+ * Prevent Cache
+ **/
+function woocommerce_prevent_sidebar_cache() {
+	echo '<!--mfunc get_sidebar() --><!--/mfunc-->';
 }
