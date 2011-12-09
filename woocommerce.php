@@ -805,223 +805,213 @@ class woocommerce {
 		wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
 	}
 	
-    /*-----------------------------------------------------------------------------------*/
-	/* Instance Loaders - loaded only when needed */
-	/*-----------------------------------------------------------------------------------*/ 
+	/** Load Instances on demand **********************************************/	
 		
-		/**
-		 * Checkout Class
-		 */
-		function checkout() { 
-			if ( !class_exists('woocommerce_checkout') ) include( 'classes/checkout.class.php' );
-			return new woocommerce_checkout();
-		}
-		
-		/**
-		 * Logging Class
-		 */
-		function logger() { 
-			if ( !class_exists('woocommerce_logger') ) include( 'classes/woocommerce_logger.class.php' );
-			return new woocommerce_logger();
-		}
+	/**
+	 * Checkout Class
+	 */
+	function checkout() { 
+		if ( !class_exists('woocommerce_checkout') ) include( 'classes/checkout.class.php' );
+		return new woocommerce_checkout();
+	}
 	
-    /*-----------------------------------------------------------------------------------*/
-	/* Helper functions */
-	/*-----------------------------------------------------------------------------------*/ 
+	/**
+	 * Logging Class
+	 */
+	function logger() { 
+		if ( !class_exists('woocommerce_logger') ) include( 'classes/woocommerce_logger.class.php' );
+		return new woocommerce_logger();
+	}
 
-		/**
-		 * Get the plugin url
-		 */
-		function plugin_url() { 
-			if($this->plugin_url) return $this->plugin_url;
-			
-			if (is_ssl()) :
-				return $this->plugin_url = str_replace('http://', 'https://', WP_PLUGIN_URL) . "/" . plugin_basename( dirname(__FILE__)); 
-			else :
-				return $this->plugin_url = WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)); 
-			endif;
-		}
-		
-		/**
-		 * Get the plugin path
-		 */
-		function plugin_path() { 	
-			if($this->plugin_path) return $this->plugin_path;
-			return $this->plugin_path = WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)); 
-		 }
-		 
-		/**
-		 * Return the URL with https if SSL is on
-		 */
-		function force_ssl( $content ) { 	
-			if (is_ssl()) :
-				if (is_array($content)) :
-					$content = array_map( array(&$this, 'force_ssl') , $content);
-				else :
-					$content = str_replace('http:', 'https:', $content);
-				endif;
-			endif;
-			return $content;
-		}
-		
-		/**
-		 * Get an image size
-		 *
-		 * Variable is filtered by woocommerce_get_image_size_{image_size}
-		 */
-		function get_image_size( $image_size ) {
-			$return = '';
-			switch ($image_size) :
-				case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
-				case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
-				case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
-				case "shop_catalog_image_height" : $return = get_option('woocommerce_catalog_image_height'); break;
-				case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
-				case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
-			endswitch;
-			return apply_filters( 'woocommerce_get_image_size_'.$image_size, $return );
-		}
+	/** Helper functions ******************************************************/
 	
-    /*-----------------------------------------------------------------------------------*/
-	/* Messages */
-	/*-----------------------------------------------------------------------------------*/ 
+	/**
+	 * Get the plugin url
+	 */
+	function plugin_url() { 
+		if($this->plugin_url) return $this->plugin_url;
+		
+		if (is_ssl()) :
+			return $this->plugin_url = str_replace('http://', 'https://', WP_PLUGIN_URL) . "/" . plugin_basename( dirname(__FILE__)); 
+		else :
+			return $this->plugin_url = WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)); 
+		endif;
+	}
+	
+	/**
+	 * Get the plugin path
+	 */
+	function plugin_path() { 	
+		if($this->plugin_path) return $this->plugin_path;
+		return $this->plugin_path = WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)); 
+	 }
+	 
+	/**
+	 * Return the URL with https if SSL is on
+	 */
+	function force_ssl( $content ) { 	
+		if (is_ssl()) :
+			if (is_array($content)) :
+				$content = array_map( array(&$this, 'force_ssl') , $content);
+			else :
+				$content = str_replace('http:', 'https:', $content);
+			endif;
+		endif;
+		return $content;
+	}
+	
+	/**
+	 * Get an image size
+	 *
+	 * Variable is filtered by woocommerce_get_image_size_{image_size}
+	 */
+	function get_image_size( $image_size ) {
+		$return = '';
+		switch ($image_size) :
+			case "shop_thumbnail_image_width" : $return = get_option('woocommerce_thumbnail_image_width'); break;
+			case "shop_thumbnail_image_height" : $return = get_option('woocommerce_thumbnail_image_height'); break;
+			case "shop_catalog_image_width" : $return = get_option('woocommerce_catalog_image_width'); break;
+			case "shop_catalog_image_height" : $return = get_option('woocommerce_catalog_image_height'); break;
+			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
+			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
+		endswitch;
+		return apply_filters( 'woocommerce_get_image_size_'.$image_size, $return );
+	}
+
+	/** Messages ****************************************************************/
     
-	    /**
-		 * Load Messages
-		 */
-		function load_messages() { 
-			if (isset($_SESSION['errors'])) $this->errors = $_SESSION['errors'];
-			if (isset($_SESSION['messages'])) $this->messages = $_SESSION['messages'];
-			
-			unset($_SESSION['messages']);
-			unset($_SESSION['errors']);
-		}
+    /**
+	 * Load Messages
+	 */
+	function load_messages() { 
+		if (isset($_SESSION['errors'])) $this->errors = $_SESSION['errors'];
+		if (isset($_SESSION['messages'])) $this->messages = $_SESSION['messages'];
+		
+		unset($_SESSION['messages']);
+		unset($_SESSION['errors']);
+	}
 
-		/**
-		 * Add an error
-		 */
-		function add_error( $error ) { $this->errors[] = $error; }
-		
-		/**
-		 * Add a message
-		 */
-		function add_message( $message ) { $this->messages[] = $message; }
-		
-		/** Clear messages and errors from the session data */
-		function clear_messages() {
-			$this->errors = $this->messages = array();
-			unset($_SESSION['messages']);
-			unset($_SESSION['errors']);
-		}
-		
-		/**
-		 * Get error count
-		 */
-		function error_count() { return sizeof($this->errors); }
-		
-		/**
-		 * Get message count
-		 */
-		function message_count() { return sizeof($this->messages); }
-		
-		/**
-		 * Output the errors and messages
-		 */
-		function show_messages() {
-		
-			if (isset($this->errors) && sizeof($this->errors)>0) :
-				echo '<div class="woocommerce_error">'.$this->errors[0].'</div>';
-				$this->clear_messages();
-				return true;
-			elseif (isset($this->messages) && sizeof($this->messages)>0) :
-				echo '<div class="woocommerce_message">'.$this->messages[0].'</div>';
-				$this->clear_messages();
-				return true;
-			else :
-				return false;
-			endif;
-		}
-		
-		/**
-		 * Redirection hook which stores messages into session data
-		 */
-		function redirect( $location, $status ) {
-			global $is_IIS;
+	/**
+	 * Add an error
+	 */
+	function add_error( $error ) { $this->errors[] = $error; }
+	
+	/**
+	 * Add a message
+	 */
+	function add_message( $message ) { $this->messages[] = $message; }
+	
+	/** Clear messages and errors from the session data */
+	function clear_messages() {
+		$this->errors = $this->messages = array();
+		unset($_SESSION['messages']);
+		unset($_SESSION['errors']);
+	}
+	
+	/**
+	 * Get error count
+	 */
+	function error_count() { return sizeof($this->errors); }
+	
+	/**
+	 * Get message count
+	 */
+	function message_count() { return sizeof($this->messages); }
+	
+	/**
+	 * Output the errors and messages
+	 */
+	function show_messages() {
+	
+		if (isset($this->errors) && sizeof($this->errors)>0) :
+			echo '<div class="woocommerce_error">'.$this->errors[0].'</div>';
+			$this->clear_messages();
+			return true;
+		elseif (isset($this->messages) && sizeof($this->messages)>0) :
+			echo '<div class="woocommerce_message">'.$this->messages[0].'</div>';
+			$this->clear_messages();
+			return true;
+		else :
+			return false;
+		endif;
+	}
+	
+	/**
+	 * Redirection hook which stores messages into session data
+	 */
+	function redirect( $location, $status ) {
+		global $is_IIS;
 
-			// IIS fix
-			if ($is_IIS) session_write_close();
-		
-			$_SESSION['errors'] = $this->errors;
-			$_SESSION['messages'] = $this->messages;
-			
-			return $location;
-		}
-		
-    /*-----------------------------------------------------------------------------------*/
-	/* Attributes */
-	/*-----------------------------------------------------------------------------------*/ 
+		// IIS fix
+		if ($is_IIS) session_write_close();
 	
-	    /**
-		 * Get attribute taxonomies
-		 */
-		function get_attribute_taxonomies() { 
-			global $wpdb;
-			if (!$this->attribute_taxonomies) :
-				$this->attribute_taxonomies = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies;");
-			endif;
-			return $this->attribute_taxonomies;
-		}
-	    
-	    /**
-		 * Get a product attributes name
-		 */
-		function attribute_taxonomy_name( $name ) { 
-			return 'pa_'.sanitize_title($name);
-		}
+		$_SESSION['errors'] = $this->errors;
+		$_SESSION['messages'] = $this->messages;
 		
-		/**
-		 * Get a product attributes label
-		 */
-		function attribute_label( $name ) { 
-			global $wpdb;
-			
-			if (strstr( $name, 'pa_' )) :
-				$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+		return $location;
+	}
+		
+	/** Attribute Helpers ****************************************************************/
+
+    /**
+	 * Get attribute taxonomies
+	 */
+	function get_attribute_taxonomies() { 
+		global $wpdb;
+		if (!$this->attribute_taxonomies) :
+			$this->attribute_taxonomies = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies;");
+		endif;
+		return $this->attribute_taxonomies;
+	}
+    
+    /**
+	 * Get a product attributes name
+	 */
+	function attribute_taxonomy_name( $name ) { 
+		return 'pa_'.sanitize_title($name);
+	}
 	
-				$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-				
-				if ($label) return $label; else return ucfirst($name);
-			else :
-				return $name;
-			endif;
-		}
+	/**
+	 * Get a product attributes label
+	 */
+	function attribute_label( $name ) { 
+		global $wpdb;
 		
-    /*-----------------------------------------------------------------------------------*/
-	/* Coupons */
-	/*-----------------------------------------------------------------------------------*/ 
+		if (strstr( $name, 'pa_' )) :
+			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+
+			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+			
+			if ($label) return $label; else return ucfirst($name);
+		else :
+			return $name;
+		endif;
+	}
+	
+	/** Coupon Helpers ********************************************************/
 		
-		/**
-		 * Get coupon types
-		 */
-		function get_coupon_discount_types() { 
-			if (!isset($this->coupon_discount_types)) :
-				$this->coupon_discount_types = apply_filters('woocommerce_coupon_discount_types', array(
-	    			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
-	    			'percent' 		=> __('Cart % Discount', 'woothemes'),
-	    			'fixed_product'	=> __('Product Discount', 'woothemes'),
-	    			'percent_product'	=> __('Product % Discount', 'woothemes')
-	    		));
-    		endif;
-    		return $this->coupon_discount_types;
-    	}
-    	
-    	/**
-		 * Get a coupon type's name
-		 */
-		function get_coupon_discount_type( $type = '' ) { 
-			$types = (array) $this->get_coupon_discount_types();
-			if (isset($types[$type])) return $types[$type];
-    	}
+	/**
+	 * Get coupon types
+	 */
+	function get_coupon_discount_types() { 
+		if (!isset($this->coupon_discount_types)) :
+			$this->coupon_discount_types = apply_filters('woocommerce_coupon_discount_types', array(
+    			'fixed_cart' 	=> __('Cart Discount', 'woothemes'),
+    			'percent' 		=> __('Cart % Discount', 'woothemes'),
+    			'fixed_product'	=> __('Product Discount', 'woothemes'),
+    			'percent_product'	=> __('Product % Discount', 'woothemes')
+    		));
+		endif;
+		return $this->coupon_discount_types;
+	}
+	
+	/**
+	 * Get a coupon type's name
+	 */
+	function get_coupon_discount_type( $type = '' ) { 
+		$types = (array) $this->get_coupon_discount_types();
+		if (isset($types[$type])) return $types[$type];
+	}
 	
 	/** Nonces ****************************************************************/
 		
