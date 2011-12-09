@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An eCommerce plugin for wordpress.
-Version: 1.3.1
+Version: 1.3.2
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -15,7 +15,7 @@ if (!session_id()) session_start();
 /**
  * Constants
  **/ 
-define("WOOCOMMERCE_VERSION", "1.3.1");
+define("WOOCOMMERCE_VERSION", "1.3.2");
 if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');	
 
 /**
@@ -50,12 +50,12 @@ if ( !is_admin() || defined('DOING_AJAX') ) :
 	include_once( 'woocommerce_template_actions.php' );		// Template actions used on the front-end
 	include_once( 'shortcodes/shortcodes-init.php' );		// Init the shortcodes
 	include_once( 'classes/woocommerce_query.class.php' );	// The main store queries
-	include_once( 'classes/cart.class.php' );				// The main cart class
-	include_once( 'classes/coupons.class.php' );			// Coupons class
-	include_once( 'classes/customer.class.php' ); 			// Customer class
 	add_action( 'init', 'include_template_functions', 99 );	// Defer loading template functions so functions are pluggable by themes
 endif;
 
+include_once( 'classes/cart.class.php' );				// The main cart class
+include_once( 'classes/coupons.class.php' );			// Coupons class
+include_once( 'classes/customer.class.php' ); 			// Customer class
 include_once( 'woocommerce_templates.php' );			// Loads template files - used in admin and front-end
 include_once( 'woocommerce_taxonomy.php' );				// Defines post formats and taxonomies
 include_once( 'widgets/widgets-init.php' );				// Widget classes
