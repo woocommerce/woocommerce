@@ -64,17 +64,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		echo '</ul>';
 		
 		if (sizeof($woocommerce->cart->get_cart())>0) :
-			echo '<p class="total"><strong>';
-			
-			if (get_option('js_prices_include_tax')=='yes') :
-				_e('Total', 'woothemes');
-			else :
-				_e('Subtotal', 'woothemes');
-			endif;
-	
-			echo ':</strong> '.$woocommerce->cart->get_cart_total();
-			
-			echo '</p>';
+			echo '<p class="total"><strong>' . __('Subtotal', 'woothemes') . ':</strong> '. $woocommerce->cart->get_cart_total() . '</p>';
 			
 			do_action( 'woocommerce_widget_shopping_cart_before_buttons' );
 			

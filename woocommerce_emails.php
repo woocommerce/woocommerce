@@ -89,14 +89,6 @@ function woocommerce_email_content_type($content_type){
 
 
 /**
- * Fix recieve password mail links
- **/
-function woocommerce_retrieve_password_message($content){
-	return htmlspecialchars($content);
-}
-	
-
-/**
  * Hooks for emails
  **/
 add_action('woocommerce_low_stock_notification', 'woocommerce_low_stock_notification');

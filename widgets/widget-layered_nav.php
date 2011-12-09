@@ -7,13 +7,15 @@
  * @author		WooThemes
  */
  
+if (is_active_widget( false, false, 'woocommerce_layered_nav', 'true' ) && !is_admin()) :
+	add_action('init', 'woocommerce_layered_nav_init', 1);
+	add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
+endif;
+
 /**
  * Layered Nav Init
  */
-if (!is_admin()) add_action('init', 'woocommerce_layered_nav_init', 1);
-
 function woocommerce_layered_nav_init() {
-
 	global $_chosen_attributes, $woocommerce;
 	
 	$_chosen_attributes = array();
@@ -44,10 +46,7 @@ function woocommerce_layered_nav_init() {
 /**
  * Layered Nav post filter
  */
-add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
-
 function woocommerce_layered_nav_query( $filtered_posts ) {
-	
 	global $_chosen_attributes, $woocommerce;
 	
 	if (sizeof($_chosen_attributes)>0) :
