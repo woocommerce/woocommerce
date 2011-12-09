@@ -839,7 +839,7 @@ function woocommerce_demo_store() {
  * display product sub categories as thumbnails
  **/
 function woocommerce_product_subcategories() {
-	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes;
+	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_categories, $product_category_found, $product_category_parent;
 
 	if ($wp_query !== $wp_the_query) return; // Detect main query
 
@@ -855,62 +855,33 @@ function woocommerce_product_subcategories() {
 
 	if ($product_cat_slug) :
 		$product_cat 		= get_term_by('slug', $product_cat_slug, 'product_cat');
-		$parent 			= $product_cat->term_id;
+		$product_category_parent = $product_cat->term_id;
 	else :
-		$parent = 0;
+		$product_category_parent = 0;
 	endif;
 
 	// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
 	$args = array(
-	    'child_of'                  => $parent,
+	    'child_of'                  => $product_category_parent,
 	    'menu_order'                => 'ASC',
 	    'hide_empty'               	=> 1,
 	    'hierarchical'             	=> 1,
 	    'taxonomy'                  => 'product_cat',
 	    'pad_counts'				=> 1
 	    );
-	$categories = get_categories( $args );
-	if ($categories) :
+	$product_categories = get_categories( $args );
 
-		$found = false;
+	if ($product_categories) :
 
-		foreach ($categories as $category) :
-
-			if ($category->parent != $parent) continue;
-
-			$found = true;
-
-			$woocommerce_loop['loop']++;
-
-			?>
-			<li class="product sub-category <?php if ($woocommerce_loop['loop']%$woocommerce_loop['columns']==0) echo 'last'; if (($woocommerce_loop['loop']-1)%$woocommerce_loop['columns']==0) echo 'first'; ?>">
-
-				<?php do_action('woocommerce_before_subcategory', $category); ?>
-
-				<a href="<?php echo get_term_link($category->slug, 'product_cat'); ?>">
-
-					<?php do_action('woocommerce_before_subcategory_title', $category); ?>
-
-					<h3><?php echo $category->name; ?> <?php if ($category->count>0) : ?><mark class="count">(<?php echo $category->count; ?>)</mark><?php endif; ?></h3>
-
-					<?php do_action('woocommerce_after_subcategory_title', $category); ?>
-
-				</a>
-
-				<?php do_action('woocommerce_after_subcategory', $category); ?>
-
-			</li><?php
-
-		endforeach;
-
-		if ($found==true && get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
-			// We are hiding products - disable the loop and pagination
+		woocommerce_get_template('loop-product-cats.php', false);
+		
+		// If we are hiding products disable the loop and pagination
+		if ($product_category_found==true && get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
 			$woocommerce_loop['show_products'] = false;
 			$wp_query->max_num_pages = 0;
 		endif;
 
 	endif;
-
 }
 
 /**
