@@ -14,11 +14,8 @@
  **/
 if (!function_exists('woocommerce_output_content_wrapper')) {
 	function woocommerce_output_content_wrapper() {
-		if ( get_option('template') === 'twentyeleven' ) :
-			echo '<div id="primary"><div id="content" role="main">';
-		else :
-			echo '<div id="container"><div id="content" role="main">';
-		endif;
+		$id = ( get_option('template') === 'twentyeleven' ) ? 'primary' : 'container';
+		echo '<div id="'.$id.'"><div id="content" role="main">';
 	}
 }
 if (!function_exists('woocommerce_output_content_wrapper_end')) {
@@ -119,7 +116,6 @@ if (!function_exists('woocommerce_check_product_visibility')) {
  **/
 if (!function_exists('woocommerce_show_product_images')) {
 	function woocommerce_show_product_images() {
-
 		global $post, $woocommerce;
 
 		echo '<div class="images">';
@@ -327,10 +323,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 }
 if (!function_exists('woocommerce_external_add_to_cart')) {
 	function woocommerce_external_add_to_cart( $post, $_product ) {
-		global $product_url;
-		
-		$product_url = get_post_meta( $_product->id, 'product_url', true );
-		if ($product_url) woocommerce_get_template('single-product/add-to-cart/external.php', false);
+		woocommerce_get_template('single-product/add-to-cart/external.php', false);
 	}
 }
 
@@ -340,17 +333,6 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
 if (!function_exists('woocommerce_quantity_input')) {
 	function woocommerce_quantity_input( $name = 'quantity' ) {
 		echo '<div class="quantity"><input name="'.$name.'" value="1" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>';
-	}
-}
-	
-
-/**
- * Product Add to Cart forms
- **/
-if (!function_exists('woocommerce_add_to_cart_form_nonce')) {
-	function woocommerce_add_to_cart_form_nonce() {
-		global $woocommerce;
-		$woocommerce->nonce_field('add_to_cart');
 	}
 }
 
@@ -388,11 +370,7 @@ if (!function_exists('woocommerce_catalog_ordering')) {
 						'price' 	=> __('Price', 'woothemes')
 					));
 
-					foreach ($catalog_orderby as $id => $name) :
-
-						echo '<option value="'.$id.'" '.selected( $_SESSION['orderby'], $id, false ).'>'.$name.'</option>';
-
-					endforeach;
+					foreach ($catalog_orderby as $id => $name) echo '<option value="'.$id.'" '.selected( $_SESSION['orderby'], $id, false ).'>'.$name.'</option>';
 				?>
 			</select>
 		</form>
@@ -406,9 +384,7 @@ if (!function_exists('woocommerce_catalog_ordering')) {
  **/
 if (!function_exists('woocommerce_product_description_tab')) {
 	function woocommerce_product_description_tab() {
-		?>
-		<li><a href="#tab-description"><?php _e('Description', 'woothemes'); ?></a></li>
-		<?php
+		?><li><a href="#tab-description"><?php _e('Description', 'woothemes'); ?></a></li><?php
 	}
 }
 if (!function_exists('woocommerce_product_attributes_tab')) {
@@ -429,31 +405,19 @@ if (!function_exists('woocommerce_product_reviews_tab')) {
  **/
 if (!function_exists('woocommerce_product_description_panel')) {
 	function woocommerce_product_description_panel() {
-		echo '<div class="panel" id="tab-description">';
-		$heading = apply_filters('woocommerce_product_description_heading', __('Product Description', 'woothemes'));
-		if ($heading) echo '<h2>' . $heading . '</h2>';
-		the_content();
-		echo '</div>';
+		woocommerce_get_template('single-product/tabs/description.php', false);
 	}
 }
 if (!function_exists('woocommerce_product_attributes_panel')) {
 	function woocommerce_product_attributes_panel() {
-		global $_product;
-		echo '<div class="panel" id="tab-attributes">';
-		echo '<h2>' . apply_filters('woocommerce_product_additional_information_heading', __('Additional Information', 'woothemes')) . '</h2>';
-		$_product->list_attributes();
-		echo '</div>';
+		woocommerce_get_template('single-product/tabs/attributes.php', false);
 	}
 }
 if (!function_exists('woocommerce_product_reviews_panel')) {
 	function woocommerce_product_reviews_panel() {
-		echo '<div class="panel" id="tab-reviews">';
-		comments_template();
-		echo '</div>';
+		woocommerce_get_template('single-product/tabs/reviews.php', false);
 	}
 }
-
-
 
 /**
  * WooCommerce Product Thumbnail

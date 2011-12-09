@@ -66,9 +66,6 @@ add_action( 'woocommerce_grouped_add_to_cart', 'woocommerce_grouped_add_to_cart'
 add_action( 'woocommerce_variable_add_to_cart', 'woocommerce_variable_add_to_cart', 30, 2 ); 
 add_action( 'woocommerce_external_add_to_cart', 'woocommerce_external_add_to_cart', 30, 2 );
 
-/* Product Add to Cart forms */
-add_action( 'woocommerce_add_to_cart_form', 'woocommerce_add_to_cart_form_nonce', 10);
-
 /* Pagination in loop-shop */
 add_action( 'woocommerce_pagination', 'woocommerce_pagination', 10 );
 add_action( 'woocommerce_pagination', 'woocommerce_catalog_ordering', 20 );

@@ -3,7 +3,11 @@
  * External Add to Cart
  */
  
-global $woocommerce, $product_url;
+global $woocommerce;
+
+$product_url = get_post_meta( $_product->id, 'product_url', true );
+
+if (!$product_url) return;
 ?>
 
 <?php do_action('woocommerce_before_add_to_cart_button'); ?>
