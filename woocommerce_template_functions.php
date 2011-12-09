@@ -579,6 +579,7 @@ if (!function_exists('woocommerce_product_reviews_tab')) {
 
 	}
 }
+do_action( 'woocommerce_product_page_tabs' );
 
 /**
  * Product page tab panels
@@ -608,7 +609,7 @@ if (!function_exists('woocommerce_product_reviews_panel')) {
 		echo '</div>';
 	}
 }
-
+do_action( 'woocommerce_product_page_tab_panels' );
 
 
 /**
