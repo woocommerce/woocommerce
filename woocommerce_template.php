@@ -251,11 +251,7 @@ if (!function_exists('woocommerce_sharethis_script')) {
 	function woocommerce_sharethis_script() {
 		if (is_single() && get_option('woocommerce_sharethis')) :
 
-			if (is_ssl()) :
-				$sharethis = 'https://ws.sharethis.com/button/buttons.js';
-			else :
-				$sharethis = 'http://w.sharethis.com/button/buttons.js';
-			endif;
+			$sharethis = (is_ssl()) ? 'https://ws.sharethis.com/button/buttons.js' : 'http://w.sharethis.com/button/buttons.js';
 
 			echo '<script type="text/javascript">var switchTo5x=true;</script><script type="text/javascript" src="'.$sharethis.'"></script><script type="text/javascript">stLight.options({publisher:"'.get_option('woocommerce_sharethis').'"});</script>';
 
@@ -376,7 +372,6 @@ if (!function_exists('woocommerce_pagination')) {
 	}
 }
 
-
 /**
  * Sorting
  **/
@@ -405,7 +400,6 @@ if (!function_exists('woocommerce_catalog_ordering')) {
 
 	}
 }
-
 
 /**
  * Product page tabs
@@ -521,165 +515,17 @@ if (!function_exists('woocommerce_shipping_calculator')) {
 	function woocommerce_shipping_calculator() {
 		global $woocommerce;
 		if (get_option('woocommerce_enable_shipping_calc')=='yes' && $woocommerce->cart->needs_shipping()) :
-		?>
-		<form class="shipping_calculator" action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
-			<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
-			<section class="shipping-calculator-form">
-			<p class="form-row">
-				<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
-					<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
-					<?php
-						foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
-							echo '<option value="'.$key.'"';
-							if ($woocommerce->customer->get_shipping_country()==$key) echo 'selected="selected"';
-							echo '>'.$value.'</option>';
-						endforeach;
-					?>
-				</select>
-			</p>
-			<div class="col2-set">
-				<p class="form-row col-1">
-					<?php
-						$current_cc = $woocommerce->customer->get_shipping_country();
-						$current_r = $woocommerce->customer->get_shipping_state();
-						$states = $woocommerce->countries->states;
-
-						if (isset( $states[$current_cc][$current_r] )) :
-							// Dropdown
-							?>
-							<span>
-								<select name="calc_shipping_state" id="calc_shipping_state"><option value=""><?php _e('Select a state&hellip;', 'woothemes'); ?></option><?php
-									foreach($states[$current_cc] as $key=>$value) :
-										echo '<option value="'.$key.'"';
-										if ($current_r==$key) echo 'selected="selected"';
-										echo '>'.$value.'</option>';
-									endforeach;
-								?></select>
-							</span>
-							<?php
-						else :
-							// Input
-							?>
-							<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('state', 'woothemes'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
-							<?php
-						endif;
-					?>
-				</p>
-				<p class="form-row col-2">
-					<input type="text" class="input-text" value="<?php echo esc_attr( $woocommerce->customer->get_shipping_postcode() ); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
-				</p>
-			</div>
-			<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woothemes'); ?></button></p>
-			<?php $woocommerce->nonce_field('cart') ?>
-			</section>
-		</form>
-		<?php
+			woocommerce_get_template('cart/shipping_calculator.php', false);
 		endif;
 	}
 }
-
 
 /**
  * WooCommerce Cart totals
  **/
 if (!function_exists('woocommerce_cart_totals')) {
 	function woocommerce_cart_totals() {
-		global $woocommerce;
-		
-		$available_methods = $woocommerce->shipping->get_available_shipping_methods();
-		?>
-		<div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
-		<?php
-		if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) :
-			// Hide totals if customer has set location and there are no methods going there
-			?>
-			<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
-			<table cellspacing="0" cellpadding="0">
-				<tbody>
-					<tr>
-						<th><?php _e('Cart Subtotal', 'woothemes'); ?></th>
-						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
-					</tr>
-
-					<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
-						<th><?php _e('Cart Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
-						<td>&ndash;<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
-					</tr><?php endif; ?>
-
-					<?php if ($woocommerce->cart->get_cart_shipping_total()) : ?><tr>
-						<th><?php _e('Shipping', 'woothemes'); ?> <small><?php echo $woocommerce->countries->shipping_to_prefix().' '.__($woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ], 'woothemes'); ?></small></th>
-						<td>
-							<?php
-								if (sizeof($available_methods)>0) :
-
-									echo '<select name="shipping_method" id="shipping_method">';
-
-									foreach ($available_methods as $method ) :
-
-										echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &ndash; ';
-										if ($method->shipping_total>0) :
-
-											if (get_option('woocommerce_display_totals_excluding_tax')=='yes') :
-
-												echo woocommerce_price($method->shipping_total);
-												if ($method->shipping_tax>0) :
-													echo ' ' . $woocommerce->countries->ex_tax_or_vat();
-												endif;
-
-											else :
-
-												echo woocommerce_price($method->shipping_total + $method->shipping_tax);
-												if ($method->shipping_tax>0) :
-													echo ' ' . $woocommerce->countries->inc_tax_or_vat();
-												endif;
-
-											endif;
-
-										else :
-											echo __('Free', 'woothemes');
-										endif;
-
-										echo '</option>';
-
-									endforeach;
-
-									echo '</select>';
-								endif;
-							?>
-						</td>
-					</tr><?php endif; ?>
-
-					<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
-						<th><?php echo $woocommerce->countries->tax_or_vat(); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
-						<td><?php
-							echo $woocommerce->cart->get_cart_tax();
-						?></td>
-					</tr><?php endif; ?>
-
-					<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-						<th><?php _e('Order Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
-						<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
-					</tr><?php endif; ?>
-
-					<tr>
-						<th><strong><?php _e('Order Total', 'woothemes'); ?></strong></th>
-						<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
-					</tr>
-				</tbody>
-			</table>
-			<p><small><?php _e('Note: Tax and shipping totals are estimated and will be updated during checkout based on your billing information.', 'woothemes'); ?></small></p>
-			<?php
-		else :
-			?>
-			<div class="woocommerce_error">
-				<p><?php if (!$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode()) : ?><?php _e('No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure their are no other available methods for your location.', 'woothemes'); ?><?php else : ?><?php printf(__('Sorry, it seems that there are no available shipping methods for your location (%s).', 'woothemes'), $woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ]); ?><?php endif; ?></p>
-				<p><?php _e('If you require assistance or wish to make alternate arrangements please contact us.', 'woothemes'); ?></p>
-			</div>
-			<?php
-		endif;
-		?>
-		</div>
-		<?php
+		woocommerce_get_template('cart/totals.php', false);
 	}
 }
 
