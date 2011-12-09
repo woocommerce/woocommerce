@@ -40,7 +40,7 @@ class woocommerce_shipping {
 		if (!is_array($this->shipping_classes)) :
 			
 			$args = array(
-				'hide_empty' => '1'
+				'hide_empty' => '0'
 			);
 			$classes = get_terms( 'product_shipping_class', $args );
 			
