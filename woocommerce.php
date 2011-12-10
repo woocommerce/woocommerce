@@ -105,7 +105,7 @@ class woocommerce {
 		foreach ($email_actions as $action) add_action($action, array( &$this, 'send_transactional_email'));
 		
 		// Actions for SSL
-		if (!is_admin()) :
+		if (!is_admin() || defined('DOING_AJAX')) :
 			add_action( 'wp', array( &$this, 'ssl_redirect'));
 			
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src' );

@@ -111,6 +111,8 @@ class woocommerce_email {
 	function new_order( $order_id ) {
 		global $order, $email_heading;
 		
+		$order = new woocommerce_order( $order_id );
+		
 		$email_heading = __('New Customer Order', 'woothemes');
 		
 		$subject = sprintf(__('[%s] New Customer Order (# %s)', 'woothemes'), get_bloginfo('name'), $order_id);
@@ -134,7 +136,7 @@ class woocommerce_email {
 	function customer_processing_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 
 		$email_heading = __('Order Received', 'woothemes');
 		
@@ -159,7 +161,7 @@ class woocommerce_email {
 	function customer_completed_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		if ($order->has_downloadable_item) :
 			$subject		= __('[%s] Order Complete/Download Links', 'woothemes');
@@ -228,7 +230,7 @@ class woocommerce_email {
 		
 		if (!$order_id || !$customer_note) return;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		$email_heading = __('A note has been added to your order', 'woothemes');
 		
@@ -251,7 +253,7 @@ class woocommerce_email {
 	 * Low stock notification email
 	 **/
 	function low_stock( $product ) {
-		$_product = &new woocommerce_product($product);
+		$_product = new woocommerce_product($product);
 	
 		$subject = '[' . get_bloginfo('name') . '] ' . __('Product low in stock', 'woothemes');
 		
@@ -268,7 +270,7 @@ class woocommerce_email {
 	 * No stock notification email
 	 **/
 	function no_stock( $product ) {
-		$_product = &new woocommerce_product($product);
+		$_product = new woocommerce_product($product);
 		
 		$subject = '[' . get_bloginfo('name') . '] ' . __('Product out of stock', 'woothemes');
 		
@@ -298,7 +300,7 @@ class woocommerce_email {
 		
 		if (!$product || !$quantity) return;
 	
-		$_product = &new woocommerce_product($product);
+		$_product = new woocommerce_product($product);
 		
 		$subject = '[' . get_bloginfo('name') . '] ' . __('Product Backorder', 'woothemes');
 	
