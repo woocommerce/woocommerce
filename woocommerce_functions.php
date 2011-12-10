@@ -10,6 +10,17 @@
  */
 
 /**
+ * HTML emails from WooCommerce
+ **/
+function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
+	global $woocommerce;
+	
+	$mailer = $woocommerce->mailer();
+		
+	$mailer->send( $to, $subject, $message, $headers, $attachments );
+}
+
+/**
  * WooCommerce conditionals
  *
  * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
@@ -217,6 +228,66 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 		return $return;
 
 	endif;
+}
+
+/**
+ * Hex darker/lighter/contrast functions for colours
+ **/
+if (!function_exists('woocommerce_hex_darker')) {
+	function woocommerce_hex_darker( $color, $factor = 30 ) {
+		$color = str_replace('#', '', $color);
+		
+		$base['R'] = hexdec($color{0}.$color{1});
+		$base['G'] = hexdec($color{2}.$color{3});
+		$base['B'] = hexdec($color{4}.$color{5});
+		
+		$color = '#';
+		
+		foreach ($base as $k => $v) :
+	        $amount = $v / 100;
+	        $amount = round($amount * $factor);
+	        $new_decimal = $v - $amount;
+	
+	        $new_hex_component = dechex($new_decimal);
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component;
+		endforeach;
+		        
+		return $color;        
+	}
+}
+if (!function_exists('woocommerce_hex_lighter')) {
+	function woocommerce_hex_lighter( $color, $factor = 30 ) {
+		$color = str_replace('#', '', $color);
+		
+		$base['R'] = hexdec($color{0}.$color{1});
+		$base['G'] = hexdec($color{2}.$color{3});
+		$base['B'] = hexdec($color{4}.$color{5});
+		
+		$color = '#';
+	     
+	    foreach ($base as $k => $v) :
+	        $amount = 255 - $v; 
+	        $amount = $amount / 100; 
+	        $amount = round($amount * $factor); 
+	        $new_decimal = $v + $amount; 
+	     
+	        $new_hex_component = dechex($new_decimal); 
+	        if(strlen($new_hex_component) < 2) :
+	        	$new_hex_component = "0".$new_hex_component;
+	        endif;
+	        $color .= $new_hex_component; 
+	   	endforeach;
+	         
+	   	return $color;          
+	}
+}
+if (!function_exists('woocommerce_light_or_dark')) {
+	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
+	    return (hexdec($color) > 0xffffff/2) ? $dark : $light;
+	}
 }
 
 /**

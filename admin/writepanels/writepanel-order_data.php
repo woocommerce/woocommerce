@@ -548,14 +548,14 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						$order->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $order_item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder_notification', $order_item['id'], $values['quantity']);
+							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'quantity' => $values['quantity']));
 						endif;
 						
 						// stock status notifications
 						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock_notification', $order_item['id']);
+							do_action('woocommerce_no_stock', $order_item['id']);
 						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock_notification', $order_item['id']);
+							do_action('woocommerce_low_stock', $order_item['id']);
 						endif;
 						
 					endif;
@@ -603,7 +603,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		elseif (isset($_POST['invoice']) && $_POST['invoice']) :
 			
 			// Mail link to customer
-			woocommerce_pay_for_order_customer_notification( $order );
+			global $woocommerce;
+			$mailer = $woocommerce->mailer();
+			$mailer->pay_for_order_customer_notification( $order );
 			
 		endif;
 	

@@ -525,3 +525,32 @@ function woocommerce_refresh_mce($ver) {
 	$ver += 3;
 	return $ver;
 }
+
+/**
+ * Preview Emails
+ **/
+add_action('admin_init', 'woocommerce_preview_emails');
+
+function woocommerce_preview_emails() {
+	if (isset($_GET['preview_woocommerce_mail'])) :
+		$nonce = $_REQUEST['_wpnonce'];
+		if (!wp_verify_nonce($nonce, 'preview-mail') ) die('Security check'); 
+		
+		global $woocommerce;
+		
+		$mailer = $woocommerce->mailer();
+	
+		$email_heading = __('Email preview', 'woothemes');
+		
+		$message = '<h2>WooCommerce sit amet</h2>';
+		
+		$message.= wpautop('Ut ut est qui euismod parum. Dolor veniam tation nihil assum mazim. Possim fiant habent decima et claritatem. Erat me usus gothica laoreet consequat. Clari facer litterarum aliquam insitam dolor. 
+
+Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam aliquip litterarum. Lius videntur nisl facilisis claritatem nunc. Praesent in iusto me tincidunt iusto. Dolore lectores sed putamus exerci est. ');
+		
+		echo $mailer->wrap_message( $email_heading, $message );
+		
+		exit;
+		
+	endif;
+}

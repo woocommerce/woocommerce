@@ -48,6 +48,7 @@ class woocommerce {
 	var $payment_gateways;
 	var $countries;
 	var $validation;
+	var $woocommerce_email;
 
 	/** Taxonomies ************************************************************/
 	
@@ -97,6 +98,11 @@ class woocommerce {
 		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
 		add_action( 'plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some more may be added by plugins
 		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
+		
+		// Email Actions
+		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
+		
+		foreach ($email_actions as $action) add_action($action, array( &$this, 'send_transactional_email'));
 		
 		// Actions for SSL
 		if (!is_admin()) :
@@ -151,7 +157,6 @@ class woocommerce {
 
 		include( 'woocommerce_functions.php' );				// Contains core functions for the front/back end
 		include( 'widgets/widgets-init.php' );				// Widget classes
-		include( 'woocommerce_emails.php' );				// Email template handlers
 		include( 'classes/countries.class.php' );			// Defines countries and states
 		include( 'classes/order.class.php' );				// Single order class
 		include( 'classes/product.class.php' );				// Product class
@@ -808,7 +813,7 @@ class woocommerce {
 	/** Load Instances on demand **********************************************/	
 		
 	/**
-	 * Checkout Class
+	 * Get Checkout Class
 	 */
 	function checkout() { 
 		if ( !class_exists('woocommerce_checkout') ) include( 'classes/checkout.class.php' );
@@ -816,11 +821,30 @@ class woocommerce {
 	}
 	
 	/**
-	 * Logging Class
+	 * Get Logging Class
 	 */
 	function logger() { 
 		if ( !class_exists('woocommerce_logger') ) include( 'classes/woocommerce_logger.class.php' );
 		return new woocommerce_logger();
+	}
+	
+	/**
+	 * Email Class
+	 */
+	function send_transactional_email( $args = array() ) {
+		$this->mailer();
+		
+		do_action( current_filter() . '_notification' , $args );
+	}
+	
+	function mailer() { 
+		// Init mail class
+		if ( !class_exists('woocommerce_email') ) :
+			include( 'classes/woocommerce_email.class.php' );
+			$this->woocommerce_email = &new woocommerce_email();
+		endif;
+		
+		return $this->woocommerce_email;
 	}
 
 	/** Helper functions ******************************************************/

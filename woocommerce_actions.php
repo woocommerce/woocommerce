@@ -486,9 +486,10 @@ function woocommerce_process_registration() {
 
                 // Change role
                 wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
-
-                // send the user a confirmation and their login details
-                woocommerce_customer_new_account( $user_id, $password );
+				
+				// send the user a confirmation and their login details
+				$mailer = $woocommerce->mailer();
+				$mailer->customer_new_account( $user_id, $password );
 
                 // set the WP login cookie
                 $secure_cookie = is_ssl() ? true : false;
