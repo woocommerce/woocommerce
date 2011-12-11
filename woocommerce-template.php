@@ -624,54 +624,60 @@ if (!function_exists('woocommerce_breadcrumb')) {
 /**
  * Display Up Sells
  **/
-function woocommerce_upsell_display() {
-	global $product;
-	$upsells = $product->get_upsells();
-	if (sizeof($upsells)>0) :
-		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
-		$args = array(
-			'post_type'	=> 'product',
-			'ignore_sticky_posts'	=> 1,
-			'posts_per_page' => 4,
-			'orderby' => 'rand',
-			'post__in' => $upsells
-		);
-		query_posts($args);
-		woocommerce_get_template_part( 'loop', 'shop' );
-		echo '</div>';
-	endif;
-	wp_reset_query();
+if (!function_exists('woocommerce_upsell_display')) {
+	function woocommerce_upsell_display() {
+		global $product;
+		$upsells = $product->get_upsells();
+		if (sizeof($upsells)>0) :
+			echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
+			$args = array(
+				'post_type'	=> 'product',
+				'ignore_sticky_posts'	=> 1,
+				'posts_per_page' => 4,
+				'orderby' => 'rand',
+				'post__in' => $upsells
+			);
+			query_posts($args);
+			woocommerce_get_template_part( 'loop', 'shop' );
+			echo '</div>';
+		endif;
+		wp_reset_query();
+	}
 }
 
 /**
  * Display Cross Sells
  **/
-function woocommerce_cross_sell_display() {
-	global $woocommerce_loop, $woocommerce;
-	$woocommerce_loop['columns'] = 2;
-	$crosssells = $woocommerce->cart->get_cross_sells();
-
-	if (sizeof($crosssells)>0) :
-		echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';
-		$args = array(
-			'post_type'	=> 'product',
-			'ignore_sticky_posts'	=> 1,
-			'posts_per_page' => 2,
-			'orderby' => 'rand',
-			'post__in' => $crosssells
-		);
-		query_posts($args);
-		woocommerce_get_template_part( 'loop', 'shop' );
-		echo '</div>';
-	endif;
-	wp_reset_query();
+if (!function_exists('woocommerce_cross_sell_display')) {
+	function woocommerce_cross_sell_display() {
+		global $woocommerce_loop, $woocommerce;
+		$woocommerce_loop['columns'] = 2;
+		$crosssells = $woocommerce->cart->get_cross_sells();
+	
+		if (sizeof($crosssells)>0) :
+			echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';
+			$args = array(
+				'post_type'	=> 'product',
+				'ignore_sticky_posts'	=> 1,
+				'posts_per_page' => 2,
+				'orderby' => 'rand',
+				'post__in' => $crosssells
+			);
+			query_posts($args);
+			woocommerce_get_template_part( 'loop', 'shop' );
+			echo '</div>';
+		endif;
+		wp_reset_query();
+	}
 }
 
 /**
  * Order review table for checkout
  **/
-function woocommerce_order_review() {
-	woocommerce_get_template('checkout/review_order.php', false);
+if (!function_exists('woocommerce_order_review')) {
+	function woocommerce_order_review() {
+		woocommerce_get_template('checkout/review_order.php', false);
+	}
 }
 
 /**
@@ -679,81 +685,87 @@ function woocommerce_order_review() {
  *
  * Adds a demo store banner to the site if enabled
  **/
-function woocommerce_demo_store() {
-	if (get_option('woocommerce_demo_store')=='no') return;
-	
-	echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>' );
+if (!function_exists('woocommerce_demo_store')) {
+	function woocommerce_demo_store() {
+		if (get_option('woocommerce_demo_store')=='no') return;
+		
+		echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>' );
+	}
 }
 
 /**
  * display product sub categories as thumbnails
  **/
-function woocommerce_product_subcategories() {
-	global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_categories, $product_category_found, $product_category_parent;
-
-	if ($wp_query !== $wp_the_query) return; // Detect main query
-
-	if (sizeof($_chosen_attributes)>0 || (isset($_GET['max_price']) && isset($_GET['min_price']))) return; // Don't show when filtering
-
-	if (is_search()) return;
-	if (!is_product_category() && !is_shop()) return;
-	if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
-	if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
-	if (is_paged()) return;
-
-	$product_cat_slug 	= get_query_var('product_cat');
-
-	if ($product_cat_slug) :
-		$product_cat 		= get_term_by('slug', $product_cat_slug, 'product_cat');
-		$product_category_parent = $product_cat->term_id;
-	else :
-		$product_category_parent = 0;
-	endif;
-
-	// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
-	$args = array(
-	    'child_of'                  => $product_category_parent,
-	    'menu_order'                => 'ASC',
-	    'hide_empty'               	=> 1,
-	    'hierarchical'             	=> 1,
-	    'taxonomy'                  => 'product_cat',
-	    'pad_counts'				=> 1
-	    );
-	$product_categories = get_categories( $args );
-
-	if ($product_categories) :
-
-		woocommerce_get_template('loop-product-cats.php', false);
-		
-		// If we are hiding products disable the loop and pagination
-		if ($product_category_found==true && get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
-			$woocommerce_loop['show_products'] = false;
-			$wp_query->max_num_pages = 0;
+if (!function_exists('woocommerce_product_subcategories')) {
+	function woocommerce_product_subcategories() {
+		global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_categories, $product_category_found, $product_category_parent;
+	
+		if ($wp_query !== $wp_the_query) return; // Detect main query
+	
+		if (sizeof($_chosen_attributes)>0 || (isset($_GET['max_price']) && isset($_GET['min_price']))) return; // Don't show when filtering
+	
+		if (is_search()) return;
+		if (!is_product_category() && !is_shop()) return;
+		if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
+		if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
+		if (is_paged()) return;
+	
+		$product_cat_slug 	= get_query_var('product_cat');
+	
+		if ($product_cat_slug) :
+			$product_cat 		= get_term_by('slug', $product_cat_slug, 'product_cat');
+			$product_category_parent = $product_cat->term_id;
+		else :
+			$product_category_parent = 0;
 		endif;
-
-	endif;
+	
+		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
+		$args = array(
+		    'child_of'                  => $product_category_parent,
+		    'menu_order'                => 'ASC',
+		    'hide_empty'               	=> 1,
+		    'hierarchical'             	=> 1,
+		    'taxonomy'                  => 'product_cat',
+		    'pad_counts'				=> 1
+		    );
+		$product_categories = get_categories( $args );
+	
+		if ($product_categories) :
+	
+			woocommerce_get_template('loop-product-cats.php', false);
+			
+			// If we are hiding products disable the loop and pagination
+			if ($product_category_found==true && get_option('woocommerce_hide_products_when_showing_subcategories')=='yes') :
+				$woocommerce_loop['show_products'] = false;
+				$wp_query->max_num_pages = 0;
+			endif;
+	
+		endif;
+	}
 }
 
 /**
  * Show subcategory thumbnail
  **/
-function woocommerce_subcategory_thumbnail( $category ) {
-	global $woocommerce;
-
-	$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_catalog');
-	$image_width 			= $woocommerce->get_image_size('shop_catalog_image_width');
-	$image_height 			= $woocommerce->get_image_size('shop_catalog_image_height');
-
-	$thumbnail_id 	= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
-
-	if ($thumbnail_id) :
-		$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
-		$image = $image[0];
-	else :
-		$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
-	endif;
-
-	echo '<img src="'.$image.'" alt="'.$category->slug.'" width="'.$image_width.'" height="'.$image_height.'" />';
+if (!function_exists('woocommerce_subcategory_thumbnail')) {
+	function woocommerce_subcategory_thumbnail( $category ) {
+		global $woocommerce;
+	
+		$small_thumbnail_size 	= apply_filters('single_product_small_thumbnail_size', 'shop_catalog');
+		$image_width 			= $woocommerce->get_image_size('shop_catalog_image_width');
+		$image_height 			= $woocommerce->get_image_size('shop_catalog_image_height');
+	
+		$thumbnail_id 	= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+	
+		if ($thumbnail_id) :
+			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+			$image = $image[0];
+		else :
+			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+		endif;
+	
+		echo '<img src="'.$image.'" alt="'.$category->slug.'" width="'.$image_width.'" height="'.$image_height.'" />';
+	}
 }
 
 /**
