@@ -790,6 +790,11 @@ function woocommerce_google_tracking() {
 function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
+	// Call the Piwik ecommerce function if WP-Piwik is configured to add
+	// tracking codes to the page
+	$wp_piwik_global_settings = get_option('wp-piwik_global-settings');
+	if($wp_piwik_global_settings['add_tracking_code']) woocommerce_ecommerce_tracking_piwik( $order_id );
+	
 	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
 	if (is_admin()) return; // Don't track admin
 	
@@ -854,6 +859,48 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();
+	</script>
+	<?php
+} 
+
+/**
+ * ecommerce tracking with piwik
+ */
+function woocommerce_ecommerce_tracking_piwik( $order_id ) {
+	global $woocommerce;
+	
+	// Remove WP-Piwik from wp_footer and run it here instead, to get Piwik 
+	// loaded *before* we do our ecommerce tracking calls
+	remove_action('wp_footer', array($GLOBALS['wp_piwik'],'footer'));
+	$GLOBALS['wp_piwik']->footer();
+	
+	if (is_admin()) return; // Don't track admin
+	
+	// Get the order and output tracking code
+	$order = &new woocommerce_order($order_id);
+	?>
+	<script type="text/javascript">
+	try {
+		// Add order items
+		<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
+			piwikTracker.addEcommerceItem(
+				"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
+				"<?php echo $item['name']; ?>",		// (optional) Product name
+				"<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
+				<?php echo $item['cost']; ?>,		// (recommended) Product price
+				<?php echo $item['qty']; ?> 		// (optional, default to 1) Product quantity
+			);
+		<?php endforeach; ?>
+		// Track order
+		piwikTracker.trackEcommerceOrder(
+			"<?php echo $order_id; ?>",		// (required) Unique Order ID
+			<?php echo $order->order_total; ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
+			false,					// (optional) Order sub total (excludes shipping)
+			<?php echo $order->order_tax; ?>,	// (optional) Tax amount
+			<?php echo $order->order_shipping; ?>,	// (optional) Shipping amount
+			false 					// (optional) Discount offered (set to false for unspecified parameter)
+		);
+	} catch( err ) {}
 	</script>
 	<?php
 } 
