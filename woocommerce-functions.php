@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce Actions
+ * WooCommerce Functions
  * 
- * Hooked-in core functions for WooCommerce related events on the front-end.
+ * Hooked-in functions for WooCommerce related events on the front-end.
  *
  * @package		WooCommerce
  * @category	Actions

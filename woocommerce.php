@@ -155,7 +155,7 @@ class woocommerce {
 		if (defined('DOING_AJAX')) $this->ajax_includes();
 		if (!is_admin() || defined('DOING_AJAX')) $this->frontend_includes();
 
-		include( 'woocommerce_functions.php' );				// Contains core functions for the front/back end
+		include( 'woocommerce-core-functions.php' );		// Contains core functions for the front/back end
 		include( 'widgets/widgets-init.php' );				// Widget classes
 		include( 'classes/countries.class.php' );			// Defines countries and states
 		include( 'classes/order.class.php' );				// Single order class
@@ -186,15 +186,15 @@ class woocommerce {
 	 * Include required ajax files
 	 **/
 	function ajax_includes() {
-		include( 'woocommerce_ajax.php' );						// Ajax functions for admin and the front-end
+		include( 'woocommerce-ajax.php' );						// Ajax functions for admin and the front-end
 	}
 	
 	/**
 	 * Include required frontend files
 	 **/
 	function frontend_includes() {
-		include( 'woocommerce_hooks.php' );						// Template hooks used on the front-end
-		include( 'woocommerce_actions.php' );					// Contains action hooks and functions for various events
+		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
+		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
 		include( 'shortcodes/shortcodes-init.php' );			// Init the shortcodes
 		include( 'classes/woocommerce_query.class.php' );		// The main store queries
 		include( 'classes/cart.class.php' );					// The main cart class
@@ -208,7 +208,7 @@ class woocommerce {
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes
 	 **/
 	function include_template_functions() {
-		include( 'woocommerce_template.php' );
+		include( 'woocommerce-template.php' );
 	}
 	
 	/**

@@ -83,9 +83,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.4 =
+* Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
-* Moved woocommerce class into main file
-* Rejigged functions/files for organisation
+* Moved woocommerce class into the main file
 
 = 1.3.2 - 09/12/2011 = 
 * Fixed error when adding an order manually
