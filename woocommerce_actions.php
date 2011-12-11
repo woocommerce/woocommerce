@@ -872,25 +872,27 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	endif;
 	?>
 	<script type="text/javascript">
-	// Add order items
-	<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
-		piwikTracker.addEcommerceItem(
-			"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
-			"<?php echo $item['name']; ?>",		// (optional) Product name
-			"<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
-			<?php echo $item['cost']; ?>,		// (recommended) Product price
-			<?php echo $item['qty']; ?> 		// (optional, default to 1) Product quantity
+	try {
+		// Add order items
+		<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
+			piwikTracker.addEcommerceItem(
+				"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
+				"<?php echo $item['name']; ?>",		// (optional) Product name
+				"<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
+				<?php echo $item['cost']; ?>,		// (recommended) Product price
+				<?php echo $item['qty']; ?> 		// (optional, default to 1) Product quantity
+			);
+		<?php endforeach; ?>
+		// Track order
+		piwikTracker.trackEcommerceOrder(
+			"<?php echo $order_id; ?>",		// (required) Unique Order ID
+			<?php echo $order->order_total; ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
+			false,					// (optional) Order sub total (excludes shipping)
+			<?php echo $order->order_tax; ?>,	// (optional) Tax amount
+			<?php echo $order->order_shipping; ?>,	// (optional) Shipping amount
+			false 					// (optional) Discount offered (set to false for unspecified parameter)
 		);
-	<?php endforeach; ?>
-	// Track order
-	piwikTracker.trackEcommerceOrder(
-		"<?php echo $order_id; ?>",		// (required) Unique Order ID
-		<?php echo $order->order_total; ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
-		false,					// (optional) Order sub total (excludes shipping)
-		<?php echo $order->order_tax; ?>,	// (optional) Tax amount
-		<?php echo $order->order_shipping; ?>,	// (optional) Shipping amount
-		false 					// (optional) Discount offered (set to false for unspecified parameter)
-	);
+	} catch( err ) {}
 	</script>
 	<?php
 } 
