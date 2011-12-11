@@ -81,10 +81,7 @@ if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
 }
 if (!function_exists('woocommerce_template_loop_price')) {
 	function woocommerce_template_loop_price() {
-		global $product;
-		$price_html = $product->get_price_html();
-		if (!$price_html) return;
-		?><span class="price"><?php echo $price_html; ?></span><?php
+		woocommerce_get_template('loop/price.php', false);
 	}
 }
 if (!function_exists('woocommerce_show_product_loop_sale_flash')) {
@@ -98,7 +95,7 @@ if (!function_exists('woocommerce_show_product_loop_sale_flash')) {
  **/
 if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility() {
-		global $product;
+		global $post, $product;
 		if (!$product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
 		if (!$product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
 	}
@@ -153,7 +150,6 @@ if (!function_exists('woocommerce_template_single_excerpt')) {
 		woocommerce_get_template('single-product/short-description.php', false);
 	}
 }
-
 if (!function_exists('woocommerce_template_single_meta')) {
 	function woocommerce_template_single_meta() {
 		woocommerce_get_template('single-product/meta.php', false);
@@ -232,7 +228,6 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		        );
 		    }
 		}
-		
 		woocommerce_get_template('single-product/add-to-cart/variable.php', false);
 	}
 }
@@ -327,29 +322,14 @@ if (!function_exists('woocommerce_output_related_products')) {
 }
 
 if (!function_exists('woocommerce_related_products')) {
-	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
-		global $product, $woocommerce_loop;
+	function woocommerce_related_products( $pp = 4, $pc = 4, $ob = 'rand' ) {
+		global $product, $woocommerce_loop, $posts_per_page, $orderby;
+		
+		$woocommerce_loop['columns'] = $pc;
+		$posts_per_page = $pp;
+		$orderby = $ob;
 
-		// Pass vars to loop
-		$woocommerce_loop['columns'] = $post_columns;
-
-		$related = $product->get_related();
-		if (sizeof($related)>0) :
-			echo '<div class="related products"><h2>'.__('Related Products', 'woothemes').'</h2>';
-			$args = array(
-				'post_type'	=> 'product',
-				'ignore_sticky_posts'	=> 1,
-				'posts_per_page' => $posts_per_page,
-				'orderby' => $orderby,
-				'post__in' => $related
-			);
-			$args = apply_filters('woocommerce_related_products_args', $args);
-			query_posts($args);
-			woocommerce_get_template_part( 'loop', 'shop' );
-			echo '</div>';
-			wp_reset_query();
-		endif;
-
+		woocommerce_get_template('single-product/related.php', false);
 	}
 }
 
