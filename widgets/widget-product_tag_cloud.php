@@ -58,8 +58,8 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 	
 	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {
-		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
-		$instance['taxonomy'] = stripslashes($new_instance['taxonomy']);
+		$instance['title'] = isset( $new_instance['title'] ) ? strip_tags( stripslashes( $new_instance['title'] ) ) : '';
+		$instance['taxonomy'] = isset( $new_instance['taxonomy'] ) ? stripslashes( $new_instance['taxonomy'] ) : '';
 		return $instance;
 	}
 
