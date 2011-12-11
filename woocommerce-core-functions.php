@@ -574,3 +574,85 @@ function delete_woocommerce_term_meta($term_id, $meta_key, $meta_value = '', $de
 function get_woocommerce_term_meta($term_id, $key, $single = true){
 	return get_metadata('woocommerce_term', $term_id, $key, $single);
 }
+
+/**
+ * Move a term before the a	given element of its hierarchy level
+ *
+ * @param object $the_term
+ * @param int $next_id the id of the next slibling element in save hierachy level
+ * @param int $index
+ * @param int $terms
+ */
+function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index=0, $terms=null ) {
+	
+	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0');
+	if( empty( $terms ) ) return $index;
+	
+	$id	= $the_term->term_id;
+	
+	$term_in_level = false; // flag: is our term to order in this level of terms
+	
+	foreach ($terms as $term) {
+		
+		if( $term->term_id == $id ) { // our term to order, we skip
+			$term_in_level = true;
+			continue; // our term to order, we skip
+		}
+		// the nextid of our term to order, lets move our term here
+		if(null !== $next_id && $term->term_id == $next_id) { 
+			$index++;
+			$index = woocommerce_set_term_order($id, $index, $taxonomy, true);
+		}		
+		
+		// set order
+		$index++;
+		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy);
+		
+		// if that term has children we walk through them
+		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
+		if( !empty($children) ) {
+			$index = woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index, $children );	
+		}
+	}
+
+	// no nextid meaning our term is in last position
+	if( $term_in_level && null === $next_id )
+		$index = woocommerce_set_term_order($id, $index+1, $taxonomy, true);
+	
+	return $index;
+	
+}
+
+/**
+ * Set the sort order of a term
+ * 
+ * @param int $term_id
+ * @param int $index
+ * @param bool $recursive
+ */
+function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=false) {
+	global $wpdb;
+	
+	$term_id 	= (int) $term_id;
+	$index 		= (int) $index;
+	
+	// Meta name
+	if (strstr($taxonomy, 'pa_')) :
+		$meta_name =  'order_' . esc_attr($taxonomy);
+	else :
+		$meta_name = 'order';
+	endif;
+	
+	update_woocommerce_term_meta( $term_id, $meta_name, $index );
+	
+	if( ! $recursive ) return $index;
+	
+	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
+
+	foreach ( $children as $term ) {
+		$index ++;
+		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy, true);		
+	}
+	
+	return $index;
+}

@@ -86,6 +86,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
 * Moved woocommerce class into the main file
+* Category ordering fix
 
 = 1.3.2 - 09/12/2011 = 
 * Fixed error when adding an order manually
