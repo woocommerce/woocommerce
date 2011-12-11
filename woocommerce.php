@@ -73,9 +73,6 @@ class woocommerce {
 	 */
 	function __construct() {
 		
-		// Start a PHP session
-		if (!session_id()) session_start();
-		
 		// Set up localisation
 		$this->load_plugin_textdomain();
 		
@@ -261,6 +258,11 @@ class woocommerce {
 	 * Init WooCommerce when WordPress Initialises
 	 **/
 	function init() {
+	
+		// Start a PHP session
+		if (!session_id()) session_start();
+		
+		// Output Buffering
 		ob_start();
 
 		// Init user roles

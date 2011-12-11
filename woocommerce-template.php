@@ -9,6 +9,8 @@
  * @author		WooThemes
  */
 
+/** Global ****************************************************************/
+
 /**
  * Content Wrappers
  **/
@@ -25,9 +27,7 @@ if (!function_exists('woocommerce_output_content_wrapper_end')) {
 }
 
 /**
- * Compatibility (for globals)
- *
- * Genisis shows products via an action, so ensure the $_product variable is set
+ * Compatibility (for globals) - Genisis shows products via an action, so ensure the $_product variable is set
  **/
 function woocommerce_before_single_product( $post, $product ) {
 	global $_product;
@@ -250,7 +250,7 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
  **/
 if (!function_exists('woocommerce_quantity_input')) {
 	function woocommerce_quantity_input( $input_name = 'quantity', $input_value = 1 ) {
-		global $name, $quantity;
+		global $name, $value;
 		
 		$name = $input_name;
 		$value = $input_value;
