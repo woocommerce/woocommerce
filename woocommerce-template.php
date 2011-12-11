@@ -52,6 +52,8 @@ if (!function_exists('woocommerce_get_sidebar')) {
 	}
 }
 
+/** Loop ******************************************************************/
+
 /**
  * Products Loop
  **/
@@ -108,6 +110,25 @@ if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility( $post, $_product ) {
 		if (!$_product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
 		if (!$_product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
+	}
+}
+
+/**
+ * Pagination
+ **/
+if (!function_exists('woocommerce_pagination')) {
+	function woocommerce_pagination() {
+		woocommerce_get_template('loop/pagination.php', false);
+	}
+}
+
+/**
+ * Sorting
+ **/
+if (!function_exists('woocommerce_catalog_ordering')) {
+	function woocommerce_catalog_ordering() {
+		if (!isset($_SESSION['orderby'])) $_SESSION['orderby'] = apply_filters('woocommerce_default_catalog_orderby', 'title');
+		woocommerce_get_template('loop/sorting.php', false);
 	}
 }
 
@@ -238,41 +259,7 @@ if (!function_exists('woocommerce_quantity_input')) {
 	}
 }
 
-/** Loop ******************************************************************/
 
-/**
- * Pagination
- **/
-if (!function_exists('woocommerce_pagination')) {
-	function woocommerce_pagination() {
-		woocommerce_get_template('loop/pagination.php', false);
-	}
-}
-
-/**
- * Sorting
- **/
-if (!function_exists('woocommerce_catalog_ordering')) {
-	function woocommerce_catalog_ordering() {
-		if (!isset($_SESSION['orderby'])) $_SESSION['orderby'] = apply_filters('woocommerce_default_catalog_orderby', 'title');
-		?>
-		<form class="woocommerce_ordering" method="post">
-			<select name="catalog_orderby" class="orderby">
-				<?php
-					$catalog_orderby = apply_filters('woocommerce_catalog_orderby', array(
-						'title' 	=> __('Alphabetically', 'woothemes'),
-						'date' 		=> __('Most Recent', 'woothemes'),
-						'price' 	=> __('Price', 'woothemes')
-					));
-
-					foreach ($catalog_orderby as $id => $name) echo '<option value="'.$id.'" '.selected( $_SESSION['orderby'], $id, false ).'>'.$name.'</option>';
-				?>
-			</select>
-		</form>
-		<?php
-
-	}
-}
 
 /**
  * Product page tabs
