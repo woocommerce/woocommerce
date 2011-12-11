@@ -74,7 +74,7 @@ class woocommerce_coupon {
 		if ($this->id) :
 			
 			if ($this->usage_limit>0) :
-				if ($this->usage_count>$this->usage_limit) :
+				if ($this->usage_count>=$this->usage_limit) :
 					return false;
 				endif;
 			endif;

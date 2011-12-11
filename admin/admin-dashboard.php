@@ -55,26 +55,28 @@ function woocommerce_content_right_now() {
 }
 
 function woocommerce_right_now() {
-
-	$woocommerce_orders = &new woocommerce_orders();
+	$pending_count 		= get_term_by( 'slug', 'pending', 'shop_order_status' )->count;
+	$completed_count  	= get_term_by( 'slug', 'completed', 'shop_order_status' )->count;
+	$on_hold_count    	= get_term_by( 'slug', 'on-hold', 'shop_order_status' )->count;
+	$processing_count 	= get_term_by( 'slug', 'processing', 'shop_order_status' )->count;
 	?>
 	</table>
 	<p class="sub woocommerce_sub"><?php _e('Orders', 'woothemes'); ?></p>
 	<table>
 		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=pending"><span class="total-count"><?php echo $woocommerce_orders->pending_count; ?></span></a></td>
+			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=pending"><span class="total-count"><?php echo $pending_count; ?></span></a></td>
 			<td class="last t"><a class="pending" href="edit.php?post_type=shop_order&shop_order_status=pending"><?php _e('Pending', 'woothemes'); ?></a></td>
 		</tr>
 		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=on-hold"><span class="total-count"><?php echo $woocommerce_orders->on_hold_count; ?></span></a></td>
+			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=on-hold"><span class="total-count"><?php echo $on_hold_count; ?></span></a></td>
 			<td class="last t"><a class="onhold" href="edit.php?post_type=shop_order&shop_order_status=on-hold"><?php _e('On-Hold', 'woothemes'); ?></a></td>
 		</tr>
 		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=processing"><span class="total-count"><?php echo $woocommerce_orders->processing_count; ?></span></a></td>
+			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=processing"><span class="total-count"><?php echo $processing_count; ?></span></a></td>
 			<td class="last t"><a class="processing" href="edit.php?post_type=shop_order&shop_order_status=processing"><?php _e('Processing', 'woothemes'); ?></a></td>
 		</tr>
 		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=completed"><span class="total-count"><?php echo $woocommerce_orders->completed_count; ?></span></a></td>
+			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=completed"><span class="total-count"><?php echo $completed_count; ?></span></a></td>
 			<td class="last t"><a class="complete" href="edit.php?post_type=shop_order&shop_order_status=completed"><?php _e('Completed', 'woothemes'); ?></a></td>
 		</tr>
 	<?php

@@ -1,6 +1,6 @@
 <?php get_header('shop'); ?>
 	  
-<?php do_action('woocommerce_before_main_content'); // <div id="container"><div id="content" role="main"> ?>
+<?php do_action('woocommerce_before_main_content'); ?>
 
 	<?php if ( have_posts() ) while ( have_posts() ) : the_post(); global $_product; $_product = &new woocommerce_product( $post->ID ); ?>
 		

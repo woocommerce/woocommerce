@@ -288,3 +288,40 @@ function woocommerce_shipping_class_description() {
 	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
 
 }
+
+
+/**
+ * Fix for per_page option
+ * Trac: http://core.trac.wordpress.org/ticket/19465
+ */
+add_filter('edit_posts_per_page', 'woocommerce_fix_edit_posts_per_page', 1, 2);
+
+function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
+	
+	if ($post_type!=='product') return $per_page;
+	
+	$screen = get_current_screen();
+	
+	if (strstr($screen->id, '-')) {
+	
+		$option = 'edit_' . str_replace('edit-', '', $screen->id) . '_per_page';
+		
+		if (isset($_POST['wp_screen_options']['option']) && $_POST['wp_screen_options']['option'] == $option ) :
+			
+			update_user_meta( get_current_user_id(), $option, $_POST['wp_screen_options']['value'] );
+			
+			wp_redirect( remove_query_arg( array('pagenum', 'apage', 'paged'), wp_get_referer() ) );
+			exit;
+
+		endif;
+		
+		$user_per_page = (int) get_user_meta( get_current_user_id(), $option, true );
+		
+		if ($user_per_page) $per_page = $user_per_page;
+		
+	}
+	
+	return $per_page;
+	
+}
+

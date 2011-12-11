@@ -4,15 +4,9 @@
  * 
  * Actions/functions/hooks for WooCommerce related events.
  *
- *		- Prevent non-admin access to backend
  *		- Clear cart on logout
  *		- Update catalog ordering if posted
- *		- AJAX update shipping method on cart page
- *		- AJAX update order review on checkout
- *		- AJAX add to cart
- *		- AJAX add to cart fragments
  *		- Increase coupon usage count
- *		- Add order item
  *		- When default permalinks are enabled, redirect shop page to post type archive url
  *		- Add to Cart
  *		- Clear cart
@@ -28,21 +22,6 @@
  * @category	Actions
  * @author		WooThemes
  */
-
-
-/**
- * Prevent non-admin access to backend
- */
-if (get_option('woocommerce_lock_down_admin')=='yes') add_action('admin_init', 'woocommerce_prevent_admin_access');
-
-function woocommerce_prevent_admin_access() {
-	
-	if ( is_admin() && !is_ajax() && !current_user_can('edit_posts') ) :
-		wp_safe_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
-		exit;
-	endif;
-	
-}
 
 /**
  * Clear cart on logout
@@ -69,91 +48,6 @@ function woocommerce_update_catalog_ordering() {
 	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
 }
 
-/**
- * AJAX update shipping method on cart page
- */
-add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
-add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
-
-function woocommerce_ajax_update_shipping_method() {
-	global $woocommerce;
-	
-	check_ajax_referer( 'update-shipping-method', 'security' );
-	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
-	
-	$woocommerce->cart->calculate_totals();
-	
-	woocommerce_cart_totals();
-	
-	die();
-}
-
-
-/**
- * AJAX update order review on checkout
- */
-add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-
-function woocommerce_ajax_update_order_review() {
-	global $woocommerce;
-	
-	check_ajax_referer( 'update-order-review', 'security' );
-	
-	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
-	
-	if (sizeof($woocommerce->cart->get_cart())==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
-		die();
-	endif;
-	
-	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
-	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
-	if (isset($_POST['country'])) $woocommerce->customer->set_country( $_POST['country'] );
-	if (isset($_POST['state'])) $woocommerce->customer->set_state( $_POST['state'] );
-	if (isset($_POST['postcode'])) $woocommerce->customer->set_postcode( $_POST['postcode'] );
-	if (isset($_POST['s_country'])) $woocommerce->customer->set_shipping_country( $_POST['s_country'] );
-	if (isset($_POST['s_state'])) $woocommerce->customer->set_shipping_state( $_POST['s_state'] );
-	if (isset($_POST['s_postcode'])) $woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
-	
-	$woocommerce->cart->calculate_totals();
-	
-	do_action('woocommerce_checkout_order_review'); // Display review order table
-
-	die();
-}
-
-/**
- * AJAX add to cart
- */
-add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-
-function woocommerce_ajax_add_to_cart() {
-	
-	global $woocommerce;
-	
-	check_ajax_referer( 'add-to-cart', 'security' );
-	
-	$product_id = (int) $_POST['product_id'];
-
-	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
-		// Return html fragments
-		$data = apply_filters('add_to_cart_fragments', array());
-	else :
-		// Return error
-		$data = array(
-			'error' => $woocommerce->errors[0]
-		);
-		$woocommerce->clear_messages();
-	endif;
-	
-	echo json_encode( $data );
-	
-	die();
-}
 
 
 /**
@@ -169,242 +63,6 @@ function woocommerce_increase_coupon_counts() {
 	endforeach;
 }
 
-/**
- * Get customer details via ajax
- */
-add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');
-
-function woocommerce_get_customer_details() {
-	
-	global $woocommerce;
-
-	check_ajax_referer( 'get-customer-details', 'security' );
-
-	$user_id = (int) trim(stripslashes($_POST['user_id']));
-	$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
-	
-	$customer_data = array(
-		$type_to_load . '_first_name' => get_user_meta( $user_id, $type_to_load . '_first_name', true ),
-		$type_to_load . '_last_name' => get_user_meta( $user_id, $type_to_load . '_last_name', true ),
-		$type_to_load . '_company' => get_user_meta( $user_id, $type_to_load . '_company', true ),
-		$type_to_load . '_address_1' => get_user_meta( $user_id, $type_to_load . '_address_1', true ),
-		$type_to_load . '_address_2' => get_user_meta( $user_id, $type_to_load . '_address_2', true ),
-		$type_to_load . '_city' => get_user_meta( $user_id, $type_to_load . '_city', true ),
-		$type_to_load . '_postcode' => get_user_meta( $user_id, $type_to_load . '_postcode', true ),
-		$type_to_load . '_country' => get_user_meta( $user_id, $type_to_load . '_country', true ),
-		$type_to_load . '_state' => get_user_meta( $user_id, $type_to_load . '_state', true ),
-		$type_to_load . '_email' => get_user_meta( $user_id, $type_to_load . '_email', true ),
-		$type_to_load . '_phone' => get_user_meta( $user_id, $type_to_load . '_phone', true ),
-	);
-	
-	echo json_encode($customer_data);
-	
-	// Quit out
-	die();
-	
-}
-
-/**
- * Add order item via ajax
- */
-add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
-
-function woocommerce_add_order_item() {
-	
-	global $woocommerce;
-
-	check_ajax_referer( 'add-order-item', 'security' );
-	
-	global $wpdb;
-	
-	$index = trim(stripslashes($_POST['index']));
-	$item_to_add = trim(stripslashes($_POST['item_to_add']));
-	
-	$post = '';
-	
-	// Find the item
-	if (is_numeric($item_to_add)) :
-		$post = get_post( $item_to_add );
-	endif;
-	
-	if (!$post || ($post->post_type!=='product' && $post->post_type!=='product_variation')) :
-		$post_id = $wpdb->get_var($wpdb->prepare("
-			SELECT post_id
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-			WHERE $wpdb->postmeta.meta_key = 'sku'
-			AND $wpdb->posts.post_status = 'publish'
-			AND $wpdb->posts.post_type = 'shop_product'
-			AND $wpdb->postmeta.meta_value = %s
-			LIMIT 1
-		"), $item_to_add );
-		$post = get_post( $post_id );
-	endif;
-	
-	if (!$post || ($post->post_type!=='product' && $post->post_type!=='product_variation')) :
-		die();
-	endif;
-	
-	if ($post->post_type=="product") :
-		$_product = &new woocommerce_product( $post->ID );
-	else :
-		$_product = &new woocommerce_product_variation( $post->ID );
-	endif;
-	?>
-	<tr class="item" rel="<?php echo $index; ?>">
-		<td class="product-id">
-			<img class="tips" tip="<?php
-				echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $_product->id;
-				echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($_product->variation_id) echo $_product->variation_id; else echo '-';
-				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
-		</td>
-		<td class="sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
-		<td class="name">
-			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $_product->get_title(); ?></a>
-			<?php
-				if (isset($_product->variation_data)) :
-					echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
-				endif;
-			?>
-		</td>
-		<td>
-			<table class="meta" cellspacing="0">
-				<tfoot>
-					<tr>
-						<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
-					</tr>
-				</tfoot>
-				<tbody class="meta_items"></tbody>
-			</table>
-		</td>
-		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
-		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="1" /></td>
-		<td class="cost"><input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" /></td>
-		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" /></td>
-		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="<?php _e('0.0000', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_tax_base_rate() ); ?>" /></td>
-		<td class="center">
-			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
-			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
-			<input type="hidden" name="item_variation[<?php echo $index; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
-			<button type="button" class="remove_row button">&times;</button>
-		</td>
-	</tr>
-	<?php
-	
-	// Quit out
-	die();
-	
-}
-
-/**
- * Add order note via ajax
- */
-add_action('wp_ajax_woocommerce_add_order_note', 'woocommerce_add_order_note');
-
-function woocommerce_add_order_note() {
-	
-	global $woocommerce;
-
-	check_ajax_referer( 'add-order-note', 'security' );
-	
-	$post_id 	= (int) $_POST['post_id'];
-	$note		= strip_tags(woocommerce_clean($_POST['note']));
-	$note_type	= $_POST['note_type'];
-	
-	$is_customer_note = ($note_type=='customer') ? 1 : 0;
-	
-	if ($post_id>0) :
-		$order = &new woocommerce_order( $post_id );
-		$comment_id = $order->add_order_note( $note, $is_customer_note );
-		
-		echo '<li rel="'.$comment_id.'" class="note ';
-		if ($is_customer_note) echo 'customer-note';
-		echo '"><div class="note_content">';
-		echo wpautop(wptexturize($note));
-		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
-		echo '</li>';
-		
-	endif;
-	
-	// Quit out
-	die();
-}
-
-/**
- * Delete order note via ajax
- */
-add_action('wp_ajax_woocommerce_delete_order_note', 'woocommerce_delete_order_note');
-
-function woocommerce_delete_order_note() {
-	
-	global $woocommerce;
-
-	check_ajax_referer( 'delete-order-note', 'security' );
-	
-	$note_id 	= (int) $_POST['note_id'];
-	
-	if ($note_id>0) :
-		wp_delete_comment( $note_id );
-	endif;
-	
-	// Quit out
-	die();
-}
-
-/**
- * Search for products for upsells/crosssells
- */
-add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
-
-function woocommerce_upsell_crosssell_search_products() {
-	
-	check_ajax_referer( 'search-products', 'security' );
-	
-	$search = (string) urldecode(stripslashes(strip_tags($_POST['search'])));
-	$name = (string) urldecode(stripslashes(strip_tags($_POST['name'])));
-	
-	if (empty($search)) die();
-	
-	if (is_numeric($search)) :
-		
-		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
-			'posts_per_page' => 15,
-			'post__in' => array(0, $search)
-		);
-		
-	else :
-	
-		$args = array(
-			'post_type'	=> 'product',
-			'post_status' => 'publish',
-			'posts_per_page' => 15,
-			's' => $search
-		);
-	
-	endif;
-	
-	$posts = get_posts( $args );
-	
-	if ($posts) : foreach ($posts as $post) : 
-		
-		$SKU = get_post_meta($post->ID, 'sku', true);
-		
-		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e('Cross-sell', 'woothemes'); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e('Up-sell', 'woothemes'); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
-		<?php
-						
-	endforeach; else : 
-	
-		?><li><?php _e('No products found', 'woothemes'); ?></li><?php 
-		
-	endif; 
-	
-	die();
-	
-}
 
 /**
  * When default permalinks are enabled, redirect shop page to post type archive url
@@ -800,24 +458,6 @@ function woocommerce_process_registration() {
 
 
 /**
- * Process ajax checkout form
- */
-add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
-add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
-
-function woocommerce_process_checkout () {
-	global $woocommerce, $woocommerce_checkout;
-	
-	include_once($woocommerce->plugin_path() . '/classes/checkout.class.php');
-	
-	$woocommerce_checkout = &new woocommerce_checkout();
-	$woocommerce_checkout->process_checkout();
-	
-	die(0);
-}
-
-
-/**
  * Cancel a pending order - hook into init function
  **/
 add_action('init', 'woocommerce_cancel_order');
@@ -920,10 +560,25 @@ function woocommerce_download_product() {
 			
 			if (!$file_path) exit;
 			
-			if (!is_multisite()) :
+			$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $download_file);
+			
+			if ($file_download_method=='redirect') :
+				
+				header('Location: '.$file_path);
+				exit;
+				
+			endif;
+			
+			if (!is_multisite()) :	
 				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
 			else :
+				$upload_dir = wp_upload_dir();
+				
+				// Try to replace network url
 				$file_path = str_replace(trailingslashit(network_admin_url()), ABSPATH, $file_path);
+				
+				// Now try to replace upload URL
+				$file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_path);
 			endif;
 			
 			// See if its local or remote
@@ -950,7 +605,7 @@ function woocommerce_download_product() {
                 default: $ctype="application/force-download";
             endswitch;
             
-            if (get_option('woocommerce_mod_xsendfile_enabled')=='yes') :
+            if ($file_download_method=='xsendfile') :
             
 				header("X-Accel-Redirect: $file_path");
 				header("X-Sendfile: $file_path");

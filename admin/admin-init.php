@@ -229,29 +229,28 @@ function woocommerce_admin_head() {
 add_action('admin_head', 'woocommerce_admin_head');
 
 /**
- * Ajax request handling for categories ordering
+ * Prevent non-admin access to backend
  */
-function woocommerce_term_ordering() {
-	global $wpdb;
-	
-	$id = (int) $_POST['id'];
-	$next_id  = isset($_POST['nextid']) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
-	$taxonomy = isset($_POST['thetaxonomy']) ? esc_attr( $_POST['thetaxonomy'] ) : null;
-	$term = get_term_by('id', $id, $taxonomy);
-	
-	if( !$id || !$term || !$taxonomy ) die(0);
-	
-	woocommerce_order_terms( $term, $next_id, $taxonomy );
-	
-	$children = get_terms($taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0");
-	
-	if( $term && sizeof($children) ) {
-		echo 'children';
-		die;	
-	}
-}
-add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
+if (get_option('woocommerce_lock_down_admin')=='yes') add_action('admin_init', 'woocommerce_prevent_admin_access');
 
+function woocommerce_prevent_admin_access() {
+	
+	if ( is_admin() && !is_ajax() && !current_user_can('edit_posts') ) :
+		wp_safe_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+		exit;
+	endif;
+	
+}
+
+/**
+ * Fix 'insert into post' buttons for images
+ **/
+add_filter('get_media_item_args', 'woocommerce_allow_img_insertion');
+
+function woocommerce_allow_img_insertion($vars) {
+    $vars['send'] = true; // 'send' as in "Send to Editor"
+    return($vars);
+}
 
 /**
  * Duplicate a product action
@@ -495,4 +494,34 @@ add_action('media_upload_downloadable_product', 'woocommerce_media_upload_downlo
 
 function woocommerce_media_upload_downloadable_product() {
 	do_action('media_upload_file');
+}
+
+/**
+ * Shortcode button in post editor
+ **/
+add_action( 'init', 'woocommerce_add_shortcode_button' );
+add_filter( 'tiny_mce_version', 'woocommerce_refresh_mce' );
+
+function woocommerce_add_shortcode_button() {
+	if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') ) return;
+	if ( get_user_option('rich_editing') == 'true') :
+		add_filter('mce_external_plugins', 'woocommerce_add_shortcode_tinymce_plugin');
+		add_filter('mce_buttons', 'woocommerce_register_shortcode_button');
+	endif;
+}
+
+function woocommerce_register_shortcode_button($buttons) {
+	array_push($buttons, "|", "woocommerce_shortcodes_button");
+	return $buttons;
+}
+
+function woocommerce_add_shortcode_tinymce_plugin($plugin_array) {
+	global $woocommerce;
+	$plugin_array['WooCommerceShortcodes'] = $woocommerce->plugin_url() . '/assets/js/admin/editor_plugin.js';
+	return $plugin_array;
+}
+
+function woocommerce_refresh_mce($ver) {
+	$ver += 3;
+	return $ver;
 }

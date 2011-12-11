@@ -34,6 +34,9 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		$this->send_shipping= $this->settings['send_shipping'];
 		$this->debug		= $this->settings['debug'];	
 		
+		// Logs
+		if ($this->debug=='yes') $this->log = $woocommerce->logger();
+		
 		// Actions
 		add_action( 'init', array(&$this, 'check_ipn_response') );
 		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
@@ -155,7 +158,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_adr = $this->liveurl . '?';		
 		endif;
 		
-		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
+		if ($this->debug=='yes') $this->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
 		
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace(array('(', '-', ' ', ')'), '', $order->billing_phone);
@@ -277,32 +280,30 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 		
+		$woocommerce->add_inline_js('
+			jQuery("body").block({ 
+					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+					overlayCSS: 
+					{ 
+						background: "#fff", 
+						opacity: 0.6 
+					},
+					css: { 
+				        padding:        20, 
+				        textAlign:      "center", 
+				        color:          "#555", 
+				        border:         "3px solid #aaa", 
+				        backgroundColor:"#fff", 
+				        cursor:         "wait",
+				        lineHeight:		"32px"
+				    } 
+				});
+			jQuery("#submit_paypal_payment_form").click();
+		');
+		
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
 				' . implode('', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
-				<script type="text/javascript">
-					(function($) {
-						jQuery("body").block(
-							{ 
-								message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
-								overlayCSS: 
-								{ 
-									background: "#fff", 
-									opacity: 0.6 
-								},
-								css: { 
-							        padding:        20, 
-							        textAlign:      "center", 
-							        color:          "#555", 
-							        border:         "3px solid #aaa", 
-							        backgroundColor:"#fff", 
-							        cursor:         "wait",
-							        lineHeight:		"32px"
-							    } 
-							});
-						jQuery("#submit_paypal_payment_form").click();
-					})(jQuery);
-				</script>
 			</form>';
 		
 	}
@@ -338,7 +339,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 		
-		if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Checking IPN response is valid...' );
+		if ($this->debug=='yes') $this->log->add( 'paypal', 'Checking IPN response is valid...' );
     
     	 // Add cmd to the post array
         $_POST['cmd'] = '_notify-validate';
@@ -364,14 +365,14 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
         
         // check to see if the request was valid
         if ( !is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && (strcmp( $response['body'], "VERIFIED") == 0)) {
-            if ($this->debug=='yes') $woocommerce->log->add( 'paypal', 'Received valid response from PayPal' );
+            if ($this->debug=='yes') $this->log->add( 'paypal', 'Received valid response from PayPal' );
             return true;
         } 
         
         if ($this->debug=='yes') :
-        	$woocommerce->log->add( 'paypal', 'Received invalid response from PayPal' );
+        	$this->log->add( 'paypal', 'Received invalid response from PayPal' );
         	if (is_wp_error($response)) :
-        		$woocommerce->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
+        		$this->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
         	endif;
         endif;
         

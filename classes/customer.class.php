@@ -2,7 +2,7 @@
 /**
  * Customer
  * 
- * The WooCommerce custoemr class handles storage of the current customer's data, such as location.
+ * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
  * @class woocommerce_customer
  * @package		WooCommerce
@@ -210,5 +210,5 @@ class woocommerce_customer {
 		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
 		
 	}
-	
+
 }

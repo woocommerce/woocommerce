@@ -79,7 +79,7 @@ class free_shipping extends woocommerce_shipping_method {
 							'title' 		=> __( 'Specific Countries', 'woothemes' ), 
 							'type' 			=> 'multiselect', 
 							'class'			=> 'chosen_select',
-							'css'			=> 'width:50%;',
+							'css'			=> 'width: 450px;',
 							'default' 		=> '',
 							'options'		=> $woocommerce->countries->countries
 						)	
