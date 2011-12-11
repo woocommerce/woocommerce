@@ -72,6 +72,12 @@ class woocommerce {
 	 * Gets things started
 	 */
 	function __construct() {
+
+		// Start a PHP session
+		if (!session_id()) session_start();
+		
+		// Output Buffering
+		ob_start();
 		
 		// Set up localisation
 		$this->load_plugin_textdomain();
@@ -260,12 +266,6 @@ class woocommerce {
 	 **/
 	function init() {
 	
-		// Start a PHP session
-		if (!session_id()) session_start();
-		
-		// Output Buffering
-		ob_start();
-		
 		// Register globals for WC environment
 		$this->register_globals();
 
@@ -295,8 +295,7 @@ class woocommerce {
 	 * When the_post is called, get product data too
 	 **/
 	function setup_product_data( $post ) {
-		if ($post->post_type!='product') return;
-		
+		if ($post->post_type!=='product') return;
 		unset($GLOBALS['product']);
 		$GLOBALS['product'] = new woocommerce_product( $post->ID );
 	}
@@ -969,7 +968,6 @@ class woocommerce {
 	 * Output the errors and messages
 	 */
 	function show_messages() {
-	
 		if (isset($this->errors) && sizeof($this->errors)>0) :
 			echo '<div class="woocommerce_error">'.$this->errors[0].'</div>';
 			$this->clear_messages();

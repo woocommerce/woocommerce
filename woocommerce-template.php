@@ -42,16 +42,17 @@ if (!function_exists('woocommerce_get_sidebar')) {
  **/
 if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 	function woocommerce_template_loop_add_to_cart() {
-
+		global $product, $post;
+		
 		// No price set - so no button
-		if( $product;->get_price() === '' && $product;->product_type!=='external') return;
+		if( $product->get_price() === '' && $product->product_type!=='external') return;
 
-		if (!$product;->is_in_stock()) :
+		if (!$product->is_in_stock()) :
 			echo '<a href="'.get_permalink($post->ID).'" class="button">'. apply_filters('out_of_stock_add_to_cart_text', __('Read More', 'woothemes')).'</a>';
 			return;
 		endif;
 
-		switch ($product;->product_type) :
+		switch ($product->product_type) :
 			case "variable" :
 				$link 	= get_permalink($post->ID);
 				$label 	= apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
@@ -65,12 +66,12 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 				$label 	= apply_filters('external_add_to_cart_text', __('Read More', 'woothemes'));
 			break;
 			default :
-				$link 	= esc_url( $product;->add_to_cart_url() );
+				$link 	= esc_url( $product->add_to_cart_url() );
 				$label 	= apply_filters('add_to_cart_text', __('Add to cart', 'woothemes'));
 			break;
 		endswitch;
 
-		echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $product;->id, $product;->product_type, $label);
+		echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label);
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
@@ -80,13 +81,14 @@ if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
 }
 if (!function_exists('woocommerce_template_loop_price')) {
 	function woocommerce_template_loop_price() {
-		$price_html = $product;->get_price_html();
+		global $product;
+		$price_html = $product->get_price_html();
 		if (!$price_html) return;
 		?><span class="price"><?php echo $price_html; ?></span><?php
 	}
 }
 if (!function_exists('woocommerce_show_product_loop_sale_flash')) {
-	function woocommerce_show_product_loop_sale_flash( $post ) {
+	function woocommerce_show_product_loop_sale_flash() {
 		woocommerce_get_template('loop/sale_flash.php', false);
 	}
 }
@@ -96,8 +98,9 @@ if (!function_exists('woocommerce_show_product_loop_sale_flash')) {
  **/
 if (!function_exists('woocommerce_check_product_visibility')) {
 	function woocommerce_check_product_visibility() {
-		if (!$product;->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
-		if (!$product;->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
+		global $product;
+		if (!$product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
+		if (!$product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
 	}
 }
 
@@ -172,7 +175,8 @@ if (!function_exists('woocommerce_show_product_sale_flash')) {
  **/
 if (!function_exists('woocommerce_template_single_add_to_cart')) {
 	function woocommerce_template_single_add_to_cart() {
-		do_action( 'woocommerce_' . $product;->product_type . '_add_to_cart',);
+		global $product;
+		do_action( 'woocommerce_' . $product->product_type . '_add_to_cart' );
 	}
 }
 if (!function_exists('woocommerce_simple_add_to_cart')) {
@@ -187,18 +191,18 @@ if (!function_exists('woocommerce_grouped_add_to_cart')) {
 }
 if (!function_exists('woocommerce_variable_add_to_cart')) {
 	function woocommerce_variable_add_to_cart() {
-		global $woocommerce, $available_variations, $attributes, $selected_attributes;
+		global $woocommerce, $available_variations, $attributes, $selected_attributes, $product, $post;
 
-		$attributes = $product;->get_available_attribute_variations();
+		$attributes = $product->get_available_attribute_variations();
 		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
 		$selected_attributes = apply_filters( 'woocommerce_product_default_attributes', $default_attributes );
 		
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
 		$available_variations = array();
 		
-		foreach($product;->get_children() as $child_id) {
+		foreach($product->get_children() as $child_id) {
 		
-		    $variation = $product;->get_child( $child_id );
+		    $variation = $product->get_child( $child_id );
 		
 		    if($variation instanceof woocommerce_product_variation) {
 		
@@ -268,7 +272,8 @@ if (!function_exists('woocommerce_product_description_tab')) {
 }
 if (!function_exists('woocommerce_product_attributes_tab')) {
 	function woocommerce_product_attributes_tab() {
-		if ($product;->has_attributes()) : ?><li><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
+		global $product;
+		if ($product->has_attributes()) : ?><li><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
 	}
 }
 if (!function_exists('woocommerce_product_reviews_tab')) {
@@ -323,12 +328,12 @@ if (!function_exists('woocommerce_output_related_products')) {
 
 if (!function_exists('woocommerce_related_products')) {
 	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
-		global $product;, $woocommerce_loop;
+		global $product, $woocommerce_loop;
 
 		// Pass vars to loop
 		$woocommerce_loop['columns'] = $post_columns;
 
-		$related = $product;->get_related();
+		$related = $product->get_related();
 		if (sizeof($related)>0) :
 			echo '<div class="related products"><h2>'.__('Related Products', 'woothemes').'</h2>';
 			$args = array(
@@ -621,7 +626,7 @@ if (!function_exists('woocommerce_breadcrumb')) {
  **/
 function woocommerce_upsell_display() {
 	global $product;
-	$upsells = $product;->get_upsells();
+	$upsells = $product->get_upsells();
 	if (sizeof($upsells)>0) :
 		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
 		$args = array(

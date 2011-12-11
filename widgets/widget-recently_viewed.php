@@ -127,9 +127,10 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 /**
  * Track product views
  */
-add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10, 2);
+add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);
 
-function woocommerce_track_product_view( $post, $_product ) {
+function woocommerce_track_product_view() {
+	global $post, $_product;
 	
 	if (!isset($_SESSION['viewed_products']) || !is_array($_SESSION['viewed_products'])) $_SESSION['viewed_products'] = array();
 	
