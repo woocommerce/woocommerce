@@ -860,16 +860,6 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	
 	// Get the order and output tracking code
 	$order = &new woocommerce_order($order_id);
-	
-	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
-	if (is_user_logged_in()) :
-		$user_id 		= get_current_user_id();
-		$current_user 	= get_user_by('id', $user_id);
-		$username 		= $current_user->user_login;
-	else :
-		$user_id 		= '';
-		$username 		= __('Guest', 'woothemes');
-	endif;
 	?>
 	<script type="text/javascript">
 	try {
