@@ -138,8 +138,7 @@ function woocommerce_product_data_box() {
 				'none' => __('None', 'woothemes')			
 			) ) );
 			
-			$_tax = new woocommerce_tax();
-			$tax_classes = $_tax->get_tax_classes();
+			$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 			$classes_options = array();
 			$classes_options[''] = __('Standard', 'woothemes');
     		if ($tax_classes) foreach ($tax_classes as $class) :
