@@ -212,15 +212,17 @@ function woocommerce_add_attribute() {
 	    				<p><?php _e('Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woothemes') ?></p>
 	    				<form action="admin.php?page=woocommerce_attributes" method="post">
 							<div class="form-field">
-								<label for="attribute_name"><?php _e('Attribute Name', 'woothemes'); ?></label>
-								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
-								<p class="description"><?php _e('Unique name/reference for the attribute; must be shorter than 28 characters.', 'woothemes'); ?></p>
-							</div>
-							<div class="form-field">
-								<label for="attribute_label"><?php _e('Attribute Label', 'woothemes'); ?></label>
+								<label for="attribute_label"><?php _e('Attribute label', 'woothemes'); ?></label>
 								<input name="attribute_label" id="attribute_label" type="text" value="" />
-								<p class="description"><?php _e('Label for the attribute (shown on the front-end).', 'woothemes'); ?></p>
+								<p class="description"><?php _e('Name for the attribute (shown on the front-end).', 'woothemes'); ?></p>
 							</div>
+							
+							<div class="form-field">
+								<label for="attribute_name"><?php _e('Attribute slug', 'woothemes'); ?></label>
+								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+								<p class="description"><?php _e('Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woothemes'); ?></p>
+							</div>
+							
 							<div class="form-field">
 								<label for="attribute_type"><?php _e('Attribute type', 'woothemes'); ?></label>
 								<select name="attribute_type" id="attribute_type">
