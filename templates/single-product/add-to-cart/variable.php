@@ -3,7 +3,7 @@
  * Variable Product Add to Cart
  */
  
-global $woocommerce, $_product, $available_variations, $attributes, $selected_attributes;
+global $woocommerce, $product, $available_variations, $attributes, $selected_attributes;
 ?>
 <script type="text/javascript">
     var product_variations = <?php echo json_encode($available_variations) ?>;
@@ -11,7 +11,7 @@ global $woocommerce, $_product, $available_variations, $attributes, $selected_at
 
 <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
+<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
 	<table class="variations" cellspacing="0">
 		<tbody>
 		<?php foreach ($attributes as $name => $options) : ?>

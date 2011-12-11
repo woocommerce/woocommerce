@@ -3,9 +3,9 @@
  * External Add to Cart
  */
  
-global $woocommerce;
+global $woocommerce, $product;
 
-$product_url = get_post_meta( $_product->id, 'product_url', true );
+$product_url = get_post_meta( $product->id, 'product_url', true );
 
 if (!$product_url) return;
 ?>

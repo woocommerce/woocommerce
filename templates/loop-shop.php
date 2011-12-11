@@ -19,9 +19,9 @@ if (!isset($woocommerce_loop['columns']) || !$woocommerce_loop['columns']) $wooc
 	
 	if ($woocommerce_loop['show_products'] && have_posts()) : while (have_posts()) : the_post(); 
 	
-		$_product = &new woocommerce_product( $post->ID ); 
+		global $product;
 		
-		if (!$_product->is_visible()) continue; 
+		if (!$product->is_visible()) continue; 
 		
 		$woocommerce_loop['loop']++;
 		
@@ -32,15 +32,15 @@ if (!isset($woocommerce_loop['columns']) || !$woocommerce_loop['columns']) $wooc
 			
 			<a href="<?php the_permalink(); ?>">
 				
-				<?php do_action('woocommerce_before_shop_loop_item_title', $post, $_product); ?>
+				<?php do_action('woocommerce_before_shop_loop_item_title'); ?>
 				
 				<h3><?php the_title(); ?></h3>
 				
-				<?php do_action('woocommerce_after_shop_loop_item_title', $post, $_product); ?>
+				<?php do_action('woocommerce_after_shop_loop_item_title'); ?>
 			
 			</a>
 	
-			<?php do_action('woocommerce_after_shop_loop_item', $post, $_product); ?>
+			<?php do_action('woocommerce_after_shop_loop_item'); ?>
 			
 		</li><?php 
 		

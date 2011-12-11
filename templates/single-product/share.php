@@ -2,8 +2,6 @@
 /**
  * Single Product Share
  */
-
-global $post, $_product;
 ?>
 
 <?php if (get_option('woocommerce_sharethis')) : ?>

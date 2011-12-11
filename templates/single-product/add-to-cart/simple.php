@@ -3,20 +3,20 @@
  * Simple Product Add to Cart
  */
  
-global $woocommerce, $_product;
+global $woocommerce, $product;
 
-if( $_product->get_price() === '') return;
+if( $product->get_price() === '') return;
 ?>
 
 <?php 
-	$availability = $_product->get_availability();
+	$availability = $product->get_availability();
 	
 	if ($availability['availability']) :
 		echo apply_filters( 'woocommerce_stock_html', '<p class="stock '.$availability['class'].'">'.$availability['availability'].'</p>', $availability['availability'] );
     endif;
 ?>
 
-<?php if (!$_product->is_in_stock()) : ?>
+<?php if (!$product->is_in_stock()) : ?>
 	<link itemprop="availability" href="http://schema.org/OutOfStock">
 <?php else : ?>
 
@@ -24,11 +24,11 @@ if( $_product->get_price() === '') return;
 
 	<?php do_action('woocommerce_before_add_to_cart_form'); ?>
 	
-	<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
+	<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 
 	 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
-	 	<?php if (!$_product->is_downloadable()) woocommerce_quantity_input(); ?>
+	 	<?php if (!$product->is_downloadable()) woocommerce_quantity_input(); ?>
 
 	 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
 

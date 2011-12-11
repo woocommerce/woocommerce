@@ -27,23 +27,6 @@ if (!function_exists('woocommerce_output_content_wrapper_end')) {
 }
 
 /**
- * Compatibility (for globals) - Genisis shows products via an action, so ensure the $_product variable is set
- **/
-function woocommerce_before_single_product( $post, $product ) {
-	global $_product;
-	if (is_null($_product)) $_product = $product;
-}
-
-/**
- * Sale Flash
- **/
-if (!function_exists('woocommerce_show_product_sale_flash')) {
-	function woocommerce_show_product_sale_flash( $post, $_product ) {
-		if ($_product->is_on_sale()) echo apply_filters('woocommerce_sale_flash', '<span class="onsale">'.__('Sale!', 'woothemes').'</span>', $post, $_product);
-	}
-}
-
-/**
  * Sidebar
  **/
 if (!function_exists('woocommerce_get_sidebar')) {
@@ -58,17 +41,17 @@ if (!function_exists('woocommerce_get_sidebar')) {
  * Products Loop
  **/
 if (!function_exists('woocommerce_template_loop_add_to_cart')) {
-	function woocommerce_template_loop_add_to_cart( $post, $_product ) {
+	function woocommerce_template_loop_add_to_cart() {
 
 		// No price set - so no button
-		if( $_product->get_price() === '' && $_product->product_type!=='external') return;
+		if( $product;->get_price() === '' && $product;->product_type!=='external') return;
 
-		if (!$_product->is_in_stock()) :
+		if (!$product;->is_in_stock()) :
 			echo '<a href="'.get_permalink($post->ID).'" class="button">'. apply_filters('out_of_stock_add_to_cart_text', __('Read More', 'woothemes')).'</a>';
 			return;
 		endif;
 
-		switch ($_product->product_type) :
+		switch ($product;->product_type) :
 			case "variable" :
 				$link 	= get_permalink($post->ID);
 				$label 	= apply_filters('variable_add_to_cart_text', __('Select options', 'woothemes'));
@@ -82,24 +65,29 @@ if (!function_exists('woocommerce_template_loop_add_to_cart')) {
 				$label 	= apply_filters('external_add_to_cart_text', __('Read More', 'woothemes'));
 			break;
 			default :
-				$link 	= esc_url( $_product->add_to_cart_url() );
+				$link 	= esc_url( $product;->add_to_cart_url() );
 				$label 	= apply_filters('add_to_cart_text', __('Add to cart', 'woothemes'));
 			break;
 		endswitch;
 
-		echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $_product->id, $_product->product_type, $label);
+		echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $product;->id, $product;->product_type, $label);
 	}
 }
 if (!function_exists('woocommerce_template_loop_product_thumbnail')) {
-	function woocommerce_template_loop_product_thumbnail( $post, $_product ) {
+	function woocommerce_template_loop_product_thumbnail() {
 		echo woocommerce_get_product_thumbnail();
 	}
 }
 if (!function_exists('woocommerce_template_loop_price')) {
-	function woocommerce_template_loop_price( $post, $_product ) {
-		$price_html = $_product->get_price_html();
+	function woocommerce_template_loop_price() {
+		$price_html = $product;->get_price_html();
 		if (!$price_html) return;
 		?><span class="price"><?php echo $price_html; ?></span><?php
+	}
+}
+if (!function_exists('woocommerce_show_product_loop_sale_flash')) {
+	function woocommerce_show_product_loop_sale_flash( $post ) {
+		woocommerce_get_template('loop/sale_flash.php', false);
 	}
 }
 
@@ -107,9 +95,9 @@ if (!function_exists('woocommerce_template_loop_price')) {
  * Check product visibility in loop
  **/
 if (!function_exists('woocommerce_check_product_visibility')) {
-	function woocommerce_check_product_visibility( $post, $_product ) {
-		if (!$_product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
-		if (!$_product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
+	function woocommerce_check_product_visibility() {
+		if (!$product;->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
+		if (!$product;->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
 	}
 }
 
@@ -153,24 +141,29 @@ if (!function_exists('woocommerce_output_product_data_tabs')) {
 	}
 }
 if (!function_exists('woocommerce_template_single_price')) {
-	function woocommerce_template_single_price( $post, $_product ) {
+	function woocommerce_template_single_price() {
 		woocommerce_get_template('single-product/price.php', false);
 	}
 }
 if (!function_exists('woocommerce_template_single_excerpt')) {
-	function woocommerce_template_single_excerpt( $post, $_product ) {
+	function woocommerce_template_single_excerpt() {
 		woocommerce_get_template('single-product/short-description.php', false);
 	}
 }
 
 if (!function_exists('woocommerce_template_single_meta')) {
-	function woocommerce_template_single_meta( $post, $_product ) {
+	function woocommerce_template_single_meta() {
 		woocommerce_get_template('single-product/meta.php', false);
 	}
 }
 if (!function_exists('woocommerce_template_single_sharing')) {
-	function woocommerce_template_single_sharing( $post, $_product ) {
+	function woocommerce_template_single_sharing() {
 		woocommerce_get_template('single-product/share.php', false);
+	}
+}
+if (!function_exists('woocommerce_show_product_sale_flash')) {
+	function woocommerce_show_product_sale_flash() {
+		woocommerce_get_template('single-product/sale_flash.php', false);
 	}
 }
 
@@ -178,34 +171,34 @@ if (!function_exists('woocommerce_template_single_sharing')) {
  * Product Add to cart buttons
  **/
 if (!function_exists('woocommerce_template_single_add_to_cart')) {
-	function woocommerce_template_single_add_to_cart( $post, $_product ) {
-		do_action( 'woocommerce_' . $_product->product_type . '_add_to_cart', $post, $_product );
+	function woocommerce_template_single_add_to_cart() {
+		do_action( 'woocommerce_' . $product;->product_type . '_add_to_cart',);
 	}
 }
 if (!function_exists('woocommerce_simple_add_to_cart')) {
-	function woocommerce_simple_add_to_cart( $post, $_product ) {
+	function woocommerce_simple_add_to_cart() {
 		woocommerce_get_template('single-product/add-to-cart/simple.php', false);
 	}
 }
 if (!function_exists('woocommerce_grouped_add_to_cart')) {
-	function woocommerce_grouped_add_to_cart( $post, $_product ) {
+	function woocommerce_grouped_add_to_cart() {
 		woocommerce_get_template('single-product/add-to-cart/grouped.php', false);
 	}
 }
 if (!function_exists('woocommerce_variable_add_to_cart')) {
-	function woocommerce_variable_add_to_cart( $post, $_product ) {
+	function woocommerce_variable_add_to_cart() {
 		global $woocommerce, $available_variations, $attributes, $selected_attributes;
 
-		$attributes = $_product->get_available_attribute_variations();
+		$attributes = $product;->get_available_attribute_variations();
 		$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
 		$selected_attributes = apply_filters( 'woocommerce_product_default_attributes', $default_attributes );
 		
 		// Put available variations into an array and put in a Javascript variable (JSON encoded)
 		$available_variations = array();
 		
-		foreach($_product->get_children() as $child_id) {
+		foreach($product;->get_children() as $child_id) {
 		
-		    $variation = $_product->get_child( $child_id );
+		    $variation = $product;->get_child( $child_id );
 		
 		    if($variation instanceof woocommerce_product_variation) {
 		
@@ -240,7 +233,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 	}
 }
 if (!function_exists('woocommerce_external_add_to_cart')) {
-	function woocommerce_external_add_to_cart( $post, $_product ) {
+	function woocommerce_external_add_to_cart() {
 		woocommerce_get_template('single-product/add-to-cart/external.php', false);
 	}
 }
@@ -249,17 +242,21 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
  * Quantity inputs
  **/
 if (!function_exists('woocommerce_quantity_input')) {
-	function woocommerce_quantity_input( $input_name = 'quantity', $input_value = 1 ) {
-		global $name, $value;
+	function woocommerce_quantity_input( $args = array() ) {
+		global $input_name, $input_value;
 		
-		$name = $input_name;
-		$value = $input_value;
+		$defaults = array(
+			'input_name' 	=> 'quantity',
+			'input_value' 	=> '1'
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+					
+		extract( $args );
 		
 		woocommerce_get_template('single-product/add-to-cart/quantity.php', false);
 	}
 }
-
-
 
 /**
  * Product page tabs
@@ -271,14 +268,12 @@ if (!function_exists('woocommerce_product_description_tab')) {
 }
 if (!function_exists('woocommerce_product_attributes_tab')) {
 	function woocommerce_product_attributes_tab() {
-		global $_product;
-		if ($_product->has_attributes()) : ?><li><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
+		if ($product;->has_attributes()) : ?><li><a href="#tab-attributes"><?php _e('Additional Information', 'woothemes'); ?></a></li><?php endif;
 	}
 }
 if (!function_exists('woocommerce_product_reviews_tab')) {
 	function woocommerce_product_reviews_tab() {
 		if ( comments_open() ) : ?><li class="reviews_tab"><a href="#tab-reviews"><?php _e('Reviews', 'woothemes'); ?><?php echo comments_number(' (0)', ' (1)', ' (%)'); ?></a></li><?php endif;
-
 	}
 }
 
@@ -328,12 +323,12 @@ if (!function_exists('woocommerce_output_related_products')) {
 
 if (!function_exists('woocommerce_related_products')) {
 	function woocommerce_related_products( $posts_per_page = 4, $post_columns = 4, $orderby = 'rand' ) {
-		global $_product, $woocommerce_loop;
+		global $product;, $woocommerce_loop;
 
 		// Pass vars to loop
 		$woocommerce_loop['columns'] = $post_columns;
 
-		$related = $_product->get_related();
+		$related = $product;->get_related();
 		if (sizeof($related)>0) :
 			echo '<div class="related products"><h2>'.__('Related Products', 'woothemes').'</h2>';
 			$args = array(
@@ -352,6 +347,8 @@ if (!function_exists('woocommerce_related_products')) {
 
 	}
 }
+
+/** Cart ******************************************************************/
 
 /**
  * WooCommerce Shipping Calculator
@@ -373,6 +370,8 @@ if (!function_exists('woocommerce_cart_totals')) {
 		woocommerce_get_template('cart/totals.php', false);
 	}
 }
+
+/** Login *****************************************************************/
 
 /**
  * WooCommerce Login Form
@@ -621,8 +620,8 @@ if (!function_exists('woocommerce_breadcrumb')) {
  * Display Up Sells
  **/
 function woocommerce_upsell_display() {
-	global $_product;
-	$upsells = $_product->get_upsells();
+	global $product;
+	$upsells = $product;->get_upsells();
 	if (sizeof($upsells)>0) :
 		echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
 		$args = array(

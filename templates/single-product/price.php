@@ -3,6 +3,6 @@
  * Single Product Price
  */
 
-global $post, $_product;
+global $post, $product;
 ?>
-<p itemprop="price" class="price"><?php echo $_product->get_price_html(); ?></p>
+<p itemprop="price" class="price"><?php echo $product->get_price_html(); ?></p>

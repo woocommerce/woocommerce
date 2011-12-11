@@ -175,7 +175,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			echo "<ul>";
 			
 			// Force found when option is selected
-			if (array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+			if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
 			
 			foreach ($terms as $term) {
 				

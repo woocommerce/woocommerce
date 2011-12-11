@@ -8,7 +8,7 @@
  * @category	Core
  * @author		WooThemes
  */
-
+ 
 /**
  * HTML emails from WooCommerce
  **/

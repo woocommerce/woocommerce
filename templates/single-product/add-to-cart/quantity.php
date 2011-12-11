@@ -3,6 +3,6 @@
  * Single Product Quantity Inputs
  */
 
-global $post, $_product, $name, $value;
+global $input_name, $input_value;
 ?>
-<div class="quantity"><input name="<?php echo $name; ?>" value="<?php echo $value; ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>
+<div class="quantity"><input name="<?php echo $input_name; ?>" value="<?php echo $input_value; ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>

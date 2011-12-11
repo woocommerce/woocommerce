@@ -87,6 +87,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Moved many shortcodes (contents) to template files for easier customisation
 * Moved woocommerce class into the main file
 * Category ordering fix
+* Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
 
 = 1.3.2 - 09/12/2011 = 
 * Fixed error when adding an order manually

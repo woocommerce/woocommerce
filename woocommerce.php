@@ -93,6 +93,7 @@ class woocommerce {
 		// Actions
 		add_action( 'init', array(&$this, 'init'), 0);
 		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
+		add_action( 'the_post', array(&$this, 'setup_product_data') );
 		add_action( 'plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some more may be added by plugins
 		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
 		
@@ -264,6 +265,9 @@ class woocommerce {
 		
 		// Output Buffering
 		ob_start();
+		
+		// Register globals for WC environment
+		$this->register_globals();
 
 		// Init user roles
 		$this->init_user_roles();
@@ -278,6 +282,23 @@ class woocommerce {
 		if (!is_admin()) $this->init_styles();
 		
 		do_action( 'woocommerce_init' );
+	}
+
+	/**
+	 * Register WC environment globals
+	 **/
+	function register_globals() {
+		$GLOBALS['product'] = null;
+	}
+	
+	/**
+	 * When the_post is called, get product data too
+	 **/
+	function setup_product_data( $post ) {
+		if ($post->post_type!='product') return;
+		
+		unset($GLOBALS['product']);
+		$GLOBALS['product'] = new woocommerce_product( $post->ID );
 	}
 	
 	/**

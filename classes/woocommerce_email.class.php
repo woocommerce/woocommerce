@@ -226,7 +226,7 @@ class woocommerce_email {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		extract( $args, EXTR_SKIP );
+		extract( $args );
 		
 		if (!$order_id || !$customer_note) return;
 		
@@ -296,7 +296,7 @@ class woocommerce_email {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		extract( $args, EXTR_SKIP );
+		extract( $args );
 		
 		if (!$product || !$quantity) return;
 	

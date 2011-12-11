@@ -3,7 +3,7 @@
  * Attributes Tab
  */
  
-global $woocommerce, $post, $_product;
+global $woocommerce, $post, $product;
 ?>
 <div class="panel" id="tab-attributes">
 
@@ -11,6 +11,6 @@ global $woocommerce, $post, $_product;
 	
 	<h2><?php echo $heading; ?></h2>
 	
-	<?php $_product->list_attributes(); ?>
+	<?php $product->list_attributes(); ?>
 
 </div>

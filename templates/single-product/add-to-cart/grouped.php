@@ -3,17 +3,17 @@
  * Grouped Product Add to Cart
  */
  
-global $woocommerce, $_product;
+global $woocommerce, $product;
 ?>
 
 <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-<form action="<?php echo esc_url( $_product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
+<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="cart" method="post" enctype='multipart/form-data'>
 	<table cellspacing="0" class="group_table">
 		<tbody>
-			<?php foreach ($_product->get_children() as $child_id) : $child_product = $_product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
+			<?php foreach ($product->get_children() as $child_id) : $child_product = $product->get_child( $child_id ); $cavailability = $child_product->get_availability(); ?>
 				<tr>
-					<td><?php woocommerce_quantity_input( 'quantity['.$child_product->id.']' ); ?></td>
+					<td><?php woocommerce_quantity_input( array( 'input_name' => 'quantity['.$child_product->id.']', 'input_value' => '0' ) ); ?></td>
 					<td><label for="product-<?php echo $child_product->id; ?>"><?php
 						if ($child_product->is_visible()) echo '<a href="'.get_permalink($child_product->id).'">';
 						echo $child_product->get_title();
