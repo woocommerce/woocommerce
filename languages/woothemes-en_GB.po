@@ -104,8 +104,8 @@ msgstr ""
 #: admin/admin-settings-forms.php:402
 #: admin/writepanels/writepanel-order_data.php:90
 #: admin/writepanels/writepanel-order_data.php:118
-#: shortcodes/shortcode-my_account.php:102
-#: shortcodes/shortcode-my_account.php:131
+#: shortcodes/shortcode-my_account.php:110
+#: shortcodes/shortcode-my_account.php:139
 #: woocommerce_taxonomy.php:166
 #: woocommerce_taxonomy.php:192
 #: woocommerce_taxonomy.php:225
@@ -199,49 +199,49 @@ msgstr ""
 msgid "Attribute taxonomies"
 msgstr ""
 
-#: admin/admin-dashboard.php:62
+#: admin/admin-dashboard.php:64
 #: woocommerce_taxonomy.php:251
 #@ woothemes
 msgid "Orders"
 msgstr ""
 
-#: admin/admin-dashboard.php:66
+#: admin/admin-dashboard.php:68
 #@ woothemes
 msgid "Pending"
 msgstr ""
 
-#: admin/admin-dashboard.php:70
+#: admin/admin-dashboard.php:72
 #@ woothemes
 msgid "On-Hold"
 msgstr ""
 
-#: admin/admin-dashboard.php:74
+#: admin/admin-dashboard.php:76
 #: admin/post-types/shop_order.php:128
 #@ woothemes
 msgid "Processing"
 msgstr ""
 
-#: admin/admin-dashboard.php:78
+#: admin/admin-dashboard.php:80
 #@ woothemes
 msgid "Completed"
 msgstr ""
 
-#: admin/admin-dashboard.php:100
+#: admin/admin-dashboard.php:102
 #@ woothemes
 msgid "Monthly Sales"
 msgstr ""
 
-#: admin/admin-dashboard.php:103
+#: admin/admin-dashboard.php:105
 #@ woothemes
 msgid "WooCommerce recent orders"
 msgstr ""
 
-#: admin/admin-dashboard.php:104
+#: admin/admin-dashboard.php:106
 #@ woothemes
 msgid "WooCommerce recent reviews"
 msgstr ""
 
-#: admin/admin-dashboard.php:129
+#: admin/admin-dashboard.php:131
 #: admin/admin-reports.php:307
 #@ woothemes
 msgid "item"
@@ -249,7 +249,7 @@ msgid_plural "items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/admin-dashboard.php:129
+#: admin/admin-dashboard.php:131
 #: admin/admin-reports.php:307
 #: shortcodes/shortcode-pay.php:114
 #: shortcodes/shortcode-thankyou.php:71
@@ -257,16 +257,16 @@ msgstr[1] ""
 msgid "Total:"
 msgstr ""
 
-#: admin/admin-dashboard.php:163
+#: admin/admin-dashboard.php:165
 #: classes/product.class.php:665
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
-#: woocommerce.php:541
+#: woocommerce.php:530
 #@ woothemes
 msgid "out of 5"
 msgstr ""
 
-#: admin/admin-dashboard.php:171
+#: admin/admin-dashboard.php:173
 #@ woothemes
 msgid "There are no product reviews yet."
 msgstr ""
@@ -406,32 +406,32 @@ msgstr ""
 msgid "No customer selected"
 msgstr ""
 
-#: admin/admin-init.php:255
+#: admin/admin-init.php:265
 #@ woothemes
 msgid "No product to duplicate has been supplied!"
 msgstr ""
 
-#: admin/admin-init.php:275
+#: admin/admin-init.php:285
 #@ woothemes
 msgid "Product creation failed, could not find original product:"
 msgstr ""
 
-#: admin/admin-init.php:293
+#: admin/admin-init.php:303
 #@ woothemes
 msgid "Make a duplicate from this product"
 msgstr ""
 
-#: admin/admin-init.php:294
+#: admin/admin-init.php:304
 #@ woothemes
 msgid "Duplicate"
 msgstr ""
 
-#: admin/admin-init.php:319
+#: admin/admin-init.php:329
 #@ woothemes
 msgid "Copy to a new draft"
 msgstr ""
 
-#: admin/admin-init.php:355
+#: admin/admin-init.php:365
 #@ woothemes
 msgid " (Copy)"
 msgstr ""
@@ -636,7 +636,7 @@ msgstr ""
 
 #: admin/post-types/product.php:35
 #: admin/post-types/shop_order.php:25
-#: shortcodes/shortcode-my_account.php:58
+#: shortcodes/shortcode-my_account.php:64
 #@ woothemes
 msgid "Date"
 msgstr ""
@@ -646,8 +646,8 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
-#: admin/admin-reports.php:1480
-#: admin/admin-reports.php:1502
+#: admin/admin-reports.php:1484
+#: admin/admin-reports.php:1506
 #: admin/post-types/product.php:86
 #@ woothemes
 msgid " in stock"
@@ -738,7 +738,7 @@ msgstr ""
 
 #: admin/admin-settings.php:1102
 #: admin/post-types/shop_order.php:20
-#: shortcodes/shortcode-my_account.php:61
+#: shortcodes/shortcode-my_account.php:67
 #@ woothemes
 msgid "Status"
 msgstr ""
@@ -838,7 +838,7 @@ msgid "Complete"
 msgstr ""
 
 #: admin/post-types/shop_order.php:130
-#: shortcodes/shortcode-my_account.php:81
+#: shortcodes/shortcode-my_account.php:89
 #@ woothemes
 msgid "View"
 msgstr ""
@@ -933,12 +933,12 @@ msgstr ""
 #: admin/admin-reports.php:757
 #: admin/admin-reports.php:763
 #: admin/admin-reports.php:769
-#: admin/admin-reports.php:1200
-#: admin/admin-reports.php:1206
-#: admin/admin-reports.php:1212
-#: admin/admin-reports.php:1218
-#: admin/admin-reports.php:1224
-#: admin/admin-reports.php:1230
+#: admin/admin-reports.php:1204
+#: admin/admin-reports.php:1210
+#: admin/admin-reports.php:1216
+#: admin/admin-reports.php:1222
+#: admin/admin-reports.php:1228
+#: admin/admin-reports.php:1234
 #@ woothemes
 msgid "n/a"
 msgstr ""
@@ -995,7 +995,7 @@ msgstr ""
 #: admin/admin-reports.php:744
 #: admin/admin-reports.php:897
 #: admin/admin-reports.php:991
-#: admin/admin-reports.php:1115
+#: admin/admin-reports.php:1119
 #@ woothemes
 msgid "Show"
 msgstr ""
@@ -1072,7 +1072,7 @@ msgstr ""
 
 #: admin/admin-reports.php:903
 #: admin/admin-reports.php:997
-#: admin/admin-reports.php:1122
+#: admin/admin-reports.php:1126
 #@ woothemes
 msgid "Sales"
 msgstr ""
@@ -1082,72 +1082,72 @@ msgstr ""
 msgid "Product does not exist"
 msgstr ""
 
-#: admin/admin-reports.php:1090
+#: admin/admin-reports.php:1094
 #@ woothemes
 msgid "Product:"
 msgstr ""
 
-#: admin/admin-reports.php:1093
+#: admin/admin-reports.php:1097
 #@ woothemes
 msgid "Choose an product&hellip;"
 msgstr ""
 
-#: admin/admin-reports.php:1121
+#: admin/admin-reports.php:1125
 #@ woothemes
 msgid "Month"
 msgstr ""
 
-#: admin/admin-reports.php:1139
+#: admin/admin-reports.php:1143
 #@ woothemes
 msgid "No sales :("
 msgstr ""
 
-#: admin/admin-reports.php:1198
+#: admin/admin-reports.php:1202
 #@ woothemes
 msgid "Total customers"
 msgstr ""
 
-#: admin/admin-reports.php:1204
+#: admin/admin-reports.php:1208
 #@ woothemes
 msgid "Total customer sales"
 msgstr ""
 
-#: admin/admin-reports.php:1210
+#: admin/admin-reports.php:1214
 #@ woothemes
 msgid "Total guest sales"
 msgstr ""
 
-#: admin/admin-reports.php:1216
+#: admin/admin-reports.php:1220
 #@ woothemes
 msgid "Total customer orders"
 msgstr ""
 
-#: admin/admin-reports.php:1222
+#: admin/admin-reports.php:1226
 #@ woothemes
 msgid "Total guest orders"
 msgstr ""
 
-#: admin/admin-reports.php:1228
+#: admin/admin-reports.php:1232
 #@ woothemes
 msgid "Average orders per customer"
 msgstr ""
 
-#: admin/admin-reports.php:1236
+#: admin/admin-reports.php:1240
 #@ woothemes
 msgid "Signups per day"
 msgstr ""
 
-#: admin/admin-reports.php:1470
+#: admin/admin-reports.php:1474
 #@ woothemes
 msgid "Low stock"
 msgstr ""
 
-#: admin/admin-reports.php:1484
+#: admin/admin-reports.php:1488
 #@ woothemes
 msgid "No products are low in stock."
 msgstr ""
 
-#: admin/admin-reports.php:1492
+#: admin/admin-reports.php:1496
 #: admin/writepanels/writepanel-product_data.php:164
 #: classes/product.class.php:389
 #: classes/product.class.php:417
@@ -1156,7 +1156,7 @@ msgstr ""
 msgid "Out of stock"
 msgstr ""
 
-#: admin/admin-reports.php:1506
+#: admin/admin-reports.php:1510
 #@ woothemes
 msgid "No products are out in stock."
 msgstr ""
@@ -2506,8 +2506,8 @@ msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:90
 #: classes/checkout.class.php:168
-#: shortcodes/shortcode-my_account.php:101
-#: shortcodes/shortcode-my_account.php:281
+#: shortcodes/shortcode-my_account.php:109
+#: shortcodes/shortcode-my_account.php:289
 #: shortcodes/shortcode-order_tracking.php:78
 #: woocommerce_template_functions.php:1378
 #@ woothemes
@@ -2530,8 +2530,8 @@ msgstr ""
 #: classes/checkout.class.php:35
 #: classes/checkout.class.php:105
 #: classes/checkout.class.php:106
-#: shortcodes/shortcode-my_account.php:284
-#: shortcodes/shortcode-my_account.php:285
+#: shortcodes/shortcode-my_account.php:292
+#: shortcodes/shortcode-my_account.php:293
 #@ woothemes
 msgid "First Name"
 msgstr ""
@@ -2542,8 +2542,8 @@ msgstr ""
 #: classes/checkout.class.php:41
 #: classes/checkout.class.php:111
 #: classes/checkout.class.php:112
-#: shortcodes/shortcode-my_account.php:288
-#: shortcodes/shortcode-my_account.php:289
+#: shortcodes/shortcode-my_account.php:296
+#: shortcodes/shortcode-my_account.php:297
 #@ woothemes
 msgid "Last Name"
 msgstr ""
@@ -2554,8 +2554,8 @@ msgstr ""
 #: classes/checkout.class.php:47
 #: classes/checkout.class.php:117
 #: classes/checkout.class.php:118
-#: shortcodes/shortcode-my_account.php:294
-#: shortcodes/shortcode-my_account.php:295
+#: shortcodes/shortcode-my_account.php:302
+#: shortcodes/shortcode-my_account.php:303
 #@ woothemes
 msgid "Company"
 msgstr ""
@@ -2574,7 +2574,7 @@ msgstr ""
 #: classes/checkout.class.php:57
 #: classes/checkout.class.php:127
 #: classes/checkout.class.php:128
-#: shortcodes/shortcode-my_account.php:303
+#: shortcodes/shortcode-my_account.php:311
 #@ woothemes
 msgid "Address 2"
 msgstr ""
@@ -2585,8 +2585,8 @@ msgstr ""
 #: classes/checkout.class.php:63
 #: classes/checkout.class.php:133
 #: classes/checkout.class.php:134
-#: shortcodes/shortcode-my_account.php:309
-#: shortcodes/shortcode-my_account.php:310
+#: shortcodes/shortcode-my_account.php:317
+#: shortcodes/shortcode-my_account.php:318
 #@ woothemes
 msgid "City"
 msgstr ""
@@ -2597,7 +2597,7 @@ msgstr ""
 #: classes/checkout.class.php:69
 #: classes/checkout.class.php:139
 #: classes/checkout.class.php:140
-#: shortcodes/shortcode-my_account.php:313
+#: shortcodes/shortcode-my_account.php:321
 #: woocommerce_template_functions.php:719
 #@ woothemes
 msgid "Postcode"
@@ -2607,7 +2607,7 @@ msgstr ""
 #: admin/writepanels/writepanel-order_data.php:137
 #: classes/checkout.class.php:75
 #: classes/checkout.class.php:146
-#: shortcodes/shortcode-my_account.php:319
+#: shortcodes/shortcode-my_account.php:327
 #@ woothemes
 msgid "Country"
 msgstr ""
@@ -2623,7 +2623,7 @@ msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:110
 #: classes/checkout.class.php:89
-#: shortcodes/shortcode-my_account.php:364
+#: shortcodes/shortcode-my_account.php:372
 #@ woothemes
 msgid "Email Address"
 msgstr ""
@@ -2635,8 +2635,8 @@ msgstr ""
 
 #: admin/writepanels/writepanel-order_data.php:118
 #: classes/checkout.class.php:236
-#: shortcodes/shortcode-my_account.php:130
-#: shortcodes/shortcode-my_account.php:281
+#: shortcodes/shortcode-my_account.php:138
+#: shortcodes/shortcode-my_account.php:289
 #: shortcodes/shortcode-order_tracking.php:87
 #: woocommerce_template_functions.php:1365
 #@ woothemes
@@ -3621,19 +3621,19 @@ msgstr ""
 
 #: classes/checkout.class.php:50
 #: classes/checkout.class.php:121
-#: shortcodes/shortcode-my_account.php:299
+#: shortcodes/shortcode-my_account.php:307
 #@ woothemes
 msgid "Address"
 msgstr ""
 
 #: classes/checkout.class.php:90
-#: shortcodes/shortcode-my_account.php:365
+#: shortcodes/shortcode-my_account.php:373
 #@ woothemes
 msgid "you@yourdomain.com"
 msgstr ""
 
 #: classes/checkout.class.php:95
-#: shortcodes/shortcode-my_account.php:369
+#: shortcodes/shortcode-my_account.php:377
 #@ woothemes
 msgid "Phone"
 msgstr ""
@@ -3706,15 +3706,15 @@ msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
 #: classes/checkout.class.php:302
-#: shortcodes/shortcode-my_account.php:321
+#: shortcodes/shortcode-my_account.php:329
 #: woocommerce_template_functions.php:680
 #@ woothemes
 msgid "Select a country&hellip;"
 msgstr ""
 
 #: classes/checkout.class.php:326
-#: shortcodes/shortcode-my_account.php:346
-#: woocommerce.php:264
+#: shortcodes/shortcode-my_account.php:354
+#: woocommerce.php:263
 #: woocommerce_template_functions.php:701
 #@ woothemes
 msgid "Select a state&hellip;"
@@ -3767,7 +3767,7 @@ msgid "Please enter an account password."
 msgstr ""
 
 #: classes/checkout.class.php:501
-#: shortcodes/shortcode-my_account.php:418
+#: shortcodes/shortcode-my_account.php:426
 #: woocommerce_actions.php:410
 #@ woothemes
 msgid "Passwords do not match."
@@ -6096,7 +6096,7 @@ msgid "cancelled"
 msgstr ""
 
 #: shortcodes/shortcode-cart.php:46
-#: shortcodes/shortcode-my_account.php:211
+#: shortcodes/shortcode-my_account.php:219
 #@ woothemes
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
@@ -6175,178 +6175,178 @@ msgstr[1] ""
 msgid "Recent Orders"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:57
+#: shortcodes/shortcode-my_account.php:63
 #@ woothemes
 msgid "#"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:59
+#: shortcodes/shortcode-my_account.php:65
 #@ woothemes
 msgid "Ship to"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:60
+#: shortcodes/shortcode-my_account.php:66
 #: widgets/widget-cart.php:70
 #@ woothemes
 msgid "Total"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:78
+#: shortcodes/shortcode-my_account.php:86
 #: shortcodes/shortcode-thankyou.php:50
 #@ woothemes
 msgid "Pay"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:79
+#: shortcodes/shortcode-my_account.php:87
 #@ woothemes
 msgid "Cancel"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:90
+#: shortcodes/shortcode-my_account.php:98
 #@ woothemes
 msgid "You have no recent orders."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:94
+#: shortcodes/shortcode-my_account.php:102
 #@ woothemes
 msgid "My Addresses"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:95
+#: shortcodes/shortcode-my_account.php:103
 #@ woothemes
 msgid "The following addresses will be used on the checkout page by default."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:121
+#: shortcodes/shortcode-my_account.php:129
 #@ woothemes
 msgid "You have not set up a billing address yet."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:150
+#: shortcodes/shortcode-my_account.php:158
 #@ woothemes
 msgid "You have not set up a shipping address yet."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:190
+#: shortcodes/shortcode-my_account.php:198
 #@ woothemes
 msgid "First name is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:191
+#: shortcodes/shortcode-my_account.php:199
 #@ woothemes
 msgid "Last name is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:192
+#: shortcodes/shortcode-my_account.php:200
 #@ woothemes
 msgid "Address is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:193
+#: shortcodes/shortcode-my_account.php:201
 #@ woothemes
 msgid "City is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:194
+#: shortcodes/shortcode-my_account.php:202
 #@ woothemes
 msgid "Postcode is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:195
+#: shortcodes/shortcode-my_account.php:203
 #@ woothemes
 msgid "Country is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:196
+#: shortcodes/shortcode-my_account.php:204
 #@ woothemes
 msgid "State is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:200
+#: shortcodes/shortcode-my_account.php:208
 #@ woothemes
 msgid "Email is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:201
+#: shortcodes/shortcode-my_account.php:209
 #@ woothemes
 msgid "Phone number is a required field."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:204
+#: shortcodes/shortcode-my_account.php:212
 #@ woothemes
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:207
+#: shortcodes/shortcode-my_account.php:215
 #@ woothemes
 msgid "Please enter a valid phone number."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:300
+#: shortcodes/shortcode-my_account.php:308
 #@ woothemes
 msgid "Address line 1"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:304
+#: shortcodes/shortcode-my_account.php:312
 #@ woothemes
 msgid "Address line 2"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:333
+#: shortcodes/shortcode-my_account.php:341
 #@ woothemes
 msgid "State"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:356
-#: woocommerce.php:265
+#: shortcodes/shortcode-my_account.php:364
+#: woocommerce.php:264
 #: woocommerce_template_functions.php:713
 #@ woothemes
 msgid "state"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:373
+#: shortcodes/shortcode-my_account.php:381
 #@ woothemes
 msgid "Fax"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:379
+#: shortcodes/shortcode-my_account.php:387
 #@ woothemes
 msgid "Save Address"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:424
+#: shortcodes/shortcode-my_account.php:432
 #@ woothemes
 msgid "Please enter your password."
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:438
+#: shortcodes/shortcode-my_account.php:446
 #@ woothemes
 msgid "New password"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:442
+#: shortcodes/shortcode-my_account.php:450
 #@ woothemes
 msgid "Re-enter new password"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:447
+#: shortcodes/shortcode-my_account.php:455
 #@ woothemes
 msgid "Save"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:479
+#: shortcodes/shortcode-my_account.php:487
 #, php-format
 #@ woothemes
 msgid "Order <mark>#%s</mark> made on <mark>%s</mark>"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:483
+#: shortcodes/shortcode-my_account.php:491
 #, php-format
 #@ woothemes
 msgid ". Order status: <mark>%s</mark>"
 msgstr ""
 
-#: shortcodes/shortcode-my_account.php:490
+#: shortcodes/shortcode-my_account.php:498
 #: shortcodes/shortcode-order_tracking.php:54
 #@ woothemes
 msgid "Order Updates"
@@ -7148,37 +7148,37 @@ msgstr ""
 msgid "Top Rated Products"
 msgstr ""
 
-#: woocommerce.php:174
+#: woocommerce.php:173
 #@ woothemes
 msgid "Customer"
 msgstr ""
 
-#: woocommerce.php:181
+#: woocommerce.php:180
 #@ woothemes
 msgid "Shop Manager"
 msgstr ""
 
-#: woocommerce.php:517
+#: woocommerce.php:506
 #@ woothemes
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce.php:520
+#: woocommerce.php:509
 #@ woothemes
 msgid "Please rate the product."
 msgstr ""
 
-#: woocommerce.php:545
+#: woocommerce.php:534
 #@ woothemes
 msgid "Your comment is awaiting approval"
 msgstr ""
 
-#: woocommerce.php:548
+#: woocommerce.php:537
 #@ woothemes
 msgid "Rating by"
 msgstr ""
 
-#: woocommerce.php:548
+#: woocommerce.php:537
 #@ woothemes
 msgid "on"
 msgstr ""
