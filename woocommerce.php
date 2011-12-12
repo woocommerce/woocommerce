@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An eCommerce plugin for wordpress.
-Version: 1.3
+Version: 1.3.2
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -13,81 +13,81 @@ Tested up to: 3.3
 if (!session_id()) session_start();
 
 /**
- * Localisation
- **/
-load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
-load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
-
-if (get_option('woocommerce_informal_localisation_type')=='yes') :
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/informal');
-else :
-	load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/formal');
-endif;
-
-/**
  * Constants
  **/ 
-if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');
-if (!defined("WOOCOMMERCE_VERSION")) define("WOOCOMMERCE_VERSION", "1.3");	
-if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
+define("WOOCOMMERCE_VERSION", "1.3.2");
+if (!defined('WOOCOMMERCE_TEMPLATE_URL')) define('WOOCOMMERCE_TEMPLATE_URL', 'woocommerce/');	
 
 /**
- * Include admin area
+ * Localisation
  **/
-if (is_admin()) :
+$variable_lang = (get_option('woocommerce_informal_localisation_type')=='yes') ? 'informal' : 'formal';
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
+load_plugin_textdomain('woothemes', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' . $variable_lang );
+
+/**
+ * Admin init + activation hooks
+ **/
+if (is_admin() && !defined('DOING_AJAX') ) :
+
 	require_once( 'admin/admin-init.php' );
 
-	/**
-	 * Installs and upgrades
-	 **/
 	register_activation_hook( __FILE__, 'activate_woocommerce' );
 	
-	if (get_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) add_action('init', 'install_woocommerce', 0);
-	
+	if (get_option('woocommerce_db_version') != WOOCOMMERCE_VERSION) : add_action('init', 'install_woocommerce', 0); endif;
+
 endif;
 
 /**
  * Include core files
  **/
-include_once( 'woocommerce_taxonomy.php' );
-include_once( 'widgets/widgets-init.php' );
-include_once( 'shortcodes/shortcodes-init.php' );
-include_once( 'woocommerce_actions.php' );
-include_once( 'woocommerce_emails.php' );
-include_once( 'woocommerce_template_actions.php' );
-include_once( 'woocommerce_templates.php' );
+if (defined('DOING_AJAX')) :
+	include_once( 'woocommerce_ajax.php' );					// Ajax functions for admin and the front-end
+endif;
+
+if ( !is_admin() || defined('DOING_AJAX') ) :
+	include_once( 'woocommerce_template_actions.php' );		// Template actions used on the front-end
+	include_once( 'shortcodes/shortcodes-init.php' );		// Init the shortcodes
+	include_once( 'classes/woocommerce_query.class.php' );	// The main store queries
+	add_action( 'init', 'include_template_functions', 99 );	// Defer loading template functions so functions are pluggable by themes
+endif;
+
+include_once( 'classes/cart.class.php' );				// The main cart class
+include_once( 'classes/coupons.class.php' );			// Coupons class
+include_once( 'classes/customer.class.php' ); 			// Customer class
+include_once( 'woocommerce_templates.php' );			// Loads template files - used in admin and front-end
+include_once( 'woocommerce_taxonomy.php' );				// Defines post formats and taxonomies
+include_once( 'widgets/widgets-init.php' );				// Widget classes
+include_once( 'woocommerce_actions.php' );				// Contains action hooks and functions for various events
+include_once( 'woocommerce_emails.php' );				// Email template handlers
+include_once( 'classes/countries.class.php' );			// Defines countries and states
+include_once( 'classes/order.class.php' );				// Single order class
+include_once( 'classes/product.class.php' );			// Product class
+include_once( 'classes/product_variation.class.php' );	// Product variation class
+include_once( 'classes/tax.class.php' );				// Tax class - used in admin and on the front-end
+include_once( 'classes/woocommerce.class.php' );		// Main WooCommerce class
+
+/**
+ * Include shipping modules and gateways
+ */
 include_once( 'classes/woocommerce_settings_api.class.php' );
 include_once( 'classes/gateways/gateways.class.php' );
 include_once( 'classes/gateways/gateway.class.php' );
 include_once( 'classes/shipping/shipping.class.php' );
 include_once( 'classes/shipping/shipping_method.class.php' );
-include_once( 'classes/cart.class.php' );
-include_once( 'classes/checkout.class.php' );
-include_once( 'classes/countries.class.php' );
-include_once( 'classes/coupons.class.php' );
-include_once( 'classes/customer.class.php' ); 
-include_once( 'classes/order.class.php' );
-include_once( 'classes/orders.class.php' );
-include_once( 'classes/product.class.php' );
-include_once( 'classes/product_variation.class.php' );
-include_once( 'classes/tax.class.php' );
-include_once( 'classes/validation.class.php' ); 
-include_once( 'classes/woocommerce_query.class.php' );
-include_once( 'classes/woocommerce_logger.class.php' );
-include_once( 'classes/woocommerce.class.php' );
-
-/**
- * Include core shipping modules
- */
 include_once( 'classes/shipping/shipping-flat_rate.php' );
 include_once( 'classes/shipping/shipping-free_shipping.php' );
-
-/**
- * Include core payment gateways
- */
 include_once( 'classes/gateways/gateway-banktransfer.php' );
 include_once( 'classes/gateways/gateway-cheque.php' );
 include_once( 'classes/gateways/gateway-paypal.php' );
+
+/**
+ * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes
+ **/
+function include_template_functions() {
+	include_once( 'woocommerce_template_functions.php' );
+}
 
 /**
  * Init woocommerce class
@@ -131,18 +131,6 @@ function woocommerce_init() {
     	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $woocommerce->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
     endif;
 }
-
-/**
- * Init WooCommerce Template Functions
- *
- * This makes them pluggable by plugins and themes
- **/
-add_action('init', 'include_template_functions', 99);
-
-function include_template_functions() {
-	include_once( 'woocommerce_template_functions.php' );
-}
-
 
 /**
  * Init WooCommerce Thumbnails after theme setup
@@ -269,7 +257,6 @@ function woocommerce_frontend_scripts() {
     	
 	/* Script variables */
 	$states = json_encode( $woocommerce->countries->states );
-	$states = (mb_detect_encoding($states, "UTF-8") == "UTF-8") ? $states : utf8_encode($states);
 	
 	$woocommerce_params = array(
 		'countries' 					=> $states,
@@ -340,6 +327,7 @@ if (!function_exists('is_account_page')) {
 }
 if (!function_exists('is_ajax')) {
 	function is_ajax() {
+		if ( defined('DOING_AJAX') ) return true;
 		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
 	}
 }
@@ -406,16 +394,6 @@ function woocommerce_force_ssl_urls( $url ) {
 if (!isset($_SERVER['REQUEST_URI'])) {
 	$_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'],1 );
 	if (isset($_SERVER['QUERY_STRING'])) { $_SERVER['REQUEST_URI'].='?'.$_SERVER['QUERY_STRING']; }
-}
-
-/**
- * Fix 'insert into post' buttons for images
- **/
-add_filter('get_media_item_args', 'woocommerce_allow_img_insertion');
-
-function woocommerce_allow_img_insertion($vars) {
-    $vars['send'] = true; // 'send' as in "Send to Editor"
-    return($vars);
 }
 
 /**

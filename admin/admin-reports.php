@@ -1068,12 +1068,16 @@ function woocommerce_product_sales() {
 		$product_sales = array();
 		$product_totals = array();
 		
+		// Get ID's related to product
+		$chosen_product = &new woocommerce_product( $chosen_product_id );
+		$child_ids = $chosen_product->get_children();
+		
 		if ($orders) :
 			foreach ($orders as $order) :
 				$date = date('Ym', strtotime( $order->post_date ));
 				$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
 				foreach ($order_items as $item) :
-					if ($item['id']!=$chosen_product_id) continue;
+					if ($item['id']!=$chosen_product_id && !in_array($item['id'], $child_ids)) continue;
 					$product_sales[$date] = isset($product_sales[$date]) ? $product_sales[$date] + $item['qty'] : $item['qty'];
 					$product_totals[$date] = isset($product_totals[$date]) ? $product_totals[$date] + ($item['qty'] * $item['cost']) : ($item['qty'] * $item['cost']);
 					

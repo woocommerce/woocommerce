@@ -289,44 +289,6 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 }
 
 /**
- * Mark an order as complete
- */
-function woocommerce_mark_order_complete() {
-
-	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
-	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-	if(!$order_id) die;
-	
-	$order = &new woocommerce_order( $order_id );
-	$order->update_status( 'completed' );
-	
-	wp_safe_redirect( wp_get_referer() );
-
-}
-add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_complete');
-
-/**
- * Mark an order as processing
- */
-function woocommerce_mark_order_processing() {
-
-	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
-	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-	if(!$order_id) die;
-	
-	$order = &new woocommerce_order( $order_id );
-	$order->update_status( 'processing' );
-	
-	wp_safe_redirect( wp_get_referer() );
-
-}
-add_action('wp_ajax_woocommerce-mark-order-processing', 'woocommerce_mark_order_processing');
-
-/**
  * Order custom field search
  **/
 if (is_admin()) :

@@ -370,9 +370,8 @@ class woocommerce_checkout {
 	 * Process the checkout after the confirm order button is pressed
 	 */
 	function process_checkout() {
-	
 		global $wpdb, $woocommerce;
-		$validation = &new woocommerce_validation();
+		$validation = $woocommerce->validation();
 		
 		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 
@@ -518,7 +517,7 @@ class woocommerce_checkout {
 			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woothemes') );
 			
 			if ($woocommerce->cart->needs_shipping()) :
-			
+				
 				// Shipping Method
 				$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
@@ -529,6 +528,7 @@ class woocommerce_checkout {
 			endif;	
 			
 			if ($woocommerce->cart->needs_payment()) :
+			
 				// Payment Method
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if (!isset($available_gateways[$this->posted['payment_method']])) :

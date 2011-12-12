@@ -26,7 +26,7 @@ class woocommerce_shipping {
 		do_action('woocommerce_shipping_init');
 		
 		$load_methods = apply_filters('woocommerce_shipping_methods', array());
-		
+
 		foreach ($load_methods as $method) :
 		
 			$this->shipping_methods[] = &new $method();
@@ -40,7 +40,7 @@ class woocommerce_shipping {
 		if (!is_array($this->shipping_classes)) :
 			
 			$args = array(
-				'hide_empty' => '1'
+				'hide_empty' => '0'
 			);
 			$classes = get_terms( 'product_shipping_class', $args );
 			

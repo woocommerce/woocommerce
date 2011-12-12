@@ -14,7 +14,7 @@ class woocommerce_payment_gateways {
 	var $payment_gateways;
    
     function init() {
-    	
+    
     	$load_gateways = apply_filters('woocommerce_payment_gateways', array());
 		
 		// Get order option

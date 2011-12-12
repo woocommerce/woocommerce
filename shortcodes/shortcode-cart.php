@@ -17,7 +17,7 @@ function get_woocommerce_cart( $atts ) {
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
 	$errors = array();
-	$validation = &new woocommerce_validation();
+	$validation = $woocommerce->validation();
 	
 	// Process Discount Codes
 	if (isset($_POST['apply_coupon']) && $_POST['apply_coupon'] && $woocommerce->verify_nonce('cart')) :

@@ -20,11 +20,11 @@
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 			</tr><?php endif; ?>
 			
-			<?php  if ($woocommerce->cart->needs_shipping()) : ?>
+			<?php if ($woocommerce->cart->needs_shipping()) : ?>
 				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
 				<td>
 				<?php
-				
+					
 					$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 					if (sizeof($available_methods)>0) :
