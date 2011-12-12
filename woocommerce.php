@@ -166,6 +166,7 @@ class woocommerce {
 		include( 'classes/order.class.php' );				// Single order class
 		include( 'classes/product.class.php' );				// Product class
 		include( 'classes/product_variation.class.php' );	// Product variation class
+		include( 'classes/tax.class.php' );					// Tax class
 		
 		// Include shipping modules and gateways
 		include( 'classes/woocommerce_settings_api.class.php' );
@@ -203,7 +204,6 @@ class woocommerce {
 		include( 'shortcodes/shortcodes-init.php' );			// Init the shortcodes
 		include( 'classes/woocommerce_query.class.php' );		// The main store queries
 		include( 'classes/cart.class.php' );					// The main cart class
-		include( 'classes/tax.class.php' );						// Tax class
 		include( 'classes/coupons.class.php' );					// Coupons class
 		include( 'classes/customer.class.php' ); 				// Customer class
 		include( 'classes/validation.class.php' );				// Validation class
