@@ -22,8 +22,6 @@ function woocommerce_order_data_meta_box($post) {
 	
 	$order = &new woocommerce_order( $thepostid );
 	
-	add_action('admin_footer', 'woocommerce_meta_scripts');
-	
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
 	// Custom user

@@ -18,7 +18,6 @@ require_once('writepanel-product-type-variable.php');
  */
 function woocommerce_product_data_box() {
 	global $post, $wpdb, $thepostid, $woocommerce;
-	add_action('admin_footer', 'woocommerce_meta_scripts');
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
 	$thepostid = $post->ID;

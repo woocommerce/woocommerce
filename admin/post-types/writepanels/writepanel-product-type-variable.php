@@ -205,19 +205,10 @@ function variable_product_type_options() {
 		<div class="clear"></div>
 	</div>
 	<?php
-}
-add_action('woocommerce_product_write_panels', 'variable_product_type_options');
-
- 
-/**
- * Product Type Javascript
- * 
- * Javascript for the variable product type
- */
-function variable_product_write_panel_js() {
-	global $post, $woocommerce;
-	
-	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
+	/**
+	 * Product Type Javascript
+	 */
+	ob_start();
 	?>
 	jQuery(function(){
 	
@@ -502,9 +493,10 @@ function variable_product_write_panel_js() {
 
 	});
 	<?php
-	
+	$javascript = ob_get_clean();
+	$woocommerce->add_inline_js( $javascript );
 }
-add_action('woocommerce_product_write_panel_js', 'variable_product_write_panel_js');
+add_action('woocommerce_product_write_panels', 'variable_product_type_options');
 
 /**
  * Product Type selector

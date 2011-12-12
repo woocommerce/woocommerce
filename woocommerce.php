@@ -102,6 +102,7 @@ class woocommerce {
 		add_action( 'the_post', array(&$this, 'setup_product_data') );
 		add_action( 'plugins_loaded', array( &$this->shipping, 'init' ), 1); 			// Load shipping methods - some more may be added by plugins
 		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1); 	// Load payment methods - some more may be added by plugins
+		add_action( 'admin_footer', array(&$this, 'output_inline_js'), 25);
 		
 		// Email Actions
 		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
@@ -183,7 +184,7 @@ class woocommerce {
 	 * Include required admin files
 	 **/
 	function admin_includes() {
-		include( 'admin/admin-init.php' );						// Admin section
+		include( 'admin/woocommerce-admin-init.php' );			// Admin section
 	}
 	
 	/**

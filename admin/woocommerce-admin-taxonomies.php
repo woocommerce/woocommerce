@@ -28,37 +28,37 @@ function woocommerce_add_category_thumbnail_field() {
 		</div>
 		<script type="text/javascript">
 			
-				window.send_to_termmeta = function(html) {
-					
-					jQuery('body').append('<div id="temp_image">' + html + '</div>');
-					
-					var img = jQuery('#temp_image').find('img');
-					
-					imgurl 		= img.attr('src');
-					imgclass 	= img.attr('class');
-					imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
-					
-					jQuery('#product_cat_thumbnail_id').val(imgid);
-					jQuery('#product_cat_thumbnail img').attr('src', imgurl);
-					jQuery('#temp_image').remove();
-					
-					tb_remove();
-				}
+			window.send_to_termmeta = function(html) {
 				
-				jQuery('.upload_image_button').live('click', function(){
-					var post_id = 0;
-					
-					window.send_to_editor = window.send_to_termmeta;
-					
-					tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
-					return false;
-				});
+				jQuery('body').append('<div id="temp_image">' + html + '</div>');
 				
-				jQuery('.remove_image_button').live('click', function(){
-					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
-					jQuery('#product_cat_thumbnail_id').val('');
-					return false;
-				});
+				var img = jQuery('#temp_image').find('img');
+				
+				imgurl 		= img.attr('src');
+				imgclass 	= img.attr('class');
+				imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
+				
+				jQuery('#product_cat_thumbnail_id').val(imgid);
+				jQuery('#product_cat_thumbnail img').attr('src', imgurl);
+				jQuery('#temp_image').remove();
+				
+				tb_remove();
+			}
+			
+			jQuery('.upload_image_button').live('click', function(){
+				var post_id = 0;
+				
+				window.send_to_editor = window.send_to_termmeta;
+				
+				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
+				return false;
+			});
+			
+			jQuery('.remove_image_button').live('click', function(){
+				jQuery('#product_cat_thumbnail img').attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
+				jQuery('#product_cat_thumbnail_id').val('');
+				return false;
+			});
 			
 		</script>
 		<div class="clear"></div>
@@ -136,53 +136,6 @@ function woocommerce_category_thumbnail_field_save( $term_id, $tt_id, $taxonomy 
     }
 }
 
-
-/**
- * Category/Term ordering
- */
-
-/**
- * Reorder on term insertion
- */
-add_action("create_term", 'woocommerce_create_term', 5, 3);
-
-function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
-	
-	if (!$taxonomy=='product_cat' && !strstr($taxonomy, 'pa_')) return;
-	
-	$next_id = null;
-	
-	$term = get_term($term_id, $taxonomy);
-	
-	// gets the sibling terms
-	$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
-	
-	foreach ($siblings as $sibling) {
-		if( $sibling->term_id == $term_id ) continue;
-		$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
-		break;
-	}
-
-	// reorder
-	woocommerce_order_terms( $term, $next_id, $taxonomy );
-}
-
-/**
- * Delete terms metas on deletion
- */
-add_action("delete_product_term", 'woocommerce_delete_term', 5, 3);
-
-function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
-	
-	$term_id = (int) $term_id;
-	
-	if(!$term_id) return;
-	
-	global $wpdb;
-	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
-	
-}
-
 /**
  * Description for product_cat page
  */
@@ -194,7 +147,6 @@ function woocommerce_product_cat_description() {
 
 }
 
-
 /**
  * Description for shipping class page
  */
@@ -205,7 +157,6 @@ function woocommerce_shipping_class_description() {
 	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
 
 }
-
 
 /**
  * Fix for per_page option
@@ -239,6 +190,4 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
 	}
 	
 	return $per_page;
-	
 }
-

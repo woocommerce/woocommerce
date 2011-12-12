@@ -9,11 +9,6 @@
  * @package 	WooCommerce
  */
 
-require_once('writepanel-product_data.php');
-require_once('writepanel-order_data.php');
-require_once('writepanel-order_notes.php');
-require_once('writepanel-coupon_data.php');
-
 /**
  * Init the meta boxes
  * 
@@ -45,9 +40,6 @@ function woocommerce_meta_boxes() {
 	remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
-	
-	//remove_meta_box('pageparentdiv', 'product_variation', 'side');
-	//add_meta_box('product_variation-parent', __('Product', 'woothemes'), 'variations_product_meta_box', 'product_variation', 'side', 'default');
 }
 
 /**
@@ -140,21 +132,6 @@ function woocommerce_meta_boxes_save_errors() {
     	echo '</div>';
     	update_option('woocommerce_errors', '');
     endif; 
-}
-
-/**
- * Meta scripts
- * 
- * Outputs JavaScript used by the meta panels.
- */
-function woocommerce_meta_scripts() {
-	?>
-	<script type="text/javascript">
-		jQuery(function(){
-			<?php do_action('woocommerce_product_write_panel_js'); ?>
-		});
-	</script>
-	<?php
 }
 
 /**

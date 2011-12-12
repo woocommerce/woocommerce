@@ -10,21 +10,9 @@
  */
 
 /**
- * Activate woocommerce
- */
-function activate_woocommerce() {
-	
-	install_woocommerce();
-	
-	// Update installed variable
-	update_option( "woocommerce_installed", 1 );
-	update_option( 'skip_install_woocommerce_pages', 0 );
-}
-
-/**
  * Install woocommerce
  */
-function install_woocommerce() {
+function do_install_woocommerce() {
 	global $woocommerce_settings, $woocommerce;
 	
 	// Do install
@@ -60,31 +48,6 @@ function install_woocommerce() {
 }
 
 /**
- * Install woocommerce redirect
- */
-add_action('admin_init', 'install_woocommerce_redirect');
-function install_woocommerce_redirect() {
-	global $pagenow, $woocommerce;
-
-	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' && get_option( "woocommerce_installed" ) == 1 ) :
-		
-		// Clear transient cache
-		$woocommerce->clear_product_transients();
-		
-		// Unset installed flag
-		update_option( "woocommerce_installed", 0 );
-		
-		// Flush rewrites
-		flush_rewrite_rules( false );
-		
-		// Redirect to settings
-		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
-		exit;
-		
-	endif;
-}
-
-/**
  * Add required post meta so queries work
  */
 function woocommerce_populate_custom_fields() {
@@ -112,7 +75,7 @@ function woocommerce_default_options() {
 	global $woocommerce_settings;
 	
 	// Include settings so that we can run through defaults
-	include_once( 'admin-settings.php' );
+	include_once( 'woocommerce-admin-settings.php' );
 	
 	foreach ($woocommerce_settings as $section) :
 	
