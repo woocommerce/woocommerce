@@ -66,12 +66,12 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		<?php echo $before_widget; ?>
 		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
 		<ul class="product_list_widget">
-		<?php foreach ($featured_posts as $r) : $_product = &new woocommerce_product( $r->ID ); ?>
+		<?php foreach ($featured_posts as $r) : $r->the_post(); global $product; ?>
 		
 		<li><a href="<?php echo esc_url( get_permalink( $r->ID ) ); ?>" title="<?php echo esc_attr($r->post_title ? $r->post_title : $r->ID); ?>">
-			<?php echo $_product->get_image(); ?>
+			<?php echo $product->get_image(); ?>
 			<?php if ( $r->post_title ) echo get_the_title( $r->ID ); else echo $r->ID; ?>			
-		</a> <?php echo $_product->get_price_html(); ?></li>
+		</a> <?php echo $product->get_price_html(); ?></li>
 		
 		<?php endforeach; ?>
 		</ul>
