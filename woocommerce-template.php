@@ -40,6 +40,19 @@ if (!function_exists('woocommerce_prevent_sidebar_cache')) {
 	}
 }
 
+/**
+ * Demo Banner
+ *
+ * Adds a demo store banner to the site if enabled
+ **/
+if (!function_exists('woocommerce_demo_store')) {
+	function woocommerce_demo_store() {
+		if (get_option('woocommerce_demo_store')=='no') return;
+		
+		echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>' );
+	}
+}
+
 /** Loop ******************************************************************/
 
 /**
@@ -286,7 +299,15 @@ if (!function_exists('woocommerce_product_reviews_panel')) {
 	}
 }
 
-
+/**
+ * Review comments template
+ **/
+if (!function_exists('woocommerce_comments')) {
+	function woocommerce_comments($comment, $args, $depth) {
+		$GLOBALS['comment'] = $comment;
+		woocommerce_get_template('single-product/review.php', false);
+	}
+}
 
 /**
  * WooCommerce Related Products
@@ -306,6 +327,15 @@ if (!function_exists('woocommerce_related_products')) {
 		$orderby = $ob;
 
 		woocommerce_get_template('single-product/related.php', false);
+	}
+}
+
+/**
+ * Display Up Sells
+ **/
+if (!function_exists('woocommerce_upsell_display')) {
+	function woocommerce_upsell_display() {
+		woocommerce_get_template('single-product/up-sells.php', false);
 	}
 }
 
@@ -329,37 +359,33 @@ if (!function_exists('woocommerce_cart_totals')) {
 	}
 }
 
+/**
+ * Display Cross Sells
+ **/
+if (!function_exists('woocommerce_cross_sell_display')) {
+	function woocommerce_cross_sell_display() {
+		woocommerce_get_template('cart/cross-sells.php', false);
+	}
+}
+
 /** Login *****************************************************************/
 
 /**
  * WooCommerce Login Form
  **/
 if (!function_exists('woocommerce_login_form')) {
-	function woocommerce_login_form( $message = '' ) {
-		global $woocommerce;
+	function woocommerce_login_form( $args = array() ) {
+		global $message;
+		
+		$defaults = array(
+			'message' => ''
+		);
 
-		if (is_user_logged_in()) return;
-
-		?>
-		<form method="post" class="login">
-			<?php if ($message) echo wpautop(wptexturize($message)); ?>
-			<p class="form-row form-row-first">
-				<label for="username"><?php _e('Username', 'woothemes'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="username" id="username" />
-			</p>
-			<p class="form-row form-row-last">
-				<label for="password"><?php _e('Password', 'woothemes'); ?> <span class="required">*</span></label>
-				<input class="input-text" type="password" name="password" id="password" />
-			</p>
-			<div class="clear"></div>
-
-			<p class="form-row">
-				<?php $woocommerce->nonce_field('login', 'login') ?>
-				<input type="submit" class="button" name="login" value="<?php _e('Login', 'woothemes'); ?>" />
-				<a class="lost_password" href="<?php echo esc_url( wp_lostpassword_url( home_url() ) ); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
-			</p>
-		</form>
-		<?php
+		$args = wp_parse_args( $args, $defaults );
+					
+		extract( $args );
+	
+		woocommerce_get_template('shop/login-form.php', false);
 	}
 }
 
@@ -368,16 +394,7 @@ if (!function_exists('woocommerce_login_form')) {
  **/
 if (!function_exists('woocommerce_checkout_login_form')) {
 	function woocommerce_checkout_login_form() {
-
-		if (is_user_logged_in()) return;
-
-		if (get_option('woocommerce_enable_signup_and_login_from_checkout')=="no") return;
-
-		$info_message = apply_filters('woocommerce_checkout_login_message', __('Already registered?', 'woothemes'));
-
-		?><p class="info"><?php echo $info_message; ?> <a href="#" class="showlogin"><?php _e('Click here to login', 'woothemes'); ?></a></p><?php
-
-		woocommerce_login_form( __('If you have shopped with us before, please enter your username and password in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section.', 'woothemes') );
+		woocommerce_get_template('checkout/login-form.php', false);
 	}
 }
 
@@ -406,74 +423,11 @@ if (!function_exists('woocommerce_breadcrumb')) {
 }
 
 /**
- * Display Up Sells
- **/
-if (!function_exists('woocommerce_upsell_display')) {
-	function woocommerce_upsell_display() {
-		global $product;
-		$upsells = $product->get_upsells();
-		if (sizeof($upsells)>0) :
-			echo '<div class="upsells products"><h2>'.__('You may also like&hellip;', 'woothemes').'</h2>';
-			$args = array(
-				'post_type'	=> 'product',
-				'ignore_sticky_posts'	=> 1,
-				'posts_per_page' => 4,
-				'orderby' => 'rand',
-				'post__in' => $upsells
-			);
-			query_posts($args);
-			woocommerce_get_template_part( 'loop', 'shop' );
-			echo '</div>';
-		endif;
-		wp_reset_query();
-	}
-}
-
-/**
- * Display Cross Sells
- **/
-if (!function_exists('woocommerce_cross_sell_display')) {
-	function woocommerce_cross_sell_display() {
-		global $woocommerce_loop, $woocommerce;
-		$woocommerce_loop['columns'] = 2;
-		$crosssells = $woocommerce->cart->get_cross_sells();
-	
-		if (sizeof($crosssells)>0) :
-			echo '<div class="cross-sells"><h2>'.__('You may be interested in&hellip;', 'woothemes').'</h2>';
-			$args = array(
-				'post_type'	=> 'product',
-				'ignore_sticky_posts'	=> 1,
-				'posts_per_page' => 2,
-				'orderby' => 'rand',
-				'post__in' => $crosssells
-			);
-			query_posts($args);
-			woocommerce_get_template_part( 'loop', 'shop' );
-			echo '</div>';
-		endif;
-		wp_reset_query();
-	}
-}
-
-/**
  * Order review table for checkout
  **/
 if (!function_exists('woocommerce_order_review')) {
 	function woocommerce_order_review() {
 		woocommerce_get_template('checkout/review_order.php', false);
-	}
-}
-
-/**
- * Demo Banner
- *
- * Adds a demo store banner to the site if enabled
- **/
-if (!function_exists('woocommerce_demo_store')) {
-	function woocommerce_demo_store() {
-		if (get_option('woocommerce_demo_store')=='no') return;
-		
-		echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>' );
 	}
 }
 
@@ -485,22 +439,18 @@ if (!function_exists('woocommerce_product_subcategories')) {
 		global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_categories, $product_category_found, $product_category_parent;
 	
 		if ($wp_query !== $wp_the_query) return; // Detect main query
-	
 		if (sizeof($_chosen_attributes)>0 || (isset($_GET['max_price']) && isset($_GET['min_price']))) return; // Don't show when filtering
-	
 		if (is_search()) return;
 		if (!is_product_category() && !is_shop()) return;
 		if (is_product_category() && get_option('woocommerce_show_subcategories')=='no') return;
 		if (is_shop() && get_option('woocommerce_shop_show_subcategories')=='no') return;
 		if (is_paged()) return;
 	
-		$product_cat_slug 	= get_query_var('product_cat');
-	
-		if ($product_cat_slug) :
-			$product_cat 		= get_term_by('slug', $product_cat_slug, 'product_cat');
-			$product_category_parent = $product_cat->term_id;
+		if ($product_cat_slug = get_query_var('product_cat')) :
+			$product_cat 				= get_term_by('slug', $product_cat_slug, 'product_cat');
+			$product_category_parent 	= $product_cat->term_id;
 		else :
-			$product_category_parent = 0;
+			$product_category_parent 	= 0;
 		endif;
 	
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug (http://core.trac.wordpress.org/ticket/15626) pad_counts won't work
@@ -565,14 +515,4 @@ if (!function_exists('woocommerce_order_details_table')) {
 		
 		woocommerce_get_template('order/order-details-table.php', false);
 	}	
-}
-
-/**
- * Review comments template
- **/
-if (!function_exists('woocommerce_comments')) {
-	function woocommerce_comments($comment, $args, $depth) {
-		$GLOBALS['comment'] = $comment;
-		woocommerce_get_template('single-product/review.php', false);
-	}
 }
