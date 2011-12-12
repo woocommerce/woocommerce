@@ -148,7 +148,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$currency_symbol = get_woocommerce_currency_symbol();
 	$price = number_format( (double) $price, $num_decimals, get_option('woocommerce_price_decimal_sep'), get_option('woocommerce_price_thousand_sep') );
 	
-	if (get_option('woocommerce_price_trim_zeros')=='yes') :
+	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) :
 		$trimmed_price = rtrim(rtrim($price, '0'), get_option('woocommerce_price_decimal_sep'));
 		$after_decimal = explode(get_option('woocommerce_price_decimal_sep'), $trimmed_price);
 		if (!isset($after_decimal[1]) || (isset($after_decimal[1]) && (strlen($after_decimal[1]) == 0 && strlen($after_decimal[1]) == $num_decimals))) $price = $trimmed_price;
