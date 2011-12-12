@@ -568,13 +568,13 @@ class woocommerce_product {
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
 			
-			$price .= '<span class="from">' . __('From:', 'woothemes') . ' </span>' . woocommerce_price($min_price);	
+			$price .= '<span class="from">' . _x('From:', 'min_price', 'woothemes') . ' </span>' . woocommerce_price($min_price);	
 			
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
 			
-			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . __('From:', 'woothemes') . ' </span>';
+			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woothemes') . ' </span>';
 			
 			$price .= woocommerce_price($this->get_price());
 			
