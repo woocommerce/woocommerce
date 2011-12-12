@@ -603,7 +603,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			// Mail link to customer
 			global $woocommerce;
 			$mailer = $woocommerce->mailer();
-			$mailer->pay_for_order_customer_notification( $order );
+			$mailer->customer_pay_for_order( $order );
 			
 		endif;
 	

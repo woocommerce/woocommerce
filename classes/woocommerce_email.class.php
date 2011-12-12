@@ -150,9 +150,12 @@ class woocommerce_email {
 		
 		// Get contents
 		$message = ob_get_clean();
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_customer_processing_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message );
+		$this->send( $order->billing_email, $subject, $message, $attachments );
 	}
 
 	/**
@@ -183,15 +186,18 @@ class woocommerce_email {
 		
 		// Get contents
 		$message = ob_get_clean();
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_customer_completed_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message );
+		$this->send( $order->billing_email, $subject, $message, $attachments );
 	}
 
 	/**
 	 * Pay for order
 	 **/
-	function pay_for_order_customer_notification( $pay_for_order ) {
+	function customer_pay_for_order( $pay_for_order ) {
 		global $order, $email_heading;
 		
 		$order = $pay_for_order;
@@ -208,9 +214,12 @@ class woocommerce_email {
 		
 		// Get contents
 		$message = ob_get_clean();
-	
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_customer_pay_for_order_attachments', '');
+		
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message );
+		$this->send( $order->billing_email, $subject, $message, $attachments );
 	}
 
 	/**
