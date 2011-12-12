@@ -46,6 +46,7 @@ class woocommerce_order {
 		
 		// Standard post data
 		$this->id = $result->ID; 
+		$this->status = $result->post_status;
 		$this->order_date = $result->post_date;
 		$this->modified_date = $result->post_modified;	
 		$this->customer_note = $result->post_excerpt;
