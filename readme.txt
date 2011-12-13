@@ -85,6 +85,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 = 1.4 =
 * Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
+* Moved template function contents to template files
 * Moved woocommerce class into the main file
 * Category ordering fix
 * Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
