@@ -478,6 +478,9 @@ function woocommerce_admin_fields($options) {
                 </tr>
                 <?php
             break;
+            default:
+            	do_action( 'woocommerce_admin_field_'.$value['type'], $value );
+            break;
         endswitch;
     endforeach;
 }
