@@ -55,7 +55,7 @@ function woocommerce_cart( $atts ) {
 		
 		else :
 		
-			$woocommerce->customer->set_shipping_location( '', '', '' );
+			$woocommerce->customer->set_shipping_to_base();
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
 			
 		endif;

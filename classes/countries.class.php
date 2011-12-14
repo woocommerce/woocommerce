@@ -570,7 +570,7 @@ class woocommerce_countries {
 	function shipping_to_prefix() {
 		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
+		if (in_array($woocommerce->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
 		else $return = __('to', 'woothemes');
 		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
 	}
@@ -579,8 +579,8 @@ class woocommerce_countries {
 	function estimated_for_prefix() {
 		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
-		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
+		if (in_array($this->get_base_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
+		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country());
 	}
 	
 	/** Correctly name tax in some countries VAT on the frontend */
