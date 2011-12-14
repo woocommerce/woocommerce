@@ -98,8 +98,8 @@ function woocommerce_get_template($template_name, $require_once = true) {
 /**
  * Currency
  **/
-function get_woocommerce_currency_symbol() {
-	$currency = get_option('woocommerce_currency');
+function get_woocommerce_currency_symbol( $currency = '' ) {
+	if (!$currency) $currency = get_option('woocommerce_currency');
 	$currency_symbol = '';
 	switch ($currency) :
 		case 'AUD' :
