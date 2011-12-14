@@ -686,7 +686,7 @@ class woocommerce_cart {
 			global $woocommerce;
 			
 			$this->reset_totals();
-			
+			do_action('woocommerce_before_calculate_totals', $this);
 			// Get count of all items + weights + subtotal (we may need this for discounts)
 			if (sizeof($this->cart_contents)>0) foreach ($this->cart_contents as $cart_item_key => $values) :
 				
