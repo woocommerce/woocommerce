@@ -612,7 +612,7 @@ class woocommerce {
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
 				'hierarchical' 			=> true,
-				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false ),
+				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
 				'has_archive' 			=> $base_slug,
