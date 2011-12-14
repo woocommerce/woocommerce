@@ -245,7 +245,7 @@ class woocommerce {
 		return $template;
 	}
 	
-	function comments_template_loader() {
+	function comments_template_loader( $template ) {
 		if(get_post_type() !== 'product') return $template;
 	
 		if (file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
