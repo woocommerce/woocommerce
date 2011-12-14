@@ -58,3 +58,5 @@ if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart-
 	<?php $woocommerce->nonce_field('cart') ?>
 	</section>
 </form>
+
+<?php do_action( 'woocommerce_after_shipping_calculator' ); ?>
