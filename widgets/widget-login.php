@@ -36,6 +36,9 @@ class WooCommerce_Widget_Login extends WP_Widget {
 		
 		extract($args);
 		
+		// Don't show if on the account page since that has a login
+		if (is_account_page() && !is_user_logged_in()) return;
+			
 		$logged_out_title = (!empty($instance['logged_out_title'])) ? $instance['logged_out_title'] : __('Customer Login', 'woothemes');
 		$logged_in_title = (!empty($instance['logged_in_title'])) ? $instance['logged_in_title'] : __('Welcome %s', 'woothemes');
 
