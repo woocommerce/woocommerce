@@ -143,7 +143,7 @@ jQuery(document).ready(function($) {
 	$('select.country_to_state').change(function(){
 		
 		var country = $(this).val();
-		var state_box = $('#' + $(this).attr('rel'));
+		var state_box = $(this).closest('div').find('#billing_state, #shipping_state');
 		
 		var input_name = $(state_box).attr('name');
 		var input_id = $(state_box).attr('id');
@@ -168,7 +168,7 @@ jQuery(document).ready(function($) {
 				if ($(state_box).is('input')) {
 					// Change for select
 					$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
-					state_box = $('#' + $(this).attr('rel'));
+					state_box = $(this).closest('div').find('#billing_state, #shipping_state');
 				}
 				$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
 				

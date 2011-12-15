@@ -32,142 +32,90 @@ class woocommerce_checkout {
 		include_once('localisation.class.php');
 		$this->localisation = &new woocommerce_localisation();
 		
-		// Define billing fields in an array. This can be hooked into and filtered if you wish to change/add anything.
-		$this->billing_fields = apply_filters('woocommerce_billing_fields', array(
-			'billing_first_name' => array( 
-				'name'			=>'billing_first_name', 
+		// Checkout fields
+		$this->address_fields = apply_filters('woocommerce_address_fields', array(
+			'first_name' => array( 
 				'label' 		=> __('First Name', 'woothemes'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-first'),
 				'position'		=> 1,
 				),
-			'billing_last_name' => array( 
+			'last_name' => array( 
 				'label' 		=> __('Last Name', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'position'		=> 2,
 				),
-			'billing_company' 	=> array( 
+			'company' 	=> array( 
 				'label' 		=> __('Company Name', 'woothemes'), 
 				'placeholder' 	=> __('Company (optional)', 'woothemes'),
 				'position'		=> 3,
 				),
-			'billing_address_1' 	=> array( 
+			'address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				'position'		=> 4,
 				),
-			'billing_address_2' => array( 
+			'address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
 				'placeholder' 	=> __('Address 2 (optional)', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
 				'label_class' 	=> array('hidden'),
 				'position'		=> 5,
 				),
-			'billing_city' 		=> array( 
+			'city' 		=> array( 
 				'label' 		=> __('City', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				'position'		=> 6,
 				),
-			'billing_postcode' 	=> array( 
+			'postcode' 	=> array( 
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-last', 'update_totals_on_change'),
 				'position'		=> 7,
 				),
-			'billing_country' 	=> array( 
+			'country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'), 
-				'rel' 			=> 'billing_state',
 				'position'		=> 8,
 				),
-			'billing_state' 	=> array( 
+			'state' 	=> array( 
 				'type'			=> 'state', 
-				'name'			=>'billing_state', 
-				'label' 		=> __('State/County', 'woothemes'), 
+				'label' 		=> __('County', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
-				'rel' 			=> 'billing_country',
 				'position'		=> 9,
-				),
-			'billing_email' 	=> array( 
-				'label' 		=> __('Email Address', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first'),
-				'position'		=> 10,
-				),
-			'billing_phone' 	=> array( 
-				'label' 		=> __('Phone', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last'),
-				'position'		=> 11,
 				)
 		));
 		
-		// Define shipping fields in an array. This can be hooked into and filtered if you wish to change/add anything.
-		$this->shipping_fields = apply_filters('woocommerce_shipping_fields', array(
-			'shipping_first_name' => array( 
-				'label' 		=> __('First Name', 'woothemes'), 
-				'placeholder' 	=> __('First Name', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
-				),
-			'shipping_last_name' => array( 
-				'label' 		=> __('Last Name', 'woothemes'), 
-				'placeholder' 	=> __('Last Name', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
-				),
-			'shipping_company' 	=> array( 
-				'label' 		=> __('Company', 'woothemes'), 
-				'placeholder' 	=> __('Company', 'woothemes') 
-				),
-			'shipping_address_1' 	=> array( 
-				'label' 		=> __('Address', 'woothemes'), 
-				'placeholder' 	=> __('Address 1', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
-				),
-			'shipping_address_2' => array( 
-				'label' 		=> __('Address 2', 'woothemes'), 
-				'placeholder' 	=> __('Address 2', 'woothemes'), 
-				'class' 		=> array('form-row-last'), 
-				'label_class' 	=> array('hidden') 
-				),
-			'shipping_city' 	=> array( 
-				'label' 		=> __('City', 'woothemes'), 
-				'placeholder' 	=> __('City', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
-				),
-			'shipping_postcode' => array( 
-				'label' 		=> __('Postcode', 'woothemes'), 
-				'placeholder' 	=> __('Postcode', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last', 'update_totals_on_change') 
-				),
-			'shipping_country' 	=> array( 
-				'type'			=> 'country', 
-				'label' 		=> __('Country', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first', 'update_totals_on_change'), 
-				'rel' 			=> 'shipping_state' 
-				),
-			'shipping_state' 	=> array( 
-				'type'			=> 'state', 
-				'label' 		=> __('State/County', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
-				'rel' 			=> 'shipping_country' 
-				)
-		));
+		uasort($this->address_fields, array(&$this, 'sort_by_position'));
+
+		$this->billing_fields = $this->shipping_fields = array();
 		
-		uasort($this->billing_fields, array(&$this, 'sort_by_position'));
+		foreach ($this->address_fields as $key => $value) :
+			$this->billing_fields['billing_' . $key] = $value;
+			$this->shipping_fields['shipping_' . $key] = $value;
+		endforeach;
 		
+		// Email and Tel
+		$this->billing_fields['billing_email'] = array(
+			'label' 		=> __('Email Address', 'woothemes'), 
+			'required' 		=> true, 
+			'class' 		=> array('form-row-first'),
+		);	
+		$this->billing_fields['billing_phone'] = array(
+			'label' 		=> __('Phone', 'woothemes'), 
+			'required' 		=> true, 
+			'class' 		=> array('form-row-last'),
+		);
+		
+		$this->billing_fields = apply_filters('woocommerce_billing_fields', $this->billing_fields);
+		$this->shipping_fields = apply_filters('woocommerce_shipping_fields', $this->shipping_fields);	
+
 	}
 	
 	function sort_by_position($a, $b) {
@@ -297,7 +245,6 @@ class woocommerce_checkout {
 			'required' => false,
 			'class' => array(),
 			'label_class' => array(),
-			'rel' => '',
 			'return' => false
 		);
 		
@@ -312,7 +259,7 @@ class woocommerce_checkout {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
-					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'" rel="'.$args['rel'].'">
+					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
 						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
 				
 				foreach($woocommerce->countries->get_allowed_countries() as $ckey=>$value) :
@@ -326,8 +273,10 @@ class woocommerce_checkout {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
-					
-				$current_cc = $this->get_value($args['rel']);
+				
+				if ($key=='billing_state') $current_cc = $this->get_value('billing_country');
+				else $current_cc = $this->get_value('shipping_country');
+				
 				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
 				
 				$current_r = $this->get_value($key);

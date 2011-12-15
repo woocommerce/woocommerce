@@ -5,6 +5,10 @@
   display: inline-block;
   zoom: 1;
   *display: inline;
+    width: 100% !important;
+   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
 }
 .chzn-container .chzn-drop {
   background: #fff;
@@ -18,6 +22,10 @@
   -o-box-shadow     : 0 4px 5px rgba(0,0,0,.15);
   box-shadow        : 0 4px 5px rgba(0,0,0,.15);
   z-index: 999;
+      width: 100% !important;
+   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
 }
 /* @end */
 

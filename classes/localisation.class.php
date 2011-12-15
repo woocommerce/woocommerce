@@ -11,128 +11,107 @@
  */
 class woocommerce_localisation {
 	
-	var $default_locale;
 	var $locale;
+	var $address_formats;
 	
 	/**
 	 * Constructor
 	 */
 	function __construct() {
 		
-		$this->default_locale = array(
-			'required_fields' => array(
-				'first_name', 'last_name', 'address_1', 'city', 'postcode', 'country', 'state', 'email', 'phone'
-			),
-			'address_format' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}"
-		);
+		// Address formats when it's different to the default locale
+		$this->address_formats = apply_filters('woocommerce_localisation_address_formats', array(
+			'default' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}",
+			'AU' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
+			'AT' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+			'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
+			'CZ' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+			'DE' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+			'DK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+		));
 		
 		$this->locale = array(
 			
 			// Austrialia
 			'AU' => array(
-				'labels'	=> array(
-					'city'	=> __('Town/City', 'woothemes')
-				),
-				'address_format' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}"
+				'city'	=> array(
+					'label'	=> __('Town/City', 'woothemes')
+				)
 			),
 			
 			// Austria
 			'AT' => array(
-				'field_postition' => array(
-					'city'		=> 7,
-					'postcode' 	=> 6
+				'city'	=> array(
+					'position'	=> 7,
+					'class'		=> array('form-row-last')
 				),
-				'field_classes' => array(
-					'city' 		=> array('form-row-last'),
-					'postcode'	=> array('form-row-first update_totals_on_change')
+				'postcode'	=> array(
+					'position'	=> 6,
+					'class'		=> array('form-row-first update_totals_on_change')
 				),
-				'required_fields' => array(
-					'first_name', 'last_name', 'address_1', 'city', 'postcode', 'country', 'email', 'phone'
-				),
-				'address_format' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+				'state'		=> array(
+					'required' => false
+				)
 			),
 			
 			// Canada
 			'CA' => array(
-				'labels'	=> array(
-					'state'	=> __('Province', 'woothemes')
+				'state'	=> array(
+					'label'	=> __('Province', 'woothemes')
 				)
 			),
 			
 			// Chile
 			'CL' => array(
-				'labels'	=> array(
-					'state'	=> __('Municipality', 'woothemes')
-				),
-				'required_fields' => array(
-					'first_name', 'last_name', 'address_1', 'country', 'state', 'email', 'phone'
+				'state'		=> array(
+					'required' 	=> false,
+					'label'		=> __('Municipality', 'woothemes')
 				)
 			),
 			
 			// China
 			'CN' => array(
-				'labels'	=> array(
-					'state'	=> __('Province', 'woothemes')
-				),
-				'address_format' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
+				'state'	=> array(
+					'label'	=> __('Province', 'woothemes')
+				)
 			),
 			
 			// Czech Republic
 			'CZ' => array(
-				'labels'	=> array(
-					'city'	=> __('Town', 'woothemes')
-				),
-				'address_format' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+				'city'	=> array(
+					'label'	=> __('Town', 'woothemes')
+				)
 			),
 			
 			// Germany
 			'DE' => array(
-				'field_postition' => array(
-					'city'		=> 7,
-					'postcode' 	=> 6
+				'city'	=> array(
+					'position'	=> 7,
+					'class'		=> array('form-row-last')
 				),
-				'field_classes' => array(
-					'city' 		=> array('form-row-last'),
-					'postcode'	=> array('form-row-first update_totals_on_change')
+				'postcode'	=> array(
+					'position'	=> 6,
+					'class'		=> array('form-row-first update_totals_on_change')
 				),
-				'required_fields' => array(
-					'first_name', 'last_name', 'address_1', 'city', 'postcode', 'country', 'email', 'phone'
-				),
-				'address_format' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+				'state'		=> array(
+					'required' => false
+				)
 			),
 			
 			// Denmark
 			'DK' => array(
-				'labels'	=> array(
-					'city'	=> __('Town', 'woothemes')
-				),
-				'address_format' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+				'city'	=> array(
+					'label'	=> __('Town', 'woothemes')
+				)
 			),
-			
-			// Germany
-			'GB' => array(
-				'field_postition' => array(
-					'city'		=> 7,
-					'postcode' 	=> 6
-				),
-				'field_classes' => array(
-					'city' 		=> array('form-row-last'),
-					'postcode'	=> array('form-row-first update_totals_on_change')
-				),
-				'required_fields' => array(
-					'first_name', 'last_name', 'address_1', 'city', 'postcode', 'country', 'email', 'phone'
-				),
-				'address_format' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
-			),
-			
-						
+					
 		);
 		
 		// Actions
-		add_filter('woocommerce_billing_fields', array(&$this, 'apply_locale'), 0);
+		add_filter('woocommerce_address_fields', array(&$this, 'apply_locale'), 0);
 	}
-	
-	function apply_locale( $fields, $type = "billing_" ) {
+
+	function apply_locale( $fields ) {
 		global $woocommerce;
 		
 		$country = $woocommerce->customer->get_country();
@@ -141,29 +120,23 @@ class woocommerce_localisation {
 			
 			$locale = $this->locale[$country];
 			
-			if (isset($locale['field_postition'])) :
-				
-				foreach ($locale['field_postition'] as $field => $value) :
-					
-					$fields[$type . $field]['position'] = $value;
-					
-				endforeach;
-				
-			endif;
-			
-			if (isset($locale['field_classes'])) :
-				
-				foreach ($locale['field_classes'] as $field => $value) :
-					
-					$fields[$type . $field]['class'] = $value;
-					
-				endforeach;
-				
-			endif;
+			$fields = $this->array_overlay( $fields, $locale );
 			
 		endif;
 		
 		return $fields;
 	}
+
+    function array_overlay($a1,$a2) {
+        foreach($a1 as $k => $v) {
+            if(!array_key_exists($k,$a2)) continue;
+            if(is_array($v) && is_array($a2[$k])){
+                $a1[$k] = $this->array_overlay($v,$a2[$k]);
+            }else{
+                $a1[$k] = $a2[$k];
+            }
+        }
+        return $a1;
+    }
 
 }
