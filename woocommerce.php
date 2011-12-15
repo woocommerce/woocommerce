@@ -1189,6 +1189,8 @@ class woocommerce {
 			
 			echo "});\n</script>\n";
 			
+			$this->_inline_js = '';
+			
 		endif;
 	}
 }
