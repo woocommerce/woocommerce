@@ -839,6 +839,10 @@ class woocommerce {
 		$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
 		$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
 		
+		if (is_checkout() || is-cart()) :
+			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
+		endif;
+		
 		wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
 	}
 	

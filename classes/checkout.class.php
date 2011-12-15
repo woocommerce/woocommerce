@@ -20,6 +20,7 @@ class woocommerce_checkout {
 	
 	/** constructor */
 	function __construct () {
+		global $woocommerce;
 		
 		add_action('woocommerce_checkout_billing',array(&$this,'checkout_form_billing'));
 		add_action('woocommerce_checkout_shipping',array(&$this,'checkout_form_shipping'));
@@ -27,11 +28,7 @@ class woocommerce_checkout {
 		$this->must_create_account = true;
 		
 		if (get_option('woocommerce_enable_guest_checkout')=='yes' || is_user_logged_in()) $this->must_create_account = false;
-		
-		// Load Locales
-		include_once('localisation.class.php');
-		$this->localisation = &new woocommerce_localisation();
-		
+				
 		// Checkout fields
 		$this->address_fields = apply_filters('woocommerce_address_fields', array(
 			'first_name' => array( 
@@ -85,7 +82,7 @@ class woocommerce_checkout {
 				),
 			'state' 	=> array( 
 				'type'			=> 'state', 
-				'label' 		=> __('County', 'woothemes'), 
+				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
 				'position'		=> 9,

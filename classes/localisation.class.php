@@ -27,88 +27,26 @@ class woocommerce_localisation {
 			'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 			'CZ' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 			'DE' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
-			'DK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}"
+			'FI' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+			'DK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+			'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
+			'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}"
 		));
 		
-		$this->locale = array(
-			
-			// Austrialia
-			'AU' => array(
-				'city'	=> array(
-					'label'	=> __('Town/City', 'woothemes')
-				)
-			),
-			
-			// Austria
-			'AT' => array(
-				'city'	=> array(
-					'position'	=> 7,
-					'class'		=> array('form-row-last')
-				),
-				'postcode'	=> array(
-					'position'	=> 6,
-					'class'		=> array('form-row-first update_totals_on_change')
-				),
-				'state'		=> array(
-					'required' => false
-				)
-			),
-			
-			// Canada
-			'CA' => array(
-				'state'	=> array(
-					'label'	=> __('Province', 'woothemes')
-				)
-			),
-			
-			// Chile
-			'CL' => array(
-				'state'		=> array(
-					'required' 	=> false,
-					'label'		=> __('Municipality', 'woothemes')
-				)
-			),
-			
-			// China
-			'CN' => array(
-				'state'	=> array(
-					'label'	=> __('Province', 'woothemes')
-				)
-			),
-			
-			// Czech Republic
-			'CZ' => array(
-				'city'	=> array(
-					'label'	=> __('Town', 'woothemes')
-				)
-			),
-			
-			// Germany
-			'DE' => array(
-				'city'	=> array(
-					'position'	=> 7,
-					'class'		=> array('form-row-last')
-				),
-				'postcode'	=> array(
-					'position'	=> 6,
-					'class'		=> array('form-row-first update_totals_on_change')
-				),
-				'state'		=> array(
-					'required' => false
-				)
-			),
-			
-			// Denmark
-			'DK' => array(
-				'city'	=> array(
-					'label'	=> __('Town', 'woothemes')
-				)
-			),
-					
-		);
 		
 		// Actions
 		add_filter('woocommerce_address_fields', array(&$this, 'apply_locale'), 0);
+	}
+
+	/**
+	 * Returns locale data for enabled countries
+	 */
+	function get_checkout_locale( $country = '' ) {
+		global $woocommerce;
+		
+		$countries = $woocommerce->countries->get_allowed_countries();
+		
+		return array_intersect_key($this->locale, $countries);
 	}
 
 	function apply_locale( $fields ) {

@@ -13,6 +13,8 @@ class woocommerce_countries {
 	
 	var $countries;
 	var $states;
+	var $locale;
+	var $address_formats;
 	
 	/**
 	 * Constructor
@@ -20,254 +22,254 @@ class woocommerce_countries {
 	function __construct() {
 	
 		$this->countries = array(
-			'AD' => __('Andorra', 'woothemes'),
-	    	'AE' => __('United Arab Emirates', 'woothemes'),
 			'AF' => __('Afghanistan', 'woothemes'),
-			'AG' => __('Antigua and Barbuda', 'woothemes'),
-			'AI' => __('Anguilla', 'woothemes'),
+			'AX' => __('Aland Islands', 'woothemes'),
 			'AL' => __('Albania', 'woothemes'),
-			'AM' => __('Armenia', 'woothemes'),
-			'AN' => __('Netherlands Antilles', 'woothemes'),
-			'AO' => __('Angola', 'woothemes'),
-			'AQ' => __('Antarctica', 'woothemes'),
-			'AR' => __('Argentina', 'woothemes'),
+			'DZ' => __('Algeria', 'woothemes'),
 			'AS' => __('American Samoa', 'woothemes'),
-			'AT' => __('Austria', 'woothemes'),
-			'AU' => __('Australia', 'woothemes'),
+			'AD' => __('Andorra', 'woothemes'),
+			'AO' => __('Angola', 'woothemes'),
+			'AI' => __('Anguilla', 'woothemes'),
+			'AQ' => __('Antarctica', 'woothemes'),
+			'AG' => __('Antigua and Barbuda', 'woothemes'),
+			'AR' => __('Argentina', 'woothemes'),
+			'AM' => __('Armenia', 'woothemes'),
 			'AW' => __('Aruba', 'woothemes'),
-			'AX' => __('Aaland Islands', 'woothemes'),
+			'AU' => __('Australia', 'woothemes'),
+			'AT' => __('Austria', 'woothemes'),
 			'AZ' => __('Azerbaijan', 'woothemes'),
-			'BA' => __('Bosnia and Herzegovina', 'woothemes'),
-			'BB' => __('Barbados', 'woothemes'),
-			'BD' => __('Bangladesh', 'woothemes'),
-			'BE' => __('Belgium', 'woothemes'),
-			'BF' => __('Burkina Faso', 'woothemes'),
-			'BG' => __('Bulgaria', 'woothemes'),
-			'BH' => __('Bahrain', 'woothemes'),
-			'BI' => __('Burundi', 'woothemes'),
-			'BJ' => __('Benin', 'woothemes'),
-			'BL' => __('Saint Barthélemy', 'woothemes'),
-			'BM' => __('Bermuda', 'woothemes'),
-			'BN' => __('Brunei', 'woothemes'),
-			'BO' => __('Bolivia', 'woothemes'),
-			'BR' => __('Brazil', 'woothemes'),
 			'BS' => __('Bahamas', 'woothemes'),
-			'BT' => __('Bhutan', 'woothemes'),
-			'BV' => __('Bouvet Island', 'woothemes'),
-			'BW' => __('Botswana', 'woothemes'),
+			'BH' => __('Bahrain', 'woothemes'),
+			'BD' => __('Bangladesh', 'woothemes'),
+			'BB' => __('Barbados', 'woothemes'),
 			'BY' => __('Belarus', 'woothemes'),
+			'BE' => __('Belgium', 'woothemes'),
 			'BZ' => __('Belize', 'woothemes'),
-			'CA' => __('Canada', 'woothemes'),
-			'CC' => __('Cocos (Keeling) Islands', 'woothemes'),
-			'CD' => __('Congo (Kinshasa)', 'woothemes'),
-			'CF' => __('Central African Republic', 'woothemes'),
-			'CG' => __('Congo (Brazzaville)', 'woothemes'),
-			'CH' => __('Switzerland', 'woothemes'),
-			'CI' => __('Ivory Coast', 'woothemes'),
-			'CK' => __('Cook Islands', 'woothemes'),
-			'CL' => __('Chile', 'woothemes'),
+			'BJ' => __('Benin', 'woothemes'),
+			'BM' => __('Bermuda', 'woothemes'),
+			'BT' => __('Bhutan', 'woothemes'),
+			'BO' => __('Bolivia', 'woothemes'),
+			'BA' => __('Bosnia and Herzegovina', 'woothemes'),
+			'BW' => __('Botswana', 'woothemes'),
+			'BV' => __('Bouvet Island', 'woothemes'),
+			'BR' => __('Brazil', 'woothemes'),
+			'IO' => __('British Indian Ocean Territory', 'woothemes'),
+			'VG' => __('British Virgin Islands', 'woothemes'),
+			'BN' => __('Brunei', 'woothemes'),
+			'BG' => __('Bulgaria', 'woothemes'),
+			'BF' => __('Burkina Faso', 'woothemes'),
+			'BI' => __('Burundi', 'woothemes'),
+			'KH' => __('Cambodia', 'woothemes'),
 			'CM' => __('Cameroon', 'woothemes'),
-			'CN' => __('China', 'woothemes'),
-			'CO' => __('Colombia', 'woothemes'),
-			'CR' => __('Costa Rica', 'woothemes'),
-			'CU' => __('Cuba', 'woothemes'),
+			'CA' => __('Canada', 'woothemes'),
 			'CV' => __('Cape Verde', 'woothemes'),
+			'KY' => __('Cayman Islands', 'woothemes'),
+			'CF' => __('Central African Republic', 'woothemes'),
+			'TD' => __('Chad', 'woothemes'),
+			'CL' => __('Chile', 'woothemes'),
+			'CN' => __('China', 'woothemes'),
 			'CX' => __('Christmas Island', 'woothemes'),
+			'CC' => __('Cocos (Keeling) Islands', 'woothemes'),
+			'CO' => __('Colombia', 'woothemes'),
+			'KM' => __('Comoros', 'woothemes'),
+			'CG' => __('Congo (Brazzaville)', 'woothemes'),
+			'CD' => __('Congo (Kinshasa)', 'woothemes'),
+			'CK' => __('Cook Islands', 'woothemes'),
+			'CR' => __('Costa Rica', 'woothemes'),
+			'HR' => __('Croatia', 'woothemes'),
+			'CU' => __('Cuba', 'woothemes'),
 			'CY' => __('Cyprus', 'woothemes'),
 			'CZ' => __('Czech Republic', 'woothemes'),
-			'DE' => __('Germany', 'woothemes'),
-			'DJ' => __('Djibouti', 'woothemes'),
 			'DK' => __('Denmark', 'woothemes'),
+			'DJ' => __('Djibouti', 'woothemes'),
 			'DM' => __('Dominica', 'woothemes'),
 			'DO' => __('Dominican Republic', 'woothemes'),
-			'DZ' => __('Algeria', 'woothemes'),
 			'EC' => __('Ecuador', 'woothemes'),
-			'EE' => __('Estonia', 'woothemes'),
 			'EG' => __('Egypt', 'woothemes'),
-			'EH' => __('Western Sahara', 'woothemes'),
+			'SV' => __('El Salvador', 'woothemes'),
+			'GQ' => __('Equatorial Guinea', 'woothemes'),
 			'ER' => __('Eritrea', 'woothemes'),
-			'ES' => __('Spain', 'woothemes'),
+			'EE' => __('Estonia', 'woothemes'),
 			'ET' => __('Ethiopia', 'woothemes'),
-			'FI' => __('Finland', 'woothemes'),
-			'FJ' => __('Fiji', 'woothemes'),
 			'FK' => __('Falkland Islands', 'woothemes'),
-			'FM' => __('Micronesia', 'woothemes'),
 			'FO' => __('Faroe Islands', 'woothemes'),
+			'FJ' => __('Fiji', 'woothemes'),
+			'FI' => __('Finland', 'woothemes'),
 			'FR' => __('France', 'woothemes'),
-			'GA' => __('Gabon', 'woothemes'),
-			'GB' => __('United Kingdom', 'woothemes'),
-			'GD' => __('Grenada', 'woothemes'),
-			'GE' => __('Georgia', 'woothemes'),
 			'GF' => __('French Guiana', 'woothemes'),
-			'GG' => __('Guernsey', 'woothemes'),
+			'PF' => __('French Polynesia', 'woothemes'),
+			'TF' => __('French Southern Territories', 'woothemes'),
+			'GA' => __('Gabon', 'woothemes'),
+			'GM' => __('Gambia', 'woothemes'),
+			'GE' => __('Georgia', 'woothemes'),
+			'DE' => __('Germany', 'woothemes'),
 			'GH' => __('Ghana', 'woothemes'),
 			'GI' => __('Gibraltar', 'woothemes'),
-			'GL' => __('Greenland', 'woothemes'),
-			'GM' => __('Gambia', 'woothemes'),
-			'GN' => __('Guinea', 'woothemes'),
-			'GP' => __('Guadeloupe', 'woothemes'),
-			'GQ' => __('Equatorial Guinea', 'woothemes'),
 			'GR' => __('Greece', 'woothemes'),
-			'GS' => __('South Georgia/Sandwich Islands', 'woothemes'),
-			'GT' => __('Guatemala', 'woothemes'),
+			'GL' => __('Greenland', 'woothemes'),
+			'GD' => __('Grenada', 'woothemes'),
+			'GP' => __('Guadeloupe', 'woothemes'),
 			'GU' => __('Guam', 'woothemes'),
+			'GT' => __('Guatemala', 'woothemes'),
+			'GG' => __('Guernsey', 'woothemes'),
+			'GN' => __('Guinea', 'woothemes'),
 			'GW' => __('Guinea-Bissau', 'woothemes'),
 			'GY' => __('Guyana', 'woothemes'),
-			'HK' => __('Hong Kong S.A.R., China', 'woothemes'),
-			'HN' => __('Honduras', 'woothemes'),
-			'HR' => __('Croatia', 'woothemes'),
 			'HT' => __('Haiti', 'woothemes'),
+			'HN' => __('Honduras', 'woothemes'),
+			'HK' => __('Hong Kong', 'woothemes'),
 			'HU' => __('Hungary', 'woothemes'),
-			'ID' => __('Indonesia', 'woothemes'),
-			'IE' => __('Ireland', 'woothemes'),
-			'IL' => __('Israel', 'woothemes'),
-			'IM' => __('Isle of Man', 'woothemes'),
-			'IN' => __('India', 'woothemes'),
-			'IO' => __('British Indian Ocean Territory', 'woothemes'),
-			'IQ' => __('Iraq', 'woothemes'),
-			'IR' => __('Iran', 'woothemes'),
 			'IS' => __('Iceland', 'woothemes'),
+			'IN' => __('India', 'woothemes'),
+			'ID' => __('Indonesia', 'woothemes'),
+			'IR' => __('Iran', 'woothemes'),
+			'IQ' => __('Iraq', 'woothemes'),
+			'IE' => __('Ireland', 'woothemes'),
+			'IM' => __('Isle of Man', 'woothemes'),
+			'IL' => __('Israel', 'woothemes'),
 			'IT' => __('Italy', 'woothemes'),
-			'JE' => __('Jersey', 'woothemes'),
+			'CI' => __('Ivory Coast', 'woothemes'),
 			'JM' => __('Jamaica', 'woothemes'),
-			'JO' => __('Jordan', 'woothemes'),
 			'JP' => __('Japan', 'woothemes'),
-			'KE' => __('Kenya', 'woothemes'),
-			'KG' => __('Kyrgyzstan', 'woothemes'),
-			'KH' => __('Cambodia', 'woothemes'),
-			'KI' => __('Kiribati', 'woothemes'),
-			'KM' => __('Comoros', 'woothemes'),
-			'KN' => __('Saint Kitts and Nevis', 'woothemes'),
-			'KP' => __('North Korea', 'woothemes'),
-			'KR' => __('South Korea', 'woothemes'),
-			'KW' => __('Kuwait', 'woothemes'),
-			'KY' => __('Cayman Islands', 'woothemes'),
+			'JE' => __('Jersey', 'woothemes'),
+			'JO' => __('Jordan', 'woothemes'),
 			'KZ' => __('Kazakhstan', 'woothemes'),
+			'KE' => __('Kenya', 'woothemes'),
+			'KI' => __('Kiribati', 'woothemes'),
+			'KW' => __('Kuwait', 'woothemes'),
+			'KG' => __('Kyrgyzstan', 'woothemes'),
 			'LA' => __('Laos', 'woothemes'),
+			'LV' => __('Latvia', 'woothemes'),
 			'LB' => __('Lebanon', 'woothemes'),
-			'LC' => __('Saint Lucia', 'woothemes'),
-			'LI' => __('Liechtenstein', 'woothemes'),
-			'LK' => __('Sri Lanka', 'woothemes'),
-			'LR' => __('Liberia', 'woothemes'),
 			'LS' => __('Lesotho', 'woothemes'),
+			'LR' => __('Liberia', 'woothemes'),
+			'LY' => __('Libya', 'woothemes'),
+			'LI' => __('Liechtenstein', 'woothemes'),
 			'LT' => __('Lithuania', 'woothemes'),
 			'LU' => __('Luxembourg', 'woothemes'),
-			'LV' => __('Latvia', 'woothemes'),
-			'LY' => __('Libya', 'woothemes'),
-			'MA' => __('Morocco', 'woothemes'),
-			'MC' => __('Monaco', 'woothemes'),
-			'MD' => __('Moldova', 'woothemes'),
-			'ME' => __('Montenegro', 'woothemes'),
-			'MF' => __('Saint Martin (French part)', 'woothemes'),
-			'MG' => __('Madagascar', 'woothemes'),
-			'MH' => __('Marshall Islands', 'woothemes'),
-			'MK' => __('Macedonia', 'woothemes'),
-			'ML' => __('Mali', 'woothemes'),
-			'MM' => __('Myanmar', 'woothemes'),
-			'MN' => __('Mongolia', 'woothemes'),
 			'MO' => __('Macao S.A.R., China', 'woothemes'),
-			'MP' => __('Northern Mariana Islands', 'woothemes'),
+			'MK' => __('Macedonia', 'woothemes'),
+			'MG' => __('Madagascar', 'woothemes'),
+			'MW' => __('Malawi', 'woothemes'),
+			'MY' => __('Malaysia', 'woothemes'),
+			'MV' => __('Maldives', 'woothemes'),
+			'ML' => __('Mali', 'woothemes'),
+			'MT' => __('Malta', 'woothemes'),
+			'MH' => __('Marshall Islands', 'woothemes'),
 			'MQ' => __('Martinique', 'woothemes'),
 			'MR' => __('Mauritania', 'woothemes'),
-			'MS' => __('Montserrat', 'woothemes'),
-			'MT' => __('Malta', 'woothemes'),
 			'MU' => __('Mauritius', 'woothemes'),
-			'MV' => __('Maldives', 'woothemes'),
-			'MW' => __('Malawi', 'woothemes'),
+			'YT' => __('Mayotte', 'woothemes'),
 			'MX' => __('Mexico', 'woothemes'),
-			'MY' => __('Malaysia', 'woothemes'),
+			'FM' => __('Micronesia', 'woothemes'),
+			'MD' => __('Moldova', 'woothemes'),
+			'MC' => __('Monaco', 'woothemes'),
+			'MN' => __('Mongolia', 'woothemes'),
+			'ME' => __('Montenegro', 'woothemes'),
+			'MS' => __('Montserrat', 'woothemes'),
+			'MA' => __('Morocco', 'woothemes'),
 			'MZ' => __('Mozambique', 'woothemes'),
+			'MM' => __('Myanmar', 'woothemes'),
 			'NA' => __('Namibia', 'woothemes'),
-			'NC' => __('New Caledonia', 'woothemes'),
-			'NE' => __('Niger', 'woothemes'),
-			'NF' => __('Norfolk Island', 'woothemes'),
-			'NG' => __('Nigeria', 'woothemes'),
-			'NI' => __('Nicaragua', 'woothemes'),
-			'NL' => __('Netherlands', 'woothemes'),
-			'NO' => __('Norway', 'woothemes'),
-			'NP' => __('Nepal', 'woothemes'),
 			'NR' => __('Nauru', 'woothemes'),
-			'NU' => __('Niue', 'woothemes'),
+			'NP' => __('Nepal', 'woothemes'),
+			'NL' => __('Netherlands', 'woothemes'),
+			'AN' => __('Netherlands Antilles', 'woothemes'),
+			'NC' => __('New Caledonia', 'woothemes'),
 			'NZ' => __('New Zealand', 'woothemes'),
+			'NI' => __('Nicaragua', 'woothemes'),
+			'NE' => __('Niger', 'woothemes'),
+			'NG' => __('Nigeria', 'woothemes'),
+			'NU' => __('Niue', 'woothemes'),
+			'NF' => __('Norfolk Island', 'woothemes'),
+			'KP' => __('North Korea', 'woothemes'),
+			'MP' => __('Northern Mariana Islands', 'woothemes'),
+			'NO' => __('Norway', 'woothemes'),
 			'OM' => __('Oman', 'woothemes'),
-			'PA' => __('Panama', 'woothemes'),
-			'PE' => __('Peru', 'woothemes'),
-			'PF' => __('French Polynesia', 'woothemes'),
-			'PG' => __('Papua New Guinea', 'woothemes'),
-			'PH' => __('Philippines', 'woothemes'),
 			'PK' => __('Pakistan', 'woothemes'),
-			'PL' => __('Poland', 'woothemes'),
-			'PM' => __('Saint Pierre and Miquelon', 'woothemes'),
-			'PN' => __('Pitcairn', 'woothemes'),
-			'PR' => __('Puerto Rico', 'woothemes'),
-			'PS' => __('Palestinian Territory', 'woothemes'),
-			'PT' => __('Portugal', 'woothemes'),
 			'PW' => __('Palau', 'woothemes'),
+			'PS' => __('Palestinian Territory', 'woothemes'),
+			'PA' => __('Panama', 'woothemes'),
+			'PG' => __('Papua New Guinea', 'woothemes'),
 			'PY' => __('Paraguay', 'woothemes'),
+			'PE' => __('Peru', 'woothemes'),
+			'PH' => __('Philippines', 'woothemes'),
+			'PN' => __('Pitcairn', 'woothemes'),
+			'PL' => __('Poland', 'woothemes'),
+			'PT' => __('Portugal', 'woothemes'),
+			'PR' => __('Puerto Rico', 'woothemes'),
 			'QA' => __('Qatar', 'woothemes'),
 			'RE' => __('Reunion', 'woothemes'),
 			'RO' => __('Romania', 'woothemes'),
-			'RS' => __('Serbia', 'woothemes'),
 			'RU' => __('Russia', 'woothemes'),
 			'RW' => __('Rwanda', 'woothemes'),
-			'SA' => __('Saudi Arabia', 'woothemes'),
-			'SB' => __('Solomon Islands', 'woothemes'),
-			'SC' => __('Seychelles', 'woothemes'),
-			'SD' => __('Sudan', 'woothemes'),
-			'SE' => __('Sweden', 'woothemes'),
-			'SG' => __('Singapore', 'woothemes'),
+			'BL' => __('Saint Barthélemy', 'woothemes'),
 			'SH' => __('Saint Helena', 'woothemes'),
-			'SI' => __('Slovenia', 'woothemes'),
-			'SJ' => __('Svalbard and Jan Mayen', 'woothemes'),
-			'SK' => __('Slovakia', 'woothemes'),
-			'SL' => __('Sierra Leone', 'woothemes'),
+			'KN' => __('Saint Kitts and Nevis', 'woothemes'),
+			'LC' => __('Saint Lucia', 'woothemes'),
+			'MF' => __('Saint Martin (French part)', 'woothemes'),
+			'PM' => __('Saint Pierre and Miquelon', 'woothemes'),
+			'VC' => __('Saint Vincent and the Grenadines', 'woothemes'),
+			'WS' => __('Samoa', 'woothemes'),
 			'SM' => __('San Marino', 'woothemes'),
-			'SN' => __('Senegal', 'woothemes'),
-			'SO' => __('Somalia', 'woothemes'),
-			'SR' => __('Suriname', 'woothemes'),
 			'ST' => __('Sao Tome and Principe', 'woothemes'),
-			'SV' => __('El Salvador', 'woothemes'),
-			'SY' => __('Syria', 'woothemes'),
+			'SA' => __('Saudi Arabia', 'woothemes'),
+			'SN' => __('Senegal', 'woothemes'),
+			'RS' => __('Serbia', 'woothemes'),
+			'SC' => __('Seychelles', 'woothemes'),
+			'SL' => __('Sierra Leone', 'woothemes'),
+			'SG' => __('Singapore', 'woothemes'),
+			'SK' => __('Slovakia', 'woothemes'),
+			'SI' => __('Slovenia', 'woothemes'),
+			'SB' => __('Solomon Islands', 'woothemes'),
+			'SO' => __('Somalia', 'woothemes'),
+			'ZA' => __('South Africa', 'woothemes'),
+			'GS' => __('South Georgia/Sandwich Islands', 'woothemes'),
+			'KR' => __('South Korea', 'woothemes'),
+			'ES' => __('Spain', 'woothemes'),
+			'LK' => __('Sri Lanka', 'woothemes'),
+			'SD' => __('Sudan', 'woothemes'),
+			'SR' => __('Suriname', 'woothemes'),
+			'SJ' => __('Svalbard and Jan Mayen', 'woothemes'),
 			'SZ' => __('Swaziland', 'woothemes'),
-			'TC' => __('Turks and Caicos Islands', 'woothemes'),
-			'TD' => __('Chad', 'woothemes'),
-			'TF' => __('French Southern Territories', 'woothemes'),
-			'TG' => __('Togo', 'woothemes'),
-			'TH' => __('Thailand', 'woothemes'),
-			'TJ' => __('Tajikistan', 'woothemes'),
-			'TK' => __('Tokelau', 'woothemes'),
-			'TL' => __('Timor-Leste', 'woothemes'),
-			'TM' => __('Turkmenistan', 'woothemes'),
-			'TN' => __('Tunisia', 'woothemes'),
-			'TO' => __('Tonga', 'woothemes'),
-			'TR' => __('Turkey', 'woothemes'),
-			'TT' => __('Trinidad and Tobago', 'woothemes'),
-			'TV' => __('Tuvalu', 'woothemes'),
+			'SE' => __('Sweden', 'woothemes'),
+			'CH' => __('Switzerland', 'woothemes'),
+			'SY' => __('Syria', 'woothemes'),
 			'TW' => __('Taiwan', 'woothemes'),
+			'TJ' => __('Tajikistan', 'woothemes'),
 			'TZ' => __('Tanzania', 'woothemes'),
-			'UA' => __('Ukraine', 'woothemes'),
-			'UG' => __('Uganda', 'woothemes'),
+			'TH' => __('Thailand', 'woothemes'),
+			'TL' => __('Timor-Leste', 'woothemes'),
+			'TG' => __('Togo', 'woothemes'),
+			'TK' => __('Tokelau', 'woothemes'),
+			'TO' => __('Tonga', 'woothemes'),
+			'TT' => __('Trinidad and Tobago', 'woothemes'),
+			'TN' => __('Tunisia', 'woothemes'),
+			'TR' => __('Turkey', 'woothemes'),
+			'TM' => __('Turkmenistan', 'woothemes'),
+			'TC' => __('Turks and Caicos Islands', 'woothemes'),
+			'TV' => __('Tuvalu', 'woothemes'),
+			'VI' => __('U.S. Virgin Islands', 'woothemes'),
+			'USAF' => __('US Armed Forces', 'woothemes'),
 			'UM' => __('US Minor Outlying Islands', 'woothemes'),
+			'UG' => __('Uganda', 'woothemes'),
+			'UA' => __('Ukraine', 'woothemes'),
+			'AE' => __('United Arab Emirates', 'woothemes'),
+			'GB' => __('United Kingdom', 'woothemes'),
 			'US' => __('United States', 'woothemes'),
-			'USAF' => __('US Armed Forces', 'woothemes'), 
 			'UY' => __('Uruguay', 'woothemes'),
 			'UZ' => __('Uzbekistan', 'woothemes'),
-			'VA' => __('Vatican', 'woothemes'),
-			'VC' => __('Saint Vincent and the Grenadines', 'woothemes'),
-			'VE' => __('Venezuela', 'woothemes'),
-			'VG' => __('British Virgin Islands', 'woothemes'),
-			'VI' => __('U.S. Virgin Islands', 'woothemes'),
-			'VN' => __('Vietnam', 'woothemes'),
 			'VU' => __('Vanuatu', 'woothemes'),
+			'VA' => __('Vatican', 'woothemes'),
+			'VE' => __('Venezuela', 'woothemes'),
+			'VN' => __('Vietnam', 'woothemes'),
 			'WF' => __('Wallis and Futuna', 'woothemes'),
-			'WS' => __('Samoa', 'woothemes'),
+			'EH' => __('Western Sahara', 'woothemes'),
 			'YE' => __('Yemen', 'woothemes'),
-			'YT' => __('Mayotte', 'woothemes'),
-			'ZA' => __('South Africa', 'woothemes'),
 			'ZM' => __('Zambia', 'woothemes'),
 			'ZW' => __('Zimbabwe', 'woothemes')
 		);
-		
+					
 		$this->states = array(
 			'AU' => array(
 				'ACT' => __('Australian Capital Territory', 'woothemes') ,
@@ -328,6 +330,13 @@ class woocommerce_countries {
 			'CZ' => array(),
 			'DE' => array(),
 			'DK' => array(),
+			'FI' => array(),
+			'FR' => array(),
+			'HK' => array(
+				'HONG KONG' => __('Hong Kong Island', 'woothemes'),
+				'KOWLOONG' => __('Kowloong', 'woothemes'),
+				'NEW TERRITORIES' => __('New Territories', 'woothemes')
+			),
 			'US' => array(
 				'AL' => __('Alabama', 'woothemes') ,
 				'AK' => __('Alaska', 'woothemes') ,
@@ -387,8 +396,6 @@ class woocommerce_countries {
 				'AP' => __('Pacific', 'woothemes') 
 			)
 		);
-		
-		asort($this->countries);
 
 	}
 	
@@ -548,6 +555,167 @@ class woocommerce_countries {
     			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woothemes') ) : __($value, 'woothemes') ) .'</option>';
 			endif;
 		endforeach;
+	}
+	
+	/** Get country address formats */
+	function get_address_format( $country = '' ) {
+		
+		if (!$this->address_formats) :
+			$this->address_formats = apply_filters('woocommerce_localisation_address_formats', array(
+				'default' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}",
+				'AU' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
+				'AT' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
+				'CZ' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'DE' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'FI' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'DK' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+				'FR' => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
+				'HK' => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}"
+			));
+		endif;
+	}
+	
+	/** Get country locale settings */
+	function get_country_locale() {
+		global $woocommerce;
+		
+		if (!$this->locale) :
+		
+			// Locale information used by the checkout
+			$this->locale = array(
+				
+				// Austria
+				'AT' => array(
+					'city'	=> array(
+						'position'	=> 7,
+						'class'		=> array('form-row-last')
+					),
+					'postcode'	=> array(
+						'position'	=> 6,
+						'class'		=> array('form-row-first update_totals_on_change')
+					),
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				
+				// Canada
+				'CA' => array(
+					'state'	=> array(
+						'label'	=> __('Province', 'woothemes')
+					)
+				),
+				
+				// Chile
+				'CL' => array(
+					'state'		=> array(
+						'required' 	=> false,
+						'label'		=> __('Municipality', 'woothemes')
+					)
+				),
+				
+				// China
+				'CN' => array(
+					'state'	=> array(
+						'label'	=> __('Province', 'woothemes')
+					)
+				),
+				
+				// Czech Republic
+				'CZ' => array(
+					'city'	=> array(
+						'label'	=> __('Town', 'woothemes')
+					)
+				),
+				
+				// Germany
+				'DE' => array(
+					'city'	=> array(
+						'position'	=> 7,
+						'class'		=> array('form-row-last')
+					),
+					'postcode'	=> array(
+						'position'	=> 6,
+						'class'		=> array('form-row-first update_totals_on_change')
+					),
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				
+				// Denmark
+				'DK' => array(
+					'city'	=> array(
+						'position'	=> 7,
+						'class'		=> array('form-row-last')
+					),
+					'postcode'	=> array(
+						'position'	=> 6,
+						'class'		=> array('form-row-first update_totals_on_change')
+					),
+					'city'	=> array(
+						'label'	=> __('Town', 'woothemes')
+					),
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				
+				// Finland
+				'FI' => array(
+					'city'	=> array(
+						'position'	=> 7,
+						'class'		=> array('form-row-last')
+					),
+					'postcode'	=> array(
+						'position'	=> 6,
+						'class'		=> array('form-row-first update_totals_on_change')
+					),
+					'city'	=> array(
+						'label'	=> __('Town', 'woothemes')
+					),
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				
+				// France
+				'FR' => array(
+					'city'	=> array(
+						'position'	=> 7,
+						'class'		=> array('form-row-last')
+					),
+					'postcode'	=> array(
+						'position'	=> 6,
+						'class'		=> array('form-row-first update_totals_on_change')
+					),
+					'city'	=> array(
+						'label'	=> __('Town', 'woothemes')
+					),
+					'state'		=> array(
+						'required' => false
+					)
+				),
+				
+				// Hong Kong
+				'HK' => array(
+					'postcode'	=> array(
+						'required' => false
+					),
+					'city'	=> array(
+						'label'	=> __('Town/District', 'woothemes')
+					),
+					'state'		=> array(
+						'label' => __('Region', 'woothemes')
+					)
+				),
+						
+			);
+		endif;
+		
+		return array_intersect_key($this->locale, $this->get_allowed_countries());
+		
 	}
 }
 
