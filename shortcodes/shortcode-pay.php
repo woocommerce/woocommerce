@@ -18,14 +18,14 @@ function get_woocommerce_pay( $atts ) {
  * Outputs the pay page - payment gateways can hook in here to show payment forms etc
  **/
 function woocommerce_pay() {
-	global $woocommerce;
+	global $woocommerce, $order;
 	
 	if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
 		// Pay for existing order
 		$order_key = urldecode( $_GET['order'] );
 		$order_id = (int) $_GET['order_id'];
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 			
@@ -68,22 +68,17 @@ function woocommerce_pay() {
 	
 			endif;
 			
-			// Show messages
-			$woocommerce->show_messages();
-			
 			// Show form
-			woocommerce_pay_for_existing_order( $order );
+			woocommerce_get_template('checkout/pay_for_order.php');
 		
 		elseif (!in_array($order->status, array('pending', 'failed'))) :
 			
 			$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woothemes') );
-			
 			$woocommerce->show_messages();
 			
 		else :
 		
 			$woocommerce->add_error( __('Invalid order.', 'woothemes') );
-			
 			$woocommerce->show_messages();
 			
 		endif;
@@ -96,7 +91,7 @@ function woocommerce_pay() {
 		
 		if ($order_id > 0) :
 		
-			$order = &new woocommerce_order( $order_id );
+			$order = new woocommerce_order( $order_id );
 		
 			if ($order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 		
@@ -142,17 +137,4 @@ function woocommerce_pay() {
 		endif;
 
 	endif;
-}
-
-/**
- * Outputs the payment page when a user comes to pay from a link (for an existing/past created order)
- **/
-function woocommerce_pay_for_existing_order( $pay_for_order ) {
-	
-	global $order;
-	
-	$order = $pay_for_order;
-	
-	woocommerce_get_template('checkout/pay_for_order.php');
-	
 }

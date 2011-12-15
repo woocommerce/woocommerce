@@ -35,7 +35,7 @@ class woocommerce_countries {
 			'AT' => __('Austria', 'woothemes'),
 			'AU' => __('Australia', 'woothemes'),
 			'AW' => __('Aruba', 'woothemes'),
-			'AX' => __('Aland Islands', 'woothemes'),
+			'AX' => __('Aaland Islands', 'woothemes'),
 			'AZ' => __('Azerbaijan', 'woothemes'),
 			'BA' => __('Bosnia and Herzegovina', 'woothemes'),
 			'BB' => __('Barbados', 'woothemes'),
@@ -114,7 +114,6 @@ class woocommerce_countries {
 			'GW' => __('Guinea-Bissau', 'woothemes'),
 			'GY' => __('Guyana', 'woothemes'),
 			'HK' => __('Hong Kong S.A.R., China', 'woothemes'),
-			//'HM' => __('Heard Island and McDonald Islands', 'woothemes'), // Uninhabitted :)
 			'HN' => __('Honduras', 'woothemes'),
 			'HR' => __('Croatia', 'woothemes'),
 			'HT' => __('Haiti', 'woothemes'),
@@ -325,128 +324,7 @@ class woocommerce_countries {
 				'SK' => __('Saskatchewan', 'woothemes') ,
 				'YT' => __('Yukon Territory', 'woothemes') 
 			),
-			/*'GB' => array(
-				'England' => array(
-					'Avon' => __('Avon', 'woothemes'),
-					'Bedfordshire' => __('Bedfordshire', 'woothemes'),
-					'Berkshire' => __('Berkshire', 'woothemes'),
-					'Bristol' => __('Bristol', 'woothemes'),
-					'Buckinghamshire' => __('Buckinghamshire', 'woothemes'),
-					'Cambridgeshire' => __('Cambridgeshire', 'woothemes'),
-					'Cheshire' => __('Cheshire', 'woothemes'),
-					'Cleveland' => __('Cleveland', 'woothemes'),
-					'Cornwall' => __('Cornwall', 'woothemes'),
-					'Cumbria' => __('Cumbria', 'woothemes'),
-					'Derbyshire' => __('Derbyshire', 'woothemes'),
-					'Devon' => __('Devon', 'woothemes'),
-					'Dorset' => __('Dorset', 'woothemes'),
-					'Durham' => __('Durham', 'woothemes'),
-					'East Riding of Yorkshire' => __('East Riding of Yorkshire', 'woothemes'),
-					'East Sussex' => __('East Sussex', 'woothemes'),
-					'Essex' => __('Essex', 'woothemes'),
-					'Gloucestershire' => __('Gloucestershire', 'woothemes'),
-					'Greater Manchester' => __('Greater Manchester', 'woothemes'),
-					'Hampshire' => __('Hampshire', 'woothemes'),
-					'Herefordshire' => __('Herefordshire', 'woothemes'),
-					'Hertfordshire' => __('Hertfordshire', 'woothemes'),
-					'Humberside' => __('Humberside', 'woothemes'),
-					'Isle of Wight' => __('Isle of Wight', 'woothemes'),
-					'Isles of Scilly' => __('Isles of Scilly', 'woothemes'),
-					'Kent' => __('Kent', 'woothemes'),
-					'Lancashire' => __('Lancashire', 'woothemes'),
-					'Leicestershire' => __('Leicestershire', 'woothemes'),
-					'Lincolnshire' => __('Lincolnshire', 'woothemes'),
-					'London' => __('London', 'woothemes'),
-					'Merseyside' => __('Merseyside', 'woothemes'),
-					'Middlesex' => __('Middlesex', 'woothemes'),
-					'Norfolk' => __('Norfolk', 'woothemes'),
-					'North Yorkshire' => __('North Yorkshire', 'woothemes'),
-					'Northamptonshire' => __('Northamptonshire', 'woothemes'),
-					'Northumberland' => __('Northumberland', 'woothemes'),
-					'Nottinghamshire' => __('Nottinghamshire', 'woothemes'),
-					'Oxfordshire' => __('Oxfordshire', 'woothemes'),
-					'Rutland' => __('Rutland', 'woothemes'),
-					'Shropshire' => __('Shropshire', 'woothemes'),
-					'Somerset' => __('Somerset', 'woothemes'),
-					'South Yorkshire' => __('South Yorkshire', 'woothemes'),
-					'Staffordshire' => __('Staffordshire', 'woothemes'),
-					'Suffolk' => __('Suffolk', 'woothemes'),
-					'Surrey' => __('Surrey', 'woothemes'),
-					'Tyne and Wear' => __('Tyne and Wear', 'woothemes'),
-					'Warwickshire' => __('Warwickshire', 'woothemes'),
-					'West Midlands' => __('West Midlands', 'woothemes'),
-					'West Sussex' => __('West Sussex', 'woothemes'),
-					'West Yorkshire' => __('West Yorkshire', 'woothemes'),
-					'Wiltshire' => __('Wiltshire', 'woothemes'),
-					'Worcestershire' => __('Worcestershire', 'woothemes')
-				),
-				'Northern Ireland' => array(
-					'Antrim' => __('Antrim', 'woothemes'),
-					'Armagh' => __('Armagh', 'woothemes'),
-					'Down' => __('Down', 'woothemes'),
-					'Fermanagh' => __('Fermanagh', 'woothemes'),
-					'Londonderry' => __('Londonderry', 'woothemes'),
-					'Tyrone' => __('Tyrone', 'woothemes')
-				),
-				'Scotland' => array(
-					'Aberdeen City' => __('Aberdeen City', 'woothemes'),
-					'Aberdeenshire' => __('Aberdeenshire', 'woothemes'),
-					'Angus' => __('Angus', 'woothemes'),
-					'Argyll and Bute' => __('Argyll and Bute', 'woothemes'),
-					'Borders' => __('Borders', 'woothemes'),
-					'Clackmannan' => __('Clackmannan', 'woothemes'),
-					'Dumfries and Galloway' => __('Dumfries and Galloway', 'woothemes'),
-					'East Ayrshire' => __('East Ayrshire', 'woothemes'),
-					'East Dunbartonshire' => __('East Dunbartonshire', 'woothemes'),
-					'East Lothian' => __('East Lothian', 'woothemes'),
-					'East Renfrewshire' => __('East Renfrewshire', 'woothemes'),
-					'Edinburgh City' => __('Edinburgh City', 'woothemes'),
-					'Falkirk' => __('Falkirk', 'woothemes'),
-					'Fife' => __('Fife', 'woothemes'),
-					'Glasgow' => __('Glasgow', 'woothemes'),
-					'Highland' => __('Highland', 'woothemes'),
-					'Inverclyde' => __('Inverclyde', 'woothemes'),
-					'Midlothian' => __('Midlothian', 'woothemes'),
-					'Moray' => __('Moray', 'woothemes'),
-					'North Ayrshire' => __('North Ayrshire', 'woothemes'),
-					'North Lanarkshire' => __('North Lanarkshire', 'woothemes'),
-					'Orkney' => __('Orkney', 'woothemes'),
-					'Perthshire and Kinross' => __('Perthshire and Kinross', 'woothemes'),
-					'Renfrewshire' => __('Renfrewshire', 'woothemes'),
-					'Roxburghshire' => __('Roxburghshire', 'woothemes'),
-					'Shetland' => __('Shetland', 'woothemes'),
-					'South Ayrshire' => __('South Ayrshire', 'woothemes'),
-					'South Lanarkshire' => __('South Lanarkshire', 'woothemes'),
-					'Stirling' => __('Stirling', 'woothemes'),
-					'West Dunbartonshire' => __('West Dunbartonshire', 'woothemes'),
-					'West Lothian' => __('West Lothian', 'woothemes'),
-					'Western Isles' => __('Western Isles', 'woothemes'),
-				),
-				'Wales' => array(
-					'Blaenau Gwent' => __('Blaenau Gwent', 'woothemes'),
-					'Bridgend' => __('Bridgend', 'woothemes'),
-					'Caerphilly' => __('Caerphilly', 'woothemes'),
-					'Cardiff' => __('Cardiff', 'woothemes'),
-					'Carmarthenshire' => __('Carmarthenshire', 'woothemes'),
-					'Ceredigion' => __('Ceredigion', 'woothemes'),
-					'Conwy' => __('Conwy', 'woothemes'),
-					'Denbighshire' => __('Denbighshire', 'woothemes'),
-					'Flintshire' => __('Flintshire', 'woothemes'),
-					'Gwynedd' => __('Gwynedd', 'woothemes'),
-					'Isle of Anglesey' => __('Isle of Anglesey', 'woothemes'),
-					'Merthyr Tydfil' => __('Merthyr Tydfil', 'woothemes'),
-					'Monmouthshire' => __('Monmouthshire', 'woothemes'),
-					'Neath Port Talbot' => __('Neath Port Talbot', 'woothemes'),
-					'Newport' => __('Newport', 'woothemes'),
-					'Pembrokeshire' => __('Pembrokeshire', 'woothemes'),
-					'Powys' => __('Powys', 'woothemes'),
-					'Rhondda Cynon Taff' => __('Rhondda Cynon Taff', 'woothemes'),
-					'Swansea' => __('Swansea', 'woothemes'),
-					'Torfaen' => __('Torfaen', 'woothemes'),
-					'The Vale of Glamorgan' => __('The Vale of Glamorgan', 'woothemes'),
-					'Wrexham' => __('Wrexham', 'woothemes')
-				)
-			),*/
+			'DE' => array(),
 			'US' => array(
 				'AL' => __('Alabama', 'woothemes') ,
 				'AK' => __('Alaska', 'woothemes') ,
@@ -570,7 +448,7 @@ class woocommerce_countries {
 	function shipping_to_prefix() {
 		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
+		if (in_array($woocommerce->customer->get_shipping_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('to the', 'woothemes');
 		else $return = __('to', 'woothemes');
 		return apply_filters('woocommerce_countries_shipping_to_prefix', $return, $woocommerce->customer->get_shipping_country());
 	}
@@ -579,8 +457,8 @@ class woocommerce_countries {
 	function estimated_for_prefix() {
 		global $woocommerce;
 		$return = '';
-		if (in_array($woocommerce->customer->get_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
-		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $woocommerce->customer->get_shipping_country());
+		if (in_array($this->get_base_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woothemes') . ' ';
+		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country());
 	}
 	
 	/** Correctly name tax in some countries VAT on the frontend */

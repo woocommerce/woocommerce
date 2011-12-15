@@ -293,7 +293,6 @@ class woocommerce_product {
 		$this->get_post_data();
 		return apply_filters('woocommerce_product_title', apply_filters('the_title', $this->post->post_title), $this);
 	}
-
 	
 	/** Get the add to url */
 	function add_to_cart_url() {
@@ -315,9 +314,8 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is stock managed */
 	function managing_stock() {
-		if (get_option('woocommerce_manage_stock')=='yes') :
-			if (isset($this->manage_stock) && $this->manage_stock=='yes') return true;
-		endif;
+		if (!isset($this->manage_stock) || $this->manage_stock=='no') return false;
+		if (get_option('woocommerce_manage_stock')=='yes') return true;
 		return false;
 	}
 	
@@ -460,12 +458,11 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is on sale */
 	function is_on_sale() {
-		if ( $this->has_child() ) :
+		if ($this->has_child()) :
 			
 			foreach ($this->get_children() as $child_id) :
-				$sale_price 	= get_post_meta( $child_id, 'sale_price', true );
-				$regular_price 	= get_post_meta( $child_id, 'price', true );
-				if ( $sale_price > 0 && $sale_price < $regular_price ) return true;
+				$sale_price = get_post_meta( $child_id, 'sale_price', true );
+				if ( $sale_price >= 0 ) return true;
 			endforeach;
 			
 		else :
@@ -571,13 +568,13 @@ class woocommerce_product {
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
 			
-			$price .= '<span class="from">' . __('From:', 'woothemes') . ' </span>' . woocommerce_price($min_price);	
+			$price .= '<span class="from">' . _x('From:', 'min_price', 'woothemes') . ' </span>' . woocommerce_price($min_price);	
 			
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
 			
-			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . __('From:', 'woothemes') . ' </span>';
+			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woothemes') . ' </span>';
 			
 			$price .= woocommerce_price($this->get_price());
 			

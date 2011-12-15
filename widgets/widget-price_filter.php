@@ -8,12 +8,15 @@
  * @category	Widgets
  * @author		WooThemes
  */
- 
+
+if (is_active_widget( false, false, 'woocommerce_price_filter', 'true' ) && !is_admin()) :
+	add_action('init', 'woocommerce_price_filter_init');
+	add_filter('loop_shop_post_in', 'woocommerce_price_filter');
+endif;
+
 /**
  * Price filter Init
  */
-add_action('init', 'woocommerce_price_filter_init');
-
 function woocommerce_price_filter_init() {
 	
 	unset($_SESSION['min_price']);
@@ -31,8 +34,6 @@ function woocommerce_price_filter_init() {
 /**
  * Price Filter post filter
  */
-add_filter('loop_shop_post_in', 'woocommerce_price_filter');
-
 function woocommerce_price_filter( $filtered_posts ) {
 
 	if (isset($_GET['max_price']) && isset($_GET['min_price'])) :

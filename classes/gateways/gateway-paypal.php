@@ -229,7 +229,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woothemes'), $order->id);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->order_total - $order->order_shipping - $order->get_total_tax(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->order_total - $order->order_shipping - $order->get_total_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
 			if ($order->order_shipping>0) :

@@ -385,7 +385,7 @@ class woocommerce_cart {
 					return false;
 				endif;
 	
-				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
+				$this->set_quantity($cart_item_key, $quantity);
 	
 			else :
 				
@@ -417,6 +417,7 @@ class woocommerce_cart {
 			else :
 				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
 			endif;
+			do_action('woocommerce_after_cart_item_quantity_update', $this->cart_contents[$cart_item_key], $quantity);
 	
 			$this->set_session();
 		}
@@ -686,7 +687,7 @@ class woocommerce_cart {
 			global $woocommerce;
 			
 			$this->reset_totals();
-			
+			do_action('woocommerce_before_calculate_totals', $this);
 			// Get count of all items + weights + subtotal (we may need this for discounts)
 			if (sizeof($this->cart_contents)>0) foreach ($this->cart_contents as $cart_item_key => $values) :
 				

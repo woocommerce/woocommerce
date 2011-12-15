@@ -34,48 +34,56 @@ class woocommerce_checkout {
 				'label' 		=> __('First Name', 'woothemes'), 
 				'placeholder' 	=> __('First Name', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-first') 
+				'class'			=> array('form-row-first'),
+				'position'		=> 1,
 				),
 			'billing_last_name' => array( 
 				'label' 		=> __('Last Name', 'woothemes'), 
 				'placeholder' 	=> __('Last Name', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
+				'class' 		=> array('form-row-last'),
+				'position'		=> 2,
 				),
 			'billing_company' 	=> array( 
 				'label' 		=> __('Company', 'woothemes'), 
-				'placeholder' 	=> __('Company', 'woothemes') 
+				'placeholder' 	=> __('Company', 'woothemes'),
+				'position'		=> 3,
 				),
 			'billing_address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
 				'placeholder' 	=> __('Address 1', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 4,
 				),
 			'billing_address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
 				'placeholder' 	=> __('Address 2', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
-				'label_class' 	=> array('hidden') 
+				'label_class' 	=> array('hidden'),
+				'position'		=> 5,
 				),
 			'billing_city' 		=> array( 
 				'label' 		=> __('City', 'woothemes'), 
 				'placeholder' 	=> __('City', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 6,
 				),
 			'billing_postcode' 	=> array( 
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-last update_totals_on_change') 
+				'class'			=> array('form-row-last update_totals_on_change'),
+				'position'		=> 7,
 				),
 			'billing_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first update_totals_on_change'), 
-				'rel' 			=> 'billing_state' 
+				'rel' 			=> 'billing_state',
+				'position'		=> 8,
 				),
 			'billing_state' 	=> array( 
 				'type'			=> 'state', 
@@ -83,19 +91,22 @@ class woocommerce_checkout {
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last update_totals_on_change'), 
-				'rel' 			=> 'billing_country' 
+				'rel' 			=> 'billing_country',
+				'position'		=> 9,
 				),
 			'billing_email' 	=> array( 
 				'label' 		=> __('Email Address', 'woothemes'), 
 				'placeholder' 	=> __('you@yourdomain.com', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 10,
 				),
 			'billing_phone' 	=> array( 
 				'label' 		=> __('Phone', 'woothemes'), 
 				'placeholder' 	=> __('Phone number', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
+				'class' 		=> array('form-row-last'),
+				'position'		=> 11,
 				)
 		));
 		
@@ -371,7 +382,6 @@ class woocommerce_checkout {
 	 */
 	function process_checkout() {
 		global $wpdb, $woocommerce;
-		$validation = $woocommerce->validation();
 		
 		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 
@@ -419,16 +429,16 @@ class woocommerce_checkout {
 					case "billing_postcode" :
 						$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 						
-						if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
+						if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
 						else :
-							$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+							$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 						endif;
 					break;
 					case "billing_phone" :
-						if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
+						if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
 					break;
 					case "billing_email" :
-						if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
+						if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
 					break;
 				endswitch;
 				
@@ -457,9 +467,9 @@ class woocommerce_checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$validation->is_postcode( $this->posted[$key], $this->posted['shipping_country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
+							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $this->posted['shipping_country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
 							else :
-								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $this->posted['shipping_country'] );
+								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $this->posted['shipping_country'] );
 							endif;
 						break;
 					endswitch;
@@ -568,8 +578,8 @@ class woocommerce_checkout {
 		                    wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
 		
 		                    // send the user a confirmation and their login details
-		                    woocommerce_customer_new_account( $user_id, $user_pass );
-		                    //wp_new_user_notification( $user_id, $user_pass );
+		                    $mailer = $woocommerce->mailer();
+							$mailer->customer_new_account( $user_id, $password );
 		
 		                    // set the WP login cookie
 		                    $secure_cookie = is_ssl() ? true : false;
