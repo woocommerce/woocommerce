@@ -279,6 +279,7 @@ class woocommerce_countries {
 				'VIC' => __('Victoria', 'woothemes') ,
 				'WA' => __('Western Australia', 'woothemes') 
 			),
+			'AT' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woothemes'),
 			    'AC' => __('Acre', 'woothemes'),
@@ -324,7 +325,9 @@ class woocommerce_countries {
 				'SK' => __('Saskatchewan', 'woothemes') ,
 				'YT' => __('Yukon Territory', 'woothemes') 
 			),
+			'CZ' => array(),
 			'DE' => array(),
+			'DK' => array(),
 			'US' => array(
 				'AL' => __('Alabama', 'woothemes') ,
 				'AK' => __('Alaska', 'woothemes') ,

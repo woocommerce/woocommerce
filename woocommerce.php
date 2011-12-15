@@ -758,7 +758,9 @@ class woocommerce {
 	 */
 	function init_styles() {
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-	
+		$chosen_en = (get_option('woocommerce_enable_chosen')=='yes') ? true : false;
+		$lightbox_en = (get_option('woocommerce_enable_lightbox')=='yes') ? true : false;
+		
     	// Optional front end css	
 		if ((defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS) || (!defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css')=='yes')) :
 			$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
@@ -766,7 +768,8 @@ class woocommerce {
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		endif;
     
-    	if (get_option('woocommerce_enable_lightbox')=='yes') wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
+    	if ($lightbox_en) wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
+    	if ($chosen_en) wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen'.$suffix.'.css' );
 	}
 	
 	/**
@@ -775,6 +778,7 @@ class woocommerce {
 	function frontend_scripts() {
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en = (get_option('woocommerce_enable_lightbox')=='yes') ? true : false;
+		$chosen_en = (get_option('woocommerce_enable_chosen')=='yes') ? true : false;
 		$jquery_ui_en = (get_option('woocommerce_enable_jquery_ui')=='yes') ? true : false;
 		$scripts_position = (get_option('woocommerce_scripts_position') == 'yes') ? true : false;
 	
@@ -788,6 +792,11 @@ class woocommerce {
 		if ($lightbox_en) :
 			wp_register_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
 			wp_enqueue_script( 'fancybox' );
+		endif;
+		
+		if ($chosen_en && is_checkout()) :
+			wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
+			wp_enqueue_script( 'chosen' );
 		endif;
 		
 		if ($jquery_ui_en) :
@@ -813,7 +822,7 @@ class woocommerce {
 		
 		$woocommerce_params = array(
 			'countries' 					=> $states,
-			'select_state_text' 			=> __('Select a state&hellip;', 'woothemes'),
+			'select_state_text' 			=> __('Select an option&hellip;', 'woothemes'),
 			'state_text' 					=> __('state', 'woothemes'),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),

@@ -16,6 +16,7 @@ class woocommerce_checkout {
 	var $shipping_fields;
 	var $must_create_account;
 	var $creating_account;
+	var $localisation;
 	
 	/** constructor */
 	function __construct () {
@@ -27,61 +28,60 @@ class woocommerce_checkout {
 		
 		if (get_option('woocommerce_enable_guest_checkout')=='yes' || is_user_logged_in()) $this->must_create_account = false;
 		
+		// Load Locales
+		include_once('localisation.class.php');
+		$this->localisation = &new woocommerce_localisation();
+		
 		// Define billing fields in an array. This can be hooked into and filtered if you wish to change/add anything.
 		$this->billing_fields = apply_filters('woocommerce_billing_fields', array(
 			'billing_first_name' => array( 
 				'name'			=>'billing_first_name', 
 				'label' 		=> __('First Name', 'woothemes'), 
-				'placeholder' 	=> __('First Name', 'woothemes'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-first'),
 				'position'		=> 1,
 				),
 			'billing_last_name' => array( 
 				'label' 		=> __('Last Name', 'woothemes'), 
-				'placeholder' 	=> __('Last Name', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'position'		=> 2,
 				),
 			'billing_company' 	=> array( 
-				'label' 		=> __('Company', 'woothemes'), 
-				'placeholder' 	=> __('Company', 'woothemes'),
+				'label' 		=> __('Company Name', 'woothemes'), 
+				'placeholder' 	=> __('Company (optional)', 'woothemes'),
 				'position'		=> 3,
 				),
 			'billing_address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
-				'placeholder' 	=> __('Address 1', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				'position'		=> 4,
 				),
 			'billing_address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
-				'placeholder' 	=> __('Address 2', 'woothemes'), 
+				'placeholder' 	=> __('Address 2 (optional)', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
 				'label_class' 	=> array('hidden'),
 				'position'		=> 5,
 				),
 			'billing_city' 		=> array( 
 				'label' 		=> __('City', 'woothemes'), 
-				'placeholder' 	=> __('City', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				'position'		=> 6,
 				),
 			'billing_postcode' 	=> array( 
 				'label' 		=> __('Postcode', 'woothemes'), 
-				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-last update_totals_on_change'),
+				'class'			=> array('form-row-last', 'update_totals_on_change'),
 				'position'		=> 7,
 				),
 			'billing_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first update_totals_on_change'), 
+				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'), 
 				'rel' 			=> 'billing_state',
 				'position'		=> 8,
 				),
@@ -90,20 +90,18 @@ class woocommerce_checkout {
 				'name'			=>'billing_state', 
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last update_totals_on_change'), 
+				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
 				'rel' 			=> 'billing_country',
 				'position'		=> 9,
 				),
 			'billing_email' 	=> array( 
 				'label' 		=> __('Email Address', 'woothemes'), 
-				'placeholder' 	=> __('you@yourdomain.com', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				'position'		=> 10,
 				),
 			'billing_phone' 	=> array( 
 				'label' 		=> __('Phone', 'woothemes'), 
-				'placeholder' 	=> __('Phone number', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'position'		=> 11,
@@ -150,23 +148,30 @@ class woocommerce_checkout {
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last update_totals_on_change') 
+				'class' 		=> array('form-row-last', 'update_totals_on_change') 
 				),
 			'shipping_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first update_totals_on_change'), 
+				'class' 		=> array('form-row-first', 'update_totals_on_change'), 
 				'rel' 			=> 'shipping_state' 
 				),
 			'shipping_state' 	=> array( 
 				'type'			=> 'state', 
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last update_totals_on_change'), 
+				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
 				'rel' 			=> 'shipping_country' 
 				)
 		));
+		
+		uasort($this->billing_fields, array(&$this, 'sort_by_position'));
+		
+	}
+	
+	function sort_by_position($a, $b) {
+	    return $a['position'] - $b['position'];
 	}
 		
 	/** Output the billing information form */
@@ -297,8 +302,6 @@ class woocommerce_checkout {
 		);
 		
 		$args = wp_parse_args( $args, $defaults );
-
-		if ($args['required']) $required = ' <span class="required">*</span>'; else $required = '';
 		
 		if (in_array('form-row-last', $args['class'])) $after = '<div class="clear"></div>'; else $after = '';
 		
@@ -308,8 +311,8 @@ class woocommerce_checkout {
 			case "country" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
-					<select name="'.$key.'" id="'.$key.'" class="country_to_state" rel="'.$args['rel'].'">
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'" rel="'.$args['rel'].'">
 						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
 				
 				foreach($woocommerce->countries->get_allowed_countries() as $ckey=>$value) :
@@ -322,7 +325,7 @@ class woocommerce_checkout {
 			case "state" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>';
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
 					
 				$current_cc = $this->get_value($args['rel']);
 				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
@@ -350,7 +353,7 @@ class woocommerce_checkout {
 			case "textarea" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $this->get_value( $key ) ).'</textarea>
 				</p>'.$after;
 				
@@ -359,14 +362,14 @@ class woocommerce_checkout {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
 					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($this->get_value( $key ), 1, false).' />
-					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 				</p>'.$after;
 				
 			break;
 			default :
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].$required.'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $this->get_value( $key ).'" />
 				</p>'.$after;
 				
@@ -887,7 +890,7 @@ class woocommerce_checkout {
 		if (isset( $this->posted[$input] ) && !empty($this->posted[$input])) :
 			return $this->posted[$input];
 		elseif (is_user_logged_in()) :
-			if (get_user_meta( get_current_user_id(), $input, true )) return get_user_meta( get_current_user_id(), $input, true );
+			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
 			
 			$current_user = wp_get_current_user();
 

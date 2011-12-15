@@ -155,6 +155,7 @@ jQuery(document).ready(function($) {
 				
 				// Empty array means state field is not used
 				$(state_box).parent().hide();
+				$(state_box).parent().find('.chzn-container').remove();
 				$(state_box).replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
 				
 			} else {
@@ -166,7 +167,7 @@ jQuery(document).ready(function($) {
 				}
 				if ($(state_box).is('input')) {
 					// Change for select
-					$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '"></select>');
+					$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
 					state_box = $('#' + $(this).attr('rel'));
 				}
 				$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
@@ -178,9 +179,12 @@ jQuery(document).ready(function($) {
 		} else {
 			if ($(state_box).is('select, .hidden')) {
 				$(state_box).parent().show();
+				$(state_box).parent().find('.chzn-container').remove();
 				$(state_box).replaceWith('<input type="text" class="input-text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
 			}
 		}
+		
+		$('body').trigger('country_to_state_changed');
 		
 	}).change();
 	
