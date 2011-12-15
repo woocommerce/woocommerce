@@ -35,7 +35,7 @@ class woocommerce_countries {
 			'AT' => __('Austria', 'woothemes'),
 			'AU' => __('Australia', 'woothemes'),
 			'AW' => __('Aruba', 'woothemes'),
-			'AX' => __('Aland Islands', 'woothemes'),
+			'AX' => __('Aaland Islands', 'woothemes'),
 			'AZ' => __('Azerbaijan', 'woothemes'),
 			'BA' => __('Bosnia and Herzegovina', 'woothemes'),
 			'BB' => __('Barbados', 'woothemes'),
@@ -114,7 +114,6 @@ class woocommerce_countries {
 			'GW' => __('Guinea-Bissau', 'woothemes'),
 			'GY' => __('Guyana', 'woothemes'),
 			'HK' => __('Hong Kong S.A.R., China', 'woothemes'),
-			//'HM' => __('Heard Island and McDonald Islands', 'woothemes'), // Uninhabitted :)
 			'HN' => __('Honduras', 'woothemes'),
 			'HR' => __('Croatia', 'woothemes'),
 			'HT' => __('Haiti', 'woothemes'),
@@ -325,6 +324,7 @@ class woocommerce_countries {
 				'SK' => __('Saskatchewan', 'woothemes') ,
 				'YT' => __('Yukon Territory', 'woothemes') 
 			),
+			'DE' => array(),
 			'US' => array(
 				'AL' => __('Alabama', 'woothemes') ,
 				'AK' => __('Alaska', 'woothemes') ,

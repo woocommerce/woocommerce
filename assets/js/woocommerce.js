@@ -151,21 +151,33 @@ jQuery(document).ready(function($) {
 		var value = $(state_box).val();
 
 		if (states[country]) {
-			var options = '';
-			var state = states[country];
-			for(var index in state) {
-				options = options + '<option value="' + index + '">' + state[index] + '</option>';
-			}
-			if ($(state_box).is('input')) {
-				// Change for select
-				$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '"></select>');
-				state_box = $('#' + $(this).attr('rel'));
-			}
-			$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
+			if (states[country].length == 0) {
+				
+				// Empty array means state field is not used
+				$(state_box).parent().hide();
+				$(state_box).replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
+				
+			} else {
 			
-			$(state_box).val(value);
+				var options = '';
+				var state = states[country];
+				for(var index in state) {
+					options = options + '<option value="' + index + '">' + state[index] + '</option>';
+				}
+				if ($(state_box).is('input')) {
+					// Change for select
+					$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '"></select>');
+					state_box = $('#' + $(this).attr('rel'));
+				}
+				$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
+				
+				$(state_box).val(value);
+				$(state_box).parent().show();
+			
+			}
 		} else {
-			if ($(state_box).is('select')) {
+			if ($(state_box).is('select, .hidden')) {
+				$(state_box).parent().show();
 				$(state_box).replaceWith('<input type="text" class="input-text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
 			}
 		}

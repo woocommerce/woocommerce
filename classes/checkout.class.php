@@ -34,48 +34,56 @@ class woocommerce_checkout {
 				'label' 		=> __('First Name', 'woothemes'), 
 				'placeholder' 	=> __('First Name', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-first') 
+				'class'			=> array('form-row-first'),
+				'position'		=> 1,
 				),
 			'billing_last_name' => array( 
 				'label' 		=> __('Last Name', 'woothemes'), 
 				'placeholder' 	=> __('Last Name', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
+				'class' 		=> array('form-row-last'),
+				'position'		=> 2,
 				),
 			'billing_company' 	=> array( 
 				'label' 		=> __('Company', 'woothemes'), 
-				'placeholder' 	=> __('Company', 'woothemes') 
+				'placeholder' 	=> __('Company', 'woothemes'),
+				'position'		=> 3,
 				),
 			'billing_address_1' 	=> array( 
 				'label' 		=> __('Address', 'woothemes'), 
 				'placeholder' 	=> __('Address 1', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 4,
 				),
 			'billing_address_2' => array( 
 				'label' 		=> __('Address 2', 'woothemes'), 
 				'placeholder' 	=> __('Address 2', 'woothemes'), 
 				'class' 		=> array('form-row-last'), 
-				'label_class' 	=> array('hidden') 
+				'label_class' 	=> array('hidden'),
+				'position'		=> 5,
 				),
 			'billing_city' 		=> array( 
 				'label' 		=> __('City', 'woothemes'), 
 				'placeholder' 	=> __('City', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 6,
 				),
 			'billing_postcode' 	=> array( 
 				'label' 		=> __('Postcode', 'woothemes'), 
 				'placeholder' 	=> __('Postcode', 'woothemes'), 
 				'required' 		=> true, 
-				'class'			=> array('form-row-last update_totals_on_change') 
+				'class'			=> array('form-row-last update_totals_on_change'),
+				'position'		=> 7,
 				),
 			'billing_country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first update_totals_on_change'), 
-				'rel' 			=> 'billing_state' 
+				'rel' 			=> 'billing_state',
+				'position'		=> 8,
 				),
 			'billing_state' 	=> array( 
 				'type'			=> 'state', 
@@ -83,19 +91,22 @@ class woocommerce_checkout {
 				'label' 		=> __('State/County', 'woothemes'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last update_totals_on_change'), 
-				'rel' 			=> 'billing_country' 
+				'rel' 			=> 'billing_country',
+				'position'		=> 9,
 				),
 			'billing_email' 	=> array( 
 				'label' 		=> __('Email Address', 'woothemes'), 
 				'placeholder' 	=> __('you@yourdomain.com', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-first') 
+				'class' 		=> array('form-row-first'),
+				'position'		=> 10,
 				),
 			'billing_phone' 	=> array( 
 				'label' 		=> __('Phone', 'woothemes'), 
 				'placeholder' 	=> __('Phone number', 'woothemes'), 
 				'required' 		=> true, 
-				'class' 		=> array('form-row-last') 
+				'class' 		=> array('form-row-last'),
+				'position'		=> 11,
 				)
 		));
 		
