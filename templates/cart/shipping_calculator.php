@@ -7,6 +7,9 @@ global $woocommerce;
 
 if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart->needs_shipping()) return;
 ?>
+
+<?php do_action( 'woocommerce_before_shipping_calculator' ); ?>
+
 <form class="shipping_calculator" action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
 	<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
 	<section class="shipping-calculator-form">
