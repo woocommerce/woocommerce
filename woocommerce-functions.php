@@ -620,13 +620,21 @@ function woocommerce_download_product() {
 				
 			endif;
 			
+			// Get URLS with https
+			$site_url = site_url();
+			$network_url = network_admin_url();
+			if (is_ssl()) :
+				$site_url = str_replace('https:', 'http:', $site_url);
+				$network_url = str_replace('https:', 'http:', $network_url);
+			endif;
+			
 			if (!is_multisite()) :	
-				$file_path = str_replace(trailingslashit(site_url()), ABSPATH, $file_path);
+				$file_path = str_replace(trailingslashit($site_url), ABSPATH, $file_path);
 			else :
 				$upload_dir = wp_upload_dir();
 				
 				// Try to replace network url
-				$file_path = str_replace(trailingslashit(network_admin_url()), ABSPATH, $file_path);
+				$file_path = str_replace(trailingslashit($network_url), ABSPATH, $file_path);
 				
 				// Now try to replace upload URL
 				$file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_path);

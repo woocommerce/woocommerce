@@ -50,6 +50,7 @@ class woocommerce_localisation {
 							)
 						)
 			);
+			
 	}
 	 
 }
