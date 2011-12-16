@@ -143,48 +143,71 @@ jQuery(document).ready(function($) {
 	$('select.country_to_state').change(function(){
 		
 		var country = $(this).val();
-		var state_box = $(this).closest('div').find('#billing_state, #shipping_state');
 		
-		var input_name = $(state_box).attr('name');
-		var input_id = $(state_box).attr('id');
-		
-		var value = $(state_box).val();
+		var $statebox = $(this).closest('div').find('#billing_state, #shipping_state');
+		var $parent = $statebox.parent();
 
+		var input_name = $statebox.attr('name');
+		var input_id = $statebox.attr('id');
+		var value = $statebox.val();
+		
 		if (states[country]) {
 			if (states[country].length == 0) {
 				
 				// Empty array means state field is not used
-				$(state_box).parent().hide();
-				$(state_box).parent().find('.chzn-container').remove();
-				$(state_box).replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
+				$parent.fadeOut(200, function() {
+					$statebox.parent().find('.chzn-container').remove();
+					$statebox.replaceWith('<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" />');
+					
+					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
+				});
 				
 			} else {
-			
-				var options = '';
-				var state = states[country];
-				for(var index in state) {
-					options = options + '<option value="' + index + '">' + state[index] + '</option>';
-				}
-				if ($(state_box).is('input')) {
-					// Change for select
-					$(state_box).replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
-					state_box = $(this).closest('div').find('#billing_state, #shipping_state');
-				}
-				$(state_box).html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
 				
-				$(state_box).val(value);
-				$(state_box).parent().show();
+				$parent.fadeOut(200, function() {
+					var options = '';
+					var state = states[country];
+					for(var index in state) {
+						options = options + '<option value="' + index + '">' + state[index] + '</option>';
+					}
+					if ($statebox.is('input')) {
+						// Change for select
+						$statebox.replaceWith('<select name="' + input_name + '" id="' + input_id + '" class="state_select"></select>');
+						$statebox = $(this).closest('div').find('#billing_state, #shipping_state');
+					}
+					$statebox.html( '<option value="">' + woocommerce_params.select_state_text + '</option>' + options);
+					
+					$statebox.val(value);
+					
+					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
+					
+					$parent.fadeIn(500);
+				});
 			
 			}
 		} else {
-			if ($(state_box).is('select, .hidden')) {
-				$(state_box).parent().show();
-				$(state_box).parent().find('.chzn-container').remove();
-				$(state_box).replaceWith('<input type="text" class="input-text" placeholder="' + woocommerce_params.state_text + '" name="' + input_name + '" id="' + input_id + '" />');
+			if ($statebox.is('select')) {
+				
+				$parent.fadeOut(200, function() {
+					$parent.find('.chzn-container').remove();
+					$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" />');
+					
+					$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
+					$parent.fadeIn(500);
+				});
+				
+			} else if ($statebox.is('.hidden')) {
+				
+				$parent.find('.chzn-container').remove();
+				$statebox.replaceWith('<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" />');
+				
+				$('body').trigger('country_to_state_changed', [country, $(this).closest('div')]);
+				$parent.delay(200).fadeIn(500);
+				
 			}
 		}
 		
-		$('body').trigger('country_to_state_changed');
+		$('body').delay(200).trigger('country_to_state_changing', [country, $(this).closest('div')]);
 		
 	}).change();
 	
@@ -555,6 +578,71 @@ jQuery(document).ready(function($) {
 			});
 			return false;
 		});
+		
+		/* Localisation */
+		var locale_json = woocommerce_params.locale.replace(/&quot;/g, '"');
+		var locale = $.parseJSON( locale_json );
+	
+		// Handle locale
+		$('body').bind('country_to_state_changing', function( event, country, wrapper ){
+			
+			var thisform = wrapper;
+			
+			if ( locale[country] ) {
+				var thislocale = locale[country];
+			} else {
+				var thislocale = locale['default'];
+			}
+				
+			// State Handling
+			if ( thislocale['state'] ) {
+				var field = thisform.find('#billing_state_field, #shipping_state_field');
+				
+				if ( thislocale['state']['label'] ) {
+					field.find('label').text( thislocale['state']['label'] );
+				}
+			}
+			
+			var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
+			var cityfield = thisform.find('#billing_city_field, #shipping_city_field');
+				
+			// City Handling
+			if ( thislocale['city'] ) {
+				if ( thislocale['city']['label'] ) {
+					cityfield.find('label').text( thislocale['city']['label'] );
+				}
+			}
+			
+			// Postcode Handling
+			if ( thislocale['postcode'] ) {
+				if ( thislocale['postcode']['label'] ) {
+					postcodefield.find('label').text( thislocale['postcode']['label'] );
+				}
+			}
+			
+			// Re-order postcode/city
+			if ( thislocale['postcode_before_city'] ) {
+				if (cityfield.is('.form-row-first')) {
+					cityfield.fadeOut(200, function() {
+						cityfield.removeClass('form-row-first').addClass('form-row-last').insertAfter( postcodefield ).fadeIn(500);
+					});
+					postcodefield.fadeOut(200, function (){
+						postcodefield.removeClass('form-row-last').addClass('form-row-first').fadeIn(500);
+					});
+				}
+			} else {
+				if (cityfield.is('.form-row-last')) {
+					cityfield.fadeOut(200, function() {
+						cityfield.removeClass('form-row-last').addClass('form-row-first').insertBefore( postcodefield ).fadeIn(500);
+					});
+					postcodefield.fadeOut(200, function (){
+						postcodefield.removeClass('form-row-first').addClass('form-row-last').fadeIn(500);
+					});
+				}
+			}
+			
+		});
+
 
 	}
 

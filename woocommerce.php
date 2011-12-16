@@ -823,7 +823,6 @@ class woocommerce {
 		$woocommerce_params = array(
 			'countries' 					=> $states,
 			'select_state_text' 			=> __('Select an option&hellip;', 'woothemes'),
-			'state_text' 					=> __('state', 'woothemes'),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),
 			'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
