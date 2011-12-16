@@ -182,6 +182,21 @@ function woocommerce_clean( $var ) {
 }
 
 /**
+ * Merge two arrays
+ **/
+function woocommerce_array_overlay($a1,$a2) {
+    foreach($a1 as $k => $v) {
+        if(!array_key_exists($k,$a2)) continue;
+        if(is_array($v) && is_array($a2[$k])){
+            $a1[$k] = woocommerce_array_overlay($v,$a2[$k]);
+        }else{
+            $a1[$k] = $a2[$k];
+        }
+    }
+    return $a1;
+}
+
+/**
  * Variation Formatting
  *
  * Gets a formatted version of variation data or item meta

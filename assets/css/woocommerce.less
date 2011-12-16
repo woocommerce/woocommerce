@@ -1,8 +1,10 @@
 .clearfix() {
-overflow:hidden;
-zoom:1;
+	&:after {
+		content:"";
+		display:block;
+		clear:both;
+	}
 }
-
 .border_radius(@radius:4px) {
 -webkit-border-radius:@radius;
 -moz-border-radius:@radius;

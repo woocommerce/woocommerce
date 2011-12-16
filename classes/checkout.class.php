@@ -30,93 +30,12 @@ class woocommerce_checkout {
 		if (get_option('woocommerce_enable_guest_checkout')=='yes' || is_user_logged_in()) $this->must_create_account = false;
 				
 		// Checkout fields
-		$this->address_fields = apply_filters('woocommerce_address_fields', array(
-			'first_name' => array( 
-				'label' 		=> __('First Name', 'woothemes'), 
-				'required' 		=> true, 
-				'class'			=> array('form-row-first'),
-				'position'		=> 1,
-				),
-			'last_name' => array( 
-				'label' 		=> __('Last Name', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last'),
-				'position'		=> 2,
-				),
-			'company' 	=> array( 
-				'label' 		=> __('Company Name', 'woothemes'), 
-				'placeholder' 	=> __('Company (optional)', 'woothemes'),
-				'position'		=> 3,
-				),
-			'address_1' 	=> array( 
-				'label' 		=> __('Address', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first'),
-				'position'		=> 4,
-				),
-			'address_2' => array( 
-				'label' 		=> __('Address 2', 'woothemes'), 
-				'placeholder' 	=> __('Address 2 (optional)', 'woothemes'), 
-				'class' 		=> array('form-row-last'), 
-				'label_class' 	=> array('hidden'),
-				'position'		=> 5,
-				),
-			'city' 		=> array( 
-				'label' 		=> __('City', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first'),
-				'position'		=> 6,
-				),
-			'postcode' 	=> array( 
-				'label' 		=> __('Postcode', 'woothemes'), 
-				'required' 		=> true, 
-				'class'			=> array('form-row-last', 'update_totals_on_change'),
-				'position'		=> 7,
-				),
-			'country' 	=> array( 
-				'type'			=> 'country', 
-				'label' 		=> __('Country', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'), 
-				'position'		=> 8,
-				),
-			'state' 	=> array( 
-				'type'			=> 'state', 
-				'label' 		=> __('State/County', 'woothemes'), 
-				'required' 		=> true, 
-				'class' 		=> array('form-row-last', 'update_totals_on_change'), 
-				'position'		=> 9,
-				)
-		));
-		
-		uasort($this->address_fields, array(&$this, 'sort_by_position'));
-
-		$this->billing_fields = $this->shipping_fields = array();
-		
-		foreach ($this->address_fields as $key => $value) :
-			$this->billing_fields['billing_' . $key] = $value;
-			$this->shipping_fields['shipping_' . $key] = $value;
-		endforeach;
-		
-		// Email and Tel
-		$this->billing_fields['billing_email'] = array(
-			'label' 		=> __('Email Address', 'woothemes'), 
-			'required' 		=> true, 
-			'class' 		=> array('form-row-first'),
-		);	
-		$this->billing_fields['billing_phone'] = array(
-			'label' 		=> __('Phone', 'woothemes'), 
-			'required' 		=> true, 
-			'class' 		=> array('form-row-last'),
-		);
-		
-		$this->billing_fields = apply_filters('woocommerce_billing_fields', $this->billing_fields);
-		$this->shipping_fields = apply_filters('woocommerce_shipping_fields', $this->shipping_fields);	
-
+		$this->billing_fields = $woocommerce->countries->get_address_fields( $this->get_value('billing_country'), 'billing_' );
+		$this->shipping_fields = $woocommerce->countries->get_address_fields( $this->get_value('shipping_country'), 'shipping_' );	
 	}
 	
-	function sort_by_position($a, $b) {
-	    return $a['position'] - $b['position'];
+	function sort_by_order($a, $b) {
+	    return $a['order'] - $b['order'];
 	}
 		
 	/** Output the billing information form */
@@ -247,14 +166,14 @@ class woocommerce_checkout {
 		
 		$args = wp_parse_args( $args, $defaults );
 		
-		if (in_array('form-row-last', $args['class'])) $after = '<div class="clear"></div>'; else $after = '';
+		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
 		
 		$field = '';
 		
 		switch ($args['type']) :
 			case "country" :
 				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
 						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
@@ -268,7 +187,7 @@ class woocommerce_checkout {
 			break;
 			case "state" :
 				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
 				
 				if ($key=='billing_state') $current_cc = $this->get_value('billing_country');
@@ -290,7 +209,7 @@ class woocommerce_checkout {
 					$field .= '</select>';
 				else :
 					// Input
-					$field .= '<input type="text" class="input-text" value="'.$current_r.'" placeholder="'.__('State/County', 'woothemes').'" name="'.$key.'" id="'.$key.'" />';
+					$field .= '<input type="text" class="input-text" value="'.$current_r.'"  placeholder="'.$args['placeholder'].'" name="'.$key.'" id="'.$key.'" />';
 				endif;
 	
 				$field .= '</p>'.$after;
@@ -298,7 +217,7 @@ class woocommerce_checkout {
 			break;
 			case "textarea" :
 				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $this->get_value( $key ) ).'</textarea>
 				</p>'.$after;
@@ -306,7 +225,7 @@ class woocommerce_checkout {
 			break;
 			case "checkbox" :
 				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($this->get_value( $key ), 1, false).' />
 					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 				</p>'.$after;
@@ -314,7 +233,7 @@ class woocommerce_checkout {
 			break;
 			default :
 			
-				$field = '<p class="form-row '.implode(' ', $args['class']).'">
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $this->get_value( $key ).'" />
 				</p>'.$after;

@@ -351,7 +351,7 @@ class woocommerce {
 		
 		if (is_account_page()) $this->add_body_class('woocommerce-account');
 		
-		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || get_page(get_option('woocommerce_order_tracking_page_id')) || get_page(get_option('woocommerce_thanks_page_id'))) $this->add_body_class('woocommerce-page');
+		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page(get_option('woocommerce_order_tracking_page_id')) || is_page(get_option('woocommerce_thanks_page_id'))) $this->add_body_class('woocommerce-page');
 	}
 	
 	/**
@@ -839,7 +839,7 @@ class woocommerce {
 		$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
 		$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
 		
-		if (is_checkout() || is-cart()) :
+		if (is_checkout() || is_cart()) :
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 		endif;
 		

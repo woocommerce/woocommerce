@@ -51,7 +51,6 @@ class woocommerce_countries {
 			'BO' => __('Bolivia', 'woothemes'),
 			'BA' => __('Bosnia and Herzegovina', 'woothemes'),
 			'BW' => __('Botswana', 'woothemes'),
-			'BV' => __('Bouvet Island', 'woothemes'),
 			'BR' => __('Brazil', 'woothemes'),
 			'IO' => __('British Indian Ocean Territory', 'woothemes'),
 			'VG' => __('British Virgin Islands', 'woothemes'),
@@ -396,7 +395,6 @@ class woocommerce_countries {
 				'AP' => __('Pacific', 'woothemes') 
 			)
 		);
-
 	}
 	
 	/** get base country */
@@ -587,14 +585,7 @@ class woocommerce_countries {
 				
 				// Austria
 				'AT' => array(
-					'city'	=> array(
-						'position'	=> 7,
-						'class'		=> array('form-row-last')
-					),
-					'postcode'	=> array(
-						'position'	=> 6,
-						'class'		=> array('form-row-first update_totals_on_change')
-					),
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					)
@@ -622,23 +613,9 @@ class woocommerce_countries {
 					)
 				),
 				
-				// Czech Republic
-				'CZ' => array(
-					'city'	=> array(
-						'label'	=> __('Town', 'woothemes')
-					)
-				),
-				
 				// Germany
 				'DE' => array(
-					'city'	=> array(
-						'position'	=> 7,
-						'class'		=> array('form-row-last')
-					),
-					'postcode'	=> array(
-						'position'	=> 6,
-						'class'		=> array('form-row-first update_totals_on_change')
-					),
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					)
@@ -646,17 +623,7 @@ class woocommerce_countries {
 				
 				// Denmark
 				'DK' => array(
-					'city'	=> array(
-						'position'	=> 7,
-						'class'		=> array('form-row-last')
-					),
-					'postcode'	=> array(
-						'position'	=> 6,
-						'class'		=> array('form-row-first update_totals_on_change')
-					),
-					'city'	=> array(
-						'label'	=> __('Town', 'woothemes')
-					),
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					)
@@ -664,17 +631,7 @@ class woocommerce_countries {
 				
 				// Finland
 				'FI' => array(
-					'city'	=> array(
-						'position'	=> 7,
-						'class'		=> array('form-row-last')
-					),
-					'postcode'	=> array(
-						'position'	=> 6,
-						'class'		=> array('form-row-first update_totals_on_change')
-					),
-					'city'	=> array(
-						'label'	=> __('Town', 'woothemes')
-					),
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					)
@@ -682,17 +639,7 @@ class woocommerce_countries {
 				
 				// France
 				'FR' => array(
-					'city'	=> array(
-						'position'	=> 7,
-						'class'		=> array('form-row-last')
-					),
-					'postcode'	=> array(
-						'position'	=> 6,
-						'class'		=> array('form-row-first update_totals_on_change')
-					),
-					'city'	=> array(
-						'label'	=> __('Town', 'woothemes')
-					),
+					'postcode_before_city' => true,
 					'state'		=> array(
 						'required' => false
 					)
@@ -710,12 +657,150 @@ class woocommerce_countries {
 						'label' => __('Region', 'woothemes')
 					)
 				),
+				
+				// United States
+				'US' => array(
+					'postcode'	=> array(
+						'label' => __('Zip', 'woothemes')
+					),
+					'state'		=> array(
+						'label' => __('State', 'woothemes')
+					)
+				),
+				
+				// United Kingdom
+				'GB' => array(
+					'postcode_before_city' => true,
+					'postcode'	=> array(
+						'label' => __('Postcode', 'woothemes')
+					),
+					'state'		=> array(
+						'label' => __('County', 'woothemes')
+					)
+				),
 						
 			);
+			
+			$this->locale = array_intersect_key($this->locale, $this->get_allowed_countries());
+			
+			$this->locale['default'] = array(
+				'postcode'	=> array(
+					'label' => __('Postcode/Zip', 'woothemes')
+				),
+				'city'	=> array(
+					'label'	=> __('Town/City', 'woothemes')
+				),
+				'state'		=> array(
+					'label' => __('State/County', 'woothemes')
+				)
+			);
+			
 		endif;
 		
-		return array_intersect_key($this->locale, $this->get_allowed_countries());
+		return $this->locale;
 		
 	}
-}
+	
+	/** Apply locale and get address fields */
+	function get_address_fields( $country, $type = 'billing_' ) {
+		global $woocommerce;
+		
+		$locale		= $this->get_country_locale();
+		
+		$fields = array(
+			'first_name' => array( 
+				'label' 		=> __('First Name', 'woothemes'), 
+				'required' 		=> true, 
+				'class'			=> array('form-row-first'),
+				),
+			'last_name' => array( 
+				'label' 		=> __('Last Name', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-last'),
+				'clear'			=> true
+				),
+			'company' 	=> array( 
+				'label' 		=> __('Company Name', 'woothemes'), 
+				'placeholder' 	=> __('Company (optional)', 'woothemes'),
+				'clear'			=> true
+				),
+			'address_1' 	=> array( 
+				'label' 		=> __('Address', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-first'),
+				),
+			'address_2' => array( 
+				'label' 		=> __('Address 2', 'woothemes'), 
+				'placeholder' 	=> __('Address 2 (optional)', 'woothemes'), 
+				'class' 		=> array('form-row-last'), 
+				'label_class' 	=> array('hidden'),
+				'clear'			=> true
+				),
+			'city' 		=> array( 
+				'label' 		=> __('Town/City', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-first'),
+				),
+			'postcode' 	=> array( 
+				'label' 		=> __('Postcode/Zip', 'woothemes'), 
+				'required' 		=> true, 
+				'class'			=> array('form-row-last', 'update_totals_on_change'),
+				'clear'			=> true
+				),
+			'country' 	=> array( 
+				'type'			=> 'country', 
+				'label' 		=> __('Country', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'),
+				),
+			'state' 	=> array( 
+				'type'			=> 'state', 
+				'label' 		=> __('State/County', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-last', 'update_totals_on_change'),
+				'clear'			=> true
+				)
+		);
+		
+		if (isset($locale[$country])) :
+			
+			$fields = woocommerce_array_overlay( $fields, $locale[$country] );
+			
+			if (isset($locale[$country]['postcode_before_city'])) :
+				$fields['city']['class'] = array('form-row-last');
+				$fields['postcode']['class'] = array('form-row-first', 'update_totals_on_change');
+			endif;
+			
+		endif;
+		
+		// Prepend field keys
+		$address_fields = array();
+		
+		foreach ($fields as $key => $value) :
+			$address_fields[$type . $key] = $value;
+		endforeach;
+		
+		// Billing/Shipping Specific
+		if ($type=='billing_') :
 
+			$address_fields['billing_email'] = array(
+				'label' 		=> __('Email Address', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-first')
+			);	
+			$address_fields['billing_phone'] = array(
+				'label' 		=> __('Phone', 'woothemes'), 
+				'required' 		=> true, 
+				'class' 		=> array('form-row-last'),
+				'clear'			=> true
+			);
+			
+			$address_fields = apply_filters('woocommerce_billing_fields', $address_fields);
+		else :
+			$address_fields = apply_filters('woocommerce_shipping_fields', $address_fields);
+		endif;
+		
+		// Return
+		return $address_fields;
+	}
+}

@@ -110,6 +110,8 @@
 .chzn-container-single .chzn-search {
   padding: 3px 4px;
   position: relative;
+  overflow: hidden;
+  zoom: 1;
   margin: 0;
   white-space: nowrap;
   z-index: 1010;
@@ -128,6 +130,7 @@
   border: 1px solid #aaa;
   font-family: sans-serif;
   font-size: 1em;
+  line-height: 1em;
    width: 100% !important;
    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
@@ -243,8 +246,9 @@
   max-height: 190px;
   padding: 0 0 0 4px;
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: auto;
+  zoom: 1;
+  clear: both;
 }
 .chzn-container-multi .chzn-results {
   margin: -1px 0 0;
