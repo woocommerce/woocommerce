@@ -199,6 +199,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( 'Enable "chosen" (enhanced select input) for country selection inputs', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_chosen',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Enable jQuery UI (used by the price slider widget)', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_jquery_ui',
 		'std' 		=> 'yes',

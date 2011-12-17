@@ -91,6 +91,12 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
 * Changed woocommerce_breadcrumb args
 * Filters for customer email attachments
+* Chosen selects for country/state select inputs (optional)
+* Locale options for country address formatting and checkout fields
+
+= 1.3.2.1 - 15/12/2011 = 
+* Category/Ordering fix
+* HTTPS download URL fix
 
 = 1.3.2 - 09/12/2011 = 
 * Fixed error when adding an order manually
