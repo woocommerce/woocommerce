@@ -638,26 +638,30 @@ class woocommerce_checkout {
 					endif;
 					
 					// Update order meta
-					update_post_meta( $order_id, '_billing_first_name', 	$this->posted['billing_first_name']);
-					update_post_meta( $order_id, '_billing_last_name', 		$this->posted['billing_last_name']);
-					update_post_meta( $order_id, '_billing_company', 		$this->posted['billing_company']);
-					update_post_meta( $order_id, '_billing_address_1', 		$this->posted['billing_address_1']);
-					update_post_meta( $order_id, '_billing_address_2', 		$this->posted['billing_address_2']);
-					update_post_meta( $order_id, '_billing_city', 			$this->posted['billing_city']);
-					update_post_meta( $order_id, '_billing_postcode', 		$this->posted['billing_postcode']);
-					update_post_meta( $order_id, '_billing_country', 		$this->posted['billing_country']);
-					update_post_meta( $order_id, '_billing_state', 			$this->posted['billing_state']);
-					update_post_meta( $order_id, '_billing_email', 			$this->posted['billing_email']);
-					update_post_meta( $order_id, '_billing_phone', 			$this->posted['billing_phone']);
-					update_post_meta( $order_id, '_shipping_first_name', 	$shipping_first_name);
-					update_post_meta( $order_id, '_shipping_last_name', 	$shipping_last_name);
-					update_post_meta( $order_id, '_shipping_company', 		$shipping_company);
-					update_post_meta( $order_id, '_shipping_address_1', 	$shipping_address_1);
-					update_post_meta( $order_id, '_shipping_address_2', 	$shipping_address_2);
-					update_post_meta( $order_id, '_shipping_city', 			$shipping_city);
-					update_post_meta( $order_id, '_shipping_postcode', 		$shipping_postcode);
-					update_post_meta( $order_id, '_shipping_country', 		$shipping_country);
-					update_post_meta( $order_id, '_shipping_state', 		$shipping_state);
+					update_post_meta( $order_id, '_billing_first_name', $this->posted['billing_first_name']);
+					update_post_meta( $order_id, '_billing_last_name', 	$this->posted['billing_last_name']);
+					update_post_meta( $order_id, '_billing_company', 	$this->posted['billing_company']);
+					update_post_meta( $order_id, '_billing_address_1', 	$this->posted['billing_address_1']);
+					update_post_meta( $order_id, '_billing_address_2', 	$this->posted['billing_address_2']);
+					update_post_meta( $order_id, '_billing_city', 		$this->posted['billing_city']);
+					update_post_meta( $order_id, '_billing_postcode', 	$this->posted['billing_postcode']);
+					update_post_meta( $order_id, '_billing_country', 	$this->posted['billing_country']);
+					update_post_meta( $order_id, '_billing_state', 		$this->posted['billing_state']);
+					update_post_meta( $order_id, '_billing_email', 		$this->posted['billing_email']);
+					update_post_meta( $order_id, '_billing_phone', 		$this->posted['billing_phone']);
+
+					if ( ! empty( $this->posted['shiptobilling'] ) || $woocommerce->cart->needs_shipping() ) :
+						update_post_meta( $order_id, '_shipping_first_name', $shipping_first_name);
+						update_post_meta( $order_id, '_shipping_last_name',  $shipping_last_name);
+						update_post_meta( $order_id, '_shipping_company', 	 $shipping_company);
+						update_post_meta( $order_id, '_shipping_address_1',  $shipping_address_1);
+						update_post_meta( $order_id, '_shipping_address_2',  $shipping_address_2);
+						update_post_meta( $order_id, '_shipping_city', 		 $shipping_city);
+						update_post_meta( $order_id, '_shipping_postcode', 	 $shipping_postcode);
+						update_post_meta( $order_id, '_shipping_country', 	 $shipping_country);
+						update_post_meta( $order_id, '_shipping_state', 	 $shipping_state);
+					endif;
+
 					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
