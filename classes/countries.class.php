@@ -614,13 +614,16 @@ class woocommerce_countries {
 		extract( $args );
 		
 		// Get all formats
-		$formats = $this->get_address_formats();
+		$formats 		= $this->get_address_formats();
 		
 		// Get format for the address' country
-		$format = ($country && isset($formats[$country])) ? $formats[$country] : $formats['default'];
+		$format			= ($country && isset($formats[$country])) ? $formats[$country] : $formats['default'];
 		
 		// Handle full country name
-		$full_country = (isset($this->countries[$country])) ? $this->countries[$country] : $country;
+		$full_country 	= (isset($this->countries[$country])) ? $this->countries[$country] : $country;
+		
+		// Handle full state name
+		$full_state		= ($country && $state && isset($this->states[$country][$state])) ? $this->states[$country][$state] : $state;
 		
 		// Substitute address parts into the string
 		$search = array(
@@ -654,7 +657,7 @@ class woocommerce_countries {
 			$address_1,
 			$address_2,
 			$city,
-			$state,
+			$full_state,
 			$postcode,
 			$full_country,
 			strtoupper($first_name),
@@ -664,7 +667,7 @@ class woocommerce_countries {
 			strtoupper($address_1),
 			strtoupper($address_2),
 			strtoupper($city),
-			strtoupper($state),
+			strtoupper($full_state),
 			strtoupper($postcode),
 			strtoupper($full_country),
 		);
