@@ -23,10 +23,12 @@ global $woocommerce, $current_user, $recent_orders;
 
 <h2><?php _e('Recent Orders', 'woothemes'); ?></h2>
 <?php
+$customer_id = get_current_user_id();
+
 $args = array(
     'numberposts'     => $recent_orders,
     'meta_key'        => '_customer_user',
-    'meta_value'	  => get_current_user_id(),
+    'meta_value'	  => $customer_id,
     'post_type'       => 'shop_order',
     'post_status'     => 'publish' 
 );
@@ -88,21 +90,20 @@ endif;
 		</header>
 		<address>
 			<?php
-				if (isset($woocommerce->countries->countries[get_user_meta( get_current_user_id(), 'billing_country', true )])) $country = $woocommerce->countries->countries[get_user_meta( get_current_user_id(), 'billing_country', true )]; else $country = '';
 				$address = array(
-					get_user_meta( get_current_user_id(), 'billing_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'billing_last_name', true )
-					,get_user_meta( get_current_user_id(), 'billing_company', true )
-					,get_user_meta( get_current_user_id(), 'billing_address_1', true )
-					,get_user_meta( get_current_user_id(), 'billing_address_2', true )
-					,get_user_meta( get_current_user_id(), 'billing_city', true )					
-					,get_user_meta( get_current_user_id(), 'billing_state', true )
-					,get_user_meta( get_current_user_id(), 'billing_postcode', true )
-					,$country
+					'first_name' 	=> get_user_meta( $customer_id, 'billing_first_name', true ),
+					'last_name'		=> get_user_meta( $customer_id, 'billing_last_name', true ),
+					'company'		=> get_user_meta( $customer_id, 'billing_company', true ),
+					'address_1'		=> get_user_meta( $customer_id, 'billing_address_1', true ),
+					'address_2'		=> get_user_meta( $customer_id, 'billing_address_2', true ),
+					'city'			=> get_user_meta( $customer_id, 'billing_city', true ),			
+					'state'			=> get_user_meta( $customer_id, 'billing_state', true ),
+					'postcode'		=> get_user_meta( $customer_id, 'billing_postcode', true ),
+					'country'		=> get_user_meta( $customer_id, 'billing_country', true )
 				);
-				$address = array_map('trim', $address);
-				$formatted_address = array();
-				foreach ($address as $part) if (!empty($part)) $formatted_address[] = $part;
-				$formatted_address = implode(', ', $formatted_address);
+
+				$formatted_address = $woocommerce->countries->get_formatted_address( $address );
+				
 				if (!$formatted_address) _e('You have not set up a billing address yet.', 'woothemes'); else echo $formatted_address;
 			?>
 		</address>
@@ -117,21 +118,20 @@ endif;
 		</header>
 		<address>
 			<?php
-				if (isset($woocommerce->countries->countries[get_user_meta( get_current_user_id(), 'shipping_country', true )])) $country = $woocommerce->countries->countries[get_user_meta( get_current_user_id(), 'shipping_country', true )]; else $country = '';
 				$address = array(
-					get_user_meta( get_current_user_id(), 'shipping_first_name', true ) . ' ' . get_user_meta( get_current_user_id(), 'shipping_last_name', true )
-					,get_user_meta( get_current_user_id(), 'shipping_company', true )
-					,get_user_meta( get_current_user_id(), 'shipping_address_1', true )
-					,get_user_meta( get_current_user_id(), 'shipping_address_1', true )
-					,get_user_meta( get_current_user_id(), 'shipping_city', true )					
-					,get_user_meta( get_current_user_id(), 'shipping_state', true )
-					,get_user_meta( get_current_user_id(), 'shipping_postcode', true )
-					,$country
+					'first_name' 	=> get_user_meta( $customer_id, 'shipping_first_name', true ),
+					'last_name'		=> get_user_meta( $customer_id, 'shipping_last_name', true ),
+					'company'		=> get_user_meta( $customer_id, 'shipping_company', true ),
+					'address_1'		=> get_user_meta( $customer_id, 'shipping_address_1', true ),
+					'address_2'		=> get_user_meta( $customer_id, 'shipping_address_2', true ),
+					'city'			=> get_user_meta( $customer_id, 'shipping_city', true ),			
+					'state'			=> get_user_meta( $customer_id, 'shipping_state', true ),
+					'postcode'		=> get_user_meta( $customer_id, 'shipping_postcode', true ),
+					'country'		=> get_user_meta( $customer_id, 'shipping_country', true )
 				);
-				$address = array_map('trim', $address);
-				$formatted_address = array();
-				foreach ($address as $part) if (!empty($part)) $formatted_address[] = $part;
-				$formatted_address = implode(', ', $formatted_address);
+
+				$formatted_address = $woocommerce->countries->get_formatted_address( $address );
+				
 				if (!$formatted_address) _e('You have not set up a shipping address yet.', 'woothemes'); else echo $formatted_address;
 			?>
 		</address>

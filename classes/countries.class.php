@@ -568,7 +568,7 @@ class woocommerce_countries {
 	}
 	
 	/** Get country address formats */
-	function get_address_format( $country = '' ) {
+	function get_address_formats() {
 		
 		if (!$this->address_formats) :
 			
@@ -602,6 +602,86 @@ class woocommerce_countries {
 				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state} {postcode}\n{country}",
 			));
 		endif;
+		
+		return $this->address_formats;
+	}
+	
+	/** Get country address formats */
+	function get_formatted_address( $args = array() ) {
+	
+		$args = array_map('trim', $args);
+					
+		extract( $args );
+		
+		// Get all formats
+		$formats = $this->get_address_formats();
+		
+		// Get format for the address' country
+		$format = ($country && isset($formats[$country])) ? $formats[$country] : $formats['default'];
+		
+		// Handle full country name
+		$full_country = (isset($this->countries[$country])) ? $this->countries[$country] : $country;
+		
+		// Substitute address parts into the string
+		$search = array(
+			'{first_name}',
+			'{last_name}',
+			'{name}',
+			'{company}',
+			'{address_1}',
+			'{address_2}',
+			'{city}',
+			'{state}', 
+			'{postcode}',
+			'{country}',
+			'{first_name_upper}',
+			'{last_name_upper}',
+			'{name_upper}',
+			'{company_upper}',
+			'{address_1_upper}',
+			'{address_2_upper}',
+			'{city_upper}',
+			'{state_upper}', 
+			'{postcode_upper}',
+			'{country_upper}',
+		);
+		
+		$replace = array(
+			$first_name,
+			$last_name,
+			$first_name . ' ' . $last_name,
+			$company,
+			$address_1,
+			$address_2,
+			$city,
+			$state,
+			$postcode,
+			$full_country,
+			strtoupper($first_name),
+			strtoupper($last_name),
+			strtoupper($first_name . ' ' . $last_name),
+			strtoupper($company),
+			strtoupper($address_1),
+			strtoupper($address_2),
+			strtoupper($city),
+			strtoupper($state),
+			strtoupper($postcode),
+			strtoupper($full_country),
+		);
+		
+		$formatted_address = str_replace( $search, $replace, $format );
+		
+		// Zap the white space
+		$formatted_address = trim(preg_replace('! +!', ' ', $formatted_address));
+		
+		// Zap any double line-breaks
+		$formatted_address = preg_replace("/(\n)+/", "\n", $formatted_address);
+		
+		// Add html breaks
+		$formatted_address = nl2br($formatted_address);
+		
+		// We're done!
+		return $formatted_address;
 	}
 	
 	/** Get country locale settings */
