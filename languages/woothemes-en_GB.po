@@ -102,8 +102,8 @@ msgstr ""
 #: admin/woocommerce-admin-settings-forms.php:353
 #: admin/woocommerce-admin-settings-forms.php:360
 #: admin/woocommerce-admin-settings-forms.php:401
-#: templates/myaccount/my-account.php:87
-#: templates/myaccount/my-account.php:116
+#: templates/myaccount/my-account.php:89
+#: templates/myaccount/my-account.php:117
 #: woocommerce.php:572
 #: woocommerce.php:598
 #: woocommerce.php:631
@@ -628,7 +628,7 @@ msgstr ""
 
 #: admin/post-types/product.php:217
 #: admin/post-types/shop_order.php:25
-#: templates/myaccount/my-account.php:41
+#: templates/myaccount/my-account.php:43
 #@ woothemes
 msgid "Date"
 msgstr ""
@@ -729,8 +729,8 @@ msgid "Enabling this option will hide it from the product page image gallery."
 msgstr ""
 
 #: admin/post-types/shop_order.php:20
-#: admin/woocommerce-admin-settings.php:1102
-#: templates/myaccount/my-account.php:44
+#: admin/woocommerce-admin-settings.php:1110
+#: templates/myaccount/my-account.php:46
 #@ woothemes
 msgid "Status"
 msgstr ""
@@ -747,7 +747,7 @@ msgid "Billing"
 msgstr ""
 
 #: admin/post-types/shop_order.php:23
-#: admin/woocommerce-admin-settings.php:1030
+#: admin/woocommerce-admin-settings.php:1038
 #: templates/cart/totals.php:28
 #: templates/checkout/pay_for_order.php:18
 #: templates/checkout/review_order.php:24
@@ -783,8 +783,8 @@ msgstr ""
 #: admin/post-types/shop_order.php:64
 #: admin/post-types/writepanels/writepanel-order_data.php:71
 #: admin/woocommerce-admin-reports.php:301
-#: woocommerce-functions.php:763
-#: woocommerce-functions.php:818
+#: woocommerce-functions.php:771
+#: woocommerce-functions.php:826
 #@ woothemes
 msgid "Guest"
 msgstr ""
@@ -830,7 +830,7 @@ msgid "Complete"
 msgstr ""
 
 #: admin/post-types/shop_order.php:130
-#: templates/myaccount/my-account.php:66
+#: templates/myaccount/my-account.php:68
 #@ woothemes
 msgid "View"
 msgstr ""
@@ -1560,810 +1560,810 @@ msgstr ""
 msgid "Enable the \"Demo Store\" notice on your site"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:233
+#: admin/woocommerce-admin-settings.php:241
 #@ woothemes
 msgid "Localisation"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:234
+#: admin/woocommerce-admin-settings.php:242
 #@ woothemes
 msgid "Use informal localisation file if it exists"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:242
+#: admin/woocommerce-admin-settings.php:250
 #@ woothemes
 msgid "ShareThis"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:245
+#: admin/woocommerce-admin-settings.php:253
 #@ woothemes
 msgid "ShareThis Publisher ID"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:246
+#: admin/woocommerce-admin-settings.php:254
 #, php-format
 #@ woothemes
 msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:255
+#: admin/woocommerce-admin-settings.php:263
 #@ woothemes
 msgid "Google Analytics"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:258
+#: admin/woocommerce-admin-settings.php:266
 #@ woothemes
 msgid "Google Analytics ID"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:259
+#: admin/woocommerce-admin-settings.php:267
 #@ woothemes
 msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:266
 #: admin/woocommerce-admin-settings.php:274
+#: admin/woocommerce-admin-settings.php:282
 #@ woothemes
 msgid "Tracking code"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:267
+#: admin/woocommerce-admin-settings.php:275
 #@ woothemes
 msgid "Add tracking code to your site's footer. You don't need to enable this if using a 3rd party analytics plugin."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:275
+#: admin/woocommerce-admin-settings.php:283
 #@ woothemes
 msgid "Add eCommerce tracking code to the thankyou page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:290
+#: admin/woocommerce-admin-settings.php:298
 #@ woothemes
 msgid "Page Setup"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:293
+#: admin/woocommerce-admin-settings.php:301
 #@ woothemes
 msgid "Shop Base Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:294
+#: admin/woocommerce-admin-settings.php:302
 #@ woothemes
 msgid "This sets the base page of your shop."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:303
+#: admin/woocommerce-admin-settings.php:311
 #@ woothemes
 msgid "Base Page Title"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:304
+#: admin/woocommerce-admin-settings.php:312
 #@ woothemes
 msgid "This title to show on the shop base page. Leave blank to use the page title."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:312
+#: admin/woocommerce-admin-settings.php:320
 #@ woothemes
 msgid "Terms page ID"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:313
+#: admin/woocommerce-admin-settings.php:321
 #@ woothemes
 msgid "If you define a \"Terms\" page the customer will be asked if they accept them when checking out."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:323
+#: admin/woocommerce-admin-settings.php:331
 #@ woothemes
 msgid "Logout link"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:324
+#: admin/woocommerce-admin-settings.php:332
 #@ woothemes
 msgid "Append a logout link to menus containing \"My Account\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:332
+#: admin/woocommerce-admin-settings.php:340
 #@ woothemes
 msgid "Permalinks"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:335
+#: admin/woocommerce-admin-settings.php:343
 #@ woothemes
 msgid "Taxonomy base page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:336
+#: admin/woocommerce-admin-settings.php:344
 #, php-format
 #@ woothemes
 msgid "Prepend shop categories/tags with shop base page (<code>%s</code>)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:361
+#: admin/woocommerce-admin-settings.php:369
 #@ woothemes
 msgid "Product base page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:362
+#: admin/woocommerce-admin-settings.php:370
 #, php-format
 #@ woothemes
 msgid "Prepend product permalinks with shop base page (<code>%s</code>)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:370
+#: admin/woocommerce-admin-settings.php:378
 #@ woothemes
 msgid "Product base category"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:371
+#: admin/woocommerce-admin-settings.php:379
 #@ woothemes
 msgid "Prepend product permalinks with product category"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:380
+#: admin/woocommerce-admin-settings.php:388
 #@ woothemes
 msgid "Shop Pages"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:380
+#: admin/woocommerce-admin-settings.php:388
 #@ woothemes
 msgid "The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:383
+#: admin/woocommerce-admin-settings.php:391
 #@ woothemes
 msgid "Cart Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:384
+#: admin/woocommerce-admin-settings.php:392
 #@ woothemes
 msgid "Page contents: [woocommerce_cart]"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:393
+#: admin/woocommerce-admin-settings.php:401
 #@ woothemes
 msgid "Checkout Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:394
+#: admin/woocommerce-admin-settings.php:402
 #@ woothemes
 msgid "Page contents: [woocommerce_checkout]"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:403
+#: admin/woocommerce-admin-settings.php:411
 #@ woothemes
 msgid "Pay Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:404
+#: admin/woocommerce-admin-settings.php:412
 #@ woothemes
 msgid "Page contents: [woocommerce_pay] Parent: \"Checkout\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:413
+#: admin/woocommerce-admin-settings.php:421
 #@ woothemes
 msgid "Thanks Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:414
+#: admin/woocommerce-admin-settings.php:422
 #@ woothemes
 msgid "Page contents: [woocommerce_thankyou] Parent: \"Checkout\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:423
+#: admin/woocommerce-admin-settings.php:431
 #@ woothemes
 msgid "My Account Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:424
+#: admin/woocommerce-admin-settings.php:432
 #@ woothemes
 msgid "Page contents: [woocommerce_my_account]"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:433
+#: admin/woocommerce-admin-settings.php:441
 #@ woothemes
 msgid "Edit Address Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:434
+#: admin/woocommerce-admin-settings.php:442
 #@ woothemes
 msgid "Page contents: [woocommerce_edit_address] Parent: \"My Account\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:443
+#: admin/woocommerce-admin-settings.php:451
 #@ woothemes
 msgid "View Order Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:444
+#: admin/woocommerce-admin-settings.php:452
 #@ woothemes
 msgid "Page contents: [woocommerce_view_order] Parent: \"My Account\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:453
+#: admin/woocommerce-admin-settings.php:461
 #@ woothemes
 msgid "Change Password Page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:454
+#: admin/woocommerce-admin-settings.php:462
 #@ woothemes
 msgid "Page contents: [woocommerce_change_password] Parent: \"My Account\""
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:469
+#: admin/woocommerce-admin-settings.php:477
 #@ woothemes
 msgid "Catalog Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:472
+#: admin/woocommerce-admin-settings.php:480
 #@ woothemes
 msgid "Subcategories"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:473
+#: admin/woocommerce-admin-settings.php:481
 #@ woothemes
 msgid "Show subcategories on category pages"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:481
+#: admin/woocommerce-admin-settings.php:489
 #@ woothemes
 msgid "Show subcategories on the shop page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:489
+#: admin/woocommerce-admin-settings.php:497
 #@ woothemes
 msgid "When showing subcategories, hide products"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:497
+#: admin/woocommerce-admin-settings.php:505
 #@ woothemes
 msgid "Product fields"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:498
+#: admin/woocommerce-admin-settings.php:506
 #@ woothemes
 msgid "Enable the SKU field for products"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:506
+#: admin/woocommerce-admin-settings.php:514
 #@ woothemes
 msgid "Enable the weight field for products"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:514
+#: admin/woocommerce-admin-settings.php:522
 #@ woothemes
 msgid "Enable the dimension fields for products"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:522
+#: admin/woocommerce-admin-settings.php:530
 #@ woothemes
 msgid "Show weight and dimension fields in product attributes tab"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:530
+#: admin/woocommerce-admin-settings.php:538
 #@ woothemes
 msgid "Weight Unit"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:531
+#: admin/woocommerce-admin-settings.php:539
 #@ woothemes
 msgid "This controls what unit you will define weights in."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:537
+#: admin/woocommerce-admin-settings.php:545
 #@ woothemes
 msgid "kg"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:538
+#: admin/woocommerce-admin-settings.php:546
 #@ woothemes
 msgid "lbs"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:543
+#: admin/woocommerce-admin-settings.php:551
 #@ woothemes
 msgid "Dimensions Unit"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:544
+#: admin/woocommerce-admin-settings.php:552
 #@ woothemes
 msgid "This controls what unit you will define lengths in."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:550
+#: admin/woocommerce-admin-settings.php:558
 #@ woothemes
 msgid "cm"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:551
+#: admin/woocommerce-admin-settings.php:559
 #@ woothemes
 msgid "in"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:556
+#: admin/woocommerce-admin-settings.php:564
 #@ woothemes
 msgid "Cart redirect"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:557
+#: admin/woocommerce-admin-settings.php:565
 #@ woothemes
 msgid "Redirect to cart after adding a product to the cart (on single product pages)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:565
+#: admin/woocommerce-admin-settings.php:573
 #@ woothemes
 msgid "Pricing Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:568
+#: admin/woocommerce-admin-settings.php:576
 #@ woothemes
 msgid "Currency Position"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:569
+#: admin/woocommerce-admin-settings.php:577
 #@ woothemes
 msgid "This controls the position of the currency symbol."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:576
+#: admin/woocommerce-admin-settings.php:584
 #@ woothemes
 msgid "Left"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:577
+#: admin/woocommerce-admin-settings.php:585
 #@ woothemes
 msgid "Right"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:578
+#: admin/woocommerce-admin-settings.php:586
 #@ woothemes
 msgid "Left (with space)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:579
+#: admin/woocommerce-admin-settings.php:587
 #@ woothemes
 msgid "Right (with space)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:584
+#: admin/woocommerce-admin-settings.php:592
 #@ woothemes
 msgid "Thousand separator"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:585
+#: admin/woocommerce-admin-settings.php:593
 #@ woothemes
 msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:594
+#: admin/woocommerce-admin-settings.php:602
 #@ woothemes
 msgid "Decimal separator"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:595
+#: admin/woocommerce-admin-settings.php:603
 #@ woothemes
 msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:604
+#: admin/woocommerce-admin-settings.php:612
 #@ woothemes
 msgid "Number of decimals"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:605
+#: admin/woocommerce-admin-settings.php:613
 #@ woothemes
 msgid "This sets the number of decimal points shown in displayed prices."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:623
+#: admin/woocommerce-admin-settings.php:631
 #@ woothemes
 msgid "Image Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:623
+#: admin/woocommerce-admin-settings.php:631
 #, php-format
 #@ woothemes
 msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href=\"%s\">regenerate your thumbnails</a>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:626
+#: admin/woocommerce-admin-settings.php:634
 #@ woothemes
 msgid "Catalog Images"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:627
+#: admin/woocommerce-admin-settings.php:635
 #@ woothemes
 msgid "This size is usually used in product listings"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:635
+#: admin/woocommerce-admin-settings.php:643
 #@ woothemes
 msgid "Single Product Image"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:636
+#: admin/woocommerce-admin-settings.php:644
 #@ woothemes
 msgid "This is the size used by the main image on the product page."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:644
+#: admin/woocommerce-admin-settings.php:652
 #@ woothemes
 msgid "Product Thumbnails"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:645
+#: admin/woocommerce-admin-settings.php:653
 #@ woothemes
 msgid "This size is usually used for the gallery of images on the product page."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:659
+#: admin/woocommerce-admin-settings.php:667
 #@ woothemes
 msgid "Inventory Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:662
+#: admin/woocommerce-admin-settings.php:670
 #@ woothemes
 msgid "Manage stock"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:663
+#: admin/woocommerce-admin-settings.php:671
 #@ woothemes
 msgid "Enable stock management"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:670
+#: admin/woocommerce-admin-settings.php:678
 #@ woothemes
 msgid "Notifications"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:671
+#: admin/woocommerce-admin-settings.php:679
 #@ woothemes
 msgid "Enable low stock notifications"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:679
+#: admin/woocommerce-admin-settings.php:687
 #@ woothemes
 msgid "Enable out of stock notifications"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:687
+#: admin/woocommerce-admin-settings.php:695
 #@ woothemes
 msgid "Low stock threshold"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:697
+#: admin/woocommerce-admin-settings.php:705
 #@ woothemes
 msgid "Out of stock threshold"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:707
+#: admin/woocommerce-admin-settings.php:715
 #@ woothemes
 msgid "Out of stock visibility"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:708
+#: admin/woocommerce-admin-settings.php:716
 #@ woothemes
 msgid "Hide out of stock items from the catalog"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:721
+#: admin/woocommerce-admin-settings.php:729
 #@ woothemes
 msgid "Shipping Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:724
-#: admin/woocommerce-admin-settings.php:733
+#: admin/woocommerce-admin-settings.php:732
+#: admin/woocommerce-admin-settings.php:741
 #@ woothemes
 msgid "Shipping calculations"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:725
+#: admin/woocommerce-admin-settings.php:733
 #@ woothemes
 msgid "Enable shipping"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:734
+#: admin/woocommerce-admin-settings.php:742
 #@ woothemes
 msgid "Enable the shipping calculator on the cart page"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:742
+#: admin/woocommerce-admin-settings.php:750
 #@ woothemes
 msgid "Shipping destination"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:743
+#: admin/woocommerce-admin-settings.php:751
 #@ woothemes
 msgid "Only ship to the users billing address"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:756
+#: admin/woocommerce-admin-settings.php:764
 #@ woothemes
 msgid "Tax Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:759
+#: admin/woocommerce-admin-settings.php:767
 #@ woothemes
 msgid "Tax calculations"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:760
+#: admin/woocommerce-admin-settings.php:768
 #@ woothemes
 msgid "Enable taxes and tax calculations"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:768
+#: admin/woocommerce-admin-settings.php:776
 #@ woothemes
 msgid "Catalog Prices include tax"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:776
+#: admin/woocommerce-admin-settings.php:784
 #@ woothemes
 msgid "Round tax at subtotal level, instead of per line"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:785
+#: admin/woocommerce-admin-settings.php:793
 #@ woothemes
 msgid "Always display cart contents excluding tax"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:793
+#: admin/woocommerce-admin-settings.php:801
 #@ woothemes
 msgid "Always display cart totals excluding tax"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:801
+#: admin/woocommerce-admin-settings.php:809
 #@ woothemes
 msgid "Additional Tax classes"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:802
+#: admin/woocommerce-admin-settings.php:810
 #@ woothemes
 msgid "List 1 per line. This is in addition to the default <em>Standard Rate</em>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:803
+#: admin/woocommerce-admin-settings.php:811
 #@ woothemes
 msgid "List product and shipping tax classes here, e.g. Zero Tax, Reduced Rate."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:811
+#: admin/woocommerce-admin-settings.php:819
 #@ woothemes
 msgid "Tax rates"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:812
+#: admin/woocommerce-admin-settings.php:820
 #@ woothemes
 msgid "All fields are required."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:813
+#: admin/woocommerce-admin-settings.php:821
 #@ woothemes
 msgid "To avoid rounding errors, insert tax rates with 4 decimal places."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:826
+#: admin/woocommerce-admin-settings.php:834
 #@ woothemes
 msgid "Email Recipient Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:829
+#: admin/woocommerce-admin-settings.php:837
 #@ woothemes
 msgid "New order notifications"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:830
+#: admin/woocommerce-admin-settings.php:838
 #@ woothemes
 msgid "The recipient of new order emails. Defaults to the admin email."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:838
+#: admin/woocommerce-admin-settings.php:846
 #@ woothemes
 msgid "Inventory notifications"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:839
+#: admin/woocommerce-admin-settings.php:847
 #@ woothemes
 msgid "The recipient of stock emails. Defaults to the admin email."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:848
+#: admin/woocommerce-admin-settings.php:856
 #@ woothemes
 msgid "Email Sender Options"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:851
+#: admin/woocommerce-admin-settings.php:859
 #@ woothemes
 msgid "\"From\" name"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:852
+#: admin/woocommerce-admin-settings.php:860
 #@ woothemes
 msgid "The sender name for WooCommerce emails."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:860
+#: admin/woocommerce-admin-settings.php:868
 #@ woothemes
 msgid "\"From\" email address"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:861
+#: admin/woocommerce-admin-settings.php:869
 #@ woothemes
 msgid "The sender email address for WooCommerce emails."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:870
+#: admin/woocommerce-admin-settings.php:878
 #@ woothemes
 msgid "Email template"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:870
+#: admin/woocommerce-admin-settings.php:878
 #, php-format
 #@ woothemes
 msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:873
+#: admin/woocommerce-admin-settings.php:881
 #@ woothemes
 msgid "Header image"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:874
+#: admin/woocommerce-admin-settings.php:882
 #, php-format
 #@ woothemes
 msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:882
+#: admin/woocommerce-admin-settings.php:890
 #@ woothemes
 msgid "Email footer text"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:883
+#: admin/woocommerce-admin-settings.php:891
 #@ woothemes
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:887
+#: admin/woocommerce-admin-settings.php:895
 #@ woothemes
 msgid "Powered by WooCommerce"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:891
+#: admin/woocommerce-admin-settings.php:899
 #@ woothemes
 msgid "Base colour"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:892
+#: admin/woocommerce-admin-settings.php:900
 #@ woothemes
 msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:900
+#: admin/woocommerce-admin-settings.php:908
 #@ woothemes
 msgid "Background colour"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:901
+#: admin/woocommerce-admin-settings.php:909
 #@ woothemes
 msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:909
+#: admin/woocommerce-admin-settings.php:917
 #@ woothemes
 msgid "Email body background colour"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:910
+#: admin/woocommerce-admin-settings.php:918
 #@ woothemes
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:918
+#: admin/woocommerce-admin-settings.php:926
 #@ woothemes
 msgid "Email body text colour"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:919
+#: admin/woocommerce-admin-settings.php:927
 #@ woothemes
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:942
-#: woocommerce.php:1090
+#: admin/woocommerce-admin-settings.php:950
+#: woocommerce.php:1102
 #@ woothemes
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:963
+#: admin/woocommerce-admin-settings.php:971
 #@ woothemes
 msgid "Your settings have been saved."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1005
+#: admin/woocommerce-admin-settings.php:1013
 #@ woothemes
 msgid "Welcome to WooCommerce!"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1006
+#: admin/woocommerce-admin-settings.php:1014
 #@ woothemes
 msgid "WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the 'Automatically add pages' button below, otherwise you can set them up manually. See the 'Pages' tab in settings for more information."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1007
+#: admin/woocommerce-admin-settings.php:1015
 #@ woothemes
 msgid "Automatically add pages"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1007
+#: admin/woocommerce-admin-settings.php:1015
 #@ woothemes
 msgid "Skip setup"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1013
+#: admin/woocommerce-admin-settings.php:1021
 #@ woothemes
 msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1014
+#: admin/woocommerce-admin-settings.php:1022
 #@ woothemes
 msgid "WooCommerce has been installed and setup. Enjoy :)"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:31
-#: admin/woocommerce-admin-settings.php:1026
+#: admin/woocommerce-admin-settings.php:1034
 #@ woothemes
 msgid "General"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1027
+#: admin/woocommerce-admin-settings.php:1035
 #@ woothemes
 msgid "Pages"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:751
-#: admin/woocommerce-admin-settings.php:1028
+#: admin/woocommerce-admin-settings.php:1036
 #@ woothemes
 msgid "Catalog"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:35
-#: admin/woocommerce-admin-settings.php:1029
+#: admin/woocommerce-admin-settings.php:1037
 #@ woothemes
 msgid "Inventory"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:33
-#: admin/woocommerce-admin-settings.php:1031
-#: classes/countries.class.php:590
+#: admin/woocommerce-admin-settings.php:1039
+#: classes/countries.class.php:488
 #: templates/checkout/pay_for_order.php:22
 #: templates/checkout/review_order.php:81
 #@ woothemes
 msgid "Tax"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1032
+#: admin/woocommerce-admin-settings.php:1040
 #@ woothemes
 msgid "Shipping Methods"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1033
-#: admin/woocommerce-admin-settings.php:1082
-#: admin/woocommerce-admin-settings.php:1095
+#: admin/woocommerce-admin-settings.php:1041
+#: admin/woocommerce-admin-settings.php:1090
+#: admin/woocommerce-admin-settings.php:1103
 #@ woothemes
 msgid "Payment Gateways"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1034
+#: admin/woocommerce-admin-settings.php:1042
 #@ woothemes
 msgid "Emails"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1154
+#: admin/woocommerce-admin-settings.php:1162
 #@ woothemes
 msgid "Save changes"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1209
+#: admin/woocommerce-admin-settings.php:1217
 #@ woothemes
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
@@ -2495,9 +2495,9 @@ msgid "Customer's notes about the order"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:88
-#: classes/checkout.class.php:168
+#: classes/checkout.class.php:48
 #: templates/myaccount/edit-address.php:13
-#: templates/myaccount/my-account.php:86
+#: templates/myaccount/my-account.php:88
 #: templates/order/order-details-table.php:117
 #: templates/order/tracking.php:49
 #@ woothemes
@@ -2516,10 +2516,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:99
 #: admin/post-types/writepanels/writepanel-order_data.php:128
-#: classes/checkout.class.php:34
-#: classes/checkout.class.php:35
-#: classes/checkout.class.php:105
-#: classes/checkout.class.php:106
+#: classes/countries.class.php:886
 #: templates/myaccount/edit-address.php:16
 #: templates/myaccount/edit-address.php:17
 #@ woothemes
@@ -2528,10 +2525,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:100
 #: admin/post-types/writepanels/writepanel-order_data.php:129
-#: classes/checkout.class.php:40
-#: classes/checkout.class.php:41
-#: classes/checkout.class.php:111
-#: classes/checkout.class.php:112
+#: classes/countries.class.php:891
 #: templates/myaccount/edit-address.php:20
 #: templates/myaccount/edit-address.php:21
 #@ woothemes
@@ -2540,10 +2534,6 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:101
 #: admin/post-types/writepanels/writepanel-order_data.php:130
-#: classes/checkout.class.php:46
-#: classes/checkout.class.php:47
-#: classes/checkout.class.php:117
-#: classes/checkout.class.php:118
 #: templates/myaccount/edit-address.php:26
 #: templates/myaccount/edit-address.php:27
 #@ woothemes
@@ -2552,18 +2542,13 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:102
 #: admin/post-types/writepanels/writepanel-order_data.php:131
-#: classes/checkout.class.php:51
-#: classes/checkout.class.php:122
 #@ woothemes
 msgid "Address 1"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:103
 #: admin/post-types/writepanels/writepanel-order_data.php:132
-#: classes/checkout.class.php:56
-#: classes/checkout.class.php:57
-#: classes/checkout.class.php:127
-#: classes/checkout.class.php:128
+#: classes/countries.class.php:907
 #: templates/myaccount/edit-address.php:35
 #@ woothemes
 msgid "Address 2"
@@ -2571,10 +2556,6 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:104
 #: admin/post-types/writepanels/writepanel-order_data.php:133
-#: classes/checkout.class.php:62
-#: classes/checkout.class.php:63
-#: classes/checkout.class.php:133
-#: classes/checkout.class.php:134
 #: templates/myaccount/edit-address.php:41
 #: templates/myaccount/edit-address.php:42
 #@ woothemes
@@ -2583,11 +2564,8 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:105
 #: admin/post-types/writepanels/writepanel-order_data.php:134
-#: classes/checkout.class.php:68
-#: classes/checkout.class.php:69
-#: classes/checkout.class.php:139
-#: classes/checkout.class.php:140
-#: templates/cart/shipping_calculator.php:54
+#: classes/countries.class.php:849
+#: templates/cart/shipping_calculator.php:57
 #: templates/myaccount/edit-address.php:45
 #@ woothemes
 msgid "Postcode"
@@ -2595,8 +2573,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:106
 #: admin/post-types/writepanels/writepanel-order_data.php:135
-#: classes/checkout.class.php:75
-#: classes/checkout.class.php:146
+#: classes/countries.class.php:926
 #: templates/myaccount/edit-address.php:51
 #@ woothemes
 msgid "Country"
@@ -2604,15 +2581,14 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:107
 #: admin/post-types/writepanels/writepanel-order_data.php:136
-#: classes/checkout.class.php:83
-#: classes/checkout.class.php:153
-#: classes/checkout.class.php:333
+#: classes/countries.class.php:868
+#: classes/countries.class.php:932
 #@ woothemes
 msgid "State/County"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:108
-#: classes/checkout.class.php:89
+#: classes/countries.class.php:961
 #: templates/myaccount/edit-address.php:96
 #@ woothemes
 msgid "Email Address"
@@ -2624,9 +2600,9 @@ msgid "Tel"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:116
-#: classes/checkout.class.php:236
+#: classes/checkout.class.php:116
 #: templates/myaccount/edit-address.php:13
-#: templates/myaccount/my-account.php:115
+#: templates/myaccount/my-account.php:116
 #: templates/order/order-details-table.php:104
 #: templates/order/tracking.php:58
 #@ woothemes
@@ -2797,7 +2773,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:360
 #: admin/post-types/writepanels/writepanel-order_data.php:367
-#: classes/countries.class.php:612
+#: classes/countries.class.php:510
 #@ woothemes
 msgid "(ex. tax)"
 msgstr ""
@@ -3511,7 +3487,7 @@ msgid "Order Totals"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanels-init.php:29
-#: classes/checkout.class.php:262
+#: classes/checkout.class.php:142
 #@ woothemes
 msgid "Order Notes"
 msgstr ""
@@ -3564,22 +3540,22 @@ msgstr ""
 msgid "You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart."
 msgstr ""
 
-#: classes/cart.class.php:1045
+#: classes/cart.class.php:1046
 #@ woothemes
 msgid "Discount code already applied!"
 msgstr ""
 
-#: classes/cart.class.php:1051
+#: classes/cart.class.php:1052
 #@ woothemes
 msgid "Invalid coupon."
 msgstr ""
 
-#: classes/cart.class.php:1069
+#: classes/cart.class.php:1070
 #@ woothemes
 msgid "Discount code applied successfully."
 msgstr ""
 
-#: classes/cart.class.php:1073
+#: classes/cart.class.php:1074
 #@ woothemes
 msgid "Coupon does not exist!"
 msgstr ""
@@ -3596,7 +3572,7 @@ msgstr ""
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr ""
 
-#: classes/cart.class.php:1003
+#: classes/cart.class.php:1004
 #: classes/order.class.php:278
 #: classes/product.class.php:606
 #: classes/product.class.php:612
@@ -3604,208 +3580,200 @@ msgstr ""
 msgid "Free!"
 msgstr ""
 
-#: classes/cart.class.php:1013
+#: classes/cart.class.php:1014
 #@ woothemes
 msgid "via"
 msgstr ""
 
-#: classes/checkout.class.php:50
-#: classes/checkout.class.php:121
+#: classes/countries.class.php:902
 #: templates/myaccount/edit-address.php:31
 #@ woothemes
 msgid "Address"
 msgstr ""
 
-#: classes/checkout.class.php:90
 #: templates/myaccount/edit-address.php:97
 #@ woothemes
 msgid "you@yourdomain.com"
 msgstr ""
 
-#: classes/checkout.class.php:95
+#: classes/countries.class.php:966
 #: templates/myaccount/edit-address.php:100
 #@ woothemes
 msgid "Phone"
 msgstr ""
 
-#: classes/checkout.class.php:96
-#@ woothemes
-msgid "Phone number"
-msgstr ""
-
-#: classes/checkout.class.php:166
+#: classes/checkout.class.php:46
 #@ woothemes
 msgid "Billing &amp Shipping"
 msgstr ""
 
-#: classes/checkout.class.php:183
+#: classes/checkout.class.php:63
 #@ woothemes
 msgid "Create an account?"
 msgstr ""
 
-#: classes/checkout.class.php:189
+#: classes/checkout.class.php:69
 #@ woothemes
 msgid "Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page."
 msgstr ""
 
-#: classes/checkout.class.php:193
+#: classes/checkout.class.php:73
 #@ woothemes
 msgid "Account username"
 msgstr ""
 
-#: classes/checkout.class.php:194
+#: classes/checkout.class.php:74
 #: templates/myaccount/login.php:16
 #: templates/myaccount/login.php:42
 #: templates/shop/login-form.php:13
-#: widgets/widget-login.php:90
+#: widgets/widget-login.php:93
 #@ woothemes
 msgid "Username"
 msgstr ""
 
-#: classes/checkout.class.php:198
-#: classes/checkout.class.php:204
+#: classes/checkout.class.php:78
+#: classes/checkout.class.php:84
 #@ woothemes
 msgid "Account password"
 msgstr ""
 
-#: classes/checkout.class.php:199
-#: classes/checkout.class.php:205
+#: classes/checkout.class.php:79
+#: classes/checkout.class.php:85
 #: templates/myaccount/login.php:20
 #: templates/myaccount/login.php:52
 #: templates/shop/login-form.php:17
-#: widgets/widget-login.php:92
+#: widgets/widget-login.php:95
 #@ woothemes
 msgid "Password"
 msgstr ""
 
-#: classes/checkout.class.php:234
+#: classes/checkout.class.php:114
 #@ woothemes
 msgid "Ship to same address?"
 msgstr ""
 
-#: classes/checkout.class.php:256
+#: classes/checkout.class.php:136
 #: templates/single-product/tabs/attributes-tab.php:4
 #: templates/single-product/tabs/attributes.php:10
 #@ woothemes
 msgid "Additional Information"
 msgstr ""
 
-#: classes/checkout.class.php:263
+#: classes/checkout.class.php:143
 #@ woothemes
 msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
-#: classes/checkout.class.php:302
-#: templates/cart/shipping_calculator.php:15
+#: classes/checkout.class.php:179
+#: templates/cart/shipping_calculator.php:18
 #: templates/myaccount/edit-address.php:53
 #@ woothemes
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: classes/checkout.class.php:326
-#: templates/cart/shipping_calculator.php:36
+#: classes/checkout.class.php:205
+#: templates/cart/shipping_calculator.php:39
 #: templates/myaccount/edit-address.php:78
-#: woocommerce.php:816
 #@ woothemes
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: classes/checkout.class.php:384
+#: classes/checkout.class.php:263
 #, php-format
 #@ woothemes
 msgid "Sorry, your session has expired. <a href=\"%s\">Return to homepage &rarr;</a>"
 msgstr ""
 
-#: classes/checkout.class.php:421
+#: classes/checkout.class.php:300
 #@ woothemes
 msgid " (billing) is not a valid postcode/ZIP."
 msgstr ""
 
-#: classes/checkout.class.php:427
+#: classes/checkout.class.php:306
 #@ woothemes
 msgid " (billing) is not a valid number."
 msgstr ""
 
-#: classes/checkout.class.php:430
+#: classes/checkout.class.php:309
 #@ woothemes
 msgid " (billing) is not a valid email address."
 msgstr ""
 
-#: classes/checkout.class.php:435
+#: classes/checkout.class.php:314
 #@ woothemes
 msgid " (billing) is a required field."
 msgstr ""
 
-#: classes/checkout.class.php:459
+#: classes/checkout.class.php:338
 #@ woothemes
 msgid " (shipping) is not a valid postcode/ZIP."
 msgstr ""
 
-#: classes/checkout.class.php:467
+#: classes/checkout.class.php:346
 #@ woothemes
 msgid " (shipping) is a required field."
 msgstr ""
 
-#: classes/checkout.class.php:498
+#: classes/checkout.class.php:377
 #@ woothemes
 msgid "Please enter an account username."
 msgstr ""
 
-#: classes/checkout.class.php:499
+#: classes/checkout.class.php:378
 #@ woothemes
 msgid "Please enter an account password."
 msgstr ""
 
-#: classes/checkout.class.php:500
+#: classes/checkout.class.php:379
 #: shortcodes/shortcode-my_account.php:260
 #: woocommerce-functions.php:466
 #@ woothemes
 msgid "Passwords do not match."
 msgstr ""
 
-#: classes/checkout.class.php:504
+#: classes/checkout.class.php:383
 #@ woothemes
 msgid "Invalid email/username."
 msgstr ""
 
-#: classes/checkout.class.php:506
+#: classes/checkout.class.php:385
 #@ woothemes
 msgid "An account is already registered with that username. Please choose another."
 msgstr ""
 
-#: classes/checkout.class.php:511
+#: classes/checkout.class.php:390
 #@ woothemes
 msgid "An account is already registered with your email address. Please login."
 msgstr ""
 
-#: classes/checkout.class.php:516
+#: classes/checkout.class.php:395
 #@ woothemes
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: classes/checkout.class.php:524
+#: classes/checkout.class.php:403
 #@ woothemes
 msgid "Invalid shipping method."
 msgstr ""
 
-#: classes/checkout.class.php:534
+#: classes/checkout.class.php:413
 #@ woothemes
 msgid "Invalid payment method."
 msgstr ""
 
-#: classes/checkout.class.php:562
+#: classes/checkout.class.php:441
 #: woocommerce-functions.php:483
 #, php-format
 #@ woothemes
 msgid "<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href=\"mailto:%s\">webmaster</a> !"
 msgstr ""
 
-#: classes/countries.class.php:23
+#: classes/countries.class.php:30
 #@ woothemes
 msgid "Andorra"
 msgstr ""
 
-#: classes/countries.class.php:24
+#: classes/countries.class.php:256
 #@ woothemes
 msgid "United Arab Emirates"
 msgstr ""
@@ -3815,27 +3783,27 @@ msgstr ""
 msgid "Afghanistan"
 msgstr ""
 
-#: classes/countries.class.php:26
+#: classes/countries.class.php:34
 #@ woothemes
 msgid "Antigua and Barbuda"
 msgstr ""
 
-#: classes/countries.class.php:27
+#: classes/countries.class.php:32
 #@ woothemes
 msgid "Anguilla"
 msgstr ""
 
-#: classes/countries.class.php:28
+#: classes/countries.class.php:27
 #@ woothemes
 msgid "Albania"
 msgstr ""
 
-#: classes/countries.class.php:29
+#: classes/countries.class.php:36
 #@ woothemes
 msgid "Armenia"
 msgstr ""
 
-#: classes/countries.class.php:30
+#: classes/countries.class.php:176
 #@ woothemes
 msgid "Netherlands Antilles"
 msgstr ""
@@ -3845,27 +3813,27 @@ msgstr ""
 msgid "Angola"
 msgstr ""
 
-#: classes/countries.class.php:32
+#: classes/countries.class.php:33
 #@ woothemes
 msgid "Antarctica"
 msgstr ""
 
-#: classes/countries.class.php:33
+#: classes/countries.class.php:35
 #@ woothemes
 msgid "Argentina"
 msgstr ""
 
-#: classes/countries.class.php:34
+#: classes/countries.class.php:29
 #@ woothemes
 msgid "American Samoa"
 msgstr ""
 
-#: classes/countries.class.php:35
+#: classes/countries.class.php:39
 #@ woothemes
 msgid "Austria"
 msgstr ""
 
-#: classes/countries.class.php:36
+#: classes/countries.class.php:38
 #@ woothemes
 msgid "Australia"
 msgstr ""
@@ -3875,52 +3843,52 @@ msgstr ""
 msgid "Aruba"
 msgstr ""
 
-#: classes/countries.class.php:38
+#: classes/countries.class.php:26
 #@ woothemes
 msgid "Aland Islands"
 msgstr ""
 
-#: classes/countries.class.php:39
+#: classes/countries.class.php:40
 #@ woothemes
 msgid "Azerbaijan"
 msgstr ""
 
-#: classes/countries.class.php:40
+#: classes/countries.class.php:52
 #@ woothemes
 msgid "Bosnia and Herzegovina"
 msgstr ""
 
-#: classes/countries.class.php:41
+#: classes/countries.class.php:44
 #@ woothemes
 msgid "Barbados"
 msgstr ""
 
-#: classes/countries.class.php:42
+#: classes/countries.class.php:43
 #@ woothemes
 msgid "Bangladesh"
 msgstr ""
 
-#: classes/countries.class.php:43
+#: classes/countries.class.php:46
 #@ woothemes
 msgid "Belgium"
 msgstr ""
 
-#: classes/countries.class.php:44
+#: classes/countries.class.php:59
 #@ woothemes
 msgid "Burkina Faso"
 msgstr ""
 
-#: classes/countries.class.php:45
+#: classes/countries.class.php:58
 #@ woothemes
 msgid "Bulgaria"
 msgstr ""
 
-#: classes/countries.class.php:46
+#: classes/countries.class.php:42
 #@ woothemes
 msgid "Bahrain"
 msgstr ""
 
-#: classes/countries.class.php:47
+#: classes/countries.class.php:60
 #@ woothemes
 msgid "Burundi"
 msgstr ""
@@ -3930,97 +3898,92 @@ msgstr ""
 msgid "Benin"
 msgstr ""
 
-#: classes/countries.class.php:49
+#: classes/countries.class.php:205
 #@ woothemes
 msgid "Saint Barthélemy"
 msgstr ""
 
-#: classes/countries.class.php:50
+#: classes/countries.class.php:49
 #@ woothemes
 msgid "Bermuda"
 msgstr ""
 
-#: classes/countries.class.php:51
+#: classes/countries.class.php:57
 #@ woothemes
 msgid "Brunei"
 msgstr ""
 
-#: classes/countries.class.php:52
+#: classes/countries.class.php:51
 #@ woothemes
 msgid "Bolivia"
 msgstr ""
 
-#: classes/countries.class.php:53
+#: classes/countries.class.php:54
 #@ woothemes
 msgid "Brazil"
 msgstr ""
 
-#: classes/countries.class.php:54
+#: classes/countries.class.php:41
 #@ woothemes
 msgid "Bahamas"
 msgstr ""
 
-#: classes/countries.class.php:55
+#: classes/countries.class.php:50
 #@ woothemes
 msgid "Bhutan"
 msgstr ""
 
-#: classes/countries.class.php:56
-#@ woothemes
-msgid "Bouvet Island"
-msgstr ""
-
-#: classes/countries.class.php:57
+#: classes/countries.class.php:53
 #@ woothemes
 msgid "Botswana"
 msgstr ""
 
-#: classes/countries.class.php:58
+#: classes/countries.class.php:45
 #@ woothemes
 msgid "Belarus"
 msgstr ""
 
-#: classes/countries.class.php:59
+#: classes/countries.class.php:47
 #@ woothemes
 msgid "Belize"
 msgstr ""
 
-#: classes/countries.class.php:60
+#: classes/countries.class.php:63
 #@ woothemes
 msgid "Canada"
 msgstr ""
 
-#: classes/countries.class.php:61
+#: classes/countries.class.php:71
 #@ woothemes
 msgid "Cocos (Keeling) Islands"
 msgstr ""
 
-#: classes/countries.class.php:62
+#: classes/countries.class.php:75
 #@ woothemes
 msgid "Congo (Kinshasa)"
 msgstr ""
 
-#: classes/countries.class.php:63
+#: classes/countries.class.php:66
 #@ woothemes
 msgid "Central African Republic"
 msgstr ""
 
-#: classes/countries.class.php:64
+#: classes/countries.class.php:74
 #@ woothemes
 msgid "Congo (Brazzaville)"
 msgstr ""
 
-#: classes/countries.class.php:65
+#: classes/countries.class.php:235
 #@ woothemes
 msgid "Switzerland"
 msgstr ""
 
-#: classes/countries.class.php:66
+#: classes/countries.class.php:130
 #@ woothemes
 msgid "Ivory Coast"
 msgstr ""
 
-#: classes/countries.class.php:67
+#: classes/countries.class.php:76
 #@ woothemes
 msgid "Cook Islands"
 msgstr ""
@@ -4030,122 +3993,122 @@ msgstr ""
 msgid "Chile"
 msgstr ""
 
-#: classes/countries.class.php:69
+#: classes/countries.class.php:62
 #@ woothemes
 msgid "Cameroon"
 msgstr ""
 
-#: classes/countries.class.php:70
+#: classes/countries.class.php:69
 #@ woothemes
 msgid "China"
 msgstr ""
 
-#: classes/countries.class.php:71
+#: classes/countries.class.php:72
 #@ woothemes
 msgid "Colombia"
 msgstr ""
 
-#: classes/countries.class.php:72
+#: classes/countries.class.php:77
 #@ woothemes
 msgid "Costa Rica"
 msgstr ""
 
-#: classes/countries.class.php:73
+#: classes/countries.class.php:79
 #@ woothemes
 msgid "Cuba"
 msgstr ""
 
-#: classes/countries.class.php:74
+#: classes/countries.class.php:64
 #@ woothemes
 msgid "Cape Verde"
 msgstr ""
 
-#: classes/countries.class.php:75
+#: classes/countries.class.php:70
 #@ woothemes
 msgid "Christmas Island"
 msgstr ""
 
-#: classes/countries.class.php:76
+#: classes/countries.class.php:80
 #@ woothemes
 msgid "Cyprus"
 msgstr ""
 
-#: classes/countries.class.php:77
+#: classes/countries.class.php:81
 #@ woothemes
 msgid "Czech Republic"
 msgstr ""
 
-#: classes/countries.class.php:78
+#: classes/countries.class.php:104
 #@ woothemes
 msgid "Germany"
 msgstr ""
 
-#: classes/countries.class.php:79
+#: classes/countries.class.php:83
 #@ woothemes
 msgid "Djibouti"
 msgstr ""
 
-#: classes/countries.class.php:80
+#: classes/countries.class.php:82
 #@ woothemes
 msgid "Denmark"
 msgstr ""
 
-#: classes/countries.class.php:81
+#: classes/countries.class.php:84
 #@ woothemes
 msgid "Dominica"
 msgstr ""
 
-#: classes/countries.class.php:82
+#: classes/countries.class.php:85
 #@ woothemes
 msgid "Dominican Republic"
 msgstr ""
 
-#: classes/countries.class.php:83
+#: classes/countries.class.php:28
 #@ woothemes
 msgid "Algeria"
 msgstr ""
 
-#: classes/countries.class.php:84
+#: classes/countries.class.php:86
 #@ woothemes
 msgid "Ecuador"
 msgstr ""
 
-#: classes/countries.class.php:85
+#: classes/countries.class.php:91
 #@ woothemes
 msgid "Estonia"
 msgstr ""
 
-#: classes/countries.class.php:86
+#: classes/countries.class.php:87
 #@ woothemes
 msgid "Egypt"
 msgstr ""
 
-#: classes/countries.class.php:87
+#: classes/countries.class.php:266
 #@ woothemes
 msgid "Western Sahara"
 msgstr ""
 
-#: classes/countries.class.php:88
+#: classes/countries.class.php:90
 #@ woothemes
 msgid "Eritrea"
 msgstr ""
 
-#: classes/countries.class.php:89
+#: classes/countries.class.php:228
 #@ woothemes
 msgid "Spain"
 msgstr ""
 
-#: classes/countries.class.php:90
+#: classes/countries.class.php:92
 #@ woothemes
 msgid "Ethiopia"
 msgstr ""
 
-#: classes/countries.class.php:91
+#: classes/countries.class.php:96
 #@ woothemes
 msgid "Finland"
 msgstr ""
 
-#: classes/countries.class.php:92
+#: classes/countries.class.php:95
 #@ woothemes
 msgid "Fiji"
 msgstr ""
@@ -4155,93 +4118,93 @@ msgstr ""
 msgid "Falkland Islands"
 msgstr ""
 
-#: classes/countries.class.php:94
+#: classes/countries.class.php:163
 #@ woothemes
 msgid "Micronesia"
 msgstr ""
 
-#: classes/countries.class.php:95
+#: classes/countries.class.php:94
 #@ woothemes
 msgid "Faroe Islands"
 msgstr ""
 
-#: classes/countries.class.php:96
+#: classes/countries.class.php:97
 #@ woothemes
 msgid "France"
 msgstr ""
 
-#: classes/countries.class.php:97
+#: classes/countries.class.php:101
 #@ woothemes
 msgid "Gabon"
 msgstr ""
 
-#: classes/countries.class.php:98
+#: classes/countries.class.php:257
 #@ woothemes
 msgid "United Kingdom"
 msgstr ""
 
-#: classes/countries.class.php:99
+#: classes/countries.class.php:109
 #@ woothemes
 msgid "Grenada"
 msgstr ""
 
-#: classes/countries.class.php:100
-#: classes/countries.class.php:461
+#: classes/countries.class.php:103
+#: classes/countries.class.php:362
 #@ woothemes
 msgid "Georgia"
 msgstr ""
 
-#: classes/countries.class.php:101
+#: classes/countries.class.php:98
 #@ woothemes
 msgid "French Guiana"
 msgstr ""
 
-#: classes/countries.class.php:102
+#: classes/countries.class.php:113
 #@ woothemes
 msgid "Guernsey"
 msgstr ""
 
-#: classes/countries.class.php:103
+#: classes/countries.class.php:105
 #@ woothemes
 msgid "Ghana"
 msgstr ""
 
-#: classes/countries.class.php:104
+#: classes/countries.class.php:106
 #@ woothemes
 msgid "Gibraltar"
 msgstr ""
 
-#: classes/countries.class.php:105
+#: classes/countries.class.php:108
 #@ woothemes
 msgid "Greenland"
 msgstr ""
 
-#: classes/countries.class.php:106
+#: classes/countries.class.php:102
 #@ woothemes
 msgid "Gambia"
 msgstr ""
 
-#: classes/countries.class.php:107
+#: classes/countries.class.php:114
 #@ woothemes
 msgid "Guinea"
 msgstr ""
 
-#: classes/countries.class.php:108
+#: classes/countries.class.php:110
 #@ woothemes
 msgid "Guadeloupe"
 msgstr ""
 
-#: classes/countries.class.php:109
+#: classes/countries.class.php:89
 #@ woothemes
 msgid "Equatorial Guinea"
 msgstr ""
 
-#: classes/countries.class.php:110
+#: classes/countries.class.php:107
 #@ woothemes
 msgid "Greece"
 msgstr ""
 
-#: classes/countries.class.php:111
+#: classes/countries.class.php:226
 #@ woothemes
 msgid "South Georgia/Sandwich Islands"
 msgstr ""
@@ -4251,24 +4214,19 @@ msgstr ""
 msgid "Guatemala"
 msgstr ""
 
-#: classes/countries.class.php:113
+#: classes/countries.class.php:111
 #@ woothemes
 msgid "Guam"
 msgstr ""
 
-#: classes/countries.class.php:114
+#: classes/countries.class.php:115
 #@ woothemes
 msgid "Guinea-Bissau"
 msgstr ""
 
-#: classes/countries.class.php:115
-#@ woothemes
-msgid "Guyana"
-msgstr ""
-
 #: classes/countries.class.php:116
 #@ woothemes
-msgid "Hong Kong S.A.R., China"
+msgid "Guyana"
 msgstr ""
 
 #: classes/countries.class.php:118
@@ -4276,77 +4234,77 @@ msgstr ""
 msgid "Honduras"
 msgstr ""
 
-#: classes/countries.class.php:119
+#: classes/countries.class.php:78
 #@ woothemes
 msgid "Croatia"
 msgstr ""
 
-#: classes/countries.class.php:120
+#: classes/countries.class.php:117
 #@ woothemes
 msgid "Haiti"
 msgstr ""
 
-#: classes/countries.class.php:121
+#: classes/countries.class.php:120
 #@ woothemes
 msgid "Hungary"
 msgstr ""
 
-#: classes/countries.class.php:122
+#: classes/countries.class.php:123
 #@ woothemes
 msgid "Indonesia"
 msgstr ""
 
-#: classes/countries.class.php:123
+#: classes/countries.class.php:126
 #@ woothemes
 msgid "Ireland"
 msgstr ""
 
-#: classes/countries.class.php:124
+#: classes/countries.class.php:128
 #@ woothemes
 msgid "Israel"
 msgstr ""
 
-#: classes/countries.class.php:125
+#: classes/countries.class.php:127
 #@ woothemes
 msgid "Isle of Man"
 msgstr ""
 
-#: classes/countries.class.php:126
+#: classes/countries.class.php:122
 #@ woothemes
 msgid "India"
 msgstr ""
 
-#: classes/countries.class.php:127
+#: classes/countries.class.php:55
 #@ woothemes
 msgid "British Indian Ocean Territory"
 msgstr ""
 
-#: classes/countries.class.php:128
+#: classes/countries.class.php:125
 #@ woothemes
 msgid "Iraq"
 msgstr ""
 
-#: classes/countries.class.php:129
+#: classes/countries.class.php:124
 #@ woothemes
 msgid "Iran"
 msgstr ""
 
-#: classes/countries.class.php:130
+#: classes/countries.class.php:121
 #@ woothemes
 msgid "Iceland"
 msgstr ""
 
-#: classes/countries.class.php:131
+#: classes/countries.class.php:129
 #@ woothemes
 msgid "Italy"
 msgstr ""
 
-#: classes/countries.class.php:132
+#: classes/countries.class.php:133
 #@ woothemes
 msgid "Jersey"
 msgstr ""
 
-#: classes/countries.class.php:133
+#: classes/countries.class.php:131
 #@ woothemes
 msgid "Jamaica"
 msgstr ""
@@ -4356,7 +4314,7 @@ msgstr ""
 msgid "Jordan"
 msgstr ""
 
-#: classes/countries.class.php:135
+#: classes/countries.class.php:132
 #@ woothemes
 msgid "Japan"
 msgstr ""
@@ -4366,507 +4324,507 @@ msgstr ""
 msgid "Kenya"
 msgstr ""
 
-#: classes/countries.class.php:137
+#: classes/countries.class.php:139
 #@ woothemes
 msgid "Kyrgyzstan"
 msgstr ""
 
-#: classes/countries.class.php:138
+#: classes/countries.class.php:61
 #@ woothemes
 msgid "Cambodia"
 msgstr ""
 
-#: classes/countries.class.php:139
+#: classes/countries.class.php:137
 #@ woothemes
 msgid "Kiribati"
 msgstr ""
 
-#: classes/countries.class.php:140
+#: classes/countries.class.php:73
 #@ woothemes
 msgid "Comoros"
 msgstr ""
 
-#: classes/countries.class.php:141
+#: classes/countries.class.php:207
 #@ woothemes
 msgid "Saint Kitts and Nevis"
 msgstr ""
 
-#: classes/countries.class.php:142
+#: classes/countries.class.php:184
 #@ woothemes
 msgid "North Korea"
 msgstr ""
 
-#: classes/countries.class.php:143
+#: classes/countries.class.php:227
 #@ woothemes
 msgid "South Korea"
 msgstr ""
 
-#: classes/countries.class.php:144
+#: classes/countries.class.php:138
 #@ woothemes
 msgid "Kuwait"
 msgstr ""
 
-#: classes/countries.class.php:145
+#: classes/countries.class.php:65
 #@ woothemes
 msgid "Cayman Islands"
 msgstr ""
 
-#: classes/countries.class.php:146
+#: classes/countries.class.php:135
 #@ woothemes
 msgid "Kazakhstan"
 msgstr ""
 
-#: classes/countries.class.php:147
+#: classes/countries.class.php:140
 #@ woothemes
 msgid "Laos"
 msgstr ""
 
-#: classes/countries.class.php:148
+#: classes/countries.class.php:142
 #@ woothemes
 msgid "Lebanon"
 msgstr ""
 
-#: classes/countries.class.php:149
+#: classes/countries.class.php:208
 #@ woothemes
 msgid "Saint Lucia"
 msgstr ""
 
-#: classes/countries.class.php:150
+#: classes/countries.class.php:146
 #@ woothemes
 msgid "Liechtenstein"
 msgstr ""
 
-#: classes/countries.class.php:151
+#: classes/countries.class.php:229
 #@ woothemes
 msgid "Sri Lanka"
 msgstr ""
 
-#: classes/countries.class.php:152
+#: classes/countries.class.php:144
 #@ woothemes
 msgid "Liberia"
 msgstr ""
 
-#: classes/countries.class.php:153
+#: classes/countries.class.php:143
 #@ woothemes
 msgid "Lesotho"
 msgstr ""
 
-#: classes/countries.class.php:154
+#: classes/countries.class.php:147
 #@ woothemes
 msgid "Lithuania"
 msgstr ""
 
-#: classes/countries.class.php:155
+#: classes/countries.class.php:148
 #@ woothemes
 msgid "Luxembourg"
 msgstr ""
 
-#: classes/countries.class.php:156
+#: classes/countries.class.php:141
 #@ woothemes
 msgid "Latvia"
 msgstr ""
 
-#: classes/countries.class.php:157
+#: classes/countries.class.php:145
 #@ woothemes
 msgid "Libya"
 msgstr ""
 
-#: classes/countries.class.php:158
+#: classes/countries.class.php:169
 #@ woothemes
 msgid "Morocco"
 msgstr ""
 
-#: classes/countries.class.php:159
+#: classes/countries.class.php:165
 #@ woothemes
 msgid "Monaco"
 msgstr ""
 
-#: classes/countries.class.php:160
+#: classes/countries.class.php:164
 #@ woothemes
 msgid "Moldova"
 msgstr ""
 
-#: classes/countries.class.php:161
+#: classes/countries.class.php:167
 #@ woothemes
 msgid "Montenegro"
 msgstr ""
 
-#: classes/countries.class.php:162
+#: classes/countries.class.php:209
 #@ woothemes
 msgid "Saint Martin (French part)"
 msgstr ""
 
-#: classes/countries.class.php:163
+#: classes/countries.class.php:151
 #@ woothemes
 msgid "Madagascar"
 msgstr ""
 
-#: classes/countries.class.php:164
+#: classes/countries.class.php:157
 #@ woothemes
 msgid "Marshall Islands"
 msgstr ""
 
-#: classes/countries.class.php:165
+#: classes/countries.class.php:150
 #@ woothemes
 msgid "Macedonia"
 msgstr ""
 
-#: classes/countries.class.php:166
+#: classes/countries.class.php:155
 #@ woothemes
 msgid "Mali"
 msgstr ""
 
-#: classes/countries.class.php:167
+#: classes/countries.class.php:171
 #@ woothemes
 msgid "Myanmar"
 msgstr ""
 
-#: classes/countries.class.php:168
+#: classes/countries.class.php:166
 #@ woothemes
 msgid "Mongolia"
 msgstr ""
 
-#: classes/countries.class.php:169
+#: classes/countries.class.php:149
 #@ woothemes
 msgid "Macao S.A.R., China"
 msgstr ""
 
-#: classes/countries.class.php:170
+#: classes/countries.class.php:185
 #@ woothemes
 msgid "Northern Mariana Islands"
 msgstr ""
 
-#: classes/countries.class.php:171
+#: classes/countries.class.php:158
 #@ woothemes
 msgid "Martinique"
 msgstr ""
 
-#: classes/countries.class.php:172
+#: classes/countries.class.php:159
 #@ woothemes
 msgid "Mauritania"
 msgstr ""
 
-#: classes/countries.class.php:173
+#: classes/countries.class.php:168
 #@ woothemes
 msgid "Montserrat"
 msgstr ""
 
-#: classes/countries.class.php:174
+#: classes/countries.class.php:156
 #@ woothemes
 msgid "Malta"
 msgstr ""
 
-#: classes/countries.class.php:175
+#: classes/countries.class.php:160
 #@ woothemes
 msgid "Mauritius"
 msgstr ""
 
-#: classes/countries.class.php:176
+#: classes/countries.class.php:154
 #@ woothemes
 msgid "Maldives"
 msgstr ""
 
-#: classes/countries.class.php:177
+#: classes/countries.class.php:152
 #@ woothemes
 msgid "Malawi"
 msgstr ""
 
-#: classes/countries.class.php:178
+#: classes/countries.class.php:162
 #@ woothemes
 msgid "Mexico"
 msgstr ""
 
-#: classes/countries.class.php:179
+#: classes/countries.class.php:153
 #@ woothemes
 msgid "Malaysia"
 msgstr ""
 
-#: classes/countries.class.php:180
+#: classes/countries.class.php:170
 #@ woothemes
 msgid "Mozambique"
 msgstr ""
 
-#: classes/countries.class.php:181
+#: classes/countries.class.php:172
 #@ woothemes
 msgid "Namibia"
 msgstr ""
 
-#: classes/countries.class.php:182
+#: classes/countries.class.php:177
 #@ woothemes
 msgid "New Caledonia"
 msgstr ""
 
-#: classes/countries.class.php:183
+#: classes/countries.class.php:180
 #@ woothemes
 msgid "Niger"
 msgstr ""
 
-#: classes/countries.class.php:184
+#: classes/countries.class.php:183
 #@ woothemes
 msgid "Norfolk Island"
 msgstr ""
 
-#: classes/countries.class.php:185
+#: classes/countries.class.php:181
 #@ woothemes
 msgid "Nigeria"
 msgstr ""
 
-#: classes/countries.class.php:186
+#: classes/countries.class.php:179
 #@ woothemes
 msgid "Nicaragua"
 msgstr ""
 
-#: classes/countries.class.php:187
+#: classes/countries.class.php:175
 #@ woothemes
 msgid "Netherlands"
 msgstr ""
 
-#: classes/countries.class.php:188
+#: classes/countries.class.php:186
 #@ woothemes
 msgid "Norway"
 msgstr ""
 
-#: classes/countries.class.php:189
+#: classes/countries.class.php:174
 #@ woothemes
 msgid "Nepal"
 msgstr ""
 
-#: classes/countries.class.php:190
+#: classes/countries.class.php:173
 #@ woothemes
 msgid "Nauru"
 msgstr ""
 
-#: classes/countries.class.php:191
+#: classes/countries.class.php:182
 #@ woothemes
 msgid "Niue"
 msgstr ""
 
-#: classes/countries.class.php:192
+#: classes/countries.class.php:178
 #@ woothemes
 msgid "New Zealand"
 msgstr ""
 
-#: classes/countries.class.php:193
+#: classes/countries.class.php:187
 #@ woothemes
 msgid "Oman"
 msgstr ""
 
-#: classes/countries.class.php:194
+#: classes/countries.class.php:191
 #@ woothemes
 msgid "Panama"
 msgstr ""
 
-#: classes/countries.class.php:195
+#: classes/countries.class.php:194
 #@ woothemes
 msgid "Peru"
 msgstr ""
 
-#: classes/countries.class.php:196
+#: classes/countries.class.php:99
 #@ woothemes
 msgid "French Polynesia"
 msgstr ""
 
-#: classes/countries.class.php:197
+#: classes/countries.class.php:192
 #@ woothemes
 msgid "Papua New Guinea"
 msgstr ""
 
-#: classes/countries.class.php:198
+#: classes/countries.class.php:195
 #@ woothemes
 msgid "Philippines"
 msgstr ""
 
-#: classes/countries.class.php:199
+#: classes/countries.class.php:188
 #@ woothemes
 msgid "Pakistan"
 msgstr ""
 
-#: classes/countries.class.php:200
+#: classes/countries.class.php:197
 #@ woothemes
 msgid "Poland"
 msgstr ""
 
-#: classes/countries.class.php:201
+#: classes/countries.class.php:210
 #@ woothemes
 msgid "Saint Pierre and Miquelon"
 msgstr ""
 
-#: classes/countries.class.php:202
+#: classes/countries.class.php:196
 #@ woothemes
 msgid "Pitcairn"
 msgstr ""
 
-#: classes/countries.class.php:203
+#: classes/countries.class.php:199
 #@ woothemes
 msgid "Puerto Rico"
 msgstr ""
 
-#: classes/countries.class.php:204
+#: classes/countries.class.php:190
 #@ woothemes
 msgid "Palestinian Territory"
 msgstr ""
 
-#: classes/countries.class.php:205
+#: classes/countries.class.php:198
 #@ woothemes
 msgid "Portugal"
 msgstr ""
 
-#: classes/countries.class.php:206
+#: classes/countries.class.php:189
 #@ woothemes
 msgid "Palau"
 msgstr ""
 
-#: classes/countries.class.php:207
+#: classes/countries.class.php:193
 #@ woothemes
 msgid "Paraguay"
 msgstr ""
 
-#: classes/countries.class.php:208
+#: classes/countries.class.php:200
 #@ woothemes
 msgid "Qatar"
 msgstr ""
 
-#: classes/countries.class.php:209
+#: classes/countries.class.php:201
 #@ woothemes
 msgid "Reunion"
 msgstr ""
 
-#: classes/countries.class.php:210
+#: classes/countries.class.php:202
 #@ woothemes
 msgid "Romania"
 msgstr ""
 
-#: classes/countries.class.php:211
+#: classes/countries.class.php:217
 #@ woothemes
 msgid "Serbia"
 msgstr ""
 
-#: classes/countries.class.php:212
+#: classes/countries.class.php:203
 #@ woothemes
 msgid "Russia"
 msgstr ""
 
-#: classes/countries.class.php:213
+#: classes/countries.class.php:204
 #@ woothemes
 msgid "Rwanda"
 msgstr ""
 
-#: classes/countries.class.php:214
+#: classes/countries.class.php:215
 #@ woothemes
 msgid "Saudi Arabia"
 msgstr ""
 
-#: classes/countries.class.php:215
+#: classes/countries.class.php:223
 #@ woothemes
 msgid "Solomon Islands"
 msgstr ""
 
-#: classes/countries.class.php:216
+#: classes/countries.class.php:218
 #@ woothemes
 msgid "Seychelles"
 msgstr ""
 
-#: classes/countries.class.php:217
+#: classes/countries.class.php:230
 #@ woothemes
 msgid "Sudan"
 msgstr ""
 
-#: classes/countries.class.php:218
+#: classes/countries.class.php:234
 #@ woothemes
 msgid "Sweden"
 msgstr ""
 
-#: classes/countries.class.php:219
+#: classes/countries.class.php:220
 #@ woothemes
 msgid "Singapore"
 msgstr ""
 
-#: classes/countries.class.php:220
+#: classes/countries.class.php:206
 #@ woothemes
 msgid "Saint Helena"
 msgstr ""
 
-#: classes/countries.class.php:221
+#: classes/countries.class.php:222
 #@ woothemes
 msgid "Slovenia"
 msgstr ""
 
-#: classes/countries.class.php:222
+#: classes/countries.class.php:232
 #@ woothemes
 msgid "Svalbard and Jan Mayen"
 msgstr ""
 
-#: classes/countries.class.php:223
+#: classes/countries.class.php:221
 #@ woothemes
 msgid "Slovakia"
 msgstr ""
 
-#: classes/countries.class.php:224
+#: classes/countries.class.php:219
 #@ woothemes
 msgid "Sierra Leone"
 msgstr ""
 
-#: classes/countries.class.php:225
+#: classes/countries.class.php:213
 #@ woothemes
 msgid "San Marino"
 msgstr ""
 
-#: classes/countries.class.php:226
+#: classes/countries.class.php:216
 #@ woothemes
 msgid "Senegal"
 msgstr ""
 
-#: classes/countries.class.php:227
+#: classes/countries.class.php:224
 #@ woothemes
 msgid "Somalia"
 msgstr ""
 
-#: classes/countries.class.php:228
+#: classes/countries.class.php:231
 #@ woothemes
 msgid "Suriname"
 msgstr ""
 
-#: classes/countries.class.php:229
+#: classes/countries.class.php:214
 #@ woothemes
 msgid "Sao Tome and Principe"
 msgstr ""
 
-#: classes/countries.class.php:230
+#: classes/countries.class.php:88
 #@ woothemes
 msgid "El Salvador"
 msgstr ""
 
-#: classes/countries.class.php:231
+#: classes/countries.class.php:236
 #@ woothemes
 msgid "Syria"
 msgstr ""
 
-#: classes/countries.class.php:232
+#: classes/countries.class.php:233
 #@ woothemes
 msgid "Swaziland"
 msgstr ""
 
-#: classes/countries.class.php:233
+#: classes/countries.class.php:249
 #@ woothemes
 msgid "Turks and Caicos Islands"
 msgstr ""
 
-#: classes/countries.class.php:234
+#: classes/countries.class.php:67
 #@ woothemes
 msgid "Chad"
 msgstr ""
 
-#: classes/countries.class.php:235
+#: classes/countries.class.php:100
 #@ woothemes
 msgid "French Southern Territories"
 msgstr ""
 
-#: classes/countries.class.php:236
+#: classes/countries.class.php:242
 #@ woothemes
 msgid "Togo"
 msgstr ""
 
-#: classes/countries.class.php:237
+#: classes/countries.class.php:240
 #@ woothemes
 msgid "Thailand"
 msgstr ""
@@ -4876,32 +4834,32 @@ msgstr ""
 msgid "Tajikistan"
 msgstr ""
 
-#: classes/countries.class.php:239
+#: classes/countries.class.php:243
 #@ woothemes
 msgid "Tokelau"
 msgstr ""
 
-#: classes/countries.class.php:240
+#: classes/countries.class.php:241
 #@ woothemes
 msgid "Timor-Leste"
 msgstr ""
 
-#: classes/countries.class.php:241
+#: classes/countries.class.php:248
 #@ woothemes
 msgid "Turkmenistan"
 msgstr ""
 
-#: classes/countries.class.php:242
+#: classes/countries.class.php:246
 #@ woothemes
 msgid "Tunisia"
 msgstr ""
 
-#: classes/countries.class.php:243
+#: classes/countries.class.php:244
 #@ woothemes
 msgid "Tonga"
 msgstr ""
 
-#: classes/countries.class.php:244
+#: classes/countries.class.php:247
 #@ woothemes
 msgid "Turkey"
 msgstr ""
@@ -4911,112 +4869,112 @@ msgstr ""
 msgid "Trinidad and Tobago"
 msgstr ""
 
-#: classes/countries.class.php:246
+#: classes/countries.class.php:250
 #@ woothemes
 msgid "Tuvalu"
 msgstr ""
 
-#: classes/countries.class.php:247
+#: classes/countries.class.php:237
 #@ woothemes
 msgid "Taiwan"
 msgstr ""
 
-#: classes/countries.class.php:248
+#: classes/countries.class.php:239
 #@ woothemes
 msgid "Tanzania"
 msgstr ""
 
-#: classes/countries.class.php:249
+#: classes/countries.class.php:255
 #@ woothemes
 msgid "Ukraine"
 msgstr ""
 
-#: classes/countries.class.php:250
+#: classes/countries.class.php:254
 #@ woothemes
 msgid "Uganda"
 msgstr ""
 
-#: classes/countries.class.php:251
+#: classes/countries.class.php:253
 #@ woothemes
 msgid "US Minor Outlying Islands"
 msgstr ""
 
-#: classes/countries.class.php:252
+#: classes/countries.class.php:258
 #@ woothemes
 msgid "United States"
 msgstr ""
 
-#: classes/countries.class.php:253
+#: classes/countries.class.php:252
 #@ woothemes
 msgid "US Armed Forces"
 msgstr ""
 
-#: classes/countries.class.php:254
+#: classes/countries.class.php:259
 #@ woothemes
 msgid "Uruguay"
 msgstr ""
 
-#: classes/countries.class.php:255
+#: classes/countries.class.php:260
 #@ woothemes
 msgid "Uzbekistan"
 msgstr ""
 
-#: classes/countries.class.php:256
+#: classes/countries.class.php:262
 #@ woothemes
 msgid "Vatican"
 msgstr ""
 
-#: classes/countries.class.php:257
+#: classes/countries.class.php:211
 #@ woothemes
 msgid "Saint Vincent and the Grenadines"
 msgstr ""
 
-#: classes/countries.class.php:258
+#: classes/countries.class.php:263
 #@ woothemes
 msgid "Venezuela"
 msgstr ""
 
-#: classes/countries.class.php:259
+#: classes/countries.class.php:56
 #@ woothemes
 msgid "British Virgin Islands"
 msgstr ""
 
-#: classes/countries.class.php:260
+#: classes/countries.class.php:251
 #@ woothemes
 msgid "U.S. Virgin Islands"
 msgstr ""
 
-#: classes/countries.class.php:261
+#: classes/countries.class.php:264
 #@ woothemes
 msgid "Vietnam"
 msgstr ""
 
-#: classes/countries.class.php:262
+#: classes/countries.class.php:261
 #@ woothemes
 msgid "Vanuatu"
 msgstr ""
 
-#: classes/countries.class.php:263
+#: classes/countries.class.php:265
 #@ woothemes
 msgid "Wallis and Futuna"
 msgstr ""
 
-#: classes/countries.class.php:264
+#: classes/countries.class.php:212
 #@ woothemes
 msgid "Samoa"
 msgstr ""
 
-#: classes/countries.class.php:265
+#: classes/countries.class.php:267
 #@ woothemes
 msgid "Yemen"
 msgstr ""
 
-#: classes/countries.class.php:266
+#: classes/countries.class.php:161
 #@ woothemes
 msgid "Mayotte"
 msgstr ""
 
-#: classes/countries.class.php:267
+#: classes/countries.class.php:225
 #@ woothemes
 msgid "South Africa"
 msgstr ""
@@ -5071,515 +5029,515 @@ msgstr ""
 msgid "Western Australia"
 msgstr ""
 
-#: classes/countries.class.php:284
+#: classes/countries.class.php:285
 #@ woothemes
 msgid "Amazonas"
 msgstr ""
 
-#: classes/countries.class.php:285
+#: classes/countries.class.php:286
 #@ woothemes
 msgid "Acre"
 msgstr ""
 
-#: classes/countries.class.php:286
+#: classes/countries.class.php:287
 #@ woothemes
 msgid "Alagoas"
 msgstr ""
 
-#: classes/countries.class.php:287
+#: classes/countries.class.php:288
 #@ woothemes
 msgid "Amap&aacute;"
 msgstr ""
 
-#: classes/countries.class.php:288
+#: classes/countries.class.php:289
 #@ woothemes
 msgid "Cear&aacute;"
 msgstr ""
 
-#: classes/countries.class.php:289
+#: classes/countries.class.php:290
 #@ woothemes
 msgid "Distrito federal"
 msgstr ""
 
-#: classes/countries.class.php:290
+#: classes/countries.class.php:291
 #@ woothemes
 msgid "Espirito santo"
 msgstr ""
 
-#: classes/countries.class.php:291
+#: classes/countries.class.php:292
 #@ woothemes
 msgid "Maranh&atilde;o"
 msgstr ""
 
-#: classes/countries.class.php:292
+#: classes/countries.class.php:293
 #@ woothemes
 msgid "Paran&aacute;"
 msgstr ""
 
-#: classes/countries.class.php:293
+#: classes/countries.class.php:294
 #@ woothemes
 msgid "Pernambuco"
 msgstr ""
 
-#: classes/countries.class.php:294
+#: classes/countries.class.php:295
 #@ woothemes
 msgid "Piau&iacute;"
 msgstr ""
 
-#: classes/countries.class.php:295
+#: classes/countries.class.php:296
 #@ woothemes
 msgid "Rio grande do norte"
 msgstr ""
 
-#: classes/countries.class.php:296
-#: classes/countries.class.php:309
+#: classes/countries.class.php:297
+#: classes/countries.class.php:310
 #@ woothemes
 msgid "Rio grande do sul"
 msgstr ""
 
-#: classes/countries.class.php:297
+#: classes/countries.class.php:298
 #@ woothemes
 msgid "Rond&ocirc;nia"
 msgstr ""
 
-#: classes/countries.class.php:298
+#: classes/countries.class.php:299
 #@ woothemes
 msgid "Roraima"
 msgstr ""
 
-#: classes/countries.class.php:299
+#: classes/countries.class.php:300
 #@ woothemes
 msgid "Santa catarina"
 msgstr ""
 
-#: classes/countries.class.php:300
+#: classes/countries.class.php:301
 #@ woothemes
 msgid "Sergipe"
 msgstr ""
 
-#: classes/countries.class.php:301
+#: classes/countries.class.php:302
 #@ woothemes
 msgid "Tocantins"
 msgstr ""
 
-#: classes/countries.class.php:302
+#: classes/countries.class.php:303
 #@ woothemes
 msgid "Par&aacute;"
 msgstr ""
 
-#: classes/countries.class.php:303
+#: classes/countries.class.php:304
 #@ woothemes
 msgid "Bahia"
 msgstr ""
 
-#: classes/countries.class.php:304
+#: classes/countries.class.php:305
 #@ woothemes
 msgid "Goi&aacute;s"
 msgstr ""
 
-#: classes/countries.class.php:305
+#: classes/countries.class.php:306
 #@ woothemes
 msgid "Mato grosso"
 msgstr ""
 
-#: classes/countries.class.php:306
+#: classes/countries.class.php:307
 #@ woothemes
 msgid "Mato grosso do sul"
 msgstr ""
 
-#: classes/countries.class.php:307
+#: classes/countries.class.php:308
 #@ woothemes
 msgid "Rio de janeiro"
 msgstr ""
 
-#: classes/countries.class.php:308
+#: classes/countries.class.php:309
 #@ woothemes
 msgid "S&atilde;o paulo"
 msgstr ""
 
-#: classes/countries.class.php:310
+#: classes/countries.class.php:311
 #@ woothemes
 msgid "Minas gerais"
 msgstr ""
 
-#: classes/countries.class.php:311
+#: classes/countries.class.php:312
 #@ woothemes
 msgid "Paraiba"
 msgstr ""
 
-#: classes/countries.class.php:314
+#: classes/countries.class.php:315
 #@ woothemes
 msgid "Alberta"
 msgstr ""
 
-#: classes/countries.class.php:315
+#: classes/countries.class.php:316
 #@ woothemes
 msgid "British Columbia"
 msgstr ""
 
-#: classes/countries.class.php:316
+#: classes/countries.class.php:317
 #@ woothemes
 msgid "Manitoba"
 msgstr ""
 
-#: classes/countries.class.php:317
+#: classes/countries.class.php:318
 #@ woothemes
 msgid "New Brunswick"
 msgstr ""
 
-#: classes/countries.class.php:318
+#: classes/countries.class.php:319
 #@ woothemes
 msgid "Newfoundland"
 msgstr ""
 
-#: classes/countries.class.php:319
+#: classes/countries.class.php:320
 #@ woothemes
 msgid "Northwest Territories"
 msgstr ""
 
-#: classes/countries.class.php:320
+#: classes/countries.class.php:321
 #@ woothemes
 msgid "Nova Scotia"
 msgstr ""
 
-#: classes/countries.class.php:321
+#: classes/countries.class.php:322
 #@ woothemes
 msgid "Nunavut"
 msgstr ""
 
-#: classes/countries.class.php:322
+#: classes/countries.class.php:323
 #@ woothemes
 msgid "Ontario"
 msgstr ""
 
-#: classes/countries.class.php:323
+#: classes/countries.class.php:324
 #@ woothemes
 msgid "Prince Edward Island"
 msgstr ""
 
-#: classes/countries.class.php:324
+#: classes/countries.class.php:325
 #@ woothemes
 msgid "Quebec"
 msgstr ""
 
-#: classes/countries.class.php:325
+#: classes/countries.class.php:326
 #@ woothemes
 msgid "Saskatchewan"
 msgstr ""
 
-#: classes/countries.class.php:326
+#: classes/countries.class.php:327
 #@ woothemes
 msgid "Yukon Territory"
 msgstr ""
 
-#: classes/countries.class.php:451
+#: classes/countries.class.php:352
 #@ woothemes
 msgid "Alabama"
 msgstr ""
 
-#: classes/countries.class.php:452
+#: classes/countries.class.php:353
 #@ woothemes
 msgid "Alaska"
 msgstr ""
 
-#: classes/countries.class.php:453
+#: classes/countries.class.php:354
 #@ woothemes
 msgid "Arizona"
 msgstr ""
 
-#: classes/countries.class.php:454
+#: classes/countries.class.php:355
 #@ woothemes
 msgid "Arkansas"
 msgstr ""
 
-#: classes/countries.class.php:455
+#: classes/countries.class.php:356
 #@ woothemes
 msgid "California"
 msgstr ""
 
-#: classes/countries.class.php:456
+#: classes/countries.class.php:357
 #@ woothemes
 msgid "Colorado"
 msgstr ""
 
-#: classes/countries.class.php:457
+#: classes/countries.class.php:358
 #@ woothemes
 msgid "Connecticut"
 msgstr ""
 
-#: classes/countries.class.php:458
+#: classes/countries.class.php:359
 #@ woothemes
 msgid "Delaware"
 msgstr ""
 
-#: classes/countries.class.php:459
+#: classes/countries.class.php:360
 #@ woothemes
 msgid "District Of Columbia"
 msgstr ""
 
-#: classes/countries.class.php:460
+#: classes/countries.class.php:361
 #@ woothemes
 msgid "Florida"
 msgstr ""
 
-#: classes/countries.class.php:462
+#: classes/countries.class.php:363
 #@ woothemes
 msgid "Hawaii"
 msgstr ""
 
-#: classes/countries.class.php:463
+#: classes/countries.class.php:364
 #@ woothemes
 msgid "Idaho"
 msgstr ""
 
-#: classes/countries.class.php:464
+#: classes/countries.class.php:365
 #@ woothemes
 msgid "Illinois"
 msgstr ""
 
-#: classes/countries.class.php:465
+#: classes/countries.class.php:366
 #@ woothemes
 msgid "Indiana"
 msgstr ""
 
-#: classes/countries.class.php:466
+#: classes/countries.class.php:367
 #@ woothemes
 msgid "Iowa"
 msgstr ""
 
-#: classes/countries.class.php:467
+#: classes/countries.class.php:368
 #@ woothemes
 msgid "Kansas"
 msgstr ""
 
-#: classes/countries.class.php:468
+#: classes/countries.class.php:369
 #@ woothemes
 msgid "Kentucky"
 msgstr ""
 
-#: classes/countries.class.php:469
+#: classes/countries.class.php:370
 #@ woothemes
 msgid "Louisiana"
 msgstr ""
 
-#: classes/countries.class.php:470
+#: classes/countries.class.php:371
 #@ woothemes
 msgid "Maine"
 msgstr ""
 
-#: classes/countries.class.php:471
+#: classes/countries.class.php:372
 #@ woothemes
 msgid "Maryland"
 msgstr ""
 
-#: classes/countries.class.php:472
+#: classes/countries.class.php:373
 #@ woothemes
 msgid "Massachusetts"
 msgstr ""
 
-#: classes/countries.class.php:473
+#: classes/countries.class.php:374
 #@ woothemes
 msgid "Michigan"
 msgstr ""
 
-#: classes/countries.class.php:474
+#: classes/countries.class.php:375
 #@ woothemes
 msgid "Minnesota"
 msgstr ""
 
-#: classes/countries.class.php:475
+#: classes/countries.class.php:376
 #@ woothemes
 msgid "Mississippi"
 msgstr ""
 
-#: classes/countries.class.php:476
+#: classes/countries.class.php:377
 #@ woothemes
 msgid "Missouri"
 msgstr ""
 
-#: classes/countries.class.php:477
+#: classes/countries.class.php:378
 #@ woothemes
 msgid "Montana"
 msgstr ""
 
-#: classes/countries.class.php:478
+#: classes/countries.class.php:379
 #@ woothemes
 msgid "Nebraska"
 msgstr ""
 
-#: classes/countries.class.php:479
+#: classes/countries.class.php:380
 #@ woothemes
 msgid "Nevada"
 msgstr ""
 
-#: classes/countries.class.php:480
+#: classes/countries.class.php:381
 #@ woothemes
 msgid "New Hampshire"
 msgstr ""
 
-#: classes/countries.class.php:481
+#: classes/countries.class.php:382
 #@ woothemes
 msgid "New Jersey"
 msgstr ""
 
-#: classes/countries.class.php:482
+#: classes/countries.class.php:383
 #@ woothemes
 msgid "New Mexico"
 msgstr ""
 
-#: classes/countries.class.php:483
+#: classes/countries.class.php:384
 #@ woothemes
 msgid "New York"
 msgstr ""
 
-#: classes/countries.class.php:484
+#: classes/countries.class.php:385
 #@ woothemes
 msgid "North Carolina"
 msgstr ""
 
-#: classes/countries.class.php:485
+#: classes/countries.class.php:386
 #@ woothemes
 msgid "North Dakota"
 msgstr ""
 
-#: classes/countries.class.php:486
+#: classes/countries.class.php:387
 #@ woothemes
 msgid "Ohio"
 msgstr ""
 
-#: classes/countries.class.php:487
+#: classes/countries.class.php:388
 #@ woothemes
 msgid "Oklahoma"
 msgstr ""
 
-#: classes/countries.class.php:488
+#: classes/countries.class.php:389
 #@ woothemes
 msgid "Oregon"
 msgstr ""
 
-#: classes/countries.class.php:489
+#: classes/countries.class.php:390
 #@ woothemes
 msgid "Pennsylvania"
 msgstr ""
 
-#: classes/countries.class.php:490
+#: classes/countries.class.php:391
 #@ woothemes
 msgid "Rhode Island"
 msgstr ""
 
-#: classes/countries.class.php:491
+#: classes/countries.class.php:392
 #@ woothemes
 msgid "South Carolina"
 msgstr ""
 
-#: classes/countries.class.php:492
+#: classes/countries.class.php:393
 #@ woothemes
 msgid "South Dakota"
 msgstr ""
 
-#: classes/countries.class.php:493
+#: classes/countries.class.php:394
 #@ woothemes
 msgid "Tennessee"
 msgstr ""
 
-#: classes/countries.class.php:494
+#: classes/countries.class.php:395
 #@ woothemes
 msgid "Texas"
 msgstr ""
 
-#: classes/countries.class.php:495
+#: classes/countries.class.php:396
 #@ woothemes
 msgid "Utah"
 msgstr ""
 
-#: classes/countries.class.php:496
+#: classes/countries.class.php:397
 #@ woothemes
 msgid "Vermont"
 msgstr ""
 
-#: classes/countries.class.php:497
+#: classes/countries.class.php:398
 #@ woothemes
 msgid "Virginia"
 msgstr ""
 
-#: classes/countries.class.php:498
+#: classes/countries.class.php:399
 #@ woothemes
 msgid "Washington"
 msgstr ""
 
-#: classes/countries.class.php:499
+#: classes/countries.class.php:400
 #@ woothemes
 msgid "West Virginia"
 msgstr ""
 
-#: classes/countries.class.php:500
+#: classes/countries.class.php:401
 #@ woothemes
 msgid "Wisconsin"
 msgstr ""
 
-#: classes/countries.class.php:501
+#: classes/countries.class.php:402
 #@ woothemes
 msgid "Wyoming"
 msgstr ""
 
-#: classes/countries.class.php:504
+#: classes/countries.class.php:405
 #@ woothemes
 msgid "Americas"
 msgstr ""
 
-#: classes/countries.class.php:505
+#: classes/countries.class.php:406
 #@ woothemes
 msgid "Europe"
 msgstr ""
 
-#: classes/countries.class.php:506
+#: classes/countries.class.php:407
 #@ woothemes
 msgid "Pacific"
 msgstr ""
 
-#: classes/countries.class.php:573
+#: classes/countries.class.php:471
 #@ woothemes
 msgid "to the"
 msgstr ""
 
-#: classes/countries.class.php:574
+#: classes/countries.class.php:472
 #@ woothemes
 msgid "to"
 msgstr ""
 
-#: classes/countries.class.php:582
+#: classes/countries.class.php:480
 #@ woothemes
 msgid "the"
 msgstr ""
 
-#: classes/countries.class.php:590
+#: classes/countries.class.php:488
 #@ woothemes
 msgid "VAT"
 msgstr ""
 
-#: classes/countries.class.php:601
+#: classes/countries.class.php:499
 #, php-format
 #@ woothemes
 msgid "(inc. %s%% VAT)"
 msgstr ""
 
-#: classes/countries.class.php:601
+#: classes/countries.class.php:499
 #, php-format
 #@ woothemes
 msgid "(inc. %s%% tax)"
 msgstr ""
 
-#: classes/countries.class.php:603
+#: classes/countries.class.php:501
 #@ woothemes
 msgid "(inc. VAT)"
 msgstr ""
 
-#: classes/countries.class.php:603
+#: classes/countries.class.php:501
 #@ woothemes
 msgid "(inc. tax)"
 msgstr ""
 
-#: classes/countries.class.php:612
+#: classes/countries.class.php:510
 #@ woothemes
 msgid "(ex. VAT)"
 msgstr ""
@@ -6025,22 +5983,22 @@ msgstr ""
 
 #: templates/cart/totals.php:23
 #: templates/checkout/review_order.php:19
-#: woocommerce.php:1045
+#: woocommerce.php:1057
 #@ woothemes
 msgid "Cart Discount"
 msgstr ""
 
-#: woocommerce.php:1046
+#: woocommerce.php:1058
 #@ woothemes
 msgid "Cart % Discount"
 msgstr ""
 
-#: woocommerce.php:1047
+#: woocommerce.php:1059
 #@ woothemes
 msgid "Product Discount"
 msgstr ""
 
-#: woocommerce.php:1048
+#: woocommerce.php:1060
 #@ woothemes
 msgid "Product % Discount"
 msgstr ""
@@ -6165,48 +6123,48 @@ msgstr[1] ""
 msgid "Recent Orders"
 msgstr ""
 
-#: templates/myaccount/my-account.php:40
+#: templates/myaccount/my-account.php:42
 #@ woothemes
 msgid "#"
 msgstr ""
 
-#: templates/myaccount/my-account.php:42
+#: templates/myaccount/my-account.php:44
 #@ woothemes
 msgid "Ship to"
 msgstr ""
 
-#: templates/myaccount/my-account.php:43
+#: templates/myaccount/my-account.php:45
 #@ woothemes
 msgid "Total"
 msgstr ""
 
 #: templates/checkout/thankyou.php:24
-#: templates/myaccount/my-account.php:63
+#: templates/myaccount/my-account.php:65
 #@ woothemes
 msgid "Pay"
 msgstr ""
 
-#: templates/myaccount/my-account.php:64
+#: templates/myaccount/my-account.php:66
 #@ woothemes
 msgid "Cancel"
 msgstr ""
 
-#: templates/myaccount/my-account.php:75
+#: templates/myaccount/my-account.php:77
 #@ woothemes
 msgid "You have no recent orders."
 msgstr ""
 
-#: templates/myaccount/my-account.php:79
+#: templates/myaccount/my-account.php:81
 #@ woothemes
 msgid "My Addresses"
 msgstr ""
 
-#: templates/myaccount/my-account.php:80
+#: templates/myaccount/my-account.php:82
 #@ woothemes
 msgid "The following addresses will be used on the checkout page by default."
 msgstr ""
 
-#: templates/myaccount/my-account.php:106
+#: templates/myaccount/my-account.php:107
 #@ woothemes
 msgid "You have not set up a billing address yet."
 msgstr ""
@@ -6281,14 +6239,14 @@ msgstr ""
 msgid "Address line 2"
 msgstr ""
 
+#: classes/countries.class.php:844
 #: templates/myaccount/edit-address.php:65
 #@ woothemes
 msgid "State"
 msgstr ""
 
-#: templates/cart/shipping_calculator.php:48
+#: templates/cart/shipping_calculator.php:51
 #: templates/myaccount/edit-address.php:88
-#: woocommerce.php:817
 #@ woothemes
 msgid "state"
 msgstr ""
@@ -6469,7 +6427,7 @@ msgid "Totals"
 msgstr ""
 
 #: templates/checkout/pay_for_order.php:14
-#: widgets/widget-cart.php:67
+#: widgets/widget-cart.php:70
 #@ woothemes
 msgid "Subtotal"
 msgstr ""
@@ -6802,7 +6760,7 @@ msgid "Best Sellers"
 msgstr ""
 
 #: widgets/widget-best_sellers.php:116
-#: widgets/widget-cart.php:85
+#: widgets/widget-cart.php:88
 #: widgets/widget-featured_products.php:113
 #: widgets/widget-layered_nav.php:319
 #: widgets/widget-onsale.php:149
@@ -6834,17 +6792,17 @@ msgstr ""
 msgid "WooCommerce Shopping Cart"
 msgstr ""
 
-#: widgets/widget-cart.php:63
+#: widgets/widget-cart.php:65
 #@ woothemes
 msgid "No products in the cart."
 msgstr ""
 
-#: widgets/widget-cart.php:71
+#: widgets/widget-cart.php:74
 #@ woothemes
 msgid "View Cart &rarr;"
 msgstr ""
 
-#: widgets/widget-cart.php:71
+#: widgets/widget-cart.php:74
 #@ woothemes
 msgid "Checkout &rarr;"
 msgstr ""
@@ -6904,62 +6862,62 @@ msgstr ""
 msgid "WooCommerce Login"
 msgstr ""
 
-#: widgets/widget-login.php:39
-#: widgets/widget-login.php:177
+#: widgets/widget-login.php:42
+#: widgets/widget-login.php:180
 #@ woothemes
 msgid "Customer Login"
 msgstr ""
 
-#: widgets/widget-login.php:40
-#: widgets/widget-login.php:180
+#: widgets/widget-login.php:43
+#: widgets/widget-login.php:183
 #, php-format
 #@ woothemes
 msgid "Welcome %s"
 msgstr ""
 
-#: widgets/widget-login.php:53
+#: widgets/widget-login.php:56
 #@ woothemes
 msgid "My account"
 msgstr ""
 
-#: widgets/widget-login.php:54
+#: widgets/widget-login.php:57
 #@ woothemes
 msgid "Change my password"
 msgstr ""
 
-#: widgets/widget-login.php:55
+#: widgets/widget-login.php:58
 #: woocommerce-functions.php:141
 #@ woothemes
 msgid "Logout"
 msgstr ""
 
-#: widgets/widget-login.php:94
+#: widgets/widget-login.php:97
 #@ woothemes
 msgid "Login &raquo;"
 msgstr ""
 
-#: widgets/widget-login.php:94
+#: widgets/widget-login.php:97
 #@ woothemes
 msgid "Lost password?"
 msgstr ""
 
-#: widgets/widget-login.php:176
+#: widgets/widget-login.php:179
 #@ woothemes
 msgid "Logged out title:"
 msgstr ""
 
-#: widgets/widget-login.php:179
+#: widgets/widget-login.php:182
 #@ woothemes
 msgid "Logged in title:"
 msgstr ""
 
-#: widgets/widget-login.php:224
+#: widgets/widget-login.php:227
 #: woocommerce-functions.php:445
 #@ woothemes
 msgid "<strong>ERROR</strong>: Please enter a username."
 msgstr ""
 
-#: widgets/widget-login.php:227
+#: widgets/widget-login.php:230
 #@ woothemes
 msgid "<strong>ERROR</strong>: Please enter your password."
 msgstr ""
@@ -7136,12 +7094,12 @@ msgstr ""
 msgid "Shop Manager"
 msgstr ""
 
-#: woocommerce-functions.php:953
+#: woocommerce-functions.php:961
 #@ woothemes
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr ""
 
-#: woocommerce-functions.php:956
+#: woocommerce-functions.php:964
 #@ woothemes
 msgid "Please rate the product."
 msgstr ""
@@ -7305,24 +7263,24 @@ msgstr ""
 msgid "Sorry, you have reached your download limit for this file. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr ""
 
-#: woocommerce-functions.php:732
+#: woocommerce-functions.php:740
 #, php-format
 #@ woothemes
 msgid "File not found. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr ""
 
-#: woocommerce-functions.php:915
+#: woocommerce-functions.php:923
 #@ woothemes
 msgid "New products"
 msgstr ""
 
-#: woocommerce-functions.php:923
+#: woocommerce-functions.php:931
 #, php-format
 #@ woothemes
 msgid "New products added to %s"
 msgstr ""
 
-#: woocommerce-functions.php:931
+#: woocommerce-functions.php:939
 #, php-format
 #@ woothemes
 msgid "New products tagged %s"
@@ -7455,7 +7413,7 @@ msgstr ""
 msgid "Your account details"
 msgstr ""
 
-#: woocommerce-core-functions.php:412
+#: woocommerce-core-functions.php:427
 #: woocommerce.php:430
 #@ woothemes
 msgid "product"
@@ -7810,7 +7768,7 @@ msgstr ""
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr ""
 
-#: woocommerce-core-functions.php:502
+#: woocommerce-core-functions.php:517
 #@ woothemes
 msgid "Show all categories"
 msgstr ""
@@ -7885,17 +7843,19 @@ msgstr ""
 msgid "Related Products"
 msgstr ""
 
-#: templates/cart/shipping_calculator.php:11
+#: templates/cart/shipping_calculator.php:14
 #@ woothemes
 msgid "Calculate Shipping"
 msgstr ""
 
-#: templates/cart/shipping_calculator.php:54
+#: classes/countries.class.php:862
+#: classes/countries.class.php:919
+#: templates/cart/shipping_calculator.php:57
 #@ woothemes
 msgid "Postcode/Zip"
 msgstr ""
 
-#: templates/cart/shipping_calculator.php:57
+#: templates/cart/shipping_calculator.php:60
 #@ woothemes
 msgid "Update Totals"
 msgstr ""
@@ -8010,7 +7970,7 @@ msgstr ""
 msgid "Telephone:"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:784
+#: admin/woocommerce-admin-settings.php:792
 #@ woothemes
 msgid "Tax display (cart totals)"
 msgstr ""
@@ -8076,42 +8036,42 @@ msgstr ""
 msgid "Czech Koruna (&#75;&#269;)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:202
+#: admin/woocommerce-admin-settings.php:210
 #@ woothemes
 msgid "Enable jQuery UI (used by the price slider widget)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:210
+#: admin/woocommerce-admin-settings.php:218
 #@ woothemes
 msgid "Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:343
+#: admin/woocommerce-admin-settings.php:351
 #@ woothemes
 msgid "Product category slug"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:344
+#: admin/woocommerce-admin-settings.php:352
 #@ woothemes
 msgid "Shows in the product category URLs. Leave blank to use the default slug."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:352
+#: admin/woocommerce-admin-settings.php:360
 #@ woothemes
 msgid "Product tag slug"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:353
+#: admin/woocommerce-admin-settings.php:361
 #@ woothemes
 msgid "Shows in the product tag URLs. Leave blank to use the default slug."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:614
+#: admin/woocommerce-admin-settings.php:622
 #@ woothemes
 msgid "Trim zeros"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:615
+#: admin/woocommerce-admin-settings.php:623
 #@ woothemes
 msgid "Trim zeros after the decimal point when displaying prices"
 msgstr ""
@@ -8254,22 +8214,22 @@ msgstr ""
 msgid "New Shipping Class Name"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1096
+#: admin/woocommerce-admin-settings.php:1104
 #@ woothemes
 msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1100
+#: admin/woocommerce-admin-settings.php:1108
 #@ woothemes
 msgid "Default"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1101
+#: admin/woocommerce-admin-settings.php:1109
 #@ woothemes
 msgid "Gateway"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1118
+#: admin/woocommerce-admin-settings.php:1126
 #@ woothemes
 msgid "Gateway ID"
 msgstr ""
@@ -8284,27 +8244,27 @@ msgstr ""
 msgid "Scripts"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:218
+#: admin/woocommerce-admin-settings.php:226
 #@ woothemes
 msgid "File download method"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:219
+#: admin/woocommerce-admin-settings.php:227
 #@ woothemes
 msgid "Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>)."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:226
+#: admin/woocommerce-admin-settings.php:234
 #@ woothemes
 msgid "Force Downloads"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:227
+#: admin/woocommerce-admin-settings.php:235
 #@ woothemes
 msgid "X-Accel-Redirect/X-Sendfile"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:228
+#: admin/woocommerce-admin-settings.php:236
 #@ woothemes
 msgid "Redirect only"
 msgstr ""
@@ -8334,5 +8294,89 @@ msgstr ""
 #@ woothemes
 msgctxt "min_price"
 msgid "From:"
+msgstr ""
+
+#: admin/woocommerce-admin-settings.php:202
+#@ woothemes
+msgid "Enable \"chosen\" (enhanced select input) for country selection inputs"
+msgstr ""
+
+#: classes/countries.class.php:119
+#@ woothemes
+msgid "Hong Kong"
+msgstr ""
+
+#: classes/countries.class.php:335
+#@ woothemes
+msgid "Hong Kong Island"
+msgstr ""
+
+#: classes/countries.class.php:336
+#@ woothemes
+msgid "Kowloong"
+msgstr ""
+
+#: classes/countries.class.php:337
+#@ woothemes
+msgid "New Territories"
+msgstr ""
+
+#: classes/countries.class.php:703
+#: classes/countries.class.php:716
+#: classes/countries.class.php:819
+#: classes/countries.class.php:836
+#@ woothemes
+msgid "Province"
+msgstr ""
+
+#: classes/countries.class.php:711
+#@ woothemes
+msgid "Municipality"
+msgstr ""
+
+#: classes/countries.class.php:748
+#@ woothemes
+msgid "Town/District"
+msgstr ""
+
+#: classes/countries.class.php:751
+#@ woothemes
+msgid "Region"
+msgstr ""
+
+#: classes/countries.class.php:841
+#@ woothemes
+msgid "Zip"
+msgstr ""
+
+#: classes/countries.class.php:852
+#@ woothemes
+msgid "County"
+msgstr ""
+
+#: classes/countries.class.php:865
+#: classes/countries.class.php:914
+#@ woothemes
+msgid "Town/City"
+msgstr ""
+
+#: classes/countries.class.php:897
+#@ woothemes
+msgid "Company Name"
+msgstr ""
+
+#: classes/countries.class.php:898
+#@ woothemes
+msgid "Company (optional)"
+msgstr ""
+
+#: classes/countries.class.php:908
+#@ woothemes
+msgid "Address 2 (optional)"
+msgstr ""
+
+#: woocommerce.php:825
+#@ woothemes
+msgid "Select an option&hellip;"
 msgstr ""
 
