@@ -347,6 +347,12 @@ jQuery(document).ready(function($) {
             $(img).attr('src', o_src);
             $(link).attr('href', o_link);
         }
+        
+        if (variation.sku) {
+        	 $('.product_meta').find('.sku').text( variation.sku );
+        } else {
+        	 $('.product_meta').find('.sku').text('');
+        }
 
         $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown');
     }

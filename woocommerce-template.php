@@ -229,6 +229,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		            'image_link' => $image_link,
 		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
 		            'availability_html' => $availability_html,
+		            'sku' => __('SKU:', 'woothemes') . ' ' . $variation->sku
 		        );
 		    }
 		}
