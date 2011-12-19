@@ -976,6 +976,10 @@ function woocommerce_settings() {
 		
 		do_action( 'woocommerce_update_options' );
 		do_action( 'woocommerce_update_options_' . $current_tab );
+		
+		// Backwards compat 1.4 <
+		if ($current_tab=='shipping') do_action( 'woocommerce_update_options_shipping_methods' );
+		
 		flush_rewrite_rules( false );
 		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
     endif;
