@@ -2,7 +2,7 @@
 /*
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
-Description: An eCommerce plugin for wordpress.
+Description: An e-commerce toolkit that helps you sell anything. Beautifully.
 Version: 1.4
 Author: WooThemes
 Author URI: http://woothemes.com
