@@ -37,7 +37,36 @@ class woocommerce_customer {
 			$_SESSION['calculated_shipping'] = false;
 			
 		endif;
-		
+	}
+	
+	/** set location to base location */
+	function set_to_base() {
+		$default = get_option('woocommerce_default_country');
+    	if (strstr($default, ':')) :
+    		$country = current(explode(':', $default));
+    		$state = end(explode(':', $default));
+    	else :
+    		$country = $default;
+    		$state = '';
+    	endif;
+    	$_SESSION['customer']['country'] = $country;
+    	$_SESSION['customer']['state'] = $state;
+    	$_SESSION['customer']['postcode'] = '';
+	}
+	
+	/** set shipping location to base location */
+	function set_shipping_to_base() {
+		$default = get_option('woocommerce_default_country');
+    	if (strstr($default, ':')) :
+    		$country = current(explode(':', $default));
+    		$state = end(explode(':', $default));
+    	else :
+    		$country = $default;
+    		$state = '';
+    	endif;
+    	$_SESSION['customer']['shipping_country'] = $country;
+    	$_SESSION['customer']['shipping_state'] = $state;
+    	$_SESSION['customer']['shipping_postcode'] = '';
 	}
     
     /** Is customer outside base country? */

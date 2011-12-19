@@ -8,7 +8,6 @@
  * @category	Shortcode
  * @author		WooThemes
  */
- 
 include_once('shortcode-cart.php');
 include_once('shortcode-checkout.php');
 include_once('shortcode-my_account.php');

@@ -46,6 +46,7 @@ class woocommerce_order {
 		
 		// Standard post data
 		$this->id = $result->ID; 
+		$this->status = $result->post_status;
 		$this->order_date = $result->post_date;
 		$this->modified_date = $result->post_modified;	
 		$this->customer_note = $result->post_excerpt;
@@ -105,40 +106,46 @@ class woocommerce_order {
 		endforeach;
 	
 		// Formatted Addresses
-		$formatted_address = array();
+		$address = array(
+			'first_name' 	=> $this->billing_first_name,
+			'last_name'		=> $this->billing_last_name,
+			'company'		=> $this->billing_company,
+			'address_1'		=> $this->billing_address_1,
+			'address_2'		=> $this->billing_address_2,
+			'city'			=> $this->billing_city,		
+			'state'			=> $this->billing_state,
+			'postcode'		=> $this->billing_postcode,
+			'country'		=> $this->billing_country
+		);
+
+		$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
 		
-		$country = ($this->billing_country && isset($woocommerce->countries->countries[$this->billing_country])) ? $woocommerce->countries->countries[$this->billing_country] : $this->billing_country;
-		
-		$state = ($this->billing_country && $this->billing_state && isset($woocommerce->countries->states[$this->billing_country][$this->billing_state])) ? $woocommerce->countries->states[$this->billing_country][$this->billing_state] : $this->billing_state;
-		
-		$address =  array_map('trim', array(
-			$this->billing_address_1,
-			$this->billing_address_2,
-			$this->billing_city,						
-			$state,
-			$this->billing_postcode,
-			$country
-		));
-		foreach ($address as $part) if (!empty($part)) $formatted_address[] = $part;
-		$this->formatted_billing_address = implode(', ', $formatted_address);
+		unset($address['first_name']);
+		unset($address['last_name']);
+		unset($address['company']);
+		foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
+		$this->billing_address_only = implode(', ', $joined_address);
 		
 		if ($this->shipping_address_1) :
-			$formatted_address = array();
+			$address = array(
+				'first_name' 	=> $this->shipping_first_name,
+				'last_name'		=> $this->shipping_last_name,
+				'company'		=> $this->shipping_company,
+				'address_1'		=> $this->shipping_address_1,
+				'address_2'		=> $this->shipping_address_2,
+				'city'			=> $this->shipping_city,		
+				'state'			=> $this->shipping_state,
+				'postcode'		=> $this->shipping_postcode,
+				'country'		=> $this->shipping_country
+			);
+	
+			$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
 			
-			$country = ($this->shipping_country && isset($woocommerce->countries->countries[$this->shipping_country])) ? $woocommerce->countries->countries[$this->shipping_country] : $this->shipping_country;
-			
-			$state = ($this->shipping_country && $this->shipping_state && isset($woocommerce->countries->states[$this->shipping_country][$this->shipping_state])) ? $woocommerce->countries->states[$this->shipping_country][$this->shipping_state] : $this->shipping_state;
-
-			$address = array_map('trim', array(
-				$this->shipping_address_1,
-				$this->shipping_address_2,
-				$this->shipping_city,						
-				$state,
-				$this->shipping_postcode,
-				$country
-			));
-			foreach ($address as $part) if (!empty($part)) $formatted_address[] = $part;
-			$this->formatted_shipping_address = implode(', ', $formatted_address);
+			unset($address['first_name']);
+			unset($address['last_name']);
+			unset($address['company']);
+			foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
+			$this->shipping_address_only = implode(', ', $joined_address);
 		endif;
 		
 		// Taxonomy data 
@@ -469,7 +476,7 @@ class woocommerce_order {
 		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
 		
 		if ($is_customer_note) :
-			do_action( 'woocommerce_new_customer_note', $this->id, $note );
+			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
 		endif;
 		
 		return $comment_id;
@@ -620,14 +627,14 @@ class woocommerce_order {
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder_notification', $item['id'], $item['qty']);
+							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'quantity' => $values['quantity']));
 						endif;
 						
 						// stock status notifications
 						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock_notification', $item['id']);
+							do_action('woocommerce_no_stock', $item['id']);
 						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock_notification', $item['id']);
+							do_action('woocommerce_low_stock', $item['id']);
 						endif;
 						
 					endif;

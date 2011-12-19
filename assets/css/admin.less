@@ -606,6 +606,9 @@ ul.recent-orders, ul.stock_list {
 			margin: 0 0 0 8px;
 		}
 	}
+	input {
+		width: auto;
+	}
 	td.apply_to_shipping {
 		padding-top: 8px;
 	}
@@ -647,7 +650,7 @@ ul.recent-orders, ul.stock_list {
 		}
 	}
 }
-table.wc_gateways {
+table.wc_gateways, table.wc_shipping {
 	td {
 		vertical-align: middle;
 		cursor: move;
@@ -845,7 +848,7 @@ table.wc_gateways {
 	border-bottom: 1px solid #DFDFDF;
 }
 
-#woocommerce_attributes td.handle {
+table td.handle {
 	vertical-align: middle;
 	width: 14px;
 	background: url(../images/handle.png) no-repeat right center;

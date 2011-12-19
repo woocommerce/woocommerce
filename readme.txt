@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
 Tested up to: 3.3
-Stable tag: 1.3.2
+Stable tag: 1.3.2.1
 
 An e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -81,6 +81,26 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 3. WooCommerce sales reports
 
 == Changelog ==
+
+= 1.4 =
+* Rewritten parts + re-organised files for increased performance and decreased memory usage
+* Moved many shortcodes (contents) to template files for easier customisation
+* Moved template function contents to template files
+* Moved woocommerce class into the main file
+* Category ordering fix
+* Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
+* Changed woocommerce_breadcrumb args
+* Filters for customer email attachments
+* Chosen selects for country/state select inputs (optional)
+* Locale options for country address formatting and checkout fields
+* Piwik (http://piwik.org/) tracking - requires http://wordpress.org/extend/plugins/wp-piwik/
+* Option to hide cart widget if the cart is empty
+* Category widget - order by option
+* Option to re-order shipping methods
+
+= 1.3.2.1 - 15/12/2011 = 
+* Category/Ordering fix
+* HTTPS download URL fix
 
 = 1.3.2 - 09/12/2011 = 
 * Fixed error when adding an order manually

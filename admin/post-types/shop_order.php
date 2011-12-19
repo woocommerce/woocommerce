@@ -47,8 +47,6 @@ function woocommerce_custom_order_columns($column) {
 		break;
 		case "order_title" :
 			
-			echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'">'.sprintf( __('Order #%s', 'woothemes'), $post->ID ).'</a> ';
-			
 			if ($order->user_id) $user_info = get_userdata($order->user_id);
 			
 			if (isset($user_info) && $user_info) : 
@@ -64,7 +62,7 @@ function woocommerce_custom_order_columns($column) {
            		$user = __('Guest', 'woothemes');
            	endif;
            	
-           	echo '<small class="meta">' . __('Customer:', 'woothemes') . ' ' . $user . '</small>';
+           	echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'"><strong>'.sprintf( __('Order #%s', 'woothemes'), $post->ID ).'</strong></a> ' . __('made by', 'woothemes') . ' ' . $user;
            	
            	if ($order->billing_email) :
         		echo '<small class="meta">'.__('Email:', 'woothemes') . ' ' . '<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
@@ -75,10 +73,8 @@ function woocommerce_custom_order_columns($column) {
 						
 		break;
 		case "billing_address" :
-			echo '<strong>'.esc_html( $order->billing_first_name . ' ' . $order->billing_last_name );
-        	if ($order->billing_company) echo ', '.esc_html( $order->billing_company );
-        	echo '</strong><br/>';
-        	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_billing_address).'&z=16' ) . '">'.esc_html( $order->formatted_billing_address ).'</a>';
+
+        	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->billing_address_only ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_billing_address) .'</a>';
         	
         	if ($order->payment_method_title) :
         		echo '<small class="meta">' . __('Paid via', 'woothemes') . ' ' . esc_html( $order->payment_method_title ) . '</small>';
@@ -87,10 +83,8 @@ function woocommerce_custom_order_columns($column) {
 		break;
 		case "shipping_address" :
 			if ($order->formatted_shipping_address) :
-            	echo '<strong>'.esc_html( $order->shipping_first_name . ' ' . $order->shipping_last_name );
-            	if ($order->shipping_company) : echo ', '.esc_html( $order->shipping_company ); endif;
-            	echo '</strong><br/>';
-            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode($order->formatted_shipping_address).'&z=16' ) .'">'.esc_html( $order->formatted_shipping_address ).'</a>';
+            	
+            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->shipping_address_only ).'&z=16' ) .'">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_shipping_address) .'</a>';
         	else :
         		echo '&ndash;';
         	endif;

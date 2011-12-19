@@ -70,11 +70,11 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		<?php echo $before_widget; ?>
 		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
 		<ul class="product_list_widget">
-		<?php  while ($r->have_posts()) : $r->the_post(); $_product = &new woocommerce_product(get_the_ID()); ?>
+		<?php  while ($r->have_posts()) : $r->the_post(); global $product; ?>
 		<li><a href="<?php the_permalink() ?>" title="<?php echo esc_attr(get_the_title() ? get_the_title() : get_the_ID()); ?>">
 			<?php if (has_post_thumbnail()) the_post_thumbnail('shop_thumbnail'); else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />'; ?>
 			<?php if ( get_the_title() ) the_title(); else the_ID(); ?>
-		</a> <?php echo $_product->get_price_html(); ?></li>
+		</a> <?php echo $product->get_price_html(); ?></li>
 		<?php endwhile; ?>
 		</ul>
 		<?php echo $after_widget; ?>
@@ -127,9 +127,10 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 /**
  * Track product views
  */
-add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10, 2);
+add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);
 
-function woocommerce_track_product_view( $post, $_product ) {
+function woocommerce_track_product_view() {
+	global $post, $product;
 	
 	if (!isset($_SESSION['viewed_products']) || !is_array($_SESSION['viewed_products'])) $_SESSION['viewed_products'] = array();
 	

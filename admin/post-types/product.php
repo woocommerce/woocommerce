@@ -6,7 +6,189 @@
  * @category 	Admin
  * @package 	WooCommerce
  */
- 
+
+/**
+ * Duplicate a product action
+ *
+ * Based on 'Duplicate Post' (http://www.lopo.it/duplicate-post-plugin/) by Enrico Battocchi
+ */
+add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_action');
+
+function woocommerce_duplicate_product_action() {
+
+	if (! ( isset( $_GET['post']) || isset( $_POST['post'])  || ( isset($_REQUEST['action']) && 'duplicate_post_save_as_new_page' == $_REQUEST['action'] ) ) ) {
+		wp_die(__('No product to duplicate has been supplied!', 'woothemes'));
+	}
+
+	// Get the original page
+	$id = (isset($_GET['post']) ? $_GET['post'] : $_POST['post']);
+	check_admin_referer( 'woocommerce-duplicate-product_' . $id );
+	$post = woocommerce_get_product_to_duplicate($id);
+
+	// Copy the page and insert it
+	if (isset($post) && $post!=null) {
+		$new_id = woocommerce_create_duplicate_from_product($post);
+
+		// If you have written a plugin which uses non-WP database tables to save
+		// information about a page you can hook this action to dupe that data.
+		do_action( 'woocommerce_duplicate_product', $new_id, $post );
+
+		// Redirect to the edit screen for the new draft page
+		wp_redirect( admin_url( 'post.php?action=edit&post=' . $new_id ) );
+		exit;
+	} else {
+		wp_die(__('Product creation failed, could not find original product:', 'woothemes') . ' ' . $id);
+	}
+}
+
+/**
+ * Duplicate a product link on products list
+ */
+add_filter('post_row_actions', 'woocommerce_duplicate_product_link_row',10,2);
+add_filter('page_row_actions', 'woocommerce_duplicate_product_link_row',10,2);
+	
+function woocommerce_duplicate_product_link_row($actions, $post) {
+	
+	if (function_exists('duplicate_post_plugin_activation')) return $actions;
+	
+	if (!current_user_can('manage_woocommerce')) return $actions;
+	
+	if ($post->post_type!='product') return $actions;
+	
+	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woothemes')
+		. '" rel="permalink">' .  __("Duplicate", 'woothemes') . '</a>';
+
+	return $actions;
+}
+
+/**
+ *  Duplicate a product link on edit screen
+ */
+add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' );
+
+function woocommerce_duplicate_product_post_button() {
+	global $post;
+	
+	if (function_exists('duplicate_post_plugin_activation')) return;
+	
+	if (!current_user_can('manage_woocommerce')) return;
+	
+	if( !is_object( $post ) ) return;
+	
+	if ($post->post_type!='product') return;
+	
+	if ( isset( $_GET['post'] ) ) :
+		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+		?>
+		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woothemes'); ?></a></div>
+		<?php
+	endif;
+}
+
+/**
+ * Get a product from the database
+ */
+function woocommerce_get_product_to_duplicate($id) {
+	global $wpdb;
+	$post = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID=$id");
+	if ($post->post_type == "revision"){
+		$id = $post->post_parent;
+		$post = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID=$id");
+	}
+	return $post[0];
+}
+
+/**
+ * Function to create the duplicate
+ */
+function woocommerce_create_duplicate_from_product($post, $parent = 0) {
+	global $wpdb;
+
+	$new_post_author 	= wp_get_current_user();
+	$new_post_date 		= current_time('mysql');
+	$new_post_date_gmt 	= get_gmt_from_date($new_post_date);
+	
+	if ($parent>0) :
+		$post_parent		= $parent;
+		$suffix 			= '';
+		$post_status     	= 'publish';
+	else :
+		$post_parent		= $post->post_parent;
+		$post_status     	= 'draft';
+		$suffix 			= __(" (Copy)", 'woothemes');
+	endif;
+	
+	$new_post_type 		= $post->post_type;
+	$post_content    	= str_replace("'", "''", $post->post_content);
+	$post_content_filtered = str_replace("'", "''", $post->post_content_filtered);
+	$post_excerpt    	= str_replace("'", "''", $post->post_excerpt);
+	$post_title      	= str_replace("'", "''", $post->post_title).$suffix;
+	$post_name       	= str_replace("'", "''", $post->post_name);
+	$comment_status  	= str_replace("'", "''", $post->comment_status);
+	$ping_status     	= str_replace("'", "''", $post->ping_status);
+
+	// Insert the new template in the post table
+	$wpdb->query(
+			"INSERT INTO $wpdb->posts
+			(post_author, post_date, post_date_gmt, post_content, post_content_filtered, post_title, post_excerpt,  post_status, post_type, comment_status, ping_status, post_password, to_ping, pinged, post_modified, post_modified_gmt, post_parent, menu_order, post_mime_type)
+			VALUES
+			('$new_post_author->ID', '$new_post_date', '$new_post_date_gmt', '$post_content', '$post_content_filtered', '$post_title', '$post_excerpt', '$post_status', '$new_post_type', '$comment_status', '$ping_status', '$post->post_password', '$post->to_ping', '$post->pinged', '$new_post_date', '$new_post_date_gmt', '$post_parent', '$post->menu_order', '$post->post_mime_type')");
+
+	$new_post_id = $wpdb->insert_id;
+
+	// Copy the taxonomies
+	woocommerce_duplicate_post_taxonomies($post->ID, $new_post_id, $post->post_type);
+
+	// Copy the meta information
+	woocommerce_duplicate_post_meta($post->ID, $new_post_id);
+	
+	// Copy the children (variations)
+	if ( $children_products =& get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) :
+
+		if ($children_products) foreach ($children_products as $child) :
+			
+			woocommerce_create_duplicate_from_product(woocommerce_get_product_to_duplicate($child->ID), $new_post_id);
+			
+		endforeach;
+
+	endif;
+
+	return $new_post_id;
+}
+
+/**
+ * Copy the taxonomies of a post to another post
+ */
+function woocommerce_duplicate_post_taxonomies($id, $new_id, $post_type) {
+	global $wpdb;
+	$taxonomies = get_object_taxonomies($post_type); //array("category", "post_tag");
+	foreach ($taxonomies as $taxonomy) {
+		$post_terms = wp_get_object_terms($id, $taxonomy);
+		for ($i=0; $i<count($post_terms); $i++) {
+			wp_set_object_terms($new_id, $post_terms[$i]->slug, $taxonomy, true);
+		}
+	}
+}
+
+/**
+ * Copy the meta information of a post to another post
+ */
+function woocommerce_duplicate_post_meta($id, $new_id) {
+	global $wpdb;
+	$post_meta_infos = $wpdb->get_results("SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=$id");
+
+	if (count($post_meta_infos)!=0) {
+		$sql_query = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
+		foreach ($post_meta_infos as $meta_info) {
+			$meta_key = $meta_info->meta_key;
+			$meta_value = addslashes($meta_info->meta_value);
+			$sql_query_sel[]= "SELECT $new_id, '$meta_key', '$meta_value'";
+		}
+		$sql_query.= implode(" UNION ALL ", $sql_query_sel);
+		$wpdb->query($sql_query);
+	}
+}
+
 /**
  * Columns for Products page
  **/
@@ -252,7 +434,7 @@ function woocommerce_products_subtype_query($query) {
 
 
 /**
- * Add functionality to the image uploader on product pages to exlcude an image
+ * Add functionality to the image uploader on product pages to exclude an image
  **/
 add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
 add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
