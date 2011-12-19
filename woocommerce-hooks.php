@@ -127,6 +127,7 @@ add_action('init', 'woocommerce_download_product');
 /* Analytics */
 add_action( 'wp_footer', 'woocommerce_google_tracking' );
 add_action( 'woocommerce_thankyou', 'woocommerce_ecommerce_tracking' );
+add_action( 'woocommerce_thankyou', 'woocommerce_ecommerce_tracking_piwik' );
 
 /* RSS Feeds */
 add_action( 'wp_head', 'woocommerce_products_rss_feed' );
