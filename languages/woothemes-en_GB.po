@@ -207,7 +207,7 @@ msgstr ""
 msgid "On-Hold"
 msgstr ""
 
-#: admin/post-types/shop_order.php:128
+#: admin/post-types/shop_order.php:122
 #: admin/woocommerce-admin-dashboard.php:76
 #@ woothemes
 msgid "Processing"
@@ -646,26 +646,26 @@ msgid " in stock"
 msgstr ""
 
 #: admin/post-types/product.php:276
-#: admin/post-types/shop_order.php:107
+#: admin/post-types/shop_order.php:101
 #@ woothemes
 msgid "Unpublished"
 msgstr ""
 
 #: admin/post-types/product.php:279
-#: admin/post-types/shop_order.php:110
+#: admin/post-types/shop_order.php:104
 #@ woothemes
 msgid "Y/m/d g:i:s A"
 msgstr ""
 
 #: admin/post-types/product.php:286
-#: admin/post-types/shop_order.php:117
+#: admin/post-types/shop_order.php:111
 #, php-format
 #@ woothemes
 msgid "%s ago"
 msgstr ""
 
 #: admin/post-types/product.php:288
-#: admin/post-types/shop_order.php:119
+#: admin/post-types/shop_order.php:113
 #@ woothemes
 msgid "Y/m/d"
 msgstr ""
@@ -729,7 +729,7 @@ msgid "Enabling this option will hide it from the product page image gallery."
 msgstr ""
 
 #: admin/post-types/shop_order.php:20
-#: admin/woocommerce-admin-settings.php:1110
+#: admin/woocommerce-admin-settings.php:1112
 #: templates/myaccount/my-account.php:46
 #@ woothemes
 msgid "Status"
@@ -747,7 +747,7 @@ msgid "Billing"
 msgstr ""
 
 #: admin/post-types/shop_order.php:23
-#: admin/woocommerce-admin-settings.php:1038
+#: admin/woocommerce-admin-settings.php:1040
 #: templates/cart/totals.php:28
 #: templates/checkout/pay_for_order.php:18
 #: templates/checkout/review_order.php:24
@@ -773,29 +773,28 @@ msgstr ""
 msgid "<mark class=\"%s\">%s</mark>"
 msgstr ""
 
-#: admin/post-types/shop_order.php:50
+#: admin/post-types/shop_order.php:65
 #: classes/gateways/gateway-paypal.php:230
 #, php-format
 #@ woothemes
 msgid "Order #%s"
 msgstr ""
 
-#: admin/post-types/shop_order.php:64
+#: admin/post-types/shop_order.php:62
 #: admin/post-types/writepanels/writepanel-order_data.php:71
 #: admin/woocommerce-admin-reports.php:301
 #: woocommerce-functions.php:771
-#: woocommerce-functions.php:826
+#: woocommerce-functions.php:821
 #@ woothemes
 msgid "Guest"
 msgstr ""
 
-#: admin/post-types/shop_order.php:67
 #: admin/post-types/writepanels/writepanel-order_data.php:69
 #@ woothemes
 msgid "Customer:"
 msgstr ""
 
-#: admin/post-types/shop_order.php:70
+#: admin/post-types/shop_order.php:68
 #: templates/emails/customer_completed_order.php:57
 #: templates/emails/customer_note_notification.php:61
 #: templates/emails/customer_processing_order.php:57
@@ -805,7 +804,7 @@ msgstr ""
 msgid "Email:"
 msgstr ""
 
-#: admin/post-types/shop_order.php:73
+#: admin/post-types/shop_order.php:71
 #: templates/emails/customer_completed_order.php:60
 #: templates/emails/customer_note_notification.php:64
 #: templates/emails/customer_processing_order.php:60
@@ -814,33 +813,33 @@ msgstr ""
 msgid "Tel:"
 msgstr ""
 
-#: admin/post-types/shop_order.php:84
+#: admin/post-types/shop_order.php:80
 #@ woothemes
 msgid "Paid via"
 msgstr ""
 
-#: admin/post-types/shop_order.php:99
+#: admin/post-types/shop_order.php:93
 #@ woothemes
 msgid "Shipped via"
 msgstr ""
 
-#: admin/post-types/shop_order.php:129
+#: admin/post-types/shop_order.php:123
 #@ woothemes
 msgid "Complete"
 msgstr ""
 
-#: admin/post-types/shop_order.php:130
+#: admin/post-types/shop_order.php:124
 #: templates/myaccount/my-account.php:68
 #@ woothemes
 msgid "View"
 msgstr ""
 
-#: admin/post-types/shop_order.php:194
+#: admin/post-types/shop_order.php:188
 #@ woothemes
 msgid "Show all statuses"
 msgstr ""
 
-#: admin/post-types/shop_order.php:223
+#: admin/post-types/shop_order.php:217
 #@ woothemes
 msgid "Show all customers"
 msgstr ""
@@ -2279,61 +2278,61 @@ msgstr ""
 msgid "Your settings have been saved."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1013
+#: admin/woocommerce-admin-settings.php:1015
 #@ woothemes
 msgid "Welcome to WooCommerce!"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1014
+#: admin/woocommerce-admin-settings.php:1016
 #@ woothemes
 msgid "WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the 'Automatically add pages' button below, otherwise you can set them up manually. See the 'Pages' tab in settings for more information."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1015
+#: admin/woocommerce-admin-settings.php:1017
 #@ woothemes
 msgid "Automatically add pages"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1015
+#: admin/woocommerce-admin-settings.php:1017
 #@ woothemes
 msgid "Skip setup"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1021
+#: admin/woocommerce-admin-settings.php:1023
 #@ woothemes
 msgid "Like WooCommerce? <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">Support us by leaving a rating!</a>"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1022
+#: admin/woocommerce-admin-settings.php:1024
 #@ woothemes
 msgid "WooCommerce has been installed and setup. Enjoy :)"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:31
-#: admin/woocommerce-admin-settings.php:1034
+#: admin/woocommerce-admin-settings.php:1036
 #@ woothemes
 msgid "General"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1035
+#: admin/woocommerce-admin-settings.php:1037
 #@ woothemes
 msgid "Pages"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:751
-#: admin/woocommerce-admin-settings.php:1036
+#: admin/woocommerce-admin-settings.php:1038
 #@ woothemes
 msgid "Catalog"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:35
-#: admin/woocommerce-admin-settings.php:1037
+#: admin/woocommerce-admin-settings.php:1039
 #@ woothemes
 msgid "Inventory"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:33
-#: admin/woocommerce-admin-settings.php:1039
+#: admin/woocommerce-admin-settings.php:1041
 #: classes/countries.class.php:488
 #: templates/checkout/pay_for_order.php:22
 #: templates/checkout/review_order.php:81
@@ -2341,29 +2340,29 @@ msgstr ""
 msgid "Tax"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1040
+#: admin/woocommerce-admin-settings.php:1042
 #@ woothemes
 msgid "Shipping Methods"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1041
-#: admin/woocommerce-admin-settings.php:1090
-#: admin/woocommerce-admin-settings.php:1103
+#: admin/woocommerce-admin-settings.php:1043
+#: admin/woocommerce-admin-settings.php:1092
+#: admin/woocommerce-admin-settings.php:1105
 #@ woothemes
 msgid "Payment Gateways"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1042
+#: admin/woocommerce-admin-settings.php:1044
 #@ woothemes
 msgid "Emails"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1162
+#: admin/woocommerce-admin-settings.php:1164
 #@ woothemes
 msgid "Save changes"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1217
+#: admin/woocommerce-admin-settings.php:1219
 #@ woothemes
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
@@ -2516,7 +2515,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:99
 #: admin/post-types/writepanels/writepanel-order_data.php:128
-#: classes/countries.class.php:886
+#: classes/countries.class.php:889
 #: templates/myaccount/edit-address.php:16
 #: templates/myaccount/edit-address.php:17
 #@ woothemes
@@ -2525,7 +2524,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:100
 #: admin/post-types/writepanels/writepanel-order_data.php:129
-#: classes/countries.class.php:891
+#: classes/countries.class.php:894
 #: templates/myaccount/edit-address.php:20
 #: templates/myaccount/edit-address.php:21
 #@ woothemes
@@ -2548,7 +2547,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:103
 #: admin/post-types/writepanels/writepanel-order_data.php:132
-#: classes/countries.class.php:907
+#: classes/countries.class.php:910
 #: templates/myaccount/edit-address.php:35
 #@ woothemes
 msgid "Address 2"
@@ -2564,7 +2563,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:105
 #: admin/post-types/writepanels/writepanel-order_data.php:134
-#: classes/countries.class.php:849
+#: classes/countries.class.php:852
 #: templates/cart/shipping_calculator.php:57
 #: templates/myaccount/edit-address.php:45
 #@ woothemes
@@ -2573,7 +2572,7 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:106
 #: admin/post-types/writepanels/writepanel-order_data.php:135
-#: classes/countries.class.php:926
+#: classes/countries.class.php:929
 #: templates/myaccount/edit-address.php:51
 #@ woothemes
 msgid "Country"
@@ -2581,14 +2580,14 @@ msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:107
 #: admin/post-types/writepanels/writepanel-order_data.php:136
-#: classes/countries.class.php:868
-#: classes/countries.class.php:932
+#: classes/countries.class.php:871
+#: classes/countries.class.php:935
 #@ woothemes
 msgid "State/County"
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:108
-#: classes/countries.class.php:961
+#: classes/countries.class.php:964
 #: templates/myaccount/edit-address.php:96
 #@ woothemes
 msgid "Email Address"
@@ -2604,7 +2603,7 @@ msgstr ""
 #: templates/myaccount/edit-address.php:13
 #: templates/myaccount/my-account.php:116
 #: templates/order/order-details-table.php:104
-#: templates/order/tracking.php:58
+#: templates/order/tracking.php:53
 #@ woothemes
 msgid "Shipping Address"
 msgstr ""
@@ -2848,7 +2847,7 @@ msgid "Manually reducing stock."
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-order_data.php:546
-#: classes/order.class.php:621
+#: classes/order.class.php:627
 #, php-format
 #@ woothemes
 msgid "Item #%s stock reduced from %s to %s."
@@ -3573,7 +3572,7 @@ msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Pleas
 msgstr ""
 
 #: classes/cart.class.php:1004
-#: classes/order.class.php:278
+#: classes/order.class.php:284
 #: classes/product.class.php:606
 #: classes/product.class.php:612
 #@ woothemes
@@ -3585,7 +3584,7 @@ msgstr ""
 msgid "via"
 msgstr ""
 
-#: classes/countries.class.php:902
+#: classes/countries.class.php:905
 #: templates/myaccount/edit-address.php:31
 #@ woothemes
 msgid "Address"
@@ -3596,7 +3595,7 @@ msgstr ""
 msgid "you@yourdomain.com"
 msgstr ""
 
-#: classes/countries.class.php:966
+#: classes/countries.class.php:969
 #: templates/myaccount/edit-address.php:100
 #@ woothemes
 msgid "Phone"
@@ -5833,19 +5832,19 @@ msgstr ""
 msgid "Payment for order #%s refunded/reversed"
 msgstr ""
 
-#: classes/order.class.php:275
+#: classes/order.class.php:281
 #, php-format
 #@ woothemes
 msgid " <small>%svia %s</small>"
 msgstr ""
 
-#: classes/order.class.php:499
+#: classes/order.class.php:505
 #, php-format
 #@ woothemes
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: classes/order.class.php:640
+#: classes/order.class.php:646
 #@ woothemes
 msgid "Order item stock reduced successfully."
 msgstr ""
@@ -6239,7 +6238,7 @@ msgstr ""
 msgid "Address line 2"
 msgstr ""
 
-#: classes/countries.class.php:844
+#: classes/countries.class.php:847
 #: templates/myaccount/edit-address.php:65
 #@ woothemes
 msgid "State"
@@ -6427,7 +6426,7 @@ msgid "Totals"
 msgstr ""
 
 #: templates/checkout/pay_for_order.php:14
-#: widgets/widget-cart.php:70
+#: widgets/widget-cart.php:73
 #@ woothemes
 msgid "Subtotal"
 msgstr ""
@@ -6555,10 +6554,10 @@ msgstr ""
 msgid "Billing address"
 msgstr ""
 
-#: templates/emails/customer_completed_order.php:77
-#: templates/emails/customer_note_notification.php:81
-#: templates/emails/customer_processing_order.php:77
-#: templates/emails/new_order.php:77
+#: templates/emails/customer_completed_order.php:73
+#: templates/emails/customer_note_notification.php:77
+#: templates/emails/customer_processing_order.php:73
+#: templates/emails/new_order.php:73
 #@ woothemes
 msgid "Shipping address"
 msgstr ""
@@ -6760,7 +6759,7 @@ msgid "Best Sellers"
 msgstr ""
 
 #: widgets/widget-best_sellers.php:116
-#: widgets/widget-cart.php:88
+#: widgets/widget-cart.php:93
 #: widgets/widget-featured_products.php:113
 #: widgets/widget-layered_nav.php:319
 #: widgets/widget-onsale.php:149
@@ -6792,17 +6791,17 @@ msgstr ""
 msgid "WooCommerce Shopping Cart"
 msgstr ""
 
-#: widgets/widget-cart.php:65
+#: widgets/widget-cart.php:68
 #@ woothemes
 msgid "No products in the cart."
 msgstr ""
 
-#: widgets/widget-cart.php:74
+#: widgets/widget-cart.php:77
 #@ woothemes
 msgid "View Cart &rarr;"
 msgstr ""
 
-#: widgets/widget-cart.php:74
+#: widgets/widget-cart.php:77
 #@ woothemes
 msgid "Checkout &rarr;"
 msgstr ""
@@ -7386,7 +7385,7 @@ msgstr ""
 msgid "have been backordered."
 msgstr ""
 
-#: admin/woocommerce-admin-functions.php:52
+#: admin/woocommerce-admin-functions.php:82
 #@ woothemes
 msgid "Email preview"
 msgstr ""
@@ -7848,8 +7847,8 @@ msgstr ""
 msgid "Calculate Shipping"
 msgstr ""
 
-#: classes/countries.class.php:862
-#: classes/countries.class.php:919
+#: classes/countries.class.php:865
+#: classes/countries.class.php:922
 #: templates/cart/shipping_calculator.php:57
 #@ woothemes
 msgid "Postcode/Zip"
@@ -8214,22 +8213,22 @@ msgstr ""
 msgid "New Shipping Class Name"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1104
+#: admin/woocommerce-admin-settings.php:1106
 #@ woothemes
 msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1108
+#: admin/woocommerce-admin-settings.php:1110
 #@ woothemes
 msgid "Default"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1109
+#: admin/woocommerce-admin-settings.php:1111
 #@ woothemes
 msgid "Gateway"
 msgstr ""
 
-#: admin/woocommerce-admin-settings.php:1126
+#: admin/woocommerce-admin-settings.php:1128
 #@ woothemes
 msgid "Gateway ID"
 msgstr ""
@@ -8321,56 +8320,56 @@ msgstr ""
 msgid "New Territories"
 msgstr ""
 
-#: classes/countries.class.php:703
-#: classes/countries.class.php:716
-#: classes/countries.class.php:819
-#: classes/countries.class.php:836
+#: classes/countries.class.php:706
+#: classes/countries.class.php:719
+#: classes/countries.class.php:822
+#: classes/countries.class.php:839
 #@ woothemes
 msgid "Province"
 msgstr ""
 
-#: classes/countries.class.php:711
+#: classes/countries.class.php:714
 #@ woothemes
 msgid "Municipality"
 msgstr ""
 
-#: classes/countries.class.php:748
+#: classes/countries.class.php:751
 #@ woothemes
 msgid "Town/District"
 msgstr ""
 
-#: classes/countries.class.php:751
+#: classes/countries.class.php:754
 #@ woothemes
 msgid "Region"
 msgstr ""
 
-#: classes/countries.class.php:841
+#: classes/countries.class.php:844
 #@ woothemes
 msgid "Zip"
 msgstr ""
 
-#: classes/countries.class.php:852
+#: classes/countries.class.php:855
 #@ woothemes
 msgid "County"
 msgstr ""
 
-#: classes/countries.class.php:865
-#: classes/countries.class.php:914
+#: classes/countries.class.php:868
+#: classes/countries.class.php:917
 #@ woothemes
 msgid "Town/City"
 msgstr ""
 
-#: classes/countries.class.php:897
+#: classes/countries.class.php:900
 #@ woothemes
 msgid "Company Name"
 msgstr ""
 
-#: classes/countries.class.php:898
+#: classes/countries.class.php:901
 #@ woothemes
 msgid "Company (optional)"
 msgstr ""
 
-#: classes/countries.class.php:908
+#: classes/countries.class.php:911
 #@ woothemes
 msgid "Address 2 (optional)"
 msgstr ""
@@ -8378,5 +8377,20 @@ msgstr ""
 #: woocommerce.php:825
 #@ woothemes
 msgid "Select an option&hellip;"
+msgstr ""
+
+#: admin/post-types/shop_order.php:65
+#@ woothemes
+msgid "made by"
+msgstr ""
+
+#: admin/woocommerce-admin-taxonomies.php:207
+#@ woothemes
+msgid "Configure shipping class"
+msgstr ""
+
+#: widgets/widget-cart.php:97
+#@ woothemes
+msgid "Hide if cart is empty"
 msgstr ""
 
