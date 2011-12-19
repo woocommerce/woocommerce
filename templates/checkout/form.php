@@ -1,6 +1,8 @@
-<?php do_action('woocommerce_before_checkout_form');
+<?php global $woocommerce; ?>
 
-global $woocommerce;
+<?php $woocommerce->show_messages(); ?>
+
+<?php do_action('woocommerce_before_checkout_form');
 
 // If checkout registration is disabled and not logged in, the user cannot checkout
 if (get_option('woocommerce_enable_signup_and_login_from_checkout')=="no" && get_option('woocommerce_enable_guest_checkout')=="no" && !is_user_logged_in()) :

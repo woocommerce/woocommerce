@@ -106,6 +106,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
+
+	array(  
+		'desc' 		=> __( 'Enable coupon form on checkout', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
 	
 	array(  
 		'desc' 		=> __( '"Ship to same address option" checked by default', 'woothemes' ),

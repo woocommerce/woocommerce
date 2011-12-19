@@ -432,6 +432,15 @@ if (!function_exists('woocommerce_order_review')) {
 }
 
 /**
+ * Coupon form for checkout
+ **/
+if (!function_exists('woocommerce_checkout_coupon_form')) {
+	function woocommerce_checkout_coupon_form() {
+		woocommerce_get_template('checkout/coupon-form.php', false);
+	}
+}
+
+/**
  * display product sub categories as thumbnails
  **/
 if (!function_exists('woocommerce_product_subcategories')) {

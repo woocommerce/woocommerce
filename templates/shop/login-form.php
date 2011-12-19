@@ -24,4 +24,6 @@ if (is_user_logged_in()) return;
 		<input type="submit" class="button" name="login" value="<?php _e('Login', 'woothemes'); ?>" />
 		<a class="lost_password" href="<?php echo esc_url( wp_lostpassword_url( home_url() ) ); ?>"><?php _e('Lost Password?', 'woothemes'); ?></a>
 	</p>
+	
+	<div class="clear"></div>
 </form>

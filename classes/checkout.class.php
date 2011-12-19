@@ -255,7 +255,7 @@ class woocommerce_checkout {
 
 		do_action('woocommerce_before_checkout_process');
 		
-		if (isset($_POST) && $_POST && !isset($_POST['login'])) :
+		if (isset($_POST) && $_POST && !isset($_POST['login']) && !isset($_POST['coupon_code'])) :
 
 			$woocommerce->verify_nonce('process_checkout');
 

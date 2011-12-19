@@ -490,7 +490,7 @@ jQuery(document).ready(function($) {
 		
 		}
 			
-		$('p.password, form.login, div.shipping_address').hide();
+		$('p.password, form.login, form.checkout_coupon, div.shipping_address').hide();
 		
 		$('input.show_password').change(function(){
 			$('p.password').slideToggle();
@@ -498,6 +498,11 @@ jQuery(document).ready(function($) {
 		
 		$('a.showlogin').click(function(){
 			$('form.login').slideToggle();
+			return false;
+		});
+		
+		$('a.showcoupon').click(function(){
+			$('form.checkout_coupon').slideToggle();
 			return false;
 		});
 		

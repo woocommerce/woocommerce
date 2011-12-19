@@ -422,6 +422,25 @@ function woocommerce_process_login() {
 }
 
 /**
+ * Process the coupon form on the checkout
+ **/
+function woocommerce_process_coupon_form() {
+	global $woocommerce;
+	
+	if (isset($_POST['coupon_code']) && $_POST['coupon_code']) :
+	
+		$coupon_code = stripslashes(trim($_POST['coupon_code']));
+		$woocommerce->cart->add_discount($coupon_code);
+		
+		if ( wp_get_referer() ) :
+			wp_safe_redirect( wp_get_referer() );
+			exit;
+		endif;
+	
+	endif;	
+}
+
+/**
  * Process the registration form
  **/
 function woocommerce_process_registration() {

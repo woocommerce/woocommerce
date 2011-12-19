@@ -97,6 +97,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Option to hide cart widget if the cart is empty
 * Category widget - order by option
 * Option to re-order shipping methods
+* Coupon entry form on checkout (optional)
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
