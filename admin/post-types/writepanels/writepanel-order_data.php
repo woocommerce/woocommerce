@@ -52,7 +52,7 @@ function woocommerce_order_data_meta_box($post) {
 		
 			<div class="order_data_left">
 				
-				<h2><?php _e('Order Details', 'woothemes'); ?></h2>
+				<h2><?php _e('Order Details', 'woothemes'); ?> &mdash; #<?php echo $thepostid; ?></h2>
 				
 				<p class="form-field"><label for="order_status"><?php _e('Order status:', 'woothemes') ?></label>
 				<select id="order_status" name="order_status" class="chosen_select">

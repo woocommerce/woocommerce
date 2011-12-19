@@ -798,11 +798,6 @@ function woocommerce_google_tracking() {
 function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
-	// Call the Piwik ecommerce function if WP-Piwik is configured to add
-	// tracking codes to the page
-	$wp_piwik_global_settings = get_option('wp-piwik_global-settings');
-	if($wp_piwik_global_settings['add_tracking_code']) woocommerce_ecommerce_tracking_piwik( $order_id );
-	
 	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
 	if (is_admin()) return; // Don't track admin
 	
@@ -877,12 +872,17 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	global $woocommerce;
 	
+	if (is_admin()) return; // Don't track admin
+	
+	// Call the Piwik ecommerce function if WP-Piwik is configured to add tracking codes to the page
+	$wp_piwik_global_settings = get_option('wp-piwik_global-settings');
+	
+	if (!isset($wp_piwik_global_settings['add_tracking_code']) || !$wp_piwik_global_settings['add_tracking_code']) return;
+	
 	// Remove WP-Piwik from wp_footer and run it here instead, to get Piwik 
 	// loaded *before* we do our ecommerce tracking calls
 	remove_action('wp_footer', array($GLOBALS['wp_piwik'],'footer'));
 	$GLOBALS['wp_piwik']->footer();
-	
-	if (is_admin()) return; // Don't track admin
 	
 	// Get the order and output tracking code
 	$order = &new woocommerce_order($order_id);

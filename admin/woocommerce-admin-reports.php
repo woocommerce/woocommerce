@@ -12,7 +12,7 @@ function woocommerce_reports() {
 	$current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'sales';
 	$current_chart = (isset($_GET['chart'])) ? $_GET['chart'] : 0;
 	
-	$charts = array(
+	$charts = apply_filters('woocommerce_reports_charts', array(
 		__('sales', 'woothemes') => array(
 			array(
 				'title' => __('Overview', 'woothemes'),
@@ -62,7 +62,7 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_stock_overview'
 			),
 		)
-	);
+	));
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">

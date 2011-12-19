@@ -10,6 +10,36 @@
  */
  
 /**
+ * Checks which method we're using to serve downloads
+ * 
+ * If using force or x-sendfile, this ensures the .htaccess is in place
+ */
+function woocomerce_check_download_folder_protection() {
+	$upload_dir 		= wp_upload_dir();
+	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
+	$download_method	= get_option('woocommerce_file_download_method');
+	
+	if ($download_method=='redirect') :
+		
+		// Redirect method - don't protect
+		if (file_exists($downloads_url.'/.htaccess')) :
+			unlink( $downloads_url . '/.htaccess' );
+		endif;
+		
+	else :
+		
+		// Force method - protect, add rules to the htaccess file
+		if (!file_exists($downloads_url.'/.htaccess')) :
+			if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
+				fwrite($file_handle, 'deny from all');
+				fclose($file_handle);
+			endif;
+		endif;
+		
+	endif;
+} 
+ 
+/**
  * Deleting products sync
  * 
  * Removes variations etc belonging to a deleted post

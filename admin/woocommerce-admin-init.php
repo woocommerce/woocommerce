@@ -106,7 +106,7 @@ function woocommerce_admin_scripts() {
     
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
-    	wp_enqueue_script('chosen');
+    	wp_enqueue_script( 'chosen' );
     	wp_enqueue_script('jquery-ui-sortable');
 
     endif;
@@ -126,7 +126,7 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'media-upload' );
 		wp_enqueue_script( 'thickbox' );
-		wp_enqueue_script('chosen');
+		wp_enqueue_script( 'chosen' );
 		
 		$woocommerce_witepanel_params = array( 
 			'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),

@@ -64,11 +64,7 @@
 
 	<h3><?php _e('Billing address', 'woothemes'); ?></h3>
 	
-	<p>
-		<?php echo $order->billing_first_name . ' ' . $order->billing_last_name; ?><br/>
-		<?php if ($order->billing_company) : ?><?php echo $order->billing_company; ?><br/><?php endif; ?>
-		<?php echo $order->formatted_billing_address; ?>
-	</p>
+	<p><?php echo $order->formatted_billing_address; ?></p>
 
 </div>
 
@@ -76,11 +72,7 @@
 
 	<h3><?php _e('Shipping address', 'woothemes'); ?></h3>
 	
-	<p>
-		<?php echo $order->shipping_first_name . ' ' . $order->shipping_last_name; ?><br/>
-		<?php if ($order->shipping_company) : ?><?php echo $order->shipping_company; ?><br/><?php endif; ?>
-		<?php echo $order->formatted_shipping_address; ?>
-	</p>
+	<p><?php echo $order->formatted_shipping_address; ?></p>
 
 </div>
 

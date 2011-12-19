@@ -191,3 +191,20 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
 	
 	return $per_page;
 }
+
+/**
+ * Configure button for shipping classes page
+ */
+ add_filter("manage_edit-product_shipping_class_columns", 'woocommerce_shipping_class_columns');
+ add_filter("manage_product_shipping_class_custom_column", 'woocommerce_shipping_class_column', 10, 3);	
+  
+ function woocommerce_shipping_class_columns( $columns ) {
+ 	$columns['configure'] = '&nbsp;';
+ 	return $columns;
+ }
+ 
+ function woocommerce_shipping_class_column( $columns, $column, $id ) {
+ 	if ($column=='configure') $columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__('Configure shipping class', 'woothemes').'</a>';
+ 	
+ 	return $columns;	
+ }
