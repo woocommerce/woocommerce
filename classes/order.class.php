@@ -123,6 +123,7 @@ class woocommerce_order {
 		unset($address['first_name']);
 		unset($address['last_name']);
 		unset($address['company']);
+		$joined_address = array();
 		foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
 		$this->billing_address_only = implode(', ', $joined_address);
 		
@@ -144,6 +145,7 @@ class woocommerce_order {
 			unset($address['first_name']);
 			unset($address['last_name']);
 			unset($address['company']);
+			$joined_address = array();
 			foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
 			$this->shipping_address_only = implode(', ', $joined_address);
 		endif;
@@ -364,7 +366,7 @@ class woocommerce_order {
 				if ($_product->exists) :
 			
 					if ($_product->is_downloadable()) :
-						$file = '<br/><small>' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</small>';
+						$file = '<br/><small>'.__('Download:', 'woothemes').' <a href="' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>';
 					endif;
 		
 				endif;	

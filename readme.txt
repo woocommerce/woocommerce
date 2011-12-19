@@ -99,6 +99,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Option to re-order shipping methods
 * Coupon entry form on checkout (optional)
 * paying_customer user meta when order is complete
+* Improved download links in emails
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

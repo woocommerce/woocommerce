@@ -66,6 +66,12 @@ $order = &new woocommerce_order( $order_id );
 
 				$item_meta = &new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
+				
+				if ($_product->exists && $_product->is_downloadable() && $order->status=='completed') :
+					
+					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woothemes') . '</a></small>';
+		
+				endif;	
 
 				echo '	</td>
 						<td>'.$item['qty'].'</td>
