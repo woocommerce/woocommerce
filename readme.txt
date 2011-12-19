@@ -98,6 +98,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Category widget - order by option
 * Option to re-order shipping methods
 * Coupon entry form on checkout (optional)
+* paying_customer user meta when order is complete
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
