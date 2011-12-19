@@ -50,9 +50,9 @@ global $woocommerce;
 						<td class="product-price"><?php 
 						
 							if (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') :
-								echo woocommerce_price( $_product->get_price_excluding_tax() ); 
+								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $_product->get_price_excluding_tax() ), $values, $cart_item_key ); 
 							else :
-								echo woocommerce_price( $_product->get_price() ); 
+								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $_product->get_price() ), $values, $cart_item_key ); 
 							endif;
 							
 						?></td>
