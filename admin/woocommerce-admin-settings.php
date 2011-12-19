@@ -980,7 +980,7 @@ function woocommerce_settings() {
     
     // Add pages button
     if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) :
-	    	
+		require_once( 'woocommerce-admin-install.php' );
     	woocommerce_create_pages();
     	update_option('skip_install_woocommerce_pages', 1);
     	$install_complete = true;
