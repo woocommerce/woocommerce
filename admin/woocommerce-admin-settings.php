@@ -970,6 +970,8 @@ function woocommerce_settings() {
     if (isset($_GET['saved']) && $_GET['saved']) :
     	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woothemes' ) . '</strong></p></div>';
         flush_rewrite_rules( false );
+        
+        do_action('woocommerce_settings_saved');
     endif;
     
     // Install/page installer
