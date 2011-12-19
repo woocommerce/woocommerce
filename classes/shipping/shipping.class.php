@@ -20,18 +20,36 @@ class woocommerce_shipping {
 	var $shipping_classes;
 	
     function init() {
-		
+
 		if (get_option('woocommerce_calc_shipping')!='no') $this->enabled = true; 
 		
 		do_action('woocommerce_shipping_init');
 		
 		$load_methods = apply_filters('woocommerce_shipping_methods', array());
-
-		foreach ($load_methods as $method) :
 		
-			$this->shipping_methods[] = &new $method();
+		// Get order option
+		$ordering 	= (array) get_option('woocommerce_shipping_method_order');
+		$order_end 	= 999;
+		
+		// Load gateways in order
+		foreach ($load_methods as $method) :
+			
+			$load_method = &new $method();
+			
+			if (isset($ordering[$load_method->id]) && is_numeric($ordering[$load_method->id])) :
+				// Add in position
+				$this->shipping_methods[$ordering[$load_method->id]] = $load_method;
+			else :
+				// Add to end of the array
+				$this->shipping_methods[$order_end] = $load_method;
+				$order_end++;
+			endif;
 			
 		endforeach;
+		
+		ksort($this->shipping_methods);
+		
+		add_action('woocommerce_update_options_shipping', array(&$this, 'process_admin_options'));
 		
 	}
 	
@@ -153,6 +171,22 @@ class woocommerce_shipping {
 		$this->shipping_total = 0;
 		$this->shipping_tax = 0;
 		$this->shipping_label = null;
+	}
+	
+	function process_admin_options() {
+		$method_order = (isset($_POST['method_order'])) ? $_POST['method_order'] : '';
+		
+		$order = array();
+		
+		if (is_array($method_order) && sizeof($method_order)>0) :
+			$loop = 0;
+			foreach ($method_order as $method_id) :
+				$order[$method_id] = $loop;
+				$loop++;
+			endforeach;
+		endif;
+		
+		update_option( 'woocommerce_shipping_method_order', $order );
 	}
 	
 }

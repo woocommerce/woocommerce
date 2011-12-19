@@ -726,7 +726,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 
 $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings', array(
 
-	array(	'name' => __( 'Shipping Options', 'woothemes' ), 'type' => 'title','desc' => '', 'id' => 'shipping_options' ),
+	array( 'name' => __( 'Shipping Options', 'woothemes' ), 'type' => 'title', 'desc' => __('Shipping can be enabled and disabled from this section.', 'woothemes'), 'id' => 'shipping_options' ),
 	
 	array(  
 		'name' 		=> __( 'Shipping calculations', 'woothemes' ),
@@ -1037,9 +1037,8 @@ function woocommerce_settings() {
 						'pages' => __( 'Pages', 'woothemes' ),
 						'catalog' => __( 'Catalog', 'woothemes' ),
 						'inventory' => __( 'Inventory', 'woothemes' ),
-						'shipping' => __( 'Shipping', 'woothemes' ),
 						'tax' => __( 'Tax', 'woothemes'),
-						'shipping_methods' => __( 'Shipping Methods', 'woothemes' ),
+						'shipping' => __( 'Shipping', 'woothemes' ),
 						'payment_gateways' => __( 'Payment Gateways', 'woothemes' ),
 						'email' => __( 'Emails', 'woothemes' ),
 					);
@@ -1062,22 +1061,65 @@ function woocommerce_settings() {
 					case "pages" :
 					case "catalog" :
 					case "inventory" :
-					case "shipping" :
 					case "tax" :
 					case "email" :
 						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 					break;
-					case "shipping_methods" : 	
+					case "shipping" :
 						
-						$links = array();
-
-		            	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
-		            		$title = ($method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
-		            		$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
+						$links = array( '<a href="#shipping-options">'.__('Shipping Options', 'woothemes').'</a>' );
+						
+						foreach ( $woocommerce->shipping->shipping_methods as $method ) :
+							$title = ( isset( $method->method_title ) && $method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
+							$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
 						endforeach;
 						
 						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
-		            
+						
+						// Gateway ordering
+						echo '<div class="section" id="shipping-options">';
+						
+						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+						
+						?>
+						<h3><?php _e('Shipping Methods', 'woothemes'); ?></h3>
+						<p><?php _e('Your activated shipping methods are listed below. Drag and drop rows to re-order them for display on the frontend.', 'woothemes'); ?></p>
+						<table class="wc_shipping widefat" cellspacing="0">
+							<thead>
+								<tr>
+									<th><?php _e('Shipping Method', 'woothemes'); ?></th>
+									<th><?php _e('Status', 'woothemes'); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+						    	<?php
+						    	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
+						    		
+						    		echo '<tr>
+						    			<td>
+						    				<p><strong>'.$method->title.'</strong><br/>
+						    				<small>'.__('Method ID', 'woothemes').': '.$method->id.'</small></p>
+						    				<input type="hidden" name="method_order[]" value="'.$method->id.'" />
+						    			</td>
+						    			<td>';
+						    		
+						    		if ($method->enabled == 'yes') 
+						    			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
+									else 
+										echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';	
+						    			
+						    		echo '</td>
+						    		</tr>';
+						    		
+						    	endforeach; 
+						    	?>
+							</tbody>
+						</table>
+						<?php
+						
+						echo '</div>';
+						
+						// Specific method options
 		            	foreach ($woocommerce->shipping->shipping_methods as $method) :
 		            		echo '<div class="section" id="shipping-'.$method->id.'">';
 		            		$method->admin_options();
@@ -1229,7 +1271,7 @@ function woocommerce_settings() {
 				});
 				
 				// Sorting
-				jQuery('table.wc_gateways tbody').sortable({
+				jQuery('table.wc_gateways tbody, table.wc_shipping tbody').sortable({
 					items:'tr',
 					cursor:'move',
 					axis:'y',
