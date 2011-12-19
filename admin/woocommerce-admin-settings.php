@@ -254,47 +254,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
-	
-	array( 'name' => __( 'ShareThis', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'share_this' ),
-
-	array(  
-		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
-		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
-		'id' 		=> 'woocommerce_sharethis',
-		'type' 		=> 'text',
-		'std' 		=> '',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'share_this'),
-	
-	array( 'name' => __( 'Google Analytics', 'woothemes' ), 'type' => 'title', 'desc' => '', 'id' => 'google_analytics' ),
-	
-	array(  
-		'name' => __('Google Analytics ID', 'woothemes'),
-		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woothemes'),
-		'id' 		=> 'woocommerce_ga_id',
-		'type' 		=> 'text',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woothemes'),
-		'desc' 		=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woothemes'),
-		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woothemes'),
-		'desc' 		=> __('Add eCommerce tracking code to the thankyou page', 'woothemes'),
-		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-					
-	array( 'type' => 'sectionend', 'id' => 'google_analytics'),
 
 )); // End general settings
 
@@ -943,6 +902,51 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 )); // End email settings
 
+$woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_settings', array(
+	
+	array( 'name' => __( 'ShareThis', 'woothemes' ), 'type' => 'title', 'desc' => __('ShareThis offers a sharing widget which will allow customers to share links to products with their friends.', 'woothemes'), 'id' => 'share_this' ),
+
+	array(  
+		'name' => __( 'ShareThis Publisher ID', 'woothemes' ),
+		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woothemes' ), '<a href="http://sharethis.com/account/">', '</a>' ),
+		'id' 		=> 'woocommerce_sharethis',
+		'type' 		=> 'text',
+		'std' 		=> '',
+        'css' 		=> 'min-width:300px;',
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'share_this'),
+	
+	array( 'name' => __( 'Google Analytics', 'woothemes' ), 'type' => 'title', 'desc' => __('Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woothemes'), 'id' => 'google_analytics' ),
+	
+	array(  
+		'name' => __('Google Analytics ID', 'woothemes'),
+		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_id',
+		'type' 		=> 'text',
+        'css' 		=> 'min-width:300px;',
+	),
+	
+	array(  
+		'name' => __('Tracking code', 'woothemes'),
+		'desc' 		=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'name' => __('Tracking code', 'woothemes'),
+		'desc' 		=> __('Add eCommerce tracking code to the thankyou page', 'woothemes'),
+		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+					
+	array( 'type' => 'sectionend', 'id' => 'google_analytics'),
+
+)); // End integration settings
+
 /**
  * Settings page
  * 
@@ -965,6 +969,7 @@ function woocommerce_settings() {
 			case "shipping" :
 			case "tax" :
 			case "email" :
+			case "integration" :
 				woocommerce_update_options( $woocommerce_settings[$current_tab] );
 			break;
 		endswitch;
@@ -1049,6 +1054,7 @@ function woocommerce_settings() {
 						'shipping' => __( 'Shipping', 'woothemes' ),
 						'payment_gateways' => __( 'Payment Gateways', 'woothemes' ),
 						'email' => __( 'Emails', 'woothemes' ),
+						'integration' => __( 'Integration', 'woothemes' )
 					);
 					
 					$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
@@ -1071,6 +1077,7 @@ function woocommerce_settings() {
 					case "inventory" :
 					case "tax" :
 					case "email" :
+					case "integration" :
 						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 					break;
 					case "shipping" :
