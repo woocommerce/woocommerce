@@ -39,13 +39,23 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$c = $instance['count'] ? '1' : '0';
 		$h = $instance['hierarchical'] ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
+		$o = $instance['orderby'];
 
 		echo $before_widget;
-		if ( $title )
-			echo $before_title . $title . $after_title;
+		if ( $title ) echo $before_title . $title . $after_title;
 
-		$cat_args = array('menu_order' => 'asc', 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
-
+		$cat_args = array('show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
+		
+		if ( $o == 'order' ) {
+			
+			$cat_args['menu_order'] = 'asc';
+			
+		} else {
+			
+			$cat_args['orderby'] = $o;
+			
+		}
+		
 		if ( $d ) {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
@@ -83,6 +93,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
+		$instance['orderby'] = strip_tags($new_instance['orderby']);
 		$instance['count'] = !empty($new_instance['count']) ? 1 : 0;
 		$instance['hierarchical'] = !empty($new_instance['hierarchical']) ? 1 : 0;
 		$instance['dropdown'] = !empty($new_instance['dropdown']) ? 1 : 0;
@@ -95,12 +106,19 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		//Defaults
 		$instance = wp_parse_args( (array) $instance, array( 'title' => '') );
 		$title = esc_attr( $instance['title'] );
+		$orderby = isset( $instance['orderby'] ) ? $instance['orderby'] : 'order';
 		$count = isset($instance['count']) ? (bool) $instance['count'] :false;
 		$hierarchical = isset( $instance['hierarchical'] ) ? (bool) $instance['hierarchical'] : false;
 		$dropdown = isset( $instance['dropdown'] ) ? (bool) $instance['dropdown'] : false;
 ?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woothemes' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
+		
+		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order by:', 'woothemes') ?></label>
+		<select id="<?php echo esc_attr( $this->get_field_id('orderby') ); ?>" name="<?php echo esc_attr( $this->get_field_name('orderby') ); ?>">
+			<option value="and" <?php selected($orderby, 'order'); ?>><?php _e('Category Order', 'woothemes'); ?></option>
+			<option value="or" <?php selected($orderby, 'name'); ?>><?php _e('Name', 'woothemes'); ?></option>
+		</select></p>
 
 		<p><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('dropdown') ); ?>" name="<?php echo esc_attr( $this->get_field_name('dropdown') ); ?>"<?php checked( $dropdown ); ?> />
 		<label for="<?php echo $this->get_field_id('dropdown'); ?>"><?php _e( 'Show as dropdown', 'woothemes' ); ?></label><br />

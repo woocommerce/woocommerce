@@ -95,6 +95,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Locale options for country address formatting and checkout fields
 * Piwik (http://piwik.org/) tracking - requires http://wordpress.org/extend/plugins/wp-piwik/
 * Option to hide cart widget if the cart is empty
+* Category widget - order by option
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
