@@ -100,6 +100,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Coupon entry form on checkout (optional)
 * paying_customer user meta when order is complete
 * Improved download links in emails
+* Replaced quantity selector of grouped downloadable products with a button
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
