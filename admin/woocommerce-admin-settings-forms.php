@@ -524,7 +524,7 @@ function woocommerce_tax_row_label( $selected ) {
 	
 		if ($states_count>0) $states_text = sprintf(_n('(1 state)', '(%s states)', $states_count, 'woothemes'), $states_count);
 
-		$return .= sprintf(__('%s', 'woothemes'), $countries_text) . ' ' . $states_text;
+		$return .= $countries_text . ' ' . $states_text;
 		
 	else :
 		
