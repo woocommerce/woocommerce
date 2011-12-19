@@ -47,20 +47,10 @@ global $woocommerce, $order;
 
 <div style="width: 49%; float:left;">
 	<h2><?php _e('Billing Address', 'woothemes'); ?></h2>
-	<p><?php
-	$address = $order->billing_first_name.' '.$order->billing_last_name.'<br/>';
-	if ($order->billing_company) $address .= $order->billing_company.'<br/>';
-	$address .= $order->formatted_billing_address;
-	echo $address;
-	?></p>
+	<p><?php echo $order->formatted_billing_address; ?></p>
 </div>
 <div style="width: 49%; float:right;">
 	<h2><?php _e('Shipping Address', 'woothemes'); ?></h2>
-	<p><?php
-	$address = $order->shipping_first_name.' '.$order->shipping_last_name.'<br/>';
-	if ($order->shipping_company) $address .= $order->shipping_company.'<br/>';
-	$address .= $order->formatted_shipping_address;
-	echo $address;
-	?></p>
+	<p><?php echo $order->formatted_shipping_address; ?></p>
 </div>
 <div class="clear"></div>
