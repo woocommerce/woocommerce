@@ -7,7 +7,7 @@
  * @author		WooThemes
  */
  
-if (is_active_widget( false, false, 'woocommerce_layered_nav', 'true' ) && !is_admin()) :
+if (is_active_widget( false, false, 'layered_nav', 'true' ) && !is_admin()) :
 	add_action('init', 'woocommerce_layered_nav_init', 1);
 	add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
 endif;

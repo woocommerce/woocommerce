@@ -9,7 +9,7 @@
  * @author		WooThemes
  */
 
-if (is_active_widget( false, false, 'woocommerce_price_filter', 'true' ) && !is_admin()) :
+if (is_active_widget( false, false, 'price_filter', 'true' ) && !is_admin()) :
 	add_action('init', 'woocommerce_price_filter_init');
 	add_filter('loop_shop_post_in', 'woocommerce_price_filter');
 endif;
