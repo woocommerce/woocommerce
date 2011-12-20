@@ -999,12 +999,12 @@ class woocommerce {
 	 */
 	function redirect( $location, $status ) {
 		global $is_IIS;
-
-		// IIS fix
-		if ($is_IIS) session_write_close();
-	
+			
 		$_SESSION['errors'] = $this->errors;
 		$_SESSION['messages'] = $this->messages;
+		
+		// IIS fix
+		if ($is_IIS) session_write_close();
 		
 		return $location;
 	}
