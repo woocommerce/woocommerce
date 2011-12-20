@@ -7,7 +7,7 @@ global $post, $product;
 ?>
 <div class="product_meta">
 
-	<?php if ($product->is_type('simple') && get_option('woocommerce_enable_sku')=='yes') : ?>
+	<?php if (($product->is_type('simple') || $product->is_type('variable')) && get_option('woocommerce_enable_sku')=='yes') : ?>
 		<span itemprop="productID" class="sku"><?php _e('SKU:', 'woothemes'); ?> <?php echo $product->sku; ?>.</span>
 	<?php endif; ?>
 	

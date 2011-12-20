@@ -39,7 +39,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$c = $instance['count'] ? '1' : '0';
 		$h = $instance['hierarchical'] ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
-		$o = $instance['orderby'];
+		$o = isset($instance['orderby']) ? $instance['orderby'] : 'order';
 
 		echo $before_widget;
 		if ( $title ) echo $before_title . $title . $after_title;

@@ -116,11 +116,12 @@ function woocommerce_front_page_archive( $query ) {
  * Fix active class in wp_list_pages for shop page
  *
  * Suggested by jessor - https://github.com/woothemes/woocommerce/issues/177
+ * Amended Dec '11, by Peter Sterling - http://www.sterling-adventures.co.uk/
  **/
 function woocommerce_list_pages($pages){
     global $post;
 
-    if (is_woocommerce() || is_cart() || is_checkout() || is_page(get_option('woocommerce_thanks_page_id'))) {
+    if (is_woocommerce()) {
         $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
         $shop_page = 'page-item-' . get_option('woocommerce_shop_page_id'); // find shop_page_id through woocommerce options
         
@@ -416,6 +417,25 @@ function woocommerce_process_login() {
 				exit;
 			endif;
 			
+		endif;
+	
+	endif;	
+}
+
+/**
+ * Process the coupon form on the checkout
+ **/
+function woocommerce_process_coupon_form() {
+	global $woocommerce;
+	
+	if (isset($_POST['coupon_code']) && $_POST['coupon_code']) :
+	
+		$coupon_code = stripslashes(trim($_POST['coupon_code']));
+		$woocommerce->cart->add_discount($coupon_code);
+		
+		if ( wp_get_referer() ) :
+			wp_safe_redirect( wp_get_referer() );
+			exit;
 		endif;
 	
 	endif;	

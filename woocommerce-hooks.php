@@ -80,6 +80,7 @@ add_action( 'woocommerce_product_tab_panels', 'woocommerce_product_reviews_panel
 
 /* Checkout */
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
 /* Cart */
@@ -119,6 +120,7 @@ add_action( 'init', 'woocommerce_add_to_cart_action' );
 
 /* Login and Registration */
 add_action( 'init', 'woocommerce_process_login' );
+add_action( 'init', 'woocommerce_process_coupon_form' );
 add_action( 'init', 'woocommerce_process_registration' );
 
 /* Product Downloads */

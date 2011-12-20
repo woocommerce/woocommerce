@@ -406,6 +406,18 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 }
 
 /**
+ * Order Status completed - This is a paying customer
+ **/
+add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
+
+function woocommerce_paying_customer( $order_id ) {
+	
+	$order = &new woocommerce_order( $order_id );
+	
+	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
+}
+
+/**
  * Filter to allow product_cat in the permalinks for products.
  *
  * @param string $permalink The existing permalink URL.

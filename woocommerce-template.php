@@ -229,6 +229,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		            'image_link' => $image_link,
 		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
 		            'availability_html' => $availability_html,
+		            'sku' => __('SKU:', 'woothemes') . ' ' . $variation->sku
 		        );
 		    }
 		}
@@ -428,6 +429,15 @@ if (!function_exists('woocommerce_breadcrumb')) {
 if (!function_exists('woocommerce_order_review')) {
 	function woocommerce_order_review() {
 		woocommerce_get_template('checkout/review_order.php', false);
+	}
+}
+
+/**
+ * Coupon form for checkout
+ **/
+if (!function_exists('woocommerce_checkout_coupon_form')) {
+	function woocommerce_checkout_coupon_form() {
+		woocommerce_get_template('checkout/coupon-form.php', false);
 	}
 }
 
