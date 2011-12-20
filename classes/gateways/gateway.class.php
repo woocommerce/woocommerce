@@ -103,7 +103,6 @@ class woocommerce_payment_gateway extends woocommerce_settings_api {
 	 */
 	function validate_fields() { return true; }
 	
-    
     /**
     * If There are no payment fields show the description if set.
     * Override this in your gateway if you have some.
