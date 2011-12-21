@@ -57,6 +57,7 @@ class woocommerce_checkout {
 				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
 				)
 			);
+		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
 	}
 		
 	/** Output the billing information form */

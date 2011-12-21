@@ -488,8 +488,7 @@ jQuery(document).ready(function($) {
 				url: 		woocommerce_params.ajax_url,
 				data: 		data,
 				success: 	function( response ) {
-					$('#order_methods, #order_review').remove();
-					$('#order_review_heading').after(response);
+					$('#order_review').after(response).remove();
 					$('#order_review input[name=payment_method]:checked').click();
 				}
 			});

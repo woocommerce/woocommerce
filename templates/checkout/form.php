@@ -1,4 +1,4 @@
-<?php global $woocommerce; ?>
+<?php global $woocommerce, $woocommerce_checkout; ?>
 
 <?php $woocommerce->show_messages(); ?>
 
@@ -15,6 +15,8 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce-
 
 <form name="checkout" method="post" class="checkout" action="<?php echo esc_url( $get_checkout_url ); ?>">
 	
+	<?php if (sizeof($woocommerce_checkout->checkout_fields)>0) : ?>
+	
 	<div class="col2-set" id="customer_details">
 		<div class="col-1">
 
@@ -30,6 +32,8 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce-
 	
 	<h3 id="order_review_heading"><?php _e('Your order', 'woothemes'); ?></h3>
 	
+	<?php endif; ?>
+
 	<?php do_action('woocommerce_checkout_order_review'); ?>
 	
 </form>

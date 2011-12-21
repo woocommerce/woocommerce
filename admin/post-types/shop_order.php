@@ -73,11 +73,15 @@ function woocommerce_custom_order_columns($column) {
 						
 		break;
 		case "billing_address" :
-
-        	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->billing_address_only ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_billing_address) .'</a>';
+			if ($order->formatted_shipping_address) :
+			
+        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->billing_address_only ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_billing_address) .'</a>';
+        	else :
+        		echo '&ndash;';
+        	endif;
         	
         	if ($order->payment_method_title) :
-        		echo '<small class="meta">' . __('Paid via', 'woothemes') . ' ' . esc_html( $order->payment_method_title ) . '</small>';
+        		echo '<small class="meta">' . __('Via', 'woothemes') . ' ' . esc_html( $order->payment_method_title ) . '</small>';
         	endif;
         	
 		break;
@@ -90,7 +94,7 @@ function woocommerce_custom_order_columns($column) {
         	endif;
         	
         	if ($order->shipping_method_title) :
-        		echo '<small class="meta">' . __('Shipped via', 'woothemes') . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
+        		echo '<small class="meta">' . __('Via', 'woothemes') . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
         	endif;
 		break;
 		case "total_cost" :
