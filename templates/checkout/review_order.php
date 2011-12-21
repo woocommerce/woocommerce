@@ -160,10 +160,6 @@
 		
 			<?php $woocommerce->nonce_field('process_checkout')?>
 			
-			<?php  $order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woothemes') ); ?>
-			
-			<input type="submit" class="button-alt" name="place_order" id="place_order" value="<?php echo $order_button_text; ?>" />
-			
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 			
 			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php echo apply_filters('woocommerce_order_button_text', __('Place order', 'woothemes')); ?>" />
