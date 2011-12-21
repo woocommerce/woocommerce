@@ -6,7 +6,7 @@ Requires at least: 3.1
 Tested up to: 3.3
 Stable tag: 1.3.2.1
 
-An e-commerce toolkit that helps you sell anything. Beautifully.
+WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
 == Description ==
 
@@ -102,6 +102,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved download links in emails
 * Replaced quantity selector of grouped downloadable products with a button
 * Reworked checkout fields to make them easier to extend
+* Added address meta to users panel
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
