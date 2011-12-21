@@ -1,5 +1,5 @@
-=== WooCommerce - eCommerce plugin for WordPress ===
-Contributors: woothemes
+=== WooCommerce ===
+Contributors: woothemes, mikejolley
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.1
