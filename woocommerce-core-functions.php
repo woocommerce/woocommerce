@@ -315,7 +315,8 @@ if (!function_exists('woocommerce_light_or_dark')) {
  * The frontend view order pages get around this filter by using remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
  **/
 add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
-add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed' );
+add_action( 'comment_feed_join', 'woocommerce_exclude_order_comments_from_feed_join' );
+add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_where' );
 
 function woocommerce_exclude_order_comments( $clauses ) {
 	global $wpdb, $typenow;
@@ -332,10 +333,16 @@ function woocommerce_exclude_order_comments( $clauses ) {
 	
 	return $clauses;	
 }
-
-function woocommerce_exclude_order_comments_from_feed( $where ) {
+function woocommerce_exclude_order_comments_from_feed_join( $join ) {
 	global $wpdb;
 	
+    if (!$join) $join = "JOIN $wpdb->posts ON ( $wpdb->comments.comment_post_ID = $wpdb->posts.ID )";
+
+    return $join;
+}
+function woocommerce_exclude_order_comments_from_feed_where( $where ) {
+	global $wpdb;
+
     if ($where) $where .= ' AND ';
 	
 	$where .= "$wpdb->posts.post_type NOT IN ('shop_order')";
