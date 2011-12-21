@@ -117,5 +117,26 @@ jQuery(function(){
 			jQuery(this).closest('tr').next('tr').hide();
 		}
 	}).change();
+	
+	// Hidden options
+	jQuery('.hide_options_if_checked input:eq(0)').change(function() {
+		
+		if (jQuery(this).is(':checked')) {
+			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+		} else {
+			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+		}
+		
+	}).change();
+	
+	jQuery('.show_options_if_checked input:eq(0)').change(function() {
+		
+		if (jQuery(this).is(':checked')) {
+			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+		} else {
+			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+		}
+		
+	}).change();
     
 });

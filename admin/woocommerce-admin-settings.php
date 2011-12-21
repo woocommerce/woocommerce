@@ -89,38 +89,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> '',
 		'type' 		=> 'multi_select_countries'
 	),
-	
-	array(  
-		'name' => __( 'Checkout', 'woothemes' ),
-		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woothemes' ),
-		'id' 		=> 'woocommerce_enable_guest_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
-		'desc' 		=> __( 'Allow users to create an account and login from the checkout page', 'woothemes' ),
-		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
 
 	array(  
+		'name' => __( 'Checkout Fields', 'woothemes' ),
 		'desc' 		=> __( 'Enable coupon form on checkout', 'woothemes' ),
 		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
-	
-	array(  
-		'desc' 		=> __( '"Ship to same address option" checked by default', 'woothemes' ),
-		'id' 		=> 'woocommerce_ship_to_same_address',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(  
@@ -132,11 +108,21 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'desc' 		=> __( 'Allow unregistered users to register from the checkout page', 'woothemes' ),
+		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+
+	array(  
+		'name' => __( 'Security', 'woothemes' ),
 		'desc' 		=> __( 'Force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS (an SSL Certificate is required)', 'woothemes' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start',
+		'show_if_checked' => 'option',
 	),
 	
 	array(  
@@ -144,9 +130,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_unforce_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'checkboxgroup'		=> 'end',
+		'show_if_checked' => 'yes',
 	),
-	
+
 	array(  
 		'name' => __( 'Customer Accounts', 'woothemes' ),
 		'desc' 		=> __( 'Allow unregistered users to register from the My Account page', 'woothemes' ),
@@ -718,7 +705,16 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'desc' 		=> __( 'Only ship to the users billing address', 'woothemes' ),
 		'id' 		=> 'woocommerce_ship_to_billing_address_only',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Ship to billing address by default', 'woothemes' ),
+		'id' 		=> 'woocommerce_ship_to_same_address',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'shipping_options' ),

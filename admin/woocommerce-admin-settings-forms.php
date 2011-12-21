@@ -194,27 +194,47 @@ function woocommerce_admin_fields($options) {
                 </tr><?php
             break;
             case 'checkbox' :
-            
+            	
+            	if (!isset($value['hide_if_checked'])) $value['hide_if_checked'] = false;
+            	if (!isset($value['show_if_checked'])) $value['show_if_checked'] = false;
+            	
             	if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='start')) :
             		?>
-            		<tr valign="top">
+            		<tr valign="top" class="<?php 
+            			if ($value['hide_if_checked']=='yes' || $value['show_if_checked']=='yes') echo 'hidden_option'; 
+            			if ($value['hide_if_checked']=='option') echo 'hide_options_if_checked';
+            			if ($value['show_if_checked']=='option') echo 'show_options_if_checked';
+            		?>">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
 					<td class="forminp">
+						<fieldset>
 					<?php
+            	else :
+            		?>
+            		<fieldset class="<?php 
+            			if ($value['hide_if_checked']=='yes' || $value['show_if_checked']=='yes') echo 'hidden_option'; 
+            			if ($value['hide_if_checked']=='option') echo 'hide_options_if_checked';
+            			if ($value['show_if_checked']=='option') echo 'show_options_if_checked';
+            		?>">
+            		<?php
             	endif;
             	
             	?>
-	            <fieldset><legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
+	            <legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
 					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
 					<?php echo $value['desc'] ?></label><br>
-				</fieldset>
 				<?php
 				
 				if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :
 					?>
-						</td>
+						</fieldset>
+					</td>
 					</tr>
+					<?php
+				else :
+					?>
+					</fieldset>
 					<?php
 				endif;
 				
