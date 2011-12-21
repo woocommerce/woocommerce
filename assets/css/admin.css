@@ -45,6 +45,7 @@ ul.totals li.right{float:right;width:49%;clear:none;}ul.totals li.right input{wi
 .woocommerce_order_items_wrapper table.woocommerce_order_items .quantity,.woocommerce_order_items_wrapper table.woocommerce_order_items .cost,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax{width:60px;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items table.meta{width:100%;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td{padding:1px 4px 1px 0;border:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td input{width:150px;}
 .widefat .column-order_title time{display:block;color:#999;margin:3px 0;}
+.widefat .column-order_actions a.button{float:left;margin:0 4px 2px 0;}
 .widefat small.meta{display:block;color:#999;font-size:inherit;margin:3px 0;}
 .widefat .column-total_cost,.widefat .column-order_date{width:150px !important;}
 .widefat .column-order_status{width:90px;text-align:center;}.widefat .column-order_status mark{display:block;text-align:center;white-space:nowrap;padding:0 2px;background:#fff;border:1px solid #fff;-webkit-box-shadow:inset 0 0 2px 1px rgba(255, 255, 255, 0.5);-webkit-border-radius:4px;-moz-border-radius:4px;-o-border-radius:4px;border-radius:4px;margin:0;font-size:9px;text-transform:uppercase;color:#fff;font-weight:bold;text-shadow:0 1px 0 rgba(0, 0, 0, 0.3);}
