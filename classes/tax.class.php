@@ -56,9 +56,10 @@ class woocommerce_tax {
 	 * @param   string	country
 	 * @param	string	state
 	 * @param	object	Tax Class
-	 * @return  int
+	 * @param   string	postcode
+	 * @return  array
 	 */
-	function find_rate( $country, $state = '*', $tax_class = '' ) {
+	function find_rate( $country, $state = '*', $tax_class = '', $postcode = '' ) {
 		
 		$rate['rate'] = 0;
 		
@@ -80,7 +81,9 @@ class woocommerce_tax {
 			else :
 				$rate = $this->rates[ $country ][ '*' ][ '*' ];
 			endif;
-		endif;
+		endif;		
+
+		$rate = apply_filters('woocommerce_tax_rate', $rate, $this->rates, $country, $state, $tax_class, $postcode);
 		
 		return $rate;
 		
@@ -102,8 +105,9 @@ class woocommerce_tax {
 			
 			$country 	= $woocommerce->customer->get_shipping_country();
 			$state 		= $woocommerce->customer->get_shipping_state();
+			$postcode   = $woocommerce->customer->get_shipping_postcode();
 			
-			$rate = $this->find_rate( $country, $state, $tax_class );
+			$rate = $this->find_rate( $country, $state, $tax_class, $postcode );
 			
 			return $rate['rate'];
 		
