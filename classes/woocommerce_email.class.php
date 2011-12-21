@@ -91,7 +91,9 @@ class woocommerce_email {
 		return $message;
 	}
 	
-	function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {	
+	function send( $to, $subject, $message, $headers = '', $attachments = "" ) {	
+		if (!$headers) $headers = "Content-Type: text/html\r\n";
+		
 		add_filter( 'wp_mail_from', array(&$this, 'get_from_address') );
 		add_filter( 'wp_mail_from_name', array(&$this, 'get_from_name') );
 		add_filter( 'wp_mail_content_type', array(&$this, 'get_content_type') );
@@ -155,7 +157,7 @@ class woocommerce_email {
 		$attachments = apply_filters('woocommerce_customer_processing_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message, $attachments );
+		$this->send( $order->billing_email, $subject, $message, false, $attachments );
 	}
 
 	/**
@@ -191,7 +193,7 @@ class woocommerce_email {
 		$attachments = apply_filters('woocommerce_customer_completed_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message, $attachments );
+		$this->send( $order->billing_email, $subject, $message, false, $attachments );
 	}
 
 	/**
