@@ -526,3 +526,109 @@ if (!function_exists('woocommerce_order_details_table')) {
 		woocommerce_get_template('order/order-details-table.php', false);
 	}	
 }
+
+/** Forms ****************************************************************/
+
+/**
+ * Outputs a checkout/address form field
+ */
+if (!function_exists('woocommerce_form_field')) {
+	function woocommerce_form_field( $key, $args, $value = '' ) {
+		global $woocommerce;
+		
+		$defaults = array(
+			'type' => 'text',
+			'label' => '',
+			'placeholder' => '',
+			'required' => false,
+			'class' => array(),
+			'label_class' => array(),
+			'return' => false
+		);
+		
+		$args = wp_parse_args( $args, $defaults );
+		
+		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
+		
+		switch ($args['type']) :
+			case "country" :
+				
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
+						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
+				
+				foreach($woocommerce->countries->get_allowed_countries() as $ckey=>$cvalue) :
+					$field .= '<option value="'.$ckey.'" '.selected($value, $ckey, false).'>'.__($cvalue, 'woothemes').'</option>';
+				endforeach;
+				
+				$field .= '</select></p>'.$after;
+	
+			break;
+			case "state" :
+				
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
+				
+				/* Get Country */
+				$country_key = ($key=='billing_state') ? 'billing_country' : 'shipping_country';
+
+				if (isset($_POST[$country_key])) :
+					$current_cc = woocommerce_clean($_POST[$country_key]);
+				elseif (is_user_logged_in()) :
+					$current_cc = get_user_meta( get_current_user_id(), $country_key, true );
+				else :
+					$current_cc = $woocommerce->countries->get_base_country();
+				endif;
+
+				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
+				
+				// Get State
+				$current_r = ($value) ? $value : $woocommerce->customer->get_state();
+
+				$states = $woocommerce->countries->states;	
+					
+				if (isset( $states[$current_cc][$current_r] )) :
+					// Dropdown
+					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woothemes').'</option>';
+					foreach($states[$current_cc] as $ckey=>$cvalue) :
+						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woothemes').'</option>';
+					endforeach;
+					$field .= '</select>';
+				else :
+					// Input
+					$field .= '<input type="text" class="input-text" value="'.$current_r.'"  placeholder="'.$args['placeholder'].'" name="'.$key.'" id="'.$key.'" />';
+				endif;
+	
+				$field .= '</p>'.$after;
+				
+			break;
+			case "textarea" :
+				
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $value ).'</textarea>
+				</p>'.$after;
+				
+			break;
+			case "checkbox" :
+				
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
+					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($value, 1, false).' />
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+				</p>'.$after;
+				
+			break;
+			default :
+			
+				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $value.'" />
+				</p>'.$after;
+				
+			break;
+		endswitch;
+		
+		if ($args['return']) return $field; else echo $field;
+	}
+}

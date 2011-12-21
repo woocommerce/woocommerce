@@ -107,24 +107,24 @@ $order = &new woocommerce_order( $order_id );
 	<div class="col-1">
 
 		<header class="title">
-			<h3><?php _e('Shipping Address', 'woothemes'); ?></h3>
-		</header>
-		<address><p>
-			<?php
-				if (!$order->formatted_shipping_address) _e('N/A', 'woothemes'); else echo $order->formatted_shipping_address;
-			?>
-		</p></address>
-
-	</div><!-- /.col-1 -->
-
-	<div class="col-2">
-
-		<header class="title">
 			<h3><?php _e('Billing Address', 'woothemes'); ?></h3>
 		</header>
 		<address><p>
 			<?php
 				if (!$order->formatted_billing_address) _e('N/A', 'woothemes'); else echo $order->formatted_billing_address;
+			?>
+		</p></address>
+
+	</div><!-- /.col-1 -->
+	
+	<div class="col-2">
+
+		<header class="title">
+			<h3><?php _e('Shipping Address', 'woothemes'); ?></h3>
+		</header>
+		<address><p>
+			<?php
+				if (!$order->formatted_shipping_address) _e('N/A', 'woothemes'); else echo $order->formatted_shipping_address;
 			?>
 		</p></address>
 

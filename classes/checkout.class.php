@@ -12,8 +12,7 @@
 class woocommerce_checkout {
 	
 	var $posted;
-	var $billing_fields;
-	var $shipping_fields;
+	var $checkout_fields;
 	var $must_create_account;
 	var $creating_account;
 	var $localisation;
@@ -25,17 +24,39 @@ class woocommerce_checkout {
 		add_action('woocommerce_checkout_billing',array(&$this,'checkout_form_billing'));
 		add_action('woocommerce_checkout_shipping',array(&$this,'checkout_form_shipping'));
 		
-		$this->must_create_account = true;
-		
-		if (get_option('woocommerce_enable_guest_checkout')=='yes' || is_user_logged_in()) $this->must_create_account = false;
-				
-		// Checkout fields
-		$this->billing_fields = $woocommerce->countries->get_address_fields( $this->get_value('billing_country'), 'billing_' );
-		$this->shipping_fields = $woocommerce->countries->get_address_fields( $this->get_value('shipping_country'), 'shipping_' );	
-	}
-	
-	function sort_by_order($a, $b) {
-	    return $a['order'] - $b['order'];
+		$this->must_create_account = (get_option('woocommerce_enable_guest_checkout')=='yes' || is_user_logged_in()) ? false : true;
+
+		// Define all Checkout fields
+		$this->checkout_fields['billing'] 	= $woocommerce->countries->get_address_fields( $this->get_value('billing_country'), 'billing_' );
+		$this->checkout_fields['shipping'] 	= $woocommerce->countries->get_address_fields( $this->get_value('shipping_country'), 'shipping_' );
+		$this->checkout_fields['account']	= array(
+			'account_username' => array( 
+				'type' => 'text', 
+				'label' => __('Account username', 'woothemes'), 
+				'placeholder' => __('Username', 'woothemes') 
+				),
+			'account_password' => array( 
+				'type' => 'password', 
+				'label' => __('Account password', 'woothemes'), 
+				'placeholder' => __('Password', 'woothemes'),
+				'class' => array('form-row-first')
+				),
+			'account_password-2' => array( 
+				'type' => 'password', 
+				'label' => __('Account password', 'woothemes'), 
+				'placeholder' => __('Password', 'woothemes'),
+				'class' => array('form-row-last'), 
+				'label_class' => array('hidden')
+				)
+			);
+		$this->checkout_fields['order']	= array(
+			'order_comments' => array( 
+				'type' => 'textarea', 
+				'class' => array('notes'), 
+				'label' => __('Order Notes', 'woothemes'), 
+				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
+				)
+			);
 	}
 		
 	/** Output the billing information form */
@@ -50,8 +71,8 @@ class woocommerce_checkout {
 		
 		// Output billing form fields
 		do_action('woocommerce_before_checkout_billing_form', $this);
-		foreach ($this->billing_fields as $key => $field) :
-			$this->checkout_form_field( $key, $field );
+		foreach ($this->checkout_fields['billing'] as $key => $field) :
+			woocommerce_form_field( $key, $field, $this->get_value( $key ) );
 		endforeach;
 		do_action('woocommerce_after_checkout_billing_form', $this);
 		
@@ -68,24 +89,9 @@ class woocommerce_checkout {
 			
 			echo '<p>'.__('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woothemes').'</p>'; 
 			
-			$this->checkout_form_field( 'account_username', array( 
-				'type' => 'text', 
-				'label' => __('Account username', 'woothemes'), 
-				'placeholder' => __('Username', 'woothemes') 
-				));
-			$this->checkout_form_field( 'account_password', array( 
-				'type' => 'password', 
-				'label' => __('Account password', 'woothemes'), 
-				'placeholder' => __('Password', 'woothemes'),
-				'class' => array('form-row-first')
-				));
-			$this->checkout_form_field( 'account_password-2', array( 
-				'type' => 'password', 
-				'label' => __('Account password', 'woothemes'), 
-				'placeholder' => __('Password', 'woothemes'),
-				'class' => array('form-row-last'), 
-				'label_class' => array('hidden')
-				));
+			foreach ($this->checkout_fields['account'] as $key => $field) :
+				woocommerce_form_field( $key, $field, $this->get_value( $key ) );
+			endforeach;
 			
 			echo '</div>';
 							
@@ -119,8 +125,8 @@ class woocommerce_checkout {
 					
 				// Output shipping form fields
 				do_action('woocommerce_before_checkout_shipping_form', $this);
-				foreach ($this->shipping_fields as $key => $field) :
-					$this->checkout_form_field( $key, $field );
+				foreach ($this->checkout_fields['shipping'] as $key => $field) :
+					woocommerce_form_field( $key, $field, $this->get_value( $key ) );
 				endforeach;
 				do_action('woocommerce_after_checkout_shipping_form', $this);
 								
@@ -136,114 +142,14 @@ class woocommerce_checkout {
 				echo '<h3>'.__('Additional Information', 'woothemes').'</h3>';
 			endif;
 			
-			$this->checkout_form_field( 'order_comments', array( 
-				'type' => 'textarea', 
-				'class' => array('notes'), 
-				'label' => __('Order Notes', 'woothemes'), 
-				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
-				));
-					
+			foreach ($this->checkout_fields['order'] as $key => $field) :
+				woocommerce_form_field( $key, $field, $this->get_value( $key ) );
+			endforeach;
+								
 		endif;
 		
 		do_action('woocommerce_after_order_notes', $this);
 	}
-
-	/**
-	 * Outputs a checkout form field
-	 */
-	function checkout_form_field( $key, $args ) {
-		global $woocommerce;
-		
-		$defaults = array(
-			'type' => 'text',
-			'label' => '',
-			'placeholder' => '',
-			'required' => false,
-			'class' => array(),
-			'label_class' => array(),
-			'return' => false
-		);
-		
-		$args = wp_parse_args( $args, $defaults );
-		
-		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
-		
-		$field = '';
-		
-		switch ($args['type']) :
-			case "country" :
-				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
-					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
-						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
-				
-				foreach($woocommerce->countries->get_allowed_countries() as $ckey=>$value) :
-					$field .= '<option value="'.$ckey.'" '.selected($this->get_value($key), $ckey, false).'>'.__($value, 'woothemes').'</option>';
-				endforeach;
-				
-				$field .= '</select></p>'.$after;
-
-			break;
-			case "state" :
-				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
-				
-				if ($key=='billing_state') $current_cc = $this->get_value('billing_country');
-				else $current_cc = $this->get_value('shipping_country');
-				
-				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
-				
-				$current_r = $this->get_value($key);
-				if (!$current_r) $current_r = $woocommerce->customer->get_state();
-				
-				$states = $woocommerce->countries->states;	
-					
-				if (isset( $states[$current_cc][$current_r] )) :
-					// Dropdown
-					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woothemes').'</option>';
-					foreach($states[$current_cc] as $ckey=>$value) :
-						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($value, 'woothemes').'</option>';
-					endforeach;
-					$field .= '</select>';
-				else :
-					// Input
-					$field .= '<input type="text" class="input-text" value="'.$current_r.'"  placeholder="'.$args['placeholder'].'" name="'.$key.'" id="'.$key.'" />';
-				endif;
-	
-				$field .= '</p>'.$after;
-				
-			break;
-			case "textarea" :
-				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
-					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $this->get_value( $key ) ).'</textarea>
-				</p>'.$after;
-				
-			break;
-			case "checkbox" :
-				
-				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($this->get_value( $key ), 1, false).' />
-					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
-				</p>'.$after;
-				
-			break;
-			default :
-			
-				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
-					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $this->get_value( $key ).'" />
-				</p>'.$after;
-				
-			break;
-		endswitch;
-		
-		if ($args['return']) return $field; else echo $field;
-	}
-
 
 	/**
 	 * Process the checkout after the confirm order button is pressed
@@ -264,18 +170,15 @@ class woocommerce_checkout {
 			endif;
 			
 			do_action('woocommerce_checkout_process');
-						
-			// Checkout fields (non-shipping/billing)
+
+			// Checkout fields (not defined in checkout_fields)
 			$this->posted['shiptobilling'] 		= isset($_POST['shiptobilling']) ? 1 : 0;
 			$this->posted['terms'] 				= isset($_POST['terms']) ? 1 : 0;
 			$this->posted['createaccount'] 		= isset($_POST['createaccount']) ? 1 : 0;
 			$this->posted['payment_method'] 	= isset($_POST['payment_method']) ? woocommerce_clean($_POST['payment_method']) : '';
 			$this->posted['shipping_method']	= isset($_POST['shipping_method']) ? woocommerce_clean($_POST['shipping_method']) : '';
-			$this->posted['order_comments'] 	= isset($_POST['order_comments']) ? woocommerce_clean($_POST['order_comments']) : '';
-			$this->posted['account_username']	= isset($_POST['account_username']) ? woocommerce_clean($_POST['account_username']) : '';
-			$this->posted['account_password'] 	= isset($_POST['account_password']) ? woocommerce_clean($_POST['account_password']) : '';
-			$this->posted['account_password-2'] = isset($_POST['account_password-2']) ? woocommerce_clean($_POST['account_password-2']) : '';
 			
+			// Ship to billing only option
 			if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 1;
 			
 			// Update customer shipping method to posted method
@@ -284,34 +187,58 @@ class woocommerce_checkout {
 			// Update cart totals
 			$woocommerce->cart->calculate_totals();
 			
-			// Billing Information
-			foreach ($this->billing_fields as $key => $field) :
+			// Note if we skip shipping
+			$skipped_shipping = false;
+			
+			// Get posted checkout_fields and do validation
+			foreach ($this->checkout_fields as $fieldset_key => $fieldset) :
 				
-				$this->posted[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+				// Skip shipping if its not needed
+				if ($fieldset_key=='shipping' && (!$woocommerce->cart->needs_shipping() || $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'])) :
+					$skipped_shipping = true;
+					continue;
+				endif;
 				
-				// Hook
-				$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
-				
-				// Special handling for validation and formatting
-				switch ($key) :
-					case "billing_postcode" :
-						$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
-						
-						if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
-						else :
-							$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
-						endif;
-					break;
-					case "billing_phone" :
-						if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid number.', 'woothemes') ); endif;
-					break;
-					case "billing_email" :
-						if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid email address.', 'woothemes') ); endif;
-					break;
-				endswitch;
-				
-				// Required
-				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . __(' (billing) is a required field.', 'woothemes') );
+				foreach ($fieldset as $key => $field) :
+					
+					if (!isset($field['type'])) $field['type'] = 'text';
+					
+					// Get Value
+					switch ($field['type']) :
+						case "checkbox" :
+							$this->posted[$key] = isset($_POST[$key]) ? 1 : 0;
+						break;
+						default :
+							$this->posted[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+						break;
+					endswitch;
+					
+					// Hook to allow modification of value
+					$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
+					
+					// Validation: Required fields
+					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woothemes') );
+					
+					// Special handling for validation and formatting
+					switch ($key) :
+						case "billing_postcode" :
+						case "shipping_postcode" :
+							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
+							
+							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
+							else :
+								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+							endif;
+						break;
+						case "billing_phone" :
+							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woothemes') ); endif;
+						break;
+						case "billing_email" :
+							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woothemes') ); endif;
+						break;
+					endswitch;
+					
+				endforeach;
 				
 			endforeach;
 			
@@ -321,31 +248,7 @@ class woocommerce_checkout {
 			$woocommerce->customer->set_postcode( $this->posted['billing_postcode'] );
 			
 			// Shipping Information
-			if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only() && empty($this->posted['shiptobilling'])) :
-				
-				foreach ($this->shipping_fields as $key => $field) :
-				
-					if (isset( $_POST[$key] )) $this->posted[$key] = woocommerce_clean($_POST[$key]); else $this->posted[$key] = '';
-					
-					// Hook
-					$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
-					
-					// Special handling for validation and formatting
-					switch ($key) :
-						case "shipping_postcode" :
-							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
-							
-							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $this->posted['shipping_country'] )) : $woocommerce->add_error( $field['label'] . __(' (shipping) is not a valid postcode/ZIP.', 'woothemes') ); 
-							else :
-								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $this->posted['shipping_country'] );
-							endif;
-						break;
-					endswitch;
-					
-					// Required
-					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . __(' (shipping) is a required field.', 'woothemes') );
-					
-				endforeach;
+			if (!$skipped_shipping) :
 				
 				// Update customer location to posted location so we can correctly check available shipping methods
 				$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
@@ -360,7 +263,6 @@ class woocommerce_checkout {
 				$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 				
 			endif;
-
 
 			if (is_user_logged_in()) :
 				$this->creating_account = false;
@@ -389,6 +291,7 @@ class woocommerce_checkout {
 				if ( email_exists( $this->posted['billing_email'] ) ) :
 					$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woothemes') );
 				endif;
+				
 			endif;
 			
 			// Terms
@@ -406,7 +309,6 @@ class woocommerce_checkout {
 			endif;	
 			
 			if ($woocommerce->cart->needs_payment()) :
-			
 				// Payment Method
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if (!isset($available_gateways[$this->posted['payment_method']])) :
@@ -457,74 +359,6 @@ class woocommerce_checkout {
 							$woocommerce->add_error( $reg_errors->get_error_message() );
 		                	break;                    
 						endif;
-						
-					endif;
-
-					// Get shipping/billing
-					if ( !empty($this->posted['shiptobilling']) ) :
-					
-						$shipping_first_name = $this->posted['billing_first_name'];
-						$shipping_last_name = $this->posted['billing_last_name'];
-						$shipping_company = $this->posted['billing_company'];
-						$shipping_address_1 = $this->posted['billing_address_1'];
-						$shipping_address_2 = $this->posted['billing_address_2'];
-						$shipping_city = $this->posted['billing_city'];							
-						$shipping_state = $this->posted['billing_state'];
-						$shipping_postcode = $this->posted['billing_postcode'];	
-						$shipping_country = $this->posted['billing_country'];
-						
-					elseif ( $woocommerce->cart->needs_shipping() ) :
-								
-						$shipping_first_name = $this->posted['shipping_first_name'];
-						$shipping_last_name = $this->posted['shipping_last_name'];
-						$shipping_company = $this->posted['shipping_company'];
-						$shipping_address_1 = $this->posted['shipping_address_1'];
-						$shipping_address_2 = $this->posted['shipping_address_2'];
-						$shipping_city = $this->posted['shipping_city'];							
-						$shipping_state = $this->posted['shipping_state'];
-						$shipping_postcode = $this->posted['shipping_postcode'];	
-						$shipping_country = $this->posted['shipping_country'];
-						
-					endif;
-					
-					// Save billing/shipping to user meta fields
-					if ($user_id>0) :
-					
-						update_user_meta( $user_id, 'billing_first_name', $this->posted['billing_first_name'] );
-						update_user_meta( $user_id, 'billing_last_name', $this->posted['billing_last_name'] );
-						update_user_meta( $user_id, 'billing_company', $this->posted['billing_company'] );
-						update_user_meta( $user_id, 'billing_email', $this->posted['billing_email'] );
-						update_user_meta( $user_id, 'billing_address_1', $this->posted['billing_address_1'] );
-						update_user_meta( $user_id, 'billing_address_2', $this->posted['billing_address_2'] );
-						update_user_meta( $user_id, 'billing_city', $this->posted['billing_city'] );
-						update_user_meta( $user_id, 'billing_postcode', $this->posted['billing_postcode'] );
-						update_user_meta( $user_id, 'billing_country', $this->posted['billing_country'] );
-						update_user_meta( $user_id, 'billing_state', $this->posted['billing_state'] );
-						update_user_meta( $user_id, 'billing_phone', $this->posted['billing_phone'] );
-
-						if ( empty($this->posted['shiptobilling']) && $woocommerce->cart->needs_shipping() ) :
-							update_user_meta( $user_id, 'shipping_first_name', $this->posted['shipping_first_name'] );
-							update_user_meta( $user_id, 'shipping_last_name', $this->posted['shipping_last_name'] );
-							update_user_meta( $user_id, 'shipping_company', $this->posted['shipping_company'] );
-							update_user_meta( $user_id, 'shipping_address_1', $this->posted['shipping_address_1'] );
-							update_user_meta( $user_id, 'shipping_address_2', $this->posted['shipping_address_2'] );
-							update_user_meta( $user_id, 'shipping_city', $this->posted['shipping_city'] );
-							update_user_meta( $user_id, 'shipping_postcode', $this->posted['shipping_postcode'] );
-							update_user_meta( $user_id, 'shipping_country', $this->posted['shipping_country'] );
-							update_user_meta( $user_id, 'shipping_state', $this->posted['shipping_state'] );
-						elseif ( $this->posted['shiptobilling'] && $woocommerce->cart->needs_shipping() ) :
-							update_user_meta( $user_id, 'shipping_first_name', $this->posted['billing_first_name'] );
-							update_user_meta( $user_id, 'shipping_last_name', $this->posted['billing_last_name'] );
-							update_user_meta( $user_id, 'shipping_company', $this->posted['billing_company'] );
-							update_user_meta( $user_id, 'shipping_address_1', $this->posted['billing_address_1'] );
-							update_user_meta( $user_id, 'shipping_address_2', $this->posted['billing_address_2'] );
-							update_user_meta( $user_id, 'shipping_city', $this->posted['billing_city'] );
-							update_user_meta( $user_id, 'shipping_postcode', $this->posted['billing_postcode'] );
-							update_user_meta( $user_id, 'shipping_country', $this->posted['billing_country'] );
-							update_user_meta( $user_id, 'shipping_state', $this->posted['billing_state'] );
-						endif;
-						
-						do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);
 						
 					endif;
 					
@@ -637,31 +471,50 @@ class woocommerce_checkout {
 						$payment_method = $available_gateways[$this->posted['payment_method']]->title;
 					endif;
 					
-					// Update order meta
-					update_post_meta( $order_id, '_billing_first_name', $this->posted['billing_first_name']);
-					update_post_meta( $order_id, '_billing_last_name', 	$this->posted['billing_last_name']);
-					update_post_meta( $order_id, '_billing_company', 	$this->posted['billing_company']);
-					update_post_meta( $order_id, '_billing_address_1', 	$this->posted['billing_address_1']);
-					update_post_meta( $order_id, '_billing_address_2', 	$this->posted['billing_address_2']);
-					update_post_meta( $order_id, '_billing_city', 		$this->posted['billing_city']);
-					update_post_meta( $order_id, '_billing_postcode', 	$this->posted['billing_postcode']);
-					update_post_meta( $order_id, '_billing_country', 	$this->posted['billing_country']);
-					update_post_meta( $order_id, '_billing_state', 		$this->posted['billing_state']);
-					update_post_meta( $order_id, '_billing_email', 		$this->posted['billing_email']);
-					update_post_meta( $order_id, '_billing_phone', 		$this->posted['billing_phone']);
-
-					if ( ! empty( $this->posted['shiptobilling'] ) || $woocommerce->cart->needs_shipping() ) :
-						update_post_meta( $order_id, '_shipping_first_name', $shipping_first_name);
-						update_post_meta( $order_id, '_shipping_last_name',  $shipping_last_name);
-						update_post_meta( $order_id, '_shipping_company', 	 $shipping_company);
-						update_post_meta( $order_id, '_shipping_address_1',  $shipping_address_1);
-						update_post_meta( $order_id, '_shipping_address_2',  $shipping_address_2);
-						update_post_meta( $order_id, '_shipping_city', 		 $shipping_city);
-						update_post_meta( $order_id, '_shipping_postcode', 	 $shipping_postcode);
-						update_post_meta( $order_id, '_shipping_country', 	 $shipping_country);
-						update_post_meta( $order_id, '_shipping_state', 	 $shipping_state);
+					// UPDATE ORDER META
+					
+					// Save billing and shipping first, also save to user meta if logged in
+					if ($this->checkout_fields['billing']) :
+						foreach ($this->checkout_fields['billing'] as $key => $field) :
+							
+							// Post
+							update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
+							
+							// User
+							if ($user_id>0) :
+								update_user_meta( $user_id, $key, $this->posted[$key] );
+							endif;
+							
+						endforeach;
 					endif;
-
+					if ($this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping()) :
+						foreach ($this->checkout_fields['shipping'] as $key => $field) :
+							
+							if ($this->posted['shiptobilling']) :
+								
+								$field_key = str_replace('shipping_', 'billing_', $key);
+								
+								// Post
+								update_post_meta( $order_id, '_' . $key, $this->posted[$field_key] );
+								
+								// User
+								if ($user_id>0) :
+									update_user_meta( $user_id, $key, $this->posted[$field_key] );
+								endif;
+							else :
+								// Post
+								update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
+								
+								// User
+								if ($user_id>0) :
+									update_user_meta( $user_id, $key, $this->posted[$key] );
+								endif;
+							endif;
+							
+						endforeach;
+					endif;
+					
+					// Save other order meta fields
 					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
@@ -754,31 +607,23 @@ class woocommerce_checkout {
 	
 	/** Gets the value either from the posted data, or from the users meta data */
 	function get_value( $input ) {
-		global $woocommerce;
-		
 		if (isset( $this->posted[$input] ) && !empty($this->posted[$input])) :
 			return $this->posted[$input];
 		elseif (is_user_logged_in()) :
 			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
 			
 			$current_user = wp_get_current_user();
-
-			switch ( $input ) :
-				
-				case "billing_email" :
-					return $current_user->user_email;
-				break;
-				
-			endswitch;
+			if ($input == "billing_email") : 
+				return $current_user->user_email;
+			endif;
+			
 		else :
 			
-			switch ( $input ) :
-				
-				case "billing_country" :
-					return $woocommerce->countries->get_base_country();
-				break;
-				
-			endswitch;
+			global $woocommerce;
+			
+			if ($input == "billing_country") :
+				return $woocommerce->countries->get_base_country();
+			endif;
 			
 		endif;
 	}
