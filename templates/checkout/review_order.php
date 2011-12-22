@@ -86,7 +86,7 @@
 				<td colspan="2"><?php _e('Order Discount', 'woothemes'); ?></td>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr><?php endif; ?>
-			
+			<?php do_action( 'woocommerce_after_review_order_items' ); ?>
 			<tr>
 				<td colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></td>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
