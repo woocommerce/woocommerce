@@ -66,8 +66,10 @@ function woocommerce_front_page_archive_paging_fix() {
 		else :
 			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
 		endif;
-			
-		query_posts( array( 'page_id' => get_option('woocommerce_shop_page_id'), 'is_paged' => true, 'paged' => $paged ) );
+		
+		global $wp_query;
+		
+		$wp_query->query( array( 'page_id' => get_option('woocommerce_shop_page_id'), 'is_paged' => true, 'paged' => $paged ) );
 		
 		define('SHOP_IS_ON_FRONT', true);
 		
@@ -81,33 +83,27 @@ function woocommerce_front_page_archive( $query ) {
 		
 	global $paged, $woocommerce, $wp_the_query, $wp_query;
 	
-	if ( defined('SHOP_IS_ON_FRONT') ) :
-	
-		wp_reset_query();
-		
-		// Only apply to front_page
-		if ( $query === $wp_the_query ) :
+	// Only apply to front_page
+	if ( defined('SHOP_IS_ON_FRONT') && $query === $wp_the_query ) :
 			
-			if (get_query_var('paged')) :
-				$paged = get_query_var('paged'); 
-			else :
-				$paged = (get_query_var('page')) ? get_query_var('page') : 1;
-			endif;
-
-			// Filter the query
-			add_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') );
-			
-			// Query the products
-			$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
-			
-			// get products in view (for use by widgets)
-			$woocommerce->query->get_products_in_view();
-			
-			// Remove the query manipulation
-			remove_filter( 'parse_query', array( &$woocommerce->query, 'parse_query') ); 
-			remove_action('loop_start', 'woocommerce_front_page_archive', 1);
-
+		if (get_query_var('paged')) :
+			$paged = get_query_var('paged'); 
+		else :
+			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
 		endif;
+
+		// Filter the query
+		add_filter( 'parse_query', array( &$woocommerce->query, 'product_query') );
+		
+		// Query the products
+		$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
+		
+		// get products in view (for use by widgets)
+		$woocommerce->query->get_products_in_view();
+		
+		// Remove the query manipulation
+		remove_filter( 'parse_query', array( &$woocommerce->query, 'product_query') ); 
+		remove_action( 'loop_start', 'woocommerce_front_page_archive', 1);
 	
 	endif;
 }
@@ -819,7 +815,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
 	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
-	if (is_admin()) return; // Don't track admin
+	if (current_user_can('manage_options')) return; // Don't track admin
 	
 	$tracking_id = get_option('woocommerce_ga_id');
 	

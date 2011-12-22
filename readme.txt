@@ -2,7 +2,7 @@
 Contributors: woothemes, mikejolley
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
-Requires at least: 3.1
+Requires at least: 3.3
 Tested up to: 3.3
 Stable tag: 1.3.2.1
 
@@ -103,6 +103,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Replaced quantity selector of grouped downloadable products with a button
 * Reworked checkout fields to make them easier to extend
 * Added address meta to users panel
+* Using 3.3 function is_main_query()
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

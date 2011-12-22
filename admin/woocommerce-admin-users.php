@@ -7,6 +7,11 @@
  * @package 	WooCommerce
  */
 
+/**
+ * Define columns to show on the users page
+ */
+add_filter('manage_users_columns', 'woocommerce_user_columns', 10, 1);
+
 function woocommerce_user_columns( $columns ) {
 	if (!current_user_can('manage_woocommerce')) return $columns;
 
@@ -17,6 +22,11 @@ function woocommerce_user_columns( $columns ) {
 	return $columns;
 }
  
+/**
+ * Define values for custom columns
+ */
+add_action('manage_users_custom_column', 'woocommerce_user_column_values', 10, 3);
+
 function woocommerce_user_column_values($value, $column_name, $user_id) {
 	global $woocommerce, $wpdb;
 	switch ($column_name) :
@@ -83,5 +93,28 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 	return $value;
 }
  
-add_filter('manage_users_columns', 'woocommerce_user_columns', 10, 1);
-add_action('manage_users_custom_column', 'woocommerce_user_column_values', 10, 3);
+/**
+ * Show Address Fields on edit user pages
+ */
+
+
+add_action( 'show_user_profile', 'my_show_extra_profile_fields' );
+add_action( 'edit_user_profile', 'my_show_extra_profile_fields' );
+
+function my_show_extra_profile_fields( $user ) { ?>
+
+	<h3>Extra profile information</h3>
+
+	<table class="form-table">
+
+		<tr>
+			<th><label for="twitter">Twitter</label></th>
+
+			<td>
+				<input type="text" name="twitter" id="twitter" value="<?php echo esc_attr( get_the_author_meta( 'twitter', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description">Please enter your Twitter username.</span>
+			</td>
+		</tr>
+
+	</table>
+<?php }

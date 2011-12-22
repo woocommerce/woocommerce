@@ -18,29 +18,39 @@ class woocommerce_query {
 	
 	/** constructor */
 	function __construct() {
-		add_filter( 'parse_query', array( &$this, 'parse_query') );
-		add_action( 'wp', array( &$this, 'remove_parse_query') );
+		add_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+		add_filter( 'wp', array( &$this, 'remove_product_query') );
+	}
+
+	/**
+	 * Hook into pre_get_posts to do the main product query
+	 */
+	function pre_get_posts( $q ) {
+		
+		// Only apply to product categories, the product post archive, the shop page, and product tags
+	    if 	( 
+	    		( !is_main_query() ) || (
+	    			!$q->is_tax( 'product_cat' ) 
+	    			&& !$q->is_tax( 'product_tag' ) 
+	    			&& !$q->is_post_type_archive( 'product' ) 
+	    		)
+	    	) 
+	    return;
+	    
+	    $this->product_query( $q );
+	    
+	    // We're on a shop page so queue the woocommerce_get_products_in_view function
+	    add_action('wp', array( &$this, 'get_products_in_view' ), 2);
+	    
+	    // And remove the pre_get_posts hook
+	    remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
 	}
 	
 	/**
 	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
 	 */
-	function parse_query( $q ) {
+	function product_query( $q ) {
 
-		// Only apply to product categories, the product post archive, the shop page, and product tags
-	    if 	( 
-	    		(
-	    			isset( $q->query_vars['suppress_filters'] ) 
-	    			&& true == $q->query_vars['suppress_filters']
-	    		) || (
-	    			!$q->is_tax( 'product_cat' ) 
-	    			&& !$q->is_tax( 'product_tag' ) 
-	    			&& !$q->is_post_type_archive( 'product' ) 
-	    			// this rule should be covered by the above && !$q->is_page(get_option('woocommerce_shop_page_id')) 
-	    		)
-	    	) 
-	    return;
-		
 		// Meta query
 		$meta_query = (array) $q->get( 'meta_query' );
 	    $meta_query[] = $this->visibility_meta_query();
@@ -66,16 +76,13 @@ class woocommerce_query {
 	    // Store variables
 	    $this->post__in = $post__in;
 	    $this->meta_query = $meta_query;
-	
-	    // We're on a shop page so queue the woocommerce_get_products_in_view function
-	    add_action('wp', array( &$this, 'get_products_in_view' ), 2);
 	}
-	
+
 	/**
-	 * Remove parse_query so it only applies to main loop
+	 * Remove the query
 	 */
-	function remove_parse_query() {
-		remove_filter( 'parse_query', array( &$this, 'parse_query') ); 
+	function remove_product_query() {
+		remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
 	}
 	
 	/**
