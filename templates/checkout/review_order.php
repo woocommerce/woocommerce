@@ -87,10 +87,14 @@
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr><?php endif; ?>
 			
+			<?php do_action('woocommerce_before_order_total'); ?>
+			
 			<tr>
 				<td colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></td>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 			</tr>
+			
+			<?php do_action('woocommerce_after_order_total'); ?>
 		</tfoot>
 		<tbody>
 			<?php
