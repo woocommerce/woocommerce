@@ -540,9 +540,18 @@ function process_product_meta_variable( $post_id ) {
 		for ($i=0; $i<sizeof($variable_sku); $i++) :
 			
 			$variation_id = (int) $variable_post_id[$i];
+			
+			// Virtal/Downloadable
+			if (isset($variable_is_virtual[$i])) $is_virtual = 'yes'; else $is_virtual = 'no';
+			if (isset($variable_is_downloadable[$i])) $is_downloadable = 'yes'; else $is_downloadable = 'no';
 
 			// Enabled or disabled
 			if (isset($variable_enabled[$i])) $post_status = 'publish'; else $post_status = 'private';
+			
+			// Disabled if downloadable and no URL
+			if ($is_downloadable=='yes' && !$variable_file_path[$i]) :
+				$post_status = 'private';
+			endif;
 			
 			// Generate a useful post title
 			$title = array();
@@ -591,10 +600,7 @@ function process_product_meta_variable( $post_id ) {
 
 			update_post_meta( $variation_id, 'stock', $variable_stock[$i] );
 			update_post_meta( $variation_id, '_thumbnail_id', $upload_image_id[$i] );
-			
-			if (isset($variable_is_virtual[$i])) $is_virtual = 'yes'; else $is_virtual = 'no';
-			if (isset($variable_is_downloadable[$i])) $is_downloadable = 'yes'; else $is_downloadable = 'no';
-			
+
 			update_post_meta( $variation_id, 'virtual', $is_virtual );
 			update_post_meta( $variation_id, 'downloadable', $is_downloadable );
 			
