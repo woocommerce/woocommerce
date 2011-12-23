@@ -193,6 +193,40 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
 }
 
 /**
+ * Thumbnail column for categories
+ */
+ add_filter("manage_edit-product_cat_columns", 'woocommerce_product_cat_columns');
+ add_filter("manage_product_cat_custom_column", 'woocommerce_product_cat_column', 10, 3);	
+  
+ function woocommerce_product_cat_columns( $columns ) {
+ 	$new_columns = array();
+ 	$new_columns['cb'] = $columns['cb'];
+ 	$new_columns['thumb'] = __('Image', 'woothemes');
+ 	unset($columns['cb']);
+ 	$columns = array_merge( $new_columns, $columns );
+ 	return $columns;
+ }
+ 
+ function woocommerce_product_cat_column( $columns, $column, $id ) {
+ 	if ($column=='thumb') :
+ 		global $woocommerce;
+ 		
+ 		$image 			= '';
+ 		$thumbnail_id 	= get_woocommerce_term_meta( $id, 'thumbnail_id', true );
+ 		if ($thumbnail_id) :
+ 			$image = wp_get_attachment_url( $thumbnail_id );
+ 		else :
+ 			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+ 		endif;
+ 		
+ 		$columns .= '<img src="'.$image.'" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
+ 	
+ 	endif;
+ 	
+ 	return $columns;	
+ }
+
+/**
  * Configure button for shipping classes page
  */
  add_filter("manage_edit-product_shipping_class_columns", 'woocommerce_shipping_class_columns');
