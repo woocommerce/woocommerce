@@ -329,7 +329,7 @@ class woocommerce {
 			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
 			exit;
 		// Break out of SSL if we leave the checkout (anywhere but thanks page)
-		elseif (is_ssl() && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(get_option('woocommerce_thanks_page_id')) && !is_ajax()) :
+		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(get_option('woocommerce_thanks_page_id')) && !is_ajax()) :
 			wp_safe_redirect( str_replace('https:', 'http:', home_url($_SERVER['REQUEST_URI']) ) );
 			exit;
 		endif;
