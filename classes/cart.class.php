@@ -1229,9 +1229,10 @@ class woocommerce_cart {
 		 * gets the cart tax (after calculation)
 		 */
 		function get_cart_tax() {
+			$return = false;
 			$cart_total_tax = $this->tax_total + $this->shipping_tax_total;
-			if ($cart_total_tax > 0) return woocommerce_price( $cart_total_tax );
-			return false;
+			if ($cart_total_tax > 0) $return = woocommerce_price( $cart_total_tax );
+			return apply_filters('woocommerce_get_cart_tax', $return);
 		}	
 		
 		/**
