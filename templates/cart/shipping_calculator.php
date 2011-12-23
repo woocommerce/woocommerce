@@ -13,25 +13,24 @@ if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart-
 <form class="shipping_calculator" action="<?php echo esc_url( $woocommerce->cart->get_cart_url() ); ?>" method="post">
 	<h2><a href="#" class="shipping-calculator-button"><?php _e('Calculate Shipping', 'woothemes'); ?> <span>&darr;</span></a></h2>
 	<section class="shipping-calculator-form">
-	<p class="form-row">
-		<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
-			<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
-			<?php
-				foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
-					echo '<option value="'.$key.'"';
-					if ($woocommerce->customer->get_shipping_country()==$key) echo 'selected="selected"';
-					echo '>'.$value.'</option>';
-				endforeach;
-			?>
-		</select>
-	</p>
-	<div class="col2-set">
-		<p class="form-row col-1">
+		<p class="form-row form-row-first">
+			<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
+				<option value=""><?php _e('Select a country&hellip;', 'woothemes'); ?></option>
+				<?php
+					foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
+						echo '<option value="'.$key.'"';
+						if ($woocommerce->customer->get_shipping_country()==$key) echo 'selected="selected"';
+						echo '>'.$value.'</option>';
+					endforeach;
+				?>
+			</select>
+		</p>
+		<p class="form-row form-row-last">
 			<?php
 				$current_cc = $woocommerce->customer->get_shipping_country();
 				$current_r = $woocommerce->customer->get_shipping_state();
 				$states = $woocommerce->countries->states;
-
+	
 				if (isset( $states[$current_cc][$current_r] )) :
 					// Dropdown
 					?>
@@ -53,12 +52,13 @@ if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart-
 				endif;
 			?>
 		</p>
-		<p class="form-row col-2">
+		<div class="clear"></div>
+		<p class="form-row form-row-wide">
 			<input type="text" class="input-text" value="<?php echo esc_attr( $woocommerce->customer->get_shipping_postcode() ); ?>" placeholder="<?php _e('Postcode/Zip', 'woothemes'); ?>" title="<?php _e('Postcode', 'woothemes'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
 		</p>
-	</div>
-	<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woothemes'); ?></button></p>
-	<?php $woocommerce->nonce_field('cart') ?>
+	
+		<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woothemes'); ?></button></p>
+		<?php $woocommerce->nonce_field('cart') ?>
 	</section>
 </form>
 
