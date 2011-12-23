@@ -40,12 +40,12 @@ msgstr "Şehir seçin&hellip;"
 msgid "state"
 msgstr "sehir"
 
-#: woocommerce-functions.php:981
+#: woocommerce-functions.php:977
 #@ woothemes
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr "Çok uzun zaman olmuş. Lütfen geri dönün ve sayfayı yenileyin."
 
-#: woocommerce-functions.php:984
+#: woocommerce-functions.php:980
 #@ woothemes
 msgid "Please rate the product."
 msgstr "Lütfen ürün için oy verin."
@@ -146,146 +146,146 @@ msgstr "Daha Fazla Satış"
 msgid "No products found"
 msgstr "Ürün bulunamadı"
 
-#: woocommerce-functions.php:177
-#: woocommerce-functions.php:197
+#: woocommerce-functions.php:173
+#: woocommerce-functions.php:193
 #@ woothemes
 msgid "Cart updated."
 msgstr "Sepet güncellendi..."
 
-#: woocommerce-functions.php:345
+#: woocommerce-functions.php:341
 #, php-format
 #@ woothemes
 msgid "<a href=\"%s\" class=\"button\">View Cart &rarr;</a> Product successfully added to your cart."
 msgstr "<a href=\"%s\" class=\"button\">Sepeti Görüntüle &rarr;</a>Seçtiğiniz ürün sepetinize eklendi."
 
-#: woocommerce-functions.php:226
-#: woocommerce-functions.php:264
+#: woocommerce-functions.php:222
+#: woocommerce-functions.php:260
 #@ woothemes
 msgid "Please choose product options&hellip;"
 msgstr "Lütfen ürün seçeneklerini seçin&hellip;"
 
-#: woocommerce-functions.php:290
+#: woocommerce-functions.php:286
 #@ woothemes
 msgid "Please choose a quantity&hellip;"
 msgstr "Lütfen sepete eklemek istediğiniz miktarı seçin..."
 
-#: woocommerce-functions.php:296
+#: woocommerce-functions.php:292
 #@ woothemes
 msgid "Please choose a product&hellip;"
 msgstr "Lütfen bir ürün seçin&hellip;"
 
-#: woocommerce-functions.php:398
+#: woocommerce-functions.php:394
 #@ woothemes
 msgid "Username is required."
 msgstr "Kullanıcı adı zorunlu"
 
-#: woocommerce-functions.php:399
-#: woocommerce-functions.php:484
+#: woocommerce-functions.php:395
+#: woocommerce-functions.php:480
 #@ woothemes
 msgid "Password is required."
 msgstr "Şifre zorunlu"
 
 #: widgets/widget-login.php:227
-#: woocommerce-functions.php:465
+#: woocommerce-functions.php:461
 #@ woothemes
 msgid "<strong>ERROR</strong>: Please enter a username."
 msgstr "<strong>Hata</strong>: Lütfen bir kullanıcı adı girin."
 
-#: woocommerce-functions.php:467
+#: woocommerce-functions.php:463
 #@ woothemes
 msgid "<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username."
 msgstr "<strong>HATA</strong>: Geçersiz kullanıcı adı.Geçersiz karakterler kullandınız. Lütfen geçerli bir kullanıcı adı giriniz."
 
-#: woocommerce-functions.php:470
+#: woocommerce-functions.php:466
 #@ woothemes
 msgid "<strong>ERROR</strong>: This username is already registered, please choose another one."
 msgstr "<strong>HATA</strong>: Bu kullanıcı adı kayıtlı. Lütfen başka bir kullanıcı adı giriniz."
 
-#: woocommerce-functions.php:475
+#: woocommerce-functions.php:471
 #@ woothemes
 msgid "<strong>ERROR</strong>: Please type your e-mail address."
 msgstr "<strong>HATA</strong>: Lütfen e-posta adresinizi giriniz."
 
-#: woocommerce-functions.php:477
+#: woocommerce-functions.php:473
 #@ woothemes
 msgid "<strong>ERROR</strong>: The email address isn&#8217;t correct."
 msgstr "<strong>ERROR</strong>: E-posta adresiniz doğru değil."
 
-#: woocommerce-functions.php:480
+#: woocommerce-functions.php:476
 #@ woothemes
 msgid "<strong>ERROR</strong>: This email is already registered, please choose another one."
 msgstr "<strong>HATA</strong>: Bu e-posta adresi zaten kayıtlı. Lütfen başka bir e-posta adresi giriniz."
 
-#: woocommerce-functions.php:485
+#: woocommerce-functions.php:481
 #@ woothemes
 msgid "Re-enter your password."
 msgstr "Şifrenizi tekrar girin."
 
 #: classes/checkout.class.php:282
 #: shortcodes/shortcode-my_account.php:226
-#: woocommerce-functions.php:486
+#: woocommerce-functions.php:482
 #@ woothemes
 msgid "Passwords do not match."
 msgstr "Şifreniz eşleşmiyor."
 
-#: woocommerce-functions.php:489
+#: woocommerce-functions.php:485
 #@ woothemes
 msgid "Anti-spam field was filled in."
 msgstr "Anti-spam alanının doldurulması gerekir."
 
 #: classes/checkout.class.php:344
-#: woocommerce-functions.php:503
+#: woocommerce-functions.php:499
 #, php-format
 #@ woothemes
 msgid "<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href=\"mailto:%s\">webmaster</a> !"
 msgstr "<strong>HATA</strong>: Kayıt edilemedi... Lütfen <a href=\"mailto:%s\">yönetici</a> ile irtibata geçiniz!"
 
-#: woocommerce-functions.php:553
+#: woocommerce-functions.php:549
 #@ woothemes
 msgid "Order cancelled by customer."
 msgstr "Sipariş müşteri tarafından iptal edildi."
 
-#: woocommerce-functions.php:556
+#: woocommerce-functions.php:552
 #@ woothemes
 msgid "Your order was cancelled."
 msgstr "Siparişiniz iptal edildi."
 
-#: woocommerce-functions.php:560
+#: woocommerce-functions.php:556
 #@ woothemes
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr "Beklemede olan siparişinizi iptal edemezsiniz. Eğer yardıma ihtiyacınız varsa lütfen bizimle irtibata geçin."
 
 #: shortcodes/shortcode-pay.php:81
-#: woocommerce-functions.php:564
+#: woocommerce-functions.php:560
 #@ woothemes
 msgid "Invalid order."
 msgstr "Geçersiz sipariş."
 
-#: woocommerce-functions.php:588
+#: woocommerce-functions.php:584
 #, php-format
 #@ woothemes
 msgid "Invalid email address. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Geçersiz e-posta adresi. <a href=\"%s\">Anasayfaya git&rarr;</a>"
 
-#: woocommerce-functions.php:600
+#: woocommerce-functions.php:596
 #, php-format
 #@ woothemes
 msgid "Invalid download. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Geçersiz indirme. <a href=\"%s\">Ana sayfaya git &rarr;</a>"
 
-#: woocommerce-functions.php:610
+#: woocommerce-functions.php:606
 #, php-format
 #@ woothemes
 msgid "Invalid order. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Geçersiz sipariş. <a href=\"%s\">Ana sayfaya git &rarr;</a>"
 
-#: woocommerce-functions.php:616
+#: woocommerce-functions.php:612
 #, php-format
 #@ woothemes
 msgid "Sorry, you have reached your download limit for this file. <a href=\"%s\">Go to homepage &rarr;</a>"
 msgstr "Üzgünüm, bu dosya indirme limitine ulaşmıştır. <a href=\"%s\">Ana sayfaya git &rarr;</a>"
 
-#: woocommerce-functions.php:760
+#: woocommerce-functions.php:756
 #, php-format
 #@ woothemes
 msgid "File not found. <a href=\"%s\">Go to homepage &rarr;</a>"
@@ -294,24 +294,24 @@ msgstr "Dosya bulunamadı. <a href=\"%s\">Ana sayfaya git &rarr;</a>"
 #: admin/post-types/shop_order.php:62
 #: admin/post-types/writepanels/writepanel-order_data.php:71
 #: admin/woocommerce-admin-reports.php:301
-#: woocommerce-functions.php:791
-#: woocommerce-functions.php:841
+#: woocommerce-functions.php:787
+#: woocommerce-functions.php:837
 #@ woothemes
 msgid "Guest"
 msgstr "Misafir"
 
-#: woocommerce-functions.php:943
+#: woocommerce-functions.php:939
 #@ woothemes
 msgid "New products"
 msgstr "Yeni ürün"
 
-#: woocommerce-functions.php:951
+#: woocommerce-functions.php:947
 #, php-format
 #@ woothemes
 msgid "New products added to %s"
 msgstr "%s yeni ürünler eklendi"
 
-#: woocommerce-functions.php:959
+#: woocommerce-functions.php:955
 #, php-format
 #@ woothemes
 msgid "New products tagged %s"
@@ -811,7 +811,7 @@ msgid "Parent Variation"
 msgstr "Üst Varyasyon"
 
 #: admin/woocommerce-admin-dashboard.php:64
-#: admin/woocommerce-admin-users.php:16
+#: admin/woocommerce-admin-users.php:21
 #: woocommerce.php:657
 #@ woothemes
 msgid "Orders"
@@ -948,7 +948,7 @@ msgid "Show all categories"
 msgstr "Tüm kategorileri göster"
 
 #: widgets/widget-login.php:58
-#: woocommerce-functions.php:142
+#: woocommerce-functions.php:138
 #@ woothemes
 msgid "Logout"
 msgstr "Çıkış"
@@ -1317,7 +1317,7 @@ msgid "Telephone:"
 msgstr "Telefon:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:116
-#: admin/woocommerce-admin-users.php:14
+#: admin/woocommerce-admin-users.php:19
 #: classes/checkout.class.php:123
 #: templates/myaccount/edit-address.php:13
 #: templates/myaccount/my-account.php:116
@@ -1329,8 +1329,8 @@ msgstr "Sevk Adresi"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:45
 #: admin/post-types/writepanels/writepanel-coupon_data.php:48
-#: admin/woocommerce-admin-users.php:51
-#: admin/woocommerce-admin-users.php:70
+#: admin/woocommerce-admin-users.php:61
+#: admin/woocommerce-admin-users.php:80
 #: templates/order/order-details-table.php:114
 #: templates/order/order-details-table.php:127
 #@ woothemes
@@ -1338,7 +1338,7 @@ msgid "N/A"
 msgstr "yok"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:88
-#: admin/woocommerce-admin-users.php:13
+#: admin/woocommerce-admin-users.php:18
 #: classes/checkout.class.php:70
 #: templates/myaccount/edit-address.php:13
 #: templates/myaccount/my-account.php:88
@@ -1919,7 +1919,7 @@ msgstr "Fatura"
 
 #: admin/post-types/shop_order.php:24
 #: templates/cart/totals.php:83
-#: templates/checkout/review_order.php:91
+#: templates/checkout/review_order.php:93
 #@ woothemes
 msgid "Order Total"
 msgstr "Sipariş Toplamı"
@@ -6895,37 +6895,37 @@ msgstr "Mevcut sevkiyat yöntemlerini görmek için yukarıdaki bilgileri doldur
 msgid "Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr "Üzgünüz, bu ülke için her hangi bir sevkiyat yöntemi bulunmamakta. Yardıma ihtiyaç duyuyor yada alternatif düzenlemeler yapmak istiyorsanız bizimle irtibata geçiniz."
 
-#: templates/checkout/review_order.php:147
+#: templates/checkout/review_order.php:151
 #@ woothemes
 msgid "Please fill in your details above to see available payment methods."
 msgstr "Mevcut ödeme yöntemlerini görmek için yukarıdaki bilgilerinizi doldurunuz."
 
-#: templates/checkout/review_order.php:149
+#: templates/checkout/review_order.php:153
 #@ woothemes
 msgid "Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr "Üzgünüz, bu ülke için her hangi bir ödeme yöntemi bulunmamaktadır. Yardıma ihtiyaç duyuyor veya alternatif düzenlemeler yapmak istiyorsanız lütfen bizimle irtibata geçin."
 
-#: templates/checkout/review_order.php:159
+#: templates/checkout/review_order.php:163
 #@ woothemes
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
 msgstr "Web tarayıcınız JavaScripti desteklemiyor yada tarayıcınızın bu özelliği kapalı. Lütfen, sipariş vermeden önce <em> Toplamları Güncelle </em> butonuna tıklayın. Bunu yapmazsanız sipariş toplamından faklı bsir ücret ödemeniz söz konusu olabilir."
 
-#: templates/checkout/review_order.php:159
+#: templates/checkout/review_order.php:163
 #@ woothemes
 msgid "Update totals"
 msgstr "Toplamlar güncellendi"
 
-#: templates/checkout/review_order.php:165
+#: templates/checkout/review_order.php:169
 #@ woothemes
 msgid "Place order"
 msgstr "Siparişi Onayla"
 
-#: templates/checkout/review_order.php:169
+#: templates/checkout/review_order.php:173
 #@ woothemes
 msgid "I accept the"
 msgstr "Evet okudum."
 
-#: templates/checkout/review_order.php:169
+#: templates/checkout/review_order.php:173
 #@ woothemes
 msgid "terms &amp; conditions"
 msgstr "Şartları &amp; koşulları kabul ediyorum."
@@ -8261,7 +8261,7 @@ msgstr "Sıralama Koşulu:"
 msgid "Category Order"
 msgstr "Kategori Sırası"
 
-#: woocommerce-functions.php:342
+#: woocommerce-functions.php:338
 #, php-format
 #@ woothemes
 msgid "<a href=\"%s\" class=\"button\">Continue Shopping &rarr;</a> Product successfully added to your cart."
@@ -8344,7 +8344,7 @@ msgstr "Güvenlik"
 msgid "Ship to billing address by default"
 msgstr "Varsayılan: \\\"Fatura Adresine Nakliye\\\""
 
-#: admin/woocommerce-admin-users.php:15
+#: admin/woocommerce-admin-users.php:20
 #@ woothemes
 msgid "Paying Customer?"
 msgstr ""
@@ -8364,4 +8364,10 @@ msgstr "geçerli bir sayı değil."
 #@ woothemes
 msgid "is not a valid email address."
 msgstr "geçerli bir e-posta değil."
+
+#: templates/emails/customer_pay_for_order.php:9
+#, php-format
+#@ woothemes
+msgid "An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: <a href=\"%s\">Pay</a>"
+msgstr ""
 
