@@ -633,7 +633,7 @@ class woocommerce_order {
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'quantity' => $values['quantity']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $this->id, 'quantity' => $values['quantity']));
 						endif;
 						
 						// stock status notifications

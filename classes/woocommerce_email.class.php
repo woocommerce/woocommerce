@@ -302,7 +302,8 @@ class woocommerce_email {
 	
 		$defaults = array(
 			'product' => '',
-			'quantity' => ''
+			'quantity' => '',
+			'order_id' => ''
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -317,7 +318,7 @@ class woocommerce_email {
 	
 		$message = $this->wrap_message( 
 			__('Product Backorder', 'woothemes'),
-			$quantity . __(' units of #', 'woothemes') . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('have been backordered.', 'woothemes')
+			sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woothemes'), $quantity, $_product->id, $_product->get_title(), $_product->sku, $order_id )
 		);
 	
 		// Send the mail

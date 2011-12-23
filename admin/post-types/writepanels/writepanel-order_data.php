@@ -546,7 +546,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						$order->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $order_item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'quantity' => $values['quantity']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $post_id, 'quantity' => $order_item['qty']));
 						endif;
 						
 						// stock status notifications

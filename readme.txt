@@ -105,6 +105,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added address meta to users panel
 * Using 3.3 function is_main_query()
 * Fixed price display if taxes disabled
+* Backorder notifications show order #
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
