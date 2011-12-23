@@ -50,7 +50,7 @@ function woocommerce_admin_init() {
 		include_once( 'post-types/post-types-init.php' );
 	elseif ( $pagenow=='edit-tags.php' ) :
 		include_once( 'woocommerce-admin-taxonomies.php' );
-	elseif ( $pagenow=='users.php' ) :
+	elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) :
 		include_once( 'woocommerce-admin-users.php' );
 	endif;
 }

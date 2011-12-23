@@ -103,6 +103,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Replaced quantity selector of grouped downloadable products with a button
 * Reworked checkout fields to make them easier to extend
 * Added address meta to users panel
+* Added address data to edit users screen
 * Using 3.3 function is_main_query()
 * Fixed price display if taxes disabled
 * Backorder notifications show order #

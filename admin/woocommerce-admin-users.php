@@ -96,25 +96,115 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 /**
  * Show Address Fields on edit user pages
  */
+add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
+add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
 
+function woocommerce_customer_meta_fields( $user ) { 
+	if (!current_user_can('manage_woocommerce')) return $columns;
 
-add_action( 'show_user_profile', 'my_show_extra_profile_fields' );
-add_action( 'edit_user_profile', 'my_show_extra_profile_fields' );
-
-function my_show_extra_profile_fields( $user ) { ?>
-
-	<h3>Extra profile information</h3>
-
-	<table class="form-table">
-
-		<tr>
-			<th><label for="twitter">Twitter</label></th>
-
-			<td>
-				<input type="text" name="twitter" id="twitter" value="<?php echo esc_attr( get_the_author_meta( 'twitter', $user->ID ) ); ?>" class="regular-text" /><br />
-				<span class="description">Please enter your Twitter username.</span>
-			</td>
-		</tr>
-
-	</table>
-<?php }
+	$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
+		'billing' => array(
+			'title' => __('Customer Billing Address', 'woothemes'),
+			'fields' => array(
+				'billing_first_name' => array(
+						'label' => __('First name', 'woothemes'),
+						'description' => ''
+					),
+				'billing_last_name' => array(
+						'label' => __('Last name', 'woothemes'),
+						'description' => ''
+					),
+				'billing_address_1' => array(
+						'label' => __('Address 1', 'woothemes'),
+						'description' => ''
+					),
+				'billing_address_2' => array(
+						'label' => __('Address 2', 'woothemes'),
+						'description' => ''
+					),
+				'billing_city' => array(
+						'label' => __('City', 'woothemes'),
+						'description' => ''
+					),
+				'billing_postcode' => array(
+						'label' => __('Postcode', 'woothemes'),
+						'description' => ''
+					),
+				'billing_state' => array(
+						'label' => __('State/County', 'woothemes'),
+						'description' => 'Country or state code'
+					),
+				'billing_country' => array(
+						'label' => __('Country', 'woothemes'),
+						'description' => '2 letter Country code'
+					),
+				'billing_phone' => array(
+						'label' => __('Telephone', 'woothemes'),
+						'description' => ''
+					),
+				'billing_email' => array(
+						'label' => __('Email', 'woothemes'),
+						'description' => ''
+					)
+			)
+		),
+		'shipping' => array(
+			'title' => __('Customer Shipping Address', 'woothemes'),
+			'fields' => array(
+				'shipping_first_name' => array(
+						'label' => __('First name', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_last_name' => array(
+						'label' => __('Last name', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_address_1' => array(
+						'label' => __('Address 1', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_address_2' => array(
+						'label' => __('Address 2', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_city' => array(
+						'label' => __('City', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_postcode' => array(
+						'label' => __('Postcode', 'woothemes'),
+						'description' => ''
+					),
+				'shipping_state' => array(
+						'label' => __('State/County', 'woothemes'),
+						'description' => __('State/County or state code', 'woothemes')
+					),
+				'shipping_country' => array(
+						'label' => __('Country', 'woothemes'),
+						'description' => __('2 letter Country code', 'woothemes')
+					)
+			)
+		)
+	));
+	
+	foreach( $show_fields as $fieldset ) :
+		?>
+		<h3><?php echo $fieldset['title']; ?></h3>
+		<table class="form-table">
+			<?php
+			foreach( $fieldset['fields'] as $key => $field ) :
+				?>
+				<tr>
+					<th><label for="<?php echo $key; ?>"><?php echo $field['label']; ?></label></th>
+					<td>
+						<input type="text" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="regular-text" /><br/>
+						<span class="description"><?php echo $field['description']; ?></span>
+					</td>
+				</tr>
+				<?php
+			endforeach;
+			?>
+		</table>
+		<?php
+	endforeach;
+}
