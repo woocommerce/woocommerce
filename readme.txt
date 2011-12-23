@@ -104,6 +104,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Reworked checkout fields to make them easier to extend
 * Added address meta to users panel
 * Using 3.3 function is_main_query()
+* Fixed price display if taxes disabled
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

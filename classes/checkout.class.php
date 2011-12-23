@@ -381,10 +381,19 @@ class woocommerce_checkout {
 						
 						$_product = $values['data'];
 			
-						// Calc item tax to store
-						$rate = '';
+						// Calc item tax to store if taxable
 						if ( $_product->is_taxable()) :
 							$rate = $_tax->get_rate( $_product->get_tax_class() );
+							
+							if (get_option('woocommerce_prices_include_tax')=='yes') :
+								$base_rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->tax_class );
+								$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
+							else :
+								$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
+							endif;
+						else :
+							$rate = '';
+							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
 						endif;
 						
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
@@ -397,14 +406,6 @@ class woocommerce_checkout {
 							foreach ($values['variation'] as $key => $value) :
 								$item_meta->add( esc_attr(str_replace('attribute_', '', $key)), $value );
 							endforeach;
-						endif;
-						
-						// Calculate discounted price ex. vat
-						if (get_option('woocommerce_prices_include_tax')=='yes') :
-							$base_rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->tax_class );
-							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
-						else :
-							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
 						endif;
 						
 						$order_items[] = apply_filters('new_order_item', array(

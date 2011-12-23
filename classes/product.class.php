@@ -270,7 +270,7 @@ class woocommerce_product {
 	
 	/** Returns whether or not the product is taxable */
 	function is_taxable() {
-		if ($this->tax_status=='taxable') return true;
+		if ($this->tax_status=='taxable' && get_option('woocommerce_calc_taxes')=='yes') return true;
 		return false;
 	}
 	
@@ -495,7 +495,7 @@ class woocommerce_product {
 		
 		$price = $this->price;
 			
-		if (get_option('woocommerce_prices_include_tax')=='yes') :
+		if ( $this->is_taxable() ) :
 		
 			if ( $rate = $this->get_tax_base_rate() ) :
 				
@@ -504,16 +504,6 @@ class woocommerce_product {
 					$_tax = &new woocommerce_tax();
 
 					if ($round) :
-						
-						//$tax_amount = round( $_tax->calc_tax( $price, $rate, true ) , 2);
-					
-						//$price = $price - $tax_amount;
-					
-						// Round
-						//$price = round( $price * 100 ) / 100;
-						
-						// Format
-						//$price = number_format($price, 2, '.', '');
 						
 						$tax_amount = round( $_tax->calc_tax( $price, $rate, true ), 4);
 					
@@ -543,7 +533,7 @@ class woocommerce_product {
 	/** Returns the base tax rate */
 	function get_tax_base_rate() {
 		
-		if ( $this->is_taxable() && get_option('woocommerce_calc_taxes')=='yes') :
+		if ( $this->is_taxable() ) :
 			
 			$_tax = &new woocommerce_tax();
 			$rate = $_tax->get_shop_base_rate( $this->tax_class ); // Get tax class directly - ignore filters

@@ -23,6 +23,7 @@ class woocommerce_order {
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
 	function woocommerce_order( $id='' ) {
+		$this->calc_taxes = (get_option('woocommerce_calc_taxes')=='yes') ? true : false;
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
@@ -379,10 +380,13 @@ class woocommerce_order {
 				<td style="text-align:left; border: 1px solid #eee;">';
 				
 					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
-							
-					if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
-						if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
+					
+					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
+					
+						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
+						
 						$return .= woocommerce_price( $item['base_cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
+						
 					else :
 						$return .= woocommerce_price( round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
 					endif;
