@@ -109,7 +109,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Backorder notifications show order #
 * Product data write panel tweaks
 * Enabled product custom fields panel
-* Renamed custom fields for product data - upgrade script will run when upgrading
+* Renamed custom fields for product data - upgrade script will run when upgrading. Some themes may be affected if using 'featured' - it is now '_featured'
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
