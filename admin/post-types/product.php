@@ -509,7 +509,7 @@ function woocommerce_admin_product_search( $wp ) {
 			
 		if( !$sku ) return; 
 		
-		$id = $wpdb->get_var('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key="sku" AND meta_value LIKE "%'.$sku.'%";');
+		$id = $wpdb->get_var('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key="_sku" AND meta_value LIKE "%'.$sku.'%";');
 		
 		if( !$id ) return; 
 

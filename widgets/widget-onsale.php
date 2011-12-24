@@ -64,7 +64,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		
 			$meta_query = array();
 		    $meta_query[] = array(
-		    	'key' => 'sale_price',
+		    	'key' => '_sale_price',
 		        'value' 	=> 0,
 				'compare' 	=> '>',
 				'type'		=> 'NUMERIC'

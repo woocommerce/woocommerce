@@ -154,7 +154,7 @@ class woocommerce_query {
 			case 'price' :
 				$orderby = 'meta_value_num';
 				$order = 'asc';
-				$meta_key = 'price';
+				$meta_key = '_price';
 			break;
 			default :
 				$orderby = 'title';
@@ -179,7 +179,7 @@ class woocommerce_query {
 		if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
 	
 	    $meta_query = array(
-	        'key' => 'visibility',
+	        'key' => '_visibility',
 	        'value' => $in,
 	        'compare' => $compare
 	    );
@@ -194,7 +194,7 @@ class woocommerce_query {
 		$meta_query = array();
 		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
 			 $meta_query = array(
-		        'key' 		=> 'stock_status',
+		        'key' 		=> '_stock_status',
 				'value' 	=> $status,
 				'compare' 	=> '='
 		    );

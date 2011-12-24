@@ -49,7 +49,7 @@ function woocommerce_price_filter( $filtered_posts ) {
 			'posts_per_page' => -1,
 			'meta_query' => array(
 				array(
-					'key' => 'price',
+					'key' => '_price',
 					'value' => array( $_GET['min_price'], $_GET['max_price'] ),
 					'type' => 'NUMERIC',
 					'compare' => 'BETWEEN'
@@ -140,14 +140,14 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_key = 'price'"));
+			WHERE meta_key = '_price'"));
 
 		else :
 		
 			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_key = 'price' AND (
+			WHERE meta_key = '_price' AND (
 				$wpdb->posts.ID IN (".implode(',', $woocommerce->query->layered_nav_product_ids).") 
 				OR (
 					$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")

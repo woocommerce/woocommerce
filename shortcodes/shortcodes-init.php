@@ -44,7 +44,7 @@ function woocommerce_product_category($atts){
 		'posts_per_page' => $per_page,
 		'meta_query' => array(
 			array(
-				'key' => 'visibility',
+				'key' => '_visibility',
 				'value' => array('catalog', 'visible'),
 				'compare' => 'IN'
 			)
@@ -92,7 +92,7 @@ function woocommerce_recent_products( $atts ) {
 		'order' => $order,
 		'meta_query' => array(
 			array(
-				'key' => 'visibility',
+				'key' => '_visibility',
 				'value' => array('catalog', 'visible'),
 				'compare' => 'IN'
 			)
@@ -131,7 +131,7 @@ function woocommerce_products($atts){
 		'order' => $order,
 		'meta_query' => array(
 			array(
-				'key' => 'visibility',
+				'key' => '_visibility',
 				'value' => array('catalog', 'visible'),
 				'compare' => 'IN'
 			)
@@ -142,7 +142,7 @@ function woocommerce_products($atts){
 		$skus = explode(',', $atts['skus']);
 	  	array_walk($skus, create_function('&$val', '$val = trim($val);'));
     	$args['meta_query'][] = array(
-      		'key' => 'sku',
+      		'key' => '_sku',
       		'value' => $skus,
       		'compare' => 'IN'
     	);
@@ -174,7 +174,7 @@ function woocommerce_product($atts){
     	'post_status' => 'publish',
     	'meta_query' => array(
 			array(
-				'key' => 'visibility',
+				'key' => '_visibility',
 				'value' => array('catalog', 'visible'),
 				'compare' => 'IN'
 			)
@@ -183,7 +183,7 @@ function woocommerce_product($atts){
   
   	if(isset($atts['sku'])){
     	$args['meta_query'][] = array(
-      		'key' => 'sku',
+      		'key' => '_sku',
       		'value' => $atts['sku'],
       		'compare' => '='
     	);
@@ -215,7 +215,7 @@ function woocommerce_product_add_to_cart($atts){
   	if ($atts['id']) :
   		$product_data = get_post( $atts['id'] );
 	elseif ($atts['sku']) :
-		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
+		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
 		$product_data = get_post( $product_id );
 	else :
 		return;
@@ -252,7 +252,7 @@ function woocommerce_product_add_to_cart_url( $atts ){
   	if ($atts['id']) :
   		$product_data = get_post( $atts['id'] );
 	elseif ($atts['sku']) :
-		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
+		$product_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s' LIMIT 1", $atts['sku']));
 		$product_data = get_post( $product_id );
 	else :
 		return;
@@ -291,12 +291,12 @@ function woocommerce_featured_products( $atts ) {
 		'order' => $order,
 		'meta_query' => array(
 			array(
-				'key' => 'visibility',
+				'key' => '_visibility',
 				'value' => array('catalog', 'visible'),
 				'compare' => 'IN'
 			),
 			array(
-				'key' => 'featured',
+				'key' => '_featured',
 				'value' => 'yes'
 			)
 		)

@@ -492,7 +492,7 @@ function woocommerce_add_order_item() {
 			SELECT post_id
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-			WHERE $wpdb->postmeta.meta_key = 'sku'
+			WHERE $wpdb->postmeta.meta_key = '_sku'
 			AND $wpdb->posts.post_status = 'publish'
 			AND $wpdb->posts.post_type = 'shop_product'
 			AND $wpdb->postmeta.meta_value = %s
