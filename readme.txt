@@ -107,6 +107,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Using 3.3 function is_main_query()
 * Fixed price display if taxes disabled
 * Backorder notifications show order #
+* Product data write panel tweaks
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
