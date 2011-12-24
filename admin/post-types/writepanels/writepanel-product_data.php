@@ -40,8 +40,6 @@ function woocommerce_product_data_box() {
 			
 			<li class="grouping_tab show_if_simple"><a href="#grouping_product_data"><?php _e('Grouping', 'woothemes'); ?></a></li>
 			
-			<li class="downloads_tab show_if_downloadable"><a href="#downloadable_product_data"><?php _e('Downloads', 'woothemes'); ?></a></li>
-			
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
 		</ul>
@@ -72,7 +70,7 @@ function woocommerce_product_data_box() {
 				woocommerce_wp_text_input( array( 'id' => 'regular_price', 'label' => __('Regular Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')' ) );
 				
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')' ) );
+				woocommerce_wp_text_input( array( 'id' => 'sale_price', 'label' => __('Sale Price', 'woothemes') . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __('Schedule', 'woothemes') . '</a>' ) );
 						
 				// Special Price date range
 				$field = array( 'id' => 'sale_price_dates', 'label' => __('Sale Price Dates', 'woothemes') );
@@ -88,14 +86,14 @@ function woocommerce_product_data_box() {
 							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
 				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
 				echo '" placeholder="' . __('To&hellip;', 'woothemes') . '" maxlength="10" />
-							<span class="description">' . __('Date format', 'woothemes') . ': <code>YYYY-MM-DD</code></span>
+							<a href="#" class="cancel_sale_schedule">'. __('Cancel', 'woothemes') .'</a>
 						</p>';
 						
 				do_action('woocommerce_product_options_pricing');
 					
 			echo '</div>';
 			
-			echo '<div class="options_group">';
+			echo '<div class="options_group hide_if_virtual">';
 			
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
@@ -120,6 +118,27 @@ function woocommerce_product_data_box() {
 				
 				do_action('woocommerce_product_options_dimensions');
 			
+			echo '</div>';
+			
+			echo '<div class="options_group show_if_downloadable">';
+			
+				// File URL
+				$file_path = get_post_meta($post->ID, 'file_path', true);
+				$field = array( 'id' => 'file_path', 'label' => __('File path', 'woothemes') );
+				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label>
+					<input type="text" class="short file_path" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woothemes').'" />
+					<input type="button"  class="upload_file_button button" value="'.__('Upload a file', 'woothemes').'" />
+				</p>';
+					
+				// Download Limit
+				$download_limit = get_post_meta($post->ID, 'download_limit', true);
+				$field = array( 'id' => 'download_limit', 'label' => __('Download Limit', 'woothemes') );
+				echo '<p class="form-field">
+					<label for="'.$field['id'].'">'.$field['label'].':</label>
+					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$download_limit.'" placeholder="'.__('Unlimited', 'woothemes').'" /> <span class="description">' . __('Leave blank for unlimited re-downloads.', 'woothemes') . '</span></p>';
+				
+				do_action('woocommerce_product_options_downloads');
+				
 			echo '</div>';
 			
 			do_action('woocommerce_product_options_general_product_data');
@@ -153,14 +172,15 @@ function woocommerce_product_data_box() {
 		<div id="inventory_product_data" class="panel woocommerce_options_panel">
 			
 			<?php
-			// manage stock
-			woocommerce_wp_checkbox( array( 'id' => 'manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woothemes') ) );
-			
+						
 			// Stock status
 			woocommerce_wp_select( array( 'id' => 'stock_status', 'label' => __('Stock status', 'woothemes'), 'options' => array(
 				'instock' => __('In stock', 'woothemes'),
 				'outofstock' => __('Out of stock', 'woothemes')
 			) ) );
+			
+			// manage stock
+			woocommerce_wp_checkbox( array( 'id' => 'manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woothemes') ) );
 			
 			do_action('woocommerce_product_options_stock');
 			
@@ -380,26 +400,6 @@ function woocommerce_product_data_box() {
 			echo '</div>';
 			?>
 		</div>
-		<div id="downloadable_product_data" class="panel woocommerce_options_panel">
-			<?php
-	
-				// File URL
-				$file_path = get_post_meta($post->ID, 'file_path', true);
-				$field = array( 'id' => 'file_path', 'label' => __('File path', 'woothemes') );
-				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short file_path" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woothemes').'" />
-					<input type="button"  class="upload_file_button button" value="'.__('Upload a file', 'woothemes').'" />
-				</p>';
-					
-				// Download Limit
-				$download_limit = get_post_meta($post->ID, 'download_limit', true);
-				$field = array( 'id' => 'download_limit', 'label' => __('Download Limit', 'woothemes') );
-				echo '<p class="form-field">
-					<label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$download_limit.'" placeholder="'.__('Unlimited', 'woothemes').'" /> <span class="description">' . __('Leave blank for unlimited re-downloads.', 'woothemes') . '</span></p>';
-	
-			?>
-		</div>
 		
 		<?php do_action('woocommerce_product_write_panels'); ?>
 		
@@ -419,19 +419,34 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce;
 
 	$woocommerce_errors = array();
-		
+	
+	// Get types
+	$product_type = sanitize_title( stripslashes( $_POST['product-type'] ) );
+	$is_downloadable = (isset($_POST['downloadable'])) ? 'yes' : 'no';
+	$is_virtual = (isset($_POST['virtual'])) ? 'yes' : 'no';
+	if( !$product_type ) $product_type = 'simple';
+	
 	// Update post meta
 	update_post_meta( $post_id, 'regular_price', stripslashes( $_POST['regular_price'] ) );
 	update_post_meta( $post_id, 'sale_price', stripslashes( $_POST['sale_price'] ) );
-	update_post_meta( $post_id, 'weight', stripslashes( $_POST['weight'] ) );
-	update_post_meta( $post_id, 'length', stripslashes( $_POST['length'] ) );
-	update_post_meta( $post_id, 'width', stripslashes( $_POST['width'] ) );
-	update_post_meta( $post_id, 'height', stripslashes( $_POST['height'] ) );
 	update_post_meta( $post_id, 'tax_status', stripslashes( $_POST['tax_status'] ) );
 	update_post_meta( $post_id, 'tax_class', stripslashes( $_POST['tax_class'] ) );
 	update_post_meta( $post_id, 'stock_status', stripslashes( $_POST['stock_status'] ) );
 	update_post_meta( $post_id, 'visibility', stripslashes( $_POST['visibility'] ) );
 	if (isset($_POST['featured'])) update_post_meta( $post_id, 'featured', 'yes' ); else update_post_meta( $post_id, 'featured', 'no' );
+		
+	// Dimensions
+	if ($is_virtual=='no') :
+		update_post_meta( $post_id, 'weight', stripslashes( $_POST['weight'] ) );
+		update_post_meta( $post_id, 'length', stripslashes( $_POST['length'] ) );
+		update_post_meta( $post_id, 'width', stripslashes( $_POST['width'] ) );
+		update_post_meta( $post_id, 'height', stripslashes( $_POST['height'] ) );
+	else :
+		update_post_meta( $post_id, 'weight', '' );
+		update_post_meta( $post_id, 'length', '' );
+		update_post_meta( $post_id, 'width', '' );
+		update_post_meta( $post_id, 'height', '' );
+	endif;
 		
 	// Unique SKU 
 	$sku = get_post_meta($post_id, 'sku', true);
@@ -533,12 +548,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, 'product_attributes', $attributes );
 
 	// Product type + Downloadable/Virtual
-	$product_type = sanitize_title( stripslashes( $_POST['product-type'] ) );
-	$is_downloadable = (isset($_POST['downloadable'])) ? 'yes' : 'no';
-	$is_virtual = (isset($_POST['virtual'])) ? 'yes' : 'no';
-	
-	if( !$product_type ) $product_type = 'simple';
-	
 	wp_set_object_terms($post_id, $product_type, 'product_type');
 	update_post_meta( $post_id, 'downloadable', $is_downloadable );
 	update_post_meta( $post_id, 'virtual', $is_virtual );

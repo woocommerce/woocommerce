@@ -388,12 +388,42 @@ jQuery( function($){
 	$('input#virtual').change(function(){
 	
 		$('.show_if_virtual').hide();
+		$('.hide_if_virtual').show();
 		
 		if ($('input#virtual').is(':checked')) {
 			$('.show_if_virtual').show();
+			$('.hide_if_virtual').hide();
 		}
 		
 	}).change();
+	
+	
+	// Sale price schedule
+	var sale_schedule_set = false;
+	$('.sale_price_dates_fields input').each(function(){
+		if ($(this).val()!='') sale_schedule_set = true;
+	});
+	if (sale_schedule_set) {
+		$('.sale_schedule').hide();
+		$('.sale_price_dates_fields').show();
+	} else {
+		$('.sale_schedule').show();
+		$('.sale_price_dates_fields').hide();
+	}
+	
+	$('.sale_schedule').click(function(){
+		$(this).hide();
+		$('.sale_price_dates_fields').show();
+		return false;
+	});
+	
+	$('.cancel_sale_schedule').click(function(){
+		$(this).closest('p').find('input').val('');
+		$('.sale_schedule').show();
+		$('.sale_price_dates_fields').hide();
+		return false;
+	});
+	
 
 	// STOCK OPTIONS
 	$('input#manage_stock').change(function(){
