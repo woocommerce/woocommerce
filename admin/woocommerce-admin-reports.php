@@ -1393,7 +1393,7 @@ function woocommerce_stock_overview() {
 		'posts_per_page' 	=> -1,
 		'meta_query' => array(
 			array(
-				'key' 		=> 'manage_stock',
+				'key' 		=> '_manage_stock',
 				'value' 	=> 'yes'
 			),
 			array(
@@ -1443,7 +1443,7 @@ function woocommerce_stock_overview() {
 		'meta_query' => array(
 			'relation' => 'AND',
 			array(
-				'key' 		=> 'manage_stock',
+				'key' 		=> '_manage_stock',
 				'value' 	=> 'yes'
 			),
 			array(
