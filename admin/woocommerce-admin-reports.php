@@ -1397,7 +1397,7 @@ function woocommerce_stock_overview() {
 				'value' 	=> 'yes'
 			),
 			array(
-				'key' 		=> 'stock',
+				'key' 		=> '_stock',
 				'value' 	=> $lowstockamount,
 				'compare' 	=> '<=',
 				'type' 		=> 'NUMERIC'
@@ -1421,13 +1421,13 @@ function woocommerce_stock_overview() {
 		'posts_per_page' 	=> -1,
 		'meta_query' => array(
 			array(
-				'key' 		=> 'stock',
+				'key' 		=> '_stock',
 				'value' 	=> $lowstockamount,
 				'compare' 	=> '<=',
 				'type' 		=> 'NUMERIC'
 			),
 			array(
-				'key' 		=> 'stock',
+				'key' 		=> '_stock',
 				'value' 	=> array('', false, null),
 				'compare' 	=> 'NOT IN'
 			)
@@ -1447,7 +1447,7 @@ function woocommerce_stock_overview() {
 				'value' 	=> 'yes'
 			),
 			array(
-				'key' 		=> 'stock',
+				'key' 		=> '_stock',
 				'value' 	=> $lowstockamount,
 				'compare' 	=> '<=',
 				'type' 		=> 'NUMERIC'
@@ -1477,7 +1477,7 @@ function woocommerce_stock_overview() {
 					if ($low_in_stock) :
 						echo '<ul class="stock_list">';
 						foreach ($low_in_stock as $product) :
-							$stock = get_post_meta($product->ID, 'stock', true);
+							$stock = get_post_meta($product->ID, '_stock', true);
 							if ($stock<=$nostockamount) continue;
 							echo '<li><a href="';
 							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
@@ -1499,7 +1499,7 @@ function woocommerce_stock_overview() {
 					if ($low_in_stock) :
 						echo '<ul class="stock_list">';
 						foreach ($low_in_stock as $product) :
-							$stock = get_post_meta($product->ID, 'stock', true);
+							$stock = get_post_meta($product->ID, '_stock', true);
 							if ($stock>$nostockamount) continue;
 							echo '<li><a href="';
 							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
