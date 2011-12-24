@@ -194,8 +194,8 @@ function woocommerce_feature_product() {
 	
 	$product = new woocommerce_product($post->ID);
 
-	if ($product->is_featured()) update_post_meta($post->ID, 'featured', 'no');
-	else update_post_meta($post->ID, 'featured', 'yes');
+	if ($product->is_featured()) update_post_meta($post->ID, '_featured', 'no');
+	else update_post_meta($post->ID, '_featured', 'yes');
 	
 	$sendback = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() );
 	wp_safe_redirect( $sendback );
@@ -650,7 +650,7 @@ function woocommerce_upsell_crosssell_search_products() {
 	
 	if ($posts) : foreach ($posts as $post) : 
 		
-		$SKU = get_post_meta($post->ID, 'sku', true);
+		$SKU = get_post_meta($post->ID, '_sku', true);
 		
 		?>
 		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e('Cross-sell', 'woothemes'); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e('Up-sell', 'woothemes'); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>

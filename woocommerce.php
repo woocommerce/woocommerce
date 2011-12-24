@@ -26,7 +26,7 @@ class woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.4';
+	var $version = '1.4b';
 	
 	/** URLS ******************************************************************/
 	
@@ -614,7 +614,7 @@ class woocommerce {
 				'hierarchical' 			=> true,
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
-				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
+				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
 				'has_archive' 			=> $base_slug,
 				'show_in_nav_menus' 	=> false,
 				'menu_icon'				=> $this->plugin_url() . '/assets/images/icons/menu_icon_products.png'

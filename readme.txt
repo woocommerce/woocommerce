@@ -108,6 +108,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed price display if taxes disabled
 * Backorder notifications show order #
 * Product data write panel tweaks
+* Enabled product custom fields panel
+* Renamed custom fields for product data - upgrade script will run when upgrading
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
@@ -397,6 +399,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.4 = 
+Major update with plenty of optimisations and new features. Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically. Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
 
 = 1.3 =
 This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.

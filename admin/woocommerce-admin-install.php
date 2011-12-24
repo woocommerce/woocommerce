@@ -18,8 +18,8 @@ function do_install_woocommerce() {
 	// Do install
 	woocommerce_default_options();
 	woocommerce_tables_install();
+	woocommerce_install_custom_fields();
 	woocommerce_default_taxonomies();
-	woocommerce_populate_custom_fields();
 	
 	// Install folder for uploading files and prevent hotlinking
 	$upload_dir 	=  wp_upload_dir();
@@ -50,7 +50,7 @@ function do_install_woocommerce() {
 /**
  * Add required post meta so queries work
  */
-function woocommerce_populate_custom_fields() {
+function woocommerce_install_custom_fields() {
 
 	// Attachment exclusion
 	$args = array( 
@@ -63,7 +63,6 @@ function woocommerce_populate_custom_fields() {
 	if ($attachments) foreach ($attachments as $id) :
 		add_post_meta($id, '_woocommerce_exclude_image', 0, true);
 	endforeach;
-	
 }
 
 /**
@@ -256,7 +255,19 @@ function woocommerce_tables_install() {
 		
 	endforeach;
 	
+	// Upgrade old meta keys for product data
+	$meta = array('sku', 'downloadable', 'virtual', 'price', 'visibility', 'stock', 'stock_status', 'backorders', 'manage_stock', 'sale_price', 'regular_price', 'weight', 'length', 'width', 'height', 'tax_status', 'tax_class', 'upsell_ids', 'crosssell_ids', 'sale_price_dates_from', 'sale_price_dates_to', 'min_variation_price', 'max_variation_price', 'featured', 'product_attributes', 'file_path', 'download_limit', 'product_url', 'min_variation_price', 'max_variation_price');
+	
+	$wpdb->query("
+		UPDATE $wpdb->postmeta 
+		LEFT JOIN $wpdb->posts ON ( $wpdb->postmeta.post_id = $wpdb->posts.ID )
+		SET meta_key = CONCAT('_', meta_key)
+		WHERE meta_key IN ('". implode("', '", $meta) ."')
+		AND $wpdb->posts.post_type = 'product'
+	");
+	
 	$wpdb->show_errors();
+
 }
 
 /**
@@ -321,8 +332,8 @@ function woocommerce_default_taxonomies() {
 	if ($downloadable_type) :
 		$products = get_objects_in_term( $downloadable_type->term_id, 'product_type' );
 		foreach ($products as $product) :
-			update_post_meta( $product, 'downloadable', 'yes' );
-			update_post_meta( $product, 'virtual', 'yes' );
+			update_post_meta( $product, '_downloadable', 'yes' );
+			update_post_meta( $product, '_virtual', 'yes' );
 			wp_set_object_terms( $product, 'simple', 'product_type');
 		endforeach;
 	endif;
@@ -331,8 +342,8 @@ function woocommerce_default_taxonomies() {
 	if ($virtual_type) :
 		$products = get_objects_in_term( $virtual_type->term_id, 'product_type' );
 		foreach ($products as $product) :
-			update_post_meta( $product, 'downloadable', 'no' );
-			update_post_meta( $product, 'virtual', 'yes' );
+			update_post_meta( $product, '_downloadable', 'no' );
+			update_post_meta( $product, '_virtual', 'yes' );
 			wp_set_object_terms( $product, 'simple', 'product_type');
 		endforeach;
 	endif;

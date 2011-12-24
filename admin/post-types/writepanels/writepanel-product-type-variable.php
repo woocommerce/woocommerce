@@ -30,7 +30,7 @@ add_action('woocommerce_product_write_panel_tabs', 'variable_product_type_option
 function variable_product_type_options() {
 	global $post, $woocommerce;
 	
-	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, 'product_attributes', true) );
+	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, '_product_attributes', true) );
 	
 	// See if any are set
 	$variation_attribute_found = false;
@@ -65,9 +65,9 @@ function variable_product_type_options() {
 				
 					$variation_data = get_post_custom( $variation->ID );
 					$image = '';
-					if (isset($variation_data['_thumbnail_id'][0])) :
-						$image_id = $variation_data['_thumbnail_id'][0];
-						$image = wp_get_attachment_url( $variation_data['_thumbnail_id'][0] );
+					if (isset($variation_data['__thumbnail_id'][0])) :
+						$image_id = $variation_data['__thumbnail_id'][0];
+						$image = wp_get_attachment_url( $variation_data['__thumbnail_id'][0] );
 					else :
 						$image_id = 0;
 					endif;
@@ -114,41 +114,41 @@ function variable_product_type_options() {
 								<tr>
 									<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button <?php if ($image_id>0) echo 'remove'; ?>" rel="<?php echo $variation->ID; ?>"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a></td>
 									
-									<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sku'][0])) echo $variation_data['sku'][0]; ?>" placeholder="<?php if ($sku = get_post_meta($post->ID, 'sku', true)) echo $sku; else echo $post->ID; ?>" /></td>
+									<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_sku'][0])) echo $variation_data['_sku'][0]; ?>" placeholder="<?php if ($sku = get_post_meta($post->ID, '_sku', true)) echo $sku; else echo $post->ID; ?>" /></td>
 									
-									<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['stock'][0])) echo $variation_data['stock'][0]; ?>" /></td>
+									<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_stock'][0])) echo $variation_data['_stock'][0]; ?>" /></td>
 									
-									<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['weight'][0])) echo $variation_data['weight'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, 'weight', true)) echo $value; else echo '0.00'; ?>" /></td>
+									<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_weight'][0])) echo $variation_data['_weight'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, '_weight', true)) echo $value; else echo '0.00'; ?>" /></td>
 									
 									<td class="dimensions_field">
 										<label for"product_length"><?php echo __('Dimensions (L&times;W&times;H)', 'woothemes'); ?></label>
-										<input id="product_length" class="input-text" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['length'][0])) echo $variation_data['length'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, 'length', true)) echo $value; else echo '0'; ?>" />
-										<input class="input-text" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['width'][0])) echo $variation_data['width'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, 'width', true)) echo $value; else echo '0'; ?>" />
-										<input class="input-text last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['height'][0])) echo $variation_data['height'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, 'height', true)) echo $value; else echo '0'; ?>" />
+										<input id="product_length" class="input-text" size="6" type="text" name="variable_length[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_length'][0])) echo $variation_data['_length'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, '_length', true)) echo $value; else echo '0'; ?>" />
+										<input class="input-text" size="6" type="text" name="variable_width[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_width'][0])) echo $variation_data['_width'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, '_width', true)) echo $value; else echo '0'; ?>" />
+										<input class="input-text last" size="6" type="text" name="variable_height[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_height'][0])) echo $variation_data['_height'][0]; ?>" placeholder="<?php if ($value = get_post_meta($post->ID, '_height', true)) echo $value; else echo '0'; ?>" />
 									</td>
 									
-									<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['price'][0])) echo $variation_data['price'][0]; ?>" /></td>
+									<td><label><?php _e('Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_price'][0])) echo $variation_data['_price'][0]; ?>" /></td>
 									
-									<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['sale_price'][0])) echo $variation_data['sale_price'][0]; ?>" /></td>
+									<td><label><?php _e('Sale Price:', 'woothemes'); ?></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_sale_price'][0])) echo $variation_data['_sale_price'][0]; ?>" /></td>
 									
 								</tr>
 								<tr>
 								
-									<td><label><?php _e('Downloadable', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['downloadable'][0])) checked($variation_data['downloadable'][0], 'yes'); ?> /></td>
+									<td><label><?php _e('Downloadable', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['_downloadable'][0])) checked($variation_data['_downloadable'][0], 'yes'); ?> /></td>
 	
-									<td><label><?php _e('Virtual', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox" name="variable_is_virtual[<?php echo $loop; ?>]" <?php if (isset($variation_data['virtual'][0])) checked($variation_data['virtual'][0], 'yes'); ?> /></td>
+									<td><label><?php _e('Virtual', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost.', 'woothemes'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox" name="variable_is_virtual[<?php echo $loop; ?>]" <?php if (isset($variation_data['_virtual'][0])) checked($variation_data['_virtual'][0], 'yes'); ?> /></td>
 									
 									<td><label><?php _e('Enabled', 'woothemes'); ?></label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /></td>
 									
 									<td>
 										<div class="show_if_variation_downloadable file_path_field">
-										<label><?php _e('File path:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['file_path'][0])) echo $variation_data['file_path'][0]; ?>" placeholder="<?php _e('File path/URL', 'woothemes'); ?>" /> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woothemes'); ?>" title="<?php _e('Upload', 'woothemes'); ?>" />
+										<label><?php _e('File path:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_file_path'][0])) echo $variation_data['_file_path'][0]; ?>" placeholder="<?php _e('File path/URL', 'woothemes'); ?>" /> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woothemes'); ?>" title="<?php _e('Upload', 'woothemes'); ?>" />
 										</div>
 									</td>
 									
 									<td>
 										<div class="show_if_variation_downloadable">
-										<label><?php _e('Download Limit:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank for unlimited re-downloads.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['download_limit'][0])) echo $variation_data['download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woothemes'); ?>" />
+										<label><?php _e('Download Limit:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Leave blank for unlimited re-downloads.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woothemes'); ?>" />
 										</div>
 									</td>
 									
@@ -273,11 +273,11 @@ function variable_product_type_options() {
 							<tr>\
 								<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
 								\
-								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" placeholder="<?php if ($sku = get_post_meta($post->ID, 'sku', true)) echo $sku; else echo $post->ID; ?>" /></td>\
+								<td><label><?php _e('SKU:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" placeholder="<?php if ($sku = get_post_meta($post->ID, '_sku', true)) echo $sku; else echo $post->ID; ?>" /></td>\
 								\
 								<td><label><?php _e('Stock Qty:', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a quantity to manage stock for this variation, or leave blank to use the variable product stock options.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
 								\
-								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, 'weight', true)) echo $value; else echo '0.00'; ?>" /></td>\
+								<td><label><?php _e('Weight', 'woothemes').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product weight.', 'woothemes'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_weight', true)) echo $value; else echo '0.00'; ?>" /></td>\
 								\
 								<td class="dimensions_field">\
 									<label for"product_length"><?php echo __('Dimensions (L&times;W&times;H)', 'woothemes'); ?></label>\
@@ -535,7 +535,7 @@ function process_product_meta_variable( $post_id ) {
 		$variable_file_path = $_POST['variable_file_path'];
 		$variable_download_limit = $_POST['variable_download_limit'];
 		
-		$attributes = (array) maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
+		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
 		
 		for ($i=0; $i<sizeof($variable_sku); $i++) :
 			
@@ -589,27 +589,27 @@ function process_product_meta_variable( $post_id ) {
 			endif;
 
 			// Update post meta
-			update_post_meta( $variation_id, 'sku', $variable_sku[$i] );
-			update_post_meta( $variation_id, 'price', $variable_price[$i] );
-			update_post_meta( $variation_id, 'sale_price', $variable_sale_price[$i] );
-			update_post_meta( $variation_id, 'weight', $variable_weight[$i] );
+			update_post_meta( $variation_id, '_sku', $variable_sku[$i] );
+			update_post_meta( $variation_id, '_price', $variable_price[$i] );
+			update_post_meta( $variation_id, '_sale_price', $variable_sale_price[$i] );
+			update_post_meta( $variation_id, '_weight', $variable_weight[$i] );
 			
-			update_post_meta( $variation_id, 'length', $variable_length[$i] );
-			update_post_meta( $variation_id, 'width', $variable_width[$i] );
-			update_post_meta( $variation_id, 'height', $variable_height[$i] );
+			update_post_meta( $variation_id, '_length', $variable_length[$i] );
+			update_post_meta( $variation_id, '_width', $variable_width[$i] );
+			update_post_meta( $variation_id, '_height', $variable_height[$i] );
 
-			update_post_meta( $variation_id, 'stock', $variable_stock[$i] );
+			update_post_meta( $variation_id, '_stock', $variable_stock[$i] );
 			update_post_meta( $variation_id, '_thumbnail_id', $upload_image_id[$i] );
 
-			update_post_meta( $variation_id, 'virtual', $is_virtual );
-			update_post_meta( $variation_id, 'downloadable', $is_downloadable );
+			update_post_meta( $variation_id, '_virtual', $is_virtual );
+			update_post_meta( $variation_id, '_downloadable', $is_downloadable );
 			
 			if ($is_downloadable=='yes') :
-				update_post_meta( $variation_id, 'download_limit', $variable_download_limit[$i] );
-				update_post_meta( $variation_id, 'file_path', $variable_file_path[$i] );
+				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
+				update_post_meta( $variation_id, '_file_path', $variable_file_path[$i] );
 			else :
-				update_post_meta( $variation_id, 'download_limit', '' );
-				update_post_meta( $variation_id, 'file_path', '' );
+				update_post_meta( $variation_id, '_download_limit', '' );
+				update_post_meta( $variation_id, '_file_path', '' );
 			endif;
 			
 			// Remove old taxnomies attributes so data is kept up to date
@@ -650,8 +650,8 @@ function process_product_meta_variable( $post_id ) {
 	$highest_price = '';
 	if ($children) :
 		foreach ($children as $child) :
-			$child_price = get_post_meta($child, 'price', true);
-			$child_sale_price = get_post_meta($child, 'sale_price', true);
+			$child_price = get_post_meta($child, '_price', true);
+			$child_sale_price = get_post_meta($child, '_sale_price', true);
 			
 			// Low price
 			if (!is_numeric($lowest_price) || $child_price<$lowest_price) $lowest_price = $child_price;
@@ -671,9 +671,9 @@ function process_product_meta_variable( $post_id ) {
 		endforeach;
 	endif;
 	
-	update_post_meta( $post_parent, 'price', $lowest_price );
-	update_post_meta( $post_parent, 'min_variation_price', $lowest_price );
-	update_post_meta( $post_parent, 'max_variation_price', $highest_price );
+	update_post_meta( $post_parent, '_price', $lowest_price );
+	update_post_meta( $post_parent, '_min_variation_price', $lowest_price );
+	update_post_meta( $post_parent, '_max_variation_price', $highest_price );
 	
 	// Update default attribute options setting
 	$default_attributes = array();

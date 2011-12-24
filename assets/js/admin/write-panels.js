@@ -345,26 +345,26 @@ jQuery( function($){
 		
 		if (select_val=='simple') {
 			$('.show_if_simple').show();
-			$('input#manage_stock').change();
+			$('input#_manage_stock').change();
 		}
 		
 		else if (select_val=='variable') {
 			$('.show_if_variable').show();
-			$('input#manage_stock').change();
-			$('input#downloadable').prop('checked', false).change();
-			$('input#virtual').removeAttr('checked').change();
+			$('input#_manage_stock').change();
+			$('input#_downloadable').prop('checked', false).change();
+			$('input#_virtual').removeAttr('checked').change();
 		}
 		
 		else if (select_val=='grouped') {
 			$('.show_if_grouped').show();
-			$('input#downloadable').prop('checked', false).change();
-			$('input#virtual').removeAttr('checked').change();
+			$('input#_downloadable').prop('checked', false).change();
+			$('input#_virtual').removeAttr('checked').change();
 		}
 		
 		else if (select_val=='external') {
 			$('.show_if_external').show();
-			$('input#downloadable').prop('checked', false).change();
-			$('input#virtual').removeAttr('checked').change();
+			$('input#_downloadable').prop('checked', false).change();
+			$('input#_virtual').removeAttr('checked').change();
 		}
 		
 		$('ul.tabs li:visible').eq(0).find('a').click();
@@ -373,11 +373,11 @@ jQuery( function($){
 		
 	}).change();
 	
-	$('input#downloadable').change(function(){
+	$('input#_downloadable').change(function(){
 	
 		$('.show_if_downloadable').hide();
 		
-		if ($('input#downloadable').is(':checked')) {
+		if ($('input#_downloadable').is(':checked')) {
 			$('.show_if_downloadable').show();
 		}
 		
@@ -385,12 +385,12 @@ jQuery( function($){
 		
 	}).change();
 	
-	$('input#virtual').change(function(){
+	$('input#_virtual').change(function(){
 	
 		$('.show_if_virtual').hide();
 		$('.hide_if_virtual').show();
 		
-		if ($('input#virtual').is(':checked')) {
+		if ($('input#_virtual').is(':checked')) {
 			$('.show_if_virtual').show();
 			$('.hide_if_virtual').hide();
 		}
@@ -426,7 +426,7 @@ jQuery( function($){
 	
 
 	// STOCK OPTIONS
-	$('input#manage_stock').change(function(){
+	$('input#_manage_stock').change(function(){
 		if ($(this).is(':checked')) $('div.stock_fields').show();
 		else $('div.stock_fields').hide();
 	}).change();

@@ -87,7 +87,7 @@ class woocommerce_product {
 		);
 		
 		// Load the data from the custom fields
-		foreach ($load_data as $key => $default) $this->$key = (isset($this->product_custom_fields[$key][0]) && $this->product_custom_fields[$key][0]!=='') ? $this->product_custom_fields[$key][0] : $default;
+		foreach ($load_data as $key => $default) $this->$key = (isset($this->product_custom_fields['_' . $key][0]) && $this->product_custom_fields['_' . $key][0]!=='') ? $this->product_custom_fields['_' . $key][0] : $default;
 			
 		// Get product type
 		$transient_name = 'woocommerce_product_type_' . $this->id;
@@ -128,7 +128,7 @@ class woocommerce_product {
 		        
 				if (sizeof($this->get_children())>0) foreach ($this->get_children() as $child_id) :
 					
-					$stock = get_post_meta($child_id, 'stock', true);
+					$stock = get_post_meta($child_id, '_stock', true);
 					
 					if ( $stock!='' ) :
 					
@@ -195,11 +195,11 @@ class woocommerce_product {
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock - $by;
 			$this->total_stock = $this->get_total_stock() - $by;
-			update_post_meta($this->id, 'stock', $this->stock);
+			update_post_meta($this->id, '_stock', $this->stock);
 			
 			// Out of stock attribute
 			if (!$this->is_in_stock()) :
-				update_post_meta($this->id, 'stock_status', 'outofstock');
+				update_post_meta($this->id, '_stock_status', 'outofstock');
     			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 			endif;
 			
@@ -216,10 +216,10 @@ class woocommerce_product {
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock + $by;
 			$this->total_stock = $this->get_total_stock() + $by;
-			update_post_meta($this->id, 'stock', $this->stock);
+			update_post_meta($this->id, '_stock', $this->stock);
 			
 			// Out of stock attribute
-			if ($this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'instock');
+			if ($this->is_in_stock()) update_post_meta($this->id, '_stock_status', 'instock');
 			
 			return $this->stock;
 		endif;
@@ -461,7 +461,7 @@ class woocommerce_product {
 		if ($this->has_child()) :
 			
 			foreach ($this->get_children() as $child_id) :
-				$sale_price = get_post_meta( $child_id, 'sale_price', true );
+				$sale_price = get_post_meta( $child_id, '_sale_price', true );
 				if ( $sale_price >= 0 ) return true;
 			endforeach;
 			
@@ -553,7 +553,7 @@ class woocommerce_product {
 			$max_price = '';
 			
 			foreach ($this->get_children() as $child_id) :
-				$child_price = get_post_meta( $child_id, 'price', true);
+				$child_price = get_post_meta( $child_id, '_price', true);
 				if ($child_price<$min_price || $min_price == '') $min_price = $child_price;
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
@@ -747,8 +747,8 @@ class woocommerce_product {
 		
 		if (!is_array($this->attributes)) :
 	
-			if (isset($this->product_custom_fields['product_attributes'][0])) 
-				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['product_attributes'][0] )); 
+			if (isset($this->product_custom_fields['_product_attributes'][0])) 
+				$this->attributes = maybe_unserialize( maybe_unserialize( $this->product_custom_fields['_product_attributes'][0] )); 
 			else 
 				$this->attributes = array();	
 		
@@ -950,7 +950,7 @@ class woocommerce_product {
     		if ($this->sale_price && $this->price!==$this->sale_price) :
     			
     			$this->price = $this->sale_price;
-    			update_post_meta($this->id, 'price', $this->price);
+    			update_post_meta($this->id, '_price', $this->price);
     			
     			// Grouped product prices and sale status are affected by children
     			$this->grouped_product_sync();
@@ -967,12 +967,12 @@ class woocommerce_product {
     		if ($this->regular_price && $this->price!==$this->regular_price) :
     			
     			$this->price = $this->regular_price;
-    			update_post_meta($this->id, 'price', $this->price);
+    			update_post_meta($this->id, '_price', $this->price);
 		
 				// Sale has expired - clear the schedule boxes
-				update_post_meta($this->id, 'sale_price', '');
-				update_post_meta($this->id, 'sale_price_dates_from', '');
-				update_post_meta($this->id, 'sale_price_dates_to', '');
+				update_post_meta($this->id, '_sale_price', '');
+				update_post_meta($this->id, '_sale_price_dates_from', '');
+				update_post_meta($this->id, '_sale_price_dates_to', '');
 			
 				// Grouped product prices and sale status are affected by children
     			$this->grouped_product_sync();
@@ -1006,8 +1006,8 @@ class woocommerce_product {
 		));
 		if ($children_by_price) :
 			foreach ($children_by_price as $child) :
-				$child_price = get_post_meta($child, 'price', true);
-				update_post_meta( $post_parent, 'price', $child_price );
+				$child_price = get_post_meta($child, '_price', true);
+				update_post_meta( $post_parent, '_price', $child_price );
 			endforeach;
 		endif;
 	}

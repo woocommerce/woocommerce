@@ -229,7 +229,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			$variation_id 	= (int) $_POST['variation_id'];
 			$quantity 		= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
 			
-            $attributes = (array) maybe_unserialize(get_post_meta($product_id, 'product_attributes', true));
+            $attributes = (array) maybe_unserialize(get_post_meta($product_id, '_product_attributes', true));
             $variations = array();
             $all_variations_set = true;
             
@@ -623,7 +623,7 @@ function woocommerce_download_product() {
 			endif;
 			
 			// Get the downloads URL and try to replace the url with a path
-			$file_path = get_post_meta($download_file, 'file_path', true);	
+			$file_path = get_post_meta($download_file, '_file_path', true);	
 			
 			if (!$file_path) exit;
 			

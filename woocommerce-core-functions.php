@@ -380,7 +380,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 					$order->user_id = 0;
 				endif;
 				
-				$limit = trim(get_post_meta($download_id, 'download_limit', true));
+				$limit = trim(get_post_meta($download_id, '_download_limit', true));
 				
 				if (!empty($limit)) :
 					$limit = (int) $limit;

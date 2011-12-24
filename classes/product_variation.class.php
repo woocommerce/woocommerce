@@ -71,63 +71,63 @@ class woocommerce_product_variation extends woocommerce_product {
 		);
 		
 		// Load the data from the custom fields
-		foreach ($load_data as $key => $default) $this->$key = (isset($parent_custom_fields[$key][0]) && $parent_custom_fields[$key][0]!=='') ? $parent_custom_fields[$key][0] : $default;
+		foreach ($load_data as $key => $default) $this->$key = (isset($parent_custom_fields['_' . $key][0]) && $parent_custom_fields['_' . $key][0]!=='') ? $parent_custom_fields['_' . $key][0] : $default;
 
 		$this->product_type = 'variable';
 		
 		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
 		/* Override parent data with variation */
-		if (isset($product_custom_fields['sku'][0]) && !empty($product_custom_fields['sku'][0])) :
+		if (isset($product_custom_fields['_sku'][0]) && !empty($product_custom_fields['_sku'][0])) :
 			$this->variation_has_sku = true;
-			$this->sku = $product_custom_fields['sku'][0];
+			$this->sku = $product_custom_fields['_sku'][0];
 		endif;
 		
-		if (isset($product_custom_fields['stock'][0]) && $product_custom_fields['stock'][0]!=='') :
+		if (isset($product_custom_fields['_stock'][0]) && $product_custom_fields['_stock'][0]!=='') :
 			$this->variation_has_stock = true;
 			$this->manage_stock = 'yes';
-			$this->stock = $product_custom_fields['stock'][0];
+			$this->stock = $product_custom_fields['_stock'][0];
 		endif;
 		
-		if (isset($product_custom_fields['weight'][0]) && $product_custom_fields['weight'][0]!=='') :
+		if (isset($product_custom_fields['_weight'][0]) && $product_custom_fields['_weight'][0]!=='') :
 			$this->variation_has_weight = true;
-			$this->weight = $product_custom_fields['weight'][0];
+			$this->weight = $product_custom_fields['_weight'][0];
 		endif;
 		
-		if (isset($product_custom_fields['length'][0]) && $product_custom_fields['length'][0]!=='') :
+		if (isset($product_custom_fields['_length'][0]) && $product_custom_fields['_length'][0]!=='') :
 			$this->variation_has_length = true;
-			$this->length = $product_custom_fields['length'][0];
+			$this->length = $product_custom_fields['_length'][0];
 		endif;
 		
-		if (isset($product_custom_fields['width'][0]) && $product_custom_fields['width'][0]!=='') :
+		if (isset($product_custom_fields['_width'][0]) && $product_custom_fields['_width'][0]!=='') :
 			$this->variation_has_width = true;
-			$this->width = $product_custom_fields['width'][0];
+			$this->width = $product_custom_fields['_width'][0];
 		endif;
 		
-		if (isset($product_custom_fields['height'][0]) && $product_custom_fields['height'][0]!=='') :
+		if (isset($product_custom_fields['_height'][0]) && $product_custom_fields['_height'][0]!=='') :
 			$this->variation_has_height = true;
-			$this->height = $product_custom_fields['height'][0];
+			$this->height = $product_custom_fields['_height'][0];
 		endif;
 		
-		if (isset($product_custom_fields['price'][0]) && $product_custom_fields['price'][0]!=='') :
+		if (isset($product_custom_fields['_price'][0]) && $product_custom_fields['_price'][0]!=='') :
 			$this->variation_has_price = true;
-			$this->price = $product_custom_fields['price'][0];
-			$this->regular_price = $product_custom_fields['price'][0];
+			$this->price = $product_custom_fields['_price'][0];
+			$this->regular_price = $product_custom_fields['_price'][0];
 		endif;
 		
-		if (isset($product_custom_fields['sale_price'][0]) && $product_custom_fields['sale_price'][0]!=='') :
+		if (isset($product_custom_fields['_sale_price'][0]) && $product_custom_fields['_sale_price'][0]!=='') :
 			$this->variation_has_sale_price = true;
-			$this->sale_price = $product_custom_fields['sale_price'][0];
+			$this->sale_price = $product_custom_fields['_sale_price'][0];
 			if ($this->sale_price < $this->price) $this->price = $this->sale_price;
 		endif;
 		
-		if (isset($product_custom_fields['downloadable'][0]) && $product_custom_fields['downloadable'][0]=='yes') :
+		if (isset($product_custom_fields['_downloadable'][0]) && $product_custom_fields['_downloadable'][0]=='yes') :
 			$this->downloadable = 'yes';
 		else :
 			$this->downloadable = 'no';
 		endif;
 		
-		if (isset($product_custom_fields['virtual'][0]) && $product_custom_fields['virtual'][0]=='yes') :
+		if (isset($product_custom_fields['_virtual'][0]) && $product_custom_fields['_virtual'][0]=='yes') :
 			$this->virtual = 'yes';
 		else :
 			$this->virtual = 'no';
@@ -205,7 +205,7 @@ class woocommerce_product_variation extends woocommerce_product {
 				
 				$this->stock = $this->stock - $by;
 				$this->total_stock = $this->get_total_stock() - $by;
-				update_post_meta($this->variation_id, 'stock', $this->stock);
+				update_post_meta($this->variation_id, '_stock', $this->stock);
 				
 				// Parents out of stock attribute
 				if (!$this->is_in_stock()) :
@@ -216,13 +216,13 @@ class woocommerce_product_variation extends woocommerce_product {
 					if ($parent_product->managing_stock()) :
 						if (!$parent_product->backorders_allowed()) :
 							if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
-								update_post_meta($this->id, 'stock_status', 'outofstock');
+								update_post_meta($this->id, '_stock_status', 'outofstock');
 								$woocommerce->clear_product_transients( $this->id ); // Clear transient
 							endif;
 						endif;
 					else :
 						if ($parent_product->get_total_stock()==0 || $parent_product->get_total_stock()<0) :
-							update_post_meta($this->id, 'stock_status', 'outofstock');
+							update_post_meta($this->id, '_stock_status', 'outofstock');
 							$woocommerce->clear_product_transients( $this->id ); // Clear transient
 						endif;
 					endif;
@@ -247,10 +247,10 @@ class woocommerce_product_variation extends woocommerce_product {
 
 				$this->stock = $this->stock + $by;
 				$this->total_stock = $this->get_total_stock() + $by;
-				update_post_meta($this->variation_id, 'stock', $this->stock);
+				update_post_meta($this->variation_id, '_stock', $this->stock);
 				
 				// Parents out of stock attribute
-				if ($this->is_in_stock()) update_post_meta($this->id, 'stock_status', 'instock');
+				if ($this->is_in_stock()) update_post_meta($this->id, '_stock_status', 'instock');
 				
 				return $this->stock;
 			endif;

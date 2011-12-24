@@ -245,7 +245,7 @@ function woocommerce_custom_product_columns($column) {
 			if (!$terms = get_the_term_list($post->ID, 'product_tag', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
 		break;
 		case "sku" :
-			if ( $sku = get_post_meta( $post->ID, 'sku', true )) :
+			if ( $sku = get_post_meta( $post->ID, '_sku', true )) :
 				echo '#'.$post->ID.' - SKU: ' . $sku;	
 			else :
 				echo '#'.$post->ID;

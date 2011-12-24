@@ -5,7 +5,7 @@
  
 global $woocommerce, $product;
 
-$product_url = get_post_meta( $product->id, 'product_url', true );
+$product_url = get_post_meta( $product->id, '_product_url', true );
 
 if (!$product_url) return;
 ?>

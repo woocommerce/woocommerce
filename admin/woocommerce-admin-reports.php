@@ -1108,7 +1108,7 @@ function woocommerce_product_sales() {
 				
 				if ($products) foreach ($products as $product) :
 					
-					$sku = get_post_meta($product->ID, 'sku', true);
+					$sku = get_post_meta($product->ID, '_sku', true);
 					
 					if ($sku) $sku = ' SKU: '.$sku;
 					
