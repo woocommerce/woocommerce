@@ -339,19 +339,19 @@ function woocommerce_custom_product_orderby( $vars ) {
 	if (isset( $vars['orderby'] )) :
 		if ( 'inventory' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> 'stock',
+				'meta_key' 	=> '_stock',
 				'orderby' 	=> 'meta_value_num'
 			) );
 		endif;
 		if ( 'price' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> 'price',
+				'meta_key' 	=> '_price',
 				'orderby' 	=> 'meta_value_num'
 			) );
 		endif;
 		if ( 'featured' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'meta_key' 	=> 'featured',
+				'meta_key' 	=> '_featured',
 				'orderby' 	=> 'meta_value'
 			) );
 		endif;
@@ -423,11 +423,11 @@ function woocommerce_products_subtype_query($query) {
     if ($typenow=='product' && isset($_GET['product_subtype']) && $_GET['product_subtype']) :
     	if ($_GET['product_subtype']=='downloadable') :
         	$query->query_vars['meta_value'] 	= 'yes';
-        	$query->query_vars['meta_key'] 		= 'downloadable';
+        	$query->query_vars['meta_key'] 		= '_downloadable';
         endif;
         if ($_GET['product_subtype']=='virtual') :
         	$query->query_vars['meta_value'] 	= 'yes';
-        	$query->query_vars['meta_key'] 		= 'virtual';
+        	$query->query_vars['meta_key'] 		= '_virtual';
         endif;
 	endif;
 }

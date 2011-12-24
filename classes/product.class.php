@@ -999,7 +999,7 @@ class woocommerce_product {
 			'post_parent' 	=> $post_parent,
 			'orderby' 	=> 'meta_value_num',
 			'order'		=> 'asc',
-			'meta_key'	=> 'price',
+			'meta_key'	=> '_price',
 			'posts_per_page' => 1,
 			'post_type' 	=> 'product',
 			'fields' 		=> 'ids'
