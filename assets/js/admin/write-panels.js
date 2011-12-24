@@ -433,7 +433,7 @@ jQuery( function($){
 	
 	
 	// DATE PICKER FIELDS
-	var dates = $( "#sale_price_dates_from, #sale_price_dates_to" ).datepicker({
+	var dates = $( "#_sale_price_dates_from, #_sale_price_dates_to" ).datepicker({
 		defaultDate: "",
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,
@@ -442,7 +442,7 @@ jQuery( function($){
 		buttonImage: woocommerce_writepanel_params.calendar_image,
 		buttonImageOnly: true,
 		onSelect: function( selectedDate ) {
-			var option = this.id == "sale_price_dates_from" ? "minDate" : "maxDate",
+			var option = this.id == "_sale_price_dates_from" ? "minDate" : "maxDate",
 				instance = $( this ).data( "datepicker" ),
 				date = $.datepicker.parseDate(
 					instance.settings.dateFormat ||
