@@ -516,6 +516,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 $item_line_tax 	= $_POST['line_tax'];
 			 $item_meta_names 	= $_POST['meta_name'];
 			 $item_meta_values 	= $_POST['meta_value'];
+			 $item_tax_class	= $_POST['item_tax_class'];
+			 $item_tax_status	= $_POST['item_tax_status'];
 	
 			 for ($i=0; $i<sizeof($item_id); $i++) :
 			 	
@@ -547,7 +549,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'line_cost' 	=> rtrim(rtrim(number_format(woocommerce_clean($item_line_cost[$i]), 2, '.', ''), '0'), '.'),
 			 		'base_cost'		=> rtrim(rtrim(number_format(woocommerce_clean($base_item_cost[$i]), 2, '.', ''), '0'), '.'),
 			 		'line_tax' 		=> rtrim(rtrim(number_format(woocommerce_clean($item_line_tax[$i]), 2, '.', ''), '0'), '.'),
-			 		'item_meta'		=> $item_meta->meta
+			 		'item_meta'		=> $item_meta->meta,
+			 		'tax_status'	=> woocommerce_clean($item_tax_status[$i]),
+			 		'tax_class'		=> woocommerce_clean($item_tax_class[$i])
 			 	));
 			 	
 			 endfor; 
