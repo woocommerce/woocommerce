@@ -43,6 +43,7 @@ ul.totals li.right{float:right;width:49%;clear:none;}ul.totals li.right input{wi
 .woocommerce_order_items_wrapper table.woocommerce_order_items .name{min-width:100px;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items .center,.woocommerce_order_items_wrapper table.woocommerce_order_items .variation-id,.woocommerce_order_items_wrapper table.woocommerce_order_items .product-id{text-align:center;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items .quantity,.woocommerce_order_items_wrapper table.woocommerce_order_items .cost,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax{width:60px;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status{width:90px;}.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class select,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status select{width:90px;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items table.meta{width:100%;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td{padding:1px 4px 1px 0;border:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td input{width:150px;}
 .widefat .column-order_title time{display:block;color:#999;margin:3px 0;}
 .widefat .column-order_actions a.button{float:left;margin:0 4px 2px 0;}
