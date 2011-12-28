@@ -380,20 +380,25 @@ class woocommerce_checkout {
 					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 						
 						$_product = $values['data'];
-			
+						
+						// Get line cost
+						$line_cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) * $values['quantity'];
+						
 						// Calc item tax to store if taxable
 						if ( $_product->is_taxable()) :
-							$rate = $_tax->get_rate( $_product->get_tax_class() );
+						
+							$tax_rates = $_tax->get_rates( $_product->get_tax_class() );
 							
-							if (get_option('woocommerce_prices_include_tax')=='yes') :
-								$base_rate = $woocommerce->cart->tax->get_shop_base_rate( $_product->tax_class );
-								$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) / (($base_rate/100) + 1);
+							if ($woocommerce->cart->prices_include_tax) :
+								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, true );
 							else :
-								$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
+								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, false );
 							endif;
+							
+							$line_tax = $line_taxes['total'];
+							
 						else :
-							$rate = '';
-							$cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() );
+							$line_tax = 0;
 						endif;
 						
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
@@ -413,10 +418,12 @@ class woocommerce_checkout {
 					 		'variation_id' 	=> $values['variation_id'],
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
-					 		'base_cost' 	=> $_product->get_price_excluding_tax( false ),
-					 		'cost'			=> rtrim(rtrim(number_format($cost, 4, '.', ''), '0'), '.'),
-					 		'taxrate' 		=> $rate,
-					 		'item_meta'		=> $item_meta->meta
+					 		'item_meta'		=> $item_meta->meta,
+					 		'base_cost' 	=> $_product->get_price(),		// Base price will be inc or ex tax depending on settings
+					 		'line_cost'		=> $line_cost,					// Discounted line cost, inc or ex tax depending on settings
+					 		'line_tax' 		=> $line_tax, 					// Tax for the line (total)
+					 		'tax_status'	=> $_product->get_tax_status(),	// Taxble, shipping, none
+					 		'tax_class'		=> $_product->get_tax_class()	// Tax class (adjusted by filters)
 					 	), $values);
 					 	
 					 	// Check cart items for errors

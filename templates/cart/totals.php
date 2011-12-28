@@ -6,6 +6,7 @@
 global $woocommerce;
 
 $available_methods = $woocommerce->shipping->get_available_shipping_methods();
+$has_compound_tax = false;
 ?>
 <div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
 	
@@ -14,10 +15,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
 		<table cellspacing="0" cellpadding="0">
 			<tbody>
-				<tr>
-					<th><?php _e('Cart Subtotal', 'woothemes'); ?></th>
-					<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
-				</tr>
+			
+				<?php if (!$woocommerce->cart->has_compound_tax) : ?>
+					<tr>
+						<th><?php _e('Subtotal', 'woothemes'); ?></th>
+						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
+					</tr>
+				<?php endif; ?>
 	
 				<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
 					<th><?php _e('Cart Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
@@ -67,12 +71,30 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					</td>
 				</tr><?php endif; ?>
 	
-				<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
-					<th><?php echo $woocommerce->countries->tax_or_vat(); ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
-					<td><?php
-						echo $woocommerce->cart->get_cart_tax();
-					?></td>
-				</tr><?php endif; ?>
+				<?php if ($woocommerce->cart->get_cart_tax()) : ?>
+					
+					<?php foreach ($woocommerce->cart->taxes as $taxes) : if ($taxes['compound']) continue; ?>
+						<tr>	
+							<th><?php echo $taxes['label']; ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
+							<td><?php echo woocommerce_price($taxes['total']); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					
+					<?php if ($woocommerce->cart->has_compound_tax) : ?>
+						<tr>
+							<th><?php _e('Subtotal', 'woothemes'); ?></th>
+							<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
+						</tr>
+					<?php endif; ?>
+					
+					<?php foreach ($woocommerce->cart->taxes as $taxes) : if (!$taxes['compound']) continue; ?>
+						<tr>	
+							<th><?php echo $taxes['label']; ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
+							<td><?php echo woocommerce_price($taxes['total']); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					
+				<?php endif; ?>
 	
 				<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
 					<th><?php _e('Order Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
