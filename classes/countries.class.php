@@ -490,18 +490,12 @@ class woocommerce_countries {
 		return apply_filters('woocommerce_countries_tax_or_vat', $return);
 	}
 	
-	function inc_tax_or_vat( $rate = false ) {
+	function inc_tax_or_vat() {
 		global $woocommerce;
 		
-		if ( $rate > 0 || $rate === 0 ) :
-			$rate = rtrim(rtrim($rate, '0'), '.');
-			if (!$rate) $rate = 0;
-			$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? sprintf(__('(inc. %s%% VAT)', 'woothemes'), $rate) : sprintf(__('(inc. %s%% tax)', 'woothemes'), $rate);
-		else :
-			$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(inc. VAT)', 'woothemes') : __('(inc. tax)', 'woothemes');
-		endif;
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(inc. VAT)', 'woothemes') : __('(inc. tax)', 'woothemes');
 		
-		return apply_filters('woocommerce_countries_inc_tax_or_vat', $return, $rate);
+		return apply_filters('woocommerce_countries_inc_tax_or_vat', $return);
 	}
 	
 	function ex_tax_or_vat() {

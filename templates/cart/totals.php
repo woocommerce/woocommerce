@@ -18,7 +18,7 @@ $has_compound_tax = false;
 			
 				<?php if (!$woocommerce->cart->has_compound_tax) : ?>
 					<tr>
-						<th><?php _e('Subtotal', 'woothemes'); ?></th>
+						<th><?php _e('Cart Subtotal', 'woothemes'); ?></th>
 						<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 					</tr>
 				<?php endif; ?>

@@ -9,60 +9,58 @@
  */
 class woocommerce_tax {
 	
-	var $rates;
-	
-	/**
-	 * Load tax rates
-	 */
-	function woocommerce_tax() {
-		add_action('init', array(&$this, 'get_tax_rates'));
-	}
+	var $rates = '';
 	
 	/**
 	 * Get the tax rates as an array
 	 */
 	function get_tax_rates() {
-		global $woocommerce;
-		
-		$tax_rates = get_option('woocommerce_tax_rates');
-		$tax_rates_array = array();
-		$index = 0;
-		if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
+		if (!is_array($this->rates)) :
+			global $woocommerce;
 			
-			// Standard Rate?
-			if (!$rate['class']) $rate['class'] = '*';
-			
-			// Add entry for each country/state - each will hold all matching rates
-			if ($rate['countries']) foreach ($rate['countries'] as $country => $states) :
+			$tax_rates = get_option('woocommerce_tax_rates');
+			$tax_rates_array = array();
+			$index = 0;
+			if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
 				
-				if ($states) :
+				// Standard Rate?
+				if (!$rate['class']) $rate['class'] = '*';
+				
+				// Add entry for each country/state - each will hold all matching rates
+				if ($rate['countries']) foreach ($rate['countries'] as $country => $states) :
 					
-					foreach ($states as $state) :
+					if ($states) :
 						
-						if (!$rate['label']) $rate['label'] = $woocommerce->countries->tax_or_vat();
-						
-						// Add % to label
-						if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
-							$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
-						endif;
-						
-						$tax_rates_array[$country][$state][$rate['class']][$index] = array( 
-							'label' => $rate['label'], 
-							'rate' => $rate['rate'], 
-							'postcode' => $rate['postcode'], 
-							'shipping' => $rate['shipping'],
-							'compound' => $rate['compound'] 
-							);
-						
-						$index++;
-						
-					endforeach;
-				endif;
-			
+						foreach ($states as $state) :
+							
+							if (!$rate['label']) $rate['label'] = $woocommerce->countries->tax_or_vat();
+							
+							// Add % to label
+							if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
+								$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
+							endif;
+							
+							$tax_rates_array[$country][$state][$rate['class']][$index] = array( 
+								'label' => $rate['label'], 
+								'rate' => $rate['rate'], 
+								'postcode' => $rate['postcode'], 
+								'shipping' => $rate['shipping'],
+								'compound' => $rate['compound'] 
+								);
+							
+							$index++;
+							
+						endforeach;
+					endif;
+				
+				endforeach;
+				
 			endforeach;
 			
-		endforeach;
-		$this->rates = $tax_rates_array;
+			$this->rates = $tax_rates_array;
+		endif;
+		
+		return $this->rates;
 	}
 	
 	/**
@@ -76,6 +74,7 @@ class woocommerce_tax {
 	 * @return  array
 	 */
 	function find_rates( $country = '', $state = '', $postcode = '', $tax_class = '' ) {
+		$this->get_tax_rates();
 		
 		if (!$country) return array();
 		
@@ -84,12 +83,14 @@ class woocommerce_tax {
 		$tax_class = sanitize_title($tax_class);
 		if (!$tax_class) $tax_class = '*';
 
+		$found_rates = array();
+
 		// Look for a state specific rule
 		if (isset($this->rates[ $country ][ $state ])) :
 			
 			// Look for tax class specific rule
-			if (isset($this->rates[ $country ][ $state ][$tax_class])) :
-				$found_rates = $this->rates[ $country ][ $state ][$tax_class];
+			if (isset($this->rates[ $country ][ $state ][ $tax_class ])) :
+				$found_rates = $this->rates[ $country ][ $state ][ $tax_class ];
 			else :
 				$found_rates = $this->rates[ $country ][ $state ][ '*' ];
 			endif;
@@ -98,8 +99,8 @@ class woocommerce_tax {
 		elseif (isset($this->rates[ $country ][ '*' ])) :
 		
 			// Look for tax class specific rule
-			if (isset($this->rates[ $country ][ '*' ][$tax_class])) :
-				$found_rates = $this->rates[ $country ][ '*' ][$tax_class];
+			if (isset($this->rates[ $country ][ '*' ][ $tax_class ])) :
+				$found_rates = $this->rates[ $country ][ '*' ][ $tax_class ];
 			else :
 				$found_rates = $this->rates[ $country ][ '*' ][ '*' ];
 			endif;
@@ -133,6 +134,8 @@ class woocommerce_tax {
 	function get_rates( $tax_class = '' ) {
 		global $woocommerce;
 		
+		$this->get_tax_rates();
+		
 		$tax_class = sanitize_title($tax_class);
 		
 		/* Checkout uses customer location, otherwise use store base rate */
@@ -163,6 +166,8 @@ class woocommerce_tax {
 	function get_shop_base_rate( $tax_class = '' ) {
 		global $woocommerce;
 		
+		$this->get_tax_rates();
+		
 		$country 	= $woocommerce->countries->get_base_country();
 		$state 		= $woocommerce->countries->get_base_state();
 		
@@ -178,6 +183,8 @@ class woocommerce_tax {
 	 */
 	function get_shipping_tax_rate( $tax_class = '' ) {
 		/*global $woocommerce;
+		
+		$this->get_tax_rates();
 		
 		if (defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT) :
 			$country 	= $woocommerce->customer->get_shipping_country();
@@ -257,7 +264,7 @@ class woocommerce_tax {
 	 * @return  array		
 	 */
 	function calc_tax( $price, $rates, $price_includes_tax = true ) {
-
+		
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 		
 		$taxes = array(
@@ -287,10 +294,17 @@ class woocommerce_tax {
 					'total' 	=> 0
 				);
 			endif;
-
-			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + ($tax_amount / 100); // Back to pounds, and added to total
 			
-			$taxes['total'] = $taxes['total'] + ($tax_amount / 100); // Back to pounds, and added to total
+			// Back to pounds
+			$tax_amount = ($tax_amount / 100);
+			
+			// Rounding
+			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				$tax_amount = round( $tax_amount, 2 );
+			endif;
+			
+			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + $tax_amount;			
+			$taxes['total'] = $taxes['total'] + $tax_amount;
 		endforeach;
 		
 		// Compound taxes
@@ -309,7 +323,7 @@ class woocommerce_tax {
 			else :
 				$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
 			endif;
-			
+						
 			if (!isset($taxes['rates'][$key])) :
 				$taxes['rates'][$key] = array(
 					'label' 	=> $rate['label'],
@@ -319,9 +333,14 @@ class woocommerce_tax {
 				);
 			endif;
 
-			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + ($tax_amount / 100); // Back to pounds, and added to total
+			// Back to pounds
+			$tax_amount = ($tax_amount / 100);
 			
-			$taxes['total'] = $taxes['total'] + ($tax_amount / 100); // Back to pounds, and added to total
+			// Rounding
+			$tax_amount = round( $tax_amount, 2 );
+			
+			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + $tax_amount;			
+			$taxes['total'] = $taxes['total'] + $tax_amount;
 		endforeach;
 
 		return $taxes;
