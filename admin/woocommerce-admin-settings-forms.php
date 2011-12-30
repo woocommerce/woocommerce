@@ -331,7 +331,7 @@ function woocommerce_admin_fields($options) {
 		            			<tr>
 		            				<th class="check-column"><input type="checkbox"></th>
 		            				<th class="country"><?php _e('Countries/states', 'woothemes'); ?></th>
-		            				<th class="postcode"><?php _e('Postcodes/zips', 'woothemes'); ?> <a class="tips" tip="<?php _e('Optionally, comma separate postcodes/zips this rate applies to', 'woothemes'); ?>">[?]</a></th>
+		            				<th class="postcode"><?php _e('Post/zip', 'woothemes'); ?> <a class="tips" tip="<?php _e('Optionally, comma separate postcodes/zips this rate applies to', 'woothemes'); ?>">[?]</a></th>
 		            				<th><?php _e('Tax Class', 'woothemes'); ?></th>
 		            				<th><?php _e('Label', 'woothemes'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woothemes'); ?>">[?]</a></th>
 		            				<th><?php _e('Rate', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woothemes'); ?>">[?]</a></th>
@@ -343,7 +343,7 @@ function woocommerce_admin_fields($options) {
 		            			<tr>
 		            				<th colspan="2"><a href="#" class="add button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
 		            				<th colspan="6">
-		            					<small><?php _e('All matching rates will be applied, and non compound rates will be stacked.', 'woothemes'); ?></small>
+		            					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woothemes'); ?></small>
 		            					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a>
 		            				</th>
 		            			</tr>

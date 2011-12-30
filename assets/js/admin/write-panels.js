@@ -35,7 +35,7 @@ jQuery( function($){
 		allow_single_deselect: 'true'
 	});
 	
-	$('#order_items_list button.remove_row').live('click', function(){
+	$('#order_items_list .remove_row').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){
 			$(this).closest('tr.item').hide();
@@ -207,7 +207,7 @@ jQuery( function($){
 		
 		var index = $(this).closest('tr.item').attr('rel');
 		
-		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td><button class="remove_meta button">&times;</button></td></tr>');
+		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>');
 		
 		return false;
 		

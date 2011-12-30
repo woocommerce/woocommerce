@@ -26,25 +26,32 @@
 .order_actions{color:#999;font-size:11px;margin:0;overflow:hidden;zoom:1;}.order_actions li{border-top:1px solid #fff;border-bottom:1px solid #ddd;padding:6px 0;margin:0;line-height:1.6em;float:left;width:50%;text-align:center;}.order_actions li a{float:none;text-align:center;}
 .order_actions li.wide{width:auto;float:none;clear:both;padding:6px;text-align:left;}
 #woocommerce-order-items .inside{margin:0;padding:0;background:#fefefe;}
-#woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .add_item_id{width:400px;vertical-align:top;}
+#woocommerce-order-items .buttons{float:left;padding-left:6px;vertical-align:top;}#woocommerce-order-items .buttons .add_item_id,#woocommerce-order-items .buttons .chzn-container{width:400px !important;margin-right:9px;vertical-align:top;float:left;}
 #woocommerce-order-items .buttons button{margin:2px 0 0 0;}
 #woocommerce-order-items .buttons-alt{float:right;padding-right:6px;}
+#woocommerce-order-items .add_meta{margin-left:0 !important;}
 #woocommerce-order-items h3 small{color:#999;}
-ul.totals{margin:6px 6px 0;float:left;}ul.totals li{float:left;clear:both;width:100%;font-size:1.2em;font-weight:bold;line-height:1.2em;margin:0;padding:0 0 9px;}ul.totals li label{font-weight:normal;display:block;font-size:0.8em;color:#333;}
-ul.totals li input{width:100%;vertical-align:middle;font-size:1em;margin:0 !important;font-weight:normal;color:#555;}
-ul.totals li input.first{width:49%;float:left;}
-ul.totals li input.last{width:49%;float:right;}
-ul.totals li.left{float:left;width:49%;clear:none;}ul.totals li.left input{width:100%;}
-ul.totals li.right{float:right;width:49%;clear:none;}ul.totals li.right input{width:100%;}
+#woocommerce-order-items .row-actions{float:right;padding:0;color:#999;}#woocommerce-order-items .row-actions a{color:#999;}
+#woocommerce-order-items .row-actions a.remove_row:hover{color:red;}
+#woocommerce-order-totals h4{margin:0 !important;}
+#woocommerce-order-totals .totals_group{border-top:1px solid white;border-bottom:1px solid #DDD;padding:10px 10px 0;}
+#woocommerce-order-totals ul.totals{margin:6px 0 0;float:left;}#woocommerce-order-totals ul.totals li{float:left;clear:both;width:100%;font-size:1.2em;font-weight:bold;line-height:1.2em;margin:0;padding:0 0 10px;}#woocommerce-order-totals ul.totals li label{font-weight:normal;display:block;font-size:0.8em;color:#333;}
+#woocommerce-order-totals ul.totals li input{width:100%;vertical-align:middle;font-size:1em;margin:0 !important;font-weight:normal;color:#555;}
+#woocommerce-order-totals ul.totals li input.first{width:49%;float:left;}
+#woocommerce-order-totals ul.totals li input.last{width:49%;float:right;}
+#woocommerce-order-totals ul.totals li.left{float:left;width:49%;clear:none;}#woocommerce-order-totals ul.totals li.left input{width:100%;}
+#woocommerce-order-totals ul.totals li.right{float:right;width:49%;clear:none;}#woocommerce-order-totals ul.totals li.right input{width:100%;}
+#woocommerce-order-totals ul.totals .calculated{border-color:#ae8ca2;border-style:dotted;}
 .woocommerce_order_items_wrapper{margin:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items{width:100%;background:#fff;}.woocommerce_order_items_wrapper table.woocommerce_order_items thead th{background:#ECECEC;padding:8px 8px;font-size:11px;text-align:left;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items td{padding:8px 8px;text-align:left;line-height:26px;vertical-align:top;border-bottom:1px dotted #ececec;}.woocommerce_order_items_wrapper table.woocommerce_order_items td input,.woocommerce_order_items_wrapper table.woocommerce_order_items td textarea{width:100%;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items td select{width:50%;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items td input,.woocommerce_order_items_wrapper table.woocommerce_order_items td textarea{font-size:14px;padding:4px;color:#555;}
-.woocommerce_order_items_wrapper table.woocommerce_order_items .name{min-width:100px;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .name{min-width:200px;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items .center,.woocommerce_order_items_wrapper table.woocommerce_order_items .variation-id,.woocommerce_order_items_wrapper table.woocommerce_order_items .product-id{text-align:center;}
-.woocommerce_order_items_wrapper table.woocommerce_order_items .quantity,.woocommerce_order_items_wrapper table.woocommerce_order_items .cost,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax{width:60px;}
-.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status{width:90px;}.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class select,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status select{width:90px;}
-.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta{width:100%;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td{padding:1px 4px 1px 0;border:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td input{width:150px;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .cost,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax,.woocommerce_order_items_wrapper table.woocommerce_order_items .quantity{width:65px;}.woocommerce_order_items_wrapper table.woocommerce_order_items .cost select,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax select,.woocommerce_order_items_wrapper table.woocommerce_order_items .quantity select{width:100%;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class{width:80px;}.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_status select,.woocommerce_order_items_wrapper table.woocommerce_order_items .tax_class select{width:100%;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items .calculated{border-color:#ae8ca2;border-style:dotted;}
+.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta{width:100%;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td{padding:1px 4px 1px 0;border:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items table.meta tr td input{min-width:100px;}
 .widefat .column-order_title time{display:block;color:#999;margin:3px 0;}
 .widefat .column-order_actions a.button{float:left;margin:0 4px 2px 0;}
 .widefat small.meta{display:block;color:#999;font-size:inherit;margin:3px 0;}
@@ -220,6 +227,7 @@ table.bar_chart tbody td.bars{position:relative;text-align:left;padding:6px 6px 
 table.bar_chart tbody td.bars span.alt{clear:both;background:#47a03e;}table.bar_chart tbody td.bars span.alt span{margin:0;color:#c5dec2 !important;text-shadow:0 1px 0 #47a03e;background:transparent;}
 #woocommerce_allowed_countries_chzn .chzn-search,#woocommerce_file_download_method_chzn .chzn-search{display:none;}
 .chzn-container{font-size:13px;position:relative;display:inline-block;zoom:1;*display:inline;margin-right:5px;}
+.chzn-container{width:100% !important;margin:0 1px;display:block;}.chzn-container .chzn-drop{width:100% !important;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
 .chzn-container .chzn-drop{background:#fff;border:1px solid #aaa;border-top:0;position:absolute;top:29px;left:0;-webkit-box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);-moz-box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);-o-box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);z-index:999;}
 .chzn-container-single .chzn-single{background-color:#fff;background-image:-webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.5, white));background-image:-webkit-linear-gradient(center bottom, #eeeeee 0%, white 50%);background-image:-moz-linear-gradient(center bottom, #eeeeee 0%, white 50%);background-image:-o-linear-gradient(top, #eeeeee 0%, #ffffff 50%);background-image:-ms-linear-gradient(top, #eeeeee 0%, #ffffff 50%);background-image:linear-gradient(top, #eeeeee 0%, #ffffff 50%);-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;-moz-background-clip:padding;-webkit-background-clip:padding-box;background-clip:padding-box;border:1px solid #aaa;display:block;overflow:hidden;white-space:nowrap;position:relative;height:23px;line-height:23px;padding:0 0 0 8px;color:#444;text-decoration:none;}
 .chzn-container-single .chzn-single span{margin-right:26px;display:block;overflow:hidden;white-space:nowrap;-o-text-overflow:ellipsis;-ms-text-overflow:ellipsis;text-overflow:ellipsis;}

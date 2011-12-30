@@ -149,12 +149,14 @@
 		background: #fefefe;
 	}
 	.buttons {
-		float: left;
+		float:left;
 		padding-left: 6px;
 		vertical-align: top;
-		.add_item_id {
-			width: 400px;
+		.add_item_id, .chzn-container {
+			width: 400px !important;
+			margin-right: 9px;
 			vertical-align: top;
+			float:left;
 		}
 		button {
 			margin: 2px 0 0 0;
@@ -164,59 +166,87 @@
 		float: right;
 		padding-right: 6px;
 	}
+	.add_meta {
+		margin-left:0 !important;
+	}
 	h3 small {
 		color: #999;
 	}
+	.row-actions {
+		float:right;
+		padding:0; 
+		color: #999;
+		a {
+			color: #999;
+		}
+		a.remove_row:hover {
+			color: red;
+		}
+	}
 }
-ul.totals {
-	margin: 6px 6px 0;
-	float: left;
-	li {
+#woocommerce-order-totals {
+	h4 {
+		margin:0 !important;
+	}
+	.totals_group {
+		border-top: 1px solid white;
+		border-bottom: 1px solid #DDD;
+		padding: 10px 10px 0;
+	}
+	ul.totals {
+		margin: 6px 0 0;
 		float: left;
-		clear: both;
-		width: 100%;
-		font-size: 1.2em;
-		font-weight: bold;
-		line-height: 1.2em;
-		margin: 0;
-		padding: 0 0 9px;
-		label {
-			font-weight: normal;
-			display: block;
-			font-size: 0.8em;
-			color: #333;
-		}
-		input {
-			width: 100%;
-			vertical-align: middle;
-			font-size: 1em;
-			margin: 0 !important;
-			font-weight: normal;
-			color: #555;
-		}
-		input.first {
-			width: 49%;
+		li {
 			float: left;
+			clear: both;
+			width: 100%;
+			font-size: 1.2em;
+			font-weight: bold;
+			line-height: 1.2em;
+			margin: 0;
+			padding: 0 0 10px;
+			label {
+				font-weight: normal;
+				display: block;
+				font-size: 0.8em;
+				color: #333;
+			}
+			input {
+				width: 100%;
+				vertical-align: middle;
+				font-size: 1em;
+				margin: 0 !important;
+				font-weight: normal;
+				color: #555;
+			}
+			input.first {
+				width: 49%;
+				float: left;
+			}
+			input.last {
+				width: 49%;
+				float: right;
+			}
 		}
-		input.last {
+		li.left {
+			float: left;
 			width: 49%;
+			clear: none;
+			input {
+				width: 100%;
+			}
+		}
+		li.right {
 			float: right;
+			width: 49%;
+			clear: none;
+			input {
+				width: 100%;
+			}
 		}
-	}
-	li.left {
-		float: left;
-		width: 49%;
-		clear: none;
-		input {
-			width: 100%;
-		}
-	}
-	li.right {
-		float: right;
-		width: 49%;
-		clear: none;
-		input {
-			width: 100%;
+		.calculated {
+			border-color: #ae8ca2;
+			border-style: dotted;
 		}
 	}
 }
@@ -250,19 +280,26 @@ ul.totals {
 			}
 		} 
 		.name {
-			min-width: 100px;
+			min-width: 200px;
 		}
 		.center, .variation-id, .product-id {
 			text-align: center;
 		}
-		.quantity, .cost, .tax {
-			width: 60px;
-		}
-		.tax_class, .tax_status {
-			width: 90px;
+		.cost, .tax, .quantity {
+			width: 65px;
 			select {
-				width: 90px;
+				width: 100%
 			}
+		}
+		.tax_status, .tax_class {
+			width: 80px;
+			select {
+				width: 100%
+			}
+		}
+		.calculated {
+			border-color: #ae8ca2;
+			border-style: dotted;
 		}
 		table.meta {
 			width: 100%;
@@ -271,7 +308,7 @@ ul.totals {
 					padding: 1px 4px 1px 0;
 					border: 0;
 					input {
-						width: 150px;
+						min-width: 100px;
 					}
 				}
 			}
@@ -1320,6 +1357,18 @@ table.bar_chart {
   zoom: 1;
   *display: inline;
   margin-right: 5px;
+}
+/* 100% width */
+.chzn-container {
+	width: 100% !important;
+	margin: 0 1px;
+	display: block;
+	.chzn-drop {
+		width: 100% !important;
+		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+		box-sizing: border-box;         /* Opera/IE 8+ */
+	}
 }
 .chzn-container .chzn-drop {
   background: #fff;

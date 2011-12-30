@@ -33,11 +33,15 @@ class woocommerce_tax {
 						
 						foreach ($states as $state) :
 							
-							if (!$rate['label']) $rate['label'] = $woocommerce->countries->tax_or_vat();
+							if (!$rate['label']) :
 							
-							// Add % to label
-							if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
-								$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
+								$rate['label'] = $woocommerce->countries->tax_or_vat();
+								
+								// Add % to label
+								if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
+									$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
+								endif;
+							
 							endif;
 							
 							$tax_rates_array[$country][$state][$rate['class']][$index] = array( 

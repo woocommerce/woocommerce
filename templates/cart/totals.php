@@ -75,7 +75,7 @@ $has_compound_tax = false;
 					
 					<?php foreach ($woocommerce->cart->taxes as $taxes) : if ($taxes['compound']) continue; ?>
 						<tr>	
-							<th><?php echo $taxes['label']; ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
+							<th><?php echo $taxes['label']; ?></th>
 							<td><?php echo woocommerce_price($taxes['total']); ?></td>
 						</tr>
 					<?php endforeach; ?>
@@ -89,7 +89,7 @@ $has_compound_tax = false;
 					
 					<?php foreach ($woocommerce->cart->taxes as $taxes) : if (!$taxes['compound']) continue; ?>
 						<tr>	
-							<th><?php echo $taxes['label']; ?> <?php if ($woocommerce->customer->is_customer_outside_base()) : ?><small><?php echo sprintf(__('estimated for %s', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); ?></small><?php endif; ?></th>
+							<th><?php echo $taxes['label']; ?></th>
 							<td><?php echo woocommerce_price($taxes['total']); ?></td>
 						</tr>
 					<?php endforeach; ?>
@@ -107,7 +107,19 @@ $has_compound_tax = false;
 				</tr>
 			</tbody>
 		</table>
-		<p><small><?php _e('Note: Tax and shipping totals are estimated and will be updated during checkout based on your billing information.', 'woothemes'); ?></small></p>
+		<p><small><?php 
+			if ($woocommerce->customer->is_customer_outside_base()) : 
+				
+				$estimated_text = ' ' . sprintf(__('(for %s)', 'woothemes'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woothemes') ); 
+			
+			else :
+			
+				$estimated_text = '';
+				
+			endif;
+			
+			echo sprintf(__('Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information.', 'woothemes'), $estimated_text ); 
+		?></small></p>
 	
 	<?php else : ?>
 	
