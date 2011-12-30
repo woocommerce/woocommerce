@@ -150,7 +150,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     public function generate_paypal_form( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		if ( $this->testmode == 'yes' ):
 			$paypal_adr = $this->testurl . '?test_ipn=1&';		
@@ -252,7 +252,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					
 					$item_name = $item['name'];
 					
-					$item_meta = &new order_item_meta( $item['item_meta'] );					
+					$item_meta = new order_item_meta( $item['item_meta'] );					
 					if ($meta = $item_meta->display( true, true )) :
 						$item_name .= ' ('.$meta.')';
 					endif;
@@ -313,7 +313,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 **/
 	function process_payment( $order_id ) {
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		return array(
 			'result' 	=> 'success',

@@ -115,12 +115,12 @@ class woocommerce_tax {
 		$matched_tax_rates = array();
 		
 		if ($postcode) :
-			foreach ($found_rates as $rate) :
-				if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[] = $rate;
+			foreach ($found_rates as $key => $rate) :
+				if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
 			endforeach;
 		else :
-			foreach ($found_rates as $rate) :
-				if (sizeof($rate['postcode'])==0) $matched_tax_rates[] = $rate;
+			foreach ($found_rates as $key => $rate) :
+				if (sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
 			endforeach;
 		endif;
 
@@ -180,43 +180,56 @@ class woocommerce_tax {
 
 	
 	/**
-	 * Get the tax rate based on the country and state
+	 * Gets an array of matching shipping tax rates for a given class
 	 *
 	 * @param   string	Tax Class
 	 * @return  mixed		
 	 */
-	function get_shipping_tax_rate( $tax_class = '' ) {
-		/*global $woocommerce;
+	function get_shipping_tax_rates( $tax_class = null ) {
+		global $woocommerce;
 		
 		$this->get_tax_rates();
 		
 		if (defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT) :
 			$country 	= $woocommerce->customer->get_shipping_country();
 			$state 		= $woocommerce->customer->get_shipping_state();
+			$postcode   = $woocommerce->customer->get_shipping_postcode();
 		else :
 			$country 	= $woocommerce->countries->get_base_country();
 			$state 		= $woocommerce->countries->get_base_state();
+			$postcode   = '';
 		endif;
 		
 		// If we are here then shipping is taxable - work it out
-		
-		if ($tax_class) :
+		if ( !is_null($tax_class) ) :
+			
+			$matched_tax_rates = array();
 			
 			// This will be per item shipping
-			$rate = $this->find_rates( $country, $state, $tax_class );
+			$rates = $this->find_rates( $country, $state, $postcode, $tax_class );
 			
-			if (isset($rate['shipping']) && $rate['shipping']=='yes') :
-				return $rate['rate'];
-			else :
+			if ($rates) foreach ($rates as $key => $rate) :
+				if (isset($rate['shipping']) && $rate['shipping']=='yes') :
+					$matched_tax_rates[$key] = $rate;
+				endif;
+			endforeach;
+			
+			if (sizeof($matched_tax_rates)==0) :
 				// Get standard rate
-				$rate = $this->find_rates( $country, $state );
-				if (isset($rate['shipping']) && $rate['shipping']=='yes') return $rate['rate'];
+				$rates = $this->find_rates( $country, $state, $postcode );
+				
+				if ($rates) foreach ($rates as $key => $rate) :
+					if (isset($rate['shipping']) && $rate['shipping']=='yes') :
+						$matched_tax_rates[$key] = $rate;
+					endif;
+				endforeach;
 			endif;
+			
+			return $matched_tax_rates;
 			
 		else :
 			
 			// This will be per order shipping - loop through the order and find the highest tax class rate
-			
 			$found_rates = array();
 			$found_shipping_rates = array();
 			
@@ -254,9 +267,9 @@ class woocommerce_tax {
 				if (isset($rate['shipping']) && $rate['shipping']=='yes') return $rate['rate'];
 			endif;
 			
-		endif;*/
+		endif;
 
-		return 0; // return false
+		return array(); // return false
 	}
 	
 	/**
@@ -265,19 +278,16 @@ class woocommerce_tax {
 	 * @param   float	price
 	 * @param   array	rates
 	 * @param	bool	passed price includes tax
-	 * @return  array		
+	 * @return  array	array of rates/amounts
 	 */
 	function calc_tax( $price, $rates, $price_includes_tax = true ) {
 		
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 		
-		$taxes = array(
-			'total' => 0,
-			'has_compound' => false,
-			'rates' => array()
-		);
+		// Taxes array
+		$taxes = array();
 		
-		// Stacked taxes
+		// Multiple taxes
 		foreach ($rates as $key => $rate) :
 			if ($rate['compound']=='yes') continue;
 			
@@ -290,15 +300,6 @@ class woocommerce_tax {
 				$tax_amount = $price * ($rate['rate']/100);
 			endif;
 			
-			if (!isset($taxes['rates'][$key])) :
-				$taxes['rates'][$key] = array(
-					'label' 	=> $rate['label'],
-					'rate' 		=> $rate['rate'],
-					'compound'	=> false,
-					'total' 	=> 0
-				);
-			endif;
-			
 			// Back to pounds
 			$tax_amount = ($tax_amount / 100);
 			
@@ -307,17 +308,18 @@ class woocommerce_tax {
 				$tax_amount = round( $tax_amount, 2 );
 			endif;
 			
-			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + $tax_amount;			
-			$taxes['total'] = $taxes['total'] + $tax_amount;
+			// Add rate
+			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+
 		endforeach;
+		
+		$pre_compound_total = array_sum($taxes);
 		
 		// Compound taxes
 		foreach ($rates as $key => $rate) :
 			if ($rate['compound']=='no') continue;
 			
-			$taxes['has_compound'] = true;
-			
-			$the_price_inc_tax = $price + ($taxes['total'] * 100);
+			$the_price_inc_tax = $price + ($pre_compound_total * 100);
 			
 			if ($price_includes_tax) :
 			
@@ -327,42 +329,122 @@ class woocommerce_tax {
 			else :
 				$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
 			endif;
-						
-			if (!isset($taxes['rates'][$key])) :
-				$taxes['rates'][$key] = array(
-					'label' 	=> $rate['label'],
-					'rate' 		=> $rate['rate'],
-					'compound'	=> true,
-					'total' 	=> 0
-				);
-			endif;
 
 			// Back to pounds
 			$tax_amount = ($tax_amount / 100);
 			
 			// Rounding
-			$tax_amount = round( $tax_amount, 2 );
+			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				$tax_amount = round( $tax_amount, 2 );
+			endif;
 			
-			$taxes['rates'][$key]['total'] = $taxes['rates'][$key]['total'] + $tax_amount;			
-			$taxes['total'] = $taxes['total'] + $tax_amount;
+			// Add rate
+			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+
 		endforeach;
 
 		return $taxes;
 	}
 	
 	/**
-	 * Calculate the shipping tax using the final value
+	 * Calculate the shipping tax using a passed array of rates
 	 *
 	 * @param   int		Price
 	 * @param	int		Taxation Rate
 	 * @return  int		
 	 */
-	function calc_shipping_tax( $price, $rate ) {
-	
-		$rate = round($rate, 4);
-		$tax_amount = $price * ($rate/100);
+	function calc_shipping_tax( $price, $rates ) {
 
-		return round($tax_amount, 2);
+		// Taxes array
+		$taxes = array();
+		
+		// Multiple taxes
+		foreach ($rates as $key => $rate) :
+			if ($rate['compound']=='yes') continue;
+			
+			$tax_amount = $price * ($rate['rate']/100);
+			
+			// Add rate
+			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+
+		endforeach;
+
+		$pre_compound_total = array_sum($taxes);
+		
+		// Compound taxes
+		foreach ($rates as $key => $rate) :
+			if ($rate['compound']=='no') continue;
+			
+			$the_price_inc_tax = $price + $pre_compound_total;
+			
+			$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
+			
+			// Add rate
+			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+
+		endforeach;
+		
+		return $taxes;
 	}
 		
+}
+
+/**
+ * WooCommerce Taxes
+ * 
+ * A Simple class for storing multiple taxes, including compound taxes
+ */
+class woocommerce_taxes {
+	
+	var $taxes;
+	
+	function __construct( $item_meta = '' ) {
+		$this->taxes = array();
+	}
+	
+	function get_taxes() {
+		return $this->taxes;
+	}
+	
+	/**
+	 * Add tax rate
+	 */
+	function add_tax_rate( $key, $label, $compound = false ) {
+		if (!isset($this->taxes[$key])) :
+			$this->taxes[$key] = array(
+				'label' => $label,
+				'total' => 0,
+				'compound' => $compound
+			);
+		endif;
+	}
+	
+	/**
+	 * Add tax amount
+	 */
+	function add_tax_amount( $key, $amount ) {
+		$this->taxes[$key]['total'] += $amount;
+	}
+	
+	/**
+	 * Merge + sum tax rows
+	 */
+	function merge( $taxes ) {
+		if ($taxes) foreach ($taxes as $key => $amount) :
+			$this->add_tax_amount( $key, $amount );
+		endforeach;
+	}
+	
+	/**
+	 * Get the total
+	 */
+	function get_tax_total( $compound = true ) {
+		$total = 0;
+		foreach ($this->taxes as $tax) :
+			if (!$compound && $tax['compound']) continue;
+			$total += $tax['total'];
+		endforeach;
+		return $total;
+	}
+	
 }

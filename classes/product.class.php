@@ -495,19 +495,14 @@ class woocommerce_product {
 		
 		$price = $this->price;
 
-		if ( $this->is_taxable() ) :
+		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='yes' ) :
 			
 			$_tax = &new woocommerce_tax();
 			
 			$tax_rates 		= $_tax->get_rates( $this->tax_class );
 			
-			if (get_option('woocommerce_prices_include_tax')=='yes') :
-				$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
-				$tax_amount		= round( $taxes['total'], 4);
-			else :
-				$taxes 			= $_tax->calc_tax( $price, $tax_rates, false );
-				$tax_amount		= round( $taxes['total'], 4);
-			endif;
+			$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
+			$tax_amount		= round( array_sum($taxes), 4);
 			
 			if ($round) :
 				$price = round( $price - $tax_amount, 2);
