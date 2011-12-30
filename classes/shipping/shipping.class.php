@@ -15,7 +15,7 @@ class woocommerce_shipping {
 	var $shipping_methods 	= array();
 	var $chosen_method		= null;
 	var $shipping_total 	= 0;
-	var $shipping_tax 		= array();
+	var $shipping_tax 		= 0;
 	var $shipping_label		= null;
 	var $shipping_classes;
 	
@@ -112,7 +112,7 @@ class woocommerce_shipping {
 	function reset_shipping_methods() {
 		foreach ( $this->shipping_methods as $shipping_method ) :
 			$shipping_method->shipping_total = 0;
-			$shipping_method->shipping_tax = array();
+			$shipping_method->shipping_tax = 0;
 			$shipping_method->rates = array();
 		endforeach;
 	}
@@ -122,7 +122,7 @@ class woocommerce_shipping {
 		if ($this->enabled=='yes') :
 		
 			$this->shipping_total = 0;
-			$this->shipping_tax = array();
+			$this->shipping_tax = 0;
 			$this->shipping_label = null;
 			$_cheapest_fee = '';
 			$_cheapest_method = '';
@@ -169,7 +169,7 @@ class woocommerce_shipping {
 	function reset_shipping() {
 		unset($_SESSION['_chosen_shipping_method']);
 		$this->shipping_total = 0;
-		$this->shipping_tax = array();
+		$this->shipping_tax = 0;
 		$this->shipping_label = null;
 	}
 	

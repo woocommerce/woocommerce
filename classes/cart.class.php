@@ -26,7 +26,6 @@ class woocommerce_cart {
 	var $subtotal_ex_tax;
 	var $tax_total;
 	var $taxes;
-	var $has_compound_tax;
 	var $discount_cart;
 	var $discount_total;
 	var $shipping_total;
@@ -438,16 +437,13 @@ class woocommerce_cart {
 			$this->cart_contents_count = 0;
 			$this->cart_contents_tax = 0;
 			$this->tax_total = 0;
-			$this->has_compound_tax = false;
 			$this->shipping_tax_total = 0;
 			$this->subtotal = 0;
 			$this->subtotal_ex_tax = 0;
 			$this->discount_total = 0;
 			$this->discount_cart = 0;
 			$this->shipping_total = 0;
-			
-			unset($this->taxes);
-			$this->taxes = new woocommerce_taxes();
+			$this->taxes = array();
 		}
 		
 		/** 
@@ -813,16 +809,10 @@ class woocommerce_cart {
 						// Tax Totals - add up each tax line and store separately
 						$this->tax_total 	= $this->tax_total + $discounted_tax_amount;
 						
-						// Store the rates returned from calc_tax
-						foreach ($tax_rates as $key => $rate) :
-							
-							$compound = ($rate['compound']=='yes') ? true : false;
-							if ($compound) $this->has_compound_tax = true;
-							
-							$this->taxes->add_tax_rate( $key, $rate['label'], $compound );
-							$this->taxes->add_tax_amount( $key, $discounted_taxes[$key] );
-
-						endforeach;
+						// Tax rows - merge the totals we just got
+						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
+						    $this->taxes[$key] = (isset($discounted_taxes[$key]) ? $discounted_taxes[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
+						}
 						
 					else :
 					
@@ -871,16 +861,10 @@ class woocommerce_cart {
 						// Tax Totals - add up each tax line and store separately
 						$this->tax_total 		= $this->tax_total + $discounted_tax_amount;
 		
-						// Store the rates returned from calc_tax
-						foreach ($tax_rates as $key => $rate) :
-							
-							$compound = ($rate['compound']=='yes') ? true : false;
-							if ($compound) $this->has_compound_tax = true;
-							
-							$this->taxes->add_tax_rate( $key, $rate['label'], $compound );
-							$this->taxes->add_tax_amount( $key, $discounted_taxes[$key] );
-
-						endforeach;
+						// Tax rows - merge the totals we just got
+						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
+						    $this->taxes[$key] = (isset($discounted_taxes[$key]) ? $discounted_taxes[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
+						}
 		
 					else :
 						$discounted_tax_amount = 0;
@@ -914,6 +898,7 @@ class woocommerce_cart {
 			// VAT exemption done at this point - so all totals are correct before exemption
 			if ($woocommerce->customer->is_vat_exempt()) :
 				$this->shipping_tax_total = $this->tax_total = 0;
+				$this->taxes = array();
 			endif;
 			
 			// Allow plugins to hook and alter totals before final total is calculated
@@ -953,11 +938,18 @@ class woocommerce_cart {
 			endif;
 			
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
-			$this->shipping_tax_total 	= array_sum( (array) $woocommerce->shipping->shipping_tax );		// Shipping Tax
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
 			
-			$this->taxes->merge( $woocommerce->shipping->shipping_tax );	// Merge tax row totals
-			
+			if (is_array($woocommerce->shipping->shipping_tax)) :
+				$this->shipping_tax_total = array_sum( $woocommerce->shipping->shipping_tax );
+				
+				// Tax rows - merge the totals we just got
+				foreach (array_keys($this->taxes + $woocommerce->shipping->shipping_tax) as $key) {
+				    $this->taxes[$key] = (isset($woocommerce->shipping->shipping_tax[$key]) ? $woocommerce->shipping->shipping_tax[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
+				}
+			else :
+				$this->shipping_tax_total = $woocommerce->shipping->shipping_tax;
+			endif;
 		}
 		
 		/** 
@@ -1167,7 +1159,7 @@ class woocommerce_cart {
 			// cart + shipping + non-compound taxes (after discount)
 			if ($compound) :
 				
-				return woocommerce_price( $this->cart_contents_total + $this->shipping_total + $woocommerce->cart->taxes->get_tax_total( false ) );
+				return woocommerce_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false ) );
 			
 			// Otherwise we show cart items totals only (before discount)
 			else :
@@ -1258,7 +1250,19 @@ class woocommerce_cart {
 			$cart_total_tax = $this->tax_total + $this->shipping_tax_total;
 			if ($cart_total_tax > 0) $return = woocommerce_price( $cart_total_tax );
 			return apply_filters('woocommerce_get_cart_tax', $return);
-		}	
+		}
+		
+		/**
+		 * Get tax row amounts with or without compound taxes includes
+		 */
+		function get_taxes_total( $compound = true ) {
+			$total = 0;
+			foreach ($this->taxes as $key => $tax) :
+				if (!$compound && $this->tax->is_compound( $key )) continue;
+				$total += $tax;
+			endforeach;
+			return $total;
+		}
 		
 		/**
 		 * gets the total (product) discount amount - these are applied before tax

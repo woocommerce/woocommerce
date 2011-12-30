@@ -14,109 +14,146 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<h2><?php _e('Cart Totals', 'woothemes'); ?></h2>
 		<table cellspacing="0" cellpadding="0">
 			<tbody>
-				<?php 
-					// Define total rows to display
-					$total_rows = array(
-						'subtotal' => array(
-							'label' => __('Cart Subtotal', 'woothemes'),
-							'value' => '<strong>' . $woocommerce->cart->get_cart_subtotal() . '</strong>'
-						)
-					);
-					
-					// Cart Discount
-					if ($woocommerce->cart->get_discounts_before_tax()) :
-						$total_rows[ 'cart-discount' ] = array(
-							'label' => __('Cart Discount', 'woothemes') . ' <a href="'.add_query_arg('remove_discounts', '1').'">'.__('[Remove]', 'woothemes').'</a>',
-							'value' => '&ndash;'.$woocommerce->cart->get_discounts_before_tax()
-						);
-					endif;
-					
-					// Shipping
-					if ($woocommerce->cart->get_cart_shipping_total() && sizeof($available_methods)>0) :
-					
-						$shipping_method_select = '<select name="shipping_method" id="shipping_method">';
-
-						foreach ($available_methods as $method ) :
-
-							$shipping_method_select .= '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &mdash; ';
+				
+				<tr class="cart-subtotal">
+					<th><strong><?php _e('Cart Subtotal', 'woothemes'); ?></strong></th>
+					<td><strong><?php echo $woocommerce->cart->get_cart_subtotal(); ?></strong></td>
+				</tr>
+				
+				<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
+				
+				<tr class="discount">
+					<th><?php _e('Cart Discount', 'woothemes'); ?></th>
+					<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
+				</tr>
+				
+				<?php endif; ?>
+				
+				<?php if ($woocommerce->cart->needs_shipping()) : ?>
+				
+				<tr class="shipping">
+					<th><?php _e('Shipping', 'woothemes'); ?></th>
+					<td>
+					<?php
+						if (sizeof($available_methods)>0) :
 							
-							if ($method->shipping_total>0) :
-
-								if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
-
-									$shipping_method_select .= woocommerce_price($method->shipping_total);
-									if ($method->shipping_tax>0 && $woocommerce->cart->prices_include_tax) :
-										$shipping_method_select .= ' ' . $woocommerce->countries->ex_tax_or_vat();
+							echo '<select name="shipping_method" id="shipping_method">';
+							
+							foreach ($available_methods as $method ) :
+								
+								echo '<option value="'.esc_attr($method->id).'" ';
+								
+								echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &mdash; ';
+								
+								if ($method->shipping_total>0) :
+								
+									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
+	
+										echo woocommerce_price($method->shipping_total);
+										if ($method->shipping_tax>0 && $woocommerce->cart->prices_include_tax) :
+											echo ' ' . $woocommerce->countries->ex_tax_or_vat();
+										endif;
+	
+									else :
+	
+										echo woocommerce_price($method->shipping_total + $method->shipping_tax);
+										if ($method->shipping_tax>0 && !$woocommerce->cart->prices_include_tax) :
+											echo ' ' . $woocommerce->countries->inc_tax_or_vat();
+										endif;
+	
 									endif;
-
+									
 								else :
-
-									$shipping_method_select .= woocommerce_price($method->shipping_total + $method->shipping_tax);
-									if ($method->shipping_tax>0 && !$woocommerce->cart->prices_include_tax) :
-										$shipping_method_select .= ' ' . $woocommerce->countries->inc_tax_or_vat();
-									endif;
-
+									echo __('Free', 'woothemes');
 								endif;
-
+								
+								echo '</option>';
+	
+							endforeach;
+							
+							echo '</select>';
+							
+						else :
+							
+							if ( !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
+								echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woothemes').'</p>';
 							else :
-								$shipping_method_select .= __('Free', 'woothemes');
+								echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
 							endif;
-
-							$shipping_method_select .= '</option>';
-
-						endforeach;
-
-						$shipping_method_select .= '</select>';
-						
-						$total_rows[ 'shipping' ] = array(
-							'label' => __('Shipping', 'woothemes') . ' <small>' . $woocommerce->countries->shipping_to_prefix() . ' ' . __($woocommerce->countries->countries[ $woocommerce->customer->get_shipping_country() ], 'woothemes') . '</small>',
-							'value' => $shipping_method_select
-						);	
-					endif;
-					
-					// Tax Rows
-					if ($woocommerce->cart->get_cart_tax()) :
-						foreach ($woocommerce->cart->taxes->get_taxes() as $taxes) : if ($taxes['compound']) continue;
-							$total_rows[ sanitize_title($taxes['label']) ] = array(
-								'label' => $taxes['label'],
-								'value' => woocommerce_price($taxes['total'])
-							);
-						endforeach;
-						
-						if ($woocommerce->cart->has_compound_tax) :
-							$total_rows[ 'order-subtotal' ] = array(
-								'label' => __('Order Subtotal', 'woothemes'),
-								'value' => '<strong>' . $woocommerce->cart->get_cart_subtotal( true ) . '</strong>'
-							);
+							
 						endif;
+				
+					?></td>
+					
+				</tr>
+	
+				<?php endif; ?>
+				
+				<?php 
+					if ($woocommerce->cart->get_cart_tax()) :
+	
+						if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
 						
-						foreach ($woocommerce->cart->taxes->get_taxes() as $taxes) : if (!$taxes['compound']) continue;
-							$total_rows[ sanitize_title($taxes['label']) ] = array(
-								'label' => $taxes['label'],
-								'value' => woocommerce_price($taxes['total'])
-							);
-						endforeach;
-					endif;	
-					
-					// Order Discount
-					if ($woocommerce->cart->get_discounts_after_tax()) :
-						$total_rows[ 'order-discount' ] = array(
-							'label' => __('Order Discount', 'woothemes') . ' <a href="'.add_query_arg('remove_discounts', '2') . '">'.__('[Remove]', 'woothemes').'</a>',
-							'value' => $woocommerce->cart->get_discounts_after_tax()
-						);
+							$has_compound_tax = false;
+							
+							foreach ($woocommerce->cart->taxes as $key => $tax) : if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
+	
+								?>
+								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+									<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+									<td><?php echo woocommerce_price($tax); ?></td>
+								</tr>
+								<?php
+								
+							endforeach;
+							
+							if ($has_compound_tax) :
+								?>
+								<tr class="order-subtotal">
+									<th><strong><?php _e('Order Subtotal', 'woothemes'); ?></strong></th>
+									<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
+								</tr>
+								<?php
+							endif;
+							
+							foreach ($woocommerce->cart->taxes as $key => $tax) : if (!$woocommerce->cart->tax->is_compound( $key )) continue;
+	
+								?>
+								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+									<th><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+									<td><?php echo woocommerce_price($tax); ?></td>
+								</tr>
+								<?php
+								
+							endforeach;
+						
+						else :
+						
+							?>
+							<tr class="tax">
+								<th><?php _e('Tax', 'woothemes'); ?></th>
+								<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
+							</tr>
+							<?php
+						
+						endif;	
 					endif;
-					
-					// Total
-					$total_rows[ 'total' ] = array(
-						'label' => __('Order Total', 'woothemes'),
-						'value' => '<strong>' . $woocommerce->cart->get_total() . '</strong>'
-					);
-					
-					// Loop through and display rows
-					if (sizeof($total_rows)>0) 
-						foreach ($total_rows as $row => $value) 
-							echo '<tr><th class="'.$row.'">'.$value['label'].'</th><td>'.$value['value'].'</td></tr>';
 				?>
+	
+				<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
+				
+				<tr class="discount">
+					<th><?php _e('Order Discount', 'woothemes'); ?></th>
+					<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
+				</tr>
+				
+				<?php endif; ?>
+				
+				<tr class="total">
+					<th><strong><?php _e('Order Total', 'woothemes'); ?></strong></th>
+					<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
+				</tr>
+				
 			</tbody>
 		</table>
 		<p><small><?php 

@@ -10,18 +10,25 @@
 			</tr>
 		</thead>
 		<tfoot>
-			<tr>
-				<td colspan="2"><?php _e('Cart Subtotal', 'woothemes'); ?></td>
+		
+			<tr class="cart-subtotal">
+				<th colspan="2"><strong><?php _e('Cart Subtotal', 'woothemes'); ?></strong></th>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 			
-			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Cart Discount', 'woothemes'); ?></td>
+			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
+			
+			<tr class="discount">
+				<th colspan="2"><?php _e('Cart Discount', 'woothemes'); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
-			</tr><?php endif; ?>
+			</tr>
+			
+			<?php endif; ?>
 			
 			<?php if ($woocommerce->cart->needs_shipping()) : ?>
-				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
+			
+			<tr class="shipping">
+				<th colspan="2"><?php _e('Shipping', 'woothemes'); ?></th>
 				<td>
 				<?php
 					
@@ -37,20 +44,24 @@
 							
 							if ($method->id==$_SESSION['_chosen_shipping_method']) echo 'selected="selected"';
 							
-							echo '>'.esc_html($method->title).' &ndash; ';
+							echo '>'.esc_html($method->title).' &mdash; ';
 							
 							if ($method->shipping_total>0) :
 							
-								if (get_option('woocommerce_display_totals_excluding_tax')=='yes') :
-									
-									echo woocommerce_price( $method->shipping_total );
-									if ($method->shipping_tax>0) : echo ' ' . $woocommerce->countries->ex_tax_or_vat(); endif;
-									
+								if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
+
+									echo woocommerce_price($method->shipping_total);
+									if ($method->shipping_tax>0 && $woocommerce->cart->prices_include_tax) :
+										echo ' ' . $woocommerce->countries->ex_tax_or_vat();
+									endif;
+
 								else :
-									
-									echo woocommerce_price( $method->shipping_total + $method->shipping_tax );
-									if ($method->shipping_tax>0) : echo ' ' . $woocommerce->countries->inc_tax_or_vat(); endif;
-								
+
+									echo woocommerce_price($method->shipping_total + $method->shipping_tax);
+									if ($method->shipping_tax>0 && !$woocommerce->cart->prices_include_tax) :
+										echo ' ' . $woocommerce->countries->inc_tax_or_vat();
+									endif;
+
 								endif;
 								
 							else :
@@ -74,43 +85,96 @@
 					endif;
 			
 				?></td>
+				
+			</tr>
 
 			<?php endif; ?>
 			
-			<?php if ($woocommerce->cart->get_cart_tax()) : ?><tr>
-				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
-				<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
-			</tr><?php endif; ?>
+			<?php 
+				if ($woocommerce->cart->get_cart_tax()) :
 
-			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Order Discount', 'woothemes'); ?></td>
+					if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
+					
+						$has_compound_tax = false;
+						
+						foreach ($woocommerce->cart->taxes as $key => $tax) : if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
+
+							?>
+							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<td><?php echo woocommerce_price($tax); ?></td>
+							</tr>
+							<?php
+							
+						endforeach;
+						
+						if ($has_compound_tax) :
+							?>
+							<tr class="order-subtotal">
+								<th colspan="2"><strong><?php _e('Order Subtotal', 'woothemes'); ?></strong></th>
+								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
+							</tr>
+							<?php
+						endif;
+						
+						foreach ($woocommerce->cart->taxes as $key => $tax) : if (!$woocommerce->cart->tax->is_compound( $key )) continue;
+
+							?>
+							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
+								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<td><?php echo woocommerce_price($tax); ?></td>
+							</tr>
+							<?php
+							
+						endforeach;
+					
+					else :
+					
+						?>
+						<tr class="tax">
+							<th colspan="2"><?php _e('Tax', 'woothemes'); ?></th>
+							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
+						</tr>
+						<?php
+					
+					endif;	
+				endif;
+			?>
+
+			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
+			
+			<tr class="discount">
+				<th colspan="2"><?php _e('Order Discount', 'woothemes'); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
-			</tr><?php endif; ?>
+			</tr>
+			
+			<?php endif; ?>
 			
 			<?php do_action('woocommerce_before_order_total'); ?>
 			
-			<tr>
-				<td colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></td>
+			<tr class="total">
+				<th colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></th>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 			</tr>
 			
 			<?php do_action('woocommerce_after_order_total'); ?>
+			
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof($woocommerce->cart->get_cart())>0) : 
-				foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
-					$_product = $values['data'];
-					if ($_product->exists() && $values['quantity']>0) :
-						echo '
-							<tr>
-								<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
-								<td>'.$values['quantity'].'</td>
-								<td>' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
-							</tr>';
-					endif;
-				endforeach; 
-			endif;
+				if (sizeof($woocommerce->cart->get_cart())>0) : 
+					foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+						$_product = $values['data'];
+						if ($_product->exists() && $values['quantity']>0) :
+							echo '
+								<tr>
+									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
+									<td>'.$values['quantity'].'</td>
+									<td>' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
+								</tr>';
+						endif;
+					endforeach; 
+				endif;
 			?>
 		</tbody>
 	</table>

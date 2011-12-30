@@ -9,20 +9,25 @@
  */
 class woocommerce_tax {
 	
-	var $rates = '';
+	var $rates;	// Simple array of rates
+	var $parsed_rates;	// Parsed into array with counties/states as keys
 	
 	/**
 	 * Get the tax rates as an array
 	 */
 	function get_tax_rates() {
-		if (!is_array($this->rates)) :
+		if (!is_array($this->parsed_rates)) :
 			global $woocommerce;
 			
 			$tax_rates = get_option('woocommerce_tax_rates');
-			$tax_rates_array = array();
+			
+			$parsed_rates = array();
+			$flat_rates	= array();
+			
 			$index = 0;
+			
 			if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
-				
+			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
 				
@@ -44,7 +49,9 @@ class woocommerce_tax {
 							
 							endif;
 							
-							$tax_rates_array[$country][$state][$rate['class']][$index] = array( 
+							$flat_rates[$index] = $rate;
+							
+							$parsed_rates[$country][$state][$rate['class']][$index] = array( 
 								'label' => $rate['label'], 
 								'rate' => $rate['rate'], 
 								'postcode' => $rate['postcode'], 
@@ -55,16 +62,16 @@ class woocommerce_tax {
 							$index++;
 							
 						endforeach;
+						
 					endif;
 				
 				endforeach;
 				
 			endforeach;
 			
-			$this->rates = $tax_rates_array;
+			$this->rates = $flat_rates;
+			$this->parsed_rates = $parsed_rates;
 		endif;
-		
-		return $this->rates;
 	}
 	
 	/**
@@ -90,23 +97,23 @@ class woocommerce_tax {
 		$found_rates = array();
 
 		// Look for a state specific rule
-		if (isset($this->rates[ $country ][ $state ])) :
+		if (isset($this->parsed_rates[ $country ][ $state ])) :
 			
 			// Look for tax class specific rule
-			if (isset($this->rates[ $country ][ $state ][ $tax_class ])) :
-				$found_rates = $this->rates[ $country ][ $state ][ $tax_class ];
+			if (isset($this->parsed_rates[ $country ][ $state ][ $tax_class ])) :
+				$found_rates = $this->parsed_rates[ $country ][ $state ][ $tax_class ];
 			else :
-				$found_rates = $this->rates[ $country ][ $state ][ '*' ];
+				$found_rates = $this->parsed_rates[ $country ][ $state ][ '*' ];
 			endif;
 		
 		// Default to * if not state specific rules are found
-		elseif (isset($this->rates[ $country ][ '*' ])) :
+		elseif (isset($this->parsed_rates[ $country ][ '*' ])) :
 		
 			// Look for tax class specific rule
-			if (isset($this->rates[ $country ][ '*' ][ $tax_class ])) :
-				$found_rates = $this->rates[ $country ][ '*' ][ $tax_class ];
+			if (isset($this->parsed_rates[ $country ][ '*' ][ $tax_class ])) :
+				$found_rates = $this->parsed_rates[ $country ][ '*' ][ $tax_class ];
 			else :
-				$found_rates = $this->rates[ $country ][ '*' ][ '*' ];
+				$found_rates = $this->parsed_rates[ $country ][ '*' ][ '*' ];
 			endif;
 			
 		endif;
@@ -124,7 +131,7 @@ class woocommerce_tax {
 			endforeach;
 		endif;
 
-		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->rates, $country, $state, $postcode, $tax_class );
+		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->parsed_rates, $country, $state, $postcode, $tax_class );
 		
 		return $matched_tax_rates;
 	}
@@ -386,65 +393,27 @@ class woocommerce_tax {
 		
 		return $taxes;
 	}
-		
-}
+	
+	/**
+	 * Return true/false depending on if a rate is a compound rate
+	 *
+	 * @param   int		key
+	 * @return  bool		
+	 */
+	function is_compound( $key ) {
+		if (isset($this->rates[$key]) && $this->rates[$key]['compound']=='yes') return true;
+		return false;
+	}
 
-/**
- * WooCommerce Taxes
- * 
- * A Simple class for storing multiple taxes, including compound taxes
- */
-class woocommerce_taxes {
-	
-	var $taxes;
-	
-	function __construct( $item_meta = '' ) {
-		$this->taxes = array();
-	}
-	
-	function get_taxes() {
-		return $this->taxes;
-	}
-	
 	/**
-	 * Add tax rate
+	 * Return a given rates label
+	 *
+	 * @param   int		key
+	 * @return  string		
 	 */
-	function add_tax_rate( $key, $label, $compound = false ) {
-		if (!isset($this->taxes[$key])) :
-			$this->taxes[$key] = array(
-				'label' => $label,
-				'total' => 0,
-				'compound' => $compound
-			);
-		endif;
+	function get_rate_label( $key ) {
+		if (isset($this->rates[$key]) && $this->rates[$key]['label']) return $this->rates[$key]['label'];
+		return '';
 	}
-	
-	/**
-	 * Add tax amount
-	 */
-	function add_tax_amount( $key, $amount ) {
-		$this->taxes[$key]['total'] += $amount;
-	}
-	
-	/**
-	 * Merge + sum tax rows
-	 */
-	function merge( $taxes ) {
-		if ($taxes) foreach ($taxes as $key => $amount) :
-			$this->add_tax_amount( $key, $amount );
-		endforeach;
-	}
-	
-	/**
-	 * Get the total
-	 */
-	function get_tax_total( $compound = true ) {
-		$total = 0;
-		foreach ($this->taxes as $tax) :
-			if (!$compound && $tax['compound']) continue;
-			$total += $tax['total'];
-		endforeach;
-		return $total;
-	}
-	
+		
 }
