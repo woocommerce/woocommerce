@@ -6820,7 +6820,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:65
 #@ woothemes
 msgid "South African rand (R)"
-msgstr ""
+msgstr "Zuid Afrikaanse Rand (R)"
 
 #: admin/woocommerce-admin-settings.php:103
 #@ woothemes
@@ -6840,7 +6840,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:138
 #@ woothemes
 msgid "Customer Accounts"
-msgstr ""
+msgstr "Klant accounts"
 
 #: admin/woocommerce-admin-settings.php:139
 #@ woothemes
@@ -7629,37 +7629,37 @@ msgstr ""
 #: languages/strings.php:13
 #@ woothemes
 msgid "pending"
-msgstr ""
+msgstr "In afwachting"
 
 #: languages/strings.php:14
 #@ woothemes
 msgid "failed"
-msgstr ""
+msgstr "Mislukt"
 
 #: languages/strings.php:15
 #@ woothemes
 msgid "on-hold"
-msgstr ""
+msgstr "In Hold"
 
 #: languages/strings.php:16
 #@ woothemes
 msgid "processing"
-msgstr ""
+msgstr "In behandeling"
 
 #: languages/strings.php:17
 #@ woothemes
 msgid "completed"
-msgstr ""
+msgstr "Afgerond"
 
 #: languages/strings.php:18
 #@ woothemes
 msgid "refunded"
-msgstr ""
+msgstr "Terugbetaald"
 
 #: languages/strings.php:19
 #@ woothemes
 msgid "cancelled"
-msgstr ""
+msgstr "Geannuleerd"
 
 #: templates/cart/cart.php:79
 #@ woothemes
@@ -7686,13 +7686,13 @@ msgstr ""
 #: templates/checkout/review_order.php:14
 #@ woothemes
 msgid "Cart Subtotal"
-msgstr ""
+msgstr "Winkelagen Subtotaal"
 
 #: templates/cart/totals.php:78
 #: templates/checkout/review_order.php:86
 #@ woothemes
 msgid "Order Discount"
-msgstr ""
+msgstr "Bestelling korting"
 
 #: templates/emails/customer_completed_order.php:23
 #: templates/emails/customer_note_notification.php:27
@@ -7702,7 +7702,7 @@ msgstr ""
 #: templates/order/order-details-table.php:21
 #@ woothemes
 msgid "Cart Subtotal:"
-msgstr ""
+msgstr "Winkelwagen Subtotaal:"
 
 #: templates/emails/customer_new_account.php:7
 #, php-format
@@ -7767,7 +7767,7 @@ msgstr ""
 #: widgets/widget-layered_nav.php:342
 #@ woothemes
 msgid "Query Type:"
-msgstr ""
+msgstr "Query Type:"
 
 #: widgets/widget-layered_nav.php:344
 #@ woothemes
@@ -7800,7 +7800,7 @@ msgstr "Klant Login"
 #, php-format
 #@ woothemes
 msgid "Welcome %s"
-msgstr ""
+msgstr "Welkom %s"
 
 #: widgets/widget-login.php:56
 #@ woothemes
@@ -7815,7 +7815,7 @@ msgstr ""
 #: widgets/widget-login.php:97
 #@ woothemes
 msgid "Login &raquo;"
-msgstr ""
+msgstr "Login &raquo;"
 
 #: widgets/widget-login.php:97
 #@ woothemes
@@ -7851,7 +7851,7 @@ msgstr ""
 #: widgets/widget-onsale.php:25
 #@ woothemes
 msgid "WooCommerce On-sale"
-msgstr ""
+msgstr "WooCommerce Sale"
 
 #: widgets/widget-onsale.php:54
 #@ woothemes
@@ -8045,7 +8045,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:305
 #@ woothemes
 msgid "Product category slug"
-msgstr ""
+msgstr "Product categorie slug"
 
 #: admin/woocommerce-admin-settings.php:306
 #@ woothemes
@@ -8075,32 +8075,32 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:1167
 #@ woothemes
 msgid "Default"
-msgstr ""
+msgstr "Standaard"
 
 #: admin/woocommerce-admin-settings.php:1168
 #@ woothemes
 msgid "Gateway"
-msgstr ""
+msgstr "Gateway"
 
 #: admin/woocommerce-admin-settings.php:1185
 #@ woothemes
 msgid "Gateway ID"
-msgstr ""
+msgstr "Gateway ID"
 
 #: admin/woocommerce-admin-settings.php:163
 #@ woothemes
 msgid "Styling"
-msgstr ""
+msgstr "Stijling"
 
 #: admin/woocommerce-admin-settings.php:180
 #@ woothemes
 msgid "Scripts"
-msgstr ""
+msgstr "Scripts"
 
 #: admin/woocommerce-admin-settings.php:221
 #@ woothemes
 msgid "File download method"
-msgstr ""
+msgstr "Bestand download methode"
 
 #: admin/woocommerce-admin-settings.php:222
 #@ woothemes
@@ -8135,7 +8135,7 @@ msgstr ""
 #: admin/woocommerce-admin-attributes.php:221
 #@ woothemes
 msgid "Attribute slug"
-msgstr ""
+msgstr "Eigenschap slug"
 
 #: admin/woocommerce-admin-attributes.php:223
 #@ woothemes
@@ -8162,17 +8162,17 @@ msgstr "Hong Kong"
 #: classes/countries.class.php:335
 #@ woothemes
 msgid "Hong Kong Island"
-msgstr ""
+msgstr "Hong Kong Island"
 
 #: classes/countries.class.php:336
 #@ woothemes
 msgid "Kowloong"
-msgstr ""
+msgstr "Kowloong"
 
 #: classes/countries.class.php:337
 #@ woothemes
 msgid "New Territories"
-msgstr ""
+msgstr "New Territories"
 
 #: classes/countries.class.php:706
 #: classes/countries.class.php:719
@@ -8185,7 +8185,7 @@ msgstr "Provincie"
 #: classes/countries.class.php:714
 #@ woothemes
 msgid "Municipality"
-msgstr ""
+msgstr "Municipality"
 
 #: classes/countries.class.php:751
 #@ woothemes
@@ -8236,7 +8236,7 @@ msgstr ""
 #: admin/post-types/shop_order.php:65
 #@ woothemes
 msgid "made by"
-msgstr ""
+msgstr "gemaakt door"
 
 #: admin/woocommerce-admin-taxonomies.php:241
 #@ woothemes
@@ -8261,28 +8261,28 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:1105
 #@ woothemes
 msgid "Shipping Method"
-msgstr ""
+msgstr "Verzend Methode"
 
 #: admin/woocommerce-admin-settings.php:1116
 #@ woothemes
 msgid "Method ID"
-msgstr ""
+msgstr "Methode ID"
 
 #: widgets/widget-product_categories.php:117
 #@ woothemes
 msgid "Order by:"
-msgstr ""
+msgstr "Sorteer op:"
 
 #: widgets/widget-product_categories.php:119
 #@ woothemes
 msgid "Category Order"
-msgstr ""
+msgstr "Categorie volgorde"
 
 #: admin/post-types/shop_order.php:84
 #: admin/post-types/shop_order.php:97
 #@ woothemes
 msgid "Via"
-msgstr ""
+msgstr "Via"
 
 #: admin/woocommerce-admin-settings.php:94
 #@ woothemes
@@ -8302,7 +8302,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:119
 #@ woothemes
 msgid "Security"
-msgstr ""
+msgstr "Beveiliging"
 
 #: admin/woocommerce-admin-settings.php:713
 #@ woothemes
@@ -8322,7 +8322,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:1057
 #@ woothemes
 msgid "Integration"
-msgstr ""
+msgstr "Integratie"
 
 #: admin/woocommerce-admin-users.php:20
 #@ woothemes
@@ -8348,7 +8348,7 @@ msgstr ""
 #: classes/order.class.php:370
 #@ woothemes
 msgid "Download:"
-msgstr ""
+msgstr "Download:"
 
 #: templates/checkout/coupon-form.php:7
 #@ woothemes
