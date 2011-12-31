@@ -335,6 +335,11 @@ jQuery( function($){
 		return false;
 	});
 	
+	$('button.add_tax_row').live('click', function(){
+		$('ul.tax_rows').append('<li class="left"><input type="text" name="_order_taxes_label[]" placeholder="' + woocommerce_writepanel_params.tax_label + '" class="calculated" /></li><li class="right"><input type="text" name="_order_taxes_total[]" placeholder="0.00" class="calculated" /><input type="hidden" name="_order_taxes_compound[]" value="0" /></li>');
+		return false;
+	});
+	
 	// PRODUCT TYPE SPECIFIC OPTIONS
 	$('select#product-type').change(function(){
 		

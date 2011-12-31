@@ -212,9 +212,9 @@ class woocommerce_order {
 	/** Calculate row cost - useful for gateways */
 	function get_row_cost( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( ($item['cost'] * $item['qty']) * (1 + ($item['taxrate']/100)) , 2, '.', '');
+			return number_format( $item['line_cost'] + $item['line_tax'] , 2, '.', '');
 		else :
-			return number_format( $item['cost'] * $item['qty'] , 2, '.', '');
+			return number_format( $item['line_cost'] , 2, '.', '');
 		endif;
 	}
 	

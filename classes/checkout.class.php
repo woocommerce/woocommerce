@@ -381,7 +381,7 @@ class woocommerce_checkout {
 						
 						$_product = $values['data'];
 						
-						// Get line cost
+						// Get the line tax and the line cost excluding tax
 						$line_cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) * $values['quantity'];
 						
 						// Calc item tax to store if taxable
@@ -395,10 +395,16 @@ class woocommerce_checkout {
 								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, false );
 							endif;
 							
-							$line_tax = $line_taxes['total'];
+							$line_tax = array_sum( $line_taxes );
 							
 						else :
 							$line_tax = 0;
+						endif;
+						
+						if ($woocommerce->cart->prices_include_tax) :
+							
+							$line_cost = $line_cost - $line_tax;
+							
 						endif;
 						
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
@@ -419,8 +425,8 @@ class woocommerce_checkout {
 					 		'name' 			=> $_product->get_title(),
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'item_meta'		=> $item_meta->meta,
-					 		'base_cost' 	=> $_product->get_price(),		// Base price will be inc or ex tax depending on settings
-					 		'line_cost'		=> $line_cost,					// Discounted line cost, inc or ex tax depending on settings
+					 		'base_cost' 	=> $_product->get_price_excluding_tax(),	// Base price
+					 		'line_cost'		=> $line_cost,					// Discounted line cost
 					 		'line_tax' 		=> $line_tax, 					// Tax for the line (total)
 					 		'tax_status'	=> $_product->get_tax_status(),	// Taxble, shipping, none
 					 		'tax_class'		=> $_product->get_tax_class()	// Tax class (adjusted by filters)
@@ -523,6 +529,21 @@ class woocommerce_checkout {
 						endforeach;
 					endif;
 					
+					// Put order taxes into an array to store
+					$order_taxes = array();
+					
+					if (is_array($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) foreach ( $woocommerce->cart->taxes as $key => $tax ) :
+						
+						$is_compound = ($woocommerce->cart->tax->is_compound( $key )) ? 1 : 0;
+						
+						$order_taxes[] = array(
+							'label' => $woocommerce->cart->tax->get_rate_label( $key ),
+							'compound' => $is_compound,
+							'total' => number_format($tax, 2, '.', '')
+						);
+						
+					endforeach;
+					
 					// Save other order meta fields
 					update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
@@ -538,6 +559,7 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ));
 					update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
 					update_post_meta( $order_id, '_order_items', 			$order_items );
+					update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
 					
 					do_action('woocommerce_checkout_update_order_meta', $order_id, $this->posted);
 					

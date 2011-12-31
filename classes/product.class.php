@@ -520,6 +520,11 @@ class woocommerce_product {
 		return apply_filters('woocommerce_product_tax_class', $this->tax_class, $this);
 	}
 	
+	/** Returns the tax status */
+	function get_tax_status() {
+		return $this->tax_status;
+	}
+	
 	/** Returns the price in html format */
 	function get_price_html() {
 		$price = '';

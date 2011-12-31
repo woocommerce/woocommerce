@@ -519,16 +519,21 @@ function woocommerce_add_order_item() {
 				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 		</td>
-		<td class="sku"><?php if ($_product->sku) echo $_product->sku; else echo '-'; ?></td>
-		<td class="name">
-			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php echo $_product->get_title(); ?></a>
-			<?php
-				if (isset($_product->variation_data)) :
-					echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
-				endif;
-			?>
+		<td class="sku">
+			<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
+			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
+			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
+			<input type="hidden" name="item_variation[<?php echo $index; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
 		</td>
-		<td>
+		<td class="name">
+		
+			<div class="row-actions">
+				<span class="trash"><a class="remove_row" href="#"><?php _e('Delete item', 'woothemes'); ?></a> | </span>
+				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e('View product', 'woothemes'); ?></a>
+			</div>
+			
+			<?php echo $_product->get_title(); ?>
+			<?php if (isset($_product->variation_data)) echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>
 			<table class="meta" cellspacing="0">
 				<tfoot>
 					<tr>
@@ -539,16 +544,50 @@ function woocommerce_add_order_item() {
 			</table>
 		</td>
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
-		<td class="quantity"><input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="0" value="1" /></td>
-		<td class="cost"><input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" /></td>
-		<td class="cost"><input type="text" name="item_cost[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" /></td>
-		<td class="tax"><input type="text" name="item_tax_rate[<?php echo $index; ?>]" placeholder="0.0000" value="<?php echo esc_attr( $_product->get_tax_base_rate() ); ?>" /></td>
-		<td class="center">
-			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
-			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
-			<input type="hidden" name="item_variation[<?php echo $index; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
-			<button type="button" class="remove_row button">&times;</button>
+
+		<td class="cost">
+			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" />
 		</td>
+		
+		<td class="tax_status">
+			<select name="item_tax_status[<?php echo $loop; ?>]">
+				<?php 
+				$options = array(
+					'taxable' => __('Taxable', 'woothemes'),
+					'shipping' => __('Shipping only', 'woothemes'),
+					'none' => __('None', 'woothemes')			
+				);
+				foreach ($options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_class(), false ).'>'. $name .'</option>';
+				?>
+			</select>
+		</td>
+		
+		<td class="tax_class">
+			<select name="item_tax_class[<?php echo $loop; ?>]">
+				<?php 
+				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+				$classes_options = array();
+				$classes_options[''] = __('Standard', 'woothemes');
+				if ($tax_classes) foreach ($tax_classes as $class) :
+					$classes_options[sanitize_title($class)] = $class;
+				endforeach;
+				foreach ($classes_options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_status(), false ).'>'. $name .'</option>';
+				?>
+			</select>
+		</td>
+		
+		<td class="quantity" width="1%">
+			<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="" size="2" />
+		</td>
+		
+		<td class="cost">
+			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
+		</td>
+		
+		<td class="tax">
+			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
+		</td>
+		
 	</tr>
 	<?php
 	

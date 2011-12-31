@@ -272,7 +272,7 @@ function woocommerce_order_items_meta_box($post) {
 						<td class="tax_class">
 							<select name="item_tax_class[<?php echo $loop; ?>]">
 								<?php 
-								$item_value = (isset($item['tax_class'])) ? $item['tax_status'] : '';
+								$item_value = (isset($item['tax_class'])) ? $item['tax_class'] : '';
 								$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 								$classes_options = array();
 								$classes_options[''] = __('Standard', 'woothemes');
@@ -289,7 +289,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						
 						<td class="cost">
-							<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['line_cost'])) echo esc_attr( $item['line_cost'] ); ?>" />
+							<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['line_cost'])) echo esc_attr( $item['line_cost'] ); ?>" class="calculated" />
 						</td>
 						
 						<td class="tax">
@@ -463,10 +463,29 @@ function woocommerce_order_totals_meta_box($post) {
 	</div>
 	<div class="totals_group">
 		<h4><?php _e('Tax rows', 'woothemes'); ?> <a class="tips" tip="<?php _e('If set, these tax rows will show in order tables instead of a single tax total - useful for displaying multiple or compound taxes.', 'woothemes'); ?>" href="#">[?]</a></h4>
-		<ul class="totals">
-			
-			<li><button class="button"><?php _e('Add row', 'woothemes'); ?></button></li>
+		<ul class="totals tax_rows">
+			<?php 
+				$taxes = maybe_unserialize($data['_order_taxes'][0]);
+				if (is_array($taxes) && sizeof($taxes)>0) :
+					foreach ($taxes as $tax) :
+						?>
+						<li class="left">
+							<input type="text" name="_order_taxes_label[]" placeholder="Tax Label" value="<?php 
+							echo $tax['label'];
+							?>" class="calculated" />
+						</li>
+						<li class="right">
+							<input type="text" name="_order_taxes_total[]" placeholder="0.00" value="<?php 
+							echo $tax['total'];
+							?>" class="calculated" />
+							<input type="hidden" name="_order_taxes_compound[]" value="<?php echo $tax['compound']; ?>" />
+						</li>
+						<?php
+					endforeach;
+				endif;
+			?>
 		</ul>
+		<p><button class="button add_tax_row"><?php _e('Add row', 'woothemes'); ?></button></p>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
@@ -539,6 +558,33 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
 		update_post_meta( $post_id, '_order_total', stripslashes( $_POST['_order_total'] ));
 		update_post_meta( $post_id, '_customer_user', (int) $_POST['customer_user'] );
+	
+	// Tax rows
+		$order_taxes = array();
+		
+		if (isset($_POST['_order_taxes_label'])) :
+			
+			$order_taxes_label	= $_POST['_order_taxes_label'];
+			$order_taxes_total	= $_POST['_order_taxes_total'];
+			$order_taxes_compound = $_POST['_order_taxes_compound'];
+			
+			for ($i=0; $i<sizeof($order_taxes_label); $i++) :
+				
+				// Add to array
+				if (!$order_taxes_label[$i]) continue;
+				if (!$order_taxes_total[$i]) continue;
+				
+				$order_taxes[] = array(
+					'label' => esc_attr($order_taxes_label[$i]),
+					'compound' => (int) esc_attr($order_taxes_compound[$i]),
+					'total' => esc_attr($order_taxes_total[$i])
+				);
+				
+			endfor;
+			
+		endif;
+		
+		update_post_meta( $post_id, '_order_taxes', $order_taxes );
 	
 	// Order items
 		$order_items = array();

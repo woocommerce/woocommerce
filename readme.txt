@@ -83,6 +83,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.4 =
+* Support for multiple and stacked (compound) taxes
+* Multiple taxes shown in order total tables
 * Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
 * Moved template function contents to template files
