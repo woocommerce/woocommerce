@@ -6681,42 +6681,42 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:149
 #@ woothemes
 msgid "No customer selected"
-msgstr ""
+msgstr "Geen klant geselecteerd"
 
 #: admin/post-types/product.php:393
 #@ woothemes
 msgid "Show all product types"
-msgstr ""
+msgstr "Toon alle product typen"
 
 #: admin/post-types/product.php:403
 #@ woothemes
 msgid "Show all sub-types"
-msgstr ""
+msgstr "Toon alle sub-typen"
 
 #: admin/woocommerce-admin-reports.php:24
 #@ woothemes
 msgid "Sales by day"
-msgstr ""
+msgstr "Verkoop per dag"
 
 #: admin/woocommerce-admin-reports.php:29
 #@ woothemes
 msgid "Sales by month"
-msgstr ""
+msgstr "Verkoop per maand"
 
 #: admin/woocommerce-admin-settings-forms.php:283
 #@ woothemes
 msgid "Choose a country&hellip;"
-msgstr ""
+msgstr "Kies een land &hellip;"
 
 #: admin/woocommerce-admin-settings-forms.php:296
 #@ woothemes
 msgid "Choose countries&hellip;"
-msgstr ""
+msgstr "Kies landen &hellip;"
 
 #: admin/woocommerce-admin-settings-forms.php:318
 #@ woothemes
 msgid "Countries/states"
-msgstr ""
+msgstr "Landen/staten"
 
 #: admin/woocommerce-admin-settings-forms.php:320
 #@ woothemes
@@ -6890,7 +6890,7 @@ msgstr "Lokalisatie"
 #: admin/woocommerce-admin-settings.php:237
 #@ woothemes
 msgid "Use informal localisation file if it exists"
-msgstr ""
+msgstr "Gebruik een informele vertaling als deze bestaat"
 
 #: admin/woocommerce-admin-settings.php:903
 #@ woothemes
@@ -6932,12 +6932,12 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:576
 #@ woothemes
 msgid "Trim zeros"
-msgstr ""
+msgstr "Trim nullen"
 
 #: admin/woocommerce-admin-settings.php:577
 #@ woothemes
 msgid "Trim zeros after the decimal point when displaying prices"
-msgstr ""
+msgstr "Trim nullen na de komma als prijzen getoond worden"
 
 #: admin/woocommerce-admin-settings.php:585
 #, php-format
@@ -6949,7 +6949,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:695
 #@ woothemes
 msgid "Shipping calculations"
-msgstr ""
+msgstr "Verzendkosten berekeningen"
 
 #: admin/woocommerce-admin-settings.php:687
 #@ woothemes
@@ -7004,7 +7004,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-coupon_data.php:42
 #@ woothemes
 msgid "Enable free shipping"
-msgstr ""
+msgstr "Activeer gratis verzending"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:42
 #, php-format
@@ -7045,7 +7045,7 @@ msgstr "Item&nbsp;Meta"
 #: admin/post-types/writepanels/writepanel-order_data.php:169
 #@ woothemes
 msgid "Base&nbsp;Cost"
-msgstr ""
+msgstr "Basis Kosten"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:169
 #@ woothemes
@@ -7164,12 +7164,12 @@ msgstr "Voorraad"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:50
 #@ woothemes
 msgid "File paths"
-msgstr ""
+msgstr "Bestandspad"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:50
 #@ woothemes
 msgid "Download limits"
-msgstr ""
+msgstr "Download limieten"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:117
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:276
@@ -7235,14 +7235,14 @@ msgstr "Upload"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:305
 #@ woothemes
 msgid "Download Limit:"
-msgstr ""
+msgstr "Download Limiet:"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:151
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:305
 #: admin/post-types/writepanels/writepanel-product_data.php:136
 #@ woothemes
 msgid "Unlimited"
-msgstr ""
+msgstr "Ongelimiteerd"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:201
 #@ woothemes
@@ -7282,22 +7282,22 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:750
 #@ woothemes
 msgid "Simple product"
-msgstr ""
+msgstr "Simple product"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:751
 #@ woothemes
 msgid "Grouped product"
-msgstr ""
+msgstr "Gegroepeerd product"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:752
 #@ woothemes
 msgid "External/Affiliate product"
-msgstr ""
+msgstr "Extern product"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:756
 #@ woothemes
 msgid "Product visibility"
-msgstr ""
+msgstr "Product zichtbaarheid"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:763
 #@ woothemes
@@ -7317,7 +7317,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanels-init.php:52
 #@ woothemes
 msgid "Product name"
-msgstr ""
+msgstr "Product naam"
 
 #: classes/cart.class.php:356
 #@ woothemes
@@ -7332,165 +7332,165 @@ msgstr ""
 #: classes/countries.class.php:226
 #@ woothemes
 msgid "South Georgia/Sandwich Islands"
-msgstr ""
+msgstr "South Georgia / Sandwich Eilanden"
 
 #: classes/countries.class.php:253
 #@ woothemes
 msgid "US Minor Outlying Islands"
-msgstr ""
+msgstr "Amerikaanse Kleine afgelegen eilanden"
 
 #: classes/countries.class.php:252
 #@ woothemes
 msgid "US Armed Forces"
-msgstr ""
+msgstr "VS Leger"
 
 #: classes/countries.class.php:285
 #@ woothemes
 msgid "Amazonas"
-msgstr ""
+msgstr "Amazonas"
 
 #: classes/countries.class.php:286
 #@ woothemes
 msgid "Acre"
-msgstr ""
+msgstr "Acre"
 
 #: classes/countries.class.php:287
 #@ woothemes
 msgid "Alagoas"
-msgstr ""
+msgstr "Alagoas"
 
 #: classes/countries.class.php:288
 #@ woothemes
 msgid "Amap&aacute;"
-msgstr ""
+msgstr "Amap&aacute;"
 
 #: classes/countries.class.php:289
 #@ woothemes
 msgid "Cear&aacute;"
-msgstr ""
+msgstr "Cear&aacute;"
 
 #: classes/countries.class.php:290
 #@ woothemes
 msgid "Distrito federal"
-msgstr ""
+msgstr "Distrito federal"
 
 #: classes/countries.class.php:291
 #@ woothemes
 msgid "Espirito santo"
-msgstr ""
+msgstr "Espirito santo"
 
 #: classes/countries.class.php:292
 #@ woothemes
 msgid "Maranh&atilde;o"
-msgstr ""
+msgstr "Maranh&atilde;o"
 
 #: classes/countries.class.php:293
 #@ woothemes
 msgid "Paran&aacute;"
-msgstr ""
+msgstr "Paran&aacute;"
 
 #: classes/countries.class.php:294
 #@ woothemes
 msgid "Pernambuco"
-msgstr ""
+msgstr "Pernambuco"
 
 #: classes/countries.class.php:295
 #@ woothemes
 msgid "Piau&iacute;"
-msgstr ""
+msgstr "Piau&iacute;"
 
 #: classes/countries.class.php:296
 #@ woothemes
 msgid "Rio grande do norte"
-msgstr ""
+msgstr "Rio grande do norte"
 
 #: classes/countries.class.php:297
 #: classes/countries.class.php:310
 #@ woothemes
 msgid "Rio grande do sul"
-msgstr ""
+msgstr "Rio grande do norte"
 
 #: classes/countries.class.php:298
 #@ woothemes
 msgid "Rond&ocirc;nia"
-msgstr ""
+msgstr "Rond&ocirc;nia"
 
 #: classes/countries.class.php:299
 #@ woothemes
 msgid "Roraima"
-msgstr ""
+msgstr "Roraima"
 
 #: classes/countries.class.php:300
 #@ woothemes
 msgid "Santa catarina"
-msgstr ""
+msgstr "Santa catarina"
 
 #: classes/countries.class.php:301
 #@ woothemes
 msgid "Sergipe"
-msgstr ""
+msgstr "Santa catarina"
 
 #: classes/countries.class.php:302
 #@ woothemes
 msgid "Tocantins"
-msgstr ""
+msgstr "Tocantins"
 
 #: classes/countries.class.php:303
 #@ woothemes
 msgid "Par&aacute;"
-msgstr ""
+msgstr "Par&aacute;"
 
 #: classes/countries.class.php:304
 #@ woothemes
 msgid "Bahia"
-msgstr ""
+msgstr "Bahia"
 
 #: classes/countries.class.php:305
 #@ woothemes
 msgid "Goi&aacute;s"
-msgstr ""
+msgstr "Goi&aacute;s"
 
 #: classes/countries.class.php:306
 #@ woothemes
 msgid "Mato grosso"
-msgstr ""
+msgstr "Mato grosso"
 
 #: classes/countries.class.php:307
 #@ woothemes
 msgid "Mato grosso do sul"
-msgstr ""
+msgstr "Mato grosso do sul"
 
 #: classes/countries.class.php:308
 #@ woothemes
 msgid "Rio de janeiro"
-msgstr ""
+msgstr "Rio de janeiro"
 
 #: classes/countries.class.php:309
 #@ woothemes
 msgid "S&atilde;o paulo"
-msgstr ""
+msgstr "S&atilde;o paulo"
 
 #: classes/countries.class.php:311
 #@ woothemes
 msgid "Minas gerais"
-msgstr ""
+msgstr "Minas gerais"
 
 #: classes/countries.class.php:312
 #@ woothemes
 msgid "Paraiba"
-msgstr ""
+msgstr "Paraiba"
 
 #: classes/countries.class.php:499
 #, php-format
 #@ woothemes
 msgid "(inc. %s%% VAT)"
-msgstr ""
+msgstr "(incl. %s%% BTW)"
 
 #: classes/countries.class.php:499
 #, php-format
 #@ woothemes
 msgid "(inc. %s%% tax)"
-msgstr ""
+msgstr "(incl. %s%% BTW)"
 
 #: classes/gateways/gateway-paypal.php:79
 #@ woothemes
@@ -7515,7 +7515,7 @@ msgstr "Debug"
 #: classes/gateways/gateway-paypal.php:133
 #@ woothemes
 msgid "Enable logging (<code>woocommerce/logs/paypal.txt</code>)"
-msgstr ""
+msgstr "Activeer logging (<code>woocommerce/logs/paypal.txt</code>)"
 
 #: classes/gateways/gateway-paypal.php:453
 #@ woothemes
