@@ -6731,23 +6731,23 @@ msgstr ""
 #: admin/woocommerce-admin-settings-forms.php:326
 #@ woothemes
 msgid "+ Add Tax Rate"
-msgstr ""
+msgstr "+ BTW percentage"
 
 #: admin/woocommerce-admin-settings-forms.php:327
 #@ woothemes
 msgid "Duplicate selected rows"
-msgstr ""
+msgstr "Dupliceer geselecteerde rijen"
 
 #: admin/woocommerce-admin-settings-forms.php:327
 #@ woothemes
 msgid "Delete selected rows"
-msgstr ""
+msgstr "Verwijderd geselecteerde rijen"
 
 #: admin/woocommerce-admin-settings-forms.php:338
 #: admin/woocommerce-admin-settings-forms.php:423
 #@ woothemes
 msgid "Select countries/states&hellip;"
-msgstr ""
+msgstr "Selecteer landen/staten &hellip;"
 
 #: admin/woocommerce-admin-settings-forms.php:341
 #: admin/woocommerce-admin-settings-forms.php:426
@@ -6769,13 +6769,13 @@ msgstr "Uitgevoerd"
 #: admin/woocommerce-admin-settings-forms.php:405
 #@ woothemes
 msgid " countries/states selected"
-msgstr ""
+msgstr "landen/staten geselecteerd"
 
 #: admin/woocommerce-admin-settings-forms.php:421
 #: admin/woocommerce-admin-settings-forms.php:541
 #@ woothemes
 msgid "No countries selected"
-msgstr ""
+msgstr "Geen laden geselecteerd"
 
 #: admin/woocommerce-admin-settings-forms.php:455
 #: classes/shipping/shipping-flat_rate.php:363
@@ -6850,7 +6850,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:147
 #@ woothemes
 msgid "Clear cart when logging out"
-msgstr ""
+msgstr "Winkelwagen wissen zodra gebruiker uitlogt"
 
 #: admin/woocommerce-admin-settings.php:155
 #@ woothemes
@@ -6860,27 +6860,27 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:164
 #@ woothemes
 msgid "Enable WooCommerce CSS styles"
-msgstr ""
+msgstr "Activeer WooCommerce CSS"
 
 #: admin/woocommerce-admin-settings.php:181
 #@ woothemes
 msgid "Enable AJAX add to cart buttons on product archives"
-msgstr ""
+msgstr "Activeer AJAX voor de winkelwagen"
 
 #: admin/woocommerce-admin-settings.php:189
 #@ woothemes
 msgid "Enable WooCommerce lightbox on the product page"
-msgstr ""
+msgstr "Activeer WooCommerce Lightbox op product paginas"
 
 #: admin/woocommerce-admin-settings.php:205
 #@ woothemes
 msgid "Enable jQuery UI (used by the price slider widget)"
-msgstr ""
+msgstr "Activeer jQuery UI"
 
 #: admin/woocommerce-admin-settings.php:213
 #@ woothemes
 msgid "Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)"
-msgstr ""
+msgstr "Activeer WooCommerce Javascript in de footer (<code>wp_footer</code>)"
 
 #: admin/woocommerce-admin-settings.php:236
 #@ woothemes
@@ -6901,7 +6901,7 @@ msgstr "ShareThis"
 #, php-format
 #@ woothemes
 msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
-msgstr ""
+msgstr "Voer je %1$sShareThis publisher ID%2$s in om social media buttons op product paginas te activeren."
 
 #: admin/woocommerce-admin-settings.php:916
 #@ woothemes
@@ -6994,7 +6994,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-coupon_data.php:39
 #@ woothemes
 msgid "Apply before tax"
-msgstr ""
+msgstr "Toepassen vooraf aan BTW"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:39
 #@ woothemes
@@ -7015,27 +7015,27 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:91
 #@ woothemes
 msgid "No billing address set."
-msgstr ""
+msgstr "Geen factuuradres ingesteld."
 
 #: admin/post-types/writepanels/writepanel-order_data.php:96
 #@ woothemes
 msgid "Load customer billing address"
-msgstr ""
+msgstr "Laad factuuradres"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:119
 #@ woothemes
 msgid "No shipping address set."
-msgstr ""
+msgstr "Geen verzendadres ingesteld"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:124
 #@ woothemes
 msgid "Load customer shipping address"
-msgstr ""
+msgstr "Laad verzendadres"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:125
 #@ woothemes
 msgid "Copy from billing information"
-msgstr ""
+msgstr "Kopieer van factuuradres"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:166
 #@ woothemes
@@ -7050,18 +7050,18 @@ msgstr "Basis Kosten"
 #: admin/post-types/writepanels/writepanel-order_data.php:169
 #@ woothemes
 msgid "Cost before discounts"
-msgstr ""
+msgstr "Prijs zonder kortingen"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:169
 #: admin/post-types/writepanels/writepanel-order_data.php:170
 #@ woothemes
 msgid "Up to 4 decimals are allowed for precision."
-msgstr ""
+msgstr "Tot vier decimalen zijn toegestaan ​​voor precisie."
 
 #: admin/post-types/writepanels/writepanel-order_data.php:170
 #@ woothemes
 msgid "Final cost after discount"
-msgstr ""
+msgstr "Kosten na berekening van kortingen"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:232
 #@ woothemes
@@ -7076,7 +7076,7 @@ msgstr "0.0000"
 #: admin/post-types/writepanels/writepanel-order_data.php:323
 #@ woothemes
 msgid "Save/update the order"
-msgstr ""
+msgstr "Opslaan/bijwerken van de bestelling"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:325
 #@ woothemes
@@ -7096,7 +7096,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:375
 #@ woothemes
 msgid "Shipping tax:"
-msgstr ""
+msgstr "BTW op verzendkosten:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:389
 #: templates/emails/customer_completed_order.php:27
@@ -7107,7 +7107,7 @@ msgstr ""
 #: templates/order/order-details-table.php:25
 #@ woothemes
 msgid "Cart Discount:"
-msgstr ""
+msgstr "Winkelwagen korting:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:396
 #: templates/emails/customer_completed_order.php:39
@@ -7118,7 +7118,7 @@ msgstr ""
 #: templates/order/order-details-table.php:37
 #@ woothemes
 msgid "Order Discount:"
-msgstr ""
+msgstr "Bestelling korting:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:403
 #: templates/emails/customer_completed_order.php:43
@@ -7193,7 +7193,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:283
 #@ woothemes
 msgid "Dimensions (L&times;W&times;H)"
-msgstr ""
+msgstr "Dimensies (lengte x breedte x hoogte)"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:137
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:294
@@ -7267,12 +7267,12 @@ msgstr "Variabel product"
 #: admin/post-types/writepanels/writepanel-product_data.php:35
 #@ woothemes
 msgid "Up-sells &amp; Cross-sells"
-msgstr ""
+msgstr "Up-sells &amp; Cross-sells"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:61
 #@ woothemes
 msgid "Product URL"
-msgstr ""
+msgstr "Product URL"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:61
 #@ woothemes
@@ -7495,7 +7495,7 @@ msgstr "(incl. %s%% BTW)"
 #: classes/gateways/gateway-paypal.php:79
 #@ woothemes
 msgid "Gateway Disabled"
-msgstr ""
+msgstr "Gateway Uitgeschakeld"
 
 #: classes/gateways/gateway-paypal.php:79
 #@ woothemes
@@ -7520,19 +7520,19 @@ msgstr "Activeer logging (<code>woocommerce/logs/paypal.txt</code>)"
 #: classes/gateways/gateway-paypal.php:453
 #@ woothemes
 msgid "Order refunded/reversed"
-msgstr ""
+msgstr "Bestelling terugbetaald"
 
 #: classes/gateways/gateway-paypal.php:454
 #, php-format
 #@ woothemes
 msgid "Order #%s has been marked as refunded - PayPal reason code: %s"
-msgstr ""
+msgstr "Bestelling #%s is gemarkeerd als terugbetaald. Paypal redenen: %s"
 
 #: classes/gateways/gateway-paypal.php:458
 #, php-format
 #@ woothemes
 msgid "Payment for order #%s refunded/reversed"
-msgstr ""
+msgstr "Bestelling %s is terugbetaald"
 
 #: classes/shipping/shipping-flat_rate.php:52
 #@ woothemes
@@ -7547,7 +7547,7 @@ msgstr "Vast Bedrag"
 #: classes/shipping/shipping-flat_rate.php:80
 #@ woothemes
 msgid "Calculation Type"
-msgstr ""
+msgstr "Berekening Type"
 
 #: classes/shipping/shipping-flat_rate.php:85
 #@ woothemes
@@ -7567,28 +7567,28 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:101
 #@ woothemes
 msgid "Default Cost"
-msgstr ""
+msgstr "Standaard kosten"
 
 #: classes/shipping/shipping-flat_rate.php:107
 #@ woothemes
 msgid "Default Handling Fee"
-msgstr ""
+msgstr "Administratie kosten"
 
 #: classes/shipping/shipping-flat_rate.php:292
 #: woocommerce.php:508
 #@ woothemes
 msgid "Shipping Class"
-msgstr ""
+msgstr "Verzend klassen"
 
 #: classes/shipping/shipping-flat_rate.php:293
 #@ woothemes
 msgid "Cost, excluding tax."
-msgstr ""
+msgstr "Kosten excl. BTW."
 
 #: classes/shipping/shipping-flat_rate.php:294
 #@ woothemes
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
-msgstr ""
+msgstr "Kosten ex belasting. Als bedrag (bv 2.50) of procenten (bv 5%)."
 
 #: classes/shipping/shipping-flat_rate.php:299
 #@ woothemes
@@ -7609,7 +7609,7 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:349
 #@ woothemes
 msgid "Select a class&hellip;"
-msgstr ""
+msgstr "Selecteer een klasse &hellip;"
 
 #: classes/shipping/shipping-free_shipping.php:64
 #@ woothemes
@@ -7669,7 +7669,7 @@ msgstr "Winkelwagen bijwerken"
 #: templates/myaccount/my-account.php:77
 #@ woothemes
 msgid "You have no recent orders."
-msgstr ""
+msgstr "Er zijn geen recente orders."
 
 #: shortcodes/shortcode-order_tracking.php:45
 #, php-format
@@ -7731,7 +7731,7 @@ msgstr ""
 #: templates/emails/customer_note_notification.php:7
 #@ woothemes
 msgid "Hello, a note has just been added to your order:"
-msgstr ""
+msgstr "Een opmerking is toegevoegd aan uw bestelling:"
 
 #: templates/emails/customer_note_notification.php:11
 #@ woothemes
@@ -7752,12 +7752,12 @@ msgstr "Registreer"
 #: templates/myaccount/login.php:56
 #@ woothemes
 msgid "Re-enter password"
-msgstr ""
+msgstr "Vul opnieuw uw wachtwoord in."
 
 #: templates/single-product-reviews.php:95
 #@ woothemes
 msgid "Your Review"
-msgstr ""
+msgstr "Jouw review"
 
 #: widgets/widget-cart.php:24
 #@ woothemes
@@ -7805,12 +7805,12 @@ msgstr "Welkom %s"
 #: widgets/widget-login.php:56
 #@ woothemes
 msgid "My account"
-msgstr ""
+msgstr "Mijn Account"
 
 #: widgets/widget-login.php:57
 #@ woothemes
 msgid "Change my password"
-msgstr ""
+msgstr "Wachtwoord wijzigen"
 
 #: widgets/widget-login.php:97
 #@ woothemes
@@ -7820,17 +7820,17 @@ msgstr "Login &raquo;"
 #: widgets/widget-login.php:97
 #@ woothemes
 msgid "Lost password?"
-msgstr ""
+msgstr "Wachtwoord opvragen"
 
 #: widgets/widget-login.php:179
 #@ woothemes
 msgid "Logged out title:"
-msgstr ""
+msgstr "Ingelogd titel:"
 
 #: widgets/widget-login.php:182
 #@ woothemes
 msgid "Logged in title:"
-msgstr ""
+msgstr "Uitgelogd titel:"
 
 #: widgets/widget-login.php:227
 #: woocommerce-functions.php:461
@@ -7856,27 +7856,27 @@ msgstr "WooCommerce Sale"
 #: widgets/widget-onsale.php:54
 #@ woothemes
 msgid "On Sale"
-msgstr ""
+msgstr "Uitgelicht"
 
 #: widgets/widget-price_filter.php:167
 #@ woothemes
 msgid "Min price"
-msgstr ""
+msgstr "Minimale prijs"
 
 #: widgets/widget-price_filter.php:168
 #@ woothemes
 msgid "Max price"
-msgstr ""
+msgstr "Maximale prijs"
 
 #: woocommerce-ajax.php:656
 #@ woothemes
 msgid "Cross-sell"
-msgstr ""
+msgstr "Cross-sell"
 
 #: woocommerce-ajax.php:656
 #@ woothemes
 msgid "Up-sell"
-msgstr ""
+msgstr "Up-sell"
 
 #: woocommerce-functions.php:338
 #, php-format
@@ -7912,12 +7912,12 @@ msgstr ""
 #: woocommerce-functions.php:481
 #@ woothemes
 msgid "Re-enter your password."
-msgstr ""
+msgstr "Vul opnieuw uw wachtwoord in."
 
 #: woocommerce-functions.php:485
 #@ woothemes
 msgid "Anti-spam field was filled in."
-msgstr ""
+msgstr "Anti-spam veld is reeds ingevuld."
 
 #: woocommerce-functions.php:584
 #, php-format
@@ -7941,12 +7941,12 @@ msgstr ""
 #, php-format
 #@ woothemes
 msgid "Invoice for Order #%s"
-msgstr ""
+msgstr "Invoice voor bestelling #%s"
 
 #: classes/woocommerce_email.class.php:246
 #@ woothemes
 msgid "A note has been added to your order"
-msgstr ""
+msgstr "Een opmerking is toegevoegd aan uw bestelling"
 
 #: classes/woocommerce_email.class.php:248
 #, php-format
@@ -8024,23 +8024,23 @@ msgstr "Tags:"
 #: templates/single-product/add-to-cart/external.php:15
 #@ woothemes
 msgid "Buy product"
-msgstr ""
+msgstr "Koop product"
 
 #: templates/cart/totals.php:23
 #: templates/cart/totals.php:78
 #@ woothemes
 msgid "[Remove]"
-msgstr ""
+msgstr "[Verwijderd]"
 
 #: admin/woocommerce-admin-reports.php:1010
 #@ woothemes
 msgid "Product no longer exists"
-msgstr ""
+msgstr "Product bestaat niet meer"
 
 #: admin/woocommerce-admin-settings.php:47
 #@ woothemes
 msgid "Czech Koruna (&#75;&#269;)"
-msgstr ""
+msgstr "Tsjechische Kroon (&#75;&#269;)"
 
 #: admin/woocommerce-admin-settings.php:305
 #@ woothemes
@@ -8055,7 +8055,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:314
 #@ woothemes
 msgid "Product tag slug"
-msgstr ""
+msgstr "Product tag slug"
 
 #: admin/woocommerce-admin-settings.php:315
 #@ woothemes
@@ -8110,22 +8110,22 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:229
 #@ woothemes
 msgid "Force Downloads"
-msgstr ""
+msgstr "Forceer Downloads"
 
 #: admin/woocommerce-admin-settings.php:230
 #@ woothemes
 msgid "X-Accel-Redirect/X-Sendfile"
-msgstr ""
+msgstr "X-Accel-Redirect/X-Sendfile"
 
 #: admin/woocommerce-admin-settings.php:231
 #@ woothemes
 msgid "Redirect only"
-msgstr ""
+msgstr "Redirect"
 
 #: admin/woocommerce-admin-attributes.php:215
 #@ woothemes
 msgid "Attribute label"
-msgstr ""
+msgstr "Eigenschap label"
 
 #: admin/woocommerce-admin-attributes.php:217
 #@ woothemes
@@ -8369,49 +8369,49 @@ msgstr ""
 #: templates/order/order-details-table.php:72
 #@ woothemes
 msgid "Download file &rarr;"
-msgstr ""
+msgstr "Download bestand &rarr;"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:71
 #@ woothemes
 msgid "Schedule"
-msgstr ""
+msgstr "Plan"
 
 #: admin/woocommerce-admin-users.php:107
 #@ woothemes
 msgid "Customer Billing Address"
-msgstr ""
+msgstr "Klant factuuradres"
 
 #: admin/woocommerce-admin-users.php:110
 #: admin/woocommerce-admin-users.php:155
 #@ woothemes
 msgid "First name"
-msgstr ""
+msgstr "Voornaam"
 
 #: admin/woocommerce-admin-users.php:114
 #: admin/woocommerce-admin-users.php:159
 #@ woothemes
 msgid "Last name"
-msgstr ""
+msgstr "Achternaam"
 
 #: admin/woocommerce-admin-users.php:142
 #@ woothemes
 msgid "Telephone"
-msgstr ""
+msgstr "Telefoon"
 
 #: admin/woocommerce-admin-users.php:152
 #@ woothemes
 msgid "Customer Shipping Address"
-msgstr ""
+msgstr "Klant verzendadres"
 
 #: admin/woocommerce-admin-users.php:180
 #@ woothemes
 msgid "State/County or state code"
-msgstr ""
+msgstr "Staat/provincie"
 
 #: admin/woocommerce-admin-users.php:184
 #@ woothemes
 msgid "2 letter Country code"
-msgstr ""
+msgstr "2-letter land code (bv NL, BE)"
 
 #: classes/woocommerce_email.class.php:321
 #, php-format
