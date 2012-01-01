@@ -6786,7 +6786,7 @@ msgstr "Verwijderd de geselecteerde tarieven?"
 #: admin/woocommerce-admin-settings-forms.php:467
 #@ woothemes
 msgid "Duplicate the selected rates?"
-msgstr ""
+msgstr "Dupliceer de geselecteerde tarieven?"
 
 #: admin/woocommerce-admin-settings-forms.php:545
 #, php-format
@@ -6825,7 +6825,7 @@ msgstr "Zuid Afrikaanse Rand (R)"
 #: admin/woocommerce-admin-settings.php:103
 #@ woothemes
 msgid "Show order comments section"
-msgstr ""
+msgstr "Toon bestelling comentaar sectie"
 
 #: admin/woocommerce-admin-settings.php:120
 #@ woothemes
@@ -6969,22 +6969,22 @@ msgstr "BTW berekeningen"
 #: admin/woocommerce-admin-settings.php:747
 #@ woothemes
 msgid "Round tax at subtotal level, instead of per line"
-msgstr ""
+msgstr "Rond BTW af bij subtotalen ipv per regel"
 
 #: admin/woocommerce-admin-settings.php:755
 #@ woothemes
 msgid "Tax display (cart totals)"
-msgstr ""
+msgstr "BTW tonen (op winkelwagen totaal)"
 
 #: admin/woocommerce-admin-settings.php:756
 #@ woothemes
 msgid "Always display cart contents excluding tax"
-msgstr ""
+msgstr "Toon winkelwagen inhoud excl. BTW"
 
 #: admin/woocommerce-admin-settings.php:764
 #@ woothemes
 msgid "Always display cart totals excluding tax"
-msgstr ""
+msgstr "Toon winkelwagen totalen excl. BTW"
 
 #: admin/woocommerce-admin-taxonomies.php:157
 #@ woothemes
@@ -7252,12 +7252,12 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:426
 #@ woothemes
 msgid "Enter a file path/URL"
-msgstr ""
+msgstr "Geef een bestandspad/URL op"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:432
 #@ woothemes
 msgid "Enter a download limit"
-msgstr ""
+msgstr "Geef een download limiet op"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:507
 #@ woothemes
@@ -7277,7 +7277,7 @@ msgstr "Product URL"
 #: admin/post-types/writepanels/writepanel-product_data.php:61
 #@ woothemes
 msgid "Enter the external URL to the product."
-msgstr ""
+msgstr "Geef een externe URL op."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:750
 #@ woothemes
@@ -7322,12 +7322,12 @@ msgstr "Product naam"
 #: classes/cart.class.php:356
 #@ woothemes
 msgid "This product cannot be purchased."
-msgstr ""
+msgstr "Dit product kan niet gekocht worden."
 
 #: classes/cart.class.php:362
 #@ woothemes
 msgid "This product cannot be purchased - the price is not yet set."
-msgstr ""
+msgstr "Dit product kan niet gekocht worden. Er is nog geen prijs gedefinieerd."
 
 #: classes/countries.class.php:226
 #@ woothemes
@@ -7537,7 +7537,7 @@ msgstr "Bestelling %s is terugbetaald"
 #: classes/shipping/shipping-flat_rate.php:52
 #@ woothemes
 msgid "Enable Flat Rate shipping"
-msgstr ""
+msgstr "Activeer vast bedrag als verzendkosten"
 
 #: classes/shipping/shipping-flat_rate.php:59
 #@ woothemes
@@ -7552,17 +7552,17 @@ msgstr "Berekening Type"
 #: classes/shipping/shipping-flat_rate.php:85
 #@ woothemes
 msgid "Per Order - charge shipping for the entire order as a whole"
-msgstr ""
+msgstr "Per Order"
 
 #: classes/shipping/shipping-flat_rate.php:86
 #@ woothemes
 msgid "Per Item - charge shipping for each item individually"
-msgstr ""
+msgstr "Per Product"
 
 #: classes/shipping/shipping-flat_rate.php:87
 #@ woothemes
 msgid "Per Class - charge shipping for each shipping class in an order"
-msgstr ""
+msgstr "Per Klasse"
 
 #: classes/shipping/shipping-flat_rate.php:101
 #@ woothemes
@@ -7593,7 +7593,7 @@ msgstr "Kosten ex belasting. Als bedrag (bv 2.50) of procenten (bv 5%)."
 #: classes/shipping/shipping-flat_rate.php:299
 #@ woothemes
 msgid "+ Add Flat Rate"
-msgstr ""
+msgstr "+ Toevoegen Vast Bedrag"
 
 #: classes/shipping/shipping-flat_rate.php:300
 #@ woothemes
@@ -7603,7 +7603,7 @@ msgstr ""
 #: classes/shipping/shipping-flat_rate.php:300
 #@ woothemes
 msgid "Delete selected rates"
-msgstr ""
+msgstr "Verwijder de geselecteerde tarieven"
 
 #: classes/shipping/shipping-flat_rate.php:317
 #: classes/shipping/shipping-flat_rate.php:349
@@ -7624,7 +7624,7 @@ msgstr ""
 #: classes/shipping/shipping-free_shipping.php:101
 #@ woothemes
 msgid "Free Shipping - does what it says on the tin."
-msgstr ""
+msgstr "Gratis verzending."
 
 #: languages/strings.php:13
 #@ woothemes
@@ -7680,7 +7680,7 @@ msgstr ""
 #: templates/checkout/form.php:9
 #@ woothemes
 msgid "You must be logged in to checkout."
-msgstr ""
+msgstr "U dient ingelogd zijn om te kunnen afrekenen."
 
 #: templates/cart/totals.php:18
 #: templates/checkout/review_order.php:14
@@ -7708,7 +7708,7 @@ msgstr "Winkelwagen Subtotaal:"
 #, php-format
 #@ woothemes
 msgid "Thanks for registering on %s. Your login details are below:"
-msgstr ""
+msgstr "Bedankt voor registeren op %s. Uw login gegevens zijn als volgt:"
 
 #: templates/emails/customer_new_account.php:10
 #, php-format
@@ -7726,7 +7726,7 @@ msgstr "Wachtwoord: %s"
 #, php-format
 #@ woothemes
 msgid "You can login to your account area here: %s."
-msgstr ""
+msgstr "U kan uw account informatie bijwerken op: %s."
 
 #: templates/emails/customer_note_notification.php:7
 #@ woothemes
@@ -7958,18 +7958,18 @@ msgstr ""
 #, php-format
 #@ woothemes
 msgid "Your account on %s"
-msgstr ""
+msgstr "Uw account op %s"
 
 #: classes/woocommerce_email.class.php:372
 #@ woothemes
 msgid "Your account details"
-msgstr ""
+msgstr "Uw account gegevens"
 
 #: woocommerce.php:505
 #: woocommerce.php:507
 #@ woothemes
 msgid "Shipping Classes"
-msgstr ""
+msgstr "Verzendings klassen"
 
 #: woocommerce.php:509
 #@ woothemes
@@ -7979,22 +7979,22 @@ msgstr "Zoek verzendingsklassen"
 #: woocommerce.php:510
 #@ woothemes
 msgid "All Shipping Classes"
-msgstr ""
+msgstr "Alle Verzendings klassen"
 
 #: woocommerce.php:511
 #@ woothemes
 msgid "Parent Shipping Class"
-msgstr ""
+msgstr "Hoofd verzendings klasse"
 
 #: woocommerce.php:512
 #@ woothemes
 msgid "Parent Shipping Class:"
-msgstr ""
+msgstr "Hoofd verzendings klasse"
 
 #: woocommerce.php:513
 #@ woothemes
 msgid "Edit Shipping Class"
-msgstr ""
+msgstr "Bewerk verzendings klasse"
 
 #: woocommerce.php:514
 #@ woothemes
@@ -8231,7 +8231,7 @@ msgstr "Adres 2 (optioneel)"
 #: woocommerce.php:825
 #@ woothemes
 msgid "Select an option&hellip;"
-msgstr ""
+msgstr "Selecteer een optie &hellip;"
 
 #: admin/post-types/shop_order.php:65
 #@ woothemes
@@ -8241,12 +8241,12 @@ msgstr "gemaakt door"
 #: admin/woocommerce-admin-taxonomies.php:241
 #@ woothemes
 msgid "Configure shipping class"
-msgstr ""
+msgstr "Configureer verzendings klasse"
 
 #: widgets/widget-cart.php:97
 #@ woothemes
 msgid "Hide if cart is empty"
-msgstr ""
+msgstr "Verbergen indien winkelwagen leeg is"
 
 #: admin/woocommerce-admin-settings.php:683
 #@ woothemes
@@ -8287,7 +8287,7 @@ msgstr "Via"
 #: admin/woocommerce-admin-settings.php:94
 #@ woothemes
 msgid "Checkout Fields"
-msgstr ""
+msgstr "Afreken velden"
 
 #: admin/woocommerce-admin-settings.php:95
 #@ woothemes
@@ -8327,7 +8327,7 @@ msgstr "Integratie"
 #: admin/woocommerce-admin-users.php:20
 #@ woothemes
 msgid "Paying Customer?"
-msgstr ""
+msgstr "Betalene klant?"
 
 #: classes/checkout.class.php:221
 #: shortcodes/shortcode-my_account.php:134
