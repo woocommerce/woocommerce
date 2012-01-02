@@ -637,10 +637,17 @@ ul.recent-orders, ul.stock_list {
 }
 
 /* Settings */
+a.export_rates, a.import_rates {
+	float:right;
+	margin-left: 3px;
+	margin-top: -3px;
+	margin-bottom: 3px;
+}
 .woocommerce table.shippingrows, .woocommerce table.taxrows {
 	td, th {
 		vertical-align: top;
 		line-height: 25px;
+		margin-bottom: 9px;
 	}
 	a.remove {
 		margin: 0 !important;
@@ -691,6 +698,21 @@ ul.recent-orders, ul.stock_list {
 			.search-field input {
 				width: 150px !important;
 			}
+		}
+	}
+	td.local_country {
+		overflow: visible !important;
+		width: 400px !important;
+		.chzn-container {
+			width: 400px !important;
+			margin-bottom: 3px;
+		}
+		textarea {
+			height: 60px;
+			width: 400px;
+			font-size: 13px;
+			line-height: 16px;
+			display: block;
 		}
 	}
 }

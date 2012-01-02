@@ -320,6 +320,53 @@ class woocommerce_order {
 
 	}
 	
+	/** Get totals for display in emails */
+	function get_order_item_totals() {
+
+		$total_rows = array();
+		
+		$total_rows[ __('Cart Subtotal:', 'woothemes') ] = $this->get_subtotal_to_display();
+		
+		if ($this->get_cart_discount() > 0) 
+			$total_rows[ __('Cart Discount:', 'woothemes') ] = woocommerce_price($this->get_cart_discount());
+		
+		if ($this->get_shipping() > 0)
+			$total_rows[ __('Shipping:', 'woothemes') ] = $this->get_shipping_to_display();
+		
+		if ($this->get_total_tax() > 0) :
+			
+			if ( is_array($this->taxes) && sizeof($this->taxes) > 0 ) :
+			
+				$has_compound_tax = false;
+				
+				foreach ($this->taxes as $tax) : if ($tax['compound']) : $has_compound_tax = true; continue; endif;
+					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+				endforeach;
+				
+				if ($has_compound_tax) :
+			
+				endif;
+				
+				foreach ($this->taxes as $tax) : if (!$tax['compound']) continue;
+					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+				endforeach;
+			
+			else :
+			
+				$total_rows[ $woocommerce->countries->tax_or_vat() ] = woocommerce_price($this->get_total_tax());
+			
+			endif;
+			
+		endif;
+		
+		if ($this->get_order_discount() > 0)
+			$total_rows[ __('Order Discount:', 'woothemes') ] = woocommerce_price($this->get_order_discount());
+		
+		$total_rows[ __('Order Total:', 'woothemes') ] = woocommerce_price($this->get_order_total());
+		
+		return apply_filters('woocommerce_get_order_item_totals', $total_rows, $this);
+	}
+	
 	/** Output items for display in html emails */
 	function email_order_items_table( $show_download_links = false, $show_sku = false ) {
 
@@ -356,13 +403,22 @@ class woocommerce_order {
 				<td style="text-align:left; border: 1px solid #eee;">';
 				
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
-					
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
 						
 						$return .= woocommerce_price( $item['base_cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
-						
 					else :
-						$return .= woocommerce_price( round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2) );
+						
+						
+						
+						
+						
+						$return .= woocommerce_price( round( $item['base_cost']*$item['qty'], 2) );
+						//???
+						
+						
+						
+						
+						
 					endif;
 			
 			$return .= '	
