@@ -23,7 +23,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Cart Discount', 'woothemes'); ?></th>
+					<th><?php _e('Cart Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 				</tr>
 				
@@ -143,7 +143,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Order Discount', 'woothemes'); ?></th>
+					<th><?php _e('Order Discount', 'woothemes'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woothemes'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 				</tr>
 				

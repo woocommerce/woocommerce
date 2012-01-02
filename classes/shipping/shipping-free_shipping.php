@@ -141,7 +141,7 @@ class free_shipping extends woocommerce_shipping_method {
 		endif;
 		
 		if ($this->requires_coupon=="yes") :
-		
+			
 			if ($woocommerce->cart->applied_coupons) : foreach ($woocommerce->cart->applied_coupons as $code) :
 				$coupon = &new woocommerce_coupon( $code );
 				

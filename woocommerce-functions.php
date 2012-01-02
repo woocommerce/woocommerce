@@ -419,7 +419,7 @@ function woocommerce_process_login() {
 }
 
 /**
- * Process the coupon form on the checkout
+ * Process the coupon form on the checkout and cart
  **/
 function woocommerce_process_coupon_form() {
 	global $woocommerce;
@@ -430,7 +430,7 @@ function woocommerce_process_coupon_form() {
 		$woocommerce->cart->add_discount($coupon_code);
 		
 		if ( wp_get_referer() ) :
-			wp_safe_redirect( wp_get_referer() );
+			wp_safe_redirect( remove_query_arg('remove_discounts', wp_get_referer()) );
 			exit;
 		endif;
 	

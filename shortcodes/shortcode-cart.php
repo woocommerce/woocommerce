@@ -17,14 +17,8 @@ function get_woocommerce_cart( $atts ) {
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
 	
-	// Process Discount Codes
-	if (isset($_POST['apply_coupon']) && $_POST['apply_coupon'] && $woocommerce->verify_nonce('cart')) :
-	
-		$coupon_code = stripslashes(trim($_POST['coupon_code']));
-		$woocommerce->cart->add_discount($coupon_code);
-	
 	// Remove Discount Codes
-	elseif (isset($_GET['remove_discounts'])) :
+	if (isset($_GET['remove_discounts'])) :
 		
 		$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
 		$woocommerce->cart->calculate_totals();

@@ -553,8 +553,8 @@ function woocommerce_tax_row_label( $selected ) {
 	if ($selected) foreach ($selected as $country => $value) :
 		
 		$country = woocommerce_clean($country);
-
-		if (sizeof($value)>1) :
+	
+		if (sizeof($value)>0 && $value[0]!=='*') :
 			$states_count+=sizeof($value);
 		endif;
 		
