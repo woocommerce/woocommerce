@@ -54,6 +54,7 @@ class woocommerce_order {
 		
 		// Custom fields
 		$this->items 				= (array) get_post_meta( $this->id, '_order_items', true );
+		$this->taxes 				= (array) get_post_meta( $this->id, '_order_taxes', true );
 		$this->user_id 				= (int) get_post_meta( $this->id, '_customer_user', true );
 		$this->completed_date		= get_post_meta( $this->id, '_completed_date', true );
 		
@@ -203,9 +204,9 @@ class woocommerce_order {
 	/** Calculate item cost - useful for gateways */
 	function get_item_cost( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( $item['cost'] * (1 + ($item['taxrate']/100)) , 2, '.', '');
+			return number_format( ($item['line_cost'] + $item['line_tax']) / $item['qty'] , 2, '.', '');
 		else :
-			return number_format( $item['cost'] , 2, '.', '');
+			return number_format( $item['line_cost'] / $item['qty'] , 2, '.', '');
 		endif;
 	}
 	
@@ -220,34 +221,50 @@ class woocommerce_order {
 	
 	
 	/** Gets subtotal */
-	function get_subtotal_to_display() {
+	function get_subtotal_to_display( $compound = false ) {
 		global $woocommerce;
 		
-		if ($this->display_totals_ex_tax || !$this->prices_include_tax) :
-			
-			$subtotal = woocommerce_price($this->order_subtotal);
-			
-			if ($this->order_tax>0 && $this->prices_include_tax) :
-				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
-			endif;
+		$subtotal = 0;
 		
-		else :
+		foreach ($this->items as $item) :
+		
+			$subtotal += $item['base_cost'] * $item['qty'];
+		
+		endforeach;
+		
+		// If showing compound taxes subtotal, add shipping + non-compound taxes
+		if ($compound && is_array($this->taxes)) :
+		
+			$subtotal += $this->get_shipping();
+		
+			foreach ($this->taxes as $tax) :
+				
+				if (isset($tax['compound']) && $tax['compound']) continue;
+				
+				$subtotal += $tax['total'];
 			
-			// Calculate subtotal inc. tax
-			$subtotal = 0;
-			
-			foreach ($this->items as $item) :
-				
-				if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
-				
-				$subtotal += round(($item['base_cost']*$item['qty']) * (($item['taxrate']/100) + 1), 2);
-				
 			endforeach;
-
-			$subtotal = woocommerce_price( $subtotal );
+			
+			$subtotal = woocommerce_price($subtotal);
+		
+		// If this is the cart subtotal, and we want to display prices inc tax, add it
+		elseif (!$this->display_totals_ex_tax && $this->prices_include_tax) :
+			
+			// Add tax to subtotal
+			$subtotal += $this->order_tax;
+			
+			$subtotal = woocommerce_price($subtotal);
 			
 			if ($this->order_tax>0 && !$this->prices_include_tax) :
 				$subtotal .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
+			endif;
+			
+		else :
+		
+			$subtotal = woocommerce_price($subtotal);
+			
+			if ($this->order_tax>0 && $this->prices_include_tax) :
+				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
 			endif;
 		
 		endif;
@@ -303,47 +320,6 @@ class woocommerce_order {
 
 	}
 	
-	/** Output items for display in emails */
-	function email_order_items_list( $show_download_links = false, $show_sku = false ) {
-		
-		$return = '';
-		
-		foreach($this->items as $item) : 
-			
-			$_product = $this->get_product_from_item( $item );
-
-			$return .= $item['qty'] . ' x ' . apply_filters('woocommerce_order_product_title', $item['name'], $_product);
-			
-			if ($show_sku) :
-				
-				$return .= ' (#' . $_product->sku . ')';
-				
-			endif;
-			
-			$return .= ' - ' . strip_tags(woocommerce_price( $item['cost']*$item['qty'], array('ex_tax_label' => 1 )));
-			
-			$item_meta = &new order_item_meta( $item['item_meta'] );					
-			$return .= PHP_EOL . $item_meta->display( true, true );
-			
-			if ($show_download_links) :
-				
-				if ($_product->exists) :
-			
-					if ($_product->is_downloadable()) :
-						$return .= PHP_EOL . ' - ' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '';
-					endif;
-		
-				endif;	
-					
-			endif;
-			
-			$return .= PHP_EOL;
-			
-		endforeach;	
-		
-		return $return;	
-	}
-	
 	/** Output items for display in html emails */
 	function email_order_items_table( $show_download_links = false, $show_sku = false ) {
 
@@ -379,8 +355,6 @@ class woocommerce_order {
 				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
 				<td style="text-align:left; border: 1px solid #eee;">';
 				
-					if (!isset($item['base_cost'])) $item['base_cost'] = $item['cost'];
-					
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
 					
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;

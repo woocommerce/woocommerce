@@ -16,6 +16,7 @@ class woocommerce_shipping {
 	var $chosen_method		= null;
 	var $shipping_total 	= 0;
 	var $shipping_tax 		= 0;
+	var $shipping_taxes		= array();
 	var $shipping_label		= null;
 	var $shipping_classes;
 	
@@ -113,6 +114,7 @@ class woocommerce_shipping {
 		foreach ( $this->shipping_methods as $shipping_method ) :
 			$shipping_method->shipping_total = 0;
 			$shipping_method->shipping_tax = 0;
+			$shipping_method->shipping_taxes = array();
 			$shipping_method->rates = array();
 		endforeach;
 	}
@@ -123,6 +125,7 @@ class woocommerce_shipping {
 		
 			$this->shipping_total = 0;
 			$this->shipping_tax = 0;
+			$this->shipping_taxes = array();
 			$this->shipping_label = null;
 			$_cheapest_fee = '';
 			$_cheapest_method = '';
@@ -157,6 +160,7 @@ class woocommerce_shipping {
 					$_SESSION['_chosen_shipping_method'] = $chosen_method;
 					$this->shipping_total 	= $_available_methods[$chosen_method]->shipping_total;
 					$this->shipping_tax 	= $_available_methods[$chosen_method]->shipping_tax;
+					$this->shipping_taxes 	= $_available_methods[$chosen_method]->shipping_taxes;
 					$this->shipping_label 	= $_available_methods[$chosen_method]->title;
 					
 				endif;
@@ -170,6 +174,7 @@ class woocommerce_shipping {
 		unset($_SESSION['_chosen_shipping_method']);
 		$this->shipping_total = 0;
 		$this->shipping_tax = 0;
+		$this->shipping_taxes = array();
 		$this->shipping_label = null;
 	}
 	

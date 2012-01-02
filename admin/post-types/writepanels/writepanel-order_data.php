@@ -550,7 +550,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_shipping_state', stripslashes( $_POST['_shipping_state'] ));
 		update_post_meta( $post_id, '_shipping_method', stripslashes( $_POST['_shipping_method'] ));
 		update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
-		update_post_meta( $post_id, '_order_subtotal', stripslashes( $_POST['_order_subtotal'] ));
 		update_post_meta( $post_id, '_order_shipping', stripslashes( $_POST['_order_shipping'] ));
 		update_post_meta( $post_id, '_cart_discount', stripslashes( $_POST['_cart_discount'] ));
 		update_post_meta( $post_id, '_order_discount', stripslashes( $_POST['_order_discount'] ));
@@ -597,8 +596,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 $item_line_cost 	= $_POST['line_cost'];
 			 $base_item_cost	= $_POST['base_item_cost'];
 			 $item_line_tax 	= $_POST['line_tax'];
-			 $item_meta_names 	= $_POST['meta_name'];
-			 $item_meta_values 	= $_POST['meta_value'];
+			 $item_meta_names 	= (isset($_POST['meta_name'])) ? $_POST['meta_name'] : '';
+			 $item_meta_values 	= (isset($_POST['meta_value'])) ? $_POST['meta_value'] : '';
 			 $item_tax_class	= $_POST['item_tax_class'];
 			 $item_tax_status	= $_POST['item_tax_status'];
 	
@@ -612,16 +611,19 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	
 			 	// Meta
 			 	$item_meta 		= &new order_item_meta();
-			 	$meta_names 	= $item_meta_names[$i];
-			 	$meta_values 	= $item_meta_values[$i];
 			 	
-			 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
-			 		$meta_name 		= esc_attr( $meta_names[$ii] );
-			 		$meta_value 	= esc_attr( $meta_values[$ii] );
-			 		if ($meta_name && $meta_value) :
-			 			$item_meta->add( $meta_name, $meta_value );
-			 		endif;
-			 	endfor;
+			 	if (isset($item_meta_names[$i]) && isset($item_meta_values[$i])) :
+				 	$meta_names 	= $item_meta_names[$i];
+				 	$meta_values 	= $item_meta_values[$i];
+				 	
+				 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
+				 		$meta_name 		= esc_attr( $meta_names[$ii] );
+				 		$meta_value 	= esc_attr( $meta_values[$ii] );
+				 		if ($meta_name && $meta_value) :
+				 			$item_meta->add( $meta_name, $meta_value );
+				 		endif;
+				 	endfor;
+			 	endif;
 			 	
 			 	// Add to array	 	
 			 	$order_items[] = apply_filters('update_order_item', array(

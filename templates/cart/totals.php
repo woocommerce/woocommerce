@@ -46,7 +46,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &mdash; ';
 								
 								if ($method->shipping_total>0) :
-								
+									
 									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
 	
 										echo woocommerce_price($method->shipping_total);
@@ -110,7 +110,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							if ($has_compound_tax) :
 								?>
 								<tr class="order-subtotal">
-									<th><strong><?php _e('Order Subtotal', 'woothemes'); ?></strong></th>
+									<th><strong><?php _e('Subtotal', 'woothemes'); ?></strong></th>
 									<td><strong><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></strong></td>
 								</tr>
 								<?php

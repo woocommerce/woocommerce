@@ -413,13 +413,14 @@ class woocommerce_cart {
 		 * @param   string	quantity	contains the quantity of the item
 		 */
 		function set_quantity( $cart_item_key, $quantity = 1 ) {
+		
 			if ($quantity==0 || $quantity<0) :
 				unset($this->cart_contents[$cart_item_key]);
 			else :
 				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
+				do_action('woocommerce_after_cart_item_quantity_update', $this->cart_contents[$cart_item_key], $quantity);
 			endif;
-			do_action('woocommerce_after_cart_item_quantity_update', $this->cart_contents[$cart_item_key], $quantity);
-	
+			
 			$this->set_session();
 		}
 
@@ -793,7 +794,7 @@ class woocommerce_cart {
 							$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
 							
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= array_sum($discounted_taxes);
+							$discounted_tax_amount	= array_sum(array_map(array(&$this, 'round'), $discounted_taxes)); // Sum taxes - round also to prevent rounding errors
 							
 						/**
 						 * Regular tax calculation (customer inside base and the tax class is unmodified
@@ -802,12 +803,9 @@ class woocommerce_cart {
 							
 							$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= array_sum($discounted_taxes);
+							$discounted_tax_amount	= array_sum(array_map(array(&$this, 'round'), $discounted_taxes)); // Sum taxes - round also to prevent rounding errors
 							
 						endif;
-						
-						// Tax Totals - add up each tax line and store separately
-						$this->tax_total 	= $this->tax_total + $discounted_tax_amount;
 						
 						// Tax rows - merge the totals we just got
 						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
@@ -821,7 +819,7 @@ class woocommerce_cart {
 						$discounted_tax_amount 	= 0;
 					
 					endif;	
-					
+										
 					// Total item price (price, discount and quantity) - round tax so price is correctly calculated
 					$total_item_price 			= ($discounted_price * $values['quantity']) - round($discounted_tax_amount, 2);	
 											
@@ -857,9 +855,6 @@ class woocommerce_cart {
 						$tax_rates 				= $this->tax->get_rates( $_product->get_tax_class() );				
 						$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, false );
 						$discounted_tax_amount	= array_sum( $discounted_taxes );
-						
-						// Tax Totals - add up each tax line and store separately
-						$this->tax_total 		= $this->tax_total + $discounted_tax_amount;
 		
 						// Tax rows - merge the totals we just got
 						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
@@ -883,8 +878,12 @@ class woocommerce_cart {
 			
 			endif;
 			
-			// Rounding
-			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes' ) $this->tax_total 	= round( $this->tax_total, 2 );
+			// Set tax total to sum of all tax rows
+			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes' ) :	
+				$this->tax_total	= array_sum(array_map(array(&$this, 'round'), $this->taxes));
+			else :
+				$this->tax_total	= array_sum( $this->taxes );
+			endif;
 				
 			// Cart Discounts (after tax)
 			$this->apply_cart_discounts_after_tax();
@@ -894,6 +893,9 @@ class woocommerce_cart {
 			
 			// Cart Shipping
 			$this->calculate_shipping(); 
+						
+			// Taxes Rounding - taxes now include shipping taxes
+			$this->taxes		= array_map(array(&$this, 'round'), $this->taxes);
 			
 			// VAT exemption done at this point - so all totals are correct before exemption
 			if ($woocommerce->customer->is_vat_exempt()) :
@@ -920,6 +922,13 @@ class woocommerce_cart {
 		function needs_payment() {
 			if ( $this->total > 0 ) return true; else return false;
 		}
+		
+		/** 
+		 * Round to 2 DP
+		 */
+		function round( $in ) {
+			return round($in, 2);
+		}
 	
     /*-----------------------------------------------------------------------------------*/
 	/* Shipping related functions */
@@ -939,16 +948,14 @@ class woocommerce_cart {
 			
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
+			$this->shipping_tax_total 	= $woocommerce->shipping->shipping_tax;		// Shipping tax amount
 			
-			if (is_array($woocommerce->shipping->shipping_tax)) :
-				$this->shipping_tax_total = array_sum( $woocommerce->shipping->shipping_tax );
-				
+			// Shipping tax rows
+			if (is_array($woocommerce->shipping->shipping_taxes) && sizeof($woocommerce->shipping->shipping_taxes)>0) :
 				// Tax rows - merge the totals we just got
-				foreach (array_keys($this->taxes + $woocommerce->shipping->shipping_tax) as $key) {
-				    $this->taxes[$key] = (isset($woocommerce->shipping->shipping_tax[$key]) ? $woocommerce->shipping->shipping_tax[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
+				foreach (array_keys($this->taxes + $woocommerce->shipping->shipping_taxes) as $key) {
+				    $this->taxes[$key] = (isset($woocommerce->shipping->shipping_taxes[$key]) ? $woocommerce->shipping->shipping_taxes[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
 				}
-			else :
-				$this->shipping_tax_total = $woocommerce->shipping->shipping_tax;
 			endif;
 		}
 		

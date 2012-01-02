@@ -119,7 +119,8 @@ class flat_rate extends woocommerce_shipping_method {
     	$_tax = &new woocommerce_tax();
     	
     	$this->shipping_total 	= 0;
-		$this->shipping_tax 	= array();
+		$this->shipping_tax 	= 0;
+		$this->shipping_taxes 	= array();
     	
     	if ($this->type=='order') :
     		
@@ -227,8 +228,6 @@ class flat_rate extends woocommerce_shipping_method {
 
 		elseif ($this->type=='item') :
 			
-			$taxes = array();
-			
 			// Shipping per item
 			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 				
@@ -257,8 +256,8 @@ class flat_rate extends woocommerce_shipping_method {
 						$item_taxes = $_tax->calc_shipping_tax( $item_shipping_price, $rates );
 						
 						// Sum the item taxes
-						foreach (array_keys($taxes + $item_taxes) as $key) {
-						    $taxes[$key] = (isset($item_taxes[$key]) ? $item_taxes[$key] : 0) + (isset($taxes[$key]) ? $taxes[$key] : 0);
+						foreach (array_keys($this->shipping_taxes + $item_taxes) as $key) {
+						    $this->shipping_taxes[$key] = (isset($item_taxes[$key]) ? $item_taxes[$key] : 0) + (isset($this->shipping_taxes[$key]) ? $this->shipping_taxes[$key] : 0);
 						}
 					
 					endif;
@@ -266,7 +265,7 @@ class flat_rate extends woocommerce_shipping_method {
 				endif;
 			endforeach; endif;
 			
-			$this->shipping_tax = $taxes;
+			$this->shipping_tax = array_sum( $this->shipping_taxes );
 			
 		endif;			
     } 
