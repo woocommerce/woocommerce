@@ -294,61 +294,94 @@ class woocommerce_tax {
 		// Taxes array
 		$taxes = array();
 		
-		// Multiple taxes
-		foreach ($rates as $key => $rate) :
-			if ($rate['compound']=='yes') continue;
+		// Price inc tax
+		if ($price_includes_tax) :
 			
-			if ($price_includes_tax) :
+			$regular_tax_rates = 0;
+			$compound_tax_rates = 0;
 			
-				$the_rate = ($rate['rate'] / 100) + 1;
-				$tax_amount = $price - ( $price / $the_rate);
+			foreach ($rates as $key => $rate) :
+				if ($rate['compound']=='yes')
+					$compound_tax_rates = $compound_tax_rates + $rate['rate'];
+				else
+					$regular_tax_rates = $regular_tax_rates + $rate['rate'];
+			endforeach;
+			
+			$regular_tax_rate = 1 + ($regular_tax_rates / 100);
+			$compound_tax_rate = 1 + ($compound_tax_rates / 100);
+			$tax_rate = $regular_tax_rate * $compound_tax_rate;
+			
+			$non_compound_price = ($price/$compound_tax_rate);
+			// $price = ($x * $regular_tax_rate) * $compound_tax_rate;
+			
+			foreach ($rates as $key => $rate) :
 				
-			else :
+				$the_rate = $rate['rate'] / 100;
+				
+				if ($rate['compound']=='yes')
+					$tax_amount = ( $the_rate / $compound_tax_rate ) * $price;
+				else
+					$tax_amount = ( $the_rate / $regular_tax_rate ) * $non_compound_price;
+				
+				// Back to pounds
+				$tax_amount = ($tax_amount / 100);
+				
+				// Rounding
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+					$tax_amount = round( $tax_amount, 2 );
+				endif;
+				
+				// Add rate
+				if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+
+			endforeach;
+		
+		// Prices ex tax
+		else :
+
+			// Multiple taxes
+			foreach ($rates as $key => $rate) :
+				if ($rate['compound']=='yes') continue;
+				
 				$tax_amount = $price * ($rate['rate']/100);
-			endif;
-			
-			// Back to pounds
-			$tax_amount = ($tax_amount / 100);
-			
-			// Rounding
-			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
-				$tax_amount = round( $tax_amount, 2 );
-			endif;
-			
-			// Add rate
-			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
-
-		endforeach;
-		
-		$pre_compound_total = array_sum($taxes);
-		
-		// Compound taxes
-		foreach ($rates as $key => $rate) :
-			if ($rate['compound']=='no') continue;
-			
-			$the_price_inc_tax = $price + ($pre_compound_total * 100);
-			
-			if ($price_includes_tax) :
-			
-				$the_rate = ($rate['rate'] / 100) + 1;
-				$tax_amount = $the_price_inc_tax - ( $the_price_inc_tax / $the_rate);
 				
-			else :
+				// Back to pounds
+				$tax_amount = ($tax_amount / 100);
+				
+				// Rounding
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+					$tax_amount = round( $tax_amount, 2 );
+				endif;
+				
+				// Add rate
+				if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+	
+			endforeach;
+			
+			$pre_compound_total = array_sum($taxes);
+			
+			// Compound taxes
+			foreach ($rates as $key => $rate) :
+				if ($rate['compound']=='no') continue;
+				
+				$the_price_inc_tax = $price + ($pre_compound_total * 100);
+				
 				$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
-			endif;
+	
+				// Back to pounds
+				$tax_amount = ($tax_amount / 100);
+				
+				// Rounding
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+					$tax_amount = round( $tax_amount, 2 );
+				endif;
+				
+				// Add rate
+				if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
+	
+			endforeach;
 
-			// Back to pounds
-			$tax_amount = ($tax_amount / 100);
-			
-			// Rounding
-			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
-				$tax_amount = round( $tax_amount, 2 );
-			endif;
-			
-			// Add rate
-			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
-
-		endforeach;
+		endif;
 
 		return $taxes;
 	}

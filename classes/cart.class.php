@@ -715,12 +715,13 @@ class woocommerce_cart {
 						endif;
 						
 						$taxes 					= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true );
-						$tax_amount				= array_sum( $taxes );
+						$tax_amount				= array_sum(array_map(array(&$this, 'round'), $taxes));
 						
 					endif;
 	
 					// Sub total is based on base prices (without discounts)
 					$this->subtotal 			= $this->subtotal + ( $base_price * $values['quantity'] );
+					
 					$this->subtotal_ex_tax 		= $this->subtotal_ex_tax + ( ( $base_price * $values['quantity'] ) - $tax_amount);
 	
 				else :
@@ -729,7 +730,7 @@ class woocommerce_cart {
 					
 						$tax_rates			 	= $this->tax->get_rates( $_product->get_tax_class() );
 						$taxes 					= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, false );
-						$tax_amount				= array_sum( $taxes );
+						$tax_amount				= array_sum(array_map(array(&$this, 'round'), $taxes));
 						
 					endif;
 					
@@ -1216,6 +1217,7 @@ class woocommerce_cart {
 							
 					$base_taxes 		= $this->tax->calc_tax( $price * $quantity, $base_tax_rates, true );
 					$base_tax_amount	= array_sum( $base_taxes );
+					
 					$row_price 			= ( $price * $quantity ) - $base_tax_amount;
 					
 					$return = woocommerce_price( $row_price );
