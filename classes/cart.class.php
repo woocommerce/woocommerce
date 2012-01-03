@@ -167,6 +167,8 @@ class woocommerce_cart {
 		function get_item_data( $cart_item, $flat = false ) {
 			global $woocommerce;
 			
+			$has_data = false;
+			
 			if (!$flat) $return = '<dl class="variation">';
 			
 			// Variation data
@@ -201,6 +203,8 @@ class woocommerce_cart {
 				else :
 					$return .= implode('', $variation_list);
 				endif;
+				
+				$has_data = true;
 			
 			endif;
 			
@@ -227,11 +231,13 @@ class woocommerce_cart {
 					$return .= implode('', $data_list);
 				endif;
 				
+				$has_data = true;
+				
 			endif;
 			
 			if (!$flat) $return .= '</dl>';
 			
-			return $return;
+			if ($has_data) return $return;
 	   				
 		}
 	

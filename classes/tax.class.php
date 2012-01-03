@@ -19,12 +19,12 @@ class woocommerce_tax {
 		if (!is_array($this->parsed_rates)) :
 			global $woocommerce;
 			
-			$tax_rates = get_option('woocommerce_tax_rates');
+			$tax_rates 			= (array) get_option('woocommerce_tax_rates');
+			$local_tax_rates 	= (array) get_option('woocommerce_local_tax_rates');
 			
-			$parsed_rates = array();
-			$flat_rates	= array();
-			
-			$index = 0;
+			$parsed_rates 		= array();
+			$flat_rates			= array();
+			$index 				= 0;
 			
 			if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
 			
@@ -39,14 +39,12 @@ class woocommerce_tax {
 						foreach ($states as $state) :
 							
 							if (!$rate['label']) :
-							
 								$rate['label'] = $woocommerce->countries->tax_or_vat();
 								
 								// Add % to label
 								if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
 									$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
 								endif;
-							
 							endif;
 							
 							$flat_rates[$index] = $rate;
@@ -54,7 +52,6 @@ class woocommerce_tax {
 							$parsed_rates[$country][$state][$rate['class']][$index] = array( 
 								'label' => $rate['label'], 
 								'rate' => $rate['rate'], 
-								//'postcode' => $rate['postcode'], 
 								'shipping' => $rate['shipping'],
 								'compound' => $rate['compound'] 
 								);
@@ -68,6 +65,34 @@ class woocommerce_tax {
 				endforeach;
 				
 			endforeach;
+			
+			if ($local_tax_rates && is_array($local_tax_rates) && sizeof($local_tax_rates)>0) foreach( $local_tax_rates as $rate ) :
+			
+				// Standard Rate?
+				if (!$rate['class']) $rate['class'] = '*';
+				
+				if (!$rate['label']) :
+					$rate['label'] = $woocommerce->countries->tax_or_vat();
+					
+					// Add % to label
+					if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
+						$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
+					endif;
+				endif;
+				
+				$flat_rates[$index] = $rate;
+				
+				$parsed_rates[$rate['country']][$rate['state']][$rate['class']][$index] = array( 
+					'label' => $rate['label'], 
+					'rate' => $rate['rate'], 
+					'postcode' => $rate['postcode'],
+					'shipping' => $rate['shipping'],
+					'compound' => $rate['compound'] 
+					);
+				
+				$index++;
+				
+			endforeach;			
 			
 			$this->rates = $flat_rates;
 			$this->parsed_rates = $parsed_rates;
@@ -119,17 +144,40 @@ class woocommerce_tax {
 		endif;
 		
 		// Now we have an array of matching rates, lets filter this based on postcode
-		$matched_tax_rates =$found_rates;
+		$matched_tax_rates = array();
 		
-		/*if ($postcode) :
-			foreach ($found_rates as $key => $rate) :
-				if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
-			endforeach;
-		else :
-			foreach ($found_rates as $key => $rate) :
-				if (sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
-			endforeach;
-		endif;*/
+		foreach ($found_rates as $key => $rate) :
+			
+			if (isset($rate['postcode'])) :
+				
+				// Local rate
+				if ($postcode) :
+				
+					// Check if postcode matches up
+					if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
+					
+					// Check postcode ranges
+					if (is_numeric($postcode)) :
+						foreach ($rate['postcode'] as $rate_postcode) :
+							if (strstr($rate_postcode, '-')) :
+								$parts = array_map('trim', explode('-', $rate_postcode));
+								if (sizeof($parts)==2 && is_numeric($parts[0]) && is_numeric($parts[1])) :
+									if ($postcode>=$parts[0] && $postcode<=$parts[1]) $matched_tax_rates[$key] = $rate;
+								endif;
+							endif;
+						endforeach;
+					endif;
+					
+				endif;
+				
+			else :
+				
+				// Standard rate
+				$matched_tax_rates[$key] = $rate;
+				
+			endif;
+			
+		endforeach;
 
 		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->parsed_rates, $country, $state, $postcode, $tax_class );
 		

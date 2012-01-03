@@ -99,30 +99,23 @@ function woocommerce_update_options($options) {
 					if (isset($tax_shipping[$i]) && $tax_shipping[$i]) $shipping = 'yes'; else $shipping = 'no';
 					if (isset($tax_compound[$i]) && $tax_compound[$i]) $compound = 'yes'; else $compound = 'no';
 					
-					// Handle countries
-					/*$counties_array = array();
-					$countries = $tax_countries[$i];
-					if ($countries) foreach ($countries as $country) :
-						
-						$country = woocommerce_clean($country);
-						$state = '*';
-						
-						if (strstr($country, ':')) :
-							$cr = explode(':', $country);
-							$country = current($cr);
-							$state = end($cr);
-						endif;
+					// Handle country
+					$country = woocommerce_clean($tax_countries[$i]);
+					$state = '*';
 					
-						$counties_array[trim($country)][] = trim($state);
-						
-					endforeach;*/
+					if (strstr($country, ':')) :
+						$cr = explode(':', $country);
+						$country = current($cr);
+						$state = end($cr);
+					endif;
 					
 					// Handle postcodes
-					$postcodes = explode(',', $tax_postcode[$i]);
+					$postcodes = explode(';', $tax_postcode[$i]);
 					$postcodes = array_filter(array_map('trim', $postcodes));
 					
 					$local_tax_rates[] = array(
-						'countries' => $counties_array,
+						'country' => $country,
+						'state' => $state,
 						'postcode' => $postcodes,
 						'rate' => $rate,
 						'shipping' => $shipping,
@@ -374,9 +367,9 @@ function woocommerce_admin_fields($options) {
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php _e('Tax Rates', 'woothemes') ?></th>
                     <td class="forminp">
-                    	<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
+                    	<!--<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
                     	<a class="button import_rates"><?php _e('Import rates', 'woothemes'); ?></a>
-                    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>
+                    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>-->
                     	<table class="taxrows widefat" cellspacing="0">
 		            		<thead>
 		            			<tr>
@@ -446,9 +439,9 @@ function woocommerce_admin_fields($options) {
 				<tr valign="top">
 					<th scope="row" class="titledesc"><?php _e('Local Tax Rates', 'woothemes') ?></th>
 				    <td class="forminp">
-				    	<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
+				    	<!--<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
 				    	<a class="button import_rates"><?php _e('Import rates', 'woothemes'); ?></a>
-				    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>
+				    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>-->
 				    	<table class="taxrows widefat" cellspacing="0">
 				    		<thead>
 				    			<tr>
@@ -478,9 +471,9 @@ function woocommerce_admin_fields($options) {
 				        			<td class="local_country">
 				        				<select name="local_tax_country[<?php echo $i; ?>]" class="select">
 				        					<option value=""><?php _e('Select a country/state&hellip;', 'woothemes'); ?></option>
-						                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['countries'] ); ?>
+						                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['country'], $rate['state'] ); ?>
 						                </select>
-				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(', ', $rate['postcode']); ?></textarea>
+				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(';', $rate['postcode']); ?></textarea>
 				               		</td>
 				               		<td class="tax_class">
 				               			<select name="local_tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
