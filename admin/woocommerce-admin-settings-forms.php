@@ -19,30 +19,24 @@ function woocommerce_update_options($options) {
     foreach ($options as $value) {
     	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
     		
-    		// Tate rates saving
-    		$tax_classes = array();
-    		$tax_countries = array();
-    		$tax_rate = array();
-    		$tax_rates = array();
-    		$tax_shipping = array();
-    		$tax_postcode = array();
-    		$tax_compound = array();
-    		
-			if (isset($_POST['tax_class'])) $tax_classes = $_POST['tax_class'];
-			if (isset($_POST['tax_country'])) $tax_countries = $_POST['tax_country'];
-			if (isset($_POST['tax_rate'])) $tax_rate = $_POST['tax_rate'];
-			if (isset($_POST['tax_shipping'])) $tax_shipping = $_POST['tax_shipping'];
-			if (isset($_POST['tax_postcode'])) $tax_postcode = $_POST['tax_postcode'];
-			if (isset($_POST['tax_compound'])) $tax_compound = $_POST['tax_compound'];
-			if (isset($_POST['tax_label'])) $tax_label = $_POST['tax_label'];
+    		// Tax rates saving
+    		$tax_rates 			= array();
+    		$tax_classes 		= (isset($_POST['tax_class'])) ? $_POST['tax_class'] : array();
+    		$tax_countries 		= (isset($_POST['tax_country'])) ? $_POST['tax_country'] : array();
+    		$tax_rate 			= (isset($_POST['tax_rate'])) ? $_POST['tax_rate'] : array();
+    		$tax_shipping 		= (isset($_POST['tax_shipping'])) ? $_POST['tax_shipping'] : array();
+    		$tax_postcode 		= (isset($_POST['tax_postcode'])) ? $_POST['tax_postcode'] : array();
+    		$tax_compound 		= (isset($_POST['tax_compound'])) ? $_POST['tax_compound'] : array();
+    		$tax_label 			= (isset($_POST['tax_label'])) ? $_POST['tax_label'] : array();
 			
 			for ($i=0; $i<sizeof($tax_classes); $i++) :
-			
+				
 				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && is_numeric($tax_rate[$i])) :
 					
 					$rate = esc_attr(trim($tax_rate[$i]));
-					if ($rate>100) $rate = 100;
 					$rate = number_format($rate, 4, '.', '');
+					
+					var_dump($rate);
 					
 					$class = woocommerce_clean($tax_classes[$i]);
 					
@@ -67,11 +61,67 @@ function woocommerce_update_options($options) {
 						
 					endforeach;
 					
+					$tax_rates[] = array(
+						'countries' => $counties_array,
+						'rate' => $rate,
+						'shipping' => $shipping,
+						'compound' => $compound,
+						'class' => $class,
+						'label' => esc_attr($tax_label[$i])
+					); 
+					
+				endif;
+
+			endfor;
+			
+			update_option( 'woocommerce_tax_rates', $tax_rates );
+
+    		// Local tax rates saving
+    		$local_tax_rates 	= array();
+    		$tax_classes 		= (isset($_POST['local_tax_class'])) ? $_POST['local_tax_class'] : array();
+    		$tax_countries 		= (isset($_POST['local_tax_country'])) ? $_POST['local_tax_country'] : array();
+    		$tax_postcode		= (isset($_POST['local_tax_postcode'])) ? $_POST['local_tax_postcode'] : array();
+    		$tax_rate 			= (isset($_POST['local_tax_rate'])) ? $_POST['local_tax_rate'] : array();
+    		$tax_shipping 		= (isset($_POST['local_tax_shipping'])) ? $_POST['local_tax_shipping'] : array();
+    		$tax_postcode 		= (isset($_POST['local_tax_postcode'])) ? $_POST['local_tax_postcode'] : array();
+    		$tax_compound 		= (isset($_POST['local_tax_compound'])) ? $_POST['local_tax_compound'] : array();
+    		$tax_label 			= (isset($_POST['local_tax_label'])) ? $_POST['local_tax_label'] : array();
+			
+			for ($i=0; $i<sizeof($tax_classes); $i++) :
+			
+				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && is_numeric($tax_rate[$i])) :
+					
+					$rate = esc_attr(trim($tax_rate[$i]));
+					$rate = number_format($rate, 4, '.', '');
+					
+					$class = woocommerce_clean($tax_classes[$i]);
+					
+					if (isset($tax_shipping[$i]) && $tax_shipping[$i]) $shipping = 'yes'; else $shipping = 'no';
+					if (isset($tax_compound[$i]) && $tax_compound[$i]) $compound = 'yes'; else $compound = 'no';
+					
+					// Handle countries
+					/*$counties_array = array();
+					$countries = $tax_countries[$i];
+					if ($countries) foreach ($countries as $country) :
+						
+						$country = woocommerce_clean($country);
+						$state = '*';
+						
+						if (strstr($country, ':')) :
+							$cr = explode(':', $country);
+							$country = current($cr);
+							$state = end($cr);
+						endif;
+					
+						$counties_array[trim($country)][] = trim($state);
+						
+					endforeach;*/
+					
 					// Handle postcodes
 					$postcodes = explode(',', $tax_postcode[$i]);
 					$postcodes = array_filter(array_map('trim', $postcodes));
 					
-					$tax_rates[] = array(
+					$local_tax_rates[] = array(
 						'countries' => $counties_array,
 						'postcode' => $postcodes,
 						'rate' => $rate,
@@ -85,7 +135,7 @@ function woocommerce_update_options($options) {
 
 			endfor;
 			
-			update_option($value['id'], $tax_rates);
+			update_option( 'woocommerce_local_tax_rates', $local_tax_rates );
 		
 		elseif (isset($value['type']) && $value['type']=='multi_select_countries') :
 		
@@ -319,7 +369,7 @@ function woocommerce_admin_fields($options) {
             case 'tax_rates' :
             	$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
             	$tax_rates = get_option('woocommerce_tax_rates');
-            	$local_tax_rates = get_option('woocommerce_tax_rates');
+            	$local_tax_rates = get_option('woocommerce_local_tax_rates');
             	
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php _e('Tax Rates', 'woothemes') ?></th>
@@ -341,7 +391,7 @@ function woocommerce_admin_fields($options) {
 		            		</thead>
 		            		<tfoot>
 		            			<tr>
-		            				<th colspan="2"><a href="#" class="add button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
+		            				<th colspan="2"><a href="#" class="add_tax_rate button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
 		            				<th colspan="6">
 		            					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woothemes'); ?></small>
 		            					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a>
@@ -413,27 +463,27 @@ function woocommerce_admin_fields($options) {
 				    		</thead>
 				    		<tfoot>
 				    			<tr>
-				    				<th colspan="2"><a href="#" class="add button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
+				    				<th colspan="2"><a href="#" class="add_local_tax_rate button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
 				    				<th colspan="5">
 				    					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woothemes'); ?></small>
 				    					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a>
 				    				</th>
 				    			</tr>
 				    		</tfoot>
-				    		<tbody id="tax_rates">
+				    		<tbody id="local_tax_rates">
 				    			
 				    			<?php $i = -1; if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) : $i++; ?>
 				    			<tr class="tax_rate">
 									<td class="check-column"><input type="checkbox" name="select" /></td>
 				        			<td class="local_country">
-				        				<select name="local_tax_country[<?php echo $i; ?>][]" class="chosen_select select">
+				        				<select name="local_tax_country[<?php echo $i; ?>]" class="select">
 				        					<option value=""><?php _e('Select a country/state&hellip;', 'woothemes'); ?></option>
 						                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['countries'] ); ?>
 						                </select>
-				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" value="<?php if (isset($rate['postcode'])) echo implode(', ', $rate['postcode']); ?>" name="tax_postcode[<?php echo $i; ?>]"></textarea>
+				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(', ', $rate['postcode']); ?></textarea>
 				               		</td>
 				               		<td class="tax_class">
-				               			<select name="tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
+				               			<select name="local_tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
 							                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
 							                <?php
 					                    		if ($tax_classes) foreach ($tax_classes as $class) :
@@ -445,16 +495,16 @@ function woocommerce_admin_fields($options) {
 					                    </select>
 				               		</td>
 				               		<td class="label">
-				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woothemes'); ?>" size="16" />
+				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woothemes'); ?>" size="16" />
 				               		</td>
 				    				<td class="rate">
-				    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%
+				    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%
 				    				</td>
 				    				<td class="compound">
-				    					<input type="checkbox" class="checkbox" name="tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
+				    					<input type="checkbox" class="checkbox" name="local_tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
 				    				</td>
 				    				<td class="apply_to_shipping">
-				    					<input type="checkbox" class="checkbox" name="tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> />
+				    					<input type="checkbox" class="checkbox" name="local_tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> />
 				    				</td>
 				    			</tr>
 				    			<?php endforeach; ?>
@@ -510,7 +560,7 @@ function woocommerce_admin_fields($options) {
 						return false;
 					});
 				
-					jQuery('.taxrows a.add').live('click', function(){
+					jQuery('.taxrows a.add_tax_rate').live('click', function(){
 						var size = jQuery('#tax_rates tr').size();
 						
 						// Add the row
@@ -535,8 +585,14 @@ function woocommerce_admin_fields($options) {
 				                    ?>
 			                    </select>\
 		               		</td>\
+		               		<td class="label">\
+		               			<input type="text" class="text" name="tax_label[' + size + ']" title="<?php _e('Label', 'woothemes'); ?>" size="16" />\
+		               		</td>\
             				<td class="rate">\
-            					<input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" />%\
+            					<input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%\
+            				</td>\
+            				<td class="compound">\
+            					<input type="checkbox" class="checkbox" name="tax_compound[' + size + ']" />\
             				</td>\
             				<td class="apply_to_shipping">\
             					<input type="checkbox" class="checkbox" name="tax_shipping[' + size + ']" />\
@@ -549,11 +605,55 @@ function woocommerce_admin_fields($options) {
 						return false;
 					});
 					
+					jQuery('.taxrows a.add_local_tax_rate').live('click', function(){
+						var size = jQuery('#local_tax_rates tr').size();
+						
+						// Add the row
+						jQuery('<tr class="tax_rate new_rate">\
+							<td class="check-column"><input type="checkbox" name="select" /></td>\
+							<td class="local_country">\
+								<select name="local_tax_country[' + size + ']" class="select">\
+									<option value=""><?php _e('Select a country/state&hellip;', 'woothemes'); ?></option>\
+						       		<?php echo $woocommerce->countries->country_dropdown_options( '', '', true ); ?>\
+						    	</select>\
+								<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[' + size + ']"></textarea>\
+							</td>\
+					   		<td class="tax_class">\
+					   			<select name="local_tax_class[' + size + ']" title="Tax Class" class="select">\
+					                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>\
+					                <?php
+					            		if ($tax_classes) foreach ($tax_classes as $class) :
+					                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
+					                    endforeach;
+					                ?>
+					            </select>\
+					   		</td>\
+					   		<td class="label">\
+					   			<input type="text" class="text" name="local_tax_label[' + size + ']" title="<?php _e('Label', 'woothemes'); ?>" size="16" />\
+					   		</td>\
+							<td class="rate">\
+								<input type="text" class="text" name="local_tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%\
+							</td>\
+							<td class="compound">\
+								<input type="checkbox" class="checkbox" name="local_tax_compound[' + size + ']" />\
+							</td>\
+							<td class="apply_to_shipping">\
+								<input type="checkbox" class="checkbox" name="local_tax_shipping[' + size + ']" />\
+							</td>\
+						</tr>').appendTo('#local_tax_rates');
+							
+						jQuery(".new_rate").removeClass('new_rate');
+							
+						return false;
+					});
+					
 					// Remove row
 					jQuery('.taxrows a.remove').live('click', function(){
 						var answer = confirm("<?php _e('Delete the selected rates?', 'woothemes'); ?>")
 						if (answer) {
-							jQuery('table.taxrows tbody tr td.check-column input:checked').each(function(i, el){
+							var $rates = jQuery(this).closest('.taxrows').find('tbody');
+							
+							$rates.find('tr td.check-column input:checked').each(function(i, el){
 								jQuery(el).closest('tr').find('input.text, input.checkbox, select.select').val('');
 								jQuery(el).closest('tr').hide();
 							});
@@ -565,7 +665,10 @@ function woocommerce_admin_fields($options) {
 					jQuery('.taxrows a.dupe').live('click', function(){
 						var answer = confirm("<?php _e('Duplicate the selected rates?', 'woothemes'); ?>")
 						if (answer) {
-							jQuery('table.taxrows tbody tr td.check-column input:checked').each(function(i, el){
+						
+							var $rates = jQuery(this).closest('.taxrows').find('tbody');
+							
+							$rates.find('tr td.check-column input:checked').each(function(i, el){
 								var dupe = jQuery(el).closest('tr').clone()
 								
 								// Remove chosen selector
@@ -573,12 +676,12 @@ function woocommerce_admin_fields($options) {
 								dupe.find('.chzn-container').remove();
 								
 								// Append
-								jQuery('table.taxrows tbody').append( dupe );
+								$rates.append( dupe );
 							});
 							
 							// Re-index keys
 							var loop = 0;
-							jQuery('#tax_rates tr.tax_rate').each(function( index, row ){
+							$rates.find('tr.tax_rate').each(function( index, row ){
 								jQuery('input.text, input.checkbox, select.select', row).each(function( i, el ){
 									
 									var t = jQuery(el);

@@ -54,7 +54,7 @@ class woocommerce_tax {
 							$parsed_rates[$country][$state][$rate['class']][$index] = array( 
 								'label' => $rate['label'], 
 								'rate' => $rate['rate'], 
-								'postcode' => $rate['postcode'], 
+								//'postcode' => $rate['postcode'], 
 								'shipping' => $rate['shipping'],
 								'compound' => $rate['compound'] 
 								);
@@ -119,9 +119,9 @@ class woocommerce_tax {
 		endif;
 		
 		// Now we have an array of matching rates, lets filter this based on postcode
-		$matched_tax_rates = array();
+		$matched_tax_rates =$found_rates;
 		
-		if ($postcode) :
+		/*if ($postcode) :
 			foreach ($found_rates as $key => $rate) :
 				if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
 			endforeach;
@@ -129,7 +129,7 @@ class woocommerce_tax {
 			foreach ($found_rates as $key => $rate) :
 				if (sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
 			endforeach;
-		endif;
+		endif;*/
 
 		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->parsed_rates, $country, $state, $postcode, $tax_class );
 		
