@@ -172,7 +172,7 @@ function woocommerce_add_attribute() {
 				        				if ( isset( $tax->attribute_label ) ) { $att_title = $tax->attribute_label; }
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product"><?php echo $tax->attribute_name; ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo $att_title; ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e('Edit', 'woothemes'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e('Delete', 'woothemes'); ?></a></span></div>				        					
 				        					</td>
@@ -194,7 +194,7 @@ function woocommerce_add_attribute() {
 													echo '<span class="na">&ndash;</span>';
 												endif;
 				        					?></td>
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo $woocommerce->attribute_taxonomy_name($tax->attribute_name); ?>&amp;post_type=product" class="button alignright"><?php _e('Configure&nbsp;terms', 'woothemes'); ?></a></td>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product" class="button alignright"><?php _e('Configure&nbsp;terms', 'woothemes'); ?></a></td>
 				        				</tr><?php
 				        			endforeach;
 				        		else :
