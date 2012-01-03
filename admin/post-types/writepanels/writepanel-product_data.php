@@ -753,12 +753,12 @@ function woocommerce_product_type_box() {
 	), $product_type) ) );
 	
 	// Visibility
-	woocommerce_wp_select( array( 'id' => '_visibility', 'label' => __('Product visibility', 'woothemes'), 'options' => array(
+	woocommerce_wp_select( array( 'id' => '_visibility', 'label' => __('Product visibility', 'woothemes'), 'options' => apply_filters('woocommerce_product_visibility_options', array(
 		'visible' => __('Catalog &amp; Search', 'woothemes'),
 		'catalog' => __('Catalog', 'woothemes'),
 		'search' => __('Search', 'woothemes'),
 		'hidden' => __('Hidden', 'woothemes')
-	) ) );
+	)) ) );
 	
 	woocommerce_wp_checkbox( array( 'id' => '_virtual', 'wrapper_class' => 'show_if_simple', 'label' => __('Virtual', 'woothemes'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woothemes') ) );
 	
