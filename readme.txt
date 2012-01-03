@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.3.2.1
+Stable tag: 1.4
 
 WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -84,6 +84,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 = 1.4 =
 * Support for multiple and stacked (compound) taxes
+* Locale options for country address formatting and checkout fields
 * Multiple taxes shown in order total tables
 * Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
@@ -94,7 +95,6 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Changed woocommerce_breadcrumb args
 * Filters for customer email attachments
 * Chosen selects for country/state select inputs (optional)
-* Locale options for country address formatting and checkout fields
 * Piwik (http://piwik.org/) tracking - requires http://wordpress.org/extend/plugins/wp-piwik/
 * Option to hide cart widget if the cart is empty
 * Category widget - order by option
@@ -113,6 +113,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Enabled product custom fields panel
 * Renamed custom fields for product data - upgrade script will run when upgrading. Some themes may be affected if using 'featured' - it is now '_featured'
 * woocommerce_product_visibility_options filter for backend
+* Shipping method classes/api changed to make rate definition simpler - shipping methods will need updating to stay compatible
+* Change textdomain from woothemes to woocommerce
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
@@ -404,7 +406,15 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Upgrade Notice ==
 
 = 1.4 = 
-Major update with plenty of optimisations and new features. Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically. Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
+Major update with plenty of optimisations and new features. Changed to note:
+
+* Requires WP 3.3
+* Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically. 
+* The shipping method classes have been updated to make rate definition easier. Third party plugins will need updating.
+* Textdomain has changed - re-scan your po/mo's
+* Tax additions (tax rows, compounds etc) required a change to the way order items are stored. Old orders won't show items when viewed. Order totals should be unaffected.
+
+Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
 
 = 1.3 =
 This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.

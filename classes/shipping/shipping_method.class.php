@@ -12,26 +12,54 @@
 class woocommerce_shipping_method extends woocommerce_settings_api {
 	
 	var $id;
-	var $method_title;
-	var $title;
+	var $method_title; 	// Method title
+	var $title;			// User set title
 	var $availability;
 	var $countries;
 	var $type;
 	var $fee				= 0;
 	var $min_amount			= null;
 	var $enabled			= false;
-	var $shipping_total 	= 0;
-	var $shipping_tax 		= 0;
-	var $cost				= 0; // Stores cost if theres only one
-	var $multiple_rates		= false;
-	var $rates 				= array(); // When a method has more than one cost/choice it will be in this array of titles/costs
+	
+	/**
+	 * Rates
+	 *
+	 * This is an array of rates - methods must populate this array to register shipping costs
+	 */
+	var $rates 				= array(); // This is an array of rates - methods must populate this array to register shipping costs
+	
+	function add_rate( $args = array() ) {
+		$defaults = array(
+			'id' 		=> '',
+			'label' 	=> '',
+			'cost' 		=> '0',
+			'taxes' 	=> array()
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+					
+		extract( $args );
+		
+		// Id and label are required
+		if (!$id || !$label) return;
+		
+		$rate = new stdClass;
+		$rate->id = $id;
+		$rate->label = $label;
+		$rate->cost = $cost;
+		$rate->taxes = $taxes;
+		
+		$this->rates[] = $rate;
+	}
 	
     function is_available() {
     	global $woocommerce;
     	
-    	if ($this->enabled=="no") return false;
+    	if ($this->enabled=="no") 
+    		return false;
     	
-		if (isset($woocommerce->cart->cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total) return false;
+		if (isset($woocommerce->cart->cart_contents_total) && isset($this->min_amount) && $this->min_amount && $this->min_amount > $woocommerce->cart->cart_contents_total) 
+			return false;
 		
 		$ship_to_countries = '';
 		

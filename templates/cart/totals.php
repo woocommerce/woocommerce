@@ -43,21 +43,21 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								
 								echo '<option value="'.esc_attr($method->id).'" ';
 								
-								echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->title.' &mdash; ';
+								echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label.' &mdash; ';
 								
-								if ($method->shipping_total>0) :
+								if ($method->cost>0) :
 									
 									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
 	
-										echo woocommerce_price($method->shipping_total);
-										if ($method->shipping_tax>0 && $woocommerce->cart->prices_include_tax) :
+										echo woocommerce_price($method->cost);
+										if (array_sum($method->taxes)>0 && $woocommerce->cart->prices_include_tax) :
 											echo ' ' . $woocommerce->countries->ex_tax_or_vat();
 										endif;
 	
 									else :
 	
-										echo woocommerce_price($method->shipping_total + $method->shipping_tax);
-										if ($method->shipping_tax>0 && !$woocommerce->cart->prices_include_tax) :
+										echo woocommerce_price($method->cost + array_sum($method->taxes));
+										if (array_sum($method->taxes)>0 && !$woocommerce->cart->prices_include_tax) :
 											echo ' ' . $woocommerce->countries->inc_tax_or_vat();
 										endif;
 	

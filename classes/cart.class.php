@@ -955,9 +955,9 @@ class woocommerce_cart {
 			
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
-			$this->shipping_tax_total 	= $woocommerce->shipping->shipping_tax;		// Shipping tax amount
+			$this->shipping_tax_total 	= array_sum( $woocommerce->shipping->shipping_taxes );	// Shipping tax amount
 			
-			// Shipping tax rows
+			// Merge Shipping tax rows with cart tax rows
 			if (is_array($woocommerce->shipping->shipping_taxes) && sizeof($woocommerce->shipping->shipping_taxes)>0) :
 				// Tax rows - merge the totals we just got
 				foreach (array_keys($this->taxes + $woocommerce->shipping->shipping_taxes) as $key) {

@@ -15,7 +15,6 @@ class woocommerce_shipping {
 	var $shipping_methods 	= array();
 	var $chosen_method		= null;
 	var $shipping_total 	= 0;
-	var $shipping_tax 		= 0;
 	var $shipping_taxes		= array();
 	var $shipping_label		= null;
 	var $shipping_classes;
@@ -51,11 +50,9 @@ class woocommerce_shipping {
 		ksort($this->shipping_methods);
 		
 		add_action('woocommerce_update_options_shipping', array(&$this, 'process_admin_options'));
-		
 	}
 	
 	function get_shipping_classes() {
-		
 		if (!is_array($this->shipping_classes)) :
 			
 			$args = array(
@@ -71,7 +68,6 @@ class woocommerce_shipping {
 	}
 
 	function get_available_shipping_methods() {
-
 		if ($this->enabled=='yes') :
 		
 			$_available_methods = array();
@@ -83,22 +79,8 @@ class woocommerce_shipping {
 					$shipping_method->calculate_shipping();
 					
 					// If available, put available methods/rates in the array
-					if ($shipping_method->multiple_rates) :
-							
-							foreach ($shipping_method->rates as $rate) :
-								
-								$method = $rate;
-								
-								$_available_methods[$method->id] = $method;
-								
-							endforeach;
-							
-					else :
-						
-						$method = $shipping_method;
-						
-						$_available_methods[$method->id] = $method;
-
+					if (is_array($shipping_method->rates) && sizeof($shipping_method->rates) > 0) :
+						foreach ($shipping_method->rates as $rate) $_available_methods[$rate->id] = $rate;
 					endif;
 					
 				endif;
@@ -112,22 +94,17 @@ class woocommerce_shipping {
 	
 	function reset_shipping_methods() {
 		foreach ( $this->shipping_methods as $shipping_method ) :
-			$shipping_method->shipping_total = 0;
-			$shipping_method->shipping_tax = 0;
-			$shipping_method->shipping_taxes = array();
 			$shipping_method->rates = array();
 		endforeach;
 	}
 	
 	function calculate_shipping() {
-		
 		if ($this->enabled=='yes') :
 		
 			$this->shipping_total = 0;
-			$this->shipping_tax = 0;
 			$this->shipping_taxes = array();
 			$this->shipping_label = null;
-			$_cheapest_fee = '';
+			$_cheapest_cost = '';
 			$_cheapest_method = '';
 			if (isset($_SESSION['_chosen_shipping_method'])) $chosen_method = $_SESSION['_chosen_shipping_method']; else $chosen_method = '';
 			$calc_cheapest = false;
@@ -141,13 +118,10 @@ class woocommerce_shipping {
 			if (sizeof($_available_methods)>0) :
 			
 				foreach ($_available_methods as $method_id => $method) :
-					
-					$fee = $method->shipping_total;
-					if ($fee < $_cheapest_fee || !is_numeric($_cheapest_fee)) :
-						$_cheapest_fee 		= $fee;
+					if ($method->cost < $_cheapest_cost || !is_numeric($_cheapest_cost)) :
+						$_cheapest_cost 	= $method->cost;
 						$_cheapest_method 	= $method_id;
 					endif;
-
 				endforeach;
 				
 				// Default to cheapest
@@ -156,24 +130,19 @@ class woocommerce_shipping {
 				endif;
 				
 				if ($chosen_method) :
-					
 					$_SESSION['_chosen_shipping_method'] = $chosen_method;
-					$this->shipping_total 	= $_available_methods[$chosen_method]->shipping_total;
-					$this->shipping_tax 	= $_available_methods[$chosen_method]->shipping_tax;
-					$this->shipping_taxes 	= $_available_methods[$chosen_method]->shipping_taxes;
-					$this->shipping_label 	= $_available_methods[$chosen_method]->title;
-					
+					$this->shipping_total 	= $_available_methods[$chosen_method]->cost;
+					$this->shipping_taxes 	= $_available_methods[$chosen_method]->taxes;
+					$this->shipping_label 	= $_available_methods[$chosen_method]->label;
 				endif;
 			endif;
 
 		endif;
-		
 	}
 	
 	function reset_shipping() {
 		unset($_SESSION['_chosen_shipping_method']);
 		$this->shipping_total = 0;
-		$this->shipping_tax = 0;
 		$this->shipping_taxes = array();
 		$this->shipping_label = null;
 	}
@@ -193,5 +162,4 @@ class woocommerce_shipping {
 		
 		update_option( 'woocommerce_shipping_method_order', $order );
 	}
-	
 }

@@ -159,9 +159,13 @@ class free_shipping extends woocommerce_shipping_method {
     } 
     
     function calculate_shipping() {
-		$this->shipping_total 	= 0;
-		$this->shipping_tax 	= 0;
-		$this->shipping_label 	= $this->title;	    	
+    	$args = array(
+    		'id' =>  $this->id,
+    		'label' => $this->title,
+    		'cost' => 0,
+    		'taxes' => array()
+    	);
+    	$this->add_rate( $args );  	
     }
     	
 }

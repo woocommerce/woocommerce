@@ -657,9 +657,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 	
 	// Upsells
-	if (isset($_POST['_upsell_ids'])) :
+	if (isset($_POST['upsell_ids'])) :
 		$upsells = array();
-		$ids = $_POST['_upsell_ids'];
+		$ids = $_POST['upsell_ids'];
 		foreach ($ids as $id) :
 			if ($id && $id>0) $upsells[] = $id;
 		endforeach;
@@ -669,9 +669,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 	
 	// Cross sells
-	if (isset($_POST['_crosssell_ids'])) :
+	if (isset($_POST['crosssell_ids'])) :
 		$crosssells = array();
-		$ids = $_POST['_crosssell_ids'];
+		$ids = $_POST['crosssell_ids'];
 		foreach ($ids as $id) :
 			if ($id && $id>0) $crosssells[] = $id;
 		endforeach;
