@@ -438,22 +438,23 @@ class woocommerce_product {
 	/** Returns whether or not the product is visible */
 	function is_visible( $single = false ) {
 	
+		$visible = true;
+			
 		// Out of stock visibility
-		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
-			if (!$this->is_in_stock()) return false;
-		endif;
+		if (get_option('woocommerce_hide_out_of_stock_items')=='yes' && !$this->is_in_stock()) $visible = false;
 		
 		// visibility setting
-		if ($this->visibility=='hidden') return false;
-		if ($this->visibility=='visible') return true;
-		
-		if ($single) return true;
+		elseif ($this->visibility=='hidden') $visible = false;
+		elseif ($this->visibility=='visible') $visible = true;
+		elseif ($single) $visible = true;
 		
 		// Visibility in loop
-		if ($this->visibility=='search' && is_search()) return true;
-		if ($this->visibility=='search' && !is_search()) return false;
-		if ($this->visibility=='catalog' && is_search()) return false;
-		if ($this->visibility=='catalog' && !is_search()) return true;
+		elseif ($this->visibility=='search' && is_search()) $visible = true;
+		elseif ($this->visibility=='search' && !is_search()) $visible = false;
+		elseif ($this->visibility=='catalog' && is_search()) $visible = false;
+		elseif ($this->visibility=='catalog' && !is_search()) $visible = true;
+		
+		return apply_filters('woocommerce_product_is_visible', $visible);
 	}
 	
 	/** Returns whether or not the product is on sale */
