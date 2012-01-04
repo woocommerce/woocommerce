@@ -546,7 +546,11 @@ function woocommerce_add_order_item() {
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
 
 		<td class="cost">
-			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( $_product->get_price_excluding_tax( false ) ); ?>" />
+			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
+		</td>
+		
+		<td class="tax">
+			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="tax_status">
@@ -580,11 +584,11 @@ function woocommerce_add_order_item() {
 			<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="" size="2" />
 		</td>
 		
-		<td class="cost">
+		<td class="line_cost">
 			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
 		</td>
 		
-		<td class="tax">
+		<td class="line_tax">
 			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
 		</td>
 		
