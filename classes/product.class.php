@@ -500,14 +500,14 @@ class woocommerce_product {
 			
 			$_tax = &new woocommerce_tax();
 			
-			$tax_rates 		= $_tax->get_rates( $this->tax_class );
-			
+			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
 			$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
-			$tax_amount		= $_tax->get_tax_total( $taxes );
 			
 			if ($round) :
+				$tax_amount		= $_tax->get_tax_total( $taxes );
 				$price = round( $price - $tax_amount, 2);
 			else :
+				$tax_amount		= array_sum( $taxes );
 				$price = $price - $tax_amount;
 			endif;
 		

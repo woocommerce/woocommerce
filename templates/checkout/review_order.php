@@ -108,7 +108,7 @@
 							
 						endforeach;
 						
-						if ($has_compound_tax) :
+						if ($has_compound_tax && !$woocommerce->cart->prices_include_tax) :
 							?>
 							<tr class="order-subtotal">
 								<th colspan="2"><strong><?php _e('Order Subtotal', 'woothemes'); ?></strong></th>

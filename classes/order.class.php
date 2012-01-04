@@ -89,7 +89,6 @@ class woocommerce_order {
 			'shipping_method_title'	=> '',
 			'payment_method'		=> '',
 			'payment_method_title' 	=> '',
-			'order_subtotal'		=> '',
 			'order_discount'		=> '',
 			'cart_discount'			=> '',
 			'order_tax'				=> '',
@@ -219,54 +218,71 @@ class woocommerce_order {
 		endif;
 	}
 	
+	/** Gets product subtotal - subtotal is shown before discounts, but with localised taxes */
+	function get_item_subtotal( $item ) {
+		$subtotal = 0;
+		
+		if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
+		
+		if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
+			if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
+			$subtotal = woocommerce_price( $item['base_cost'] * $item['qty'], array('ex_tax_label' => $ex_tax_label ));
+		else :
+			$subtotal = woocommerce_price( ($item['base_cost'] + $item['base_tax']) * $item['qty'] );
+		endif;
+		return $subtotal;
+	}
 	
-	/** Gets subtotal */
+	/** Gets subtotal - subtotal is shown before discounts, but with localised taxes */
 	function get_subtotal_to_display( $compound = false ) {
 		global $woocommerce;
 		
 		$subtotal = 0;
 		
-		foreach ($this->items as $item) :
+		if ( !$compound ) :
+
+			foreach ($this->items as $item) :
+				
+				if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
+				
+				$subtotal += $item['base_cost'] * $item['qty'];
+				
+				if (!$this->display_cart_ex_tax) :
+					$subtotal += $item['base_tax'] * $item['qty'];
+				endif;
+
+			endforeach;
+			
+			$subtotal = woocommerce_price($subtotal);
+			
+			if ($this->display_cart_ex_tax && $this->prices_include_tax) :	
+				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+			endif;
 		
-			$subtotal += $item['base_cost'] * $item['qty'];
-		
-		endforeach;
-		
-		// If showing compound taxes subtotal, add shipping + non-compound taxes
-		if ($compound && is_array($this->taxes)) :
-		
+		else :
+			
+			if ($this->prices_include_tax) return;
+			
+			foreach ($this->items as $item) :
+				
+				$subtotal += $item['base_cost'];
+			
+			endforeach;
+			
+			// Add Shipping Costs
 			$subtotal += $this->get_shipping();
 		
+			// Remove non-compound taxes
 			foreach ($this->taxes as $tax) :
 				
 				if (isset($tax['compound']) && $tax['compound']) continue;
 				
-				$subtotal += $tax['total'];
+				$subtotal = $subtotal + $tax['total'];
 			
 			endforeach;
 			
 			$subtotal = woocommerce_price($subtotal);
-		
-		// If this is the cart subtotal, and we want to display prices inc tax, add it
-		elseif (!$this->display_totals_ex_tax && $this->prices_include_tax) :
-			
-			// Add tax to subtotal
-			$subtotal += $this->order_tax;
-			
-			$subtotal = woocommerce_price($subtotal);
-			
-			if ($this->order_tax>0 && !$this->prices_include_tax) :
-				$subtotal .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
-			endif;
-			
-		else :
-		
-			$subtotal = woocommerce_price($subtotal);
-			
-			if ($this->order_tax>0 && $this->prices_include_tax) :
-				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
-			endif;
-		
+
 		endif;
 		
 		return $subtotal;
@@ -320,12 +336,13 @@ class woocommerce_order {
 
 	}
 	
-	/** Get totals for display in emails */
+	/** Get totals for display on pages and in emails */
 	function get_order_item_totals() {
 
 		$total_rows = array();
 		
-		$total_rows[ __('Cart Subtotal:', 'woothemes') ] = $this->get_subtotal_to_display();
+		if ($subtotal = $this->get_subtotal_to_display())
+			$total_rows[ __('Cart Subtotal:', 'woothemes') ] = $subtotal;
 		
 		if ($this->get_cart_discount() > 0) 
 			$total_rows[ __('Cart Discount:', 'woothemes') ] = woocommerce_price($this->get_cart_discount());
@@ -344,7 +361,9 @@ class woocommerce_order {
 				endforeach;
 				
 				if ($has_compound_tax) :
-			
+					if ($subtotal = $this->get_subtotal_to_display( true )) :
+						$total_rows[ __('Subtotal:', 'woothemes') ] = $subtotal;
+					endif;
 				endif;
 				
 				foreach ($this->taxes as $tax) : if (!$tax['compound']) continue;

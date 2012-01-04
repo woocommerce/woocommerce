@@ -17,70 +17,16 @@ $order = &new woocommerce_order( $order_id );
 		</tr>
 	</thead>
 	<tfoot>
-		<tr>
-			<th scope="row" colspan="2"><?php _e('Cart Subtotal:', 'woothemes'); ?></th>
-			<td><strong><?php echo $order->get_subtotal_to_display(); ?></strong></td>
-		</tr>
-		<?php if ($order->get_cart_discount() > 0) : ?><tr>
-			<th scope="row" colspan="2"><?php _e('Cart Discount:', 'woothemes'); ?></th>
-			<td><?php echo woocommerce_price($order->get_cart_discount()); ?></td>
-		</tr><?php endif; ?>
-		<?php if ($order->get_shipping() > 0) : ?><tr>
-			<th scope="row" colspan="2"><?php _e('Shipping:', 'woothemes'); ?></th>
-			<td><?php echo $order->get_shipping_to_display(); ?></td>
-		</tr><?php endif; ?>
-
-		<?php if ($order->get_total_tax() > 0) : ?>
-		
-			<?php if (is_array($order->taxes) && sizeof($order->taxes)>0) : $has_compound_tax = false; ?>
-			
-				<?php foreach ($order->taxes as $tax) : if (isset($tax['compound']) && $tax['compound']) : $has_compound_tax = true; continue; endif; ?>
-					<tr>
-						<th scope="row" colspan="2"><?php echo $tax['label']; ?></th>
-						<td><?php echo woocommerce_price( $tax['total'] ); ?></td>
-					</tr>
-				<?php endforeach; ?>
-				
-				<?php if ($has_compound_tax) : ?>
-					<tr>
-						<th scope="row" colspan="2"><?php _e('Subtotal:', 'woothemes'); ?></th>
-						<td><strong><?php echo $order->get_subtotal_to_display( true ); ?></strong></td>
-					</tr>
-
-					<?php foreach ($order->taxes as $tax) : if (!$tax['compound']) continue; ?>
-						<tr>
-							<th scope="row" colspan="2"><?php echo $tax['label']; ?></th>
-							<td><?php echo woocommerce_price( $tax['total'] ); ?></td>
-						</tr>
-					<?php endforeach; ?>
-				
-				<?php endif; ?>
-			
-			<?php else : ?>
-
-				<tr>
-					<th scope="row" colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
-					<td><?php echo woocommerce_price($order->get_total_tax()); ?></td>
-				</tr>
-			
-			<?php endif; ?>
-
-		<?php endif; ?>
-		
-		<?php if ($order->get_order_discount() > 0) : ?><tr>
-			<th scope="row" colspan="2"><?php _e('Order Discount:', 'woothemes'); ?></th>
-			<td><?php echo woocommerce_price($order->get_order_discount()); ?></td>
-		</tr><?php endif; ?>
-		<tr>
-			<th scope="row" colspan="2"><?php _e('Order Total:', 'woothemes'); ?></th>
-			<td><strong><?php echo woocommerce_price($order->get_order_total()); ?></strong></td>
-		</tr>
-		<?php if ($order->customer_note) : ?>
-		<tr>
-			<td><?php _e('Note:', 'woothemes'); ?></td>
-			<td colspan="2"><?php echo wpautop(wptexturize($order->customer_note)); ?></td>
-		</tr>
-		<?php endif; ?>
+	<?php 
+		if ($totals = $order->get_order_item_totals()) foreach ($totals as $label => $value) :
+			?>
+			<tr>
+				<th scope="row" colspan="2"><?php echo $label; ?></th>
+				<td><?php echo $value; ?></td>
+			</tr>
+			<?php 
+		endforeach; 
+	?>
 	</tfoot>
 	<tbody>
 		<?php
@@ -107,19 +53,8 @@ $order = &new woocommerce_order( $order_id );
 		
 				endif;	
 
-				echo '	</td>
-						<td>'.$item['qty'].'</td>
-						<td>';
+				echo '</td><td>'.$item['qty'].'</td><td>' . $order->get_item_subtotal($item) . '</td></tr>';
 				
-				if ($order->display_cart_ex_tax || !$order->prices_include_tax) :	
-					if ($order->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-					echo woocommerce_price( $order->get_row_cost( $item, false ), array('ex_tax_label' => $ex_tax_label ));
-				else :
-					echo woocommerce_price( $order->get_row_cost( $item, true ) );
-				endif;
-
-				echo '</td>
-					</tr>';
 			endforeach;
 		endif;
 		?>

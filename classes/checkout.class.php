@@ -382,27 +382,6 @@ class woocommerce_checkout {
 					foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 						
 						$_product = $values['data'];
-						
-						// Get the line tax and the line cost excluding tax
-						$line_tax 	= 0;
-						$line_cost 	= $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) * $values['quantity'];
-						
-						// Calc item tax to store if taxable
-						if ( $_product->is_taxable()) :
-						
-							$tax_rates = $_tax->get_rates( $_product->get_tax_class() );
-							
-							if ($woocommerce->cart->prices_include_tax) :
-								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, true );
-							else :
-								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, false );
-							endif;
-							
-							$line_tax = $_tax->get_tax_total( $line_taxes );
-							
-							if ($woocommerce->cart->prices_include_tax) $line_cost = $line_cost - $line_tax;
-
-						endif;
 
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
 						$item_meta = &new order_item_meta();
@@ -417,16 +396,17 @@ class woocommerce_checkout {
 						endif;
 						
 						$order_items[] = apply_filters('new_order_item', array(
-					 		'id' 			=> $values['product_id'],
-					 		'variation_id' 	=> $values['variation_id'],
-					 		'name' 			=> $_product->get_title(),
-					 		'qty' 			=> (int) $values['quantity'],
-					 		'item_meta'		=> $item_meta->meta,
-					 		'base_cost' 	=> $_product->get_price_excluding_tax(),	// Base price
-					 		'line_cost'		=> number_format($line_cost, 2, '.', ''),	// Discounted line cost
-					 		'line_tax' 		=> number_format($line_tax, 2, '.', ''), 	// Tax for the line (total)
-					 		'tax_status'	=> $_product->get_tax_status(),	// Taxble, shipping, none
-					 		'tax_class'		=> $_product->get_tax_class()	// Tax class (adjusted by filters)
+					 		'id' 				=> $values['product_id'],
+					 		'variation_id' 		=> $values['variation_id'],
+					 		'name' 				=> $_product->get_title(),
+					 		'qty' 				=> (int) $values['quantity'],
+					 		'item_meta'			=> $item_meta->meta,
+					 		'base_tax' 			=> number_format($values['base_tax'], 2, '.', ''),	// Base tax (unit, before discounts)
+					 		'base_cost' 		=> number_format($values['base_cost'], 2, '.', ''),	// Base price (unit, before discounts)
+					 		'line_cost'			=> number_format($values['line_cost'], 2, '.', ''),	// Discounted line cost
+					 		'line_tax' 			=> number_format($values['line_tax'], 2, '.', ''), 	// Tax for the line (total)
+					 		'tax_status'		=> $_product->get_tax_status(),						// Taxble, shipping, none
+					 		'tax_class'			=> $_product->get_tax_class()						// Tax class (adjusted by filters)
 					 	), $values);
 					 	
 					 	// Check cart items for errors

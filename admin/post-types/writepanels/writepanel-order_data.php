@@ -166,16 +166,18 @@ function woocommerce_order_items_meta_box($post) {
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					
 					<th class="cost"><?php _e('Unit&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit cost before discounts', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
-															
+					
+					<th class="tax"><?php _e('Unit&nbsp;Tax', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit tax before discounts', 'woothemes'); ?>." href="#">[?]</a></th>
+										
 					<th class="tax_status"><?php _e('Taxable', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Whether the item is taxable or not', 'woothemes'); ?>." href="#">[?]</a></th>
 					
 					<th class="tax_class"><?php _e('Tax&nbsp;Class', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('The items tax class for this order', 'woothemes'); ?>." href="#">[?]</a></th>
 					
 					<th class="quantity"><?php _e('Quantity', 'woothemes'); ?></th>
 					
-					<th class="cost"><?php _e('Line&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Line cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
+					<th class="line_cost"><?php _e('Line&nbsp;Cost', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Line cost after discount', 'woothemes'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
 					
-					<th class="tax"><?php _e('Line&nbsp;Tax', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Line tax after discount', 'woothemes'); ?>." href="#">[?]</a></th>
+					<th class="line_tax"><?php _e('Line&nbsp;Tax', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Line tax after discount', 'woothemes'); ?>." href="#">[?]</a></th>
 
 				</tr>
 			</thead>
@@ -189,10 +191,11 @@ function woocommerce_order_items_meta_box($post) {
 						$_product = &new woocommerce_product( $item['id'] );
 					endif;
 
-					// Totals
+					// Totals - Backwards Compatibility
 					if (!isset($item['line_cost']) && isset($item['taxrate']) && isset($item['cost'])) :
 						$item['line_tax'] = number_format(($item['cost'] * $item['qty'])*($item['taxrate']/100), 2, '.', '');
 						$item['line_cost'] = ($item['cost'] * $item['qty']);
+						$item['base_tax'] = number_format( $item['cost'] * ($item['taxrate']/100), 4, '.', '');
 					endif;
 
 					?>
@@ -253,6 +256,10 @@ function woocommerce_order_items_meta_box($post) {
 						
 						<td class="cost">
 							<input type="text" name="base_item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['base_cost'])) echo esc_attr( $item['base_cost'] ); ?>" />
+						</td>
+						
+						<td class="tax">
+							<input type="text" name="base_item_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php if (isset($item['base_tax'])) echo esc_attr( $item['base_tax'] ); ?>" />
 						</td>
 						
 						<td class="tax_status">
@@ -595,6 +602,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 $item_quantity 	= $_POST['item_quantity'];
 			 $item_line_cost 	= $_POST['line_cost'];
 			 $base_item_cost	= $_POST['base_item_cost'];
+			 $base_item_tax		= $_POST['base_item_tax'];
 			 $item_line_tax 	= $_POST['line_tax'];
 			 $item_meta_names 	= (isset($_POST['meta_name'])) ? $_POST['meta_name'] : '';
 			 $item_meta_values 	= (isset($_POST['meta_value'])) ? $_POST['meta_value'] : '';
@@ -633,6 +641,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'qty' 			=> (int) $item_quantity[$i],
 			 		'line_cost' 	=> rtrim(rtrim(number_format(woocommerce_clean($item_line_cost[$i]), 4, '.', ''), '0'), '.'),
 			 		'base_cost'		=> rtrim(rtrim(number_format(woocommerce_clean($base_item_cost[$i]), 4, '.', ''), '0'), '.'),
+			 		'base_tax'		=> rtrim(rtrim(number_format(woocommerce_clean($base_item_tax[$i]), 4, '.', ''), '0'), '.'),
 			 		'line_tax' 		=> rtrim(rtrim(number_format(woocommerce_clean($item_line_tax[$i]), 4, '.', ''), '0'), '.'),
 			 		'item_meta'		=> $item_meta->meta,
 			 		'tax_status'	=> woocommerce_clean($item_tax_status[$i]),

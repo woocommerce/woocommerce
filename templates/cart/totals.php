@@ -107,7 +107,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								
 							endforeach;
 							
-							if ($has_compound_tax) :
+							if ($has_compound_tax && !$woocommerce->cart->prices_include_tax) :
 								?>
 								<tr class="order-subtotal">
 									<th><strong><?php _e('Subtotal', 'woothemes'); ?></strong></th>
