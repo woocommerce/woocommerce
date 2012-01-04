@@ -116,10 +116,7 @@ class flat_rate extends woocommerce_shipping_method {
     function calculate_shipping() {
     	global $woocommerce;
     	
-    	$_tax = &new woocommerce_tax();
-    	
     	$this->rates 	= array();
-    	$shipping_taxes = array();
     	$shipping_total = 0;
     	
     	if ($this->type=='order') :
@@ -169,16 +166,10 @@ class flat_rate extends woocommerce_shipping_method {
 			// Shipping for whole order
 			$shipping_total = $cost + $this->get_fee( $fee, $woocommerce->cart->cart_contents_total );
 			
-			if ( get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
-				$rates = $_tax->get_shipping_tax_rates();
-				$shipping_taxes = $_tax->calc_shipping_tax( $shipping_total, $rates );
-			endif;
-			
 			$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total,
-				'taxes' => $shipping_taxes
+				'cost' 	=> $shipping_total
 			);
 			
 		elseif ($this->type=='class') :
@@ -221,17 +212,11 @@ class flat_rate extends woocommerce_shipping_method {
  			
  			// Total
  			$shipping_total = $cost + $fee;
-
-			if ( get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
-				$rates = $_tax->get_shipping_tax_rates();
-				$shipping_taxes = $_tax->calc_shipping_tax( $shipping_total, $rates );
-			endif;
 			
 			$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total,
-				'taxes' => $shipping_taxes
+				'cost' 	=> $shipping_total
 			);
 
 		elseif ($this->type=='item') :
@@ -253,31 +238,16 @@ class flat_rate extends woocommerce_shipping_method {
 						$fee	= $this->get_fee( $this->fee, $_product->get_price() );
 					endif;
 					
-					$item_shipping_price = ( $cost + $fee ) * $values['quantity'];
-					
-					$shipping_total = $shipping_total + $item_shipping_price;
-						
-					if ( $_product->is_shipping_taxable() && $this->tax_status=='taxable' ) :
-					
-						$rates = $_tax->get_shipping_tax_rates( $_product->get_tax_class() );
-						
-						$item_taxes = $_tax->calc_shipping_tax( $item_shipping_price, $rates );
-						
-						// Sum the item taxes
-						foreach (array_keys($shipping_taxes + $item_taxes) as $key) {
-						    $shipping_taxes[$key] = (isset($item_taxes[$key]) ? $item_taxes[$key] : 0) + (isset($shipping_taxes[$key]) ? $shipping_taxes[$key] : 0);
-						}
-					
-					endif;
+					$shipping_total = $shipping_total + (( $cost + $fee ) * $values['quantity']);
 					
 				endif;
 			endforeach; endif;
 			
 			$rate = array(
-				'id' 	=> $this->id,
-				'label' => $this->title,
-				'cost' 	=> $shipping_total,
-				'taxes' => $shipping_taxes
+				'id' 		=> $this->id,
+				'label' 	=> $this->title,
+				'cost' 		=> $shipping_total,
+				'calc_tax' 	=> 'per_item'
 			);
 			
 		endif;	

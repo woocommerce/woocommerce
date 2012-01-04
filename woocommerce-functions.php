@@ -852,8 +852,8 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 			'<?php echo $order_id; ?>',           		// order ID - required
 			'<?php bloginfo('name'); ?>',  				// affiliation or store name
 			'<?php echo $order->order_total; ?>',   	// total - required
-			'<?php echo $order->order_tax; ?>',     	// tax
-			'<?php echo $order->order_shipping; ?>',	// shipping
+			'<?php echo $order->get_total_tax(); ?>',   // tax
+			'<?php echo $order->get_shipping(); ?>',	// shipping
 			'<?php echo $order->billing_city; ?>',      // city
 			'<?php echo $order->billing_state; ?>',     // state or province
 			'<?php echo $order->billing_country; ?>'    // country
@@ -866,7 +866,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 				'<?php echo $_product->sku; ?>',      	// SKU/code - required
 				'<?php echo $item['name']; ?>',        	// product name
 				'<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>',   // category or variation
-				'<?php echo $item['cost']; ?>',         // unit price - required
+				'<?php echo ($item['line_cost']/$item['qty']); ?>',         // unit price - required
 				'<?php echo $item['qty']; ?>'           // quantity - required
 			]);
 		<?php endforeach; ?>
@@ -911,7 +911,7 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 				"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
 				"<?php echo $item['name']; ?>",		// (optional) Product name
 				"<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
-				<?php echo $item['cost']; ?>,		// (recommended) Product price
+				<?php echo ($item['line_cost']/$item['qty']); ?>,		// (recommended) Product price
 				<?php echo $item['qty']; ?> 		// (optional, default to 1) Product quantity
 			);
 		<?php endforeach; ?>
@@ -920,8 +920,8 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 			"<?php echo $order_id; ?>",		// (required) Unique Order ID
 			<?php echo $order->order_total; ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
 			false,					// (optional) Order sub total (excludes shipping)
-			<?php echo $order->order_tax; ?>,	// (optional) Tax amount
-			<?php echo $order->order_shipping; ?>,	// (optional) Shipping amount
+			<?php echo $order->get_total_tax(); ?>,	// (optional) Tax amount
+			<?php echo $order->get_shipping(); ?>,	// (optional) Shipping amount
 			false 					// (optional) Discount offered (set to false for unspecified parameter)
 		);
 	} catch( err ) {}

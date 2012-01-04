@@ -14,6 +14,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 	var $id;
 	var $method_title; 	// Method title
 	var $title;			// User set title
+	var $tax_status;
 	var $availability;
 	var $countries;
 	var $type;
@@ -28,12 +29,20 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 	 */
 	var $rates 				= array(); // This is an array of rates - methods must populate this array to register shipping costs
 	
+	/**
+	 * Add a rate
+	 *
+	 * A a shipping rate. If taxes are not set they will be calculated based on cost.
+	 */
 	function add_rate( $args = array() ) {
+		global $woocommerce;
+		
 		$defaults = array(
 			'id' 		=> '',
 			'label' 	=> '',
 			'cost' 		=> '0',
-			'taxes' 	=> array()
+			'taxes' 	=> '',
+			'calc_tax'	=> 'per_order'
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -43,13 +52,47 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 		// Id and label are required
 		if (!$id || !$label) return;
 		
-		$rate = new stdClass;
-		$rate->id = $id;
-		$rate->label = $label;
-		$rate->cost = $cost;
-		$rate->taxes = $taxes;
-		
-		$this->rates[] = $rate;
+		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
+		// This saves shipping methods having to do compelex tax calculations
+		if (!is_array($taxes) && $taxes!==false && $cost>0 && get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
+			
+			$_tax 	= &new woocommerce_tax();
+			$taxes 	= array();
+			
+			switch ($calc_tax) :
+				
+				case "per_item" :
+					if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+						
+						$_product = $values['data'];
+						
+						if ($values['quantity']>0 && $_product->needs_shipping() && $_product->is_shipping_taxable()) :
+							
+							$rates = $_tax->get_shipping_tax_rates( $_product->get_tax_class() );	
+							$item_taxes = $_tax->calc_shipping_tax( $cost, $rates );
+								
+							// Sum the item taxes
+							foreach (array_keys($taxes + $item_taxes) as $key) :
+								$taxes[$key] = (isset($item_taxes[$key]) ? $item_taxes[$key] : 0) + (isset($taxes[$key]) ? $taxes[$key] : 0);
+							endforeach;
+							
+						endif;
+					endforeach; endif;
+				break;
+				
+				case "per_order" :
+				default :
+					
+					$rates = $_tax->get_shipping_tax_rates();
+					$taxes = $_tax->calc_shipping_tax( $cost, $rates );
+					
+				break;
+				
+			endswitch;
+			
+		endif;
+
+		$this->rates[] = new woocommerce_shipping_rate( $id, $label, $cost, $taxes );
 	}
 	
     function is_available() {
@@ -84,6 +127,33 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 		else :
 			return $fee;
 		endif;
+	}	
+}
+
+/**
+ * WooCommerce Shipping Rate Class
+ * 
+ * Simple Class for storing rates. 
+ */ 
+class woocommerce_shipping_rate {
+
+	var $id 	= '';
+	var $label 	= '';
+	var $cost 	= 0;
+	var $taxes 	= array();
+	
+	function woocommerce_shipping_rate( $id, $label, $cost, $taxes ) {
+		$this->id 		= $id;
+		$this->label 	= $label;
+		$this->cost 	= $cost;
+		$this->taxes 	= ($taxes) ? $taxes : array();
 	}
-    	
+	
+	function get_shipping_tax() {
+		$taxes = 0;
+		if ($this->taxes && sizeof($this->taxes)>0) :
+			$taxes = array_sum($this->taxes);
+		endif;
+		return $taxes;
+	}
 }

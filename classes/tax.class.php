@@ -285,42 +285,54 @@ class woocommerce_tax {
 		else :
 			
 			// This will be per order shipping - loop through the order and find the highest tax class rate
-			$found_rates = array();
-			$found_shipping_rates = array();
+			$found_tax_classes = array();
+			$matched_tax_rates = array();
+			$rates = false;
 			
 			// Loop cart and find the highest tax band
 			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item) :
 				
-				if ($item['data']->get_tax_class()) :
-					
-					$found_rate = $this->find_rates( $country, $state, $item['data']->get_tax_class() );
-					
-					$found_rates[] = $found_rate['rate'];
-					
-					if (isset($found_rate['shipping']) && $found_rate['shipping']=='yes') $found_shipping_rates[] = $found_rate['rate'];
-					
-				endif;
+				$found_tax_classes[] = $item['data']->get_tax_class();
 				
 			endforeach; endif;
 			
-			if (sizeof($found_rates) > 0 && sizeof($found_shipping_rates) > 0) :
+			$found_tax_classes = array_unique( $found_tax_classes );
+			
+			// If multiple classes are found, use highest
+			if (sizeof($found_tax_classes)>1) :
 				
-				rsort($found_rates);
-				rsort($found_shipping_rates);
-				
-				if ($found_rates[0] == $found_shipping_rates[0]) :
-					return $found_shipping_rates[0];
+				if (in_array('', $found_tax_classes)) :
+					$rates = $this->find_rates( $country, $state, $postcode );
 				else :
-					// Use standard rate
-					$rate = $this->find_rates( $country, $state );
-					if (isset($rate['shipping']) && $rate['shipping']=='yes') return $rate['rate'];
+					$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+					
+					foreach ($tax_classes as $tax_class) :
+						if (in_array( $tax_class, $found_tax_classes )) :
+							$rates = $this->find_rates( $country, $state, $postcode, $tax_class );
+							break;
+						endif;
+					endforeach;
 				endif;
-				
-			else :
-				// Use standard rate
-				$rate = $this->find_rates( $country, $state );	
-				if (isset($rate['shipping']) && $rate['shipping']=='yes') return $rate['rate'];
+
+			// If a single tax class is found, use it
+			elseif (sizeof($found_tax_classes)==1) :
+			
+				$rates = $this->find_rates( $country, $state, $postcode, $found_tax_classes[0] );
+			
 			endif;
+			
+			// If no classes are found, use standard rates
+			if (!$rates) :
+				$rates = $this->find_rates( $country, $state, $postcode );	
+			endif;
+			
+			if ($rates) foreach ($rates as $key => $rate) :
+				if (isset($rate['shipping']) && $rate['shipping']=='yes') :
+					$matched_tax_rates[$key] = $rate;
+				endif;
+			endforeach;
+			
+			return $matched_tax_rates;
 			
 		endif;
 
@@ -471,7 +483,7 @@ class woocommerce_tax {
 			if (!isset($taxes[$key])) $taxes[$key] = $tax_amount; else $taxes[$key] += $tax_amount;
 
 		endforeach;
-		
+
 		return $taxes;
 	}
 	
@@ -496,5 +508,32 @@ class woocommerce_tax {
 		if (isset($this->rates[$key]) && $this->rates[$key]['label']) return $this->rates[$key]['label'];
 		return '';
 	}
-		
+	
+	/**
+	 * Round tax lines and return the sum to 2 dp
+	 *
+	 * @param   array
+	 * @return  float		
+	 */
+	function get_tax_total( $taxes ) {
+		return array_sum(array_map(array(&$this, 'round'), $taxes));
+	}
+	
+	/**
+	 * Round tax lines
+	 *
+	 * @param   array
+	 * @return  float		
+	 */
+	function get_taxes_rounded( $taxes ) {
+		return array_map(array(&$this, 'round'), $taxes);
+	}
+	
+	/** 
+	 * Round to 2 DP
+	 */
+	function round( $in ) {
+		return round($in, 2);
+	}
+	
 }

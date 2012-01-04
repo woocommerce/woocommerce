@@ -50,14 +50,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
 	
 										echo woocommerce_price($method->cost);
-										if (array_sum($method->taxes)>0 && $woocommerce->cart->prices_include_tax) :
+										if ( $method->get_shipping_tax()>0 && $woocommerce->cart->prices_include_tax ) :
 											echo ' ' . $woocommerce->countries->ex_tax_or_vat();
 										endif;
 	
 									else :
 	
-										echo woocommerce_price($method->cost + array_sum($method->taxes));
-										if (array_sum($method->taxes)>0 && !$woocommerce->cart->prices_include_tax) :
+										echo woocommerce_price($method->cost + $method->get_shipping_tax());
+										if ( $method->get_shipping_tax()>0 && !$woocommerce->cart->prices_include_tax ) :
 											echo ' ' . $woocommerce->countries->inc_tax_or_vat();
 										endif;
 	
@@ -91,7 +91,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				<?php 
 					if ($woocommerce->cart->get_cart_tax()) :
-	
+						
 						if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
 						
 							$has_compound_tax = false;

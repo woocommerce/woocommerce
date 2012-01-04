@@ -721,7 +721,7 @@ class woocommerce_cart {
 						endif;
 						
 						$taxes 					= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true );
-						$tax_amount				= array_sum(array_map(array(&$this, 'round'), $taxes));
+						$tax_amount				= $this->tax->get_tax_total($taxes);
 						
 					endif;
 	
@@ -736,7 +736,7 @@ class woocommerce_cart {
 					
 						$tax_rates			 	= $this->tax->get_rates( $_product->get_tax_class() );
 						$taxes 					= $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, false );
-						$tax_amount				= array_sum(array_map(array(&$this, 'round'), $taxes));
+						$tax_amount				= $this->tax->get_tax_total($taxes);
 						
 					endif;
 					
@@ -801,7 +801,7 @@ class woocommerce_cart {
 							$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
 							
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= array_sum(array_map(array(&$this, 'round'), $discounted_taxes)); // Sum taxes - round also to prevent rounding errors
+							$discounted_tax_amount	= $this->tax->get_tax_total($discounted_taxes); // Sum taxes - round also to prevent rounding errors
 							
 						/**
 						 * Regular tax calculation (customer inside base and the tax class is unmodified
@@ -810,7 +810,7 @@ class woocommerce_cart {
 							
 							$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= array_sum(array_map(array(&$this, 'round'), $discounted_taxes)); // Sum taxes - round also to prevent rounding errors
+							$discounted_tax_amount	= $this->tax->get_tax_total($discounted_taxes); // Sum taxes - round also to prevent rounding errors
 							
 						endif;
 						
@@ -887,7 +887,7 @@ class woocommerce_cart {
 			
 			// Set tax total to sum of all tax rows
 			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes' ) :	
-				$this->tax_total	= array_sum(array_map(array(&$this, 'round'), $this->taxes));
+				$this->tax_total	= $this->tax->get_tax_total( $this->taxes );
 			else :
 				$this->tax_total	= array_sum( $this->taxes );
 			endif;
@@ -902,7 +902,7 @@ class woocommerce_cart {
 			$this->calculate_shipping(); 
 						
 			// Taxes Rounding - taxes now include shipping taxes
-			$this->taxes		= array_map(array(&$this, 'round'), $this->taxes);
+			$this->taxes		= $this->tax->get_taxes_rounded( $this->taxes );
 			
 			// VAT exemption done at this point - so all totals are correct before exemption
 			if ($woocommerce->customer->is_vat_exempt()) :
@@ -928,13 +928,6 @@ class woocommerce_cart {
 		 */
 		function needs_payment() {
 			if ( $this->total > 0 ) return true; else return false;
-		}
-		
-		/** 
-		 * Round to 2 DP
-		 */
-		function round( $in ) {
-			return round($in, 2);
 		}
 	
     /*-----------------------------------------------------------------------------------*/
@@ -1299,7 +1292,6 @@ class woocommerce_cart {
 			return false;
 		}
 		
-		
 		/**
 		 * gets the total discount amount - both kinds
 		 */
@@ -1309,5 +1301,4 @@ class woocommerce_cart {
 			endif;
 			return false;
 		}	
-	
 }

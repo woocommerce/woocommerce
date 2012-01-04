@@ -332,7 +332,9 @@ class woocommerce_checkout {
 					if ($this->creating_account && !$user_id) :
 				
 						$reg_errors = new WP_Error();
+						
 						do_action('register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors);
+						
 						$errors = apply_filters( 'registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
 				
 		                // if there are no errors, let's create the user account
@@ -367,11 +369,11 @@ class woocommerce_checkout {
 					$_tax = new woocommerce_tax();
 					
 					$order_data = array(
-						'post_type' => 'shop_order',
-						'post_title' => 'Order &ndash; '.date('F j, Y @ h:i A'),
-						'post_status' => 'publish',
-						'post_excerpt' => $this->posted['order_comments'],
-						'post_author' => 1
+						'post_type' 	=> 'shop_order',
+						'post_title' 	=> 'Order &ndash; '.date('F j, Y @ h:i A'),
+						'post_status' 	=> 'publish',
+						'post_excerpt' 	=> $this->posted['order_comments'],
+						'post_author' 	=> 1
 					);
 
 					// Cart items
@@ -382,7 +384,8 @@ class woocommerce_checkout {
 						$_product = $values['data'];
 						
 						// Get the line tax and the line cost excluding tax
-						$line_cost = $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) * $values['quantity'];
+						$line_tax 	= 0;
+						$line_cost 	= $woocommerce->cart->get_discounted_price( $values, $_product->get_price() ) * $values['quantity'];
 						
 						// Calc item tax to store if taxable
 						if ( $_product->is_taxable()) :
@@ -395,18 +398,12 @@ class woocommerce_checkout {
 								$line_taxes = $woocommerce->cart->tax->calc_tax( $line_cost, $tax_rates, false );
 							endif;
 							
-							$line_tax = array_sum( $line_taxes );
+							$line_tax = $_tax->get_tax_total( $line_taxes );
 							
-						else :
-							$line_tax = 0;
+							if ($woocommerce->cart->prices_include_tax) $line_cost = $line_cost - $line_tax;
+
 						endif;
-						
-						if ($woocommerce->cart->prices_include_tax) :
-							
-							$line_cost = $line_cost - $line_tax;
-							
-						endif;
-						
+
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
 						$item_meta = &new order_item_meta();
 						
@@ -426,14 +423,14 @@ class woocommerce_checkout {
 					 		'qty' 			=> (int) $values['quantity'],
 					 		'item_meta'		=> $item_meta->meta,
 					 		'base_cost' 	=> $_product->get_price_excluding_tax(),	// Base price
-					 		'line_cost'		=> $line_cost,					// Discounted line cost
-					 		'line_tax' 		=> $line_tax, 					// Tax for the line (total)
+					 		'line_cost'		=> number_format($line_cost, 2, '.', ''),	// Discounted line cost
+					 		'line_tax' 		=> number_format($line_tax, 2, '.', ''), 	// Tax for the line (total)
 					 		'tax_status'	=> $_product->get_tax_status(),	// Taxble, shipping, none
 					 		'tax_class'		=> $_product->get_tax_class()	// Tax class (adjusted by filters)
 					 	), $values);
 					 	
 					 	// Check cart items for errors
-					 	do_action('woocommerce_check_cart_items');
+					 	do_action('woocommerce_check_cart_items', $order_items);
 					 	
 					endforeach;
 					
@@ -477,7 +474,7 @@ class woocommerce_checkout {
 					// Get better formatted billing method (title)
 					$shipping_method = $this->posted['shipping_method'];
 					if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
-						$shipping_method = $available_methods[$this->posted['shipping_method']]->title;
+						$shipping_method = $available_methods[$this->posted['shipping_method']]->label;
 					endif;
 					
 					// Get better formatted shipping method (title/label)
@@ -549,7 +546,6 @@ class woocommerce_checkout {
 					update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 					update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
 					update_post_meta( $order_id, '_payment_method_title', 	$payment_method);
-					update_post_meta( $order_id, '_order_subtotal', 		number_format($woocommerce->cart->subtotal_ex_tax, 2, '.', ''));
 					update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
 					update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
 					update_post_meta( $order_id, '_cart_discount', 			number_format($woocommerce->cart->get_cart_discount_total(), 2, '.', ''));
@@ -638,6 +634,8 @@ class woocommerce_checkout {
 	
 	/** Gets the value either from the posted data, or from the users meta data */
 	function get_value( $input ) {
+		global $woocommerce;
+		
 		if (isset( $this->posted[$input] ) && !empty($this->posted[$input])) :
 			return $this->posted[$input];
 		elseif (is_user_logged_in()) :
@@ -649,9 +647,7 @@ class woocommerce_checkout {
 			endif;
 			
 		else :
-			
-			global $woocommerce;
-			
+
 			if ($input == "billing_country") :
 				return $woocommerce->countries->get_base_country();
 			endif;

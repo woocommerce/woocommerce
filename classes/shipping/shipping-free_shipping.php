@@ -160,10 +160,10 @@ class free_shipping extends woocommerce_shipping_method {
     
     function calculate_shipping() {
     	$args = array(
-    		'id' =>  $this->id,
+    		'id' 	=>  $this->id,
     		'label' => $this->title,
-    		'cost' => 0,
-    		'taxes' => array()
+    		'cost' 	=> 0,
+    		'taxes' => false
     	);
     	$this->add_rate( $args );  	
     }

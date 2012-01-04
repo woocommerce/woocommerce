@@ -454,7 +454,7 @@ class woocommerce_product {
 		elseif ($this->visibility=='catalog' && is_search()) $visible = false;
 		elseif ($this->visibility=='catalog' && !is_search()) $visible = true;
 		
-		return apply_filters('woocommerce_product_is_visible', $visible);
+		return apply_filters('woocommerce_product_is_visible', $visible, $this->id);
 	}
 	
 	/** Returns whether or not the product is on sale */
@@ -503,7 +503,7 @@ class woocommerce_product {
 			$tax_rates 		= $_tax->get_rates( $this->tax_class );
 			
 			$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
-			$tax_amount		= round( array_sum($taxes), 4);
+			$tax_amount		= $_tax->get_tax_total( $taxes );
 			
 			if ($round) :
 				$price = round( $price - $tax_amount, 2);

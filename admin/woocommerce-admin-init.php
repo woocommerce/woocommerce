@@ -136,6 +136,7 @@ function woocommerce_admin_scripts() {
 			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
 			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woothemes'),
 			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woothemes'),
+			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
 			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
 			'meta_name'						=> __('Meta Name', 'woothemes'),

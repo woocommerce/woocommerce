@@ -445,24 +445,24 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 			
 			<li class="left">
-				<label><?php _e('Shipping tax:', 'woothemes'); ?></label>
-				<input type="text" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php 
-				if (isset($data['_order_shipping_tax'][0])) echo $data['_order_shipping_tax'][0];
-				?>" class="calculated" />
-			</li>
-			
-			<li class="right">
-				<label><?php _e('Tax:', 'woothemes'); ?></label>
+				<label><?php _e('Cart Tax:', 'woothemes'); ?></label>
 				<input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php 
 				if (isset($data['_order_tax'][0])) echo $data['_order_tax'][0];
 				?>" class="calculated" />
 			</li>
-				
+			
+			<li class="right">
+				<label><?php _e('Shipping Tax:', 'woothemes'); ?></label>
+				<input type="text" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php 
+				if (isset($data['_order_shipping_tax'][0])) echo $data['_order_shipping_tax'][0];
+				?>" />
+			</li>
+	
 		</ul>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e('Tax rows', 'woothemes'); ?> <a class="tips" tip="<?php _e('If set, these tax rows will show in order tables instead of a single tax total - useful for displaying multiple or compound taxes.', 'woothemes'); ?>" href="#">[?]</a></h4>
+		<h4><?php _e('Tax Rows', 'woothemes'); ?> <a class="tips" tip="<?php _e('These rows contain taxes for this order. This allows you to add multiple or compound taxes. Leave the rate blank to remove a tax row.', 'woothemes'); ?>" href="#">[?]</a></h4>
 		<ul class="totals tax_rows">
 			<?php 
 				$taxes = maybe_unserialize($data['_order_taxes'][0]);
@@ -553,10 +553,10 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_order_shipping', stripslashes( $_POST['_order_shipping'] ));
 		update_post_meta( $post_id, '_cart_discount', stripslashes( $_POST['_cart_discount'] ));
 		update_post_meta( $post_id, '_order_discount', stripslashes( $_POST['_order_discount'] ));
-		update_post_meta( $post_id, '_order_tax', stripslashes( $_POST['_order_tax'] ));
-		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
 		update_post_meta( $post_id, '_order_total', stripslashes( $_POST['_order_total'] ));
 		update_post_meta( $post_id, '_customer_user', (int) $_POST['customer_user'] );
+		update_post_meta( $post_id, '_order_tax', stripslashes( $_POST['_order_tax'] ));
+		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
 	
 	// Tax rows
 		$order_taxes = array();
