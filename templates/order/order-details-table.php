@@ -37,6 +37,7 @@ $order = &new woocommerce_order( $order_id );
 			<th scope="row" colspan="2"><?php _e('Order Discount:', 'woothemes'); ?></th>
 			<td><?php echo woocommerce_price($order->get_order_discount()); ?></td>
 		</tr><?php endif; ?>
+		<?php do_action( 'woocommerce_before_order_total' ); ?>
 		<tr>
 			<th scope="row" colspan="2"><?php _e('Order Total:', 'woothemes'); ?></th>
 			<td><?php echo woocommerce_price($order->get_order_total()); ?></td>
