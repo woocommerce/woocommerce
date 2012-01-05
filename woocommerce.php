@@ -770,13 +770,6 @@ class woocommerce {
 			$css = file_exists(get_stylesheet_directory() . '/woocommerce/style.css') ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
 			wp_register_style('woocommerce_frontend_styles', $css );
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
-            
-            // Check if rtl exists and is rtl.
-            if (file_exists($this->plugin_path() . '/assets/css/woocommerce-rtl.css') && is_rtl())
-            {
-                wp_enqueue_style('woocommerce_frontend_styles_rtl', $this->plugin_url() . '/assets/css/woocommerce-rtl.css', array('woocommerce_frontend_styles'));
-            }
-            
 		endif;
     
     	if ($lightbox_en) wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
