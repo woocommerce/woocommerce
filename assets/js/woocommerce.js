@@ -547,6 +547,10 @@ jQuery(document).ready(function($) {
 			clearTimeout(updateTimer);
 			update_checkout();
 		});
+		$('#order_review input[name=payment_method]').live( 'change', function(){
+			clearTimeout(updateTimer);
+			update_checkout();
+		});
 		$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 			clearTimeout(updateTimer);
 			updateTimer = setTimeout("update_checkout()", '1000');
