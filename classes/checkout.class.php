@@ -334,19 +334,20 @@ class woocommerce_checkout {
 				
 						$reg_errors = new WP_Error();
 						
-						do_action('register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors);
+						do_action('woocommerce_register_post', $this->posted['account_username'], $this->posted['billing_email'], $reg_errors);
 						
-						$errors = apply_filters( 'registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
+						$errors = apply_filters( 'woocommerce_registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
 				
 		                // if there are no errors, let's create the user account
 						if ( !$reg_errors->get_error_code() ) :
 		
 			                $user_pass = $this->posted['account_password'];
 			                $user_id = wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
-			                if ( !$user_id ) {
+			               
+			               if ( !$user_id ) :
 			                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you... please contact us if you continue to have problems.', 'woocommerce') );
 			                    break;
-			                }
+			                endif;
 		
 		                    // Change role
 		                    wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
