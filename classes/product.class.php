@@ -710,7 +710,7 @@ class woocommerce_product {
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
 		
 		// Get the posts
-		$related_posts = get_posts(array(
+		$related_posts = get_posts(apply_filters('woocommerce_product_related_posts', array(
 			'orderby' 		=> 'rand',
 			'posts_per_page'=> $limit,
 			'post_type' 	=> 'product',
@@ -729,7 +729,7 @@ class woocommerce_product {
 					'terms' 	=> $tags_array
 				)
 			)
-		));
+		)));
 		
 		$related_posts = array_diff( $related_posts, array($this->id) );
 		
