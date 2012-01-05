@@ -673,26 +673,23 @@ function woocommerce_download_product() {
 			
 			// Download the file
 			$file_extension = strtolower(substr(strrchr($file_path,"."),1));
-
-            switch ($file_extension) :
-                case "pdf": $ctype="application/pdf"; break;
-                case "exe": $ctype="application/octet-stream"; break;
-                case "zip": $ctype="application/zip"; break;
-                case "doc": $ctype="application/msword"; break;
-                case "xls": $ctype="application/vnd.ms-excel"; break;
-                case "ppt": $ctype="application/vnd.ms-powerpoint"; break;
-                case "gif": $ctype="image/gif"; break;
-                case "png": $ctype="image/png"; break;
-                case "jpe": 
-                case "jpeg": 
-                case "jpg": $ctype="image/jpg"; break;
-                case "mp3":	$ctype="audio/mpeg"; break;
-                default: $ctype="application/force-download";
-            endswitch;
+			
+			$ctype = "application/force-download";
+			
+			foreach (get_allowed_mime_types() as $mime => $type) :
+				$mimes = explode('|', $mime);
+				if (in_array($file_extension, $mimes)) :
+					$ctype = $type;
+					break;
+				endif;
+			endforeach;
             
 			if ($file_download_method=='xsendfile') :
              	
-             	$file_path = trim(str_replace(getcwd(), '', $file_path), '/'); // Path fix - kudos to Jason Judge
+             	if (getcwd()) :
+             		// Path fix - kudos to Jason Judge
+             		$file_path = trim(preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/');
+             	endif;
              	
 	            header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
 	            
