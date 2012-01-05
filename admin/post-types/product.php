@@ -291,15 +291,15 @@ function woocommerce_custom_product_columns($column) {
 			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr><br />';
 			
 			if ( 'publish' == $post->post_status ) :
-				_e( 'Published' );
+				_e( 'Published', 'woothemes' );
 			elseif ( 'future' == $post->post_status ) :
 				if ( $time_diff > 0 ) :
 					echo '<strong class="attention">' . __( 'Missed schedule', 'woothemes' ) . '</strong>';
 				else :
-					_e( 'Scheduled' );
+					_e( 'Scheduled', 'woothemes' );
 				endif;
 			else :
-				_e( 'Last Modified' );
+				_e( 'Last Modified', 'woothemes' );
 			endif;
 
 			if ( $this_data = $product->visibility ) :
