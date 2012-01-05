@@ -299,6 +299,7 @@ class woocommerce {
 		if ($post->post_type!=='product') return;
 		unset($GLOBALS['product']);
 		$GLOBALS['product'] = new woocommerce_product( $post->ID );
+		return $GLOBALS['product'];
 	}
 	
 	/**

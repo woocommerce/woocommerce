@@ -29,39 +29,39 @@ class woocommerce_coupon {
 		$this->code = $code;
 		
 		$coupon_data = apply_filters('woocommerce_get_shop_coupon_data', false, $code);
-		
-                if ($coupon_data) :
-                    $this->id = $coupon_data['id'];
-                    $this->type = $coupon_data['type'];
-                    $this->amount = $coupon_data['amount'];
-                    $this->individual_use = $coupon_data['individual_use'];
-                    $this->product_ids = $coupon_data['product_ids'];
-                    $this->exclude_product_ids = $coupon_data['exclude_product_ids'];
-                    $this->usage_limit = $coupon_data['usage_limit'];
-                    $this->usage_count = $coupon_data['usage_count'];
-                    $this->expiry_date = $coupon_data['expiry_date'];
-                    $this->apply_before_tax = $coupon_data['apply_before_tax'];
-                    $this->free_shipping = $coupon_data['free_shipping'];
-                    return true;
-                else:
-                    $coupon = get_page_by_title($this->code, 'OBJECT', 'shop_coupon');
-                    if ($coupon && $coupon->post_status == 'publish') :
-                        $this->id = $coupon->ID;
-                        $this->type = get_post_meta($coupon->ID, 'discount_type', true);
-                        $this->amount = get_post_meta($coupon->ID, 'coupon_amount', true);
-                        $this->individual_use = get_post_meta($coupon->ID, 'individual_use', true);
-                        $this->product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
-                        $this->exclude_product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'exclude_product_ids', true))));
-                        $this->usage_limit = get_post_meta($coupon->ID, 'usage_limit', true);
-                        $this->usage_count = (int) get_post_meta($coupon->ID, 'usage_count', true);
-                        $this->expiry_date = ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
-                        $this->apply_before_tax = get_post_meta($coupon->ID, 'apply_before_tax', true);
-                        $this->free_shipping = get_post_meta($coupon->ID, 'free_shipping', true);
-                        return true;
-                    endif;
-                endif;
 
-                return false;
+        if ($coupon_data) :
+            $this->id = $coupon_data['id'];
+            $this->type = $coupon_data['type'];
+            $this->amount = $coupon_data['amount'];
+            $this->individual_use = $coupon_data['individual_use'];
+            $this->product_ids = $coupon_data['product_ids'];
+            $this->exclude_product_ids = $coupon_data['exclude_product_ids'];
+            $this->usage_limit = $coupon_data['usage_limit'];
+            $this->usage_count = $coupon_data['usage_count'];
+            $this->expiry_date = $coupon_data['expiry_date'];
+            $this->apply_before_tax = $coupon_data['apply_before_tax'];
+            $this->free_shipping = $coupon_data['free_shipping'];
+            return true;
+        else:
+            $coupon = get_page_by_title($this->code, 'OBJECT', 'shop_coupon');
+            if ($coupon && $coupon->post_status == 'publish') :
+                $this->id = $coupon->ID;
+                $this->type = get_post_meta($coupon->ID, 'discount_type', true);
+                $this->amount = get_post_meta($coupon->ID, 'coupon_amount', true);
+                $this->individual_use = get_post_meta($coupon->ID, 'individual_use', true);
+                $this->product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
+                $this->exclude_product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'exclude_product_ids', true))));
+                $this->usage_limit = get_post_meta($coupon->ID, 'usage_limit', true);
+                $this->usage_count = (int) get_post_meta($coupon->ID, 'usage_count', true);
+                $this->expiry_date = ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
+                $this->apply_before_tax = get_post_meta($coupon->ID, 'apply_before_tax', true);
+                $this->free_shipping = get_post_meta($coupon->ID, 'free_shipping', true);
+                return true;
+            endif;
+        endif;
+
+        return false;
 	}
 	
 	/** Check if coupon needs applying before tax **/

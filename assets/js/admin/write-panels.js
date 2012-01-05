@@ -35,7 +35,7 @@ jQuery( function($){
 		allow_single_deselect: 'true'
 	});
 	
-	$('#order_items_list button.remove_row').live('click', function(){
+	$('#order_items_list .remove_row').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){
 			$(this).closest('tr.item').hide();
@@ -48,121 +48,7 @@ jQuery( function($){
 		var answer = confirm(woocommerce_writepanel_params.cart_total);
 		if (answer){
 			
-			var item_count = $('#order_items_list tr.item').size();
-			var subtotal = 0;
-			var discount = $('input#_order_discount').val();
-			var shipping = $('input#_order_shipping').val();
-			var shipping_tax = parseFloat($('input#_order_shipping_tax').val());
-			var tax = 0;
-			var itemTotal = 0;
-			var subtotal = 0;
-			var total = 0;
-			var cart_discount = 0;
-			
-			if (!discount) discount = 0;
-			if (!shipping) shipping = 0;
-			if (!shipping_tax) shipping_tax = 0;
-			
-			// Items
-			if (item_count>0) {
-				for (i=0; i<item_count; i++) {
-					
-					itemCost 			= $('input[name^=item_cost]:eq(' + i + ')').val();
-					itemQty 			= parseInt($('input[name^=item_quantity]:eq(' + i + ')').val());
-					itemBase 			= $('input[name^=base_item_cost]:eq(' + i + ')').val();
-					itemTax				= $('input[name^=item_tax_rate]:eq(' + i + ')').val();
-					
-					if (!itemCost) 		itemCost = 0;
-					if (!itemTax) 		itemTax = 0;
-					if (!itemQty) 		itemQty = 0;
-					if (!itemBase) 		itemBase = 0;
-					
-					totalItemTax 		= 0;
-					
-					// Calculate tax and discounts
-					if (itemTax && itemTax>0) {
-						
-						if (woocommerce_writepanel_params.prices_include_tax == 'yes') {
-							
-							taxRate = ( itemTax/100 ) + 1;
-							
-							itemDiscount = (( itemBase * itemQty ) * taxRate) - (( itemCost * itemQty ) * taxRate);
-							
-							// Tax worked out backwards
-							totalItemTax = (itemCost * itemQty) * ( itemTax/100 );
-							
-							discounted_price = (itemCost * itemQty) * taxRate;
-							
-							if (woocommerce_writepanel_params.round_at_subtotal == 'no') {
-								totalItemTax = totalItemTax * 100;
-								totalItemTax = totalItemTax.toFixed(2);
-								totalItemTax = Math.round( totalItemTax ) / 100;
-							}
-							
-						} else {
-							
-							taxRate = ( itemTax/100 );
-							
-							itemDiscount = ( itemBase * itemQty ) - ( itemCost * itemQty );
-
-							// Tax worked out forwards
-							totalItemTax = (itemCost * itemQty) * taxRate;
-							
-							discounted_price = (itemCost * itemQty) + totalItemTax;
-							
-							if (woocommerce_writepanel_params.round_at_subtotal == 'no') {
-								totalItemTax = totalItemTax * 100;
-								totalItemTax = totalItemTax.toFixed(2);
-								totalItemTax = Math.round( totalItemTax ) / 100;
-							}
-							
-						}
-						
-						
-					} else {
-						itemDiscount 		= ( itemBase * itemQty ) - ( itemCost * itemQty );
-						discounted_price 	= ( itemCost * itemQty );
-					}
-					
-					subtotal 		= subtotal + parseFloat( (itemBase * itemQty) );
-					
-					cart_discount 	= cart_discount + parseFloat( itemDiscount );
-					
-					totalItemCost 	= parseFloat( discounted_price );
-					
-					itemTotal 		= itemTotal + parseFloat( totalItemCost );
-				
-					tax 			= tax + parseFloat( totalItemTax );
-					
-				}
-			}
-				
-			if (woocommerce_writepanel_params.round_at_subtotal == 'yes') {
-						
-				tax = tax * 100;
-				tax = tax.toFixed(2);
-				tax = Math.round( tax ) / 100;
-			
-			}
-			
-			total = parseFloat(itemTotal) - parseFloat(discount) + parseFloat(shipping) + parseFloat(shipping_tax);
-			
-			// Rounding
-			subtotal = subtotal * 100;
-			subtotal = subtotal.toFixed(2);
-			subtotal = Math.round( subtotal ) / 100;
-			
-			total = total * 100;
-			total = total.toFixed(2);
-			total = Math.round( total ) / 100;
-			
-			if (total < 0 ) total = 0;
-			
-			$('input#_cart_discount').val( cart_discount.toFixed(2) );
-			$('input#_order_subtotal').val( subtotal.toFixed(2) );
-			$('input#_order_tax').val( tax.toFixed(2) );
-			$('input#_order_shipping_tax').val( shipping_tax.toFixed(2) );
-			$('input#_order_total').val( total.toFixed(2) );
+			// TODO add calcuations
 
 		}
 		return false;
@@ -207,7 +93,7 @@ jQuery( function($){
 		
 		var index = $(this).closest('tr.item').attr('rel');
 		
-		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td><button class="remove_meta button">&times;</button></td></tr>');
+		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>');
 		
 		return false;
 		
@@ -332,6 +218,11 @@ jQuery( function($){
 			$('input#_shipping_country').val( $('input#_billing_country').val() );
 			$('input#_shipping_state').val( $('input#_billing_state').val() );			
 		}
+		return false;
+	});
+	
+	$('button.add_tax_row').live('click', function(){
+		$('ul.tax_rows').append('<li class="left"><input type="text" name="_order_taxes_label[]" placeholder="' + woocommerce_writepanel_params.tax_label + '" class="calculated" value="' + woocommerce_writepanel_params.tax_or_vat + '" /></li><li class="right"><input type="text" name="_order_taxes_total[]" placeholder="0.00" class="calculated" /><input type="hidden" name="_order_taxes_compound[]" value="0" /></li>');
 		return false;
 	});
 	

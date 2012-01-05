@@ -208,9 +208,9 @@ function woocommerce_product($atts){
 function woocommerce_product_add_to_cart($atts){
   	if (empty($atts)) return;
   	
-  	global $wpdb;
+  	global $wpdb, $woocommerce;
   	
-  	if (!$atts['style']) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
+  	if (!isset($atts['style'])) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
   	
   	if ($atts['id']) :
   		$product_data = get_post( $atts['id'] );
@@ -223,17 +223,17 @@ function woocommerce_product_add_to_cart($atts){
 	
 	if ($product_data->post_type!=='product') return;
 	
-	$_product = &new woocommerce_product( $product_data->ID ); 
+	$product = $woocommerce->setup_product_data( $product_data );
 		
-	if (!$_product->is_visible()) continue; 
+	if (!$product->is_visible()) continue; 
 	
 	ob_start();
 	?>
 	<p class="product" style="<?php echo $atts['style']; ?>">
 	
-		<?php echo $_product->get_price_html(); ?>
+		<?php echo $product->get_price_html(); ?>
 		
-		<?php woocommerce_template_loop_add_to_cart( $product_data, $_product ); ?>
+		<?php woocommerce_template_loop_add_to_cart(); ?>
 					
 	</p><?php 
 	

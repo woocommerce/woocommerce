@@ -10,26 +10,16 @@
 			</tr>
 		</thead>
 		<tfoot>
-			<tr>
-				<td colspan="2"><?php _e('Subtotal', 'woothemes'); ?></td>
-				<td><?php echo $order->get_subtotal_to_display(); ?></td>
-			</tr>
-			<?php if ($order->order_shipping>0) : ?><tr>
-				<td colspan="2"><?php _e('Shipping', 'woothemes'); ?></td>
-				<td><?php echo $order->get_shipping_to_display(); ?></small></td>
-			</tr><?php endif; ?>
-			<?php if ($order->get_total_tax()>0) : ?><tr>
-				<td colspan="2"><?php _e('Tax', 'woothemes'); ?></td>
-				<td><?php echo woocommerce_price($order->get_total_tax()); ?></td>
-			</tr><?php endif; ?>
-			<?php if ($order->order_discount>0) : ?><tr class="discount">
-				<td colspan="2"><?php _e('Discount', 'woothemes'); ?></td>
-				<td>-<?php echo woocommerce_price($order->order_discount); ?></td>
-			</tr><?php endif; ?>
-			<tr>
-				<td colspan="2"><strong><?php _e('Grand Total', 'woothemes'); ?></strong></td>
-				<td><strong><?php echo woocommerce_price($order->order_total); ?></strong></td>
-			</tr>
+		<?php 
+			if ($totals = $order->get_order_item_totals()) foreach ($totals as $label => $value) :
+				?>
+				<tr>
+					<th scope="row" colspan="2"><?php echo $label; ?></th>
+					<td><?php echo $value; ?></td>
+				</tr>
+				<?php 
+			endforeach; 
+		?>
 		</tfoot>
 		<tbody>
 			<?php
@@ -39,7 +29,7 @@
 						<tr>
 							<td>'.$item['name'].'</td>
 							<td>'.$item['qty'].'</td>
-							<td>'.woocommerce_price( $item['cost']*$item['qty'] ).'</td>
+							<td>' . $order->get_item_subtotal($item) . '</td>
 						</tr>';
 				endforeach; 
 			endif;

@@ -150,7 +150,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     public function generate_paypal_form( $order_id ) {
 		global $woocommerce;
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		if ( $this->testmode == 'yes' ):
 			$paypal_adr = $this->testurl . '?test_ipn=1&';		
@@ -229,13 +229,13 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woothemes'), $order->id);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->order_total - $order->order_shipping - $order->get_total_tax() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_total_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
-			if ($order->order_shipping>0) :
+			if ($order->get_shipping()>0) :
 				$paypal_args['item_name_2'] = __('Shipping cost', 'woothemes');
 				$paypal_args['quantity_2'] 	= '1';
-				$paypal_args['amount_2'] 	= number_format($order->order_shipping, 2);
+				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
 			endif;
 					
 		else :
@@ -252,24 +252,24 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					
 					$item_name = $item['name'];
 					
-					$item_meta = &new order_item_meta( $item['item_meta'] );					
+					$item_meta = new order_item_meta( $item['item_meta'] );					
 					if ($meta = $item_meta->display( true, true )) :
 						$item_name .= ' ('.$meta.')';
 					endif;
 						
 					$paypal_args['item_name_'.$item_loop] = $item_name;
 					$paypal_args['quantity_'.$item_loop] = $item['qty'];
-					$paypal_args['amount_'.$item_loop] = number_format($item['cost'], 2, '.', '');
+					$paypal_args['amount_'.$item_loop] = $order->get_item_cost( $item, false );
 					
 				endif;
 			endforeach; endif;
 		
 			// Shipping Cost
-			if ($order->order_shipping>0) :
+			if ($order->get_shipping()>0) :
 				$item_loop++;
 				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
 				$paypal_args['quantity_'.$item_loop] = '1';
-				$paypal_args['amount_'.$item_loop] = number_format($order->order_shipping, 2);
+				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
 			endif;
 		
 		endif;
@@ -313,7 +313,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 **/
 	function process_payment( $order_id ) {
 		
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		return array(
 			'result' 	=> 'success',
