@@ -188,7 +188,9 @@
 					// Chosen Method
 					if (sizeof($available_gateways)) :
 						$default_gateway = get_option('woocommerce_default_gateway');
-						if (isset($available_gateways[$default_gateway])) :
+						if (isset($_SESSION['_chosen_payment_method']) && isset($available_gateways[$_SESSION['_chosen_payment_method']])) :
+							$available_gateways[$_SESSION['_chosen_payment_method']]->set_current();
+						elseif (isset($available_gateways[$default_gateway])) :
 							$available_gateways[$default_gateway]->set_current();
 						else :
 							current($available_gateways)->set_current();

@@ -182,8 +182,9 @@ class woocommerce_checkout {
 			// Ship to billing only option
 			if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 1;
 			
-			// Update customer shipping method to posted method
+			// Update customer shipping and payment method to posted method
 			$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
+			$_SESSION['_chosen_payment_method'] = $this->posted['payment_method'];
 			
 			// Update cart totals
 			$woocommerce->cart->calculate_totals();

@@ -110,6 +110,7 @@ function woocommerce_ajax_update_order_review() {
 	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
 	
 	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
+	if (isset($_POST['payment_method'])) $_SESSION['_chosen_payment_method'] = $_POST['payment_method'];
 	if (isset($_POST['country'])) $woocommerce->customer->set_country( $_POST['country'] );
 	if (isset($_POST['state'])) $woocommerce->customer->set_state( $_POST['state'] );
 	if (isset($_POST['postcode'])) $woocommerce->customer->set_postcode( $_POST['postcode'] );
