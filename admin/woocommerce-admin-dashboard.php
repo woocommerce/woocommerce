@@ -23,7 +23,7 @@ function woocommerce_content_right_now() {
 	global $woocommerce;
 	?>
 	</table>
-	<p class="sub woocommerce_sub"><?php _e('Shop Content', 'woothemes'); ?></p>
+	<p class="sub woocommerce_sub"><?php _e('Shop Content', 'woocommerce'); ?></p>
 	<table>
 		<tr>
 			<td class="first b"><a href="edit.php?post_type=product"><?php
@@ -31,25 +31,25 @@ function woocommerce_content_right_now() {
 				$num = number_format_i18n( $num_posts->publish );
 				echo $num;
 			?></a></td>
-			<td class="t"><a href="edit.php?post_type=product"><?php _e('Products', 'woothemes'); ?></a></td>
+			<td class="t"><a href="edit.php?post_type=product"><?php _e('Products', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="first b"><a href="edit-tags.php?taxonomy=product_cat&post_type=product"><?php
 				echo wp_count_terms('product_cat');
 			?></a></td>
-			<td class="t"><a href="edit-tags.php?taxonomy=product_cat&post_type=product"><?php _e('Product Categories', 'woothemes'); ?></a></td>
+			<td class="t"><a href="edit-tags.php?taxonomy=product_cat&post_type=product"><?php _e('Product Categories', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="first b"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php
 				echo wp_count_terms('product_tag');
 			?></a></td>
-			<td class="t"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php _e('Product Tags', 'woothemes'); ?></a></td>
+			<td class="t"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php _e('Product Tags', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="first b"><a href="admin.php?page=woocommerce_attributes"><?php 
 				echo sizeof($woocommerce->get_attribute_taxonomies());
 			?></a></td>
-			<td class="t"><a href="admin.php?page=woocommerce_attributes"><?php _e('Attribute taxonomies', 'woothemes'); ?></a></td>
+			<td class="t"><a href="admin.php?page=woocommerce_attributes"><?php _e('Attribute taxonomies', 'woocommerce'); ?></a></td>
 		</tr>
 	<?php
 }
@@ -61,23 +61,23 @@ function woocommerce_right_now() {
 	$processing_count 	= get_term_by( 'slug', 'processing', 'shop_order_status' )->count;
 	?>
 	</table>
-	<p class="sub woocommerce_sub"><?php _e('Orders', 'woothemes'); ?></p>
+	<p class="sub woocommerce_sub"><?php _e('Orders', 'woocommerce'); ?></p>
 	<table>
 		<tr>
 			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=pending"><span class="total-count"><?php echo $pending_count; ?></span></a></td>
-			<td class="last t"><a class="pending" href="edit.php?post_type=shop_order&shop_order_status=pending"><?php _e('Pending', 'woothemes'); ?></a></td>
+			<td class="last t"><a class="pending" href="edit.php?post_type=shop_order&shop_order_status=pending"><?php _e('Pending', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=on-hold"><span class="total-count"><?php echo $on_hold_count; ?></span></a></td>
-			<td class="last t"><a class="onhold" href="edit.php?post_type=shop_order&shop_order_status=on-hold"><?php _e('On-Hold', 'woothemes'); ?></a></td>
+			<td class="last t"><a class="onhold" href="edit.php?post_type=shop_order&shop_order_status=on-hold"><?php _e('On-Hold', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=processing"><span class="total-count"><?php echo $processing_count; ?></span></a></td>
-			<td class="last t"><a class="processing" href="edit.php?post_type=shop_order&shop_order_status=processing"><?php _e('Processing', 'woothemes'); ?></a></td>
+			<td class="last t"><a class="processing" href="edit.php?post_type=shop_order&shop_order_status=processing"><?php _e('Processing', 'woocommerce'); ?></a></td>
 		</tr>
 		<tr>
 			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=completed"><span class="total-count"><?php echo $completed_count; ?></span></a></td>
-			<td class="last t"><a class="complete" href="edit.php?post_type=shop_order&shop_order_status=completed"><?php _e('Completed', 'woothemes'); ?></a></td>
+			<td class="last t"><a class="complete" href="edit.php?post_type=shop_order&shop_order_status=completed"><?php _e('Completed', 'woocommerce'); ?></a></td>
 		</tr>
 	<?php
 }
@@ -99,11 +99,11 @@ function woocommerce_init_dashboard_widgets() {
 		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($current_month_offset+1).'-2011')).' &rarr;</a>';
 	endif;
 	
-	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date('F', strtotime('01-'.($current_month_offset-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woothemes').'</span>';
+	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date('F', strtotime('01-'.($current_month_offset-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
 	wp_add_dashboard_widget('woocommmerce_dashboard_sales', $sales_heading, 'woocommmerce_dashboard_sales');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woothemes'), 'woocommmerce_dashboard_recent_orders');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_reviews', __('WooCommerce recent reviews', 'woothemes'), 'woocommmerce_dashboard_recent_reviews');
+	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woocommerce'), 'woocommmerce_dashboard_recent_orders');
+	wp_add_dashboard_widget('woocommmerce_dashboard_recent_reviews', __('WooCommerce recent reviews', 'woocommerce'), 'woocommmerce_dashboard_recent_reviews');
 } 
 				     		
 /**
@@ -128,7 +128,7 @@ function woocommmerce_dashboard_recent_orders() {
 			echo '
 			<li>
 				<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords($this_order->status).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">'.get_the_time('l jS \of F Y h:i:s A', $order->ID).'</a><br />
-				<small>'.sizeof($this_order->items).' '._n('item', 'items', sizeof($this_order->items), 'woothemes').' <span class="order-cost">'.__('Total:', 'woothemes') . ' ' . woocommerce_price($this_order->order_total).'</span></small>
+				<small>'.sizeof($this_order->items).' '._n('item', 'items', sizeof($this_order->items), 'woocommerce').' <span class="order-cost">'.__('Total:', 'woocommerce') . ' ' . woocommerce_price($this_order->order_total).'</span></small>
 			</li>';
 
 		endforeach;
@@ -162,7 +162,7 @@ function woocommmerce_dashboard_recent_reviews() {
 			$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 			
 			echo '<div class="star-rating" title="'.$rating.'">
-				<span style="width:'.($rating*10).'px">'.$rating.' '.__('out of 5', 'woothemes').'</span></div>';
+				<span style="width:'.($rating*10).'px">'.$rating.' '.__('out of 5', 'woocommerce').'</span></div>';
 				
 			echo '<h4 class="meta"><a href="'.get_permalink($comment->ID).'#comment-'.$comment->comment_ID .'">'.$comment->post_title.'</a> reviewed by ' .strip_tags($comment->comment_author) .'</h4>';
 			echo '<blockquote>'.strip_tags($comment->comment_excerpt).' [...]</blockquote></li>';
@@ -170,7 +170,7 @@ function woocommmerce_dashboard_recent_reviews() {
 		endforeach;
 		echo '</ul>';
 	else :
-		echo '<p>'.__('There are no product reviews yet.', 'woothemes').'</p>';
+		echo '<p>'.__('There are no product reviews yet.', 'woocommerce').'</p>';
 	endif;
 }
 

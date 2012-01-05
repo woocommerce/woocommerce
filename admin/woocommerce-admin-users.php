@@ -15,10 +15,10 @@ add_filter('manage_users_columns', 'woocommerce_user_columns', 10, 1);
 function woocommerce_user_columns( $columns ) {
 	if (!current_user_can('manage_woocommerce')) return $columns;
 
-	$columns['woocommerce_billing_address'] = __('Billing Address', 'woothemes');
-	$columns['woocommerce_shipping_address'] = __('Shipping Address', 'woothemes');
-	$columns['woocommerce_paying_customer'] = __('Paying Customer?', 'woothemes');
-	$columns['woocommerce_order_count'] = __('Orders', 'woothemes');
+	$columns['woocommerce_billing_address'] = __('Billing Address', 'woocommerce');
+	$columns['woocommerce_shipping_address'] = __('Shipping Address', 'woocommerce');
+	$columns['woocommerce_paying_customer'] = __('Paying Customer?', 'woocommerce');
+	$columns['woocommerce_order_count'] = __('Orders', 'woocommerce');
 	return $columns;
 }
  
@@ -58,7 +58,7 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 			
-			if (!$formatted_address) $value = __('N/A', 'woothemes'); else $value = $formatted_address;
+			if (!$formatted_address) $value = __('N/A', 'woocommerce'); else $value = $formatted_address;
 			
 			$value = wpautop($value);
 		break;
@@ -77,7 +77,7 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 			
-			if (!$formatted_address) $value = __('N/A', 'woothemes'); else $value = $formatted_address;
+			if (!$formatted_address) $value = __('N/A', 'woocommerce'); else $value = $formatted_address;
 			
 			$value = wpautop($value);
 		break;
@@ -104,84 +104,84 @@ function woocommerce_customer_meta_fields( $user ) {
 
 	$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
 		'billing' => array(
-			'title' => __('Customer Billing Address', 'woothemes'),
+			'title' => __('Customer Billing Address', 'woocommerce'),
 			'fields' => array(
 				'billing_first_name' => array(
-						'label' => __('First name', 'woothemes'),
+						'label' => __('First name', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_last_name' => array(
-						'label' => __('Last name', 'woothemes'),
+						'label' => __('Last name', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_address_1' => array(
-						'label' => __('Address 1', 'woothemes'),
+						'label' => __('Address 1', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_address_2' => array(
-						'label' => __('Address 2', 'woothemes'),
+						'label' => __('Address 2', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_city' => array(
-						'label' => __('City', 'woothemes'),
+						'label' => __('City', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_postcode' => array(
-						'label' => __('Postcode', 'woothemes'),
+						'label' => __('Postcode', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_state' => array(
-						'label' => __('State/County', 'woothemes'),
+						'label' => __('State/County', 'woocommerce'),
 						'description' => 'Country or state code'
 					),
 				'billing_country' => array(
-						'label' => __('Country', 'woothemes'),
+						'label' => __('Country', 'woocommerce'),
 						'description' => '2 letter Country code'
 					),
 				'billing_phone' => array(
-						'label' => __('Telephone', 'woothemes'),
+						'label' => __('Telephone', 'woocommerce'),
 						'description' => ''
 					),
 				'billing_email' => array(
-						'label' => __('Email', 'woothemes'),
+						'label' => __('Email', 'woocommerce'),
 						'description' => ''
 					)
 			)
 		),
 		'shipping' => array(
-			'title' => __('Customer Shipping Address', 'woothemes'),
+			'title' => __('Customer Shipping Address', 'woocommerce'),
 			'fields' => array(
 				'shipping_first_name' => array(
-						'label' => __('First name', 'woothemes'),
+						'label' => __('First name', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_last_name' => array(
-						'label' => __('Last name', 'woothemes'),
+						'label' => __('Last name', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_address_1' => array(
-						'label' => __('Address 1', 'woothemes'),
+						'label' => __('Address 1', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_address_2' => array(
-						'label' => __('Address 2', 'woothemes'),
+						'label' => __('Address 2', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_city' => array(
-						'label' => __('City', 'woothemes'),
+						'label' => __('City', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_postcode' => array(
-						'label' => __('Postcode', 'woothemes'),
+						'label' => __('Postcode', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_state' => array(
-						'label' => __('State/County', 'woothemes'),
-						'description' => __('State/County or state code', 'woothemes')
+						'label' => __('State/County', 'woocommerce'),
+						'description' => __('State/County or state code', 'woocommerce')
 					),
 				'shipping_country' => array(
-						'label' => __('Country', 'woothemes'),
-						'description' => __('2 letter Country code', 'woothemes')
+						'label' => __('Country', 'woocommerce'),
+						'description' => __('2 letter Country code', 'woocommerce')
 					)
 			)
 		)

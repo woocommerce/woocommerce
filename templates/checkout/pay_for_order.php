@@ -4,9 +4,9 @@
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woothemes'); ?></th>
-				<th><?php _e('Qty', 'woothemes'); ?></th>
-				<th><?php _e('Totals', 'woothemes'); ?></th>
+				<th><?php _e('Product', 'woocommerce'); ?></th>
+				<th><?php _e('Qty', 'woocommerce'); ?></th>
+				<th><?php _e('Totals', 'woocommerce'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
@@ -62,7 +62,7 @@
 					endforeach;
 				else :
 				
-					echo '<p>'.__('Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
+					echo '<p>'.__('Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce').'</p>';
 					
 				endif;
 			?>
@@ -71,7 +71,7 @@
 
 		<div class="form-row">
 			<?php $woocommerce->nonce_field('pay')?>
-			<input type="submit" class="button-alt" name="pay" id="place_order" value="<?php _e('Pay for order', 'woothemes'); ?>" />
+			<input type="submit" class="button-alt" name="pay" id="place_order" value="<?php _e('Pay for order', 'woocommerce'); ?>" />
 
 		</div>
 

@@ -57,14 +57,14 @@ function woocommerce_import_start() {
 							            'labels' => array(
 							                    'name' => $nicename,
 							                    'singular_name' => $nicename,
-							                    'search_items' =>  __( 'Search', 'woothemes') . ' ' . $nicename,
-							                    'all_items' => __( 'All', 'woothemes') . ' ' . $nicename,
-							                    'parent_item' => __( 'Parent', 'woothemes') . ' ' . $nicename,
-							                    'parent_item_colon' => __( 'Parent', 'woothemes') . ' ' . $nicename . ':',
-							                    'edit_item' => __( 'Edit', 'woothemes') . ' ' . $nicename,
-							                    'update_item' => __( 'Update', 'woothemes') . ' ' . $nicename,
-							                    'add_new_item' => __( 'Add New', 'woothemes') . ' ' . $nicename,
-							                    'new_item_name' => __( 'New', 'woothemes') . ' ' . $nicename
+							                    'search_items' =>  __( 'Search', 'woocommerce') . ' ' . $nicename,
+							                    'all_items' => __( 'All', 'woocommerce') . ' ' . $nicename,
+							                    'parent_item' => __( 'Parent', 'woocommerce') . ' ' . $nicename,
+							                    'parent_item_colon' => __( 'Parent', 'woocommerce') . ' ' . $nicename . ':',
+							                    'edit_item' => __( 'Edit', 'woocommerce') . ' ' . $nicename,
+							                    'update_item' => __( 'Update', 'woocommerce') . ' ' . $nicename,
+							                    'add_new_item' => __( 'Add New', 'woocommerce') . ' ' . $nicename,
+							                    'new_item_name' => __( 'New', 'woocommerce') . ' ' . $nicename
 							            ),
 							            'show_ui' => false,
 							            'query_var' => true,

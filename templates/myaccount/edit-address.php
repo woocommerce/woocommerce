@@ -10,7 +10,7 @@ global $woocommerce, $load_address, $address;
 
 <form action="<?php echo esc_url( add_query_arg( 'address', $load_address, get_permalink( get_option( 'woocommerce_edit_address_page_id' ) ) ) ); ?>" method="post">
 	
-	<h3><?php if ($load_address=='billing') _e('Billing Address', 'woothemes'); else _e('Shipping Address', 'woothemes'); ?></h3>
+	<h3><?php if ($load_address=='billing') _e('Billing Address', 'woocommerce'); else _e('Shipping Address', 'woocommerce'); ?></h3>
 	
 	<?php 
 	foreach ($address as $key => $field) :
@@ -18,7 +18,7 @@ global $woocommerce, $load_address, $address;
 	endforeach;
 	?>
 	
-	<input type="submit" class="button" name="save_address" value="<?php _e('Save Address', 'woothemes'); ?>" />
+	<input type="submit" class="button" name="save_address" value="<?php _e('Save Address', 'woocommerce'); ?>" />
 	
 	<?php $woocommerce->nonce_field('edit_address') ?>
 	<input type="hidden" name="action" value="edit_address" />

@@ -20,9 +20,9 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_recent_reviews';
-		$this->woo_widget_description = __( 'Display a list of your most recent reviews on your site.', 'woothemes' );
+		$this->woo_widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recent_reviews';
-		$this->woo_widget_name = __('WooCommerce Recent Reviews', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Recent Reviews', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -52,7 +52,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
  		ob_start();
 		extract($args);
 
- 		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recent Reviews', 'woothemes') : $instance['title'], $instance, $this->id_base);
+ 		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recent Reviews', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( ! $number = absint( $instance['number'] ) ) $number = 5;
 		
 		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
@@ -71,7 +71,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 				
 				$rating_html = '<div class="star-rating" title="'.$rating.'">
-					<span style="width:'.($rating*$star_size).'px">'.$rating.' '.__('out of 5', 'woothemes').'</span>
+					<span style="width:'.($rating*$star_size).'px">'.$rating.' '.__('out of 5', 'woocommerce').'</span>
 				</div>';
 				
 				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
@@ -82,7 +82,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				
 				echo $rating_html;
 				
-				echo sprintf(_x('by %1$s', 'woothemes'), get_comment_author()) . '</li>';
+				echo sprintf(_x('by %1$s', 'woocommerce'), get_comment_author()) . '</li>';
 				
 			endforeach;
 
@@ -117,10 +117,10 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
 ?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 <?php
 	}

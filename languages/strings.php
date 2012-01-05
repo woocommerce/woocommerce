@@ -10,10 +10,10 @@
  */
 
 // Order Status Terms
-__('pending', 'woothemes');
-__('failed', 'woothemes');
-__('on-hold', 'woothemes');
-__('processing', 'woothemes');
-__('completed', 'woothemes');
-__('refunded', 'woothemes');
-__('cancelled', 'woothemes');
+__('pending', 'woocommerce');
+__('failed', 'woocommerce');
+__('on-hold', 'woocommerce');
+__('processing', 'woocommerce');
+__('completed', 'woocommerce');
+__('refunded', 'woocommerce');
+__('cancelled', 'woocommerce');

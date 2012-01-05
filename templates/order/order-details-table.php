@@ -7,13 +7,13 @@ global $woocommerce, $order_id;
 
 $order = &new woocommerce_order( $order_id );
 ?>
-<h2><?php _e('Order Details', 'woothemes'); ?></h2>
+<h2><?php _e('Order Details', 'woocommerce'); ?></h2>
 <table class="shop_table">
 	<thead>
 		<tr>
-			<th><?php _e('Product', 'woothemes'); ?></th>
-			<th><?php _e('Qty', 'woothemes'); ?></th>
-			<th><?php _e('Totals', 'woothemes'); ?></th>
+			<th><?php _e('Product', 'woocommerce'); ?></th>
+			<th><?php _e('Qty', 'woocommerce'); ?></th>
+			<th><?php _e('Totals', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
 	<tfoot>
@@ -49,7 +49,7 @@ $order = &new woocommerce_order( $order_id );
 				
 				if ($_product->exists && $_product->is_downloadable() && $order->status=='completed') :
 					
-					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woothemes') . '</a></small>';
+					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woocommerce') . '</a></small>';
 		
 				endif;	
 
@@ -62,12 +62,12 @@ $order = &new woocommerce_order( $order_id );
 </table>
 
 <header>
-	<h2><?php _e('Customer details', 'woothemes'); ?></h2>
+	<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 </header>
 <dl>
 <?php
-	if ($order->billing_email) echo '<dt>'.__('Email:', 'woothemes').'</dt><dd>'.$order->billing_email.'</dd>';
-	if ($order->billing_phone) echo '<dt>'.__('Telephone:', 'woothemes').'</dt><dd>'.$order->billing_phone.'</dd>';
+	if ($order->billing_email) echo '<dt>'.__('Email:', 'woocommerce').'</dt><dd>'.$order->billing_email.'</dd>';
+	if ($order->billing_phone) echo '<dt>'.__('Telephone:', 'woocommerce').'</dt><dd>'.$order->billing_phone.'</dd>';
 ?>
 </dl>
 
@@ -76,11 +76,11 @@ $order = &new woocommerce_order( $order_id );
 	<div class="col-1">
 
 		<header class="title">
-			<h3><?php _e('Billing Address', 'woothemes'); ?></h3>
+			<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
 		</header>
 		<address><p>
 			<?php
-				if (!$order->formatted_billing_address) _e('N/A', 'woothemes'); else echo $order->formatted_billing_address;
+				if (!$order->formatted_billing_address) _e('N/A', 'woocommerce'); else echo $order->formatted_billing_address;
 			?>
 		</p></address>
 
@@ -89,11 +89,11 @@ $order = &new woocommerce_order( $order_id );
 	<div class="col-2">
 
 		<header class="title">
-			<h3><?php _e('Shipping Address', 'woothemes'); ?></h3>
+			<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
 		</header>
 		<address><p>
 			<?php
-				if (!$order->formatted_shipping_address) _e('N/A', 'woothemes'); else echo $order->formatted_shipping_address;
+				if (!$order->formatted_shipping_address) _e('N/A', 'woocommerce'); else echo $order->formatted_shipping_address;
 			?>
 		</p></address>
 

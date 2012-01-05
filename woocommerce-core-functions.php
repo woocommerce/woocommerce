@@ -443,7 +443,7 @@ function woocommerce_product_cat_filter_post_link( $permalink, $post, $leavename
 
     if ( empty( $terms ) ) :
     	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $permalink = str_replace( '%product_cat%', __('product', 'woothemes'), $permalink );
+        $permalink = str_replace( '%product_cat%', __('product', 'woocommerce'), $permalink );
     else :
     	// Replace the placeholder rewrite tag with the first term's slug
         $first_term = array_shift( $terms );
@@ -533,7 +533,7 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	if (!$terms) return;
 	
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="">'.__('Show all categories', 'woothemes').'</option>';
+	$output .= '<option value="">'.__('Show all categories', 'woocommerce').'</option>';
 	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
 	$output .="</select>";
 	

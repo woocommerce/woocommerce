@@ -4,18 +4,18 @@
 
 <?php do_action('woocommerce_email_header'); ?>
 
-<p><?php _e("Thank you, we are now processing your order. Your order's details are below.", 'woothemes'); ?></p>
+<p><?php _e("Thank you, we are now processing your order. Your order's details are below.", 'woocommerce'); ?></p>
 
 <?php do_action('woocommerce_email_before_order_table', $order, false); ?>
 
-<h2><?php echo __('Order #:', 'woothemes') . ' ' . $order->id; ?></h2>
+<h2><?php echo __('Order #:', 'woocommerce') . ' ' . $order->id; ?></h2>
 
 <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;" border="1" bordercolor="#eee">
 	<thead>
 		<tr>
-			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Product', 'woothemes'); ?></th>
-			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Quantity', 'woothemes'); ?></th>
-			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Price', 'woothemes'); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Product', 'woocommerce'); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Quantity', 'woocommerce'); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Price', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
 	<tfoot>
@@ -37,18 +37,18 @@
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>
 
-<h2><?php _e('Customer details', 'woothemes'); ?></h2>
+<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 
 <?php if ($order->billing_email) : ?>
-	<p><strong><?php _e('Email:', 'woothemes'); ?></strong> <?php echo $order->billing_email; ?></p>
+	<p><strong><?php _e('Email:', 'woocommerce'); ?></strong> <?php echo $order->billing_email; ?></p>
 <?php endif; ?>
 <?php if ($order->billing_phone) : ?>
-	<p><strong><?php _e('Tel:', 'woothemes'); ?></strong> <?php echo $order->billing_phone; ?></p>
+	<p><strong><?php _e('Tel:', 'woocommerce'); ?></strong> <?php echo $order->billing_phone; ?></p>
 <?php endif; ?>
 
 <div style="float:left; width: 49%;">
 
-	<h3><?php _e('Billing address', 'woothemes'); ?></h3>
+	<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
 	
 	<p><?php echo $order->formatted_billing_address; ?></p>
 
@@ -56,7 +56,7 @@
 
 <div style="float:right; width: 49%;">
 
-	<h3><?php _e('Shipping address', 'woothemes'); ?></h3>
+	<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
 	
 	<p><?php echo $order->formatted_shipping_address; ?></p>
 

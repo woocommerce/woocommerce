@@ -49,7 +49,7 @@ if (!function_exists('woocommerce_demo_store')) {
 	function woocommerce_demo_store() {
 		if (get_option('woocommerce_demo_store')=='no') return;
 		
-		echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woothemes').'</p>' );
+		echo apply_filters('woocommerce_demo_store', '<p class="demo_store">'.__('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce').'</p>' );
 	}
 }
 
@@ -229,7 +229,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		            'image_link' => $image_link,
 		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
 		            'availability_html' => $availability_html,
-		            'sku' => __('SKU:', 'woothemes') . ' ' . $variation->sku
+		            'sku' => __('SKU:', 'woocommerce') . ' ' . $variation->sku
 		        );
 		    }
 		}
@@ -556,10 +556,10 @@ if (!function_exists('woocommerce_form_field')) {
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
 					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
-						<option value="">'.__('Select a country&hellip;', 'woothemes').'</option>';
+						<option value="">'.__('Select a country&hellip;', 'woocommerce').'</option>';
 				
 				foreach($woocommerce->countries->get_allowed_countries() as $ckey=>$cvalue) :
-					$field .= '<option value="'.$ckey.'" '.selected($value, $ckey, false).'>'.__($cvalue, 'woothemes').'</option>';
+					$field .= '<option value="'.$ckey.'" '.selected($value, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
 				endforeach;
 				
 				$field .= '</select></p>'.$after;
@@ -590,9 +590,9 @@ if (!function_exists('woocommerce_form_field')) {
 					
 				if (isset( $states[$current_cc][$current_r] )) :
 					// Dropdown
-					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woothemes').'</option>';
+					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
 					foreach($states[$current_cc] as $ckey=>$cvalue) :
-						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woothemes').'</option>';
+						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
 					endforeach;
 					$field .= '</select>';
 				else :

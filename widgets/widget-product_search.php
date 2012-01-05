@@ -20,9 +20,9 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 	
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_product_search';
-		$this->woo_widget_description = __( 'A Search box for products only.', 'woothemes' );
+		$this->woo_widget_description = __( 'A Search box for products only.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_search';
-		$this->woo_widget_name = __('WooCommerce Product Search', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Product Search', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -45,9 +45,9 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		?>
 		<form role="search" method="get" id="searchform" action="<?php echo esc_url( home_url() ); ?>">
 			<div>
-				<label class="screen-reader-text" for="s"><?php _e('Search for:', 'woothemes'); ?></label>
-				<input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Search for products', 'woothemes'); ?>" />
-				<input type="submit" id="searchsubmit" value="<?php _e('Search', 'woothemes'); ?>" />
+				<label class="screen-reader-text" for="s"><?php _e('Search for:', 'woocommerce'); ?></label>
+				<input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Search for products', 'woocommerce'); ?>" />
+				<input type="submit" id="searchsubmit" value="<?php _e('Search', 'woocommerce'); ?>" />
 				<input type="hidden" name="post_type" value="product" />
 			</div>
 		</form>
@@ -66,7 +66,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 	function form( $instance ) {
 		global $wpdb;
 		?>
-			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes') ?></label>
+			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 		<?php
 	}

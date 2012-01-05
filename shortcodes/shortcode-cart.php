@@ -33,7 +33,7 @@ function woocommerce_cart( $atts ) {
 		$postcode 	= $_POST['calc_shipping_postcode'];
 		
 		if ($postcode && !$woocommerce->validation->is_postcode( $postcode, $country )) : 
-			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woothemes') ); 
+			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woocommerce') ); 
 			$postcode = '';
 		elseif ($postcode) :
 			$postcode = $woocommerce->validation->format_postcode( $postcode, $country );
@@ -45,12 +45,12 @@ function woocommerce_cart( $atts ) {
 			$woocommerce->customer->set_location( $country, $state, $postcode );
 			$woocommerce->customer->set_shipping_location( $country, $state, $postcode );
 			$woocommerce->cart->calculate_totals();
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
+			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 		
 		else :
 		
 			$woocommerce->customer->set_shipping_to_base();
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woothemes') );
+			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 			
 		endif;
 

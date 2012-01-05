@@ -17,13 +17,13 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns = array();
 	
 	$columns["cb"] 			= "<input type=\"checkbox\" />";
-	$columns["title"] 		= __("Code", 'woothemes');
-	$columns["type"] 		= __("Coupon type", 'woothemes');
-	$columns["amount"] 		= __("Coupon amount", 'woothemes');
-	$columns["products"]	= __("Product IDs", 'woothemes');
-	$columns["usage_limit"] = __("Usage limit", 'woothemes');
-	$columns["usage_count"] = __("Usage count", 'woothemes');
-	$columns["expiry_date"] = __("Expiry date", 'woothemes');
+	$columns["title"] 		= __("Code", 'woocommerce');
+	$columns["type"] 		= __("Coupon type", 'woocommerce');
+	$columns["amount"] 		= __("Coupon amount", 'woocommerce');
+	$columns["products"]	= __("Product IDs", 'woocommerce');
+	$columns["usage_limit"] = __("Usage limit", 'woocommerce');
+	$columns["usage_count"] = __("Usage count", 'woocommerce');
+	$columns["expiry_date"] = __("Expiry date", 'woocommerce');
 
 	return $columns;
 }

@@ -73,12 +73,12 @@ function woocommerce_pay() {
 		
 		elseif (!in_array($order->status, array('pending', 'failed'))) :
 			
-			$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woothemes') );
+			$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce') );
 			$woocommerce->show_messages();
 			
 		else :
 		
-			$woocommerce->add_error( __('Invalid order.', 'woothemes') );
+			$woocommerce->add_error( __('Invalid order.', 'woocommerce') );
 			$woocommerce->show_messages();
 			
 		endif;
@@ -98,19 +98,19 @@ function woocommerce_pay() {
 				?>
 				<ul class="order_details">
 					<li class="order">
-						<?php _e('Order:', 'woothemes'); ?>
+						<?php _e('Order:', 'woocommerce'); ?>
 						<strong># <?php echo $order->id; ?></strong>
 					</li>
 					<li class="date">
-						<?php _e('Date:', 'woothemes'); ?>
+						<?php _e('Date:', 'woocommerce'); ?>
 						<strong><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></strong>
 					</li>
 					<li class="total">
-						<?php _e('Total:', 'woothemes'); ?>
+						<?php _e('Total:', 'woocommerce'); ?>
 						<strong><?php echo woocommerce_price($order->order_total); ?></strong>
 					</li>
 					<li class="method">
-						<?php _e('Payment method:', 'woothemes'); ?>
+						<?php _e('Payment method:', 'woocommerce'); ?>
 						<strong><?php 
 							echo $order->payment_method_title; 
 						?></strong>

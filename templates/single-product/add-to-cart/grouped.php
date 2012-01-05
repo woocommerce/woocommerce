@@ -31,7 +31,7 @@ endforeach;
 					<td>
 						<?php if ($all_products_are_downloadable) : ?>
 						
-							<button type="submit" name="quantity[<?php echo $child_product['product']->id; ?>]" value="1" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+							<button type="submit" name="quantity[<?php echo $child_product['product']->id; ?>]" value="1" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
 						
 						<?php else : ?>
 						
@@ -56,7 +56,7 @@ endforeach;
 	
 		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 	
-		<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+		<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
 	
 		<?php do_action('woocommerce_after_add_to_cart_button'); ?>
 	

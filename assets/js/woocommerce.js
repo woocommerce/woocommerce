@@ -452,10 +452,11 @@ jQuery(document).ready(function($) {
 		
 			if (xhr) xhr.abort();
 		
-			var method 		= $('#shipping_method').val();
-			var country 	= $('#billing_country').val();
-			var state 		= $('#billing_state').val();
-			var postcode 	= $('input#billing_postcode').val();
+			var method 			= $('#shipping_method').val();
+			var payment_method 	= $('#order_review input[name=payment_method]:checked').val();
+			var country 		= $('#billing_country').val();
+			var state 			= $('#billing_state').val();
+			var postcode 		= $('input#billing_postcode').val();	
 				
 			if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
 				var s_country 	= $('#billing_country').val();
@@ -474,6 +475,7 @@ jQuery(document).ready(function($) {
 				action: 			'woocommerce_update_order_review',
 				security: 			woocommerce_params.update_order_review_nonce,
 				shipping_method: 	method, 
+				payment_method:		payment_method,
 				country: 			country, 
 				state: 				state, 
 				postcode: 			postcode, 
