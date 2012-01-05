@@ -683,19 +683,37 @@ function woocommerce_download_product() {
                 case "ppt": $ctype="application/vnd.ms-powerpoint"; break;
                 case "gif": $ctype="image/gif"; break;
                 case "png": $ctype="image/png"; break;
-                case "jpe": case "jpeg": case "jpg": $ctype="image/jpg"; break;
+                case "jpe": 
+                case "jpeg": 
+                case "jpg": $ctype="image/jpg"; break;
+                case "mp3":	$ctype="audio/mpeg"; break;
                 default: $ctype="application/force-download";
             endswitch;
             
-            if ($file_download_method=='xsendfile') :
-            
-				header("X-Accel-Redirect: $file_path");
-				header("X-Sendfile: $file_path");
-				header("Content-Type: $ctype");
-				header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
-				exit;
-
-            endif;
+			if ($file_download_method=='xsendfile') :
+             	
+             	$file_path = trim(str_replace(getcwd(), '', $file_path), '/'); // Path fix - kudos to Jason Judge
+             	
+	            header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
+	            
+	            if (function_exists('apache_get_modules') && in_array( 'mod_xsendfile', apache_get_modules()) ) :
+	            	
+	            	header("X-Sendfile: $file_path");
+	            	exit;
+	            	
+	            elseif (stristr(getenv('SERVER_SOFTWARE'), 'lighttpd') ) :
+	            
+	            	header("X-Lighttpd-Sendfile: $file_path");
+	            	exit;
+	            
+	            elseif (stristr(getenv('SERVER_SOFTWARE'), 'nginx') || stristr(getenv('SERVER_SOFTWARE'), 'cherokee')) :
+	            
+	            	header("X-Accel-Redirect: $file_path");
+	            	exit;
+	            
+	            endif;
+	            
+	        endif;
 
 			/**
 			 * readfile_chunked
