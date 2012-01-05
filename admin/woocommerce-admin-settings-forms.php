@@ -225,11 +225,11 @@ function woocommerce_admin_fields($options) {
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
                     	
-                    	<?php _e('Width', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
+                    	<?php _e('Width', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
                     	
-                    	<?php _e('Height', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
+                    	<?php _e('Height', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" /> 
                     	
-                    	<label><?php _e('Hard Crop', 'woothemes'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php if (get_option( $value['id'].'_crop')!='') checked(get_option( $value['id'].'_crop'), 1); else checked(1); ?> /></label> 
+                    	<label><?php _e('Hard Crop', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php if (get_option( $value['id'].'_crop')!='') checked(get_option( $value['id'].'_crop'), 1); else checked(1); ?> /></label> 
                     	
                     	<span class="description"><?php echo $value['desc'] ?></span></td>
                 </tr><?php
@@ -320,7 +320,7 @@ function woocommerce_admin_fields($options) {
             	?><tr valign="top" class="single_select_page">
                     <th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-			        	<?php echo str_replace(' id=', " data-placeholder='".__('Select a page...', 'woothemes')."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <span class="description"><?php echo $value['desc'] ?></span>        
+			        	<?php echo str_replace(' id=', " data-placeholder='".__('Select a page...', 'woocommerce')."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <span class="description"><?php echo $value['desc'] ?></span>        
 			        </td>
                	</tr><?php	
             break;
@@ -336,7 +336,7 @@ function woocommerce_admin_fields($options) {
             	endif;
             	?><tr valign="top">
                     <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e('Choose a country&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e('Choose a country&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">	
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 			        </select> <span class="description"><?php echo $value['desc'] ?></span>
                		</td>
@@ -349,7 +349,7 @@ function woocommerce_admin_fields($options) {
             	?><tr valign="top">
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e('Choose countries&hellip;', 'woothemes'); ?>" title="Country" class="chosen_select">	
+	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e('Choose countries&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">	
 				        	<?php
 				        		if ($countries) foreach ($countries as $key=>$val) :
 	                    			echo '<option value="'.$key.'" '.selected( in_array($key, $selections), true, false ).'>'.$val.'</option>';   			
@@ -365,29 +365,29 @@ function woocommerce_admin_fields($options) {
             	$local_tax_rates = get_option('woocommerce_local_tax_rates');
             	
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php _e('Tax Rates', 'woothemes') ?></th>
+					<th scope="row" class="titledesc"><?php _e('Tax Rates', 'woocommerce') ?></th>
                     <td class="forminp">
-                    	<!--<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
-                    	<a class="button import_rates"><?php _e('Import rates', 'woothemes'); ?></a>
-                    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>-->
+                    	<!--<a class="button export_rates"><?php _e('Export rates', 'woocommerce'); ?></a>
+                    	<a class="button import_rates"><?php _e('Import rates', 'woocommerce'); ?></a>
+                    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
                     	<table class="taxrows widefat" cellspacing="0">
 		            		<thead>
 		            			<tr>
 		            				<th class="check-column"><input type="checkbox"></th>
-		            				<th class="country"><?php _e('Countries/states', 'woothemes'); ?></th>
-		            				<th><?php _e('Tax Class', 'woothemes'); ?></th>
-		            				<th><?php _e('Label', 'woothemes'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woothemes'); ?>">[?]</a></th>
-		            				<th><?php _e('Rate', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woothemes'); ?>">[?]</a></th>
-		            				<th><?php _e('Compound', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woothemes'); ?>">[?]</a></th>
-		            				<th><?php _e('Shipping', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woothemes'); ?>">[?]</a></th>
+		            				<th class="country"><?php _e('Countries/states', 'woocommerce'); ?></th>
+		            				<th><?php _e('Tax Class', 'woocommerce'); ?></th>
+		            				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
 		            			</tr>
 		            		</thead>
 		            		<tfoot>
 		            			<tr>
-		            				<th colspan="2"><a href="#" class="add_tax_rate button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
+		            				<th colspan="2"><a href="#" class="add_tax_rate button"><?php _e('+ Add Tax Rate', 'woocommerce'); ?></a></th>
 		            				<th colspan="6">
-		            					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woothemes'); ?></small>
-		            					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a>
+		            					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woocommerce'); ?></small>
+		            					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woocommerce'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woocommerce'); ?></a>
 		            				</th>
 		            			</tr>
 		            		</tfoot>
@@ -397,17 +397,17 @@ function woocommerce_admin_fields($options) {
 		            			<tr class="tax_rate">
 	            					<td class="check-column"><input type="checkbox" name="select" /></td>
 		                			<td class="country">
-		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php echo woocommerce_tax_row_label( $rate['countries'] ); ?></label></p>
+		                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woocommerce') ?></button> <label><?php echo woocommerce_tax_row_label( $rate['countries'] ); ?></label></p>
 		                				<div class="options" style="display:none">
-		                					<select name="tax_country[<?php echo $i; ?>][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">
+		                					<select name="tax_country[<?php echo $i; ?>][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woocommerce'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">
 						                   		<?php echo $woocommerce->countries->country_multiselect_options( $rate['countries'] ); ?>
 						                	</select>
-				                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>
+				                			<?php echo '<p><button class="select_all button">'.__('All', 'woocommerce').'</button><button class="select_none button">'.__('None', 'woocommerce').'</button><button class="button select_us_states">'.__('US States', 'woocommerce').'</button><button class="button select_europe">'.__('EU States', 'woocommerce').'</button></p>'; ?>
 				                		</div>
 				               		</td>
 				               		<td class="tax_class">
 				               			<select name="tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
-							                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
+							                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>
 							                <?php
 					                    		if ($tax_classes) foreach ($tax_classes as $class) :
 							                        echo '<option value="'.sanitize_title($class).'"';
@@ -418,10 +418,10 @@ function woocommerce_admin_fields($options) {
 					                    </select>
 				               		</td>
 				               		<td class="label">
-				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woothemes'); ?>" size="16" />
+				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />
 				               		</td>
 		            				<td class="rate">
-		            					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%
+		            					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%
 		            				</td>
 		            				<td class="compound">
 		            					<input type="checkbox" class="checkbox" name="tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
@@ -437,29 +437,29 @@ function woocommerce_admin_fields($options) {
 		            </td>
 				</tr>
 				<tr valign="top">
-					<th scope="row" class="titledesc"><?php _e('Local Tax Rates', 'woothemes') ?></th>
+					<th scope="row" class="titledesc"><?php _e('Local Tax Rates', 'woocommerce') ?></th>
 				    <td class="forminp">
-				    	<!--<a class="button export_rates"><?php _e('Export rates', 'woothemes'); ?></a>
-				    	<a class="button import_rates"><?php _e('Import rates', 'woothemes'); ?></a>
-				    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woothemes'), ''); ?></p>-->
+				    	<!--<a class="button export_rates"><?php _e('Export rates', 'woocommerce'); ?></a>
+				    	<a class="button import_rates"><?php _e('Import rates', 'woocommerce'); ?></a>
+				    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
 				    	<table class="taxrows widefat" cellspacing="0">
 				    		<thead>
 				    			<tr>
 				    				<th class="check-column"><input type="checkbox"></th>
-				    				<th class="country"><?php _e('Post/zip codes', 'woothemes'); ?> <a class="tips" tip="<?php _e('List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woothemes'); ?>">[?]</a></th>
-				    				<th><?php _e('Tax Class', 'woothemes'); ?></th>
-				    				<th><?php _e('Label', 'woothemes'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woothemes'); ?>">[?]</a></th>
-				    				<th><?php _e('Rate', 'woothemes'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woothemes'); ?>">[?]</a></th>
-				    				<th><?php _e('Compound', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woothemes'); ?>">[?]</a></th>
-				    				<th><?php _e('Shipping', 'woothemes'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woothemes'); ?>">[?]</a></th>
+				    				<th class="country"><?php _e('Post/zip codes', 'woocommerce'); ?> <a class="tips" tip="<?php _e('List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Tax Class', 'woocommerce'); ?></th>
+				    				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
 				    			</tr>
 				    		</thead>
 				    		<tfoot>
 				    			<tr>
-				    				<th colspan="2"><a href="#" class="add_local_tax_rate button"><?php _e('+ Add Tax Rate', 'woothemes'); ?></a></th>
+				    				<th colspan="2"><a href="#" class="add_local_tax_rate button"><?php _e('+ Add Tax Rate', 'woocommerce'); ?></a></th>
 				    				<th colspan="5">
-				    					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woothemes'); ?></small>
-				    					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woothemes'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woothemes'); ?></a>
+				    					<small><?php _e('All matching rates will be applied, and non-compound rates will be summed.', 'woocommerce'); ?></small>
+				    					<a href="#" class="dupe button"><?php _e('Duplicate selected rows', 'woocommerce'); ?></a> <a href="#" class="remove button"><?php _e('Delete selected rows', 'woocommerce'); ?></a>
 				    				</th>
 				    			</tr>
 				    		</tfoot>
@@ -470,14 +470,14 @@ function woocommerce_admin_fields($options) {
 									<td class="check-column"><input type="checkbox" name="select" /></td>
 				        			<td class="local_country">
 				        				<select name="local_tax_country[<?php echo $i; ?>]" class="select">
-				        					<option value=""><?php _e('Select a country/state&hellip;', 'woothemes'); ?></option>
+				        					<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>
 						                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['country'], $rate['state'] ); ?>
 						                </select>
-				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(';', $rate['postcode']); ?></textarea>
+				               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woocommerce'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(';', $rate['postcode']); ?></textarea>
 				               		</td>
 				               		<td class="tax_class">
 				               			<select name="local_tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
-							                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>
+							                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>
 							                <?php
 					                    		if ($tax_classes) foreach ($tax_classes as $class) :
 							                        echo '<option value="'.sanitize_title($class).'"';
@@ -488,10 +488,10 @@ function woocommerce_admin_fields($options) {
 					                    </select>
 				               		</td>
 				               		<td class="label">
-				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woothemes'); ?>" size="16" />
+				               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />
 				               		</td>
 				    				<td class="rate">
-				    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%
+				    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%
 				    				</td>
 				    				<td class="compound">
 				    					<input type="checkbox" class="checkbox" name="local_tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
@@ -512,14 +512,14 @@ function woocommerce_admin_fields($options) {
 				
 					jQuery('tr.tax_rate .edit_options').live('click', function(){
 						jQuery(this).closest('td').find('.options').slideToggle();
-						if (jQuery(this).text()=='<?php _e('Edit', 'woothemes'); ?>') {
+						if (jQuery(this).text()=='<?php _e('Edit', 'woocommerce'); ?>') {
 							
 							jQuery(this).closest('tr').find("select.tax_chosen_select").chosen();
 							
-							jQuery(this).text('<?php _e('Done', 'woothemes'); ?>');
+							jQuery(this).text('<?php _e('Done', 'woocommerce'); ?>');
 						
 						} else {
-							jQuery(this).text('<?php _e('Edit', 'woothemes'); ?>');
+							jQuery(this).text('<?php _e('Edit', 'woocommerce'); ?>');
 						}
 						return false;
 					});
@@ -544,7 +544,7 @@ function woocommerce_admin_fields($options) {
 					
 					jQuery('tr.tax_rate .options select').live('change', function(){
 						jQuery(this).trigger("liszt:updated");
-						jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + '<?php _e(' countries/states selected', 'woothemes') ?>' );
+						jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + '<?php _e(' countries/states selected', 'woocommerce') ?>' );
 					});
 					
 					jQuery('tr.tax_rate .select_europe').live('click', function(){
@@ -560,17 +560,17 @@ function woocommerce_admin_fields($options) {
 						jQuery('<tr class="tax_rate new_rate">\
         					<td class="check-column"><input type="checkbox" name="select" /></td>\
                 			<td class="country">\
-                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woothemes') ?></button> <label><?php _e('No countries selected', 'woothemes'); ?></label></p>\
+                				<p class="edit"><button class="edit_options button"><?php _e('Edit', 'woocommerce') ?></button> <label><?php _e('No countries selected', 'woocommerce'); ?></label></p>\
                 				<div class="options" style="display:none">\
-                					<select name="tax_country[' + size + '][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woothemes'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">\
+                					<select name="tax_country[' + size + '][]" data-placeholder="<?php _e('Select countries/states&hellip;', 'woocommerce'); ?>" class="tax_chosen_select select" size="10" multiple="multiple">\
 				                   		<?php echo $woocommerce->countries->country_multiselect_options(); ?>\
 				                	</select>\
-		                			<?php echo '<p><button class="select_all button">'.__('All', 'woothemes').'</button><button class="select_none button">'.__('None', 'woothemes').'</button><button class="button select_us_states">'.__('US States', 'woothemes').'</button><button class="button select_europe">'.__('EU States', 'woothemes').'</button></p>'; ?>\
+		                			<?php echo '<p><button class="select_all button">'.__('All', 'woocommerce').'</button><button class="select_none button">'.__('None', 'woocommerce').'</button><button class="button select_us_states">'.__('US States', 'woocommerce').'</button><button class="button select_europe">'.__('EU States', 'woocommerce').'</button></p>'; ?>\
 		                		</div>\
 		               		</td>\
 		               		<td class="tax_class">\
 		               			<select name="tax_class[' + size + ']" title="Tax Class" class="select">\
-					                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>\
+					                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>\
 					                <?php
 			                    		if ($tax_classes) foreach ($tax_classes as $class) :
 					                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
@@ -579,10 +579,10 @@ function woocommerce_admin_fields($options) {
 			                    </select>\
 		               		</td>\
 		               		<td class="label">\
-		               			<input type="text" class="text" name="tax_label[' + size + ']" title="<?php _e('Label', 'woothemes'); ?>" size="16" />\
+		               			<input type="text" class="text" name="tax_label[' + size + ']" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />\
 		               		</td>\
             				<td class="rate">\
-            					<input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%\
+            					<input type="text" class="text" name="tax_rate[' + size + ']" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%\
             				</td>\
             				<td class="compound">\
             					<input type="checkbox" class="checkbox" name="tax_compound[' + size + ']" />\
@@ -606,14 +606,14 @@ function woocommerce_admin_fields($options) {
 							<td class="check-column"><input type="checkbox" name="select" /></td>\
 							<td class="local_country">\
 								<select name="local_tax_country[' + size + ']" class="select">\
-									<option value=""><?php _e('Select a country/state&hellip;', 'woothemes'); ?></option>\
+									<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>\
 						       		<?php echo $woocommerce->countries->country_dropdown_options( '', '', true ); ?>\
 						    	</select>\
-								<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woothemes'); ?>" class="text" name="local_tax_postcode[' + size + ']"></textarea>\
+								<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woocommerce'); ?>" class="text" name="local_tax_postcode[' + size + ']"></textarea>\
 							</td>\
 					   		<td class="tax_class">\
 					   			<select name="local_tax_class[' + size + ']" title="Tax Class" class="select">\
-					                <option value=""><?php _e('Standard Rate', 'woothemes'); ?></option>\
+					                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>\
 					                <?php
 					            		if ($tax_classes) foreach ($tax_classes as $class) :
 					                        echo '<option value="'.sanitize_title($class).'">'.$class.'</option>';
@@ -622,10 +622,10 @@ function woocommerce_admin_fields($options) {
 					            </select>\
 					   		</td>\
 					   		<td class="label">\
-					   			<input type="text" class="text" name="local_tax_label[' + size + ']" title="<?php _e('Label', 'woothemes'); ?>" size="16" />\
+					   			<input type="text" class="text" name="local_tax_label[' + size + ']" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />\
 					   		</td>\
 							<td class="rate">\
-								<input type="text" class="text" name="local_tax_rate[' + size + ']" title="<?php _e('Rate', 'woothemes'); ?>" placeholder="<?php _e('Rate', 'woothemes'); ?>" maxlength="8" size="4" />%\
+								<input type="text" class="text" name="local_tax_rate[' + size + ']" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%\
 							</td>\
 							<td class="compound">\
 								<input type="checkbox" class="checkbox" name="local_tax_compound[' + size + ']" />\
@@ -642,7 +642,7 @@ function woocommerce_admin_fields($options) {
 					
 					// Remove row
 					jQuery('.taxrows a.remove').live('click', function(){
-						var answer = confirm("<?php _e('Delete the selected rates?', 'woothemes'); ?>")
+						var answer = confirm("<?php _e('Delete the selected rates?', 'woocommerce'); ?>")
 						if (answer) {
 							var $rates = jQuery(this).closest('.taxrows').find('tbody');
 							
@@ -656,7 +656,7 @@ function woocommerce_admin_fields($options) {
 					
 					// Dupe row
 					jQuery('.taxrows a.dupe').live('click', function(){
-						var answer = confirm("<?php _e('Duplicate the selected rates?', 'woothemes'); ?>")
+						var answer = confirm("<?php _e('Duplicate the selected rates?', 'woocommerce'); ?>")
 						if (answer) {
 						
 							var $rates = jQuery(this).closest('.taxrows').find('tbody');
@@ -731,19 +731,19 @@ function woocommerce_tax_row_label( $selected ) {
 	// Show label
 	if (sizeof($counties_array)==0) :
 	
-		$return .= __('No countries selected', 'woothemes');
+		$return .= __('No countries selected', 'woocommerce');
 		
 	elseif ( sizeof($counties_array) < 6 ) :
 	
-		if ($states_count>0) $states_text = sprintf(_n('(1 state)', '(%s states)', $states_count, 'woothemes'), $states_count);
+		if ($states_count>0) $states_text = sprintf(_n('(1 state)', '(%s states)', $states_count, 'woocommerce'), $states_count);
 
 		$return .= $countries_text . ' ' . $states_text;
 		
 	else :
 		
-		if ($states_count>0) $states_text = sprintf(_n('and 1 state', 'and %s states', $states_count, 'woothemes'), $states_count);
+		if ($states_count>0) $states_text = sprintf(_n('and 1 state', 'and %s states', $states_count, 'woocommerce'), $states_count);
 		
-		$return .= sprintf(_n('1 country', '%1$s countries', sizeof($counties_array), 'woothemes'), sizeof($counties_array)) . ' ' . $states_text;
+		$return .= sprintf(_n('1 country', '%1$s countries', sizeof($counties_array), 'woocommerce'), sizeof($counties_array)) . ' ' . $states_text;
 	
 	endif;
 	

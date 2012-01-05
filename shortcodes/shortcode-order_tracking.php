@@ -42,7 +42,7 @@ function woocommerce_order_tracking( $atts ) {
 					
 		endif;
 		
-		echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woothemes'), get_permalink($post->ID)).'</p>';
+		echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woocommerce'), get_permalink($post->ID)).'</p>';
 	
 	else :
 	

@@ -14,10 +14,10 @@ global $woocommerce;
 		<tr>
 			<th class="product-remove"></th>
 			<th class="product-thumbnail"></th>
-			<th class="product-name"><span class="nobr"><?php _e('Product Name', 'woothemes'); ?></span></th>
-			<th class="product-price"><span class="nobr"><?php _e('Unit Price', 'woothemes'); ?></span></th>
-			<th class="product-quantity"><?php _e('Quantity', 'woothemes'); ?></th>
-			<th class="product-subtotal"><?php _e('Price', 'woothemes'); ?></th>
+			<th class="product-name"><span class="nobr"><?php _e('Product Name', 'woocommerce'); ?></span></th>
+			<th class="product-price"><span class="nobr"><?php _e('Unit Price', 'woocommerce'); ?></span></th>
+			<th class="product-quantity"><?php _e('Quantity', 'woocommerce'); ?></th>
+			<th class="product-subtotal"><?php _e('Price', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -29,7 +29,7 @@ global $woocommerce;
 				
 					?>
 					<tr>
-						<td class="product-remove"><a href="<?php echo esc_url( $woocommerce->cart->get_remove_url($cart_item_key) ); ?>" class="remove" title="<?php _e('Remove this item', 'woothemes'); ?>">&times;</a></td>
+						<td class="product-remove"><a href="<?php echo esc_url( $woocommerce->cart->get_remove_url($cart_item_key) ); ?>" class="remove" title="<?php _e('Remove this item', 'woocommerce'); ?>">&times;</a></td>
 						<td class="product-thumbnail">
 							<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>">
 							<?php 
@@ -44,7 +44,7 @@ global $woocommerce;
 								echo $woocommerce->cart->get_item_data( $values );
                    				
                    				// Backorder notification
-                   				if ($_product->backorders_require_notification() && $_product->get_total_stock()<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woothemes').'</p>';
+                   				if ($_product->backorders_require_notification() && $_product->get_total_stock()<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woocommerce').'</p>';
 							?>
 						</td>
 						<td class="product-price"><?php 
@@ -73,10 +73,10 @@ global $woocommerce;
 		<tr>
 			<td colspan="6" class="actions">
 				<div class="coupon">
-					<label for="coupon_code"><?php _e('Coupon', 'woothemes'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woothemes'); ?>" />
+					<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
 				</div>
 				<?php $woocommerce->nonce_field('cart') ?>
-				<input type="submit" class="button" name="update_cart" value="<?php _e('Update Cart', 'woothemes'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woothemes'); ?></a>
+				<input type="submit" class="button" name="update_cart" value="<?php _e('Update Cart', 'woocommerce'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woocommerce'); ?></a>
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 			</td>
 		</tr>

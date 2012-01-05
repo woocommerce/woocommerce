@@ -20,9 +20,9 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 		
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_recent_products';
-		$this->woo_widget_description = __( 'Display a list of your most recent products on your site.', 'woothemes' );
+		$this->woo_widget_description = __( 'Display a list of your most recent products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recent_products';
-		$this->woo_widget_name = __('WooCommerce Recent Products', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Recent Products', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -51,7 +51,7 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 		ob_start();
 		extract($args);
 		
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('New Products', 'woothemes') : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty($instance['title']) ? __('New Products', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
 		else if ( $number < 1 )
@@ -126,14 +126,14 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 
 		$show_variations = isset( $instance['show_variations'] ) ? (bool) $instance['show_variations'] : false;
 ?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 
     <p><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('show_variations') ); ?>" name="<?php echo esc_attr( $this->get_field_name('show_variations') ); ?>"<?php checked( $show_variations ); ?> />
-		<label for="<?php echo $this->get_field_id('show_variations'); ?>"><?php _e( 'Show hidden product variations', 'woothemes' ); ?></label><br />
+		<label for="<?php echo $this->get_field_id('show_variations'); ?>"><?php _e( 'Show hidden product variations', 'woocommerce' ); ?></label><br />
 
 <?php
 	}

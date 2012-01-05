@@ -27,31 +27,31 @@ function woocommerce_coupon_data_meta_box($post) {
 		<?php
 
 			// Type
-    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woothemes'), 'options' => $woocommerce->get_coupon_discount_types() ) );
+    		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woocommerce'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 				
 			// Amount
-			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woothemes'), 'placeholder' => __('0.00', 'woothemes'), 'description' => __('Enter an amount e.g. 2.99', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woocommerce'), 'placeholder' => __('0.00', 'woocommerce'), 'description' => __('Enter an amount e.g. 2.99', 'woocommerce') ) );
 				
 			// Individual use
-			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woothemes'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woothemes') ) );
+			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woocommerce'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woocommerce') ) );
 			
 			// Apply before tax
-			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply before tax', 'woothemes'), 'description' => __('Check this box if the coupon should be applied before calculating cart tax', 'woothemes') ) );
+			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply before tax', 'woocommerce'), 'description' => __('Check this box if the coupon should be applied before calculating cart tax', 'woocommerce') ) );
 			
 			// Free Shipping
-			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woothemes'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woothemes'), admin_url('admin.php?page=woocommerce&tab=shipping_methods&subtab=shipping-free_shipping')) ) );
+			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woocommerce'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woocommerce'), admin_url('admin.php?page=woocommerce&tab=shipping_methods&subtab=shipping-free_shipping')) ) );
 			
 			// Product ids
-			woocommerce_wp_text_input( array( 'id' => 'product_ids', 'label' => __('Product IDs', 'woothemes'), 'placeholder' => __('N/A', 'woothemes'), 'description' => __('(optional) Comma separate IDs which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => 'product_ids', 'label' => __('Product IDs', 'woocommerce'), 'placeholder' => __('N/A', 'woocommerce'), 'description' => __('(optional) Comma separate IDs which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce') ) );
 			
 			// Exclude Product ids
-			woocommerce_wp_text_input( array( 'id' => 'exclude_product_ids', 'label' => __('Exclude Product IDs', 'woothemes'), 'placeholder' => __('N/A', 'woothemes'), 'description' => __('(optional) Comma separate IDs which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => 'exclude_product_ids', 'label' => __('Exclude Product IDs', 'woocommerce'), 'placeholder' => __('N/A', 'woocommerce'), 'description' => __('(optional) Comma separate IDs which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce') ) );
 			
 			// Usage limit
-			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woothemes'), 'placeholder' => __('Unlimited usage', 'woothemes'), 'description' => __('(optional) How many times this coupon can be used before it is void', 'woothemes') ) );
+			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woocommerce'), 'placeholder' => __('Unlimited usage', 'woocommerce'), 'description' => __('(optional) How many times this coupon can be used before it is void', 'woocommerce') ) );
 				
 			// Expiry date
-			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woothemes'), 'placeholder' => __('Never expire', 'woothemes'), 'description' => __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woothemes'), 'class' => 'short date-picker' ) );
+			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woocommerce'), 'placeholder' => __('Never expire', 'woocommerce'), 'description' => __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woocommerce'), 'class' => 'short date-picker' ) );
 			
 			do_action('woocommerce_coupon_options');
 			

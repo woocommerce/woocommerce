@@ -4,22 +4,22 @@
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woothemes'); ?></th>
-				<th><?php _e('Qty', 'woothemes'); ?></th>
-				<th><?php _e('Totals', 'woothemes'); ?></th>
+				<th><?php _e('Product', 'woocommerce'); ?></th>
+				<th><?php _e('Qty', 'woocommerce'); ?></th>
+				<th><?php _e('Totals', 'woocommerce'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
 		
 			<tr class="cart-subtotal">
-				<th colspan="2"><strong><?php _e('Cart Subtotal', 'woothemes'); ?></strong></th>
+				<th colspan="2"><strong><?php _e('Cart Subtotal', 'woocommerce'); ?></strong></th>
 				<td><?php echo $woocommerce->cart->get_cart_subtotal(); ?></td>
 			</tr>
 			
 			<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
 			
 			<tr class="discount">
-				<th colspan="2"><?php _e('Cart Discount', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Cart Discount', 'woocommerce'); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 			</tr>
 			
@@ -28,7 +28,7 @@
 			<?php if ($woocommerce->cart->needs_shipping()) : ?>
 			
 			<tr class="shipping">
-				<th colspan="2"><?php _e('Shipping', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Shipping', 'woocommerce'); ?></th>
 				<td>
 				<?php
 					
@@ -65,7 +65,7 @@
 								endif;
 								
 							else :
-								echo __('Free', 'woothemes');
+								echo __('Free', 'woocommerce');
 							endif;
 							
 							echo '</option>';
@@ -77,9 +77,9 @@
 					else :
 						
 						if ( !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
-							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woothemes').'</p>';
+							echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woocommerce').'</p>';
 						else :
-							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
+							echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce').'</p>';
 						endif;
 						
 					endif;
@@ -111,7 +111,7 @@
 						if ($has_compound_tax && !$woocommerce->cart->prices_include_tax) :
 							?>
 							<tr class="order-subtotal">
-								<th colspan="2"><strong><?php _e('Order Subtotal', 'woothemes'); ?></strong></th>
+								<th colspan="2"><strong><?php _e('Order Subtotal', 'woocommerce'); ?></strong></th>
 								<td><?php echo $woocommerce->cart->get_cart_subtotal( true ); ?></td>
 							</tr>
 							<?php
@@ -132,7 +132,7 @@
 					
 						?>
 						<tr class="tax">
-							<th colspan="2"><?php _e('Tax', 'woothemes'); ?></th>
+							<th colspan="2"><?php _e('Tax', 'woocommerce'); ?></th>
 							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
@@ -144,7 +144,7 @@
 			<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 			
 			<tr class="discount">
-				<th colspan="2"><?php _e('Order Discount', 'woothemes'); ?></th>
+				<th colspan="2"><?php _e('Order Discount', 'woocommerce'); ?></th>
 				<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 			</tr>
 			
@@ -153,7 +153,7 @@
 			<?php do_action('woocommerce_before_order_total'); ?>
 			
 			<tr class="total">
-				<th colspan="2"><strong><?php _e('Order Total', 'woothemes'); ?></strong></th>
+				<th colspan="2"><strong><?php _e('Order Total', 'woocommerce'); ?></strong></th>
 				<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
 			</tr>
 			
@@ -212,9 +212,9 @@
 				else :
 				
 					if ( !$woocommerce->customer->get_country() ) :
-						echo '<p>'.__('Please fill in your details above to see available payment methods.', 'woothemes').'</p>';
+						echo '<p>'.__('Please fill in your details above to see available payment methods.', 'woocommerce').'</p>';
 					else :
-						echo '<p>'.__('Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woothemes').'</p>';
+						echo '<p>'.__('Sorry, it seems that there are no available payment methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce').'</p>';
 					endif;
 					
 				endif;
@@ -224,17 +224,17 @@
 
 		<div class="form-row">
 		
-			<noscript><?php _e('Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'woothemes'); ?><br/><input type="submit" class="button-alt" name="update_totals" value="<?php _e('Update totals', 'woothemes'); ?>" /></noscript>
+			<noscript><?php _e('Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so.', 'woocommerce'); ?><br/><input type="submit" class="button-alt" name="update_totals" value="<?php _e('Update totals', 'woocommerce'); ?>" /></noscript>
 		
 			<?php $woocommerce->nonce_field('process_checkout')?>
 			
 			<?php do_action( 'woocommerce_review_order_before_submit' ); ?>
 			
-			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php echo apply_filters('woocommerce_order_button_text', __('Place order', 'woothemes')); ?>" />
+			<input type="submit" class="button alt" name="place_order" id="place_order" value="<?php echo apply_filters('woocommerce_order_button_text', __('Place order', 'woocommerce')); ?>" />
 			
 			<?php if (get_option('woocommerce_terms_page_id')>0) : ?>
 			<p class="form-row terms">
-				<label for="terms" class="checkbox"><?php _e('I accept the', 'woothemes'); ?> <a href="<?php echo esc_url( get_permalink(get_option('woocommerce_terms_page_id')) ); ?>" target="_blank"><?php _e('terms &amp; conditions', 'woothemes'); ?></a></label>
+				<label for="terms" class="checkbox"><?php _e('I accept the', 'woocommerce'); ?> <a href="<?php echo esc_url( get_permalink(get_option('woocommerce_terms_page_id')) ); ?>" target="_blank"><?php _e('terms &amp; conditions', 'woocommerce'); ?></a></label>
 				<input type="checkbox" class="input-checkbox" name="terms" <?php if (isset($_POST['terms'])) echo 'checked="checked"'; ?> id="terms" />
 			</p>
 			<?php endif; ?>

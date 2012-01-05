@@ -9,7 +9,7 @@ if (sizeof($crosssells)==0) return;
 $woocommerce_loop['columns'] = 2;
 ?>
 <div class="cross-sells">
-	<h2><?php _e('You may be interested in&hellip;', 'woothemes') ?></h2>
+	<h2><?php _e('You may be interested in&hellip;', 'woocommerce') ?></h2>
 	<?php
 	$args = array(
 		'post_type'	=> 'product',

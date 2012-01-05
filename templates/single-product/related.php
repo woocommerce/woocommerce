@@ -9,7 +9,7 @@ $related = $product->get_related();
 
 if (sizeof($related)==0) return;
 ?>
-<div class="related products"><h2><?php _e('Related Products', 'woothemes'); ?></h2>
+<div class="related products"><h2><?php _e('Related Products', 'woocommerce'); ?></h2>
 	<?php
 		$args = array(
 			'post_type'	=> 'product',

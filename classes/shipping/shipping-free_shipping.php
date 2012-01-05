@@ -13,7 +13,7 @@ class free_shipping extends woocommerce_shipping_method {
 	
 	function __construct() { 
         $this->id 			= 'free_shipping';
-        $this->method_title = __('Free shipping', 'woothemes');
+        $this->method_title = __('Free shipping', 'woocommerce');
 
 		// Load the form fields.
 		$this->init_form_fields();
@@ -41,42 +41,42 @@ class free_shipping extends woocommerce_shipping_method {
     
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' 		=> __( 'Enable/Disable', 'woothemes' ), 
+							'title' 		=> __( 'Enable/Disable', 'woocommerce' ), 
 							'type' 			=> 'checkbox', 
-							'label' 		=> __( 'Enable Free Shipping', 'woothemes' ), 
+							'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ), 
 							'default' 		=> 'yes'
 						), 
 			'title' => array(
-							'title' 		=> __( 'Method Title', 'woothemes' ), 
+							'title' 		=> __( 'Method Title', 'woocommerce' ), 
 							'type' 			=> 'text', 
-							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
-							'default'		=> __( 'Free Shipping', 'woothemes' )
+							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ), 
+							'default'		=> __( 'Free Shipping', 'woocommerce' )
 						),
 			'min_amount' => array(
-							'title' 		=> __( 'Minimum Order Amount', 'woothemes' ), 
+							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ), 
 							'type' 			=> 'text', 
-							'description' 	=> __('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woothemes'),
+							'description' 	=> __('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woocommerce'),
 							'default' 		=> ''
 						),
 			'requires_coupon' => array(
-							'title' 		=> __( 'Coupon', 'woothemes' ), 
+							'title' 		=> __( 'Coupon', 'woocommerce' ), 
 							'type' 			=> 'checkbox', 
-							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woothemes' ), 
-							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method.', 'woothemes'),
+							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woocommerce' ), 
+							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method.', 'woocommerce'),
 							'default' 		=> 'no'
 						),
 			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woothemes' ), 
+							'title' 		=> __( 'Method availability', 'woocommerce' ), 
 							'type' 			=> 'select', 
 							'default' 		=> 'all',
 							'class'			=> 'availability',
 							'options'		=> array(
-								'all' 		=> __('All allowed countries', 'woothemes'),
-								'specific' 	=> __('Specific Countries', 'woothemes')
+								'all' 		=> __('All allowed countries', 'woocommerce'),
+								'specific' 	=> __('Specific Countries', 'woocommerce')
 							)
 						),
 			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woothemes' ), 
+							'title' 		=> __( 'Specific Countries', 'woocommerce' ), 
 							'type' 			=> 'multiselect', 
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
@@ -97,8 +97,8 @@ class free_shipping extends woocommerce_shipping_method {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('Free Shipping', 'woothemes'); ?></h3>
-    	<p><?php _e('Free Shipping - does what it says on the tin.', 'woothemes'); ?></p>
+    	<h3><?php _e('Free Shipping', 'woocommerce'); ?></h3>
+    	<p><?php _e('Free Shipping - does what it says on the tin.', 'woocommerce'); ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.

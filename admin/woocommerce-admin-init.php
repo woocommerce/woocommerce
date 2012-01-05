@@ -21,10 +21,10 @@ function woocommerce_admin_menu() {
 	
 	if ( current_user_can( 'manage_woocommerce' ) ) $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
-    add_menu_page(__('WooCommerce', 'woothemes'), __('WooCommerce', 'woothemes'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
-    add_submenu_page('woocommerce', __('WooCommerce Settings', 'woothemes'),  __('Settings', 'woothemes') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
-    add_submenu_page('woocommerce', __('Reports', 'woothemes'),  __('Reports', 'woothemes') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports_page');
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woothemes'), __('Attributes', 'woothemes'), 'manage_categories', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
+    add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
+    add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports_page');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_categories', 'woocommerce_attributes', 'woocommerce_attributes_page');
     
     $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     
@@ -131,18 +131,18 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'chosen' );
 		
 		$woocommerce_witepanel_params = array( 
-			'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woothemes'),
-			'cart_total' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to calculate discounts before tax manually.", 'woothemes'),
-			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woothemes'),
-			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woothemes'),
-			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woothemes'),
+			'remove_item_notice' 			=>  __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woocommerce'),
+			'cart_total' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to calculate discounts before tax manually.", 'woocommerce'),
+			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
+			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce'),
+			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
 			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
 			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
-			'meta_name'						=> __('Meta Name', 'woothemes'),
-			'meta_value'					=> __('Meta Value', 'woothemes'),
-			'no_customer_selected'			=> __('No customer selected', 'woothemes'),
-			'tax_label'						=> __('Tax Label', 'woothemes'),
+			'meta_name'						=> __('Meta Name', 'woocommerce'),
+			'meta_value'					=> __('Meta Value', 'woocommerce'),
+			'no_customer_selected'			=> __('No customer selected', 'woocommerce'),
+			'tax_label'						=> __('Tax Label', 'woocommerce'),
 			'plugin_url' 					=> $woocommerce->plugin_url(),
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
 			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),

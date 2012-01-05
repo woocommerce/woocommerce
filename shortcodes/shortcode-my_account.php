@@ -131,12 +131,12 @@ function woocommerce_save_address() {
 		$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
 		
 		// Validation: Required fields
-		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woothemes') );
+		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
 		
 		// Postcode
 		if ($key=='billing_postcode' || $key=='shipping_postcode') :
 			if ( ! $woocommerce->validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
-				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woothemes' ) ); 
+				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) ); 
 			else :
 				$_POST[$key] = $woocommerce->validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 			endif;
@@ -220,10 +220,10 @@ function woocommerce_save_password() {
 	$_POST = array_map( 'woocommerce_clean', $_POST );
 
 	if ( empty( $_POST[ 'password_1' ] ) || empty( $_POST[ 'password_2' ] ) )
-		$woocommerce->add_error( __( 'Please enter your password.', 'woothemes' ) );
+		$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
 	
 	if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] )
-		$woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
+		$woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
 		
 	if ( $woocommerce->error_count() == 0 ) {
 		
@@ -263,14 +263,14 @@ function woocommerce_view_order() {
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 	
 	echo '<p>'
-	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woothemes'), $order->id, date(get_option('date_format'), strtotime($order->order_date)) )
-	. sprintf( __('. Order status: <mark>%s</mark>', 'woothemes'), __($status->name, 'woothemes') )
+	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date(get_option('date_format'), strtotime($order->order_date)) )
+	. sprintf( __('. Order status: <mark>%s</mark>', 'woocommerce'), __($status->name, 'woocommerce') )
 	. '.</p>';
 
 	$notes = $order->get_customer_order_notes();
 	if ($notes) :
 		?>
-		<h2><?php _e('Order Updates', 'woothemes'); ?></h2>
+		<h2><?php _e('Order Updates', 'woocommerce'); ?></h2>
 		<ol class="commentlist notes">	
 			<?php foreach ($notes as $note) : ?>
 			<li class="comment note">

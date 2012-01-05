@@ -20,9 +20,9 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_product_categories';
-		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woothemes' );
+		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_categories';
-		$this->woo_widget_name = __('WooCommerce Product Categories', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Product Categories', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -35,7 +35,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	function widget( $args, $instance ) {
 		extract( $args );
 
-		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Product Categories', 'woothemes' ) : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Product Categories', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		$c = $instance['count'] ? '1' : '0';
 		$h = $instance['hierarchical'] ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
@@ -111,23 +111,23 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$hierarchical = isset( $instance['hierarchical'] ) ? (bool) $instance['hierarchical'] : false;
 		$dropdown = isset( $instance['dropdown'] ) ? (bool) $instance['dropdown'] : false;
 ?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woothemes' ); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 		
-		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order by:', 'woothemes') ?></label>
+		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order by:', 'woocommerce') ?></label>
 		<select id="<?php echo esc_attr( $this->get_field_id('orderby') ); ?>" name="<?php echo esc_attr( $this->get_field_name('orderby') ); ?>">
-			<option value="and" <?php selected($orderby, 'order'); ?>><?php _e('Category Order', 'woothemes'); ?></option>
-			<option value="or" <?php selected($orderby, 'name'); ?>><?php _e('Name', 'woothemes'); ?></option>
+			<option value="and" <?php selected($orderby, 'order'); ?>><?php _e('Category Order', 'woocommerce'); ?></option>
+			<option value="or" <?php selected($orderby, 'name'); ?>><?php _e('Name', 'woocommerce'); ?></option>
 		</select></p>
 
 		<p><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('dropdown') ); ?>" name="<?php echo esc_attr( $this->get_field_name('dropdown') ); ?>"<?php checked( $dropdown ); ?> />
-		<label for="<?php echo $this->get_field_id('dropdown'); ?>"><?php _e( 'Show as dropdown', 'woothemes' ); ?></label><br />
+		<label for="<?php echo $this->get_field_id('dropdown'); ?>"><?php _e( 'Show as dropdown', 'woocommerce' ); ?></label><br />
 
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('count') ); ?>" name="<?php echo esc_attr( $this->get_field_name('count') ); ?>"<?php checked( $count ); ?> />
-		<label for="<?php echo $this->get_field_id('count'); ?>"><?php _e( 'Show post counts', 'woothemes' ); ?></label><br />
+		<label for="<?php echo $this->get_field_id('count'); ?>"><?php _e( 'Show post counts', 'woocommerce' ); ?></label><br />
 
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('hierarchical') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hierarchical') ); ?>"<?php checked( $hierarchical ); ?> />
-		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woothemes' ); ?></label></p>
+		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woocommerce' ); ?></label></p>
 <?php
 	}
 

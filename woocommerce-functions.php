@@ -135,7 +135,7 @@ function woocommerce_list_pages($pages){
  **/
 function woocommerce_nav_menu_items( $items, $args ) {
 	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(get_option('woocommerce_myaccount_page_id'))) && is_user_logged_in() ) :
-		$items .= '<li><a href="'. wp_logout_url() .'">'.__('Logout', 'woothemes').'</a></li>';
+		$items .= '<li><a href="'. wp_logout_url() .'">'.__('Logout', 'woocommerce').'</a></li>';
 	endif;
 	
     return $items;
@@ -170,7 +170,7 @@ function woocommerce_update_cart_action() {
 	
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 		
-		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
+		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
 		
 		if ( wp_get_referer() ) :
 			wp_safe_redirect( wp_get_referer() );
@@ -190,7 +190,7 @@ function woocommerce_update_cart_action() {
 			endforeach;
 		endif;
 		
-		$woocommerce->add_message( __('Cart updated.', 'woothemes') );
+		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
 		
 	endif;
 }
@@ -219,7 +219,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		// Variation add to cart
 		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id'])) :
             
-            $woocommerce->add_error( __('Please choose product options&hellip;', 'woothemes') );
+            $woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
             wp_safe_redirect(get_permalink($_GET['product']));
             exit;
             
@@ -257,7 +257,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				endif;
 
             else :
-                $woocommerce->add_error( __('Please choose product options&hellip;', 'woothemes') );
+                $woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
                 wp_redirect(get_permalink($_GET['product']));
                 exit;
             endif;
@@ -283,13 +283,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			endforeach;
 			
 			if ($total_quantity==0) :
-				$woocommerce->add_error( __('Please choose a quantity&hellip;', 'woothemes') );
+				$woocommerce->add_error( __('Please choose a quantity&hellip;', 'woocommerce') );
 			endif;
 		
 		elseif ($_GET['product']) :
 			
 			/* Link on product pages */
-			$woocommerce->add_error( __('Please choose a product&hellip;', 'woothemes') );
+			$woocommerce->add_error( __('Please choose a product&hellip;', 'woocommerce') );
 			wp_redirect( get_permalink( $_GET['product'] ) );
 			exit;
 		
@@ -335,10 +335,10 @@ function woocommerce_add_to_cart_message() {
 		
 		$return_to = (wp_get_referer()) ? wp_get_referer() : home_url();
 
-		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">Continue Shopping &rarr;</a> Product successfully added to your cart.', 'woothemes'), $return_to ));
+		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">Continue Shopping &rarr;</a> Product successfully added to your cart.', 'woocommerce'), $return_to ));
 	
 	else :
-		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woothemes'), $woocommerce->cart->get_cart_url()) );
+		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woocommerce'), $woocommerce->cart->get_cart_url()) );
 	endif;
 }
 
@@ -391,8 +391,8 @@ function woocommerce_process_login() {
 	
 		$woocommerce->verify_nonce('login');
 
-		if ( !isset($_POST['username']) || empty($_POST['username']) ) $woocommerce->add_error( __('Username is required.', 'woothemes') );
-		if ( !isset($_POST['password']) || empty($_POST['password']) ) $woocommerce->add_error( __('Password is required.', 'woothemes') );
+		if ( !isset($_POST['username']) || empty($_POST['username']) ) $woocommerce->add_error( __('Username is required.', 'woocommerce') );
+		if ( !isset($_POST['password']) || empty($_POST['password']) ) $woocommerce->add_error( __('Password is required.', 'woocommerce') );
 		
 		if ($woocommerce->error_count()==0) :
 			
@@ -458,31 +458,31 @@ function woocommerce_process_registration() {
 		
 		// Check the username
 		if ( $sanitized_user_login == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.', 'woocommerce' ) );
 		} elseif ( ! validate_username( $_POST['username'] ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.', 'woocommerce' ) );
 			$sanitized_user_login = '';
 		} elseif ( username_exists( $sanitized_user_login ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.', 'woocommerce' ) );
 		}
 	
 		// Check the e-mail address
 		if ( $user_email == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.', 'woocommerce' ) );
 		} elseif ( ! is_email( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'woocommerce' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'woothemes' ) );
+			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'woocommerce' ) );
 		}
 	
 		// Password
-		if ( !$password ) $woocommerce->add_error( __('Password is required.', 'woothemes') );
-		if ( !$password2 ) $woocommerce->add_error( __('Re-enter your password.', 'woothemes') );
-		if ( $password != $password2 ) $woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
+		if ( !$password ) $woocommerce->add_error( __('Password is required.', 'woocommerce') );
+		if ( !$password2 ) $woocommerce->add_error( __('Re-enter your password.', 'woocommerce') );
+		if ( $password != $password2 ) $woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
 		
 		// Spam trap
-		if (isset($_POST['email_2']) && $_POST['email_2']) $woocommerce->add_error( __('Anti-spam field was filled in.', 'woothemes') );
+		if (isset($_POST['email_2']) && $_POST['email_2']) $woocommerce->add_error( __('Anti-spam field was filled in.', 'woocommerce') );
 		
 		if ($woocommerce->error_count()==0) :
 			
@@ -496,7 +496,7 @@ function woocommerce_process_registration() {
                 $user_id 	= wp_create_user( $sanitized_user_login, $password, $user_email );
                 
                 if ( !$user_id ) {
-                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woothemes'), get_option('admin_email')));
+                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woocommerce'), get_option('admin_email')));
                     return;
                 }
 
@@ -546,18 +546,18 @@ function woocommerce_cancel_order() {
 		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed')) && $woocommerce->verify_nonce('cancel_order', '_GET')) :
 			
 			// Cancel the order + restore stock
-			$order->cancel_order( __('Order cancelled by customer.', 'woothemes') );
+			$order->cancel_order( __('Order cancelled by customer.', 'woocommerce') );
 			
 			// Message
-			$woocommerce->add_message( __('Your order was cancelled.', 'woothemes') );
+			$woocommerce->add_message( __('Your order was cancelled.', 'woocommerce') );
 		
 		elseif ($order->status!='pending') :
 			
-			$woocommerce->add_error( __('Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woothemes') );
+			$woocommerce->add_error( __('Your order is no longer pending and could not be cancelled. Please contact us if you need assistance.', 'woocommerce') );
 			
 		else :
 		
-			$woocommerce->add_error( __('Invalid order.', 'woothemes') );
+			$woocommerce->add_error( __('Invalid order.', 'woocommerce') );
 			
 		endif;
 		
@@ -581,7 +581,7 @@ function woocommerce_download_product() {
 		$email = urldecode( $_GET['email'] );
 		
 		if (!is_email($email)) :
-			wp_die( sprintf(__('Invalid email address. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			wp_die( sprintf(__('Invalid email address. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 		endif;
 		
 		$download_result = $wpdb->get_row( $wpdb->prepare("
@@ -593,7 +593,7 @@ function woocommerce_download_product() {
 		;", $email, $order_key, $download_file ) );
 		
 		if (!$download_result) :
-			wp_die( sprintf(__('Invalid download. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			wp_die( sprintf(__('Invalid download. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 			exit;
 		endif;
 		
@@ -603,13 +603,13 @@ function woocommerce_download_product() {
 		if ($order_id) :
 			$order = &new woocommerce_order( $order_id );
 			if ($order->status!='completed' && $order->status!='processing' && $order->status!='publish') :
-				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 				exit;
 			endif;
 		endif;
 		
 		if ($downloads_remaining=='0') :
-			wp_die( sprintf(__('Sorry, you have reached your download limit for this file. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+			wp_die( sprintf(__('Sorry, you have reached your download limit for this file. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 		else :
 			
 			if ($downloads_remaining>0) :
@@ -753,7 +753,7 @@ function woocommerce_download_product() {
             	
             else :
             	
-            	@readfile_chunked("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woothemes'), home_url()) );
+            	@readfile_chunked("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 			
             endif;
             
@@ -784,7 +784,7 @@ function woocommerce_google_tracking() {
 		$username 		= $current_user->user_login;
 	else :
 		$user_id 		= '';
-		$username 		= __('Guest', 'woothemes');
+		$username 		= __('Guest', 'woocommerce');
 	endif;
 	?>
 	<script type="text/javascript">
@@ -834,7 +834,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 		$username 		= $current_user->user_login;
 	else :
 		$user_id 		= '';
-		$username 		= __('Guest', 'woothemes');
+		$username 		= __('Guest', 'woocommerce');
 	endif;
 	?>
 	<script type="text/javascript">
@@ -936,7 +936,7 @@ function woocommerce_products_rss_feed() {
 		
 		$feed = get_post_type_archive_feed_link( 'product' );
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . __('New products', 'woothemes') . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . __('New products', 'woocommerce') . '" href="' . $feed . '" />';
 	
 	elseif ( is_tax( 'product_cat' ) ) :
 		
@@ -944,7 +944,7 @@ function woocommerce_products_rss_feed() {
 		
 		$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
 		
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products added to %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products added to %s', 'woocommerce'), urlencode($term->name)) . '" href="' . $feed . '" />';
 		
 	elseif ( is_tax( 'product_tag' ) ) :
 		
@@ -952,7 +952,7 @@ function woocommerce_products_rss_feed() {
 		
 		$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
 		
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products tagged %s', 'woothemes'), urlencode($term->name)) . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__('New products tagged %s', 'woocommerce'), urlencode($term->name)) . '" href="' . $feed . '" />';
 		
 	endif;
 }
@@ -974,10 +974,10 @@ function woocommerce_check_comment_rating($comment_data) {
 	
 	// If posting a comment (not trackback etc) and not logged in
 	if ( isset($_POST['rating']) && !$woocommerce->verify_nonce('comment_rating') )
-		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woothemes') );
+		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woocommerce') );
 		
 	elseif ( isset($_POST['rating']) && empty($_POST['rating']) && $comment_data['comment_type']== '' ) {
-		wp_die( __('Please rate the product.',"woothemes") );
+		wp_die( __('Please rate the product.', 'woocommerce') );
 		exit;
 	}
 	return $comment_data;

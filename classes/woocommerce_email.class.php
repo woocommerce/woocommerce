@@ -115,9 +115,9 @@ class woocommerce_email {
 		
 		$order = new woocommerce_order( $order_id );
 		
-		$email_heading = __('New Customer Order', 'woothemes');
+		$email_heading = __('New Customer Order', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (# %s)', 'woothemes' ), get_bloginfo('name' ), $order_id ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (# %s)', 'woocommerce' ), get_bloginfo('name' ), $order_id ), $order );
 		
 		// Buffer
 		ob_start();
@@ -140,9 +140,9 @@ class woocommerce_email {
 		
 		$order = new woocommerce_order( $order_id );
 
-		$email_heading = __('Order Received', 'woothemes');
+		$email_heading = __('Order Received', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_customer_procesing_order', sprintf( __( '[%s] Order Received', 'woothemes' ), get_bloginfo( 'name' ) ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_customer_procesing_order', sprintf( __( '[%s] Order Received', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
 		
 		// Buffer
 		ob_start();
@@ -169,11 +169,11 @@ class woocommerce_email {
 		$order = new woocommerce_order( $order_id );
 		
 		if ($order->has_downloadable_item) :
-			$subject		= __('[%s] Order Complete/Download Links', 'woothemes');
-			$email_heading 	= __('Order Complete/Download Links', 'woothemes');
+			$subject		= __('[%s] Order Complete/Download Links', 'woocommerce');
+			$email_heading 	= __('Order Complete/Download Links', 'woocommerce');
 		else :
-			$subject		= __('[%s] Order Complete', 'woothemes');
-			$email_heading 	= __('Order Complete', 'woothemes');
+			$subject		= __('[%s] Order Complete', 'woocommerce');
+			$email_heading 	= __('Order Complete', 'woocommerce');
 		endif;
 		
 		$email_heading = apply_filters( 'woocommerce_completed_order_customer_notification_subject', $email_heading );
@@ -204,9 +204,9 @@ class woocommerce_email {
 		
 		$order = $pay_for_order;
 		
-		$email_heading = sprintf(__('Invoice for Order #%s', 'woothemes'), $order->id);
+		$email_heading = sprintf(__('Invoice for Order #%s', 'woocommerce'), $order->id);
 	
-		$subject = apply_filters( 'woocommerce_email_subject_customer_pay_for_order', sprintf( __( '[%s] Pay for Order', 'woothemes' ), get_bloginfo( 'name' ) ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_customer_pay_for_order', sprintf( __( '[%s] Pay for Order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
 	
 		// Buffer
 		ob_start();
@@ -243,9 +243,9 @@ class woocommerce_email {
 		
 		$order = new woocommerce_order( $order_id );
 		
-		$email_heading = __('A note has been added to your order', 'woothemes');
+		$email_heading = __('A note has been added to your order', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_customer_note', sprintf( __( '[%s] A note has been added to your order', 'woothemes' ), get_bloginfo( 'name' ) ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_customer_note', sprintf( __( '[%s] A note has been added to your order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
 		
 		// Buffer
 		ob_start();
@@ -266,11 +266,11 @@ class woocommerce_email {
 	function low_stock( $product ) {
 		$_product = new woocommerce_product($product);
 	
-		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product low in stock', 'woothemes' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product low in stock', 'woocommerce' ) ), $_product );
 		
 		$message = $this->wrap_message( 
-			__('Product low in stock', 'woothemes'),
-			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woothemes')
+			__('Product low in stock', 'woocommerce'),
+			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woocommerce')
 		);
 	
 		// Send the mail
@@ -283,11 +283,11 @@ class woocommerce_email {
 	function no_stock( $product ) {
 		$_product = new woocommerce_product($product);
 		
-		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product out of stock', 'woothemes' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product out of stock', 'woocommerce' ) ), $_product );
 		
 		$message = $this->wrap_message( 
-			__('Product out of stock', 'woothemes'),
-			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woothemes')
+			__('Product out of stock', 'woocommerce'),
+			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woocommerce')
 		);
 	
 		// Send the mail
@@ -314,11 +314,11 @@ class woocommerce_email {
 	
 		$_product = new woocommerce_product($product);
 		
-		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product Backorder', 'woothemes' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product Backorder', 'woocommerce' ) ), $_product );
 	
 		$message = $this->wrap_message( 
-			__('Product Backorder', 'woothemes'),
-			sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woothemes'), $quantity, $_product->id, $_product->get_title(), $_product->sku, $order_id )
+			__('Product Backorder', 'woocommerce'),
+			sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woocommerce'), $quantity, $_product->id, $_product->get_title(), $_product->sku, $order_id )
 		);
 	
 		// Send the mail
@@ -334,7 +334,7 @@ class woocommerce_email {
 		$show_fields = apply_filters('woocommerce_email_order_meta_keys', array('coupons'), $sent_to_admin);
 	
 		if ($order->customer_note) :
-			$meta[__('Note:', 'woothemes')] = wptexturize($order->customer_note);
+			$meta[__('Note:', 'woocommerce')] = wptexturize($order->customer_note);
 		endif;
 		
 		if ($show_fields) foreach ($show_fields as $field) :
@@ -345,7 +345,7 @@ class woocommerce_email {
 		endforeach;
 		
 		if (sizeof($meta)>0) :
-			echo '<h2>'.__('Order information', 'woothemes').'</h2>';
+			echo '<h2>'.__('Order information', 'woocommerce').'</h2>';
 			foreach ($meta as $key=>$value) :
 				echo '<p><strong>'.$key.':</strong> '.$value.'</p>';
 			endforeach;
@@ -368,8 +368,8 @@ class woocommerce_email {
 		 
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 		
-		$subject		= apply_filters( 'woocommerce_email_subject_customer_new_account', sprintf( __( 'Your account on %s', 'woothemes'), $blogname ), $user );
-		$email_heading 	= __('Your account details', 'woothemes');
+		$subject		= apply_filters( 'woocommerce_email_subject_customer_new_account', sprintf( __( 'Your account on %s', 'woocommerce'), $blogname ), $user );
+		$email_heading 	= __('Your account details', 'woocommerce');
 	
 		// Buffer
 		ob_start();

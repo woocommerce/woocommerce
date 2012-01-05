@@ -33,7 +33,7 @@ class woocommerce_settings_api {
 	 *
 	 * @since 1.0.0
 	 */
-	function init_form_fields () { return __( 'This function needs to be overridden by your payment gateway class.', 'woothemes' ); }
+	function init_form_fields () { return __( 'This function needs to be overridden by your payment gateway class.', 'woocommerce' ); }
 	
 	/**
 	 * Admin Panel Options Processing

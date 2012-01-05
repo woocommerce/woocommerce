@@ -21,9 +21,9 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 	
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_top_rated_products';
-		$this->woo_widget_description = __( 'Display a list of top rated products on your site.', 'woothemes' );
+		$this->woo_widget_description = __( 'Display a list of top rated products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_top_rated_products';
-		$this->woo_widget_name = __('WooCommerce Top Rated Products', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Top Rated Products', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -52,7 +52,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		ob_start();
 		extract($args);
 
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('Top Rated Products', 'woothemes') : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty($instance['title']) ? __('Top Rated Products', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		
 		if ( !$number = (int) $instance['number'] ) $number = 10;
 		else if ( $number < 1 ) $number = 1;
@@ -132,10 +132,10 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] )
 			$number = 5;
 ?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woothemes'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 <?php
 	}

@@ -19,12 +19,12 @@ function woocommerce_add_category_thumbnail_field() {
 	global $woocommerce;
 	?>
 	<div class="form-field">
-		<label><?php _e('Thumbnail', 'woothemes'); ?></label>
+		<label><?php _e('Thumbnail', 'woocommerce'); ?></label>
 		<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /></div>
 		<div style="line-height:60px;">
 			<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" />
-			<button type="submit" class="upload_image_button button"><?php _e('Upload/Add image', 'woothemes'); ?></button>
-			<button type="submit" class="remove_image_button button"><?php _e('Remove image', 'woothemes'); ?></button>
+			<button type="submit" class="upload_image_button button"><?php _e('Upload/Add image', 'woocommerce'); ?></button>
+			<button type="submit" class="remove_image_button button"><?php _e('Remove image', 'woocommerce'); ?></button>
 		</div>
 		<script type="text/javascript">
 			
@@ -78,13 +78,13 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 	endif;
 	?>
 	<tr class="form-field">
-		<th scope="row" valign="top"><label><?php _e('Thumbnail', 'woothemes'); ?></label></th>
+		<th scope="row" valign="top"><label><?php _e('Thumbnail', 'woocommerce'); ?></label></th>
 		<td>
 			<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo $image; ?>" width="60px" height="60px" /></div>
 			<div style="line-height:60px;">
 				<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" value="<?php echo $thumbnail_id; ?>" />
-				<button type="submit" class="upload_image_button button"><?php _e('Upload/Add image', 'woothemes'); ?></button>
-				<button type="submit" class="remove_image_button button"><?php _e('Remove image', 'woothemes'); ?></button>
+				<button type="submit" class="upload_image_button button"><?php _e('Upload/Add image', 'woocommerce'); ?></button>
+				<button type="submit" class="remove_image_button button"><?php _e('Remove image', 'woocommerce'); ?></button>
 			</div>
 			<script type="text/javascript">
 				
@@ -143,7 +143,7 @@ add_action('product_cat_pre_add_form', 'woocommerce_product_cat_description');
 
 function woocommerce_product_cat_description() {
 
-	echo wpautop(__('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woothemes'));
+	echo wpautop(__('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce'));
 
 }
 
@@ -154,7 +154,7 @@ add_action('product_shipping_class_pre_add_form', 'woocommerce_shipping_class_de
 
 function woocommerce_shipping_class_description() {
 
-	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woothemes'));
+	echo wpautop(__('Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woocommerce'));
 
 }
 
@@ -201,7 +201,7 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
  function woocommerce_product_cat_columns( $columns ) {
  	$new_columns = array();
  	$new_columns['cb'] = $columns['cb'];
- 	$new_columns['thumb'] = __('Image', 'woothemes');
+ 	$new_columns['thumb'] = __('Image', 'woocommerce');
  	unset($columns['cb']);
  	$columns = array_merge( $new_columns, $columns );
  	return $columns;
@@ -238,7 +238,7 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
  }
  
  function woocommerce_shipping_class_column( $columns, $column, $id ) {
- 	if ($column=='configure') $columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__('Configure shipping class', 'woothemes').'</a>';
+ 	if ($column=='configure') $columns .= '<a href="'. admin_url( 'edit-tags.php?action=edit&taxonomy=product_shipping_class&tag_ID='. $id .'&post_type=product' ) .'" class="button alignright">'.__('Configure shipping class', 'woocommerce').'</a>';
  	
  	return $columns;	
  }

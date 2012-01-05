@@ -32,19 +32,19 @@ class woocommerce_checkout {
 		$this->checkout_fields['account']	= array(
 			'account_username' => array( 
 				'type' => 'text', 
-				'label' => __('Account username', 'woothemes'), 
-				'placeholder' => __('Username', 'woothemes') 
+				'label' => __('Account username', 'woocommerce'), 
+				'placeholder' => __('Username', 'woocommerce') 
 				),
 			'account_password' => array( 
 				'type' => 'password', 
-				'label' => __('Account password', 'woothemes'), 
-				'placeholder' => __('Password', 'woothemes'),
+				'label' => __('Account password', 'woocommerce'), 
+				'placeholder' => __('Password', 'woocommerce'),
 				'class' => array('form-row-first')
 				),
 			'account_password-2' => array( 
 				'type' => 'password', 
-				'label' => __('Account password', 'woothemes'), 
-				'placeholder' => __('Password', 'woothemes'),
+				'label' => __('Account password', 'woocommerce'), 
+				'placeholder' => __('Password', 'woocommerce'),
 				'class' => array('form-row-last'), 
 				'label_class' => array('hidden')
 				)
@@ -53,8 +53,8 @@ class woocommerce_checkout {
 			'order_comments' => array( 
 				'type' => 'textarea', 
 				'class' => array('notes'), 
-				'label' => __('Order Notes', 'woothemes'), 
-				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woothemes') 
+				'label' => __('Order Notes', 'woocommerce'), 
+				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woocommerce') 
 				)
 			);
 		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
@@ -65,9 +65,9 @@ class woocommerce_checkout {
 		global $woocommerce;
 		
 		if ($woocommerce->cart->ship_to_billing_address_only()) :
-			echo '<h3>'.__('Billing &amp Shipping', 'woothemes').'</h3>';
+			echo '<h3>'.__('Billing &amp Shipping', 'woocommerce').'</h3>';
 		else : 
-			echo '<h3>'.__('Billing Address', 'woothemes').'</h3>';
+			echo '<h3>'.__('Billing Address', 'woocommerce').'</h3>';
 		endif;
 		
 		// Output billing form fields
@@ -82,13 +82,13 @@ class woocommerce_checkout {
 		
 			if (get_option('woocommerce_enable_guest_checkout')=='yes') :
 				
-				echo '<p class="form-row"><input class="input-checkbox" id="createaccount" '.checked($this->get_value('createaccount'), true).' type="checkbox" name="createaccount" value="1" /> <label for="createaccount" class="checkbox">'.__('Create an account?', 'woothemes').'</label></p>';
+				echo '<p class="form-row"><input class="input-checkbox" id="createaccount" '.checked($this->get_value('createaccount'), true).' type="checkbox" name="createaccount" value="1" /> <label for="createaccount" class="checkbox">'.__('Create an account?', 'woocommerce').'</label></p>';
 				
 			endif;
 			
 			echo '<div class="create-account">';
 			
-			echo '<p>'.__('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woothemes').'</p>'; 
+			echo '<p>'.__('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woocommerce').'</p>'; 
 			
 			foreach ($this->checkout_fields['account'] as $key => $field) :
 				woocommerce_form_field( $key, $field, $this->get_value( $key ) );
@@ -118,9 +118,9 @@ class woocommerce_checkout {
 			
 			endif;
 
-			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" '.checked($shiptobilling, 1, false).' type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox">'.__('Ship to same address?', 'woothemes').'</label></p>';
+			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" '.checked($shiptobilling, 1, false).' type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox">'.__('Ship to same address?', 'woocommerce').'</label></p>';
 			
-			echo '<h3>'.__('Shipping Address', 'woothemes').'</h3>';
+			echo '<h3>'.__('Shipping Address', 'woocommerce').'</h3>';
 			
 			echo'<div class="shipping_address">';
 					
@@ -140,7 +140,7 @@ class woocommerce_checkout {
 		if (get_option('woocommerce_enable_order_comments')!='no') :
 		
 			if ($woocommerce->cart->ship_to_billing_address_only()) :
-				echo '<h3>'.__('Additional Information', 'woothemes').'</h3>';
+				echo '<h3>'.__('Additional Information', 'woocommerce').'</h3>';
 			endif;
 			
 			foreach ($this->checkout_fields['order'] as $key => $field) :
@@ -167,7 +167,7 @@ class woocommerce_checkout {
 			$woocommerce->verify_nonce('process_checkout');
 
 			if (sizeof($woocommerce->cart->get_cart())==0) :
-				$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woothemes'), home_url()) );
+				$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce'), home_url()) );
 			endif;
 			
 			do_action('woocommerce_checkout_process');
@@ -218,7 +218,7 @@ class woocommerce_checkout {
 					$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
 					
 					// Validation: Required fields
-					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woothemes') );
+					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
 					
 					// Special handling for validation and formatting
 					switch ($key) :
@@ -226,16 +226,16 @@ class woocommerce_checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woothemes') ); 
+							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
 							else :
 								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 							endif;
 						break;
 						case "billing_phone" :
-							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woothemes') ); endif;
+							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
 						break;
 						case "billing_email" :
-							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woothemes') ); endif;
+							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
 						break;
 					endswitch;
 					
@@ -277,26 +277,26 @@ class woocommerce_checkout {
 			
 			if ($this->creating_account) :
 			
-				if ( empty($this->posted['account_username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woothemes') );
-				if ( empty($this->posted['account_password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woothemes') );
-				if ( $this->posted['account_password-2'] !== $this->posted['account_password'] ) $woocommerce->add_error( __('Passwords do not match.', 'woothemes') );
+				if ( empty($this->posted['account_username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woocommerce') );
+				if ( empty($this->posted['account_password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
+				if ( $this->posted['account_password-2'] !== $this->posted['account_password'] ) $woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
 			
 				// Check the username
 				if ( !validate_username( $this->posted['account_username'] ) ) :
-					$woocommerce->add_error( __('Invalid email/username.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid email/username.', 'woocommerce') );
 				elseif ( username_exists( $this->posted['account_username'] ) ) :
-					$woocommerce->add_error( __('An account is already registered with that username. Please choose another.', 'woothemes') );
+					$woocommerce->add_error( __('An account is already registered with that username. Please choose another.', 'woocommerce') );
 				endif;
 				
 				// Check the e-mail address
 				if ( email_exists( $this->posted['billing_email'] ) ) :
-					$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woothemes') );
+					$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woocommerce') );
 				endif;
 				
 			endif;
 			
 			// Terms
-			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woothemes') );
+			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
 			
 			if ($woocommerce->cart->needs_shipping()) :
 				
@@ -304,7 +304,7 @@ class woocommerce_checkout {
 				$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				if (!isset($available_methods[$this->posted['shipping_method']])) :
-					$woocommerce->add_error( __('Invalid shipping method.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid shipping method.', 'woocommerce') );
 				endif;	
 			
 			endif;	
@@ -313,7 +313,7 @@ class woocommerce_checkout {
 				// Payment Method
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 				if (!isset($available_gateways[$this->posted['payment_method']])) :
-					$woocommerce->add_error( __('Invalid payment method.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid payment method.', 'woocommerce') );
 				else :
 					// Payment Method Field Validation
 					$available_gateways[$this->posted['payment_method']]->validate_fields();
@@ -343,7 +343,7 @@ class woocommerce_checkout {
 			                $user_pass = $this->posted['account_password'];
 			                $user_id = wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
 			                if ( !$user_id ) {
-			                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woothemes'), get_option('admin_email')));
+			                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woocommerce'), get_option('admin_email')));
 			                    break;
 			                }
 		

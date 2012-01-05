@@ -148,12 +148,12 @@ class woocommerce_cart {
 					if ($_product->is_in_stock() && $_product->has_enough_stock( $values['quantity'] )) :
 						// :)
 					else :
-						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title(), $_product->stock ) );
+						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
 						return $error;
 					endif;
 				else :
 					if (!$_product->is_in_stock()) :
-						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woothemes'), $_product->get_title() ) );
+						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title() ) );
 						return $error;
 					endif;
 				endif;
@@ -360,22 +360,22 @@ class woocommerce_cart {
 			
 			// Type/Exists check
 			if ( $product_data->is_type('external') || !$product_data->exists() ) :
-				$woocommerce->add_error( __('This product cannot be purchased.', 'woothemes') );
+				$woocommerce->add_error( __('This product cannot be purchased.', 'woocommerce') );
 				return false; 
 			endif;
 			
 			// Price set check
 			if( $product_data->get_price() === '' ) :
-				$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set.', 'woothemes') );
+				$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set.', 'woocommerce') );
 				return false; 
 			endif;
 	
 			// Stock check - only check if we're managing stock and backorders are not allowed
 			if ( !$product_data->has_enough_stock( $quantity ) ) :
-				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woothemes'), $product_data->get_stock_quantity() ));
+				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woocommerce'), $product_data->get_stock_quantity() ));
 				return false; 
 			elseif ( !$product_data->is_in_stock() ) :
-				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
+				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
 				return false;
 			endif;
 			
@@ -385,10 +385,10 @@ class woocommerce_cart {
 				
 				// Stock check - this time accounting for whats already in-cart
 				if ( !$product_data->has_enough_stock( $quantity ) ) :
-					$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woothemes'), $product_data->get_stock_quantity(), $this->cart_contents[$cart_item_key]['quantity'] ));
+					$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woocommerce'), $product_data->get_stock_quantity(), $this->cart_contents[$cart_item_key]['quantity'] ));
 					return false; 
 				elseif ( !$product_data->is_in_stock() ) :
-					$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woothemes') );
+					$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
 					return false;
 				endif;
 	
@@ -1043,7 +1043,7 @@ class woocommerce_cart {
 					endif;
 	
 				else :
-					return __('Free!', 'woothemes');
+					return __('Free!', 'woocommerce');
 				endif;
 			endif;
 		}
@@ -1053,7 +1053,7 @@ class woocommerce_cart {
 		 */
 		function get_cart_shipping_title() {
 			if (isset($this->shipping_label)) :
-				return __('via', 'woothemes') . ' ' . $this->shipping_label;
+				return __('via', 'woocommerce') . ' ' . $this->shipping_label;
 			endif;
 			return false;
 		}
@@ -1085,13 +1085,13 @@ class woocommerce_cart {
 				
 				// Check if applied
 				if ($woocommerce->cart->has_discount($coupon_code)) :
-					$woocommerce->add_error( __('Discount code already applied!', 'woothemes') );
+					$woocommerce->add_error( __('Discount code already applied!', 'woocommerce') );
 					return false;
 				endif;	
 				
 				// Check it can be used with cart
 				if (!$the_coupon->is_valid()) :
-					$woocommerce->add_error( __('Invalid coupon.', 'woothemes') );
+					$woocommerce->add_error( __('Invalid coupon.', 'woocommerce') );
 					return false;
 				endif;
 				
@@ -1109,11 +1109,11 @@ class woocommerce_cart {
 				
 				$this->applied_coupons[] = $coupon_code;
 				$this->set_session();
-				$woocommerce->add_message( __('Discount code applied successfully.', 'woothemes') );
+				$woocommerce->add_message( __('Discount code applied successfully.', 'woocommerce') );
 				return true;
 			
 			else :
-				$woocommerce->add_error( __('Coupon does not exist!', 'woothemes') );
+				$woocommerce->add_error( __('Coupon does not exist!', 'woocommerce') );
 				return false;
 			endif;
 			return false;

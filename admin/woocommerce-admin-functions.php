@@ -79,7 +79,7 @@ function woocommerce_preview_emails() {
 		
 		$mailer = $woocommerce->mailer();
 	
-		$email_heading = __('Email preview', 'woothemes');
+		$email_heading = __('Email preview', 'woocommerce');
 		
 		$message = '<h2>WooCommerce sit amet</h2>';
 		

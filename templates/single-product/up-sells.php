@@ -8,7 +8,7 @@ $upsells = $product->get_upsells();
 if (sizeof($upsells)==0) return;
 ?>
 <div class="upsells products">
-	<h2><?php _e('You may also like&hellip;', 'woothemes') ?></h2>
+	<h2><?php _e('You may also like&hellip;', 'woocommerce') ?></h2>
 	<?php
 	$args = array(
 		'post_type'	=> 'product',

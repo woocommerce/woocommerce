@@ -103,7 +103,7 @@ function woocommerce_ajax_update_order_review() {
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
 	if (sizeof($woocommerce->cart->get_cart())==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'woothemes').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woothemes').'</a></p>';
+		echo '<p class="error">'.__('Sorry, your session has expired.', 'woocommerce').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woocommerce').'</a></p>';
 		die();
 	endif;
 	
@@ -179,9 +179,9 @@ function woocommerce_feature_product() {
 
 	if( !is_admin() ) die;
 	
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
 	
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
+	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	
 	$post_id = isset($_GET['product_id']) && (int)$_GET['product_id'] ? (int)$_GET['product_id'] : '';
 	
@@ -209,8 +209,8 @@ add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product')
 function woocommerce_mark_order_complete() {
 
 	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
@@ -228,8 +228,8 @@ add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_co
 function woocommerce_mark_order_processing() {
 
 	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woothemes') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woothemes') );
+	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
@@ -514,9 +514,9 @@ function woocommerce_add_order_item() {
 	<tr class="item" rel="<?php echo $index; ?>">
 		<td class="product-id">
 			<img class="tips" tip="<?php
-				echo '<strong>'.__('Product ID:', 'woothemes').'</strong> '. $_product->id;
-				echo '<br/><strong>'.__('Variation ID:', 'woothemes').'</strong> '; if ($_product->variation_id) echo $_product->variation_id; else echo '-';
-				echo '<br/><strong>'.__('Product SKU:', 'woothemes').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
+				echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $_product->id;
+				echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if ($_product->variation_id) echo $_product->variation_id; else echo '-';
+				echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
 		</td>
 		<td class="sku">
@@ -528,8 +528,8 @@ function woocommerce_add_order_item() {
 		<td class="name">
 		
 			<div class="row-actions">
-				<span class="trash"><a class="remove_row" href="#"><?php _e('Delete item', 'woothemes'); ?></a> | </span>
-				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e('View product', 'woothemes'); ?></a>
+				<span class="trash"><a class="remove_row" href="#"><?php _e('Delete item', 'woocommerce'); ?></a> | </span>
+				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e('View product', 'woocommerce'); ?></a>
 			</div>
 			
 			<?php echo $_product->get_title(); ?>
@@ -537,7 +537,7 @@ function woocommerce_add_order_item() {
 			<table class="meta" cellspacing="0">
 				<tfoot>
 					<tr>
-						<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woothemes'); ?></button></td>
+						<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woocommerce'); ?></button></td>
 					</tr>
 				</tfoot>
 				<tbody class="meta_items"></tbody>
@@ -546,20 +546,20 @@ function woocommerce_add_order_item() {
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
 
 		<td class="cost">
-			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
+			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="tax">
-			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
+			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="tax_status">
 			<select name="item_tax_status[<?php echo $loop; ?>]">
 				<?php 
 				$options = array(
-					'taxable' => __('Taxable', 'woothemes'),
-					'shipping' => __('Shipping only', 'woothemes'),
-					'none' => __('None', 'woothemes')			
+					'taxable' => __('Taxable', 'woocommerce'),
+					'shipping' => __('Shipping only', 'woocommerce'),
+					'none' => __('None', 'woocommerce')			
 				);
 				foreach ($options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_class(), false ).'>'. $name .'</option>';
 				?>
@@ -571,7 +571,7 @@ function woocommerce_add_order_item() {
 				<?php 
 				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 				$classes_options = array();
-				$classes_options[''] = __('Standard', 'woothemes');
+				$classes_options[''] = __('Standard', 'woocommerce');
 				if ($tax_classes) foreach ($tax_classes as $class) :
 					$classes_options[sanitize_title($class)] = $class;
 				endforeach;
@@ -581,15 +581,15 @@ function woocommerce_add_order_item() {
 		</td>
 		
 		<td class="quantity" width="1%">
-			<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woothemes'); ?>" value="" size="2" />
+			<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woocommerce'); ?>" value="" size="2" />
 		</td>
 		
 		<td class="line_cost">
-			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
+			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" class="calculated" />
 		</td>
 		
 		<td class="line_tax">
-			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woothemes'); ?>" class="calculated" />
+			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" class="calculated" />
 		</td>
 		
 	</tr>
@@ -625,7 +625,7 @@ function woocommerce_add_order_note() {
 		if ($is_customer_note) echo 'customer-note';
 		echo '"><div class="note_content">';
 		echo wpautop(wptexturize($note));
-		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
+		echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woocommerce'), human_time_diff(current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woocommerce').'</a></p>';
 		echo '</li>';
 		
 	endif;
@@ -696,12 +696,12 @@ function woocommerce_upsell_crosssell_search_products() {
 		$SKU = get_post_meta($post->ID, '_sku', true);
 		
 		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e('Cross-sell', 'woothemes'); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e('Up-sell', 'woothemes'); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
+		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e('Cross-sell', 'woocommerce'); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e('Up-sell', 'woocommerce'); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
 		<?php
 						
 	endforeach; else : 
 	
-		?><li><?php _e('No products found', 'woothemes'); ?></li><?php 
+		?><li><?php _e('No products found', 'woocommerce'); ?></li><?php 
 		
 	endif; 
 	

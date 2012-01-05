@@ -18,7 +18,7 @@ global $woocommerce, $product, $available_variations, $attributes, $selected_att
 			<tr>
 				<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
 				<td><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
-					<option value=""><?php echo __('Choose an option', 'woothemes') ?>&hellip;</option>
+					<option value=""><?php echo __('Choose an option', 'woocommerce') ?>&hellip;</option>
 					<?php if(is_array($options)) : ?>
 						<?php
 							$selected_value = (isset($selected_attributes[sanitize_title($name)])) ? $selected_attributes[sanitize_title($name)] : '';
@@ -51,7 +51,7 @@ global $woocommerce, $product, $available_variations, $attributes, $selected_att
 		<div class="variations_button">
 			<input type="hidden" name="variation_id" value="" />
 			<?php woocommerce_quantity_input(); ?>
-			<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+			<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
 		</div>
 	</div>
 	<div><input type="hidden" name="product_id" value="<?php echo esc_attr( $post->ID ); ?>" /></div>

@@ -30,7 +30,7 @@ if( $product->get_price() === '') return;
 
 	 	<?php if (!$product->is_downloadable()) woocommerce_quantity_input(); ?>
 
-	 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woothemes'); ?></button>
+	 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
 
 	 	<?php do_action('woocommerce_after_add_to_cart_button'); ?>
 

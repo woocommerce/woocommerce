@@ -19,9 +19,9 @@ class WooCommerce_Widget_Login extends WP_Widget {
 	
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_login';
-		$this->woo_widget_description = __( 'Display a login area and "My Account" links in the sidebar.', 'woothemes' );
+		$this->woo_widget_description = __( 'Display a login area and "My Account" links in the sidebar.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_login';
-		$this->woo_widget_name = __('WooCommerce Login', 'woothemes' );
+		$this->woo_widget_name = __('WooCommerce Login', 'woocommerce' );
 		
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -39,8 +39,8 @@ class WooCommerce_Widget_Login extends WP_Widget {
 		// Don't show if on the account page since that has a login
 		if (is_account_page() && !is_user_logged_in()) return;
 			
-		$logged_out_title = (!empty($instance['logged_out_title'])) ? $instance['logged_out_title'] : __('Customer Login', 'woothemes');
-		$logged_in_title = (!empty($instance['logged_in_title'])) ? $instance['logged_in_title'] : __('Welcome %s', 'woothemes');
+		$logged_out_title = (!empty($instance['logged_out_title'])) ? $instance['logged_out_title'] : __('Customer Login', 'woocommerce');
+		$logged_in_title = (!empty($instance['logged_in_title'])) ? $instance['logged_in_title'] : __('Welcome %s', 'woocommerce');
 
 		echo $before_widget;
 		
@@ -53,9 +53,9 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			do_action('woocommerce_login_widget_logged_in_before_links');
 						
 			$links = apply_filters( 'woocommerce_login_widget_logged_in_links', array(
-				__('My account', 'woothemes') 	=> get_permalink(get_option('woocommerce_myaccount_page_id')), 
-				__('Change my password', 'woothemes') => get_permalink(get_option('woocommerce_change_password_page_id')),
-				__('Logout', 'woothemes')		=> wp_logout_url(home_url())
+				__('My account', 'woocommerce') 	=> get_permalink(get_option('woocommerce_myaccount_page_id')), 
+				__('Change my password', 'woocommerce') => get_permalink(get_option('woocommerce_change_password_page_id')),
+				__('Logout', 'woocommerce')		=> wp_logout_url(home_url())
 			));
 			
 			if (sizeof($links>0)) :
@@ -90,11 +90,11 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			?>
 			<form method="post">
 			
-				<p><label for="user_login"><?php _e('Username', 'woothemes'); ?></label> <input name="log" value="<?php if (isset($_POST['log'])) echo esc_attr(stripslashes($_POST['log'])); ?>" class="input-text" id="user_login" type="text" /></p>
+				<p><label for="user_login"><?php _e('Username', 'woocommerce'); ?></label> <input name="log" value="<?php if (isset($_POST['log'])) echo esc_attr(stripslashes($_POST['log'])); ?>" class="input-text" id="user_login" type="text" /></p>
 				
-				<p><label for="user_pass"><?php _e('Password', 'woothemes'); ?></label> <input name="pwd" class="input-text" id="user_pass" type="password" /></p>		
+				<p><label for="user_pass"><?php _e('Password', 'woocommerce'); ?></label> <input name="pwd" class="input-text" id="user_pass" type="password" /></p>		
 				
-				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &raquo;', 'woothemes'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woothemes'); ?></a></p>
+				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &raquo;', 'woocommerce'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woocommerce'); ?></a></p>
 				
 				<div>
 					<input type="hidden" name="redirect_to" class="redirect_to" value="<?php echo $redirect_to; ?>" />
@@ -176,11 +176,11 @@ class WooCommerce_Widget_Login extends WP_Widget {
 	function form( $instance ) {
 		?>
 		
-		<p><label for="<?php echo $this->get_field_id('logged_out_title'); ?>"><?php _e('Logged out title:', 'woothemes') ?></label>
-		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('logged_out_title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('logged_out_title') ); ?>" value="<?php if (isset ( $instance['logged_out_title'])) echo esc_attr( $instance['logged_out_title'] ); else echo __('Customer Login', 'woothemes'); ?>" /></p>
+		<p><label for="<?php echo $this->get_field_id('logged_out_title'); ?>"><?php _e('Logged out title:', 'woocommerce') ?></label>
+		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('logged_out_title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('logged_out_title') ); ?>" value="<?php if (isset ( $instance['logged_out_title'])) echo esc_attr( $instance['logged_out_title'] ); else echo __('Customer Login', 'woocommerce'); ?>" /></p>
 		
-		<p><label for="<?php echo $this->get_field_id('logged_in_title'); ?>"><?php _e('Logged in title:', 'woothemes') ?></label>
-		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('logged_in_title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('logged_in_title') ); ?>" value="<?php if (isset ( $instance['logged_in_title'])) echo esc_attr( $instance['logged_in_title'] ); else echo __('Welcome %s', 'woothemes'); ?>" /></p>
+		<p><label for="<?php echo $this->get_field_id('logged_in_title'); ?>"><?php _e('Logged in title:', 'woocommerce') ?></label>
+		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('logged_in_title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('logged_in_title') ); ?>" value="<?php if (isset ( $instance['logged_in_title'])) echo esc_attr( $instance['logged_in_title'] ); else echo __('Welcome %s', 'woocommerce'); ?>" /></p>
 		
 		<?php
 	}
@@ -224,10 +224,10 @@ function woocommerce_sidebar_login_process() {
 		// Check the username
 		if ( !$_POST['log'] ) :
 			$user = new WP_Error();
-			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter a username.', 'woothemes'));
+			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter a username.', 'woocommerce'));
 		elseif ( !$_POST['pwd'] ) :
 			$user = new WP_Error();
-			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter your password.', 'woothemes'));
+			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter your password.', 'woocommerce'));
 		endif;
 		
 		// Redirect if successful

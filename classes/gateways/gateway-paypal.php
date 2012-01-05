@@ -64,8 +64,8 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('PayPal standard', 'woothemes'); ?></h3>
-    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woothemes'); ?></p>
+    	<h3><?php _e('PayPal standard', 'woocommerce'); ?></h3>
+    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce'); ?></p>
     	<table class="form-table">
     	<?php
     		if ( $this->is_valid_for_use() ) :
@@ -76,7 +76,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     		else :
     		
     			?>
-            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woothemes' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woothemes' ); ?></p></div>
+            		<div class="inline error"><p><strong><?php _e( 'Gateway Disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
         		<?php
         		
     		endif;
@@ -92,45 +92,45 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
     
     	$this->form_fields = array(
 			'enabled' => array(
-							'title' => __( 'Enable/Disable', 'woothemes' ), 
+							'title' => __( 'Enable/Disable', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable PayPal standard', 'woothemes' ), 
+							'label' => __( 'Enable PayPal standard', 'woocommerce' ), 
 							'default' => 'yes'
 						), 
 			'title' => array(
-							'title' => __( 'Title', 'woothemes' ), 
+							'title' => __( 'Title', 'woocommerce' ), 
 							'type' => 'text', 
-							'description' => __( 'This controls the title which the user sees during checkout.', 'woothemes' ), 
-							'default' => __( 'PayPal', 'woothemes' )
+							'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ), 
+							'default' => __( 'PayPal', 'woocommerce' )
 						),
 			'description' => array(
-							'title' => __( 'Description', 'woothemes' ), 
+							'title' => __( 'Description', 'woocommerce' ), 
 							'type' => 'textarea', 
-							'description' => __( 'This controls the description which the user sees during checkout.', 'woothemes' ), 
-							'default' => __("Pay via PayPal; you can pay with your credit card if you don't have a PayPal account", 'woothemes')
+							'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ), 
+							'default' => __("Pay via PayPal; you can pay with your credit card if you don't have a PayPal account", 'woocommerce')
 						),
 			'email' => array(
-							'title' => __( 'PayPal Email', 'woothemes' ), 
+							'title' => __( 'PayPal Email', 'woocommerce' ), 
 							'type' => 'text', 
-							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woothemes' ), 
+							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ), 
 							'default' => ''
 						),
 			'send_shipping' => array(
-							'title' => __( 'Shipping details', 'woothemes' ), 
+							'title' => __( 'Shipping details', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woothemes' ), 
+							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
 							'default' => 'no'
 						), 
 			'testmode' => array(
-							'title' => __( 'PayPal sandbox', 'woothemes' ), 
+							'title' => __( 'PayPal sandbox', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable PayPal sandbox', 'woothemes' ), 
+							'label' => __( 'Enable PayPal sandbox', 'woocommerce' ), 
 							'default' => 'yes'
 						),
 			'debug' => array(
-							'title' => __( 'Debug', 'woothemes' ), 
+							'title' => __( 'Debug', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable logging (<code>woocommerce/logs/paypal.txt</code>)', 'woothemes' ), 
+							'label' => __( 'Enable logging (<code>woocommerce/logs/paypal.txt</code>)', 'woocommerce' ), 
 							'default' => 'no'
 						)
 			);
@@ -227,13 +227,13 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$paypal_args['tax_cart'] = $order->get_total_tax();
 			
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
-			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woothemes'), $order->id);
+			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woocommerce'), $order->id);
 			$paypal_args['quantity_1'] 		= 1;
 			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_total_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
-				$paypal_args['item_name_2'] = __('Shipping cost', 'woothemes');
+				$paypal_args['item_name_2'] = __('Shipping cost', 'woocommerce');
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
 			endif;
@@ -267,7 +267,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
 				$item_loop++;
-				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woothemes');
+				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woocommerce');
 				$paypal_args['quantity_'.$item_loop] = '1';
 				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
 			endif;
@@ -282,7 +282,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 		$woocommerce->add_inline_js('
 			jQuery("body").block({ 
-					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woothemes').'", 
+					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce').'", 
 					overlayCSS: 
 					{ 
 						background: "#fff", 
@@ -303,7 +303,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
 				' . implode('', $paypal_args_array) . '
-				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woothemes').'</a>
+				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woocommerce').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woocommerce').'</a>
 			</form>';
 		
 	}
@@ -327,7 +327,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	 **/
 	function receipt_page( $order ) {
 		
-		echo '<p>'.__('Thank you for your order, please click the button below to pay with PayPal.', 'woothemes').'</p>';
+		echo '<p>'.__('Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce').'</p>';
 		
 		echo $this->generate_paypal_form( $order );
 		
@@ -424,7 +424,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 					if (!in_array(strtolower($posted['txn_type']), $accepted_types)) exit;
 	            	
 	            	// Payment completed
-	                $order->add_order_note( __('IPN payment completed', 'woothemes') );
+	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
 	                $order->payment_complete();
 	                
 	                // Store PP Details
@@ -440,22 +440,22 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	            case 'failed' :
 	            case 'voided' :
 	                // Order failed
-	                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+	                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
 	            break;
 	            case "refunded" :
 	            case "reversed" :
 	            case "chargeback" :
 	            	
 	            	// Mark order as refunded
-	            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woothemes'), strtolower($posted['payment_status']) ) );
+	            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
 	            	
 					$message = woocommerce_mail_template( 
-						__('Order refunded/reversed', 'woothemes'),
-						sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woothemes'), $order->id, $posted['reason_code'] )
+						__('Order refunded/reversed', 'woocommerce'),
+						sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->id, $posted['reason_code'] )
 					);
 				
 					// Send the mail
-					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woothemes'), $order->id), $message );
+					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woocommerce'), $order->id), $message );
 	            	
 	            break;
 	            default:

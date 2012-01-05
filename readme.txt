@@ -6,9 +6,6 @@ Requires at least: 3.3
 Tested up to: 3.3
 Stable tag: 1.4
 
-Text Domain: woocommerce
-Domain Path: /languages/
-
 WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
 == Description ==

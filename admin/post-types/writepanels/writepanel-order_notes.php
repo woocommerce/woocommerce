@@ -34,24 +34,24 @@ function woocommerce_order_notes_meta_box() {
 			if ($customer_note) echo 'customer-note';
 			echo '"><div class="note_content">';
 			echo wpautop(wptexturize($note->comment_content));
-			echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woothemes'), human_time_diff(strtotime($note->comment_date), current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woothemes').'</a></p>';
+			echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woocommerce'), human_time_diff(strtotime($note->comment_date), current_time('timestamp'))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woocommerce').'</a></p>';
 			echo '</li>';
 		endforeach;
 	else :
-		echo '<li>' . __('There are no notes for this order yet.', 'woothemes') . '</li>';
+		echo '<li>' . __('There are no notes for this order yet.', 'woocommerce') . '</li>';
 	endif;
 	
 	echo '</ul>';
 	?>
 	<div class="add_note">
-		<h4><?php _e('Add note', 'woothemes'); ?></h4>
-		<p><?php _e('Add a note for your reference, or add a customer note (the user will be notified).', 'woothemes'); ?></p>
+		<h4><?php _e('Add note', 'woocommerce'); ?></h4>
+		<p><?php _e('Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce'); ?></p>
 		<p><input type="text" name="order_note" id="add_order_note" class="input-text" />
 		<select name="order_note_type" id="order_note_type">
-			<option value="customer"><?php _e('Customer note', 'woothemes'); ?></option>
-			<option value=""><?php _e('Private note', 'woothemes'); ?></option>
+			<option value="customer"><?php _e('Customer note', 'woocommerce'); ?></option>
+			<option value=""><?php _e('Private note', 'woocommerce'); ?></option>
 		</select></p>
-		<a href="#" class="add_note button"><?php _e('Add', 'woothemes'); ?></a>
+		<a href="#" class="add_note button"><?php _e('Add', 'woocommerce'); ?></a>
 	</div>
 	<script type="text/javascript">
 		

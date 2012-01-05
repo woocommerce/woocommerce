@@ -17,7 +17,7 @@ add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_acti
 function woocommerce_duplicate_product_action() {
 
 	if (! ( isset( $_GET['post']) || isset( $_POST['post'])  || ( isset($_REQUEST['action']) && 'duplicate_post_save_as_new_page' == $_REQUEST['action'] ) ) ) {
-		wp_die(__('No product to duplicate has been supplied!', 'woothemes'));
+		wp_die(__('No product to duplicate has been supplied!', 'woocommerce'));
 	}
 
 	// Get the original page
@@ -37,7 +37,7 @@ function woocommerce_duplicate_product_action() {
 		wp_redirect( admin_url( 'post.php?action=edit&post=' . $new_id ) );
 		exit;
 	} else {
-		wp_die(__('Product creation failed, could not find original product:', 'woothemes') . ' ' . $id);
+		wp_die(__('Product creation failed, could not find original product:', 'woocommerce') . ' ' . $id);
 	}
 }
 
@@ -55,8 +55,8 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 	
 	if ($post->post_type!='product') return $actions;
 	
-	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woothemes')
-		. '" rel="permalink">' .  __("Duplicate", 'woothemes') . '</a>';
+	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woocommerce')
+		. '" rel="permalink">' .  __("Duplicate", 'woocommerce') . '</a>';
 
 	return $actions;
 }
@@ -80,7 +80,7 @@ function woocommerce_duplicate_product_post_button() {
 	if ( isset( $_GET['post'] ) ) :
 		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 		?>
-		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woothemes'); ?></a></div>
+		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woocommerce'); ?></a></div>
 		<?php
 	endif;
 }
@@ -115,7 +115,7 @@ function woocommerce_create_duplicate_from_product($post, $parent = 0) {
 	else :
 		$post_parent		= $post->post_parent;
 		$post_status     	= 'draft';
-		$suffix 			= __(" (Copy)", 'woothemes');
+		$suffix 			= __(" (Copy)", 'woocommerce');
 	endif;
 	
 	$new_post_type 		= $post->post_type;
@@ -199,22 +199,22 @@ function woocommerce_edit_product_columns($columns){
 	$columns = array();
 	
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = __("Image", 'woothemes');
+	$columns["thumb"] = __("Image", 'woocommerce');
 	
-	$columns["title"] = __("Name", 'woothemes');
-	if( get_option('woocommerce_enable_sku', true) == 'yes' ) $columns["sku"] = __("ID", 'woothemes');
-	$columns["product_type"] = __("Type", 'woothemes');
+	$columns["title"] = __("Name", 'woocommerce');
+	if( get_option('woocommerce_enable_sku', true) == 'yes' ) $columns["sku"] = __("ID", 'woocommerce');
+	$columns["product_type"] = __("Type", 'woocommerce');
 	
-	$columns["product_cat"] = __("Categories", 'woothemes');
-	$columns["product_tags"] = __("Tags", 'woothemes');
-	$columns["featured"] = __("Featured", 'woothemes');
+	$columns["product_cat"] = __("Categories", 'woocommerce');
+	$columns["product_tags"] = __("Tags", 'woocommerce');
+	$columns["featured"] = __("Featured", 'woocommerce');
 	
 	if (get_option('woocommerce_manage_stock')=='yes') :
-		$columns["is_in_stock"] = __("In Stock?", 'woothemes');
+		$columns["is_in_stock"] = __("In Stock?", 'woocommerce');
 	endif;
 	
-	$columns["price"] = __("Price", 'woothemes');
-	$columns["product_date"] = __("Date", 'woothemes');
+	$columns["price"] = __("Price", 'woocommerce');
+	$columns["product_date"] = __("Date", 'woocommerce');
 	
 	return $columns;
 }
@@ -253,7 +253,7 @@ function woocommerce_custom_product_columns($column) {
 		break;
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID) );
-			echo '<a href="'.$url.'" title="'.__('Change', 'woothemes') .'">';
+			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
 			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
 			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';
 			echo '</a>';
@@ -265,7 +265,7 @@ function woocommerce_custom_product_columns($column) {
 				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" /> ';
 			endif;
 			if ( $product->managing_stock() ) :
-				echo $product->get_total_stock().__(' in stock', 'woothemes');
+				echo $product->get_total_stock().__(' in stock', 'woocommerce');
 			endif;
 		break;
 		case "product_type" :
@@ -273,33 +273,33 @@ function woocommerce_custom_product_columns($column) {
 		break;
 		case "product_date" :
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
-				$t_time = $h_time = __( 'Unpublished', 'woothemes' );
+				$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
 				$time_diff = 0;
 			else :
-				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woothemes' ) );
+				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ) );
 				$m_time = $post->post_date;
 				$time = get_post_time( 'G', true, $post );
 
 				$time_diff = time() - $time;
 
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
-					$h_time = sprintf( __( '%s ago', 'woothemes' ), human_time_diff( $time ) );
+					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $time ) );
 				else
-					$h_time = mysql2date( __( 'Y/m/d', 'woothemes' ), $m_time );
+					$h_time = mysql2date( __( 'Y/m/d', 'woocommerce' ), $m_time );
 			endif;
 
 			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr><br />';
 			
 			if ( 'publish' == $post->post_status ) :
-				_e( 'Published', 'woothemes' );
+				_e( 'Published', 'woocommerce' );
 			elseif ( 'future' == $post->post_status ) :
 				if ( $time_diff > 0 ) :
-					echo '<strong class="attention">' . __( 'Missed schedule', 'woothemes' ) . '</strong>';
+					echo '<strong class="attention">' . __( 'Missed schedule', 'woocommerce' ) . '</strong>';
 				else :
-					_e( 'Scheduled', 'woothemes' );
+					_e( 'Scheduled', 'woocommerce' );
 				endif;
 			else :
-				_e( 'Last Modified', 'woothemes' );
+				_e( 'Last Modified', 'woocommerce' );
 			endif;
 
 			if ( $this_data = $product->visibility ) :
@@ -390,7 +390,7 @@ function woocommerce_products_by_type() {
     	// Types
 		$terms = get_terms('product_type');
 		$output = "<select name='product_type' id='dropdown_product_type'>";
-		$output .= '<option value="">'.__('Show all product types', 'woothemes').'</option>';
+		$output .= '<option value="">'.__('Show all product types', 'woocommerce').'</option>';
 		foreach($terms as $term) :
 			$output .="<option value='$term->slug' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
@@ -400,15 +400,15 @@ function woocommerce_products_by_type() {
 		
 		// Downloadable/virtual
 		$output .= "<select name='product_subtype' id='dropdown_product_subtype'>";
-		$output .= '<option value="">'.__('Show all sub-types', 'woothemes').'</option>';
+		$output .= '<option value="">'.__('Show all sub-types', 'woocommerce').'</option>';
 		
 		$output .="<option value='downloadable' ";
 		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('downloadable', $_GET['product_subtype'], false);
-		$output .=">".__('Downloadable', 'woothemes')."</option>";
+		$output .=">".__('Downloadable', 'woocommerce')."</option>";
 		
 		$output .="<option value='virtual' ";
 		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('virtual', $_GET['product_subtype'], false);
-		$output .=">".__('Virtual', 'woothemes')."</option>";
+		$output .=">".__('Virtual', 'woocommerce')."</option>";
 
 		$output .="</select>";
 		
@@ -449,7 +449,7 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 	
 	$exclude_image = (int) get_post_meta($object->ID, '_woocommerce_exclude_image', true);
 	
-	$label = __('Exclude image', 'woothemes');
+	$label = __('Exclude image', 'woocommerce');
 	
 	$html = '<input type="checkbox" '.checked($exclude_image, 1, false).' name="attachments['.$object->ID.'][woocommerce_exclude_image]" id="attachments['.$object->ID.'][woocommerce_exclude_image" />';
 	
@@ -458,7 +458,7 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 			'input' => 'html',
 			'html' =>  $html,
 			'value' => '',
-			'helps' => __('Enabling this option will hide it from the product page image gallery.', 'woothemes')
+			'helps' => __('Enabling this option will hide it from the product page image gallery.', 'woocommerce')
 	);
 	
 	return $fields;
@@ -532,13 +532,13 @@ function woocommerce_admin_product_search_label($query) {
 	$sku = get_query_var( 'sku' );
 	if($sku) {
 		$post_type = get_post_type_object($wp->query_vars['post_type']);
-		return sprintf(__("[%s with SKU of %s]", 'woothemes'), $post_type->labels->singular_name, $sku);
+		return sprintf(__("[%s with SKU of %s]", 'woocommerce'), $post_type->labels->singular_name, $sku);
 	}
 	
 	$p = get_query_var( 'p' );
 	if ($p) {
 		$post_type = get_post_type_object($wp->query_vars['post_type']);
-		return sprintf(__("[%s with ID of %d]", 'woothemes'), $post_type->labels->singular_name, $p);
+		return sprintf(__("[%s with ID of %d]", 'woocommerce'), $post_type->labels->singular_name, $p);
 	}
 	
 	return $query;

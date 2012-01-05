@@ -314,10 +314,10 @@ class woocommerce_order {
 			
 			endif;
 			
-			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woothemes'), $tax_text, ucwords($this->shipping_method_title));
+			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woocommerce'), $tax_text, ucwords($this->shipping_method_title));
 			
 		else :
-			$shipping = __('Free!', 'woothemes');
+			$shipping = __('Free!', 'woocommerce');
 		endif;
 		
 		return $shipping;
@@ -342,13 +342,13 @@ class woocommerce_order {
 		$total_rows = array();
 		
 		if ($subtotal = $this->get_subtotal_to_display())
-			$total_rows[ __('Cart Subtotal:', 'woothemes') ] = $subtotal;
+			$total_rows[ __('Cart Subtotal:', 'woocommerce') ] = $subtotal;
 		
 		if ($this->get_cart_discount() > 0) 
-			$total_rows[ __('Cart Discount:', 'woothemes') ] = woocommerce_price($this->get_cart_discount());
+			$total_rows[ __('Cart Discount:', 'woocommerce') ] = woocommerce_price($this->get_cart_discount());
 		
 		if ($this->get_shipping() > 0)
-			$total_rows[ __('Shipping:', 'woothemes') ] = $this->get_shipping_to_display();
+			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
 		
 		if ($this->get_total_tax() > 0) :
 			
@@ -362,7 +362,7 @@ class woocommerce_order {
 				
 				if ($has_compound_tax) :
 					if ($subtotal = $this->get_subtotal_to_display( true )) :
-						$total_rows[ __('Subtotal:', 'woothemes') ] = $subtotal;
+						$total_rows[ __('Subtotal:', 'woocommerce') ] = $subtotal;
 					endif;
 				endif;
 				
@@ -379,9 +379,9 @@ class woocommerce_order {
 		endif;
 		
 		if ($this->get_order_discount() > 0)
-			$total_rows[ __('Order Discount:', 'woothemes') ] = woocommerce_price($this->get_order_discount());
+			$total_rows[ __('Order Discount:', 'woocommerce') ] = woocommerce_price($this->get_order_discount());
 		
-		$total_rows[ __('Order Total:', 'woothemes') ] = woocommerce_price($this->get_order_total());
+		$total_rows[ __('Order Total:', 'woocommerce') ] = woocommerce_price($this->get_order_total());
 		
 		return apply_filters('woocommerce_get_order_item_totals', $total_rows, $this);
 	}
@@ -409,7 +409,7 @@ class woocommerce_order {
 				if ($_product->exists) :
 			
 					if ($_product->is_downloadable()) :
-						$file = '<br/><small>'.__('Download:', 'woothemes').' <a href="' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>';
+						$file = '<br/><small>'.__('Download:', 'woocommerce').' <a href="' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>';
 					endif;
 		
 				endif;	
@@ -557,7 +557,7 @@ class woocommerce_order {
 				// Status was changed
 				do_action( 'woocommerce_order_status_'.$new_status->slug, $this->id );
 				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woothemes'), $this->status, $new_status->slug ) );
+				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $this->status, $new_status->slug ) );
 				clean_term_cache( '', 'shop_order_status' );
 				
 				// Date
@@ -679,7 +679,7 @@ class woocommerce_order {
 						
 						$new_quantity = $_product->reduce_stock( $item['qty'] );
 						
-						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woothemes'), $item['id'], $old_stock, $new_quantity) );
+						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
 							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $this->id, 'quantity' => $values['quantity']));
@@ -698,7 +698,7 @@ class woocommerce_order {
 			 	
 			endforeach;
 			
-			$this->add_order_note( __('Order item stock reduced successfully.', 'woothemes') );
+			$this->add_order_note( __('Order item stock reduced successfully.', 'woocommerce') );
 		
 		endif;
 			

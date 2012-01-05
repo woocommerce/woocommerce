@@ -5,7 +5,7 @@
 
 global $post, $wp_query, $author, $paged, $delimiter, $wrap_before, $wrap_after, $before, $after, $home;
 
-if( !$home ) $home = _x('Home', 'breadcrumb', 'woothemes');
+if( !$home ) $home = _x('Home', 'breadcrumb', 'woocommerce');
 
 $home_link = home_url();
 
@@ -57,7 +57,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	elseif ( is_tax('product_tag') ) :
 	
 		$queried_object = $wp_query->get_queried_object();
-		echo $prepend . $before . __('Products tagged &ldquo;', 'woothemes') . $queried_object->name . '&rdquo;' . $after;
+		echo $prepend . $before . __('Products tagged &ldquo;', 'woocommerce') . $queried_object->name . '&rdquo;' . $after;
 	
 	elseif ( is_day() ) :
 	
@@ -80,7 +80,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 		if (is_search()) :
 	
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __('Search results for &ldquo;', 'woothemes') . get_search_query() . '&rdquo;' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __('Search results for &ldquo;', 'woocommerce') . get_search_query() . '&rdquo;' . $after;
 	
 		else :
 	
@@ -128,7 +128,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 	elseif ( is_404() ) :
 	
-		echo $before . __('Error 404', 'woothemes') . $after;
+		echo $before . __('Error 404', 'woocommerce') . $after;
 	
 	elseif ( !is_single() && !is_page() && get_post_type() != 'post' ) :
 	
@@ -164,22 +164,22 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 	elseif ( is_search() ) :
 	
-		echo $before . __('Search results for &ldquo;', 'woothemes') . get_search_query() . '&rdquo;' . $after;
+		echo $before . __('Search results for &ldquo;', 'woocommerce') . get_search_query() . '&rdquo;' . $after;
 	
 	elseif ( is_tag() ) :
 	
-			echo $before . __('Posts tagged &ldquo;', 'woothemes') . single_tag_title('', false) . '&rdquo;' . $after;
+			echo $before . __('Posts tagged &ldquo;', 'woocommerce') . single_tag_title('', false) . '&rdquo;' . $after;
 	
 	elseif ( is_author() ) :
 	
 		$userdata = get_userdata($author);
-		echo $before . __('Author:', 'woothemes') . ' ' . $userdata->display_name . $after;
+		echo $before . __('Author:', 'woocommerce') . ' ' . $userdata->display_name . $after;
 	
 	endif;
 	
 	if ( get_query_var('paged') ) :
 	
-		echo ' (' . __('Page', 'woothemes') . ' ' . get_query_var('paged') .')';
+		echo ' (' . __('Page', 'woocommerce') . ' ' . get_query_var('paged') .')';
 	
 	endif;
 	
