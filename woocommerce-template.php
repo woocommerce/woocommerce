@@ -376,10 +376,11 @@ if (!function_exists('woocommerce_cross_sell_display')) {
  **/
 if (!function_exists('woocommerce_login_form')) {
 	function woocommerce_login_form( $args = array() ) {
-		global $message;
+		global $message, $redirect;
 		
 		$defaults = array(
-			'message' => ''
+			'message' => '',
+			'redirect' => ''
 		);
 
 		$args = wp_parse_args( $args, $defaults );

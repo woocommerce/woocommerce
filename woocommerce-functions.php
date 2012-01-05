@@ -135,7 +135,7 @@ function woocommerce_list_pages($pages){
  **/
 function woocommerce_nav_menu_items( $items, $args ) {
 	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(get_option('woocommerce_myaccount_page_id'))) && is_user_logged_in() ) :
-		$items .= '<li><a href="'. wp_logout_url() .'">'.__('Logout', 'woocommerce').'</a></li>';
+		$items .= '<li><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
 	endif;
 	
     return $items;
@@ -405,10 +405,17 @@ function woocommerce_process_login() {
 			if ( is_wp_error($user) ) :
 				$woocommerce->add_error( $user->get_error_message() );
 			else :
+				
+				if (isset($_POST['redirect']) && $_POST['redirect']) :
+					wp_safe_redirect( esc_attr($_POST['redirect']) );
+					exit;
+				endif;
+				
 				if ( wp_get_referer() ) :
 					wp_safe_redirect( wp_get_referer() );
 					exit;
 				endif;
+				
 				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
 				exit;
 			endif;
