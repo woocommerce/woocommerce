@@ -144,6 +144,15 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __( 'Checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_guest_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> ''
+	),
+	
+	array(  
 		'desc' 		=> __( 'Clear cart when logging out', 'woocommerce' ),
 		'id' 		=> 'woocommerce_clear_cart_on_logout',
 		'std' 		=> 'no',
