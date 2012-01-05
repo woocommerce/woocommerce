@@ -42,7 +42,7 @@ function woocommerce_custom_order_columns($column) {
 	switch ($column) {
 		case "order_status" :
 			
-			echo sprintf( __('<mark class="%s">%s</mark>', 'woocommerce'), sanitize_title($order->status), __($order->status, 'woocommerce') );
+			echo sprintf( '<mark class="%s">%s</mark>', sanitize_title($order->status), __($order->status, 'woocommerce') );
 			
 		break;
 		case "order_title" :

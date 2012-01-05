@@ -335,10 +335,10 @@ function woocommerce_add_to_cart_message() {
 		
 		$return_to = (wp_get_referer()) ? wp_get_referer() : home_url();
 
-		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">Continue Shopping &rarr;</a> Product successfully added to your cart.', 'woocommerce'), $return_to ));
+		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
 	
 	else :
-		$woocommerce->add_message( sprintf(__('<a href="%s" class="button">View Cart &rarr;</a> Product successfully added to your cart.', 'woocommerce'), $woocommerce->cart->get_cart_url()) );
+		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
 	endif;
 }
 
@@ -458,22 +458,22 @@ function woocommerce_process_registration() {
 		
 		// Check the username
 		if ( $sanitized_user_login == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please enter a username.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'Please enter a username.', 'woocommerce' ) );
 		} elseif ( ! validate_username( $_POST['username'] ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'This username is invalid because it uses illegal characters. Please enter a valid username.', 'woocommerce' ) );
 			$sanitized_user_login = '';
 		} elseif ( username_exists( $sanitized_user_login ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This username is already registered, please choose another one.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'This username is already registered, please choose another one.', 'woocommerce' ) );
 		}
 	
 		// Check the e-mail address
 		if ( $user_email == '' ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: Please type your e-mail address.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'Please type your e-mail address.', 'woocommerce' ) );
 		} elseif ( ! is_email( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: The email address isn&#8217;t correct.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'The email address isn&#8217;t correct.', 'woocommerce' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
-			$woocommerce->add_error( __( '<strong>ERROR</strong>: This email is already registered, please choose another one.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'This email is already registered, please choose another one.', 'woocommerce' ) );
 		}
 	
 		// Password
@@ -496,7 +496,7 @@ function woocommerce_process_registration() {
                 $user_id 	= wp_create_user( $sanitized_user_login, $password, $user_email );
                 
                 if ( !$user_id ) {
-                	$woocommerce->add_error( sprintf(__('<strong>ERROR</strong>: Couldn&#8217;t register you... please contact the <a href="mailto:%s">webmaster</a> !', 'woocommerce'), get_option('admin_email')));
+                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you... please contact us if you continue to have problems.', 'woocommerce') );
                     return;
                 }
 
@@ -581,7 +581,7 @@ function woocommerce_download_product() {
 		$email = urldecode( $_GET['email'] );
 		
 		if (!is_email($email)) :
-			wp_die( sprintf(__('Invalid email address. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+			wp_die( __('Invalid email address.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 		endif;
 		
 		$download_result = $wpdb->get_row( $wpdb->prepare("
@@ -593,7 +593,7 @@ function woocommerce_download_product() {
 		;", $email, $order_key, $download_file ) );
 		
 		if (!$download_result) :
-			wp_die( sprintf(__('Invalid download. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+			wp_die( __('Invalid download.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 			exit;
 		endif;
 		
@@ -603,13 +603,13 @@ function woocommerce_download_product() {
 		if ($order_id) :
 			$order = &new woocommerce_order( $order_id );
 			if ($order->status!='completed' && $order->status!='processing' && $order->status!='publish') :
-				wp_die( sprintf(__('Invalid order. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+				wp_die( __('Invalid order.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 				exit;
 			endif;
 		endif;
 		
 		if ($downloads_remaining=='0') :
-			wp_die( sprintf(__('Sorry, you have reached your download limit for this file. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+			wp_die( __('Sorry, you have reached your download limit for this file', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 		else :
 			
 			if ($downloads_remaining>0) :
@@ -753,7 +753,7 @@ function woocommerce_download_product() {
             	
             else :
             	
-            	@readfile_chunked("$file_path") or wp_die( sprintf(__('File not found. <a href="%s">Go to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+            	@readfile_chunked("$file_path") or wp_die( __('File not found', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 			
             endif;
             

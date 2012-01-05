@@ -224,10 +224,10 @@ function woocommerce_sidebar_login_process() {
 		// Check the username
 		if ( !$_POST['log'] ) :
 			$user = new WP_Error();
-			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter a username.', 'woocommerce'));
+			$user->add('empty_username', '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Please enter a username.', 'woocommerce'));
 		elseif ( !$_POST['pwd'] ) :
 			$user = new WP_Error();
-			$user->add('empty_username', __('<strong>ERROR</strong>: Please enter your password.', 'woocommerce'));
+			$user->add('empty_username', '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Please enter your password.', 'woocommerce'));
 		endif;
 		
 		// Redirect if successful
