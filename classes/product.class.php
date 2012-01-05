@@ -463,7 +463,7 @@ class woocommerce_product {
 			
 			foreach ($this->get_children() as $child_id) :
 				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price >= 0 ) return true;
+				if ( $sale_price!=="" && $sale_price >= 0 ) return true;
 			endforeach;
 			
 		else :
