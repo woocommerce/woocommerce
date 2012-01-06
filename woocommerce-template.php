@@ -31,7 +31,7 @@ if (!function_exists('woocommerce_archive_product_content')) {
 	function woocommerce_archive_product_content() { ?>
 		
 		<?php 
-			$shop_page_id = get_option('woocommerce_shop_page_id');
+			$shop_page_id = woocommerce_get_page_id('shop');
 			$shop_page = get_post($shop_page_id);
 			$shop_page_title = (get_option('woocommerce_shop_page_title')) ? get_option('woocommerce_shop_page_title') : $shop_page->post_title;
 		?>

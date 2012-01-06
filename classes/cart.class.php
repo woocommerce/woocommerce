@@ -261,24 +261,24 @@ class woocommerce_cart {
 		
 		/** gets the url to the cart page */
 		function get_cart_url() {
-			$cart_page_id = get_option('woocommerce_cart_page_id');
-			if ($cart_page_id) return get_permalink($cart_page_id);
+			$cart_page_id = woocommerce_get_page_id('cart');
+			if ($cart_page_id) return apply_filters('woocommerce_get_cart_url', get_permalink($cart_page_id));
 		}
 		
 		/** gets the url to the checkout page */
 		function get_checkout_url() {
-			$checkout_page_id = get_option('woocommerce_checkout_page_id');
+			$checkout_page_id = woocommerce_get_page_id('checkout');
 			if ($checkout_page_id) :
 				if (is_ssl()) return str_replace('http:', 'https:', get_permalink($checkout_page_id));
-				return get_permalink($checkout_page_id);
+				return apply_filters('woocommerce_get_checkout_url', get_permalink($checkout_page_id));
 			endif;
 		}
 		
 		/** gets the url to remove an item from the cart */
 		function get_remove_url( $cart_item_key ) {
 			global $woocommerce;
-			$cart_page_id = get_option('woocommerce_cart_page_id');
-			if ($cart_page_id) return $woocommerce->nonce_url( 'cart', add_query_arg('remove_item', $cart_item_key, get_permalink($cart_page_id)));
+			$cart_page_id = woocommerce_get_page_id('cart');
+			if ($cart_page_id) return apply_filters('woocommerce_get_remove_url', $woocommerce->nonce_url( 'cart', add_query_arg('remove_item', $cart_item_key, get_permalink($cart_page_id))));
 		}
 		
 		/**

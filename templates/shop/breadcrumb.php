@@ -11,10 +11,10 @@ $home_link = home_url();
 
 $prepend = '';
 
-if ( get_option('woocommerce_prepend_shop_page_to_urls')=="yes" && get_option('woocommerce_shop_page_id') && get_option('page_on_front') !== get_option('woocommerce_shop_page_id') )
-	$prepend =  $before . '<a href="' . get_permalink( get_option('woocommerce_shop_page_id') ) . '">' . get_the_title( get_option('woocommerce_shop_page_id') ) . '</a> ' . $after . $delimiter;
+if ( get_option('woocommerce_prepend_shop_page_to_urls')=="yes" && woocommerce_get_page_id('shop') && get_option('page_on_front') !== woocommerce_get_page_id('shop') )
+	$prepend =  $before . '<a href="' . get_permalink( woocommerce_get_page_id('shop') ) . '">' . get_the_title( woocommerce_get_page_id('shop') ) . '</a> ' . $after . $delimiter;
 
-if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('page_on_front')==get_option('woocommerce_shop_page_id'))) || is_paged() ) :
+if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('page_on_front')==woocommerce_get_page_id('shop'))) || is_paged() ) :
 
 	echo $wrap_before;
 	
@@ -74,9 +74,9 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 		echo $before . get_the_time('Y') . $after;
 	
-	elseif ( is_post_type_archive('product') && get_option('page_on_front') !== get_option('woocommerce_shop_page_id') ) :
+	elseif ( is_post_type_archive('product') && get_option('page_on_front') !== woocommerce_get_page_id('shop') ) :
 	
-		$_name = get_option('woocommerce_shop_page_id') ? get_the_title( get_option('woocommerce_shop_page_id') ) : ucwords(get_option('woocommerce_shop_slug'));
+		$_name = woocommerce_get_page_id('shop') ? get_the_title( woocommerce_get_page_id('shop') ) : ucwords(get_option('woocommerce_shop_slug'));
 	
 		if (is_search()) :
 	

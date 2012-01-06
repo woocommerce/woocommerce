@@ -137,7 +137,7 @@ function woocommerce_ajax_add_to_cart() {
 	
 	check_ajax_referer( 'add-to-cart', 'security' );
 	
-	$product_id = (int) $_POST['product_id'];
+	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
 
 	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
 		// Return html fragments

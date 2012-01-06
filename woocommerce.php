@@ -239,7 +239,7 @@ class woocommerce {
 			$find = 'taxonomy-product_cat.php';
 		elseif ( is_tax('product_tag') )
 			$find = 'taxonomy-product_tag.php';
-		elseif ( is_post_type_archive('product') ||  is_page( get_option('woocommerce_shop_page_id') ))
+		elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') ))
 			$find = 'archive-product.php';
 		else
 			$find = false;
@@ -334,10 +334,10 @@ class woocommerce {
 	 **/
 	function ssl_redirect() {
 		if (!is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && is_checkout()) :
-			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
+			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(woocommerce_get_page_id('checkout'))), 301 );
 			exit;
 		// Break out of SSL if we leave the checkout (anywhere but thanks page)
-		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(get_option('woocommerce_thanks_page_id')) && !is_ajax()) :
+		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(woocommerce_get_page_id('thanks')) && !is_ajax()) :
 			wp_safe_redirect( str_replace('https:', 'http:', home_url($_SERVER['REQUEST_URI']) ) );
 			exit;
 		endif;
@@ -359,7 +359,7 @@ class woocommerce {
 		
 		if (is_account_page()) $this->add_body_class('woocommerce-account');
 		
-		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page(get_option('woocommerce_order_tracking_page_id')) || is_page(get_option('woocommerce_thanks_page_id'))) $this->add_body_class('woocommerce-page');
+		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page(woocommerce_get_page_id('order_tracking')) || is_page(woocommerce_get_page_id('thanks'))) $this->add_body_class('woocommerce-page');
 	}
 	
 	/**
@@ -425,7 +425,7 @@ class woocommerce {
 		/**
 		 * Slugs
 		 **/
-		$shop_page_id = get_option('woocommerce_shop_page_id');
+		$shop_page_id = woocommerce_get_page_id('shop');
 		
 		$base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
 		
@@ -842,15 +842,15 @@ class woocommerce {
 			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart')
 		);
 		
-		$woocommerce_params['is_checkout'] = ( is_page(get_option('woocommerce_checkout_page_id')) ) ? 1 : 0;
-		$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
+		$woocommerce_params['is_checkout'] = ( is_page(woocommerce_get_page_id('checkout')) ) ? 1 : 0;
+		$woocommerce_params['is_pay_page'] = ( is_page(woocommerce_get_page_id('pay')) ) ? 1 : 0;
 		$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
 		
 		if (is_checkout() || is_cart()) :
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 		endif;
 		
-		wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
+		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters('woocommerce_params', $woocommerce_params) );
 	}
 	
 	/** Load Instances on demand **********************************************/	
@@ -1014,7 +1014,7 @@ class woocommerce {
 		// IIS fix
 		if ($is_IIS) session_write_close();
 		
-		return $location;
+		return apply_filters('woocommerce_redirect', $location);
 	}
 		
 	/** Attribute Helpers ****************************************************************/

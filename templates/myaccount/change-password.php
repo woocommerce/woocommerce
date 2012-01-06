@@ -8,7 +8,7 @@ global $woocommerce;
 
 <?php $woocommerce->show_messages(); ?>
 
-<form action="<?php echo esc_url( get_permalink(get_option('woocommerce_change_password_page_id')) ); ?>" method="post">
+<form action="<?php echo esc_url( get_permalink(woocommerce_get_page_id('change_password')) ); ?>" method="post">
 
 	<p class="form-row form-row-first">
 		<label for="password_1"><?php _e('New password', 'woocommerce'); ?> <span class="required">*</span></label>

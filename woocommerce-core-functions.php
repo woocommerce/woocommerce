@@ -21,6 +21,17 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 }
 
 /**
+ * WooCommerce page IDs
+ *
+ * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+ **/
+if (!function_exists('woocommerce_get_page_id')) {
+	function woocommerce_get_page_id( $page ) {
+		return apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+	}
+}
+
+/**
  * WooCommerce conditionals
  *
  * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
@@ -30,7 +41,7 @@ function is_woocommerce() {
 }
 if (!function_exists('is_shop')) {
 	function is_shop() {
-		if (is_post_type_archive( 'product' ) || is_page(get_option('woocommerce_shop_page_id'))) return true; else return false;
+		if (is_post_type_archive( 'product' ) || is_page(woocommerce_get_page_id('shop'))) return true; else return false;
 	}
 }
 if (!function_exists('is_product_category')) {
@@ -50,18 +61,18 @@ if (!function_exists('is_product')) {
 }
 if (!function_exists('is_cart')) {
 	function is_cart() {
-		return is_page(get_option('woocommerce_cart_page_id'));
+		return is_page(woocommerce_get_page_id('cart'));
 	}
 }
 if (!function_exists('is_checkout')) {
 	function is_checkout() {
-		if (is_page(get_option('woocommerce_checkout_page_id')) || is_page(get_option('woocommerce_pay_page_id'))) return true; else return false;
+		if (is_page(woocommerce_get_page_id('checkout')) || is_page(woocommerce_get_page_id('pay'))) return true; else return false;
 	}
 }
 if (!function_exists('is_account_page')) {
 	function is_account_page() {
-		if ( is_page(get_option('woocommerce_myaccount_page_id')) || is_page(get_option('woocommerce_edit_address_page_id')) || is_page(get_option('woocommerce_view_order_page_id')) || is_page(get_option('woocommerce_change_password_page_id')) ) return true; else return false;
-		return is_page(get_option('woocommerce_myaccount_page_id'));
+		if ( is_page(woocommerce_get_page_id('myaccount')) || is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) ) return true; else return false;
+		return is_page(woocommerce_get_page_id('myaccount'));
 	}
 }
 if (!function_exists('is_ajax')) {

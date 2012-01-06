@@ -299,7 +299,7 @@ class woocommerce_checkout {
 			endif;
 			
 			// Terms
-			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
+			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && woocommerce_get_page_id('terms')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
 			
 			if ($woocommerce->cart->needs_shipping()) :
 				
@@ -565,10 +565,12 @@ class woocommerce_checkout {
 						
 						// Redirect to success/confirmation/payment page
 						if ($result['result']=='success') :
-						
+							
+							$result = apply_filters('woocommerce_payment_successful_result', $result );
+							
 							if (is_ajax()) : 
 								ob_clean();
-								echo json_encode($result);
+								echo json_encode( $result );
 								exit;
 							else :
 								wp_safe_redirect( $result['redirect'] );
@@ -588,10 +590,10 @@ class woocommerce_checkout {
 						// Redirect to success/confirmation/payment page
 						if (is_ajax()) : 
 							ob_clean();
-							echo json_encode( array('redirect'	=> apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(get_option('woocommerce_thanks_page_id')))) );
+							echo json_encode( array('redirect'	=> apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks')))) );
 							exit;
 						else :
-							wp_safe_redirect( apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(get_option('woocommerce_thanks_page_id'))) );
+							wp_safe_redirect( apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks'))) );
 							exit;
 						endif;
 						

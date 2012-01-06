@@ -61,7 +61,7 @@ function woocommerce_pay() {
 					
 					// No payment was required for order
 					$order->payment_complete();
-					wp_safe_redirect( get_permalink(get_option('woocommerce_thanks_page_id')) );
+					wp_safe_redirect( get_permalink(woocommerce_get_page_id('thanks')) );
 					exit;
 					
 				endif;
@@ -124,14 +124,14 @@ function woocommerce_pay() {
 				
 			else :
 			
-				wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
+				wp_safe_redirect( get_permalink(woocommerce_get_page_id('myaccount')) );
 				exit;
 				
 			endif;
 			
 		else :
 			
-			wp_safe_redirect( get_permalink(get_option('woocommerce_myaccount_page_id')) );
+			wp_safe_redirect( get_permalink(woocommerce_get_page_id('myaccount')) );
 			exit;
 			
 		endif;

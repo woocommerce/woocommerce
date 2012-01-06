@@ -13,7 +13,7 @@
  * When default permalinks are enabled, redirect shop page to post type archive url
  **/
 function woocommerce_shop_page_archive_redirect() {
-	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == get_option('woocommerce_shop_page_id') ) :
+	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	endif;
@@ -26,7 +26,7 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 	
 	if (!is_woocommerce()) return $menu_items;
 	
-	$shop_page 		= (int) get_option('woocommerce_shop_page_id');
+	$shop_page 		= (int) woocommerce_get_page_id('shop');
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) :
@@ -59,7 +59,7 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
  **/
 function woocommerce_front_page_archive_paging_fix() {
 		
-	if ( is_front_page() && is_page( get_option('woocommerce_shop_page_id') )) :
+	if ( is_front_page() && is_page( woocommerce_get_page_id('shop') )) :
 		
 		if (get_query_var('paged')) :
 			$paged = get_query_var('paged'); 
@@ -69,7 +69,7 @@ function woocommerce_front_page_archive_paging_fix() {
 		
 		global $wp_query;
 		
-		$wp_query->query( array( 'page_id' => get_option('woocommerce_shop_page_id'), 'is_paged' => true, 'paged' => $paged ) );
+		$wp_query->query( array( 'page_id' => woocommerce_get_page_id('shop'), 'is_paged' => true, 'paged' => $paged ) );
 		
 		define('SHOP_IS_ON_FRONT', true);
 		
@@ -119,7 +119,7 @@ function woocommerce_list_pages($pages){
 
     if (is_woocommerce()) {
         $pages = str_replace( 'current_page_parent', '', $pages); // remove current_page_parent class from any item
-        $shop_page = 'page-item-' . get_option('woocommerce_shop_page_id'); // find shop_page_id through woocommerce options
+        $shop_page = 'page-item-' . woocommerce_get_page_id('shop'); // find shop_page_id through woocommerce options
         
         if (is_shop()) :
         	$pages = str_replace($shop_page, $shop_page . ' current_page_item', $pages); // add current_page_item class to shop page
@@ -134,7 +134,7 @@ function woocommerce_list_pages($pages){
  * Add logout link to my account menu
  **/
 function woocommerce_nav_menu_items( $items, $args ) {
-	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(get_option('woocommerce_myaccount_page_id'))) && is_user_logged_in() ) :
+	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() ) :
 		$items .= '<li><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
 	endif;
 	
@@ -220,12 +220,12 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id'])) :
             
             $woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
-            wp_safe_redirect(get_permalink($_GET['product']));
+            wp_safe_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_GET['product'])));
             exit;
             
        else :
 			
-			$product_id 	= (int) $_GET['product'];
+			$product_id 	= (int) apply_filters('woocommerce_add_to_cart_product_id', $_GET['product']);
 			$variation_id 	= (int) $_POST['variation_id'];
 			$quantity 		= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
 			
@@ -348,7 +348,7 @@ function woocommerce_add_to_cart_message() {
 function woocommerce_clear_cart_after_payment() {
 	global $woocommerce;
 	
-	if (is_page(get_option('woocommerce_thanks_page_id'))) :
+	if (is_page(woocommerce_get_page_id('thanks'))) :
 	
 		if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
 		if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
@@ -416,7 +416,7 @@ function woocommerce_process_login() {
 					exit;
 				endif;
 				
-				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 				exit;
 			endif;
 			
@@ -523,7 +523,7 @@ function woocommerce_process_registration() {
 					wp_safe_redirect( wp_get_referer() );
 					exit;
 				endif;
-				wp_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+				wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 				exit;
 			
 			else :

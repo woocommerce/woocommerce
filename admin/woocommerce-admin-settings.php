@@ -253,7 +253,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 )); // End general settings
 
-$shop_page_id = get_option('woocommerce_shop_page_id');
+$shop_page_id = woocommerce_get_page_id('shop');
 $base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
 	
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
@@ -1021,14 +1021,14 @@ function woocommerce_settings() {
     	
     	flush_rewrite_rules( false );
     	
-		if (get_option('woocommerce_shop_page_id')) :
+		if (woocommerce_get_page_id('shop')) :
 			$install_complete = true;
 		else :
 			$show_page_installer = true;
 		endif;
 		
 	// If we havn't just installed, but page installed has not been skipped and shop page does not exist...
-	elseif (!get_option('skip_install_woocommerce_pages') && !get_option('woocommerce_shop_page_id')) :
+	elseif (!get_option('skip_install_woocommerce_pages') && !woocommerce_get_page_id('shop')) :
 		
 		$show_page_installer = true;
 		

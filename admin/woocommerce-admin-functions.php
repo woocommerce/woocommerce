@@ -99,7 +99,7 @@ Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam al
  */
 function woocommerce_prevent_admin_access() {
 	if ( get_option('woocommerce_lock_down_admin')=='yes' && !is_ajax() && !current_user_can('edit_posts') ) :
-		wp_safe_redirect(get_permalink(get_option('woocommerce_myaccount_page_id')));
+		wp_safe_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 		exit;
 	endif;
 }
