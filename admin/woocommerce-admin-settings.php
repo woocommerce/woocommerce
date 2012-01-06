@@ -1114,6 +1114,7 @@ function woocommerce_settings() {
 						<table class="wc_shipping widefat" cellspacing="0">
 							<thead>
 								<tr>
+									<th><?php _e('Default', 'woocommerce'); ?></th>
 									<th><?php _e('Shipping Method', 'woocommerce'); ?></th>
 									<th><?php _e('Status', 'woocommerce'); ?></th>
 								</tr>
@@ -1121,12 +1122,16 @@ function woocommerce_settings() {
 							<tbody>
 						    	<?php
 						    	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
-						    		
-						    		echo '<tr>
+						    	
+						    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
+						    	
+						    	echo '<tr>
+						    		<td width="1%" class="radio">
+						    			<input type="radio" name="default_shipping_method" value="'.$method->id.'" '.checked($default_shipping_method, $method->id, false).' />
+						    			<input type="hidden" name="method_order[]" value="'.$method->id.'" />
 						    			<td>
 						    				<p><strong>'.$method->title.'</strong><br/>
 						    				<small>'.__('Method ID', 'woocommerce').': '.$method->id.'</small></p>
-						    				<input type="hidden" name="method_order[]" value="'.$method->id.'" />
 						    			</td>
 						    			<td>';
 						    		

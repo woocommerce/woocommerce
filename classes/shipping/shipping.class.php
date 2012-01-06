@@ -107,9 +107,6 @@ class woocommerce_shipping {
 			$_cheapest_cost = '';
 			$_cheapest_method = '';
 			if (isset($_SESSION['_chosen_shipping_method'])) $chosen_method = $_SESSION['_chosen_shipping_method']; else $chosen_method = '';
-			$calc_cheapest = false;
-			
-			if (!$chosen_method || empty($chosen_method)) $calc_cheapest = true;
 			
 			$this->reset_shipping_methods();
 			
@@ -117,18 +114,25 @@ class woocommerce_shipping {
 			
 			if (sizeof($_available_methods)>0) :
 			
-				foreach ($_available_methods as $method_id => $method) :
-					if ($method->cost < $_cheapest_cost || !is_numeric($_cheapest_cost)) :
-						$_cheapest_cost 	= $method->cost;
-						$_cheapest_method 	= $method_id;
+				// If not set, set a default
+				if (!$chosen_method || empty($chosen_method) || !isset($_available_methods[$chosen_method])) :
+					
+					$chosen_method = get_option('woocommerce_default_shipping_method');
+					
+					if (!$chosen_method || empty($chosen_method) || !isset($_available_methods[$chosen_method])) :
+						// Default to cheapest
+						foreach ($_available_methods as $method_id => $method) :
+							if ($method->cost < $_cheapest_cost || !is_numeric($_cheapest_cost)) :
+								$_cheapest_cost 	= $method->cost;
+								$_cheapest_method 	= $method_id;
+							endif;
+						endforeach;
+						
+						$chosen_method = $_cheapest_method;
 					endif;
-				endforeach;
 				
-				// Default to cheapest
-				if ($calc_cheapest || !isset($_available_methods[$chosen_method])) :
-					$chosen_method = $_cheapest_method;
 				endif;
-				
+
 				if ($chosen_method) :
 					$_SESSION['_chosen_shipping_method'] = $chosen_method;
 					$this->shipping_total 	= $_available_methods[$chosen_method]->cost;
@@ -148,6 +152,8 @@ class woocommerce_shipping {
 	}
 	
 	function process_admin_options() {
+	
+		$default_shipping_method = (isset($_POST['default_shipping_method'])) ? esc_attr($_POST['default_shipping_method']) : '';
 		$method_order = (isset($_POST['method_order'])) ? $_POST['method_order'] : '';
 		
 		$order = array();
@@ -160,6 +166,7 @@ class woocommerce_shipping {
 			endforeach;
 		endif;
 		
+		update_option( 'woocommerce_default_shipping_method', $default_shipping_method );
 		update_option( 'woocommerce_shipping_method_order', $order );
 	}
 }
