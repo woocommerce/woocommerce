@@ -117,6 +117,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Shipping method classes/api changed to make rate definition simpler - shipping methods will need updating to stay compatible
 * Change textdomain from woothemes to woocommerce
 * Free shipping coupons ignore min-amount
+* Delete all variations option
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

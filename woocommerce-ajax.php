@@ -258,6 +258,23 @@ function woocommerce_remove_variation() {
 }
 
 /**
+ * Delete variations via ajax function
+ */
+add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variations');
+
+function woocommerce_remove_variations() {
+	
+	check_ajax_referer( 'delete-variations', 'security' );
+	$variation_ids = (array) $_POST['variation_ids'];
+	foreach ($variation_ids as $variation_id) :
+		$variation = get_post($variation_id);
+		if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
+	endforeach;
+	die();
+	
+}
+
+/**
  * Add variation via ajax function
  */
 add_action('wp_ajax_woocommerce_add_variation', 'woocommerce_add_variation');

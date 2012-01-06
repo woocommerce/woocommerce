@@ -198,6 +198,8 @@ function variable_product_type_options() {
 			<button type="button" class="button button-primary add_variation" <?php disabled($variation_attribute_found, false); ?>><?php _e('Add Variation', 'woocommerce'); ?></button>
 			<button type="button" class="button link_all_variations" <?php disabled($variation_attribute_found, false); ?>><?php _e('Link all variations', 'woocommerce'); ?></button>
 			
+			<a href="#" class="delete delete_variations"><?php _e('Delete all variations', 'woocommerce'); ?></a>
+			
 			<p class="description"><?php _e('Add (optional) information for product variations. If you modify your product attributes you must save the product before they will be selectable.', 'woocommerce'); ?></p>
 		
 		<?php endif; ?>
@@ -379,6 +381,44 @@ function variable_product_type_options() {
 					jQuery(el).fadeOut('300', function(){
 						jQuery(el).remove();
 					});
+				}
+				
+			}
+			return false;
+		});
+		
+		jQuery('a.delete_variations').live('click', function(){
+			var answer = confirm('<?php _e('Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce'); ?>');
+			if (answer){
+			
+				var answer = confirm('<?php _e('Last warning, are you sure?', 'woocommerce'); ?>');
+				
+				if (answer) {
+					
+					var variation_ids = [];
+					
+					jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+					
+					jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
+						
+						var variation = jQuery(this).attr('rel');
+						if (variation>0) {
+							variation_ids.push(variation);
+						}
+					});
+					
+					var data = {
+						action: 'woocommerce_remove_variations',
+						variation_ids: variation_ids,
+						security: '<?php echo wp_create_nonce("delete-variations"); ?>'
+					};
+					
+					jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
+						jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
+							jQuery('.woocommerce_variations .woocommerce_variation').remove();
+						});
+					});
+					
 				}
 				
 			}
