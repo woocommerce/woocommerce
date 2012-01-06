@@ -62,7 +62,7 @@ class free_shipping extends woocommerce_shipping_method {
 							'title' 		=> __( 'Coupon', 'woocommerce' ), 
 							'type' 			=> 'checkbox', 
 							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woocommerce' ), 
-							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method.', 'woocommerce'),
+							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method. If a coupon is used, the minimum order amount will be ignored.', 'woocommerce'),
 							'default' 		=> 'no'
 						),
 			'availability' => array(
@@ -114,18 +114,6 @@ class free_shipping extends woocommerce_shipping_method {
     	
     	if ($this->enabled=="no") return false;
 
-    	if (isset($woocommerce->cart->cart_contents_total)) :
-    	
-	    	if ($woocommerce->cart->prices_include_tax) :
-	    		$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-	    	else :
-	    		$total = $woocommerce->cart->cart_contents_total;
-	    	endif;
-	    	
-	    	if (isset($this->min_amount) && $this->min_amount && $this->min_amount > $total) return false;
-    	
-    	endif;
-		
 		$ship_to_countries = '';
 		
 		if ($this->availability == 'specific') :
@@ -139,7 +127,7 @@ class free_shipping extends woocommerce_shipping_method {
 		if (is_array($ship_to_countries)) :
 			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
 		endif;
-		
+
 		if ($this->requires_coupon=="yes") :
 			
 			if ($woocommerce->cart->applied_coupons) : foreach ($woocommerce->cart->applied_coupons as $code) :
@@ -153,6 +141,18 @@ class free_shipping extends woocommerce_shipping_method {
 			
 			return false;
 			
+		endif;
+
+		if (isset($woocommerce->cart->cart_contents_total)) :
+		
+			if ($woocommerce->cart->prices_include_tax) :
+				$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
+			else :
+				$total = $woocommerce->cart->cart_contents_total;
+			endif;
+			
+			if (isset($this->min_amount) && $this->min_amount && $this->min_amount > $total) return false;
+		
 		endif;
 		
 		return true;
