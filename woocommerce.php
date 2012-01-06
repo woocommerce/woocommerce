@@ -226,6 +226,10 @@ class woocommerce {
 	 *
 	 * Templates are in the 'templates' folder. woocommerce looks for theme 
 	 * overides in /theme/woocommerce/ by default
+	 *
+	 * For beginners, it also looks for a woocommerce.php template first. If the user adds 
+	 * this to the theme (containing a woocommerce() inside) this will be used for all 
+	 * woocommerce templates.
 	 */
 	function template_loader( $template ) {
 		
@@ -241,7 +245,7 @@ class woocommerce {
 			$find = false;
 			
 		if ($find) :
-			$template = locate_template( array( $find, $this->template_url . $find ) );
+			$template = locate_template( array( 'woocommerce.php', $find, $this->template_url . $find ) );
 			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $find;
 		endif;
 		

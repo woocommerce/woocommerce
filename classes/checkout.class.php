@@ -221,24 +221,26 @@ class woocommerce_checkout {
 					// Validation: Required fields
 					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
 					
-					// Special handling for validation and formatting
-					switch ($key) :
-						case "billing_postcode" :
-						case "shipping_postcode" :
-							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
-							
-							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
-							else :
-								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
-							endif;
-						break;
-						case "billing_phone" :
-							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
-						break;
-						case "billing_email" :
-							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
-						break;
-					endswitch;
+					if (!empty($this->posted[$key])) :
+						// Special handling for validation and formatting
+						switch ($key) :
+							case "billing_postcode" :
+							case "shipping_postcode" :
+								$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
+								
+								if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+								else :
+									$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+								endif;
+							break;
+							case "billing_phone" :
+								if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
+							break;
+							case "billing_email" :
+								if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
+							break;
+						endswitch;
+					endif;
 					
 				endforeach;
 				
