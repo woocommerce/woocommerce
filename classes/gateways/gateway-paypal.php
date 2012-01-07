@@ -340,14 +340,19 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		global $woocommerce;
 		
 		if ($this->debug=='yes') $this->log->add( 'paypal', 'Checking IPN response is valid...' );
-    
-    	 // Add cmd to the post array
-        $_POST['cmd'] = '_notify-validate';
+    	
+    	// Get recieved values from post data
+		$received_values = (array) stripslashes_deep( $_POST );
+		
+		 // Add cmd to the post array
+		$received_values['cmd'] = '_notify-validate';
 
         // Send back post vars to paypal
         $params = array( 
-        	'body' => $_POST,
-        	'sslverify' => false
+        	'body' 			=> $received_values,
+        	'sslverify' 	=> false,
+        	'timeout' 		=> 30,
+        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
         );
 
         // Get url
@@ -359,9 +364,6 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 		
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
-		
-		 // Clean
-        unset($_POST['cmd']);
         
         // check to see if the request was valid
         if ( !is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && (strcmp( $response['body'], "VERIFIED") == 0)) {
@@ -385,13 +387,21 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	function check_ipn_response() {
 			
 		if (isset($_GET['paypalListener']) && $_GET['paypalListener'] == 'paypal_standard_IPN'):
-		
+			
+			ob_clean();
+			
         	$_POST = stripslashes_deep($_POST);
         	
         	if ($this->check_ipn_request_is_valid()) :
-        	
+        		
+        		header('HTTP/1.1 200 OK');
+        		
             	do_action("valid-paypal-standard-ipn-request", $_POST);
-
+			
+			else :
+			
+				wp_die("PayPal IPN Request Failure");
+			
        		endif;
        		
        	endif;
