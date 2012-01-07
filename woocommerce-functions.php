@@ -145,7 +145,7 @@ function woocommerce_nav_menu_items( $items, $args ) {
  * Update catalog ordering if posted
  */
 function woocommerce_update_catalog_ordering() {
-	if (isset($_POST['catalog_orderby']) && $_POST['catalog_orderby'] != '') $_SESSION['orderby'] = $_POST['catalog_orderby'];
+	if (isset($_REQUEST['orderby']) && $_REQUEST['orderby'] != '') $_SESSION['orderby'] = esc_attr($_REQUEST['orderby']);
 }
 
 /**
