@@ -679,7 +679,7 @@ if (!function_exists('woocommerce_form_field')) {
 					
 				if (isset( $states[$current_cc][$current_r] )) :
 					// Dropdown
-					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
+					$field .= '<select name="'.$key.'" id="'.$key.'" class="state_select"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
 					foreach($states[$current_cc] as $ckey=>$cvalue) :
 						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
 					endforeach;
