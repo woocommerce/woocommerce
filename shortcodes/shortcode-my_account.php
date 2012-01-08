@@ -73,7 +73,7 @@ function woocommerce_edit_address() {
 	global $woocommerce, $load_address, $address;
 	
 	if ( ! is_user_logged_in() ) :
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	endif;
 
@@ -152,7 +152,7 @@ function woocommerce_save_address() {
 
 		do_action( 'woocommerce_customer_save_address', $user_id );
 
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	}
 }
@@ -188,7 +188,7 @@ function woocommerce_change_password() {
 	global $woocommerce;
 	
 	if ( ! is_user_logged_in() ) :
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	endif;
 
@@ -231,7 +231,7 @@ function woocommerce_save_password() {
 
 		do_action( 'woocommerce_customer_change_password', $user_id );
 
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	}
 }
@@ -247,7 +247,7 @@ function woocommerce_view_order() {
 	global $woocommerce;
 	
 	if ( ! is_user_logged_in() ) :
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	endif;
 	
@@ -256,7 +256,7 @@ function woocommerce_view_order() {
 	$order 			= &new woocommerce_order( $order_id );
 	
 	if ( $order_id==0 || $order->user_id != $user_id ) :
-		wp_safe_redirect( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) );
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
 		exit;
 	endif;
 	

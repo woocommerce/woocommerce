@@ -8,7 +8,7 @@ global $woocommerce, $current_user, $recent_orders;
 
 <?php $woocommerce->show_messages(); ?>
 
-<p><?php echo sprintf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woocommerce'), $current_user->display_name, get_permalink(get_option('woocommerce_change_password_page_id'))); ?></p>
+<p><?php echo sprintf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woocommerce'), $current_user->display_name, get_permalink(woocommerce_get_page_id('change_password'))); ?></p>
 
 <?php do_action('woocommerce_before_my_account'); ?>
 
@@ -65,7 +65,7 @@ if ($customer_orders) :
 							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woocommerce'); ?></a>
 							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woocommerce'); ?></a>
 						<?php endif; ?>
-						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(get_option('woocommerce_view_order_page_id'))) ); ?>" class="button"><?php _e('View', 'woocommerce'); ?></a>
+						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>" class="button"><?php _e('View', 'woocommerce'); ?></a>
 					</td>
 				</tr><?php
 			endforeach;
@@ -86,7 +86,7 @@ endif;
 	
 		<header class="title">				
 			<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
-			<a href="<?php echo esc_url( add_query_arg('address', 'billing', get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>	
+			<a href="<?php echo esc_url( add_query_arg('address', 'billing', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>	
 		</header>
 		<address>
 			<?php
@@ -114,7 +114,7 @@ endif;
 	
 		<header class="title">
 			<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
-			<a href="<?php echo esc_url( add_query_arg('address', 'shipping', get_permalink(get_option('woocommerce_edit_address_page_id'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>
+			<a href="<?php echo esc_url( add_query_arg('address', 'shipping', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>
 		</header>
 		<address>
 			<?php

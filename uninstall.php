@@ -21,16 +21,16 @@ remove_role( 'shop_manager' );
 $wp_roles->remove_cap( 'administrator', 'manage_woocommerce' );
 
 // Pages
-wp_delete_post( get_option('woocommerce_shop_page_id'), true );
-wp_delete_post( get_option('woocommerce_cart_page_id'), true );
-wp_delete_post( get_option('woocommerce_checkout_page_id'), true );
-wp_delete_post( get_option('woocommerce_order_tracking_page_id'), true );
-wp_delete_post( get_option('woocommerce_myaccount_page_id'), true );
-wp_delete_post( get_option('woocommerce_edit_address_page_id'), true );
-wp_delete_post( get_option('woocommerce_view_order_page_id'), true );
-wp_delete_post( get_option('woocommerce_change_password_page_id'), true );
-wp_delete_post( get_option('woocommerce_pay_page_id'), true );
-wp_delete_post( get_option('woocommerce_thanks_page_id'), true );
+wp_delete_post( woocommerce_get_page_id('shop'), true );
+wp_delete_post( woocommerce_get_page_id('cart'), true );
+wp_delete_post( woocommerce_get_page_id('checkout'), true );
+wp_delete_post( woocommerce_get_page_id('order_tracking'), true );
+wp_delete_post( woocommerce_get_page_id('myaccount'), true );
+wp_delete_post( woocommerce_get_page_id('edit_address'), true );
+wp_delete_post( woocommerce_get_page_id('view_order'), true );
+wp_delete_post( woocommerce_get_page_id('change_password'), true );
+wp_delete_post( woocommerce_get_page_id('pay'), true );
+wp_delete_post( woocommerce_get_page_id('thanks'), true );
 
 // Tables
 $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."woocommerce_attribute_taxonomies");

@@ -162,19 +162,19 @@ function woocommerce_create_pages() {
     woocommerce_create_page( esc_sql( _x('my-account', 'page_slug', 'woocommerce') ), 'woocommerce_myaccount_page_id', __('My Account', 'woocommerce'), '[woocommerce_my_account]' );
 
 	// Edit address page
-    woocommerce_create_page( esc_sql( _x('edit-address', 'page_slug', 'woocommerce') ), 'woocommerce_edit_address_page_id', __('Edit My Address', 'woocommerce'), '[woocommerce_edit_address]', get_option('woocommerce_myaccount_page_id') );
+    woocommerce_create_page( esc_sql( _x('edit-address', 'page_slug', 'woocommerce') ), 'woocommerce_edit_address_page_id', __('Edit My Address', 'woocommerce'), '[woocommerce_edit_address]', woocommerce_get_page_id('myaccount') );
     
     // View order page
-    woocommerce_create_page( esc_sql( _x('view-order', 'page_slug', 'woocommerce') ), 'woocommerce_view_order_page_id', __('View Order', 'woocommerce'), '[woocommerce_view_order]', get_option('woocommerce_myaccount_page_id') );
+    woocommerce_create_page( esc_sql( _x('view-order', 'page_slug', 'woocommerce') ), 'woocommerce_view_order_page_id', __('View Order', 'woocommerce'), '[woocommerce_view_order]', woocommerce_get_page_id('myaccount') );
 
     // Change password page
-    woocommerce_create_page( esc_sql( _x('change-password', 'page_slug', 'woocommerce') ), 'woocommerce_change_password_page_id', __('Change Password', 'woocommerce'), '[woocommerce_change_password]', get_option('woocommerce_myaccount_page_id') );
+    woocommerce_create_page( esc_sql( _x('change-password', 'page_slug', 'woocommerce') ), 'woocommerce_change_password_page_id', __('Change Password', 'woocommerce'), '[woocommerce_change_password]', woocommerce_get_page_id('myaccount') );
 
 	// Pay page
-    woocommerce_create_page( esc_sql( _x('pay', 'page_slug', 'woocommerce') ), 'woocommerce_pay_page_id', __('Checkout &rarr; Pay', 'woocommerce'), '[woocommerce_pay]', get_option('woocommerce_checkout_page_id') );
+    woocommerce_create_page( esc_sql( _x('pay', 'page_slug', 'woocommerce') ), 'woocommerce_pay_page_id', __('Checkout &rarr; Pay', 'woocommerce'), '[woocommerce_pay]', woocommerce_get_page_id('checkout') );
     
     // Thanks page
-    woocommerce_create_page( esc_sql( _x('order-received', 'page_slug', 'woocommerce') ), 'woocommerce_thanks_page_id', __('Order Received', 'woocommerce'), '[woocommerce_thankyou]', get_option('woocommerce_checkout_page_id') );
+    woocommerce_create_page( esc_sql( _x('order-received', 'page_slug', 'woocommerce') ), 'woocommerce_thanks_page_id', __('Order Received', 'woocommerce'), '[woocommerce_thankyou]', woocommerce_get_page_id('checkout') );
     
 }
 

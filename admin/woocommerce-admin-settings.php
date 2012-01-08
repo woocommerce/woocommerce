@@ -253,7 +253,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 )); // End general settings
 
-$shop_page_id = get_option('woocommerce_shop_page_id');
+$shop_page_id = woocommerce_get_page_id('shop');
 $base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
 	
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
@@ -1021,14 +1021,14 @@ function woocommerce_settings() {
     	
     	flush_rewrite_rules( false );
     	
-		if (get_option('woocommerce_shop_page_id')) :
+		if (woocommerce_get_page_id('shop')) :
 			$install_complete = true;
 		else :
 			$show_page_installer = true;
 		endif;
 		
 	// If we havn't just installed, but page installed has not been skipped and shop page does not exist...
-	elseif (!get_option('skip_install_woocommerce_pages') && !get_option('woocommerce_shop_page_id')) :
+	elseif (!get_option('skip_install_woocommerce_pages') && !woocommerce_get_page_id('shop')) :
 		
 		$show_page_installer = true;
 		
@@ -1114,6 +1114,7 @@ function woocommerce_settings() {
 						<table class="wc_shipping widefat" cellspacing="0">
 							<thead>
 								<tr>
+									<th><?php _e('Default', 'woocommerce'); ?></th>
 									<th><?php _e('Shipping Method', 'woocommerce'); ?></th>
 									<th><?php _e('Status', 'woocommerce'); ?></th>
 								</tr>
@@ -1121,12 +1122,16 @@ function woocommerce_settings() {
 							<tbody>
 						    	<?php
 						    	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
-						    		
-						    		echo '<tr>
+						    	
+						    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
+						    	
+						    	echo '<tr>
+						    		<td width="1%" class="radio">
+						    			<input type="radio" name="default_shipping_method" value="'.$method->id.'" '.checked($default_shipping_method, $method->id, false).' />
+						    			<input type="hidden" name="method_order[]" value="'.$method->id.'" />
 						    			<td>
 						    				<p><strong>'.$method->title.'</strong><br/>
 						    				<small>'.__('Method ID', 'woocommerce').': '.$method->id.'</small></p>
-						    				<input type="hidden" name="method_order[]" value="'.$method->id.'" />
 						    			</td>
 						    			<td>';
 						    		

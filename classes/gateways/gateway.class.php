@@ -28,7 +28,7 @@ class woocommerce_payment_gateway extends woocommerce_settings_api {
 	 */
 	function get_return_url( $order = '' ) {
 		
-		$thanks_page_id = get_option('woocommerce_thanks_page_id');
+		$thanks_page_id = woocommerce_get_page_id('thanks');
 		if ($thanks_page_id) :
 			$return_url = get_permalink($thanks_page_id);
 		else :
@@ -41,7 +41,7 @@ class woocommerce_payment_gateway extends woocommerce_settings_api {
 		
 		if (is_ssl() || get_option('woocommerce_force_ssl_checkout')=='yes') $return_url = str_replace('http:', 'https:', $return_url);
 		
-		return $return_url;
+		return apply_filters('woocommerce_get_return_url', $return_url);
 	}
 	
 	/**

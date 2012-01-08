@@ -89,6 +89,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Rewritten parts + re-organised files for increased performance and decreased memory usage
 * Moved many shortcodes (contents) to template files for easier customisation
 * Moved template function contents to template files
+* Added a simple, basic method of adding woocommerce support to themes using a woocommerce.php file based on page.php containing woocommerce_content()
 * Moved woocommerce class into the main file
 * Category ordering fix
 * Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
@@ -115,6 +116,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * woocommerce_product_visibility_options filter for backend
 * Shipping method classes/api changed to make rate definition simpler - shipping methods will need updating to stay compatible
 * Change textdomain from woothemes to woocommerce
+* Free shipping coupons ignore min-amount
+* Delete all variations option
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

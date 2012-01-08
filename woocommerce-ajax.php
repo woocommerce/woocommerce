@@ -137,7 +137,7 @@ function woocommerce_ajax_add_to_cart() {
 	
 	check_ajax_referer( 'add-to-cart', 'security' );
 	
-	$product_id = (int) $_POST['product_id'];
+	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
 
 	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
 		// Return html fragments
@@ -253,6 +253,23 @@ function woocommerce_remove_variation() {
 	$variation_id = intval( $_POST['variation_id'] );
 	$variation = get_post($variation_id);
 	if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
+	die();
+	
+}
+
+/**
+ * Delete variations via ajax function
+ */
+add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variations');
+
+function woocommerce_remove_variations() {
+	
+	check_ajax_referer( 'delete-variations', 'security' );
+	$variation_ids = (array) $_POST['variation_ids'];
+	foreach ($variation_ids as $variation_id) :
+		$variation = get_post($variation_id);
+		if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
+	endforeach;
 	die();
 	
 }

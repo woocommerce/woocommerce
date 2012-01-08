@@ -137,7 +137,7 @@ class woocommerce {
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
 			add_action( 'init', array(&$this, 'include_template_functions'), 99 );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
-			add_action( 'template_redirect', array(&$this, 'frontend_scripts') );
+			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
@@ -226,6 +226,10 @@ class woocommerce {
 	 *
 	 * Templates are in the 'templates' folder. woocommerce looks for theme 
 	 * overides in /theme/woocommerce/ by default
+	 *
+	 * For beginners, it also looks for a woocommerce.php template first. If the user adds 
+	 * this to the theme (containing a woocommerce() inside) this will be used for all 
+	 * woocommerce templates.
 	 */
 	function template_loader( $template ) {
 		
@@ -235,13 +239,13 @@ class woocommerce {
 			$find = 'taxonomy-product_cat.php';
 		elseif ( is_tax('product_tag') )
 			$find = 'taxonomy-product_tag.php';
-		elseif ( is_post_type_archive('product') ||  is_page( get_option('woocommerce_shop_page_id') ))
+		elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') ))
 			$find = 'archive-product.php';
 		else
 			$find = false;
 			
 		if ($find) :
-			$template = locate_template( array( $find, $this->template_url . $find ) );
+			$template = locate_template( array( 'woocommerce.php', $find, $this->template_url . $find ) );
 			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $find;
 		endif;
 		
@@ -330,10 +334,10 @@ class woocommerce {
 	 **/
 	function ssl_redirect() {
 		if (!is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && is_checkout()) :
-			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(get_option('woocommerce_checkout_page_id'))), 301 );
+			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(woocommerce_get_page_id('checkout'))), 301 );
 			exit;
 		// Break out of SSL if we leave the checkout (anywhere but thanks page)
-		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(get_option('woocommerce_thanks_page_id')) && !is_ajax()) :
+		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(woocommerce_get_page_id('thanks')) && !is_ajax()) :
 			wp_safe_redirect( str_replace('https:', 'http:', home_url($_SERVER['REQUEST_URI']) ) );
 			exit;
 		endif;
@@ -355,7 +359,7 @@ class woocommerce {
 		
 		if (is_account_page()) $this->add_body_class('woocommerce-account');
 		
-		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page(get_option('woocommerce_order_tracking_page_id')) || is_page(get_option('woocommerce_thanks_page_id'))) $this->add_body_class('woocommerce-page');
+		if (is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page(woocommerce_get_page_id('order_tracking')) || is_page(woocommerce_get_page_id('thanks'))) $this->add_body_class('woocommerce-page');
 	}
 	
 	/**
@@ -421,7 +425,7 @@ class woocommerce {
 		/**
 		 * Slugs
 		 **/
-		$shop_page_id = get_option('woocommerce_shop_page_id');
+		$shop_page_id = woocommerce_get_page_id('shop');
 		
 		$base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
 		
@@ -785,38 +789,26 @@ class woocommerce {
 		$chosen_en = (get_option('woocommerce_enable_chosen')=='yes') ? true : false;
 		$jquery_ui_en = (get_option('woocommerce_enable_jquery_ui')=='yes') ? true : false;
 		$scripts_position = (get_option('woocommerce_scripts_position') == 'yes') ? true : false;
-	
-		wp_register_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
-		wp_register_script( 'woocommerce_plugins', $this->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
 		
-		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'woocommerce_plugins' );
-		wp_enqueue_script( 'woocommerce' );
+		// Woocommerce.min.js is minified and contains woocommerce_plugins
+		wp_enqueue_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce.min.js', array('jquery'), '1.0', $scripts_position );
 		
-		if ($lightbox_en) :
-			wp_register_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
-			wp_enqueue_script( 'fancybox' );
-		endif;
+		if ($lightbox_en) 
+			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
 		
-		if ($chosen_en && is_checkout()) :
-			wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
-			wp_enqueue_script( 'chosen' );
-		endif;
+		if ($chosen_en && is_checkout()) 
+			wp_enqueue_script( 'chosen', $this->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
 		
 		if ($jquery_ui_en) :
-			wp_register_script( 'jqueryui', $this->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', 'jquery', '1.0', $scripts_position );
-			wp_register_script( 'wc_price_slider', $this->plugin_url() . '/assets/js/price_slider'.$suffix.'.js', 'jqueryui', '1.0', $scripts_position );
-			
-			wp_enqueue_script( 'jqueryui' );
-			wp_enqueue_script( 'wc_price_slider' );
+			wp_enqueue_script( 'jqueryui', $this->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+			wp_enqueue_script( 'wc_price_slider', $this->plugin_url() . '/assets/js/price_slider'.$suffix.'.js', array('jqueryui'), '1.0', $scripts_position );
 			
 			$woocommerce_price_slider_params = array(
-				'currency_symbol' 				=> get_woocommerce_currency_symbol(),
-				'currency_pos'           		=> get_option('woocommerce_currency_pos'), 
+				'currency_symbol' 			=> get_woocommerce_currency_symbol(),
+				'currency_pos'           	=> get_option('woocommerce_currency_pos'), 
+				'min_price'					=> isset($_SESSION['min_price']) ? $_SESSION['min_price'] : '',
+				'max_price'					=> isset($_SESSION['max_price']) ? $_SESSION['max_price'] : ''
 			);
-			
-			if (isset($_SESSION['min_price'])) $woocommerce_price_slider_params['min_price'] = $_SESSION['min_price'];
-			if (isset($_SESSION['max_price'])) $woocommerce_price_slider_params['max_price'] = $_SESSION['max_price'];
 			
 			wp_localize_script( 'wc_price_slider', 'woocommerce_price_slider_params', $woocommerce_price_slider_params );
 		endif;
@@ -835,18 +827,16 @@ class woocommerce {
 			'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
 			'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
 			'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout'),
-			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart')
+			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart'),
+			'is_checkout'					=> ( is_page(woocommerce_get_page_id('checkout')) ) ? 1 : 0,
+			'is_pay_page'					=> ( is_page(woocommerce_get_page_id('pay')) ) ? 1 : 0,
+			'is_cart'						=> ( is_cart() ) ? 1 : 0
 		);
 		
-		$woocommerce_params['is_checkout'] = ( is_page(get_option('woocommerce_checkout_page_id')) ) ? 1 : 0;
-		$woocommerce_params['is_pay_page'] = ( is_page(get_option('woocommerce_pay_page_id')) ) ? 1 : 0;
-		$woocommerce_params['is_cart'] = ( is_cart() ) ? 1 : 0;
-		
-		if (is_checkout() || is_cart()) :
+		if (is_checkout() || is_cart()) 
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
-		endif;
 		
-		wp_localize_script( 'woocommerce', 'woocommerce_params', $woocommerce_params );
+		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters('woocommerce_params', $woocommerce_params) );
 	}
 	
 	/** Load Instances on demand **********************************************/	
@@ -1010,7 +1000,7 @@ class woocommerce {
 		// IIS fix
 		if ($is_IIS) session_write_close();
 		
-		return $location;
+		return apply_filters('woocommerce_redirect', $location);
 	}
 		
 	/** Attribute Helpers ****************************************************************/

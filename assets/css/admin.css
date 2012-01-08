@@ -169,6 +169,7 @@ table.woocommerce_attributes .taxonomy td.name{padding:10px 15px;font-size:14px;
 table.woocommerce_attributes .taxonomy td.values{position:relative;}table.woocommerce_attributes .taxonomy td.values .chzn-container{width:100% !important;margin:0 1px;display:block;}table.woocommerce_attributes .taxonomy td.values .chzn-container .chzn-drop{width:100% !important;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
 table.woocommerce_attributes .center{text-align:center;}
 #woocommerce_attributes select.attribute_taxonomy,button.add_attribute,button.add_variable_attribute,button.add_variation,button.link_all_variations{float:right;}
+a.delete_variations{float:right;line-height:23px;margin-right:3px;color:#999;}a.delete_variations:hover{color:red;}
 #upsells_and_crosssells_product_data{padding:0 9px 9px;}
 div.multi_select_products_wrapper{float:left;width:49%;padding:0;}
 div.multi_select_products_wrapper-alt{float:right;}
@@ -180,7 +181,7 @@ div.multi_select_products_wrapper-alt{float:right;}
 .multi_select_products .product_search input{width:100%;}
 #woocommerce-product-data input.dp-applied{float:left;}
 #grouped_product_options,#virtual_product_options,#simple_product_options{padding:12px;font-style:italic;color:#666;}
-#variable_product_options p.description{float:left;padding:0;margin:0;}
+#variable_product_options p.description{float:left;padding:0;margin:0;line-height:23px;}
 #variable_product_options p.bulk_edit,#variable_product_options p.default_variation{background:#ececec;padding:6px !important;margin:0 0 8px !important;overflow:hidden;zoom:1;}#variable_product_options p.bulk_edit strong,#variable_product_options p.default_variation strong{margin:0 6px 0 0;float:left;line-height:23px;}
 #variable_product_options p.bulk_edit .button,#variable_product_options p.default_variation .button,#variable_product_options p.bulk_edit select,#variable_product_options p.default_variation select{margin:0 6px 0 0;float:left;}
 #variable_product_options p.bulk_edit a.set,#variable_product_options p.default_variation a.set{padding-left:20px;background:#fefefe url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat 7px 5px;}

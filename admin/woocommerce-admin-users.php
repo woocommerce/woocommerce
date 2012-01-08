@@ -94,14 +94,9 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 }
  
 /**
- * Show Address Fields on edit user pages
+ * Get Address Fields for edit user pages
  */
-add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
-add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
-
-function woocommerce_customer_meta_fields( $user ) { 
-	if (!current_user_can('manage_woocommerce')) return $columns;
-
+function woocommerce_get_customer_meta_fields() {
 	$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
 		'billing' => array(
 			'title' => __('Customer Billing Address', 'woocommerce'),
@@ -186,6 +181,19 @@ function woocommerce_customer_meta_fields( $user ) {
 			)
 		)
 	));
+	return $show_fields;
+}
+ 
+/**
+ * Show Address Fields on edit user pages
+ */
+add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
+add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
+
+function woocommerce_customer_meta_fields( $user ) { 
+	if (!current_user_can('manage_woocommerce')) return $columns;
+
+	$show_fields = woocommerce_get_customer_meta_fields();
 	
 	foreach( $show_fields as $fieldset ) :
 		?>
@@ -207,4 +215,24 @@ function woocommerce_customer_meta_fields( $user ) {
 		</table>
 		<?php
 	endforeach;
+}
+
+/**
+ * Save Address Fields on edit user pages
+ */
+add_action( 'personal_options_update', 'woocommerce_save_customer_meta_fields' );
+add_action( 'edit_user_profile_update', 'woocommerce_save_customer_meta_fields' );
+ 
+function woocommerce_save_customer_meta_fields( $user_id ) {
+	if (!current_user_can('manage_woocommerce')) return $columns;
+ 	
+ 	$save_fields = woocommerce_get_customer_meta_fields();
+ 	
+ 	foreach( $save_fields as $fieldset ) :
+ 		foreach( $fieldset['fields'] as $key => $field ) :
+ 		
+ 			if (isset($_POST[$key])) update_user_meta( $user_id, $key, trim(esc_attr( $_POST[$key] )) );
+ 		
+ 		endforeach;
+ 	endforeach;
 }

@@ -10,4 +10,4 @@ $info_message = apply_filters('woocommerce_checkout_login_message', __('Already 
 
 <p class="info"><?php echo $info_message; ?> <a href="#" class="showlogin"><?php _e('Click here to login', 'woocommerce'); ?></a></p>
 
-<?php woocommerce_login_form( array( 'message' => __('If you have shopped with us before, please enter your username and password in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section.', 'woocommerce'), 'redirect' => get_permalink(get_option('woocommerce_checkout_page_id')) ) ); ?>
+<?php woocommerce_login_form( array( 'message' => __('If you have shopped with us before, please enter your username and password in the boxes below. If you are a new customer please proceed to the Billing &amp; Shipping section.', 'woocommerce'), 'redirect' => get_permalink(woocommerce_get_page_id('checkout')) ) ); ?>

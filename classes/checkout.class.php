@@ -221,24 +221,26 @@ class woocommerce_checkout {
 					// Validation: Required fields
 					if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
 					
-					// Special handling for validation and formatting
-					switch ($key) :
-						case "billing_postcode" :
-						case "shipping_postcode" :
-							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
-							
-							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
-							else :
-								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
-							endif;
-						break;
-						case "billing_phone" :
-							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
-						break;
-						case "billing_email" :
-							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
-						break;
-					endswitch;
+					if (!empty($this->posted[$key])) :
+						// Special handling for validation and formatting
+						switch ($key) :
+							case "billing_postcode" :
+							case "shipping_postcode" :
+								$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
+								
+								if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+								else :
+									$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+								endif;
+							break;
+							case "billing_phone" :
+								if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
+							break;
+							case "billing_email" :
+								if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
+							break;
+						endswitch;
+					endif;
 					
 				endforeach;
 				
@@ -297,7 +299,7 @@ class woocommerce_checkout {
 			endif;
 			
 			// Terms
-			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && get_option('woocommerce_terms_page_id')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
+			if (!isset($_POST['update_totals']) && empty($this->posted['terms']) && woocommerce_get_page_id('terms')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
 			
 			if ($woocommerce->cart->needs_shipping()) :
 				
@@ -563,10 +565,12 @@ class woocommerce_checkout {
 						
 						// Redirect to success/confirmation/payment page
 						if ($result['result']=='success') :
-						
+							
+							$result = apply_filters('woocommerce_payment_successful_result', $result );
+							
 							if (is_ajax()) : 
 								ob_clean();
-								echo json_encode($result);
+								echo json_encode( $result );
 								exit;
 							else :
 								wp_safe_redirect( $result['redirect'] );
@@ -586,10 +590,10 @@ class woocommerce_checkout {
 						// Redirect to success/confirmation/payment page
 						if (is_ajax()) : 
 							ob_clean();
-							echo json_encode( array('redirect'	=> get_permalink(get_option('woocommerce_thanks_page_id'))) );
+							echo json_encode( array('redirect'	=> apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks')))) );
 							exit;
 						else :
-							wp_safe_redirect( get_permalink(get_option('woocommerce_thanks_page_id')) );
+							wp_safe_redirect( apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks'))) );
 							exit;
 						endif;
 						

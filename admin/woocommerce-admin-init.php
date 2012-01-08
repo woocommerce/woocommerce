@@ -267,3 +267,53 @@ function woocommerce_admin_head() {
 	<?php
 }
 add_action('admin_head', 'woocommerce_admin_head');
+
+/**
+ * Add functionality to the image uploader on product pages to exclude an image
+ **/
+add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
+add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
+add_action('add_attachment', 'woocommerce_exclude_image_from_product_page_field_add');
+
+function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
+	
+	if (!$object->post_parent) return $fields;
+	
+	$parent = get_post( $object->post_parent );
+	
+	if ($parent->post_type!=='product') return $fields;
+	
+	$exclude_image = (int) get_post_meta($object->ID, '_woocommerce_exclude_image', true);
+	
+	$label = __('Exclude image', 'woocommerce');
+	
+	$html = '<input type="checkbox" '.checked($exclude_image, 1, false).' name="attachments['.$object->ID.'][woocommerce_exclude_image]" id="attachments['.$object->ID.'][woocommerce_exclude_image" />';
+	
+	$fields['woocommerce_exclude_image'] = array(
+			'label' => $label,
+			'input' => 'html',
+			'html' =>  $html,
+			'value' => '',
+			'helps' => __('Enabling this option will hide it from the product page image gallery.', 'woocommerce')
+	);
+	
+	return $fields;
+}
+
+function woocommerce_exclude_image_from_product_page_field_save( $post, $attachment ) {
+
+	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) :
+		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
+		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 1);
+	else :
+		delete_post_meta( (int) $post['ID'], '_woocommerce_exclude_image' );
+		update_post_meta( (int) $post['ID'], '_woocommerce_exclude_image', 0);
+	endif;
+		
+	return $post;
+				
+}
+
+function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
+	add_post_meta( $post_id, '_woocommerce_exclude_image', 0);
+}

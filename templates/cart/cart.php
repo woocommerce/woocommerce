@@ -31,14 +31,14 @@ global $woocommerce;
 					<tr>
 						<td class="product-remove"><a href="<?php echo esc_url( $woocommerce->cart->get_remove_url($cart_item_key) ); ?>" class="remove" title="<?php _e('Remove this item', 'woocommerce'); ?>">&times;</a></td>
 						<td class="product-thumbnail">
-							<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>">
+							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>">
 							<?php 
 								echo $_product->get_image();
 							?>
 							</a>
 						</td>
 						<td class="product-name">
-							<a href="<?php echo esc_url( get_permalink($values['product_id']) ); ?>"><?php echo $_product->get_title(); ?></a>
+							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>"><?php echo $_product->get_title(); ?></a>
 							<?php
 								// Meta data
 								echo $woocommerce->cart->get_item_data( $values );

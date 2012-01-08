@@ -8,7 +8,7 @@ global $woocommerce, $load_address, $address;
 
 <?php $woocommerce->show_messages(); ?>
 
-<form action="<?php echo esc_url( add_query_arg( 'address', $load_address, get_permalink( get_option( 'woocommerce_edit_address_page_id' ) ) ) ); ?>" method="post">
+<form action="<?php echo esc_url( add_query_arg( 'address', $load_address, get_permalink( woocommerce_get_page_id('edit_address') ) ) ); ?>" method="post">
 	
 	<h3><?php if ($load_address=='billing') _e('Billing Address', 'woocommerce'); else _e('Shipping Address', 'woocommerce'); ?></h3>
 	

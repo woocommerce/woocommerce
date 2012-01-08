@@ -53,8 +53,8 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			do_action('woocommerce_login_widget_logged_in_before_links');
 						
 			$links = apply_filters( 'woocommerce_login_widget_logged_in_links', array(
-				__('My account', 'woocommerce') 	=> get_permalink(get_option('woocommerce_myaccount_page_id')), 
-				__('Change my password', 'woocommerce') => get_permalink(get_option('woocommerce_change_password_page_id')),
+				__('My account', 'woocommerce') 	=> get_permalink(woocommerce_get_page_id('myaccount')), 
+				__('Change my password', 'woocommerce') => get_permalink(woocommerce_get_page_id('change_password')),
 				__('Logout', 'woocommerce')		=> wp_logout_url(home_url())
 			));
 			
@@ -86,7 +86,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			endforeach;					
 			
 			// Get redirect URL
-			$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(get_option('woocommerce_myaccount_page_id')) );
+			$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(woocommerce_get_page_id('myaccount')) );
 			?>
 			<form method="post">
 			
@@ -196,7 +196,7 @@ function woocommerce_sidebar_login_process() {
 		global $login_errors;
 		
 		// Get redirect URL
-		$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(get_option('woocommerce_myaccount_page_id')) );
+		$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(woocommerce_get_page_id('myaccount')) );
 
 		// Check for Secure Cookie
 		$secure_cookie = '';

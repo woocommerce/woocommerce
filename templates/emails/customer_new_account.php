@@ -11,7 +11,7 @@
 	<li><?php echo sprintf(__('Password: %s', 'woocommerce'), $user_pass); ?></li>
 </ul>
 
-<p><?php echo sprintf(__("You can login to your account area here: %s.", 'woocommerce'), get_permalink(get_option('woocommerce_myaccount_page_id'))); ?></p>
+<p><?php echo sprintf(__("You can login to your account area here: %s.", 'woocommerce'), get_permalink(woocommerce_get_page_id('myaccount'))); ?></p>
 
 <div style="clear:both;"></div>
 

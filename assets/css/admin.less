@@ -982,6 +982,15 @@ table.woocommerce_attributes .center {
 #woocommerce_attributes select.attribute_taxonomy, button.add_attribute, button.add_variable_attribute, button.add_variation, button.link_all_variations {
 	float: right;
 }
+a.delete_variations {
+	float: right;
+	line-height: 23px;
+	margin-right: 3px;
+	color: #999;
+	&:hover {
+		color: red;
+	}
+}
 
 #upsells_and_crosssells_product_data {
 	padding: 0 9px 9px;
@@ -1042,6 +1051,7 @@ div.multi_select_products_wrapper-alt {
 		float: left;
 		padding: 0;
 		margin: 0;
+		line-height: 23px;
 	}
 	p.bulk_edit, p.default_variation {
 		background: #ececec;

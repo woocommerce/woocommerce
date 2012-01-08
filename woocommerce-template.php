@@ -9,6 +9,94 @@
  * @author		WooThemes
  */
 
+/** Template pages ********************************************************/
+
+if (!function_exists('woocommerce_content')) {
+	// This function is only used in the optional 'woocommerce.php' template
+	// people can add to their themes to add basic woocommerce support.
+	function woocommerce_content() {
+		global $woocommerce;
+		
+		if ( is_single() && get_post_type() == 'product' ) 
+			woocommerce_single_product_content();
+		elseif ( is_tax('product_cat') )
+			woocommerce_product_taxonomy_content();
+		elseif ( is_tax('product_tag') )
+			woocommerce_product_taxonomy_content();
+		else
+			woocommerce_archive_product_content();
+	}
+}
+if (!function_exists('woocommerce_archive_product_content')) {
+	function woocommerce_archive_product_content() { ?>
+		
+		<?php 
+			$shop_page_id = woocommerce_get_page_id('shop');
+			$shop_page = get_post($shop_page_id);
+			$shop_page_title = (get_option('woocommerce_shop_page_title')) ? get_option('woocommerce_shop_page_title') : $shop_page->post_title;
+		?>
+		
+		<?php if (is_search()) : ?>		
+			<h1 class="page-title"><?php _e('Search Results:', 'woocommerce'); ?> &ldquo;<?php the_search_query(); ?>&rdquo; <?php if (get_query_var('paged')) echo ' &mdash; Page '.get_query_var('paged'); ?></h1>
+		<?php else : ?>
+			<h1 class="page-title"><?php echo apply_filters('the_title', $shop_page_title); ?></h1>
+		<?php endif; ?>
+		
+		<?php echo apply_filters('the_content', $shop_page->post_content); ?>
+		
+		<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
+		
+		<?php do_action('woocommerce_pagination'); ?>
+		
+	<?php }
+}
+if (!function_exists('woocommerce_product_taxonomy_content')) {
+	function woocommerce_product_taxonomy_content() { 
+		
+		global $wp_query; ?>
+	
+		<?php $term = get_term_by( 'slug', get_query_var($wp_query->query_vars['taxonomy']), $wp_query->query_vars['taxonomy']); ?>
+				
+		<h1 class="page-title"><?php echo wptexturize($term->name); ?></h1>
+			
+		<?php if ($term->description) : ?><div class="term_description"><?php echo wpautop(wptexturize($term->description)); ?></div><?php endif; ?>
+		
+		<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
+		
+		<?php do_action('woocommerce_pagination'); ?>
+	
+	<?php }
+}
+if (!function_exists('woocommerce_single_product_content')) {
+	function woocommerce_single_product_content() { ?>
+	
+		<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
+			
+			<?php do_action('woocommerce_before_single_product'); ?>
+		
+			<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
+				
+				<?php do_action('woocommerce_before_single_product_summary'); ?>
+				
+				<div class="summary">
+					
+					<h1 itemprop="name" class="product_title page-title"><?php the_title(); ?></h1>
+					
+					<?php do_action( 'woocommerce_single_product_summary'); ?>
+		
+				</div>
+				
+				<?php do_action('woocommerce_after_single_product_summary'); ?>
+		
+			</div>
+				
+			<?php do_action('woocommerce_after_single_product'); ?>
+		
+		<?php endwhile; ?>
+	
+	<?php }
+}
+
 /** Global ****************************************************************/
 
 if (!function_exists('woocommerce_output_content_wrapper')) {
@@ -591,7 +679,7 @@ if (!function_exists('woocommerce_form_field')) {
 					
 				if (isset( $states[$current_cc][$current_r] )) :
 					// Dropdown
-					$field .= '<select name="'.$key.'" id="'.$key.'"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
+					$field .= '<select name="'.$key.'" id="'.$key.'" class="state_select"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
 					foreach($states[$current_cc] as $ckey=>$cvalue) :
 						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
 					endforeach;
