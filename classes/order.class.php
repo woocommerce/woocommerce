@@ -63,7 +63,7 @@ class woocommerce_order {
 		$order_custom_fields = get_post_custom( $this->id );
 		
 		// Define the data we're going to load: Key => Default value
-		$load_data = array(
+		$load_data = apply_filters('woocommerce_load_order_data', array(
 			'order_key'				=> '',
 			'billing_first_name'	=> '',
 			'billing_last_name' 	=> '',
@@ -95,7 +95,7 @@ class woocommerce_order {
 			'order_shipping'		=> '',
 			'order_shipping_tax'	=> '',
 			'order_total'			=> ''
-		);
+		));
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :

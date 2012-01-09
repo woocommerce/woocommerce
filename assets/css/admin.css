@@ -15,7 +15,8 @@
 #order_data .order_data_left .form-field select{width:100%;}
 #order_data .order_data_left .form-field #order_status_chzn .chzn-search{display:none;}
 #order_data .order_data_left .form-field-wide{width:100%;clear:both;}
-#order_data .order_data_right{width:48%;float:right;}#order_data .order_data_right .order_data{overflow:hidden;zoom:1;}
+#order_data .order_data_right{width:48%;float:right;}#order_data .order_data_right .order_data{overflow:hidden;zoom:1;width:49%;float:left;}
+#order_data .order_data_right .order_data_alt{float:right;}
 #order_data .order_data_right h2{margin-top:11px;margin-bottom:0;}
 #order_data .order_data_right p{padding:0 !important;}
 #order_data .order_data_right p.none_set{color:#999;}

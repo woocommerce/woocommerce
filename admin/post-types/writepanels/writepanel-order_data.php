@@ -84,59 +84,139 @@ function woocommerce_order_data_meta_box($post) {
 			</div>
 			<div class="order_data_right">
 				<div class="order_data">
-					
-					<h2><?php _e('Billing Address', 'woocommerce'); ?> <a class="edit_address" href="#">(<?php _e('Edit', 'woocommerce') ;?>)</a></h2>
-					<div class="address">
-						<?php
-						if ($order->formatted_billing_address) echo wpautop($order->formatted_billing_address); else echo '<p class="none_set">' . __('No billing address set.', 'woocommerce') . '</p>';
-						?>
-					</div>
-					<div class="edit_address">
-						<p>
-							<button class="button load_customer_billing"><?php _e('Load customer billing address', 'woocommerce'); ?></button>
-						</p>
-						<?php
-						woocommerce_wp_text_input( array( 'id' => '_billing_first_name', 'label' => __('First Name', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_last_name', 'label' => __('Last Name', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_company', 'label' => __('Company', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_address_1', 'label' => __('Address 1', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_address_2', 'label' => __('Address 2', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_city', 'label' => __('City', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_postcode', 'label' => __('Postcode', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_country', 'label' => __('Country', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_state', 'label' => __('State/County', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_email', 'label' => __('Email Address', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_billing_phone', 'label' => __('Tel', 'woocommerce') ) );
-						?>
-					</div>
-					
+					<h2><?php _e('Billing Details', 'woocommerce'); ?> <a class="edit_address" href="#">(<?php _e('Edit', 'woocommerce') ;?>)</a></h2>
+					<?php
+						$billing_data = apply_filters('woocommerce_admin_billing_fields', array(
+							'first_name' => array( 
+								'label' => __('First Name', 'woocommerce'), 
+								'show'	=> false
+								),
+							'last_name' => array( 
+								'label' => __('Last Name', 'woocommerce'), 
+								'show'	=> false
+								),
+							'company' => array( 
+								'label' => __('Company', 'woocommerce'), 
+								'show'	=> false
+								),
+							'address_1' => array( 
+								'label' => __('Address 1', 'woocommerce'), 
+								'show'	=> false
+								),
+							'address_2' => array( 
+								'label' => __('Address 2', 'woocommerce'),
+								'show'	=> false 
+								),
+							'city' => array( 
+								'label' => __('City', 'woocommerce'), 
+								'show'	=> false
+								),
+							'postcode' => array( 
+								'label' => __('Postcode', 'woocommerce'), 
+								'show'	=> false
+								),
+							'country' => array( 
+								'label' => __('Country', 'woocommerce'), 
+								'show'	=> false
+								),
+							'state' => array( 
+								'label' => __('State/County', 'woocommerce'), 
+								'show'	=> false
+								),
+							'email' => array( 
+								'label' => __('Email', 'woocommerce'), 
+								),
+							'phone' => array( 
+								'label' => __('Phone', 'woocommerce'), 
+								),
+							));
+						
+						// Display values
+						echo '<div class="address">';
+						
+							if ($order->formatted_billing_address) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->formatted_billing_address.'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No billing address set.', 'woocommerce') . '</p>';
+							
+							foreach ( $billing_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
+								$field_name = 'billing_'.$key;
+								echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
+							endforeach;
+						
+						echo '</div>';
+
+						// Display form
+						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__('Load customer billing address', 'woocommerce').'</button></p>';
+						
+						foreach ( $billing_data as $key => $field ) :
+							woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+						endforeach;
+						
+						echo '</div>';
+					?>
 				</div>
-				<div class="order_data">
+				<div class="order_data order_data_alt">
 					
-					<h2><?php _e('Shipping Address', 'woocommerce'); ?> <a class="edit_address" href="#">(<?php _e('Edit', 'woocommerce') ;?>)</a></h2>
-					<div class="address">
-						<?php
-						if ($order->formatted_shipping_address) echo wpautop($order->formatted_shipping_address); else echo '<p class="none_set">' . __('No shipping address set.', 'woocommerce') . '</p>';
-						?>
-					</div>
-					<div class="edit_address">
-						<p>
-							<button class="button load_customer_shipping"><?php _e('Load customer shipping address', 'woocommerce'); ?></button>
-							<button class="button billing-same-as-shipping"><?php _e('Copy from billing information', 'woocommerce'); ?></button>
-						</p>
-						<?php
-						woocommerce_wp_text_input( array( 'id' => '_shipping_first_name', 'label' => __('First Name', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_last_name', 'label' => __('Last Name', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_company', 'label' => __('Company', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_address_1', 'label' => __('Address 1', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_address_2', 'label' => __('Address 2', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_city', 'label' => __('City', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_postcode', 'label' => __('Postcode', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_country', 'label' => __('Country', 'woocommerce') ) );
-						woocommerce_wp_text_input( array( 'id' => '_shipping_state', 'label' => __('State/County', 'woocommerce') ) );
-						?>
-					</div>
-				
+					<h2><?php _e('Shipping Details', 'woocommerce'); ?> <a class="edit_address" href="#">(<?php _e('Edit', 'woocommerce') ;?>)</a></h2>
+					<?php
+						$shipping_data = apply_filters('woocommerce_admin_shipping_fields', array(
+							'first_name' => array( 
+								'label' => __('First Name', 'woocommerce'), 
+								'show'	=> false
+								),
+							'last_name' => array( 
+								'label' => __('Last Name', 'woocommerce'), 
+								'show'	=> false
+								),
+							'company' => array( 
+								'label' => __('Company', 'woocommerce'), 
+								'show'	=> false
+								),
+							'address_1' => array( 
+								'label' => __('Address 1', 'woocommerce'), 
+								'show'	=> false
+								),
+							'address_2' => array( 
+								'label' => __('Address 2', 'woocommerce'),
+								'show'	=> false 
+								),
+							'city' => array( 
+								'label' => __('City', 'woocommerce'), 
+								'show'	=> false
+								),
+							'postcode' => array( 
+								'label' => __('Postcode', 'woocommerce'), 
+								'show'	=> false
+								),
+							'country' => array( 
+								'label' => __('Country', 'woocommerce'), 
+								'show'	=> false
+								),
+							'state' => array( 
+								'label' => __('State/County', 'woocommerce'), 
+								'show'	=> false
+								),
+							));
+						
+						// Display values
+						echo '<div class="address">';
+						
+							if ($order->formatted_shipping_address) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->formatted_shipping_address.'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No shipping address set.', 'woocommerce') . '</p>';
+							
+							foreach ( $shipping_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
+								$field_name = 'shipping_'.$key;
+								echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
+							endforeach;
+						
+						echo '</div>';
+
+						// Display form
+						echo '<div class="edit_address"><p><button class="button load_customer_shipping">'.__('Load customer shipping address', 'woocommerce').'</button></p>';
+						
+						foreach ( $shipping_data as $key => $field ) :
+							woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+						endforeach;
+						
+						echo '</div>';
+					?>
 				</div>
 			</div>
 			<div class="clear"></div>
