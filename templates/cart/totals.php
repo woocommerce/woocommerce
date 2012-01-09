@@ -41,9 +41,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							
 							foreach ($available_methods as $method ) :
 								
-								echo '<option value="'.esc_attr($method->id).'" ';
-								
-								echo '<option value="'.$method->id.'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label.' &mdash; ';
+								echo '<option value="'.esc_attr($method->id).'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label.' &mdash; ';
 								
 								if ($method->cost>0) :
 									
