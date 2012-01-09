@@ -1184,7 +1184,9 @@ class woocommerce_cart {
 		 * gets the total excluding taxes
 		 */
 		function get_total_ex_tax() {
-			return woocommerce_price( $this->total - $this->tax_total - $this->shipping_tax_total );
+			$total = $this->total - $this->tax_total - $this->shipping_tax_total;
+			if ($total<0) $total = 0;
+			return woocommerce_price( $total );
 		}
 		
 		/**
