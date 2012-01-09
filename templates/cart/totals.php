@@ -88,7 +88,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php endif; ?>
 				
 				<?php 
-					if ($woocommerce->cart->get_cart_tax()) :
+					if (get_option('woocommerce_display_cart_taxes')=='yes' && $woocommerce->cart->get_cart_tax()) :
 						
 						if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
 						
@@ -149,7 +149,15 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				<tr class="total">
 					<th><strong><?php _e('Order Total', 'woocommerce'); ?></strong></th>
-					<td><strong><?php echo $woocommerce->cart->get_total(); ?></strong></td>
+					<td><strong><?php 
+						
+						if (get_option('woocommerce_display_cart_taxes')=='no' && !$woocommerce->cart->prices_include_tax) :
+							echo $woocommerce->cart->get_total_ex_tax(); 
+						else :
+							echo $woocommerce->cart->get_total(); 
+						endif;
+						
+					?></strong></td>
 				</tr>
 				
 			</tbody>

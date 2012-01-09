@@ -921,6 +921,12 @@ class woocommerce_cart {
 				$this->tax_total	= array_sum( $this->taxes );
 			endif;
 				
+			// VAT exemption done at this point - so all totals are correct before exemption
+			if ($woocommerce->customer->is_vat_exempt()) :
+				$this->shipping_tax_total = $this->tax_total = 0;
+				$this->taxes = array();
+			endif;
+			
 			// Cart Discounts (after tax)
 			$this->apply_cart_discounts_after_tax();
 			
@@ -929,15 +935,15 @@ class woocommerce_cart {
 			
 			// Cart Shipping
 			$this->calculate_shipping(); 
-						
-			// Taxes Rounding - taxes now include shipping taxes
-			$this->taxes		= $this->tax->get_taxes_rounded( $this->taxes );
 			
-			// VAT exemption done at this point - so all totals are correct before exemption
+			// VAT exemption done again to wipe shipping tax
 			if ($woocommerce->customer->is_vat_exempt()) :
 				$this->shipping_tax_total = $this->tax_total = 0;
 				$this->taxes = array();
 			endif;
+						
+			// Taxes Rounding - taxes now include shipping taxes
+			$this->taxes		= $this->tax->get_taxes_rounded( $this->taxes );
 			
 			// Allow plugins to hook and alter totals before final total is calculated
 			do_action('woocommerce_calculate_totals', $this);
@@ -1172,6 +1178,13 @@ class woocommerce_cart {
 		 */
 		function get_total() {
 			return woocommerce_price($this->total);
+		}
+		
+		/**
+		 * gets the total excluding taxes
+		 */
+		function get_total_ex_tax() {
+			return woocommerce_price( $this->total - $this->tax_total - $this->shipping_tax_total );
 		}
 		
 		/**
