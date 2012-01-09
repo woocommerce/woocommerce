@@ -118,7 +118,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
 		endif;
 		
-		return true;
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
     } 
     
     function get_fee( $fee, $total ) {

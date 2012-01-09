@@ -155,7 +155,7 @@ class free_shipping extends woocommerce_shipping_method {
 		
 		endif;
 		
-		return true;
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
     } 
     
     function calculate_shipping() {

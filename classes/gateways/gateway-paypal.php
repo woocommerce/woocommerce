@@ -419,11 +419,15 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			$order = new woocommerce_order( (int) $posted['custom'] );
 	        if ($order->order_key!==$posted['invoice']) exit;
 	        
+	        // Lowercase
+	        $posted['payment_status'] = strtolower($posted['payment_status']);
+	        $posted['txn_type'] = strtolower($posted['txn_type']);
+	        
 	        // Sandbox fix
-	        if ($posted['test_ipn']==1 && $posted['payment_status']=='Pending') $posted['payment_status'] = 'completed';
+	        if ($posted['test_ipn']==1 && $posted['payment_status']=='pending') $posted['payment_status'] = 'completed';
 	        
 	        // We are here so lets check status and do actions
-	        switch (strtolower($posted['payment_status'])) :
+	        switch ($posted['payment_status']) :
 	            case 'completed' :
 	            	
 	            	// Check order not already completed
@@ -431,7 +435,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	            	
 	            	// Check valid txn_type
 	            	$accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
-					if (!in_array(strtolower($posted['txn_type']), $accepted_types)) exit;
+					if (!in_array($posted['txn_type'], $accepted_types)) exit;
 	            	
 	            	// Payment completed
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
