@@ -91,6 +91,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Moved template function contents to template files
 * Added a simple, basic method of adding woocommerce support to themes using a woocommerce.php file based on page.php containing woocommerce_content()
 * Moved woocommerce class into the main file
+* Improved roles and capabilities for WooCommerce pages - more caps added for easier configuration
 * Category ordering fix
 * Made 'product' global, and auto filled when calling the_post - also remove this from the hooks. Certain themes may need to be updated.
 * Changed woocommerce_breadcrumb args

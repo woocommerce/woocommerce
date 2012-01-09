@@ -23,8 +23,8 @@ function woocommerce_admin_menu() {
 	
     add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
     add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
-    add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'manage_woocommerce', 'woocommerce_reports', 'woocommerce_reports_page');
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_categories', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
     
     $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     

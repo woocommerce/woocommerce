@@ -409,11 +409,19 @@ class woocommerce {
 			    'upload_files'				=> true,
 			   	'export'					=> true,
 				'import'					=> true,
-				'manage_woocommerce'		=> true
+				'manage_woocommerce'		=> true,
+				'manage_woocommerce_orders'		=> true,
+				'manage_woocommerce_coupons'	=> true,
+				'manage_woocommerce_products'	=> true,
+				'view_woocommerce_reports'		=> true
 			));
 			
 			// Main Shop capabilities for admin
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
+			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_orders' );
+			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_coupons' );
+			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_products' );
+			$wp_roles->add_cap( 'administrator', 'view_woocommerce_reports' );
 		endif;
 	}
 
@@ -478,6 +486,12 @@ class woocommerce {
 	            	),
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
+	            'capabilities'			=> array(
+	            	'manage_terms' 		=> 'manage_woocommerce_products',
+	            	'edit_terms' 		=> 'manage_woocommerce_products',
+	            	'delete_terms' 		=> 'manage_woocommerce_products',
+	            	'assign_terms' 		=> 'manage_woocommerce_products',
+	            ),
 	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false ),
 	        )
 	    );
@@ -501,6 +515,12 @@ class woocommerce {
 	            	),
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
+				'capabilities'			=> array(
+					'manage_terms' 		=> 'manage_woocommerce_products',
+					'edit_terms' 		=> 'manage_woocommerce_products',
+					'delete_terms' 		=> 'manage_woocommerce_products',
+					'assign_terms' 		=> 'manage_woocommerce_products',
+				),
 	            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
 	        )
 	    );
@@ -526,6 +546,12 @@ class woocommerce {
 	            'show_ui' 				=> true,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
+				'capabilities'			=> array(
+					'manage_terms' 		=> 'manage_woocommerce_products',
+					'edit_terms' 		=> 'manage_woocommerce_products',
+					'delete_terms' 		=> 'manage_woocommerce_products',
+					'assign_terms' 		=> 'manage_woocommerce_products',
+				),
 	            'rewrite' 				=> false,
 	        )
 	    );
@@ -617,6 +643,17 @@ class woocommerce {
 				'public' 				=> true,
 				'show_ui' 				=> true,
 				'capability_type' 		=> 'post',
+				'capabilities' => array(
+					'publish_posts' 		=> 'manage_woocommerce_products',
+					'edit_posts' 			=> 'manage_woocommerce_products',
+					'edit_others_posts' 	=> 'manage_woocommerce_products',
+					'delete_posts' 			=> 'manage_woocommerce_products',
+					'delete_others_posts'	=> 'manage_woocommerce_products',
+					'read_private_posts'	=> 'manage_woocommerce_products',
+					'edit_post' 			=> 'manage_woocommerce_products',
+					'delete_post' 			=> 'manage_woocommerce_products',
+					'read_post' 			=> 'manage_woocommerce_products'
+				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
 				'hierarchical' 			=> true,
@@ -649,6 +686,17 @@ class woocommerce {
 				'public' 				=> true,
 				'show_ui' 				=> false,
 				'capability_type' 		=> 'post',
+				'capabilities' => array(
+					'publish_posts' 		=> 'manage_woocommerce_products',
+					'edit_posts' 			=> 'manage_woocommerce_products',
+					'edit_others_posts' 	=> 'manage_woocommerce_products',
+					'delete_posts' 			=> 'manage_woocommerce_products',
+					'delete_others_posts'	=> 'manage_woocommerce_products',
+					'read_private_posts'	=> 'manage_woocommerce_products',
+					'edit_post' 			=> 'manage_woocommerce_products',
+					'delete_post' 			=> 'manage_woocommerce_products',
+					'read_post' 			=> 'manage_woocommerce_products'
+				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> true,
 				'hierarchical' 			=> true,
@@ -681,15 +729,15 @@ class woocommerce {
 				'show_ui' 				=> true,
 				'capability_type' 		=> 'post',
 				'capabilities' => array(
-					'publish_posts' 	=> 'manage_woocommerce',
-					'edit_posts' 		=> 'manage_woocommerce',
-					'edit_others_posts' => 'manage_woocommerce',
-					'delete_posts' 		=> 'manage_woocommerce',
-					'delete_others_posts'=> 'manage_woocommerce',
-					'read_private_posts'=> 'manage_woocommerce',
-					'edit_post' 		=> 'manage_woocommerce',
-					'delete_post' 		=> 'manage_woocommerce',
-					'read_post' 		=> 'manage_woocommerce',
+					'publish_posts' 		=> 'manage_woocommerce_orders',
+					'edit_posts' 			=> 'manage_woocommerce_orders',
+					'edit_others_posts' 	=> 'manage_woocommerce_orders',
+					'delete_posts' 			=> 'manage_woocommerce_orders',
+					'delete_others_posts'	=> 'manage_woocommerce_orders',
+					'read_private_posts'	=> 'manage_woocommerce_orders',
+					'edit_post' 			=> 'manage_woocommerce_orders',
+					'delete_post' 			=> 'manage_woocommerce_orders',
+					'read_post' 			=> 'manage_woocommerce_orders'
 				),
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
@@ -725,15 +773,15 @@ class woocommerce {
 				'show_ui' 				=> true,
 				'capability_type' 		=> 'post',
 				'capabilities' => array(
-					'publish_posts' 	=> 'manage_woocommerce',
-					'edit_posts' 		=> 'manage_woocommerce',
-					'edit_others_posts' => 'manage_woocommerce',
-					'delete_posts' 		=> 'manage_woocommerce',
-					'delete_others_posts'=> 'manage_woocommerce',
-					'read_private_posts'=> 'manage_woocommerce',
-					'edit_post' 		=> 'manage_woocommerce',
-					'delete_post' 		=> 'manage_woocommerce',
-					'read_post' 		=> 'manage_woocommerce',
+					'publish_posts' 		=> 'manage_woocommerce_coupons',
+					'edit_posts' 			=> 'manage_woocommerce_coupons',
+					'edit_others_posts' 	=> 'manage_woocommerce_coupons',
+					'delete_posts' 			=> 'manage_woocommerce_coupons',
+					'delete_others_posts'	=> 'manage_woocommerce_coupons',
+					'read_private_posts'	=> 'manage_woocommerce_coupons',
+					'edit_post' 			=> 'manage_woocommerce_coupons',
+					'delete_post' 			=> 'manage_woocommerce_coupons',
+					'read_post' 			=> 'manage_woocommerce_coupons'
 				),
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
