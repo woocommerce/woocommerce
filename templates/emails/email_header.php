@@ -15,7 +15,7 @@
 			}
 			img{border:none; font-size:14px; font-weight:bold; height:auto; line-height:100%; outline:none; text-decoration:none; text-transform:capitalize;}
 			#backgroundTable{height:100% !important; margin:0; padding:0; width:100% !important;}
-
+			mark { background: transparent none; color: inherit; }
 			/* Template Styles */
 
 			body {

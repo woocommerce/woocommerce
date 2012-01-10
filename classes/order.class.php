@@ -52,14 +52,6 @@ class woocommerce_order {
 		$this->modified_date = $result->post_modified;	
 		$this->customer_note = $result->post_excerpt;
 		
-		// Custom fields
-		$this->items 				= (array) get_post_meta( $this->id, '_order_items', true );
-		$this->taxes 				= (array) get_post_meta( $this->id, '_order_taxes', true );
-		$this->user_id 				= (int) get_post_meta( $this->id, '_customer_user', true );
-		$this->completed_date		= get_post_meta( $this->id, '_completed_date', true );
-		
-		if (!$this->completed_date) $this->completed_date = $this->modified_date;
-		
 		$order_custom_fields = get_post_custom( $this->id );
 		
 		// Define the data we're going to load: Key => Default value
@@ -105,7 +97,15 @@ class woocommerce_order {
 				$this->$key = $default;
 			endif;
 		endforeach;
-	
+		
+		// Other custom fields
+		$this->items = isset( $order_custom_fields['_order_items'][0] ) ?maybe_unserialize( maybe_unserialize( $order_custom_fields['_order_items'][0] )) : array();
+		$this->taxes = isset( $order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( maybe_unserialize( $order_custom_fields['_order_taxes'][0] )) : array();
+		$this->user_id = (int) isset($order_custom_fields['_customer_user'][0]) ? $order_custom_fields['_customer_user'][0] : '';
+		$this->completed_date = isset($order_custom_fields['_completed_date'][0]) ? $order_custom_fields['_completed_date'][0] : '';
+		
+		if (!$this->completed_date) $this->completed_date = $this->modified_date;
+
 		// Formatted Addresses
 		$address = array(
 			'first_name' 	=> $this->billing_first_name,
@@ -682,7 +682,7 @@ class woocommerce_order {
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $this->id, 'quantity' => $values['quantity']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $item['id'], 'order_id' => $this->id, 'quantity' => $item['quantity']));
 						endif;
 						
 						// stock status notifications

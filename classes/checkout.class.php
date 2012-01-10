@@ -553,13 +553,11 @@ class woocommerce_checkout {
 					do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
 					
 					// Process payment
-					$order = new woocommerce_order($order_id);
-					
 					if ($woocommerce->cart->needs_payment()) :
 						
 						// Store Order ID in session so it can be re-used after payment failure
 						$_SESSION['order_awaiting_payment'] = $order_id;
-					
+
 						// Process Payment
 						$result = $available_gateways[$this->posted['payment_method']]->process_payment( $order_id );
 						
@@ -580,7 +578,9 @@ class woocommerce_checkout {
 						endif;
 					
 					else :
-					
+						
+						$order = new woocommerce_order($order_id);
+						
 						// No payment was required for order
 						$order->payment_complete();
 						
