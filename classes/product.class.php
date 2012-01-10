@@ -44,6 +44,7 @@ class woocommerce_product {
 	var $max_variation_price;
 	var $featured;
 	var $shipping_class;
+	var $dimensions;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -771,55 +772,66 @@ class woocommerce_product {
 		return false;
 	}
 	
+	/** Returns whether or not we are showing dimensions on the product page */
+	function enable_dimensions_display() {
+		if (get_option('woocommerce_enable_dimension_product_attributes')=='yes') return true;
+		return false;
+	}
+	
+	/** Returns whether or not the product has dimensions set */
+	function has_dimensions() {
+		if ($this->get_dimensions()) return true;
+		return false;
+	}
+	
+	/** Returns whether or not the product has weight set */
+	function has_weight() {
+		if ($this->get_weight()) return true;
+		return false;
+	}
+	
+	/** Returns dimensions */
+	function get_dimensions() {
+		if (!$this->dimensions) :
+			$this->dimensions = '';
+			
+			$length = $this->length;
+			$width = $this->width;
+			$height = $this->height;
+			
+			if (($length && $width && $height)) $dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
+		endif;
+		return $this->dimensions;
+	}
+
 	/** Lists a table of attributes for the product page */
 	function list_attributes() {
 		global $woocommerce;
 		
 		$attributes = $this->get_attributes();
 		
-		$show_dimensions 	= false;
-		$has_dimensions 	= false;
-		
-		if (get_option('woocommerce_enable_dimension_product_attributes')=='yes') :
-			
-			$show_dimensions 	= true;
-			$weight 			= '';
-			$dimensions 		= '';
-			
-			$length = $this->length;
-			$width = $this->width;
-			$height = $this->height;
-			
-			if ($this->get_weight()) $weight = $this->get_weight() . get_option('woocommerce_weight_unit');
-			
-			if (($length && $width && $height)) $dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
-			
-			if ($weight || $dimensions) $has_dimensions = true;
-			
-		endif;	
-		
-		if (sizeof($attributes)>0 || ($show_dimensions && $has_dimensions)) :
+		if (sizeof($attributes)>0 || ($this->enable_dimensions_display() && ($this->has_dimensions() || $this->has_weight()))) :
 			
 			echo '<table class="shop_attributes">';
 			$alt = 1;
 			
-			if (($show_dimensions && $has_dimensions)) :
+			if ($this->enable_dimensions_display()) :
 				
-				if ($weight) :
+				if ($this->has_weight()) :
 					
 					$alt = $alt*-1;
 					echo '<tr class="';
 					if ($alt==1) echo 'alt';
-					echo '"><th>'.__('Weight', 'woocommerce').'</th><td>'.$weight.'</td></tr>';
+					echo '"><th>'.__('Weight', 'woocommerce').'</th><td>'. $this->get_weight() . get_option('woocommerce_weight_unit') .'</td></tr>';
 					
 				endif;
 				
-				if ($dimensions) :
+				if ($this->has_dimensions()) :
 					
 					$alt = $alt*-1;
 					echo '<tr class="';
 					if ($alt==1) echo 'alt';
-					echo '"><th>'.__('Dimensions', 'woocommerce').'</th><td>'.$dimensions.'</td></tr>';
+					echo '"><th>'.__('Dimensions', 'woocommerce').'</th><td>'.$this->get_dimensions().'</td></tr>';
 					
 				endif;
 				
