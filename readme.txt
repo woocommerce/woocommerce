@@ -119,6 +119,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Change textdomain from woothemes to woocommerce
 * Free shipping coupons ignore min-amount
 * Delete all variations option
+* Product category widget option to show current children only
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

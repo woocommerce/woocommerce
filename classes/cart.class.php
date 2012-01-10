@@ -53,7 +53,7 @@ class woocommerce_cart {
     function init() {
   		$this->applied_coupons = array();
 		$this->get_cart_from_session();
-		if ( isset($_SESSION['coupons']) ) $this->applied_coupons = $_SESSION['coupons'];
+		if ( isset($_SESSION['coupons']) ) $this->applied_coupons = array_filter((array) $_SESSION['coupons']);
 		add_action('woocommerce_check_cart_items', array(&$this, 'check_cart_items'), 1);
     }
 
@@ -458,7 +458,7 @@ class woocommerce_cart {
 		 */
 		function get_discounted_price( $values, $price, $add_totals = false ) {
 	
-			if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
+			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
 				$coupon = &new woocommerce_coupon( $code );
 				
 				if ( $coupon->apply_before_tax() && $coupon->is_valid() ) :
@@ -594,7 +594,7 @@ class woocommerce_cart {
 		 */
 		function apply_product_discounts_after_tax( $values, $price ) {
 			
-			if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
+			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
 				$coupon = &new woocommerce_coupon( $code );
 				
 				do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );

@@ -417,7 +417,10 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	    if ( !empty($posted['custom']) && !empty($posted['invoice']) ) {
 	
 			$order = new woocommerce_order( (int) $posted['custom'] );
-	        if ($order->order_key!==$posted['invoice']) exit;
+	        if ($order->order_key!==$posted['invoice']) :
+	        	if ($this->debug=='yes') $this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
+	        	exit;
+	        endif;
 	        
 	        // Lowercase
 	        $posted['payment_status'] = strtolower($posted['payment_status']);
@@ -426,20 +429,29 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 	        // Sandbox fix
 	        if ($posted['test_ipn']==1 && $posted['payment_status']=='pending') $posted['payment_status'] = 'completed';
 	        
+	        if ($this->debug=='yes') $this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
+	        
 	        // We are here so lets check status and do actions
 	        switch ($posted['payment_status']) :
 	            case 'completed' :
 	            	
 	            	// Check order not already completed
-	            	if ($order->status == 'completed') exit;
+	            	if ($order->status == 'completed') :
+	            		 if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Order #' . $posted['custom'] . ' is already complete.' );
+	            		 exit;
+	            	endif;
 	            	
 	            	// Check valid txn_type
 	            	$accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
-					if (!in_array($posted['txn_type'], $accepted_types)) exit;
+					if (!in_array($posted['txn_type'], $accepted_types)) :
+						if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
+					endif;
 	            	
 	            	// Payment completed
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
 	                $order->payment_complete();
+	                
+	                if ($this->debug=='yes') $this->log->add( 'paypal', 'Payment complete.' );
 	                
 	                // Store PP Details
 	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);

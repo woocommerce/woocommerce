@@ -38,6 +38,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Product Categories', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		$c = $instance['count'] ? '1' : '0';
 		$h = $instance['hierarchical'] ? '1' : '0';
+		$s = $instance['show_children_only'] ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
 		$o = isset($instance['orderby']) ? $instance['orderby'] : 'order';
 
@@ -75,15 +76,70 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			</script>
 			<?php
 			
+		} elseif ( $s ) {
+			
+			global $wp_query;
+			
+			$cat_args['title_li'] = '';
+			$cat_args['hierarchical'] = 1;
+			$cat_args['child_of'] = 0;
+			$cat_args['pad_counts'] = 1;
+			
+			$cats = get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
+			
+			if (is_tax('product_cat')) :
+				$current_cat = $wp_query->queried_object;
+				$current_cat_parent = woocommerce_get_term_top_most_parent( $current_cat->term_id, 'product_cat' );
+			else :
+				$current_cat = false;
+				$current_cat_parent = false;
+			endif;
+			
+			echo '<ul>';
+			
+			foreach ($cats as $cat) : 
+			
+				if ($cat->parent) continue;
+				
+				echo '<li class="cat-item cat-item-'.$cat->term_id;
+				
+				if (is_tax('product_cat', $cat->slug)) echo ' current-cat';
+				
+				echo '"><a href="'.get_term_link( $cat->slug, 'product_cat' ).'">'.$cat->name.'</a>';
+				
+				if ($c) echo ' ('.$cat->count.')';
+				
+				if (is_tax('product_cat', $cat->slug) || ($current_cat_parent && $current_cat_parent->term_id==$cat->term_id)) :
+					
+					$subcat_args = $cat_args;
+					
+					$subcat_args['child_of'] = $cat->term_id;
+					$subcat_args['hierarchical'] = 1;
+					$subcat_args['show_option_none'] = false;
+					unset( $subcat_args['parent'] );
+					
+					echo '<ul class="children">';
+					
+					wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $subcat_args));
+					
+					echo '</ul>';
+					
+				endif;
+				
+				echo '</li>';
+				
+			endforeach;
+			
+			echo '</ul>';
+			
 		} else {
-?>
-		<ul>
-<?php
-		$cat_args['title_li'] = '';
-		wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $cat_args));
-?>
-		</ul>
-<?php
+
+			echo '<ul>';
+			
+			$cat_args['title_li'] = '';
+			wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $cat_args));
+	
+			echo '</ul>';
 		}
 
 		echo $after_widget;
@@ -97,6 +153,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$instance['count'] = !empty($new_instance['count']) ? 1 : 0;
 		$instance['hierarchical'] = !empty($new_instance['hierarchical']) ? 1 : 0;
 		$instance['dropdown'] = !empty($new_instance['dropdown']) ? 1 : 0;
+		$instance['show_children_only'] = !empty($new_instance['show_children_only']) ? 1 : 0;
 
 		return $instance;
 	}
@@ -110,6 +167,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$count = isset($instance['count']) ? (bool) $instance['count'] :false;
 		$hierarchical = isset( $instance['hierarchical'] ) ? (bool) $instance['hierarchical'] : false;
 		$dropdown = isset( $instance['dropdown'] ) ? (bool) $instance['dropdown'] : false;
+		$show_children_only = isset( $instance['show_children_only'] ) ? (bool) $instance['show_children_only'] : false;
 ?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
@@ -127,7 +185,10 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		<label for="<?php echo $this->get_field_id('count'); ?>"><?php _e( 'Show post counts', 'woocommerce' ); ?></label><br />
 
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('hierarchical') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hierarchical') ); ?>"<?php checked( $hierarchical ); ?> />
-		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woocommerce' ); ?></label></p>
+		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woocommerce' ); ?></label><br/>
+		
+		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('show_children_only') ); ?>" name="<?php echo esc_attr( $this->get_field_name('show_children_only') ); ?>"<?php checked( $show_children_only ); ?> />
+		<label for="<?php echo $this->get_field_id('show_children_only'); ?>"><?php _e( 'Show children of current category only ', 'woocommerce' ); ?></label></p>
 <?php
 	}
 

@@ -167,16 +167,16 @@ function woocommerce_price( $price, $args = array() ) {
 	
 	switch ($currency_pos) :
 		case 'left' :
-			$return = '<mark>'. $currency_symbol . $price . '</mark>';
+			$return = '<mark class="amount">'. $currency_symbol . $price . '</mark>';
 		break;
 		case 'right' :
-			$return = '<mark>'. $price . $currency_symbol . '</mark>';
+			$return = '<mark class="amount">'. $price . $currency_symbol . '</mark>';
 		break;
 		case 'left_space' :
-			$return = '<mark>'. $currency_symbol . ' ' . $price . '</mark>';
+			$return = '<mark class="amount">'. $currency_symbol . ' ' . $price . '</mark>';
 		break;
 		case 'right_space' :
-			$return = '<mark>'. $price . ' ' . $currency_symbol . '</mark>';
+			$return = '<mark class="amount">'. $price . ' ' . $currency_symbol . '</mark>';
 		break;
 	endswitch;
 
@@ -205,6 +205,21 @@ function woocommerce_array_overlay($a1,$a2) {
         }
     }
     return $a1;
+}
+
+/**
+ * Get top term
+ * http://wordpress.stackexchange.com/questions/24794/get-the-the-top-level-parent-of-a-custom-taxonomy-term
+ **/
+function woocommerce_get_term_top_most_parent($term_id, $taxonomy) {
+    // start from the current term
+    $parent  = get_term_by( 'id', $term_id, $taxonomy);
+    // climb up the hierarchy until we reach a term with parent = '0'
+    while ($parent->parent != '0'){
+        $term_id = $parent->parent;
+        $parent  = get_term_by( 'id', $term_id, $taxonomy);
+    }
+    return $parent;
 }
 
 /**
