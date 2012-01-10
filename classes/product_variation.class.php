@@ -211,7 +211,7 @@ class woocommerce_product_variation extends woocommerce_product {
 				if (!$this->is_in_stock()) :
 				
 					// Check parent
-					$parent_product = &new woocommerce_product( $this->id );
+					$parent_product = new woocommerce_product( $this->id );
 					
 					if ($parent_product->managing_stock()) :
 						if (!$parent_product->backorders_allowed()) :

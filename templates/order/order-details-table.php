@@ -5,7 +5,7 @@
  
 global $woocommerce, $order_id;
 
-$order = &new woocommerce_order( $order_id );
+$order = new woocommerce_order( $order_id );
 ?>
 <h2><?php _e('Order Details', 'woocommerce'); ?></h2>
 <table class="shop_table">
@@ -35,16 +35,16 @@ $order = &new woocommerce_order( $order_id );
 			foreach($order->items as $item) :
 
 				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-					$_product = &new woocommerce_product_variation( $item['variation_id'] );
+					$_product = new woocommerce_product_variation( $item['variation_id'] );
 				else :
-					$_product = &new woocommerce_product( $item['id'] );
+					$_product = new woocommerce_product( $item['id'] );
 				endif;
 
 				echo '
 					<tr>
 						<td class="product-name">'.$item['name'];
 
-				$item_meta = &new order_item_meta( $item['item_meta'] );
+				$item_meta = new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
 				
 				if ($_product->exists && $_product->is_downloadable() && $order->status=='completed') :

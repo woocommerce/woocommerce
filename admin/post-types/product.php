@@ -227,7 +227,7 @@ add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_col
 
 function woocommerce_custom_product_columns($column) {
 	global $post, $woocommerce;
-	$product = &new woocommerce_product($post->ID);
+	$product = new woocommerce_product($post->ID);
 
 	switch ($column) {
 		case "thumb" :

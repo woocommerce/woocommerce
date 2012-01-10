@@ -34,7 +34,7 @@ class woocommerce_shipping {
 		// Load gateways in order
 		foreach ($load_methods as $method) :
 			
-			$load_method = &new $method();
+			$load_method = new $method();
 			
 			if (isset($ordering[$load_method->id]) && is_numeric($ordering[$load_method->id])) :
 				// Add in position

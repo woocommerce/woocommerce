@@ -194,7 +194,7 @@ class woocommerce_bacs extends woocommerce_payment_gateway {
     function process_payment( $order_id ) {
     	global $woocommerce;
     	
-		$order = &new woocommerce_order( $order_id );
+		$order = new woocommerce_order( $order_id );
 		
 		// Mark as on-hold (we're awaiting the payment)
 		$order->update_status('on-hold', __('Awaiting BACS payment', 'woocommerce'));

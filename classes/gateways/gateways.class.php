@@ -24,7 +24,7 @@ class woocommerce_payment_gateways {
 		// Load gateways in order
 		foreach ($load_gateways as $gateway) :
 			
-			$load_gateway = &new $gateway();
+			$load_gateway = new $gateway();
 			
 			if (isset($ordering[$load_gateway->id]) && is_numeric($ordering[$load_gateway->id])) :
 				// Add in position

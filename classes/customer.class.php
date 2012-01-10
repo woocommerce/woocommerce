@@ -203,16 +203,16 @@ class woocommerce_customer {
 				
 				if ($result->order_id>0) :
 				
-					$order = &new woocommerce_order( $result->order_id );
+					$order = new woocommerce_order( $result->order_id );
 					
 					if ( $order->status!='completed' && $order->status!='processing' ) continue;
 						
 					$product_post = get_post( $result->product_id );
 	
 					if ($product_post->post_type=='product_variation') :
-						$_product = &new woocommerce_product_variation( $result->product_id );
+						$_product = new woocommerce_product_variation( $result->product_id );
 					else :
-						$_product = &new woocommerce_product( $result->product_id );
+						$_product = new woocommerce_product( $result->product_id );
 					endif;					
 					
 					if ($_product->exists) :

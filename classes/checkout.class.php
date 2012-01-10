@@ -388,7 +388,7 @@ class woocommerce_checkout {
 						$_product = $values['data'];
 
 						// Store any item meta data - item meta class lets plugins add item meta in a standardized way
-						$item_meta = &new order_item_meta();
+						$item_meta = new order_item_meta();
 						
 						$item_meta->new_order_item( $values );
 						
@@ -428,7 +428,7 @@ class woocommerce_checkout {
 						$order_id = (int) $_SESSION['order_awaiting_payment'];
 						
 						/* Check order is unpaid */
-						$order = &new woocommerce_order( $order_id );
+						$order = new woocommerce_order( $order_id );
 						
 						if ( $order->status == 'pending' ) :
 							
@@ -553,7 +553,7 @@ class woocommerce_checkout {
 					do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
 					
 					// Process payment
-					$order = &new woocommerce_order($order_id);
+					$order = new woocommerce_order($order_id);
 					
 					if ($woocommerce->cart->needs_payment()) :
 						

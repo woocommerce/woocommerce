@@ -92,9 +92,9 @@ class woocommerce {
 		if (is_admin() && !defined('DOING_AJAX')) $this->install();
 
 		// Load class instances
-		$this->payment_gateways 	= &new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
-		$this->shipping 			= &new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
-		$this->countries 			= &new woocommerce_countries();			// Countries class
+		$this->payment_gateways 	= new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->shipping 			= new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
+		$this->countries 			= new woocommerce_countries();			// Countries class
 		
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
@@ -124,10 +124,10 @@ class woocommerce {
 		if ( !is_admin() || defined('DOING_AJAX') ) :
 			
 			// Class instances
-			$this->cart 			= &new woocommerce_cart();				// Cart class, stores the cart contents
-			$this->customer 		= &new woocommerce_customer();			// Customer class, sorts out session data such as location
-			$this->query			= &new woocommerce_query();				// Query class, handles front-end queries and loops
-			$this->validation 		= &new woocommerce_validation();		// Validation class
+			$this->cart 			= new woocommerce_cart();				// Cart class, stores the cart contents
+			$this->customer 		= new woocommerce_customer();			// Customer class, sorts out session data such as location
+			$this->query			= new woocommerce_query();				// Query class, handles front-end queries and loops
+			$this->validation 		= new woocommerce_validation();		// Validation class
 			
 			// Load messages
 			$this->load_messages();
@@ -918,7 +918,7 @@ class woocommerce {
 		// Init mail class
 		if ( !class_exists('woocommerce_email') ) :
 			include( 'classes/woocommerce_email.class.php' );
-			$this->woocommerce_email = &new woocommerce_email();
+			$this->woocommerce_email = new woocommerce_email();
 		endif;
 		
 		return $this->woocommerce_email;
