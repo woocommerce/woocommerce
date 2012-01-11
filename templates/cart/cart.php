@@ -38,7 +38,7 @@ global $woocommerce;
 							</a>
 						</td>
 						<td class="product-name">
-							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>"><?php echo $_product->get_title(); ?></a>
+							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>"><?php echo apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $_product); ?></a>
 							<?php
 								// Meta data
 								echo $woocommerce->cart->get_item_data( $values );

@@ -744,7 +744,26 @@ class woocommerce_product {
 	function get_attribute( $attr ) {
 		$attributes = $this->get_attributes();
 		
-		if ( isset($attributes[$attr]) ) return $attributes[$attr]['value']; else return false;
+		$attr = sanitize_title( $attr );
+		
+		if (isset($attributes[$attr]) || isset($attributes['pa_' . $attr])) :
+			
+			$attribute = isset($attributes[$attr]) ? $attributes[$attr] : $attributes['pa_' . $attr];
+			
+			if ($attribute['is_taxonomy']) :
+				
+				// Get string with terms
+				return get_the_term_list( $this->id, $attribute['name'], ''. '', ', ' );
+				
+			else :
+				
+				return $attribute['value'];
+				
+			endif;
+		
+		endif;
+		
+		return false;
 	}
 	
 	/** Returns product attributes */
