@@ -383,7 +383,7 @@ ul.products {
 	padding-left:0;
 	li {
 		float: left;
-		margin: 0 3.8% 20px 0;
+		margin: 0 3.8% 2.992em 0;
 		padding: 0;
 		position: relative;
 		width:22.05%;
@@ -393,6 +393,11 @@ ul.products {
 			right: 0;
 			left: auto;
 			margin: -6px -6px 0 0;	
+		}
+		h3 {
+			padding:.5em 0;
+			margin:0;
+			font-size:1em;
 		}
 		a {
 			text-decoration: none;
@@ -413,21 +418,26 @@ ul.products {
 			display: block;
 		}
 		.price {
-			color: green;
+			color: #8fae1b;
 			display: block;
 			font-weight: normal;
+			margin-bottom:.5em;
 			del {
-				font-size: 10px;
+				font-size: 11px;
 				line-height: 10px;
 				margin: -2px 0 0 0;
 				display: block;
 				color: #ccc;
 			}
+			ins {
+				background: none;
+			}
 			.from {
-				font-size: 10px;
+				font-size: 11px;
 				line-height: 10px;
 				margin: -2px 0 0 0;
 				display: block;
+				text-transform: uppercase;
 				color: #ccc;
 			}
 		}
@@ -772,6 +782,7 @@ ul.cart_list, ul.product_list_widget {
 		padding: 4px 0;
 		margin: 0;
 		.clearfix;
+		list-style: none;
 		a {
 			display: block;
 			font-weight: bold;	
@@ -1338,6 +1349,7 @@ ol.commentlist.notes {
 		overflow: hidden;
 		zoom: 1;
 		padding: 0 0 1px;
+		list-style: none;
 		a, span {
 			padding: 1px 0;
 			float: left;
