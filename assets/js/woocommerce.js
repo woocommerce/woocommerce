@@ -12,6 +12,7 @@ jQuery(document).ready(function($) {
 				
 				if (!$thisbutton.attr('data-product_id')) return true;
 				
+				$thisbutton.removeClass('added');
 				$thisbutton.addClass('loading');
 				
 				var data = {
