@@ -79,9 +79,6 @@ class woocommerce {
 		// Start a PHP session
 		if (!session_id()) session_start();
 		
-		// Output Buffering
-		ob_start();
-		
 		// Set up localisation
 		$this->load_plugin_textdomain();
 		

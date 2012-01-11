@@ -83,6 +83,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.4 =
+* Improved default theme
 * Support for multiple and stacked (compound) taxes
 * Locale options for country address formatting and checkout fields
 * Multiple taxes shown in order total tables

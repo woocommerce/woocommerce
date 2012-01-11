@@ -317,3 +317,13 @@ function woocommerce_exclude_image_from_product_page_field_save( $post, $attachm
 function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
 	add_post_meta( $post_id, '_woocommerce_exclude_image', 0);
 }
+
+/**
+ * Duplicate a product action
+ */
+add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_action');
+
+function woocommerce_duplicate_product_action() {
+	include_once('includes/duplicate_product.php');
+	woocommerce_duplicate_product();
+}
