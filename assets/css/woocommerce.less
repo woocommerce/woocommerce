@@ -317,17 +317,17 @@ form.cart {
 	.button {
 		vertical-align: middle;
 		float: left;
-		margin: 2px 0;
+		//margin: 2px 0;
 	}
 }
 
 span.onsale {
-	background: green;
 	color: #fff;
 	min-height: 32px;
 	min-width: 32px;
 	padding: 4px;
 	font-size: 12px;
+	font-weight: bold;
 	position: absolute;
 	text-align: center;
 	line-height: 32px;
@@ -335,6 +335,20 @@ span.onsale {
 	left: 6px;
 	margin:0;
 	.border_radius(20px);
+	.vertical_gradient(#a1c41e,#8fae1b);
+	.text_shadow(0,-1px,0,#8fae1b);
+	-webkit-box-shadow:
+		inset 0 1px 0 rgba(255,255,255,0.3),
+		inset 0 -1px 0 rgba(0,0,0,0.2),
+		0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow:
+		inset 0 1px 0 rgba(255,255,255,0.3),
+		inset 0 -1px 0 rgba(0,0,0,0.2),
+		0 1px 2px rgba(0,0,0,0.2);
+	box-shadow:
+		inset 0 1px 0 rgba(255,255,255,0.3),
+		inset 0 -1px 0 rgba(0,0,0,0.2),
+		0 1px 2px rgba(0,0,0,0.2);
 }
 
 .products ul, ul.products {
@@ -390,6 +404,7 @@ ul.products {
 			display: block;
 			margin: 0 0 8px;
 			border: 1px solid #ddd;
+			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.1));
 		}
 		a:hover img {
 			border: 1px solid #bbb;
@@ -433,36 +448,61 @@ ul.products {
 /* =Buttons
 -------------------------------------------------------------- */
 a.button, button.button, input.button, #review_form #submit {
-	color: #fff;
-	background-color: #ff9c07;
-	padding: 6px;
-	line-height: 1em;
-	margin: 4px 2px 0 0;
-	float: left;
-	font-size: 12px;
-	width: auto;
-	vertical-align: middle;
-	text-align: center;
-	text-decoration: none;
-	border:none;
-	cursor: pointer;
-	font-family: inherit;
-	.border_radius(3px);
-	position: relative;
-	.transition();
+	font-size: 100%; 
+    margin: 0; 
+    vertical-align: baseline; 
+    *vertical-align: middle;
+    line-height: normal;
+    cursor: pointer;
+    position: relative;
+    font-family: sans-serif;
+	
+	text-decoration:none;
+	overflow:visible;
+	border:1px solid #969696;
+	.vertical_gradient(#f5f5f5,#e1e1e1);
+	padding:5px 10px;
+	color:#676767;  
+    text-decoration:none;
+    font-weight:bold;
+    text-shadow:0 1px 0 #fff;
+    margin:0;
+    .border_radius(2px);
+    -webkit-box-shadow:
+        inset 0 -1px 0 rgba(0,0,0,0.075),
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 1px 2px rgba(0,0,0,0.1);
+    -moz-box-shadow:
+        inset 0 -1px 0 rgba(0,0,0,0.075),
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 1px 2px rgba(0,0,0,0.1);
+    box-shadow:
+        inset 0 -1px 0 rgba(0,0,0,0.075),
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 1px 2px rgba(0,0,0,0.1);
 	
 	&.loading {    
-		.opacity(0.5);
+		//.opacity(0.5);
+		color:#999;
+		border-color:#ccc;
 				 
 		&:before {
-			content:"";
+			/*content:"";
 			position: absolute;
 			height:16px;
 			width:16px;
 			top:0.35em;
 			right:-26px;
 			text-indent: 0; 
-			background: url(../images/ajax-loader.gif) no-repeat;
+			background: url(../images/ajax-loader.gif) no-repeat;*/
+			
+			content: "";
+			position: absolute;
+			top:0;
+			right:0;
+			left:0;
+			bottom:0;
+			background: url(../images/ajax-loader.gif) center no-repeat rgba(255,255,255,0.65);
 		}
 	}
 	
@@ -480,34 +520,33 @@ a.button, button.button, input.button, #review_form #submit {
 	}
 	
 	&:hover {
-		background-color: #ff9933;
+		.vertical_gradient(#fafafa,#e6e6e6);
 		text-decoration: none;
 	}
+	
+	&:active {
+		top:1px;
+	}
+	
+	&.alt {
+		.vertical_gradient(#ad74a2,#935386);
+		border-color:#522e4b;
+		color:#fff;
+		.text_shadow(0,-1px,0,rgba(0,0,0,0.6));
+		
+		&:hover {
+			.vertical_gradient(#b784ad,#935386);
+		}
+	}
+}
+
+input.button {
+	padding-top:6px;
+	padding-bottom:7px;
 }
 
 .cart .button, .cart input.button {
 	float:none;
-}
-
-.button.alt {
-	color: #fff;
-	background: #069bcd;
-	padding: 6px;
-	line-height: 1em;
-	margin: 4px 2px 0 0;
-	float: left;
-	font-size: 12px;
-	width: auto;
-	vertical-align: middle;
-	text-align: center;
-	text-decoration: none;
-	border:none;
-	cursor: pointer;
-	font-family: inherit;
-	.border_radius(3px);
-}
-.button.alt:hover {
-	background:#0588b5;
 }
 
 /* =Reviews/comments
@@ -709,7 +748,7 @@ table.shop_table {
 		vertical-align: middle;
 		
 		a.button {
-			margin:0 3px;
+			//margin:0 3px;
 		}
 	}
 	tfoot td {
@@ -725,7 +764,7 @@ table.my_account_orders {
 	}
 	.button {
 		white-space: nowrap;
-		margin: 4px 0;
+		//margin: 4px 0;
 	}
 }
 
@@ -809,7 +848,7 @@ td.actions {
 	}
 	.button.alt {
 		float: right;
-		margin:2px 0 0 6px;
+		//margin:2px 0 0 6px;
 	}
 }
 td.product-name {
@@ -831,36 +870,78 @@ td.product-name {
 td.quantity {
 	min-width: 80px;
 }
-.quantity input {
-	margin-left:0; margin-right:0;
+.quantity {
+	width:60px;
+	position: relative;
+	
+	input.qty {
+		width:40px;
+		height:28px;
+		padding:0;
+		text-align: center;
+		border:1px solid #969696;
+		border-right:0;
+		.border_radius_right(0);
+		.inset_box_shadow(0,0,2px,0,#ccc);
+		font-weight: bold;
+		.border_radius_left(2px);
+	}
+	
+	.plus, .minus {
+		display: block;
+		padding:0;
+		position: absolute;
+		text-align: center;
+		vertical-align: text-top;
+		margin:0 !important;
+		width:20px;
+		height: 15px;
+		text-decoration:none;
+		overflow:visible;
+		border:1px solid #969696;
+		.vertical_gradient(#f5f5f5,#e1e1e1);
+		color:#676767;  
+	    text-decoration:none;
+	    font-weight:bold;
+	    text-shadow:0 1px 0 #fff;
+	    margin:0;
+	    cursor: pointer;
+	    line-height: 0em;
+	    .border_radius(2px);
+	    -webkit-box-shadow:
+	        inset 0 -1px 0 rgba(0,0,0,0.075),
+	        inset 0 1px 0 rgba(255,255,255,0.3),
+	        0 1px 2px rgba(0,0,0,0.1);
+	    -moz-box-shadow:
+	        inset 0 -1px 0 rgba(0,0,0,0.075),
+	        inset 0 1px 0 rgba(255,255,255,0.3),
+	        0 1px 2px rgba(0,0,0,0.1);
+	    box-shadow:
+	        inset 0 -1px 0 rgba(0,0,0,0.075),
+	        inset 0 1px 0 rgba(255,255,255,0.3),
+	        0 1px 2px rgba(0,0,0,0.1);
+	    
+	    &:hover {
+	    	.vertical_gradient(#f5f5f5,#e6e6e6);
+	    }
+	}
+	
+	.plus {
+		top:0;
+		right:0;
+		border-bottom:0;
+		.border_radius_bottom(0);
+	}
+	
+	.minus {
+		bottom:0;
+		right:0;
+		.border_radius_top(0);
+	}
 }
-.quantity input.qty {
-	border:1px solid #ccc; 
-	width:20px; 
-	display: inline;
-	padding:1px 5px 2px;
-	line-height: 1em;
-	vertical-align: middle;
-	margin:0;
-}
-.quantity input.plus, .quantity input.minus {
-	background: #ccc;
-	padding: 4px;
-	vertical-align: middle;
-	line-height: 1em;
-	border:none; width:20px;
-	color:#fff;
-	cursor: pointer;
-	margin:0;
-	display:inline;
-	border:0;
-}
-.quantity input.minus { .border_radius_left(5px); }
-.quantity input.plus { .border_radius_right(5px); float:none; }
-.quantity input.minus:hover, .quantity input.plus:hover { background: #f93; }
 
 .cart input {
-	width:100px;
+	//width:100px;
 	margin: 0;
 	vertical-align: middle;
 	line-height: 1em;
