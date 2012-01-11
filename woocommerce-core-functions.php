@@ -167,16 +167,16 @@ function woocommerce_price( $price, $args = array() ) {
 	
 	switch ($currency_pos) :
 		case 'left' :
-			$return = '<mark class="amount">'. $currency_symbol . $price . '</mark>';
+			$return = '<span class="amount">'. $currency_symbol . $price . '</span>';
 		break;
 		case 'right' :
-			$return = '<mark class="amount">'. $price . $currency_symbol . '</mark>';
+			$return = '<span class="amount">'. $price . $currency_symbol . '</span>';
 		break;
 		case 'left_space' :
-			$return = '<mark class="amount">'. $currency_symbol . ' ' . $price . '</mark>';
+			$return = '<span class="amount">'. $currency_symbol . ' ' . $price . '</span>';
 		break;
 		case 'right_space' :
-			$return = '<mark class="amount">'. $price . ' ' . $currency_symbol . '</mark>';
+			$return = '<span class="amount">'. $price . ' ' . $currency_symbol . '</span>';
 		break;
 	endswitch;
 
