@@ -16,7 +16,7 @@
  */
 function variable_product_type_options_tab() {
 	?>
-	<li class="variations_tab show_if_variable"><a href="#variable_product_options" title="<?php _e('Variations for variable products are defined here.', 'woocommerce'); ?>"><?php _e('Variations', 'woocommerce'); ?></a></li>
+	<li class="variations_tab show_if_variable variation_options"><a href="#variable_product_options" title="<?php _e('Variations for variable products are defined here.', 'woocommerce'); ?>"><?php _e('Variations', 'woocommerce'); ?></a></li>
 	<?php
 }
 

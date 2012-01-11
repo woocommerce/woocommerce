@@ -26,17 +26,17 @@ function woocommerce_product_data_box() {
 	
 		<ul class="product_data_tabs tabs" style="display:none;">
 			
-			<li class="active show_if_simple show_if_variable show_if_external"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
+			<li class="active show_if_simple show_if_variable show_if_external general_options"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
 			
-			<li class="tax_tab show_if_simple show_if_variable"><a href="#tax_product_data"><?php _e('Tax', 'woocommerce'); ?></a></li>
+			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e('Tax', 'woocommerce'); ?></a></li>
 			
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab show_if_simple show_if_variable show_if_grouped"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li><?php endif; ?>
+			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li><?php endif; ?>
 			
-			<li class="upsells_and_crosssells_tab"><a href="#upsells_and_crosssells_product_data"><?php _e('Up-sells &amp; Cross-sells', 'woocommerce'); ?></a></li>
+			<li class="upsells_and_crosssells_tab crosssell_options"><a href="#upsells_and_crosssells_product_data"><?php _e('Up-sells/Cross-sells', 'woocommerce'); ?></a></li>
 			
-			<li class="attributes_tab"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woocommerce'); ?></a></li>
+			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woocommerce'); ?></a></li>
 			
-			<li class="grouping_tab show_if_simple"><a href="#grouping_product_data"><?php _e('Grouping', 'woocommerce'); ?></a></li>
+			<li class="grouping_tab show_if_simple grouping_options"><a href="#grouping_product_data"><?php _e('Grouping', 'woocommerce'); ?></a></li>
 			
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
