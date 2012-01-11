@@ -10,13 +10,13 @@ jQuery(document).ready(function($) {
 			
 			if ($thisbutton.is('.product_type_simple, .product_type_downloadable, .product_type_virtual')) {
 				
-				if (!$($thisbutton).attr('data-product_id')) return true;
+				if (!$thisbutton.attr('data-product_id')) return true;
 				
-				$($thisbutton).addClass('loading');
+				$thisbutton.addClass('loading');
 				
 				var data = {
 					action: 		'woocommerce_add_to_cart',
-					product_id: 	$($thisbutton).attr('data-product_id'),
+					product_id: 	$thisbutton.attr('data-product_id'),
 					security: 		woocommerce_params.add_to_cart_nonce
 				};
 				
@@ -26,7 +26,7 @@ jQuery(document).ready(function($) {
 				// Ajax action
 				$.post( woocommerce_params.ajax_url, data, function(response) {
 					
-					$($thisbutton).removeClass('loading');
+					$thisbutton.removeClass('loading');
 	
 					// Get response
 					data = $.parseJSON( response );
@@ -49,7 +49,7 @@ jQuery(document).ready(function($) {
 					$('.widget_shopping_cart, .shop_table.cart, .updating, .cart_totals').fadeTo('400', '0.6').block({message: null, overlayCSS: {background: 'transparent url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
 					
 					// Changes button classes
-					$($thisbutton).addClass('added');
+					$thisbutton.addClass('added');
 	
 					// Cart widget load
 					if ($('.widget_shopping_cart').size()>0) {
