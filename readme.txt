@@ -120,7 +120,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Change textdomain from woothemes to woocommerce
 * Free shipping coupons ignore min-amount
 * Delete all variations option
+* Removed the need of ob_start on most frontend pages to improve page loading speed
 * Product category widget option to show current children only
+* Tweaked visibility settings and made them more clear
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

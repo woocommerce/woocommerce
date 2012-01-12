@@ -27,7 +27,7 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
  **/
 if (!function_exists('woocommerce_get_page_id')) {
 	function woocommerce_get_page_id( $page ) {
-		return (int) apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+		return apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
 	}
 }
 
@@ -72,7 +72,6 @@ if (!function_exists('is_checkout')) {
 if (!function_exists('is_account_page')) {
 	function is_account_page() {
 		if ( is_page(woocommerce_get_page_id('myaccount')) || is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) ) return true; else return false;
-		return is_page(woocommerce_get_page_id('myaccount'));
 	}
 }
 if (!function_exists('is_ajax')) {

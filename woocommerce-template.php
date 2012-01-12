@@ -183,17 +183,6 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
 }
 
 /**
- * Check product visibility in loop
- **/
-if (!function_exists('woocommerce_check_product_visibility')) {
-	function woocommerce_check_product_visibility() {
-		global $post, $product;
-		if (!$product->is_visible( true ) && $post->post_parent > 0) : wp_safe_redirect(get_permalink($post->post_parent)); exit; endif;
-		if (!$product->is_visible( true )) : wp_safe_redirect(home_url()); exit; endif;
-	}
-}
-
-/**
  * Pagination
  **/
 if (!function_exists('woocommerce_pagination')) {

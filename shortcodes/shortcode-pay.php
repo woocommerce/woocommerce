@@ -34,40 +34,6 @@ function woocommerce_pay() {
 			if ($order->billing_state) $woocommerce->customer->set_state( $order->billing_state );
 			if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
 			
-			// Pay form was posted - process payment
-			if (isset($_POST['pay']) && $woocommerce->verify_nonce('pay')) :
-			
-				// Update payment method
-				if ($order->order_total > 0 ) : 
-					$payment_method 			= woocommerce_clean($_POST['payment_method']);
-					
-					$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-					
-					// Update meta
-					update_post_meta( $order_id, '_payment_method', $payment_method);
-					if (isset($available_gateways) && isset($available_gateways[$payment_method])) :
-						$payment_method_title = $available_gateways[$payment_method]->title;
-					endif;
-					update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
-
-					$result = $available_gateways[$payment_method]->process_payment( $order_id );
-
-					// Redirect to success/confirmation/payment page
-					if ($result['result']=='success') :
-						wp_redirect( $result['redirect'] );
-						exit;
-					endif;
-				else :
-					
-					// No payment was required for order
-					$order->payment_complete();
-					wp_safe_redirect( get_permalink(woocommerce_get_page_id('thanks')) );
-					exit;
-					
-				endif;
-	
-			endif;
-			
 			// Show form
 			woocommerce_get_template('checkout/pay_for_order.php');
 		
@@ -124,16 +90,16 @@ function woocommerce_pay() {
 				
 			else :
 			
-				wp_safe_redirect( get_permalink(woocommerce_get_page_id('myaccount')) );
-				exit;
+				$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce') );
+				$woocommerce->show_messages();
 				
 			endif;
 			
 		else :
 			
-			wp_safe_redirect( get_permalink(woocommerce_get_page_id('myaccount')) );
-			exit;
-			
+			$woocommerce->add_error( __('Invalid order.', 'woocommerce') );
+			$woocommerce->show_messages();
+						
 		endif;
 
 	endif;
