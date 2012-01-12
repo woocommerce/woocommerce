@@ -388,7 +388,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 			
 		if (isset($_GET['paypalListener']) && $_GET['paypalListener'] == 'paypal_standard_IPN'):
 			
-			ob_clean();
+			@ob_clean();
 			
         	$_POST = stripslashes_deep($_POST);
         	
