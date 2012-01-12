@@ -16,7 +16,7 @@ global $woocommerce, $current_user, $recent_orders;
 <h2><?php _e('Available downloads', 'woocommerce'); ?></h2>
 <ul class="digital-downloads">
 	<?php foreach ($downloads as $download) : ?>
-		<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads Remaining', $download['downloads_remaining'], 'woocommerce'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
+		<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads remaining', $download['downloads_remaining'], 'woocommerce'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
 	<?php endforeach; ?>
 </ul>
 <?php endif; ?>	
