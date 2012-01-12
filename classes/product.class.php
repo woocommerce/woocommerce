@@ -440,7 +440,7 @@ class woocommerce_product {
 	}
 	
 	/** Returns whether or not the product is visible */
-	function is_visible() {
+	function is_visible( $single = false ) {
 	
 		$visible = true;
 			
@@ -450,6 +450,7 @@ class woocommerce_product {
 		// visibility setting
 		elseif ($this->visibility=='hidden') $visible = false;
 		elseif ($this->visibility=='visible') $visible = true;
+		elseif ($single) $visible = true;
 		
 		// Visibility in loop
 		elseif ($this->visibility=='search' && is_search()) $visible = true;

@@ -10,35 +10,13 @@
  */
 
 /**
- * Handle redirects before content is output - hooked into template_redirect so is_page works
+ * When default permalinks are enabled, redirect shop page to post type archive url
  **/
-function woocommerce_redirects() {
-	global $woocommerce;
-	
-	// When default permalinks are enabled, redirect shop page to post type archive url
+function woocommerce_shop_page_archive_redirect() {
 	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	endif;
-	
-	// When on the checkout with an empty cart, redirect to cart page
-	if (is_page(woocommerce_get_page_id('checkout')) && sizeof($woocommerce->cart->get_cart())==0) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
-		exit;
-	endif;
-	
-	// When on pay page with no query string, redirect to checkout
-	if (is_page(woocommerce_get_page_id('pay')) && !isset($_GET['order'])) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('checkout')));
-		exit;
-	endif;
-	
-	// My account page redirects (logged out)
-	if (!is_user_logged_in() && ( is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) )) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
-		exit;
-	endif;
-
 }
 
 /**
@@ -360,7 +338,7 @@ function woocommerce_add_to_cart_message() {
 		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
 	
 	else :
-		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
+		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
 	endif;
 }
 
@@ -401,81 +379,6 @@ function woocommerce_clear_cart_after_payment() {
 		
 	endif;
 }
-
-
-/**
- * Process the checkout form
- **/
-function woocommerce_checkout_action() {
-	global $woocommerce;
-	
-	if (isset($_POST['woocommerce_checkout_place_order']) || isset($_POST['woocommerce_checkout_update_totals'])) :
-		
-		if (sizeof($woocommerce->cart->get_cart())==0) :
-			wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
-			exit;
-		endif;
-		
-		$woocommerce_checkout = $woocommerce->checkout();
-		$woocommerce_checkout->process_checkout();
-	
-	endif;
-}
-
-/**
- * Process the pay form
- **/
-function woocommerce_pay_action() {
-	global $woocommerce;
-	
-	if (isset($_POST['woocommerce_pay']) && $woocommerce->verify_nonce('pay')) :
-	
-		// Pay for existing order
-		$order_key = urldecode( $_GET['order'] );
-		$order_id = (int) $_GET['order_id'];
-		$order = new woocommerce_order( $order_id );
-		
-		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
-			
-			// Set customer location to order location
-			if ($order->billing_country) $woocommerce->customer->set_country( $order->billing_country );
-			if ($order->billing_state) $woocommerce->customer->set_state( $order->billing_state );
-			if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
-			
-			// Update payment method
-			if ($order->order_total > 0 ) : 
-				$payment_method 			= woocommerce_clean($_POST['payment_method']);
-				
-				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-				
-				// Update meta
-				update_post_meta( $order_id, '_payment_method', $payment_method);
-				if (isset($available_gateways) && isset($available_gateways[$payment_method])) :
-					$payment_method_title = $available_gateways[$payment_method]->title;
-				endif;
-				update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
-	
-				$result = $available_gateways[$payment_method]->process_payment( $order_id );
-	
-				// Redirect to success/confirmation/payment page
-				if ($result['result']=='success') :
-					wp_redirect( $result['redirect'] );
-					exit;
-				endif;
-			else :
-				
-				// No payment was required for order
-				$order->payment_complete();
-				wp_safe_redirect( get_permalink(woocommerce_get_page_id('thanks')) );
-				exit;
-				
-			endif;
-			
-		endif;
-	
-	endif;
-}
-
 
 /**
  * Process the login form

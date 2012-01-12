@@ -39,8 +39,6 @@ add_action('admin_init', 'woocommerce_admin_init');
 function woocommerce_admin_init() {
 	global $pagenow;
 	
-	ob_start();
-	
 	include_once( 'woocommerce-admin-hooks.php' );
 	include_once( 'woocommerce-admin-functions.php' );
 

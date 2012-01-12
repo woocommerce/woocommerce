@@ -72,7 +72,10 @@ function woocommerce_my_account( $atts ) {
 function woocommerce_edit_address() {
 	global $woocommerce, $load_address, $address;
 	
-	if ( ! is_user_logged_in() ) return;
+	if ( ! is_user_logged_in() ) :
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
+	endif;
 
 	$load_address = woocommerce_get_address_to_edit();
 	
@@ -84,6 +87,9 @@ function woocommerce_edit_address() {
 /**
  * Save and and update a billing or shipping address if the
  * form was submitted through the user account page.
+ *
+ * @todo Address fields should be loaded using the array defined in 
+ * the checkout class.
  *
  * @package WooCommerce
  * @since 1.4
@@ -181,7 +187,10 @@ function woocommerce_get_address_to_edit() {
 function woocommerce_change_password() {
 	global $woocommerce;
 	
-	if ( ! is_user_logged_in() ) return;
+	if ( ! is_user_logged_in() ) :
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
+	endif;
 
 	woocommerce_get_template( 'myaccount/change-password.php' );
 }
@@ -237,15 +246,18 @@ add_action( 'template_redirect', 'woocommerce_save_password' );
 function woocommerce_view_order() {
 	global $woocommerce;
 	
-	if ( ! is_user_logged_in() ) return;
+	if ( ! is_user_logged_in() ) :
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
+	endif;
 	
 	$user_id      	= get_current_user_id();
 	$order_id		= (isset($_GET['order'])) ? $_GET['order'] : 0;
 	$order 			= new woocommerce_order( $order_id );
-
+	
 	if ( $order_id==0 || $order->user_id != $user_id ) :
-		echo '<div class="woocommerce_error">' . __('Invalid order.', 'woocommerce') . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __('My Account &rarr;', 'woocommerce') .'</a>' . '</div>';
-		return;
+		wp_safe_redirect( get_permalink( woocommerce_get_page_id('myaccount') ) );
+		exit;
 	endif;
 	
 	$status = get_term_by('slug', $order->status, 'shop_order_status');

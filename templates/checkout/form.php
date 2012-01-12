@@ -1,4 +1,4 @@
-<?php global $woocommerce; $woocommerce_checkout = $woocommerce->checkout(); ?>
+<?php global $woocommerce, $woocommerce_checkout; ?>
 
 <?php $woocommerce->show_messages(); ?>
 
