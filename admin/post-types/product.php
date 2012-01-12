@@ -131,7 +131,21 @@ function woocommerce_custom_product_columns($column) {
 			endif;
 		break;
 		case "product_type" :
-			echo ucwords($product->product_type);
+			
+			// Its was dynamic but did not support the translations
+			if( $product->product_type == 'grouped' ):
+				echo __('Grouped product', 'woocommerce');
+			elseif ( $product->product_type == 'external' ):
+				echo __('External/Affiliate product', 'woocommerce');
+			elseif ( $product->product_type == 'simple' ):
+				echo __('Simple product', 'woocommerce');
+			elseif ( $product->product_type == 'variable' ):
+				echo __('Variable', 'woocommerce');
+			else:
+				// Assuming that we have other types in future
+				echo ucwords($product->product_type);
+			endif;
+			
 		break;
 		case "product_date" :
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
@@ -164,8 +178,14 @@ function woocommerce_custom_product_columns($column) {
 				_e( 'Last Modified', 'woocommerce' );
 			endif;
 
-			if ( $this_data = $product->visibility ) :
-				echo '<br />' . ucfirst($this_data);	
+			/**
+			 * show hidden visible product on colum Date
+			 * Assuming that we have only show and hidden status
+			 */
+			if ( $product->visibility == 'hidden' ) :
+				echo '<br />'. __('Hidden', 'woocommerce');
+			else:
+				echo '<br />'. __('Visible', 'woocommerce');
 			endif;
 			
 		break;
