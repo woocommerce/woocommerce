@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 1.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-10-30 14:35+0100\n"
-"PO-Revision-Date: 2012-01-11 19:49+0100\n"
+"PO-Revision-Date: 2012-01-12 08:04+0100\n"
 "Last-Translator: Geert De Deckere <geertdd@gmail.com>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "MIME-Version: 1.0\n"
@@ -925,7 +925,7 @@ msgstr "Gratis"
 #: templates/cart/totals.php:134
 #: templates/checkout/review_order.php:135
 msgid "Tax"
-msgstr "Btw"
+msgstr "BTW"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:499
@@ -1450,7 +1450,7 @@ msgstr "Bon type"
 #: admin/post-types/shop_coupon.php:22
 #: admin/post-types/writepanels/writepanel-coupon_data.php:33
 msgid "Coupon amount"
-msgstr "Bon aantal"
+msgstr "Bon waarde"
 
 #@ woocommerce
 #: admin/post-types/shop_coupon.php:23
@@ -1473,7 +1473,7 @@ msgstr "Gebruik tellen"
 #: admin/post-types/shop_coupon.php:26
 #: admin/post-types/writepanels/writepanel-coupon_data.php:54
 msgid "Expiry date"
-msgstr "Verval datum"
+msgstr "Vervaldatum"
 
 #@ woocommerce
 #: admin/post-types/product.php:202
@@ -1611,7 +1611,7 @@ msgstr "Klant:"
 #: templates/emails/new_order.php:43
 #: templates/order/order-details-table.php:69
 msgid "Email:"
-msgstr "Email:"
+msgstr "E-mail:"
 
 #@ woocommerce
 #: admin/post-types/shop_order.php:71
@@ -1708,7 +1708,7 @@ msgstr "Totaal verkopen"
 #: admin/woocommerce-admin-reports.php:1235
 #: admin/woocommerce-admin-reports.php:1241
 msgid "n/a"
-msgstr "nvt"
+msgstr "n.v.t."
 
 #@ woocommerce
 #: admin/woocommerce-admin-reports.php:269
@@ -1954,7 +1954,7 @@ msgstr "Algemene Opties"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:23
 msgid "Base Country/Region"
-msgstr "Vestingings land"
+msgstr "Vestingingsland"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:24
@@ -1969,7 +1969,7 @@ msgstr "Toegestane landen"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:72
 msgid "These are countries that you are willing to ship to."
-msgstr "Landen aan wie verzonden wordt"
+msgstr "Landen waarnaar verzonden wordt"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:79
@@ -2014,17 +2014,17 @@ msgstr "Pagina-instelling"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:264
 msgid "Shop Base Page"
-msgstr "Winkel basis pagina"
+msgstr "Winkel basispagina"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:265
 msgid "This sets the base page of your shop."
-msgstr "Stel de basis pagina van de winkel in."
+msgstr "Stel de basispagina van de winkel in."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:274
 msgid "Base Page Title"
-msgstr "Basis pagina titel"
+msgstr "Basispagina titel"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:275
@@ -2059,7 +2059,7 @@ msgstr "Permalinks"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:306
 msgid "Taxonomy base page"
-msgstr "Taxonomie basis pagina"
+msgstr "Taxonomie basispagina"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:307
@@ -2070,13 +2070,13 @@ msgstr "Vooraf op winkel categorieën/tags met winkel basispagina (<code>%s</cod
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:332
 msgid "Product base page"
-msgstr "Product basis pagina"
+msgstr "Product basispagina"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:333
 #, php-format
 msgid "Prepend product permalinks with shop base page (<code>%s</code>)"
-msgstr "Vooraf op product permalinks pagina met de winkel basis pagina (<code>%s</code>)"
+msgstr "Vooraf op product permalinks pagina met de winkel basispagina (<code>%s</code>)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:341
@@ -2086,17 +2086,17 @@ msgstr "Product categorie basis"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:342
 msgid "Prepend product permalinks with product category"
-msgstr "Vooraf product permalinks op product categoriën"
+msgstr "Vooraf product permalinks op productcategorieën"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:351
 msgid "Shop Pages"
-msgstr "Winkel paginas"
+msgstr "Winkelpagina's"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:351
 msgid "The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin."
-msgstr "De volgende paginas dienen geselecteerd te worden zodat WooCommerce deze herkent. Deze paginas worden bij installatie van WooCommerce aangemaakt."
+msgstr "De volgende pagina's dienen geselecteerd te worden zodat WooCommerce deze herkent. Deze pagina's zouden bij de installatie van WooCommerce aangemaakt geworden moeten zijn."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:354
@@ -2111,7 +2111,7 @@ msgstr "Pagina inhoud:  [woocommerce_cart]"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:364
 msgid "Checkout Page"
-msgstr "Betaal pagina"
+msgstr "Afrekenpagina"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:365
@@ -2121,7 +2121,7 @@ msgstr "Pagina inhoud: [woocommerce_checkout]"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:374
 msgid "Pay Page"
-msgstr "Betaal pagina"
+msgstr "Betaalpagina"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:375
@@ -2181,7 +2181,7 @@ msgstr "Pagina inhoud: [woocommerce_change_password] Ouder: \"Mijn Account\""
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:440
 msgid "Catalog Options"
-msgstr "Catalogus Opties"
+msgstr "Catalogusopties"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:443
@@ -2276,112 +2276,112 @@ msgstr "Doorsturen naar de winkelwagen na het toevoegen van een product in de wi
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:536
 msgid "Pricing Options"
-msgstr "Prijzen opties"
+msgstr "Prijsopties"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:32
 msgid "Currency"
-msgstr "Munt eenheid"
+msgstr "Munteenheid"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:41
 msgid "US Dollars (&#36;)"
-msgstr "US Dollars (&#36;)"
+msgstr "Amerikaanse dollar (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:42
 msgid "Euros (&euro;)"
-msgstr "Euros (&euro;)"
+msgstr "Euro (&euro;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:43
 msgid "Pounds Sterling (&pound;)"
-msgstr "Pounds Sterling (&pound;)"
+msgstr "Britse pond (&pound;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:44
 msgid "Australian Dollars (&#36;)"
-msgstr "Australische Dollars ($)"
+msgstr "Australische dollar ($)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:45
 msgid "Brazilian Real (&#36;)"
-msgstr "Braziliaanse Real (&#36;)"
+msgstr "Braziliaanse real (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:46
 msgid "Canadian Dollars (&#36;)"
-msgstr "Canadese Dollars (&#36;)"
+msgstr "Canadese dollar (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:48
 msgid "Danish Krone"
-msgstr "Deense Kroon"
+msgstr "Deense kroon"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:49
 msgid "Hong Kong Dollar (&#36;)"
-msgstr "Hong Kong Dollar (&#36;)"
+msgstr "Hong Kong dollar (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:50
 msgid "Hungarian Forint"
-msgstr "Hongaarse Forint"
+msgstr "Hongaarse forint"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:51
 msgid "Israeli Shekel"
-msgstr "Israëlische Shekel"
+msgstr "Israëlische shekel"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:52
 msgid "Japanese Yen (&yen;)"
-msgstr "Japanese Yen (&yen;)"
+msgstr "Japanese yen (&yen;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:53
 msgid "Malaysian Ringgits"
-msgstr "Maleisische Ringgits"
+msgstr "Maleisische ringgit"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:54
 msgid "Mexican Peso (&#36;)"
-msgstr "Mexicaanse Peso (&#36;)"
+msgstr "Mexicaanse peso (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:55
 msgid "New Zealand Dollar (&#36;)"
-msgstr "Nieuw-Zeelandse Dollar (&#36;)"
+msgstr "Nieuw-Zeelandse dollar (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:56
 msgid "Norwegian Krone"
-msgstr "Noorweegse Krone"
+msgstr "Noorweegse kroon"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:57
 msgid "Philippine Pesos"
-msgstr "Filippijnse Pesos"
+msgstr "Filippijnse pesos"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:58
 msgid "Polish Zloty"
-msgstr "Poolse Zloty"
+msgstr "Poolse zloty"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:59
 msgid "Singapore Dollar (&#36;)"
-msgstr "Singapore Dollar (&#36;)"
+msgstr "Singaporese dollar (&#36;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:60
 msgid "Swedish Krona"
-msgstr "Zweedse Kroon"
+msgstr "Zweedse kroon"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:61
 msgid "Swiss Franc"
-msgstr "Zwitserse Frank"
+msgstr "Zwitserse frank"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:62
@@ -2391,12 +2391,12 @@ msgstr "Taiwanese nieuwe dollar"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:63
 msgid "Thai Baht"
-msgstr "Thaise Baht"
+msgstr "Thaise baht"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:64
 msgid "Turkish Lira (TL)"
-msgstr "Turkse Lira (TL)"
+msgstr "Turkse lira (TL)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:539
@@ -2406,7 +2406,7 @@ msgstr "Valuta Symbool Positie"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:540
 msgid "This controls the position of the currency symbol."
-msgstr "Dit regelt de positie van het valutasymbool."
+msgstr "Dit bepaalt de positie van het valutasymbool."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:547
@@ -2461,7 +2461,7 @@ msgstr "Dit bepaalt het aantal decimalen getoond in de getoonde prijzen."
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:594
 msgid "Image Options"
-msgstr "Afbeelding opties"
+msgstr "Afbeeldingsopties"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:597
@@ -2607,7 +2607,7 @@ msgstr "\"Van\" naam"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:835
 msgid "The sender name for WooCommerce emails."
-msgstr "Afzender (naam) voor WooCommerce emails."
+msgstr "Afzender (naam) voor WooCommerce e-mails."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:843
@@ -2633,17 +2633,17 @@ msgstr "Header afbeelding"
 #: admin/woocommerce-admin-settings.php:857
 #, php-format
 msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
-msgstr "Voeg de URL in voor de email-header. Upload de afbeelding door middel van de <a href=\"%s\">media uploader</a>."
+msgstr "Voeg de URL in voor de e-mail-header. Upload de afbeelding door middel van de <a href=\"%s\">media uploader</a>."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:865
 msgid "Email footer text"
-msgstr "Email footer tekst"
+msgstr "E-mail footer tekst"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:866
 msgid "The text to appear in the footer of WooCommerce emails."
-msgstr "De tekst verschijnt in de footer van WooCommerce emails."
+msgstr "De tekst verschijnt in de footer van WooCommerce e-mails."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:870
@@ -2658,22 +2658,22 @@ msgstr "Basiskleur"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:875
 msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
-msgstr "De tekst kleur voor WooCommerce email templates. Standaard <code>#557da1</code>."
+msgstr "De tekst kleur voor WooCommerce e-mail templates. Standaard <code>#557da1</code>."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:883
 msgid "Background colour"
-msgstr "Achtergrond kleur"
+msgstr "Achtergrondkleur"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:884
 msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
-msgstr "De achtergrond kleur voor WooCommerce email templates. Standaard  <code>#eeeeee</code>."
+msgstr "De achtergrondkleur voor WooCommerce e-mail templates. Standaard  <code>#eeeeee</code>."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:892
 msgid "Email body background colour"
-msgstr "Email bericht achtergrond kleur"
+msgstr "E-mailbericht achtergrondkleur"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:893
@@ -2683,7 +2683,7 @@ msgstr "De bericht achtergrond kleur. Standaard <code>#fdfdfd</code>."
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:901
 msgid "Email body text colour"
-msgstr "Email bericht tekst kleur"
+msgstr "E-mailbericht tekstkleur"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:902
@@ -2694,7 +2694,7 @@ msgstr "De bericht tekst kleur. Standaard <code>#505050</code>."
 #: admin/woocommerce-admin-settings.php:970
 #: woocommerce.php:1096
 msgid "Action failed. Please refresh the page and retry."
-msgstr "Actie niet gelukt. Ververs de paginas (F5) en probeer opnieuw."
+msgstr "Actie niet gelukt. Ververs de pagina en probeer opnieuw."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:996
@@ -2744,7 +2744,7 @@ msgstr "Betalingsgateways"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1068
 msgid "Emails"
-msgstr "Emails"
+msgstr "E-mails"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1238
@@ -2777,7 +2777,7 @@ msgstr "Afbeelding verwijderen"
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:30
 msgid "Discount type"
-msgstr "Korting Type"
+msgstr "Kortingstype"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:33
@@ -2845,7 +2845,7 @@ msgstr "(optioneel) Vervaldatum voor de coupon, <code>YYYY-MM-DD</code>"
 #: admin/post-types/writepanels/writepanels-init.php:51
 #: templates/checkout/coupon-form.php:15
 msgid "Coupon code"
-msgstr "Coupon code"
+msgstr "Code kortingsbon"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:57
@@ -2930,7 +2930,7 @@ msgstr "Provincie"
 #: admin/post-types/writepanels/writepanel-order_data.php:108
 #: classes/countries.class.php:961
 msgid "Email Address"
-msgstr "Email adres"
+msgstr "E-mailadres"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:109
@@ -2999,7 +2999,7 @@ msgstr "Voorraad herstellen"
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:381
 msgid "Email invoice"
-msgstr "Email factuur"
+msgstr "E-mail factuur"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:389
@@ -3487,7 +3487,7 @@ msgstr "Bestelling Acties"
 #@ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:38
 msgid "Coupon Data"
-msgstr "Coupon Data"
+msgstr "Instellingen kortingsbon"
 
 #@ woocommerce
 #: classes/cart.class.php:375
@@ -3651,7 +3651,7 @@ msgstr "Wachtwoorden komen niet overeen."
 #@ woocommerce
 #: classes/checkout.class.php:289
 msgid "Invalid email/username."
-msgstr "Ongeldige email/gebruikersnaam."
+msgstr "Ongeldige e-mail/gebruikersnaam."
 
 #@ woocommerce
 #: classes/checkout.class.php:291
@@ -3661,7 +3661,7 @@ msgstr "Er is al een account geregistreerd met deze gebruikersnaam. Gelieve een 
 #@ woocommerce
 #: classes/checkout.class.php:296
 msgid "An account is already registered with your email address. Please login."
-msgstr "Er is al een account geregistreerd met uw email adres. Gelieve in te loggen."
+msgstr "Er is al een account geregistreerd met uw e-mailadres. Gelieve in te loggen."
 
 #@ woocommerce
 #: classes/checkout.class.php:302
@@ -3929,12 +3929,12 @@ msgstr "Betaal via PayPal; u kunt met een credit card betalen als u geen PayPal 
 #@ woocommerce
 #: classes/gateways/gateway-paypal.php:113
 msgid "PayPal Email"
-msgstr "PayPal Email"
+msgstr "PayPal E-mail"
 
 #@ woocommerce
 #: classes/gateways/gateway-paypal.php:115
 msgid "Please enter your PayPal email address; this is needed in order to take payment."
-msgstr "Vul uw PayPal email adres in; dit is nodig om de betaling te volbrengen."
+msgstr "Vul uw PayPal e-mailadres in; dit is nodig om de betaling te volbrengen."
 
 #@ woocommerce
 #: classes/gateways/gateway-paypal.php:119
@@ -5892,7 +5892,7 @@ msgstr "en is voltooid"
 #@ woocommerce
 #: templates/order/tracking-form.php:11
 msgid "To track your order please enter your Order ID in the box below and press return. This was given to you on your receipt and in the confirmation email you should have received."
-msgstr "Om uw bestelling te volgen vult u hieronder uw Bestellings ID in en drukt op enter. Deze ID staat op uw factuur en in de bevestigings email die u ontvangen heeft."
+msgstr "Om uw bestelling te volgen vult u hieronder uw Bestellings ID in en drukt op enter. Deze ID staat op uw factuur en in de bevestigingse-mail die u ontvangen heeft."
 
 #@ woocommerce
 #: templates/order/tracking-form.php:13
@@ -5902,17 +5902,17 @@ msgstr "Bestelling ID"
 #@ woocommerce
 #: templates/order/tracking-form.php:13
 msgid "Found in your order confirmation email."
-msgstr "Te vinden in de bevestigings-email"
+msgstr "Te vinden in de bevestigingse-mail"
 
 #@ woocommerce
 #: templates/order/tracking-form.php:14
 msgid "Billing Email"
-msgstr "Email gebruikt voor factuur"
+msgstr "E-mail gebruikt voor factuur"
 
 #@ woocommerce
 #: templates/order/tracking-form.php:14
 msgid "Email you used during checkout."
-msgstr "Email gebruikt bij afrekenen."
+msgstr "E-mail gebruikt bij afrekenen."
 
 #@ woocommerce
 #: templates/order/tracking-form.php:17
@@ -6006,7 +6006,7 @@ msgstr "Er zijn nog geen reviews. Wil je een <a href=\"#review_form\" class=\"in
 #: templates/myaccount/login.php:46
 #: templates/single-product-reviews.php:81
 msgid "Email"
-msgstr "Email"
+msgstr "E-mail"
 
 #@ woocommerce
 #: templates/single-product-reviews.php:84
@@ -6236,12 +6236,12 @@ msgstr "Eigenschap:"
 #@ woocommerce
 #: widgets/widget-price_filter.php:98
 msgid "Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories."
-msgstr "Toont een prijs filter slider in een widget."
+msgstr "Toont een prijsfilter slider in een widget."
 
 #@ woocommerce
 #: widgets/widget-price_filter.php:100
 msgid "WooCommerce Price Filter"
-msgstr "WooCommerce Prijs Filter"
+msgstr "WooCommerce Prijsfilter"
 
 #@ woocommerce
 #: widgets/widget-price_filter.php:169
@@ -6396,7 +6396,7 @@ msgstr "Loguit Link"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:295
 msgid "Append a logout link to menus containing \"My Account\""
-msgstr "Voegt een loguit link toe aan menus welke  \"Mijn Account\" bevatten"
+msgstr "Voeg een \"log uit\" link toe aan menu's die \"Mijn Account\" bevatten"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:809
@@ -6406,7 +6406,7 @@ msgstr "E-mail ontvanger opties"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:812
 msgid "New order notifications"
-msgstr "Nieuwe bestelling notificatie"
+msgstr "Nieuwe bestellingsnotificatie"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:813
@@ -6421,7 +6421,7 @@ msgstr "Inventaris notificaties"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:822
 msgid "The recipient of stock emails. Defaults to the admin email."
-msgstr "Adres waarheen voorraad informatie verstuurd word."
+msgstr "E-mailadres waarheen voorraadinformatie verstuurd wordt."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:831
@@ -6432,7 +6432,7 @@ msgstr "E-mail afzender opties"
 #: admin/woocommerce-admin-settings.php:853
 #, php-format
 msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>."
-msgstr "Deze sectie wordt gebruikt om WooCommerce emails aan te passen. <a href=\"%s\" target=\"_blank\">Klik hier om email templates te bekijken</a>. Voor meer functies, kopieer <code>woocommerce/templates/emails/</code> naar <code>yourtheme/woocommmerce/emails/</code>."
+msgstr "Deze sectie wordt gebruikt om WooCommerce e-mails aan te passen. <a href=\"%s\" target=\"_blank\">Klik hier om e-mailtemplates te bekijken</a>. Voor meer functies, kopieer <code>woocommerce/templates/emails/</code> naar <code>yourtheme/woocommmerce/emails/</code>."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1040
@@ -6442,12 +6442,12 @@ msgstr "Welkom bij WooCommerce!"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1041
 msgid "WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the 'Automatically add pages' button below, otherwise you can set them up manually. See the 'Pages' tab in settings for more information."
-msgstr "WooCommerce heeft enkele WordPress paginas nodig welke shortcodes gebruiken. Je kan deze aanmaken door op de button hieronder te drukken of deze handmatig in te stellen - gebruik hiervoor het 'Pagina' tabblad. "
+msgstr "WooCommerce heeft enkele WordPresspagina's nodig met bepaalde shortcodes in. Je kan deze automatisch aanmaken door op de button hieronder te klikken. Om deze pagina's handmatig in te stellen kan je bij het tabblad \"Pagina's\" terecht."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1042
 msgid "Automatically add pages"
-msgstr "Automatisch paginas toevoegen"
+msgstr "Automatisch pagina's toevoegen"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:1042
@@ -6554,7 +6554,7 @@ msgstr "Order Afgerond"
 #@ woocommerce
 #: admin/woocommerce-admin-functions.php:82
 msgid "Email preview"
-msgstr "Email preview"
+msgstr "E-mail preview"
 
 #@ woocommerce
 #: classes/woocommerce_email.class.php:348
@@ -6659,7 +6659,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings-forms.php:387
 #: admin/woocommerce-admin-settings-forms.php:459
 msgid "+ Add Tax Rate"
-msgstr "+ BTW percentage"
+msgstr "+ BTW-percentage"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:390
@@ -6745,17 +6745,17 @@ msgstr[1] "%1$s landen"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:33
 msgid "This controls what currency prices are listed at in the catalog and which currency gateways will take payments in."
-msgstr ""
+msgstr "Dit bepaalt de munteenheid voor de catalogusprijzen en betalingsgateways."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:65
 msgid "South African rand (R)"
-msgstr "Zuid Afrikaanse Rand (R)"
+msgstr "Zuid-Afrikaanse rand (R)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:103
 msgid "Show order comments section"
-msgstr "Toon bestelling comentaar sectie"
+msgstr "Toon bestelling comentaarsectie"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:120
@@ -6770,7 +6770,7 @@ msgstr ""
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:138
 msgid "Customer Accounts"
-msgstr "Klant accounts"
+msgstr "Klantaccounts"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:139
@@ -6800,7 +6800,7 @@ msgstr "Activeer AJAX voor de winkelwagen"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:198
 msgid "Enable WooCommerce lightbox on the product page"
-msgstr "Activeer WooCommerce Lightbox op product paginas"
+msgstr "Activeer WooCommerce Lightbox op productpagina's"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:214
@@ -6831,7 +6831,7 @@ msgstr "ShareThis"
 #: admin/woocommerce-admin-settings.php:919
 #, php-format
 msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
-msgstr "Voer je %1$sShareThis publisher ID%2$s in om social media buttons op product paginas te activeren."
+msgstr "Voer je %1$sShareThis publisher ID%2$s in om social media buttons op productpagina's te activeren."
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:928
@@ -6894,7 +6894,7 @@ msgstr "Verzend bestemming"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:739
 msgid "Tax calculations"
-msgstr "BTW berekeningen"
+msgstr "BTW-berekeningen"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:748
@@ -6909,7 +6909,7 @@ msgstr ""
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:39
 msgid "Apply before tax"
-msgstr "Toepassen vooraf aan BTW"
+msgstr "Toepassen vóór BTW"
 
 #@ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:39
@@ -7293,7 +7293,7 @@ msgstr "Santa catarina"
 #@ woocommerce
 #: classes/countries.class.php:301
 msgid "Sergipe"
-msgstr "Santa catarina"
+msgstr "Sergipe"
 
 #@ woocommerce
 #: classes/countries.class.php:302
@@ -7813,7 +7813,7 @@ msgstr "Koop product"
 #: templates/cart/totals.php:26
 #: templates/cart/totals.php:146
 msgid "[Remove]"
-msgstr "[Verwijderd]"
+msgstr "[Verwijder]"
 
 #@ woocommerce
 #: admin/woocommerce-admin-reports.php:1013
@@ -7823,7 +7823,7 @@ msgstr "Product bestaat niet meer"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:47
 msgid "Czech Koruna (&#75;&#269;)"
-msgstr "Tsjechische Kroon (&#75;&#269;)"
+msgstr "Tsjechische kroon (&#75;&#269;)"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:314
@@ -7884,7 +7884,7 @@ msgstr "Scripts"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:230
 msgid "File download method"
-msgstr "Bestand download methode"
+msgstr "Bestand downloadmethode"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:231
@@ -8071,7 +8071,7 @@ msgstr "Via"
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:94
 msgid "Checkout Fields"
-msgstr "Afreken velden"
+msgstr "Afrekenvelden"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings.php:95
