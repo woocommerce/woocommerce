@@ -123,7 +123,6 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Removed the need of ob_start on most frontend pages to improve page loading speed
 * Product category widget option to show current children only
 * Tweaked visibility settings and made them more clear
-* Updated default styles
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
