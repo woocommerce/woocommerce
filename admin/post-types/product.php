@@ -276,7 +276,23 @@ function woocommerce_products_by_type() {
 		foreach($terms as $term) :
 			$output .="<option value='$term->slug' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
-			$output .=">".ucfirst($term->name)." ($term->count)</option>";
+			$output .=">";
+			
+				// Its was dynamic but did not support the translations
+				if( $term->name == 'grouped' ):
+					$output .= __('Grouped product', 'woocommerce');
+				elseif ( $term->name == 'external' ):
+					$output .= __('External/Affiliate product', 'woocommerce');
+				elseif ( $term->name == 'simple' ):
+					$output .= __('Simple product', 'woocommerce');
+				elseif ( $term->name == 'variable' ):
+					$output .= __('Variable', 'woocommerce');
+				else:
+					// Assuming that we have other types in future
+					$output .= ucwords($term->name);
+				endif;
+			
+			$output .=" ($term->count)</option>";
 		endforeach;
 		$output .="</select>";
 		
