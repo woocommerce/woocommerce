@@ -416,13 +416,14 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Upgrade Notice ==
 
 = 1.4 = 
-Major update with plenty of optimisations and new features. Changed to note:
+Major update with plenty of optimisations and new features. Changes to note:
 
 * Requires WP 3.3
 * Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically. 
 * The shipping method classes have been updated to make rate definition easier. Third party plugins will need updating.
 * Textdomain has changed - re-scan your po/mo's
 * Tax additions (tax rows, compounds etc) required a change to the way order items are stored. Old orders won't show items when viewed. Order totals should be unaffected.
+* Significant modifications to woocommerce.less/.css to deliver a more polished look when using the default styles. If your theme builds on top of this you will likely need to update some classes. Consider using https://gist.github.com/1601558 to disable WooCommerce default css.
 
 Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
 
