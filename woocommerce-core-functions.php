@@ -112,8 +112,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	if (!$currency) $currency = get_option('woocommerce_currency');
 	$currency_symbol = '';
 	switch ($currency) :
+		case 'BRL' : $currency_symbol = 'R&#36;'; break; // in Brazil the correct is R$ 0.00,00
 		case 'AUD' :
-		case 'BRL' :
 		case 'CAD' :
 		case 'MXN' :
 		case 'NZD' :
