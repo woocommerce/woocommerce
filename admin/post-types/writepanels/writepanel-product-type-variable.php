@@ -327,11 +327,11 @@ function variable_product_type_options() {
 
 		jQuery('button.link_all_variations').live('click', function(){
 			
-			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes.', 'woocommerce'); ?>');
+			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce'); ?>');
 			
 			if (answer) {
 				
-				jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+				jQuery('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 				
 				var data = {
 					action: 'woocommerce_link_all_variations',
@@ -341,11 +341,19 @@ function variable_product_type_options() {
 	
 				jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
 					
-					jQuery('.woocommerce_variations').unblock();
+					var count = parseInt( response );	
 					
-					if (response==1) {				
+					if (count>0) {
 						jQuery('.woocommerce_variations').load( window.location + ' .woocommerce_variations > *' );
 					}
+					
+					if (count==1) {
+						alert( count + ' <?php _e("variation added"); ?>');
+					} else {
+						alert( count + ' <?php _e("variations added"); ?>');
+					}
+					
+					jQuery('#variable_product_options').unblock();
 	
 				});
 			}
@@ -555,7 +563,7 @@ add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
  * Processes this product types options when a post is saved
  */
 function process_product_meta_variable( $post_id ) {
-	global $woocommerce; 
+	global $woocommerce, $wpdb; 
 	
 	if (isset($_POST['variable_sku'])) :
 		
@@ -589,9 +597,7 @@ function process_product_meta_variable( $post_id ) {
 			if (isset($variable_enabled[$i])) $post_status = 'publish'; else $post_status = 'private';
 			
 			// Disabled if downloadable and no URL
-			if ($is_downloadable=='yes' && !$variable_file_path[$i]) :
-				$post_status = 'private';
-			endif;
+			if ($is_downloadable=='yes' && !$variable_file_path[$i]) $post_status = 'private';
 			
 			// Generate a useful post title
 			$title = array();
@@ -599,9 +605,7 @@ function process_product_meta_variable( $post_id ) {
 			foreach ($attributes as $attribute) :
 				if ( $attribute['is_variation'] ) :
 					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
-					if ($value) :
-						$title[] = $woocommerce->attribute_label($attribute['name']).': '.$value;
-					endif;
+					if ($value) $title[] = $attribute['name'].': '.$value;
 				endif;
 			endforeach;
 			
@@ -623,7 +627,6 @@ function process_product_meta_variable( $post_id ) {
 
 			else :
 				
-				global $wpdb;
 				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => '#' . $post_id . ' Variation ('.$sku_string.') - ' . implode(', ', $title) ), array( 'ID' => $variation_id ) );
 			
 			endif;
@@ -653,12 +656,7 @@ function process_product_meta_variable( $post_id ) {
 			endif;
 			
 			// Remove old taxnomies attributes so data is kept up to date
-			$variation_custom_fields = get_post_custom( $variation_id );
-			
-			foreach ($variation_custom_fields as $name => $value) :
-				if (!strstr($name, 'attribute_')) continue;
-				delete_post_meta( $variation_id, $name );
-			endforeach;
+			if ($variation_id) $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE 'attribute_%' AND post_id = $variation_id;");
 		
 			// Update taxonomies
 			foreach ($attributes as $attribute) :
