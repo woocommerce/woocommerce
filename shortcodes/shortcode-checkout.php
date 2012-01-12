@@ -15,25 +15,15 @@ function get_woocommerce_checkout( $atts ) {
 }
 
 function woocommerce_checkout( $atts ) {
-	global $woocommerce, $woocommerce_checkout;
+	global $woocommerce;
 	
-	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+	if (sizeof($woocommerce->cart->get_cart())==0) return;
 	
-	if (sizeof($woocommerce->cart->get_cart())==0) :
-		wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
-		exit;
-	endif;
-	
-	$non_js_checkout = (isset($_POST['update_totals']) && $_POST['update_totals']) ? true : false;
-	
-	$woocommerce_checkout = $woocommerce->checkout();
-	
-	$woocommerce_checkout->process_checkout();
+	$non_js_checkout = (isset($_POST['woocommerce_checkout_update_totals']) && $_POST['woocommerce_checkout_update_totals']) ? true : false;
 	
 	do_action('woocommerce_check_cart_items');
 	
 	if ( $woocommerce->error_count()==0 && $non_js_checkout) $woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce') );
 	
 	woocommerce_get_template('checkout/form.php', false);
-	
 }

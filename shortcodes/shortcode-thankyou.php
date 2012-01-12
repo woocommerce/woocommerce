@@ -20,6 +20,8 @@ function get_woocommerce_thankyou( $atts ) {
 function woocommerce_thankyou( $atts ) {
 	global $woocommerce, $order;
 	
+	$order = false;
+	
 	// Pay for order after checkout step
 	if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
 	if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';

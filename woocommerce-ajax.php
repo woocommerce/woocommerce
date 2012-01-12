@@ -103,7 +103,7 @@ function woocommerce_ajax_update_order_review() {
 	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
 	if (sizeof($woocommerce->cart->get_cart())==0) :
-		echo '<p class="error">'.__('Sorry, your session has expired.', 'woocommerce').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woocommerce').'</a></p>';
+		echo '<div class="woocommerce_error">'.__('Sorry, your session has expired.', 'woocommerce').' <a href="'.home_url().'">'.__('Return to homepage &rarr;', 'woocommerce').'</a></div>';
 		die();
 	endif;
 	
@@ -161,8 +161,8 @@ function woocommerce_ajax_add_to_cart() {
 add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
 add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
 
-function woocommerce_process_checkout () {
-	global $woocommerce, $woocommerce_checkout;
+function woocommerce_process_checkout() {
+	global $woocommerce;
 	
 	$woocommerce_checkout = $woocommerce->checkout();
 	$woocommerce_checkout->process_checkout();

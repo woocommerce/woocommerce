@@ -1,6 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order, $woocommerce; ?>
+<?php global $order; ?>
 
 <?php do_action('woocommerce_email_header'); ?>
 

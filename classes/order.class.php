@@ -22,7 +22,7 @@ class woocommerce_order {
 	} 
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
-	function woocommerce_order( $id='' ) {
+	function __construct ( $id='' ) {
 		$this->calc_taxes = (get_option('woocommerce_calc_taxes')=='yes') ? true : false;
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
@@ -682,7 +682,7 @@ class woocommerce_order {
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $item['id'], 'order_id' => $this->id, 'quantity' => $item['quantity']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $item['id'], 'order_id' => $this->id, 'quantity' => $item['qty']));
 						endif;
 						
 						// stock status notifications

@@ -39,7 +39,6 @@ add_action( 'woocommerce_before_subcategory_title', 'woocommerce_subcategory_thu
 
 /* Before Single Products */
 add_action( 'woocommerce_before_single_product', array(&$woocommerce, 'show_messages'), 10 );
-add_action( 'woocommerce_before_single_product', 'woocommerce_check_product_visibility', 10);
 
 /* Before Single Products Summary Div */
 add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20);
@@ -97,7 +96,7 @@ add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 /** Store Event Hooks *****************************************************/
 
 /* Shop Page Handling and Support */
-add_action( 'init', 'woocommerce_shop_page_archive_redirect' );
+add_action( 'template_redirect', 'woocommerce_redirects' );
 add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
 add_action( 'wp', 'woocommerce_front_page_archive_paging_fix', 1 );
 add_action( 'loop_start', 'woocommerce_front_page_archive', 1 );
@@ -117,6 +116,10 @@ add_action( 'init', 'woocommerce_update_catalog_ordering' );
 /* Cart Actions */
 add_action( 'init', 'woocommerce_update_cart_action' );
 add_action( 'init', 'woocommerce_add_to_cart_action' );
+
+/* Checkout Actions */
+add_action( 'init', 'woocommerce_checkout_action' );
+add_action( 'init', 'woocommerce_pay_action' );
 
 /* Login and Registration */
 add_action( 'init', 'woocommerce_process_login' );

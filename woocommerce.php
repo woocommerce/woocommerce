@@ -52,6 +52,7 @@ class woocommerce {
 	var $countries;
 	var $validation;
 	var $woocommerce_email;
+	var $checkout;
 
 	/** Taxonomies ************************************************************/
 	
@@ -285,7 +286,7 @@ class woocommerce {
 		
 		// Init styles
 		if (!is_admin()) $this->init_styles();
-		
+
 		do_action( 'woocommerce_init' );
 	}
 
@@ -890,8 +891,12 @@ class woocommerce {
 	 * Get Checkout Class
 	 */
 	function checkout() { 
-		if ( !class_exists('woocommerce_checkout') ) include( 'classes/checkout.class.php' );
-		return new woocommerce_checkout();
+		if ( !class_exists('woocommerce_checkout') ) :
+			include( 'classes/checkout.class.php' );
+			$this->checkout = new woocommerce_checkout();
+		endif;
+		
+		return $this->checkout;
 	}
 	
 	/**
