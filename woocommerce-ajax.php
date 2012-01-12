@@ -310,6 +310,8 @@ function woocommerce_link_all_variations() {
 	
 	check_ajax_referer( 'link-variations', 'security' );
 	
+	@set_time_limit(0); 
+	
 	$post_id = intval( $_POST['post_id'] );
 	
 	if (!$post_id) die();
@@ -422,6 +424,7 @@ function woocommerce_link_all_variations() {
 	}
 	
 	$variation_ids = array();
+	$added = 0;
 	$possible_variations = array_cartesian( $variations );
 	
 	foreach ($possible_variations as $variation) :
@@ -439,9 +442,14 @@ function woocommerce_link_all_variations() {
 			
 		endforeach;
 		
+		$added++;
+		
+		// Max 100
+		if ($added>49) break;
+		
 	endforeach;
 	
-	echo 1;
+	echo $added;
 		
 	die();
 	
