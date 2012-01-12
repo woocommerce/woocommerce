@@ -12,8 +12,9 @@
 class woocommerce_cod extends woocommerce_payment_gateway {
 	
 	function __construct() {
-		$this->method_title = 'Cash on Delivery';
 		$this->id = 'cod';
+		$this->method_title = __('Cash on Delivery', 'woocommerce');
+		$this->has_fields 		= false;
 		
 		// Load the form fields.
 		$this->init_form_fields();
@@ -70,7 +71,7 @@ class woocommerce_cod extends woocommerce_payment_gateway {
     }
     
 	function payment_fields() {	 // Fields for the payment form	
-		if ($this->description) { echo '<p>'.$this->description.'</p>'; }
+		if ($this->description) { echo wpautop($this->description); }
     }
     
     // Process the payment
@@ -87,7 +88,7 @@ class woocommerce_cod extends woocommerce_payment_gateway {
 	}
 	
 	function thankyou() {
-		if ($this->instructions!='') { echo '<p>'.$this->instructions.'</p>'; }
+		if ($this->instructions!='') { echo wpautop($this->instructions); }
 	}
 	
 }
