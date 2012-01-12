@@ -180,6 +180,7 @@ class woocommerce {
 		include( 'classes/gateways/gateway-banktransfer.php' );
 		include( 'classes/gateways/gateway-cheque.php' );
 		include( 'classes/gateways/gateway-paypal.php' );
+		include( 'classes/gateways/gateway-cod.php' );
 	}
 	
 	/**
