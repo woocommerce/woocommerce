@@ -189,6 +189,7 @@ div.product {
 		del {
 			font-size: 14px;
 			color: #ccc;
+			display: block;
 		}
 	}
 	p.stock {
@@ -200,12 +201,11 @@ div.product {
 		width: 47%;
 		margin-bottom: 10px;
 		img {
-			border: 1px solid #ddd;
-			background: #f5f5f5;
-			padding: 6px;
 			display: block;
 			width:100%;
 			height: auto;
+			.box_shadow(0,1px,2px,0,rgba(0,0,0,0.3));
+			.transition();
 		}
 		div.thumbnails {
 			padding-top: 10px;
@@ -257,8 +257,7 @@ div.product {
 		ul.tabs {
 			.border_radius_top(3px);
 			background: #ddd;
-			overflow: hidden;
-			zoom: 1;
+			.clearfix();
 			margin: 0;
 			padding: 4px 4px 0;
 			list-style: none outside;
@@ -301,8 +300,7 @@ p.cart {
 
 form.cart {
 	margin-bottom: 24px;
-	overflow: hidden;
-	zoom:1;
+	.clearfix();
 	div.quantity {
 		float: left;
 		margin: 0 4px 0 0;
@@ -378,8 +376,7 @@ span.onsale {
 }
 
 .related, .upsells.products {
-	overflow: hidden;
-	zoom:1;
+	.clearfix();
 	ul.products, ul {
 		float: none;
 		
@@ -593,15 +590,13 @@ input.button {
 	}
 	#comments {
 		.add_review {
-			overflow: hidden;
-			zoom: 1;
+			.clearfix();
 		}
 		h2 {
 			clear: none;
 		}
 		ol.commentlist {
-			overflow: hidden;
-			zoom: 1;
+			.clearfix();
 			margin: 0;
 			width:100%;
 			background: none;
@@ -682,8 +677,7 @@ input.button {
 }
 
 p.stars {
-	overflow: hidden;
-	zoom: 1;
+	.clearfix();
 	span {
 		width: 80px;
 		height: 16px;
@@ -719,20 +713,20 @@ p.stars {
 
 table.shop_attributes {
 	border: 0;
-	border-top: 1px dotted #ccc;
+	border-top: 1px dotted rgba(0,0,0,0.1);
 	th {
 		width: 150px;
 		font-weight: bold;
 		padding: 8px;
 		color: black;
-		border-bottom: 1px dotted #ccc;
+		border-bottom: 1px dotted rgba(0,0,0,0.1);
 		margin: 0;
 		line-height: 1.5em;
 	}
 	td {
 		font-style: italic;
 		padding: 0;
-		border-bottom: 1px dotted #ccc;
+		border-bottom: 1px dotted rgba(0,0,0,0.1);
 		margin: 0;
 		line-height: 1.5em;
 		p {
@@ -741,12 +735,12 @@ table.shop_attributes {
 		}
 	}
 	.alt td, .alt th {
-		background: #f9f9f9;
+		background: rgba(0,0,0,0.025);
 	}
 }
 
 table.shop_table {
-	border: 1px solid #E7E7E7;
+	border: 1px solid rgba(0,0,0,0.1);
 	margin: 0px -1px 24px 0px;
 	text-align: left;
 	width: 100%;
@@ -760,7 +754,7 @@ table.shop_table {
 		padding: 9px 12px;
 	}
 	td {
-		border-top: 1px solid #E7E7E7;
+		border-top: 1px solid rgba(0,0,0,0.1);
 		padding: 6px 12px;
 		vertical-align: middle;
 	}
@@ -827,6 +821,9 @@ ul.cart_list, ul.product_list_widget {
 			dd {
 				margin-bottom:.5em;
 			}
+		}
+		.star-rating {
+			float: none;
 		}
 	}
 }
@@ -1290,8 +1287,7 @@ div.shipping-address {
 -------------------------------------------------------------- */
 
 .order_details {
-	overflow: hidden;
-	zoom:1;
+	.clearfix();
 	margin:0 0 1.5em;
 	list-style: none;
 	
@@ -1323,8 +1319,7 @@ div.shipping-address {
 
 .addresses {
 	.title {
-		overflow: hidden;
-		zoom:1;
+		.clearfix();
 		
 		h3 {
 			float: left;
@@ -1356,7 +1351,7 @@ ul.digital-downloads {
 	li {
 		list-style: none;
 		margin-left:0;
-		padding-left:1em;
+		padding-left:1.5em;
 		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAHCAYAAAA1WQxeAAAAQUlEQVQIHWP8//8/AwgwMjLWgxlQAijeCGIyIQtiYxNUwAjUhWI0uilMMLvQJUB8kBzYCmyKYGJwN8AEYDphJgIAPtccffZCsOoAAAAASUVORK5CYII=) left no-repeat;
 		.count {
 			float: right;
@@ -1410,8 +1405,7 @@ ul.digital-downloads {
 	border: 0;
 	list-style: none outside;
 	li {
-		overflow: hidden;
-		zoom: 1;
+		.clearfix();
 		padding: 0 0 1px;
 		list-style: none;
 		a, span {
