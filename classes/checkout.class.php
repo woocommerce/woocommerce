@@ -545,6 +545,8 @@ class woocommerce_checkout {
 				update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
 				update_post_meta( $order_id, '_order_items', 			$order_items );
 				update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
+				update_post_meta( $order_id, '_order_currency', 		get_option('woocommerce_currency') );
+				update_post_meta( $order_id, '_order_price_include_tax',get_option('woocommerce_prices_include_tax') );
 				
 				do_action('woocommerce_checkout_update_order_meta', $order_id, $this->posted);
 				
