@@ -38,7 +38,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Product Categories', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		$c = $instance['count'] ? '1' : '0';
 		$h = $instance['hierarchical'] ? '1' : '0';
-		$s = $instance['show_children_only'] ? '1' : '0';
+		$s = (isset($instance['show_children_only']) && $instance['show_children_only']) ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
 		$o = isset($instance['orderby']) ? $instance['orderby'] : 'order';
 
