@@ -460,9 +460,9 @@ jQuery(document).ready(function($) {
 			var postcode 		= $('input#billing_postcode').val();	
 				
 			if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
-				var s_country 	= $('#billing_country').val();
-				var s_state 	= $('#billing_state').val();
-				var s_postcode 	= $('input#billing_postcode').val();
+				var s_country 	= country;
+				var s_state 	= state;
+				var s_postcode 	= postcode;
 				
 			} else {
 				var s_country 	= $('#shipping_country').val();

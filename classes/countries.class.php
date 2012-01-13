@@ -935,7 +935,7 @@ class woocommerce_countries {
 				'clear'			=> true
 				)
 		);
-		
+
 		if (isset($locale[$country])) :
 			
 			$fields = woocommerce_array_overlay( $fields, $locale[$country] );

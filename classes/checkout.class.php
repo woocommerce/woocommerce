@@ -620,8 +620,8 @@ class woocommerce_checkout {
 	function get_value( $input ) {
 		global $woocommerce;
 		
-		if (isset( $this->posted[$input] ) && !empty($this->posted[$input])) :
-			return $this->posted[$input];
+		if (isset( $_POST[$input] ) && !empty($_POST[$input])) :
+			return esc_attr($_POST[$input]);
 		elseif (is_user_logged_in()) :
 			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
 			
