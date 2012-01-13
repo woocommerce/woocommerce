@@ -15,62 +15,62 @@ if (!function_exists('woocommerce_content')) {
 	// This function is only used in the optional 'woocommerce.php' template
 	// people can add to their themes to add basic woocommerce support.
 	function woocommerce_content() {
-		global $woocommerce;
-		
-		if ( is_single() && get_post_type() == 'product' ) 
+		if ( is_singular('product') ) 
 			woocommerce_single_product_content();
-		elseif ( is_tax('product_cat') )
-			woocommerce_product_taxonomy_content();
-		elseif ( is_tax('product_tag') )
+		elseif ( is_tax('product_cat') || is_tax('product_tag') )
 			woocommerce_product_taxonomy_content();
 		else
 			woocommerce_archive_product_content();
 	}
 }
 if (!function_exists('woocommerce_archive_product_content')) {
-	function woocommerce_archive_product_content() { ?>
+	function woocommerce_archive_product_content() {
 		
-		<?php 
-			$shop_page_id = woocommerce_get_page_id('shop');
-			$shop_page = get_post($shop_page_id);
-			$shop_page_title = (get_option('woocommerce_shop_page_title')) ? get_option('woocommerce_shop_page_title') : $shop_page->post_title;
-		?>
+		if (!is_search()) :
+			$shop_page = get_post( woocommerce_get_page_id('shop') );
+			$shop_page_title = apply_filters('the_title', (get_option('woocommerce_shop_page_title')) ? get_option('woocommerce_shop_page_title') : $shop_page->post_title);
+			$shop_page_content = $shop_page->post_content;
+		else :
+			$shop_page_title = __('Search Results:', 'woocommerce') . ' &ldquo;' . get_search_query() . '&rdquo;'; 
+			if (get_query_var('paged')) $shop_page_title .= ' &mdash; ' . __('Page', 'woocommerce') . ' ' . get_query_var('paged');
+			$shop_page_content = '';
+		endif;
 		
-		<?php if (is_search()) : ?>		
-			<h1 class="page-title"><?php _e('Search Results:', 'woocommerce'); ?> &ldquo;<?php the_search_query(); ?>&rdquo; <?php if (get_query_var('paged')) echo ' &mdash; Page '.get_query_var('paged'); ?></h1>
-		<?php else : ?>
-			<h1 class="page-title"><?php echo apply_filters('the_title', $shop_page_title); ?></h1>
-		<?php endif; ?>
+		?><h1 class="page-title"><?php echo $shop_page_title ?></h1>
 		
-		<?php echo apply_filters('the_content', $shop_page->post_content); ?>
+		<?php echo apply_filters('the_content', $shop_page_content); ?>
 		
 		<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
 		
-		<?php do_action('woocommerce_pagination'); ?>
+		<?php do_action('woocommerce_pagination'); 
 		
-	<?php }
+	}
 }
 if (!function_exists('woocommerce_product_taxonomy_content')) {
 	function woocommerce_product_taxonomy_content() { 
 		
-		global $wp_query; ?>
-	
-		<?php $term = get_term_by( 'slug', get_query_var($wp_query->query_vars['taxonomy']), $wp_query->query_vars['taxonomy']); ?>
-				
-		<h1 class="page-title"><?php echo wptexturize($term->name); ?></h1>
+		global $wp_query; 
+		
+		$term = get_term_by( 'slug', get_query_var($wp_query->query_vars['taxonomy']), $wp_query->query_vars['taxonomy']);
+		
+		?><h1 class="page-title"><?php echo wptexturize($term->name); ?></h1>
 			
-		<?php if ($term->description) : ?><div class="term_description"><?php echo wpautop(wptexturize($term->description)); ?></div><?php endif; ?>
+		<?php if ($term->description) : ?>
+		
+			<div class="term_description"><?php echo wpautop(wptexturize($term->description)); ?></div>
+			
+		<?php endif; ?>
 		
 		<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
 		
-		<?php do_action('woocommerce_pagination'); ?>
+		<?php do_action('woocommerce_pagination');
 	
-	<?php }
+	}
 }
 if (!function_exists('woocommerce_single_product_content')) {
-	function woocommerce_single_product_content() { ?>
+	function woocommerce_single_product_content() {
 	
-		<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
+		if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
 			
 			<?php do_action('woocommerce_before_single_product'); ?>
 		
@@ -92,9 +92,9 @@ if (!function_exists('woocommerce_single_product_content')) {
 				
 			<?php do_action('woocommerce_after_single_product'); ?>
 		
-		<?php endwhile; ?>
+		<?php endwhile;
 	
-	<?php }
+	}
 }
 
 /** Global ****************************************************************/
@@ -178,7 +178,6 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
 		if (!$placeholder_height) $placeholder_height = $woocommerce->get_image_size('shop_catalog_image_height');
 
 		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
-
 	}
 }
 
