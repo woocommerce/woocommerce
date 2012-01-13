@@ -962,7 +962,7 @@ class woocommerce_cart {
 			endif;
 				
 			// VAT exemption done at this point - so all totals are correct before exemption
-			if ($woocommerce->customer->is_vat_exempt()) :
+			if ($woocommerce->customer->is_vat_exempt() || (is_cart() && get_option('woocommerce_display_cart_taxes')=='no')) :
 				$this->shipping_tax_total = $this->tax_total = 0;
 				$this->taxes = array();
 			endif;
