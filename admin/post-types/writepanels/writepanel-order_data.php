@@ -245,14 +245,14 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="name"><?php _e('Item', 'woocommerce'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					
-					<th class="cost"><?php _e('Unit&nbsp;Cost', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit cost before discounts', 'woocommerce'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
-					
-					<th class="tax"><?php _e('Unit&nbsp;Tax', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit tax before discounts', 'woocommerce'); ?>." href="#">[?]</a></th>
-										
 					<th class="tax_status"><?php _e('Taxable', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Whether the item is taxable or not', 'woocommerce'); ?>." href="#">[?]</a></th>
 					
 					<th class="tax_class"><?php _e('Tax&nbsp;Class', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('The items tax class for this order', 'woocommerce'); ?>." href="#">[?]</a></th>
 					
+					<th class="cost"><?php _e('Unit&nbsp;Cost', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit cost before discounts', 'woocommerce'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
+					
+					<th class="tax"><?php _e('Unit&nbsp;Tax', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Unit tax before discounts', 'woocommerce'); ?>." href="#">[?]</a></th>
+
 					<th class="quantity"><?php _e('Quantity', 'woocommerce'); ?></th>
 					
 					<th class="line_cost"><?php _e('Line&nbsp;Cost', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Line cost after discount', 'woocommerce'); ?> <?php echo $woocommerce->countries->ex_tax_or_vat(); ?>." href="#">[?]</a></th>
@@ -333,15 +333,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 
 						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
-						
-						<td class="cost">
-							<input type="text" name="base_item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['base_cost'])) echo esc_attr( $item['base_cost'] ); ?>" />
-						</td>
-						
-						<td class="tax">
-							<input type="text" name="base_item_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['base_tax'])) echo esc_attr( $item['base_tax'] ); ?>" />
-						</td>
-						
+
 						<td class="tax_status">
 							<select name="item_tax_status[<?php echo $loop; ?>]">
 								<?php 
@@ -370,17 +362,25 @@ function woocommerce_order_items_meta_box($post) {
 								?>
 							</select>
 						</td>
+
+						<td class="cost">
+							<input type="text" name="base_item_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['base_cost'])) echo esc_attr( $item['base_cost'] ); ?>" />
+						</td>
+						
+						<td class="tax">
+							<input type="text" name="base_item_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['base_tax'])) echo esc_attr( $item['base_tax'] ); ?>" />
+						</td>
 						
 						<td class="quantity" width="1%">
 							<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woocommerce'); ?>" value="<?php echo esc_attr( $item['qty'] ); ?>" size="2" />
 						</td>
 						
-						<td class="cost">
-							<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_cost'])) echo esc_attr( $item['line_cost'] ); ?>" class="calculated" />
+						<td class="line_cost">
+							<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_cost'])) echo esc_attr( $item['line_cost'] ); ?>" />
 						</td>
 						
-						<td class="tax">
-							<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_tax'])) echo esc_attr( $item['line_tax'] ); ?>" class="calculated" />
+						<td class="line_tax">
+							<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_tax'])) echo esc_attr( $item['line_tax'] ); ?>" />
 						</td>
 						
 					</tr>
@@ -437,7 +437,9 @@ function woocommerce_order_items_meta_box($post) {
 		<button type="button" class="button button-primary add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
-		<button type="button" class="button button calc_totals"><?php _e('Calculate totals', 'woocommerce'); ?></button>
+		<button type="button" class="button calc_line_costs"><?php _e('Calc line cost &uarr;', 'woocommerce'); ?></button>
+		<button type="button" class="button calc_line_taxes"><?php _e('Calc line taxes &uarr;', 'woocommerce'); ?></button>
+		<button type="button" class="button calc_totals"><?php _e('Calc totals &rarr;', 'woocommerce'); ?></button>
 	</p>	
 	<div class="clear"></div>
 	<?php

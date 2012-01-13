@@ -413,7 +413,8 @@ class woocommerce_order {
 	
 	/** Get totals for display on pages and in emails */
 	function get_order_item_totals() {
-
+		global $woocommerce;
+		
 		$total_rows = array();
 		
 		if ($subtotal = $this->get_subtotal_to_display())

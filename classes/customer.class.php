@@ -107,7 +107,7 @@ class woocommerce_customer {
 	
 	/** Gets the postcode from the current session */
 	function get_postcode() {
-		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return strtolower(str_replace(' ', '', $_SESSION['customer']['postcode']));
+		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return strtoupper(str_replace(' ', '', $_SESSION['customer']['postcode']));
 	}
 	
 	/** Gets the state from the current session */
@@ -122,7 +122,7 @@ class woocommerce_customer {
 	
 	/** Gets the postcode from the current session */
 	function get_shipping_postcode() {
-		if (isset($_SESSION['customer']['shipping_postcode'])) return strtolower(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
+		if (isset($_SESSION['customer']['shipping_postcode'])) return strtoupper(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
 	}
 	
 	/** Sets session data for the location */

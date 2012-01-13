@@ -26,7 +26,7 @@ function woocommerce_product_data_box() {
 	
 		<ul class="product_data_tabs tabs" style="display:none;">
 			
-			<li class="active show_if_simple show_if_variable show_if_external general_options"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
+			<li class="active general_options"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
 			
 			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e('Tax', 'woocommerce'); ?></a></li>
 			
@@ -43,7 +43,7 @@ function woocommerce_product_data_box() {
 		</ul>
 		<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 						
-			echo '<div class="options_group">';
+			echo '<div class="options_group show_if_simple show_if_variable show_if_external">';
 			
 				// SKU
 				if( get_option('woocommerce_enable_sku', true) !== 'no' ) :
@@ -57,6 +57,7 @@ function woocommerce_product_data_box() {
 			echo '</div>';
 			
 			echo '<div class="options_group show_if_external">';
+			
 				// External URL
 				woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __('Product URL', 'woocommerce'), 'placeholder' => 'http://', 'description' => __('Enter the external URL to the product.', 'woocommerce') ) );
 			
@@ -91,7 +92,7 @@ function woocommerce_product_data_box() {
 					
 			echo '</div>';
 			
-			echo '<div class="options_group hide_if_virtual">';
+			echo '<div class="options_group hide_if_virtual hide_if_grouped">';
 			
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
@@ -115,6 +116,21 @@ function woocommerce_product_data_box() {
 				endif;
 				
 				do_action('woocommerce_product_options_dimensions');
+			
+			echo '</div>';
+			
+			echo '<div class="options_group">';
+			
+				// Visibility
+				woocommerce_wp_select( array( 'id' => '_visibility', 'label' => __('Visibility', 'woocommerce'), 'options' => apply_filters('woocommerce_product_visibility_options', array(
+					'visible' => __('Catalog &amp; search', 'woocommerce'),
+					'catalog' => __('Catalog', 'woocommerce'),
+					'search' => __('Search', 'woocommerce'),
+					'hidden' => __('Hidden', 'woocommerce')
+				)), 'description' => __('Define the loops this product should be visible in. It will still be accessible directly.', 'woocommerce') ) );
+				
+				// Featured
+				woocommerce_wp_checkbox( array( 'id' => '_featured', 'label' => __('Featured', 'woocommerce'), 'description' => __('Enable this option to feature this product', 'woocommerce') ) );
 			
 			echo '</div>';
 			
@@ -752,20 +768,9 @@ function woocommerce_product_type_box() {
 		'external' => __('External/Affiliate product', 'woocommerce')
 	), $product_type) ) );
 	
-	// Visibility
-	woocommerce_wp_select( array( 'id' => '_visibility', 'label' => __('Visibility', 'woocommerce'), 'options' => apply_filters('woocommerce_product_visibility_options', array(
-		'visible' => __('Catalog &amp; search', 'woocommerce'),
-		'catalog' => __('Catalog', 'woocommerce'),
-		'search' => __('Search', 'woocommerce'),
-		'hidden' => __('Hidden', 'woocommerce')
-	)), 'description' => __('Define the loops this product should be visible in. It will still be accessible directly.', 'woocommerce') ) );
-	
 	woocommerce_wp_checkbox( array( 'id' => '_virtual', 'wrapper_class' => 'show_if_simple', 'label' => __('Virtual', 'woocommerce'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce') ) );
 	
 	woocommerce_wp_checkbox( array( 'id' => '_downloadable', 'wrapper_class' => 'show_if_simple', 'label' => __('Downloadable', 'woocommerce'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce') ) );
-	
-	// Featured
-	woocommerce_wp_checkbox( array( 'id' => '_featured', 'label' => __('Featured', 'woocommerce'), 'description' => __('Enable this option to feature this product', 'woocommerce') ) );
 	
 	echo '</div>';
 			

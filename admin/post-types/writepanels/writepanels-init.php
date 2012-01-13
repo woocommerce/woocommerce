@@ -19,7 +19,7 @@ add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
 function woocommerce_meta_boxes() {
 	
 	// Products
-	add_meta_box( 'woocommerce-product-type', __('Product Type &amp; Visibility', 'woocommerce'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
+	add_meta_box( 'woocommerce-product-type', __('Product Type', 'woocommerce'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woocommerce'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
 	
 	// Orders

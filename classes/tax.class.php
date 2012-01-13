@@ -85,7 +85,7 @@ class woocommerce_tax {
 				$parsed_rates[$rate['country']][$rate['state']][$rate['class']][$index] = array( 
 					'label' => $rate['label'], 
 					'rate' => $rate['rate'], 
-					'postcode' => $rate['postcode'],
+					'postcode' => array_map('strtoupper', $rate['postcode']),
 					'shipping' => $rate['shipping'],
 					'compound' => $rate['compound'] 
 					);
@@ -347,7 +347,7 @@ class woocommerce_tax {
 	 * @param	bool	passed price includes tax
 	 * @return  array	array of rates/amounts
 	 */
-	function calc_tax( $price, $rates, $price_includes_tax = true ) {
+	function calc_tax( $price, $rates, $price_includes_tax = true, $force_no_rounding = false ) {
 		
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 		
@@ -387,7 +387,7 @@ class woocommerce_tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && !$force_no_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				
@@ -409,7 +409,7 @@ class woocommerce_tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && !$force_no_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				
@@ -432,7 +432,7 @@ class woocommerce_tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && !$force_no_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				
