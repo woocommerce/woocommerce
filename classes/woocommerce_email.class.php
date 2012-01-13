@@ -86,9 +86,7 @@ class woocommerce_email {
 		do_action('woocommerce_email_footer');
 		
 		// Get contents
-		$message = ob_get_contents();
-		
-		ob_end_clean();
+		$message = ob_get_clean();
 		
 		return $message;
 	}
@@ -99,7 +97,7 @@ class woocommerce_email {
 		add_filter( 'wp_mail_content_type', array(&$this, 'get_content_type') );
 		
 		// Send the mail	
-		@wp_mail( $to, $subject, $message, $headers, $attachments );
+		wp_mail( $to, $subject, $message, $headers, $attachments );
 		
 		// Unhook
 		remove_filter( 'wp_mail_from', array(&$this, 'get_from_address') );

@@ -59,12 +59,10 @@ class woocommerce_order {
 	var $formatted_shipping_address;
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
-	function __construct ( $id='' ) {
-		$this->calc_taxes = (get_option('woocommerce_calc_taxes')=='yes') ? true : false;
+	function woocommerce_order( $id = '' ) {
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
-		
 		if ($id>0) $this->get_order( $id );
 	}
 	
@@ -227,14 +225,14 @@ class woocommerce_order {
 	
 	function get_items() {
 		if (!$this->items) :
-			$this->items = isset( $this->order_custom_fields['_order_items'][0] ) ? maybe_unserialize( maybe_unserialize( $this->order_custom_fields['_order_items'][0] )) : array();
+			$this->items = isset( $this->order_custom_fields['_order_items'][0] ) ? maybe_unserialize( $this->order_custom_fields['_order_items'][0] ) : array();
 		endif;
 		return $this->items;
 	}
 	
 	function get_taxes() {
 		if (!$this->taxes) :
-			$this->taxes = isset( $this->order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( maybe_unserialize( $this->order_custom_fields['_order_taxes'][0] )) : array();
+			$this->taxes = isset( $this->order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( $this->order_custom_fields['_order_taxes'][0] ) : array();
 		endif;
 		return $this->taxes;
 	}
@@ -429,7 +427,7 @@ class woocommerce_order {
 		
 		if ($this->get_total_tax() > 0) :
 			
-			if ( is_array($this->get_taxes()) && sizeof($this->get_taxes()) > 0 ) :
+			if ( sizeof($this->get_taxes()) > 0 ) :
 			
 				$has_compound_tax = false;
 				
