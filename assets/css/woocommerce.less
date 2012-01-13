@@ -1359,45 +1359,8 @@ ul.digital-downloads {
 	}
 }
 
-/* =Layered Nav Widgets
+/* =Layered Nav Widget
 -------------------------------------------------------------- */
-
-.widget_price_filter { 
-	.price_slider_wrapper {
-		.button {
-			float: right;
-			margin: 0;
-		}
-		.price_slider {
-			margin: 1em .6em .6em;
-			.ui-slider-handle {
-				outline: 0;
-			}
-		}
-		.price_slider_amount {
-			overflow: hidden;
-			line-height: 2em;
-		}
-	}
-	.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #d3d3d3; background: #e6e6e6; font-weight: normal; color: #555555; }
-	.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dadada; font-weight: normal; color: #212121; }
-	.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #ffffff; font-weight: normal; color: #212121; }
-	
-	.ui-corner-all { -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; }
-	
-	.ui-slider { position: relative; text-align: left; }
-	.ui-slider .ui-slider-handle { position: absolute; z-index: 2; width: 1.2em; height: 1.2em; cursor: default; }
-	.ui-slider .ui-slider-range { position: absolute; z-index: 1; font-size: .7em; display: block; border: 0; background-position: 0 0; }
-	
-	.price_slider_wrapper .ui-widget-content { border: 1px solid #aaaaaa; background: #ffffff; color: #222222; }
-	.price_slider_wrapper .ui-widget-header { border: 1px solid #aaaaaa; background: #cccccc; color: #222222; font-weight: bold; }
-	
-	.ui-slider-horizontal { height: .8em; }
-	.ui-slider-horizontal .ui-slider-handle { top: -.3em; margin-left: -.6em; }
-	.ui-slider-horizontal .ui-slider-range { top: 0; height: 100%; }
-	.ui-slider-horizontal .ui-slider-range-min { left: 0; }
-	.ui-slider-horizontal .ui-slider-range-max { right: 0; }
-}
 
 .widget_layered_nav ul {
 	margin: 0;
@@ -1429,5 +1392,95 @@ ul.digital-downloads {
 		font-size: 1em;
 		padding: 1px 0;
 		color: #999;
+	}
+}
+
+/* =Layered Nav Widget
+-------------------------------------------------------------- */
+
+.widget_price_filter {
+	.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { 
+	}
+	
+	.price_slider {
+		margin-bottom:1em;
+	}
+	
+	.price_slider_amount {
+		text-align: right;
+		line-height: 2.4em;
+		font-size:0.8751em;
+		
+		.button {
+			font-size:1.15em;
+		}
+		
+		.button {
+			float: left;
+		}
+	}
+   
+   .ui-slider { 
+		position: relative; 
+		text-align: left; 
+	}
+	
+   .ui-slider .ui-slider-handle { 
+		position: absolute; 
+		z-index: 2; 
+		width: 0.9em; 
+		height: 0.9em; 
+		.border_radius(1em);
+		border:1px solid #333;
+		cursor: pointer;
+		.vertical_gradient(#fff,#bbb);
+		outline: none;
+		top:-.3em;
+		-webkit-box-shadow:
+			0 1px 2px rgba(0,0,0,0.3),
+			inset 0 0 0 1px rgba(255,255,255,0.65);
+		-moz-box-shadow:
+			0 1px 2px rgba(0,0,0,0.3),
+			inset 0 0 0 1px rgba(255,255,255,0.65);
+		box-shadow:
+			0 1px 2px rgba(0,0,0,0.3),
+			inset 0 0 0 1px rgba(255,255,255,0.65);
+			
+		&:last-child {
+			margin-left:-1em;
+		}
+	}
+	
+   .ui-slider .ui-slider-range { 
+		position: absolute; 
+		z-index: 1; 
+		font-size: .7em; 
+		display: block; 
+		border: 0; 
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAFUlEQVQIHWP4//9/PRMDA8NzEPEMADLLBU76a5idAAAAAElFTkSuQmCC) top repeat-x #1982D1;
+		.inset_box_shadow(0,0,0,1px,rgba(0,0,0,0.5));
+		.border_radius(1em);
+	}
+   
+   .price_slider_wrapper .ui-widget-content { 
+		.border_radius(1em);
+		.vertical_gradient(#333, #666);
+	}
+   
+   .ui-slider-horizontal { 
+		height: .5em; 
+	}
+		
+   .ui-slider-horizontal .ui-slider-range { 
+		top: 0; 
+		height: 100%; 
+	}
+	
+   .ui-slider-horizontal .ui-slider-range-min { 
+		left: -1px; 
+	}
+	
+   .ui-slider-horizontal .ui-slider-range-max { 
+		right: -1px; 
 	}
 }
