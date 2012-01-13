@@ -75,7 +75,7 @@ class woocommerce_email {
 	/**
 	 * Wraps a message in the woocommerce mail template
 	 **/
-	function wrap_message( $email_heading, $message ) {		
+	function wrap_message( $email_heading, $message ) {	
 		// Buffer
 		ob_start();
 	
@@ -86,19 +86,20 @@ class woocommerce_email {
 		do_action('woocommerce_email_footer');
 		
 		// Get contents
-		$message = ob_get_clean();
+		$message = ob_get_contents();
+		
+		ob_end_clean();
 		
 		return $message;
 	}
 	
 	function send( $to, $subject, $message, $headers = "", $attachments = "" ) {	
-
 		add_filter( 'wp_mail_from', array(&$this, 'get_from_address') );
 		add_filter( 'wp_mail_from_name', array(&$this, 'get_from_name') );
 		add_filter( 'wp_mail_content_type', array(&$this, 'get_content_type') );
 		
 		// Send the mail	
-		wp_mail( $to, $subject, $message, $headers, $attachments );
+		@wp_mail( $to, $subject, $message, $headers, $attachments );
 		
 		// Unhook
 		remove_filter( 'wp_mail_from', array(&$this, 'get_from_address') );
@@ -263,34 +264,26 @@ class woocommerce_email {
 	 * Low stock notification email
 	 **/
 	function low_stock( $product ) {
-		$_product = new woocommerce_product($product);
 	
-		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product low in stock', 'woocommerce' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product low in stock', 'woocommerce' ) ), $product );
 		
-		$message = $this->wrap_message( 
-			__('Product low in stock', 'woocommerce'),
-			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is low in stock.', 'woocommerce')
-		);
+		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is low in stock.', 'woocommerce');
 	
 		// Send the mail
-		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 	}
 	
 	/**
 	 * No stock notification email
 	 **/
 	function no_stock( $product ) {
-		$_product = new woocommerce_product($product);
 		
-		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product out of stock', 'woocommerce' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product out of stock', 'woocommerce' ) ), $product );
 		
-		$message = $this->wrap_message( 
-			__('Product out of stock', 'woocommerce'),
-			'#' . $_product->id .' '. $_product->get_title() . ' ('. $_product->sku.') ' . __('is out of stock.', 'woocommerce')
-		);
+		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is out of stock.', 'woocommerce');
 	
 		// Send the mail
-		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 	}
 	
 	
@@ -310,18 +303,13 @@ class woocommerce_email {
 		extract( $args );
 		
 		if (!$product || !$quantity) return;
-	
-		$_product = new woocommerce_product($product);
 		
-		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product Backorder', 'woocommerce' ) ), $_product );
+		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product Backorder', 'woocommerce' ) ), $product );
 	
-		$message = $this->wrap_message( 
-			__('Product Backorder', 'woocommerce'),
-			sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woocommerce'), $quantity, $_product->id, $_product->get_title(), $_product->sku, $order_id )
-		);
+		$message = sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woocommerce'), $quantity, $product->id, $product->get_title(), $product->sku, $order_id );
 	
 		// Send the mail
-		$this->send( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
 	}
 
 	/**

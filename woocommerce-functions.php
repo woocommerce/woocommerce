@@ -979,7 +979,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 		]);
 		
 		// Order items
-		<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
+		<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
 			_gaq.push(['_addItem',
 				'<?php echo $order_id; ?>',           	// order ID - required
 				'<?php echo $_product->sku; ?>',      	// SKU/code - required
@@ -1025,7 +1025,7 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	<script type="text/javascript">
 	try {
 		// Add order items
-		<?php if ($order->items) foreach($order->items as $item) : $_product = $order->get_product_from_item( $item ); ?>
+		<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
 			piwikTracker.addEcommerceItem(
 				"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
 				"<?php echo $item['name']; ?>",		// (optional) Product name

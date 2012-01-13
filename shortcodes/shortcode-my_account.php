@@ -98,7 +98,9 @@ function woocommerce_save_address() {
 		return;
 
 	$woocommerce->verify_nonce( 'edit_address' );
-
+	
+	$validation = $woocommerce->validation();
+	
 	$user_id = get_current_user_id();
 
 	if ( $user_id <= 0 ) return;
@@ -129,10 +131,10 @@ function woocommerce_save_address() {
 		
 		// Postcode
 		if ($key=='billing_postcode' || $key=='shipping_postcode') :
-			if ( ! $woocommerce->validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
+			if ( ! $validation->is_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] ) ) :
 				$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) ); 
 			else :
-				$_POST[$key] = $woocommerce->validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
+				$_POST[$key] = $validation->format_postcode( $_POST[$key], $_POST[ $load_address . '_country' ] );
 			endif;
 		endif;
 		

@@ -50,7 +50,6 @@ class woocommerce {
 	var $cart;
 	var $payment_gateways;
 	var $countries;
-	var $validation;
 	var $woocommerce_email;
 	var $checkout;
 
@@ -125,7 +124,6 @@ class woocommerce {
 			$this->cart 			= new woocommerce_cart();				// Cart class, stores the cart contents
 			$this->customer 		= new woocommerce_customer();			// Customer class, sorts out session data such as location
 			$this->query			= new woocommerce_query();				// Query class, handles front-end queries and loops
-			$this->validation 		= new woocommerce_validation();		// Validation class
 			
 			// Load messages
 			$this->load_messages();
@@ -208,7 +206,6 @@ class woocommerce {
 		include( 'classes/cart.class.php' );					// The main cart class
 		include( 'classes/coupons.class.php' );					// Coupons class
 		include( 'classes/customer.class.php' ); 				// Customer class
-		include( 'classes/validation.class.php' );				// Validation class
 	}
 	
 	/**
@@ -909,11 +906,18 @@ class woocommerce {
 	}
 	
 	/**
+	 * Get Validation Class
+	 */
+	function validation() {
+		if ( !class_exists('woocommerce_validation') ) include( 'classes/woocommerce_validation.class.php' );
+		return new woocommerce_validation();
+	}
+	
+	/**
 	 * Email Class
 	 */
 	function send_transactional_email( $args = array() ) {
 		$this->mailer();
-		
 		do_action( current_filter() . '_notification' , $args );
 	}
 	
@@ -923,7 +927,6 @@ class woocommerce {
 			include( 'classes/woocommerce_email.class.php' );
 			$this->woocommerce_email = new woocommerce_email();
 		endif;
-		
 		return $this->woocommerce_email;
 	}
 

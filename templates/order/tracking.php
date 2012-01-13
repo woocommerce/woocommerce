@@ -47,10 +47,10 @@ global $woocommerce, $order;
 
 <div style="width: 49%; float:left;">
 	<h2><?php _e('Billing Address', 'woocommerce'); ?></h2>
-	<p><?php echo $order->formatted_billing_address; ?></p>
+	<p><?php echo $order->get_formatted_billing_address(); ?></p>
 </div>
 <div style="width: 49%; float:right;">
 	<h2><?php _e('Shipping Address', 'woocommerce'); ?></h2>
-	<p><?php echo $order->formatted_shipping_address; ?></p>
+	<p><?php echo $order->get_formatted_shipping_address(); ?></p>
 </div>
 <div class="clear"></div>

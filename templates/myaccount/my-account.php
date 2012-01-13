@@ -54,7 +54,7 @@ if ($customer_orders) :
 				?><tr class="order">
 					<td><?php echo $order->id; ?></td>
 					<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
-					<td><address><?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?></address></td>
+					<td><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
 					<td><?php echo woocommerce_price($order->order_total); ?></td>
 					<td><?php 
 						$status = get_term_by('slug', $order->status, 'shop_order_status');

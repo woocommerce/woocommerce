@@ -1,6 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order_id, $order, $woocommerce; ?>
+<?php global $order; ?>
 
 <?php do_action('woocommerce_email_header'); ?>
 
@@ -50,7 +50,7 @@
 
 	<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
 	
-	<p><?php echo $order->formatted_billing_address; ?></p>
+	<p><?php echo $order->get_formatted_billing_address(); ?></p>
 
 </div>
 
@@ -58,7 +58,7 @@
 
 	<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
 	
-	<p><?php echo $order->formatted_shipping_address; ?></p>
+	<p><?php echo $order->get_formatted_shipping_address(); ?></p>
 
 </div>
 

@@ -134,7 +134,7 @@ function woocommerce_order_data_meta_box($post) {
 						// Display values
 						echo '<div class="address">';
 						
-							if ($order->formatted_billing_address) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->formatted_billing_address.'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No billing address set.', 'woocommerce') . '</p>';
+							if ($order->get_formatted_billing_address()) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->get_formatted_billing_address().'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No billing address set.', 'woocommerce') . '</p>';
 							
 							foreach ( $billing_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
 								$field_name = 'billing_'.$key;
@@ -199,7 +199,7 @@ function woocommerce_order_data_meta_box($post) {
 						// Display values
 						echo '<div class="address">';
 						
-							if ($order->formatted_shipping_address) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->formatted_shipping_address.'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No shipping address set.', 'woocommerce') . '</p>';
+							if ($order->get_formatted_shipping_address()) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->get_formatted_shipping_address().'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No shipping address set.', 'woocommerce') . '</p>';
 							
 							foreach ( $shipping_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
 								$field_name = 'shipping_'.$key;

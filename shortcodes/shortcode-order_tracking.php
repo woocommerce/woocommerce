@@ -23,14 +23,14 @@ function woocommerce_order_tracking( $atts ) {
 	
 	if ($_POST) :
 		
-		$order = new woocommerce_order();
-		
-		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order->id = (int) $_POST['orderid']; else $order->id = 0;
-		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
-		
 		$woocommerce->verify_nonce( 'order_tracking' );
 		
-		if ($order->id && $order_email && $order->get_order( $order->id )) :
+		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order_id = (int) $_POST['orderid']; else $order_id = 0;
+		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
+		
+		$order = new woocommerce_order( $order_id );
+		
+		if ($order->id && $order_email) :
 
 			if ($order->billing_email == $order_email) :
 			

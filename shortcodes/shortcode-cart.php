@@ -26,17 +26,19 @@ function woocommerce_cart( $atts ) {
 	// Update Shipping
 	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && $woocommerce->verify_nonce('cart')) :
 		
+		$validation = $woocommerce->validation();
+		
 		$_SESSION['calculated_shipping'] = true;
 		unset($_SESSION['_chosen_shipping_method']);
 		$country 	= $_POST['calc_shipping_country'];
 		$state 		= $_POST['calc_shipping_state'];
 		$postcode 	= $_POST['calc_shipping_postcode'];
 		
-		if ($postcode && !$woocommerce->validation->is_postcode( $postcode, $country )) : 
+		if ($postcode && !$validation->is_postcode( $postcode, $country )) : 
 			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woocommerce') ); 
 			$postcode = '';
 		elseif ($postcode) :
-			$postcode = $woocommerce->validation->format_postcode( $postcode, $country );
+			$postcode = $validation->format_postcode( $postcode, $country );
 		endif;
 		
 		if ($country) :

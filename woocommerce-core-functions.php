@@ -385,7 +385,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 	
 	$order = new woocommerce_order( $order_id );
 	
-	if (sizeof($order->items)>0) foreach ($order->items as $item) :
+	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 	
 		if ($item['id']>0) :
 			$_product = $order->get_product_from_item( $item );

@@ -11,15 +11,52 @@
  */
 class woocommerce_order {
 	
-	private $_data = array();
+	var $id;
 	
-	public function __get($variable) {
-		return isset($this->_data[$variable]) ? $this->_data[$variable] : null;
-	}
-	
-	public function __set($variable, $value) {
-		$this->_data[$variable] = $value;
-	} 
+	var $order_date;
+	var $modified_date;
+	var $customer_note;
+	var $order_custom_fields;
+	var $order_key;
+	var $billing_first_name;
+	var $billing_last_name;
+	var $billing_company;
+	var $billing_address_1;
+	var $billing_address_2;
+	var $billing_city;
+	var $billing_postcode;
+	var $billing_country;
+	var $billing_state;
+	var $billing_email;
+	var $billing_phone;
+	var $shipping_first_name;
+	var $shipping_last_name;
+	var $shipping_company;
+	var $shipping_address_1;
+	var $shipping_address_2;
+	var $shipping_city;
+	var $shipping_postcode;
+	var $shipping_country;
+	var $shipping_state;
+	var $shipping_method;
+	var $shipping_method_title;
+	var $payment_method;
+	var $payment_method_title;
+	var $order_discount;
+	var $cart_discount;
+	var $order_tax;
+	var $order_shipping;
+	var $order_shipping_tax;
+	var $order_total;
+	var $items;
+	var $taxes;
+	var $customer_user;
+	var $user_id;
+	var $completed_date;
+	var $billing_address;
+	var $formatted_billing_address;
+	var $shipping_address;
+	var $formatted_shipping_address;
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
 	function __construct ( $id='' ) {
@@ -43,16 +80,12 @@ class woocommerce_order {
 	
 	/** Populates an order from the loaded post data */
 	function populate( $result ) {
-		global $woocommerce;
-		
 		// Standard post data
 		$this->id = $result->ID; 
-		$this->status = $result->post_status;
 		$this->order_date = $result->post_date;
 		$this->modified_date = $result->post_modified;	
 		$this->customer_note = $result->post_excerpt;
-		
-		$order_custom_fields = get_post_custom( $this->id );
+		$this->order_custom_fields = get_post_custom( $this->id );
 		
 		// Define the data we're going to load: Key => Default value
 		$load_data = apply_filters('woocommerce_load_order_data', array(
@@ -86,80 +119,124 @@ class woocommerce_order {
 			'order_tax'				=> '',
 			'order_shipping'		=> '',
 			'order_shipping_tax'	=> '',
-			'order_total'			=> ''
+			'order_total'			=> '',
+			'customer_user'			=> '',
+			'completed_date'		=> $this->modified_date
 		));
 		
 		// Load the data from the custom fields
 		foreach ($load_data as $key => $default) :
-			if (isset($order_custom_fields[ '_' . $key ][0]) && $order_custom_fields[ '_' . $key ][0]!=='') :
-				$this->$key = $order_custom_fields[ '_' . $key ][0];
+			if (isset($this->order_custom_fields[ '_' . $key ][0]) && $this->order_custom_fields[ '_' . $key ][0]!=='') :
+				$this->$key = $this->order_custom_fields[ '_' . $key ][0];
 			else :
 				$this->$key = $default;
 			endif;
 		endforeach;
 		
-		// Other custom fields
-		$this->items = isset( $order_custom_fields['_order_items'][0] ) ?maybe_unserialize( maybe_unserialize( $order_custom_fields['_order_items'][0] )) : array();
-		$this->taxes = isset( $order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( maybe_unserialize( $order_custom_fields['_order_taxes'][0] )) : array();
-		$this->user_id = (int) isset($order_custom_fields['_customer_user'][0]) ? $order_custom_fields['_customer_user'][0] : '';
-		$this->completed_date = isset($order_custom_fields['_completed_date'][0]) ? $order_custom_fields['_completed_date'][0] : '';
+		// Alias
+		$this->user_id = (int) $this->customer_user;
 		
-		if (!$this->completed_date) $this->completed_date = $this->modified_date;
-
-		// Formatted Addresses
-		$address = array(
-			'first_name' 	=> $this->billing_first_name,
-			'last_name'		=> $this->billing_last_name,
-			'company'		=> $this->billing_company,
-			'address_1'		=> $this->billing_address_1,
-			'address_2'		=> $this->billing_address_2,
-			'city'			=> $this->billing_city,		
-			'state'			=> $this->billing_state,
-			'postcode'		=> $this->billing_postcode,
-			'country'		=> $this->billing_country
-		);
-
-		$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
-		
-		unset($address['first_name']);
-		unset($address['last_name']);
-		unset($address['company']);
-		$joined_address = array();
-		foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
-		$this->billing_address_only = implode(', ', $joined_address);
-		
-		if ($this->shipping_address_1) :
+		// Get status
+		$terms = wp_get_object_terms( $this->id, 'shop_order_status', array('fields' => 'slugs') );
+		$this->status = (isset($terms[0])) ? $terms[0] : 'pending';
+	}
+	
+	function get_formatted_billing_address() {
+		if (!$this->formatted_billing_address) :
+			global $woocommerce;
+			
+			// Formatted Addresses
 			$address = array(
-				'first_name' 	=> $this->shipping_first_name,
-				'last_name'		=> $this->shipping_last_name,
-				'company'		=> $this->shipping_company,
-				'address_1'		=> $this->shipping_address_1,
-				'address_2'		=> $this->shipping_address_2,
-				'city'			=> $this->shipping_city,		
-				'state'			=> $this->shipping_state,
-				'postcode'		=> $this->shipping_postcode,
-				'country'		=> $this->shipping_country
+				'first_name' 	=> $this->billing_first_name,
+				'last_name'		=> $this->billing_last_name,
+				'company'		=> $this->billing_company,
+				'address_1'		=> $this->billing_address_1,
+				'address_2'		=> $this->billing_address_2,
+				'city'			=> $this->billing_city,		
+				'state'			=> $this->billing_state,
+				'postcode'		=> $this->billing_postcode,
+				'country'		=> $this->billing_country
 			);
 	
-			$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
-			
-			unset($address['first_name']);
-			unset($address['last_name']);
-			unset($address['company']);
+			$this->formatted_billing_address = $woocommerce->countries->get_formatted_address( $address );
+		endif;
+		return $this->formatted_billing_address;
+	}
+	
+	function get_billing_address() {
+		if (!$this->billing_address) :
+			// Formatted Addresses
+			$address = array(
+				'address_1'		=> $this->billing_address_1,
+				'address_2'		=> $this->billing_address_2,
+				'city'			=> $this->billing_city,		
+				'state'			=> $this->billing_state,
+				'postcode'		=> $this->billing_postcode,
+				'country'		=> $this->billing_country
+			);
 			$joined_address = array();
 			foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
-			$this->shipping_address_only = implode(', ', $joined_address);
+			$this->billing_address = implode(', ', $joined_address);
 		endif;
+		return $this->billing_address;
+	}
+	
+	function get_formatted_shipping_address() {
+		if (!$this->formatted_shipping_address) :
+			if ($this->shipping_address_1) :
+				global $woocommerce;
+				
+				// Formatted Addresses
+				$address = array(
+					'first_name' 	=> $this->shipping_first_name,
+					'last_name'		=> $this->shipping_last_name,
+					'company'		=> $this->shipping_company,
+					'address_1'		=> $this->shipping_address_1,
+					'address_2'		=> $this->shipping_address_2,
+					'city'			=> $this->shipping_city,		
+					'state'			=> $this->shipping_state,
+					'postcode'		=> $this->shipping_postcode,
+					'country'		=> $this->shipping_country
+				);
 		
-		// Taxonomy data 
-		$terms = wp_get_object_terms( $this->id, 'shop_order_status' );
-		if (!is_wp_error($terms) && $terms) :
-			$term = current($terms);
-			$this->status = $term->slug; 
-		else :
-			$this->status = 'pending';
+				$this->formatted_shipping_address = $woocommerce->countries->get_formatted_address( $address );
+			endif;
 		endif;
-			
+		return $this->formatted_shipping_address;
+	}
+	
+	function get_shipping_address() {
+		if (!$this->shipping_address) :
+			if ($this->shipping_address_1) :
+				// Formatted Addresses
+				$address = array(
+					'address_1'		=> $this->shipping_address_1,
+					'address_2'		=> $this->shipping_address_2,
+					'city'			=> $this->shipping_city,		
+					'state'			=> $this->shipping_state,
+					'postcode'		=> $this->shipping_postcode,
+					'country'		=> $this->shipping_country
+				);
+				$joined_address = array();
+				foreach ($address as $part) if (!empty($part)) $joined_address[] = $part;
+				$this->shipping_address = implode(', ', $joined_address);
+			endif;
+		endif;
+		return $this->shipping_address;
+	}
+	
+	function get_items() {
+		if (!$this->items) :
+			$this->items = isset( $this->order_custom_fields['_order_items'][0] ) ? maybe_unserialize( maybe_unserialize( $this->order_custom_fields['_order_items'][0] )) : array();
+		endif;
+		return $this->items;
+	}
+	
+	function get_taxes() {
+		if (!$this->taxes) :
+			$this->taxes = isset( $this->order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( maybe_unserialize( $this->order_custom_fields['_order_taxes'][0] )) : array();
+		endif;
+		return $this->taxes;
 	}
 	
 	/** Gets shipping and product tax */
@@ -241,7 +318,7 @@ class woocommerce_order {
 		
 		if ( !$compound ) :
 
-			foreach ($this->items as $item) :
+			foreach ($this->get_items() as $item) :
 				
 				if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
 				
@@ -263,7 +340,7 @@ class woocommerce_order {
 			
 			if ($this->prices_include_tax) return;
 			
-			foreach ($this->items as $item) :
+			foreach ($this->get_items() as $item) :
 				
 				$subtotal += $item['base_cost'];
 			
@@ -273,7 +350,7 @@ class woocommerce_order {
 			$subtotal += $this->get_shipping();
 		
 			// Remove non-compound taxes
-			foreach ($this->taxes as $tax) :
+			foreach ($this->get_taxes() as $tax) :
 				
 				if (isset($tax['compound']) && $tax['compound']) continue;
 				
@@ -352,11 +429,11 @@ class woocommerce_order {
 		
 		if ($this->get_total_tax() > 0) :
 			
-			if ( is_array($this->taxes) && sizeof($this->taxes) > 0 ) :
+			if ( is_array($this->get_taxes()) && sizeof($this->get_taxes()) > 0 ) :
 			
 				$has_compound_tax = false;
 				
-				foreach ($this->taxes as $tax) : if ($tax['compound']) : $has_compound_tax = true; continue; endif;
+				foreach ($this->get_taxes() as $tax) : if ($tax['compound']) : $has_compound_tax = true; continue; endif;
 					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
 				endforeach;
 				
@@ -366,7 +443,7 @@ class woocommerce_order {
 					endif;
 				endif;
 				
-				foreach ($this->taxes as $tax) : if (!$tax['compound']) continue;
+				foreach ($this->get_taxes() as $tax) : if (!$tax['compound']) continue;
 					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
 				endforeach;
 			
@@ -391,7 +468,7 @@ class woocommerce_order {
 
 		$return = '';
 		
-		foreach($this->items as $item) : 
+		foreach($this->get_items() as $item) : 
 			
 			$_product = $this->get_product_from_item( $item );
 			
@@ -454,7 +531,7 @@ class woocommerce_order {
 	function has_downloadable_item() {
 		$has_downloadable_item = false;
 		
-		foreach($this->items as $item) : 
+		foreach($this->get_items() as $item) : 
 			
 			$_product = $this->get_product_from_item( $item );
 
@@ -605,7 +682,7 @@ class woocommerce_order {
 		
 			$downloadable_order = false;
 			
-			if (sizeof($this->items)>0) foreach ($this->items as $item) :
+			if (sizeof($this->get_items())>0) foreach ($this->get_items() as $item) :
 			
 				if ($item['id']>0) :
 				
@@ -648,7 +725,7 @@ class woocommerce_order {
 		
 		if ( get_post_meta( $this->id, '_recorded_sales', true )=='yes' ) return;
 		
-		if (sizeof($this->items)>0) foreach ($this->items as $item) :
+		if (sizeof($this->get_items())>0) foreach ($this->get_items() as $item) :
 			if ($item['id']>0) :
 				$sales 	= (int) get_post_meta( $item['id'], 'total_sales', true );
 				$sales += (int) $item['qty'];
@@ -665,15 +742,15 @@ class woocommerce_order {
 	 */
 	function reduce_order_stock() {
 		
-		if (get_option('woocommerce_manage_stock')=='yes' && sizeof($this->items)>0) :
+		if (get_option('woocommerce_manage_stock')=='yes' && sizeof($this->get_items())>0) :
 		
 			// Reduce stock levels and do any other actions with products in the cart
-			foreach ($this->items as $item) :
+			foreach ($this->get_items() as $item) :
 			
 				if ($item['id']>0) :
 					$_product = $this->get_product_from_item( $item );
 					
-					if ( $_product->exists && $_product->managing_stock() ) :
+					if ( $_product && $_product->exists && $_product->managing_stock() ) :
 					
 						$old_stock = $_product->stock;
 						
@@ -682,14 +759,14 @@ class woocommerce_order {
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $item['id'], 'order_id' => $this->id, 'quantity' => $item['qty']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $this->id, 'quantity' => $item['qty']));
 						endif;
 						
 						// stock status notifications
 						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock', $item['id']);
+							do_action('woocommerce_no_stock', $_product);
 						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock', $item['id']);
+							do_action('woocommerce_low_stock', $_product);
 						endif;
 						
 					endif;

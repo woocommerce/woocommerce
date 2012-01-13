@@ -23,8 +23,8 @@
 		</tfoot>
 		<tbody>
 			<?php
-			if (sizeof($order->items)>0) : 
-				foreach ($order->items as $item) :
+			if (sizeof($order->get_items())>0) : 
+				foreach ($order->get_items() as $item) :
 					echo '
 						<tr>
 							<td>'.$item['name'].'</td>

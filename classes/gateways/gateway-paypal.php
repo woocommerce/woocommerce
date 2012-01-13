@@ -245,7 +245,7 @@ class woocommerce_paypal extends woocommerce_payment_gateway {
 
 			// Cart Contents
 			$item_loop = 0;
-			if (sizeof($order->items)>0) : foreach ($order->items as $item) :
+			if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
 				if ($item['qty']) :
 					
 					$item_loop++;

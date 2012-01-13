@@ -73,9 +73,9 @@ function woocommerce_custom_order_columns($column) {
 						
 		break;
 		case "billing_address" :
-			if ($order->formatted_shipping_address) :
+			if ($order->get_formatted_shipping_address()) :
 			
-        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->billing_address_only ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_billing_address) .'</a>';
+        		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->get_billing_address() ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->get_formatted_billing_address()) .'</a>';
         	else :
         		echo '&ndash;';
         	endif;
@@ -86,9 +86,9 @@ function woocommerce_custom_order_columns($column) {
         	
 		break;
 		case "shipping_address" :
-			if ($order->formatted_shipping_address) :
+			if ($order->get_formatted_shipping_address()) :
             	
-            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->shipping_address_only ).'&z=16' ) .'">'. preg_replace('#<br\s*/?>#i', ', ', $order->formatted_shipping_address) .'</a>';
+            	echo '<a target="_blank" href="' . esc_url( 'http://maps.google.co.uk/maps?&q='.urlencode( $order->get_shipping_address() ).'&z=16' ) .'">'. preg_replace('#<br\s*/?>#i', ', ', $order->get_formatted_shipping_address()) .'</a>';
         	else :
         		echo '&ndash;';
         	endif;

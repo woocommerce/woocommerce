@@ -190,6 +190,9 @@ class woocommerce_checkout {
 		// Note if we skip shipping
 		$skipped_shipping = false;
 		
+		// Get validation class
+		$validation = $woocommerce->validation();
+		
 		// Get posted checkout_fields and do validation
 		foreach ($this->checkout_fields as $fieldset_key => $fieldset) :
 			
@@ -226,16 +229,16 @@ class woocommerce_checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$woocommerce->validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
 							else :
-								$this->posted[$key] = $woocommerce->validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 							endif;
 						break;
 						case "billing_phone" :
-							if (!$woocommerce->validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
+							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
 						break;
 						case "billing_email" :
-							if (!$woocommerce->validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
+							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
 						break;
 					endswitch;
 				endif;
@@ -425,10 +428,11 @@ class woocommerce_checkout {
 					
 					$order_id = (int) $_SESSION['order_awaiting_payment'];
 					
-					/* Check order is unpaid */
-					$order = new woocommerce_order( $order_id );
+					/* Check order is unpaid by getting its status */
+					$terms = wp_get_object_terms( $order_id, 'shop_order_status', array('fields' => 'slugs') );
+					$order_status = (isset($terms[0])) ? $terms[0] : 'pending';
 					
-					if ( $order->status == 'pending' ) :
+					if ( $order_status == 'pending' ) :
 						
 						// Resume the unpaid order
 						$order_data['ID'] = $order_id;
@@ -507,6 +511,9 @@ class woocommerce_checkout {
 						
 					endforeach;
 				endif;
+				
+				// Save any other user meta
+				if ($user_id) do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);
 				
 				// Put order taxes into an array to store
 				$order_taxes = array();

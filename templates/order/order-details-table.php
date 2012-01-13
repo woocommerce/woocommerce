@@ -30,9 +30,9 @@ $order = new woocommerce_order( $order_id );
 	</tfoot>
 	<tbody>
 		<?php
-		if (sizeof($order->items)>0) :
+		if (sizeof($order->get_items())>0) :
 
-			foreach($order->items as $item) :
+			foreach($order->get_items() as $item) :
 
 				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
 					$_product = new woocommerce_product_variation( $item['variation_id'] );
@@ -80,7 +80,7 @@ $order = new woocommerce_order( $order_id );
 		</header>
 		<address><p>
 			<?php
-				if (!$order->formatted_billing_address) _e('N/A', 'woocommerce'); else echo $order->formatted_billing_address;
+				if (!$order->get_formatted_billing_address()) _e('N/A', 'woocommerce'); else echo $order->get_formatted_billing_address();
 			?>
 		</p></address>
 
@@ -93,7 +93,7 @@ $order = new woocommerce_order( $order_id );
 		</header>
 		<address><p>
 			<?php
-				if (!$order->formatted_shipping_address) _e('N/A', 'woocommerce'); else echo $order->formatted_shipping_address;
+				if (!$order->get_formatted_shipping_address()) _e('N/A', 'woocommerce'); else echo $order->get_formatted_shipping_address();
 			?>
 		</p></address>
 
