@@ -90,7 +90,7 @@ p.stars span a.star-2{width:32px;z-index:9;}
 p.stars span a.star-3{width:48px;z-index:8;}
 p.stars span a.star-4{width:64px;z-index:7;}
 p.stars span a.star-5{width:80px;z-index:6;}
-table.shop_attributes{border:0;border-top:1px dotted rgba(0, 0, 0, 0.1);}table.shop_attributes th{width:150px;font-weight:bold;padding:8px;color:black;border-bottom:1px dotted rgba(0, 0, 0, 0.1);margin:0;line-height:1.5em;}
+table.shop_attributes{border:0;border-top:1px dotted rgba(0, 0, 0, 0.1);margin-bottom:1.618em;width:100%;}table.shop_attributes th{width:150px;font-weight:bold;padding:8px;color:black;border-bottom:1px dotted rgba(0, 0, 0, 0.1);margin:0;line-height:1.5em;}
 table.shop_attributes td{font-style:italic;padding:0;border-bottom:1px dotted rgba(0, 0, 0, 0.1);margin:0;line-height:1.5em;}table.shop_attributes td p{margin:0;padding:8px;}
 table.shop_attributes .alt td,table.shop_attributes .alt th{background:rgba(0, 0, 0, 0.025);}
 table.shop_table{border:1px solid rgba(0, 0, 0, 0.1);margin:0px -1px 24px 0px;text-align:left;width:100%;border-collapse:separate;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;}table.shop_table th{color:#888;font-size:12px;font-weight:bold;line-height:18px;padding:9px 12px;}
