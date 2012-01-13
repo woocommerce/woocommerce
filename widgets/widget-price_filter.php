@@ -124,6 +124,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		if (get_search_query()) $fields = '<input type="hidden" name="s" value="'.get_search_query().'" />';
 		if (isset($_GET['post_type'])) $fields .= '<input type="hidden" name="post_type" value="'.esc_attr( $_GET['post_type'] ).'" />';
+		if (isset($_GET['product_cat'])) $fields .= '<input type="hidden" name="product_cat" value="'.esc_attr( $_GET['product_cat'] ).'" />';
+		if (isset($_GET['product_tag'])) $fields .= '<input type="hidden" name="product_tag" value="'.esc_attr( $_GET['product_tag'] ).'" />';
 		
 		if ($_chosen_attributes) foreach ($_chosen_attributes as $attribute => $data) :
 		
