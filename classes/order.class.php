@@ -450,7 +450,9 @@ class woocommerce_order {
 			
 				$has_compound_tax = false;
 				
-				foreach ($this->get_taxes() as $tax) : if ($tax['compound']) : $has_compound_tax = true; continue; endif;
+				foreach ($this->get_taxes() as $tax) : 
+					if ($tax['compound']) : $has_compound_tax = true; continue; endif;
+					if ($tax['total']==0) continue;
 					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
 				endforeach;
 				
@@ -460,7 +462,9 @@ class woocommerce_order {
 					endif;
 				endif;
 				
-				foreach ($this->get_taxes() as $tax) : if (!$tax['compound']) continue;
+				foreach ($this->get_taxes() as $tax) : 
+					if (!$tax['compound']) continue;
+					if ($tax['total']==0) continue;
 					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
 				endforeach;
 			
