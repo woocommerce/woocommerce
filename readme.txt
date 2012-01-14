@@ -83,7 +83,6 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.4 =
-* Displaying correct currency symbol (Real of Brazil)
 * Improved default theme
 * Support for multiple and stacked (compound) taxes
 * Locale options for country address formatting and checkout fields
@@ -125,6 +124,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Product category widget option to show current children only
 * Updated default styles
 * Tweaked visibility settings and made them more clear
+* If there is limited stock, quantity input plus button won't go higher
+* Displaying correct currency symbol (Real of Brazil)
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
