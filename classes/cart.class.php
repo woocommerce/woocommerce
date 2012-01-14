@@ -827,7 +827,7 @@ class woocommerce_cart {
 						 * 	OR
 						 * ADJUST TAX - Checkout calculations when a tax class is modified
 						 */
-						if ( ( $woocommerce->customer->is_customer_outside_base() && defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT) || ($_product->get_tax_class() !== $_product->tax_class) ) :
+						if ( ( $woocommerce->customer->is_customer_outside_base() && defined('WOOCOMMERCE_CHECKOUT')) || ($_product->get_tax_class() !== $_product->tax_class) ) :
 							
 							// Get tax rate for the store base, ensuring we use the unmodified tax_class for the product
 							$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );

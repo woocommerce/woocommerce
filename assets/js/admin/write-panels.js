@@ -55,32 +55,48 @@ jQuery( function($){
 		
 		if (answer) {
 			
-			$('#order_items_list tr.item').each(function(){
-				var unit 		= parseFloat( $(this).find('.cost input').val() );
-				var unit_tax 	= parseFloat( $(this).find('.tax input').val() );
-				var quantity 	= parseInt( $(this).find('.quantity input').val() );				
+			var $items = $('#order_items_list tr.item');
+						
+			var country = $('#_shipping_country').val();
+			if (country) {
+				var state = $('#_shipping_state').val();
+				var postcode = $('#_shipping_postcode').val();
+			} else {
+				country = $('#_billing_country').val();
+				var state = $('#_billing_state').val();
+				var postcode = $('#_billing_postcode').val();
+			}
+			
+			$items.each(function( idx ){
 				
-				if (unit>0 && quantity>0) {
-					var total 		= ( unit * quantity );
-					total			= parseFloat( total.toFixed(4) );
-					total			= total.toString();
-					$(this).find('.line_cost input').val( total );
-				} else {
-					$(this).find('.line_cost input').val( '0.00' );
-				}
+				var $row = $(this);
 				
-				if (unit_tax>0 && quantity>0) {
-					var total 		= ( unit_tax * quantity );
-					total			= parseFloat( total.toFixed(4) );
-					total			= total.toString();
-					$(this).find('.line_tax input').val( total );
-				} else {
-					$(this).find('.line_tax input').val( '0.00' );
-				}
+				var data = {
+					action: 		'woocommerce_calc_line_cost',
+					unit_cost:		$row.find('.cost input').val(),
+					unit_tax:		$row.find('.tax input').val(),
+					quantity:		$row.find('.quantity input').val(),
+					tax_class:		$row.find('.tax_class select').val(),
+					tax_status: 	$row.find('.tax_status select').val(),
+					country:		country,
+					state:			state,
+					postcode:		postcode,
+					security: 		woocommerce_writepanel_params.calc_totals_nonce
+				};
+				
+				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
+
+					result = jQuery.parseJSON( response );
+					$row.find('.line_cost input').val( result.cost );
+					$row.find('.line_tax input').val( result.tax );
+					
+					if (idx == ($items.size() - 1)) {
+						$('.woocommerce_order_items_wrapper').unblock();
+					}
+					
+				});
 				
 			});
-
-			$('.woocommerce_order_items_wrapper').unblock();
 
 		} else {
 			$('.woocommerce_order_items_wrapper').unblock();
@@ -162,8 +178,8 @@ jQuery( function($){
 			
 			// Get row totals
 			var unit_costs 	= 0;
+			var unit_taxes 	= 0;
 			var line_costs 	= 0;
-			var line_costs_rounded = 0;
 			var cart_tax 	= 0;
 			var order_shipping 		= parseFloat( $('#_order_shipping').val() );
 			var order_shipping_tax 	= parseFloat( $('#_order_shipping_tax').val() );
@@ -176,17 +192,15 @@ jQuery( function($){
 			$('#order_items_list tr.item').each(function(){
 				
 				var unit_cost 	= parseFloat( $(this).find('.cost input').val() );
+				var unit_tax 	= parseFloat( $(this).find('.tax input').val() );
 				var quantity 	= parseInt( $(this).find('.quantity input').val() );
 				var line_cost 	= parseFloat( $(this).find('.line_cost input').val() );
 				var line_tax 	= parseFloat( $(this).find('.line_tax input').val() );
 				
 				unit_costs = unit_costs + parseFloat( unit_cost * quantity );
+				unit_taxes = unit_taxes + parseFloat( unit_tax * quantity );
 				
-				// Work out line_cost to 2dp in case of tax inc prices
-				var line_cost_rounded = parseFloat(( line_cost + line_tax ) - parseFloat(line_tax.toFixed(2)));
-
 				line_costs = line_costs + line_cost;
-				line_costs_rounded = line_costs_rounded + line_cost_rounded;
 				
 				if (woocommerce_writepanel_params.round_at_subtotal=='no') {
 					line_tax = parseFloat( line_tax.toFixed( 2 ) );
@@ -202,11 +216,11 @@ jQuery( function($){
 			}
 			
 			// Cart discount
-			var cart_discount = ( unit_costs - line_costs );
+			var cart_discount = ( (unit_costs + unit_taxes) - (line_costs + cart_tax) );
 			cart_discount = cart_discount.toFixed( 2 );
 			
 			// Total
-			var order_total = line_costs_rounded + cart_tax + order_shipping + order_shipping_tax - order_discount;
+			var order_total = line_costs + cart_tax + order_shipping + order_shipping_tax - order_discount;
 			order_total = order_total.toFixed( 2 );
 			
 			// Set fields

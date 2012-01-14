@@ -275,6 +275,24 @@ class woocommerce_order {
 		return $this->order_total;
 	}
 	
+	/** Get item base cost - this is the cost before discount */
+	function get_item_base_cost( $item, $inc_tax = false ) {
+		if ($inc_tax) :
+			return number_format( $item['base_cost'] + $item['base_tax'], 2, '.', '');
+		else :
+			return number_format( $item['base_cost'], 2, '.', '');
+		endif;
+	}
+	
+	/** Get row base cost - this is the cost before discount */
+	function get_row_base_cost( $item, $inc_tax = false ) {
+		if ($inc_tax) :
+			return number_format( ($item['base_cost'] + $item['base_tax']) * $item['qty'], 2, '.', '');
+		else :
+			return number_format( $item['base_cost'] * $item['qty'], 2, '.', '');
+		endif;
+	}
+	
 	/** Calculate item cost - useful for gateways */
 	function get_item_cost( $item, $inc_tax = false ) {
 		if ($inc_tax) :
@@ -301,9 +319,9 @@ class woocommerce_order {
 		
 		if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
 			if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-			$subtotal = woocommerce_price( $item['base_cost'] * $item['qty'], array('ex_tax_label' => $ex_tax_label ));
+			$subtotal = woocommerce_price( $this->get_row_base_cost( $item ), array('ex_tax_label' => $ex_tax_label ));
 		else :
-			$subtotal = woocommerce_price( ($item['base_cost'] + $item['base_tax']) * $item['qty'] );
+			$subtotal = woocommerce_price( $this->get_row_base_cost( $item, true ) );
 		endif;
 		return $subtotal;
 	}
@@ -320,7 +338,7 @@ class woocommerce_order {
 				
 				if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
 				
-				$subtotal += $item['base_cost'] * $item['qty'];
+				$subtotal += $this->get_row_base_cost( $item );
 				
 				if (!$this->display_cart_ex_tax) :
 					$subtotal += $item['base_tax'] * $item['qty'];
@@ -496,24 +514,12 @@ class woocommerce_order {
 				<td style="text-align:left; border: 1px solid #eee;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
 				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
 				<td style="text-align:left; border: 1px solid #eee;">';
-				
+					
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
-						
-						$return .= woocommerce_price( $item['base_cost']*$item['qty'], array('ex_tax_label' => $ex_tax_label ));
+						$return .= woocommerce_price( $this->get_row_base_cost( $item ), array('ex_tax_label' => $ex_tax_label ));
 					else :
-						
-						
-						
-						
-						
-						$return .= woocommerce_price( round( $item['base_cost']*$item['qty'], 2) );
-						//???
-						
-						
-						
-						
-						
+						$return .= woocommerce_price( $this->get_row_base_cost( $item, true ) );
 					endif;
 			
 			$return .= '	

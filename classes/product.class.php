@@ -529,7 +529,7 @@ class woocommerce_product {
 				$tax_amount		= $_tax->get_tax_total( $taxes );
 				$price = round( $price - $tax_amount, 2);
 			else :
-				$taxes 			= $_tax->calc_tax( $price, $tax_rates, true, true );
+				$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
 				$tax_amount		= array_sum( $taxes );
 				$price = $price - $tax_amount;
 			endif;

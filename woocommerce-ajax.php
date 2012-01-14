@@ -596,11 +596,11 @@ function woocommerce_add_order_item() {
 		</td>
 
 		<td class="cost">
-			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( rtrim(rtrim(number_format($_product->get_price_excluding_tax( false ), 4, '.', ''), 0), '.') ); ?>" />
+			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="tax">
-			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( rtrim(rtrim(number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax( false ), 4, '.', ''), 0), '.') ); ?>" />
+			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="quantity" width="1%">
@@ -608,11 +608,11 @@ function woocommerce_add_order_item() {
 		</td>
 		
 		<td class="line_cost">
-			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>"  value="<?php echo esc_attr( rtrim(rtrim(number_format($_product->get_price_excluding_tax( false ), 4, '.', ''), 0), '.') ); ?>" />
+			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>"  value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 		<td class="line_tax">
-			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( rtrim(rtrim(number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax( false ), 4, '.', ''), 0), '.') ); ?>" />
+			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 	</tr>
@@ -623,7 +623,7 @@ function woocommerce_add_order_item() {
 }
 
 /**
- * Add order note via ajax
+ * Calc line taxes
  */
 add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
 
@@ -648,8 +648,8 @@ function woocommerce_calc_line_taxes() {
 	if ($tax_status=='taxable') :
 		$tax_rates				= $tax->find_rates( $country, $state, $postcode, $tax_class );
 		
-		$unit_tax				= rtrim(rtrim(number_format( array_sum($tax->calc_tax( $unit, $tax_rates, false, true )), 4, '.', ''), 0), '.');
-		$line_tax				= rtrim(rtrim(number_format( array_sum($tax->calc_tax( $line, $tax_rates, false, true )), 4, '.', ''), 0), '.');
+		$unit_tax				= number_format( array_sum($tax->calc_tax( $unit, $tax_rates, false )), 2, '.', '');
+		$line_tax				= number_format( array_sum($tax->calc_tax( $line, $tax_rates, false )), 2, '.', '');
 	endif;
 	
 	echo json_encode(array(
@@ -661,6 +661,54 @@ function woocommerce_calc_line_taxes() {
 	die();
 }
 
+/**
+ * Calc line cost
+ */
+add_action('wp_ajax_woocommerce_calc_line_cost', 'woocommerce_calc_line_cost');
+
+function woocommerce_calc_line_cost() {
+	global $woocommerce;
+
+	check_ajax_referer( 'calc-totals', 'security' );
+	
+	$tax = new woocommerce_tax();
+	
+	$line_cost 	= 0;
+	$line_tax 	= 0;
+	
+	$country 		= strtoupper(esc_attr($_POST['country']));
+	$state 			= strtoupper(esc_attr($_POST['state']));
+	$postcode 		= strtoupper(esc_attr($_POST['postcode']));
+	$unit 			= esc_attr($_POST['unit_cost']);
+	$unit_tax 		= esc_attr($_POST['unit_tax']);
+	$quantity 		= esc_attr($_POST['quantity']);
+	$tax_class 		= esc_attr($_POST['tax_class']);
+	$tax_status		= esc_attr($_POST['tax_status']);
+	
+	if ($tax_status=='taxable') :
+		$tax_rates	= $tax->find_rates( $country, $state, $postcode, $tax_class );
+		
+		if (get_option('woocommerce_prices_include_tax')=='yes') :
+			
+			$inc_tax	= ( $unit + $unit_tax ) * $quantity;
+			
+			$line_tax	= number_format( array_sum($tax->calc_tax( $inc_tax, $tax_rates, true )), 2, '.', '');
+			$line_cost 		= $inc_tax - $line_tax;
+			
+		else :
+			$line_cost 		= $unit * $quantity;
+			$line_tax		= number_format( array_sum($tax->calc_tax( $cost, $tax_rates, false )), 2, '.', '');
+		endif;
+	endif;
+	
+	echo json_encode(array(
+		'cost' => $line_cost,
+		'tax' => $line_tax
+	));
+	
+	// Quit out
+	die();
+}
 
 /**
  * Add order note via ajax
