@@ -166,8 +166,10 @@ class woocommerce_product_variation extends woocommerce_product {
 			if ($this->price) :
 				if ($this->variation_has_sale_price) :
 					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price( $this->sale_price ).'</ins>';
+					$price = apply_filters('woocommerce_variation_sale_price_html', $price, $this);
 				else :
 					$price .= woocommerce_price( $this->price );
+					$price = apply_filters('woocommerce_variation_price_html', $price, $this);
 				endif;
 			endif;
 	

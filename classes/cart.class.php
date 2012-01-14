@@ -325,7 +325,7 @@ class woocommerce_cart {
 		 * Returns the contents of the cart
 		 */
 		function get_cart() {
-			return $this->cart_contents;
+			return (array) $this->cart_contents;
 		}	
 	
  	/*-----------------------------------------------------------------------------------*/

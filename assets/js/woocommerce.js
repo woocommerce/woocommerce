@@ -128,7 +128,17 @@ jQuery(document).ready(function($) {
 	$(".plus").live('click', function() {
 	    var currentVal = parseInt($(this).prev(".qty").val());
 	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 0;
-	    $(this).prev(".qty").val(currentVal + 1); 
+	    
+	    $qty = $(this).prev(".qty");
+	    
+	    var max = parseInt($qty.attr('data-max'));
+	    if (max=="" || max == "NaN") max = '';
+	    
+	    if (max && (max==currentVal || currentVal>max)) {
+	    	$qty.val(max); 
+	    } else {
+	    	$qty.val(currentVal + 1); 
+	    }
 	});
 	
 	$(".minus").live('click', function() {

@@ -9,6 +9,7 @@ if( $product->get_price() === '') return;
 ?>
 
 <?php 
+	// Availability
 	$availability = $product->get_availability();
 	
 	if ($availability['availability']) :
@@ -28,7 +29,10 @@ if( $product->get_price() === '') return;
 
 	 	<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 
-	 	<?php if (!$product->is_downloadable()) woocommerce_quantity_input(); ?>
+	 	<?php 
+	 		if (!$product->is_downloadable()) 
+	 			woocommerce_quantity_input( array( 'max_value' => ($product->backorders_allowed()) ? '' : $product->get_stock_quantity() ) ); 
+	 	?>
 
 	 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
 

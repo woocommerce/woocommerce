@@ -221,8 +221,11 @@ class flat_rate extends woocommerce_shipping_method {
 
 		elseif ($this->type=='item') :
 			
+			// Per item shipping so we pass an array of costs (per item) instead of a single value
+			$costs = array();
+			
 			// Shipping per item
-			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
+			foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
 				
 				$_product = $values['data'];
 				
@@ -238,15 +241,15 @@ class flat_rate extends woocommerce_shipping_method {
 						$fee	= $this->get_fee( $this->fee, $_product->get_price() );
 					endif;
 					
-					$shipping_total = $shipping_total + (( $cost + $fee ) * $values['quantity']);
+					$costs[$item_id] = (( $cost + $fee ) * $values['quantity']);
 					
 				endif;
-			endforeach; endif;
+			endforeach;
 			
 			$rate = array(
 				'id' 		=> $this->id,
 				'label' 	=> $this->title,
-				'cost' 		=> $shipping_total,
+				'cost' 		=> $costs,
 				'calc_tax' 	=> 'per_item'
 			);
 			

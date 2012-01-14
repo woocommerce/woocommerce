@@ -323,11 +323,12 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
  **/
 if (!function_exists('woocommerce_quantity_input')) {
 	function woocommerce_quantity_input( $args = array() ) {
-		global $input_name, $input_value;
+		global $input_name, $input_value, $max_value;
 		
 		$defaults = array(
 			'input_name' 	=> 'quantity',
-			'input_value' 	=> '1'
+			'input_value' 	=> '1',
+			'max_value'		=> ''
 		);
 
 		$args = wp_parse_args( $args, $defaults );

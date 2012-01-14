@@ -21,7 +21,6 @@ function woocommerce_cart( $atts ) {
 	if (isset($_GET['remove_discounts'])) :
 		
 		$woocommerce->cart->remove_coupons( $_GET['remove_discounts'] );
-		$woocommerce->cart->calculate_totals();
 	
 	// Update Shipping
 	elseif (isset($_POST['calc_shipping']) && $_POST['calc_shipping'] && $woocommerce->verify_nonce('cart')) :
@@ -46,7 +45,6 @@ function woocommerce_cart( $atts ) {
 			// Update customer location
 			$woocommerce->customer->set_location( $country, $state, $postcode );
 			$woocommerce->customer->set_shipping_location( $country, $state, $postcode );
-			$woocommerce->cart->calculate_totals();
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 		
 		else :
@@ -57,6 +55,9 @@ function woocommerce_cart( $atts ) {
 		endif;
 
 	endif;
+	
+	// Calc totals
+	$woocommerce->cart->calculate_totals();
 	
 	do_action('woocommerce_check_cart_items');
 	
