@@ -126,6 +126,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Tweaked visibility settings and made them more clear
 * If there is limited stock, quantity input plus button won't go higher
 * Displaying correct currency symbol (Real of Brazil)
+* Added local pickup and local delivery shipping methods (thanks Patrick Garman)
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

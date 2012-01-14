@@ -24,7 +24,6 @@ class local_delivery extends woocommerce_shipping_method {
 		
 		// Define user set variables
 		$this->enabled		= $this->settings['enabled'];
-		$this->free			= $this->settings['free'];
 		$this->title		= $this->settings['title'];
 		$this->fee			= $this->settings['fee'];
 		$this->type			= $this->settings['type'];	
@@ -90,6 +89,7 @@ class local_delivery extends woocommerce_shipping_method {
 	function admin_options() {
 		global $woocommerce; ?>
 		<h3><?php echo $this->method_title; ?></h3>
+		<p><?php _e('Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce'); ?></p>
 		<table class="form-table">
     		<?php $this->generate_settings_html(); ?>
     	</table> <?php
