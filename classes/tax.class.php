@@ -26,7 +26,7 @@ class woocommerce_tax {
 			$flat_rates			= array();
 			$index 				= 0;
 			
-			if ($tax_rates && is_array($tax_rates) && sizeof($tax_rates)>0) foreach( $tax_rates as $rate ) :
+			foreach( $tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
@@ -66,7 +66,7 @@ class woocommerce_tax {
 				
 			endforeach;
 			
-			if ($local_tax_rates && is_array($local_tax_rates) && sizeof($local_tax_rates)>0) foreach( $local_tax_rates as $rate ) :
+			foreach( $local_tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
