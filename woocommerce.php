@@ -175,6 +175,8 @@ class woocommerce {
 		include( 'classes/shipping/shipping_method.class.php' );
 		include( 'classes/shipping/shipping-flat_rate.php' );
 		include( 'classes/shipping/shipping-free_shipping.php' );
+		include( 'classes/shipping/shipping-local-delivery.php' );
+		include( 'classes/shipping/shipping-local-pickup.php' );
 		include( 'classes/gateways/gateway-banktransfer.php' );
 		include( 'classes/gateways/gateway-cheque.php' );
 		include( 'classes/gateways/gateway-paypal.php' );
