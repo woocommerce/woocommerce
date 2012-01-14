@@ -63,6 +63,7 @@ class local_pickup extends woocommerce_shipping_method {
 	function admin_options() {
 		global $woocommerce; ?>
 		<h3><?php echo $this->method_title; ?></h3>
+		<p><?php _e('Local pickup is a simple method which allows the customer to pick up their order themselves.', 'woocommerce'); ?></p>
 		<table class="form-table">
     		<?php $this->generate_settings_html(); ?>
     	</table> <?php
