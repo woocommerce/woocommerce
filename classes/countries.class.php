@@ -623,53 +623,30 @@ class woocommerce_countries {
 		$full_state		= ($country && $state && isset($this->states[$country][$state])) ? $this->states[$country][$state] : $state;
 		
 		// Substitute address parts into the string
-		$search = array(
-			'{first_name}',
-			'{last_name}',
-			'{name}',
-			'{company}',
-			'{address_1}',
-			'{address_2}',
-			'{city}',
-			'{state}', 
-			'{postcode}',
-			'{country}',
-			'{first_name_upper}',
-			'{last_name_upper}',
-			'{name_upper}',
-			'{company_upper}',
-			'{address_1_upper}',
-			'{address_2_upper}',
-			'{city_upper}',
-			'{state_upper}', 
-			'{postcode_upper}',
-			'{country_upper}',
-		);
-		
 		$replace = array(
-			$first_name,
-			$last_name,
-			$first_name . ' ' . $last_name,
-			$company,
-			$address_1,
-			$address_2,
-			$city,
-			$full_state,
-			$postcode,
-			$full_country,
-			strtoupper($first_name),
-			strtoupper($last_name),
-			strtoupper($first_name . ' ' . $last_name),
-			strtoupper($company),
-			strtoupper($address_1),
-			strtoupper($address_2),
-			strtoupper($city),
-			strtoupper($full_state),
-			strtoupper($postcode),
-			strtoupper($full_country),
+			'{first_name}'       => $first_name,
+			'{last_name}'        => $last_name,
+			'{name}'             => $first_name . ' ' . $last_name,
+			'{company}'          => $company,
+			'{address_1}'        => $address_1,
+			'{address_2}'        => $address_2,
+			'{city}'             => $city,
+			'{state}'            => $full_state,
+			'{postcode}'         => $postcode,
+			'{country}'          => $full_country,
+			'{first_name_upper}' => strtoupper($first_name),
+			'{last_name_upper}'  => strtoupper($last_name),
+			'{name_upper}'       => strtoupper($first_name . ' ' . $last_name),
+			'{company_upper}'    => strtoupper($company),
+			'{address_1_upper}'  => strtoupper($address_1),
+			'{address_2_upper}'  => strtoupper($address_2),
+			'{city_upper}'       => strtoupper($city),
+			'{state_upper}'      => strtoupper($full_state),
+			'{postcode_upper}'   => strtoupper($postcode),
+			'{country_upper}'    => strtoupper($full_country),
 		);
-		
-		$formatted_address = str_replace( $search, $replace, $format );
+
+		$formatted_address = str_replace( array_keys($replace), $replace, $format );
 		
 		// Zap the white space
 		$formatted_address = trim(preg_replace('! +!', ' ', $formatted_address));
