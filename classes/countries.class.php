@@ -648,11 +648,9 @@ class woocommerce_countries {
 
 		$formatted_address = str_replace( array_keys($replace), $replace, $format );
 		
-		// Zap the white space
-		$formatted_address = trim(preg_replace('! +!', ' ', $formatted_address));
-		
-		// Zap any double line-breaks
-		$formatted_address = preg_replace("/(\n)+/", "\n", $formatted_address);
+		// Clean up white space
+		$formatted_address = preg_replace('/  +/', ' ', trim($formatted_address));
+		$formatted_address = preg_replace('/\n\n+/', "\n", $formatted_address);
 		
 		// Add html breaks
 		$formatted_address = nl2br($formatted_address);
