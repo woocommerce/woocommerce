@@ -428,9 +428,7 @@ class woocommerce_countries {
 	/** get countries we allow only */
 	function get_allowed_countries() {
 	
-		$countries = $this->countries;
-		
-		if (get_option('woocommerce_allowed_countries')!=='specific') return $countries;
+		if (get_option('woocommerce_allowed_countries')!=='specific') return $this->countries;
 
 		$allowed_countries = array();
 		
@@ -438,7 +436,7 @@ class woocommerce_countries {
 		
 		foreach ($allowed_countries_raw as $country) :
 			
-			$allowed_countries[$country] = $countries[$country];
+			$allowed_countries[$country] = $this->countries[$country];
 			
 		endforeach;
 		
@@ -502,9 +500,7 @@ class woocommerce_countries {
 	/** Outputs the list of countries and states for use in dropdown boxes */
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
-		$countries = $this->countries;
-		
-		if ( $countries ) foreach ( $countries as $key=>$value) :
+		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
@@ -526,9 +522,7 @@ class woocommerce_countries {
 	/** Outputs the list of countries and states for use in multiselect boxes */
 	function country_multiselect_options( $selected_countries = '', $escape=false ) {
 		
-		$countries = $this->countries;
-		
-		if ( $countries ) foreach ( $countries as $key=>$value) :
+		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
