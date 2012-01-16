@@ -408,41 +408,27 @@ class woocommerce_countries {
 			)
 		);
 	}
-	
+
 	/** get base country */
 	function get_base_country() {
 		$default = get_option('woocommerce_default_country');
-    	if (strstr($default, ':')) :
-    		$country = current(explode(':', $default));
-    		$state = end(explode(':', $default));
-    	else :
-    		$country = $default;
-    		$state = '';
-    	endif;
-		
-		return $country;	    	
+		if (($pos = strpos($default, ':')) === false)
+			return $default;
+		return substr($default, 0, $pos);
 	}
-	
+
 	/** get base state */
 	function get_base_state() {
 		$default = get_option('woocommerce_default_country');
-    	if (strstr($default, ':')) :
-    		$country = current(explode(':', $default));
-    		$state = end(explode(':', $default));
-    	else :
-    		$country = $default;
-    		$state = '';
-    	endif;
-		
-		return $state;	    	
+		if (($pos = strrpos($default, ':')) === false)
+			return '';
+		return substr($default, $pos + 1);
 	}
-	
+
 	/** get countries we allow only */
 	function get_allowed_countries() {
 	
-		$countries = $this->countries;
-		
-		if (get_option('woocommerce_allowed_countries')!=='specific') return $countries;
+		if (get_option('woocommerce_allowed_countries')!=='specific') return $this->countries;
 
 		$allowed_countries = array();
 		
@@ -450,7 +436,7 @@ class woocommerce_countries {
 		
 		foreach ($allowed_countries_raw as $country) :
 			
-			$allowed_countries[$country] = $countries[$country];
+			$allowed_countries[$country] = $this->countries[$country];
 			
 		endforeach;
 		
@@ -514,9 +500,7 @@ class woocommerce_countries {
 	/** Outputs the list of countries and states for use in dropdown boxes */
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
-		$countries = $this->countries;
-		
-		if ( $countries ) foreach ( $countries as $key=>$value) :
+		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
@@ -538,9 +522,7 @@ class woocommerce_countries {
 	/** Outputs the list of countries and states for use in multiselect boxes */
 	function country_multiselect_options( $selected_countries = '', $escape=false ) {
 		
-		$countries = $this->countries;
-		
-		if ( $countries ) foreach ( $countries as $key=>$value) :
+		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
