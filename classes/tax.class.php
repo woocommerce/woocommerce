@@ -85,7 +85,7 @@ class woocommerce_tax {
 				$parsed_rates[$rate['country']][$rate['state']][$rate['class']][$index] = array( 
 					'label' => $rate['label'], 
 					'rate' => $rate['rate'], 
-					'postcode' => array_map('strtoupper', $rate['postcode']),
+					'postcode' => array_map('strtoupper', (array) $rate['postcode']),
 					'shipping' => $rate['shipping'],
 					'compound' => $rate['compound'] 
 					);
