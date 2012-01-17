@@ -166,7 +166,7 @@ class woocommerce_email {
 		
 		$order = new woocommerce_order( $order_id );
 		
-		if ($order->has_downloadable_item) :
+		if ($order->has_downloadable_item()) :
 			$subject		= __('[%s] Order Complete/Download Links', 'woocommerce');
 			$email_heading 	= __('Order Complete/Download Links', 'woocommerce');
 		else :
