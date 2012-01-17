@@ -127,6 +127,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * If there is limited stock, quantity input plus button won't go higher
 * Displaying correct currency symbol (Real of Brazil)
 * Added local pickup and local delivery shipping methods (thanks Patrick Garman)
+* Improved woocommerce_coupon_is_valid filter
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix
@@ -427,7 +428,7 @@ Major update with plenty of optimisations and new features. Changes to note:
 * Tax additions (tax rows, compounds etc) required a change to the way order items are stored. Old orders won't show items when viewed. Order totals should be unaffected.
 * Significant modifications to woocommerce.less/.css to deliver a more polished look when using the default styles. If your theme builds on top of this you will likely need to update some classes. Consider using https://gist.github.com/1601558 to disable WooCommerce default css.
 
-Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
+Please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading - this includes shipping and payment gateways.
 
 = 1.3 =
 This is a major update and includes improvements to the tax and coupon system in particular - please backup your database before upgrading and also ensure you are running the latest versions of any WooCommerce plugins after upgrading.
