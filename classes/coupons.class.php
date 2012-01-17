@@ -85,49 +85,52 @@ class woocommerce_coupon {
 		global $woocommerce;
 				
 		if ($this->id) :
+		
+			$valid = true;
 			
+			// Usage Limit
 			if ($this->usage_limit>0) :
 				if ($this->usage_count>=$this->usage_limit) :
-					return false;
+					$valid = false;
 				endif;
 			endif;
 			
+			// Expired
 			if ($this->expiry_date) :
 				if (strtotime('NOW')>$this->expiry_date) :
-					return false;
+					$valid = false;
 				endif;
 			endif;
 			
 			// Product ids - If a product included is found in the cart then its valid
 			if (sizeof( $this->product_ids )>0) :
-				$valid = false;
+				$valid_for_cart = false;
 				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
 					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
-						$valid = true;
+						$valid_for_cart = true;
 					endif;
 				endforeach; endif;
-				if (!$valid) return false;
+				if (!$valid_for_cart) $valid = false;
 			endif;
 			
 			// Cart discounts cannot be added if non-eligble product is found in cart
 			if ($this->type!='fixed_product' && $this->type!='percent_product') : 
 
 				if (sizeof( $this->exclude_product_ids )>0) :
-					$valid = true;
+					$valid_for_cart = true;
 					if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
 						if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
-							$valid = false;
+							$valid_for_cart = false;
 						endif;
 					endforeach; endif;
-					if (!$valid) return false;
+					if (!$valid_for_cart) $valid = false;
 				endif;
 			
 			endif;
 			
-			$valid = apply_filters('woocommerce_coupon_is_valid', true, $this);
-			if (!$valid) return false;
+			$valid = apply_filters('woocommerce_coupon_is_valid', $valid, $this);
 			
-			return true;
+			if ($valid) return true;
 		
 		endif;
 		
