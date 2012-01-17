@@ -12,7 +12,7 @@
 class woocommerce_order {
 	
 	var $id;
-	
+	var $status;
 	var $order_date;
 	var $modified_date;
 	var $customer_note;
