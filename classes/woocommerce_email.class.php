@@ -96,8 +96,11 @@ class woocommerce_email {
 		add_filter( 'wp_mail_from_name', array(&$this, 'get_from_name') );
 		add_filter( 'wp_mail_content_type', array(&$this, 'get_content_type') );
 		
-		// Send the mail	
+		ob_start();
+			
 		wp_mail( $to, $subject, $message, $headers, $attachments );
+		
+		ob_end_clean();
 		
 		// Unhook
 		remove_filter( 'wp_mail_from', array(&$this, 'get_from_address') );
