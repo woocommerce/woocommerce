@@ -38,14 +38,11 @@ class local_delivery extends woocommerce_shipping_method {
 		if ($this->type=='free') 		$shipping_total 	= 0;
 		if ($this->type=='fixed') 		$shipping_total 	= $this->fee;
 		if ($this->type=='percent') 	$shipping_total 	= $woocommerce->cart->cart_contents_total * ($this->fee/100);
-										$shipping_tax 		= 0;
 		
 		$rate = array(
 			'id' 		=> $this->id,
 			'label' 	=> $this->title,
-			'cost' 		=> $shipping_total,
-			'taxes'		=> $shipping_tax,
-			'calc_tax' 	=> 'per_order'
+			'cost' 		=> $shipping_total
 		);
 		
 		$this->add_rate($rate);  

@@ -17,6 +17,8 @@ function get_woocommerce_cart( $atts ) {
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
 	
+	if (!defined('WOOCOMMERCE_CART')) define('WOOCOMMERCE_CART', true);
+	
 	// Remove Discount Codes
 	if (isset($_GET['remove_discounts'])) :
 		

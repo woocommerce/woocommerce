@@ -14,7 +14,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 	var $id;
 	var $method_title; 	// Method title
 	var $title;			// User set title
-	var $tax_status;
+	var $tax_status			= 'taxable';
 	var $availability;
 	var $countries;
 	var $type;

@@ -80,6 +80,8 @@ function woocommerce_ajax_update_shipping_method() {
 	
 	check_ajax_referer( 'update-shipping-method', 'security' );
 	
+	if (!defined('WOOCOMMERCE_CART')) define('WOOCOMMERCE_CART', true);
+	
 	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
 	
 	$woocommerce->cart->calculate_totals();
@@ -163,6 +165,8 @@ add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout'
 
 function woocommerce_process_checkout() {
 	global $woocommerce;
+	
+	if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
 	
 	$woocommerce_checkout = $woocommerce->checkout();
 	$woocommerce_checkout->process_checkout();

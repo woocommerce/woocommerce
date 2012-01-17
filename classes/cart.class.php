@@ -971,7 +971,7 @@ class woocommerce_cart {
 			$this->apply_cart_discounts_after_tax();
 			
 			// Only go beyond this point if on the cart/checkout
-			if (!is_checkout() && !is_cart() && !defined('WOOCOMMERCE_CHECKOUT') && !is_ajax()) return;
+			if (!is_checkout() && !is_cart() && !defined('WOOCOMMERCE_CHECKOUT') && !defined('WOOCOMMERCE_CART')) return;
 			
 			// Cart Shipping
 			$this->calculate_shipping(); 
