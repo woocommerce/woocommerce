@@ -25,8 +25,10 @@ if ( $typenow=='product' ) :
 elseif ( $typenow=='shop_coupon' ) :
 	include_once('shop_coupon.php');
 	include_once('writepanels/writepanel-coupon_data.php');
+	add_action('load-edit.php', 'woocommerce_admin_help_tab');
 elseif ( $typenow=='shop_order' ) :
 	include_once('shop_order.php');
 	include_once('writepanels/writepanel-order_data.php');
 	include_once('writepanels/writepanel-order_notes.php');
+	add_action('load-edit.php', 'woocommerce_admin_help_tab');
 endif;

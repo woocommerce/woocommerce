@@ -21,10 +21,13 @@ function woocommerce_admin_menu() {
 	
 	if ( current_user_can( 'manage_woocommerce' ) ) $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
-    add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
+    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
     add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
-    add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
+    $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    
+    add_action('load-'.$main_page, 'woocommerce_admin_help_tab');
+    add_action('load-'.$reports_page, 'woocommerce_admin_help_tab');
     
     $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     
@@ -88,6 +91,15 @@ function install_woocommerce() {
 	do_install_woocommerce();
 }
 
+
+/**
+ * Admin Help Tabs
+ */
+function woocommerce_admin_help_tab() {
+	include_once( 'woocommerce-admin-content.php' );
+	woocommerce_admin_help_tab_content();
+}
+ 
 /**
  * Admin Scripts
  */
