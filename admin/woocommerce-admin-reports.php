@@ -439,7 +439,7 @@ function woocommerce_sales_overview() {
 					tickLength: 1,
 					minTickSize: [1, "day"]
 				},
-				yaxes: [ { min: 0, tickSize: 1, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
+				yaxes: [ { min: 0, tickSize: 10, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
 		   		colors: ["#8a4b75", "#47a03e"]
 		 	});
 		 	
@@ -629,7 +629,7 @@ function woocommerce_daily_sales() {
 					tickLength: 1,
 					minTickSize: [1, "day"]
 				},
-				yaxes: [ { min: 0, tickSize: 1, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
+				yaxes: [ { min: 0, tickSize: 10, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
 		   		colors: ["#8a4b75", "#47a03e"]
 		 	});
 		 	
@@ -739,7 +739,7 @@ function woocommerce_monthly_sales() {
 		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label> 
 		<select name="show_year" id="show_year">
 			<?php
-				for ($i = $first_year; $i <= date('Y'); $i++) printf('<option value="%u" %u>%u</option>', $i, selected($current_year, $i, false), $i);
+				for ($i = $first_year; $i <= date('Y'); $i++) printf('<option value="%s" %s>%s</option>', $i, selected($current_year, $i, false), $i);
 			?>
 		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
 	</form>
@@ -825,7 +825,7 @@ function woocommerce_monthly_sales() {
 					tickLength: 1,
 					minTickSize: [1, "month"]
 				},
-				yaxes: [ { min: 0, tickSize: 1, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
+				yaxes: [ { min: 0, tickSize: 10, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
 		   		colors: ["#8a4b75", "#47a03e"]
 		 	});
 		 	
