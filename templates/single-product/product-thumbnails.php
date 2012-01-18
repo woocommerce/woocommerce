@@ -17,21 +17,16 @@ global $post, $woocommerce;
 			'post__not_in'	=> array($thumb_id),
 			'post_mime_type'=> 'image',
 			'orderby'		=> 'menu_order',
-			'order'			=> 'ASC',
-			'meta_query' 	=> array(
-				array(
-					'key' 		=> '_woocommerce_exclude_image',
-					'value'		=> '1',
-					'compare' 	=> '!='
-				)
-			)
+			'order'			=> 'ASC'
 		);
 		$attachments = get_posts($args);
 		if ($attachments) :
 			$loop = 0;
 			$columns = apply_filters('woocommerce_product_thumbnails_columns', 3);
 			foreach ( $attachments as $attachment ) :
-
+				
+				if (get_post_meta($attachment->ID, '_woocommerce_exclude_image', true)==1) continue;
+				
 				$loop++;
 
 				$_post = & get_post( $attachment->ID );
