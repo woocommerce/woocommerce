@@ -595,10 +595,16 @@ class woocommerce_checkout {
 					
 					// Redirect to success/confirmation/payment page
 					if (is_ajax()) : 
-						echo json_encode( array('redirect'	=> apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks')))) );
+						echo json_encode( 
+							array(
+								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks')), $order)
+							) 
+						);
 						exit;
 					else :
-						wp_safe_redirect( apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks'))) );
+						wp_safe_redirect( 
+							apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', get_permalink(woocommerce_get_page_id('thanks')), $order) 
+						);
 						exit;
 					endif;
 					
