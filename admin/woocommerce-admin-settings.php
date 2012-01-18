@@ -1089,6 +1089,9 @@ function woocommerce_settings() {
 				?>
 			</h2>
 			<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
+			
+			<div id="woocommerce_extensions"><?php echo sprintf(__('More functionality and gateway options available via our <a href="%s" target="_blank">official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+
 			<?php
 				switch ($current_tab) :
 					case "general" :
