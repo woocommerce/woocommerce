@@ -186,7 +186,7 @@ function woocommerce_feature_product() {
 	
 	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
 	
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if( !check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	
 	$post_id = isset($_GET['product_id']) && (int)$_GET['product_id'] ? (int)$_GET['product_id'] : '';
 	
@@ -215,7 +215,7 @@ function woocommerce_mark_order_complete() {
 
 	if( !is_admin() ) die;
 	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
@@ -234,7 +234,7 @@ function woocommerce_mark_order_processing() {
 
 	if( !is_admin() ) die;
 	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if( !check_admin_referer()) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
