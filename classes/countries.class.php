@@ -461,7 +461,6 @@ class woocommerce_countries {
 	
 	/** Prefix certain countries with 'the' */
 	function estimated_for_prefix() {
-		global $woocommerce;
 		$return = '';
 		if (in_array($this->get_base_country(), array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' ))) $return = __('the', 'woocommerce') . ' ';
 		return apply_filters('woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country());
@@ -469,24 +468,18 @@ class woocommerce_countries {
 	
 	/** Correctly name tax in some countries VAT on the frontend */
 	function tax_or_vat() {
-		global $woocommerce;
-		
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('VAT', 'woocommerce') : __('Tax', 'woocommerce');
 		
 		return apply_filters('woocommerce_countries_tax_or_vat', $return);
 	}
 	
 	function inc_tax_or_vat() {
-		global $woocommerce;
-		
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(inc. VAT)', 'woocommerce') : __('(inc. tax)', 'woocommerce');
 		
 		return apply_filters('woocommerce_countries_inc_tax_or_vat', $return);
 	}
 	
 	function ex_tax_or_vat() {
-		global $woocommerce;
-		
 		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(ex. VAT)', 'woocommerce') : __('(ex. tax)', 'woocommerce');
 		
 		return apply_filters('woocommerce_countries_ex_tax_or_vat', $return);
@@ -643,8 +636,6 @@ class woocommerce_countries {
 	
 	/** Get country locale settings */
 	function get_country_locale() {
-		global $woocommerce;
-		
 		if (!$this->locale) :
 		
 			// Locale information used by the checkout
@@ -834,8 +825,6 @@ class woocommerce_countries {
 	
 	/** Apply locale and get address fields */
 	function get_address_fields( $country, $type = 'billing_' ) {
-		global $woocommerce;
-		
 		$locale		= $this->get_country_locale();
 		
 		$fields = array(
