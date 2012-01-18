@@ -494,8 +494,8 @@ function woocommerce_process_login() {
 		if ($woocommerce->error_count()==0) :
 			
 			$creds = array();
-			$creds['user_login'] = $_POST['username'];
-			$creds['user_password'] = $_POST['password'];
+			$creds['user_login'] 	= esc_attr($_POST['username']);
+			$creds['user_password'] = esc_attr($_POST['password']);
 			$creds['remember'] = true;
 			$secure_cookie = is_ssl() ? true : false;
 			$user = wp_signon( $creds, $secure_cookie );
@@ -553,17 +553,18 @@ function woocommerce_process_registration() {
 		$woocommerce->verify_nonce('register');
 		
 		// Get fields
-		$sanitized_user_login 	= (isset($_POST['username'])) ? sanitize_user(trim($_POST['username'])) : '';
-		$user_email 		= (isset($_POST['email'])) ? esc_attr(trim($_POST['email'])) : '';
-		$password	= (isset($_POST['password'])) ? esc_attr(trim($_POST['password'])) : '';
-		$password2 	= (isset($_POST['password2'])) ? esc_attr(trim($_POST['password2'])) : '';
+		$username 				= (isset($_POST['username'])) ? esc_attr(trim($_POST['username'])) : '';
+		$sanitized_user_login 	= sanitize_user($username);
+		$user_email 			= (isset($_POST['email'])) ? esc_attr(trim($_POST['email'])) : '';
+		$password				= (isset($_POST['password'])) ? esc_attr(trim($_POST['password'])) : '';
+		$password2 				= (isset($_POST['password2'])) ? esc_attr(trim($_POST['password2'])) : '';
 		
 		$user_email = apply_filters( 'user_registration_email', $user_email );
 		
 		// Check the username
 		if ( $sanitized_user_login == '' ) {
 			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'Please enter a username.', 'woocommerce' ) );
-		} elseif ( ! validate_username( $_POST['username'] ) ) {
+		} elseif ( ! validate_username( $username ) ) {
 			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'This username is invalid because it uses illegal characters. Please enter a valid username.', 'woocommerce' ) );
 			$sanitized_user_login = '';
 		} elseif ( username_exists( $sanitized_user_login ) ) {

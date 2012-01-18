@@ -40,11 +40,11 @@
 		
 			<p class="form-row form-row-first">
 				<label for="reg_username"><?php _e('Username', 'woocommerce'); ?> <span class="required">*</span></label>
-				<input type="text" class="input-text" name="username" id="reg_username" value="<?php if (isset($_POST['username'])) echo $_POST['username']; ?>" />
+				<input type="text" class="input-text" name="username" id="reg_username" value="<?php if (isset($_POST['username'])) echo esc_attr($_POST['username']); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="reg_email"><?php _e('Email', 'woocommerce'); ?> <span class="required">*</span></label>
-				<input type="email" class="input-text" name="email" id="reg_email" <?php if (isset($_POST['email'])) echo $_POST['email']; ?> />
+				<input type="email" class="input-text" name="email" id="reg_email" <?php if (isset($_POST['email'])) echo esc_attr($_POST['email']); ?> />
 			</p>
 			<div class="clear"></div>
 			
