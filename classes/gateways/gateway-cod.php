@@ -77,7 +77,7 @@ class woocommerce_cod extends woocommerce_payment_gateway {
     // Process the payment
 	function process_payment ($order_id) {
 		global $woocommerce;
-		$order = &new woocommerce_order ($order_id);
+		$order = new woocommerce_order ($order_id);
 		$order->update_status('on-hold', __('Payment to be made upon delivery.', 'woocommerce'));
 		$woocommerce->cart->empty_cart(); // Dump the cart
 		unset($_SESSION['order_awaiting_payment']); // Lose our session	
