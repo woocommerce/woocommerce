@@ -32,7 +32,7 @@ class local_pickup extends woocommerce_shipping_method {
 
 	 function calculate_shipping() {
 		global $woocommerce;
-		$_tax = &new woocommerce_tax();
+		$_tax = new woocommerce_tax();
 		
 		$rate = array(
 			'id' 		=> $this->id,

@@ -34,7 +34,7 @@ class local_delivery extends woocommerce_shipping_method {
 
 	 function calculate_shipping() {
 		global $woocommerce;
-		$_tax = &new woocommerce_tax();
+		$_tax = new woocommerce_tax();
 		if ($this->type=='free') 		$shipping_total 	= 0;
 		if ($this->type=='fixed') 		$shipping_total 	= $this->fee;
 		if ($this->type=='percent') 	$shipping_total 	= $woocommerce->cart->cart_contents_total * ($this->fee/100);
