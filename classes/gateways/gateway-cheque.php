@@ -4,12 +4,12 @@
  * 
  * Provides a Cheque Payment Gateway, mainly for testing purposes.
  *
- * @class 		woocommerce_cheque
+ * @class 		Woocommerce_Cheque
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class woocommerce_cheque extends woocommerce_payment_gateway {
+class Woocommerce_Cheque extends Woocommerce_Payment_Gateway {
 		
 	public function __construct() { 
         $this->id				= 'cheque';
@@ -109,7 +109,7 @@ class woocommerce_cheque extends woocommerce_payment_gateway {
 	function process_payment( $order_id ) {
 		global $woocommerce;
 
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 
 		// Mark as on-hold (we're awaiting the cheque)
 		$order->update_status('on-hold', __('Awaiting cheque payment', 'woocommerce'));

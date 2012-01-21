@@ -260,7 +260,7 @@ function woocommerce_product_add_to_cart_url( $atts ){
 	
 	if ($product_data->post_type!=='product') return;
 	
-	$_product = new woocommerce_product( $product_data->ID ); 
+	$_product = new Woocommerce_Product( $product_data->ID ); 
 		
 	return esc_url( $_product->add_to_cart_url() );
 }

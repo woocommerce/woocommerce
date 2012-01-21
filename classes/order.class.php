@@ -4,12 +4,12 @@
  * 
  * The WooCommerce order class handles order data.
  *
- * @class woocommerce_order
+ * @class Woocommerce_Order
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_order {
+class Woocommerce_Order {
 	
 	var $id;
 	var $status;
@@ -420,9 +420,9 @@ class woocommerce_order {
 	function get_product_from_item( $item ) {
 		
 		if (isset($item['variation_id']) && $item['variation_id']>0) :
-			$_product = new woocommerce_product_variation( $item['variation_id'] );
+			$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
 		else :
-			$_product = new woocommerce_product( $item['id'] );
+			$_product = new Woocommerce_Product( $item['id'] );
 		endif;
 		
 		return $_product;

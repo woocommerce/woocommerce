@@ -5,12 +5,12 @@
  * The WooCommerce cart class stores cart data and active coupons as well as handling customer sessions and some cart related urls.
  * The cart class also has a price calculation function which calls upon other classes to calcualte totals.
  *
- * @class 		woocommerce_cart
+ * @class 		Woocommerce_Cart
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_cart {
+class Woocommerce_Cart {
 	
 	/* Public Variables */
 	var $cart_contents;
@@ -39,7 +39,7 @@ class woocommerce_cart {
 	 * Constructor
 	 */
 	function __construct() {
-		$this->tax = new woocommerce_tax();
+		$this->tax = new Woocommerce_Tax();
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
@@ -76,9 +76,9 @@ class woocommerce_cart {
 				foreach ($cart as $key => $values) :
 				
 					if ($values['variation_id'] > 0) :
-						$_product = new woocommerce_product_variation($values['variation_id']);
+						$_product = new Woocommerce_Product_Variation($values['variation_id']);
 					else :
-						$_product = new woocommerce_product($values['product_id']);
+						$_product = new Woocommerce_Product($values['product_id']);
 					endif;
 					
 					if ($_product->exists && $values['quantity']>0) :
@@ -393,9 +393,9 @@ class woocommerce_cart {
 			$cart_item_key = $this->find_product_in_cart($cart_id);
 			
 			if ($variation_id>0) :
-				$product_data = new woocommerce_product_variation( $variation_id );
+				$product_data = new Woocommerce_Product_Variation( $variation_id );
 			else :
-				$product_data = new woocommerce_product( $product_id );
+				$product_data = new Woocommerce_Product( $product_id );
 			endif;
 			
 			// Type/Exists check
@@ -499,7 +499,7 @@ class woocommerce_cart {
 		function get_discounted_price( $values, $price, $add_totals = false ) {
 	
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
-				$coupon = new woocommerce_coupon( $code );
+				$coupon = new Woocommerce_Coupon( $code );
 				
 				if ( $coupon->apply_before_tax() && $coupon->is_valid() ) :
 					
@@ -635,7 +635,7 @@ class woocommerce_cart {
 		function apply_product_discounts_after_tax( $values, $price ) {
 			
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
-				$coupon = new woocommerce_coupon( $code );
+				$coupon = new Woocommerce_Coupon( $code );
 				
 				do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );
 				
@@ -698,7 +698,7 @@ class woocommerce_cart {
 		function apply_cart_discounts_after_tax() {	
 			
 			if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
-				$coupon = new woocommerce_coupon( $code );
+				$coupon = new Woocommerce_Coupon( $code );
 				
 				do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
 				
@@ -1125,7 +1125,7 @@ class woocommerce_cart {
 		function add_discount( $coupon_code ) {
 			global $woocommerce;
 			
-			$the_coupon = new woocommerce_coupon($coupon_code);
+			$the_coupon = new Woocommerce_Coupon($coupon_code);
 			
 			if ($the_coupon->id) :
 				
@@ -1147,7 +1147,7 @@ class woocommerce_cart {
 				endif;
 				
 				foreach ($this->applied_coupons as $code) :
-					$coupon = new woocommerce_coupon($code);
+					$coupon = new Woocommerce_Coupon($code);
 					if ($coupon->individual_use=='yes') :
 						$this->applied_coupons = array();
 					endif;
@@ -1179,13 +1179,13 @@ class woocommerce_cart {
 		
 			if ($type == 1) :
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
-					$coupon = new woocommerce_coupon( $code );
+					$coupon = new Woocommerce_Coupon( $code );
 					if ( $coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
 				endforeach;
 				$_SESSION['coupons'] = $this->applied_coupons;
 			elseif ($type == 2) :
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
-					$coupon = new woocommerce_coupon( $code );
+					$coupon = new Woocommerce_Coupon( $code );
 					if ( !$coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
 				endforeach;
 				$_SESSION['coupons'] = $this->applied_coupons;

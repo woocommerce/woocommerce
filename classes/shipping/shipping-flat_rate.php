@@ -4,12 +4,12 @@
  * 
  * A simple shipping method for a flat fee per item or per order
  *
- * @class 		flat_rate
+ * @class 		Flat_Rate
  * @package		WooCommerce
  * @category	Shipping
  * @author		WooThemes
  */  
-class flat_rate extends woocommerce_shipping_method {
+class Flat_Rate extends Woocommerce_Shipping_Method {
 	
 	function __construct() { 
         $this->id 			= 'flat_rate';

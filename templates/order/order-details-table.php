@@ -5,7 +5,7 @@
  
 global $woocommerce, $order_id;
 
-$order = new woocommerce_order( $order_id );
+$order = new Woocommerce_Order( $order_id );
 ?>
 <h2><?php _e('Order Details', 'woocommerce'); ?></h2>
 <table class="shop_table">
@@ -35,9 +35,9 @@ $order = new woocommerce_order( $order_id );
 			foreach($order->get_items() as $item) :
 
 				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-					$_product = new woocommerce_product_variation( $item['variation_id'] );
+					$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
 				else :
-					$_product = new woocommerce_product( $item['id'] );
+					$_product = new Woocommerce_Product( $item['id'] );
 				endif;
 
 				echo '

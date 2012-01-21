@@ -2,13 +2,13 @@
 /**
  * Contains Validation functions
  *
- * @class 		woocommerce_validation
+ * @class 		Woocommerce_Validation
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
 
-class woocommerce_validation {
+class Woocommerce_Validation {
 	
 	/**
 	 * Validates an email using wordpress native is_email function

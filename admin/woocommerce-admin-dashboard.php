@@ -125,7 +125,7 @@ function woocommmerce_dashboard_recent_orders() {
 		echo '<ul class="recent-orders">';
 		foreach ($orders as $order) :
 			
-			$this_order = new woocommerce_order( $order->ID );
+			$this_order = new Woocommerce_Order( $order->ID );
 			
 			echo '
 			<li>
@@ -270,7 +270,7 @@ function woocommmerce_dashboard_sales_js() {
 	if ($orders) :
 		foreach ($orders as $order) :
 			
-			$order_data = new woocommerce_order($order->ID);
+			$order_data = new Woocommerce_Order($order->ID);
 			
 			if ($order_data->status=='cancelled' || $order_data->status=='refunded') continue;
 			

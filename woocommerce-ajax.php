@@ -197,7 +197,7 @@ function woocommerce_feature_product() {
 	
 	if($post->post_type !== 'product') die;
 	
-	$product = new woocommerce_product($post->ID);
+	$product = new Woocommerce_Product($post->ID);
 
 	if ($product->is_featured()) update_post_meta($post->ID, '_featured', 'no');
 	else update_post_meta($post->ID, '_featured', 'yes');
@@ -219,7 +219,7 @@ function woocommerce_mark_order_complete() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	$order->update_status( 'completed' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -238,7 +238,7 @@ function woocommerce_mark_order_processing() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	$order->update_status( 'processing' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -322,7 +322,7 @@ function woocommerce_link_all_variations() {
 	
 	$variations = array();
 	
-	$_product = new woocommerce_product( $post_id );
+	$_product = new Woocommerce_Product( $post_id );
 		
 	// Put variation attributes into an array
 	foreach ($_product->get_attributes() as $attribute) :
@@ -533,9 +533,9 @@ function woocommerce_add_order_item() {
 	endif;
 	
 	if ($post->post_type=="product") :
-		$_product = new woocommerce_product( $post->ID );
+		$_product = new Woocommerce_Product( $post->ID );
 	else :
-		$_product = new woocommerce_product_variation( $post->ID );
+		$_product = new Woocommerce_Product_Variation( $post->ID );
 	endif;
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
@@ -636,7 +636,7 @@ function woocommerce_calc_line_taxes() {
 
 	check_ajax_referer( 'calc-totals', 'security' );
 	
-	$tax = new woocommerce_tax();
+	$tax = new Woocommerce_Tax();
 	
 	$unit_tax = 0;
 	$line_tax = 0;
@@ -675,7 +675,7 @@ function woocommerce_calc_line_cost() {
 
 	check_ajax_referer( 'calc-totals', 'security' );
 	
-	$tax = new woocommerce_tax();
+	$tax = new Woocommerce_Tax();
 	
 	$line_cost 	= 0;
 	$line_tax 	= 0;
@@ -732,7 +732,7 @@ function woocommerce_add_order_note() {
 	$is_customer_note = ($note_type=='customer') ? 1 : 0;
 	
 	if ($post_id>0) :
-		$order = new woocommerce_order( $post_id );
+		$order = new Woocommerce_Order( $post_id );
 		$comment_id = $order->add_order_note( $note, $is_customer_note );
 		
 		echo '<li rel="'.$comment_id.'" class="note ';

@@ -4,13 +4,13 @@
  * 
  * A simple shipping method allowing free pickup as a shipping method
  *
- * @class 		local_pickup
+ * @class 		Local_Pickup
  * @package		WooCommerce
  * @category	Shipping
  * @author		Patrick Garman (www.patrickgarman.com)
  */  
 
-class local_pickup extends woocommerce_shipping_method {
+class Local_Pickup extends Woocommerce_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-pickup';
@@ -32,7 +32,7 @@ class local_pickup extends woocommerce_shipping_method {
 
 	 function calculate_shipping() {
 		global $woocommerce;
-		$_tax = new woocommerce_tax();
+		$_tax = new Woocommerce_Tax();
 		
 		$rate = array(
 			'id' 		=> $this->id,
