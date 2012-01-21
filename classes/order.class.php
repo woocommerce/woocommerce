@@ -131,7 +131,7 @@ class woocommerce_order {
 			endif;
 		endforeach;
 		
-		// Alias
+		// Aliases
 		$this->user_id = (int) $this->customer_user;
 		
 		// Get status
@@ -687,7 +687,7 @@ class woocommerce_order {
 		
 		unset($_SESSION['order_awaiting_payment']);
 		
-		if ( $this->status=='on-hold' || $this->status=='pending' ) :
+		if ( $this->status=='on-hold' || $this->status=='pending' || $this->status=='failed' ) :
 		
 			$downloadable_order = false;
 			
