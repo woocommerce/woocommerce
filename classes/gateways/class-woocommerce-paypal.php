@@ -259,7 +259,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 						
 					$paypal_args['item_name_'.$item_loop] = $item_name;
 					$paypal_args['quantity_'.$item_loop] = $item['qty'];
-					$paypal_args['amount_'.$item_loop] = $order->get_item_cost( $item, false );
+					$paypal_args['amount_'.$item_loop] = $order->get_item_total( $item, false );
 					
 				endif;
 			endforeach; endif;
