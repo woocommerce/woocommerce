@@ -514,7 +514,7 @@ class Woocommerce_Product {
 	}
 	
 	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
-	function get_price_excluding_tax( $round = true ) {
+	function get_price_excluding_tax() {
 		
 		$price = $this->price;
 
@@ -524,15 +524,9 @@ class Woocommerce_Product {
 			
 			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
 			
-			if ($round) :
-				$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
-				$tax_amount		= $_tax->get_tax_total( $taxes );
-				$price = round( $price - $tax_amount, 2);
-			else :
-				$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
-				$tax_amount		= array_sum( $taxes );
-				$price = $price - $tax_amount;
-			endif;
+			$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
+			$tax_amount		= $_tax->get_tax_total( $taxes );
+			$price 			= round( $price - $tax_amount, 2);
 		
 		endif;
 		

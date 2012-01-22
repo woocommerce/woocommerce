@@ -406,14 +406,12 @@ class Woocommerce_Checkout {
 				 		'name' 				=> $_product->get_title(),
 				 		'qty' 				=> (int) $values['quantity'],
 				 		'item_meta'			=> $item_meta->meta,
-				 		'base_tax' 			=> number_format($values['base_tax'], 2, '.', ''),	// Base tax (unit, before discounts)
-				 		'base_cost' 		=> number_format($values['base_cost'], 2, '.', ''),	// Base price (unit, before discounts)
-				 		'line_cost'			=> number_format($values['line_cost'], 2, '.', ''),	// Discounted line cost
-				 		'line_tax' 			=> number_format($values['line_tax'], 2, '.', ''), 	// Tax for the line (total)
-				 		'tax_status'		=> $_product->get_tax_status(),						// Taxble, shipping, none
-				 		'tax_class'			=> $_product->get_tax_class()						// Tax class (adjusted by filters)
+				 		'line_subtotal' 	=> number_format($values['line_subtotal'], 2, '.', ''),		// Line subtotal (before discounts)
+				 		'line_subtotal_tax' => number_format($values['line_subtotal_tax'], 2, '.', ''),	// Line tax (before discounts)
+				 		'line_total'		=> number_format($values['line_total'], 2, '.', ''), 		// Line total (after discounts)
+				 		'line_tax' 			=> number_format($values['line_tax'], 2, '.', ''), 			// Line Tax (after discounts)
+				 		'tax_class'			=> $_product->get_tax_class()								// Tax class (adjusted by filters)
 				 	), $values);
-
 				endforeach;
 				
 				// Check order items for errors
@@ -546,7 +544,7 @@ class Woocommerce_Checkout {
 				update_post_meta( $order_id, '_order_items', 			$order_items );
 				update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
 				update_post_meta( $order_id, '_order_currency', 		get_option('woocommerce_currency') );
-				update_post_meta( $order_id, '_order_price_include_tax',get_option('woocommerce_prices_include_tax') );
+				update_post_meta( $order_id, '_prices_include_tax', 	get_option('woocommerce_prices_include_tax') );
 				
 				do_action('woocommerce_checkout_update_order_meta', $order_id, $this->posted);
 				

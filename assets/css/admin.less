@@ -284,12 +284,12 @@ mark.amount {
 		background: #fff;
 		thead th {
 			background: #ECECEC;
-			padding: 8px 8px;
+			padding: 8px;
 			font-size: 11px;
 			text-align: left;
 		}
 		td {
-			padding: 8px 8px;
+			padding: 8px;
 			text-align: left;
 			line-height: 26px;
 			vertical-align: top;
@@ -312,17 +312,37 @@ mark.amount {
 		.center, .variation-id, .product-id {
 			text-align: center;
 		}
-		.cost, .tax, .quantity, .line_cost, .line_tax {
-			width: 65px;
+		.cost, .tax, .quantity, .line_total, .line_subtotal, .tax_class {
+			text-align: right;
+			label {
+				display: block;
+				white-space: nowrap;
+				color: #999;
+				font-size: 0.833em;
+				input {
+					display: inline;
+				}
+			}
+			input {
+				width: 60px;
+				vertical-align:middle;
+				text-align: right;
+			}
 			select {
-				width: 100%
+				width: 85px;
+				height: 26px;
+				vertical-align:middle;
 			}
 		}
-		.tax_status, .tax_class {
-			width: 80px;
-			select {
-				width: 100%
+		.quantity {
+			text-align: center;
+			input {
+				text-align: center;
+				width: 40px;
 			}
+		}
+		td.tax_class, th.tax_class {
+			text-align: left;
 		}
 		.calculated {
 			border-color: #ae8ca2;
