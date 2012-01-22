@@ -275,53 +275,54 @@ class woocommerce_order {
 		return $this->order_total;
 	}
 	
-	/** Get item base cost - this is the cost before discount */
-	function get_item_base_cost( $item, $inc_tax = false ) {
+	
+	/** Get item subtotal - this is the cost before discount */
+	function get_item_subtotal( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( $item['base_cost'] + $item['base_tax'], 2, '.', '');
+			return number_format( ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] ) , 2, '.', '');
 		else :
-			return number_format( $item['base_cost'], 2, '.', '');
+			return number_format( ( $item['line_subtotal'] / $item['qty'] ), 2, '.', '');
 		endif;
 	}
 	
-	/** Get row base cost - this is the cost before discount */
-	function get_row_base_cost( $item, $inc_tax = false ) {
+	/** Get line subtotal - this is the cost before discount */
+	function get_line_subtotal( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( ($item['base_cost'] + $item['base_tax']) * $item['qty'], 2, '.', '');
+			return number_format( $item['line_subtotal'] + $item['line_subtotal_tax'], 2, '.', '');
 		else :
-			return number_format( $item['base_cost'] * $item['qty'], 2, '.', '');
+			return number_format( $item['line_subtotal'], 2, '.', '');
 		endif;
 	}
 	
 	/** Calculate item cost - useful for gateways */
-	function get_item_cost( $item, $inc_tax = false ) {
+	function get_item_total( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( ($item['line_cost'] + $item['line_tax']) / $item['qty'] , 2, '.', '');
+			return number_format( ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] ), 2, '.', '');
 		else :
-			return number_format( $item['line_cost'] / $item['qty'] , 2, '.', '');
+			return number_format( $item['line_total'] / $item['qty'] , 2, '.', '');
 		endif;
 	}
 	
-	/** Calculate row cost - useful for gateways */
-	function get_row_cost( $item, $inc_tax = false ) {
+	/** Calculate line total - useful for gateways */
+	function get_line_total( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( $item['line_cost'] + $item['line_tax'] , 2, '.', '');
+			return number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '');
 		else :
-			return number_format( $item['line_cost'] , 2, '.', '');
+			return number_format( $item['line_total'] , 2, '.', '');
 		endif;
 	}
 	
-	/** Gets product subtotal - subtotal is shown before discounts, but with localised taxes */
-	function get_item_subtotal( $item ) {
+	/** Gets line subtotal - formatted for display */
+	function get_formatted_line_subtotal( $item ) {
 		$subtotal = 0;
 		
-		if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
+		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
 		
 		if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
 			if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-			$subtotal = woocommerce_price( $this->get_row_base_cost( $item ), array('ex_tax_label' => $ex_tax_label ));
+			$subtotal = woocommerce_price( $this->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ));
 		else :
-			$subtotal = woocommerce_price( $this->get_row_base_cost( $item, true ) );
+			$subtotal = woocommerce_price( $this->get_line_subtotal( $item, true ) );
 		endif;
 		return $subtotal;
 	}
@@ -336,12 +337,12 @@ class woocommerce_order {
 
 			foreach ($this->get_items() as $item) :
 				
-				if (!isset($item['base_cost']) || !isset($item['base_tax'])) return;
+				if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
 				
-				$subtotal += $this->get_row_base_cost( $item );
+				$subtotal += $this->get_line_subtotal( $item );
 				
 				if (!$this->display_cart_ex_tax) :
-					$subtotal += $item['base_tax'] * $item['qty'];
+					$subtotal += $item['line_subtotal_tax'];
 				endif;
 
 			endforeach;
@@ -358,7 +359,7 @@ class woocommerce_order {
 			
 			foreach ($this->get_items() as $item) :
 				
-				$subtotal += $item['base_cost'];
+				$subtotal += $item['line_subtotal'];
 			
 			endforeach;
 			
@@ -521,9 +522,9 @@ class woocommerce_order {
 					
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
-						$return .= woocommerce_price( $this->get_row_base_cost( $item ), array('ex_tax_label' => $ex_tax_label ));
+						$return .= woocommerce_price( $this->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ));
 					else :
-						$return .= woocommerce_price( $this->get_row_base_cost( $item, true ) );
+						$return .= woocommerce_price( $this->get_line_subtotal( $item, true ) );
 					endif;
 			
 			$return .= '	
