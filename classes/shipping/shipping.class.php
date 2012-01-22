@@ -4,12 +4,12 @@
  * 
  * Handles shipping and loads shipping methods via hooks.
  *
- * @class 		woocommerce_shipping
+ * @class 		Woocommerce_Shipping
  * @package		WooCommerce
  * @category	Shipping
  * @author		WooThemes
  */  
-class woocommerce_shipping {
+class Woocommerce_Shipping {
 	
 	var $enabled			= false;
 	var $shipping_methods 	= array();

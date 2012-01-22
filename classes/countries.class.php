@@ -4,12 +4,12 @@
  * 
  * The WooCommerce countries class stores country/state data.
  *
- * @class 		woocommerce_countries
+ * @class 		Woocommerce_Countries
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_countries {
+class Woocommerce_Countries {
 	
 	var $countries;
 	var $states;

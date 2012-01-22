@@ -1,15 +1,15 @@
 <?php
 /**
- * Cash on Delivery Gateway
+new Woocommercevery Gateway
  * 
  * Provides a Cash on Delivery Payment Gateway.
  *
- * @class 		woocommerce_cod
+ * @class 		Woocommerce_Cod
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		Patrick Garman (www.patrickgarman.com)
  */
-class woocommerce_cod extends woocommerce_payment_gateway {
+class Woocommerce_Cod extends Woocommerce_Payment_Gateway {
 	
 	function __construct() {
 		$this->id = 'cod';

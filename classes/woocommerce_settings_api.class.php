@@ -2,12 +2,12 @@
 /**
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
- * @class 		woocommerce
+ * @class 		Woocommerce_Settings_Api
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_settings_api {
+class Woocommerce_Settings_Api {
 	
 	var $plugin_id = 'woocommerce_';
 	var $settings = array();

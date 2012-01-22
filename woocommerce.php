@@ -16,7 +16,7 @@ Domain Path: /languages/
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
-if ( !class_exists( 'woocommerce' ) ) :
+if ( !class_exists( 'Woocommerce' ) ) :
 
 /**
  * Main WooCommerce Class
@@ -25,7 +25,7 @@ if ( !class_exists( 'woocommerce' ) ) :
  *
  * @since WooCommerce 1.4
  */
-class woocommerce {
+class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
@@ -89,9 +89,9 @@ class woocommerce {
 		if (is_admin() && !defined('DOING_AJAX')) $this->install();
 
 		// Load class instances
-		$this->payment_gateways 	= new woocommerce_payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
-		$this->shipping 			= new woocommerce_shipping();			// Shipping class. loads and stores shipping methods
-		$this->countries 			= new woocommerce_countries();			// Countries class
+		$this->payment_gateways 	= new Woocommerce_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->shipping 			= new Woocommerce_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->countries 			= new Woocommerce_Countries();			// Countries class
 		
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
@@ -121,9 +121,9 @@ class woocommerce {
 		if ( !is_admin() || defined('DOING_AJAX') ) :
 			
 			// Class instances
-			$this->cart 			= new woocommerce_cart();				// Cart class, stores the cart contents
-			$this->customer 		= new woocommerce_customer();			// Customer class, sorts out session data such as location
-			$this->query			= new woocommerce_query();				// Query class, handles front-end queries and loops
+			$this->cart 			= new Woocommerce_Cart();				// Cart class, stores the cart contents
+			$this->customer 		= new Woocommerce_Customer();			// Customer class, sorts out session data such as location
+			$this->query			= new Woocommerce_Query();				// Query class, handles front-end queries and loops
 			
 			// Load messages
 			$this->load_messages();
@@ -303,7 +303,7 @@ class woocommerce {
 	function setup_product_data( $post ) {
 		if ($post->post_type!=='product') return;
 		unset($GLOBALS['product']);
-		$GLOBALS['product'] = new woocommerce_product( $post->ID );
+		$GLOBALS['product'] = new Woocommerce_Product( $post->ID );
 		return $GLOBALS['product'];
 	}
 	
@@ -891,9 +891,9 @@ class woocommerce {
 	 * Get Checkout Class
 	 */
 	function checkout() { 
-		if ( !class_exists('woocommerce_checkout') ) :
+		if ( !class_exists('Woocommerce_Checkout') ) :
 			include( 'classes/checkout.class.php' );
-			$this->checkout = new woocommerce_checkout();
+			$this->checkout = new Woocommerce_Checkout();
 		endif;
 		
 		return $this->checkout;
@@ -903,16 +903,16 @@ class woocommerce {
 	 * Get Logging Class
 	 */
 	function logger() { 
-		if ( !class_exists('woocommerce_logger') ) include( 'classes/woocommerce_logger.class.php' );
-		return new woocommerce_logger();
+		if ( !class_exists('Woocommerce_Logger') ) include( 'classes/woocommerce_logger.class.php' );
+		return new Woocommerce_Logger();
 	}
 	
 	/**
 	 * Get Validation Class
 	 */
 	function validation() {
-		if ( !class_exists('woocommerce_validation') ) include( 'classes/woocommerce_validation.class.php' );
-		return new woocommerce_validation();
+		if ( !class_exists('Woocommerce_Validation') ) include( 'classes/woocommerce_validation.class.php' );
+		return new Woocommerce_Validation();
 	}
 	
 	/**
@@ -925,9 +925,9 @@ class woocommerce {
 	
 	function mailer() { 
 		// Init mail class
-		if ( !class_exists('woocommerce_email') ) :
+		if ( !class_exists('Woocommerce_Email') ) :
 			include( 'classes/woocommerce_email.class.php' );
-			$this->woocommerce_email = new woocommerce_email();
+			$this->woocommerce_email = new Woocommerce_Email();
 		endif;
 		return $this->woocommerce_email;
 	}
@@ -1260,6 +1260,6 @@ class woocommerce {
 /**
  * Init woocommerce class
  */
-$GLOBALS['woocommerce'] = new woocommerce();
+$GLOBALS['woocommerce'] = new Woocommerce();
 
 endif; // class_exists check

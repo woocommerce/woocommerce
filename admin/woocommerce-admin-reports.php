@@ -292,7 +292,7 @@ function woocommerce_sales_overview() {
 						echo '<ul class="recent-orders">';
 						foreach ($orders as $order) :
 							
-							$this_order = new woocommerce_order( $order->ID );
+							$this_order = new Woocommerce_Order( $order->ID );
 							
 							if ($this_order->user_id > 0) :
 								$customer = get_user_by('id', $this_order->user_id);
@@ -1072,7 +1072,7 @@ function woocommerce_product_sales() {
 		$product_totals = array();
 		
 		// Get ID's related to product
-		$chosen_product = new woocommerce_product( $chosen_product_id );
+		$chosen_product = new Woocommerce_Product( $chosen_product_id );
 		$child_ids = $chosen_product->get_children();
 		
 		if ($orders) :

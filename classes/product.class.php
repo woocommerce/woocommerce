@@ -4,12 +4,12 @@
  * 
  * The WooCommerce product class handles individual product data.
  *
- * @class woocommerce_product
+ * @class Woocommerce_Product
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_product {
+class Woocommerce_Product {
 	
 	var $id;
 	var $product_custom_fields;
@@ -178,9 +178,9 @@ class woocommerce_product {
 	
 	function get_child( $child_id ) {
 		if ($this->is_type('variable')) :
-			$child = new woocommerce_product_variation( $child_id, $this->id, $this->product_custom_fields );
+			$child = new Woocommerce_Product_Variation( $child_id, $this->id, $this->product_custom_fields );
 		else :
-			$child = new woocommerce_product( $child_id );
+			$child = new Woocommerce_Product( $child_id );
 		endif;
 		return $child;
 	}
@@ -501,7 +501,7 @@ class woocommerce_product {
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='no' ) :
 			
-			$_tax = new woocommerce_tax();
+			$_tax = new Woocommerce_Tax();
 			
 			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
 			$taxes 			= $_tax->calc_tax( $price, $tax_rates, false );
@@ -520,7 +520,7 @@ class woocommerce_product {
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='yes' ) :
 			
-			$_tax = new woocommerce_tax();
+			$_tax = new Woocommerce_Tax();
 			
 			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
 			

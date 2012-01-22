@@ -20,7 +20,7 @@ function woocommerce_order_data_meta_box($post) {
 	
 	$thepostid = $post->ID;
 	
-	$order = new woocommerce_order( $thepostid );
+	$order = new Woocommerce_Order( $thepostid );
 	
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
@@ -260,9 +260,9 @@ function woocommerce_order_items_meta_box($post) {
 				<?php $loop = 0; if (sizeof($order_items)>0 && isset($order_items[0]['id'])) foreach ($order_items as $item) : 
 				
 					if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-						$_product = new woocommerce_product_variation( $item['variation_id'] );
+						$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
 					else :
-						$_product = new woocommerce_product( $item['id'] );
+						$_product = new Woocommerce_Product( $item['id'] );
 					endif;
 
 					// Totals - Backwards Compatibility
@@ -721,7 +721,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;
 		
 	// Order data saved, now get it so we can manipulate status
-		$order = new woocommerce_order( $post_id );
+		$order = new Woocommerce_Order( $post_id );
 		
 	// Order status
 		$order->update_status( $_POST['order_status'] );

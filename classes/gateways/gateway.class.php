@@ -4,12 +4,12 @@
  * 
  * Extended by individual payment gateways to handle payments.
  *
- * @class 		woocommerce_payment_gateway
+ * @class 		Woocommerce_Payment_Gateway
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class woocommerce_payment_gateway extends woocommerce_settings_api {
+class Woocommerce_Payment_Gateway extends Woocommerce_Settings_Api {
 	
 	var $id;
 	var $title;
