@@ -59,7 +59,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 			$number = 15;
 
     	$query_args = array(
-    		'showposts' 	=> $number, 
+    		'posts_per_page' 	=> $number, 
     		'nopaging' 		=> 0, 
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
