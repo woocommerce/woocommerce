@@ -2,12 +2,12 @@
 /**
  * WooCommerce Emails Class
  *
- * @class 		woocommerce
+ * @class 		Woocommerce_Email
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_email {
+class Woocommerce_Email {
 	
 	private $_from_address;
 	private $_from_name;
@@ -114,7 +114,7 @@ class woocommerce_email {
 	function new_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 		
 		$email_heading = __('New Customer Order', 'woocommerce');
 		
@@ -139,7 +139,7 @@ class woocommerce_email {
 	function customer_processing_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 
 		$email_heading = __('Order Received', 'woocommerce');
 		
@@ -167,7 +167,7 @@ class woocommerce_email {
 	function customer_completed_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 		
 		if ($order->has_downloadable_item()) :
 			$subject		= __('[%s] Order Complete/Download Links', 'woocommerce');
@@ -242,7 +242,7 @@ class woocommerce_email {
 		
 		if (!$order_id || !$customer_note) return;
 		
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 		
 		$email_heading = __('A note has been added to your order', 'woocommerce');
 		

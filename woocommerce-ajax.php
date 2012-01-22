@@ -197,7 +197,7 @@ function woocommerce_feature_product() {
 	
 	if($post->post_type !== 'product') die;
 	
-	$product = new woocommerce_product($post->ID);
+	$product = new Woocommerce_Product($post->ID);
 
 	if ($product->is_featured()) update_post_meta($post->ID, '_featured', 'no');
 	else update_post_meta($post->ID, '_featured', 'yes');
@@ -219,7 +219,7 @@ function woocommerce_mark_order_complete() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	$order->update_status( 'completed' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -238,7 +238,7 @@ function woocommerce_mark_order_processing() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	$order->update_status( 'processing' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -322,7 +322,7 @@ function woocommerce_link_all_variations() {
 	
 	$variations = array();
 	
-	$_product = new woocommerce_product( $post_id );
+	$_product = new Woocommerce_Product( $post_id );
 		
 	// Put variation attributes into an array
 	foreach ($_product->get_attributes() as $attribute) :
@@ -533,9 +533,9 @@ function woocommerce_add_order_item() {
 	endif;
 	
 	if ($post->post_type=="product") :
-		$_product = new woocommerce_product( $post->ID );
+		$_product = new Woocommerce_Product( $post->ID );
 	else :
-		$_product = new woocommerce_product_variation( $post->ID );
+		$_product = new Woocommerce_Product_Variation( $post->ID );
 	endif;
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
@@ -548,7 +548,7 @@ function woocommerce_add_order_item() {
 		</td>
 		<td class="sku">
 			<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
-			<input type="hidden" class="item_id" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
+			<input type="hidden" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
 			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
 			<input type="hidden" name="item_variation[<?php echo $index; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
 		</td>
@@ -570,11 +570,23 @@ function woocommerce_add_order_item() {
 				<tbody class="meta_items"></tbody>
 			</table>
 		</td>
-		
 		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
+
+		<td class="tax_status">
+			<select name="item_tax_status[<?php echo $loop; ?>]">
+				<?php 
+				$options = array(
+					'taxable' => __('Taxable', 'woocommerce'),
+					'shipping' => __('Shipping only', 'woocommerce'),
+					'none' => __('None', 'woocommerce')			
+				);
+				foreach ($options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_class(), false ).'>'. $name .'</option>';
+				?>
+			</select>
+		</td>
 		
-		<td class="tax_class" width="1%">
-			<select class="tax_class" name="item_tax_class[<?php echo $loop; ?>]">
+		<td class="tax_class">
+			<select name="item_tax_class[<?php echo $loop; ?>]">
 				<?php 
 				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 				$classes_options = array();
@@ -586,21 +598,25 @@ function woocommerce_add_order_item() {
 				?>
 			</select>
 		</td>
+
+		<td class="cost">
+			<input type="text" name="base_item_cost[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
+		</td>
+		
+		<td class="tax">
+			<input type="text" name="base_item_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
+		</td>
 		
 		<td class="quantity" width="1%">
-			<input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="<?php _e('0', 'woocommerce'); ?>" value="1" size="2" class="quantity" />
+			<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woocommerce'); ?>" value="1" size="2" />
 		</td>
 		
-		<td class="line_subtotal" width="1%">
-			<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_subtotal[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" class="line_subtotal" /></label>
-			
-			<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_subtotal_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" class="line_subtotal_tax" /></label>
+		<td class="line_cost">
+			<input type="text" name="line_cost[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>"  value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
-		<td class="line_total" width="1%">
-			<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_total[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_excluding_tax(), 2, '.', '') ); ?>" class="line_total" /></label>
-			
-			<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_tax[<?php echo $index; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" class="line_tax" /></label>
+		<td class="line_tax">
+			<input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php echo esc_attr( number_format($_product->get_price_including_tax() - $_product->get_price_excluding_tax(), 2, '.', '') ); ?>" />
 		</td>
 		
 	</tr>
@@ -611,7 +627,7 @@ function woocommerce_add_order_item() {
 }
 
 /**
- * Calc line tax
+ * Calc line taxes
  */
 add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
 
@@ -620,46 +636,83 @@ function woocommerce_calc_line_taxes() {
 
 	check_ajax_referer( 'calc-totals', 'security' );
 	
-	$tax = new woocommerce_tax();
+	$tax = new Woocommerce_Tax();
 	
-	$base_tax_amount = 0;
-	$line_tax_amount = 0;
+	$unit_tax = 0;
+	$line_tax = 0;
 	
 	$country 		= strtoupper(esc_attr($_POST['country']));
 	$state 			= strtoupper(esc_attr($_POST['state']));
 	$postcode 		= strtoupper(esc_attr($_POST['postcode']));
-	
-	$line_subtotal 	= esc_attr($_POST['line_subtotal']);
-	$line_total 	= esc_attr($_POST['line_total']);
-	
-	$item_id		= esc_attr($_POST['item_id']);
+	$unit 			= esc_attr($_POST['unit_cost']);
+	$line 			= esc_attr($_POST['line_cost']);
 	$tax_class 		= esc_attr($_POST['tax_class']);
+	$tax_status		= esc_attr($_POST['tax_status']);
 	
-	// Get product details
-	$_product			= new woocommerce_product($item_id);
-	$item_tax_status 	= $_product->get_tax_status();
-	
-	if ($item_tax_status=='taxable') :
+	if ($tax_status=='taxable') :
+		$tax_rates				= $tax->find_rates( $country, $state, $postcode, $tax_class );
 		
-		$tax_rates			= $tax->find_rates( $country, $state, $postcode, $tax_class );
-		
-		$line_subtotal_tax_amount	= rtrim(rtrim(number_format( array_sum($tax->calc_tax( $line_subtotal, $tax_rates, false )), 4, '.', ''), '0'), '.');
-		$line_tax_amount			= rtrim(rtrim(number_format( array_sum($tax->calc_tax( $line_total, $tax_rates, false )), 4, '.', ''), '0'), '.');
-		
+		$unit_tax				= number_format( array_sum($tax->calc_tax( $unit, $tax_rates, false )), 2, '.', '');
+		$line_tax				= number_format( array_sum($tax->calc_tax( $line, $tax_rates, false )), 2, '.', '');
 	endif;
 	
-	if ($line_subtotal_tax_amount<0) $line_subtotal_tax_amount = 0;
-	if ($line_tax_amount<0) $line_tax_amount = 0;
-	
 	echo json_encode(array(
-		'line_subtotal_tax' => $line_subtotal_tax_amount,
-		'line_tax' => $line_tax_amount
+		'unit' => $unit_tax,
+		'line' => $line_tax
 	));
 	
 	// Quit out
 	die();
 }
 
+/**
+ * Calc line cost
+ */
+add_action('wp_ajax_woocommerce_calc_line_cost', 'woocommerce_calc_line_cost');
+
+function woocommerce_calc_line_cost() {
+	global $woocommerce;
+
+	check_ajax_referer( 'calc-totals', 'security' );
+	
+	$tax = new Woocommerce_Tax();
+	
+	$line_cost 	= 0;
+	$line_tax 	= 0;
+	
+	$country 		= strtoupper(esc_attr($_POST['country']));
+	$state 			= strtoupper(esc_attr($_POST['state']));
+	$postcode 		= strtoupper(esc_attr($_POST['postcode']));
+	$unit 			= esc_attr($_POST['unit_cost']);
+	$unit_tax 		= esc_attr($_POST['unit_tax']);
+	$quantity 		= esc_attr($_POST['quantity']);
+	$tax_class 		= esc_attr($_POST['tax_class']);
+	$tax_status		= esc_attr($_POST['tax_status']);
+	
+	if ($tax_status=='taxable') :
+		$tax_rates	= $tax->find_rates( $country, $state, $postcode, $tax_class );
+		
+		if (get_option('woocommerce_prices_include_tax')=='yes') :
+			
+			$inc_tax	= ( $unit + $unit_tax ) * $quantity;
+			
+			$line_tax	= number_format( array_sum($tax->calc_tax( $inc_tax, $tax_rates, true )), 2, '.', '');
+			$line_cost 		= $inc_tax - $line_tax;
+			
+		else :
+			$line_cost 		= $unit * $quantity;
+			$line_tax		= number_format( array_sum($tax->calc_tax( $cost, $tax_rates, false )), 2, '.', '');
+		endif;
+	endif;
+	
+	echo json_encode(array(
+		'cost' => $line_cost,
+		'tax' => $line_tax
+	));
+	
+	// Quit out
+	die();
+}
 
 /**
  * Add order note via ajax
@@ -679,7 +732,7 @@ function woocommerce_add_order_note() {
 	$is_customer_note = ($note_type=='customer') ? 1 : 0;
 	
 	if ($post_id>0) :
-		$order = new woocommerce_order( $post_id );
+		$order = new Woocommerce_Order( $post_id );
 		$comment_id = $order->add_order_note( $note, $is_customer_note );
 		
 		echo '<li rel="'.$comment_id.'" class="note ';

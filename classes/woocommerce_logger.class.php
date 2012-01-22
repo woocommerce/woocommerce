@@ -2,12 +2,12 @@
 /**
  * Allows log files to be written to for debugging purposes.
  *
- * @class 		woocommerce
+ * @class 		Woocommerce_Logger
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_logger {
+class Woocommerce_Logger {
 	
 	private $handles;
 	

@@ -159,9 +159,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$price = number_format( (double) $price, $num_decimals, get_option('woocommerce_price_decimal_sep'), get_option('woocommerce_price_thousand_sep') );
 	
 	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) :
-		$trimmed_price = rtrim(rtrim($price, '0'), get_option('woocommerce_price_decimal_sep'));
-		$after_decimal = explode(get_option('woocommerce_price_decimal_sep'), $trimmed_price);
-		if (!isset($after_decimal[1]) || (isset($after_decimal[1]) && (strlen($after_decimal[1]) == 0 && strlen($after_decimal[1]) == $num_decimals))) $price = $trimmed_price;
+		$price = preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
 	endif;
 	
 	switch ($currency_pos) :
@@ -383,7 +381,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	
 	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 	
@@ -444,7 +442,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
 
 function woocommerce_paying_customer( $order_id ) {
 	
-	$order = new woocommerce_order( $order_id );
+	$order = new Woocommerce_Order( $order_id );
 	
 	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
 }

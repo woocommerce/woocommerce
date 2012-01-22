@@ -4,12 +4,12 @@
  * 
  * The WooCommerce product variation class handles product variation data.
  *
- * @class woocommerce_product_variation
+ * @class Woocommerce_Product_Variation
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_product_variation extends woocommerce_product {
+class Woocommerce_Product_Variation extends Woocommerce_Product {
 	
 	var $variation_data;
 	var $variation_id;
@@ -213,7 +213,7 @@ class woocommerce_product_variation extends woocommerce_product {
 				if (!$this->is_in_stock()) :
 				
 					// Check parent
-					$parent_product = new woocommerce_product( $this->id );
+					$parent_product = new Woocommerce_Product( $this->id );
 					
 					if ($parent_product->managing_stock()) :
 						if (!$parent_product->backorders_allowed()) :

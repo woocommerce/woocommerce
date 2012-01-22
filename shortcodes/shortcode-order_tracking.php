@@ -28,7 +28,7 @@ function woocommerce_order_tracking( $atts ) {
 		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order_id = (int) $_POST['orderid']; else $order_id = 0;
 		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
 		
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 		
 		if ($order->id && $order_email) :
 
