@@ -243,7 +243,7 @@ function woocommerce_view_order() {
 	
 	$user_id      	= get_current_user_id();
 	$order_id		= (isset($_GET['order'])) ? $_GET['order'] : 0;
-	$order 			= new woocommerce_order( $order_id );
+	$order 			= new Woocommerce_Order( $order_id );
 
 	if ( $order_id==0 || $order->user_id != $user_id ) :
 		echo '<div class="woocommerce_error">' . __('Invalid order.', 'woocommerce') . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __('My Account &rarr;', 'woocommerce') .'</a>' . '</div>';

@@ -4,12 +4,12 @@
  * 
  * The WooCommerce coupons class gets coupon data from storage
  *
- * @class 		woocommerce_coupon
+ * @class 		Woocommerce_Coupon
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_coupon {
+class Woocommerce_Coupon {
 	
 	var $code;
 	var $id;

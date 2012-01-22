@@ -4,12 +4,12 @@
  * 
  * Extended by shipping methods to handle shipping calculations etc.
  *
- * @class 		woocommerce_shipping_method
+ * @class 		Woocommerce_Shipping_Method
  * @package		WooCommerce
  * @category	Shipping
  * @author		WooThemes
  */  
-class woocommerce_shipping_method extends woocommerce_settings_api {
+class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
 	
 	var $id;
 	var $method_title; 	// Method title
@@ -59,7 +59,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 		// This saves shipping methods having to do compelex tax calculations
 		if (!is_array($taxes) && $taxes!==false && $total_cost>0 && get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
 			
-			$_tax 	= new woocommerce_tax();
+			$_tax 	= new Woocommerce_Tax();
 			$taxes 	= array();
 			
 			switch ($calc_tax) :
@@ -102,7 +102,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
 			
 		endif;
 
-		$this->rates[] = new woocommerce_shipping_rate( $id, $label, $total_cost, $taxes );
+		$this->rates[] = new Woocommerce_Shipping_Rate( $id, $label, $total_cost, $taxes );
 	}
 	
     function is_available() {
@@ -145,7 +145,7 @@ class woocommerce_shipping_method extends woocommerce_settings_api {
  * 
  * Simple Class for storing rates. 
  */ 
-class woocommerce_shipping_rate {
+class Woocommerce_Shipping_Rate {
 
 	var $id 	= '';
 	var $label 	= '';

@@ -2,12 +2,12 @@
 /**
  * Performs tax calculations and loads tax rates.
  *
- * @class 		woocommerce_tax
+ * @class 		Woocommerce_Tax
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class woocommerce_tax {
+class Woocommerce_Tax {
 	
 	var $rates;	// Simple array of rates
 	var $parsed_rates;	// Parsed into array with counties/states as keys

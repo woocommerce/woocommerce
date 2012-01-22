@@ -30,7 +30,7 @@ function woocommerce_thankyou( $atts ) {
 	unset($_SESSION['order_awaiting_payment']);
 	
 	if ($order_id > 0) :
-		$order = new woocommerce_order( $order_id );
+		$order = new Woocommerce_Order( $order_id );
 		if ($order->order_key != $order_key) :
 			unset($order);
 		endif;
