@@ -23,7 +23,12 @@ class woocommerce_settings_api {
 	 *
 	 * @since 1.0.0
 	 */
-	function admin_options() {}
+	function admin_options() { ?>
+		<h3><?php echo (isset($this->method_title)) ? $this->method_title : __('Settings','woocommerce') ; ?></h3>
+		<table class="form-table">
+			<?php $this->generate_settings_html(); ?>
+		</table><?php
+	}
 	
 	/**
 	 * Initialise Settings Form Fields
