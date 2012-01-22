@@ -10,7 +10,7 @@
  * @author		Patrick Garman (www.patrickgarman.com)
  */  
 
-class Local_Pickup extends Woocommerce_Shipping_Method {
+class Woocommerce_Local_Pickup extends Woocommerce_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-pickup';
@@ -71,5 +71,5 @@ class Local_Pickup extends Woocommerce_Shipping_Method {
 
 }
 
-function add_local_pickup_method($methods) { $methods[] = 'local_pickup'; return $methods; }
+function add_local_pickup_method($methods) { $methods[] = 'woocommerce_local_pickup'; return $methods; }
 add_filter('woocommerce_shipping_methods','add_local_pickup_method');

@@ -9,7 +9,7 @@
  * @category	Shipping
  * @author		WooThemes
  */  
-class Flat_Rate extends Woocommerce_Shipping_Method {
+class Woocommerce_Flat_Rate extends Woocommerce_Shipping_Method {
 	
 	function __construct() { 
         $this->id 			= 'flat_rate';
@@ -413,7 +413,7 @@ class Flat_Rate extends Woocommerce_Shipping_Method {
 }
 
 function add_flat_rate_method( $methods ) {
-	$methods[] = 'flat_rate'; return $methods;
+	$methods[] = 'woocommerce_flat_rate'; return $methods;
 }
 
 add_filter('woocommerce_shipping_methods', 'add_flat_rate_method' );

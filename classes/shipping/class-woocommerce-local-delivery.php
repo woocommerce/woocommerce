@@ -10,7 +10,7 @@
  * @author		Patrick Garman (www.patrickgarman.com)
  */  
 
-class Local_Delivery extends Woocommerce_Shipping_Method {
+class Woocommerce_Local_Delivery extends Woocommerce_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-delivery';
@@ -94,5 +94,5 @@ class Local_Delivery extends Woocommerce_Shipping_Method {
 
 }
 
-function add_local_delivery_method($methods) { $methods[] = 'local_delivery'; return $methods; }
+function add_local_delivery_method($methods) { $methods[] = 'woocommerce_local_delivery'; return $methods; }
 add_filter('woocommerce_shipping_methods','add_local_delivery_method');

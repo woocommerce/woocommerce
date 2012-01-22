@@ -159,28 +159,29 @@ class Woocommerce {
 		if (defined('DOING_AJAX')) $this->ajax_includes();
 		if (!is_admin() || defined('DOING_AJAX')) $this->frontend_includes();
 
-		include( 'woocommerce-core-functions.php' );		// Contains core functions for the front/back end
-		include( 'widgets/widgets-init.php' );				// Widget classes
-		include( 'classes/countries.class.php' );			// Defines countries and states
-		include( 'classes/order.class.php' );				// Single order class
-		include( 'classes/product.class.php' );				// Product class
-		include( 'classes/product_variation.class.php' );	// Product variation class
-		include( 'classes/tax.class.php' );					// Tax class
+		include( 'woocommerce-core-functions.php' );					// Contains core functions for the front/back end
+		include( 'widgets/widget-init.php' );							// Widget classes
+		include( 'classes/class-woocommerce-countries.php' );			// Defines countries and states
+		include( 'classes/class-woocommerce-order.php' );				// Single order class
+		include( 'classes/class-woocommerce-product.php' );				// Product class
+		include( 'classes/class-woocommerce-product-variation.php' );	// Product variation class
+		include( 'classes/class-woocommerce-tax.php' );					// Tax class
 		
 		// Include shipping modules and gateways
-		include( 'classes/woocommerce_settings_api.class.php' );
-		include( 'classes/gateways/gateways.class.php' );
-		include( 'classes/gateways/gateway.class.php' );
-		include( 'classes/shipping/shipping.class.php' );
-		include( 'classes/shipping/shipping_method.class.php' );
-		include( 'classes/shipping/shipping-flat_rate.php' );
-		include( 'classes/shipping/shipping-free_shipping.php' );
-		include( 'classes/shipping/shipping-local-delivery.php' );
-		include( 'classes/shipping/shipping-local-pickup.php' );
-		include( 'classes/gateways/gateway-banktransfer.php' );
-		include( 'classes/gateways/gateway-cheque.php' );
-		include( 'classes/gateways/gateway-paypal.php' );
-		include( 'classes/gateways/gateway-cod.php' );
+		include( 'classes/class-woocommerce-settings-api.php' );
+		include( 'classes/gateways/class-woocommerce-payment-gateways.php' );
+		include( 'classes/gateways/class-woocommerce-payment-gateway.php' );
+		include( 'classes/shipping/class-woocommerce-shipping.php' );
+		include( 'classes/shipping/class-woocommerce-shipping-method.php' );
+		
+		include( 'classes/shipping/class-woocommerce-flat-rate.php' );
+		include( 'classes/shipping/class-woocommerce-free-shipping.php' );
+		include( 'classes/shipping/class-woocommerce-local-delivery.php' );
+		include( 'classes/shipping/class-woocommerce-local-pickup.php' );
+		include( 'classes/gateways/class-woocommerce-bacs.php' );
+		include( 'classes/gateways/class-woocommerce-cheque.php' );
+		include( 'classes/gateways/class-woocommerce-paypal.php' );
+		include( 'classes/gateways/class-woocommerce-cod.php' );
 	}
 	
 	/**
@@ -203,11 +204,11 @@ class Woocommerce {
 	function frontend_includes() {
 		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
 		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
-		include( 'shortcodes/shortcodes-init.php' );			// Init the shortcodes
-		include( 'classes/woocommerce_query.class.php' );		// The main store queries
-		include( 'classes/cart.class.php' );					// The main cart class
-		include( 'classes/coupons.class.php' );					// Coupons class
-		include( 'classes/customer.class.php' ); 				// Customer class
+		include( 'shortcodes/shortcode-init.php' );			// Init the shortcodes
+		include( 'classes/class-woocommerce-query.php' );		// The main store queries
+		include( 'classes/class-woocommerce-cart.php' );		// The main cart class
+		include( 'classes/class-woocommerce-coupon.php' );		// Coupon class
+		include( 'classes/class-woocommerce-customer.php' ); 	// Customer class
 	}
 	
 	/**
@@ -892,7 +893,7 @@ class Woocommerce {
 	 */
 	function checkout() { 
 		if ( !class_exists('Woocommerce_Checkout') ) :
-			include( 'classes/checkout.class.php' );
+			include( 'classes/class-woocommerce-checkout.php' );
 			$this->checkout = new Woocommerce_Checkout();
 		endif;
 		
@@ -903,7 +904,7 @@ class Woocommerce {
 	 * Get Logging Class
 	 */
 	function logger() { 
-		if ( !class_exists('Woocommerce_Logger') ) include( 'classes/woocommerce_logger.class.php' );
+		if ( !class_exists('Woocommerce_Logger') ) include( 'classes/class-woocommerce-logger.php' );
 		return new Woocommerce_Logger();
 	}
 	
@@ -911,7 +912,7 @@ class Woocommerce {
 	 * Get Validation Class
 	 */
 	function validation() {
-		if ( !class_exists('Woocommerce_Validation') ) include( 'classes/woocommerce_validation.class.php' );
+		if ( !class_exists('Woocommerce_Validation') ) include( 'classes/class-woocommerce-validation.php' );
 		return new Woocommerce_Validation();
 	}
 	
@@ -926,7 +927,7 @@ class Woocommerce {
 	function mailer() { 
 		// Init mail class
 		if ( !class_exists('Woocommerce_Email') ) :
-			include( 'classes/woocommerce_email.class.php' );
+			include( 'classes/class-woocommerce-email.php' );
 			$this->woocommerce_email = new Woocommerce_Email();
 		endif;
 		return $this->woocommerce_email;
