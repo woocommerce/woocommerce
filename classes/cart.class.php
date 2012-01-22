@@ -556,7 +556,7 @@ class woocommerce_cart {
 									
 								elseif ($coupon->type=='percent_product') :
 								
-									$percent_discount = ( $values['data']->get_price_excluding_tax( false ) / 100 ) * $coupon->amount;
+									$percent_discount = ( $values['data']->get_price_excluding_tax() / 100 ) * $coupon->amount;
 									
 									if ($add_totals) $this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
 									
@@ -576,7 +576,7 @@ class woocommerce_cart {
 							 */
 							
 							// Get item discount by dividing item cost by subtotal to get a %
-							$discount_percent = ($values['data']->get_price_excluding_tax( false )*$values['quantity']) / $this->subtotal_ex_tax;
+							$discount_percent = ($values['data']->get_price_excluding_tax()*$values['quantity']) / $this->subtotal_ex_tax;
 							
 							// Use pence to help prevent rounding errors
 							$coupon_amount_pence = $coupon->amount * 100;
@@ -835,11 +835,17 @@ class woocommerce_cart {
 							// Work out new price based on region
 							$row_base_price 		= $base_price * $values['quantity'];
 							$base_taxes				= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true );
-							$modded_taxes			= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
-							$adjusted_price 		= ($row_base_price - array_sum($base_taxes) + array_sum($modded_taxes)) / $values['quantity'];
+							$taxes					= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 							
-							// Calc base tax (for a single unit) - we will store this in the order data
-							$base_tax				= array_sum($modded_taxes) / $values['quantity'];
+							// Tax amount
+							$tax_amount				= $this->tax->get_tax_total($taxes);
+							
+							// Line subtotal + tax
+							$line_subtotal_tax		= round($tax_amount, 2);
+							$line_subtotal			= $row_base_price - array_sum($base_taxes);
+							
+							// Adjusted price 
+							$adjusted_price 		= ($row_base_price - array_sum($base_taxes) + array_sum($taxes)) / $values['quantity'];
 
 							// Apply discounts
 							$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
@@ -852,8 +858,12 @@ class woocommerce_cart {
 						 */
 						else :
 							
-							// Calc base tax (for a single unit) - we will store this in the order data
-							$base_tax				= array_sum($this->tax->calc_tax( $base_price, $tax_rates, true ));
+							// Base tax for line before discount - we will store this in the order data
+							$tax_amount				= $this->tax->get_tax_total($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true ));
+							
+							// Line subtotal + tax
+							$line_subtotal_tax		= round($tax_amount, 2);
+							$line_subtotal			= ($base_price * $values['quantity']) - $line_subtotal_tax;
 							
 							// Calc prices and tax (discounted)
 							$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
@@ -872,25 +882,27 @@ class woocommerce_cart {
 						// Discounted Price (price with any pre-tax discounts applied)
 						$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
 						$discounted_tax_amount 	= 0;
-						$base_tax 				= 0;
+						$tax_amount 			= 0;
+						$line_subtotal_tax		= 0;
+						$line_subtotal			= ($base_price * $values['quantity']);
 					
 					endif;	
 										
-					// Lines prices - round tax so price is correctly calculated
+					// Line prices - round tax so price is correctly calculated
 					$line_tax			= round($discounted_tax_amount, 2);
-					$line_cost 			= ($discounted_price * $values['quantity']) - $line_tax;	
+					$line_total 		= ($discounted_price * $values['quantity']) - $line_tax;
 											
 					// Add any product discounts (after tax)
-					$this->apply_product_discounts_after_tax( $values, $line_cost + $discounted_tax_amount );
+					$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
 						
 					// Cart contents total is based on discounted prices and is used for the final total calculation
-					$this->cart_contents_total 	= $this->cart_contents_total 		+ $line_cost;
+					$this->cart_contents_total 	= $this->cart_contents_total 		+ $line_total;
 					
-					// Store unit/line cost + tax
-					$this->cart_contents[$cart_item_key]['line_cost'] 	= $line_cost;
-					$this->cart_contents[$cart_item_key]['line_tax'] 	= $line_tax;
-					$this->cart_contents[$cart_item_key]['base_cost'] 	= $_product->get_price_excluding_tax( false );
-					$this->cart_contents[$cart_item_key]['base_tax'] 	= $base_tax;
+					// Store costs + taxes for lines
+					$this->cart_contents[$cart_item_key]['line_total'] 			= $line_total;
+					$this->cart_contents[$cart_item_key]['line_tax'] 			= $line_tax;
+					$this->cart_contents[$cart_item_key]['line_subtotal'] 		= $line_subtotal;
+					$this->cart_contents[$cart_item_key]['line_subtotal_tax'] 	= $line_subtotal_tax;
 					
 				endforeach; endif;
 			
@@ -917,12 +929,12 @@ class woocommerce_cart {
 						// Get tax rates
 						$tax_rates 				= $this->tax->get_rates( $_product->get_tax_class() );
 						
-						// Calc base tax (for a single unit) - we will store this in the order data
-						$base_tax				= array_sum($this->tax->calc_tax( $base_price, $tax_rates, false ));
+						// Base tax for line before discount - we will store this in the order data
+						$tax_amount				= $this->tax->get_tax_total($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, false ));
 						
 						// Now calc product rates			
 						$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, false );
-						$discounted_tax_amount	= array_sum( $discounted_taxes );
+						$discounted_tax_amount	= $this->tax->get_tax_total( $discounted_taxes );
 		
 						// Tax rows - merge the totals we just got
 						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
@@ -931,24 +943,26 @@ class woocommerce_cart {
 		
 					else :
 						$discounted_tax_amount 	= 0;
-						$base_tax 				= 0;
+						$tax_amount 			= 0;
 					endif;
 					
-					// Lines prices
+					// Line prices
+					$line_subtotal_tax	= $tax_amount;
 					$line_tax			= $discounted_tax_amount;
-					$line_cost 			= $discounted_price * $values['quantity'];		
+					$line_subtotal		= $base_price * $values['quantity'];	
+					$line_total 		= $discounted_price * $values['quantity'];	
 											
 					// Add any product discounts (after tax)
-					$this->apply_product_discounts_after_tax( $values, $line_cost + $line_tax );
+					$this->apply_product_discounts_after_tax( $values, $line_total + $line_tax );
 						
 					// Cart contents total is based on discounted prices and is used for the final total calculation
-					$this->cart_contents_total 	= $this->cart_contents_total 		+ $line_cost;
+					$this->cart_contents_total 	= $this->cart_contents_total 		+ $line_total;
 					
-					// Store unit, line cost + tax
-					$this->cart_contents[$cart_item_key]['line_cost'] 	= $line_cost;
-					$this->cart_contents[$cart_item_key]['line_tax'] 	= $line_tax;
-					$this->cart_contents[$cart_item_key]['base_cost'] 	= $_product->get_price();
-					$this->cart_contents[$cart_item_key]['base_tax'] 	= $base_tax;
+					// Store costs + taxes for lines
+					$this->cart_contents[$cart_item_key]['line_total'] 			= $line_total;
+					$this->cart_contents[$cart_item_key]['line_tax'] 			= $line_tax;
+					$this->cart_contents[$cart_item_key]['line_subtotal'] 		= $line_subtotal;
+					$this->cart_contents[$cart_item_key]['line_subtotal_tax'] 	= $line_subtotal_tax;
 				
 				endforeach; endif;
 			
