@@ -53,7 +53,7 @@ $order = new woocommerce_order( $order_id );
 		
 				endif;	
 
-				echo '</td><td>'.$item['qty'].'</td><td>' . $order->get_item_subtotal($item) . '</td></tr>';
+				echo '</td><td>'.$item['qty'].'</td><td>' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
 				
 			endforeach;
 		endif;
