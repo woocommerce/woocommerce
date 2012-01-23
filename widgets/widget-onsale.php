@@ -91,7 +91,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
 		    
     	$query_args = array(
-    		'showposts' 	=> $number, 
+    		'posts_per_page' 	=> $number, 
     		'nopaging' 		=> 0, 
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
