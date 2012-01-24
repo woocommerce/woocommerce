@@ -318,7 +318,7 @@ function woocommerce_order_items_meta_box($post) {
 												$meta_value = $meta;
 											endif;
 	
-											echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$meta_name.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $meta_value ).'" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
+											echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.esc_attr( $meta_name ).'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $meta_value ).'" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
 										endforeach;
 									endif;
 								?>

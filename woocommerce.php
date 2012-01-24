@@ -133,6 +133,7 @@ class Woocommerce {
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
 			add_action( 'init', array(&$this, 'include_template_functions'), 99 );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
+			add_action( 'wp', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
@@ -289,6 +290,13 @@ class Woocommerce {
 		if (!is_admin()) $this->init_styles();
 
 		do_action( 'woocommerce_init' );
+	}
+	
+	/**
+	 * Output buffering on the checkout allows gateways to do header redirects
+	 **/
+	function buffer_checkout() {
+		if (is_checkout()) ob_start();
 	}
 
 	/**
@@ -468,7 +476,7 @@ class Woocommerce {
 		register_taxonomy( 'product_cat',
 	        array('product'),
 	        array(
-	            'hierarchical' 			=> true,
+	            'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(

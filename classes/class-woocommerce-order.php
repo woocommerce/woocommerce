@@ -277,30 +277,39 @@ class Woocommerce_Order {
 	
 	
 	/** Get item subtotal - this is the cost before discount */
-	function get_item_subtotal( $item, $inc_tax = false ) {
+	function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] ) , 2, '.', '');
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
 		else :
-			return number_format( ( $item['line_subtotal'] / $item['qty'] ), 2, '.', '');
+			$price = ( $item['line_subtotal'] / $item['qty'] );
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Get line subtotal - this is the cost before discount */
-	function get_line_subtotal( $item, $inc_tax = false ) {
+	function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( $item['line_subtotal'] + $item['line_subtotal_tax'], 2, '.', '');
+			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		else :
-			return number_format( $item['line_subtotal'], 2, '.', '');
+			$price = $item['line_subtotal'];
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Calculate item cost - useful for gateways */
-	function get_item_total( $item, $inc_tax = false ) {
+	function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] ), 2, '.', '');
+			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
 		else :
-			return number_format( $item['line_total'] / $item['qty'] , 2, '.', '');
+			$price = $item['line_total'] / $item['qty'];
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
+	}
+	
+	/** Calculate item tax - useful for gateways */
+	function get_item_tax( $item, $round = true ) {
+		$price = $item['line_tax'] / $item['qty'];
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Calculate line total - useful for gateways */
@@ -310,6 +319,22 @@ class Woocommerce_Order {
 		else :
 			return number_format( $item['line_total'] , 2, '.', '');
 		endif;
+	}
+	
+	/** Calculate line tax - useful for gateways */
+	function get_line_tax( $item ) {
+		return number_format( $item['line_tax'], 2, '.', '');
+	}
+	
+	/** Depreciated functions */
+	function get_item_cost( $item, $inc_tax = false ) {
+		_deprecated_function( __FUNCTION__, '1.4', 'get_item_total()' );
+		return $this->get_item_total( $item, $inc_tax );
+	}
+	
+	function get_row_cost( $item, $inc_tax = false ) {
+		_deprecated_function( __FUNCTION__, '1.4', 'get_row_cost()' );
+		return $this->get_line_total( $item, $inc_tax );
 	}
 	
 	/** Gets line subtotal - formatted for display */
