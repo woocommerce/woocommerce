@@ -1040,17 +1040,26 @@ class Woocommerce {
 	 * Output the errors and messages
 	 */
 	function show_messages() {
-		if (isset($this->errors) && sizeof($this->errors)>0) :
-			echo '<div class="woocommerce_error">'.$this->errors[0].'</div>';
+		
+		// Show multiple errors in a list format
+		if (isset($this->errors) && sizeof($this->errors)>0) {
+			echo '<ul class="woocommerce_error">';
+			foreach ($this->errors as $error) {
+				echo '<li>' . $error . '</li>';
+			}
+			echo '</ul>';
 			$this->clear_messages();
 			return true;
-		elseif (isset($this->messages) && sizeof($this->messages)>0) :
+			
+		// Show a single message in a div
+		} elseif (isset($this->messages) && sizeof($this->messages)>0) {
 			echo '<div class="woocommerce_message">'.$this->messages[0].'</div>';
 			$this->clear_messages();
 			return true;
-		else :
+			
+		} else {
 			return false;
-		endif;
+		}
 	}
 	
 	/**

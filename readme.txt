@@ -129,6 +129,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added local pickup and local delivery shipping methods (thanks Patrick Garman)
 * Improved woocommerce_coupon_is_valid filter
 * Random products widget, thanks to Geert De Deckere
+* Error are now lists instead of divs so we can show multiple errors at once
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

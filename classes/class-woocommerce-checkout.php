@@ -220,7 +220,7 @@ class Woocommerce_Checkout {
 				$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
 				
 				// Validation: Required fields
-				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
+				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
 				
 				if (!empty($this->posted[$key])) :
 					// Special handling for validation and formatting
@@ -229,16 +229,16 @@ class Woocommerce_Checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('(billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
 							else :
 								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 							endif;
 						break;
 						case "billing_phone" :
-							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
+							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid number.', 'woocommerce') ); endif;
 						break;
 						case "billing_email" :
-							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
+							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') ); endif;
 						break;
 					endswitch;
 				endif;
