@@ -24,10 +24,13 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
  * WooCommerce page IDs
  *
  * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+ *
+ * returns -1 if no page is found
  **/
 if (!function_exists('woocommerce_get_page_id')) {
 	function woocommerce_get_page_id( $page ) {
-		return apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+		$page = apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+		return ($page) ? $page : -1;
 	}
 }
 

@@ -16,7 +16,7 @@ function woocommerce_redirects() {
 	global $woocommerce;
 	
 	// When default permalinks are enabled, redirect shop page to post type archive url
-	if ( isset($_GET['page_id']) && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
+	if ( isset($_GET['page_id']) && $_GET['page_id'] > 0 && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	endif;
