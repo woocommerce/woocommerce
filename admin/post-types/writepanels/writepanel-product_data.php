@@ -30,7 +30,7 @@ function woocommerce_product_data_box() {
 			
 			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e('Tax', 'woocommerce'); ?></a></li>
 			
-			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?><li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li><?php endif; ?>
+			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li>
 			
 			<li class="upsells_and_crosssells_tab crosssell_options"><a href="#upsells_and_crosssells_product_data"><?php _e('Up-sells/Cross-sells', 'woocommerce'); ?></a></li>
 			
@@ -182,7 +182,7 @@ function woocommerce_product_data_box() {
 			do_action('woocommerce_product_options_tax');
 			?>
 		</div>
-		<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+		
 		<div id="inventory_product_data" class="panel woocommerce_options_panel">
 			
 			<?php
@@ -193,30 +193,34 @@ function woocommerce_product_data_box() {
 				'outofstock' => __('Out of stock', 'woocommerce')
 			) ) );
 			
-			// manage stock
-			woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce') ) );
+			if (get_option('woocommerce_manage_stock')=='yes') {
 			
-			do_action('woocommerce_product_options_stock');
+				// manage stock
+				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce') ) );
+				
+				do_action('woocommerce_product_options_stock');
+				
+				echo '<div class="stock_fields show_if_simple show_if_variable">';
+				
+				// Stock
+				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __('Stock Qty', 'woocommerce') ) );
+	
+				// Backorders?
+				woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __('Allow Backorders?', 'woocommerce'), 'options' => array(
+					'no' => __('Do not allow', 'woocommerce'),
+					'notify' => __('Allow, but notify customer', 'woocommerce'),
+					'yes' => __('Allow', 'woocommerce')
+				) ) );
 			
-			echo '<div class="stock_fields show_if_simple show_if_variable">';
+				do_action('woocommerce_product_options_stock_fields');
+				
+				echo '</div>';
 			
-			// Stock
-			woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __('Stock Qty', 'woocommerce') ) );
-
-			// Backorders?
-			woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __('Allow Backorders?', 'woocommerce'), 'options' => array(
-				'no' => __('Do not allow', 'woocommerce'),
-				'notify' => __('Allow, but notify customer', 'woocommerce'),
-				'yes' => __('Allow', 'woocommerce')
-			) ) );
-			
-			do_action('woocommerce_product_options_stock_fields');
-			
-			echo '</div>';
+			}
 			?>			
 			
 		</div>
-		<?php endif; ?>
+
 		<div id="woocommerce_attributes" class="panel">
 		
 			<div class="woocommerce_attributes_wrapper">
