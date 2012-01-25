@@ -492,11 +492,6 @@ class Woocommerce_Checkout {
 							
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$field_key] );
-							
-							// User
-							if ($user_id>0) :
-								update_user_meta( $user_id, $key, $this->posted[$field_key] );
-							endif;
 						else :
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
