@@ -167,7 +167,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<p><small><?php 
 			if ($woocommerce->customer->is_customer_outside_base()) : 
 				
-				$estimated_text = ' ' . sprintf(__('(for %s)', 'woocommerce'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woocommerce') ); 
+				$estimated_text = ' ' . sprintf(__('(taxes estimated for %s)', 'woocommerce'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woocommerce') ); 
 			
 			else :
 			

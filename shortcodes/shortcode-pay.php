@@ -69,7 +69,7 @@ function woocommerce_pay() {
 					</li>
 					<li class="date">
 						<?php _e('Date:', 'woocommerce'); ?>
-						<strong><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></strong>
+						<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
 					</li>
 					<li class="total">
 						<?php _e('Total:', 'woocommerce'); ?>
