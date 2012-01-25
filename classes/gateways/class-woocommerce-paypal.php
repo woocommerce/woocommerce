@@ -250,7 +250,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 			
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
-				$paypal_args['item_name_2'] = __('Shipping cost', 'woocommerce');
+				$paypal_args['item_name_2'] = __('Shipping via ', 'woocommerce') . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
 			endif;
