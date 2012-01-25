@@ -22,6 +22,7 @@ include_once('widget-recently_viewed.php');
 include_once('widget-best_sellers.php');
 include_once('widget-onsale.php');
 include_once('widget-login.php');
+include_once('widget-random_products.php');
 
 function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Recent_Products');
@@ -38,5 +39,6 @@ function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Best_Sellers');
 	register_widget('WooCommerce_Widget_On_Sale');
 	register_widget('WooCommerce_Widget_Login');
+	register_widget('WooCommerce_Widget_Random_Products');
 }
 add_action('widgets_init', 'woocommerce_register_widgets');
