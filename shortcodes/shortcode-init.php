@@ -310,10 +310,47 @@ function woocommerce_featured_products( $atts ) {
 }
 
 /**
+ * Show a single product page
+ **/
+function woocommerce_product_page_shortcode($atts){
+  	if (empty($atts)) return;
+	
+	if (!$atts['id'] && !$atts['sku']) return;
+	
+  	$args = array(
+    	'posts_per_page' 	=> 1,
+    	'post_type'	=> 'product',
+    	'post_status' => 'publish',
+    	'ignore_sticky_posts'	=> 1,
+  	);
+
+  	if(isset($atts['sku'])){
+    	$args['meta_query'][] = array(
+      		'key' => '_sku',
+      		'value' => $atts['sku'],
+      		'compare' => '='
+    	);
+  	}
+
+  	if(isset($atts['id'])){
+    	$args['p'] = $atts['id'];
+  	}
+
+  	$product_query = new WP_Query($args);
+  	ob_start();
+  	echo '<div class="single-product">';
+	woocommerce_single_product_content( $product_query );
+	echo '</div>';
+	wp_reset_query();
+	return ob_get_clean();
+}	
+
+/**
  * Shortcode creation
  **/
-add_shortcode('product_category', 'woocommerce_product_category');
 add_shortcode('product', 'woocommerce_product');
+add_shortcode('product_page', 'woocommerce_product_page_shortcode');
+add_shortcode('product_category', 'woocommerce_product_category');
 add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
 add_shortcode('add_to_cart_url', 'woocommerce_product_add_to_cart_url');
 add_shortcode('products', 'woocommerce_products');
