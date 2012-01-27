@@ -267,7 +267,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 					
 					$item_loop++;
 					
-					$item_name = $item['name'];
+					$product = get_product_from_item($item);
+					
+					$item_name 	= $item['name'];
+					
+					if (get_option('woocommerce_enable_sku')=='yes') {
+						$item_name .= ' ('.$product->get_sku().')';
+					}
 					
 					$item_meta = new order_item_meta( $item['item_meta'] );					
 					if ($meta = $item_meta->display( true, true )) :
@@ -284,7 +290,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
 				$item_loop++;
-				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woocommerce');
+				$paypal_args['item_name_'.$item_loop] = __('Shipping via ', 'woocommerce') . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_'.$item_loop] = '1';
 				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
 			endif;
