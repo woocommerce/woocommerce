@@ -390,7 +390,7 @@ function woocommerce_product_data_box() {
 				if (sizeof($posts_in)>0) :
 					$args = array(
 						'post_type'	=> 'product',
-						'post_status' => 'publish',
+						'post_status' => 'any',
 						'numberposts' => -1,
 						'orderby' => 'title',
 						'order' => 'asc',
