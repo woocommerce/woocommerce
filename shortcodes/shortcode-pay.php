@@ -25,7 +25,7 @@ function woocommerce_pay() {
 		// Pay for existing order
 		$order_key = urldecode( $_GET['order'] );
 		$order_id = (int) $_GET['order_id'];
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 			
@@ -57,7 +57,7 @@ function woocommerce_pay() {
 		
 		if ($order_id > 0) :
 		
-			$order = new Woocommerce_Order( $order_id );
+			$order = new WC_Order( $order_id );
 		
 			if ($order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 		

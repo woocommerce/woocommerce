@@ -4,12 +4,12 @@
  * 
  * The WooCommerce product class handles individual product data.
  *
- * @class Woocommerce_Product
+ * @class 		WC_Product
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Product {
+class WC_Product {
 	
 	var $id;
 	var $product_custom_fields;
@@ -51,7 +51,7 @@ class Woocommerce_Product {
 	 *
 	 * @param   int		$id		ID of the product to load
 	 */
-	function woocommerce_product( $id ) {
+	function __construct( $id ) {
 		
 		$this->id = (int) $id;
 
@@ -178,9 +178,9 @@ class Woocommerce_Product {
 	
 	function get_child( $child_id ) {
 		if ($this->is_type('variable')) :
-			$child = new Woocommerce_Product_Variation( $child_id, $this->id, $this->product_custom_fields );
+			$child = new WC_Product_Variation( $child_id, $this->id, $this->product_custom_fields );
 		else :
-			$child = new Woocommerce_Product( $child_id );
+			$child = new WC_Product( $child_id );
 		endif;
 		return $child;
 	}
@@ -501,7 +501,7 @@ class Woocommerce_Product {
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='yes' ) :
 			
-			$_tax = new Woocommerce_Tax();
+			$_tax = new WC_Tax();
 			
 			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
 			
@@ -1022,4 +1022,12 @@ class Woocommerce_Product {
 		endif;
 	}
 
+}
+
+/** Depreciated */
+class woocommerce_product extends WC_Product {
+	public function __construct( $id ) { 
+		_deprecated_function( 'woocommerce_product', '1.4', 'WC_Product()' );
+		parent::__construct( $id ); 
+	} 
 }

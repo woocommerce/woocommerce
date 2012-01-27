@@ -176,7 +176,7 @@ function woocommerce_update_catalog_ordering() {
 function woocommerce_increase_coupon_counts() {
 	global $woocommerce;
 	if ($applied_coupons = $woocommerce->cart->get_applied_coupons()) foreach ($applied_coupons as $code) :
-		$coupon = new Woocommerce_Coupon( $code );
+		$coupon = new WC_Coupon( $code );
 		$coupon->inc_usage_count();
 	endforeach;
 }
@@ -375,7 +375,7 @@ function woocommerce_clear_cart_after_payment() {
 		if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
 		if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
 		if ($order_id > 0) :
-			$order = new Woocommerce_Order( $order_id );
+			$order = new WC_Order( $order_id );
 			if ($order->order_key == $order_key) :
 			
 				$woocommerce->cart->empty_cart();
@@ -389,7 +389,7 @@ function woocommerce_clear_cart_after_payment() {
 	
 	if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
 		
-		$order = new Woocommerce_Order($_SESSION['order_awaiting_payment']);
+		$order = new WC_Order($_SESSION['order_awaiting_payment']);
 		
 		if ($order->id > 0 && $order->status!=='pending') :
 			
@@ -433,7 +433,7 @@ function woocommerce_pay_action() {
 		// Pay for existing order
 		$order_key = urldecode( $_GET['order'] );
 		$order_id = (int) $_GET['order_id'];
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
 			
@@ -646,7 +646,7 @@ function woocommerce_cancel_order() {
 		$order_key = urldecode( $_GET['order'] );
 		$order_id = (int) $_GET['order_id'];
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 
 		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed')) && $woocommerce->verify_nonce('cancel_order', '_GET')) :
 			
@@ -706,7 +706,7 @@ function woocommerce_download_product() {
 		$downloads_remaining = $download_result->downloads_remaining;
 		
 		if ($order_id) :
-			$order = new Woocommerce_Order( $order_id );
+			$order = new WC_Order( $order_id );
 			if ($order->status!='completed' && $order->status!='processing' && $order->status!='publish') :
 				wp_die( __('Invalid order.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 				exit;
@@ -945,7 +945,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 	remove_action('wp_footer', 'woocommerce_google_tracking');
 	
 	// Get the order and output tracking code
-	$order = new Woocommerce_Order($order_id);
+	$order = new WC_Order($order_id);
 	
 	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
 	if (is_user_logged_in()) :
@@ -1021,7 +1021,7 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	$GLOBALS['wp_piwik']->footer();
 	
 	// Get the order and output tracking code
-	$order = new Woocommerce_Order($order_id);
+	$order = new WC_Order($order_id);
 	?>
 	<script type="text/javascript">
 	try {

@@ -391,7 +391,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	
 	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 	
@@ -452,7 +452,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
 
 function woocommerce_paying_customer( $order_id ) {
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	
 	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
 }
@@ -580,7 +580,7 @@ function woocommerce_walk_category_dropdown_tree() {
 	$args = func_get_args();
 	// the user's options are the third parameter
 	if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') )
-		$walker = new Woocommerce_Walker_CategoryDropdown;
+		$walker = new WC_Walker_CategoryDropdown;
 	else
 		$walker = $args[2]['walker'];
 
@@ -590,7 +590,7 @@ function woocommerce_walk_category_dropdown_tree() {
 /**
  * Create HTML dropdown list of Product Categories.
  */
-class Woocommerce_Walker_CategoryDropdown extends Walker {
+class WC_Walker_CategoryDropdown extends Walker {
 
 	var $tree_type = 'category';
 	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );

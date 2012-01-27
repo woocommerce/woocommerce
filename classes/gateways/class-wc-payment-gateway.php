@@ -4,12 +4,12 @@
  * 
  * Extended by individual payment gateways to handle payments.
  *
- * @class 		Woocommerce_Payment_Gateway
+ * @class 		WC_Payment_Gateway
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class Woocommerce_Payment_Gateway extends Woocommerce_Settings_Api {
+class WC_Payment_Gateway extends WC_Settings_Api {
 	
 	var $id;
 	var $title;
@@ -111,4 +111,12 @@ class Woocommerce_Payment_Gateway extends Woocommerce_Settings_Api {
         if ($this->description) echo wpautop(wptexturize($this->description));
     }
     
+}
+
+/** Depreciated */
+class woocommerce_payment_gateway extends WC_Payment_Gateway {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_payment_gateway', '1.4', 'WC_Payment_Gateway()' );
+		parent::__construct(); 
+	} 
 }

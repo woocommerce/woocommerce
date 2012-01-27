@@ -4,12 +4,12 @@
  * 
  * A simple shipping method for free shipping
  *
- * @class 		Free_Shipping
+ * @class 		WC_Free_Shipping
  * @package		WooCommerce
  * @category	Shipping
  * @author		WooThemes
  */ 
-class Woocommerce_Free_Shipping extends Woocommerce_Shipping_Method {
+class WC_Free_Shipping extends WC_Shipping_Method {
 	
 	function __construct() { 
         $this->id 			= 'free_shipping';
@@ -131,7 +131,7 @@ class Woocommerce_Free_Shipping extends Woocommerce_Shipping_Method {
 		if ($this->requires_coupon=="yes") :
 			
 			if ($woocommerce->cart->applied_coupons) : foreach ($woocommerce->cart->applied_coupons as $code) :
-				$coupon = new Woocommerce_Coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				
 				if ( $coupon->enable_free_shipping() ) :
 					return true;
@@ -171,7 +171,7 @@ class Woocommerce_Free_Shipping extends Woocommerce_Shipping_Method {
 }
 
 function add_free_shipping_method( $methods ) {
-	$methods[] = 'woocommerce_free_shipping'; return $methods;
+	$methods[] = 'WC_Free_Shipping'; return $methods;
 }
 
 add_filter('woocommerce_shipping_methods', 'add_free_shipping_method' );

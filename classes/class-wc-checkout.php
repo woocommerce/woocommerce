@@ -4,12 +4,12 @@
  * 
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @class 		Woocommerce_Checkout
+ * @class 		WC_Checkout
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Checkout {
+class WC_Checkout {
 	
 	var $posted;
 	var $checkout_fields;
@@ -371,7 +371,7 @@ class Woocommerce_Checkout {
 				endif;
 				
 				// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
-				$_tax = new Woocommerce_Tax();
+				$_tax = new WC_Tax();
 				
 				$order_data = array(
 					'post_type' 	=> 'shop_order',
@@ -581,7 +581,7 @@ class Woocommerce_Checkout {
 				
 				else :
 					
-					$order = new Woocommerce_Order($order_id);
+					$order = new WC_Order($order_id);
 					
 					// No payment was required for order
 					$order->payment_complete();
@@ -642,4 +642,12 @@ class Woocommerce_Checkout {
 			
 		endif;
 	}
+}
+
+/** Depreciated */
+class woocommerce_checkout extends WC_Checkout {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_checkout', '1.4', 'WC_Checkout()' );
+		parent::__construct(); 
+	} 
 }

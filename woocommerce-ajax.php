@@ -197,7 +197,7 @@ function woocommerce_feature_product() {
 	
 	if($post->post_type !== 'product') die;
 	
-	$product = new Woocommerce_Product($post->ID);
+	$product = new WC_Product($post->ID);
 
 	if ($product->is_featured()) update_post_meta($post->ID, '_featured', 'no');
 	else update_post_meta($post->ID, '_featured', 'yes');
@@ -219,7 +219,7 @@ function woocommerce_mark_order_complete() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	$order->update_status( 'completed' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -238,7 +238,7 @@ function woocommerce_mark_order_processing() {
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if(!$order_id) die;
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	$order->update_status( 'processing' );
 	
 	wp_safe_redirect( wp_get_referer() );
@@ -322,7 +322,7 @@ function woocommerce_link_all_variations() {
 	
 	$variations = array();
 	
-	$_product = new Woocommerce_Product( $post_id );
+	$_product = new WC_Product( $post_id );
 		
 	// Put variation attributes into an array
 	foreach ($_product->get_attributes() as $attribute) :
@@ -355,7 +355,7 @@ function woocommerce_link_all_variations() {
     
     foreach($_product->get_children() as $child_id) {
     	$child = $_product->get_child( $child_id );
-        if($child instanceof woocommerce_product_variation) {
+        if($child instanceof WC_Product_Variation) {
             $available_variations[] = $child->get_variation_attributes();
         }
     }
@@ -533,9 +533,9 @@ function woocommerce_add_order_item() {
 	endif;
 	
 	if ($post->post_type=="product") :
-		$_product = new Woocommerce_Product( $post->ID );
+		$_product = new WC_Product( $post->ID );
 	else :
-		$_product = new Woocommerce_Product_Variation( $post->ID );
+		$_product = new WC_Product_Variation( $post->ID );
 	endif;
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
@@ -620,7 +620,7 @@ function woocommerce_calc_line_taxes() {
 
 	check_ajax_referer( 'calc-totals', 'security' );
 	
-	$tax = new Woocommerce_Tax();
+	$tax = new WC_Tax();
 	
 	$base_tax_amount = 0;
 	$line_tax_amount = 0;
@@ -636,7 +636,7 @@ function woocommerce_calc_line_taxes() {
 	$tax_class 		= esc_attr($_POST['tax_class']);
 	
 	// Get product details
-	$_product			= new Woocommerce_Product($item_id);
+	$_product			= new WC_Product($item_id);
 	$item_tax_status 	= $_product->get_tax_status();
 	
 	if ($item_tax_status=='taxable') :
@@ -678,7 +678,7 @@ function woocommerce_add_order_note() {
 	$is_customer_note = ($note_type=='customer') ? 1 : 0;
 	
 	if ($post_id>0) :
-		$order = new Woocommerce_Order( $post_id );
+		$order = new WC_Order( $post_id );
 		$comment_id = $order->add_order_note( $note, $is_customer_note );
 		
 		echo '<li rel="'.$comment_id.'" class="note ';

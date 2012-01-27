@@ -4,12 +4,12 @@
  * 
  * Provides a Bank Transfer Payment Gateway. Based on code by Mike Pepper.
  *
- * @class 		Woocommerce_Bacs
+ * @class 		WC_BACS
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class Woocommerce_Bacs extends Woocommerce_Payment_Gateway {
+class WC_BACS extends WC_Payment_Gateway {
 
     public function __construct() { 
 		$this->id				= 'bacs';
@@ -194,7 +194,7 @@ class Woocommerce_Bacs extends Woocommerce_Payment_Gateway {
     function process_payment( $order_id ) {
     	global $woocommerce;
     	
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		// Mark as on-hold (we're awaiting the payment)
 		$order->update_status('on-hold', __('Awaiting BACS payment', 'woocommerce'));
@@ -221,7 +221,7 @@ class Woocommerce_Bacs extends Woocommerce_Payment_Gateway {
  * Add the gateway to WooCommerce
  **/
 function add_bacs_gateway( $methods ) {
-	$methods[] = 'woocommerce_bacs'; return $methods;
+	$methods[] = 'WC_BACS'; return $methods;
 }
 
 add_filter('woocommerce_payment_gateways', 'add_bacs_gateway' );

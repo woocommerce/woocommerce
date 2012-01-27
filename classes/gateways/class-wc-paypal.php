@@ -4,12 +4,12 @@
  * 
  * Provides a PayPal Standard Payment Gateway.
  *
- * @class 		Woocommerce_Paypal
+ * @class 		WC_Paypal
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
+class WC_Paypal extends WC_Payment_Gateway {
 		
 	public function __construct() { 
 		global $woocommerce;
@@ -156,7 +156,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
     public function generate_paypal_form( $order_id ) {
 		global $woocommerce;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		if ( $this->testmode == 'yes' ):
 			$paypal_adr = $this->testurl . '?test_ipn=1&';		
@@ -330,7 +330,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 	 **/
 	function process_payment( $order_id ) {
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		return array(
 			'result' 	=> 'success',
@@ -433,7 +433,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 		// Custom holds post ID
 	    if ( !empty($posted['custom']) && !empty($posted['invoice']) ) {
 	
-			$order = new Woocommerce_Order( (int) $posted['custom'] );
+			$order = new WC_Order( (int) $posted['custom'] );
 	        if ($order->order_key!==$posted['invoice']) :
 	        	if ($this->debug=='yes') $this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
 	        	exit;
@@ -518,7 +518,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
  * Add the gateway to WooCommerce
  **/
 function add_paypal_gateway( $methods ) {
-	$methods[] = 'woocommerce_paypal'; return $methods;
+	$methods[] = 'WC_Paypal'; return $methods;
 }
 
 add_filter('woocommerce_payment_gateways', 'add_paypal_gateway' );

@@ -4,12 +4,12 @@
  * 
  * Extended by shipping methods to handle shipping calculations etc.
  *
- * @class 		Woocommerce_Shipping_Method
+ * @class 		WC_Shipping_Method
  * @package		WooCommerce
  * @category	Shipping
  * @author		WooThemes
  */  
-class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
+class WC_Shipping_Method extends WC_Settings_Api {
 	
 	var $id;
 	var $method_title; 	// Method title
@@ -59,7 +59,7 @@ class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
 		// This saves shipping methods having to do compelex tax calculations
 		if (!is_array($taxes) && $taxes!==false && $total_cost>0 && get_option('woocommerce_calc_taxes')=='yes' && $this->tax_status=='taxable' ) :
 			
-			$_tax 	= new Woocommerce_Tax();
+			$_tax 	= new WC_Tax();
 			$taxes 	= array();
 			
 			switch ($calc_tax) :
@@ -102,7 +102,7 @@ class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
 			
 		endif;
 
-		$this->rates[] = new Woocommerce_Shipping_Rate( $id, $label, $total_cost, $taxes );
+		$this->rates[] = new WC_Shipping_Rate( $id, $label, $total_cost, $taxes );
 	}
 	
     function is_available() {
@@ -145,14 +145,14 @@ class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
  * 
  * Simple Class for storing rates. 
  */ 
-class Woocommerce_Shipping_Rate {
+class WC_Shipping_Rate {
 
 	var $id 	= '';
 	var $label 	= '';
 	var $cost 	= 0;
 	var $taxes 	= array();
 	
-	function woocommerce_shipping_rate( $id, $label, $cost, $taxes ) {
+	public function __construct( $id, $label, $cost, $taxes ) {
 		$this->id 		= $id;
 		$this->label 	= $label;
 		$this->cost 	= $cost;
@@ -166,4 +166,12 @@ class Woocommerce_Shipping_Rate {
 		endif;
 		return $taxes;
 	}
+}
+
+/** Depreciated */
+class woocommerce_shipping_method extends WC_Shipping_Method {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_shipping_method', '1.4', 'WC_Shipping_Method()' );
+		parent::__construct(); 
+	} 
 }

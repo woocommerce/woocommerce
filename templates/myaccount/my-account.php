@@ -49,7 +49,7 @@ if ($customer_orders) :
 		
 		<tbody><?php
 			foreach ($customer_orders as $customer_order) :
-				$order = new Woocommerce_Order();
+				$order = new WC_Order();
 				$order->populate($customer_order);
 				?><tr class="order">
 					<td><?php echo $order->id; ?></td>

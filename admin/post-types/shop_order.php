@@ -37,7 +37,7 @@ add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_co
 function woocommerce_custom_order_columns($column) {
 
 	global $post;
-	$order = new Woocommerce_Order( $post->ID );
+	$order = new WC_Order( $post->ID );
 	
 	switch ($column) {
 		case "order_status" :

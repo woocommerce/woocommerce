@@ -4,12 +4,12 @@
  * 
  * The WooCommerce countries class stores country/state data.
  *
- * @class 		Woocommerce_Countries
+ * @class 		WC_Countries
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Countries {
+class WC_Countries {
 	
 	var $countries;
 	var $states;
@@ -923,4 +923,12 @@ class Woocommerce_Countries {
 		// Return
 		return $address_fields;
 	}
+}
+
+/** Depreciated */
+class woocommerce_countries extends WC_Countries {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_countries', '1.4', 'WC_Countries()' );
+		parent::__construct(); 
+	} 
 }

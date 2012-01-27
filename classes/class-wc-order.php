@@ -4,12 +4,12 @@
  * 
  * The WooCommerce order class handles order data.
  *
- * @class Woocommerce_Order
+ * @class 		WC_Order
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Order {
+class WC_Order {
 	
 	var $id;
 	var $status;
@@ -59,7 +59,7 @@ class Woocommerce_Order {
 	var $formatted_shipping_address;
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
-	function woocommerce_order( $id = '' ) {
+	function __construct( $id = '' ) {
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
@@ -446,9 +446,9 @@ class Woocommerce_Order {
 	function get_product_from_item( $item ) {
 		
 		if (isset($item['variation_id']) && $item['variation_id']>0) :
-			$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
+			$_product = new WC_Product_Variation( $item['variation_id'] );
 		else :
-			$_product = new Woocommerce_Product( $item['id'] );
+			$_product = new WC_Product( $item['id'] );
 		endif;
 		
 		return $_product;
@@ -934,4 +934,12 @@ class order_item_meta {
 		endif;
 	}
 	
+}
+
+/** Depreciated */
+class woocommerce_order extends WC_Order {
+	public function __construct( $id = '' ) { 
+		_deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' );
+		parent::__construct( $id ); 
+	} 
 }

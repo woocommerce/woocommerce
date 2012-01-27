@@ -287,7 +287,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		
 		    $variation = $product->get_child( $child_id );
 		
-		    if($variation instanceof woocommerce_product_variation) {
+		    if($variation instanceof WC_Product_Variation) {
 		
 		    	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
 		

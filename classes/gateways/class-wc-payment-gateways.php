@@ -4,12 +4,12 @@
  * 
  * Loads payment gateways via hooks for use in the store.
  *
- * @class 		Woocommerce_Payment_Gateways
+ * @class 		WC_Payment_Gateways
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class Woocommerce_Payment_Gateways {
+class WC_Payment_Gateways {
 	
 	var $payment_gateways;
    
