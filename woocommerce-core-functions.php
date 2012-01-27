@@ -162,7 +162,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$price = number_format( (double) $price, $num_decimals, get_option('woocommerce_price_decimal_sep'), get_option('woocommerce_price_thousand_sep') );
 	
 	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) :
-		$price = preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
+		$price = woocommerce_trim_zeros($price);
 	endif;
 	
 	switch ($currency_pos) :
@@ -185,6 +185,13 @@ function woocommerce_price( $price, $args = array() ) {
 	return $return;
 }	
 	
+/**
+ * Trim trailing zeros
+ **/
+function woocommerce_trim_zeros( $price ) {
+	return rtrim(rtrim($price, '0'), '.');
+}
+
 /**
  * Clean variables
  **/
