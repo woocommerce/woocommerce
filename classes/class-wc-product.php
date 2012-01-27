@@ -304,10 +304,10 @@ class WC_Product {
 		
 		if ($this->is_type('variable')) :
 			$url = add_query_arg('add-to-cart', 'variation');
-			$url = add_query_arg('product', $this->id, $url);
+			$url = add_query_arg('product_id', $this->id, $url);
 		elseif ( $this->has_child() ) :
 			$url = add_query_arg('add-to-cart', 'group');
-			$url = add_query_arg('product', $this->id, $url);
+			$url = add_query_arg('product_id', $this->id, $url);
 		else :
 			$url = add_query_arg('add-to-cart', $this->id);
 		endif;

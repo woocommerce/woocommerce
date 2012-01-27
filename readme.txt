@@ -133,6 +133,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Problem: Stock management off, hide out of stock on meant some product were hidden randomly. Solution: Enable instock/outofstock selector on edit product page regardless of settings
 * If sending shipping to paypal, send shipping address
 * Send shipping name to paypal
+* Code to allow add-on validation
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

@@ -140,16 +140,19 @@ function woocommerce_ajax_add_to_cart() {
 	check_ajax_referer( 'add-to-cart', 'security' );
 	
 	$product_id = (int) apply_filters('woocommerce_add_to_cart_product_id', $_POST['product_id']);
-
-	if ($woocommerce->cart->add_to_cart($product_id, 1)) :
+	
+	$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
+	
+	if ($passed_validation && $woocommerce->cart->add_to_cart($product_id, 1)) :
 		// Return html fragments
 		$data = apply_filters('add_to_cart_fragments', array());
 	else :
-		// Return error
+		// If there was an error adding to the cart, redirect to the product page to show any errors
 		$data = array(
-			'error' => $woocommerce->errors[0]
+			'error' => true,
+			'product_url' => get_permalink( $product_id )
 		);
-		$woocommerce->clear_messages();
+		$woocommerce->set_messages();
 	endif;
 	
 	echo json_encode( $data );

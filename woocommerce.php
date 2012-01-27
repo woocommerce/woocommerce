@@ -1063,13 +1063,20 @@ class Woocommerce {
 	}
 	
 	/**
+	 * Set session data for messages
+	 */
+	function set_messages() {
+		$_SESSION['errors'] = $this->errors;
+		$_SESSION['messages'] = $this->messages;
+	}
+	
+	/**
 	 * Redirection hook which stores messages into session data
 	 */
 	function redirect( $location, $status ) {
 		global $is_IIS;
 			
-		$_SESSION['errors'] = $this->errors;
-		$_SESSION['messages'] = $this->messages;
+		$this->set_messages();
 		
 		// IIS fix
 		if ($is_IIS) session_write_close();
