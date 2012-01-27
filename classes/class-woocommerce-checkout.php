@@ -406,10 +406,10 @@ class Woocommerce_Checkout {
 				 		'name' 				=> $_product->get_title(),
 				 		'qty' 				=> (int) $values['quantity'],
 				 		'item_meta'			=> $item_meta->meta,
-				 		'line_subtotal' 	=> number_format($values['line_subtotal'], 2, '.', ''),		// Line subtotal (before discounts)
-				 		'line_subtotal_tax' => number_format($values['line_subtotal_tax'], 2, '.', ''),	// Line tax (before discounts)
-				 		'line_total'		=> number_format($values['line_total'], 2, '.', ''), 		// Line total (after discounts)
-				 		'line_tax' 			=> number_format($values['line_tax'], 2, '.', ''), 			// Line Tax (after discounts)
+				 		'line_subtotal' 	=> woocommerce_trim_zeros(number_format($values['line_subtotal'], 4, '.', '')),		// Line subtotal (before discounts)
+				 		'line_subtotal_tax' => woocommerce_trim_zeros(number_format($values['line_subtotal_tax'], 4, '.', '')),	// Line tax (before discounts)
+				 		'line_total'		=> woocommerce_trim_zeros(number_format($values['line_total'], 4, '.', '')), 		// Line total (after discounts)
+				 		'line_tax' 			=> woocommerce_trim_zeros(number_format($values['line_tax'], 4, '.', '')), 			// Line Tax (after discounts)
 				 		'tax_class'			=> $_product->get_tax_class()								// Tax class (adjusted by filters)
 				 	), $values);
 				endforeach;
@@ -508,21 +508,24 @@ class Woocommerce_Checkout {
 				// Save any other user meta
 				if ($user_id) do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);
 				
-				// Put order taxes into an array to store
+				// Prepare order taxes for storage
 				$order_taxes = array();
-				
-				if (is_array($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) foreach ( $woocommerce->cart->taxes as $key => $tax ) :
+
+				foreach (array_keys($woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes) as $key) {
 					
 					$is_compound = ($woocommerce->cart->tax->is_compound( $key )) ? 1 : 0;
+					
+					$cart_tax = (isset($woocommerce->cart->taxes[$key])) ? $woocommerce->cart->taxes[$key] : 0;
+					$shipping_tax = (isset($woocommerce->cart->shipping_taxes[$key])) ? $woocommerce->cart->shipping_taxes[$key] : 0;
 					
 					$order_taxes[] = array(
 						'label' => $woocommerce->cart->tax->get_rate_label( $key ),
 						'compound' => $is_compound,
-						'total' => number_format($tax, 2, '.', '')
+						'cart_tax' => number_format($cart_tax, 2, '.', ''),
+						'shipping_tax' => number_format($shipping_tax, 2, '.', '')
 					);
-					
-				endforeach;
-				
+				}
+								
 				// Save other order meta fields
 				update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);

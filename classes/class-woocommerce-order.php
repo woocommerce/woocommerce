@@ -396,7 +396,7 @@ class Woocommerce_Order {
 				
 				if (isset($tax['compound']) && $tax['compound']) continue;
 				
-				$subtotal = $subtotal + $tax['total'];
+				$subtotal = $subtotal + $tax['cart_tax'] + $tax['shipping_tax'];
 			
 			endforeach;
 			
@@ -478,8 +478,8 @@ class Woocommerce_Order {
 				
 				foreach ($this->get_taxes() as $tax) : 
 					if ($tax['compound']) : $has_compound_tax = true; continue; endif;
-					if ($tax['total']==0) continue;
-					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+					if (($tax['cart_tax']+$tax['shipping_tax'])==0) continue;
+					$total_rows[ $tax['label'] ] = woocommerce_price( ($tax['cart_tax']+$tax['shipping_tax']) );
 				endforeach;
 				
 				if ($has_compound_tax) :
@@ -490,8 +490,8 @@ class Woocommerce_Order {
 				
 				foreach ($this->get_taxes() as $tax) : 
 					if (!$tax['compound']) continue;
-					if ($tax['total']==0) continue;
-					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+					if (($tax['cart_tax']+$tax['shipping_tax'])==0) continue;
+					$total_rows[ $tax['label'] ] = woocommerce_price( ($tax['cart_tax']+$tax['shipping_tax']) );
 				endforeach;
 			
 			else :

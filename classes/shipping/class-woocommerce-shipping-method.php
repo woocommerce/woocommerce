@@ -71,11 +71,11 @@ class Woocommerce_Shipping_Method extends Woocommerce_Settings_Api {
 						
 						$cart = $woocommerce->cart->get_cart();
 						
-						foreach ($cost as $id => $amount) :
+						foreach ($cost as $cost_key => $amount) :
 							
-							if (!isset($cart[$id])) continue;
+							if (!isset($cart[$cost_key])) continue;
 							
-							$_product = $cart[$id]['data'];
+							$_product = $cart[$cost_key]['data'];
 							
 							$rates = $_tax->get_shipping_tax_rates( $_product->get_tax_class() );	
 							$item_taxes = $_tax->calc_shipping_tax( $amount, $rates );

@@ -519,16 +519,6 @@ class Woocommerce_Tax {
 		return array_sum(array_map(array(&$this, 'round'), $taxes));
 	}
 	
-	/**
-	 * Round tax lines
-	 *
-	 * @param   array
-	 * @return  float		
-	 */
-	function get_taxes_rounded( $taxes ) {
-		return array_map(array(&$this, 'round'), $taxes);
-	}
-	
 	/** 
 	 * Round to 2 DP
 	 */

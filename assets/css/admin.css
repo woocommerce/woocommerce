@@ -36,15 +36,24 @@ mark.amount{background:transparent none;color:inherit;}
 #woocommerce-order-items h3 small{color:#999;}
 #woocommerce-order-items .row-actions{float:right;padding:0;color:#999;}#woocommerce-order-items .row-actions a{color:#999;}
 #woocommerce-order-items .row-actions a.remove_row:hover{color:red;}
-#woocommerce-order-totals h4{margin:0 !important;}
-#woocommerce-order-totals .totals_group{border-top:1px solid white;border-bottom:1px solid #DDD;padding:10px 10px 0;}
+#woocommerce-order-totals h4{margin:0 !important;}#woocommerce-order-totals h4 a.add_tax_row{display:block;padding-bottom:10px;}
+#woocommerce-order-totals .totals_group{border-top:1px solid white;border-bottom:1px solid #DDD;padding:10px 0 0;}
+#woocommerce-order-totals .totals_group:first-child{border-top:0;}
 #woocommerce-order-totals ul.totals{margin:6px 0 0;float:left;}#woocommerce-order-totals ul.totals li{float:left;clear:both;width:100%;font-size:1.2em;font-weight:bold;line-height:1.2em;margin:0;padding:0 0 10px;}#woocommerce-order-totals ul.totals li label{font-weight:normal;display:block;font-size:0.8em;color:#333;}
 #woocommerce-order-totals ul.totals li input{width:100%;vertical-align:middle;font-size:1em;margin:0 !important;font-weight:normal;color:#555;}
 #woocommerce-order-totals ul.totals li input.first{width:49%;float:left;}
 #woocommerce-order-totals ul.totals li input.last{width:49%;float:right;}
-#woocommerce-order-totals ul.totals li.left{float:left;width:49%;clear:none;}#woocommerce-order-totals ul.totals li.left input{width:100%;}
+#woocommerce-order-totals ul.totals li.left{float:left;width:49%;clear:left;}#woocommerce-order-totals ul.totals li.left input{width:100%;}
 #woocommerce-order-totals ul.totals li.right{float:right;width:49%;clear:none;}#woocommerce-order-totals ul.totals li.right input{width:100%;}
 #woocommerce-order-totals ul.totals .calculated{border-color:#ae8ca2;border-style:dotted;}
+#woocommerce-order-totals #tax_rows{margin:6px 0 0;}
+#woocommerce-order-totals .tax_row{margin:0 0 9px;border:1px solid #DFDFDF;background:#fff;padding:6px 6px 0;position:relative;opacity:0.75;}#woocommerce-order-totals .tax_row:hover,#woocommerce-order-totals .tax_row:focus{opacity:1;}
+#woocommerce-order-totals .tax_row p{margin:0 0 6px;}
+#woocommerce-order-totals .tax_row label{color:#555;}#woocommerce-order-totals .tax_row label .checkbox{line-height:26px;}
+#woocommerce-order-totals .tax_row p.first{float:left;width:49%;clear:left;}#woocommerce-order-totals .tax_row p.first input,#woocommerce-order-totals .tax_row p.first select{width:100%;}
+#woocommerce-order-totals .tax_row p.last{float:right;width:49%;clear:none;}#woocommerce-order-totals .tax_row p.last input,#woocommerce-order-totals .tax_row p.last select{width:100%;}
+#woocommerce-order-totals .tax_row a.delete_tax_row{padding:0;text-decoration:none;font-size:11px;line-height:16px;width:16px;height:16px;text-align:center;color:#999;float:right;background:#ddd;border:1px solid #eee;-webkit-box-shadow:0 0 0 1px #ccc;-webkit-border-radius:8px;-moz-border-radius:8px;-o-border-radius:8px;border-radius:8px;position:absolute;top:0;right:0;margin:-8px -8px 0 0;display:none;}
+#woocommerce-order-totals .tax_row:hover a.delete_tax_row,#woocommerce-order-totals .tax_row:focus a.delete_tax_row{display:block;}
 .woocommerce_order_items_wrapper{margin:0;}.woocommerce_order_items_wrapper table.woocommerce_order_items{width:100%;background:#fff;}.woocommerce_order_items_wrapper table.woocommerce_order_items thead th{background:#ECECEC;padding:8px;font-size:11px;text-align:left;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items td{padding:8px;text-align:left;line-height:26px;vertical-align:top;border-bottom:1px dotted #ececec;}.woocommerce_order_items_wrapper table.woocommerce_order_items td input,.woocommerce_order_items_wrapper table.woocommerce_order_items td textarea{width:100%;}
 .woocommerce_order_items_wrapper table.woocommerce_order_items td select{width:50%;}

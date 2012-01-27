@@ -90,11 +90,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php 
 					if (get_option('woocommerce_display_cart_taxes')=='yes' && $woocommerce->cart->get_cart_tax()) :
 						
-						if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
+						$taxes = $woocommerce->cart->get_taxes();
+						
+						if (sizeof($taxes)>0) :
 						
 							$has_compound_tax = false;
 							
-							foreach ($woocommerce->cart->taxes as $key => $tax) : 
+							foreach ($taxes as $key => $tax) : 
 								if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
 								if ($tax==0) continue;
 								?>
@@ -115,7 +117,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								<?php
 							endif;
 							
-							foreach ($woocommerce->cart->taxes as $key => $tax) : 
+							foreach ($taxes as $key => $tax) : 
 								if (!$woocommerce->cart->tax->is_compound( $key )) continue;
 								if ($tax==0) continue;
 								?>

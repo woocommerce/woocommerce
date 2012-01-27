@@ -214,11 +214,18 @@ mark.amount {
 #woocommerce-order-totals {
 	h4 {
 		margin:0 !important;
+		a.add_tax_row {
+			display: block;
+			padding-bottom: 10px;
+		}
 	}
 	.totals_group {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DDD;
-		padding: 10px 10px 0;
+		padding: 10px 0 0;
+	}
+	.totals_group:first-child {
+		border-top: 0;
 	}
 	ul.totals {
 		margin: 6px 0 0;
@@ -258,7 +265,7 @@ mark.amount {
 		li.left {
 			float: left;
 			width: 49%;
-			clear: none;
+			clear: left;
 			input {
 				width: 100%;
 			}
@@ -274,6 +281,73 @@ mark.amount {
 		.calculated {
 			border-color: #ae8ca2;
 			border-style: dotted;
+		}
+	}
+	#tax_rows {
+		margin: 6px 0 0;
+	}
+	.tax_row {
+		margin:0 0 9px;
+		border:1px solid #DFDFDF;
+		background: #fff;
+		padding:6px 6px 0;
+		position: relative;
+		opacity:0.75;
+		&:hover, &:focus {
+			opacity:1;
+		}
+		p {
+			margin:0 0 6px;
+		}
+		label {
+			color:#555;
+			.checkbox {
+				line-height: 26px;
+			}
+		}
+		p.first {
+			float: left;
+			width: 49%;
+			clear: left;
+			input, select {
+				width: 100%;
+			}
+		}
+		p.last {
+			float: right;
+			width: 49%;
+			clear: none;
+			input, select {
+				width: 100%;
+			}
+		}
+		a.delete_tax_row {
+			padding:0;
+			text-decoration: none;
+			font-size: 11px;
+			line-height: 16px;
+			width: 16px;
+			height: 16px;
+			text-align: center;
+			color:#999;
+			float: right;
+			background: #ddd;
+			border: 1px solid #eee;
+			-webkit-box-shadow: 0 0 0 1px #ccc;
+			-webkit-border-radius:8px;
+			-moz-border-radius:8px;
+			-o-border-radius:8px;
+			border-radius:8px;
+			position: absolute;
+			top: 0;
+			right: 0;
+			margin: -8px -8px 0 0;
+			display: none;
+		}
+		&:hover, &:focus {
+			a.delete_tax_row {
+				display: block;
+			}
 		}
 	}
 }

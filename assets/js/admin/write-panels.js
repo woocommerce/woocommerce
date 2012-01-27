@@ -20,6 +20,10 @@ jQuery( function($){
 	});
 	
 	// ORDERS
+	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
+		window.onbeforeunload = '';
+	});
+	
 	$('a.edit_address').click(function(){
 		
 		$(this).hide();
@@ -167,7 +171,7 @@ jQuery( function($){
 			$('#_order_total').val( order_total );
 			
 			// Since we currently cannot calc shipping from the backend, ditch the rows. They must be manually calculated.
-			$('ul.tax_rows').empty();
+			$('#tax_rows').empty();
 
 			$('#woocommerce-order-totals').unblock();
 
@@ -351,8 +355,38 @@ jQuery( function($){
 		return false;
 	});
 	
-	$('button.add_tax_row').live('click', function(){
-		$('ul.tax_rows').append('<li class="left"><input type="text" name="_order_taxes_label[]" placeholder="' + woocommerce_writepanel_params.tax_label + '" class="calculated" value="' + woocommerce_writepanel_params.tax_or_vat + '" /></li><li class="right"><input type="text" name="_order_taxes_total[]" placeholder="0.00" class="calculated" /><input type="hidden" name="_order_taxes_compound[]" value="0" /></li>');
+	$('a.add_tax_row').live('click', function(){
+		
+		var size = $('#tax_rows .tax_row').size();
+		
+		$('#tax_rows').append('<div class="tax_row">\
+			<p class="first">\
+				<label>' + woocommerce_writepanel_params.tax_label + '</label>\
+				<input type="text" name="_order_taxes_label[' + size + ']" placeholder="' + woocommerce_writepanel_params.tax_or_vat + '" />\
+			</p>\
+			<p class="last">\
+				<label>' + woocommerce_writepanel_params.compound_label + '\
+				<input type="checkbox" name="_order_taxes_compound[' + size + ']" /></label>\
+			</p>\
+			<p class="first">\
+				<label>' + woocommerce_writepanel_params.cart_tax_label + '</label>\
+				<input type="text" name="_order_taxes_cart[' + size + ']" placeholder="0.00" />\
+			</p>\
+			<p class="last">\
+				<label>' + woocommerce_writepanel_params.shipping_tax_label + '</label>\
+				<input type="text" name="_order_taxes_shipping[' + size + ']" placeholder="0.00" />\
+			</p>\
+			<a href="#" class="delete_tax_row">&times;</a>\
+			<div class="clear"></div>\
+		</div>');
+		
+		return false;
+	});
+	
+	$('a.delete_tax_row').live('click', function(){
+		$tax_row = $(this).closest('.tax_row');
+		$tax_row.find('input').val('');
+		$tax_row.hide();
 		return false;
 	});
 	

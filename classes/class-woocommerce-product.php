@@ -493,25 +493,6 @@ class Woocommerce_Product {
 	function get_price() {
 		return $this->price;
 	}
-
-	/** Returns the price (including tax) - ignores tax_class filters */
-	function get_price_including_tax( $round = true ) {
-		
-		$price = $this->price;
-
-		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='no' ) :
-			
-			$_tax = new Woocommerce_Tax();
-			
-			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
-			$taxes 			= $_tax->calc_tax( $price, $tax_rates, false );
-			$tax_amount		= $_tax->get_tax_total( $taxes );
-			$price 			= round( $price + $tax_amount, 2);
-		
-		endif;
-		
-		return $price;
-	}
 	
 	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
 	function get_price_excluding_tax() {
