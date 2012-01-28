@@ -195,7 +195,7 @@ function woocommerce_custom_product_columns( $column ) {
 				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" /> ';
 			endif;
 			if ( $product->managing_stock() ) :
-				echo $product->get_total_stock().__(' in stock', 'woocommerce');
+				echo '&times; ' . $product->get_total_stock();
 			endif;
 		break;
 	}
