@@ -474,7 +474,7 @@ class WC_Countries {
 	}
 	
 	function inc_tax_or_vat() {
-		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(inc. VAT)', 'woocommerce') : __('(inc. tax)', 'woocommerce');
+		$return = ( in_array($this->get_base_country(), $this->get_european_union_countries()) ) ? __('(incl. VAT)', 'woocommerce') : __('(incl. tax)', 'woocommerce');
 		
 		return apply_filters('woocommerce_countries_inc_tax_or_vat', $return);
 	}

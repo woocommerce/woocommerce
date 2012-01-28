@@ -716,10 +716,10 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 		'variation_id' 		=> (int) $item_variation[$i],
 			 		'name' 				=> htmlspecialchars(stripslashes($item_name[$i])),
 			 		'qty' 				=> (int) $item_quantity[$i],
-			 		'line_total' 		=> rtrim(rtrim(number_format(woocommerce_clean($line_total[$i]), 4, '.', '')), '0'), '.'),
-			 		'line_tax'			=> rtrim(rtrim(number_format(woocommerce_clean($line_tax[$i]), 4, '.', '')), '0'), '.'),
-			 		'line_subtotal'		=> rtrim(rtrim(number_format(woocommerce_clean($line_subtotal[$i]), 4, '.', '')), '0'), '.'),
-			 		'line_subtotal_tax' => rtrim(rtrim(number_format(woocommerce_clean($line_subtotal_tax[$i]), 4, '.', '')), '0'), '.'),
+			 		'line_total' 		=> rtrim(rtrim(number_format(woocommerce_clean($line_total[$i]), 4, '.', ''), '0'), '.'),
+			 		'line_tax'			=> rtrim(rtrim(number_format(woocommerce_clean($line_tax[$i]), 4, '.', ''), '0'), '.'),
+			 		'line_subtotal'		=> rtrim(rtrim(number_format(woocommerce_clean($line_subtotal[$i]), 4, '.', ''), '0'), '.'),
+			 		'line_subtotal_tax' => rtrim(rtrim(number_format(woocommerce_clean($line_subtotal_tax[$i]), 4, '.', ''), '0'), '.'),
 			 		'item_meta'			=> $item_meta->meta,
 			 		'tax_class'			=> woocommerce_clean($item_tax_class[$i])
 			 	));
