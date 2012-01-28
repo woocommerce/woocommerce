@@ -85,8 +85,8 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 			
 			$paying_customer = get_user_meta( $user_id, 'paying_customer', true );
 			
-			if ($paying_customer) $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
-			else $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';
+			if ($paying_customer) $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
+			else $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';
 			
 		break;
 	endswitch;
