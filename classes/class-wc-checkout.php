@@ -406,10 +406,10 @@ class WC_Checkout {
 				 		'name' 				=> $_product->get_title(),
 				 		'qty' 				=> (int) $values['quantity'],
 				 		'item_meta'			=> $item_meta->meta,
-				 		'line_subtotal' 	=> woocommerce_trim_zeros(number_format($values['line_subtotal'], 4, '.', '')),		// Line subtotal (before discounts)
-				 		'line_subtotal_tax' => woocommerce_trim_zeros(number_format($values['line_subtotal_tax'], 4, '.', '')),	// Line tax (before discounts)
-				 		'line_total'		=> woocommerce_trim_zeros(number_format($values['line_total'], 4, '.', '')), 		// Line total (after discounts)
-				 		'line_tax' 			=> woocommerce_trim_zeros(number_format($values['line_tax'], 4, '.', '')), 			// Line Tax (after discounts)
+				 		'line_subtotal' 	=> rtrim(rtrim(number_format($values['line_subtotal'], 4, '.', '')), '0'), '.'),	// Line subtotal (before discounts)
+				 		'line_subtotal_tax' => rtrim(rtrim(number_format($values['line_subtotal_tax'], 4, '.', '')), '0'), '.'), // Line tax (before discounts)
+				 		'line_total'		=> rtrim(rtrim(number_format($values['line_total'], 4, '.', '')), '0'), '.'), 		// Line total (after discounts)
+				 		'line_tax' 			=> rtrim(rtrim(number_format($values['line_tax'], 4, '.', '')), '0'), '.'), 		// Line Tax (after discounts)
 				 		'tax_class'			=> $_product->get_tax_class()								// Tax class (adjusted by filters)
 				 	), $values);
 				endforeach;

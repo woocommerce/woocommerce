@@ -189,7 +189,7 @@ function woocommerce_price( $price, $args = array() ) {
  * Trim trailing zeros
  **/
 function woocommerce_trim_zeros( $price ) {
-	return rtrim(rtrim($price, '0'), '.');
+	return preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
 }
 
 /**
