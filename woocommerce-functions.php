@@ -225,11 +225,11 @@ function woocommerce_update_cart_action() {
 function woocommerce_add_to_cart_action( $url = false ) {
 	global $woocommerce;
 
-	if (empty($_GET['add-to-cart']) || !$woocommerce->verify_nonce('add_to_cart', '_GET')) return;
+	if (empty($_REQUEST['add-to-cart']) || !$woocommerce->verify_nonce('add_to_cart', '_REQUEST')) return;
     
     $added_to_cart 		= false;
     
-    switch ($_GET['add-to-cart']) {
+    switch ($_REQUEST['add-to-cart']) {
     	
     	// Variable Products
     	case 'variation' :
@@ -237,12 +237,12 @@ function woocommerce_add_to_cart_action( $url = false ) {
     		// Only allow integer variation ID - if its not set, redirect to the product page
     		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id']) || $_POST['variation_id']<1) {
     			$woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
-    			wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_GET['product_id'])));
+    			wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
     			exit;
     		}
     		
     		// Get product ID to add and quantity
-    		$product_id 		= (int) apply_filters('woocommerce_add_to_cart_product_id', $_GET['product_id']);
+    		$product_id 		= (int) apply_filters('woocommerce_add_to_cart_product_id', $_REQUEST['product_id']);
     		$variation_id 		= (int) $_POST['variation_id'];
     		$quantity 			= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
     		$attributes 		= (array) maybe_unserialize(get_post_meta($product_id, '_product_attributes', true));
@@ -278,7 +278,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				}
             } else {
                 $woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
-                wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_GET['product_id'])));
+                wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
                 exit;
            }
     		            
@@ -309,15 +309,15 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				
 				if (!$added_to_cart && !$quantity_set) {
 					$woocommerce->add_error( __('Please choose a quantity&hellip;', 'woocommerce') );
-					wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_GET['product_id'])));
+					wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
 					exit;
 				}
 	
-			} elseif ($_GET['product_id']) {
+			} elseif ($_REQUEST['product_id']) {
 			
 				/* Link on product archives */
 				$woocommerce->add_error( __('Please choose a product&hellip;', 'woocommerce') );
-				wp_redirect( get_permalink( $_GET['product_id'] ) );
+				wp_redirect( get_permalink( $_REQUEST['product_id'] ) );
 				exit;
 				
 			}
@@ -328,10 +328,10 @@ function woocommerce_add_to_cart_action( $url = false ) {
     	default :
     		
     		// Only allow integers
-    		if (!is_numeric($_GET['add-to-cart'])) break;
+    		if (!is_numeric($_REQUEST['add-to-cart'])) break;
     		
     		// Get product ID to add and quantity
-    		$product_id		= (int) $_GET['add-to-cart'];
+    		$product_id		= (int) $_REQUEST['add-to-cart'];
     		$quantity 		= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
     		
     		// Add to cart validation
@@ -339,7 +339,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     		
     		if ($passed_validation) {
 	    		// Add the product to the cart
-	    		if ($woocommerce->cart->add_to_cart($_GET['add-to-cart'], $quantity)) {
+	    		if ($woocommerce->cart->add_to_cart($_REQUEST['add-to-cart'], $quantity)) {
 	    			woocommerce_add_to_cart_message();
 	    			$added_to_cart = true;
 	    		}
@@ -365,7 +365,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 			exit;
 		}
-
+  
     }
 
 }
