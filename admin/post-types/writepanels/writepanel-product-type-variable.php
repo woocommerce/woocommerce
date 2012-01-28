@@ -65,9 +65,9 @@ function variable_product_type_options() {
 				
 					$variation_data = get_post_custom( $variation->ID );
 					$image = '';
-					if (isset($variation_data['__thumbnail_id'][0])) :
-						$image_id = $variation_data['__thumbnail_id'][0];
-						$image = wp_get_attachment_url( $variation_data['__thumbnail_id'][0] );
+					if (isset($variation_data['_thumbnail_id'][0])) :
+						$image_id = $variation_data['_thumbnail_id'][0];
+						$image = wp_get_attachment_url( $variation_data['_thumbnail_id'][0] );
 					else :
 						$image_id = 0;
 					endif;
