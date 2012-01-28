@@ -156,7 +156,7 @@ function woocommerce_custom_product_columns( $column ) {
 			
 		break;
 		case "sku" :
-			if ( $sku = get_post_meta( $post->ID, '_sku', true ) ) echo $sku;
+			echo $product->get_sku();
 		break;
 		case "product_type" :
 			if( $product->product_type == 'grouped' ):
@@ -196,17 +196,6 @@ function woocommerce_custom_product_columns( $column ) {
 			endif;
 			if ( $product->managing_stock() ) :
 				echo $product->get_total_stock().__(' in stock', 'woocommerce');
-			endif;
-		break;
-		case "visibility" :
-			/**
-			 * show hidden visible product on colum Date
-			 * Assuming that we have only show and hidden status
-			 */
-			if ( $product->visibility == 'hidden' ) :
-				echo '<br />'. __('Hidden', 'woocommerce');
-			else:
-				echo '<br />'. __('Visible', 'woocommerce');
 			endif;
 		break;
 	}
