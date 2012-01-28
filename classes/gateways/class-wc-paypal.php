@@ -267,7 +267,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 					
 					$item_loop++;
 					
-					$product = get_product_from_item($item);
+					$product = $order->get_product_from_item($item);
 					
 					$item_name 	= $item['name'];
 					
