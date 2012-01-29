@@ -2,12 +2,12 @@
 /**
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
  *
- * @class 		Woocommerce_Query
+ * @class 		WC_Query
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Query {
+class WC_Query {
 	
 	var $unfiltered_product_ids 	= array(); 	// Unfiltered product ids (before layered nav etc)
 	var $filtered_product_ids 		= array(); 	// Filtered product ids (after layered nav)

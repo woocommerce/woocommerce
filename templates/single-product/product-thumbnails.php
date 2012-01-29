@@ -41,6 +41,5 @@ global $post, $woocommerce;
 
 			endforeach;
 		endif;
-		wp_reset_query();
 	?>
 </div>

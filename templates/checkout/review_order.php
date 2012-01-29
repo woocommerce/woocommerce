@@ -92,16 +92,18 @@
 			
 			<?php 
 				if ($woocommerce->cart->get_cart_tax()) :
-
-					if (isset($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) :
+					
+					$taxes = $woocommerce->cart->get_taxes();
+					
+					if (sizeof($taxes)>0) :
 					
 						$has_compound_tax = false;
 						
-						foreach ($woocommerce->cart->taxes as $key => $tax) : if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
+						foreach ($taxes as $key => $tax) : if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
 
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th colspan="2"><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo woocommerce_price($tax); ?></td>
 							</tr>
 							<?php
@@ -117,11 +119,11 @@
 							<?php
 						endif;
 						
-						foreach ($woocommerce->cart->taxes as $key => $tax) : if (!$woocommerce->cart->tax->is_compound( $key )) continue;
+						foreach ($taxes as $key => $tax) : if (!$woocommerce->cart->tax->is_compound( $key )) continue;
 
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th colspan="2"><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
 								<td><?php echo woocommerce_price($tax); ?></td>
 							</tr>
 							<?php

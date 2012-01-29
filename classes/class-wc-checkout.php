@@ -4,12 +4,12 @@
  * 
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @class 		Woocommerce_Checkout
+ * @class 		WC_Checkout
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Checkout {
+class WC_Checkout {
 	
 	var $posted;
 	var $checkout_fields;
@@ -220,7 +220,7 @@ class Woocommerce_Checkout {
 				$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
 				
 				// Validation: Required fields
-				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
+				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
 				
 				if (!empty($this->posted[$key])) :
 					// Special handling for validation and formatting
@@ -229,16 +229,16 @@ class Woocommerce_Checkout {
 						case "shipping_postcode" :
 							$this->posted[$key] = strtolower(str_replace(' ', '', $this->posted[$key]));
 							
-							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( $field['label'] . __(' (billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('(billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
 							else :
 								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
 							endif;
 						break;
 						case "billing_phone" :
-							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid number.', 'woocommerce') ); endif;
+							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid number.', 'woocommerce') ); endif;
 						break;
 						case "billing_email" :
-							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( $field['label'] . ' ' . __('is not a valid email address.', 'woocommerce') ); endif;
+							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') ); endif;
 						break;
 					endswitch;
 				endif;
@@ -371,7 +371,7 @@ class Woocommerce_Checkout {
 				endif;
 				
 				// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
-				$_tax = new Woocommerce_Tax();
+				$_tax = new WC_Tax();
 				
 				$order_data = array(
 					'post_type' 	=> 'shop_order',
@@ -406,10 +406,10 @@ class Woocommerce_Checkout {
 				 		'name' 				=> $_product->get_title(),
 				 		'qty' 				=> (int) $values['quantity'],
 				 		'item_meta'			=> $item_meta->meta,
-				 		'line_subtotal' 	=> number_format($values['line_subtotal'], 2, '.', ''),		// Line subtotal (before discounts)
-				 		'line_subtotal_tax' => number_format($values['line_subtotal_tax'], 2, '.', ''),	// Line tax (before discounts)
-				 		'line_total'		=> number_format($values['line_total'], 2, '.', ''), 		// Line total (after discounts)
-				 		'line_tax' 			=> number_format($values['line_tax'], 2, '.', ''), 			// Line Tax (after discounts)
+				 		'line_subtotal' 	=> rtrim(rtrim(number_format($values['line_subtotal'], 4, '.', ''), '0'), '.'),	// Line subtotal (before discounts)
+				 		'line_subtotal_tax' => rtrim(rtrim(number_format($values['line_subtotal_tax'], 4, '.', ''), '0'), '.'), // Line tax (before discounts)
+				 		'line_total'		=> rtrim(rtrim(number_format($values['line_total'], 4, '.', ''), '0'), '.'), 		// Line total (after discounts)
+				 		'line_tax' 			=> rtrim(rtrim(number_format($values['line_tax'], 4, '.', ''), '0'), '.'), 		// Line Tax (after discounts)
 				 		'tax_class'			=> $_product->get_tax_class()								// Tax class (adjusted by filters)
 				 	), $values);
 				endforeach;
@@ -492,11 +492,6 @@ class Woocommerce_Checkout {
 							
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$field_key] );
-							
-							// User
-							if ($user_id>0) :
-								update_user_meta( $user_id, $key, $this->posted[$field_key] );
-							endif;
 						else :
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
@@ -513,21 +508,24 @@ class Woocommerce_Checkout {
 				// Save any other user meta
 				if ($user_id) do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);
 				
-				// Put order taxes into an array to store
+				// Prepare order taxes for storage
 				$order_taxes = array();
-				
-				if (is_array($woocommerce->cart->taxes) && sizeof($woocommerce->cart->taxes)>0) foreach ( $woocommerce->cart->taxes as $key => $tax ) :
+
+				foreach (array_keys($woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes) as $key) {
 					
 					$is_compound = ($woocommerce->cart->tax->is_compound( $key )) ? 1 : 0;
+					
+					$cart_tax = (isset($woocommerce->cart->taxes[$key])) ? $woocommerce->cart->taxes[$key] : 0;
+					$shipping_tax = (isset($woocommerce->cart->shipping_taxes[$key])) ? $woocommerce->cart->shipping_taxes[$key] : 0;
 					
 					$order_taxes[] = array(
 						'label' => $woocommerce->cart->tax->get_rate_label( $key ),
 						'compound' => $is_compound,
-						'total' => number_format($tax, 2, '.', '')
+						'cart_tax' => number_format($cart_tax, 2, '.', ''),
+						'shipping_tax' => number_format($shipping_tax, 2, '.', '')
 					);
-					
-				endforeach;
-				
+				}
+								
 				// Save other order meta fields
 				update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
@@ -583,7 +581,7 @@ class Woocommerce_Checkout {
 				
 				else :
 					
-					$order = new Woocommerce_Order($order_id);
+					$order = new WC_Order($order_id);
 					
 					// No payment was required for order
 					$order->payment_complete();
@@ -644,4 +642,12 @@ class Woocommerce_Checkout {
 			
 		endif;
 	}
+}
+
+/** Depreciated */
+class woocommerce_checkout extends WC_Checkout {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_checkout', '1.4', 'WC_Checkout()' );
+		parent::__construct(); 
+	} 
 }

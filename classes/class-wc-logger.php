@@ -2,12 +2,12 @@
 /**
  * Allows log files to be written to for debugging purposes.
  *
- * @class 		Woocommerce_Logger
+ * @class 		WC_Logger
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Logger {
+class WC_Logger {
 	
 	private $handles;
 	
@@ -65,4 +65,12 @@ class Woocommerce_Logger {
 		
 	}
 
+}
+
+/** Depreciated */
+class woocommerce_logger extends WC_Logger {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_logger', '1.4', 'WC_Logger()' );
+		parent::__construct(); 
+	} 
 }

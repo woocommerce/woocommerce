@@ -4,12 +4,12 @@
  * 
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
- * @class Woocommerce_Customer
+ * @class 		WC_Customer
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Customer {
+class WC_Customer {
 	
 	/** constructor */
 	function __construct() {
@@ -203,16 +203,16 @@ class Woocommerce_Customer {
 				
 				if ($result->order_id>0) :
 				
-					$order = new Woocommerce_Order( $result->order_id );
+					$order = new WC_Order( $result->order_id );
 					
 					if ( $order->status!='completed' && $order->status!='processing' ) continue;
 						
 					$product_post = get_post( $result->product_id );
 	
 					if ($product_post->post_type=='product_variation') :
-						$_product = new Woocommerce_Product_Variation( $result->product_id );
+						$_product = new WC_Product_Variation( $result->product_id );
 					else :
-						$_product = new Woocommerce_Product( $result->product_id );
+						$_product = new WC_Product( $result->product_id );
 					endif;					
 					
 					if ($_product->exists) :
@@ -239,5 +239,12 @@ class Woocommerce_Customer {
 		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
 		
 	}
+}
 
+/** Depreciated */
+class woocommerce_customer extends WC_Coupon {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_customer', '1.4', 'WC_Customer()' );
+		parent::__construct(); 
+	} 
 }

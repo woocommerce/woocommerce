@@ -24,10 +24,13 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
  * WooCommerce page IDs
  *
  * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+ *
+ * returns -1 if no page is found
  **/
 if (!function_exists('woocommerce_get_page_id')) {
 	function woocommerce_get_page_id( $page ) {
-		return apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+		$page = apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
+		return ($page) ? $page : -1;
 	}
 }
 
@@ -159,7 +162,7 @@ function woocommerce_price( $price, $args = array() ) {
 	$price = number_format( (double) $price, $num_decimals, get_option('woocommerce_price_decimal_sep'), get_option('woocommerce_price_thousand_sep') );
 	
 	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) :
-		$price = preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
+		$price = woocommerce_trim_zeros($price);
 	endif;
 	
 	switch ($currency_pos) :
@@ -182,6 +185,13 @@ function woocommerce_price( $price, $args = array() ) {
 	return $return;
 }	
 	
+/**
+ * Trim trailing zeros
+ **/
+function woocommerce_trim_zeros( $price ) {
+	return preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
+}
+
 /**
  * Clean variables
  **/
@@ -381,7 +391,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_produ
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	
 	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 	
@@ -442,7 +452,7 @@ add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
 
 function woocommerce_paying_customer( $order_id ) {
 	
-	$order = new Woocommerce_Order( $order_id );
+	$order = new WC_Order( $order_id );
 	
 	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
 }
@@ -570,7 +580,7 @@ function woocommerce_walk_category_dropdown_tree() {
 	$args = func_get_args();
 	// the user's options are the third parameter
 	if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') )
-		$walker = new Woocommerce_Walker_CategoryDropdown;
+		$walker = new WC_Walker_CategoryDropdown;
 	else
 		$walker = $args[2]['walker'];
 
@@ -580,7 +590,7 @@ function woocommerce_walk_category_dropdown_tree() {
 /**
  * Create HTML dropdown list of Product Categories.
  */
-class Woocommerce_Walker_CategoryDropdown extends Walker {
+class WC_Walker_CategoryDropdown extends Walker {
 
 	var $tree_type = 'category';
 	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );

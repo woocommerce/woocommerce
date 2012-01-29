@@ -4,13 +4,13 @@
  * 
  * A simple shipping method allowing local delivery as a shipping method
  *
- * @class 		Local_Delivery
+ * @class 		WC_Local_Delivery
  * @package		WooCommerce
  * @category	Shipping
  * @author		Patrick Garman (www.patrickgarman.com)
  */  
 
-class Woocommerce_Local_Delivery extends Woocommerce_Shipping_Method {
+class WC_Local_Delivery extends WC_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-delivery';
@@ -34,7 +34,7 @@ class Woocommerce_Local_Delivery extends Woocommerce_Shipping_Method {
 
 	 function calculate_shipping() {
 		global $woocommerce;
-		$_tax = new Woocommerce_Tax();
+		$_tax = new WC_Tax();
 		if ($this->type=='free') 		$shipping_total 	= 0;
 		if ($this->type=='fixed') 		$shipping_total 	= $this->fee;
 		if ($this->type=='percent') 	$shipping_total 	= $woocommerce->cart->cart_contents_total * ($this->fee/100);
@@ -94,5 +94,5 @@ class Woocommerce_Local_Delivery extends Woocommerce_Shipping_Method {
 
 }
 
-function add_local_delivery_method($methods) { $methods[] = 'woocommerce_local_delivery'; return $methods; }
+function add_local_delivery_method($methods) { $methods[] = 'WC_Local_Delivery'; return $methods; }
 add_filter('woocommerce_shipping_methods','add_local_delivery_method');

@@ -49,11 +49,11 @@ if ($customer_orders) :
 		
 		<tbody><?php
 			foreach ($customer_orders as $customer_order) :
-				$order = new Woocommerce_Order();
+				$order = new WC_Order();
 				$order->populate($customer_order);
 				?><tr class="order">
 					<td><?php echo $order->id; ?></td>
-					<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
+					<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
 					<td><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
 					<td><?php echo woocommerce_price($order->order_total); ?></td>
 					<td><?php 

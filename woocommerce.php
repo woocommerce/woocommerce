@@ -89,9 +89,9 @@ class Woocommerce {
 		if (is_admin() && !defined('DOING_AJAX')) $this->install();
 
 		// Load class instances
-		$this->payment_gateways 	= new Woocommerce_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
-		$this->shipping 			= new Woocommerce_Shipping();			// Shipping class. loads and stores shipping methods
-		$this->countries 			= new Woocommerce_Countries();			// Countries class
+		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->countries 			= new WC_Countries();			// Countries class
 		
 		// Variables
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
@@ -121,9 +121,9 @@ class Woocommerce {
 		if ( !is_admin() || defined('DOING_AJAX') ) :
 			
 			// Class instances
-			$this->cart 			= new Woocommerce_Cart();				// Cart class, stores the cart contents
-			$this->customer 		= new Woocommerce_Customer();			// Customer class, sorts out session data such as location
-			$this->query			= new Woocommerce_Query();				// Query class, handles front-end queries and loops
+			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
+			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
+			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 			
 			// Load messages
 			$this->load_messages();
@@ -133,6 +133,7 @@ class Woocommerce {
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
 			add_action( 'init', array(&$this, 'include_template_functions'), 99 );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
+			add_action( 'wp', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
@@ -161,27 +162,27 @@ class Woocommerce {
 
 		include( 'woocommerce-core-functions.php' );					// Contains core functions for the front/back end
 		include( 'widgets/widget-init.php' );							// Widget classes
-		include( 'classes/class-woocommerce-countries.php' );			// Defines countries and states
-		include( 'classes/class-woocommerce-order.php' );				// Single order class
-		include( 'classes/class-woocommerce-product.php' );				// Product class
-		include( 'classes/class-woocommerce-product-variation.php' );	// Product variation class
-		include( 'classes/class-woocommerce-tax.php' );					// Tax class
+		include( 'classes/class-wc-countries.php' );			// Defines countries and states
+		include( 'classes/class-wc-order.php' );				// Single order class
+		include( 'classes/class-wc-product.php' );				// Product class
+		include( 'classes/class-wc-product-variation.php' );	// Product variation class
+		include( 'classes/class-wc-tax.php' );					// Tax class
 		
 		// Include shipping modules and gateways
-		include( 'classes/class-woocommerce-settings-api.php' );
-		include( 'classes/gateways/class-woocommerce-payment-gateways.php' );
-		include( 'classes/gateways/class-woocommerce-payment-gateway.php' );
-		include( 'classes/shipping/class-woocommerce-shipping.php' );
-		include( 'classes/shipping/class-woocommerce-shipping-method.php' );
+		include( 'classes/class-wc-settings-api.php' );
+		include( 'classes/gateways/class-wc-payment-gateways.php' );
+		include( 'classes/gateways/class-wc-payment-gateway.php' );
+		include( 'classes/shipping/class-wc-shipping.php' );
+		include( 'classes/shipping/class-wc-shipping-method.php' );
 		
-		include( 'classes/shipping/class-woocommerce-flat-rate.php' );
-		include( 'classes/shipping/class-woocommerce-free-shipping.php' );
-		include( 'classes/shipping/class-woocommerce-local-delivery.php' );
-		include( 'classes/shipping/class-woocommerce-local-pickup.php' );
-		include( 'classes/gateways/class-woocommerce-bacs.php' );
-		include( 'classes/gateways/class-woocommerce-cheque.php' );
-		include( 'classes/gateways/class-woocommerce-paypal.php' );
-		include( 'classes/gateways/class-woocommerce-cod.php' );
+		include( 'classes/shipping/class-wc-flat-rate.php' );
+		include( 'classes/shipping/class-wc-free-shipping.php' );
+		include( 'classes/shipping/class-wc-local-delivery.php' );
+		include( 'classes/shipping/class-wc-local-pickup.php' );
+		include( 'classes/gateways/class-wc-bacs.php' );
+		include( 'classes/gateways/class-wc-cheque.php' );
+		include( 'classes/gateways/class-wc-paypal.php' );
+		include( 'classes/gateways/class-wc-cod.php' );
 	}
 	
 	/**
@@ -205,10 +206,10 @@ class Woocommerce {
 		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
 		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
 		include( 'shortcodes/shortcode-init.php' );			// Init the shortcodes
-		include( 'classes/class-woocommerce-query.php' );		// The main store queries
-		include( 'classes/class-woocommerce-cart.php' );		// The main cart class
-		include( 'classes/class-woocommerce-coupon.php' );		// Coupon class
-		include( 'classes/class-woocommerce-customer.php' ); 	// Customer class
+		include( 'classes/class-wc-query.php' );		// The main store queries
+		include( 'classes/class-wc-cart.php' );		// The main cart class
+		include( 'classes/class-wc-coupon.php' );		// Coupon class
+		include( 'classes/class-wc-customer.php' ); 	// Customer class
 	}
 	
 	/**
@@ -290,6 +291,13 @@ class Woocommerce {
 
 		do_action( 'woocommerce_init' );
 	}
+	
+	/**
+	 * Output buffering on the checkout allows gateways to do header redirects
+	 **/
+	function buffer_checkout() {
+		if (is_checkout()) ob_start();
+	}
 
 	/**
 	 * Register WC environment globals
@@ -304,7 +312,7 @@ class Woocommerce {
 	function setup_product_data( $post ) {
 		if ($post->post_type!=='product') return;
 		unset($GLOBALS['product']);
-		$GLOBALS['product'] = new Woocommerce_Product( $post->ID );
+		$GLOBALS['product'] = new WC_Product( $post->ID );
 		return $GLOBALS['product'];
 	}
 	
@@ -468,7 +476,7 @@ class Woocommerce {
 		register_taxonomy( 'product_cat',
 	        array('product'),
 	        array(
-	            'hierarchical' 			=> true,
+	            'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
@@ -892,9 +900,9 @@ class Woocommerce {
 	 * Get Checkout Class
 	 */
 	function checkout() { 
-		if ( !class_exists('Woocommerce_Checkout') ) :
-			include( 'classes/class-woocommerce-checkout.php' );
-			$this->checkout = new Woocommerce_Checkout();
+		if ( !class_exists('WC_Checkout') ) :
+			include( 'classes/class-wc-checkout.php' );
+			$this->checkout = new WC_Checkout();
 		endif;
 		
 		return $this->checkout;
@@ -904,16 +912,16 @@ class Woocommerce {
 	 * Get Logging Class
 	 */
 	function logger() { 
-		if ( !class_exists('Woocommerce_Logger') ) include( 'classes/class-woocommerce-logger.php' );
-		return new Woocommerce_Logger();
+		if ( !class_exists('WC_Logger') ) include( 'classes/class-wc-logger.php' );
+		return new WC_Logger();
 	}
 	
 	/**
 	 * Get Validation Class
 	 */
 	function validation() {
-		if ( !class_exists('Woocommerce_Validation') ) include( 'classes/class-woocommerce-validation.php' );
-		return new Woocommerce_Validation();
+		if ( !class_exists('WC_Validation') ) include( 'classes/class-wc-validation.php' );
+		return new WC_Validation();
 	}
 	
 	/**
@@ -926,9 +934,9 @@ class Woocommerce {
 	
 	function mailer() { 
 		// Init mail class
-		if ( !class_exists('Woocommerce_Email') ) :
-			include( 'classes/class-woocommerce-email.php' );
-			$this->woocommerce_email = new Woocommerce_Email();
+		if ( !class_exists('WC_Email') ) :
+			include( 'classes/class-wc-email.php' );
+			$this->woocommerce_email = new WC_Email();
 		endif;
 		return $this->woocommerce_email;
 	}
@@ -1032,17 +1040,34 @@ class Woocommerce {
 	 * Output the errors and messages
 	 */
 	function show_messages() {
-		if (isset($this->errors) && sizeof($this->errors)>0) :
-			echo '<div class="woocommerce_error">'.$this->errors[0].'</div>';
+		
+		// Show multiple errors in a list format
+		if (isset($this->errors) && sizeof($this->errors)>0) {
+			echo '<ul class="woocommerce_error">';
+			foreach ($this->errors as $error) {
+				echo '<li>' . $error . '</li>';
+			}
+			echo '</ul>';
 			$this->clear_messages();
 			return true;
-		elseif (isset($this->messages) && sizeof($this->messages)>0) :
+			
+		// Show a single message in a div
+		} elseif (isset($this->messages) && sizeof($this->messages)>0) {
 			echo '<div class="woocommerce_message">'.$this->messages[0].'</div>';
 			$this->clear_messages();
 			return true;
-		else :
+			
+		} else {
 			return false;
-		endif;
+		}
+	}
+	
+	/**
+	 * Set session data for messages
+	 */
+	function set_messages() {
+		$_SESSION['errors'] = $this->errors;
+		$_SESSION['messages'] = $this->messages;
 	}
 	
 	/**
@@ -1051,8 +1076,7 @@ class Woocommerce {
 	function redirect( $location, $status ) {
 		global $is_IIS;
 			
-		$_SESSION['errors'] = $this->errors;
-		$_SESSION['messages'] = $this->messages;
+		$this->set_messages();
 		
 		// IIS fix
 		if ($is_IIS) session_write_close();

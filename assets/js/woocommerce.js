@@ -32,8 +32,8 @@ jQuery(document).ready(function($) {
 					// Get response
 					data = $.parseJSON( response );
 					
-					if (data.error) {
-						alert(data.error);
+					if (data.error && data.product_url) {
+						window.location = data.product_url;
 						return;
 					}
 					

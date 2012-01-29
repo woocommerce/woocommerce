@@ -4,12 +4,12 @@
  * 
  * The WooCommerce order class handles order data.
  *
- * @class Woocommerce_Order
+ * @class 		WC_Order
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Order {
+class WC_Order {
 	
 	var $id;
 	var $status;
@@ -59,7 +59,7 @@ class Woocommerce_Order {
 	var $formatted_shipping_address;
 	
 	/** Get the order if ID is passed, otherwise the order is new and empty */
-	function woocommerce_order( $id = '' ) {
+	function __construct( $id = '' ) {
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
@@ -277,30 +277,39 @@ class Woocommerce_Order {
 	
 	
 	/** Get item subtotal - this is the cost before discount */
-	function get_item_subtotal( $item, $inc_tax = false ) {
+	function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] ) , 2, '.', '');
+			$price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] / $item['qty'] );
 		else :
-			return number_format( ( $item['line_subtotal'] / $item['qty'] ), 2, '.', '');
+			$price = ( $item['line_subtotal'] / $item['qty'] );
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Get line subtotal - this is the cost before discount */
-	function get_line_subtotal( $item, $inc_tax = false ) {
+	function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( $item['line_subtotal'] + $item['line_subtotal_tax'], 2, '.', '');
+			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		else :
-			return number_format( $item['line_subtotal'], 2, '.', '');
+			$price = $item['line_subtotal'];
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Calculate item cost - useful for gateways */
-	function get_item_total( $item, $inc_tax = false ) {
+	function get_item_total( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
-			return number_format( ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] ), 2, '.', '');
+			$price = ( ( $item['line_total'] + $item['line_tax'] ) / $item['qty'] );
 		else :
-			return number_format( $item['line_total'] / $item['qty'] , 2, '.', '');
+			$price = $item['line_total'] / $item['qty'];
 		endif;
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
+	}
+	
+	/** Calculate item tax - useful for gateways */
+	function get_item_tax( $item, $round = true ) {
+		$price = $item['line_tax'] / $item['qty'];
+		return ($round) ? number_format( $price, 2, '.', '') : $price;
 	}
 	
 	/** Calculate line total - useful for gateways */
@@ -310,6 +319,22 @@ class Woocommerce_Order {
 		else :
 			return number_format( $item['line_total'] , 2, '.', '');
 		endif;
+	}
+	
+	/** Calculate line tax - useful for gateways */
+	function get_line_tax( $item ) {
+		return number_format( $item['line_tax'], 2, '.', '');
+	}
+	
+	/** Depreciated functions */
+	function get_item_cost( $item, $inc_tax = false ) {
+		_deprecated_function( __FUNCTION__, '1.4', 'get_item_total()' );
+		return $this->get_item_total( $item, $inc_tax );
+	}
+	
+	function get_row_cost( $item, $inc_tax = false ) {
+		_deprecated_function( __FUNCTION__, '1.4', 'get_row_cost()' );
+		return $this->get_line_total( $item, $inc_tax );
 	}
 	
 	/** Gets line subtotal - formatted for display */
@@ -371,7 +396,7 @@ class Woocommerce_Order {
 				
 				if (isset($tax['compound']) && $tax['compound']) continue;
 				
-				$subtotal = $subtotal + $tax['total'];
+				$subtotal = $subtotal + $tax['cart_tax'] + $tax['shipping_tax'];
 			
 			endforeach;
 			
@@ -421,9 +446,9 @@ class Woocommerce_Order {
 	function get_product_from_item( $item ) {
 		
 		if (isset($item['variation_id']) && $item['variation_id']>0) :
-			$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
+			$_product = new WC_Product_Variation( $item['variation_id'] );
 		else :
-			$_product = new Woocommerce_Product( $item['id'] );
+			$_product = new WC_Product( $item['id'] );
 		endif;
 		
 		return $_product;
@@ -453,8 +478,8 @@ class Woocommerce_Order {
 				
 				foreach ($this->get_taxes() as $tax) : 
 					if ($tax['compound']) : $has_compound_tax = true; continue; endif;
-					if ($tax['total']==0) continue;
-					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+					if (($tax['cart_tax']+$tax['shipping_tax'])==0) continue;
+					$total_rows[ $tax['label'] ] = woocommerce_price( ($tax['cart_tax']+$tax['shipping_tax']) );
 				endforeach;
 				
 				if ($has_compound_tax) :
@@ -465,8 +490,8 @@ class Woocommerce_Order {
 				
 				foreach ($this->get_taxes() as $tax) : 
 					if (!$tax['compound']) continue;
-					if ($tax['total']==0) continue;
-					$total_rows[ $tax['label'] ] = woocommerce_price( $tax['total'] );
+					if (($tax['cart_tax']+$tax['shipping_tax'])==0) continue;
+					$total_rows[ $tax['label'] ] = woocommerce_price( ($tax['cart_tax']+$tax['shipping_tax']) );
 				endforeach;
 			
 			else :
@@ -909,4 +934,12 @@ class order_item_meta {
 		endif;
 	}
 	
+}
+
+/** Depreciated */
+class woocommerce_order extends WC_Order {
+	public function __construct( $id = '' ) { 
+		_deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' );
+		parent::__construct( $id ); 
+	} 
 }

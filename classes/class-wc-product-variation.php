@@ -4,12 +4,12 @@
  * 
  * The WooCommerce product variation class handles product variation data.
  *
- * @class Woocommerce_Product_Variation
+ * @class 		WC_Product_Variation
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Product_Variation extends Woocommerce_Product {
+class WC_Product_Variation extends WC_Product {
 	
 	var $variation_data;
 	var $variation_id;
@@ -27,7 +27,7 @@ class Woocommerce_Product_Variation extends Woocommerce_Product {
 	 *
 	 * @param   int		$id		ID of the product to load
 	 */
-	function woocommerce_product_variation( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
+	function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
 		
 		$this->variation_id = $variation_id;
 	
@@ -213,7 +213,7 @@ class Woocommerce_Product_Variation extends Woocommerce_Product {
 				if (!$this->is_in_stock()) :
 				
 					// Check parent
-					$parent_product = new Woocommerce_Product( $this->id );
+					$parent_product = new WC_Product( $this->id );
 					
 					if ($parent_product->managing_stock()) :
 						if (!$parent_product->backorders_allowed()) :
@@ -261,4 +261,12 @@ class Woocommerce_Product_Variation extends Woocommerce_Product {
 		endif;
 	}
 
+}
+
+/** Depreciated */
+class woocommerce_product_variation extends WC_Product_Variation {
+	public function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) { 
+		_deprecated_function( 'woocommerce_product_variation', '1.4', 'WC_Product_Variation()' );
+		parent::__construct( $variation_id, $parent_id, $parent_custom_fields ); 
+	} 
 }

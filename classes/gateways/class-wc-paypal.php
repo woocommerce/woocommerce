@@ -4,12 +4,12 @@
  * 
  * Provides a PayPal Standard Payment Gateway.
  *
- * @class 		Woocommerce_Paypal
+ * @class 		WC_Paypal
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
+class WC_Paypal extends WC_Payment_Gateway {
 		
 	public function __construct() { 
 		global $woocommerce;
@@ -121,6 +121,12 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
 							'default' => 'no'
 						), 
+			'ask_for_shipping' => array(
+							'title' => __( 'Hide shipping', 'woocommerce' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
+							'default' => 'no'
+						),
 			'testmode' => array(
 							'title' => __( 'PayPal sandbox', 'woocommerce' ), 
 							'type' => 'checkbox', 
@@ -150,7 +156,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
     public function generate_paypal_form( $order_id ) {
 		global $woocommerce;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		if ( $this->testmode == 'yes' ):
 			$paypal_adr = $this->testurl . '?test_ipn=1&';		
@@ -195,7 +201,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 				// IPN
 				'notify_url'			=> trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN',
 				
-				// Address info
+				// Billing Address info
 				'first_name'			=> $order->billing_first_name,
 				'last_name'				=> $order->billing_last_name,
 				'company'				=> $order->billing_company,
@@ -217,6 +223,17 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 		if ($this->send_shipping=='yes') :
 			$paypal_args['no_shipping'] = 0;
 			$paypal_args['address_override'] = 1;
+			
+			// If we are sending shipping, send shipping address instead of billing
+			$paypal_args['first_name']	= $order->shipping_first_name;
+			$paypal_args['last_name']	= $order->shipping_last_name;
+			$paypal_args['company']		= $order->shipping_company;
+			$paypal_args['address1']	= $order->shipping_address_1;
+			$paypal_args['address2']	= $order->shipping_address_2;
+			$paypal_args['city']		= $order->shipping_city;
+			$paypal_args['state']		= $order->shipping_state;
+			$paypal_args['zip']			= $order->shipping_postcode;
+			$paypal_args['country']		= $order->shipping_country;
 		else :
 			$paypal_args['no_shipping'] = 1;
 		endif;
@@ -233,7 +250,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 			
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
-				$paypal_args['item_name_2'] = __('Shipping cost', 'woocommerce');
+				$paypal_args['item_name_2'] = __('Shipping via ', 'woocommerce') . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
 			endif;
@@ -250,7 +267,13 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 					
 					$item_loop++;
 					
-					$item_name = $item['name'];
+					$product = $order->get_product_from_item($item);
+					
+					$item_name 	= $item['name'];
+					
+					if (get_option('woocommerce_enable_sku')=='yes') {
+						$item_name .= ' ('.$product->get_sku().')';
+					}
 					
 					$item_meta = new order_item_meta( $item['item_meta'] );					
 					if ($meta = $item_meta->display( true, true )) :
@@ -267,7 +290,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
 				$item_loop++;
-				$paypal_args['item_name_'.$item_loop] = __('Shipping cost', 'woocommerce');
+				$paypal_args['item_name_'.$item_loop] = __('Shipping via ', 'woocommerce') . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_'.$item_loop] = '1';
 				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
 			endif;
@@ -313,7 +336,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 	 **/
 	function process_payment( $order_id ) {
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		return array(
 			'result' 	=> 'success',
@@ -416,7 +439,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
 		// Custom holds post ID
 	    if ( !empty($posted['custom']) && !empty($posted['invoice']) ) {
 	
-			$order = new Woocommerce_Order( (int) $posted['custom'] );
+			$order = new WC_Order( (int) $posted['custom'] );
 	        if ($order->order_key!==$posted['invoice']) :
 	        	if ($this->debug=='yes') $this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
 	        	exit;
@@ -501,7 +524,7 @@ class Woocommerce_Paypal extends Woocommerce_Payment_Gateway {
  * Add the gateway to WooCommerce
  **/
 function add_paypal_gateway( $methods ) {
-	$methods[] = 'woocommerce_paypal'; return $methods;
+	$methods[] = 'WC_Paypal'; return $methods;
 }
 
 add_filter('woocommerce_payment_gateways', 'add_paypal_gateway' );

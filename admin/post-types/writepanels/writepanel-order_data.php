@@ -20,7 +20,7 @@ function woocommerce_order_data_meta_box($post) {
 	
 	$thepostid = $post->ID;
 	
-	$order = new Woocommerce_Order( $thepostid );
+	$order = new WC_Order( $thepostid );
 	
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
@@ -260,9 +260,9 @@ function woocommerce_order_items_meta_box($post) {
 				<?php $loop = 0; if (sizeof($order_items)>0 && isset($order_items[0]['id'])) foreach ($order_items as $item) : 
 				
 					if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-						$_product = new Woocommerce_Product_Variation( $item['variation_id'] );
+						$_product = new WC_Product_Variation( $item['variation_id'] );
 					else :
-						$_product = new Woocommerce_Product( $item['id'] );
+						$_product = new WC_Product( $item['id'] );
 					endif;
 
 					// Totals - Backwards Compatibility
@@ -318,7 +318,7 @@ function woocommerce_order_items_meta_box($post) {
 												$meta_value = $meta;
 											endif;
 	
-											echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.$meta_name.'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $meta_value ).'" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
+											echo '<tr><td><input type="text" name="meta_name['.$loop.'][]" value="'.esc_attr( $meta_name ).'" /></td><td><input type="text" name="meta_value['.$loop.'][]" value="'.esc_attr( $meta_value ).'" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
 										endforeach;
 									endif;
 								?>
@@ -460,6 +460,7 @@ function woocommerce_order_actions_meta_box($post) {
  * Displays the order totals meta box
  */
 function woocommerce_order_totals_meta_box($post) {
+	global $woocommerce;
 	
 	$data = get_post_custom( $post->ID );
 	?>
@@ -505,7 +506,45 @@ function woocommerce_order_totals_meta_box($post) {
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e('Taxes', 'woocommerce'); ?></h4>
+		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>" href="#">[?]</a></h4>
+		<div id="tax_rows">
+			<?php 
+				$loop = 0;
+				$taxes = maybe_unserialize($data['_order_taxes'][0]);
+				if (is_array($taxes) && sizeof($taxes)>0) :
+					foreach ($taxes as $tax) :
+						?>
+						<div class="tax_row">
+							<p class="first">
+								<label><?php _e('Tax Label:', 'woocommerce'); ?></label>
+								<input type="text" name="_order_taxes_label[<?php echo $loop; ?>]" placeholder="<?php echo $woocommerce->countries->tax_or_vat(); ?>" value="<?php echo $tax['label']; ?>" />
+							</p>
+							<p class="last">
+								<label><?php _e('Compound:', 'woocommerce'); ?>
+								<input type="checkbox" name="_order_taxes_compound[<?php echo $loop; ?>]" <?php checked($tax['compound'], 1); ?> /></label>
+							</p>
+							<p class="first">
+								<label><?php _e('Cart Tax:', 'woocommerce'); ?></label>
+								<input type="text" name="_order_taxes_cart[<?php echo $loop; ?>]" placeholder="0.00" value="<?php echo $tax['cart_tax']; ?>" />
+							</p>
+							<p class="last">
+								<label><?php _e('Shipping Tax:', 'woocommerce'); ?></label>
+								<input type="text" name="_order_taxes_shipping[<?php echo $loop; ?>]" placeholder="0.00" value="<?php echo $tax['shipping_tax']; ?>" />
+							</p>
+							<a href="#" class="delete_tax_row">&times;</a>
+							<div class="clear"></div>
+						</div>
+						<?php
+						$loop++;
+					endforeach;
+				endif;
+			?>
+		</div>
+		<h4><a href="#" class="add_tax_row"><?php _e('+ Add tax row', 'woocommerce'); ?></a></h4>
+		<div class="clear"></div>
+	</div>
+	<div class="totals_group">
+		<h4><?php _e('Tax Totals', 'woocommerce'); ?></h4>
 		<ul class="totals">
 			
 			<li class="left">
@@ -523,33 +562,6 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 	
 		</ul>
-		<div class="clear"></div>
-	</div>
-	<div class="totals_group">
-		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" tip="<?php _e('These rows contain taxes for this order. This allows you to add multiple or compound taxes. Leave the rate blank to remove a tax row.', 'woocommerce'); ?>" href="#">[?]</a></h4>
-		<ul class="totals tax_rows">
-			<?php 
-				$taxes = maybe_unserialize($data['_order_taxes'][0]);
-				if (is_array($taxes) && sizeof($taxes)>0) :
-					foreach ($taxes as $tax) :
-						?>
-						<li class="left">
-							<input type="text" name="_order_taxes_label[]" placeholder="Tax Label" value="<?php 
-							echo $tax['label'];
-							?>" class="calculated" />
-						</li>
-						<li class="right">
-							<input type="text" name="_order_taxes_total[]" placeholder="0.00" value="<?php 
-							echo $tax['total'];
-							?>" class="calculated" />
-							<input type="hidden" name="_order_taxes_compound[]" value="<?php echo $tax['compound']; ?>" />
-						</li>
-						<?php
-					endforeach;
-				endif;
-			?>
-		</ul>
-		<p><button class="button add_tax_row"><?php _e('Add row', 'woocommerce'); ?></button></p>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
@@ -584,7 +596,7 @@ function woocommerce_order_totals_meta_box($post) {
 add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 1, 2);
 
 function woocommerce_process_shop_order_meta( $post_id, $post ) {
-	global $wpdb;
+	global $wpdb, $woocommerce;
 	
 	$woocommerce_errors = array();
 	
@@ -627,20 +639,25 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		
 		if (isset($_POST['_order_taxes_label'])) :
 			
-			$order_taxes_label	= $_POST['_order_taxes_label'];
-			$order_taxes_total	= $_POST['_order_taxes_total'];
-			$order_taxes_compound = $_POST['_order_taxes_compound'];
+			$order_taxes_label		= $_POST['_order_taxes_label'];
+			$order_taxes_compound 	= $_POST['_order_taxes_compound'];
+			$order_taxes_cart 		= $_POST['_order_taxes_cart'];
+			$order_taxes_shipping 	= $_POST['_order_taxes_shipping'];
 			
 			for ($i=0; $i<sizeof($order_taxes_label); $i++) :
 				
-				// Add to array
-				if (!$order_taxes_label[$i]) continue;
-				if (!$order_taxes_total[$i]) continue;
+				// Add to array if the tax amount is set
+				if (!$order_taxes_cart[$i] && !$order_taxes_shipping[$i]) continue;
+				
+				if (!$order_taxes_label[$i]) $order_taxes_label[$i] = $woocommerce->countries->tax_or_vat();
+				
+				if (isset($order_taxes_compound[$i])) $is_compound = 1; else $is_compound = 0;
 				
 				$order_taxes[] = array(
-					'label' => esc_attr($order_taxes_label[$i]),
-					'compound' => (int) esc_attr($order_taxes_compound[$i]),
-					'total' => esc_attr($order_taxes_total[$i])
+					'label' 		=> esc_attr($order_taxes_label[$i]),
+					'compound' 		=> $is_compound,
+					'cart_tax' 		=> esc_attr($order_taxes_cart[$i]),
+					'shipping_tax' 	=> esc_attr($order_taxes_shipping[$i])
 				);
 				
 			endfor;
@@ -721,7 +738,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;
 		
 	// Order data saved, now get it so we can manipulate status
-		$order = new Woocommerce_Order( $post_id );
+		$order = new WC_Order( $post_id );
 		
 	// Order status
 		$order->update_status( $_POST['order_status'] );

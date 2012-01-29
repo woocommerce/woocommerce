@@ -2,12 +2,12 @@
 /**
  * WooCommerce Emails Class
  *
- * @class 		Woocommerce_Email
+ * @class 		WC_Email
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Email {
+class WC_Email {
 	
 	private $_from_address;
 	private $_from_name;
@@ -114,7 +114,7 @@ class Woocommerce_Email {
 	function new_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		$email_heading = __('New Customer Order', 'woocommerce');
 		
@@ -139,7 +139,7 @@ class Woocommerce_Email {
 	function customer_processing_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 
 		$email_heading = __('Order Received', 'woocommerce');
 		
@@ -167,7 +167,7 @@ class Woocommerce_Email {
 	function customer_completed_order( $order_id ) {
 		global $order, $email_heading;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		if ($order->has_downloadable_item()) :
 			$subject		= __('[%s] Order Complete/Download Links', 'woocommerce');
@@ -242,7 +242,7 @@ class Woocommerce_Email {
 		
 		if (!$order_id || !$customer_note) return;
 		
-		$order = new Woocommerce_Order( $order_id );
+		$order = new WC_Order( $order_id );
 		
 		$email_heading = __('A note has been added to your order', 'woocommerce');
 		
@@ -372,4 +372,12 @@ class Woocommerce_Email {
 		$this->send( $user_email, $subject, $message );
 	}
 
+}
+
+/** Depreciated */
+class woocommerce_email extends WC_Email {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_email', '1.4', 'WC_Email()' );
+		parent::__construct(); 
+	} 
 }

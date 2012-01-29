@@ -2,12 +2,12 @@
 /**
  * Performs tax calculations and loads tax rates.
  *
- * @class 		Woocommerce_Tax
+ * @class 		WC_Tax
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Tax {
+class WC_Tax {
 	
 	var $rates;	// Simple array of rates
 	var $parsed_rates;	// Parsed into array with counties/states as keys
@@ -519,16 +519,6 @@ class Woocommerce_Tax {
 		return array_sum(array_map(array(&$this, 'round'), $taxes));
 	}
 	
-	/**
-	 * Round tax lines
-	 *
-	 * @param   array
-	 * @return  float		
-	 */
-	function get_taxes_rounded( $taxes ) {
-		return array_map(array(&$this, 'round'), $taxes);
-	}
-	
 	/** 
 	 * Round to 2 DP
 	 */
@@ -536,4 +526,12 @@ class Woocommerce_Tax {
 		return round($in, 2);
 	}
 	
+}
+
+/** Depreciated */
+class woocommerce_tax extends WC_Tax {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_tax', '1.4', 'WC_Tax()' );
+		parent::__construct(); 
+	} 
 }

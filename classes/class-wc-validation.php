@@ -2,13 +2,13 @@
 /**
  * Contains Validation functions
  *
- * @class 		Woocommerce_Validation
+ * @class 		WC_Validation
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
 
-class Woocommerce_Validation {
+class WC_Validation {
 	
 	/**
 	 * Validates an email using wordpress native is_email function
@@ -121,4 +121,12 @@ class Woocommerce_Validation {
 		return $postcode;
 	}
 	
+}
+
+/** Depreciated */
+class woocommerce_validation extends WC_Validation {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_validation', '1.4', 'WC_Validation()' );
+		parent::__construct(); 
+	} 
 }

@@ -5,12 +5,12 @@
  * The WooCommerce cart class stores cart data and active coupons as well as handling customer sessions and some cart related urls.
  * The cart class also has a price calculation function which calls upon other classes to calcualte totals.
  *
- * @class 		Woocommerce_Cart
+ * @class 		WC_Cart
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Cart {
+class WC_Cart {
 	
 	/* Public Variables */
 	var $cart_contents;
@@ -26,6 +26,7 @@ class Woocommerce_Cart {
 	var $subtotal_ex_tax;
 	var $tax_total;
 	var $taxes;
+	var $shipping_taxes;
 	var $discount_cart;
 	var $discount_total;
 	var $shipping_total;
@@ -39,7 +40,7 @@ class Woocommerce_Cart {
 	 * Constructor
 	 */
 	function __construct() {
-		$this->tax = new Woocommerce_Tax();
+		$this->tax = new WC_Tax();
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
@@ -76,9 +77,9 @@ class Woocommerce_Cart {
 				foreach ($cart as $key => $values) :
 				
 					if ($values['variation_id'] > 0) :
-						$_product = new Woocommerce_Product_Variation($values['variation_id']);
+						$_product = new WC_Product_Variation($values['variation_id']);
 					else :
-						$_product = new Woocommerce_Product($values['product_id']);
+						$_product = new WC_Product($values['product_id']);
 					endif;
 					
 					if ($_product->exists && $values['quantity']>0) :
@@ -113,6 +114,7 @@ class Woocommerce_Cart {
 			$this->subtotal_ex_tax 		= isset($_SESSION['subtotal_ex_tax']) ? $_SESSION['subtotal_ex_tax'] : 0;
 			$this->tax_total 			= isset($_SESSION['tax_total']) ? $_SESSION['tax_total'] : 0;
 			$this->taxes 				= isset($_SESSION['taxes']) ? $_SESSION['taxes'] : array();
+			$this->shipping_taxes		= isset($_SESSION['shipping_taxes']) ? $_SESSION['shipping_taxes'] : array();
 			$this->discount_cart 		= isset($_SESSION['discount_cart']) ? $_SESSION['discount_cart'] : 0;
 			$this->discount_total 		= isset($_SESSION['discount_total']) ? $_SESSION['discount_total'] : 0;
 			$this->shipping_total 		= isset($_SESSION['shipping_total']) ? $_SESSION['shipping_total'] : 0;
@@ -146,6 +148,7 @@ class Woocommerce_Cart {
 			$_SESSION['subtotal'] = $this->subtotal;
 			$_SESSION['subtotal_ex_tax'] = $this->subtotal_ex_tax;
 			$_SESSION['tax_total'] = $this->tax_total;
+			$_SESSION['shipping_taxes'] = $this->shipping_taxes;
 			$_SESSION['taxes'] = $this->taxes;
 			$_SESSION['discount_cart'] = $this->discount_cart;
 			$_SESSION['discount_total'] = $this->discount_total;
@@ -160,7 +163,7 @@ class Woocommerce_Cart {
 		function empty_cart() {
 			$this->cart_contents = array();
 			$this->reset();
-			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'], $_SESSION['coupons'], $_SESSION['cart'] );
+			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'], $_SESSION['coupons'], $_SESSION['cart'] );
 		}
 
  	/*-----------------------------------------------------------------------------------*/
@@ -212,7 +215,7 @@ class Woocommerce_Cart {
 			if (!$flat) $return = '<dl class="variation">';
 			
 			// Variation data
-			if($cart_item['data'] instanceof woocommerce_product_variation && is_array($cart_item['variation'])) :
+			if($cart_item['data'] instanceof WC_Product_Variation && is_array($cart_item['variation'])) :
 			
 				$variation_list = array();
 				
@@ -326,6 +329,20 @@ class Woocommerce_Cart {
 		 */
 		function get_cart() {
 			return (array) $this->cart_contents;
+		}
+		
+		/**
+		 * Returns the cart and shipping taxes, merged
+		 */
+		function get_taxes() {
+			$merged_taxes = array();
+
+			// Merge
+			foreach (array_keys($this->taxes + $this->shipping_taxes) as $key) {
+				$merged_taxes[$key] = (isset($this->shipping_taxes[$key]) ? $this->shipping_taxes[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
+			}
+			
+			return $merged_taxes;
 		}	
 	
  	/*-----------------------------------------------------------------------------------*/
@@ -393,9 +410,9 @@ class Woocommerce_Cart {
 			$cart_item_key = $this->find_product_in_cart($cart_id);
 			
 			if ($variation_id>0) :
-				$product_data = new Woocommerce_Product_Variation( $variation_id );
+				$product_data = new WC_Product_Variation( $variation_id );
 			else :
-				$product_data = new Woocommerce_Product( $product_id );
+				$product_data = new WC_Product( $product_id );
 			endif;
 			
 			// Type/Exists check
@@ -485,6 +502,7 @@ class Woocommerce_Cart {
 			$this->cart_contents_tax = 0;
 			$this->tax_total = 0;
 			$this->shipping_tax_total = 0;
+			$this->shipping_taxes = array();
 			$this->subtotal = 0;
 			$this->subtotal_ex_tax = 0;
 			$this->discount_total = 0;
@@ -499,7 +517,7 @@ class Woocommerce_Cart {
 		function get_discounted_price( $values, $price, $add_totals = false ) {
 	
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
-				$coupon = new Woocommerce_Coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				
 				if ( $coupon->apply_before_tax() && $coupon->is_valid() ) :
 					
@@ -635,7 +653,7 @@ class Woocommerce_Cart {
 		function apply_product_discounts_after_tax( $values, $price ) {
 			
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
-				$coupon = new Woocommerce_Coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				
 				do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );
 				
@@ -698,7 +716,7 @@ class Woocommerce_Cart {
 		function apply_cart_discounts_after_tax() {	
 			
 			if ($this->applied_coupons) foreach ($this->applied_coupons as $code) :
-				$coupon = new Woocommerce_Coupon( $code );
+				$coupon = new WC_Coupon( $code );
 				
 				do_action( 'woocommerce_cart_discount_after_tax_' . $coupon->type, $coupon );
 				
@@ -838,11 +856,11 @@ class Woocommerce_Cart {
 							$taxes					= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 							
 							// Tax amount
-							$tax_amount				= $this->tax->get_tax_total($taxes);
+							$tax_amount				= array_sum($taxes);
 							
 							// Line subtotal + tax
-							$line_subtotal_tax		= round($tax_amount, 2);
-							$line_subtotal			= $row_base_price - array_sum($base_taxes);
+							$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round($tax_amount, 2) : $tax_amount;
+							$line_subtotal			= $row_base_price - $this->tax->get_tax_total($base_taxes);
 							
 							// Adjusted price 
 							$adjusted_price 		= ($row_base_price - array_sum($base_taxes) + array_sum($taxes)) / $values['quantity'];
@@ -851,7 +869,7 @@ class Woocommerce_Cart {
 							$discounted_price 		= $this->get_discounted_price( $values, $adjusted_price, true );
 							
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= $this->tax->get_tax_total($discounted_taxes); // Sum taxes - round also to prevent rounding errors
+							$discounted_tax_amount	= array_sum($discounted_taxes); // Sum taxes
 							
 						/**
 						 * Regular tax calculation (customer inside base and the tax class is unmodified
@@ -859,17 +877,17 @@ class Woocommerce_Cart {
 						else :
 							
 							// Base tax for line before discount - we will store this in the order data
-							$tax_amount				= $this->tax->get_tax_total($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true ));
+							$tax_amount				= array_sum($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true ));
 							
 							// Line subtotal + tax
-							$line_subtotal_tax		= round($tax_amount, 2);
-							$line_subtotal			= ($base_price * $values['quantity']) - $line_subtotal_tax;
+							$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round($tax_amount, 2) : $tax_amount;
+							$line_subtotal			= ($base_price * $values['quantity']) - round($line_subtotal_tax, 2);
 							
 							// Calc prices and tax (discounted)
 							$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
 							$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, true );
-							$discounted_tax_amount	= $this->tax->get_tax_total($discounted_taxes); // Sum taxes - round also to prevent rounding errors
-							
+							$discounted_tax_amount	= array_sum($discounted_taxes); // Sum taxes
+														
 						endif;
 						
 						// Tax rows - merge the totals we just got
@@ -888,9 +906,9 @@ class Woocommerce_Cart {
 					
 					endif;	
 										
-					// Line prices - round tax so price is correctly calculated
-					$line_tax			= round($discounted_tax_amount, 2);
-					$line_total 		= ($discounted_price * $values['quantity']) - $line_tax;
+					// Line prices
+					$line_tax = ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round($discounted_tax_amount, 2) : $discounted_tax_amount;
+					$line_total 		= ($discounted_price * $values['quantity']) - round($line_tax, 2);
 											
 					// Add any product discounts (after tax)
 					$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
@@ -930,11 +948,11 @@ class Woocommerce_Cart {
 						$tax_rates 				= $this->tax->get_rates( $_product->get_tax_class() );
 						
 						// Base tax for line before discount - we will store this in the order data
-						$tax_amount				= $this->tax->get_tax_total($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, false ));
+						$tax_amount				= array_sum($this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, false ));
 						
 						// Now calc product rates			
 						$discounted_taxes		= $this->tax->calc_tax( $discounted_price * $values['quantity'], $tax_rates, false );
-						$discounted_tax_amount	= $this->tax->get_tax_total( $discounted_taxes );
+						$discounted_tax_amount	= array_sum( $discounted_taxes );
 		
 						// Tax rows - merge the totals we just got
 						foreach (array_keys($this->taxes + $discounted_taxes) as $key) {
@@ -969,16 +987,12 @@ class Woocommerce_Cart {
 			endif;
 			
 			// Set tax total to sum of all tax rows
-			if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes' ) :	
-				$this->tax_total	= $this->tax->get_tax_total( $this->taxes );
-			else :
-				$this->tax_total	= array_sum( $this->taxes );
-			endif;
+			$this->tax_total	= $this->tax->get_tax_total( $this->taxes );
 				
 			// VAT exemption done at this point - so all totals are correct before exemption
 			if ($woocommerce->customer->is_vat_exempt() || (is_cart() && get_option('woocommerce_display_cart_taxes')=='no')) :
 				$this->shipping_tax_total = $this->tax_total = 0;
-				$this->taxes = array();
+				$this->taxes = $this->shipping_taxes = array();
 			endif;
 			
 			// Cart Discounts (after tax)
@@ -990,17 +1004,18 @@ class Woocommerce_Cart {
 			// Cart Shipping
 			$this->calculate_shipping(); 
 			
-			// VAT exemption done again to wipe shipping tax
+			// VAT exemption for shipping
 			if ($woocommerce->customer->is_vat_exempt()) :
-				$this->shipping_tax_total = $this->tax_total = 0;
-				$this->taxes = array();
+				$this->shipping_tax_total = 0;
+				$this->shipping_taxes = array();
 			endif;
-						
-			// Taxes Rounding - taxes now include shipping taxes
-			$this->taxes		= $this->tax->get_taxes_rounded( $this->taxes );
+			
+			// Round cart/shipping tax rows
+			$this->taxes = array_map(array(&$this->tax, 'round'), $this->taxes);
+			$this->shipping_taxes = array_map(array(&$this->tax, 'round'), $this->shipping_taxes);
 			
 			// Allow plugins to hook and alter totals before final total is calculated
-			do_action('woocommerce_calculate_totals', $this);
+			do_action('woocommerce_calculate_totals', $this);			
 					
 			/** 
 			 * Grand Total
@@ -1037,15 +1052,8 @@ class Woocommerce_Cart {
 			
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
-			$this->shipping_tax_total 	= array_sum( $woocommerce->shipping->shipping_taxes );	// Shipping tax amount
-			
-			// Merge Shipping tax rows with cart tax rows
-			if (is_array($woocommerce->shipping->shipping_taxes) && sizeof($woocommerce->shipping->shipping_taxes)>0) :
-				// Tax rows - merge the totals we just got
-				foreach (array_keys($this->taxes + $woocommerce->shipping->shipping_taxes) as $key) {
-				    $this->taxes[$key] = (isset($woocommerce->shipping->shipping_taxes[$key]) ? $woocommerce->shipping->shipping_taxes[$key] : 0) + (isset($this->taxes[$key]) ? $this->taxes[$key] : 0);
-				}
-			endif;
+			$this->shipping_taxes		= $woocommerce->shipping->shipping_taxes;	// Shipping Taxes
+			$this->shipping_tax_total 	= $this->tax->get_tax_total( $this->shipping_taxes );	// Shipping tax amount
 		}
 		
 		/** 
@@ -1139,7 +1147,7 @@ class Woocommerce_Cart {
 		function add_discount( $coupon_code ) {
 			global $woocommerce;
 			
-			$the_coupon = new Woocommerce_Coupon($coupon_code);
+			$the_coupon = new WC_Coupon($coupon_code);
 			
 			if ($the_coupon->id) :
 				
@@ -1161,7 +1169,7 @@ class Woocommerce_Cart {
 				endif;
 				
 				foreach ($this->applied_coupons as $code) :
-					$coupon = new Woocommerce_Coupon($code);
+					$coupon = new WC_Coupon($code);
 					if ($coupon->individual_use=='yes') :
 						$this->applied_coupons = array();
 					endif;
@@ -1193,13 +1201,13 @@ class Woocommerce_Cart {
 		
 			if ($type == 1) :
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
-					$coupon = new Woocommerce_Coupon( $code );
+					$coupon = new WC_Coupon( $code );
 					if ( $coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
 				endforeach;
 				$_SESSION['coupons'] = $this->applied_coupons;
 			elseif ($type == 2) :
 				if ($this->applied_coupons) foreach ($this->applied_coupons as $index => $code) :
-					$coupon = new Woocommerce_Coupon( $code );
+					$coupon = new WC_Coupon( $code );
 					if ( !$coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
 				endforeach;
 				$_SESSION['coupons'] = $this->applied_coupons;
@@ -1369,6 +1377,10 @@ class Woocommerce_Cart {
 				if (!$compound && $this->tax->is_compound( $key )) continue;
 				$total += $tax;
 			endforeach;
+			foreach ($this->shipping_taxes as $key => $tax) :
+				if (!$compound && $this->tax->is_compound( $key )) continue;
+				$total += $tax;
+			endforeach;
 			return $total;
 		}
 		
@@ -1401,4 +1413,12 @@ class Woocommerce_Cart {
 			endif;
 			return false;
 		}	
+}
+
+/** Depreciated */
+class woocommerce_cart extends WC_Cart {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_cart', '1.4', 'WC_Cart()' );
+		parent::__construct(); 
+	} 
 }

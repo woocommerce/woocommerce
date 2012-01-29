@@ -243,7 +243,7 @@ function woocommerce_view_order() {
 	
 	$user_id      	= get_current_user_id();
 	$order_id		= (isset($_GET['order'])) ? $_GET['order'] : 0;
-	$order 			= new Woocommerce_Order( $order_id );
+	$order 			= new WC_Order( $order_id );
 
 	if ( $order_id==0 || $order->user_id != $user_id ) :
 		echo '<div class="woocommerce_error">' . __('Invalid order.', 'woocommerce') . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __('My Account &rarr;', 'woocommerce') .'</a>' . '</div>';
@@ -253,7 +253,7 @@ function woocommerce_view_order() {
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 	
 	echo '<p>'
-	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date(get_option('date_format'), strtotime($order->order_date)) )
+	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date_i18n(get_option('date_format'), strtotime($order->order_date)) )
 	. sprintf( __('. Order status: <mark>%s</mark>', 'woocommerce'), __($status->name, 'woocommerce') )
 	. '.</p>';
 

@@ -128,6 +128,12 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Displaying correct currency symbol (Real of Brazil)
 * Added local pickup and local delivery shipping methods (thanks Patrick Garman)
 * Improved woocommerce_coupon_is_valid filter
+* Random products widget, thanks to Geert De Deckere
+* Error are now lists instead of divs so we can show multiple errors at once
+* Problem: Stock management off, hide out of stock on meant some product were hidden randomly. Solution: Enable instock/outofstock selector on edit product page regardless of settings
+* If sending shipping to paypal, send shipping address
+* Send shipping name to paypal
+* Code to allow add-on validation
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

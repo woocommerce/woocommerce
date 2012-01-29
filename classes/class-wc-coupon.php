@@ -4,12 +4,12 @@
  * 
  * The WooCommerce coupons class gets coupon data from storage
  *
- * @class 		Woocommerce_Coupon
+ * @class 		WC_Coupon
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Coupon {
+class WC_Coupon {
 	
 	var $code;
 	var $id;
@@ -24,7 +24,7 @@ class Woocommerce_Coupon {
 	var $free_shipping;
 	
 	/** get coupon with $code */
-	function woocommerce_coupon( $code ) {
+	function __construct( $code ) {
 		
 		$this->code = $code;
 		
@@ -136,4 +136,12 @@ class Woocommerce_Coupon {
 		
 		return false;
 	}
+}
+
+/** Depreciated */
+class woocommerce_coupon extends WC_Coupon {
+	public function __construct( $code ) { 
+		_deprecated_function( 'woocommerce_coupon', '1.4', 'WC_Coupon()' );
+		parent::__construct( $code ); 
+	} 
 }

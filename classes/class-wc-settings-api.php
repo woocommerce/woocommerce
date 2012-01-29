@@ -2,12 +2,12 @@
 /**
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
- * @class 		Woocommerce_Settings_Api
+ * @class 		WC_Settings_Api
  * @package		WooCommerce
  * @category	Class
  * @author		WooThemes
  */
-class Woocommerce_Settings_Api {
+class WC_Settings_Api {
 	
 	var $plugin_id = 'woocommerce_';
 	var $settings = array();
@@ -446,4 +446,12 @@ class Woocommerce_Settings_Api {
     	return $value;
     } // End validate_select_field()
     
+}
+
+/** Depreciated */
+class woocommerce_settings_api extends WC_Settings_Api {
+	public function __construct() { 
+		_deprecated_function( 'woocommerce_settings_api', '1.4', 'WC_Settings_Api()' );
+		parent::__construct(); 
+	} 
 }

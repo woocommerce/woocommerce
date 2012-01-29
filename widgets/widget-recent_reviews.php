@@ -64,7 +64,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		
 			foreach ( (array) $comments as $comment) :
 				
-				$_product = new Woocommerce_Product( $comment->comment_post_ID );
+				$_product = new WC_Product( $comment->comment_post_ID );
 				
 				$star_size = apply_filters('woocommerce_star_rating_size_recent_reviews', 16);
 				

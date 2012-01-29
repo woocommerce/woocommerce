@@ -4,12 +4,12 @@ new Woocommercevery Gateway
  * 
  * Provides a Cash on Delivery Payment Gateway.
  *
- * @class 		Woocommerce_Cod
+ * @class 		WC_COD
  * @package		WooCommerce
  * @category	Payment Gateways
  * @author		Patrick Garman (www.patrickgarman.com)
  */
-class Woocommerce_Cod extends Woocommerce_Payment_Gateway {
+class WC_COD extends WC_Payment_Gateway {
 	
 	function __construct() {
 		$this->id = 'cod';
@@ -94,5 +94,5 @@ class Woocommerce_Cod extends Woocommerce_Payment_Gateway {
 }
 	
 // Adding Gateway to WooCommerce Gateways
-function woocommerce_cod_add_gateway ($methods) { $methods[] = 'woocommerce_cod'; return $methods; }
+function woocommerce_cod_add_gateway ($methods) { $methods[] = 'WC_COD'; return $methods; }
 add_filter ('woocommerce_payment_gateways', 'woocommerce_cod_add_gateway');

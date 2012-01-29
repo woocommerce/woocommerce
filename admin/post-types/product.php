@@ -63,20 +63,22 @@ function woocommerce_edit_product_columns($columns){
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["thumb"] = __("Image", 'woocommerce');
 	
-	$columns["title"] = __("Name", 'woocommerce');
-	if( get_option('woocommerce_enable_sku', true) == 'yes' ) $columns["sku"] = __("ID", 'woocommerce');
+	$columns["name"] = __("Name", 'woocommerce');
+	
+	if (get_option('woocommerce_enable_sku', true) == 'yes') 
+		$columns["sku"] = __("SKU", 'woocommerce');
+		
 	$columns["product_type"] = __("Type", 'woocommerce');
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
 	$columns["product_tags"] = __("Tags", 'woocommerce');
 	$columns["featured"] = __("Featured", 'woocommerce');
 	
-	if (get_option('woocommerce_manage_stock')=='yes') :
+	if (get_option('woocommerce_manage_stock')=='yes')
 		$columns["is_in_stock"] = __("In Stock?", 'woocommerce');
-	endif;
 	
 	$columns["price"] = __("Price", 'woocommerce');
-	$columns["product_date"] = __("Date", 'woocommerce');
+	$columns["date"] = __("Date", 'woocommerce');
 	
 	return $columns;
 }
@@ -85,16 +87,89 @@ function woocommerce_edit_product_columns($columns){
 /**
  * Custom Columns for Products page
  **/
-add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_columns', 2);
+add_action('manage_product_posts_custom_column', 'woocommerce_custom_product_columns', 2 );
 
-function woocommerce_custom_product_columns($column) {
+function woocommerce_custom_product_columns( $column ) {
 	global $post, $woocommerce;
-	$product = new Woocommerce_Product($post->ID);
+	$product = new WC_Product($post->ID);
 
 	switch ($column) {
 		case "thumb" :
 			if (has_post_thumbnail($post->ID)) :
 				echo get_the_post_thumbnail($post->ID, 'shop_thumbnail');
+			endif;
+		break;
+		case "name" : 
+			$edit_link = get_edit_post_link( $post->ID );
+			$title = _draft_or_post_title();
+			$post_type_object = get_post_type_object( $post->post_type );
+			$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
+			
+			echo '<strong><a class="row-title" href="'.$edit_link.'">' . $title.'</a>';
+			
+			_post_states( $post );
+			
+			echo '</strong>';
+			
+			if ( $post->post_parent > 0 )
+				echo '&nbsp;&nbsp;&larr; <a href="'. get_edit_post_link($post->post_parent) .'">'. get_the_title($post->post_parent) .'</a>';
+			
+			// Get actions
+			$actions = array();
+			
+			$actions['id'] = 'ID: #' . $post->ID;
+			
+			if ( $can_edit_post && 'trash' != $post->post_status ) {
+				$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline' ) ) . '">' . __( 'Quick&nbsp;Edit' ) . '</a>';
+			}
+			if ( current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
+				if ( 'trash' == $post->post_status )
+					$actions['untrash'] = "<a title='" . esc_attr( __( 'Restore this item from the Trash' ) ) . "' href='" . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-' . $post->post_type . '_' . $post->ID ) . "'>" . __( 'Restore' ) . "</a>";
+				elseif ( EMPTY_TRASH_DAYS )
+					$actions['trash'] = "<a class='submitdelete' title='" . esc_attr( __( 'Move this item to the Trash' ) ) . "' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash' ) . "</a>";
+				if ( 'trash' == $post->post_status || !EMPTY_TRASH_DAYS )
+					$actions['delete'] = "<a class='submitdelete' title='" . esc_attr( __( 'Delete this item permanently' ) ) . "' href='" . get_delete_post_link( $post->ID, '', true ) . "'>" . __( 'Delete Permanently' ) . "</a>";
+			}
+			if ( $post_type_object->public ) {
+				if ( in_array( $post->post_status, array( 'pending', 'draft' ) ) ) {
+					if ( $can_edit_post )
+						$actions['view'] = '<a href="' . esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'Preview' ) . '</a>';
+				} elseif ( 'trash' != $post->post_status ) {
+					$actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+				}
+			}
+			$actions = apply_filters( 'post_row_actions', $actions, $post );
+			
+			echo '<div class="row-actions">';
+		
+			$i = 0;
+			$action_count = sizeof($actions);
+			
+			foreach ( $actions as $action => $link ) {
+				++$i;
+				( $i == $action_count ) ? $sep = '' : $sep = ' | ';
+				echo "<span class='$action'>$link$sep</span>";
+			}
+			echo '</div>';
+			
+			get_inline_data( $post );
+			
+		break;
+		case "sku" :
+			echo $product->get_sku();
+		break;
+		case "product_type" :
+			if( $product->product_type == 'grouped' ):
+				echo __('Grouped', 'woocommerce');
+			elseif ( $product->product_type == 'external' ):
+				echo __('External/Affiliate', 'woocommerce');
+			elseif ( $product->product_type == 'simple' ):
+				echo __('Simple', 'woocommerce');
+			elseif ( $product->product_type == 'variable' ):
+				echo __('Variable', 'woocommerce');
+			else:
+				// Assuming that we have other types in future
+				echo ucwords($product->product_type);
 			endif;
 		break;
 		case "price":
@@ -106,88 +181,22 @@ function woocommerce_custom_product_columns($column) {
 		case "product_tags" :
 			if (!$terms = get_the_term_list($post->ID, 'product_tag', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
 		break;
-		case "sku" :
-			if ( $sku = get_post_meta( $post->ID, '_sku', true )) :
-				echo '#'.$post->ID.' - SKU: ' . $sku;	
-			else :
-				echo '#'.$post->ID;
-			endif;
-		break;
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
 			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" />';
+			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
+			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';
 			echo '</a>';
 		break;
 		case "is_in_stock" :
 			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) :
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.gif" alt="yes" /> ';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" /> ';
 			else :
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.gif" alt="no" /> ';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" /> ';
 			endif;
 			if ( $product->managing_stock() ) :
-				echo $product->get_total_stock().__(' in stock', 'woocommerce');
+				echo '&times; ' . $product->get_total_stock();
 			endif;
-		break;
-		case "product_type" :
-			
-			// Its was dynamic but did not support the translations
-			if( $product->product_type == 'grouped' ):
-				echo __('Grouped product', 'woocommerce');
-			elseif ( $product->product_type == 'external' ):
-				echo __('External/Affiliate product', 'woocommerce');
-			elseif ( $product->product_type == 'simple' ):
-				echo __('Simple product', 'woocommerce');
-			elseif ( $product->product_type == 'variable' ):
-				echo __('Variable', 'woocommerce');
-			else:
-				// Assuming that we have other types in future
-				echo ucwords($product->product_type);
-			endif;
-			
-		break;
-		case "product_date" :
-			if ( '0000-00-00 00:00:00' == $post->post_date ) :
-				$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				$time_diff = 0;
-			else :
-				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ) );
-				$m_time = $post->post_date;
-				$time = get_post_time( 'G', true, $post );
-
-				$time_diff = time() - $time;
-
-				if ( $time_diff > 0 && $time_diff < 24*60*60 )
-					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $time ) );
-				else
-					$h_time = mysql2date( __( 'Y/m/d', 'woocommerce' ), $m_time );
-			endif;
-
-			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr><br />';
-			
-			if ( 'publish' == $post->post_status ) :
-				_e( 'Published', 'woocommerce' );
-			elseif ( 'future' == $post->post_status ) :
-				if ( $time_diff > 0 ) :
-					echo '<strong class="attention">' . __( 'Missed schedule', 'woocommerce' ) . '</strong>';
-				else :
-					_e( 'Scheduled', 'woocommerce' );
-				endif;
-			else :
-				_e( 'Last Modified', 'woocommerce' );
-			endif;
-
-			/**
-			 * show hidden visible product on colum Date
-			 * Assuming that we have only show and hidden status
-			 */
-			if ( $product->visibility == 'hidden' ) :
-				echo '<br />'. __('Hidden', 'woocommerce');
-			else:
-				echo '<br />'. __('Visible', 'woocommerce');
-			endif;
-			
 		break;
 	}
 }
@@ -205,7 +214,7 @@ function woocommerce_custom_product_sort($columns) {
 		'price'			=> 'price',
 		'featured'		=> 'featured',
 		'sku'			=> 'sku',
-		'product_date'	=> 'date'
+		'name'			=> 'title'
 	);
 	return wp_parse_args($custom, $columns);
 }

@@ -68,9 +68,16 @@ if (!function_exists('woocommerce_product_taxonomy_content')) {
 	}
 }
 if (!function_exists('woocommerce_single_product_content')) {
-	function woocommerce_single_product_content() {
-	
-		if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
+	function woocommerce_single_product_content( $wc_query = false ) {
+		
+		// Let developers override the query used, in case they want to use this function for their own loop/wp_query
+		if (!$wc_query) {
+			global $wp_query;
+			
+			$wc_query = $wp_query;
+		}
+		
+		if ( $wc_query->have_posts() ) while ( $wc_query->have_posts() ) : $wc_query->the_post(); ?>
 			
 			<?php do_action('woocommerce_before_single_product'); ?>
 		
@@ -89,9 +96,9 @@ if (!function_exists('woocommerce_single_product_content')) {
 				<?php do_action('woocommerce_after_single_product_summary'); ?>
 		
 			</div>
-				
+
 			<?php do_action('woocommerce_after_single_product'); ?>
-		
+			
 		<?php endwhile;
 	
 	}
@@ -280,7 +287,7 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		
 		    $variation = $product->get_child( $child_id );
 		
-		    if($variation instanceof woocommerce_product_variation) {
+		    if($variation instanceof WC_Product_Variation) {
 		
 		    	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
 		
