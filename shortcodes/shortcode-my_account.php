@@ -40,7 +40,7 @@ function woocommerce_my_account( $atts ) {
 	
 	if ( ! is_user_logged_in() ) :
 		
-		woocommerce_get_template( 'myaccount/login.php' );
+		woocommerce_get_template( 'myaccount/form-login.php' );
 	
 	else :
 
@@ -78,7 +78,7 @@ function woocommerce_edit_address() {
 	
 	$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 	
-	woocommerce_get_template( 'myaccount/edit-address.php' );
+	woocommerce_get_template( 'myaccount/form-edit-address.php' );
 }
 
 /**
@@ -185,7 +185,7 @@ function woocommerce_change_password() {
 	
 	if ( ! is_user_logged_in() ) return;
 
-	woocommerce_get_template( 'myaccount/change-password.php' );
+	woocommerce_get_template( 'myaccount/form-change-password.php' );
 }
 
 /**

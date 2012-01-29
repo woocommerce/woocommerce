@@ -1,4 +1,9 @@
-<?php global $order, $woocommerce; ?>
+<?php
+/**
+ * Pay for order form
+ */
+global $order, $woocommerce; 
+?>
 <form id="order_review" method="post">
 	
 	<table class="shop_table">

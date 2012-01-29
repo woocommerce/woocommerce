@@ -65,11 +65,11 @@ class WC_Email {
 	}
 	
 	function email_header() {
-		woocommerce_get_template('emails/email_header.php', false);
+		woocommerce_get_template('emails/email-header.php', false);
 	}
 	
 	function email_footer() {
-		woocommerce_get_template('emails/email_footer.php', false);
+		woocommerce_get_template('emails/email-footer.php', false);
 	}
 	
 	/**
@@ -124,7 +124,7 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/new_order.php', false);
+		woocommerce_get_template('emails/admin-new-order.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -149,7 +149,7 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer_processing_order.php', false);
+		woocommerce_get_template('emails/customer-processing-order.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -185,7 +185,7 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer_completed_order.php', false);
+		woocommerce_get_template('emails/customer-completed-order.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -198,28 +198,28 @@ class WC_Email {
 	}
 
 	/**
-	 * Pay for order
+	 * Pay for order - invoice
 	 **/
-	function customer_pay_for_order( $pay_for_order ) {
+	function customer_invoice( $pay_for_order ) {
 		global $order, $email_heading;
 		
 		$order = $pay_for_order;
 		
 		$email_heading = sprintf(__('Invoice for Order #%s', 'woocommerce'), $order->id);
 	
-		$subject = apply_filters( 'woocommerce_email_subject_customer_pay_for_order', sprintf( __( '[%s] Pay for Order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_customer_invoice', sprintf( __( '[%s] Pay for Order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
 	
 		// Buffer
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer_pay_for_order.php', false);
+		woocommerce_get_template('emails/customer-invoice.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_customer_pay_for_order_attachments', '');
+		$attachments = apply_filters('woocommerce_customer_invoice_attachments', '');
 		
 		// Send the mail	
 		$this->send( $order->billing_email, $subject, $message, $attachments );
@@ -252,7 +252,7 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer_note_notification.php', false);
+		woocommerce_get_template('emails/customer-note.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -363,7 +363,7 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer_new_account.php', false);
+		woocommerce_get_template('emails/customer-new-account.php', false);
 		
 		// Get contents
 		$message = ob_get_clean();

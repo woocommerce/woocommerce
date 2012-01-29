@@ -62,94 +62,12 @@ class WC_Checkout {
 		
 	/** Output the billing information form */
 	function checkout_form_billing() {
-		global $woocommerce;
-		
-		if ($woocommerce->cart->ship_to_billing_address_only()) :
-			echo '<h3>'.__('Billing &amp Shipping', 'woocommerce').'</h3>';
-		else : 
-			echo '<h3>'.__('Billing Address', 'woocommerce').'</h3>';
-		endif;
-		
-		// Output billing form fields
-		do_action('woocommerce_before_checkout_billing_form', $this);
-		foreach ($this->checkout_fields['billing'] as $key => $field) :
-			woocommerce_form_field( $key, $field, $this->get_value( $key ) );
-		endforeach;
-		do_action('woocommerce_after_checkout_billing_form', $this);
-		
-		// Registration Form Fields
-		if (!is_user_logged_in() && get_option('woocommerce_enable_signup_and_login_from_checkout')=="yes") :
-		
-			if (get_option('woocommerce_enable_guest_checkout')=='yes') :
-				
-				echo '<p class="form-row"><input class="input-checkbox" id="createaccount" '.checked($this->get_value('createaccount'), true).' type="checkbox" name="createaccount" value="1" /> <label for="createaccount" class="checkbox">'.__('Create an account?', 'woocommerce').'</label></p>';
-				
-			endif;
-			
-			echo '<div class="create-account">';
-			
-			echo '<p>'.__('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woocommerce').'</p>'; 
-			
-			foreach ($this->checkout_fields['account'] as $key => $field) :
-				woocommerce_form_field( $key, $field, $this->get_value( $key ) );
-			endforeach;
-			
-			echo '</div>';
-							
-		endif;
-		
+		include( woocommerce_locate_template( 'checkout/form-billing.php' ) );
 	}
 	
 	/** Output the shipping information form */
 	function checkout_form_shipping() {
-		global $woocommerce;
-		
-		// Shipping Details
-		if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only()) :
-			
-			if (!isset($_POST) || !$_POST) :
-			
-				$shiptobilling = (get_option('woocommerce_ship_to_same_address')=='yes') ? 1 : 0;
-				$shiptobilling = apply_filters('woocommerce_shiptobilling_default', $shiptobilling);
-			
-			else :
-			
-				$shiptobilling = $this->get_value('shiptobilling');
-			
-			endif;
-
-			echo '<p class="form-row" id="shiptobilling"><input class="input-checkbox" '.checked($shiptobilling, 1, false).' type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox">'.__('Ship to same address?', 'woocommerce').'</label></p>';
-			
-			echo '<h3>'.__('Shipping Address', 'woocommerce').'</h3>';
-			
-			echo'<div class="shipping_address">';
-					
-				// Output shipping form fields
-				do_action('woocommerce_before_checkout_shipping_form', $this);
-				foreach ($this->checkout_fields['shipping'] as $key => $field) :
-					woocommerce_form_field( $key, $field, $this->get_value( $key ) );
-				endforeach;
-				do_action('woocommerce_after_checkout_shipping_form', $this);
-								
-			echo '</div>';
-		
-		endif;
-		
-		do_action('woocommerce_before_order_notes', $this);
-		
-		if (get_option('woocommerce_enable_order_comments')!='no') :
-		
-			if ($woocommerce->cart->ship_to_billing_address_only()) :
-				echo '<h3>'.__('Additional Information', 'woocommerce').'</h3>';
-			endif;
-			
-			foreach ($this->checkout_fields['order'] as $key => $field) :
-				woocommerce_form_field( $key, $field, $this->get_value( $key ) );
-			endforeach;
-								
-		endif;
-		
-		do_action('woocommerce_after_order_notes', $this);
+		include( woocommerce_locate_template( 'checkout/form-shipping.php' ) );
 	}
 
 	/**
