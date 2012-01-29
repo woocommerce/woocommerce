@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart Page
+ * Thankyou Page
  */
  
 global $woocommerce, $order;

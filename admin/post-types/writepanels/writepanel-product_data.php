@@ -472,8 +472,18 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	if ($new_sku!==$sku) :
 		if ($new_sku && !empty($new_sku)) :
 			if (
-				$wpdb->get_var($wpdb->prepare("SELECT * FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s';", $new_sku)) || 
-				$wpdb->get_var($wpdb->prepare("SELECT * FROM $wpdb->posts WHERE ID='%s' AND ID!='%s' AND post_type='product';", $new_sku, $post_id))
+				$wpdb->get_var($wpdb->prepare("
+					SELECT $wpdb->posts.ID
+				    FROM $wpdb->posts
+				    LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+				    WHERE $wpdb->posts.post_type = 'product'
+				    AND $wpdb->posts.post_status = 'publish' 
+				    AND (
+				    	($wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s')
+				    	OR
+				    	($wpdb->posts.ID = '%s' AND $wpdb->posts.ID != '%s')
+				    );
+				 ", $new_sku, $new_sku, $post_id))
 				) :
 				$woocommerce_errors[] = __('Product SKU must be unique.', 'woocommerce');
 			else :

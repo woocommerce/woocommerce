@@ -46,7 +46,7 @@ function woocommerce_order_tracking( $atts ) {
 	
 	else :
 	
-		woocommerce_get_template( 'order/tracking-form.php' );
+		woocommerce_get_template( 'order/form-tracking.php' );
 		
 	endif;	
 	
