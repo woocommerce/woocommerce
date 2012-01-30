@@ -43,9 +43,6 @@ function woocommerce_admin_init() {
 	global $pagenow;
 	
 	ob_start();
-	
-	include_once( 'woocommerce-admin-hooks.php' );
-	include_once( 'woocommerce-admin-functions.php' );
 
 	if ( $pagenow=='index.php' ) :
 		include_once( 'woocommerce-admin-dashboard.php' );
@@ -59,6 +56,9 @@ function woocommerce_admin_init() {
 		include_once( 'woocommerce-admin-users.php' );
 	endif;
 }
+
+include_once( 'woocommerce-admin-hooks.php' );
+include_once( 'woocommerce-admin-functions.php' );
 
 /**
  * Includes for admin pages - only load functions when needed

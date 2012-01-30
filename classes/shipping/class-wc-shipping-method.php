@@ -9,7 +9,7 @@
  * @category	Shipping
  * @author		WooThemes
  */  
-class WC_Shipping_Method extends WC_Settings_Api {
+class WC_Shipping_Method extends WC_Settings_API {
 	
 	var $id;
 	var $method_title; 	// Method title

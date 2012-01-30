@@ -9,7 +9,7 @@
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class WC_Payment_Gateway extends WC_Settings_Api {
+class WC_Payment_Gateway extends WC_Settings_API {
 	
 	var $id;
 	var $title;

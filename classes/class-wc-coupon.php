@@ -2,7 +2,7 @@
 /**
  * WooCommerce coupons
  * 
- * The WooCommerce coupons class gets coupon data from storage
+ * The WooCommerce coupons class gets coupon data from storage and checks coupon validity
  *
  * @class 		WC_Coupon
  * @package		WooCommerce

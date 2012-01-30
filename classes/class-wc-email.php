@@ -1,6 +1,8 @@
 <?php
 /**
- * WooCommerce Emails Class
+ * Email
+ *
+ * WooCommerce Emails Class which handles the sending on transactional emails and email templates
  *
  * @class 		WC_Email
  * @package		WooCommerce
