@@ -15,6 +15,7 @@ class WC_Cheque extends WC_Payment_Gateway {
         $this->id				= 'cheque';
         $this->icon 			= apply_filters('woocommerce_cheque_icon', '');
         $this->has_fields 		= false;
+        $this->method_title     = __( 'Cheque', 'woocommerce' );
 		
 		// Load the form fields.
 		$this->init_form_fields();
