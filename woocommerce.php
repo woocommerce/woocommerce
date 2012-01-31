@@ -476,7 +476,7 @@ class Woocommerce {
 		register_taxonomy( 'product_cat',
 	        array('product'),
 	        array(
-	            'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
+	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
@@ -663,7 +663,7 @@ class Woocommerce {
 				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
-				'hierarchical' 			=> true,
+				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
@@ -706,7 +706,7 @@ class Woocommerce {
 				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> true,
-				'hierarchical' 			=> true,
+				'hierarchical' 			=> false,
 				'rewrite' 				=> false,
 				'query_var'				=> true,			
 				'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
