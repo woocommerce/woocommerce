@@ -507,6 +507,12 @@ jQuery(document).ready(function($) {
 			});
 		
 		}
+		
+		// Event for updating the checkout
+		$('body').bind('update_checkout', function() {
+			clearTimeout(updateTimer);
+			update_checkout();
+		});
 			
 		$('p.password, form.login, form.checkout_coupon, div.shipping_address').hide();
 		
@@ -555,20 +561,18 @@ jQuery(document).ready(function($) {
 		
 		/* Update totals */
 		$('#shipping_method').live('change', function(){
-			clearTimeout(updateTimer);
-			update_checkout();
+			$('body').trigger('update_checkout');
 		});
 		$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 			clearTimeout(updateTimer);
 			updateTimer = setTimeout("update_checkout()", '1000');
 		});
 		$('select#billing_country, select#billing_state, select#shipping_country, select#shipping_state, #shiptobilling input, .update_totals_on_change').live('change', function(){
-			clearTimeout(updateTimer);
-			update_checkout();
+			$('body').trigger('update_checkout');
 		});
 		
 		// Update on page load
-		if (woocommerce_params.is_checkout==1) update_checkout();
+		if (woocommerce_params.is_checkout==1) $('body').trigger('update_checkout');
 		
 		/* AJAX Form Submission */
 		$('form.checkout').submit(function(){
