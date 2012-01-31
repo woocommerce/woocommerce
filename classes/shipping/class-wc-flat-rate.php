@@ -32,6 +32,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->fee 			= $this->settings['fee']; 
 		
 		// Flat rates
+		$this->flat_rate_option = 'woocommerce_flat_rates';
+		$this->admin_page_heading = __('Flat Rates', 'woocommerce');
+		$this->admin_page_description = __('Flat rates let you define a standard rate per item, or per order.', 'woocommerce');
 		$this->get_flat_rates();
 		
 		// Actions
@@ -49,7 +52,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			'enabled' => array(
 							'title' 		=> __( 'Enable/Disable', 'woocommerce' ), 
 							'type' 			=> 'checkbox', 
-							'label' 		=> __( 'Enable Flat Rate shipping', 'woocommerce' ), 
+							'label' 		=> __( 'Enable this shipping method', 'woocommerce' ), 
 							'default' 		=> 'yes'
 						), 
 			'title' => array(
@@ -268,8 +271,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	public function admin_options() {
 		global $woocommerce;
     	?>
-    	<h3><?php _e('Flat Rates', 'woocommerce'); ?></h3>
-    	<p><?php _e('Flat rates let you define a standard rate per item, or per order.', 'woocommerce'); ?></p>
+    	<h3><?php echo $this->admin_page_heading; ?></h3>
+    	<p><?php echo $this->admin_page_description; ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -277,7 +280,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     		?>
 	    	<tr valign="top">
 	            <th scope="row" class="titledesc"><?php _e('Flat Rates', 'woocommerce'); ?>:</th>
-	            <td class="forminp" id="flat_rates">
+	            <td class="forminp" id="<?php echo $this->id; ?>_flat_rates">
 	            	<table class="shippingrows widefat" cellspacing="0">
 	            		<thead>
 	            			<tr>
@@ -300,7 +303,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	                		echo '<tr class="flat_rate">
 	                			<td class="check-column"><input type="checkbox" name="select" /></td>
 	                			<td class="flat_rate_class">
-	                					<select name="flat_rate_class['.$i.']" class="select">';
+	                					<select name="'. $this->id .'_class['.$i.']" class="select">';
 	                					
 	                		if ($woocommerce->shipping->get_shipping_classes()) :
 		                		foreach ($woocommerce->shipping->get_shipping_classes() as $shipping_class) :
@@ -312,8 +315,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			               	
 			                echo '</select>
 			               		</td>
-			                    <td><input type="text" value="'.$rate['cost'].'" name="flat_rate_cost['.$i.']" placeholder="'.__('0.00', 'woocommerce').'" size="4" /></td>
-			                    <td><input type="text" value="'.$rate['fee'].'" name="flat_rate_fee['.$i.']" placeholder="'.__('0.00', 'woocommerce').'" size="4" /></td>
+			                    <td><input type="text" value="'.$rate['cost'].'" name="'. $this->id .'_cost['.$i.']" placeholder="'.__('0.00', 'woocommerce').'" size="4" /></td>
+			                    <td><input type="text" value="'.$rate['fee'].'" name="'. $this->id .'_fee['.$i.']" placeholder="'.__('0.00', 'woocommerce').'" size="4" /></td>
 		                    </tr>';
 	                	endforeach;
 	                	?>
@@ -325,14 +328,14 @@ class WC_Flat_Rate extends WC_Shipping_Method {
        	<script type="text/javascript">
 			jQuery(function() {
 			
-				jQuery('#flat_rates a.add').live('click', function(){
+				jQuery('#<?php echo $this->id; ?>_flat_rates a.add').live('click', function(){
 					
-					var size = jQuery('tbody.flat_rates .flat_rate').size();
+					var size = jQuery('#<?php echo $this->id; ?>_flat_rates tbody .flat_rate').size();
 					
 					jQuery('<tr class="flat_rate">\
 						<td class="check-column"><input type="checkbox" name="select" /></td>\
             			<td class="flat_rate_class">\
-            				<select name="flat_rate_class[' + size + ']" class="select">\
+            				<select name="<?php echo $this->id; ?>_class[' + size + ']" class="select">\
 	               				<?php 
 	               				if ($woocommerce->shipping->get_shipping_classes()) :
 			                		foreach ($woocommerce->shipping->get_shipping_classes() as $class) :
@@ -344,18 +347,18 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	               				?>\
 	               			</select>\
 	               		</td>\
-	                    <td><input type="text" name="flat_rate_cost[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
-	                    <td><input type="text" name="flat_rate_fee[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
-                    </tr>').appendTo('#flat_rates table tbody');
+	                    <td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
+	                    <td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
+                    </tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
 					
 					return false;
 				});
 				
 				// Remove row
-				jQuery('#flat_rates a.remove').live('click', function(){
+				jQuery('#<?php echo $this->id; ?>_flat_rates a.remove').live('click', function(){
 					var answer = confirm("<?php _e('Delete the selected rates?', 'woocommerce'); ?>")
 					if (answer) {
-						jQuery('#flat_rates table tbody tr td.check-column input:checked').each(function(i, el){
+						jQuery('#<?php echo $this->id; ?>_flat_rates table tbody tr td.check-column input:checked').each(function(i, el){
 							jQuery(el).closest('tr').remove();
 						});
 					}
@@ -375,9 +378,9 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$flat_rate_fee = array();
 		$flat_rates = array();
 		
-		if (isset($_POST['flat_rate_class']))	$flat_rate_class	= array_map('woocommerce_clean', $_POST['flat_rate_class']);
-		if (isset($_POST['flat_rate_cost'])) 	$flat_rate_cost 	= array_map('woocommerce_clean', $_POST['flat_rate_cost']);
-		if (isset($_POST['flat_rate_fee'])) 	$flat_rate_fee 		= array_map('woocommerce_clean', $_POST['flat_rate_fee']);
+		if (isset($_POST[$this->id . '_class']))	$flat_rate_class	= array_map('woocommerce_clean', $_POST[$this->id . '_class']);
+		if (isset($_POST[$this->id . '_cost'])) 	$flat_rate_cost 	= array_map('woocommerce_clean', $_POST[$this->id . '_cost']);
+		if (isset($_POST[$this->id . '_fee'])) 	$flat_rate_fee 		= array_map('woocommerce_clean', $_POST[$this->id . '_fee']);
 		
 		// Get max key
 		$values = $flat_rate_class;
@@ -401,13 +404,13 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 		endfor;
 		
-		update_option('woocommerce_flat_rates', $flat_rates);
+		update_option($this->flat_rate_option, $flat_rates);
 		
 		$this->get_flat_rates();
     }
     
     function get_flat_rates() {
-    	$this->flat_rates = array_filter((array) get_option('woocommerce_flat_rates'));
+    	$this->flat_rates = array_filter((array) get_option($this->flat_rate_option));
     }
 
 }

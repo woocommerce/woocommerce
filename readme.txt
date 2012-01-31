@@ -134,6 +134,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * If sending shipping to paypal, send shipping address
 * Send shipping name to paypal
 * Code to allow add-on validation
+* International shipping (based on flat rate)
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

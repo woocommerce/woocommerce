@@ -176,6 +176,7 @@ class Woocommerce {
 		include( 'classes/shipping/class-wc-shipping-method.php' );
 		
 		include( 'classes/shipping/class-wc-flat-rate.php' );
+		include( 'classes/shipping/class-wc-international-delivery.php' );
 		include( 'classes/shipping/class-wc-free-shipping.php' );
 		include( 'classes/shipping/class-wc-local-delivery.php' );
 		include( 'classes/shipping/class-wc-local-pickup.php' );
