@@ -291,6 +291,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 		endif;
 		
+		$paypal_args = apply_filters( 'woocommerce_paypal_args', $paypal_args );
+		
 		$paypal_args_array = array();
 
 		foreach ($paypal_args as $key => $value) {
