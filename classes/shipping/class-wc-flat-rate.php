@@ -53,7 +53,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Enable/Disable', 'woocommerce' ), 
 							'type' 			=> 'checkbox', 
 							'label' 		=> __( 'Enable this shipping method', 'woocommerce' ), 
-							'default' 		=> 'yes'
+							'default' 		=> 'no'
 						), 
 			'title' => array(
 							'title' 		=> __( 'Method Title', 'woocommerce' ), 
