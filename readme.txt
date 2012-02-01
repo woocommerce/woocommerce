@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.4 =
+= 1.4 - 01/02/2012 = 
 * Improved default theme
 * Support for multiple and stacked (compound) taxes
 * Locale options for country address formatting and checkout fields
