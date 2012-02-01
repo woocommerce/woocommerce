@@ -82,6 +82,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.4.2 = 
+* Uninstall fix
+
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix
 * Logout error fix
