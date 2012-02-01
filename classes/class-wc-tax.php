@@ -532,6 +532,5 @@ class WC_Tax {
 class woocommerce_tax extends WC_Tax {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_tax', '1.4', 'WC_Tax()' );
-		parent::__construct(); 
 	} 
 }
