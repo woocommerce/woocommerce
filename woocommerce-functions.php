@@ -379,13 +379,17 @@ function woocommerce_add_to_cart_message() {
 	// Output success messages
 	if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
 		
-		$return_to = (wp_get_referer()) ? wp_get_referer() : home_url();
-
-		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
+		$return_to 	= (wp_get_referer()) ? wp_get_referer() : home_url();
+		
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') );
 	
 	else :
-		$woocommerce->add_message( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') ));
+	
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') );
+		
 	endif;
+	
+	$woocommerce->add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
 }
 
 /**

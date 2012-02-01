@@ -55,7 +55,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				'title' 		=> __( 'Enable', 'woocommerce' ), 
 				'type' 			=> 'checkbox', 
 				'label' 		=> __( 'Enable local delivery', 'woocommerce' ), 
-				'default' 		=> 'yes'
+				'default' 		=> 'no'
 			), 
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ), 

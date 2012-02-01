@@ -1011,6 +1011,9 @@ function woocommerce_settings() {
     $install_complete = false;
     $show_page_installer = false;
     
+    // Hide WC Link
+    if (isset($_GET['hide-wc-extensions-message'])) update_option('hide-wc-extensions-message', 1);
+    
     // Add pages button
     if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) :
 		require_once( 'woocommerce-admin-install.php' );
@@ -1090,7 +1093,9 @@ function woocommerce_settings() {
 			</h2>
 			<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
 			
-			<div id="woocommerce_extensions"><?php echo sprintf(__('More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+			<?php if (!get_option('hide-wc-extensions-message')) : ?>
+			<div id="woocommerce_extensions"><a href="<?php echo add_query_arg('hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a><?php echo sprintf(__('More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+			<?php endif; ?>
 
 			<?php
 				switch ($current_tab) :
