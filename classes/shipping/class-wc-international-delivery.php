@@ -24,7 +24,8 @@ class WC_International_Delivery extends WC_Flat_Rate {
 		// Define user set variables
         $this->enabled		= $this->settings['enabled'];
 		$this->title 		= $this->settings['title'];
-		$this->exclude_countries 	= $this->settings['exclude_countries'];
+		$this->availability = $this->settings['availability'];
+		$this->countries 	= $this->settings['countries'];
 		$this->type 		= $this->settings['type'];
 		$this->tax_status	= $this->settings['tax_status'];
 		$this->cost 		= $this->settings['cost'];
@@ -60,8 +61,18 @@ class WC_International_Delivery extends WC_Flat_Rate {
 							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ), 
 							'default'		=> __( 'International Delivery', 'woocommerce' )
 						),
-			'exclude_countries' => array(
-							'title' 		=> __( 'Availability: Exclude Countries', 'woocommerce' ), 
+			'availability' => array(
+							'title' 		=> __( 'Availability', 'woocommerce' ), 
+							'type' 			=> 'select', 
+							'description' 	=> '', 
+							'default' 		=> 'including',
+							'options' 		=> array(
+								'including' 	=> __('Selected countries', 'woocommerce'),
+								'excluding' 	=> __('Excluding selected countries', 'woocommerce'),
+							)
+						),
+			'countries' => array(
+							'title' 		=> __( 'Countries', 'woocommerce' ), 
 							'type' 			=> 'multiselect', 
 							'class'			=> 'chosen_select',
 							'css'			=> 'width: 450px;',
@@ -114,8 +125,18 @@ class WC_International_Delivery extends WC_Flat_Rate {
     	
     	if ($this->enabled=="no") return false;
 		
-		if (is_array($this->exclude_countries)) :
-			if (in_array($woocommerce->customer->get_shipping_country(), $this->exclude_countries)) return false;
+		if ($this->availability=='including') :
+			
+			if (is_array($this->countries)) :
+				if (!in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+			endif;
+			
+		else :
+			
+			if (is_array($this->countries)) :
+				if (in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+			endif;
+			
 		endif;
 		
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
