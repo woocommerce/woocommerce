@@ -2926,7 +2926,7 @@ msgstr "Überweisung aktivieren"
 
 #: classes/gateways/class-wc-bacs.php:56
 #: classes/gateways/class-wc-cheque.php:51
-#: classes/gateways/class-wc-cod.php:54
+#: classes/gateways/class-wc-cod.php:53
 #: classes/gateways/class-wc-paypal.php:103
 #: classes/shipping/class-wc-local-delivery.php:61
 #: classes/shipping/class-wc-local-pickup.php:55
@@ -3075,7 +3075,7 @@ msgstr "Aktiviere PayPal-Standard"
 msgid "PayPal"
 msgstr "PayPal"
 
-#: classes/gateways/class-wc-cod.php:60
+#: classes/gateways/class-wc-cod.php:59
 #: classes/gateways/class-wc-paypal.php:109
 #: templates/single-product/tabs/tab-description.php:1
 #@ woocommerce
@@ -8602,48 +8602,48 @@ msgid "Couldn&#8217;t register you... please contact us if you continue to have 
 msgstr "Wir konnten Sie nicht registrieren... Bitte kontaktieren Sie uns falls Sie weiterhin Probleme haben."
 
 #: classes/gateways/class-wc-cod.php:16
-#: classes/gateways/class-wc-cod.php:37
-#: classes/gateways/class-wc-cod.php:57
+#: classes/gateways/class-wc-cod.php:36
+#: classes/gateways/class-wc-cod.php:56
 #@ woocommerce
 msgid "Cash on Delivery"
 msgstr "Per Nachnahme"
 
-#: classes/gateways/class-wc-cod.php:38
+#: classes/gateways/class-wc-cod.php:37
 #@ woocommerce
 msgid "Have your customers pay with cash (or by other means) upon delivery."
 msgstr "Wollen ihre Kunden per Nachnahme bei der Auslieferung zahlen (Bar oder über andere Zahlungsmethoden)?"
 
-#: classes/gateways/class-wc-cod.php:47
+#: classes/gateways/class-wc-cod.php:46
 #@ woocommerce
 msgid "Enable COD"
 msgstr "Per Nachnahme aktivieren"
 
-#: classes/gateways/class-wc-cod.php:48
+#: classes/gateways/class-wc-cod.php:47
 #@ woocommerce
 msgid "Turn on Cash on Delivery for WooCommerce"
 msgstr "Aktivieren Sie per Nachnahme für WooCommerce"
 
-#: classes/gateways/class-wc-cod.php:56
+#: classes/gateways/class-wc-cod.php:55
 #@ woocommerce
 msgid "Payment method title that the customer will see on your website."
 msgstr "Der Titel der Zahlungsweise, welchen der Kunde auf ihrer Webseite sehen sehen wird."
 
-#: classes/gateways/class-wc-cod.php:62
+#: classes/gateways/class-wc-cod.php:61
 #@ woocommerce
 msgid "Payment method description that the customer will see on your website."
 msgstr "Beschreibung der Zahlungsweise welche der Kunde auf ihrer Webseite sehen wird."
 
-#: classes/gateways/class-wc-cod.php:66
+#: classes/gateways/class-wc-cod.php:65
 #@ woocommerce
 msgid "Instructions"
 msgstr "Anweisungen"
 
-#: classes/gateways/class-wc-cod.php:68
+#: classes/gateways/class-wc-cod.php:67
 #@ woocommerce
 msgid "Instructions that will be added to the thank you page."
 msgstr "Anweisungen, die der Danke-Seite hinzugefügt werden"
 
-#: classes/gateways/class-wc-cod.php:82
+#: classes/gateways/class-wc-cod.php:81
 #@ woocommerce
 msgid "Payment to be made upon delivery."
 msgstr "Zahlung, die bei Anlieferung gemacht wird."
@@ -8958,11 +8958,6 @@ msgstr "(inkl. Steuer)"
 msgid "Bacs"
 msgstr "Überweisung"
 
-#: classes/gateways/class-wc-cheque.php:18
-#@ woocommerce
-msgid "cheque"
-msgstr "Scheck"
-
 #: classes/gateways/class-wc-paypal.php:22
 #@ woocommerce
 msgid "Paypal"
@@ -9007,4 +9002,15 @@ msgstr "Zeige eine Liste von zufälligen Produkten auf ihrer Seite."
 #@ woocommerce
 msgid "Random Products"
 msgstr "Zufällige Produkte"
+
+#: classes/gateways/class-wc-cheque.php:18
+#@ woocommerce
+msgid "Cheque"
+msgstr "Scheck"
+
+#: admin/woocommerce-admin-settings.php:798
+#, php-format
+#@ woocommerce
+msgid "Reduced Rate%sZero Rate"
+msgstr "Reduzierter Satz%sSteuerfrei"
 

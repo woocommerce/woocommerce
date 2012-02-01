@@ -795,7 +795,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'id' 		=> 'woocommerce_tax_classes',
 		'css' 		=> 'width:100%; height: 75px;',
 		'type' 		=> 'textarea',
-		'std' 		=> "Reduced Rate\nZero Rate"
+		'std' 		=> sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
 	),
 	
 	array(  
