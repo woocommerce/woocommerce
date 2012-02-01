@@ -106,8 +106,8 @@ add_filter( 'wp_list_pages', 'woocommerce_list_pages' );
 add_filter( 'wp_nav_menu_items', 'woocommerce_nav_menu_items', 10, 2 );
 
 /* Clear the cart */
-if (get_option('woocommerce_clear_cart_on_logout')=='yes') 
-	add_action( 'wp_logout', array(&$woocommerce->cart, 'empty_cart') );
+if (get_option('woocommerce_clear_cart_on_logout')=='yes') add_action( 'wp_logout', 'woocommerce_empty_cart' );
+	
 add_action( 'wp', 'woocommerce_clear_cart_after_payment' );
 
 /* Catalog sorting/ordering */

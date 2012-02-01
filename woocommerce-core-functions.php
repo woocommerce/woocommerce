@@ -35,6 +35,21 @@ if (!function_exists('woocommerce_get_page_id')) {
 }
 
 /**
+ * WooCommerce clear cart
+ *
+ * Clears the cart session when called
+ **/
+if (!function_exists('woocommerce_empty_cart')) {
+	function woocommerce_empty_cart() {
+		global $woocommerce;
+		
+		if (!isset($woocommerce->cart) || $woocommerce->cart == '' ) $woocommerce->cart = new WC_Cart();
+		
+		$woocommerce->cart->empty_cart();
+	}
+}
+
+/**
  * WooCommerce conditionals
  *
  * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)

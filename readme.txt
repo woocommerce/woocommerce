@@ -82,6 +82,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.4.1 =
+* Depreciated tax class fix
+* Logout error fix
+
 = 1.4 - 01/02/2012 = 
 * Improved default theme
 * Support for multiple and stacked (compound) taxes
