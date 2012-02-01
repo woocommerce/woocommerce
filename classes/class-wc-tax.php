@@ -233,6 +233,10 @@ class WC_Tax {
 		return $this->find_rates( $country, $state, '', $tax_class );
 	}
 
+	/** Depreciated before new tax system - added to stop errors before people upgrade */
+	function get_shipping_tax_rate() {
+		_deprecated_function( 'get_shipping_tax_rate', '1.4' );
+	}
 	
 	/**
 	 * Gets an array of matching shipping tax rates for a given class
