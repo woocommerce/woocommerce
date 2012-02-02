@@ -172,6 +172,5 @@ class WC_Shipping_Rate {
 class woocommerce_shipping_method extends WC_Shipping_Method {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_shipping_method', '1.4', 'WC_Shipping_Method()' );
-		parent::__construct(); 
 	} 
 }
