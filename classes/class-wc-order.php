@@ -939,7 +939,7 @@ class order_item_meta {
 /** Depreciated */
 class woocommerce_order extends WC_Order {
 	public function __construct( $id = '' ) { 
-		_deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' );
+		// _deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' ); Depreciated, but leaving uncommented until all gateways are updated
 		parent::__construct( $id ); 
 	} 
 }

@@ -1032,7 +1032,7 @@ function woocommerce_settings() {
     	
     	flush_rewrite_rules( false );
     	
-		if (woocommerce_get_page_id('shop')) :
+		if (woocommerce_get_page_id('shop')>0) :
 			$install_complete = true;
 		else :
 			$show_page_installer = true;
