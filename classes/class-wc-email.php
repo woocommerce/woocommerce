@@ -120,7 +120,9 @@ class WC_Email {
 		
 		$email_heading = __('New Customer Order', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (# %s)', 'woocommerce' ), get_bloginfo('name' ), $order_id ), $order );
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (# %s)', 'woocommerce' ), $blogname, $order_id ), $order );
 		
 		// Buffer
 		ob_start();
@@ -145,7 +147,9 @@ class WC_Email {
 
 		$email_heading = __('Order Received', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_customer_procesing_order', sprintf( __( '[%s] Order Received', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_customer_procesing_order', sprintf( __( '[%s] Order Received', 'woocommerce' ), $blogname ), $order );
 		
 		// Buffer
 		ob_start();
@@ -180,8 +184,10 @@ class WC_Email {
 		endif;
 		
 		$email_heading = apply_filters( 'woocommerce_completed_order_customer_notification_subject', $email_heading );
-	
-		$subject = apply_filters( 'woocommerce_email_subject_customer_completed_order', sprintf( $subject, get_bloginfo( 'name' ) ), $order );
+		
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_customer_completed_order', sprintf( $subject, $blogname ), $order );
 		
 		// Buffer
 		ob_start();
@@ -208,8 +214,10 @@ class WC_Email {
 		$order = $pay_for_order;
 		
 		$email_heading = sprintf(__('Invoice for Order #%s', 'woocommerce'), $order->id);
-	
-		$subject = apply_filters( 'woocommerce_email_subject_customer_invoice', sprintf( __( '[%s] Pay for Order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
+		
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_customer_invoice', sprintf( __( '[%s] Pay for Order', 'woocommerce' ), $blogname ), $order );
 	
 		// Buffer
 		ob_start();
@@ -248,7 +256,9 @@ class WC_Email {
 		
 		$email_heading = __('A note has been added to your order', 'woocommerce');
 		
-		$subject = apply_filters( 'woocommerce_email_subject_customer_note', sprintf( __( '[%s] A note has been added to your order', 'woocommerce' ), get_bloginfo( 'name' ) ), $order );
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_customer_note', sprintf( __( '[%s] A note has been added to your order', 'woocommerce' ), $blogname ), $order );
 		
 		// Buffer
 		ob_start();
@@ -267,8 +277,10 @@ class WC_Email {
 	 * Low stock notification email
 	 **/
 	function low_stock( $product ) {
-	
-		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product low in stock', 'woocommerce' ) ), $product );
+		
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_low_stock', sprintf( '[%s] %s', $blogname, __( 'Product low in stock', 'woocommerce' ) ), $product );
 		
 		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is low in stock.', 'woocommerce');
 	
@@ -281,7 +293,9 @@ class WC_Email {
 	 **/
 	function no_stock( $product ) {
 		
-		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product out of stock', 'woocommerce' ) ), $product );
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_no_stock', sprintf( '[%s] %s', $blogname, __( 'Product out of stock', 'woocommerce' ) ), $product );
 		
 		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is out of stock.', 'woocommerce');
 	
@@ -307,7 +321,9 @@ class WC_Email {
 		
 		if (!$product || !$quantity) return;
 		
-		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', get_bloginfo( 'name' ), __( 'Product Backorder', 'woocommerce' ) ), $product );
+		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+		
+		$subject = apply_filters( 'woocommerce_email_subject_backorder', sprintf( '[%s] %s', $blogname, __( 'Product Backorder', 'woocommerce' ) ), $product );
 	
 		$message = sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woocommerce'), $quantity, $product->id, $product->get_title(), $product->sku, $order_id );
 	
