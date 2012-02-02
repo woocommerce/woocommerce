@@ -15,7 +15,7 @@ class WC_BACS extends WC_Payment_Gateway {
 		$this->id				= 'bacs';
 		$this->icon 			= apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields 		= false;
-		
+		$this->method_title     = __( 'Bacs', 'woocommerce' );
 		// Load the form fields.
 		$this->init_form_fields();
 		

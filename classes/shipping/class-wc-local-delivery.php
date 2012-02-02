@@ -14,7 +14,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-delivery';
-		$this->method_title = __('Local Delivery', 'woothemes');
+		$this->method_title = __('Local Delivery', 'woocommerce');
 
 		// Load the form fields.
 		$this->init_form_fields();
