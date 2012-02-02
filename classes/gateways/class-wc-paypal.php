@@ -19,7 +19,9 @@ class WC_Paypal extends WC_Payment_Gateway {
         $this->has_fields 	= false;
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
-        
+        $this->method_title     = __( 'Paypal', 'woocommerce' );
+		
+		
 		// Load the form fields.
 		$this->init_form_fields();
 		

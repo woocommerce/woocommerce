@@ -14,7 +14,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-pickup';
-		$this->method_title = __('Local Pickup', 'woothemes');
+		$this->method_title = __('Local Pickup', 'woocommerce');
 
 		// Load the form fields.
 		$this->init_form_fields();
