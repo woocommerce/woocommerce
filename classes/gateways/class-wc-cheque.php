@@ -57,7 +57,7 @@ class WC_Cheque extends WC_Payment_Gateway {
 							'title' => __( 'Customer Message', 'woocommerce' ), 
 							'type' => 'textarea', 
 							'description' => __( 'Let the customer know the payee and where they should be sending the cheque to and that their order won\'t be shipping until you receive it.', 'woocommerce' ), 
-							'default' => 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.'
+							'default' => __( 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woocommerce' )    
 						)
 			);
     
