@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.4
+Stable tag: 1.4.1
 
 WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -33,7 +33,7 @@ Checkout and contribute to the source on GitHub at http://github.com/woothemes/w
 
 = Minimum Requirements =
 
-* WordPress 3.1 or greater
+* WordPress 3.3 or greater
 * PHP version 5.2.4 or greater
 * MySQL version 5.0 or greater
 * Some payment gateways require fsockopen support (for IPN access)
@@ -58,13 +58,13 @@ The manual installation involves downloading the plugin and uploading it to your
 
 For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips. 
 
-The codex for WooCommerce can be found here: http://www.woothemes.com/woocommerce-codex/
+The documentation for WooCommerce can be found here: http://www.woothemes.com/woocommerce-docs/
 
-Clients and beginners will appreciate the user guide here: http://www.woothemes.com/woocommerce-codex/woocommerce-user-guide/
+Clients and beginners will appreciate the usage instructions here: http://www.woothemes.com/woocommerce-docs/category/user-guide/
 
 = Where can I request new features and extensions? =
 
-You can vote on and request new features and extensions in our WooIdeas board - http://ideas.woothemes.com/forums/133476-woocommerce
+You can vote on and request new features and extensions in our WooIdeas board - http://woo.uservoice.com/forums/133476-woocommerce
 
 = Where can I report bugs or contribute to the project? =
 
@@ -82,7 +82,18 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.4 =
+= 1.4.2 = 
+* Uninstall fix
+
+= 1.4.1 - 01/02/2012 = 
+* Depreciated tax class fix
+* Logout error fix
+* get_shipping_tax_rate deprecated to stop errors
+* get_attribute returns non-linked terms
+* First time install fix
+* Added back version constant to stop 3rd party themes breaking
+
+= 1.4 - 01/02/2012 = 
 * Improved default theme
 * Support for multiple and stacked (compound) taxes
 * Locale options for country address formatting and checkout fields
@@ -134,6 +145,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * If sending shipping to paypal, send shipping address
 * Send shipping name to paypal
 * Code to allow add-on validation
+* International shipping (based on flat rate)
 
 = 1.3.2.1 - 15/12/2011 = 
 * Category/Ordering fix

@@ -14,7 +14,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 
 	function __construct() { 
 		$this->id 			= 'local-delivery';
-		$this->method_title = __('Local Delivery', 'woothemes');
+		$this->method_title = __('Local Delivery', 'woocommerce');
 
 		// Load the form fields.
 		$this->init_form_fields();
@@ -55,7 +55,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				'title' 		=> __( 'Enable', 'woocommerce' ), 
 				'type' 			=> 'checkbox', 
 				'label' 		=> __( 'Enable local delivery', 'woocommerce' ), 
-				'default' 		=> 'yes'
+				'default' 		=> 'no'
 			), 
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ), 

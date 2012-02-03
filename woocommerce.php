@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An e-commerce toolkit that helps you sell anything. Beautifully.
-Version: 1.4
+Version: 1.4.1
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -29,7 +29,7 @@ class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.4';
+	var $version = '1.4.1';
 	
 	/** URLS ******************************************************************/
 	
@@ -78,6 +78,9 @@ class Woocommerce {
 
 		// Start a PHP session
 		if (!session_id()) session_start();
+		
+		// Define version constant
+		define( 'WOOCOMMERCE_VERSION', $this->version );
 		
 		// Set up localisation
 		$this->load_plugin_textdomain();
@@ -176,6 +179,7 @@ class Woocommerce {
 		include( 'classes/shipping/class-wc-shipping-method.php' );
 		
 		include( 'classes/shipping/class-wc-flat-rate.php' );
+		include( 'classes/shipping/class-wc-international-delivery.php' );
 		include( 'classes/shipping/class-wc-free-shipping.php' );
 		include( 'classes/shipping/class-wc-local-delivery.php' );
 		include( 'classes/shipping/class-wc-local-pickup.php' );
@@ -476,7 +480,7 @@ class Woocommerce {
 		register_taxonomy( 'product_cat',
 	        array('product'),
 	        array(
-	            'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
+	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Categories', 'woocommerce'),
 	            'labels' => array(
@@ -663,7 +667,7 @@ class Woocommerce {
 				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
-				'hierarchical' 			=> true,
+				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
@@ -706,7 +710,7 @@ class Woocommerce {
 				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> true,
-				'hierarchical' 			=> true,
+				'hierarchical' 			=> false,
 				'rewrite' 				=> false,
 				'query_var'				=> true,			
 				'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),

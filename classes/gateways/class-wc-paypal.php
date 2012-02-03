@@ -19,7 +19,9 @@ class WC_Paypal extends WC_Payment_Gateway {
         $this->has_fields 	= false;
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
-        
+        $this->method_title     = __( 'Paypal', 'woocommerce' );
+		
+		
 		// Load the form fields.
 		$this->init_form_fields();
 		
@@ -121,12 +123,6 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
 							'default' => 'no'
 						), 
-			'ask_for_shipping' => array(
-							'title' => __( 'Hide shipping', 'woocommerce' ), 
-							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
-							'default' => 'no'
-						),
 			'testmode' => array(
 							'title' => __( 'PayPal sandbox', 'woocommerce' ), 
 							'type' => 'checkbox', 
@@ -296,6 +292,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 			endif;
 		
 		endif;
+		
+		$paypal_args = apply_filters( 'woocommerce_paypal_args', $paypal_args );
 		
 		$paypal_args_array = array();
 

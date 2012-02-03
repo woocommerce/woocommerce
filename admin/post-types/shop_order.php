@@ -101,20 +101,20 @@ function woocommerce_custom_order_columns($column) {
 			echo woocommerce_price($order->order_total);
 		break;
 		case "order_date" :
+		
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
 				$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
 				$time_diff = 0;
 			else :
-				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ) );
-				$m_time = $post->post_date;
-				$time = get_post_time( 'G', true, $post );
+				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
+				$time = strtotime($post->post_date);
 
-				$time_diff = time() - $time;
+				$time_diff = current_time('timestamp') - $time;
 
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
 					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $time ) );
 				else
-					$h_time = mysql2date( __( 'Y/m/d', 'woocommerce' ), $m_time );
+					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
 			endif;
 
 			echo '<abbr title="' . $t_time . '">' . apply_filters( 'post_date_column_time', $h_time, $post ) . '</abbr>';

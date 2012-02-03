@@ -9,7 +9,7 @@
  * @category	Payment Gateways
  * @author		WooThemes
  */
-class WC_Payment_Gateway extends WC_Settings_Api {
+class WC_Payment_Gateway extends WC_Settings_API {
 	
 	var $id;
 	var $title;
@@ -116,7 +116,7 @@ class WC_Payment_Gateway extends WC_Settings_Api {
 /** Depreciated */
 class woocommerce_payment_gateway extends WC_Payment_Gateway {
 	public function __construct() { 
-		_deprecated_function( 'woocommerce_payment_gateway', '1.4', 'WC_Payment_Gateway()' );
+		// _deprecated_function( 'woocommerce_payment_gateway', '1.4', 'WC_Payment_Gateway()' ); Depreciated, but leaving uncommented until all gateways are updated
 		parent::__construct(); 
 	} 
 }

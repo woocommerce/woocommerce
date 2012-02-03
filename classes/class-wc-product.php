@@ -728,7 +728,19 @@ class WC_Product {
 			if ($attribute['is_taxonomy']) :
 				
 				// Get string with terms
-				return get_the_term_list( $this->id, $attribute['name'], ''. '', ', ' );
+				$terms = get_the_terms( $this->id, $attribute['name'] );
+				
+				if ( $terms && ! is_wp_error( $terms ) ) :
+				
+					$terms_array = array();
+					
+					foreach ( $terms as $term ) :
+						$terms_array[] = $term->name;
+					endforeach;
+					
+					return implode( ', ', $terms_array );
+				
+				endif;	
 				
 			else :
 				

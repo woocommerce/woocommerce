@@ -803,7 +803,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'id' 		=> 'woocommerce_tax_classes',
 		'css' 		=> 'width:100%; height: 75px;',
 		'type' 		=> 'textarea',
-		'std' 		=> "Reduced Rate\nZero Rate"
+		'std' 		=> sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
 	),
 	
 	array(  
@@ -1019,6 +1019,9 @@ function woocommerce_settings() {
     $install_complete = false;
     $show_page_installer = false;
     
+    // Hide WC Link
+    if (isset($_GET['hide-wc-extensions-message'])) update_option('hide-wc-extensions-message', 1);
+    
     // Add pages button
     if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) :
 		require_once( 'woocommerce-admin-install.php' );
@@ -1037,7 +1040,7 @@ function woocommerce_settings() {
     	
     	flush_rewrite_rules( false );
     	
-		if (woocommerce_get_page_id('shop')) :
+		if (woocommerce_get_page_id('shop')>0) :
 			$install_complete = true;
 		else :
 			$show_page_installer = true;
@@ -1098,7 +1101,9 @@ function woocommerce_settings() {
 			</h2>
 			<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
 			
-			<div id="woocommerce_extensions"><?php echo sprintf(__('More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+			<?php if (!get_option('hide-wc-extensions-message')) : ?>
+			<div id="woocommerce_extensions"><a href="<?php echo add_query_arg('hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a><?php echo sprintf(__('More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+			<?php endif; ?>
 
 			<?php
 				switch ($current_tab) :

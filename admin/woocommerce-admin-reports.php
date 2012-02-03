@@ -975,7 +975,7 @@ function woocommerce_top_earners() {
 		foreach ($orders as $order) :
 			$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
 			foreach ($order_items as $item) :
-				if (isset($item['line_cost'])) $row_cost = $item['line_cost'];
+				if (isset($item['line_total'])) $row_cost = $item['line_total'];
 				else $row_cost = $item['cost'] * $item['qty'];
 				
 				$found_products[$item['id']] = isset($found_products[$item['id']]) ? $found_products[$item['id']] + $row_cost : $row_cost;
@@ -1083,7 +1083,7 @@ function woocommerce_product_sales() {
 					if ($item['id']!=$chosen_product_id && !in_array($item['id'], $child_ids)) continue;
 					$product_sales[$date] = isset($product_sales[$date]) ? $product_sales[$date] + $item['qty'] : $item['qty'];
 					
-					if (isset($item['line_cost'])) $row_cost = $item['line_cost'];
+					if (isset($item['line_total'])) $row_cost = $item['line_total'];
 					else $row_cost = $item['cost'] * $item['qty'];
 					
 					$product_totals[$date] = isset($product_totals[$date]) ? $product_totals[$date] + $row_cost : $row_cost;

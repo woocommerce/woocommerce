@@ -7,7 +7,7 @@
  * @category	Class
  * @author		WooThemes
  */
-class WC_Settings_Api {
+class WC_Settings_API {
 	
 	var $plugin_id = 'woocommerce_';
 	var $settings = array();

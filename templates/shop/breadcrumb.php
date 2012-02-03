@@ -32,7 +32,8 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 		echo $before . single_cat_title('', false) . $after;
 	
 	elseif ( is_tax('product_cat') ) :
-	
+		
+		echo $prepend;
 		$term = get_term_by( 'slug', get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
 	
 		$parents = array();
@@ -52,7 +53,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 		endif;
 	
 		$queried_object = $wp_query->get_queried_object();
-		echo $prepend . $before . $queried_object->name . $after;
+		echo $before . $queried_object->name . $after;
 	
 	elseif ( is_tax('product_tag') ) :
 	

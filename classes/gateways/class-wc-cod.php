@@ -1,6 +1,6 @@
 <?php
 /**
-new Woocommercevery Gateway
+ * Cash on Delivery Gateway
  * 
  * Provides a Cash on Delivery Payment Gateway.
  *
