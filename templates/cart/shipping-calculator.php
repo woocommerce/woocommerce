@@ -56,7 +56,7 @@ if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart-
 		<p class="form-row form-row-wide">
 			<input type="text" class="input-text" value="<?php echo esc_attr( $woocommerce->customer->get_shipping_postcode() ); ?>" placeholder="<?php _e('Postcode/Zip', 'woocommerce'); ?>" title="<?php _e('Postcode', 'woocommerce'); ?>" name="calc_shipping_postcode" id="calc_shipping_postcode" />
 		</p>
-	
+		<div class="clear"></div>
 		<p><button type="submit" name="calc_shipping" value="1" class="button"><?php _e('Update Totals', 'woocommerce'); ?></button></p>
 		<?php $woocommerce->nonce_field('cart') ?>
 	</section>
