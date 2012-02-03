@@ -36,7 +36,7 @@ function get_woocommerce_view_order() {
  * @since 1.4
  */
 function woocommerce_my_account( $atts ) {
-	global $woocommerce, $current_user, $recent_orders;
+	global $woocommerce, $current_user;
 	
 	if ( ! is_user_logged_in() ) :
 		
@@ -52,7 +52,10 @@ function woocommerce_my_account( $atts ) {
 		
 		get_currentuserinfo();
 		
-		woocommerce_get_template( 'myaccount/my-account.php' );
+		woocommerce_get_template( 'myaccount/my-account.php', array(
+			'current_user' 	=> $current_user,
+			'recent_orders' 	=> $recent_orders
+		) );
 
 	endif;
 		
@@ -70,7 +73,7 @@ function woocommerce_my_account( $atts ) {
  * @since 1.4
  */
 function woocommerce_edit_address() {
-	global $woocommerce, $load_address, $address;
+	global $woocommerce;
 	
 	if ( ! is_user_logged_in() ) return;
 
@@ -78,7 +81,10 @@ function woocommerce_edit_address() {
 	
 	$address = $woocommerce->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
 	
-	woocommerce_get_template( 'myaccount/form-edit-address.php' );
+	woocommerce_get_template( 'myaccount/form-edit-address.php', array(
+		'load_address' 	=> $load_address,
+		'address'		=> $address
+	) );
 }
 
 /**

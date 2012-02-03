@@ -1,8 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order_id, $order, $woocommerce; ?>
-
-<?php do_action('woocommerce_email_header'); ?>
+<?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <p><?php _e("Your order is complete. Your order's details are below:", 'woocommerce'); ?></p>
 

@@ -3,7 +3,7 @@
  * Order Tracking
  */
  
-global $woocommerce, $order;
+global $woocommerce;
 ?>
 
 <?php

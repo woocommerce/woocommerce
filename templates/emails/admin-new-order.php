@@ -1,8 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order; ?>
-
-<?php do_action('woocommerce_email_header'); ?>
+<?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <p><?php echo __('You have received an order from', 'woocommerce') . ' ' . $order->billing_first_name . ' ' . $order->billing_last_name . __(". Their order is as follows:", 'woocommerce'); ?></p>
 

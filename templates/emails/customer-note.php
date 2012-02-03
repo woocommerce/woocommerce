@@ -1,8 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order_id, $order, $customer_note, $woocommerce; ?>
-
-<?php do_action('woocommerce_email_header'); ?>
+<?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <p><?php _e("Hello, a note has just been added to your order:", 'woocommerce'); ?></p>
 

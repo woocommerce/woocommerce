@@ -2,7 +2,7 @@
 /**
  * Review Comments Template
  *
- * Closesing li is left out on purpose!
+ * Closing li is left out on purpose!
  */
  
 global $post; 

@@ -15,7 +15,7 @@ global $woocommerce;
 		
 		else :
 		
-			$shiptobilling = $this->get_value('shiptobilling');
+			$shiptobilling = $checkout->get_value('shiptobilling');
 		
 		endif;
 	?>
@@ -28,21 +28,21 @@ global $woocommerce;
 			
 	<div class="shipping_address">
 					
-		<?php do_action('woocommerce_before_checkout_shipping_form', $this); ?>
+		<?php do_action('woocommerce_before_checkout_shipping_form', $checkout); ?>
 		
-		<?php foreach ($this->checkout_fields['shipping'] as $key => $field) : ?>
+		<?php foreach ($checkout->checkout_fields['shipping'] as $key => $field) : ?>
 		
-			<?php woocommerce_form_field( $key, $field, $this->get_value( $key ) ); ?>
+			<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 		
 		<?php endforeach; ?>
 		
-		<?php do_action('woocommerce_after_checkout_shipping_form', $this); ?>
+		<?php do_action('woocommerce_after_checkout_shipping_form', $checkout); ?>
 								
 	</div>
 		
 <?php endif; ?>
 		
-<?php do_action('woocommerce_before_order_notes', $this); ?>
+<?php do_action('woocommerce_before_order_notes', $checkout); ?>
 		
 <?php if (get_option('woocommerce_enable_order_comments')!='no') : ?>
 		
@@ -52,12 +52,12 @@ global $woocommerce;
 	
 	<?php endif; ?>
 			
-	<?php foreach ($this->checkout_fields['order'] as $key => $field) : ?>
+	<?php foreach ($checkout->checkout_fields['order'] as $key => $field) : ?>
 	
-		<?php woocommerce_form_field( $key, $field, $this->get_value( $key ) ); ?>
+		<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 			
 	<?php endforeach; ?>
 								
 <?php endif; ?>
 		
-<?php do_action('woocommerce_after_order_notes', $this); ?>
+<?php do_action('woocommerce_after_order_notes', $checkout); ?>

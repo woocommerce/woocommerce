@@ -3,7 +3,7 @@
  * My Account
  */
  
-global $woocommerce, $current_user, $recent_orders;
+global $woocommerce;
 ?>
 
 <?php $woocommerce->show_messages(); ?>

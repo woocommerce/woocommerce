@@ -3,7 +3,7 @@
  * Thankyou Page
  */
  
-global $woocommerce, $order;
+global $woocommerce;
 ?>
 
 <?php if ($order) : ?>

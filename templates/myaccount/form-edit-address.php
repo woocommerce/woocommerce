@@ -3,7 +3,7 @@
  * Edit Address Form
  */
  
-global $woocommerce, $load_address, $address;
+global $woocommerce;
 ?>
 
 <?php $woocommerce->show_messages(); ?>

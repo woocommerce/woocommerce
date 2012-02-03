@@ -3,7 +3,7 @@
  * Login Form
  */
  
-global $message, $redirect, $woocommerce; 
+global $woocommerce; 
 
 if (is_user_logged_in()) return;
 ?>

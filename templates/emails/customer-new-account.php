@@ -1,8 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $user_login, $user_pass, $blogname; ?>
-
-<?php do_action('woocommerce_email_header'); ?>
+<?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <p><?php echo sprintf(__("Thanks for registering on %s. Your login details are below:", 'woocommerce'), $blogname); ?></p>
 

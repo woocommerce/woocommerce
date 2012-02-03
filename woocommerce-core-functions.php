@@ -114,27 +114,27 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
 }
 
 /**
- * Get other templates (e.g. product attributes)
+ * Get other templates (e.g. product attributes) passing attributes and including the file
  */
-function woocommerce_get_template($template_name, $require_once = true) {
+function woocommerce_get_template($template_name, $args = array()) {
 	global $woocommerce;
 	
-	if (file_exists( STYLESHEETPATH . '/' . $woocommerce->template_url . $template_name )) 
-		load_template( STYLESHEETPATH . '/' . $woocommerce->template_url . $template_name, $require_once ); 
-	elseif (file_exists( STYLESHEETPATH . '/' . $template_name )) 
-		load_template( STYLESHEETPATH . '/' . $template_name , $require_once); 
-	else 
-		load_template( $woocommerce->plugin_path() . '/templates/' . $template_name , $require_once);
+	if ( $args && is_array($args) ) 
+		extract( $args );
+	
+	include( woocommerce_locate_template( $template_name ) );
 }
 
 /**
- * Locate a template and return the path for inclusion - this lets us pass variables to the template easier than wth get_template_part
+ * Locate a template and return the path for inclusion
  */
 function woocommerce_locate_template( $template_name ) {
 	global $woocommerce;
 	
-	$template = locate_template( $woocommerce->template_url . $template_name );
+	// Look in yourtheme/woocommerce/template-name and yourtheme/template-name
+	$template = locate_template( array( $woocommerce->template_url . $template_name , $template_name ) );
 	
+	// Get default template
 	if (!$template) $template = $woocommerce->plugin_path() . '/templates/' . $template_name;
 	
 	return $template;

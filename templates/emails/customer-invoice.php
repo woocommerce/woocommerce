@@ -1,8 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<?php global $order, $woocommerce; ?>
-
-<?php do_action('woocommerce_email_header'); ?>
+<?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <?php if ($order->status=='pending') : ?>
 

@@ -62,12 +62,12 @@ class WC_Checkout {
 		
 	/** Output the billing information form */
 	function checkout_form_billing() {
-		include( woocommerce_locate_template( 'checkout/form-billing.php' ) );
+		woocommerce_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 	
 	/** Output the shipping information form */
 	function checkout_form_shipping() {
-		include( woocommerce_locate_template( 'checkout/form-shipping.php' ) );
+		woocommerce_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
 	/**

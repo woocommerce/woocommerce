@@ -66,12 +66,12 @@ class WC_Email {
 		return 'text/html';
 	}
 	
-	function email_header() {
-		woocommerce_get_template('emails/email-header.php', false);
+	function email_header( $email_heading ) {
+		woocommerce_get_template('emails/email-header.php', array( 'email_heading' => $email_heading ));
 	}
 	
 	function email_footer() {
-		woocommerce_get_template('emails/email-footer.php', false);
+		woocommerce_get_template('emails/email-footer.php');
 	}
 	
 	/**
@@ -81,7 +81,7 @@ class WC_Email {
 		// Buffer
 		ob_start();
 	
-		do_action('woocommerce_email_header');
+		do_action('woocommerce_email_header', $email_heading);
 		
 		echo wpautop(wptexturize( $message ));
 		
@@ -114,7 +114,6 @@ class WC_Email {
 	 * New order
 	 **/
 	function new_order( $order_id ) {
-		global $order, $email_heading;
 		
 		$order = new WC_Order( $order_id );
 		
@@ -128,7 +127,10 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/admin-new-order.php', false);
+		woocommerce_get_template('emails/admin-new-order.php', array(
+			'order' => $order,
+			'email_heading' => $email_heading
+		));
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -141,7 +143,6 @@ class WC_Email {
 	 * Processing Order
 	 **/
 	function customer_processing_order( $order_id ) {
-		global $order, $email_heading;
 		
 		$order = new WC_Order( $order_id );
 
@@ -155,7 +156,10 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer-processing-order.php', false);
+		woocommerce_get_template('emails/customer-processing-order.php', array(
+			'order' => $order,
+			'email_heading' => $email_heading
+		));
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -171,7 +175,6 @@ class WC_Email {
 	 * Completed Order
 	 **/
 	function customer_completed_order( $order_id ) {
-		global $order, $email_heading;
 		
 		$order = new WC_Order( $order_id );
 		
@@ -193,7 +196,10 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer-completed-order.php', false);
+		woocommerce_get_template('emails/customer-completed-order.php', array(
+			'order' => $order,
+			'email_heading' => $email_heading
+		));
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -209,7 +215,6 @@ class WC_Email {
 	 * Pay for order - invoice
 	 **/
 	function customer_invoice( $pay_for_order ) {
-		global $order, $email_heading;
 		
 		$order = $pay_for_order;
 		
@@ -223,7 +228,10 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer-invoice.php', false);
+		woocommerce_get_template('emails/customer-invoice.php', array(
+			'order' => $order,
+			'email_heading' => $email_heading
+		));
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -239,7 +247,6 @@ class WC_Email {
 	 * Customer notes
 	 **/
 	function customer_note( $args ) {
-		global $order, $email_heading, $customer_note;
 		
 		$defaults = array(
 			'order_id' => '',
@@ -264,7 +271,11 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer-note.php', false);
+		woocommerce_get_template('emails/customer-note.php', array(
+			'order' => $order,
+			'email_heading' => $email_heading,
+			'customer_note' => $customer_note
+		));
 		
 		// Get contents
 		$message = ob_get_clean();
@@ -362,7 +373,6 @@ class WC_Email {
 	 * Customer new account welcome email
 	 **/
 	function customer_new_account( $user_id, $plaintext_pass ) {
-		 global $user_login, $user_pass, $blogname;
 		
 		if (!$user_id || !$plaintext_pass) return;
 		
@@ -381,7 +391,12 @@ class WC_Email {
 		ob_start();
 		
 		// Get mail template
-		woocommerce_get_template('emails/customer-new-account.php', false);
+		woocommerce_get_template('emails/customer-new-account.php', array(
+			'user_login' 	=> $user_login,
+			'user_pass'		=> $user_pass,
+			'blogname'		=> $blogname,
+			'email_heading'	=> $email_heading
+		));
 		
 		// Get contents
 		$message = ob_get_clean();

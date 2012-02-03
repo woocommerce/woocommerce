@@ -3,7 +3,7 @@
  * Order Details
  */
  
-global $woocommerce, $order_id;
+global $woocommerce;
 
 $order = new WC_Order( $order_id );
 ?>

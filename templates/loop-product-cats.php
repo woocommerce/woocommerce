@@ -1,4 +1,10 @@
-<?php global $woocommerce, $woocommerce_loop, $product_categories, $product_category_found, $product_category_parent; ?>
+<?php 
+
+global $woocommerce, $woocommerce_loop, $product_category_found; 
+
+$product_category_found = false;
+
+?>
 
 <?php 
 foreach ($product_categories as $category) :
@@ -8,7 +14,6 @@ foreach ($product_categories as $category) :
 	$product_category_found = true;
 
 	$woocommerce_loop['loop']++;
-
 	?>
 	<li class="product sub-category <?php if ($woocommerce_loop['loop']%$woocommerce_loop['columns']==0) echo 'last'; if (($woocommerce_loop['loop']-1)%$woocommerce_loop['columns']==0) echo 'first'; ?>">
 

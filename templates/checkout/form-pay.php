@@ -2,7 +2,7 @@
 /**
  * Pay for order form
  */
-global $order, $woocommerce; 
+global $woocommerce; 
 ?>
 <form id="order_review" method="post">
 	

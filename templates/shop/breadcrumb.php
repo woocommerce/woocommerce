@@ -3,7 +3,7 @@
  * Shop Breadcrumb
  */
 
-global $post, $wp_query, $author, $paged, $delimiter, $wrap_before, $wrap_after, $before, $after, $home;
+global $post, $wp_query;
 
 if( !$home ) $home = _x('Home', 'breadcrumb', 'woocommerce');
 

@@ -165,7 +165,6 @@
 
                                             	<!-- // Begin Module: Standard Header Image \\ -->
                                             	<h1 class="h1" style="color:<?php echo woocommerce_light_or_dark(get_option('woocommerce_email_base_color'), '#202020', '#ffffff'); ?> !important; margin:0; text-shadow:0 1px 0 <?php echo woocommerce_hex_lighter(get_option('woocommerce_email_base_color'), 20); ?>;"><?php
-                                            		global $email_heading;
                                             		echo $email_heading;
                                             	?></h1>
                                             	<!-- // End Module: Standard Header Image \\ -->
