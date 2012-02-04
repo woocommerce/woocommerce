@@ -805,7 +805,8 @@ class WC_Product {
 			$width = $this->width;
 			$height = $this->height;
 			
-			if (($length && $width && $height)) $dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
+			if (($length && $width && $height)) 
+				$this->dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
 		endif;
 		return $this->dimensions;
 	}

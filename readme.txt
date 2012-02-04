@@ -85,6 +85,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 = 1.4.2 = 
 * Uninstall fix
 * Improved template loader - passes args instead of using globals
+* Get dimensions fix
 
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix
