@@ -25,6 +25,10 @@ function woocommerce_attributes() {
 		$attribute_type = (string) $_POST['attribute_type'];
 		$attribute_label = (string) $_POST['attribute_label'];
 		
+		if (!$attribute_label) $attribute_label = ucwords($attribute_name);
+		
+		if (!$attribute_name) $attribute_name = sanitize_title($attribute_label);
+		
 		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_taxonomy_name($attribute_name) )) :
 		
 			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );

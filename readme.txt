@@ -87,6 +87,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Improved template loader - passes args instead of using globals
 * Get dimensions fix
 * Add order item error fix
+* Made slug non-required on add attribute form
 * Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
