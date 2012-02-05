@@ -504,7 +504,6 @@ class WC_Product {
 			$_tax = new WC_Tax();
 			
 			$tax_rates 		= $_tax->get_shop_base_rate( $this->tax_class );
-			
 			$taxes 			= $_tax->calc_tax( $price, $tax_rates, true );
 			$tax_amount		= $_tax->get_tax_total( $taxes );
 			$price 			= round( $price - $tax_amount, 2);

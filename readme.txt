@@ -86,6 +86,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Uninstall fix
 * Improved template loader - passes args instead of using globals
 * Get dimensions fix
+* Add order item error fix
+* Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix
