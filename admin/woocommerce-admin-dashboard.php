@@ -135,6 +135,8 @@ function woocommmerce_dashboard_recent_orders() {
 
 		endforeach;
 		echo '</ul>';
+	else:
+		echo '<p>' . __( 'There are no product orders yet.', 'woocommerce' ) . '</p>';
 	endif;
 } 
 
