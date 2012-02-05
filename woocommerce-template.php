@@ -148,6 +148,37 @@ if (!function_exists('woocommerce_demo_store')) {
 	}
 }
 
+/**
+ * Show Messages
+ *
+ * Displays WooCommerce errors and messages
+ **/
+if (!function_exists('woocommerce_show_messages')) {
+  function woocommerce_show_messages() {
+    global $woocommerce;
+
+		// Show multiple errors in a list format
+		if (isset($woocommerce->errors) && sizeof($woocommerce->errors)>0) {
+			echo '<ul class="woocommerce_error">';
+			foreach ($woocommerce->errors as $error) {
+				echo '<li>' . $error . '</li>';
+			}
+			echo '</ul>';
+			$woocommerce->clear_messages();
+			return true;
+
+		// Show a single message in a div
+		} elseif (isset($woocommerce->messages) && sizeof($woocommerce->messages)>0) {
+			echo '<div class="woocommerce_message">'.$woocommerce->messages[0].'</div>';
+			$woocommerce->clear_messages();
+			return true;
+
+		} else {
+			return false;
+		}
+  }
+}
+
 /** Loop ******************************************************************/
 
 /**
