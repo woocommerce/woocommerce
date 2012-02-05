@@ -26,7 +26,7 @@ class WC_Tax {
 			$flat_rates			= array();
 			$index 				= 0;
 			
-			foreach( $tax_rates as $rate ) :
+			if ($tax_rates) foreach( $tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
@@ -66,7 +66,7 @@ class WC_Tax {
 				
 			endforeach;
 			
-			foreach( $local_tax_rates as $rate ) :
+			if ($local_tax_rates) foreach( $local_tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
