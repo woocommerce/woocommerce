@@ -104,7 +104,9 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 				echo '<li class="cat-item cat-item-'.$cat->term_id;
 				
 				if (is_tax('product_cat', $cat->slug)) echo ' current-cat';
-				if ($current_cat_parent->term_id==$cat->term_id) echo ' current-cat-parent';
+				if ($current_cat && $current_cat_parent
+						&& $current_cat_parent->term_id == $cat->term_id 
+						&& $current_cat_parent->term_id != $current_cat->term_id) echo ' current-cat-parent';
 				
 				echo '"><a href="'.get_term_link( $cat->slug, 'product_cat' ).'">'.$cat->name.'</a>';
 				
