@@ -242,6 +242,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __('Require Login to Download', 'woocommerce'),
+		'desc' 		=> __('Do not allow downloads if a user is not logged in.', 'woocommerce'),
+		'id' 		=> 'woocommerce_downloads_require_login',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'no',
+	),
+	
+	array(  
 		'name' => __('Localisation', 'woocommerce'),
 		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
 		'id' 		=> 'woocommerce_informal_localisation_type',

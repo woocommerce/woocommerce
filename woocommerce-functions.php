@@ -718,7 +718,7 @@ function woocommerce_download_product() {
 		endif;
 		
 		$download_result = $wpdb->get_row( $wpdb->prepare("
-			SELECT order_id, downloads_remaining 
+			SELECT order_id, downloads_remaining,user_id 
 			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
@@ -732,6 +732,21 @@ function woocommerce_download_product() {
 		
 		$order_id = $download_result->order_id;
 		$downloads_remaining = $download_result->downloads_remaining;
+		$user_id = $download_result->user_id;
+		
+				
+		if (get_option('woocommerce_downloads_require_login')=='yes'):
+			if(is_user_logged_in()==false):
+				wp_die( __('You must be logged in to download files.', 'woocommerce') . ' <a href="'.wp_login_url(get_permalink(woocommerce_get_page_id('myaccount'))).'">' . __('Login &rarr;', 'woocommerce') . '</a>' );
+				exit;
+			else:
+				$current_user = wp_get_current_user();
+				if($user_id != $current_user->ID):
+					wp_die( __('This is not your download link.', 'woocommerce'));
+					exit;
+				endif;
+			endif;
+		endif;
 		
 		if ($order_id) :
 			$order = new WC_Order( $order_id );
@@ -740,7 +755,7 @@ function woocommerce_download_product() {
 				exit;
 			endif;
 		endif;
-		
+				
 		if ($downloads_remaining=='0') :
 			wp_die( __('Sorry, you have reached your download limit for this file', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 		else :
