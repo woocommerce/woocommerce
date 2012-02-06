@@ -242,8 +242,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Require Login to Download', 'woocommerce'),
-		'desc' 		=> __('Do not allow downloads if a user is not logged in.', 'woocommerce'),
+		'name' => __('Require login to download', 'woocommerce'),
+		'desc' 		=> __('Do not allow downloads if a user is not logged in. This setting does not apply to guest downloads.', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',

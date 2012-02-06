@@ -735,8 +735,8 @@ function woocommerce_download_product() {
 		$user_id = $download_result->user_id;
 		
 				
-		if (get_option('woocommerce_downloads_require_login')=='yes'):
-			if(is_user_logged_in()==false):
+		if ($user_id && get_option('woocommerce_downloads_require_login')=='yes'):
+			if (!is_user_logged_in()):
 				wp_die( __('You must be logged in to download files.', 'woocommerce') . ' <a href="'.wp_login_url(get_permalink(woocommerce_get_page_id('myaccount'))).'">' . __('Login &rarr;', 'woocommerce') . '</a>' );
 				exit;
 			else:
@@ -747,6 +747,7 @@ function woocommerce_download_product() {
 				endif;
 			endif;
 		endif;
+		
 		
 		if ($order_id) :
 			$order = new WC_Order( $order_id );
