@@ -12,10 +12,19 @@
 class WC_Flat_Rate extends WC_Shipping_Method {
 	
 	function __construct() { 
-        $this->id 			= 'flat_rate';
-        $this->method_title = __('Flat rate', 'woocommerce');
+        $this->id 						= 'flat_rate';
+        $this->method_title 			= __('Flat rate', 'woocommerce');
 
-		// Load the form fields.
+		$this->flat_rate_option 		= 'woocommerce_flat_rates';
+		$this->admin_page_heading 		= __('Flat Rates', 'woocommerce');
+		$this->admin_page_description 	= __('Flat rates let you define a standard rate per item, or per order.', 'woocommerce');
+    	
+    	$this->init();
+    } 
+    
+    function init() {
+    	
+    	// Load the form fields.
 		$this->init_form_fields();
 		
 		// Load the settings.
@@ -31,16 +40,13 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->cost 		= $this->settings['cost'];
 		$this->fee 			= $this->settings['fee']; 
 		
-		// Flat rates
-		$this->flat_rate_option = 'woocommerce_flat_rates';
-		$this->admin_page_heading = __('Flat Rates', 'woocommerce');
-		$this->admin_page_description = __('Flat rates let you define a standard rate per item, or per order.', 'woocommerce');
+		// Load Flat rates
 		$this->get_flat_rates();
 		
-		// Actions
+    	// Add Actions
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_flat_rates'));
-    } 
+    }
 
 	/**
      * Initialise Gateway Settings Form Fields

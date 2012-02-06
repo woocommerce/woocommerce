@@ -11,35 +11,18 @@
  */  
 class WC_International_Delivery extends WC_Flat_Rate {
 	
-	function __construct() { 
-        $this->id 			= 'international_delivery';
-        $this->method_title = __('International Delivery', 'woocommerce');
+	var $id = 'international_delivery';
 
-		// Load the form fields.
-		$this->init_form_fields();
-		
-		// Load the settings.
-		$this->init_settings();
-		
-		// Define user set variables
-        $this->enabled		= $this->settings['enabled'];
-		$this->title 		= $this->settings['title'];
-		$this->availability = $this->settings['availability'];
-		$this->countries 	= $this->settings['countries'];
-		$this->type 		= $this->settings['type'];
-		$this->tax_status	= $this->settings['tax_status'];
-		$this->cost 		= $this->settings['cost'];
-		$this->fee 			= $this->settings['fee']; 
-		
-		// Flat rates
-		$this->flat_rate_option = 'woocommerce_international_delivery_flat_rates';
-		$this->admin_page_heading = __('International Delivery', 'woocommerce');
-		$this->admin_page_description = __('International delivery based on flat rate shipping.', 'woocommerce');
-		$this->get_flat_rates();
-		
-		// Actions
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_flat_rates'));
+	function __construct() { 
+       
+        $this->id 						= 'international_delivery';
+        $this->method_title 			= __('International Delivery', 'woocommerce');
+
+		$this->flat_rate_option	 		= 'woocommerce_international_delivery_flat_rates';
+		$this->admin_page_heading 		= __('International Delivery', 'woocommerce');
+		$this->admin_page_description 	= __('International delivery based on flat rate shipping.', 'woocommerce');
+    	
+    	$this->init();
     } 
 
 	/**

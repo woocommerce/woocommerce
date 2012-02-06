@@ -14,7 +14,10 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 	function __construct() { 
         $this->id 			= 'free_shipping';
         $this->method_title = __('Free shipping', 'woocommerce');
-
+		$this->init();
+    } 
+    
+    function init() {
 		// Load the form fields.
 		$this->init_form_fields();
 		
@@ -31,7 +34,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 		
 		// Actions
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
-    } 
+    }
 
 	/**
      * Initialise Gateway Settings Form Fields

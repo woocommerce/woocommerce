@@ -15,7 +15,10 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	function __construct() { 
 		$this->id 			= 'local-pickup';
 		$this->method_title = __('Local Pickup', 'woocommerce');
-
+		$this->init();
+	} 
+	
+    function init() {
 		// Load the form fields.
 		$this->init_form_fields();
 		
@@ -27,10 +30,9 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		$this->title		= $this->settings['title'];
 		
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
-		
-	} 
-
-	 function calculate_shipping() {
+	}
+	
+	function calculate_shipping() {
 		global $woocommerce;
 		$_tax = new WC_Tax();
 		

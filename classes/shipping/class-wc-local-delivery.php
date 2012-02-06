@@ -11,11 +11,14 @@
  */  
 
 class WC_Local_Delivery extends WC_Shipping_Method {
-
+	
 	function __construct() { 
-		$this->id 			= 'local-delivery';
+		$this->id			= 'local-delivery';
 		$this->method_title = __('Local Delivery', 'woocommerce');
-
+		$this->init();
+	} 
+	
+    function init() {
 		// Load the form fields.
 		$this->init_form_fields();
 		
@@ -29,10 +32,9 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		$this->type			= $this->settings['type'];	
 		
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
-		
-	} 
-
-	 function calculate_shipping() {
+	}
+	 
+	function calculate_shipping() {
 		global $woocommerce;
 		$_tax = new WC_Tax();
 		if ($this->type=='free') 		$shipping_total 	= 0;
