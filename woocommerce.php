@@ -503,7 +503,7 @@ class Woocommerce {
 	            	'delete_terms' 		=> 'manage_woocommerce_products',
 	            	'assign_terms' 		=> 'manage_woocommerce_products',
 	            ),
-	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false ),
+	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false, 'heirarchical' => true ),
 	        )
 	    );
 	    
