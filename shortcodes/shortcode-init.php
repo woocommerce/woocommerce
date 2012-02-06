@@ -131,26 +131,26 @@ function woocommerce_products($atts){
 		'order' => $order,
 		'meta_query' => array(
 			array(
-				'key' => '_visibility',
-				'value' => array('catalog', 'visible'),
-				'compare' => 'IN'
+				'key' 		=> '_visibility',
+				'value' 	=> array('catalog', 'visible'),
+				'compare' 	=> 'IN'
 			)
 		)
 	);
 	
 	if(isset($atts['skus'])){
 		$skus = explode(',', $atts['skus']);
-	  	array_walk($skus, create_function('&$val', '$val = trim($val);'));
+	  	$skus = array_map('trim', $skus);
     	$args['meta_query'][] = array(
-      		'key' => '_sku',
-      		'value' => $skus,
-      		'compare' => 'IN'
+      		'key' 		=> '_sku',
+      		'value' 	=> $skus,
+      		'compare' 	=> 'IN'
     	);
   	}
 	
 	if(isset($atts['ids'])){
 		$ids = explode(',', $atts['ids']);
-	  	array_walk($ids, create_function('&$val', '$val = trim($val);'));
+	  	$ids = array_map('trim', $ids);
     	$args['post__in'] = $ids;
 	}
 	
