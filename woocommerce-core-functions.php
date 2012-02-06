@@ -104,13 +104,14 @@ if (!function_exists('is_ajax')) {
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
 	global $woocommerce;
-	if ($name=='shop') :
-		if (!locate_template(array( 'loop-shop.php', $woocommerce->template_url . 'loop-shop.php' ))) :
-			load_template( $woocommerce->plugin_path() . '/templates/loop-shop.php',false );
-			return;
-		endif;
-	endif;
-	get_template_part( $woocommerce->template_url . $slug, $name );
+	if ($name=='shop' && !locate_template(array( 'loop-shop.php', $woocommerce->template_url . 'loop-shop.php' ))) {
+		load_template( $woocommerce->plugin_path() . '/templates/loop-shop.php',false );
+		return;
+	} elseif ($name=='shop' && locate_template(array( $woocommerce->template_url . 'loop-shop.php' ))) {
+		get_template_part( $woocommerce->template_url . $slug, $name );
+		return;
+	}
+	get_template_part( $slug, $name );
 }
 
 /**
