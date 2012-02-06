@@ -90,6 +90,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Made slug non-required on add attribute form
 * Other minor fixes
 * Fixed sharethis code
+* Added sharedaddy support
 
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix

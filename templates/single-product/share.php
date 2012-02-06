@@ -17,3 +17,9 @@
 	<script type="text/javascript">stLight.options({publisher:"<?php echo get_option('woocommerce_sharethis'); ?>"});</script>
 
 <?php endif; ?>
+
+<?php if (get_option('woocommerce_sharedaddy') && function_exists('sharing_display')) : ?>
+
+	<div class="social"><?php echo sharing_display(); ?></div>
+
+<?php endif; ?>

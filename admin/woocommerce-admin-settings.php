@@ -932,6 +932,18 @@ $woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_se
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'share_this'),
+
+	array( 'name' => __( 'ShareDaddy', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce'), 'id' => 'share_this' ),
+
+	array(  
+		'name' => __( 'Output ShareDaddy button?', 'woocommerce' ),
+		'desc' 		=> __( 'Enable this option to show the ShareDaddy button (if installed) on the product page.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_sharedaddy',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'no',
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'share_this'),
 	
 	array( 'name' => __( 'Google Analytics', 'woocommerce' ), 'type' => 'title', 'desc' => __('Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce'), 'id' => 'google_analytics' ),
 	
