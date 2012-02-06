@@ -3,7 +3,7 @@
  * Variable Product Add to Cart
  */
  
-global $woocommerce, $product;
+global $woocommerce, $product, $post;
 ?>
 <script type="text/javascript">
     var product_variations = <?php echo json_encode($available_variations) ?>;

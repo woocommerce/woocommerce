@@ -264,8 +264,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
                     $all_variations_set = false;
                 }
             }
-            
-            
+
             if ($all_variations_set) {
             	// Add to cart validation
             	$passed_validation 	= apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
