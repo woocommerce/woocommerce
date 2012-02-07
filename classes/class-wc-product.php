@@ -799,13 +799,19 @@ class WC_Product {
 	function get_dimensions() {
 		if (!$this->dimensions) :
 			$this->dimensions = '';
-			
-			$length = $this->length;
-			$width = $this->width;
-			$height = $this->height;
-			
-			if (($length && $width && $height)) 
-				$this->dimensions = $length . get_option('woocommerce_dimension_unit') . ' x ' . $width . get_option('woocommerce_dimension_unit') . ' x ' . $height . get_option('woocommerce_dimension_unit');
+
+			// Show length
+			if ($this->length) {
+				$this->dimensions = $this->length.get_option('woocommerce_dimension_unit');
+				// Show width also
+				if ($this->width) {
+					$this->dimensions .= ' × '.$this->width.get_option('woocommerce_dimension_unit');
+					// Show height also
+					if ($this->height) {
+						$this->dimensions .= ' × '.$this->height.get_option('woocommerce_dimension_unit');
+					}
+				}
+			}
 		endif;
 		return $this->dimensions;
 	}
