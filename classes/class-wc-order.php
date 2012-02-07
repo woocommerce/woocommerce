@@ -723,7 +723,7 @@ class WC_Order {
 				
 					$_product = $this->get_product_from_item( $item );
 					
-					if ( $_product->exists && $_product->is_downloadable() && $_product->is_virtual() ) :
+					if ( $_product->is_downloadable() && $_product->is_virtual() ) :
 						$downloadable_order = true;
 						continue;
 					endif;

@@ -16,6 +16,8 @@ function get_woocommerce_order_tracking($atts) {
 function woocommerce_order_tracking( $atts ) {
 	global $woocommerce;
 	
+	woocommerce_nocache();
+
 	extract(shortcode_atts(array(
 	), $atts));
 	

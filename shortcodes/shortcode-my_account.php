@@ -38,6 +38,8 @@ function get_woocommerce_view_order() {
 function woocommerce_my_account( $atts ) {
 	global $woocommerce, $current_user;
 	
+	woocommerce_nocache();
+
 	if ( ! is_user_logged_in() ) :
 		
 		woocommerce_get_template( 'myaccount/form-login.php' );
@@ -74,6 +76,8 @@ function woocommerce_my_account( $atts ) {
  */
 function woocommerce_edit_address() {
 	global $woocommerce;
+	
+	woocommerce_nocache();
 	
 	if ( ! is_user_logged_in() ) return;
 
@@ -245,6 +249,8 @@ add_action( 'template_redirect', 'woocommerce_save_password' );
 function woocommerce_view_order() {
 	global $woocommerce;
 	
+	woocommerce_nocache();
+
 	if ( ! is_user_logged_in() ) return;
 	
 	$user_id      	= get_current_user_id();

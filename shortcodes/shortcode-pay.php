@@ -20,6 +20,8 @@ function get_woocommerce_pay( $atts ) {
 function woocommerce_pay() {
 	global $woocommerce;
 	
+	woocommerce_nocache();
+	
 	if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
 		// Pay for existing order
