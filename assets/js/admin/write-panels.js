@@ -570,7 +570,8 @@ jQuery( function($){
 				$('table.woocommerce_attributes tbody').append( $(thisrow) );
 				$(thisrow).show();
 				row_indexes();
-				
+				// Reset selected attribute in the list
+				$('select.attribute_taxonomy').val('');
 			}
 	
 			show_attribute_table();
