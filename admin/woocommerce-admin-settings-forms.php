@@ -241,7 +241,7 @@ function woocommerce_admin_fields($options) {
                         <?php
                         foreach ($value['options'] as $key => $val) {
                         ?>
-                            <option value="<?php echo esc_attr( $key ); ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo ucfirst($val) ?></option>
+                            <option value="<?php echo esc_attr( $key ); ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo $val ?></option>
                         <?php
                         }
                         ?>
