@@ -17,6 +17,8 @@ function get_woocommerce_checkout( $atts ) {
 function woocommerce_checkout( $atts ) {
 	global $woocommerce;
 	
+	woocommerce_nocache();
+
 	if (sizeof($woocommerce->cart->get_cart())==0) return;
 	
 	$non_js_checkout = (isset($_POST['woocommerce_checkout_update_totals']) && $_POST['woocommerce_checkout_update_totals']) ? true : false;

@@ -20,6 +20,8 @@ function get_woocommerce_thankyou( $atts ) {
 function woocommerce_thankyou( $atts ) {
 	global $woocommerce;
 	
+	woocommerce_nocache();
+
 	$order = false;
 	
 	// Pay for order after checkout step

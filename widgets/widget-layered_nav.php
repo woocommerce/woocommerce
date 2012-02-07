@@ -156,6 +156,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		$title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
 		$taxonomy 	= $woocommerce->attribute_taxonomy_name($instance['attribute']);
 		$query_type = (isset($instance['query_type'])) ? $instance['query_type'] : 'and';
+		$display_type = (isset($instance['display_type'])) ? $instance['display_type'] : 'list';
 		
 		if (!taxonomy_exists($taxonomy)) return;
 
@@ -172,120 +173,153 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 			echo $before_widget . $before_title . $title . $after_title;
 			
-			echo "<ul>";
+			if ($display_type=='dropdown') {
+				
+				$found = true;
+				
+				echo '<select id="dropdown_layered_nav_'.$taxonomy.'">';
+				
+				echo '<option>'. sprintf( __('Any %s', 'woocommerce'), $taxonomy ) .'</option>';
+				
+				foreach ($terms as $term) {
+					echo '<option>'.$term->name.'</option>';
+				}
+					
+				echo '</select>';
+				
+				?>
+				<script type='text/javascript'>
+				/* <![CDATA[ */
+					var dropdown = document.getElementById("dropdown_layered_nav_<?php echo $taxonomy; ?>");
+					function onCatChange() {
+						if ( dropdown.options[dropdown.selectedIndex].value !=='' ) {
+							location.href = "<?php echo home_url(); ?>/?product_cat="+dropdown.options[dropdown.selectedIndex].value;
+						}
+					}
+					dropdown.onchange = onCatChange;
+				/* ]]> */
+				</script>
+				<?php
 			
-			// Force found when option is selected
-			if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+			} else {
+				
+				// List display
+				echo "<ul>";
+				
+				// Force found when option is selected
+				if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+				
+				foreach ($terms as $term) {
+					
+					// Get count based on current view - uses transients
+					$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
+					
+					if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
 			
-			foreach ($terms as $term) {
-				
-				// Get count based on current view - uses transients
-				$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
-				
-				if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
-		
-					$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-				
-					set_transient( $transient_name, $_products_in_term );
+						$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
+					
+						set_transient( $transient_name, $_products_in_term );
+					}
+					
+					$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']));
+					
+					// If this is an AND query, only show options with count > 0
+					if ($query_type=='and') {
+						
+						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
+	
+						if ($count>0) $found = true;
+					
+						if ($count==0 && !$option_is_set) continue;
+					
+					// If this is an OR query, show all options so search can be expanded
+					} else {
+						
+						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
+						
+						if ($count>0) $found = true;
+	
+					}
+					
+					$class = '';
+					
+					$arg = 'filter_'.strtolower(sanitize_title($instance['attribute']));
+					
+					if (isset($_GET[ $arg ])) $current_filter = explode(',', $_GET[ $arg ]); else $current_filter = array();
+					
+					if (!is_array($current_filter)) $current_filter = array();
+					
+					if (!in_array($term->term_id, $current_filter)) $current_filter[] = $term->term_id;
+					
+					// Base Link decided by current page
+					if (defined('SHOP_IS_ON_FRONT')) :
+						$link = home_url();
+					elseif (is_post_type_archive('product') || is_page( woocommerce_get_page_id('shop') )) :
+						$link = get_post_type_archive_link('product');
+					else :					
+						$link = get_term_link( get_query_var('term'), get_query_var('taxonomy') );
+					endif;
+					
+					// All current filters
+					if ($_chosen_attributes) foreach ($_chosen_attributes as $name => $data) :
+						if ($name!==$taxonomy) :
+							$link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'filter_', $name))), implode(',', $data['terms']), $link );
+							if ($data['query_type']=='or') $link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'query_type_', $name))), 'or', $link );
+						endif;
+					endforeach;
+					
+					// Min/Max
+					if (isset($_GET['min_price'])) :
+						$link = add_query_arg( 'min_price', $_GET['min_price'], $link );
+					endif;
+					if (isset($_GET['max_price'])) :
+						$link = add_query_arg( 'max_price', $_GET['max_price'], $link );
+					endif;
+					
+					// Current Filter = this widget
+					if (isset( $_chosen_attributes[$taxonomy] ) && is_array($_chosen_attributes[$taxonomy]['terms']) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms'])) :
+						$class = 'class="chosen"';
+						
+						// Remove this term is $current_filter has more than 1 term filtered
+						if (sizeof($current_filter)>1) :
+							$current_filter_without_this = array_diff($current_filter, array($term->term_id));
+							$link = add_query_arg( $arg, implode(',', $current_filter_without_this), $link );
+						endif;
+						
+					else :
+						$link = add_query_arg( $arg, implode(',', $current_filter), $link );
+					endif;
+					
+					// Search Arg
+					if (get_search_query()) :
+						$link = add_query_arg( 's', get_search_query(), $link );
+					endif;
+					
+					// Post Type Arg
+					if (isset($_GET['post_type'])) :
+						$link = add_query_arg( 'post_type', $_GET['post_type'], $link );
+					endif;
+					
+					// Query type Arg
+					if ($query_type=='or' && !( sizeof($current_filter) == 1 && isset( $_chosen_attributes[$taxonomy]['terms'] ) && is_array($_chosen_attributes[$taxonomy]['terms']) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']) )) :
+						$link = add_query_arg( 'query_type_'.strtolower(sanitize_title($instance['attribute'])), 'or', $link );
+					endif;
+					
+					echo '<li '.$class.'>';
+					
+					if ($count>0 || $option_is_set) echo '<a href="'.$link.'">'; else echo '<span>';
+					
+					echo $term->name;
+					
+					if ($count>0 || $option_is_set) echo '</a>'; else echo '</span>';
+					
+					echo ' <small class="count">'.$count.'</small></li>';
+					
 				}
 				
-				$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']));
-				
-				// If this is an AND query, only show options with count > 0
-				if ($query_type=='and') {
-					
-					$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
-
-					if ($count>0) $found = true;
-				
-					if ($count==0 && !$option_is_set) continue;
-				
-				// If this is an OR query, show all options so search can be expanded
-				} else {
-					
-					$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
-					
-					if ($count>0) $found = true;
-
-				}
-				
-				$class = '';
-				
-				$arg = 'filter_'.strtolower(sanitize_title($instance['attribute']));
-				
-				if (isset($_GET[ $arg ])) $current_filter = explode(',', $_GET[ $arg ]); else $current_filter = array();
-				
-				if (!is_array($current_filter)) $current_filter = array();
-				
-				if (!in_array($term->term_id, $current_filter)) $current_filter[] = $term->term_id;
-				
-				// Base Link decided by current page
-				if (defined('SHOP_IS_ON_FRONT')) :
-					$link = home_url();
-				elseif (is_post_type_archive('product') || is_page( woocommerce_get_page_id('shop') )) :
-					$link = get_post_type_archive_link('product');
-				else :					
-					$link = get_term_link( get_query_var('term'), get_query_var('taxonomy') );
-				endif;
-				
-				// All current filters
-				if ($_chosen_attributes) foreach ($_chosen_attributes as $name => $data) :
-					if ($name!==$taxonomy) :
-						$link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'filter_', $name))), implode(',', $data['terms']), $link );
-						if ($data['query_type']=='or') $link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'query_type_', $name))), 'or', $link );
-					endif;
-				endforeach;
-				
-				// Min/Max
-				if (isset($_GET['min_price'])) :
-					$link = add_query_arg( 'min_price', $_GET['min_price'], $link );
-				endif;
-				if (isset($_GET['max_price'])) :
-					$link = add_query_arg( 'max_price', $_GET['max_price'], $link );
-				endif;
-				
-				// Current Filter = this widget
-				if (isset( $_chosen_attributes[$taxonomy] ) && is_array($_chosen_attributes[$taxonomy]['terms']) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms'])) :
-					$class = 'class="chosen"';
-					
-					// Remove this term is $current_filter has more than 1 term filtered
-					if (sizeof($current_filter)>1) :
-						$current_filter_without_this = array_diff($current_filter, array($term->term_id));
-						$link = add_query_arg( $arg, implode(',', $current_filter_without_this), $link );
-					endif;
-					
-				else :
-					$link = add_query_arg( $arg, implode(',', $current_filter), $link );
-				endif;
-				
-				// Search Arg
-				if (get_search_query()) :
-					$link = add_query_arg( 's', get_search_query(), $link );
-				endif;
-				
-				// Post Type Arg
-				if (isset($_GET['post_type'])) :
-					$link = add_query_arg( 'post_type', $_GET['post_type'], $link );
-				endif;
-				
-				// Query type Arg
-				if ($query_type=='or' && !( sizeof($current_filter) == 1 && isset( $_chosen_attributes[$taxonomy]['terms'] ) && is_array($_chosen_attributes[$taxonomy]['terms']) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']) )) :
-					$link = add_query_arg( 'query_type_'.strtolower(sanitize_title($instance['attribute'])), 'or', $link );
-				endif;
-				
-				echo '<li '.$class.'>';
-				
-				if ($count>0 || $option_is_set) echo '<a href="'.$link.'">'; else echo '<span>';
-				
-				echo $term->name;
-				
-				if ($count>0 || $option_is_set) echo '</a>'; else echo '</span>';
-				
-				echo ' <small class="count">'.$count.'</small></li>';
-				
-			}
+				echo "</ul>";
 			
-			echo "</ul>";
+			} // End display type conditional
 			
 			echo $after_widget;
 			
@@ -307,6 +341,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		$instance['attribute'] = stripslashes($new_instance['attribute']);
 		$instance['query_type'] = stripslashes($new_instance['query_type']);
+		$instance['display_type'] = stripslashes($new_instance['display_type']);
 		return $instance;
 	}
 
@@ -315,6 +350,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 		global $woocommerce;
 		
 		if (!isset($instance['query_type'])) $instance['query_type'] = 'and';
+		if (!isset($instance['display_type'])) $instance['display_type'] = 'list';
 		?>
 			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
@@ -337,6 +373,12 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					endforeach;
 				endif;
 				?>
+			</select></p>
+			
+			<p><label for="<?php echo $this->get_field_id('display_type'); ?>"><?php _e('Display Type:', 'woocommerce') ?></label>
+			<select id="<?php echo esc_attr( $this->get_field_id('display_type') ); ?>" name="<?php echo esc_attr( $this->get_field_name('display_type') ); ?>">
+				<option value="list" <?php selected($instance['display_type'], 'list'); ?>><?php _e('List', 'woocommerce'); ?></option>
+				<option value="dropdown" <?php selected($instance['display_type'], 'dropdown'); ?>><?php _e('Dropdown', 'woocommerce'); ?></option>
 			</select></p>
 			
 			<p><label for="<?php echo $this->get_field_id('query_type'); ?>"><?php _e('Query Type:', 'woocommerce') ?></label>

@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 
 WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.4.2 = 
+= 1.4.2 - 07/02/2012 = 
 * Uninstall fix
 * Improved template loader - passes args instead of using globals
 * Get dimensions fix
@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed sharethis code
 * Added sharedaddy support
 * Option to require login to download files
+* woocommerce_nocache function for cart/checkout/myaccount pages which need to be dynamic
 
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix

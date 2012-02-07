@@ -130,8 +130,8 @@ if (!function_exists('woocommerce_get_sidebar')) {
  * Prevent Cache
  **/
 if (!function_exists('woocommerce_prevent_sidebar_cache')) {
-	function woocommerce_prevent_sidebar_cache() {
-		echo '<!--mfunc get_sidebar() --><!--/mfunc-->';
+	function woocommerce_prevent_sidebar_cache( $sidebar ) {
+		echo '<!--mfunc get_sidebar("'.$sidebar.'") --><!--/mfunc-->';
 	}
 }
 
