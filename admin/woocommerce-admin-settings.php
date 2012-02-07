@@ -513,9 +513,10 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'options' => array( 
-			'kg' => __( 'kg', 'woocommerce' ),
-			'lbs' => __( 'lbs', 'woocommerce' )
-		)
+			'kg'  => __( 'kg', 'woocommerce' ),
+			'g'   => __( 'g', 'woocommerce' ),
+			'lbs' => __( 'lbs', 'woocommerce' ),
+		),
 	),
 
 	array(  
@@ -526,10 +527,11 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'std' 		=> 'cm',
 		'type' 		=> 'select',
 		'options' => array( 
+			'm'  => __( 'm', 'woocommerce' ),
 			'cm' => __( 'cm', 'woocommerce' ),
-			'in' => __( 'in', 'woocommerce' )
-		)
-	),
+			'mm' => __( 'mm', 'woocommerce' ),
+			'in' => __( 'in', 'woocommerce' ),
+		),
 	
 	array(  
 		'name' => __( 'Cart redirect', 'woocommerce' ),
