@@ -532,7 +532,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'mm' => __( 'mm', 'woocommerce' ),
 			'in' => __( 'in', 'woocommerce' ),
 		),
-	
+	),
+
 	array(  
 		'name' => __( 'Cart redirect', 'woocommerce' ),
 		'desc' 		=> __( 'Redirect to cart after adding a product to the cart (on single product pages)', 'woocommerce' ),
