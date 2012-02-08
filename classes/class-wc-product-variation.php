@@ -21,6 +21,7 @@ class WC_Product_Variation extends WC_Product {
 	var $variation_has_sale_price;
 	var $variation_has_stock;
 	var $variation_has_sku;
+	var $variation_shipping_class;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -259,6 +260,17 @@ class WC_Product_Variation extends WC_Product {
 		else :
 			return parent::increase_stock( $by );
 		endif;
+	}
+	
+	/**
+	 * Get the shipping class, and if not set, get the shipping class of the parent
+	 */
+	function get_shipping_class() {
+		if (!$this->variation_shipping_class) :
+			$classes = get_the_terms( $this->id, 'product_shipping_class' );
+			if ($classes && !is_wp_error($classes)) $this->variation_shipping_class = current($classes)->slug; else $this->variation_shipping_class = parent::get_shipping_class();
+		endif;
+		return $this->variation_shipping_class;
 	}
 
 }

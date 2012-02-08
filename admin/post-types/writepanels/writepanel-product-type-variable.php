@@ -73,6 +73,9 @@ function variable_product_type_options() {
 					endif;
 					
 					if (!$image) $image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+					
+					$classes = get_the_terms( $variation->ID, 'product_shipping_class' );
+					if ($classes && !is_wp_error($classes)) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
 					?>
 					<div class="woocommerce_variation">
 						<p>
@@ -133,6 +136,18 @@ function variable_product_type_options() {
 									
 								</tr>
 								<tr>
+									
+									<td><label><?php _e('Shipping class:', 'woocommerce'); ?></label> <?php
+										$args = array(
+											'taxonomy' 			=> 'product_shipping_class',
+											'hide_empty'		=> 0,
+											'show_option_all' 	=> __('Same as parent', 'woocommerce'),
+											'name' 				=> 'variable_shipping_class['.$loop.']',
+											'id'				=> '',
+											'selected'			=> $current_shipping_class
+										);
+										wp_dropdown_categories( $args );
+									?></td>
 								
 									<td><label><?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['_downloadable'][0])) checked($variation_data['_downloadable'][0], 'yes'); ?> /></td>
 	
@@ -151,8 +166,6 @@ function variable_product_type_options() {
 										<label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 										</div>
 									</td>
-									
-									<td>&nbsp;</td>
 																
 								</tr>	
 							</tbody>
@@ -293,6 +306,17 @@ function variable_product_type_options() {
 								<td><label><?php _e('Sale Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" /></td>\
 							</tr>\
 							<tr>\
+								<td><label><?php _e('Shipping class:', 'woocommerce'); ?></label> <?php
+									$args = array(
+										'taxonomy' 			=> 'product_shipping_class',
+										'hide_empty'		=> 0,
+										'show_option_all' 	=> __('Same as parent', 'woocommerce'),
+										'name' 				=> "variable_shipping_class[]",
+										'id'				=> '',
+										'echo'				=> 0
+									);
+									echo addslashes(str_replace('[]', "[' + loop + ']", str_replace("\n", '', wp_dropdown_categories( $args ))));
+								?></td>\
 								<td><label><?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[' + loop + ']" /></td>\
 								\
 								<td><label><?php _e('Virtual', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="checkbox" class="checkbox" name="variable_is_virtual[' + loop + ']" /></td>\
@@ -306,7 +330,6 @@ function variable_product_type_options() {
 								<td>\
 									<div class="show_if_variation_downloadable" style="display:none;"><label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" /></div>\
 								</td>\
-								<td>&nbsp;</td>\
 							</tr>\
 						</tbody>\
 					</table>\
@@ -582,6 +605,7 @@ function process_product_meta_variable( $post_id ) {
 		if (isset($_POST['variable_is_downloadable'])) $variable_is_downloadable = $_POST['variable_is_downloadable'];
 		$variable_file_path = $_POST['variable_file_path'];
 		$variable_download_limit = $_POST['variable_download_limit'];
+		$variable_shipping_class = $_POST['variable_shipping_class'];
 		
 		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
 		
@@ -654,6 +678,10 @@ function process_product_meta_variable( $post_id ) {
 				update_post_meta( $variation_id, '_download_limit', '' );
 				update_post_meta( $variation_id, '_file_path', '' );
 			endif;
+			
+			// Save shipping class
+			$variable_shipping_class[$i] = ( $variable_shipping_class[$i] ) ? (int) $variable_shipping_class[$i] : '';
+			wp_set_object_terms( $variation_id, $variable_shipping_class[$i], 'product_shipping_class');
 			
 			// Remove old taxnomies attributes so data is kept up to date
 			if ($variation_id) $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE 'attribute_%' AND post_id = $variation_id;");

@@ -658,7 +658,7 @@ class WC_Product {
 	function get_shipping_class() {
 		if (!$this->shipping_class) :
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			$this->shipping_class = (isset($classes[0])) ? $classes[0]->slug : '';
+			if ($classes && !is_wp_error($classes)) $this->shipping_class = current($classes)->slug; else $this->shipping_class = '';
 		endif;
 		return $this->shipping_class;
 	}

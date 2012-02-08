@@ -537,7 +537,7 @@ class Woocommerce {
 	    );
 	    
 		register_taxonomy( 'product_shipping_class',
-	        array('product'),
+	        array('product', 'product_variation'),
 	        array(
 	            'hierarchical' 			=> true,
 	            'update_count_callback' => '_update_post_term_count',

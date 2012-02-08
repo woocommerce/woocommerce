@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Added sharedaddy support
 * Option to require login to download files
 * Option to display layered nav as a dropdown
+* Shipping classes added to individual product variations
 * woocommerce_nocache function for cart/checkout/myaccount pages which need to be dynamic
 * Other minor fixes
 
