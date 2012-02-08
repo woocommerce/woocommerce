@@ -119,13 +119,15 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 					$subcat_args['child_of'] = $cat->term_id;
 					$subcat_args['hierarchical'] = 1;
 					$subcat_args['show_option_none'] = false;
+					$subcat_args['echo'] = false;
 					unset( $subcat_args['parent'] );
 					
-					echo '<ul class="children">';
-					
-					wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $subcat_args));
-					
-					echo '</ul>';
+					$subcategories = wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $subcat_args));
+					if ($subcategories) {
+						echo '<ul class="children">';
+						echo $subcategories;
+						echo '</ul>';
+					}
 					
 				endif;
 				
