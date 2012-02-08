@@ -174,32 +174,30 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			echo $before_widget . $before_title . $title . $after_title;
 			
 			if ($display_type=='dropdown') {
+			
+				$taxonomy_filter = str_replace('pa_', '', $taxonomy);
 				
 				$found = true;
 				
-				echo '<select id="dropdown_layered_nav_'.$taxonomy.'">';
+				echo '<select id="dropdown_layered_nav_'.$taxonomy_filter.'">';
 				
-				echo '<option>'. sprintf( __('Any %s', 'woocommerce'), $taxonomy ) .'</option>';
+				echo '<option value="">'. sprintf( __('Any %s', 'woocommerce'), $woocommerce->attribute_label( $taxonomy ) ) .'</option>';
 				
 				foreach ($terms as $term) {
-					echo '<option>'.$term->name.'</option>';
+					echo '<option value="'.$term->term_id.'" '.selected( (isset($_GET['filter_'.$taxonomy_filter])) ? $_GET['filter_'.$taxonomy_filter] : '' , $term->term_id, false).'>'.$term->name.'</option>';
 				}
 					
 				echo '</select>';
 				
-				?>
-				<script type='text/javascript'>
-				/* <![CDATA[ */
-					var dropdown = document.getElementById("dropdown_layered_nav_<?php echo $taxonomy; ?>");
-					function onCatChange() {
-						if ( dropdown.options[dropdown.selectedIndex].value !=='' ) {
-							location.href = "<?php echo home_url(); ?>/?product_cat="+dropdown.options[dropdown.selectedIndex].value;
-						}
-					}
-					dropdown.onchange = onCatChange;
-				/* ]]> */
-				</script>
-				<?php
+				$woocommerce->add_inline_js("
+					
+					jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
+						
+						location.href = '".home_url(remove_query_arg('filter_' . $taxonomy_filter, add_query_arg('filtering', '1')))."&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
+						
+					});
+					
+				");
 			
 			} else {
 				

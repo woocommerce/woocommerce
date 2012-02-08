@@ -88,11 +88,12 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Get dimensions fix
 * Add order item error fix
 * Made slug non-required on add attribute form
-* Other minor fixes
 * Fixed sharethis code
 * Added sharedaddy support
 * Option to require login to download files
+* Option to display layered nav as a dropdown
 * woocommerce_nocache function for cart/checkout/myaccount pages which need to be dynamic
+* Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
 * Depreciated tax class fix
