@@ -22,6 +22,8 @@ function woocommerce_pay() {
 	
 	woocommerce_nocache();
 	
+	do_action('before_woocommerce_pay');
+	
 	if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
 		// Pay for existing order
@@ -90,7 +92,7 @@ function woocommerce_pay() {
 				<div class="clear"></div>
 				<?php
 				
-			else :
+			elseif (!in_array($order->status, array('pending', 'failed'))) :
 			
 				$woocommerce->add_error( __('Your order has already been paid for. Please contact us if you need assistance.', 'woocommerce') );
 				$woocommerce->show_messages();
@@ -105,4 +107,6 @@ function woocommerce_pay() {
 		endif;
 
 	endif;
+	
+	do_action('after_woocommerce_pay');
 }
