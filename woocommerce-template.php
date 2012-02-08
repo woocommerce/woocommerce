@@ -118,6 +118,31 @@ if (!function_exists('woocommerce_output_content_wrapper_end')) {
 }
 
 /**
+ * Messages
+ **/
+if (!function_exists('woocommerce_show_messages')) {
+	function woocommerce_show_messages() {
+		global $woocommerce;
+		
+		if ( $woocommerce->error_count() > 0 ) {
+			
+			woocommerce_get_template('shop/errors.php', array(
+				'errors' => $woocommerce->get_errors()
+			));
+			
+		} elseif ( $woocommerce->message_count() > 0 ) {
+		
+			woocommerce_get_template('shop/messages.php', array(
+				'messages' => $woocommerce->get_messages()
+			));
+		
+		}
+		
+		$woocommerce->clear_messages();
+	}
+}
+
+/**
  * Sidebar
  **/
 if (!function_exists('woocommerce_get_sidebar')) {

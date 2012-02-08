@@ -1041,30 +1041,19 @@ class Woocommerce {
 	function message_count() { return sizeof($this->messages); }
 	
 	/**
+	 * Get errors
+	 */
+	function get_errors() { return (array) $this->errors; }
+	
+	/**
+	 * Get messages
+	 */
+	function get_messages() { return (array) $this->messages; }
+	
+	/**
 	 * Output the errors and messages
 	 */
-	function show_messages() {
-		
-		// Show multiple errors in a list format
-		if (isset($this->errors) && sizeof($this->errors)>0) {
-			echo '<ul class="woocommerce_error">';
-			foreach ($this->errors as $error) {
-				echo '<li>' . $error . '</li>';
-			}
-			echo '</ul>';
-			$this->clear_messages();
-			return true;
-			
-		// Show a single message in a div
-		} elseif (isset($this->messages) && sizeof($this->messages)>0) {
-			echo '<div class="woocommerce_message">'.$this->messages[0].'</div>';
-			$this->clear_messages();
-			return true;
-			
-		} else {
-			return false;
-		}
-	}
+	function show_messages() { woocommerce_show_messages(); }
 	
 	/**
 	 * Set session data for messages
