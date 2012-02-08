@@ -94,6 +94,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Option to display layered nav as a dropdown
 * Shipping classes added to individual product variations
 * woocommerce_nocache function for cart/checkout/myaccount pages which need to be dynamic
+* Coupon code case fix
 * Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 

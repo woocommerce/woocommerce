@@ -25,8 +25,9 @@ class WC_Coupon {
 	
 	/** get coupon with $code */
 	function __construct( $code ) {
-		
-		$this->code = $code;
+		global $wpdb;
+		 
+		$this->code = esc_attr($code);
 		
 		$coupon_data = apply_filters('woocommerce_get_shop_coupon_data', false, $code);
 
@@ -44,7 +45,11 @@ class WC_Coupon {
             $this->free_shipping = $coupon_data['free_shipping'];
             return true;
         else:
-            $coupon = get_page_by_title($this->code, 'OBJECT', 'shop_coupon');
+            $coupon_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE BINARY post_title = %s AND post_type= %s", $this->code, 'shop_coupon' ) );
+			if ( $coupon_id ) $coupon = get_page($coupon_id); else return false;
+            
+            // Check titles match
+            if ($this->code!==$coupon->post_title) return false;
             if ($coupon && $coupon->post_status == 'publish') :
                 $this->id = $coupon->ID;
                 $this->type = get_post_meta($coupon->ID, 'discount_type', true);
