@@ -179,6 +179,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			);
 		endif;		
 		
+		// PayPal Args
 		$paypal_args = array_merge(
 			array(
 				'cmd' 					=> '_cart',
@@ -210,12 +211,12 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'email'					=> $order->billing_email,
 	
 				// Payment Info
-				'invoice' 				=> $order->order_key,
-				'discount_amount_cart' 	=> $order->get_order_discount()
+				'invoice' 				=> $order->order_key
 			), 
 			$phone_args
 		);
 		
+		// Shipping
 		if ($this->send_shipping=='yes') :
 			$paypal_args['no_shipping'] = 0;
 			$paypal_args['address_override'] = 1;
@@ -234,15 +235,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['no_shipping'] = 1;
 		endif;
 		
-		if (get_option('woocommerce_prices_include_tax')=='yes') :
+		// If prices include tax or have order discounts, send the whole order
+		if ( get_option('woocommerce_prices_include_tax')=='yes' || $order->get_order_discount() > 0 ) :
 			
-			// Tax
-			$paypal_args['tax_cart'] = $order->get_total_tax();
+			// Discount
+			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
 			
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woocommerce'), $order->id);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_total_tax() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
 			if ($order->get_shipping()>0) :
