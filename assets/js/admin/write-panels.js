@@ -572,7 +572,8 @@ jQuery( function($){
 				row_indexes();
 				
 			}
-	
+			
+			$('select.attribute_taxonomy').val('');
 			show_attribute_table();
 		});
 		
