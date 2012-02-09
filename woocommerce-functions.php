@@ -39,6 +39,14 @@ function woocommerce_redirects() {
 		exit;
 	endif;
 
+	// Redirect to the product page if we have a single product
+	if (is_search() && is_post_type_archive('product') && get_option('woocommerce_redirect_on_single_search_result')=='yes') {
+		if ($wp_query->post_count==1) {
+			$product = new WC_Product($wp_query->post->ID);
+			if ($product->is_visible()) wp_safe_redirect( get_permalink($product->id), 302 );
+			exit;
+		}
+	}
 }
 
 /**
