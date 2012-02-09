@@ -215,10 +215,10 @@ function woocommerce_price( $price, $args = array() ) {
 			$return = '<span class="amount">'. $price . $currency_symbol . '</span>';
 		break;
 		case 'left_space' :
-			$return = '<span class="amount">'. $currency_symbol . ' ' . $price . '</span>';
+			$return = '<span class="amount">'. $currency_symbol . '&nbsp;' . $price . '</span>';
 		break;
 		case 'right_space' :
-			$return = '<span class="amount">'. $price . ' ' . $currency_symbol . '</span>';
+			$return = '<span class="amount">'. $price . '&nbsp;' . $currency_symbol . '</span>';
 		break;
 	endswitch;
 
