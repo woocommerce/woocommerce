@@ -510,7 +510,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<div id="tax_rows">
 			<?php 
 				$loop = 0;
-				$taxes = maybe_unserialize($data['_order_taxes'][0]);
+				$taxes = (isset($data['_order_taxes'][0])) ? maybe_unserialize($data['_order_taxes'][0]) : '';
 				if (is_array($taxes) && sizeof($taxes)>0) :
 					foreach ($taxes as $tax) :
 						?>
