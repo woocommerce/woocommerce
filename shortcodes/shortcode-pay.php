@@ -24,6 +24,8 @@ function woocommerce_pay() {
 	
 	do_action('before_woocommerce_pay');
 	
+	$woocommerce->show_messages();
+	
 	if ( isset($_GET['pay_for_order']) && isset($_GET['order']) && isset($_GET['order_id']) ) :
 		
 		// Pay for existing order

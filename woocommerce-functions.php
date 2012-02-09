@@ -456,7 +456,9 @@ function woocommerce_pay_action() {
 	global $woocommerce;
 	
 	if (isset($_POST['woocommerce_pay']) && $woocommerce->verify_nonce('pay')) :
-	
+		
+		ob_start();
+		
 		// Pay for existing order
 		$order_key = urldecode( $_GET['order'] );
 		$order_id = (int) $_GET['order_id'];
