@@ -96,6 +96,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * woocommerce_nocache function for cart/checkout/myaccount pages which need to be dynamic
 * Coupon code case fix
 * Removed automatic -free on shipping methods
+* Option to redirect to the product page after searching if one result found (kudos to pixeltrix)
 * Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
