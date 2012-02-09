@@ -372,8 +372,10 @@ function variable_product_type_options() {
 					
 					if (count==1) {
 						alert( count + ' <?php _e("variation added"); ?>');
-					} else {
+					} else if (count==0 || count>1) {
 						alert( count + ' <?php _e("variations added"); ?>');
+					} else {
+						alert('<?php _e("No variations added"); ?>');
 					}
 					
 					jQuery('#variable_product_options').unblock();

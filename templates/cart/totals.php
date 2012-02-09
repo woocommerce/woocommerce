@@ -41,9 +41,10 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							
 							foreach ($available_methods as $method ) :
 								
-								echo '<option value="'.esc_attr($method->id).'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label.' &mdash; ';
-								
+								echo '<option value="'.esc_attr($method->id).'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label;								
 								if ($method->cost>0) :
+								
+									echo ' &mdash; ';
 									
 									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
 	
@@ -61,8 +62,6 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 	
 									endif;
 									
-								else :
-									echo __('Free', 'woocommerce');
 								endif;
 								
 								echo '</option>';

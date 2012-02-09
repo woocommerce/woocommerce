@@ -44,9 +44,11 @@
 							
 							if ($method->id==$_SESSION['_chosen_shipping_method']) echo 'selected="selected"';
 							
-							echo '>'.esc_html($method->label).' &mdash; ';
+							echo '>'.esc_html($method->label);
 							
 							if ($method->cost>0) :
+							
+								echo ' &mdash; ';
 							
 								if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
 
@@ -64,8 +66,6 @@
 
 								endif;
 								
-							else :
-								echo __('Free', 'woocommerce');
 							endif;
 							
 							echo '</option>';
