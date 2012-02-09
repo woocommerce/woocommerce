@@ -9,7 +9,7 @@
 
 function woocommerce_reports() {
 
-	$current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'sales';
+	$current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : __('sales', 'woocommerce');
 	$current_chart = (isset($_GET['chart'])) ? $_GET['chart'] : 0;
 	
 	$charts = apply_filters('woocommerce_reports_charts', array(
