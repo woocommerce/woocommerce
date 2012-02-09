@@ -534,12 +534,21 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		),
 	),
 
-	array(  
-		'name' => __( 'Cart redirect', 'woocommerce' ),
+	array(
+		'name' => __( 'Redirects', 'woocommerce' ),
 		'desc' 		=> __( 'Redirect to cart after adding a product to the cart (on single product pages)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_cart_redirect_after_add',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(
+		'desc' 		=> __( 'Redirect to the product page on a single matching search result', 'woocommerce' ),
+		'id' 		=> 'woocommerce_redirect_on_single_search_result',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
