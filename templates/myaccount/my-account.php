@@ -73,8 +73,10 @@ if ($customer_orders) :
 	
 	</table>
 <?php
-else : 
-	_e('You have no recent orders.', 'woocommerce');
+else :
+?>
+	<p><?php _e('You have no recent orders.', 'woocommerce'); ?></p>
+<?php
 endif;
 ?>
 
