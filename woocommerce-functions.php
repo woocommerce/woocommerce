@@ -13,7 +13,7 @@
  * Handle redirects before content is output - hooked into template_redirect so is_page works
  **/
 function woocommerce_redirects() {
-	global $woocommerce;
+	global $woocommerce, $wp_query;
 	
 	// When default permalinks are enabled, redirect shop page to post type archive url
 	if ( isset($_GET['page_id']) && $_GET['page_id'] > 0 && get_option( 'permalink_structure' )=="" && $_GET['page_id'] == woocommerce_get_page_id('shop') ) :
