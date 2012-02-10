@@ -65,6 +65,8 @@ jQuery(document).ready(function($) {
 							
 							// Unblock
 							$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
+							
+							$('body').trigger('cart_widget_refreshed');
 						} );
 					} else {
 						// Replace fragments
@@ -85,6 +87,7 @@ jQuery(document).ready(function($) {
 						
 						$('.shop_table.cart').css('opacity', '1').unblock();
 						
+						$('body').trigger('cart_page_refreshed');
 					});
 					
 					$('.cart_totals').load( window.location + ' .cart_totals:eq(0) > *', function() {
