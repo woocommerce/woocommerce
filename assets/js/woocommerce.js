@@ -365,7 +365,7 @@ jQuery(document).ready(function($) {
         	 $('.product_meta').find('.sku').text('');
         }
 
-        $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown');
+        $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown
     }
 	
 	//when one of attributes is changed - check everything to show only valid options
@@ -447,6 +447,7 @@ jQuery(document).ready(function($) {
 			$.post( woocommerce_params.ajax_url, data, function(response) {
 				
 				$('div.cart_totals').replaceWith( response );
+				$('body').trigger('updated_shipping_method');
 							
 			});
 			
@@ -503,6 +504,7 @@ jQuery(document).ready(function($) {
 				success: 	function( response ) {
 					$('#order_review').after(response).remove();
 					$('#order_review input[name=payment_method]:checked').click();
+					$('body').trigger('updated_checkout');
 				}
 			});
 		
