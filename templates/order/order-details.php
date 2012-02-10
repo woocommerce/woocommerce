@@ -64,7 +64,7 @@ $order = new WC_Order( $order_id );
 <header>
 	<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 </header>
-<dl>
+<dl class="customer_details">
 <?php
 	if ($order->billing_email) echo '<dt>'.__('Email:', 'woocommerce').'</dt><dd>'.$order->billing_email.'</dd>';
 	if ($order->billing_phone) echo '<dt>'.__('Telephone:', 'woocommerce').'</dt><dd>'.$order->billing_phone.'</dd>';
