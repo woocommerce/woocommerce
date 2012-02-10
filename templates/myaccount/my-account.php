@@ -39,11 +39,11 @@ if ($customer_orders) :
 	
 		<thead>
 			<tr>
-				<th><span class="nobr"><?php _e('#', 'woocommerce'); ?></span></th>
-				<th><span class="nobr"><?php _e('Date', 'woocommerce'); ?></span></th>
-				<th><span class="nobr"><?php _e('Ship to', 'woocommerce'); ?></span></th>
-				<th><span class="nobr"><?php _e('Total', 'woocommerce'); ?></span></th>
-				<th colspan="2"><span class="nobr"><?php _e('Status', 'woocommerce'); ?></span></th>
+				<th class="order-number"><span class="nobr"><?php _e('#', 'woocommerce'); ?></span></th>
+				<th class="order-date"><span class="nobr"><?php _e('Date', 'woocommerce'); ?></span></th>
+				<th class="order-shipto"><span class="nobr"><?php _e('Ship to', 'woocommerce'); ?></span></th>
+				<th class="order-total"><span class="nobr"><?php _e('Total', 'woocommerce'); ?></span></th>
+				<th class="order-status" colspan="2"><span class="nobr"><?php _e('Status', 'woocommerce'); ?></span></th>
 			</tr>
 		</thead>
 		
@@ -52,15 +52,15 @@ if ($customer_orders) :
 				$order = new WC_Order();
 				$order->populate($customer_order);
 				?><tr class="order">
-					<td><?php echo $order->id; ?></td>
-					<td><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
-					<td><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
-					<td><?php echo woocommerce_price($order->order_total); ?></td>
-					<td><?php 
+					<td class="order-number"><?php echo $order->id; ?></td>
+					<td class="order-date"><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
+					<td class="order-shipto"><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
+					<td class="order-total"><?php echo woocommerce_price($order->order_total); ?></td>
+					<td class="order-status"><?php
 						$status = get_term_by('slug', $order->status, 'shop_order_status');
 						echo __($status->name, 'woocommerce'); 
 					?></td>
-					<td style="text-align:right; white-space:nowrap;">
+					<td class="order-actions" style="text-align:right; white-space:nowrap;">
 						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
 							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woocommerce'); ?></a>
 							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woocommerce'); ?></a>

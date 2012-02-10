@@ -8,12 +8,12 @@ global $woocommerce;
 $order = new WC_Order( $order_id );
 ?>
 <h2><?php _e('Order Details', 'woocommerce'); ?></h2>
-<table class="shop_table">
+<table class="shop_table order_details">
 	<thead>
 		<tr>
-			<th><?php _e('Product', 'woocommerce'); ?></th>
-			<th><?php _e('Qty', 'woocommerce'); ?></th>
-			<th><?php _e('Totals', 'woocommerce'); ?></th>
+			<th class="product-name"><?php _e('Product', 'woocommerce'); ?></th>
+			<th class="product-quantity"><?php _e('Qty', 'woocommerce'); ?></th>
+			<th class="product-total"><?php _e('Totals', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
 	<tfoot>
@@ -53,7 +53,7 @@ $order = new WC_Order( $order_id );
 		
 				endif;	
 
-				echo '</td><td>'.$item['qty'].'</td><td>' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
+				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
 				
 			endforeach;
 		endif;
@@ -64,7 +64,7 @@ $order = new WC_Order( $order_id );
 <header>
 	<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 </header>
-<dl>
+<dl class="customer_details">
 <?php
 	if ($order->billing_email) echo '<dt>'.__('Email:', 'woocommerce').'</dt><dd>'.$order->billing_email.'</dd>';
 	if ($order->billing_phone) echo '<dt>'.__('Telephone:', 'woocommerce').'</dt><dd>'.$order->billing_phone.'</dd>';
