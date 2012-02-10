@@ -82,6 +82,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.4.3 = 
+* Fix for variation shipping class detection
+
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
 * Improved template loader - passes args instead of using globals

@@ -267,7 +267,7 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	function get_shipping_class() {
 		if (!$this->variation_shipping_class) :
-			$classes = get_the_terms( $this->id, 'product_shipping_class' );
+			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
 			if ($classes && !is_wp_error($classes)) $this->variation_shipping_class = current($classes)->slug; else $this->variation_shipping_class = parent::get_shipping_class();
 		endif;
 		return $this->variation_shipping_class;
