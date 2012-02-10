@@ -85,6 +85,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 = 1.4.3 = 
 * Fix for variation shipping class detection
 * Classes added to my-account
+* Fix for price filtering when the shop is the homepage
+* Renamed orderby GET variable to 'sort' to prevent conflicts with permalinks
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix

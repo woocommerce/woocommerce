@@ -50,7 +50,7 @@ class WC_Query {
 	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
 	 */
 	function product_query( $q ) {
-
+		
 		// Meta query
 		$meta_query = (array) $q->get( 'meta_query' );
 	    $meta_query[] = $this->visibility_meta_query();
@@ -72,7 +72,6 @@ class WC_Query {
 		$q->set( 'meta_query', $meta_query );
 	    $q->set( 'post__in', $post__in );
 	    $q->set( 'posts_per_page', ($q->get('posts_per_page')) ? $q->get('posts_per_page') : apply_filters('loop_shop_per_page', get_option('posts_per_page') ) );
-
 	    
 	    // Store variables
 	    $this->post__in = $post__in;

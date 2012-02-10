@@ -36,8 +36,6 @@ function woocommerce_update_options($options) {
 					$rate = esc_attr(trim($tax_rate[$i]));
 					$rate = number_format($rate, 4, '.', '');
 					
-					var_dump($rate);
-					
 					$class = woocommerce_clean($tax_classes[$i]);
 					
 					if (isset($tax_shipping[$i]) && $tax_shipping[$i]) $shipping = 'yes'; else $shipping = 'no';

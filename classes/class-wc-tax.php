@@ -146,7 +146,7 @@ class WC_Tax {
 		// Now we have an array of matching rates, lets filter this based on postcode
 		$matched_tax_rates = array();
 		
-		foreach ($found_rates as $key => $rate) :
+		if ($found_rates) foreach ($found_rates as $key => $rate) :
 			
 			if (isset($rate['postcode'])) :
 				

@@ -88,7 +88,7 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
  * Detect frontpage shop and fix pagination on static front page
  **/
 function woocommerce_front_page_archive_paging_fix() {
-		
+	
 	if ( is_front_page() && is_page( woocommerce_get_page_id('shop') )) :
 		
 		if (get_query_var('paged')) :
@@ -111,19 +111,19 @@ function woocommerce_front_page_archive_paging_fix() {
  */
 function woocommerce_front_page_archive( $query ) {
 		
-	global $paged, $woocommerce, $wp_the_query, $wp_query;
-	
+	global $paged, $woocommerce, $wp_query;
+		
 	// Only apply to front_page
-	if ( defined('SHOP_IS_ON_FRONT') && $query === $wp_the_query ) :
-			
+	if ( defined('SHOP_IS_ON_FRONT') && is_main_query() ) :
+		
 		if (get_query_var('paged')) :
 			$paged = get_query_var('paged'); 
 		else :
 			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
 		endif;
-
+		
 		// Filter the query
-		add_filter( 'parse_query', array( &$woocommerce->query, 'product_query') );
+		add_filter( 'pre_get_posts', array( &$woocommerce->query, 'pre_get_posts') );
 		
 		// Query the products
 		$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
@@ -132,7 +132,7 @@ function woocommerce_front_page_archive( $query ) {
 		$woocommerce->query->get_products_in_view();
 		
 		// Remove the query manipulation
-		remove_filter( 'parse_query', array( &$woocommerce->query, 'product_query') ); 
+		remove_filter( 'pre_get_posts', array( &$woocommerce->query, 'pre_get_posts') ); 
 		remove_action( 'loop_start', 'woocommerce_front_page_archive', 1);
 	
 	endif;
@@ -175,7 +175,7 @@ function woocommerce_nav_menu_items( $items, $args ) {
  * Update catalog ordering if posted
  */
 function woocommerce_update_catalog_ordering() {
-	if (isset($_REQUEST['orderby']) && $_REQUEST['orderby'] != '') $_SESSION['orderby'] = esc_attr($_REQUEST['orderby']);
+	if (isset($_REQUEST['sort']) && $_REQUEST['sort'] != '') $_SESSION['orderby'] = esc_attr($_REQUEST['sort']);
 }
 
 /**

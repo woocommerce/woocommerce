@@ -102,7 +102,7 @@ if ( !is_admin() || defined('DOING_AJAX') ) {
 add_action( 'template_redirect', 'woocommerce_redirects' );
 add_filter( 'wp_nav_menu_objects',  'woocommerce_nav_menu_item_classes', 2, 20 );
 add_action( 'wp', 'woocommerce_front_page_archive_paging_fix', 1 );
-add_action( 'loop_start', 'woocommerce_front_page_archive', 1 );
+add_action( 'woocommerce_before_shop_loop', 'woocommerce_front_page_archive', 1 );
 add_filter( 'wp_list_pages', 'woocommerce_list_pages' );
 
 /* Logout link */
