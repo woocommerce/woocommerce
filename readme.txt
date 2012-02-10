@@ -84,6 +84,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 = 1.4.3 = 
 * Fix for variation shipping class detection
+* Classes added to my-account
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
