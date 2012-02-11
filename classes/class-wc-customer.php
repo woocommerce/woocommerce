@@ -107,7 +107,9 @@ class WC_Customer {
 	
 	/** Gets the postcode from the current session */
 	function get_postcode() {
-		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return strtoupper(str_replace(' ', '', $_SESSION['customer']['postcode']));
+		global $woocommerce;
+		$validation = $woocommerce->validation();
+		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return $validation->format_postcode( $_SESSION['customer']['postcode'], $this->get_country());
 	}
 	
 	/** Gets the state from the current session */
@@ -122,7 +124,9 @@ class WC_Customer {
 	
 	/** Gets the postcode from the current session */
 	function get_shipping_postcode() {
-		if (isset($_SESSION['customer']['shipping_postcode'])) return strtoupper(str_replace(' ', '', $_SESSION['customer']['shipping_postcode']));
+		global $woocommerce;
+		$validation = $woocommerce->validation();
+		if (isset($_SESSION['customer']['shipping_postcode'])) return $validation->format_postcode( $_SESSION['customer']['shipping_postcode'], $this->get_shipping_country());
 	}
 	
 	/** Sets session data for the location */
