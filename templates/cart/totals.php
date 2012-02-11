@@ -64,7 +64,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							if ( 1 === count( $available_methods ) ) {
 
 								echo esc_html( $method->full_label );
-								echo '<input type="hidden" name="shipping_method" value="'.esc_attr( $method->id ).'">';
+								echo '<input type="hidden" name="shipping_method" id="shipping_method" value="'.esc_attr( $method->id ).'">';
 
 							// Show multiple shipping methods in a select list
 							} else {
