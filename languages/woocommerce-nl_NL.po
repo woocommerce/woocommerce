@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 1.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-02-11 18:34+0100\n"
-"PO-Revision-Date: 2012-02-11 18:35+0100\n"
+"PO-Revision-Date: 2012-02-12 09:58+0100\n"
 "Last-Translator: Geert De Deckere <geertdd@gmail.com>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr "Terug naar de homepage &rarr;"
 #: woocommerce-ajax.php:220
 #: woocommerce-ajax.php:239
 msgid "You do not have sufficient permissions to access this page."
-msgstr "Je hoeft niet voldoende rechten om deze pagina te bekijken."
+msgstr "U heeft niet voldoende rechten om deze pagina te bekijken."
 
 # @ woocommerce
 #: woocommerce-ajax.php:192
@@ -213,7 +213,7 @@ msgstr "Gelieve een gebruikersnaam in te vullen."
 # @ woocommerce
 #: woocommerce-functions.php:605
 msgid "This username is invalid because it uses illegal characters. Please enter a valid username."
-msgstr "De gebruikersnaam bevat ongeldige tekens en is ongeldig. Gelieve een geldige gebruikersnaam in te vullen."
+msgstr "De gebruikersnaam bevat ongeldige tekens. Gelieve een geldige gebruikersnaam in te vullen."
 
 # @ woocommerce
 #: woocommerce-functions.php:608
@@ -268,7 +268,7 @@ msgstr "Uw bestelling is geannuleerd."
 # @ woocommerce
 #: woocommerce-functions.php:698
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
-msgstr "Er is reeds een betaling geschied voor deze bestelling. Neem contact met ons op als je hulp nodig hebt."
+msgstr "Er is reeds een betaling gebeurd voor deze bestelling. Neem contact met ons op als u hulp nodig heeft."
 
 # @ woocommerce
 #: woocommerce-functions.php:702
@@ -750,7 +750,7 @@ msgstr "Variatie bewerken"
 # @ woocommerce
 #: woocommerce.php:689
 msgid "New Variation"
-msgstr "Variatie Nieuwe variatie"
+msgstr "Nieuwe variatie"
 
 # @ woocommerce
 #: woocommerce.php:690
@@ -776,7 +776,7 @@ msgstr "Geen variaties in de prullenbak gevonden"
 # @ woocommerce
 #: woocommerce.php:695
 msgid "Parent Variation"
-msgstr "Hoofd Variatie"
+msgstr "Hoofdvariatie"
 
 # @ woocommerce
 #: woocommerce.php:724
@@ -906,7 +906,7 @@ msgstr "Hoofd Coupon"
 # @ woocommerce
 #: woocommerce.php:782
 msgid "This is where you can add new coupons that customers can use in your store."
-msgstr "Hier kun je nieuwe coupons toevoegen."
+msgstr "Hier kunt u nieuwe kortingscodes toevoegen."
 
 # @ woocommerce
 #: woocommerce.php:880
@@ -1066,7 +1066,7 @@ msgstr "Eigenschap toevoegen"
 # @ woocommerce
 #: admin/woocommerce-admin-attributes.php:250
 msgid "Are you sure you want to delete this attribute?"
-msgstr "Weet je zeker dat je deze eigenschap wilt verwijderen?"
+msgstr "Weet u zeker dat u deze eigenschap wilt verwijderen?"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:20
@@ -1421,7 +1421,7 @@ msgstr "Uit te sluiten afbeelding"
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:316
 msgid "Enabling this option will hide it from the product page image gallery."
-msgstr "Inschakelen van deze optie activeert het verbergen van het product pagina-afbeelding galerij."
+msgstr "Inschakelen van deze optie activeert het verbergen van het productpagina-afbeelding galerij."
 
 # @ woocommerce
 #: admin/woocommerce-admin-install.php:150
@@ -2590,7 +2590,7 @@ msgstr "Verberg producten indien subcategorien getoond worden"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:476
 msgid "Product fields"
-msgstr "Product velden"
+msgstr "Productvelden"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:477
@@ -2615,12 +2615,12 @@ msgstr "Toon gewicht en afmetingen bij de producteigenschappen"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:509
 msgid "Weight Unit"
-msgstr "Gewicht Unit"
+msgstr "Gewichtseenheid"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:510
 msgid "This controls what unit you will define weights in."
-msgstr "Gewicht eenheid."
+msgstr "Dit bepaalt in welke eenheid u het gewicht van een product opgeeft."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:516
@@ -2629,9 +2629,8 @@ msgstr "kg"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:517
-#, fuzzy
 msgid "g"
-msgstr "kg"
+msgstr "g"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:518
@@ -2641,18 +2640,17 @@ msgstr "lbs"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:523
 msgid "Dimensions Unit"
-msgstr "Afmeting eenheid"
+msgstr "Afmetingseenheid"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:524
 msgid "This controls what unit you will define lengths in."
-msgstr "Afmetingen eenheid. "
+msgstr "Dit bepaalt in welke eenheid u afmetingen van een product opgeeft."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:530
-#, fuzzy
 msgid "m"
-msgstr "cm"
+msgstr "m"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:531
@@ -2677,7 +2675,7 @@ msgstr ""
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:539
 msgid "Redirect to cart after adding a product to the cart (on single product pages)"
-msgstr "Doorsturen naar de winkelwagen na het toevoegen van een product in de winkelwagen (op een product pagina)"
+msgstr "Doorsturen naar de winkelwagen na het toevoegen van een product in de winkelwagen (op een productpagina)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:547
@@ -2788,7 +2786,7 @@ msgstr "Productafbeelding"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:627
 msgid "This is the size used by the main image on the product page."
-msgstr "Dit formaat wordt gebruikt als hoofd afbeelding op een product pagina."
+msgstr "Dit formaat wordt gebruikt als hoofdafbeelding op een productpagina."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:635
@@ -3119,7 +3117,7 @@ msgstr "ShareThis Publisher ID"
 #: admin/woocommerce-admin-settings.php:947
 #, php-format
 msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
-msgstr "Voer je %1$sShareThis publisher ID%2$s in om social media buttons op productpagina's te activeren."
+msgstr "Voer uw %1$sShareThis publisher ID%2$s in om social media buttons op productpagina's te activeren."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:956
@@ -3138,9 +3136,8 @@ msgstr "ShareDaddy knop tonen?"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:960
-#, fuzzy
 msgid "Enable this option to show the ShareDaddy button (if installed) on the product page."
-msgstr "Schakel dit in om het eigenschap op de product pagina te laten zien."
+msgstr "Schakel dit in om het eigenschap op de productpagina te laten zien."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:968
@@ -3150,7 +3147,7 @@ msgstr "Google Analytics"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:968
 msgid "Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website."
-msgstr "Google Analytics is een gratis dienst van Google met gedetailleerde gebruikersstatistieken van uw website bezoekers."
+msgstr "Google Analytics is een gratis dienst van Google met gedetailleerde statistieken over uw websitebezoekers."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:971
@@ -3191,7 +3188,7 @@ msgstr "Welkom bij WooCommerce!"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:1084
 msgid "WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the 'Automatically add pages' button below, otherwise you can set them up manually. See the 'Pages' tab in settings for more information."
-msgstr "WooCommerce heeft enkele WordPresspagina's nodig met bepaalde shortcodes in. Je kan deze automatisch aanmaken door op de button hieronder te klikken. Om deze pagina's handmatig in te stellen kan je bij het tabblad \"Pagina's\" terecht."
+msgstr "WooCommerce heeft enkele WordPresspagina's nodig met bepaalde shortcodes in. U kunt deze automatisch laten aanmaken door op de button hieronder te klikken. Om deze pagina's handmatig in te stellen kunt u bij het tabblad \"Pagina's\" terecht."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:1085
@@ -4401,7 +4398,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:234
 msgid "You must add some attributes via the \"Product Data\" panel and save before adding a new variation."
-msgstr "Je moet eigenschappen toevoegen via het \"Product Data\" paneel en opslaan voordat je een variatie toevoegd."
+msgstr "U moet eigenschappen toevoegen via het \"Productgegevens\" paneel en opslaan voordat u een variatie toevoegt."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:353
@@ -4427,7 +4424,7 @@ msgstr "Geen variaties gevonden"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:389
 msgid "Are you sure you want to remove this variation?"
-msgstr "Wil je deze variatie verwijderen?"
+msgstr "Wilt u deze variatie verwijderen?"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:424
@@ -4559,7 +4556,7 @@ msgstr "Schakel deze optie in om het product in de schijnwerpers te plaatsen"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:141
 msgid "File path"
-msgstr "Bestands pad"
+msgstr "Bestandspad"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:144
@@ -4569,7 +4566,7 @@ msgstr "Upload een bestand"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:149
 msgid "Download Limit"
-msgstr "Download Limiet"
+msgstr "Downloadlimiet"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:167
@@ -4649,7 +4646,7 @@ msgstr "Zichtbaar?"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:233
 msgid "Enable this to show the attribute on the product page."
-msgstr "Schakel dit in om het eigenschap op de product pagina te laten zien."
+msgstr "Schakel dit in om het eigenschap op de productpagina te laten zien."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:234
@@ -4689,7 +4686,7 @@ msgstr "Up-Sells"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:358
 msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
-msgstr "Up-Sells zijn producten die je adviseert in plaats van het huidige product. Bijvoorbeeld als een product meer winst opleverd of van betere  kwaliteit is."
+msgstr "Up-Sells zijn producten die u adviseert in plaats van het huidige product, vb. een product dat meer winst oplevert of van een betere kwaliteit is."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:367
@@ -4699,7 +4696,7 @@ msgstr "Cross-Sells"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:368
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
-msgstr "Cross-Sells zijn producten die je aanbeveeld omdat de klant het huidige product besteld."
+msgstr "Cross-Sells zijn producten die u aanbeveelt op basis van de producten in de winkelwagen van de klant."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:387
@@ -4741,22 +4738,22 @@ msgstr "Invoegen in URL-veld"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:23
 msgid "Product Data"
-msgstr "Product Data"
+msgstr "Productgegevens"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:26
 msgid "Order Data"
-msgstr "Bestelling data"
+msgstr "Bestellingsdata"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:27
 msgid "Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item's stock levels.</small>"
-msgstr "Bestelde producten<small>&ndash; Notitie: indien je de hoeveelheden aanpast dien je handmatig de voorraad bij te werken.</small>"
+msgstr "Bestelde producten<small>&ndash; Notitie: indien u de hoeveelheden aanpast dient u handmatig de voorraad bij te werken.</small>"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:28
 msgid "Order Totals"
-msgstr "Bestelling Totalen"
+msgstr "Bestellingstotalen"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:29
@@ -4766,7 +4763,7 @@ msgstr "Opmerkingen bij bestelling"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:30
 msgid "Order Actions"
-msgstr "Bestelling Acties"
+msgstr "Bestellingsacties"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:38
@@ -4781,7 +4778,7 @@ msgstr "Code kortingsbon"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanels-init.php:52
 msgid "Product name"
-msgstr "Product naam"
+msgstr "Productnaam"
 
 # @ woocommerce
 #: classes/class-wc-cart.php:194
@@ -6902,7 +6899,7 @@ msgstr "Opmerking:"
 # @ woocommerce
 #: classes/class-wc-email.php:365
 msgid "Order information"
-msgstr "Bestelling informatie"
+msgstr "Bestellingsinformatie"
 
 # @ woocommerce
 #: classes/class-wc-email.php:387
@@ -7107,7 +7104,7 @@ msgstr "BIC"
 # @ woocommerce
 #: classes/gateways/class-wc-bacs.php:200
 msgid "Awaiting BACS payment"
-msgstr "Wachten op bank overschrijving"
+msgstr "Wachten op bankoverschrijving"
 
 # @ woocommerce
 #: classes/gateways/class-wc-cheque.php:18
@@ -7211,7 +7208,7 @@ msgstr "PayPal standaard"
 # @ woocommerce
 #: classes/gateways/class-wc-paypal.php:70
 msgid "PayPal standard works by sending the user to PayPal to enter their payment information."
-msgstr "PayPal standaard werkt door het verwijzen van de gebruiker naar PayPal om de betaling uit te voeren."
+msgstr "PayPal standaard werkt door de klant door te sturen naar PayPal om de betaling uit te voeren."
 
 # @ woocommerce
 #: classes/gateways/class-wc-paypal.php:81
@@ -7221,7 +7218,7 @@ msgstr "Gateway Uitgeschakeld"
 # @ woocommerce
 #: classes/gateways/class-wc-paypal.php:81
 msgid "PayPal does not support your store currency."
-msgstr "PayPal ondersteund niet je huidige winkel valuta."
+msgstr "PayPal ondersteunt de valuta van uw winkel niet."
 
 # @ woocommerce
 #: classes/gateways/class-wc-paypal.php:99
@@ -7703,7 +7700,7 @@ msgstr ""
 #: shortcodes/shortcode-pay.php:48
 #: shortcodes/shortcode-pay.php:99
 msgid "Your order has already been paid for. Please contact us if you need assistance."
-msgstr "Er is reeds een betaling geschied voor deze bestelling. Neem contact met ons op als je hulp nodig hebt."
+msgstr "Er is reeds een betaling gebeurd voor deze bestelling. Neem contact met ons op als u hulp nodig heeft."
 
 # @ woocommerce
 #: shortcodes/shortcode-pay.php:73
@@ -7766,7 +7763,7 @@ msgstr "Schrijf de eerste review"
 # @ woocommerce
 #: templates/single-product-reviews.php:66
 msgid "There are no reviews yet, would you like to <a href=\"#review_form\" class=\"inline show_review_form\">submit yours</a>?"
-msgstr "Er zijn nog geen reviews. Wil je een <a href=\"#review_form\" class=\"inline show_review_form\">review insturen</a>?"
+msgstr "Er zijn nog geen reviews. Wilt u een <a href=\"#review_form\" class=\"inline show_review_form\">review insturen</a>?"
 
 # @ woocommerce
 #: templates/single-product-reviews.php:84
@@ -8049,7 +8046,7 @@ msgstr "Onze excuses. Het lijkt er op dat er geen betalingsmogelijkheden zijn vo
 # @ woocommerce
 #: templates/checkout/review-order.php:231
 msgid "Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order. You may be charged more than the amount stated above if you fail to do so."
-msgstr "Omdat je browser geen JavaScript ondersteund, of JavaScript uit staat, controleer of je de <em>Werk totalen bij</em> knop hebt ingedrukt voor je je bestelling plaatst. Anders kan  het zijn dat er meer kosten in rekening worden gebracht dan dat hierboven staat."
+msgstr "Omdat uw browser geen JavaScript ondersteunt, of JavaScript uitgeschakeld is, controleert u of u de <em>Werk totalen bij</em> knop heeft ingedrukt voor u uw bestelling plaatst. Anders kan het zijn dat er meer kosten in rekening worden gebracht dan dat hierboven staat."
 
 # @ woocommerce
 #: templates/checkout/review-order.php:231
@@ -8064,7 +8061,7 @@ msgstr "Plaats bestelling"
 # @ woocommerce
 #: templates/checkout/review-order.php:241
 msgid "I accept the"
-msgstr "I accepteer de"
+msgstr "Ik accepteer de"
 
 # @ woocommerce
 #: templates/checkout/review-order.php:241
@@ -8129,7 +8126,7 @@ msgstr "Klant details"
 #: templates/emails/customer-note.php:53
 #: templates/emails/customer-processing-order.php:49
 msgid "Billing address"
-msgstr "Factuur adres"
+msgstr "Factuuradres"
 
 # @ woocommerce
 #: templates/emails/admin-new-order.php:57
@@ -8142,7 +8139,7 @@ msgstr "Verzendadres"
 # @ woocommerce
 #: templates/emails/customer-completed-order.php:5
 msgid "Your order is complete. Your order's details are below:"
-msgstr "Je bestelling is compleet. De details van je bestelling staan hieronder:"
+msgstr "Uw bestelling is compleet. De details van uw bestelling staan hieronder:"
 
 # @ woocommerce
 #: templates/emails/customer-invoice.php:7
@@ -8480,12 +8477,12 @@ msgstr "Toont een lijst van best verkopende producten op de site."
 # @ woocommerce
 #: widgets/widget-best_sellers.php:24
 msgid "WooCommerce Best Sellers"
-msgstr "WooCommerce Best Sellers"
+msgstr "WooCommerce Bestsellers"
 
 # @ woocommerce
 #: widgets/widget-best_sellers.php:53
 msgid "Best Sellers"
-msgstr "Best Sellers"
+msgstr "Bestsellers"
 
 # @ woocommerce
 #: widgets/widget-best_sellers.php:116
@@ -8552,7 +8549,7 @@ msgstr "Toont een speciale eigenschap in een widget zodat u de producten kunt fi
 # @ woocommerce
 #: widgets/widget-layered_nav.php:139
 msgid "WooCommerce Layered Nav"
-msgstr "WooCommerce GeLaagde Navigatie"
+msgstr "WooCommerce Gelaagde Navigatie"
 
 # @ woocommerce
 #: widgets/widget-layered_nav.php:184
