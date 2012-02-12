@@ -21,6 +21,7 @@ class WC_Checkout {
 	function __construct () {
 		global $woocommerce;
 		
+		add_action('woocommerce_checkout_process',array(&$this,'checkout_process'));
 		add_action('woocommerce_checkout_billing',array(&$this,'checkout_form_billing'));
 		add_action('woocommerce_checkout_shipping',array(&$this,'checkout_form_shipping'));
 		
@@ -58,6 +59,12 @@ class WC_Checkout {
 				)
 			);
 		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
+	}
+	
+	/** Checkout process */
+	function checkout_process() {
+		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
+		do_action('woocommerce_check_cart_items');
 	}
 		
 	/** Output the billing information form */
