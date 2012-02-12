@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Hidden shipping text when calculator is hidden
 * If theres 1 shipping method, don't show a select box (thanks GeertDD)
 * Don't repeat weight units after each measurement (GeertDD is on a role)
+* CZ fix
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix

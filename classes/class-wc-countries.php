@@ -668,6 +668,11 @@ class WC_Countries {
 						'label'	=> __('Province', 'woocommerce')
 					)
 				),
+				'CZ' => array(
+					'state'		=> array(
+						'required' => false
+					)
+				),
 				'DE' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
