@@ -87,6 +87,11 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Classes added to my-account
 * Fix for price filtering when the shop is the homepage
 * Renamed orderby GET variable to 'sort' to prevent conflicts with permalinks
+* Fixed a bug allowing checkout when items are out of stock
+* Added a cart item error page for checkout, if the items are invalid
+* Hidden shipping text when calculator is hidden
+* If theres 1 shipping method, don't show a select box (thanks GeertDD)
+* Don't repeat weight units after each measurement (GeertDD is on a role)
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix

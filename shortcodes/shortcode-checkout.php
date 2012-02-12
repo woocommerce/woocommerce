@@ -21,11 +21,20 @@ function woocommerce_checkout( $atts ) {
 
 	if (sizeof($woocommerce->cart->get_cart())==0) return;
 	
-	$non_js_checkout = (isset($_POST['woocommerce_checkout_update_totals']) && $_POST['woocommerce_checkout_update_totals']) ? true : false;
-	
 	do_action('woocommerce_check_cart_items');
 	
-	if ( $woocommerce->error_count()==0 && $non_js_checkout) $woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce') );
+	if ( $woocommerce->error_count()>0 ) {
+		
+		woocommerce_get_template('checkout/cart-errors.php');
+		
+	} else {
 	
-	woocommerce_get_template('checkout/form-checkout.php');
+		$non_js_checkout = (isset($_POST['woocommerce_checkout_update_totals']) && $_POST['woocommerce_checkout_update_totals']) ? true : false;
+		
+		if ( $woocommerce->error_count()==0 && $non_js_checkout) $woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce') );
+		
+		woocommerce_get_template('checkout/form-checkout.php');
+	
+	}
+	
 }

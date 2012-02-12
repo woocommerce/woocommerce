@@ -29,57 +29,66 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				<?php endif; ?>
 				
-				<?php if ($woocommerce->cart->needs_shipping()) : ?>
+				<?php if ($woocommerce->cart->needs_shipping() && ( $available_methods || get_option('woocommerce_enable_shipping_calc') == 'yes' )) : ?>
 				
 				<tr class="shipping">
 					<th><?php _e('Shipping', 'woocommerce'); ?></th>
 					<td>
 					<?php
-						if (sizeof($available_methods)>0) :
-							
-							echo '<select name="shipping_method" id="shipping_method">';
-							
-							foreach ($available_methods as $method ) :
-								
-								echo '<option value="'.esc_attr($method->id).'" '.selected($method->id, $_SESSION['_chosen_shipping_method'], false).'>'.$method->label;								
-								if ($method->cost>0) :
-								
-									echo ' &mdash; ';
-									
-									if ($woocommerce->cart->display_totals_ex_tax || !$woocommerce->cart->prices_include_tax) :
-	
-										echo woocommerce_price($method->cost);
-										if ( $method->get_shipping_tax()>0 && $woocommerce->cart->prices_include_tax ) :
-											echo ' ' . $woocommerce->countries->ex_tax_or_vat();
-										endif;
-	
-									else :
-	
-										echo woocommerce_price($method->cost + $method->get_shipping_tax());
-										if ( $method->get_shipping_tax()>0 && !$woocommerce->cart->prices_include_tax ) :
-											echo ' ' . $woocommerce->countries->inc_tax_or_vat();
-										endif;
-	
-									endif;
-									
-								endif;
-								
-								echo '</option>';
-	
-							endforeach;
-							
-							echo '</select>';
-							
-						else :
-							
-							if ( !$woocommerce->customer->get_shipping_country() || !$woocommerce->customer->get_shipping_state() || !$woocommerce->customer->get_shipping_postcode() ) : 
+						// If at least one shipping method is available
+						if ( $available_methods ) {
+
+							// Prepare text labels with price for each shipping method
+							foreach ( $available_methods as $method ) {
+								$method->full_label = $method->label;
+
+								if ( $method->cost > 0 ) {
+									$method->full_label .= ' &mdash; ';
+
+									// Append price to label using the correct tax settings
+									if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
+										$method->full_label .= woocommerce_price( $method->cost );
+										if ( $method->get_shipping_tax() > 0 && $woocommerce->cart->prices_include_tax ) {
+											$method->full_label .= ' '.$woocommerce->countries->ex_tax_or_vat();
+										}
+									} else {
+										$method->full_label .= woocommerce_price( $method->cost + $method->get_shipping_tax() );
+										if ( $method->get_shipping_tax() > 0 && ! $woocommerce->cart->prices_include_tax ) {
+											$method->full_label .= ' '.$woocommerce->countries->inc_tax_or_vat();
+										}
+									}
+								}
+							}
+
+							// Print a single available shipping method as plain text
+							if ( 1 === count( $available_methods ) ) {
+
+								echo esc_html( $method->full_label );
+								echo '<input type="hidden" name="shipping_method" id="shipping_method" value="'.esc_attr( $method->id ).'">';
+
+							// Show multiple shipping methods in a select list
+							} else {
+
+								echo '<select name="shipping_method" id="shipping_method">';
+								foreach ( $available_methods as $method ) {
+									echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
+									echo esc_html( $method->full_label );
+									echo '</option>';
+								}
+								echo '</select>';
+
+							}
+
+						// No shipping methods are available
+						} else {
+
+							if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() || ! $woocommerce->customer->get_shipping_postcode() ) {
 								echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woocommerce').'</p>';
-							else :
+							} else {
 								echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce').'</p>';
-							endif;
-							
-						endif;
-				
+							}
+
+						}
 					?></td>
 					
 				</tr>
