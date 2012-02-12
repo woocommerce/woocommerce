@@ -29,7 +29,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				<?php endif; ?>
 				
-				<?php if ($woocommerce->cart->needs_shipping()) : ?>
+				<?php if ($woocommerce->cart->needs_shipping() && ( $available_methods || get_option('woocommerce_enable_shipping_calc') == 'yes' )) : ?>
 				
 				<tr class="shipping">
 					<th><?php _e('Shipping', 'woocommerce'); ?></th>
