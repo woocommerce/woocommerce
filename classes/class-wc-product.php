@@ -802,15 +802,17 @@ class WC_Product {
 
 			// Show length
 			if ($this->length) {
-				$this->dimensions = $this->length.get_option('woocommerce_dimension_unit');
+				$this->dimensions = $this->length;
 				// Show width also
 				if ($this->width) {
-					$this->dimensions .= ' × '.$this->width.get_option('woocommerce_dimension_unit');
+					$this->dimensions .= ' × '.$this->width;
 					// Show height also
 					if ($this->height) {
-						$this->dimensions .= ' × '.$this->height.get_option('woocommerce_dimension_unit');
+						$this->dimensions .= ' × '.$this->height;
 					}
 				}
+				// Append the unit
+				$this->dimensions .= ' '.get_option('woocommerce_dimension_unit');
 			}
 		endif;
 		return $this->dimensions;
