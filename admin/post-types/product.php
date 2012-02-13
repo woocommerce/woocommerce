@@ -156,7 +156,7 @@ function woocommerce_custom_product_columns( $column ) {
 			
 		break;
 		case "sku" :
-			echo $product->get_sku();
+			if ($product->get_sku()) echo $product->get_sku(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_type" :
 			if( $product->product_type == 'grouped' ):

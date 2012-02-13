@@ -47,7 +47,7 @@ function woocommerce_product_data_box() {
 			
 				// SKU
 				if( get_option('woocommerce_enable_sku', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => __('SKU', 'woocommerce'), 'placeholder' => $post->ID ) );
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __('Stock Keeping Unit', 'woocommerce') .'">' . __('SKU', 'woocommerce') . '</abbr>' ) );
 				else:
 					echo '<input type="hidden" name="_sku" value="'.get_post_meta($thepostid, '_sku', true).'" />';
 				endif;
@@ -478,12 +478,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				    LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
 				    WHERE $wpdb->posts.post_type = 'product'
 				    AND $wpdb->posts.post_status = 'publish' 
-				    AND (
-				    	($wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s')
-				    	OR
-				    	($wpdb->posts.ID = '%s' AND $wpdb->posts.ID != '%s')
+				    AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
 				    );
-				 ", $new_sku, $new_sku, $post_id))
+				 ", $new_sku))
 				) :
 				$woocommerce_errors[] = __('Product SKU must be unique.', 'woocommerce');
 			else :

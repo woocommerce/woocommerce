@@ -521,8 +521,8 @@ class WC_Order {
 			
 			$file = $sku = $variation = '';
 			
-			if ($show_sku) :
-				$sku = ' (#' . $_product->sku . ')';
+			if ($show_sku && $_product->get_sku()) :
+				$sku = ' (#' . $_product->get_sku() . ')';
 			endif;
 			
 			$item_meta = new order_item_meta( $item['item_meta'] );					

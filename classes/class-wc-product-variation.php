@@ -52,7 +52,7 @@ class WC_Product_Variation extends WC_Product {
 		
 		// Define the data we're going to load from the parent: Key => Default value
 		$load_data = array(
-			'sku'			=> $this->id,
+			'sku'			=> '',
 			'price' 		=> 0,
 			'visibility'	=> 'hidden',
 			'stock'			=> 0,

@@ -61,7 +61,7 @@ class WC_Product {
 
 		// Define the data we're going to load: Key => Default value
 		$load_data = array(
-			'sku'			=> $this->id,
+			'sku'			=> '',
 			'downloadable' 	=> 'no',
 			'virtual' 		=> 'no',
 			'price' 		=> '',

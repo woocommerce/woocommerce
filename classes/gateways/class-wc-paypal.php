@@ -269,7 +269,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 					
 					$item_name 	= $item['name'];
 					
-					if (get_option('woocommerce_enable_sku')=='yes') {
+					if (get_option('woocommerce_enable_sku')=='yes' && $product->get_sku()) {
 						$item_name .= ' ('.$product->get_sku().')';
 					}
 					
