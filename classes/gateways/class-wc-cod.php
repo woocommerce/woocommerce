@@ -80,6 +80,7 @@ class WC_COD extends WC_Payment_Gateway {
 		$order = new woocommerce_order ($order_id);
 		$order->update_status('on-hold', __('Payment to be made upon delivery.', 'woocommerce'));
 		$woocommerce->cart->empty_cart(); // Dump the cart
+		$order->payment_complete(); // Can't do_action('process_payment') without this.
 		unset($_SESSION['order_awaiting_payment']); // Lose our session	
 		return array( // Return and let's visit the order completed page
 			'result' 	=> 'success',

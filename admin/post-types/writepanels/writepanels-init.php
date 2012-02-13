@@ -162,7 +162,7 @@ function woocommerce_wp_checkbox( $field ) {
 	
 	echo '<p class="form-field '.$field['id'].'_field '.$field['wrapper_class'].'"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" ';
 	
-	checked($field['value'], 'yes');
+	checked($field['value'], 'on');
 	
 	echo ' /> ';
 	
