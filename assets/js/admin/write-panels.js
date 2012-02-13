@@ -521,37 +521,38 @@ jQuery( function($){
 	
 	// ATTRIBUTE TABLES
 		
+		// Open/close
+		jQuery('.woocommerce_attributes').on('click', '.woocommerce_attribute h3', function(){
+			jQuery(this).next('table.woocommerce_attribute_data').toggle();
+		});
+		
+		jQuery('.woocommerce_attribute.closed').each(function(){
+			jQuery(this).find('table.woocommerce_attribute_data').hide();
+		});
+		
 		// Multiselect attributes
-		$("#attributes_list select.multiselect").chosen();	
+		$(".woocommerce_attributes select.multiselect").chosen();	
 		
 		// Initial order
-		var woocommerce_attributes_table_items = $('#attributes_list').children('tr').get();
-		woocommerce_attributes_table_items.sort(function(a, b) {
-		   var compA = $(a).attr('rel');
-		   var compB = $(b).attr('rel');
+		var woocommerce_attribute_items = $('.woocommerce_attributes').find('.woocommerce_attribute').get();
+		
+		woocommerce_attribute_items.sort(function(a, b) {
+		   var compA = parseInt($(a).attr('rel'));
+		   var compB = parseInt($(b).attr('rel'));
 		   return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
 		})
-		$(woocommerce_attributes_table_items).each( function(idx, itm) { $('#attributes_list').append(itm); } );
-		
-		// Show
-		function show_attribute_table() {
-			$('table.woocommerce_attributes, table.woocommerce_variable_attributes').each(function(){
-				if ($('tbody tr', this).size()==0) 
-					$(this).parent().hide();
-				else 
-					$(this).parent().show();
-			});
-		}
-		show_attribute_table();
+		$(woocommerce_attribute_items).each( function(idx, itm) { $('.woocommerce_attributes').append(itm); } );
 		
 		function row_indexes() {
-			$('#attributes_list tr').each(function(index, el){ $('.attribute_position', el).val( parseInt( $(el).index('#attributes_list tr') ) ); });
+			$('.woocommerce_attributes .woocommerce_attribute').each(function(index, el){ 
+				$('.attribute_position', el).val( parseInt( $(el).index('.woocommerce_attributes .woocommerce_attribute') ) ); 
+			});
 		};
 		
 		// Add rows
-		$('button.add_attribute').click(function(){
+		$('button.add_attribute').on('click', function(){
 			
-			var size = $('table.woocommerce_attributes tbody tr').size();
+			var size = $('.woocommerce_attributes .woocommerce_attribute').size();
 			
 			var attribute_type = $('select.attribute_taxonomy').val();
 			
@@ -561,56 +562,99 @@ jQuery( function($){
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 				
 				// Add custom attribute row
-				$('table.woocommerce_attributes tbody').append('<tr><td class="handle"></td><td><input type="text" name="attribute_names[' + size + ']" /><input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" /><input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" /></td><td><input type="text" name="attribute_values[' + size + ']" /></td><td class="center"><input type="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /></td><td class="center enable_variation" ' + enable_variation + '><input type="checkbox" name="attribute_variation[' + size + ']" value="1" /></td><td class="center"><button type="button" class="remove_row button">&times;</button></td></tr>');
+				$('.woocommerce_attributes').append('<div class="woocommerce_attribute">\
+						<h3>\
+							<button type="button" class="remove_row button">' + woocommerce_writepanel_params.remove_label + '</button>\
+							<div class="handlediv" title="' + woocommerce_writepanel_params.click_to_toggle + '"></div>\
+							<strong class="attribute_name"></strong>\
+						</h3>\
+						<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">\
+							<tbody>\
+								<tr>\
+									<td class="attribute_name">\
+										<label>' + woocommerce_writepanel_params.name_label + ':</label>\
+										<input type="text" class="attribute_name" name="attribute_names[' + size + ']" />\
+										<input type="hidden" name="attribute_is_taxonomy[' + size + ']" value="0" />\
+										<input type="hidden" name="attribute_position[' + size + ']" class="attribute_position" value="' + size + '" />\
+									</td>\
+									<td rowspan="3">\
+										<label>' + woocommerce_writepanel_params.values_label + ':</label>\
+										<textarea name="attribute_values[' + size + ']" cols="5" rows="5" placeholder="' + woocommerce_writepanel_params.text_attribute_tip + '"></textarea>\								
+									</td>\
+								</tr>\
+								<tr>\
+									<td>\
+										<label><input type="checkbox" class="checkbox" checked="checked" name="attribute_visibility[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.visible_label + '</label>\
+									</td>\
+								</tr>\
+								<tr>\
+									<td>\
+										<div class="enable_variation show_if_variable" ' + enable_variation + '>\
+										<label><input type="checkbox" class="checkbox" name="attribute_variation[' + size + ']" value="1" /> ' + woocommerce_writepanel_params.used_for_variations_label + '</label>\
+										</div>\
+									</td>\
+								</tr>\
+							</tbody>\
+						</table>\
+					</div>');
 				
 			} else {
 				
 				// Reveal taxonomy row
-				var thisrow = $('table.woocommerce_attributes tbody tr.' + attribute_type);
-				$('table.woocommerce_attributes tbody').append( $(thisrow) );
-				$(thisrow).show();
+				var thisrow = $('.woocommerce_attributes .woocommerce_attribute.' + attribute_type);
+				$('.woocommerce_attributes').append( $(thisrow) );
+				$(thisrow).show().find('.woocommerce_attribute_data').show();
 				row_indexes();
 				
 			}
 			
 			$('select.attribute_taxonomy').val('');
-			show_attribute_table();
 		});
 		
-		$('button.hide_row').live('click', function(){
-			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
-			if (answer){
-				$(this).parent().parent().find('select, input[type=text]').val('');
-				$(this).parent().parent().hide();
-				show_attribute_table();
-			}
+		$('.woocommerce_attributes').on('blur', 'input.attribute_name', function(){
+			$(this).closest('.woocommerce_attribute').find('strong.attribute_name').text( $(this).val() );
+		});
+		
+		$('.woocommerce_attributes').on('click', 'button.select_all_attributes', function(){
+			$(this).closest('td').find('select option').attr("selected","selected");
+			$(this).closest('td').find('select').trigger("liszt:updated");
 			return false;
 		});
 		
-		$('#attributes_list button.remove_row').live('click', function(){
+		$('.woocommerce_attributes').on('click', 'button.select_no_attributes', function(){
+			$(this).closest('td').find('select option').removeAttr("selected");
+			$(this).closest('td').find('select').trigger("liszt:updated");
+			return false;
+		});
+		
+		$('.woocommerce_attributes').on('click', 'button.remove_row', function(){
 			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
 			if (answer){
-				$(this).parent().parent().remove();
-				show_attribute_table();
-				row_indexes();
+				var $parent = $(this).parent().parent();
+				
+				if ($parent.is('.taxonomy')) {
+					$parent.find('select, input[type=text]').val('');
+					$parent.hide();
+				} else {
+					$parent.find('select, input[type=text]').val('');
+					$parent.hide();
+					row_indexes();
+				}
 			}
 			return false;
 		});
 		
 		// Attribute ordering
-		$('table.woocommerce_attributes tbody').sortable({
-			items:'tr',
+		$('.woocommerce_attributes').sortable({
+			items:'.woocommerce_attribute',
 			cursor:'move',
 			axis:'y',
-			handle: '.handle',
+			handle: 'h3',
 			scrollSensitivity:40,
-			helper:function(e,ui){
-				ui.children().each(function(){
-					$(this).width($(this).width());
-				});
-				ui.css('left', '0');
-				return ui;
-			},
+			forcePlaceholderSize: true,
+			helper: 'clone',
+			opacity: 0.65,
+			placeholder: 'attributes-sortable-placeholder',
 			start:function(event,ui){
 				ui.item.css('background-color','#f6f6f6');
 			},

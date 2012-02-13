@@ -94,7 +94,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Don't repeat weight units after each measurement (GeertDD is on a role)
 * CZ fix
 * SKU system changes - old system was confusing and could conflict with post IDs thus the following changes have been made; 1) SKU no longer defaults to post ID automatically, 2) Unique SKU check looks for SKUs only - not post IDs 3) get_sku() will return _sku not post ID
-* Product interface tweaks
+* Product admin interface tweaks
+* Variation interface tweaks
+* Attribute interface tweaks
+* Ability to select all/none attributes
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
