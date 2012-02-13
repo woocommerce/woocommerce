@@ -1161,7 +1161,7 @@ table td.handle {
 	cursor: move;
 	padding-right: 0;
 }
-#woocommerce_attributes, #variable_product_options {
+#woocommerce_attributes {
 	padding: 12px;
 }
 .woocommerce_attributes_wrapper, .woocommerce_variable_attributes_wrapper {
@@ -1221,15 +1221,6 @@ table.woocommerce_attributes .center {
 }
 #woocommerce_attributes select.attribute_taxonomy, button.add_attribute, button.add_variable_attribute, button.add_variation, button.link_all_variations {
 	float: right;
-}
-a.delete_variations {
-	float: right;
-	line-height: 23px;
-	margin-right: 3px;
-	color: #999;
-	&:hover {
-		color: red;
-	}
 }
 
 #upsells_and_crosssells_product_data {
@@ -1293,12 +1284,15 @@ div.multi_select_products_wrapper-alt {
 		margin: 0;
 		line-height: 23px;
 	}
-	p.bulk_edit, p.default_variation {
-		background: #ececec;
-		padding: 6px !important;
-		margin: 0 0 8px !important;
+	p.toolbar {
+		margin: 0 !important;
 		overflow: hidden;
 		zoom: 1;
+		
+		border-top: 1px solid white;
+		border-bottom: 1px solid #DFDFDF;
+		padding: 9px 12px !important;
+		
 		strong {
 			margin: 0 6px 0 0;
 			float: left;
@@ -1316,18 +1310,45 @@ div.multi_select_products_wrapper-alt {
 			padding-left: 20px;
 			background: #fefefe url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWUlEQVQYGY3QAQrAIAgFUB07mrfWu7kc+2JRsiA0fJnE7k5m5tQsEWFS1WGduh3mahpNLx3hOs4WAr2zfU8mRBGxorAJ4wAU+boS1g41x4UbScQdQJ3/fvgDtStDiI0qoDcAAAAASUVORK5CYII=) no-repeat 7px 5px;
 		}
+		a.delete_variations {
+			padding-left: 20px;
+			background: #fefefe url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVQYlWP8//8/Az7AhFeWGAUsDAwMDHv27MFqj4uLCyNBExhp70gAohwKC5KJ+HQAAAAASUVORK5CYII=) no-repeat 7px 6px;
+		}
+		.add_variation, .link_all_variations {
+			float: right;
+		}
+	}
+	.woocommerce_variations {
+		border-top: 1px solid white;
+		border-bottom: 1px solid #DFDFDF;
+		padding: 9px 12px 0;
 	}
 }
 .woocommerce_variation {
 	background: #ececec;
 	border: 1px solid #ececec;
-	margin: 0 0 8px !important;
-	p {
+	margin: 0 0 9px !important;
+	h3 {
 		margin: 0 !important;
 		padding: 6px !important;
+		font-size: 1em !important;
+		cursor: pointer;
 		button {
 			float: right;
 		}
+		strong {
+			font-weight: normal;
+		}
+		select {
+			font-family: sans-serif;
+		}
+		.handlediv {
+			background-position: 6px 5px !important;
+			display: none;
+		}
+	}
+	&:hover h3 .handlediv {
+		display: block;
 	}
 	table td {
 		background: #fff;
