@@ -578,7 +578,7 @@ jQuery( function($){
 		});
 		
 		$('button.hide_row').live('click', function(){
-			var answer = confirm("Remove this attribute?")
+			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
 			if (answer){
 				$(this).parent().parent().find('select, input[type=text]').val('');
 				$(this).parent().parent().hide();
@@ -588,7 +588,7 @@ jQuery( function($){
 		});
 		
 		$('#attributes_list button.remove_row').live('click', function(){
-			var answer = confirm("Remove this attribute?")
+			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
 			if (answer){
 				$(this).parent().parent().remove();
 				show_attribute_table();
