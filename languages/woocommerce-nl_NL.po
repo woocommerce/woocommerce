@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce 1.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-02-11 18:34+0100\n"
-"PO-Revision-Date: 2012-02-12 09:58+0100\n"
+"PO-Revision-Date: 2012-02-12 12:00+0100\n"
 "Last-Translator: Geert De Deckere <geertdd@gmail.com>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "MIME-Version: 1.0\n"
@@ -3814,7 +3814,7 @@ msgstr ""
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:45
 msgid "(optional) Comma separate IDs which need to be in the cart to use this coupon or, for \"Product Discounts\", which products are discounted."
-msgstr "(optioneel) Komma separeer IDs welke in de winkelwagen moeten zijn om deze kortingsbon te gebruiken."
+msgstr "(optioneel) Lijst van product ID's die in de winkelwagen moeten zijn om deze kortingsbon te gebruiken (scheiden met komma's)."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:48
@@ -4666,7 +4666,7 @@ msgstr "Selecteer termen"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:299
 msgid "Pipe separate terms"
-msgstr "Separeer conditie met pipes"
+msgstr "Scheid verschillende termen met pipes"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:336
@@ -7688,7 +7688,7 @@ msgstr ". Bestelling status <mark>%s</mark>"
 # @ woocommerce
 #: shortcodes/shortcode-my_account.php:275
 msgid "Order Updates"
-msgstr "Bestelling Updates"
+msgstr "Bestellingsupdates"
 
 # @ woocommerce
 #: shortcodes/shortcode-order_tracking.php:49
@@ -7808,7 +7808,7 @@ msgstr "Slecht"
 # @ woocommerce
 #: templates/single-product-reviews.php:95
 msgid "Your Review"
-msgstr "Jouw review"
+msgstr "Uw review"
 
 # @ woocommerce
 #: templates/cart/cart.php:17
@@ -8553,9 +8553,9 @@ msgstr "WooCommerce Gelaagde Navigatie"
 
 # @ woocommerce
 #: widgets/widget-layered_nav.php:184
-#, fuzzy, php-format
+#, php-format
 msgid "Any %s"
-msgstr "Alle"
+msgstr "Alle %s"
 
 # @ woocommerce
 #: widgets/widget-layered_nav.php:356
@@ -8763,7 +8763,7 @@ msgstr "WooCommerce Product Tags"
 # @ woocommerce
 #: widgets/widget-random_products.php:15
 msgid "WooCommerce Random Products"
-msgstr ""
+msgstr "WooCommerce Willkeurige producten"
 
 # @ woocommerce
 #: widgets/widget-random_products.php:18
@@ -8773,7 +8773,7 @@ msgstr ""
 # @ woocommerce
 #: widgets/widget-random_products.php:29
 msgid "Random Products"
-msgstr ""
+msgstr "Willekeurige producten"
 
 # @ woocommerce
 #: widgets/widget-random_products.php:113
