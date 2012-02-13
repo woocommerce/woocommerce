@@ -40,7 +40,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 							// Prepare text labels with price for each shipping method
 							foreach ( $available_methods as $method ) {
-								$method->full_label = $method->label;
+								$method->full_label = esc_html( $method->label );
 
 								if ( $method->cost > 0 ) {
 									$method->full_label .= ' &mdash; ';
@@ -63,7 +63,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							// Print a single available shipping method as plain text
 							if ( 1 === count( $available_methods ) ) {
 
-								echo esc_html( $method->full_label );
+								echo $method->full_label;
 								echo '<input type="hidden" name="shipping_method" id="shipping_method" value="'.esc_attr( $method->id ).'">';
 
 							// Show multiple shipping methods in a select list
@@ -72,7 +72,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								echo '<select name="shipping_method" id="shipping_method">';
 								foreach ( $available_methods as $method ) {
 									echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
-									echo esc_html( $method->full_label );
+									echo $method->full_label;
 									echo '</option>';
 								}
 								echo '</select>';
