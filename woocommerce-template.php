@@ -613,7 +613,7 @@ if (!function_exists('woocommerce_subcategory_thumbnail')) {
 			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
 		endif;
 	
-		echo '<img src="'.$image.'" alt="'.$category->slug.'" width="'.$image_width.'" height="'.$image_height.'" />';
+		echo '<img src="'.$image.'" alt="'.$category->name.'" width="'.$image_width.'" height="'.$image_height.'" />';
 	}
 }
 
