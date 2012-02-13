@@ -109,6 +109,10 @@ function woocommerce_get_customer_meta_fields() {
 						'label' => __('Last name', 'woocommerce'),
 						'description' => ''
 					),
+				'billing_company' => array(
+						'label' => __('Company', 'woocommerce'),
+						'description' => ''
+					),
 				'billing_address_1' => array(
 						'label' => __('Address 1', 'woocommerce'),
 						'description' => ''
@@ -152,6 +156,10 @@ function woocommerce_get_customer_meta_fields() {
 					),
 				'shipping_last_name' => array(
 						'label' => __('Last name', 'woocommerce'),
+						'description' => ''
+					),
+				'shipping_company' => array(
+						'label' => __('Company', 'woocommerce'),
 						'description' => ''
 					),
 				'shipping_address_1' => array(

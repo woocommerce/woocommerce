@@ -57,6 +57,7 @@ function woocommerce_duplicate_product_post_button() {
 add_filter('manage_edit-product_columns', 'woocommerce_edit_product_columns');
 
 function woocommerce_edit_product_columns($columns){
+	global $woocommerce;
 	
 	$columns = array();
 	
@@ -68,16 +69,15 @@ function woocommerce_edit_product_columns($columns){
 	if (get_option('woocommerce_enable_sku', true) == 'yes') 
 		$columns["sku"] = __("SKU", 'woocommerce');
 		
-	$columns["product_type"] = __("Type", 'woocommerce');
+	if (get_option('woocommerce_manage_stock')=='yes')
+		$columns["is_in_stock"] = __("Stock", 'woocommerce');
+	
+	$columns["price"] = __("Price", 'woocommerce');
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
 	$columns["product_tags"] = __("Tags", 'woocommerce');
-	$columns["featured"] = __("Featured", 'woocommerce');
-	
-	if (get_option('woocommerce_manage_stock')=='yes')
-		$columns["is_in_stock"] = __("In Stock?", 'woocommerce');
-	
-	$columns["price"] = __("Price", 'woocommerce');
+	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" tip="' . __("Featured", 'woocommerce') . '" />';
+	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" tip="' . __("Type", 'woocommerce') . '" />';
 	$columns["date"] = __("Date", 'woocommerce');
 	
 	return $columns;
@@ -95,9 +95,7 @@ function woocommerce_custom_product_columns( $column ) {
 
 	switch ($column) {
 		case "thumb" :
-			if (has_post_thumbnail($post->ID)) :
-				echo get_the_post_thumbnail($post->ID, 'shop_thumbnail');
-			endif;
+			$product->get_image();
 		break;
 		case "name" : 
 			$edit_link = get_edit_post_link( $post->ID );
@@ -114,10 +112,13 @@ function woocommerce_custom_product_columns( $column ) {
 			if ( $post->post_parent > 0 )
 				echo '&nbsp;&nbsp;&larr; <a href="'. get_edit_post_link($post->post_parent) .'">'. get_the_title($post->post_parent) .'</a>';
 			
+			// Excerpt view
+			if (isset($_GET['mode']) && $_GET['mode']=='excerpt') echo apply_filters('the_excerpt', $post->post_excerpt);
+			
 			// Get actions
 			$actions = array();
 			
-			$actions['id'] = 'ID: #' . $post->ID;
+			$actions['id'] = 'ID: ' . $post->ID;
 			
 			if ( $can_edit_post && 'trash' != $post->post_status ) {
 				$actions['inline hide-if-no-js'] = '<a href="#" class="editinline" title="' . esc_attr( __( 'Edit this item inline' ) ) . '">' . __( 'Quick&nbsp;Edit' ) . '</a>';
@@ -160,20 +161,28 @@ function woocommerce_custom_product_columns( $column ) {
 		break;
 		case "product_type" :
 			if( $product->product_type == 'grouped' ):
-				echo __('Grouped', 'woocommerce');
+				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Grouped', 'woocommerce') . '"></span>';
 			elseif ( $product->product_type == 'external' ):
-				echo __('External/Affiliate', 'woocommerce');
+				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('External/Affiliate', 'woocommerce') . '"></span>';
 			elseif ( $product->product_type == 'simple' ):
-				echo __('Simple', 'woocommerce');
+				
+				if ($product->is_virtual()) {
+					echo '<span class="product-type tips virtual" tip="' . __('Virtual', 'woocommerce') . '"></span>';
+				} elseif ($product->is_downloadable()) {
+					echo '<span class="product-type tips downloadable" tip="' . __('Downloadable', 'woocommerce') . '"></span>';
+				} else {
+					echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Simple', 'woocommerce') . '"></span>';
+				}
+				
 			elseif ( $product->product_type == 'variable' ):
-				echo __('Variable', 'woocommerce');
+				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Variable', 'woocommerce') . '"></span>';
 			else:
 				// Assuming that we have other types in future
-				echo ucwords($product->product_type);
+				echo '<span class="product-type tips '.$product->product_type.'" tip="' . ucwords($product->product_type) . '"></span>';
 			endif;
 		break;
 		case "price":
-			echo $product->get_price_html();	
+			if ($product->get_price_html()) echo $product->get_price_html(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_cat" :
 			if (!$terms = get_the_term_list($post->ID, 'product_cat', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
@@ -184,19 +193,22 @@ function woocommerce_custom_product_columns( $column ) {
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
 			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';
+			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" />';
+			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" />';
 			echo '</a>';
 		break;
 		case "is_in_stock" :
-			if ( !$product->is_type( 'grouped' ) && $product->is_in_stock() ) :
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" /> ';
-			else :
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" /> ';
-			endif;
+		
+			if ($product->is_in_stock()) {
+				echo '<mark class="instock">' . __('In stock', 'woocommerce') . '</mark>';
+			} else {
+				echo '<mark class="outofstock">' . __('Out of stock', 'woocommerce') . '</mark>';
+			}
+		
 			if ( $product->managing_stock() ) :
-				echo '&times; ' . $product->get_total_stock();
+				echo ' &times; ' . $product->get_total_stock();
 			endif;
+			
 		break;
 	}
 }

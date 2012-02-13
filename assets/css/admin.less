@@ -617,11 +617,15 @@ table.wp-list-table {
 	.column-product_cat, .column-product_tag {
 		width: 11% !important;
 	}
-	.column-product_cat, .column-product_tags, .column-is_in_stock, .column-price, .column-product_date, .column-featured {
+	.column-sku, .column-product_cat, .column-product_tags, .column-is_in_stock, .column-price, .column-product_date {
 		width: 9%;
 	}
-	.column-sku, .column-product_type {
-		width: 7%;
+	.column-featured, .column-product_type {
+		width: 46px;
+		text-align: left !important;
+	}
+	.manage-column.column-featured img, .manage-column.column-product_type img {
+		padding-left: 2px;
 	}
 	img {
 		margin: 1px 2px;
@@ -637,8 +641,42 @@ table.wp-list-table {
 	span.na {
 		color: #999;
 	}
-	.column-featured, .column-is_in_stock {
+	.column-is_in_stock {
 		text-align: left !important;
+	}
+	span.product-type {
+		width: 16px;
+		height: 16px;
+		margin: 1px 2px;
+		display: block;
+		background:url(../images/product_types.png) no-repeat -16px 0;
+		&.grouped {
+			background:url(../images/product_types.png) no-repeat 0 0;
+		}
+		&.external {
+			background:url(../images/product_types.png) no-repeat -32px 0;
+		}
+		&.variable {
+			background:url(../images/product_types.png) no-repeat -48px 0;
+		}
+		&.downloadable {
+			background:url(../images/product_types.png) no-repeat -64px 0;
+		}
+		&.virtual {
+			background:url(../images/product_types.png) no-repeat -80px 0;
+		}
+	}
+	mark.instock {
+		font-weight: bold;
+		color: green;
+		background: transparent none;
+		line-height: 1;
+	}
+	mark.outofstock {
+		font-weight: bold;
+		color: #aa4444;
+		background: transparent none;
+		line-height: 1;
 	}
 }
 

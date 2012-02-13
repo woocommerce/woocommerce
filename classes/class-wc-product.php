@@ -385,26 +385,18 @@ class WC_Product {
 		$class = "";
 		
 		if (!$this->managing_stock()) :
-			if ($this->is_in_stock()) :
-				//$availability = __('In stock', 'woocommerce'); /* Lets not bother showing stock if its not managed and is available */
-			else :
+			if (!$this->is_in_stock()) :
 				$availability = __('Out of stock', 'woocommerce');
 				$class = 'out-of-stock';
 			endif;
 		else :
 			if ($this->is_in_stock()) :
 				if ($this->get_total_stock() > 0) :
-					$availability = __('In stock', 'woocommerce');
+				
+					$availability = sprintf( __('%s in stock', 'woocommerce'), $this->stock );
 					
-					if ($this->backorders_allowed()) :
-						if ($this->backorders_require_notification()) :
-							$availability .= ' &ndash; '.$this->stock.' ';
-							$availability .= __('available', 'woocommerce');
-							$availability .= __(' (backorders allowed)', 'woocommerce');
-						endif;
-					else :
-						$availability .= ' &ndash; '.$this->stock.' ';
-						$availability .= __('available', 'woocommerce');
+					if ($this->backorders_allowed() && $this->backorders_require_notification()) :	
+						$availability .= ' ' . __('(backorders allowed)', 'woocommerce');
 					endif;
 					
 				else :

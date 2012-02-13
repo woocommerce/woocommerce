@@ -95,12 +95,20 @@ ul.order_notes li.customer-note .note_content:after{border-color:#d7cad2 transpa
 .add_note input#add_order_note{width:50%;}
 table.wp-list-table .column-thumb{width:52px;text-align:center;white-space:nowrap;}
 table.wp-list-table .column-product_cat,table.wp-list-table .column-product_tag{width:11% !important;}
-table.wp-list-table .column-product_cat,table.wp-list-table .column-product_tags,table.wp-list-table .column-is_in_stock,table.wp-list-table .column-price,table.wp-list-table .column-product_date,table.wp-list-table .column-featured{width:9%;}
-table.wp-list-table .column-sku,table.wp-list-table .column-product_type{width:7%;}
+table.wp-list-table .column-sku,table.wp-list-table .column-product_cat,table.wp-list-table .column-product_tags,table.wp-list-table .column-is_in_stock,table.wp-list-table .column-price,table.wp-list-table .column-product_date{width:9%;}
+table.wp-list-table .column-featured,table.wp-list-table .column-product_type{width:46px;text-align:left !important;}
+table.wp-list-table .manage-column.column-featured img,table.wp-list-table .manage-column.column-product_type img{padding-left:2px;}
 table.wp-list-table img{margin:1px 2px;}
 table.wp-list-table .column-thumb img{padding:2px;margin:0;border:1px solid #dfdfdf;vertical-align:middle;width:32px;height:32px;}
 table.wp-list-table span.na{color:#999;}
-table.wp-list-table .column-featured,table.wp-list-table .column-is_in_stock{text-align:left !important;}
+table.wp-list-table .column-is_in_stock{text-align:left !important;}
+table.wp-list-table span.product-type{width:16px;height:16px;margin:1px 2px;display:block;background:url(../images/product_types.png) no-repeat -16px 0;}table.wp-list-table span.product-type.grouped{background:url(../images/product_types.png) no-repeat 0 0;}
+table.wp-list-table span.product-type.external{background:url(../images/product_types.png) no-repeat -32px 0;}
+table.wp-list-table span.product-type.variable{background:url(../images/product_types.png) no-repeat -48px 0;}
+table.wp-list-table span.product-type.downloadable{background:url(../images/product_types.png) no-repeat -64px 0;}
+table.wp-list-table span.product-type.virtual{background:url(../images/product_types.png) no-repeat -80px 0;}
+table.wp-list-table mark.instock{font-weight:bold;color:green;background:transparent none;line-height:1;}
+table.wp-list-table mark.outofstock{font-weight:bold;color:#aa4444;background:transparent none;line-height:1;}
 ul.woocommerce_stats{overflow:hidden;zoom:1;}ul.woocommerce_stats li{width:22%;padding:0 1.4%;float:left;font-size:0.8em;border-left:1px solid #fff;border-right:1px solid #ececec;text-align:center;}
 ul.woocommerce_stats li:first-child{border-left:0;}
 ul.woocommerce_stats li:last-child{border-right:0;}
