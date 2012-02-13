@@ -602,7 +602,7 @@ class WC_Countries {
 		$full_state		= ($country && $state && isset($this->states[$country][$state])) ? $this->states[$country][$state] : $state;
 		
 		// Substitute address parts into the string
-		$replace = array(
+		$replace = apply_filters('woocommerce_formatted_address_replacements', array(
 			'{first_name}'       => $first_name,
 			'{last_name}'        => $last_name,
 			'{name}'             => $first_name . ' ' . $last_name,
@@ -623,7 +623,7 @@ class WC_Countries {
 			'{state_upper}'      => strtoupper($full_state),
 			'{postcode_upper}'   => strtoupper($postcode),
 			'{country_upper}'    => strtoupper($full_country),
-		);
+		));
 
 		$formatted_address = str_replace( array_keys($replace), $replace, $format );
 		
