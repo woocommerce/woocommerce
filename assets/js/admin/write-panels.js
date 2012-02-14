@@ -579,7 +579,7 @@ jQuery( function($){
 									</td>\
 									<td rowspan="3">\
 										<label>' + woocommerce_writepanel_params.values_label + ':</label>\
-										<textarea name="attribute_values[' + size + ']" cols="5" rows="5" placeholder="' + woocommerce_writepanel_params.text_attribute_tip + '"></textarea>\								
+										<textarea name="attribute_values[' + size + ']" cols="5" rows="5" placeholder="' + woocommerce_writepanel_params.text_attribute_tip + '"></textarea>\
 									</td>\
 								</tr>\
 								<tr>\
