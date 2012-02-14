@@ -98,6 +98,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Variation interface tweaks
 * Attribute interface tweaks
 * Ability to select all/none attributes
+* Quantity based on stock limit on cart page, like the product page
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
