@@ -1072,7 +1072,7 @@ class WC_Cart {
 				endif;
 			endforeach;
 			
-			return $needs_shipping;
+			return apply_filters( 'woocomerce_cart_needs_shipping', $needs_shipping );
 		}
 		
 		/** 
