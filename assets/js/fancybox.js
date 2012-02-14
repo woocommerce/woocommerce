@@ -462,10 +462,6 @@
 
 		_format_title = function(title) {
 			if (title && title.length) {
-				if (currentOpts.titlePosition == 'float') {
-					//return '<table id="fancybox-title-float-wrap" cellpadding="0" cellspacing="0"><tr><td id="fancybox-title-float-left"></td><td id="fancybox-title-float-main">' + title + '</td><td id="fancybox-title-float-right"></td></tr></table>';
-				}
-
 				return '<div id="fancybox-title-' + currentOpts.titlePosition + '">' + title + '</div>';
 			}
 
