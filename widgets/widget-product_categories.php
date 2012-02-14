@@ -14,6 +14,8 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
+	var $cat_ancestors;
+	var $current_cat;
 	
 	/** constructor */
 	function WooCommerce_Widget_Product_Categories() {
@@ -88,46 +90,37 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			$cats = get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
 			
 			if (is_tax('product_cat')) :
-				$current_cat = $wp_query->queried_object;
-				$current_cat_parent = woocommerce_get_term_top_most_parent( $current_cat->term_id, 'product_cat' );
+				$this->current_cat = $wp_query->queried_object;
+				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 			else :
-				$current_cat = false;
-				$current_cat_parent = false;
+				$this->current_cat = false;
+				$this->cat_ancestors = array();
 			endif;
-			
+
 			echo '<ul>';
 			
 			foreach ($cats as $cat) : 
-			
+				
+				// Only show top level for now
 				if ($cat->parent) continue;
 				
 				echo '<li class="cat-item cat-item-'.$cat->term_id;
 				
 				if (is_tax('product_cat', $cat->slug)) echo ' current-cat';
-				if ($current_cat && $current_cat_parent
-						&& $current_cat_parent->term_id == $cat->term_id 
-						&& $current_cat_parent->term_id != $current_cat->term_id) echo ' current-cat-parent';
+				if (
+					$this->current_cat 
+					&& in_array( $cat->term_id, $this->cat_ancestors )
+					) echo ' current-cat-parent';
 				
 				echo '"><a href="'.get_term_link( $cat->slug, 'product_cat' ).'">'.$cat->name.'</a>';
 				
 				if ($c) echo ' <span class="count">('.$cat->count.')</span>';
 				
-				if (is_tax('product_cat', $cat->slug) || ($current_cat_parent && $current_cat_parent->term_id==$cat->term_id)) :
+				if ( is_tax('product_cat', $cat->slug) || (in_array( $cat->term_id, $this->cat_ancestors ))) :
 					
-					$subcat_args = $cat_args;
+					$children = $this->get_children_cats( $cat->term_id );
 					
-					$subcat_args['child_of'] = $cat->term_id;
-					$subcat_args['hierarchical'] = 1;
-					$subcat_args['show_option_none'] = false;
-					$subcat_args['echo'] = false;
-					unset( $subcat_args['parent'] );
-					
-					$subcategories = wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $subcat_args));
-					if ($subcategories) {
-						echo '<ul class="children">';
-						echo $subcategories;
-						echo '</ul>';
-					}
+					$this->output_children_cats( $children, $c );
 					
 				endif;
 				
@@ -148,6 +141,50 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		}
 
 		echo $after_widget;
+	}
+	
+	function get_children_cats( $parent ) {
+		$cat_args = array();
+		
+		$cat_args['title_li'] = '';
+		$cat_args['hierarchical'] = 1;
+		$cat_args['child_of'] = 0;
+		$cat_args['pad_counts'] = 1;
+		$cat_args['parent'] = $parent;
+			
+		return get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_subcat_args', $cat_args) );
+	}
+	
+	function output_children_cats( $children, $c ) {
+		
+		echo '<ul class="children">';
+						
+		foreach ($children as $child) {
+			
+			echo '<li class="cat-item cat-item-'.$child->term_id;
+				
+			if (is_tax('product_cat', $child->slug)) echo ' current-cat';
+			if (
+				$this->current_cat 
+				&& in_array( $child->term_id, $this->cat_ancestors )
+				) echo ' current-cat-parent';
+			
+			echo '"><a href="'.get_term_link( $child->slug, 'product_cat' ).'">'.$child->name.'</a>';
+			
+			if ($c) echo ' <span class="count">('.$child->count.')</span>';
+			
+			if ( is_tax('product_cat', $child->slug) || (in_array( $child->term_id, $this->cat_ancestors ))) {
+
+				$children_children = $this->get_children_cats( $child->term_id );
+				
+				if ($children_children) $this->output_children_cats( $children_children, $c );
+			
+			}
+			
+			echo '</li>';		
+		}
+		
+		echo '</ul>';
 	}
 
 	/** @see WP_Widget->update */
