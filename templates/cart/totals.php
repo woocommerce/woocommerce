@@ -72,7 +72,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								echo '<select name="shipping_method" id="shipping_method">';
 								foreach ( $available_methods as $method ) {
 									echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
-									echo $method->full_label;
+									echo strip_tags( $method->full_label );
 									echo '</option>';
 								}
 								echo '</select>';

@@ -661,29 +661,27 @@ class WC_Order {
 		if ($note) $note .= ' ';
 	
 		$new_status = get_term_by( 'slug', sanitize_title( $new_status ), 'shop_order_status');
-		if ($new_status) :
+		if ($new_status) {
 		
 			wp_set_object_terms($this->id, $new_status->slug, 'shop_order_status');
 			
-			if ( $this->status != $new_status->slug ) :
+			if ( $this->status != $new_status->slug ) {
 				// Status was changed
 				do_action( 'woocommerce_order_status_'.$new_status->slug, $this->id );
 				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
 				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $this->status, $new_status->slug ) );
 				
 				// Date
-				if ($new_status->slug=='completed') :
+				if ($new_status->slug=='completed') 
 					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-				endif;
 				
 				// Sales
-				if ($this->status == 'on-hold' && ($new_status->slug=='processing' || $new_status->slug=='completed')) :
+				if ($this->status == 'on-hold' && ($new_status->slug=='processing' || $new_status->slug=='completed')) 
 					$this->record_product_sales();
-				endif;
 				
-			endif;
+			}
 		
-		endif;
+		}
 		
 	}
 	
