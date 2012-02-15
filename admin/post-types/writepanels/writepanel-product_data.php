@@ -223,6 +223,10 @@ function woocommerce_product_data_box() {
 
 		<div id="woocommerce_attributes" class="panel">
 			
+			<p class="toolbar">
+				<a href="#" class="close_all"><?php _e('Close all', 'woocommerce'); ?></a><a href="#" class="expand_all"><?php _e('Expand all', 'woocommerce'); ?></a>
+			</p>
+			
 			<div class="woocommerce_attributes">
 			
 				<?php

@@ -521,6 +521,16 @@ jQuery( function($){
 	
 	// ATTRIBUTE TABLES
 		
+		jQuery('.expand_all').click(function(){
+			jQuery(this).closest('.panel').find('table.woocommerce_attribute_data, table.woocommerce_variable_attributes').show();
+			return false;
+		});
+		
+		jQuery('.close_all').click(function(){
+			jQuery(this).closest('.panel').find('table.woocommerce_attribute_data, table.woocommerce_variable_attributes').hide();
+			return false;
+		});
+		
 		// Open/close
 		jQuery('.woocommerce_attributes').on('click', '.woocommerce_attribute h3', function(){
 			jQuery(this).next('table.woocommerce_attribute_data').toggle();
