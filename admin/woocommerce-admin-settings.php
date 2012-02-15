@@ -1075,10 +1075,15 @@ function woocommerce_settings() {
 	
 		update_option('woocommerce_installed', 0);
 
-    	echo '<div id="message" class="updated fade">
-    		<p style="float:right;">' . __( 'Like WooCommerce? <a href="http://wordpress.org/extend/plugins/woocommerce/">Support us by leaving a rating!</a>', 'woocommerce' ) . '</p>
-    		<p><strong>' . __( 'WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ) . '</strong></p>
-    	</div>';
+    	?>
+    	<div id="message" class="updated woocommerce-message wc-connect">
+			<div class="squeezer">
+				<h4><?php _e( '<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ); ?></h4>
+				<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="An open-source #ecommerce plugin for #wordpress that helps you sell anything. Beautifully." data-via="woothemes" data-size="large" data-hashtags="woocommerce">Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
+			</div>
+		</div>
+		<?php
     	
     	flush_rewrite_rules( false );
     	

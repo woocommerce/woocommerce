@@ -9,20 +9,20 @@
 	-moz-box-shadow: inset 0 0 15px rgba( 0,0,0,0.04 );
 	box-shadow: inset 0 0 15px rgba( 0,0,0,0.04 );
 	overflow: hidden;
-	line-height: 180%;
-	padding: 10px 0 5px !important;
+	padding: 10px 0 10px !important;
 	background: #cc99c2 url(../images/message.png) no-repeat right bottom !important;
 }	
 .woocommerce-message .squeezer {
 	max-width: 940px;
-	margin: 0 0 2px;
+	margin: 0;
 	padding: 0 10px;
 	text-align: left;
 	overflow: hidden;
 }
 .woocommerce-message h4 {
-	margin: 0 10px 10px 0;
+	margin: 0 10px 0 0;
 	font-size: 18px;
+	line-height: 36px;
 	font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",Verdana,"Bitstream Vera Sans",sans-serif;
 	font-weight: normal;
 	color: #fff;
@@ -30,17 +30,22 @@
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
-	display: inline-block;
+	float: left;
+	vertical-align: middle;
 }
 .woocommerce-message p {
-	margin: -1px 0 0 0 !important;
-	padding: 0;
-	display: inline-block;
+	margin: 0 !important;
+	padding: 2px 0 !important;
+	float: left;
+	line-height: 32px;
+	vertical-align: middle;
 }
 .woocommerce-message p a.button-primary {
 	font-size: 16px !important;
-	display: inline-block;
-	padding: 8px 15px;
+	line-height: 16px !important;
+	margin: 0 5px 0 0;
+	padding: 6px 15px;
+	vertical-align: middle;
 	color: #fff;
 	text-align: center;
 	text-decoration: none;
@@ -67,4 +72,7 @@
 }
 .woocommerce-message p a.skip {
 	opacity: 0.5;
+}
+.woocommerce-message .twitter-share-button {
+	vertical-align: middle;
 }

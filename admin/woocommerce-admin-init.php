@@ -39,7 +39,7 @@ function woocommerce_admin_menu() {
  */
 add_action( "admin_print_styles", 'woocommerce_admin_notices_styles' );
 
-function woocommerce_admin_notices() {
+function woocommerce_admin_install_notice() {
 	?>
 	<div id="message" class="updated woocommerce-message wc-connect">
 		<div class="squeezer">
@@ -50,10 +50,16 @@ function woocommerce_admin_notices() {
 	<?php
 }
 function woocommerce_admin_notices_styles() {
-	if (get_option('woocommerce_installed')!=1 || get_option('skip_install_woocommerce_pages')==1 || woocommerce_get_page_id('shop')>0 || isset($_GET['install_woocommerce_pages']) || isset($_GET['skip_install_woocommerce_pages'])) return;
 	
-	add_action( 'admin_notices', 'woocommerce_admin_notices' );
-	wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/wc-activation.css', dirname( __FILE__ ) ) );
+	if ( get_option('woocommerce_installed')==1 ) {
+		
+		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/wc-activation.css', dirname( __FILE__ ) ) );
+	
+		if (get_option('skip_install_woocommerce_pages')!=1 && woocommerce_get_page_id('shop')<1 && !isset($_GET['install_woocommerce_pages']) && !isset($_GET['skip_install_woocommerce_pages'])) {
+			add_action( 'admin_notices', 'woocommerce_admin_install_notice' );
+		}
+		
+	}	
 }
 
 
