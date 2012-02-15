@@ -101,6 +101,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Quantity based on stock limit on cart page, like the product page
 * Fixed category widget hierarchy
 * Password error on checkout
+* Improved install process
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix

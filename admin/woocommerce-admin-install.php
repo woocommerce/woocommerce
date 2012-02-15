@@ -45,6 +45,9 @@ function do_install_woocommerce() {
 	
 	// Update version
 	update_option( "woocommerce_db_version", $woocommerce->version );
+	
+	// Flush rewrites
+	flush_rewrite_rules( false );
 }
 
 /**

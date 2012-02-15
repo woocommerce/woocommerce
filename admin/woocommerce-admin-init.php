@@ -35,6 +35,29 @@ function woocommerce_admin_menu() {
 }
 
 /**
+ * Admin Notices
+ */
+add_action( "admin_print_styles", 'woocommerce_admin_notices_styles' );
+
+function woocommerce_admin_notices() {
+	?>
+	<div id="message" class="updated woocommerce-message wc-connect">
+		<div class="squeezer">
+			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; Your almost ready to start selling :)', 'woocommerce' ); ?></h4>
+			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
+		</div>
+	</div>
+	<?php
+}
+function woocommerce_admin_notices_styles() {
+	if (get_option('woocommerce_installed')!=1 || get_option('skip_install_woocommerce_pages')==1 || woocommerce_get_page_id('shop')>0 || isset($_GET['install_woocommerce_pages']) || isset($_GET['skip_install_woocommerce_pages'])) return;
+	
+	add_action( 'admin_notices', 'woocommerce_admin_notices' );
+	wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/wc-activation.css', dirname( __FILE__ ) ) );
+}
+
+
+/**
  * Admin Includes - loaded conditionally
  */
 add_action('admin_init', 'woocommerce_admin_init');
@@ -82,8 +105,8 @@ function woocommerce_attributes_page() {
  */
 function activate_woocommerce() {
 	include_once( 'woocommerce-admin-install.php' );
-	update_option( "woocommerce_installed", 1 );
 	update_option( 'skip_install_woocommerce_pages', 0 );
+	update_option( 'woocommerce_installed', 1 );
 	do_install_woocommerce();
 }
 function install_woocommerce() {

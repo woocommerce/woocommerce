@@ -105,30 +105,6 @@ function woocommerce_prevent_admin_access() {
 }
 
 /**
- * Redirect to settings after installation
- */
-function install_woocommerce_redirect() {
-	global $pagenow, $woocommerce;
-
-	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' && get_option( "woocommerce_installed" ) == 1 ) :
-		
-		// Clear transient cache
-		$woocommerce->clear_product_transients();
-		
-		// Unset installed flag
-		update_option( "woocommerce_installed", 0 );
-		
-		// Flush rewrites
-		flush_rewrite_rules( false );
-		
-		// Redirect to settings
-		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
-		exit;
-		
-	endif;
-}
-
-/**
  * Fix 'insert into post' buttons for images
  **/
 function woocommerce_allow_img_insertion($vars) {

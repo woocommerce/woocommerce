@@ -1048,6 +1048,7 @@ function woocommerce_settings() {
     
     // Add pages button
     if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) :
+		
 		require_once( 'woocommerce-admin-install.php' );
     	woocommerce_create_pages();
     	update_option('skip_install_woocommerce_pages', 1);
@@ -1060,32 +1061,19 @@ function woocommerce_settings() {
     	$install_complete = true;
     	
     // If we have just activated WooCommerce...
-    elseif (isset($_GET['installed']) && $_GET['installed']) :
+    elseif (get_option('woocommerce_installed')==1) :
     	
     	flush_rewrite_rules( false );
     	
 		if (woocommerce_get_page_id('shop')>0) :
 			$install_complete = true;
-		else :
-			$show_page_installer = true;
 		endif;
-		
-	// If we havn't just installed, but page installed has not been skipped and shop page does not exist...
-	elseif (!get_option('skip_install_woocommerce_pages') && !woocommerce_get_page_id('shop')) :
-		
-		$show_page_installer = true;
 		
 	endif;
 	
-	if ($show_page_installer) :
-    	
-    	echo '<div id="message" class="updated fade">
-    		<p><strong>' . __( 'Welcome to WooCommerce!', 'woocommerce' ) . '</strong></p>
-    		<p>'. __('WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the \'Automatically add pages\' button below, otherwise you can set them up manually. See the \'Pages\' tab in settings for more information.', 'woocommerce') .'</p>
-    		<p><a href="'.remove_query_arg('installed', add_query_arg('install_woocommerce_pages', 'true')).'" class="button button-primary">'. __('Automatically add pages', 'woocommerce') .'</a> <a href="'.remove_query_arg('installed', add_query_arg('skip_install_woocommerce_pages', 'true')).'" class="button">'. __('Skip setup', 'woocommerce') .'</a></p>
-    	</div>';
-    	
-    elseif ($install_complete) :
+	if ($install_complete) :
+	
+		update_option('woocommerce_installed', 0);
 
     	echo '<div id="message" class="updated fade">
     		<p style="float:right;">' . __( 'Like WooCommerce? <a href="http://wordpress.org/extend/plugins/woocommerce/">Support us by leaving a rating!</a>', 'woocommerce' ) . '</p>
