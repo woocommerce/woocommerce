@@ -202,10 +202,9 @@ function woocommerce_update_cart_action() {
 		
 		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
 		
-		if ( wp_get_referer() ) :
-			wp_safe_redirect( wp_get_referer() );
-			exit;
-		endif;
+		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
+		wp_safe_redirect( $referer );
+		exit;
 	
 	// Update Cart
 	elseif (isset($_POST['update_cart']) && $_POST['update_cart']  && $woocommerce->verify_nonce('cart')) :
@@ -221,11 +220,10 @@ function woocommerce_update_cart_action() {
 		endif;
 		
 		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
-
-		if ( wp_get_referer() ) :
-			wp_safe_redirect( wp_get_referer() );
-			exit;
-		endif;
+		
+		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
+		wp_safe_redirect( $referer );
+		exit;
 
 	endif;
 }
