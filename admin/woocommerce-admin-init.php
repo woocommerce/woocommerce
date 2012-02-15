@@ -69,7 +69,7 @@ function woocommerce_admin_init() {
 
 	if ( $pagenow=='index.php' ) :
 		include_once( 'woocommerce-admin-dashboard.php' );
-	elseif ( $pagenow=='import.php' ) :
+	elseif ( $pagenow=='admin.php' && isset($_GET['import']) ) :
 		include_once( 'woocommerce-admin-import.php' );
 	elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) :
 		include_once( 'post-types/post-types-init.php' );

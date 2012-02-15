@@ -11,7 +11,6 @@
  */
  
 function woocommerce_import_start() {
-	
 	global $wpdb;
 	
 	$id = (int) $_POST['import_id'];
@@ -54,21 +53,9 @@ function woocommerce_import_start() {
 							        array('product'),
 							        array(
 							            'hierarchical' => true,
-							            'labels' => array(
-							                    'name' => $nicename,
-							                    'singular_name' => $nicename,
-							                    'search_items' =>  __( 'Search', 'woocommerce') . ' ' . $nicename,
-							                    'all_items' => __( 'All', 'woocommerce') . ' ' . $nicename,
-							                    'parent_item' => __( 'Parent', 'woocommerce') . ' ' . $nicename,
-							                    'parent_item_colon' => __( 'Parent', 'woocommerce') . ' ' . $nicename . ':',
-							                    'edit_item' => __( 'Edit', 'woocommerce') . ' ' . $nicename,
-							                    'update_item' => __( 'Update', 'woocommerce') . ' ' . $nicename,
-							                    'add_new_item' => __( 'Add New', 'woocommerce') . ' ' . $nicename,
-							                    'new_item_name' => __( 'New', 'woocommerce') . ' ' . $nicename
-							            ),
 							            'show_ui' => false,
 							            'query_var' => true,
-							            'rewrite' => array( 'slug' => strtolower(sanitize_title($nicename)), 'with_front' => false, 'hierarchical' => true ),
+							            'rewrite' => false,
 							        )
 							    );
 								
