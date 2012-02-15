@@ -730,7 +730,7 @@ if (!function_exists('woocommerce_form_field')) {
 				</p>'.$after;
 
 			break;
-			default :
+			case "text" :
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
@@ -738,8 +738,13 @@ if (!function_exists('woocommerce_form_field')) {
 				</p>'.$after;
 				
 			break;
+			default :
+			
+				$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
+			
+			break;
 		endswitch;
-		
+
 		if ($args['return']) return $field; else echo $field;
 	}
 }

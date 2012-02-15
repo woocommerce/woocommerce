@@ -102,6 +102,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fixed category widget hierarchy
 * Password error on checkout
 * Improved install process
+* Hookable woocommerce_form_field
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
