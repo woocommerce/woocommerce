@@ -3,7 +3,7 @@
  * Sorting
  */
 ?>
-<form class="woocommerce_ordering" method="<?php if (get_option( 'permalink_structure' )=="") echo 'POST'; else echo 'GET'; ?>">
+<form class="woocommerce_ordering" method="POST">
 	<select name="sort" class="orderby">
 		<?php
 			$catalog_orderby = apply_filters('woocommerce_catalog_orderby', array(
