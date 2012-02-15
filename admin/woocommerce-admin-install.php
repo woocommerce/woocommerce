@@ -25,7 +25,7 @@ function do_install_woocommerce() {
 	$upload_dir 	=  wp_upload_dir();
 	$downloads_url 	= $upload_dir['basedir'] . '/woocommerce_uploads';
 	if ( wp_mkdir_p($downloads_url) && !file_exists($downloads_url.'/.htaccess') ) :
-		if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
+		if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
 			fwrite($file_handle, 'deny from all');
 			fclose($file_handle);
 		endif;
@@ -34,7 +34,7 @@ function do_install_woocommerce() {
 	// Install folder for logs
 	$logs_url 		= WP_PLUGIN_DIR . "/" . plugin_basename( dirname(dirname(__FILE__))) . '/logs';
 	if ( wp_mkdir_p($logs_url) && !file_exists($logs_url.'/.htaccess') ) :
-		if ($file_handle = fopen( $logs_url . '/.htaccess', 'w' )) :
+		if ($file_handle = @fopen( $logs_url . '/.htaccess', 'w' )) :
 			fwrite($file_handle, 'deny from all');
 			fclose($file_handle);
 		endif;
