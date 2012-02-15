@@ -187,7 +187,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					endforeach; 
 				endif;
 
-				do_action( 'woocommerce_cart_contents_review' );
+				do_action( 'woocommerce_cart_contents_review_order' );
 			?>
 		</tbody>
 	</table>
