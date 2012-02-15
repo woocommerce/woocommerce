@@ -58,7 +58,7 @@ $order = new WC_Order( $order_id );
 			endforeach;
 		endif;
 
-		do_action( 'woocommerce_cart_contents_order_details' );
+		do_action( 'woocommerce_order_items_table' );
 		?>
 	</tbody>
 </table>
