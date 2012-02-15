@@ -557,7 +557,9 @@ class WC_Order {
 			</tr>';
 			
 		endforeach;	
-		
+
+		$return = apply_filters( 'woocommerce_email_order_items_table', $return );
+
 		return $return;	
 		
 	}
