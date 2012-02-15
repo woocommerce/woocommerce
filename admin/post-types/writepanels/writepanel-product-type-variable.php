@@ -673,7 +673,7 @@ function process_product_meta_variable( $post_id ) {
 			endif;
 
 			// Update post meta
-			update_post_meta( $variation_id, '_sku', $variable_sku[$i] );
+			update_post_meta( $variation_id, '_sku', esc_html( $variable_sku[$i] ) );
 			update_post_meta( $variation_id, '_price', $variable_price[$i] );
 			update_post_meta( $variation_id, '_sale_price', $variable_sale_price[$i] );
 			update_post_meta( $variation_id, '_weight', $variable_weight[$i] );
