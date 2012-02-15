@@ -100,6 +100,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Ability to select all/none attributes
 * Quantity based on stock limit on cart page, like the product page
 * Fixed category widget hierarchy
+* Password error on checkout
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix

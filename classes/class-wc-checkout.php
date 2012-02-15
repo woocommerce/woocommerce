@@ -269,8 +269,8 @@ class WC_Checkout {
 	                // if there are no errors, let's create the user account
 					if ( !$reg_errors->get_error_code() ) :
 	
-		                $user_pass = $this->posted['account_password'];
-		                $user_id = wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
+		                $user_pass 	= esc_attr( $this->posted['account_password'] );
+		                $user_id 	= wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
 		               
 		               if ( !$user_id ) :
 		                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you... please contact us if you continue to have problems.', 'woocommerce') );
@@ -282,7 +282,7 @@ class WC_Checkout {
 	
 	                    // send the user a confirmation and their login details
 	                    $mailer = $woocommerce->mailer();
-						$mailer->customer_new_account( $user_id, $password );
+						$mailer->customer_new_account( $user_id, $user_pass );
 	
 	                    // set the WP login cookie
 	                    $secure_cookie = is_ssl() ? true : false;
