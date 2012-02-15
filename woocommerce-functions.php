@@ -221,7 +221,10 @@ function woocommerce_update_cart_action() {
 		endif;
 		
 		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
-		
+
+		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+		exit;
+
 	endif;
 }
 
