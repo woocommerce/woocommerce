@@ -57,6 +57,8 @@ $order = new WC_Order( $order_id );
 				
 			endforeach;
 		endif;
+
+		do_action( 'woocommerce_cart_contents_review' );
 		?>
 	</tbody>
 </table>
