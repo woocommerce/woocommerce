@@ -1,4 +1,4 @@
-=== WooCommerce ===
+=== WooCommerce – excelling eCommerce ===
 Contributors: woothemes, mikejolley, jameskoster
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
@@ -6,11 +6,13 @@ Requires at least: 3.3
 Tested up to: 3.3
 Stable tag: 1.4.3
 
-WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
+WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
 == Description ==
 
-Transform your WordPress website into a thorough-bred online store. Delivering enterprise-level quality & features whilst backed by a name you can trust. Say hello to WooCommerce.
+Transform your WordPress website into a thorough-bred online store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to WooCommerce.
+
+WooCommerce is built by WooThemes who also offer premium eCommerce themes and extensions to further enhance your shopfront.
 
 [vimeo http://vimeo.com/29198966]
 

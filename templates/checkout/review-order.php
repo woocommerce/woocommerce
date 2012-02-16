@@ -14,7 +14,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<tr>
 				<th class="product-name"><?php _e('Product', 'woocommerce'); ?></th>
 				<th class="product-quantity"><?php _e('Qty', 'woocommerce'); ?></th>
-				<th class="product-subtotal"><?php _e('Totals', 'woocommerce'); ?></th>
+				<th class="product-total"><?php _e('Totals', 'woocommerce'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
@@ -181,7 +181,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								<tr>
 									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
 									<td class="product-quantity">'.$values['quantity'].'</td>
-									<td class="product-subtotal">' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
+									<td class="product-total">' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
 								</tr>';
 						endif;
 					endforeach; 
