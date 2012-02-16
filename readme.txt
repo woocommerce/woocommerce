@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 
 WooCommerce is an open-source e-commerce toolkit that helps you sell anything. Beautifully.
 
@@ -82,7 +82,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.4.3 = 
+= 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection
 * Classes added to my-account
 * Fix for price filtering when the shop is the homepage
