@@ -214,6 +214,8 @@ class WC_Product {
 	 * @param   int		$by		Amount to increase by
 	 */
 	function increase_stock( $by = 1 ) {
+		global $woocommerce;
+		
 		if ($this->managing_stock()) :
 			$this->stock = $this->stock + $by;
 			$this->total_stock = $this->get_total_stock() + $by;
