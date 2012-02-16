@@ -108,6 +108,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Updated dummy content
 * Removed the sorting 'GET' from the sort form in favour of POST - caused too many issues. GET requests will still work however.
 * Moved localisation to init
+* Price slider triggers
 
 = 1.4.2 - 09/02/2012 = 
 * Uninstall fix
