@@ -570,7 +570,7 @@ jQuery(document).ready(function($) {
 		});
 		$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 			clearTimeout(updateTimer);
-			updateTimer = setTimeout("update_checkout()", '1000');
+			updateTimer = setTimeout(update_checkout, '1000');
 		});
 		$('select#billing_country, select#billing_state, select#shipping_country, select#shipping_state, #shiptobilling input, .update_totals_on_change').live('change', function(){
 			$('body').trigger('update_checkout');
