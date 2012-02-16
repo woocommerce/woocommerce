@@ -12,9 +12,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woocommerce'); ?></th>
-				<th><?php _e('Qty', 'woocommerce'); ?></th>
-				<th><?php _e('Totals', 'woocommerce'); ?></th>
+				<th class="product-name"><?php _e('Product', 'woocommerce'); ?></th>
+				<th class="product-quantity"><?php _e('Qty', 'woocommerce'); ?></th>
+				<th class="product-subtotal"><?php _e('Totals', 'woocommerce'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
