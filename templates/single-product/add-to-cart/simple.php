@@ -31,7 +31,7 @@ if( $product->get_price() === '') return;
 
 	 	<?php 
 	 		if (!$product->is_downloadable()) 
-	 			woocommerce_quantity_input( array( 'max_value' => ($product->backorders_allowed()) ? '' : $product->get_stock_quantity() ) ); 
+	 			woocommerce_quantity_input( array( 'min_value' => 1, 'max_value' => ($product->backorders_allowed()) ? '' : $product->get_stock_quantity() ) ); 
 	 	?>
 
 	 	<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>

@@ -362,7 +362,8 @@ if (!function_exists('woocommerce_quantity_input')) {
 		$defaults = array(
 			'input_name' 	=> 'quantity',
 			'input_value' 	=> '1',
-			'max_value'		=> ''
+			'max_value'		=> '',
+			'min_value'		=> '0'
 		);
 
 		$args = wp_parse_args( $args, $defaults );

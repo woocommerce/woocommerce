@@ -92,6 +92,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Method availability (country) for local pickup/delivery
 * Fixed permalinks in shortcodes
 * Install process tweaks (for flushing post type rules)
+* data-min argument/option for quantity inputs
 
 = 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection
