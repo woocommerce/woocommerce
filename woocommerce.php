@@ -850,7 +850,10 @@ class Woocommerce {
 		$scripts_position = (get_option('woocommerce_scripts_position') == 'yes') ? true : false;
 		
 		// Woocommerce.min.js is minified and contains woocommerce_plugins
-		wp_enqueue_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce.min.js', array('jquery'), '1.0', $scripts_position );
+		wp_enqueue_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			wp_enqueue_script( 'woocommerce_plugins', $this->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+		}
 		
 		if ($lightbox_en) 
 			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
