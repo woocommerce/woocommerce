@@ -19,6 +19,11 @@ function do_install_woocommerce() {
 	woocommerce_default_options();
 	woocommerce_tables_install();
 	woocommerce_install_custom_fields();
+	
+	// Register post types
+	$woocommerce->init_taxonomy();
+
+	// Add default taxonomies
 	woocommerce_default_taxonomies();
 	
 	// Install folder for uploading files and prevent hotlinking
@@ -45,9 +50,6 @@ function do_install_woocommerce() {
 	
 	// Update version
 	update_option( "woocommerce_db_version", $woocommerce->version );
-	
-	// Flush rewrites
-	flush_rewrite_rules( false );
 }
 
 /**
@@ -285,27 +287,6 @@ function woocommerce_tables_install() {
  * Adds the default terms for taxonomies - product types and order statuses. Modify at your own risk.
  */
 function woocommerce_default_taxonomies() {
-	
-	if (!post_type_exists('product')) :
-		register_post_type('product',
-			array(
-				'public' => true,
-				'show_ui' => true,
-				'capability_type' => 'post',
-				'publicly_queryable' => true,
-				'exclude_from_search' => false,
-				'hierarchical' => true,
-				'query_var' => true,			
-				'supports' => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
-				'show_in_nav_menus' => false,
-			)
-		);
-	endif;
-	
-	if (!taxonomy_exists('product_type')) :
-		register_taxonomy( 'product_type', array('post', 'product'));
-		register_taxonomy( 'shop_order_status', array('post', 'product'));
-	endif;
 	
 	$product_types = array(
 		'simple',

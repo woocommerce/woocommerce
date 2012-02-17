@@ -63,9 +63,6 @@ function woocommerce_admin_installed_notice() {
 	</div>
 	<?php
 	
-	// Flush rules after install
-	flush_rewrite_rules( false );
-	
 	// Set installed option
 	update_option('woocommerce_installed', 0);
 }

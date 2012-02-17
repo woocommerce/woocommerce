@@ -257,6 +257,7 @@ class Woocommerce {
 	 **/
 	function install() {
 		register_activation_hook( __FILE__, 'activate_woocommerce' );
+		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
 		if ( get_option('woocommerce_db_version') != $this->version ) : add_action('init', 'install_woocommerce', 0); endif;
 	}
 	
@@ -440,6 +441,8 @@ class Woocommerce {
 	 * Init WooCommerce taxonomies
 	 **/
 	function init_taxonomy() {
+		
+		if (post_type_exists('product')) return;
 		
 		/**
 		 * Slugs

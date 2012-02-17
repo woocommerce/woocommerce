@@ -1033,6 +1033,8 @@ function woocommerce_settings() {
 		
 		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
 		
+		exit;
+		
 	}
     
     // Settings saved message

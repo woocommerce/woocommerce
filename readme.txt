@@ -90,6 +90,8 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Fix for reducing/increasing stock notifications
 * Don't reset shipping method on cart during every update
 * Method availability (country) for local pickup/delivery
+* Fixed permalinks in shortcodes
+* Install process tweaks (for flushing post type rules)
 
 = 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection
