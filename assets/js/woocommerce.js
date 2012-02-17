@@ -405,7 +405,7 @@ jQuery(document).ready(function($) {
         if(all_set) {
         	var variation = matching_variations.pop();
         	if (variation) {
-            	$('form input[name=variation_id]').val(variation.variation_id);
+            	$('form input[name=variation_id]').val(variation.variation_id).change();
             	show_variation(variation);
             } else {
             	// Nothing found - reset fields
@@ -418,7 +418,7 @@ jQuery(document).ready(function($) {
 
 	$('.variations select').change(function(){
 		
-		$('form input[name=variation_id]').val('');
+		$('form input[name=variation_id]').val('').change();
         $('.single_variation_wrap').hide();
         $('.single_variation').text('');
 		check_variations();
