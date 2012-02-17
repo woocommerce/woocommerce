@@ -70,7 +70,7 @@
 	outline: none;
 	opacity: 1;
 }
-.woocommerce-message p a.skip {
+.woocommerce-message p a.skip, .woocommerce-message p a.docs {
 	opacity: 0.5;
 }
 .woocommerce-message .twitter-share-button {
