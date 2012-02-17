@@ -84,6 +84,10 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
+= 1.4.4 = 
+* Trigger 'change' event on the hidden variation_id input
+* Load non-minified woocommerce.js file if SCRIPT_DEBUG is on
+
 = 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection
 * Classes added to my-account
