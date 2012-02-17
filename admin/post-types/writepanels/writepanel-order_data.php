@@ -640,7 +640,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		if (isset($_POST['_order_taxes_label'])) :
 			
 			$order_taxes_label		= $_POST['_order_taxes_label'];
-			$order_taxes_compound 	= $_POST['_order_taxes_compound'];
+			$order_taxes_compound 	= isset($_POST['_order_taxes_compound']) ? $_POST['_order_taxes_compound'] : array();
 			$order_taxes_cart 		= $_POST['_order_taxes_cart'];
 			$order_taxes_shipping 	= $_POST['_order_taxes_shipping'];
 			
@@ -764,14 +764,14 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						$order->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $order_item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $post_id, 'quantity' => $order_item['qty']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $post_id, 'quantity' => $order_item['qty']));
 						endif;
 						
 						// stock status notifications
 						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock', $order_item['id']);
+							do_action('woocommerce_no_stock', $_product);
 						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock', $order_item['id']);
+							do_action('woocommerce_low_stock', $_product);
 						endif;
 						
 					endif;
