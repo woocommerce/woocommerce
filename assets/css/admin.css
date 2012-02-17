@@ -9,7 +9,7 @@
 .icon32-posts-shop_coupon{background-position:-475px -6px !important;}
 .icon32-posts-product_variation{background-position:-533px -6px !important;}
 .icon32-woocommerce-reports{background-position:-591px -6px !important;}
-.wrap.woocommerce div.updated{margin-top:10px;}
+.wrap.woocommerce div.updated,.wrap.woocommerce div.error{margin-top:10px;}
 mark.amount{background:transparent none;color:inherit;}
 #order_data{padding:0 10px 9px;}#order_data .order_data_left{width:48%;float:left;}#order_data .order_data_left h2{margin-top:11px;margin-bottom:0;}
 #order_data .order_data_left p{padding:0 !important;}
