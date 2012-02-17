@@ -129,9 +129,6 @@ class WC_Cart {
 		 * Sets the php session data for the cart and coupons and re-calculates totals
 		 */
 		function set_session() {
-			// Cart contents change so reset shipping
-			unset($_SESSION['_chosen_shipping_method']);
-			
 			// Re-calc totals
 			$this->calculate_totals();
 			
