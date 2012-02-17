@@ -3,29 +3,29 @@
  * Loop Add to Cart
  */
  
-global $post, $product; 
+global $product; 
 
 if( $product->get_price() === '' && $product->product_type!=='external') return;
 ?>
 
 <?php if (!$product->is_in_stock()) : ?>
 		
-	<a href="<?php echo get_permalink($post->ID); ?>" class="button"><?php echo apply_filters('out_of_stock_add_to_cart_text', __('Read More', 'woocommerce')); ?></a>
+	<a href="<?php echo get_permalink($product->id); ?>" class="button"><?php echo apply_filters('out_of_stock_add_to_cart_text', __('Read More', 'woocommerce')); ?></a>
 
 <?php 
 else :
 		
 	switch ($product->product_type) :
 		case "variable" :
-			$link 	= get_permalink($post->ID);
+			$link 	= get_permalink($product->id);
 			$label 	= apply_filters('variable_add_to_cart_text', __('Select options', 'woocommerce'));
 		break;
 		case "grouped" :
-			$link 	= get_permalink($post->ID);
+			$link 	= get_permalink($product->id);
 			$label 	= apply_filters('grouped_add_to_cart_text', __('View options', 'woocommerce'));
 		break;
 		case "external" :
-			$link 	= get_permalink($post->ID);
+			$link 	= get_permalink($product->id);
 			$label 	= apply_filters('external_add_to_cart_text', __('Read More', 'woocommerce'));
 		break;
 		default :
