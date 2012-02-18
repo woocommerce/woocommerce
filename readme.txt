@@ -500,7 +500,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Upgrade Notice ==
 
 = 1.4.4 =
-Minor update. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.
+Minor update fixing a few bugs. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.
 
 = 1.4 = 
 Major update with plenty of optimisations and new features. Changes to note:
