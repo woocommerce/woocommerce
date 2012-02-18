@@ -85,15 +85,17 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 == Changelog ==
 
 = 1.4.4 = 
-* Trigger 'change' event on the hidden variation_id input
-* Load non-minified woocommerce.js file if SCRIPT_DEBUG is on
-* Fix for reducing/increasing stock notifications
+* Fix for remove coupon links after ajax update of shipping
+* Fix for reducing/increasing stock + notifications
 * Don't reset shipping method on cart during every update
+* Checkout country/state/postcode defaults to session if not logged in
 * Method availability (country) for local pickup/delivery
-* Fixed permalinks in shortcodes
+* Fixed get_permalink in shortcodes
 * Install process tweaks (for flushing post type rules)
 * data-min argument/option for quantity inputs
-* Notice when the configuration may cause permalink errors
+* Notice is now shown in admin when the configuration may cause permalink errors
+* Trigger 'change' event on the hidden variation_id input
+* Load non-minified woocommerce.js file if SCRIPT_DEBUG is on
 
 = 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection

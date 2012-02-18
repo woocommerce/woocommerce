@@ -52,7 +52,8 @@ function woocommerce_cart( $atts ) {
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 		
 		else :
-		
+			
+			$woocommerce->customer->set_to_base();
 			$woocommerce->customer->set_shipping_to_base();
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 			

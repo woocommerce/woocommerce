@@ -23,7 +23,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Cart Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
+					<th><?php _e('Cart Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1', $woocommerce->cart->get_cart_url()) ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 				</tr>
 				
@@ -153,7 +153,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Order Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
+					<th><?php _e('Order Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2', $woocommerce->cart->get_cart_url()) ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 				</tr>
 				

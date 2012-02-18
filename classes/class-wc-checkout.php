@@ -550,8 +550,11 @@ class WC_Checkout {
 		global $woocommerce;
 		
 		if (isset( $_POST[$input] ) && !empty($_POST[$input])) :
+		
 			return esc_attr($_POST[$input]);
+			
 		elseif (is_user_logged_in()) :
+		
 			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
 			
 			$current_user = wp_get_current_user();
@@ -560,10 +563,19 @@ class WC_Checkout {
 			endif;
 			
 		else :
-
-			if ($input == "billing_country") :
-				return $woocommerce->countries->get_base_country();
-			endif;
+		
+			// If we are here then the user is not logged in - try to use the session data, otherwise default to base
+			if ($input == "billing_country") return ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country();
+			
+			if ($input == "billing_state") return ($woocommerce->customer->get_state()) ? $woocommerce->customer->get_state() : $woocommerce->countries->get_base_state();
+			
+			if ($input == "billing_postcode") return ($woocommerce->customer->get_postcode()) ? $woocommerce->customer->get_postcode() : '';
+			
+			if ($input == "shipping_country") return ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country();
+			
+			if ($input == "shipping_state") return ($woocommerce->customer->get_shipping_state()) ? $woocommerce->customer->get_shipping_state() : $woocommerce->countries->get_base_state();
+			
+			if ($input == "shipping_postcode") return ($woocommerce->customer->get_shipping_postcode()) ? $woocommerce->customer->get_shipping_postcode() : '';
 			
 		endif;
 	}
