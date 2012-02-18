@@ -1,26 +1,26 @@
 === WooCommerce – excelling eCommerce ===
 Contributors: woothemes, mikejolley, jameskoster
-Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, inventory
+Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
 == Description ==
 
-Transform your WordPress website into a thorough-bred online store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to WooCommerce.
+Transform your WordPress website into a thorough-bred online eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to WooCommerce.
 
-WooCommerce is built by WooThemes who also offer premium eCommerce themes and extensions to further enhance your shopfront.
+WooCommerce is built by the experienced folk at WooThemes who also offer premium eCommerce themes and extensions to further enhance your shopfront.
 
 [vimeo http://vimeo.com/29198966]
 
 = STRENGTH & FLEXIBILITY =
-Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer.
+Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer, eCommerce is now truly accessible to anyone.
 
 = CUSTOMIZABLE =
-Your business is unique, as should your online store. Choose one of our themes or build your own and give it a personal touch using the built in shortcodes and widgets.
+Your business is unique, as should your online store. Choose one of our eCommerce themes (http://www.woothemes.com/themes/woocommerce-themes/) or build your own and give it a personal touch using the built in shortcodes and widgets.
 
 = SMART DASHBOARD WIDGETS =
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
@@ -28,7 +28,10 @@ Keep a birds-eye view of incoming sales and reviews, stock levels and general st
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
-Read more about the features and benefits of WooCommerce at http://www.woothemes.com/woocommerce/
+= EXTENDABLE =
+Need more power for your eCommerce store? A specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of extensions available to provide just that - http://www.woothemes.com/extensions/woocommerce-extensions/
+
+Read more about the features and benefits of the WooCommerce eCommerce platform at http://www.woothemes.com/woocommerce/
 Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
 
 == Installation ==
@@ -64,7 +67,11 @@ The documentation for WooCommerce can be found here: http://www.woothemes.com/wo
 
 Clients and beginners will appreciate the usage instructions here: http://www.woothemes.com/woocommerce-docs/category/user-guide/
 
-= Where can I request new features and extensions? =
+= Will WooCommerce work with my theme? =
+
+Yes; WooCommerce will work with any theme, but may require some styling to make it match nicely. See our docs.
+
+= Where can I request new features, eCommerce themes and extensions? =
 
 You can vote on and request new features and extensions in our WooIdeas board - http://woo.uservoice.com/forums/133476-woocommerce
 
@@ -84,7 +91,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 
 == Changelog ==
 
-= 1.4.4 = 
+= 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
 * Fix for reducing/increasing stock + notifications
 * Don't reset shipping method on cart during every update
@@ -490,6 +497,9 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.4.4 =
+Minor update. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.
 
 = 1.4 = 
 Major update with plenty of optimisations and new features. Changes to note:
