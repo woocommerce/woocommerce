@@ -261,8 +261,15 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 )); // End general settings
 
+// Get shop page
 $shop_page_id = woocommerce_get_page_id('shop');
+
 $base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
+
+$woocommerce_prepend_shop_page_to_products_warning = '';
+
+if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 )
+	$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __('Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce') . '</mark>';
 	
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
@@ -338,7 +345,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array(  
 		'name' => __( 'Product base page', 'woocommerce' ),
-		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug),
+		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug) . $woocommerce_prepend_shop_page_to_products_warning,
 		'id' 		=> 'woocommerce_prepend_shop_page_to_products',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',

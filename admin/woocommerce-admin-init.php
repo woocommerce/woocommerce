@@ -82,25 +82,6 @@ function woocommerce_admin_notices_styles() {
 	}
 }
 
-/**
- * Notices to prevent user error
- */
-add_action( 'admin_notices', 'woocommerce_admin_notices' );
-
-function woocommerce_admin_notices() {
-	
-	if (!isset($_GET['page']) || $_GET['page']!=='woocommerce') return;
-
-	// Error notice when prepending urls with shop
-	$shop_page_id 	= woocommerce_get_page_id('shop');
-	
-	if ( get_option('woocommerce_prepend_shop_page_to_products')=='yes' && $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 ) {
-		
-		echo '<div class="error fade"><p><strong>'.__('You have chosen to prepend product permalinks with the shop page, but the shop page has children. Child pages will show 404\'s unless changed.', 'woocommerce').'</strong></p></div>';
-		
-	}
-}
-
 
 /**
  * Admin Includes - loaded conditionally

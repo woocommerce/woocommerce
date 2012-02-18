@@ -134,6 +134,7 @@ ul.recent-orders.stock_list a,ul.stock_list.stock_list a{text-decoration:none;}
 #woocommmerce_dashboard_recent_reviews blockquote{padding:0;margin:0;}
 #woocommmerce_dashboard_recent_reviews .avatar{float:left;margin:0 10px 5px 0;}
 #woocommmerce_dashboard_recent_reviews .star-rating{float:right;width:50px;height:10px;margin:3px 0 0 0;background:url(../images/admin-star.png) repeat-x left -10px;}#woocommmerce_dashboard_recent_reviews .star-rating span{background:url(../images/admin-star.png) repeat-x left 0;height:0;padding-top:10px;overflow:hidden;float:left;}
+mark.notice{background:#fff;color:red;margin:0 0 0 10px;}
 a.export_rates,a.import_rates{float:right;margin-left:3px;margin-top:-3px;margin-bottom:3px;}
 .woocommerce table.shippingrows td,.woocommerce table.taxrows td,.woocommerce table.shippingrows th,.woocommerce table.taxrows th{vertical-align:top;line-height:25px;margin-bottom:9px;}
 .woocommerce table.shippingrows a.remove,.woocommerce table.taxrows a.remove{margin:0 !important;}
