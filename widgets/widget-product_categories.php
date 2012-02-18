@@ -80,7 +80,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			
 		} elseif ( $s ) {
 			
-			global $wp_query;
+			global $wp_query, $post;
 			
 			$cat_args['title_li'] = '';
 			$cat_args['hierarchical'] = 1;
@@ -89,12 +89,23 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			
 			$cats = get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
 			
+			$this->current_cat = false;
+			$this->cat_ancestors = array();
+				
 			if (is_tax('product_cat')) :
+			
 				$this->current_cat = $wp_query->queried_object;
 				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
-			else :
-				$this->current_cat = false;
-				$this->cat_ancestors = array();
+			
+			elseif (is_singular('product')) :
+				
+				$product_category = wp_get_post_terms( $post->ID, 'product_cat' ); 
+				
+				if ($product_category) :
+					$this->current_cat = end($product_category);
+					$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
+				endif;
+				
 			endif;
 
 			echo '<ul>';
@@ -106,7 +117,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 				
 				echo '<li class="cat-item cat-item-'.$cat->term_id;
 				
-				if (is_tax('product_cat', $cat->slug)) echo ' current-cat';
+				if ($this->current_cat->term_id == $cat->term_id || is_tax('product_cat', $cat->slug)) echo ' current-cat';
 				if (
 					$this->current_cat 
 					&& in_array( $cat->term_id, $this->cat_ancestors )
@@ -163,7 +174,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			
 			echo '<li class="cat-item cat-item-'.$child->term_id;
 				
-			if (is_tax('product_cat', $child->slug)) echo ' current-cat';
+			if ($this->current_cat->term_id == $child->term_id || is_tax('product_cat', $child->slug)) echo ' current-cat';
 			if (
 				$this->current_cat 
 				&& in_array( $child->term_id, $this->cat_ancestors )

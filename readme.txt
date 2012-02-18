@@ -103,6 +103,7 @@ Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/wo
 * Notice is now shown in admin when the configuration may cause permalink errors
 * Trigger 'change' event on the hidden variation_id input
 * Load non-minified woocommerce.js file if SCRIPT_DEBUG is on
+* Category widget hierarchy on single product page
 
 = 1.4.3 - 16/02/2012 = 
 * Fix for variation shipping class detection
