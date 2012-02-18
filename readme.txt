@@ -29,7 +29,7 @@ Keep a birds-eye view of incoming sales and reviews, stock levels and general st
 Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
 = EXTENDABLE =
-Need more power for your eCommerce store? A specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of extensions available to provide just that - http://www.woothemes.com/extensions/woocommerce-extensions/
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that - http://www.woothemes.com/extensions/woocommerce-extensions/
 
 Read more about the features and benefits of the WooCommerce eCommerce platform at http://www.woothemes.com/woocommerce/
 Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
