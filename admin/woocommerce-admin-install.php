@@ -45,8 +45,8 @@ function do_install_woocommerce() {
 		endif;
 	endif;
 	
-	// Clear transient cache (if this is an upgrade then woocommerce_class will be defined)
-	if ( $woocommerce instanceof woocommerce ) $woocommerce->clear_product_transients();
+	// Clear transient cache
+	$woocommerce->clear_product_transients();
 	
 	// Update version
 	update_option( "woocommerce_db_version", $woocommerce->version );
