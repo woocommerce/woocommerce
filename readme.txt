@@ -10,9 +10,9 @@ WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anyth
 
 == Description ==
 
-Transform your WordPress website into a thorough-bred online eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to WooCommerce.
+Transform your WordPress website into a thorough-bred online eCommerce store. Delivering enterprise-level quality and features whilst backed by a name you can trust. Say hello to the WooCommerce eCommerce plugin.
 
-WooCommerce is built by the experienced folk at WooThemes who also offer premium eCommerce themes and extensions to further enhance your shopfront.
+WooCommerce is built by the experienced folk at WooThemes who also offer premium [eCommerce themes](http://www.woothemes.com/themes/woocommerce-themes/ "eCommerce themes from WooThemes") and [extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes") to further enhance your shopfront.
 
 [vimeo http://vimeo.com/29198966]
 
@@ -20,7 +20,7 @@ WooCommerce is built by the experienced folk at WooThemes who also offer premium
 Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer, eCommerce is now truly accessible to anyone.
 
 = CUSTOMIZABLE =
-Your business is unique, as should your online store. Choose one of our eCommerce themes (http://www.woothemes.com/themes/woocommerce-themes/) or build your own and give it a personal touch using the built in shortcodes and widgets.
+Your business is unique, as should your online store. Choose one of our [eCommerce themes](http://www.woothemes.com/themes/woocommerce-themes/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
 
 = SMART DASHBOARD WIDGETS =
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
@@ -28,11 +28,54 @@ Keep a birds-eye view of incoming sales and reviews, stock levels and general st
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
-= EXTENDABLE =
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that - http://www.woothemes.com/extensions/woocommerce-extensions/
+= BUNDLED GATEWAYS AND SHIPPING =
+WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways and shipping methods:
 
-Read more about the features and benefits of the WooCommerce eCommerce platform at http://www.woothemes.com/woocommerce/
-Checkout and contribute to the source on GitHub at http://github.com/woothemes/woocommerce/
+* PayPal Standard
+* BACS
+* Cheque
+* Cash on Delivery
+* Flat rate shipping
+* Free shipping
+* International delivery
+* Local delivery
+* Local Pickup
+
+= EXTENSIONS =
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that: [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+
+Here's a list of some of our popular functionality extensions:
+
+* [Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/) - Bulk discounts, role based pricing and more.
+* [Catalog Visibility Options](http://www.woothemes.com/extension/catalog-visibility-options/) - Transform WooCommerce into an online catalog by removing eCommerce functionality
+* [Product Addons](http://www.woothemes.com/extension/product-addons/) - Create personalised products.
+* [Currency Converter Widget](http://www.woothemes.com/extension/currency-converter-widget/) - Dynamically switch the currency of displayed prices.
+* [Product Enquiry Form](http://www.woothemes.com/extension/product-enquiry-form/) - Allow visitors to email you enquiries about a product.
+* [Sale Flash Pro](http://www.woothemes.com/extension/sale-flash-pro/) - Display a % discount or total amount off per product.
+* [Facebook Tab](http://www.woothemes.com/extension/facebook-tab/) - Sell your products via your Facebook page.
+* [Commission King](http://www.woothemes.com/extension/commission-king/) - Assign, track and pay commissions on your WooCommerce products.
+* [Google Product Feed](http://www.woothemes.com/extension/google-product-feed/) - Add your products to Google Product Search.
+* [Newsletter Subscription](http://www.woothemes.com/extension/newsletter-subscription/) - Allow customers to subscribe to your MailChimp or CampaignMonitor mailing list.
+
+And here are some of our more popular payment gateway and shipping method extensions:
+
+* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules (per-order) based on country/postcode, weight, cart items, and price.
+* [FedEx](http://www.woothemes.com/extension/fedex/) - Calculate rates from FedEx's API
+* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
+* [Authorize.net](http://www.woothemes.com/extension/authorize-net/) - Direct gateway
+* [Inspire Checkout (free)](http://www.woothemes.com/extension/inspire-gateway/) - Direct gateway
+* [CardSave (free)](http://www.woothemes.com/extension/cardsave/) - Form based gateway
+
+Finally, here are some cool free extensions listed here on WordPress.org:
+
+* [WooCommerce Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/) - Adds useful admin links and resources for the WooCommerce eCommerce Plugin to the WordPress Toolbar / Admin Bar.
+* [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
+* [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
+* [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
+
+Read more about the features and benefits of the WooCommerce eCommerce platform on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress"),
+
+Checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/)
 
 == Installation ==
 
@@ -45,27 +88,33 @@ Checkout and contribute to the source on GitHub at http://github.com/woothemes/w
 
 = Automatic installation =
 
-Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce log in to your WordPress admin panel, navigate to the Plugins menu and click Add New. 
+Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress admin panel, navigate to the Plugins menu and click Add New. 
 
-In the search field type “WooCommerce” and click Search Plugins. Once you’ve found the plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation. 
+In the search field type “WooCommerce” and click Search Plugins. Once you’ve found our eCommerce plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation. 
 
 = Manual installation =
 
-The manual installation involves downloading the plugin and uploading it to your webserver via your favourite FTP application.
+The manual installation method involves downloading our eCommerce plugin and uploading it to your webserver via your favourite FTP application.
 
 1. Download the plugin file to your computer and unzip it
 2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
 3. Activate the plugin from the Plugins menu within the WordPress admin.
 
+= Upgrading =
+
+Automatic updates should work a charm; as always though, ensure you backup your site just in case. 
+
+If on the off chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
+
 == Frequently Asked Questions == 
 
 = Where can I find WooCommerce documentation and user guides =
 
-For further documentation on using WooCommerce, please sign up for free at http://www.woothemes.com/. This will provide access to extensive WooCommerce Codex, documentation and tips. 
+For further documentation on using WooCommerce, please sign up for free at [WooThemes](http://www.woothemes.com/). This will provide access to extensive WooCommerce Codex, documentation and tips. 
 
-The documentation for WooCommerce can be found here: http://www.woothemes.com/woocommerce-docs/
+The documentation for WooCommerce can be found on the [WooCommerce Docs](http://www.woothemes.com/woocommerce-docs/) website.
 
-Clients and beginners will appreciate the usage instructions here: http://www.woothemes.com/woocommerce-docs/category/user-guide/
+Clients and beginners will appreciate the usage instructions here: [User Guide](http://www.woothemes.com/woocommerce-docs/category/user-guide/)
 
 = Will WooCommerce work with my theme? =
 
@@ -73,15 +122,15 @@ Yes; WooCommerce will work with any theme, but may require some styling to make 
 
 = Where can I request new features, eCommerce themes and extensions? =
 
-You can vote on and request new features and extensions in our WooIdeas board - http://woo.uservoice.com/forums/133476-woocommerce
+You can vote on and request new features and extensions in our [WooIdeas board](http://woo.uservoice.com/forums/133476-woocommerce)
 
 = Where can I report bugs or contribute to the project? =
 
-Bugs can be reported either in our support forum or preferably at the WooCommerce GitHub repository (https://github.com/woothemes/woocommerce/issues)
+Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woothemes/woocommerce/issues).
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes you can! Join in on our GitHub repository :) https://github.com/woothemes/woocommerce/
+Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/woocommerce/) :)
 
 == Screenshots ==
 
