@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce
 Plugin URI: http://www.woothemes.com/woocommerce/
 Description: An e-commerce toolkit that helps you sell anything. Beautifully.
-Version: 1.4.4
+Version: 1.4.5
 Author: WooThemes
 Author URI: http://woothemes.com
 Requires at least: 3.1
@@ -29,7 +29,7 @@ class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.4.4';
+	var $version = '1.4.5';
 	
 	/** URLS ******************************************************************/
 	
@@ -283,8 +283,22 @@ class Woocommerce {
 		
 		// Init styles
 		if (!is_admin()) $this->init_styles();
-
+		
+		// Trigger API requests
+		$this->api_requests();
+		
+		// Init action
 		do_action( 'woocommerce_init' );
+	}
+	
+	/**
+	 * API request - Trigger any API requests (handy for third party plugins/gateways)
+	 **/
+	function api_requests() {
+		if (isset($_GET['wc-api'])) {
+			$api = strtolower(esc_attr( $_GET['wc-api'] ));
+			do_action( 'woocommerce_api_' . $api );
+		}
 	}
 	
 	/**

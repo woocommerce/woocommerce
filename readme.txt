@@ -140,6 +140,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.4.5 =
+* Added basic API for payment gateways to hook into (for IPN etc)
+
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
 * Fix for reducing/increasing stock + notifications
