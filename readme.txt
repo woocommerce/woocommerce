@@ -73,6 +73,9 @@ Finally, here are some cool free extensions listed here on WordPress.org:
 * [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
 * [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
 
+= THEMES =
+Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/themes/woocommerce-themes/)
+
 Read more about the features and benefits of the WooCommerce eCommerce platform on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress"),
 
 Checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/)
