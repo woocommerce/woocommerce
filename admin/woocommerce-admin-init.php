@@ -82,30 +82,51 @@ function woocommerce_admin_notices_styles() {
 	}
 }
 
-
 /**
  * Admin Includes - loaded conditionally
  */
 add_action('admin_init', 'woocommerce_admin_init');
 
 function woocommerce_admin_init() {
-	global $pagenow;
+	global $pagenow, $typenow;
 	
 	ob_start();
-
-	if ( $pagenow=='index.php' ) :
-		include_once( 'woocommerce-admin-dashboard.php' );
-	elseif ( $pagenow=='admin.php' && isset($_GET['import']) ) :
-		include_once( 'woocommerce-admin-import.php' );
-	elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) :
-		include_once( 'post-types/post-types-init.php' );
-	elseif ( $pagenow=='edit-tags.php' ) :
-		include_once( 'woocommerce-admin-taxonomies.php' );
-	elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) :
-		include_once( 'woocommerce-admin-users.php' );
+	
+	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) :
+		$typenow = $post->post_type;
+	elseif (empty($typenow) && !empty($_GET['post'])) :
+	    $post = get_post($_GET['post']);
+	    $typenow = $post->post_type;
 	endif;
+
+	if ( $pagenow=='index.php' ) {
+	
+		include_once( 'woocommerce-admin-dashboard.php' );
+		
+	} elseif ( $pagenow=='admin.php' && isset($_GET['import']) ) {
+	
+		include_once( 'woocommerce-admin-import.php' );
+		
+	} elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) {
+	
+		include_once( 'post-types/writepanels/writepanels-init.php' );	
+		
+		if (in_array($typenow, array('product', 'shop_coupon', 'shop_order'))) add_action('admin_print_styles', 'woocommerce_admin_help_tab');
+		
+	} elseif ( $pagenow=='edit-tags.php' ) {
+	
+		include_once( 'woocommerce-admin-taxonomies.php' );
+		
+	} elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) {
+	
+		include_once( 'woocommerce-admin-users.php' );
+		
+	}
 }
 
+include_once( 'post-types/product.php' );
+include_once( 'post-types/shop_coupon.php' );
+include_once( 'post-types/shop_order.php' );
 include_once( 'woocommerce-admin-hooks.php' );
 include_once( 'woocommerce-admin-functions.php' );
 

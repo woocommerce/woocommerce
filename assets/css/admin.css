@@ -11,6 +11,12 @@
 .icon32-woocommerce-reports{background-position:-591px -6px !important;}
 .wrap.woocommerce div.updated,.wrap.woocommerce div.error{margin-top:10px;}
 mark.amount{background:transparent none;color:inherit;}
+.inline-edit-product .inline-edit-col-center,.inline-edit-product .inline-edit-col-right{float:right !important;}
+#woocommerce-fields.inline-edit-col{clear:left;}#woocommerce-fields.inline-edit-col label.featured,#woocommerce-fields.inline-edit-col label.manage_stock{margin-left:10px;}
+#woocommerce-fields.inline-edit-col .dimensions div{display:block;margin:.2em 0;}#woocommerce-fields.inline-edit-col .dimensions div span.title{display:block;float:left;width:5em;}
+#woocommerce-fields.inline-edit-col .dimensions div span.input-text-wrap{display:block;margin-left:5em;}
+#woocommerce-fields.inline-edit-col .text{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;width:99%;float:left;margin:1px 1% 1px 1px;}
+#woocommerce-fields.inline-edit-col .length,#woocommerce-fields.inline-edit-col .width,#woocommerce-fields.inline-edit-col .height{width:32.33%;}
 #order_data{padding:0 10px 9px;}#order_data .order_data_left{width:48%;float:left;}#order_data .order_data_left h2{margin-top:11px;margin-bottom:0;}
 #order_data .order_data_left p{padding:0 !important;}
 #order_data .order_data_left .form-field{float:left;width:50%;padding:0;margin:9px 0 0 0;}#order_data .order_data_left .form-field label{display:block;padding:0 0 3px;}

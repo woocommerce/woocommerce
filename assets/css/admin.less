@@ -65,6 +65,46 @@ mark.amount {
 	color: inherit;
 }
 
+/* Bulk/Quick edit */
+.inline-edit-product {
+	.inline-edit-col-center, .inline-edit-col-right {
+		float: right !important;
+	}
+}
+#woocommerce-fields.inline-edit-col {
+	clear: left;
+	label.featured, label.manage_stock {
+		margin-left: 10px;
+	}
+	.dimensions {
+		div {
+			display: block;
+			margin: .2em 0;
+			span.title {
+				display: block;
+				float: left;
+				width: 5em;
+			}
+			span.input-text-wrap {
+				display: block;
+				margin-left: 5em;
+			}
+		}
+	}
+	.text {
+		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+		box-sizing: border-box;         /* Opera/IE 8+ */
+		width: 99%;
+		float: left;
+		margin: 1px 1% 1px 1px;
+	}
+	.length, .width, .height {
+		width: 32.33%;
+	}
+}
+
+
 /* Orders */
 #order_data {
 	padding: 0 10px 9px;

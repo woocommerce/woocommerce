@@ -8,6 +8,11 @@
  * @category 	Admin Write Panels
  * @package 	WooCommerce
  */
+ 
+include_once('writepanel-product_data.php');
+include_once('writepanel-coupon_data.php');
+include_once('writepanel-order_data.php');
+include_once('writepanel-order_notes.php');
 
 /**
  * Init the meta boxes

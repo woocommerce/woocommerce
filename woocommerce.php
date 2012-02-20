@@ -146,7 +146,7 @@ class Woocommerce {
 	 * Include required core files
 	 **/
 	function includes() {
-		if (is_admin() && !defined('DOING_AJAX')) $this->admin_includes();
+		if (is_admin()) $this->admin_includes();
 		if (defined('DOING_AJAX')) $this->ajax_includes();
 		if (!is_admin() || defined('DOING_AJAX')) $this->frontend_includes();
 

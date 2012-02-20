@@ -155,6 +155,26 @@ function woocommerce_custom_product_columns( $column ) {
 			
 			get_inline_data( $post );
 			
+			/* Custom inline data for woocommerce */
+			echo '
+				<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
+					<div class="sku">' . $product->sku . '</div>
+					<div class="regular_price">' . $product->regular_price . '</div>
+					<div class="sale_price">' . $product->sale_price . '</div>
+					<div class="weight">' . $product->weight . '</div>
+					<div class="length">' . $product->length . '</div>
+					<div class="width">' . $product->width . '</div>
+					<div class="height">' . $product->height . '</div>
+					<div class="visibility">' . $product->visibility . '</div>
+					<div class="stock_status">' . $product->stock_status . '</div>
+					<div class="stock">' . $product->stock . '</div>
+					<div class="manage_stock">' . $product->manage_stock . '</div>
+					<div class="featured">' . $product->featured . '</div>
+					<div class="product_type">' . $product->product_type . '</div>
+					<div class="product_is_virtual">' . $product->virtual . '</div>
+				</div>
+			';
+			
 		break;
 		case "sku" :
 			if ($product->get_sku()) echo $product->get_sku(); else echo '<span class="na">&ndash;</span>';
@@ -415,3 +435,202 @@ function woocommerce_admin_product_search_label($query) {
 	
 	return $query;
 }
+
+/**
+ * Custom quick edit
+ **/
+add_action('quick_edit_custom_box',  'woocommerce_admin_product_quick_edit', 10, 2);
+add_action('admin_enqueue_scripts', 'woocommerce_admin_product_quick_edit_scripts', 10);  
+add_action('save_post', 'woocommerce_admin_product_quick_edit_save', 10, 2);  
+
+function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
+	if ($column_name != 'price' || $post_type != 'product') return;
+	?>
+    <fieldset class="inline-edit-col-left">  
+		<div id="woocommerce-fields" class="inline-edit-col">  
+		
+			<h4><?php _e('Product Data', 'woocommerce'); ?></h4>
+			
+			<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>
+			
+				<label>  
+				    <span class="title"><?php _e('SKU', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+						<input type="text" name="_sku" class="text sku" value="">
+					</span>  
+				</label>
+				<br class="clear" />
+				
+			<?php endif; ?>
+			
+			<div class="price_fields">
+				<label>  
+				    <span class="title"><?php _e('Price', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+						<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Regular price', 'woocommerce'); ?>" value="">
+					</span> 
+				</label>
+				<br class="clear" />
+				<label>  
+				    <span class="title"><?php _e('Sale', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+						<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Sale price', 'woocommerce'); ?>" value="">
+					</span> 
+				</label>
+				<br class="clear" />
+			</div>
+			
+			<div class="dimension_fields">
+				<label>  
+				    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+						<input type="text" name="_weight" class="text weight" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="">
+					</span> 
+				</label>
+				<br class="clear" />
+				<div class="inline-edit-group dimensions">
+					<div>
+					    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
+					    <span class="input-text-wrap">  
+							<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
+							<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
+							<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+						</span>  
+					</div> 
+				</div>
+			</div>
+			
+			<label class="alignleft">  
+			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>  
+			    <span class="input-text-wrap"> 
+			    	<select class="visibility" name="_visibility">
+					<?php
+						$options = array(
+							'visible' => __('Catalog &amp; search', 'woocommerce'),
+							'catalog' => __('Catalog', 'woocommerce'),
+							'search' => __('Search', 'woocommerce'),
+							'hidden' => __('Hidden', 'woocommerce')
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="'.$key.'">'. $value .'</option>';
+						}
+					?>
+					</select> 
+				</span>  
+			</label> 
+			<label class="alignleft featured">
+				<input type="checkbox" name="_featured" value="1">
+				<span class="checkbox-title"><?php _e('Featured', 'woocommerce'); ?></span>
+			</label>
+			<br class="clear" />
+			
+			<h4><?php _e('Inventory', 'woocommerce'); ?></h4>
+			<label class="alignleft">  
+			    <span class="title"><?php _e('In stock?', 'woocommerce'); ?></span>  
+			    <span class="input-text-wrap"> 
+			    	<select class="stock_status" name="_stock_status">
+					<?php
+						$options = array(
+							'instock' => __('In stock', 'woocommerce'),
+							'outofstock' => __('Out of stock', 'woocommerce')
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="'.$key.'">'. $value .'</option>';
+						}
+					?>
+					</select> 
+				</span>  
+			</label> 
+			
+			<div class="stock_fields">
+				
+				<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+					<label class="alignleft manage_stock">
+						<input type="checkbox" name="_manage_stock" value="1">
+						<span class="checkbox-title"><?php _e('Manage stock?', 'woocommerce'); ?></span>
+					</label>
+					<br class="clear" />
+					<label class="stock_qty_field">  
+					    <span class="title"><?php _e('Stock Qty', 'woocommerce'); ?></span>  
+					    <span class="input-text-wrap">  
+							<input type="text" name="_stock" class="text stock" value="">
+						</span>  
+					</label>
+				<?php endif; ?>
+			
+			</div>
+			
+			<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_quick_edit_nonce' ); ?>" />
+		</div>  
+	</fieldset> 
+	<?php
+}
+
+function woocommerce_admin_product_quick_edit_scripts() {  
+	global $woocommerce;
+	
+    wp_enqueue_script( 'woocommerce_quick-edit', $woocommerce->plugin_url() . '/assets/js/admin/quick-edit.js', array('jquery') ); 
+}  
+
+function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {  
+	
+	if ( !$_POST ) return $post_id;
+	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
+	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+	if ( !isset($_POST['woocommerce_quick_edit_nonce']) || (isset($_POST['woocommerce_quick_edit_nonce']) && !wp_verify_nonce( $_POST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ))) return $post_id;
+	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( $post->post_type != 'product' ) return $post_id;
+	
+	global $woocommerce, $wpdb;
+	
+	$product = new WC_Product( $post_id );
+	
+	// Save fields
+	if(isset($_POST['_sku'])) update_post_meta($post_id, '_sku', esc_html(stripslashes($_POST['_sku'])));
+	if(isset($_POST['_weight'])) update_post_meta($post_id, '_weight', esc_html(stripslashes($_POST['_weight'])));
+	if(isset($_POST['_length'])) update_post_meta($post_id, '_length', esc_html(stripslashes($_POST['_length'])));
+	if(isset($_POST['_width'])) update_post_meta($post_id, '_width', esc_html(stripslashes($_POST['_width'])));
+	if(isset($_POST['_height'])) update_post_meta($post_id, '_height', esc_html(stripslashes($_POST['_height'])));
+	if(isset($_POST['_stock_status'])) update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+	if(isset($_POST['_visibility'])) update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	if(isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
+	
+	if ($product->is_type('simple') || $product->is_type('external')) {
+	
+		if(isset($_POST['_regular_price'])) update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
+		if(isset($_POST['_sale_price'])) update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
+		
+		// Handle price - remove dates and set to lowest
+		$price_changed = false;
+		
+		if(isset($_POST['_regular_price']) && stripslashes( $_POST['_regular_price'] )!=$product->regular_price) $price_changed = true;
+		if(isset($_POST['_sale_price']) && stripslashes( $_POST['_sale_price'] )!=$product->sale_price) $price_changed = true;
+		
+		if ($price_changed) {
+			update_post_meta( $post_id, '_sale_price_dates_from', '');
+			update_post_meta( $post_id, '_sale_price_dates_to', '');
+			
+			if ($_POST['_sale_price'] != '') {
+				update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
+			} else {
+				update_post_meta( $post_id, '_price', stripslashes($_POST['_regular_price']) );
+			}
+		}
+	}
+	
+	// Handle stock
+	if (!$product->is_type('grouped')) {
+		if (isset($_POST['_manage_stock'])) {
+			update_post_meta( $post_id, '_manage_stock', 'yes' );
+			update_post_meta( $post_id, '_stock', (int) $_POST['_stock'] );
+		} else {
+			update_post_meta( $post_id, '_manage_stock', 'no' );
+			update_post_meta( $post_id, '_stock', '0' );
+		}
+	}
+
+	// Clear transient
+	$woocommerce->clear_product_transients( $post_id ); 
+}  
+
