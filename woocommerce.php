@@ -131,7 +131,7 @@ class Woocommerce {
 			// Hooks
 			add_filter( 'template_include', array(&$this, 'template_loader') );
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
-			add_action( 'init', array(&$this, 'include_template_functions'), 99 );
+			add_action( 'init', array(&$this, 'include_template_functions'), 25 );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
 			add_action( 'wp', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
