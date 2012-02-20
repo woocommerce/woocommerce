@@ -82,4 +82,22 @@ jQuery(document).ready(function(){
     	}
     
     });
+    
+    jQuery('#wpbody').on('click', '#doaction, #doaction2', function(){  
+
+		jQuery('select, input.text', '.inline-edit-row').val('');
+		jQuery('select option', '.inline-edit-row').removeAttr('checked');
+		jQuery('#woocommerce-fields-bulk .inline-edit-group .alignright').hide();
+		
+	});
+	
+	 jQuery('#wpbody').on('change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function(){  
+    
+    	if (jQuery(this).val()==1) {
+    		jQuery(this).closest('div').find('.alignright').show();
+    	} else {
+    		jQuery(this).closest('div').find('.alignright').hide();
+    	}
+    
+    });
 });  

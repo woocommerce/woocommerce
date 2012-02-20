@@ -141,7 +141,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.4.5 =
-* Quick edit products!
+* Quick edit products
+* Bulk edit products
 * Added basic API for payment gateways to hook into (for IPN etc)
 * Added Bulgarian translation
 

@@ -632,3 +632,292 @@ function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {
 	$woocommerce->clear_product_transients( $post_id ); 
 }  
 
+/**
+ * Custom bulk edit
+ **/
+add_action('bulk_edit_custom_box',  'woocommerce_admin_product_bulk_edit', 10, 2);
+add_action('save_post', 'woocommerce_admin_product_bulk_edit_save', 10, 2);  
+
+function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
+	if ($column_name != 'price' || $post_type != 'product') return;
+	?>
+    <fieldset class="inline-edit-col-right">  
+		<div id="woocommerce-fields-bulk" class="inline-edit-col">  
+		
+			<h4><?php _e('Product Data', 'woocommerce'); ?></h4>
+			
+			<div class="inline-edit-group">  
+				<label class="alignleft">
+					<span class="title"><?php _e('Price', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">
+				    	<select class="change_regular_price change_to" name="change_regular_price">
+						<?php
+							$options = array(
+								'' 	=> __('— No Change —'),
+								'1' => __('Change to:', 'woocommerce')
+							);
+							foreach ($options as $key => $value) {
+								echo '<option value="'.$key.'">'. $value .'</option>';
+							}
+						?>
+						</select> 
+					</span>
+				</label>
+			    <label class="alignright">
+			    	<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Regular price', 'woocommerce'); ?>" value="">
+			    </label>
+			</div>
+			
+			<div class="inline-edit-group">  
+				<label class="alignleft">
+				    <span class="title"><?php _e('Sale', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+				    	<select class="change_sale_price change_to" name="change_sale_price">
+						<?php
+							$options = array(
+								'' 	=> __('— No Change —'),
+								'1' => __('Change to:', 'woocommerce')
+							);
+							foreach ($options as $key => $value) {
+								echo '<option value="'.$key.'">'. $value .'</option>';
+							}
+						?>
+						</select> 
+					</span> 
+				</label>
+				<label class="alignright">
+					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Sale price', 'woocommerce'); ?>" value="">
+				</label>
+			</div>
+			<div class="inline-edit-group">  
+				<label class="alignleft">  
+				    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+				    	<select class="change_weight change_to" name="change_weight">
+						<?php
+							$options = array(
+								'' 	=> __('— No Change —'),
+								'1' => __('Change to:', 'woocommerce')
+							);
+							foreach ($options as $key => $value) {
+								echo '<option value="'.$key.'">'. $value .'</option>';
+							}
+						?>
+						</select> 
+					</span> 
+				</label>
+				<label class="alignright">
+					<input type="text" name="_weight" class="text weight" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="">
+				</label>
+			</div>
+			<div class="inline-edit-group dimensions">
+				<label class="alignleft">  
+				    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap">  
+				    	<select class="change_dimensions change_to" name="change_dimensions">
+						<?php
+							$options = array(
+								'' 	=> __('— No Change —'),
+								'1' => __('Change to:', 'woocommerce')
+							);
+							foreach ($options as $key => $value) {
+								echo '<option value="'.$key.'">'. $value .'</option>';
+							}
+						?>
+						</select> 
+					</span>  
+				</label>
+				<div class="alignright">
+					<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
+					<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
+					<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+				</div>
+			</div>
+			<label>  
+			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>  
+			    <span class="input-text-wrap"> 
+			    	<select class="visibility" name="_visibility">
+					<?php
+						$options = array(
+							'' => __('— No Change —'),
+							'visible' => __('Catalog &amp; search', 'woocommerce'),
+							'catalog' => __('Catalog', 'woocommerce'),
+							'search' => __('Search', 'woocommerce'),
+							'hidden' => __('Hidden', 'woocommerce')
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="'.$key.'">'. $value .'</option>';
+						}
+					?>
+					</select> 
+				</span>  
+			</label>
+			<label>  
+			    <span class="title"><?php _e('Featured', 'woocommerce'); ?></span>  
+			    <span class="input-text-wrap"> 
+			    	<select class="featured" name="_featured">
+					<?php
+						$options = array(
+							'' => __('— No Change —'),
+							'yes' => __('Yes', 'woocommerce'),
+							'no' => __('No', 'woocommerce')
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="'.$key.'">'. $value .'</option>';
+						}
+					?>
+					</select> 
+				</span>  
+			</label> 
+
+			<label>  
+			    <span class="title"><?php _e('In stock?', 'woocommerce'); ?></span>  
+			    <span class="input-text-wrap"> 
+			    	<select class="stock_status" name="_stock_status">
+					<?php
+						$options = array(
+							'' => __('— No Change —'),
+							'instock' => __('In stock', 'woocommerce'),
+							'outofstock' => __('Out of stock', 'woocommerce')
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="'.$key.'">'. $value .'</option>';
+						}
+					?>
+					</select> 
+				</span>  
+			</label> 
+			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
+				<label>  
+				    <span class="title"><?php _e('Manage stock?', 'woocommerce'); ?></span>  
+				    <span class="input-text-wrap"> 
+				    	<select class="manage_stock" name="_manage_stock">
+						<?php
+							$options = array(
+								'' => __('— No Change —'),
+								'yes' => __('Yes', 'woocommerce'),
+								'no' => __('No', 'woocommerce')
+							);
+							foreach ($options as $key => $value) {
+								echo '<option value="'.$key.'">'. $value .'</option>';
+							}
+						?>
+						</select> 
+					</span>  
+				</label>
+				
+				<div class="inline-edit-group dimensions">
+					<label class="alignleft stock_qty_field">  
+					    <span class="title"><?php _e('Stock Qty', 'woocommerce'); ?></span>  
+					    <span class="input-text-wrap">  
+					    	<select class="change_stock change_to" name="change_stock">
+							<?php
+								$options = array(
+									'' 	=> __('— No Change —'),
+									'1' => __('Change to:', 'woocommerce')
+								);
+								foreach ($options as $key => $value) {
+									echo '<option value="'.$key.'">'. $value .'</option>';
+								}
+							?>
+							</select> 
+						</span>  
+					</label>
+					<label class="alignright">
+						<input type="text" name="_stock" class="text stock" placeholder="<?php _e('Stock Qty', 'woocommerce'); ?>" value="">
+					</label>
+				</div>
+			<?php endif; ?>
+			<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
+		</div>  
+	</fieldset> 
+	<?php
+}
+
+function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {  
+		
+	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
+	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+	if ( !isset($_REQUEST['woocommerce_bulk_edit_nonce']) || (isset($_REQUEST['woocommerce_bulk_edit_nonce']) && !wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ))) return $post_id;
+	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( $post->post_type != 'product' ) return $post_id;
+	
+	global $woocommerce, $wpdb;
+
+	$product = new WC_Product( $post_id );
+	
+	// Save fields
+	if (isset($_REQUEST['change_weight']) && $_REQUEST['change_weight']==1) 	
+		if(isset($_REQUEST['_weight'])) update_post_meta($post_id, '_weight', esc_html(stripslashes($_REQUEST['_weight'])));
+	
+	if (isset($_REQUEST['change_dimensions']) && $_REQUEST['change_dimensions']==1) {
+		if(isset($_REQUEST['_length'])) update_post_meta($post_id, '_length', esc_html(stripslashes($_REQUEST['_length'])));
+		if(isset($_REQUEST['_width'])) update_post_meta($post_id, '_width', esc_html(stripslashes($_REQUEST['_width'])));
+		if(isset($_REQUEST['_height'])) update_post_meta($post_id, '_height', esc_html(stripslashes($_REQUEST['_height'])));
+	}
+	
+	if(isset($_REQUEST['_stock_status']) && $_REQUEST['_stock_status']) update_post_meta( $post_id, '_stock_status', stripslashes( $_REQUEST['_stock_status'] ) );
+	
+	if(isset($_REQUEST['_visibility']) && $_REQUEST['_visibility']) update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
+	
+	if(isset($_REQUEST['_featured']) && $_REQUEST['_featured']) update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) );
+	
+	// Handle price - remove dates and set to lowest
+	if ($product->is_type('simple') || $product->is_type('external')) {
+
+		$price_changed = false;
+		
+		if (isset($_REQUEST['change_regular_price']) && $_REQUEST['change_regular_price']==1) {
+			
+			if(isset($_REQUEST['_regular_price'])) update_post_meta( $post_id, '_regular_price', stripslashes( $_REQUEST['_regular_price'] ) );
+			
+			if(isset($_REQUEST['_regular_price']) && stripslashes( $_REQUEST['_regular_price'] )!=$product->regular_price) {
+				$price_changed = true;
+				$product->regular_price = stripslashes( $_REQUEST['_regular_price'] );
+			}	
+			
+		}
+		
+		if (isset($_REQUEST['change_sale_price']) && $_REQUEST['change_sale_price']==1) {
+			
+			if(isset($_REQUEST['_sale_price'])) update_post_meta( $post_id, '_sale_price', stripslashes( $_REQUEST['_sale_price'] ) );
+			
+			if(isset($_REQUEST['_sale_price']) && stripslashes( $_REQUEST['_sale_price'] )!=$product->sale_price) {
+				$price_changed = true;
+				$product->sale_price = stripslashes( $_REQUEST['_sale_price'] );
+			}
+			
+		}
+
+		if ($price_changed) {
+			update_post_meta( $post_id, '_sale_price_dates_from', '');
+			update_post_meta( $post_id, '_sale_price_dates_to', '');
+			
+			if ($product->sale_price) {
+				update_post_meta( $post_id, '_price', $product->sale_price );
+			} else {
+				update_post_meta( $post_id, '_price', $product->regular_price );
+			}
+		}
+	}
+	
+	// Handle stock
+	if (!$product->is_type('grouped')) {
+		if (isset($_REQUEST['_manage_stock']) && $_REQUEST['_manage_stock']) {
+		
+			if ($_REQUEST['_manage_stock']=='yes') {
+				update_post_meta( $post_id, '_manage_stock', 'yes' );
+				
+				if (isset($_REQUEST['change_stock']) && $_REQUEST['change_stock']==1) update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
+			} else {
+				update_post_meta( $post_id, '_manage_stock', 'no' );
+				update_post_meta( $post_id, '_stock', '0' );
+			}
+			
+		}
+	}
+
+	// Clear transient
+	$woocommerce->clear_product_transients( $post_id ); 
+}  

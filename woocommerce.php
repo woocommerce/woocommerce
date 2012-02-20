@@ -530,7 +530,7 @@ class Woocommerce {
 	            'hierarchical' 			=> false,
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
-	                    'name' 				=> __( 'Product Tags', 'woocommerce'),
+	                    'name' 				=> __( 'Tags', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Product Tag', 'woocommerce'),
 	                    'search_items' 		=> __( 'Search Product Tags', 'woocommerce'),
 	                    'all_items' 		=> __( 'All Product Tags', 'woocommerce'),

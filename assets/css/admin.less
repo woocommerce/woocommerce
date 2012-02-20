@@ -66,7 +66,7 @@ mark.amount {
 }
 
 /* Bulk/Quick edit */
-.inline-edit-product {
+.inline-edit-product.quick-edit-row {
 	.inline-edit-col-center, .inline-edit-col-right {
 		float: right !important;
 	}
@@ -101,6 +101,30 @@ mark.amount {
 	}
 	.length, .width, .height {
 		width: 32.33%;
+	}
+}
+#woocommerce-fields-bulk.inline-edit-col {
+	label {
+		clear: left;
+	}
+	.inline-edit-group {
+		label, div.alignright {
+			clear: none;
+			width: 49%;
+			margin: .2em 0;
+		}
+	}
+	.regular_price, .sale_price, .weight, .stock {
+		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+		box-sizing: border-box;         /* Opera/IE 8+ */
+		width: 100%;
+	}
+	.length, .width, .height {
+		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+		box-sizing: border-box;         /* Opera/IE 8+ */
+		width: 32%;
 	}
 }
 
