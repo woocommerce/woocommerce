@@ -523,8 +523,6 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<span class="checkbox-title"><?php _e('Featured', 'woocommerce'); ?></span>
 			</label>
 			<br class="clear" />
-			
-			<h4><?php _e('Inventory', 'woocommerce'); ?></h4>
 			<label class="alignleft">  
 			    <span class="title"><?php _e('In stock?', 'woocommerce'); ?></span>  
 			    <span class="input-text-wrap"> 
