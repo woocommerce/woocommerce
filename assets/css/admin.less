@@ -693,11 +693,18 @@ table.wp-list-table {
 		text-align: center;
 		img {
 			margin: 0 auto;
+			padding-top: 0 !important;
 		}
 	}
-	th.column-note {
+	.column-order_comments {
+		width: 3em !important;
+		.post-com-count {
+			float: left;
+		}
+	}
+	th.column-note, th.column-order_comments {
 		img {
-			padding-top: 2px !important;
+			padding-top: 1px !important;
 		}
 	}
 	.manage-column.column-featured img, .manage-column.column-product_type img {
