@@ -269,16 +269,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 					
 					$item_name 	= $item['name'];
 					
-					if (get_option('woocommerce_enable_sku')=='yes' && $product->get_sku()) {
-						$item_name .= ' ('.$product->get_sku().')';
-					}
-					
 					$item_meta = new order_item_meta( $item['item_meta'] );					
 					if ($meta = $item_meta->display( true, true )) :
 						$item_name .= ' ('.$meta.')';
 					endif;
 						
 					$paypal_args['item_name_'.$item_loop] = $item_name;
+					if ($product->get_sku()) $paypal_args['item_number_'.$item_loop] = $product->get_sku();
 					$paypal_args['quantity_'.$item_loop] = $item['qty'];
 					$paypal_args['amount_'.$item_loop] = $order->get_item_total( $item, false );
 					
