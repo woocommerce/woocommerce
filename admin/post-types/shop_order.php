@@ -13,6 +13,7 @@
 add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
 
 function woocommerce_edit_order_columns($columns){
+	global $woocommerce;
 	
 	$columns = array();
 	
@@ -22,12 +23,13 @@ function woocommerce_edit_order_columns($columns){
 	$columns["billing_address"] = __("Billing", 'woocommerce');
 	$columns["shipping_address"] = __("Shipping", 'woocommerce');
 	$columns["total_cost"] = __("Order Total", 'woocommerce');
+	$columns["comments"] = '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . esc_url( admin_url( 'images/comment-grey-bubble.png' ) ) . '" />';
+	$columns["note"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/note_head.png" alt="' . __("Customer Notes", 'woocommerce') . '" class="tips" tip="' . __("Customer Notes", 'woocommerce') . '" />';
 	$columns["order_date"] = __("Date", 'woocommerce');
 	$columns["order_actions"] = __("Actions", 'woocommerce');
 	
 	return $columns;
 }
-
 
 /**
  * Custom Columns for order page
@@ -36,7 +38,7 @@ add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_co
 
 function woocommerce_custom_order_columns($column) {
 
-	global $post;
+	global $post, $woocommerce;
 	$order = new WC_Order( $post->ID );
 	
 	switch ($column) {
@@ -127,6 +129,14 @@ function woocommerce_custom_order_columns($column) {
 				<?php if (in_array($order->status, array('pending', 'on-hold', 'processing'))) : ?><a class="button" href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID), 'woocommerce-mark-order-complete' ); ?>"><?php _e('Complete', 'woocommerce'); ?></a><?php endif; ?>
 				<a class="button" href="<?php echo admin_url('post.php?post='.$post->ID.'&action=edit'); ?>"><?php _e('View', 'woocommerce'); ?></a>
 			</p><?php
+			
+		break;
+		case "note" :
+			
+			if ($order->customer_note) 
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" tip="'. __('Yes', 'woocommerce') .'" />';
+			else 
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" tip="'. __('No', 'woocommerce') .'" />';
 			
 		break;
 	}
@@ -260,6 +270,7 @@ function woocommerce_custom_shop_order_sort($columns) {
 		'order_total'	=> 'order_total',
 		'order_date'	=> 'date'
 	);
+	unset($columns['comments']);
 	return wp_parse_args($custom, $columns);
 }
 

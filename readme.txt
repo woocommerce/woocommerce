@@ -147,6 +147,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Added Bulgarian translation
 * Fixed SKU sort in admin
 * woocommerce_file_download_path hook
+* Order screen has icons showing customer notes + order notes
+* Fixed category hierarchy (typo)
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
