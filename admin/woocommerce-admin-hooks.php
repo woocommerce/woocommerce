@@ -34,4 +34,4 @@ add_filter( 'tiny_mce_version', 'woocommerce_refresh_mce' );
 /** Category/Term ordering ************************************************/
 
 add_action("create_term", 'woocommerce_create_term', 5, 3);
-add_action("delete_product_term", 'woocommerce_delete_term', 5, 3);
+add_action("delete_term", 'woocommerce_delete_term', 5, 3);
