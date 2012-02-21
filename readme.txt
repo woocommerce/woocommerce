@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Bulk edit products
 * Added basic API for payment gateways to hook into (for IPN etc)
 * Added Bulgarian translation
+* Fixed SKU sort in admin
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

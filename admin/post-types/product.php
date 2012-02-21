@@ -280,7 +280,8 @@ function woocommerce_custom_product_orderby( $vars ) {
 		endif;
 		if ( 'sku' == $vars['orderby'] ) :
 			$vars = array_merge( $vars, array(
-				'orderby' 	=> 'id'
+				'meta_key' 	=> '_sku',
+				'orderby' 	=> 'meta_value'
 			) );
 		endif;
 	endif;
