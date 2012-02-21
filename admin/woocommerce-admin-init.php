@@ -43,7 +43,7 @@ function woocommerce_admin_install_notice() {
 	?>
 	<div id="message" class="updated woocommerce-message wc-connect">
 		<div class="squeezer">
-			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; Your almost ready to start selling :)', 'woocommerce' ); ?></h4>
+			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; You\'re almost ready to start selling :)', 'woocommerce' ); ?></h4>
 			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
 		</div>
 	</div>
@@ -53,7 +53,7 @@ function woocommerce_admin_installed_notice() {
 	?>
 	<div id="message" class="updated woocommerce-message wc-connect">
 		<div class="squeezer">
-			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; Your ready to start selling :)', 'woocommerce' ); ?></h4>
+			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; You\'re ready to start selling :)', 'woocommerce' ); ?></h4>
 			
 			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e('Documentation', 'woocommerce'); ?></a></p>
 			
