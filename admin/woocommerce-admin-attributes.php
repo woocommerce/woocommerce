@@ -119,12 +119,12 @@ function woocommerce_edit_attribute() {
 	    				<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 							
 							<div class="form-field">
-								<label for="attribute_label"><?php _e('Attribute Label', 'woocommerce'); ?></label>
+								<label for="attribute_label"><?php _e('Name', 'woocommerce'); ?></label>
 								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
-								<p class="description"><?php _e('Label for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
+								<p class="description"><?php _e('Name for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
 							</div>
 							<div class="form-field">
-								<label for="attribute_type"><?php _e('Attribute type', 'woocommerce'); ?></label>
+								<label for="attribute_type"><?php _e('Type', 'woocommerce'); ?></label>
 								<select name="attribute_type" id="attribute_type">
 									<option value="select" <?php selected($att_type, 'select'); ?>><?php _e('Select', 'woocommerce') ?></option>
 									<option value="text" <?php selected($att_type, 'text'); ?>><?php _e('Text', 'woocommerce') ?></option>										
@@ -162,7 +162,7 @@ function woocommerce_add_attribute() {
 				        <thead>
 				            <tr>
 				                <th scope="col"><?php _e('Name', 'woocommerce') ?></th>
-				                <th scope="col"><?php _e('Label', 'woocommerce') ?></th>
+				                <th scope="col"><?php _e('Slug', 'woocommerce') ?></th>
 				                <th scope="col"><?php _e('Type', 'woocommerce') ?></th>
 				                <th scope="col" colspan="2"><?php _e('Terms', 'woocommerce') ?></th>
 				            </tr>
@@ -172,15 +172,13 @@ function woocommerce_add_attribute() {
 				        		$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();
 				        		if ( $attribute_taxonomies ) :
 				        			foreach ($attribute_taxonomies as $tax) :
-				        				$att_title = $tax->attribute_name;
-				        				if ( isset( $tax->attribute_label ) ) { $att_title = $tax->attribute_label; }
 				        				?><tr>
 
-				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo $att_title; ?></a>
+				        					<td><a href="edit-tags.php?taxonomy=<?php echo esc_html($woocommerce->attribute_taxonomy_name($tax->attribute_name)); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a>
 				        					
 				        					<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg('edit', $tax->attribute_id, 'admin.php?page=woocommerce_attributes') ); ?>"><?php _e('Edit', 'woocommerce'); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg('delete', $tax->attribute_id, 'admin.php?page=woocommerce_attributes'), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php _e('Delete', 'woocommerce'); ?></a></span></div>				        					
 				        					</td>
-				        					<td><?php echo esc_html( ucwords( $att_title ) ); ?></td>
+				        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 				        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
 				        					<td><?php 
 				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
@@ -216,19 +214,19 @@ function woocommerce_add_attribute() {
 	    				<p><?php _e('Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce') ?></p>
 	    				<form action="admin.php?page=woocommerce_attributes" method="post">
 							<div class="form-field">
-								<label for="attribute_label"><?php _e('Attribute label', 'woocommerce'); ?></label>
+								<label for="attribute_label"><?php _e('Name', 'woocommerce'); ?></label>
 								<input name="attribute_label" id="attribute_label" type="text" value="" />
 								<p class="description"><?php _e('Name for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
 							</div>
 							
 							<div class="form-field">
-								<label for="attribute_name"><?php _e('Attribute slug', 'woocommerce'); ?></label>
+								<label for="attribute_name"><?php _e('Slug', 'woocommerce'); ?></label>
 								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
 								<p class="description"><?php _e('Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce'); ?></p>
 							</div>
 							
 							<div class="form-field">
-								<label for="attribute_type"><?php _e('Attribute type', 'woocommerce'); ?></label>
+								<label for="attribute_type"><?php _e('Type', 'woocommerce'); ?></label>
 								<select name="attribute_type" id="attribute_type">
 									<option value="select"><?php _e('Select', 'woocommerce') ?></option>
 									<option value="text"><?php _e('Text', 'woocommerce') ?></option>										
