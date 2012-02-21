@@ -784,7 +784,7 @@ function woocommerce_download_product() {
 			endif;
 			
 			// Get the downloads URL and try to replace the url with a path
-			$file_path = get_post_meta($download_file, '_file_path', true);	
+			$file_path = apply_filters('woocommerce_file_download_path', get_post_meta($download_file, '_file_path', true), $download_file);	
 			
 			if (!$file_path) exit;
 			
