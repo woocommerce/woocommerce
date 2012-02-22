@@ -1019,7 +1019,7 @@ class WC_Cart {
 			 *
 			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 			 */
-			$this->total = number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, 2, '.', '');
+			$this->total = apply_filters('woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, 2, '.', ''), $this);
 			
 			if ($this->total < 0) $this->total = 0;
 		}
