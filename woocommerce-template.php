@@ -366,7 +366,7 @@ if (!function_exists('woocommerce_quantity_input')) {
 			'min_value'		=> '0'
 		);
 
-		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters('woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ));
 		
 		woocommerce_get_template('single-product/add-to-cart/quantity.php', $args);
 	}

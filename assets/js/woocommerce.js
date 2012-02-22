@@ -128,6 +128,18 @@ jQuery(document).ready(function($) {
 	// Quantity buttons
 	$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 	
+	$("div.quantity, td.quantity").find('.qty').each(function(){
+		
+		var min = parseInt($(this).attr('data-min'));
+		
+		if (min && min > 1 && parseInt($(this).val()) < min) {
+			
+			$(this).val(min);
+			
+		}
+		
+	});
+	
 	$(".plus").live('click', function() {
 	    var currentVal = parseInt($(this).prev(".qty").val());
 	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 0;
