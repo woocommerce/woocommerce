@@ -922,11 +922,13 @@ class WC_Countries {
 
 			$address_fields['billing_email'] = array(
 				'label' 		=> __('Email Address', 'woocommerce'), 
+				'placeholder' 	=> __('Email Address', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first')
 			);	
 			$address_fields['billing_phone'] = array(
 				'label' 		=> __('Phone', 'woocommerce'), 
+				'placeholder' 	=> __('Phone', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'clear'			=> true
