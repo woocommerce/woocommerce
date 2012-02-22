@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix for default value when data-min is used
 * Hooks for quantity selectors
 * Load order of the translation files tweaked so ones in wp-content/languages get priority
+* Improved woocommerce_get_template_part
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
