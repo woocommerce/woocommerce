@@ -305,10 +305,11 @@ class Woocommerce {
 	 * Localisation
 	 **/
 	function load_plugin_textdomain() {
-		$variable_lang = (get_option('woocommerce_informal_localisation_type')=='yes') ? 'informal' : 'formal';
-		load_plugin_textdomain('woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages');
-		load_plugin_textdomain('woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/../../languages/woocommerce');
-		load_plugin_textdomain('woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' . $variable_lang );
+		// Note: the first-loaded translation file overrides any following ones if the same translation is present
+		$variable_lang = ( get_option( 'woocommerce_informal_localisation_type' ) == 'yes' ) ? 'informal' : 'formal';
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/../../languages/woocommerce');
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages/'.$variable_lang );
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages');
 	}
 	
 	/**
