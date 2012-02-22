@@ -1031,6 +1031,11 @@ class Woocommerce {
 		
 		unset($_SESSION['messages']);
 		unset($_SESSION['errors']);
+		
+		// Load errors from querystring
+		if (isset($_GET['wc_error'])) {
+			$this->add_error( esc_attr( $_GET['wc_error'] ) );
+		}
 	}
 
 	/**

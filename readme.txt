@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Delete term cleanup
 * Filters to override default country and state on checkout form
 * Added item_number to paypal standard (sku)
+* Errors can be loaded into any page though wc_error query string var
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
