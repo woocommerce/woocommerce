@@ -113,14 +113,33 @@ if (!function_exists('is_ajax')) {
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
 	global $woocommerce;
-	if ($name=='shop' && !locate_template(array( 'loop-shop.php', $woocommerce->template_url . 'loop-shop.php' ))) {
-		load_template( $woocommerce->plugin_path() . '/templates/loop-shop.php',false );
-		return;
-	} elseif ($name=='shop' && locate_template(array( $woocommerce->template_url . 'loop-shop.php' ))) {
-		get_template_part( $woocommerce->template_url . $slug, $name );
-		return;
+	$template = '';
+	
+	if ( $name ) {
+		
+		// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
+		$template = locate_template( array ( "{$slug}-{$name}.php", "{$woocommerce->template_url}{$slug}-{$name}.php" ) );
+
+		// Get default slug-name.php
+		if ( !$template && file_exists( $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php" ) )
+			$template = $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php";
+		
 	}
-	get_template_part( $slug, $name );
+	
+	// If template file doesn't exist, look in slug.php to follow get_template_part wordpress function
+	if ( !$template ) {
+	
+		// Look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
+		$template = locate_template( array ( "{$slug}.php", "{$woocommerce->template_url}{$slug}.php" ) );
+		
+		// Get default slug.php
+		if ( !$template && file_exists( $woocommerce->plugin_path() . "/templates/{$slug}.php" ) )
+			$template = $woocommerce->plugin_path() . "/templates/{$slug}.php";
+		
+	}
+
+	if ( $template )
+		load_template( $template, false );
 }
 
 /**
