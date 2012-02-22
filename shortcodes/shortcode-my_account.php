@@ -171,15 +171,10 @@ add_action( 'template_redirect', 'woocommerce_save_address' );
  * @since 1.4
  */
 function woocommerce_get_address_to_edit() {
-	$load_address = 'billing';
 
-	if ( isset( $_GET[ 'address' ] ) )
-		$load_address = esc_attr( $_GET[ 'address' ] );
-
-	if ( $load_address == 'billing' )
-		$load_address = 'billing'; 
-	else 
-		$load_address = 'shipping';
+	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
+	
+	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
 
 	return $load_address;
 }
