@@ -108,36 +108,36 @@ function woocommerce_edit_attribute() {
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-	    <h2><?php _e('Attributes', 'woocommerce') ?></h2>
-	    <br class="clear" />
-	    <div id="col-container">
-	    	<div id="col-left">
-	    		<div class="col-wrap">
-	    			<div class="form-wrap">
-	    				<h3><?php _e('Edit Attribute', 'woocommerce') ?></h3>
-	    				<p><?php _e('Attribute taxonomy names cannot be changed; you may only change an attributes type.', 'woocommerce') ?></p>
-	    				<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
-							
-							<div class="form-field">
-								<label for="attribute_label"><?php _e('Name', 'woocommerce'); ?></label>
-								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
-								<p class="description"><?php _e('Name for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
-							</div>
-							<div class="form-field">
-								<label for="attribute_type"><?php _e('Type', 'woocommerce'); ?></label>
-								<select name="attribute_type" id="attribute_type">
-									<option value="select" <?php selected($att_type, 'select'); ?>><?php _e('Select', 'woocommerce') ?></option>
-									<option value="text" <?php selected($att_type, 'text'); ?>><?php _e('Text', 'woocommerce') ?></option>										
-								</select>
-							</div>
-							
-							<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button" value="<?php _e('Save Attribute', 'woocommerce'); ?>"></p>
-							<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
-	    				</form>
-	    			</div>
-	    		</div>
-	    	</div>
-	    </div>
+	    <h2><?php _e('Edit Attribute', 'woocommerce') ?></h2>
+		<form action="admin.php?page=woocommerce_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
+			<table class="form-table">
+				<tbody>
+					<tr class="form-field form-required">
+						<th scope="row" valign="top">
+							<label for="attribute_label"><?php _e('Name', 'woocommerce'); ?></label>
+						</th>
+						<td>
+							<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
+							<p class="description"><?php _e('Name for the attribute (shown on the front-end).', 'woocommerce'); ?></p>
+						</td>
+					</tr>
+					<tr class="form-field form-required">
+						<th scope="row" valign="top">
+							<label for="attribute_type"><?php _e('Type', 'woocommerce'); ?></label>
+						</th>
+						<td>
+							<select name="attribute_type" id="attribute_type">
+								<option value="select" <?php selected($att_type, 'select'); ?>><?php _e('Select', 'woocommerce') ?></option>
+								<option value="text" <?php selected($att_type, 'text'); ?>><?php _e('Text', 'woocommerce') ?></option>										
+							</select>
+							<p class="description"><?php _e('Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce'); ?></p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php _e('Update', 'woocommerce'); ?>"></p>
+			<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
+		</form>
 	</div>
 	<?php
 	
