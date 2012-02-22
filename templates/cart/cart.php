@@ -21,6 +21,8 @@ global $woocommerce;
 		</tr>
 	</thead>
 	<tbody>
+		<?php do_action( 'woocommerce_before_cart_contents' ); ?>
+		
 		<?php
 		if (sizeof($woocommerce->cart->get_cart())>0) : 
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
@@ -88,6 +90,8 @@ global $woocommerce;
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 			</td>
 		</tr>
+		
+		<?php do_action( 'woocommerce_after_cart_contents' ); ?>
 	</tbody>
 </table>
 </form>
