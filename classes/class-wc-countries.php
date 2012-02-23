@@ -840,22 +840,25 @@ class WC_Countries {
 		$fields = array(
 			'first_name' => array( 
 				'label' 		=> __('First Name', 'woocommerce'), 
+				'placeholder' 	=> __('First Name', 'woocommerce'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-first'),
 				),
 			'last_name' => array( 
 				'label' 		=> __('Last Name', 'woocommerce'), 
+				'placeholder' 	=> __('Last Name', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'clear'			=> true
 				),
 			'company' 	=> array( 
 				'label' 		=> __('Company Name', 'woocommerce'), 
-				'placeholder' 	=> __('Company (optional)', 'woocommerce'),
+				'placeholder' 	=> __('Company (optional)', 'woocommerce'), 
 				'clear'			=> true
 				),
 			'address_1' 	=> array( 
 				'label' 		=> __('Address', 'woocommerce'), 
+				'placeholder' 	=> __('Address', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				),
@@ -868,11 +871,13 @@ class WC_Countries {
 				),
 			'city' 		=> array( 
 				'label' 		=> __('Town/City', 'woocommerce'), 
+				'placeholder' 	=> __('Town/City', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				),
 			'postcode' 	=> array( 
 				'label' 		=> __('Postcode/Zip', 'woocommerce'), 
+				'placeholder' 	=> __('Postcode/Zip', 'woocommerce'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-last', 'update_totals_on_change'),
 				'clear'			=> true
@@ -880,12 +885,14 @@ class WC_Countries {
 			'country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woocommerce'), 
+				'placeholder' 	=> __('Country', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'),
 				),
 			'state' 	=> array( 
 				'type'			=> 'state', 
 				'label' 		=> __('State/County', 'woocommerce'), 
+				'placeholder' 	=> __('State/County', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last', 'update_totals_on_change'),
 				'clear'			=> true
@@ -915,11 +922,13 @@ class WC_Countries {
 
 			$address_fields['billing_email'] = array(
 				'label' 		=> __('Email Address', 'woocommerce'), 
+				'placeholder' 	=> __('Email Address', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first')
 			);	
 			$address_fields['billing_phone'] = array(
 				'label' 		=> __('Phone', 'woocommerce'), 
+				'placeholder' 	=> __('Phone', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'clear'			=> true
