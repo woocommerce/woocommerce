@@ -654,7 +654,7 @@ if (!function_exists('woocommerce_form_field')) {
 		
 		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
 		
-		$required = ( $args['required'] ) ? ' <span class="required">*</span>' : '';
+		$required = ( $args['required'] ) ? ' <abbr class="required" title="'.esc_attr__( 'required', 'woocommerce' ).'">*</abbr>' : '';
 		
 		switch ($args['type']) :
 			case "country" :
