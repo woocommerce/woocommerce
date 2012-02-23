@@ -128,7 +128,7 @@ jQuery(document).ready(function($) {
 	// Quantity buttons
 	$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 	
-	$("div.quantity, td.quantity").find('.qty').each(function(){
+	$("div.quantity:not(.cart div.quantity), td.quantity").find('.qty').each(function(){
 		
 		var min = parseInt($(this).attr('data-min'));
 		
