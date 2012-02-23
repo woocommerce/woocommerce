@@ -29,7 +29,7 @@ class WC_Query {
 		
 		// Only apply to product categories, the product post archive, the shop page, and product tags
 	    if 	( 
-	    		( !is_main_query() ) || (
+	    		( !$q->is_main_query() ) || (
 	    			!$q->is_tax( 'product_cat' ) 
 	    			&& !$q->is_tax( 'product_tag' ) 
 	    			&& !$q->is_post_type_archive( 'product' ) 
