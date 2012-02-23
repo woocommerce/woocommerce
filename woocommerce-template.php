@@ -654,11 +654,13 @@ if (!function_exists('woocommerce_form_field')) {
 		
 		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
 		
+		$required = ( $args['required'] ) ? ' <span class="required">*</span>' : '';
+		
 		switch ($args['type']) :
 			case "country" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required .'</label>
 					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
 						<option value="">'.__('Select a country&hellip;', 'woocommerce').'</option>';
 				
@@ -672,7 +674,7 @@ if (!function_exists('woocommerce_form_field')) {
 			case "state" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>';
 				
 				/* Get Country */
 				$country_key = ($key=='billing_state') ? 'billing_country' : 'shipping_country';
@@ -710,7 +712,7 @@ if (!function_exists('woocommerce_form_field')) {
 			case "textarea" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required .'</label>
 					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $value ).'</textarea>
 				</p>'.$after;
 				
@@ -719,14 +721,14 @@ if (!function_exists('woocommerce_form_field')) {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($value, 1, false).' />
-					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>' . $required . '
 				</p>'.$after;
 				
 			break;
 			case "password" :
 		
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>
 					<input type="password" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $value.'" />
 				</p>'.$after;
 
@@ -734,7 +736,7 @@ if (!function_exists('woocommerce_form_field')) {
 			case "text" :
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>
 					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $value.'" />
 				</p>'.$after;
 				
