@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Improved edit my address page when accessed directly
 * Extra hooks in carts/totals
 * Tweaked attributes page/labels
+* Added required * to checkout fields, dynamically for locales
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

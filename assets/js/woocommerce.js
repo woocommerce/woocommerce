@@ -636,6 +636,7 @@ jQuery(document).ready(function($) {
 		/* Localisation */
 		var locale_json = woocommerce_params.locale.replace(/&quot;/g, '"');
 		var locale = $.parseJSON( locale_json );
+		var required = ' <abbr class="required" title="' + woocommerce_params.required_text + '">*</abbr>';
 	
 		// Handle locale
 		$('body').bind('country_to_state_changing', function( event, country, wrapper ){
@@ -653,8 +654,23 @@ jQuery(document).ready(function($) {
 				var field = thisform.find('#billing_state_field, #shipping_state_field');
 				
 				if ( thislocale['state']['label'] ) {
-					field.find('label').text( thislocale['state']['label'] );
+
+					field.find('label').html( thislocale['state']['label'] );
+					
+				} 
+				
+				field.find('label abbr').remove();
+
+				if ( typeof thislocale['state']['required'] == 'undefined' || thislocale['state']['required'] == true ) {
+					
+					field.find('label').append( required );
+	
 				}
+				
+			} else {
+				
+				if (field.find('label abbr').size()==0) field.find('label').append( required );
+				
 			}
 			
 			var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
@@ -662,16 +678,47 @@ jQuery(document).ready(function($) {
 				
 			// City Handling
 			if ( thislocale['city'] ) {
+			
 				if ( thislocale['city']['label'] ) {
-					cityfield.find('label').text( thislocale['city']['label'] );
+					
+					cityfield.find('label').html( thislocale['city']['label'] );
+					
+				} 
+				
+				cityfield.find('label abbr').remove();
+				
+				if ( typeof thislocale['city']['required'] == 'undefined' || thislocale['city']['required'] == true ) {
+					
+					cityfield.find('label').append( required );
+	
 				}
+				
+			} else {
+				if (cityfield.find('label abbr').size()==0) cityfield.find('label').append( required );
+				
 			}
 			
 			// Postcode Handling
 			if ( thislocale['postcode'] ) {
+			
 				if ( thislocale['postcode']['label'] ) {
-					postcodefield.find('label').text( thislocale['postcode']['label'] );
+					
+					postcodefield.find('label').html( thislocale['postcode']['label'] );
+					
+				} 
+				
+				postcodefield.find('label abbr').remove();
+
+				if ( typeof thislocale['postcode']['required'] == 'undefined' || thislocale['postcode']['required'] == true ) {
+					
+					postcodefield.find('label').append( required );
+	
 				}
+				
+			} else {
+			
+				if (postcodefield.find('label abbr').size()==0) postcodefield.find('label').append( required );
+				
 			}
 			
 			// Re-order postcode/city

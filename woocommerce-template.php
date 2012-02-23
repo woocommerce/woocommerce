@@ -654,7 +654,7 @@ if (!function_exists('woocommerce_form_field')) {
 		
 		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
 		
-		$required = ( $args['required'] ) ? ' <span class="required">*</span>' : '';
+		$required = ( $args['required'] ) ? ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>' : '';
 		
 		switch ($args['type']) :
 			case "country" :
@@ -721,7 +721,7 @@ if (!function_exists('woocommerce_form_field')) {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($value, 1, false).' />
-					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>' . $required . '
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'] . $required . '</label>
 				</p>'.$after;
 				
 			break;

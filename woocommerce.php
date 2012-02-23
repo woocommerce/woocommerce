@@ -899,6 +899,7 @@ class Woocommerce {
 		$woocommerce_params = array(
 			'countries' 					=> $states,
 			'select_state_text' 			=> __('Select an option&hellip;', 'woocommerce'),
+			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),
 			'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
