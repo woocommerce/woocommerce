@@ -101,6 +101,8 @@ global $woocommerce;
 	
 	<?php woocommerce_cart_totals(); ?>
 	
+	<?php do_action('woocommerce_do_after_cart_totals'); ?>
+	
 	<?php woocommerce_shipping_calculator(); ?>
 	
 </div>
