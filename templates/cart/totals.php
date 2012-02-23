@@ -9,6 +9,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 ?>
 <div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
 	
+	<?php do_action('woocommerce_before_cart_totals'); ?>
+	
 	<?php if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) : ?>
 	
 		<h2><?php _e('Cart Totals', 'woocommerce'); ?></h2>
@@ -209,4 +211,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<?php endif; ?>
 		
 	<?php endif; ?>
+	
+	<?php do_action('woocommerce_after_cart_totals'); ?>
+	
 </div>
