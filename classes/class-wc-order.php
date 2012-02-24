@@ -683,7 +683,7 @@ class WC_Order {
 					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
 				
 				// Sales
-				if ($this->status == 'on-hold' && ($new_status->slug=='processing' || $new_status->slug=='completed')) 
+				if ($new_status->slug=='processing' || $new_status->slug=='completed') 
 					$this->record_product_sales();
 				
 			}

@@ -167,6 +167,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * is main query tweak
 * Filters for BACS fields
 * Polish translation by Maciej Swoboda
+* More reliable cache deletion
+* Fixed record_product_sales
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
