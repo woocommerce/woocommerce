@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Added required * to checkout fields, dynamically for locales
 * is main query tweak
 * Filters for BACS fields
+* Polish translation by Maciej Swoboda
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
