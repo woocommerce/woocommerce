@@ -3210,8 +3210,8 @@ msgstr "E-mail template"
 #: admin/woocommerce-admin-settings.php:888
 #, php-format
 #@ woocommerce
-msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>."
-msgstr "Deze sectie wordt gebruikt om WooCommerce e-mails aan te passen. <a href=\"%s\" target=\"_blank\">Klik hier om e-mailtemplates te bekijken</a>. Voor meer functies, kopieer <code>woocommerce/templates/emails/</code> naar <code>yourtheme/woocommmerce/emails/</code>."
+msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Deze sectie wordt gebruikt om WooCommerce e-mails aan te passen. <a href=\"%s\" target=\"_blank\">Klik hier om e-mailtemplates te bekijken</a>. Voor meer functies, kopieer <code>woocommerce/templates/emails/</code> naar <code>yourtheme/woocommerce/emails/</code>."
 
 #: admin/woocommerce-admin-settings.php:891
 #@ woocommerce

@@ -841,7 +841,7 @@ ul.woocommerce_stats strong {
 #dashboard_right_now .t a {
   white-space: normal;
 }
-#woocommmerce_dashboard_sales h3 a {
+#woocommerce_dashboard_sales h3 a {
   float: right;
   margin-left: 8px;
 }
@@ -897,32 +897,32 @@ ul.recent-orders.stock_list a,
 ul.stock_list.stock_list a {
   text-decoration: none;
 }
-#woocommmerce_dashboard_recent_reviews li {
+#woocommerce_dashboard_recent_reviews li {
   line-height: 1.5em;
   margin-bottom: 12px;
 }
-#woocommmerce_dashboard_recent_reviews h4.meta {
+#woocommerce_dashboard_recent_reviews h4.meta {
   line-height: 1.4;
   margin: -0.2em 0 0 0;
   font-weight: normal;
   color: #999;
 }
-#woocommmerce_dashboard_recent_reviews blockquote {
+#woocommerce_dashboard_recent_reviews blockquote {
   padding: 0;
   margin: 0;
 }
-#woocommmerce_dashboard_recent_reviews .avatar {
+#woocommerce_dashboard_recent_reviews .avatar {
   float: left;
   margin: 0 10px 5px 0;
 }
-#woocommmerce_dashboard_recent_reviews .star-rating {
+#woocommerce_dashboard_recent_reviews .star-rating {
   float: right;
   width: 50px;
   height: 10px;
   margin: 3px 0 0 0;
   background: url(../images/admin-star.png) repeat-x left -10px;
 }
-#woocommmerce_dashboard_recent_reviews .star-rating span {
+#woocommerce_dashboard_recent_reviews .star-rating span {
   background: url(../images/admin-star.png) repeat-x left 0;
   height: 0;
   padding-top: 10px;

@@ -908,7 +908,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array( 'type' => 'sectionend', 'id' => 'email_options' ),
 	
-	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__('This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>.', 'woocommerce'), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
+	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__('This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce'), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
 	
 	array(  
 		'name' => __( 'Header image', 'woocommerce' ),

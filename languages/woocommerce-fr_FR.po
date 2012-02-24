@@ -2903,8 +2903,8 @@ msgstr "Modèle d'email"
 # @ woothemes
 #: ../admin/woocommerce-admin-settings.php:861
 #, php-format
-msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>."
-msgstr "Cette section vous laisse la possibilité de personnaliser les emails WooCommerce. <a href=\"%s\" target=\"_blank\">Cliquer ici pour prévisualiser votre modèle d'email</a>. Pour davantage de contrôles copiez <code>woocommerce/templates/emails/</code> dans <code>votretheme/woocommmerce/emails/</code>."
+msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Cette section vous laisse la possibilité de personnaliser les emails WooCommerce. <a href=\"%s\" target=\"_blank\">Cliquer ici pour prévisualiser votre modèle d'email</a>. Pour davantage de contrôles copiez <code>woocommerce/templates/emails/</code> dans <code>votretheme/woocommerce/emails/</code>."
 
 # @ woothemes
 #: ../admin/woocommerce-admin-settings.php:864

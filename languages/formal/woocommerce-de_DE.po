@@ -6359,8 +6359,8 @@ msgstr "E-Mail-Absender Optionen"
 #: admin/woocommerce-admin-settings.php:888
 #, php-format
 #@ woocommerce
-msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>."
-msgstr "Hier können Sie die WooCommerce E-Mails anpassen. <a href=\"%s\" target=\"_blank\">Für Vorschau der E-Mailvorlage hier klicken</a>. Wenn Sie weitergehende Änderungen wünschen, kopieren Sie <code>woocommerce/templates/emails/</code> nach <code>ihrtheme/woocommmerce/emails/</code>."
+msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
+msgstr "Hier können Sie die WooCommerce E-Mails anpassen. <a href=\"%s\" target=\"_blank\">Für Vorschau der E-Mailvorlage hier klicken</a>. Wenn Sie weitergehende Änderungen wünschen, kopieren Sie <code>woocommerce/templates/emails/</code> nach <code>ihrtheme/woocommerce/emails/</code>."
 
 #: admin/woocommerce-admin-init.php:47
 #@ woocommerce

@@ -12,7 +12,7 @@ if (current_user_can('manage_woocommerce')) :
 	add_action('right_now_content_table_end', 'woocommerce_content_right_now');
 	add_action('right_now_table_end', 'woocommerce_right_now');
 	add_action('wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
-	add_action('admin_footer', 'woocommmerce_dashboard_sales_js');
+	add_action('admin_footer', 'woocommerce_dashboard_sales_js');
 endif;
 
 /**
@@ -103,15 +103,15 @@ function woocommerce_init_dashboard_widgets() {
 	
 	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
-	wp_add_dashboard_widget('woocommmerce_dashboard_sales', $sales_heading, 'woocommmerce_dashboard_sales');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woocommerce'), 'woocommmerce_dashboard_recent_orders');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_reviews', __('WooCommerce recent reviews', 'woocommerce'), 'woocommmerce_dashboard_recent_reviews');
+	wp_add_dashboard_widget('woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales');
+	wp_add_dashboard_widget('woocommerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woocommerce'), 'woocommerce_dashboard_recent_orders');
+	wp_add_dashboard_widget('woocommerce_dashboard_recent_reviews', __('WooCommerce recent reviews', 'woocommerce'), 'woocommerce_dashboard_recent_reviews');
 } 
 				     		
 /**
  * Recent orders widget
  */
-function woocommmerce_dashboard_recent_orders() {
+function woocommerce_dashboard_recent_orders() {
 
 	$args = array(
 	    'numberposts'     => 8,
@@ -143,7 +143,7 @@ function woocommmerce_dashboard_recent_orders() {
 /**
  * Recent reviews widget
  */
-function woocommmerce_dashboard_recent_reviews() {
+function woocommerce_dashboard_recent_reviews() {
 	global $wpdb;
 	$comments = $wpdb->get_results("SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
 	FROM $wpdb->comments
@@ -203,7 +203,7 @@ function orders_this_month( $where = '' ) {
 /**
  * Sales widget
  */
-function woocommmerce_dashboard_sales() {
+function woocommerce_dashboard_sales() {
 		
 	?><div id="placeholder" style="width:100%; height:300px; position:relative;"></div><?php
 }
@@ -211,7 +211,7 @@ function woocommmerce_dashboard_sales() {
 /**
  * Sales widget javascript
  */
-function woocommmerce_dashboard_sales_js() {
+function woocommerce_dashboard_sales_js() {
 	
 	global $woocommerce;
 	
