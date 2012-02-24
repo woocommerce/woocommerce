@@ -839,7 +839,7 @@ class WC_Order {
 		
 		foreach ($comments as $comment) :
 			$is_customer_note = get_comment_meta($comment->comment_ID, 'is_customer_note', true);
-			if ($is_customer_note) $notes[] = $comment;
+			if ($is_customer_note) $notes[] = make_clickable($comment);
 		endforeach;
 		
 		add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
