@@ -498,7 +498,7 @@ class WC_Checkout {
 							echo json_encode( $result );
 							exit;
 						else :
-							wp_safe_redirect( $result['redirect'] );
+							wp_redirect( $result['redirect'] );
 							exit;
 						endif;
 						

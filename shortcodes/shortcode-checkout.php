@@ -23,7 +23,7 @@ function woocommerce_checkout( $atts ) {
 	
 	do_action('woocommerce_check_cart_items');
 	
-	if ( $woocommerce->error_count()>0 ) {
+	if ( !isset($_POST) && $woocommerce->error_count()>0 ) {
 		
 		woocommerce_get_template('checkout/cart-errors.php');
 		
