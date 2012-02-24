@@ -171,6 +171,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fixed record_product_sales
 * Fix order tracking page
 * Fix dates for orders
+* Made links in customer notes clickable links
+* Product option for customise the button text for external products
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

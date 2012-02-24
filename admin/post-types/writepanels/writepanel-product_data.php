@@ -60,6 +60,9 @@ function woocommerce_product_data_box() {
 			
 				// External URL
 				woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __('Product URL', 'woocommerce'), 'placeholder' => 'http://', 'description' => __('Enter the external URL to the product.', 'woocommerce') ) );
+				
+				// Button text
+				woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __('Button text', 'woocommerce'), 'placeholder' => __('Buy product', 'woocommerce'), 'description' => __('This text will be shown on the button linking to the external product.', 'woocommerce') ) );
 			
 			echo '</div>';
 				
@@ -767,6 +770,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	if ($product_type=='external') :
 		
 		if (isset($_POST['_product_url']) && $_POST['_product_url']) update_post_meta( $post_id, '_product_url', esc_attr($_POST['_product_url']) );
+		if (isset($_POST['_button_text']) && $_POST['_button_text']) update_post_meta( $post_id, '_button_text', esc_attr($_POST['_button_text']) );
 		
 	endif;
 			
