@@ -17,7 +17,7 @@ function get_woocommerce_cart( $atts ) {
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 	
 	if (!defined('WOOCOMMERCE_CART')) define('WOOCOMMERCE_CART', true);
 	

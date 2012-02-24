@@ -30,15 +30,6 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 }
 
 /**
- * Prevent caching
- **/
-function woocommerce_nocache() {
-  	if(!defined('DONOTCACHEPAGE')) {
-		define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
-	}
-}
-
-/**
  * WooCommerce page IDs
  *
  * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking

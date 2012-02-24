@@ -1238,6 +1238,29 @@ class Woocommerce {
 		call_user_func($function, $atts);
 		return $this->cache( $function . '-shortcode', ob_get_clean(), $atts);
 	}
+	
+	/**
+	 * nocache
+	 *
+	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages
+	 */
+	function nocache() {
+		if(!defined('DONOTCACHEPAGE')) define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
+	}
+	
+	/**
+	 * cookie_cart_has_contents
+	 *
+	 * Sets a cookie when the cart has something in it. Can be used by hosts to prevent caching if set.
+	 */
+	function cart_has_contents_cookie( $set ) {
+		if (!headers_sent()) {
+			if ($set) 
+				setcookie("wc-cart-has-contents", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false);
+			else 
+				setcookie("wc-cart-has-contents", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false);
+		}
+	}
 		
 	/** Transients ************************************************************/
 		

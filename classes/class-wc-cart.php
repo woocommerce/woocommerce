@@ -66,6 +66,7 @@ class WC_Cart {
 		 * Get the cart data from the PHP session
 		 */
 		function get_cart_from_session() {
+			global $woocommerce;
 			
 			// Load the coupons
 			$this->applied_coupons = (isset($_SESSION['coupons'])) ? array_filter((array) $_SESSION['coupons']) : array();
@@ -104,6 +105,12 @@ class WC_Cart {
 				$this->cart_contents = array();
 			endif;
 			
+			// Cookie
+			if (sizeof($this->cart_contents)>0) 
+				$woocommerce->cart_has_contents_cookie( true );
+			else 
+				$woocommerce->cart_has_contents_cookie( false );
+				
 			// Load totals
 			$this->cart_contents_total 	= isset($_SESSION['cart_contents_total']) ? $_SESSION['cart_contents_total'] : 0;
 			$this->cart_contents_weight = isset($_SESSION['cart_contents_weight']) ? $_SESSION['cart_contents_weight'] : 0;

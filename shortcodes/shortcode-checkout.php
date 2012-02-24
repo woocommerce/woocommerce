@@ -17,7 +17,7 @@ function get_woocommerce_checkout( $atts ) {
 function woocommerce_checkout( $atts ) {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 
 	if (sizeof($woocommerce->cart->get_cart())==0) return;
 	
