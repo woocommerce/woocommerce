@@ -209,7 +209,7 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
 		if (!$placeholder_width) $placeholder_width = $woocommerce->get_image_size('shop_catalog_image_width');
 		if (!$placeholder_height) $placeholder_height = $woocommerce->get_image_size('shop_catalog_image_height');
 
-		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
+		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'. woocommerce_placeholder_img_src() .'" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
 	}
 }
 
@@ -611,7 +611,7 @@ if (!function_exists('woocommerce_subcategory_thumbnail')) {
 			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
 			$image = $image[0];
 		else :
-			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+			$image = woocommerce_placeholder_img_src();
 		endif;
 	
 		echo '<img src="'.$image.'" alt="'.$category->name.'" width="'.$image_width.'" height="'.$image_height.'" />';

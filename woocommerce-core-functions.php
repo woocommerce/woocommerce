@@ -10,6 +10,15 @@
  */
  
 /**
+ * Get the placeholder for products etc
+ **/
+function woocommerce_placeholder_img_src() {
+	global $woocommerce;
+	
+	return apply_filters('woocommerce_placeholder_img_src', $woocommerce->plugin_url().'/assets/images/placeholder.png');
+}
+ 
+/**
  * HTML emails from WooCommerce
  **/
 function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {

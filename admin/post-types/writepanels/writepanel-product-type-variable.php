@@ -75,7 +75,7 @@ function variable_product_type_options() {
 						$image_id = 0;
 					endif;
 					
-					if (!$image) $image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+					if (!$image) $image = woocommerce_placeholder_img_src();
 					
 					$classes = get_the_terms( $variation->ID, 'product_shipping_class' );
 					if ($classes && !is_wp_error($classes)) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
@@ -299,7 +299,7 @@ function variable_product_type_options() {
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">\
 						<tbody>\
 							<tr>\
-								<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
+								<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
 								\
 								<td><label><?php _e('SKU:', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_sku[' + loop + ']" placeholder="<?php if ($sku = get_post_meta($post->ID, '_sku', true)) echo $sku; ?>" /></td>\
 								\
@@ -548,7 +548,7 @@ function variable_product_type_options() {
 			if (jQuery(this).is('.remove')) {
 				
 				jQuery('.upload_image_id', current_field_wrapper).val('');
-				jQuery('img', current_field_wrapper).attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
+				jQuery('img', current_field_wrapper).attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 				jQuery(this).removeClass('remove');
 				
 			} else {
