@@ -263,7 +263,7 @@ function woocommerce_view_order() {
 	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date_i18n(get_option('date_format'), strtotime($order->order_date)) )
 	. sprintf( __('. Order status: <mark>%s</mark>', 'woocommerce'), __($status->name, 'woocommerce') )
 	. '.</p>';
-
+	
 	$notes = $order->get_customer_order_notes();
 	if ($notes) :
 		?>

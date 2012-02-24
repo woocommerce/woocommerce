@@ -42,7 +42,9 @@ $order = new WC_Order( $order_id );
 
 				echo '
 					<tr>
-						<td class="product-name">'.$item['name'];
+						<td class="product-name">';
+						
+				echo '<a href="'.get_permalink( $item['id'] ).'">' . $item['name'] . '</a>';
 
 				$item_meta = new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
