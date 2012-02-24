@@ -1022,12 +1022,19 @@ table.wc_gateways, table.wc_shipping {
 		}
 	}
 	table.form-table {
+		margin: 0 0 0;
 		textarea.input-text {
 			height: 100%;
 			min-width: 150px;
 		}
 		textarea.wide-input {
 			width: 100%;
+		}
+		img.help_tip {
+			padding: 0;
+			margin: -4px 0 0 5px;
+			vertical-align: middle;
+			cursor: help;
 		}
 	}
 }
@@ -1611,6 +1618,10 @@ img.tips {
 	box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	-webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
 	-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
+	code {
+    	background: #855c76;
+    	padding: 1px;
+    }
 }
 #tiptip_arrow, #tiptip_arrow_inner {
 	position: absolute;
@@ -1702,7 +1713,7 @@ img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: po
 	-o-border-radius:4px;
 	-khtml-border-radius:4px;
 	border-radius:4px;
-    opacity: 0.80
+    opacity: 0.80;
 }
 
 /* Custom charts */

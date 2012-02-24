@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.4.5 =
 * Quick edit products
 * Bulk edit products
+* Better mixed cart handling - option to give access to downloads after payment (processing order status)
 * Added basic API for payment gateways to hook into (for IPN etc)
 * Added Bulgarian translation
 * Fixed SKU sort in admin
@@ -174,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Made links in customer notes clickable links
 * Product option for customise the button text for external products
 * Function for getting placeholder.png - woocommerce_placeholder_img_src() with filter woocommerce_placeholder_img_src
+* Slight settings cleanup
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

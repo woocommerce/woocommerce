@@ -447,8 +447,12 @@ function woocommerce_exclude_order_comments_from_feed_where( $where ) {
  **/
 add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
 
+if (get_option('woocommerce_downloads_grant_access_after_payment')=='yes') add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions');
+
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
+	
+	if (get_post_meta( $order_id, '_downloadable_product_permissions_granted', true)==1) return; // Only do this once
 	
 	$order = new WC_Order( $order_id );
 	
@@ -502,6 +506,8 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 		endif;
 	
 	endforeach;
+	
+	update_post_meta( $order_id, '_downloadable_product_permissions_granted', 1);
 }
 
 /**

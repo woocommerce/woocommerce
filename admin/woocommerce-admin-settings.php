@@ -25,7 +25,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_default_country',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GB',
-		'type' 		=> 'single_select_country'
+		'type' 		=> 'single_select_country',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -37,6 +38,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
+		'desc_tip'	=>  true,
 		'options' => array_unique(apply_filters('woocommerce_currencies', array( 
 			'USD' => __( 'US Dollars (&#36;)', 'woocommerce' ),
 			'EUR' => __( 'Euros (&euro;)', 'woocommerce' ),
@@ -75,6 +77,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 		'options' => array(  
 			'all'  => __( 'All Countries', 'woocommerce' ),
 			'specific' => __( 'Specific Countries', 'woocommerce' )			
@@ -89,31 +92,18 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> '',
 		'type' 		=> 'multi_select_countries'
 	),
-
+	
 	array(  
-		'name' => __( 'Checkout Fields', 'woocommerce' ),
-		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
+		'name' => __('Localisation', 'woocommerce'),
+		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
+		'id' 		=> 'woocommerce_informal_localisation_type',
+		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
 	),
 	
-	array(  
-		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_order_comments',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
+	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
-	array(  
-		'desc' 		=> __( 'Allow unregistered users to register from the checkout page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
+	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
 
 	array(  
 		'name' => __( 'Security', 'woocommerce' ),
@@ -133,23 +123,47 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup'		=> 'end',
 		'show_if_checked' => 'yes',
 	),
-
-	array(  
-		'name' => __( 'Customer Accounts', 'woocommerce' ),
-		'desc' 		=> __( 'Allow unregistered users to register from the My Account page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_myaccount_registration',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
 	
 	array(  
 		'name' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woocommerce' ),
+		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> ''
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_order_comments',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'desc' 		=> __( 'Allow unregistered users to register from the Checkout', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(  
+		'desc' 		=> __( 'Allow unregistered users to register from "My Account"', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_myaccount_registration',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
 	),
 	
 	array(  
@@ -167,6 +181,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
+
+	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
+	
+	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce'), 'id' => 'script_styling_options' ),
 	
 	array(  
 		'name' => __( 'Styling', 'woocommerce' ),
@@ -219,13 +237,17 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-	    'desc'     => __( 'Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)', 'woocommerce' ),
+	    'desc'     => __( 'Output WooCommerce JavaScript in the footer', 'woocommerce' ),
 	    'id'     => 'woocommerce_scripts_position',
 	    'std'     => 'yes',
 	    'type'     => 'checkbox',
 	    'checkboxgroup'		=> 'end'
 	),
 
+	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
+	
+	array(	'name' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __('The following options are specific to downloadable products.', 'woocommerce'), 'id' => 'digital_download_options' ),
+	
 	array(  
 		'name' => __('File download method', 'woocommerce'),
 		'desc' 		=> __('Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce'),
@@ -234,6 +256,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'class'		=> 'chosen_select',
 		'css' 		=> 'min-width:300px;',
 		'std'		=> 'force',
+		'desc_tip'	=>  true,
 		'options' => array(  
 			'force'  	=> __( 'Force Downloads', 'woocommerce' ),
 			'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
@@ -250,14 +273,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Localisation', 'woocommerce'),
-		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
-		'id' 		=> 'woocommerce_informal_localisation_type',
+		'name' => __('Mixed cart handling', 'woocommerce'),
+		'desc' 		=> __('Grant access to downloadable products after payment. Turn this option off to only grant access when an order is "complete".', 'woocommerce'),
+		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
 		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
+		'std' 		=> 'yes',
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'general_options'),
+	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
 
 )); // End general settings
 

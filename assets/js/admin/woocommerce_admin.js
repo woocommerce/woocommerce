@@ -104,7 +104,7 @@ function clearPlaceholdersBeforeSubmit(form){form.find(':input[placeholder]').ea
  */
 jQuery(function(){
 
-    jQuery(".tips").tipTip({
+    jQuery(".tips, .help_tip").tipTip({
     	'attribute' : 'tip',
     	'fadeIn' : 50,
     	'fadeOut' : 50
