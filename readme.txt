@@ -169,6 +169,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Polish translation by Maciej Swoboda
 * More reliable cache deletion
 * Fixed record_product_sales
+* Fix order tracking page
+* Fix dates for orders
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

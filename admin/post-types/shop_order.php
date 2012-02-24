@@ -106,15 +106,14 @@ function woocommerce_custom_order_columns($column) {
 		
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
 				$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				$time_diff = 0;
 			else :
 				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-				$time = strtotime($post->post_date);
-
-				$time_diff = current_time('timestamp') - $time;
-
+				
+				$gmt_time = strtotime($post->post_date_gmt);
+				$time_diff = current_time('timestamp', 1) - $gmt_time;
+				
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
-					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $time ) );
+					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $gmt_time, current_time('timestamp', 1) ) );
 				else
 					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
 			endif;

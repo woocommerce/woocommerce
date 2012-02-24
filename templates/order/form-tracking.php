@@ -3,7 +3,7 @@
  * Order Tracking Form
  */
  
-global $woocommerce;
+global $woocommerce, $post;
 ?>
 
 <form action="<?php echo esc_url( get_permalink($post->ID) ); ?>" method="post" class="track_order">
