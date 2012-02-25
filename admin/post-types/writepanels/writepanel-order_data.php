@@ -410,7 +410,7 @@ function woocommerce_order_items_meta_box($post) {
 			?>
 		</select>
 		
-		<button type="button" class="button button-primary add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
+		<button type="button" class="button add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e('Calc line tax &uarr;', 'woocommerce'); ?></button>

@@ -308,6 +308,25 @@ mark.amount {
 #woocommerce-order-items .row-actions a.remove_row:hover {
   color: red;
 }
+#woocommerce-order-downloads .buttons {
+  float: left;
+  padding: 0;
+  margin: 0;
+  vertical-align: top;
+}
+#woocommerce-order-downloads .buttons .add_item_id,
+#woocommerce-order-downloads .buttons .chzn-container {
+  width: 400px !important;
+  margin-right: 9px;
+  vertical-align: top;
+  float: left;
+}
+#woocommerce-order-downloads .buttons button {
+  margin: 2px 0 0 0;
+}
+#woocommerce-order-downloads h3 small {
+  color: #999;
+}
 #woocommerce-order-totals h4 {
   margin: 0 !important;
 }
@@ -1357,13 +1376,15 @@ div.multi_select_products_wrapper-alt {
   padding-left: 14px;
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVQYlWP8//8/Az7AhFeWGAUsDAwMDHv27MFqj4uLCyNBExhp70gAohwKC5KJ+HQAAAAASUVORK5CYII=) no-repeat left;
 }
-.wc-metaboxes-wrapper p.toolbar {
+.wc-metaboxes-wrapper .toolbar {
   margin: 0 !important;
-  overflow: hidden;
-  zoom: 1;
   border-top: 1px solid white;
   border-bottom: 1px solid #DFDFDF;
   padding: 9px 12px !important;
+}
+.wc-metaboxes-wrapper p.toolbar {
+  overflow: hidden;
+  zoom: 1;
 }
 .wc-metaboxes-wrapper select.attribute_taxonomy,
 .wc-metaboxes-wrapper button.add_attribute,
@@ -1449,6 +1470,9 @@ div.multi_select_products_wrapper-alt {
 }
 .wc-metaboxes-wrapper .wc-metabox table td select {
   width: 100%;
+}
+.wc-metaboxes-wrapper .wc-metabox table td input.short {
+  width: 200px;
 }
 .wc-metaboxes-wrapper .wc-metabox table td input.checkbox {
   width: auto;
@@ -1648,7 +1672,8 @@ img.ui-datepicker-trigger {
   margin-top: -1px;
   cursor: pointer;
 }
-.woocommerce_options_panel img.ui-datepicker-trigger {
+.woocommerce_options_panel img.ui-datepicker-trigger,
+.wc-metabox-content img.ui-datepicker-trigger {
   float: left;
   margin-right: 8px;
   margin-top: 4px;

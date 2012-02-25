@@ -463,6 +463,89 @@ function woocommerce_link_all_variations() {
 }
 
 /**
+ * Delete download permissions via ajax function
+ */
+add_action('wp_ajax_woocommerce_revoke_access_to_download', 'woocommerce_revoke_access_to_download');
+
+function woocommerce_revoke_access_to_download() {
+	
+	check_ajax_referer( 'revoke-access', 'security' );
+	
+	global $wpdb;
+	
+	$product_id = intval( $_POST['product_id'] );
+	$order_id 	= intval( $_POST['order_id'] );
+	
+	$wpdb->query("
+		DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+		WHERE order_id = $order_id
+		AND product_id = $product_id
+	");
+
+	die();	
+}
+
+/**
+ * Grant download permissions via ajax function
+ */
+add_action('wp_ajax_woocommerce_grant_access_to_download', 'woocommerce_grant_access_to_download');
+
+function woocommerce_grant_access_to_download() {
+	
+	check_ajax_referer( 'grant-access', 'security' );
+	
+	global $wpdb;
+	
+	$product_id = intval( $_POST['product_id'] );
+	$order_id 	= intval( $_POST['order_id'] );
+	
+	$order = new WC_Order( $order_id );
+	
+	$user_email = $order->billing_email;
+				
+	if ($order->user_id>0) :
+		$user_info = get_userdata($order->user_id);
+		if ($user_info->user_email) :
+			$user_email = $user_info->user_email;
+		endif;
+	else :
+		$order->user_id = 0;
+	endif;
+	
+	$limit = trim(get_post_meta($product_id, '_download_limit', true));
+	
+	$wpdb->hide_errors();
+
+	$success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
+		'product_id' => $product_id, 
+		'user_id' => $order->user_id,
+		'user_email' => $user_email,
+		'order_id' => $order->id,
+		'order_key' => $order->order_key,
+		'downloads_remaining' => $limit
+	), array( 
+		'%s', 
+		'%s', 
+		'%s', 
+		'%s', 
+		'%s',
+		'%s'
+	) );
+	
+	if ($success) {
+		echo json_encode(array(
+			'success'		=> 1,
+			'download_id'  	=> $product_id,
+			'title'			=> get_the_title($product_id),
+			'expires'		=> '',
+			'remaining'		=> $limit
+		));
+	}
+	
+	die();	
+}
+
+/**
  * Get customer details via ajax
  */
 add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');

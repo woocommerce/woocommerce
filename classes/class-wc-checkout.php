@@ -302,6 +302,7 @@ class WC_Checkout {
 					'post_type' 	=> 'shop_order',
 					'post_title' 	=> 'Order &ndash; '.date('F j, Y @ h:i A'),
 					'post_status' 	=> 'publish',
+					'ping_status'	=> 'closed',
 					'post_excerpt' 	=> $this->posted['order_comments'],
 					'post_author' 	=> 1
 				);

@@ -287,6 +287,26 @@ mark.amount {
 		}
 	}
 }
+#woocommerce-order-downloads {
+	.buttons {
+		float:left;
+		padding: 0;
+		margin: 0;
+		vertical-align: top;
+		.add_item_id, .chzn-container {
+			width: 400px !important;
+			margin-right: 9px;
+			vertical-align: top;
+			float:left;
+		}
+		button {
+			margin: 2px 0 0 0;
+		}
+	}
+	h3 small {
+		color: #999;
+	}
+}
 #woocommerce-order-totals {
 	h4 {
 		margin:0 !important;
@@ -1316,13 +1336,15 @@ div.multi_select_products_wrapper-alt {
 		padding-left: 14px;
 		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVQYlWP8//8/Az7AhFeWGAUsDAwMDHv27MFqj4uLCyNBExhp70gAohwKC5KJ+HQAAAAASUVORK5CYII=) no-repeat left;
 	}
-	p.toolbar {
+	.toolbar {
 		margin: 0 !important;
-		overflow: hidden;
-		zoom: 1;
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DFDFDF;
 		padding: 9px 12px !important;
+	}
+	p.toolbar {
+		overflow: hidden;
+		zoom: 1;
 	}
 	select.attribute_taxonomy, button.add_attribute, button.add_variable_attribute, .fr {
 		float: right;
@@ -1401,6 +1423,9 @@ div.multi_select_products_wrapper-alt {
 				}
 				select { 
 					width: 100%;
+				}
+				input.short {
+					width: 200px;
 				}
 				input.checkbox {
 					width: auto;
@@ -1614,7 +1639,7 @@ img.tips {
 
 /* Datepicker */
 img.ui-datepicker-trigger { vertical-align: middle; margin-top: -1px; cursor: pointer }
-.woocommerce_options_panel img.ui-datepicker-trigger { float: left; margin-right: 8px; margin-top: 4px; margin-left: 4px; }
+.woocommerce_options_panel img.ui-datepicker-trigger, .wc-metabox-content img.ui-datepicker-trigger { float: left; margin-right: 8px; margin-top: 4px; margin-left: 4px; }
 #ui-datepicker-div { display: none }
 
 /* Reports */

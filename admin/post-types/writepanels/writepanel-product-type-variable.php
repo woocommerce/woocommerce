@@ -116,7 +116,7 @@ function variable_product_type_options() {
 							?>
 							<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation->ID ); ?>" />
 						</h3>
-						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-content">
+						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">
 							<tbody>	
 								<tr>
 									<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button <?php if ($image_id>0) echo 'remove'; ?>" rel="<?php echo $variation->ID; ?>"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a></td>
@@ -287,7 +287,7 @@ function variable_product_type_options() {
 	
 							endforeach;
 					?><input type="hidden" name="variable_post_id[' + loop + ']" value="' + variation_id + '" /></h3>\
-					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-content">\
+					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">\
 						<tbody>\
 							<tr>\
 								<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\

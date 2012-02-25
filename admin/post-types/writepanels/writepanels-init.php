@@ -13,6 +13,7 @@ include_once('writepanel-product_data.php');
 include_once('writepanel-coupon_data.php');
 include_once('writepanel-order_data.php');
 include_once('writepanel-order_notes.php');
+include_once('writepanel-order_downloads.php');
 
 /**
  * Init the meta boxes
@@ -32,6 +33,7 @@ function woocommerce_meta_boxes() {
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woocommerce'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
 	add_meta_box( 'woocommerce-order-totals', __('Order Totals', 'woocommerce'), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
 	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woocommerce'), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-downloads', __('Downloadable Product Permissions <small>&ndash; Note: Permissions for line items will automatically be granted when the order status changes to processing/completed.</small>', 'woocommerce'), 'woocommerce_order_downloads_meta_box', 'shop_order', 'normal', 'default');
 	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woocommerce'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'high');
 	
 	remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );

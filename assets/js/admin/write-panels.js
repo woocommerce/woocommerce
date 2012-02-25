@@ -532,11 +532,11 @@ jQuery( function($){
 		
 		// Open/close
 		jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(){
-			jQuery(this).next('.wc-content').toggle();
+			jQuery(this).next('.wc-metabox-content').toggle();
 		});
 		
 		jQuery('.wc-metabox.closed').each(function(){
-			jQuery(this).find('.wc-content').hide();
+			jQuery(this).find('.wc-metabox-content').hide();
 		});
 	
 	// ATTRIBUTE TABLES

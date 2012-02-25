@@ -266,7 +266,7 @@ function woocommerce_product_data_box() {
 									<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 									<strong class="attribute_name"><?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?></strong>
 								</h3>
-								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-content">
+								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 									<tbody>	
 										<tr>
 											<td class="attribute_name">
@@ -342,7 +342,7 @@ function woocommerce_product_data_box() {
 								<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 								<strong class="attribute_name"><?php echo esc_attr( $attribute['name'] ); ?></strong>
 							</h3>
-							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-content">
+							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 								<tbody>	
 									<tr>
 										<td class="attribute_name">

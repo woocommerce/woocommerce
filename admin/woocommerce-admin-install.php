@@ -226,6 +226,8 @@ function woocommerce_tables_install() {
         user_email			varchar(200) NOT NULL,
         user_id				mediumint(9) NULL,
         downloads_remaining	varchar(9) NULL,
+        access_granted 		datetime NOT NULL default '0000-00-00 00:00:00',
+        access_expires 		datetime NULL,
         PRIMARY KEY id (product_id,order_id,order_key)) $collate;";
     dbDelta($sql);
     

@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.4.5 =
 * Quick edit products
 * Bulk edit products
+* PayPal standard goes straight to PayPal via a GET request - no more pay page/forms
 * Better mixed cart handling - option to give access to downloads after payment (processing order status)
 * Added basic API for payment gateways to hook into (for IPN etc)
 * Added Bulgarian translation
