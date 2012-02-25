@@ -224,13 +224,13 @@ function woocommerce_product_data_box() {
 			
 		</div>
 
-		<div id="woocommerce_attributes" class="panel">
+		<div id="woocommerce_attributes" class="panel wc-metaboxes-wrapper">
 			
 			<p class="toolbar">
 				<a href="#" class="close_all"><?php _e('Close all', 'woocommerce'); ?></a><a href="#" class="expand_all"><?php _e('Expand all', 'woocommerce'); ?></a>
 			</p>
 			
-			<div class="woocommerce_attributes">
+			<div class="woocommerce_attributes wc-metaboxes">
 			
 				<?php
 					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();	// Array of defined attribute taxonomies
@@ -260,13 +260,13 @@ function woocommerce_product_data_box() {
 				    		$has_terms = (is_wp_error($post_terms) || !$post_terms || sizeof($post_terms)==0) ? 0 : 1;
 				    		
 				    		?>
-				    		<div class="woocommerce_attribute closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
+				    		<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
 								<h3>
 									<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 									<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 									<strong class="attribute_name"><?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?></strong>
 								</h3>
-								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">
+								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-content">
 									<tbody>	
 										<tr>
 											<td class="attribute_name">
@@ -336,13 +336,13 @@ function woocommerce_product_data_box() {
 			    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
 						
 						?>
-			    		<div class="woocommerce_attribute closed" rel="<?php echo $position; ?>">
+			    		<div class="woocommerce_attribute wc-metabox closed" rel="<?php echo $position; ?>">
 							<h3>
 								<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 								<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 								<strong class="attribute_name"><?php echo esc_attr( $attribute['name'] ); ?></strong>
 							</h3>
-							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">
+							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-content">
 								<tbody>	
 									<tr>
 										<td class="attribute_name">

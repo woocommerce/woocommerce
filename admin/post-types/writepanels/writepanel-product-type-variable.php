@@ -41,7 +41,7 @@ function variable_product_type_options() {
 		endif;
 	}
 	?>
-	<div id="variable_product_options" class="panel">
+	<div id="variable_product_options" class="panel wc-metaboxes-wrapper">
 	
 		<?php if (!$variation_attribute_found) : ?>
 			<div class="inline updated"><p><?php _e('Before you can start adding variations you must set up and save some variable attributes via the <strong>Attributes</strong> tab.', 'woocommerce'); ?></p></div>
@@ -52,7 +52,7 @@ function variable_product_type_options() {
 				<strong><?php _e('Bulk edit:', 'woocommerce'); ?></strong> <a class="button set set_all_prices" href="#"><?php _e('Prices', 'woocommerce'); ?></a> <a class="button set set_all_sale_prices" href="#"><?php _e('Sale prices', 'woocommerce'); ?></a> <a class="button set set_all_stock" href="#"><?php _e('Stock', 'woocommerce'); ?></a> <a class="button toggle toggle_downloadable" href="#"><?php _e('Downloadable', 'woocommerce'); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e('Virtual', 'woocommerce'); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e('Enabled', 'woocommerce'); ?></a> <a class="button set set_all_paths" href="#"><?php _e('File paths', 'woocommerce'); ?></a> <a class="button set set_all_limits" href="#"><?php _e('Download limits', 'woocommerce'); ?></a> <a href="#" class="button delete_variations"><?php _e('Delete all', 'woocommerce'); ?></a>
 			</p>
 	
-			<div class="woocommerce_variations">
+			<div class="woocommerce_variations wc-metaboxes">
 				<?php
 				$args = array(
 					'post_type'	=> 'product_variation',
@@ -80,8 +80,8 @@ function variable_product_type_options() {
 					$classes = get_the_terms( $variation->ID, 'product_shipping_class' );
 					if ($classes && !is_wp_error($classes)) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
 					?>
-					<div class="woocommerce_variation closed">
-						<h3>
+					<div class="woocommerce_variation wc-metabox closed">
+						<h3 class="fixed">
 							<button type="button" class="remove_variation button" rel="<?php echo $variation->ID; ?>"><?php _e('Remove', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 							<strong>#<?php echo $variation->ID; ?> &mdash; </strong>
@@ -116,7 +116,7 @@ function variable_product_type_options() {
 							?>
 							<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation->ID ); ?>" />
 						</h3>
-						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">
+						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-content">
 							<tbody>	
 								<tr>
 									<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button <?php if ($image_id>0) echo 'remove'; ?>" rel="<?php echo $variation->ID; ?>"><img src="<?php echo $image ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a></td>
@@ -241,15 +241,6 @@ function variable_product_type_options() {
 			
 		<?php else : ?>
 		
-		// Open/close
-		jQuery('#variable_product_options').on('click', '.woocommerce_variation h3', function(){
-			jQuery(this).next('table.woocommerce_variable_attributes').toggle();
-		});
-		
-		jQuery('.woocommerce_variation.closed').each(function(){
-			jQuery(this).find('table.woocommerce_variable_attributes').hide();
-		});
-		
 		// Add a variation
 		jQuery('#variable_product_options').on('click', 'button.add_variation', function(){
 		
@@ -267,7 +258,7 @@ function variable_product_type_options() {
 				
 				var loop = jQuery('.woocommerce_variation').size();
 				
-				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation">\
+				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation wc-metabox">\
 					<h3 class="handle">\
 						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php _e('Remove', 'woocommerce'); ?></button>\
 						<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>\
@@ -296,7 +287,7 @@ function variable_product_type_options() {
 	
 							endforeach;
 					?><input type="hidden" name="variable_post_id[' + loop + ']" value="' + variation_id + '" /></h3>\
-					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes">\
+					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-content">\
 						<tbody>\
 							<tr>\
 								<td class="upload_image" rowspan="2"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\

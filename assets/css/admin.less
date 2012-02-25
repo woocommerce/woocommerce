@@ -1167,7 +1167,7 @@ table.wc_gateways, table.wc_shipping {
 	}
 }
 
-#woocommerce-product-data .inside, #woocommerce-product-type-options .inside, #woocommerce-order-data .inside, #woocommerce-product-type .inside {
+#woocommerce-product-data .inside, #woocommerce-product-type-options .inside, #woocommerce-order-data .inside, #woocommerce-product-type .inside, #woocommerce-order-downloads .inside {
 	padding: 0;
 	margin: 0;
 }
@@ -1301,65 +1301,21 @@ div.multi_select_products_wrapper-alt {
 	color: #666;
 }
 
-/* Attribute/variation tables */
-table.woocommerce_attribute_data, table.woocommerce_variable_attributes {
-	width: 100%;
-	position: relative;
-	background: #fff;
-	padding: 3px;
-	td {
-		text-align: left;
-		border-bottom: 1px dotted #ececec;
-		padding: 6px 6px;
-		vertical-align: middle;
-		label {
-			text-align: left;
-			display: block;
-			line-height: 21px;
-		}
-		input {
-			float: left;
-		}
-		input, textarea {
-			width: 100%;
-			margin: 0;
-			display: block;
-			font-size: 14px;
-			padding: 4px;
-			color: #555;
-		}
-		select { 
-			width: 100%;
-		}
+/* WC Metabox Panels - used for attribtes, download permissions etc */
+.wc-metaboxes-wrapper {
+	.expand_all, .close_all {
+		float: right;
+		margin-left: 9px;
+		line-height: 22px;
 	}
-	td.attribute_name {
-		width: 200px;
+	.expand_all {
+		padding-left: 14px;
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat left;
 	}
-}
-.attributes-sortable-placeholder{
-	border-color:#bbb;
-	background-color:#f5f5f5;
-	margin-bottom: 9px;
-	border-width:1px;
-	border-style:dashed;
-}
-
-.expand_all, .close_all {
-	float: right;
-	margin-left: 9px;
-	line-height: 22px;
-}
-.expand_all {
-	padding-left: 14px;
-	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat left;
-}
-.close_all {
-	padding-left: 14px;
-	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVQYlWP8//8/Az7AhFeWGAUsDAwMDHv27MFqj4uLCyNBExhp70gAohwKC5KJ+HQAAAAASUVORK5CYII=) no-repeat left;
-}
-
-/* Attributes */
-#woocommerce_attributes {
+	.close_all {
+		padding-left: 14px;
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKUlEQVQYlWP8//8/Az7AhFeWGAUsDAwMDHv27MFqj4uLCyNBExhp70gAohwKC5KJ+HQAAAAASUVORK5CYII=) no-repeat left;
+	}
 	p.toolbar {
 		margin: 0 !important;
 		overflow: hidden;
@@ -1372,15 +1328,21 @@ table.woocommerce_attribute_data, table.woocommerce_variable_attributes {
 		float: right;
 		margin: 0 0 0 6px;
 	}
-	.woocommerce_attributes {
+	.wc-metaboxes {
 		border-bottom: 1px solid #DFDFDF;
 		padding: 0 12px 0;
 	}
-	.woocommerce_attribute {
+	.wc-metabox-sortable-placeholder {
+		border-color:#bbb;
+		background-color:#f5f5f5;
+		margin-bottom: 9px;
+		border-width:1px;
+		border-style:dashed;
+	}
+	.wc-metabox {
 		background: #ececec;
 		border: 1px solid #ececec;
 		margin: 9px 0 !important;
-		
 		h3 {
 			margin: 0 !important;
 			padding: 6px !important;
@@ -1403,24 +1365,53 @@ table.woocommerce_attribute_data, table.woocommerce_variable_attributes {
 				display: none;
 				height: 24px;
 			}
+			&.fixed {
+				cursor: pointer !important;
+			}
 		}
 		&:hover h3 .handlediv {
 			display: block;
 		}
 		table {
+			width: 100%;
+			position: relative;
+			background: #fff;
+			padding: 3px;
 			td {
+				text-align: left;
+				padding: 6px 6px;
 				vertical-align: top;
 				border: 0;
+				label {
+					text-align: left;
+					display: block;
+					line-height: 21px;
+				}
+				input {
+					float: left;
+					min-width: 200px;
+				}
+				input, textarea {
+					width: 100%;
+					margin: 0;
+					display: block;
+					font-size: 14px;
+					padding: 4px;
+					color: #555;
+				}
+				select { 
+					width: 100%;
+				}
+				input.checkbox {
+					width: auto;
+					min-width: inherit;
+					vertical-align: middle;
+					display: inline;
+					float: none;
+				}
 			}
-			input {
-				min-width: 200px;
-			}
-			input.checkbox {
-				width: auto;
-				min-width: inherit;
-				vertical-align: middle;
-				display: inline;
-				float: none;
+			td.attribute_name {
+				width: 200px;
 			}
 			.plus, .minus {
 				margin-top: 6px;
@@ -1440,14 +1431,6 @@ table.woocommerce_attribute_data, table.woocommerce_variable_attributes {
 /* Configuration */
 #variable_product_options {
 	p.toolbar {
-		margin: 0 !important;
-		overflow: hidden;
-		zoom: 1;
-		
-		border-top: 1px solid white;
-		border-bottom: 1px solid #DFDFDF;
-		padding: 9px 12px !important;
-		
 		strong {
 			margin: 0 6px 0 0;
 			float: left;
@@ -1474,99 +1457,72 @@ table.woocommerce_attribute_data, table.woocommerce_variable_attributes {
 			margin: 0 0 0 6px;
 		}
 	}
-	.woocommerce_variations {
-		border-top: 1px solid white;
-		border-bottom: 1px solid #DFDFDF;
-		padding: 0 12px 0;
-	}
-}
-.woocommerce_variation {
-	background: #ececec;
-	border: 1px solid #ececec;
-	margin: 9px 0 !important;
-	h3 {
-		margin: 0 !important;
-		padding: 6px !important;
-		font-size: 1em !important;
-		cursor: pointer;
-		button {
-			float: right;
-		}
-		strong {
-			font-weight: normal;
-		}
-		select {
-			font-family: sans-serif;
-		}
-		.handlediv {
-			background-position: 6px 5px !important;
-			display: none;
-		}
-	}
-	&:hover h3 .handlediv {
-		display: block;
-	}
-	table td {
-		width: 16.66%;
-		&.dimensions_field {
+	.woocommerce_variation {
+		table td {
+			width: 16.66%;
 			input {
-				width: 32%;
-				margin-right: 2%;
+				min-width: inherit !important;
 			}
-			.last {
-				margin-right: 0;
+			&.dimensions_field {
+				input {
+					width: 32%;
+					margin-right: 2%;
+				}
+				.last {
+					margin-right: 0;
+				}
 			}
-		}
-		&.upload_image {
-			width: 1%;
-			white-space: nowrap;
-			img {
-				float: none;
-				margin-right: 6px;
-				vertical-align: middle;
-			}
-			.button {
-				margin: 0;
-				padding: 4px 10px;
-				width: auto;
-				float: none;
-				vertical-align: middle;
-			}
-			.upload_image_button {
-				display: block;
-				position: relative;
-				.overlay {
-					display: none;
-					width: 60px;
-					height: 60px;
-					position: absolute;
-					top: 0;
-					left: 0;
+			&.upload_image {
+				width: 1%;
+				white-space: nowrap;
+				img {
+					float: none;
+					margin-right: 6px;
+					vertical-align: middle;
+				}
+				.button {
 					margin: 0;
-					padding: 0;
-					opacity:0.5;
-					background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAXklEQVQYGW2OUQrAMAhDFy8+dnKnwiuh2I+aJulDZebDkfSie1b28Q7EXWrfvSm60RQnkQUC8ja7owpmL6d4GdDZ0cNNHyIhZEj4QYCxze6orsluAh8AnR0xKPR07weXJi8JGd3qqwAAAABJRU5ErkJggg==) no-repeat center center;
+					padding: 4px 10px;
+					width: auto;
+					float: none;
+					vertical-align: middle;
 				}
-			}
-			.upload_image_button:hover {
-				.overlay {
+				.upload_image_button {
 					display: block;
+					position: relative;
+					.overlay {
+						display: none;
+						width: 60px;
+						height: 60px;
+						position: absolute;
+						top: 0;
+						left: 0;
+						margin: 0;
+						padding: 0;
+						opacity:0.5;
+						background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAXklEQVQYGW2OUQrAMAhDFy8+dnKnwiuh2I+aJulDZebDkfSie1b28Q7EXWrfvSm60RQnkQUC8ja7owpmL6d4GdDZ0cNNHyIhZEj4QYCxze6orsluAh8AnR0xKPR07weXJi8JGd3qqwAAAABJRU5ErkJggg==) no-repeat center center;
+					}
+				}
+				.upload_image_button:hover {
+					.overlay {
+						display: block;
+					}
+				}
+				.upload_image_button.remove .overlay {
+					background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWElEQVQYGY2OUQ6AMAxCZdm9jSev65K3YKNm+6EFBlVEHDxJJ3Pi0C72xlBNyTs3jU7wEUTTIB51GCp2CL8HLpHEdaOLb/N2dfuq9NT0zOo/M9q6EaImsd/uViMLVuD4KAAAAABJRU5ErkJggg==) no-repeat center center;
 				}
 			}
-			.upload_image_button.remove .overlay {
-				background: #eee url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAWElEQVQYGY2OUQ6AMAxCZdm9jSev65K3YKNm+6EFBlVEHDxJJ3Pi0C72xlBNyTs3jU7wEUTTIB51GCp2CL8HLpHEdaOLb/N2dfuq9NT0zOo/M9q6EaImsd/uViMLVuD4KAAAAABJRU5ErkJggg==) no-repeat center center;
-			}
-		}
-		.file_path_field {
-			position: relative;
-			padding-right: 40px;
-			.upload_file_button {
-				position: absolute;
-				right: 0;
-				width: 30px;
-				padding: 5px 0;
-				margin: 1px 0 0;
-				text-align: center;
+			.file_path_field {
+				position: relative;
+				padding-right: 40px;
+				.upload_file_button {
+					position: absolute;
+					right: 0;
+					width: 30px;
+					padding: 5px 0;
+					margin: 1px 0 0;
+					text-align: center;
+				}
 			}
 		}
 	}
