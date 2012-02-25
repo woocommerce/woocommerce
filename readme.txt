@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Function for getting placeholder.png - woocommerce_placeholder_img_src() with filter woocommerce_placeholder_img_src
 * Slight settings cleanup
 * Order items (frontend) link through to product pages
+* Separate right now widget (thanks Mamaduka!)
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

@@ -812,25 +812,89 @@ ul.woocommerce_stats {
 	}
 }
 
-#dashboard_right_now p.woocommerce_sub {
-	position: static;
-	top: auto;
-	left: auto;
-	margin: 15px 5px 0;
-	padding: 0 0 5px 0;
-	border-bottom: #ECECEC 1px solid;
+#woocommerce_dashboard_right_now p.sub,
+#woocommerce_dashboard_right_now .table, 
+#woocommerce_dashboard_right_now .versions {
+	margin: -12px;
 }
-#dashboard_right_now .onhold {
+#woocommerce_dashboard_right_now .inside {
+	font-size: 12px;
+	margin-bottom: 0;
+	padding-top: 20px;
+}
+#woocommerce_dashboard_right_now p.sub {
+	padding: 5px 0 15px;
+	color: #8f8f8f;
+	font-size: 14px;
+	position: absolute;
+	top: -17px;
+	left: 15px;
+}
+#woocommerce_dashboard_right_now .table {
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+#woocommerce_dashboard_right_now .table_shop_content {
+	float: left;
+	border-top: #ececec 1px solid;
+	width: 45%;
+}
+#woocommerce_dashboard_right_now .table_orders {
+	float: right;
+	border-top: #ececec 1px solid;
+	width: 45%;
+}
+#woocommerce_dashboard_right_now table td {
+	padding: 3px 0;
+	white-space: nowrap;
+}
+#woocommerce_dashboard_right_now table tr.first td {
+	border-top: none;
+}
+#woocommerce_dashboard_right_now td.b {
+	padding-right: 6px;
+	text-align: right;
+	font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
+	font-size: 14px;
+	width: 1%;
+}
+#woocommerce_dashboard_right_now td.b a {
+	font-size: 18px;
+}
+#woocommerce_dashboard_right_now td.b a:hover {
+	color: #d54e21;
+}
+#woocommerce_dashboard_right_now .t {
+	font-size: 12px;
+	padding-right: 12px;
+	padding-top: 6px;
+	color: #777;
+}
+#woocommerce_dashboard_right_now .t a {
+	white-space: nowrap;
+}
+#woocommerce_dashboard_right_now .on-hold a {
 	color: red;
 }
-#dashboard_right_now .pending {
+#woocommerce_dashboard_right_now .pending a {
 	color: #e66f00;
 }
-#dashboard_right_now .complete {
+#woocommerce_dashboard_right_now .completed a {
 	color: green;
 }
-#dashboard_right_now .t, #dashboard_right_now .t a {
-	white-space: normal;
+#woocommerce_dashboard_right_now .versions {
+	padding: 6px 10px 12px;
+	clear: both;
+}
+#woocommerce_dashboard_right_now .versions .b {
+	font-weight: bold;
+}
+#woocommerce_dashboard_right_now a.button {
+	float: right;
+	clear: right;
+	position: relative;
+	top: -5px;
 }
 
 #woocommerce_dashboard_sales {
