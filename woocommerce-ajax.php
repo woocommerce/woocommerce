@@ -513,7 +513,13 @@ function woocommerce_grant_access_to_download() {
 	endif;
 	
 	$limit = trim(get_post_meta($product_id, '_download_limit', true));
+	$expiry = trim(get_post_meta($product_id, '_download_expiry', true));
 	
+	$limit = (empty($limit)) ? '' : (int) $limit;
+	$expiry = (empty($expiry)) ? '' : (int) $expiry;
+	
+	if ($expiry) $expiry = date("Y-m-d", strtotime('NOW + ' . $expiry . ' DAY'));
+				
 	$wpdb->hide_errors();
 
 	$success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
@@ -522,14 +528,20 @@ function woocommerce_grant_access_to_download() {
 		'user_email' => $user_email,
 		'order_id' => $order->id,
 		'order_key' => $order->order_key,
-		'downloads_remaining' => $limit
+		'downloads_remaining' => $limit,
+		'access_granted'		=> current_time('mysql'),
+		'access_expires'		=> $expiry,
+		'download_count'		=> 0
 	), array( 
 		'%s', 
 		'%s', 
 		'%s', 
 		'%s', 
 		'%s',
-		'%s'
+		'%s',
+		'%s',
+		'%s',
+		'%d'
 	) );
 	
 	if ($success) {
@@ -537,7 +549,7 @@ function woocommerce_grant_access_to_download() {
 			'success'		=> 1,
 			'download_id'  	=> $product_id,
 			'title'			=> get_the_title($product_id),
-			'expires'		=> '',
+			'expires'		=> $expiry,
 			'remaining'		=> $limit
 		));
 	}

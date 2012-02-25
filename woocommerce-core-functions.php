@@ -443,7 +443,7 @@ if (get_option('woocommerce_downloads_grant_access_after_payment')=='yes') add_a
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 	
-	if (get_post_meta( $order_id, '_downloadable_product_permissions_granted', true)==1) return; // Only do this once
+	if (get_post_meta( $order_id, __('Download Permissions Granted', 'woocommerce'), true)==1) return; // Only do this once
 	
 	$order = new WC_Order( $order_id );
 	
@@ -468,28 +468,34 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 				endif;
 				
 				$limit = trim(get_post_meta($download_id, '_download_limit', true));
+				$expiry = trim(get_post_meta($download_id, '_download_expiry', true));
 				
-				if (!empty($limit)) :
-					$limit = (int) $limit;
-				else :
-					$limit = '';
-				endif;
+				$limit = (empty($limit)) ? '' : (int) $limit;
+				$expiry = (empty($expiry)) ? '' : (int) $expiry;
+				
+				if ($expiry) $expiry = date("Y-m-d", strtotime('NOW + ' . $expiry . ' DAY'));
 				
 				// Downloadable product - give access to the customer
 				$wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
-					'product_id' => $download_id, 
-					'user_id' => $order->user_id,
-					'user_email' => $user_email,
-					'order_id' => $order->id,
-					'order_key' => $order->order_key,
-					'downloads_remaining' => $limit
+					'product_id' 			=> $download_id, 
+					'user_id' 				=> $order->user_id,
+					'user_email' 			=> $user_email,
+					'order_id' 				=> $order->id,
+					'order_key' 			=> $order->order_key,
+					'downloads_remaining' 	=> $limit,
+					'access_granted'		=> current_time('mysql'),
+					'access_expires'		=> $expiry,
+					'download_count'		=> 0
 				), array( 
 					'%s', 
 					'%s', 
 					'%s', 
 					'%s', 
 					'%s',
-					'%s'
+					'%s',
+					'%s',
+					'%s',
+					'%d'
 				) );	
 				
 			endif;
@@ -498,7 +504,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 	
 	endforeach;
 	
-	update_post_meta( $order_id, '_downloadable_product_permissions_granted', 1);
+	update_post_meta( $order_id,  __('Download Permissions Granted', 'woocommerce'), 1);
 }
 
 /**

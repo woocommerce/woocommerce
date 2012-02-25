@@ -21,7 +21,7 @@ function woocommerce_order_downloads_meta_box() {
 		<div class="wc-metaboxes">
 		
 			<?php
-				$i = 0;
+				$i = -1;
 				
 				$download_permissions = $wpdb->get_results("
 					SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -37,7 +37,7 @@ function woocommerce_order_downloads_meta_box() {
 						<h3 class="fixed">
 							<button type="button" rel="<?php echo $download->product_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
-							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title(); ?></strong>
+							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title() . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count), $download->download_count); ?></strong>
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 							<tbody>	
@@ -45,11 +45,11 @@ function woocommerce_order_downloads_meta_box() {
 									<td>
 										<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>
 										<input type="hidden" name="download_id[<?php echo $i; ?>]" value="<?php echo $download->product_id; ?>" />
-										<input type="text" class="short" name="downloads_remaining[<?php echo $i; ?>]" value="<?php  ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
+										<input type="text" class="short" name="downloads_remaining[<?php echo $i; ?>]" value="<?php echo $download->downloads_remaining ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 									</td>
 									<td>
 										<label><?php _e('Access Expires', 'woocommerce'); ?>:</label>
-										<input type="text" class="short date-picker" name="access_expires[<?php echo $i; ?>]" value="<?php  ?>" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />
+										<input type="text" class="short date-picker" name="access_expires[<?php echo $i; ?>]" value="<?php echo ($download->access_expires>0) ? date('Y-m-d', strtotime($download->access_expires)) : ''; ?>" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />
 									</td>
 								</tr>
 							</tbody>
@@ -234,4 +234,45 @@ function woocommerce_order_downloads_meta_box() {
 	<?php
 	$javascript = ob_get_clean();
 	$woocommerce->add_inline_js( $javascript );
+}
+
+/**
+ * Order Downloads Save
+ * 
+ * Function for processing and storing all order downloads.
+ */
+add_action('woocommerce_process_shop_order_meta', 'woocommerce_order_downloads_save', 5, 2);
+
+function woocommerce_order_downloads_save( $post_id, $post ) {
+	global $wpdb, $woocommerce;
+			
+	if (isset($_POST['download_id'])) :
+		
+		// Download data
+		$download_ids			= $_POST['download_id'];
+		$downloads_remaining 	= $_POST['downloads_remaining'];
+		$access_expires 		= $_POST['access_expires'];
+		
+		// Order data
+		$order_key = get_post_meta($post->ID, '_order_key', true);
+		$customer_email = get_post_meta($post->ID, '_billing_email', true);
+		$customer_user = (int) get_post_meta($post->ID, '_customer_user', true);
+
+		for ($i=0; $i<sizeof($download_ids); $i++) :
+			
+			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array( 
+				'user_id'				=> $customer_user,
+				'user_email' 			=> $customer_email,
+				'downloads_remaining'	=> $downloads_remaining[$i],
+				'access_expires'		=> ($access_expires[$i]) ? date('Y-m-d', strtotime($access_expires[$i])) : ''
+			), array( 
+				'order_id' 		=> $post_id,
+				'product_id' 	=> $download_ids[$i] 
+			), array( '%d', '%s', '%s', '%s' ), array( '%d', '%d' ) );
+			
+		endfor;
+		
+	endif;
+	
+	update_post_meta( $post_id, '_order_taxes', $order_taxes );
 }
