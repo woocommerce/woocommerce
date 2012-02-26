@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Slight settings cleanup
 * Order items (frontend) link through to product pages
 * Separate right now widget (thanks Mamaduka!)
+* Fixed missing errors on my account
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
