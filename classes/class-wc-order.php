@@ -516,7 +516,7 @@ class WC_Order {
 	}
 	
 	/** Output items for display in html emails */
-	function email_order_items_table( $show_download_links = false, $show_sku = false ) {
+	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_image = false ) {
 
 		$return = '';
 		
@@ -524,7 +524,12 @@ class WC_Order {
 			
 			$_product = $this->get_product_from_item( $item );
 			
-			$file = $sku = $variation = '';
+			$file = $sku = $variation = $image = '';
+			
+			if ($show_image) :
+				$src = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail');
+				$image = apply_filters('woocommerce_order_product_image', '<img src="'.$src[0].'" alt="Product Image" height="32" width="32" style="vertical-align:middle; margin-right: 10px;" />', $_product);
+			endif;
 			
 			if ($show_sku && $_product->get_sku()) :
 				$sku = ' (#' . $_product->get_sku() . ')';
@@ -546,9 +551,9 @@ class WC_Order {
 			endif;
 			
 			$return .= '<tr>
-				<td style="text-align:left; border: 1px solid #eee;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
-				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
-				<td style="text-align:left; border: 1px solid #eee;">';
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'. $image . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'.$item['qty'].'</td>
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">';
 					
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;

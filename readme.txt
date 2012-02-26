@@ -183,7 +183,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Order items (frontend) link through to product pages
 * Separate right now widget (thanks Mamaduka!)
 * Fixed missing errors on my account
-* Enhanced variation price display (thanks pixeltrix) and tweaked get_price_html
+* Enhanced variation price display (thanks pixeltrix) and tweaked get_price_html - new filters for variation prices
+* email_order_items_table image thumbnail support
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

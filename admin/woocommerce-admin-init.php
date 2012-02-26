@@ -424,3 +424,59 @@ function woocommerce_duplicate_product_action() {
 	include_once('includes/duplicate_product.php');
 	woocommerce_duplicate_product();
 }
+
+/**
+ * Post updated messages
+ */
+add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
+
+function woocommerce_product_updated_messages( $messages ) {
+	global $post, $post_ID;
+	
+	$messages['product'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => sprintf( __('Product updated. <a href="%s">View Product</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Product updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Product restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => sprintf( __('Product published. <a href="%s">View Contact</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
+		7 => __('Product saved.'),
+		8 => sprintf( __('Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+		9 => sprintf( __('Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink($post_ID) ) ),
+		10 => sprintf( __('Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+	);
+	
+	$messages['shop_order'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => __('Order updated.', 'woocommerce'),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Order updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Order restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __('Order updated.', 'woocommerce'),
+		7 => __('Order saved.'),
+		8 => __('Order submitted.', 'woocommerce'),
+		9 => sprintf( __('Order scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ) ),
+		10 => __('Order draft updated.', 'woocommerce')
+	);
+
+	$messages['shop_coupon'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => __('Coupon updated.', 'woocommerce'),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Coupon updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Coupon restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __('Coupon updated.', 'woocommerce'),
+		7 => __('Coupon saved.'),
+		8 => __('Coupon submitted.', 'woocommerce'),
+		9 => sprintf( __('Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ) ),
+		10 => __('Coupon draft updated.', 'woocommerce')
+	);
+	
+	return $messages;
+}
