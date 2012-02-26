@@ -360,8 +360,8 @@ if (!function_exists('woocommerce_external_add_to_cart')) {
 		if (!$product_url) return;
 
 		woocommerce_get_template('single-product/add-to-cart/external.php', array(
-			'product_url' = $product_url,
-			'button_text' = ($button_text) ? $button_text : __('Buy product', 'woocommerce'),
+			'product_url' => $product_url,
+			'button_text' => ($button_text) ? $button_text : __('Buy product', 'woocommerce'),
 		));
 	}
 }

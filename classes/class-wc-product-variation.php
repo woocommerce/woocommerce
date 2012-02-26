@@ -164,7 +164,7 @@ class WC_Product_Variation extends WC_Product {
 		if ($this->variation_has_price || $this->variation_has_sale_price) :
 			$price = '';
 			
-			if ($this->price) :
+			if ($this->price!=='') :
 				if ($this->variation_has_sale_price) :
 					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price( $this->sale_price ).'</ins>';
 					$price = apply_filters('woocommerce_variation_sale_price_html', $price, $this);

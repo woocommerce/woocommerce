@@ -526,12 +526,10 @@ class WC_Product {
 	}
 	
 	/** Returns the price in html format */
-	function get_price_html() {
-		$price = '';
+	function get_price_html( $price = '' ) {
 		if ($this->is_type('grouped')) :
 			
-			$min_price = '';
-			$max_price = '';
+			$min_price = $max_price = '';
 			
 			foreach ($this->get_children() as $child_id) :
 				$child_price = get_post_meta( $child_id, '_price', true);
@@ -539,23 +537,33 @@ class WC_Product {
 				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
 			endforeach;
 			
-			$price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>' . woocommerce_price($min_price);	
+			$price .= $this->get_price_html_from_text() . woocommerce_price( $min_price );	
 			
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
+			
+			// Ensure variation prices are synced with variations
+			if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' ) 
+				$this->variable_product_sync();
+			
+			// Get the price
 			if ($this->price > 0) :
-				if ($this->is_on_sale() && isset($this->min_variation_price)) :
+				if ($this->is_on_sale() && isset($this->min_variation_price) && $this->min_variation_regular_price !== $this->get_price()) :
 
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
-					$price .= '<del>'.woocommerce_price( $this->min_variation_regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
-
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+						$price .= $this->get_price_html_from_text();
+					
+					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, $this->get_price() );
+					
 					$price = apply_filters('woocommerce_variable_sale_price_html', $price, $this);
 
 				else :
 
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
-					$price .= woocommerce_price($this->get_price());
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+						$price .= $this->get_price_html_from_text();
+						
+					$price .= woocommerce_price( $this->get_price() );
 
 					$price = apply_filters('woocommerce_variable_price_html', $price, $this);
 
@@ -565,35 +573,40 @@ class WC_Product {
 				$price = apply_filters('woocommerce_variable_empty_price_html', '', $this);
 
 			elseif ($this->price == 0 ) :
+				
+				if ($this->is_on_sale() && isset($this->min_variation_regular_price) && $this->min_variation_regular_price !== $this->get_price()) :
 
-				if ($this->is_on_sale() && isset($this->min_variation_regular_price)) :
-
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
-					$price .= '<del>'.woocommerce_price( $this->min_variation_regular_price ).'</del> <ins>'.__('Free!', 'woocommerce').'</ins>';
-
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+						$price .= $this->get_price_html_from_text();
+					
+					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, __('Free!', 'woocommerce') );
+					
 					$price = apply_filters('woocommerce_variable_free_sale_price_html', $price, $this);
 
 				else :
 
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
-					$price = __('Free!', 'woocommerce');
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+						$price .= $this->get_price_html_from_text();
+						
+					$price .= __('Free!', 'woocommerce');
 
 					$price = apply_filters('woocommerce_variable_free_price_html', $price, $this);
 
 				endif;
 
 			endif;
+			
 		else :
 			if ($this->price > 0) :
 				if ($this->is_on_sale() && isset($this->regular_price)) :
-				
-					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
+					
+					$price .= $this->get_price_html_from_to( $this->regular_price, $this->get_price() );
 					
 					$price = apply_filters('woocommerce_sale_price_html', $price, $this);
 					
 				else :
 				
-					$price .= woocommerce_price($this->get_price());
+					$price .= woocommerce_price( $this->get_price() );
 					
 					$price = apply_filters('woocommerce_price_html', $price, $this);
 					
@@ -605,8 +618,8 @@ class WC_Product {
 			elseif ($this->price == 0 ) :
 			
 				if ($this->is_on_sale() && isset($this->regular_price)) :
-				
-					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.__('Free!', 'woocommerce').'</ins>';
+					
+					$price .= $this->get_price_html_from_to( $this->regular_price, __('Free!', 'woocommerce') );
 					
 					$price = apply_filters('woocommerce_free_sale_price_html', $price, $this);
 					
@@ -622,6 +635,14 @@ class WC_Product {
 		endif;
 		
 		return $price;
+	}
+	
+	/** Functions for getting parts of a price, in html, used by get_price_html */
+	function get_price_html_from_text() {
+		return '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+	}
+	function get_price_html_from_to( $from, $to ) {
+		return '<del>' . ((is_numeric($from)) ? woocommerce_price( $from ) : $from) . '</del> <ins>' . ((is_numeric($to)) ? woocommerce_price( $to ) : $to) . '</ins>';
 	}
 	
 	/** Returns the product rating in html format - ratings are stored in transient cache */
@@ -1018,10 +1039,6 @@ class WC_Product {
     			
     			// Grouped product prices and sale status are affected by children
     			$this->grouped_product_sync();
-    			
-    			// Clear transient
-    			$woocommerce->clear_product_transients( $this->id );
-    			
     		endif;
 
     	endif;
@@ -1039,11 +1056,7 @@ class WC_Product {
 				update_post_meta($this->id, '_sale_price_dates_to', '');
 			
 				// Grouped product prices and sale status are affected by children
-    			$this->grouped_product_sync();
-    			
-    			// Clear transient
-    			$woocommerce->clear_product_transients( $this->id );
-			
+    			$this->grouped_product_sync();			
 			endif;
     		
     	endif;
@@ -1053,8 +1066,7 @@ class WC_Product {
 	 * Sync grouped products with the childs lowest price (so they can be sorted by price accurately)
 	 **/
 	function grouped_product_sync() {
-		
-		global $wpdb;
+		global $wpdb, $woocommerce;
 		$post_parent = $wpdb->get_var("SELECT post_parent FROM $wpdb->posts WHERE ID = $this->id;");
 		
 		if (!$post_parent) return;
@@ -1074,8 +1086,57 @@ class WC_Product {
 				update_post_meta( $post_parent, '_price', $child_price );
 			endforeach;
 		endif;
+		
+		$woocommerce->clear_product_transients( $this->id );
 	}
 
+    /**
+	 * Sync variable product prices with the childs lowest/highest prices
+	 **/
+	function variable_product_sync() {
+		global $woocommerce;
+		
+		if (!$this->is_type('variable')) return;
+		
+		$children = get_posts( array(
+			'post_parent' 	=> $this->id,
+			'posts_per_page'=> -1,
+			'post_type' 	=> 'product_variation',
+			'fields' 		=> 'ids',
+			'post_status'	=> 'any'
+		));
+		
+		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
+		
+		if ($children) {
+			foreach ($children as $child) {
+				$child_price 		= get_post_meta($child, '_price', true);
+				$child_sale_price 	= get_post_meta($child, '_sale_price', true);
+				
+				// Low price
+				if (!is_numeric($this->min_variation_regular_price) || $child_price < $this->min_variation_regular_price) $this->min_variation_regular_price = $child_price;
+				if ($child_sale_price!=='' && (!is_numeric($this->min_variation_sale_price) || $child_sale_price < $this->min_variation_sale_price)) $this->min_variation_sale_price = $child_sale_price;
+				
+				// High price
+				if (!is_numeric($this->max_variation_regular_price) || $child_price > $this->max_variation_regular_price) $this->max_variation_regular_price = $child_price;
+				if ($child_sale_price!=='' && (!is_numeric($this->max_variation_sale_price) || $child_sale_price > $this->max_variation_sale_price)) $this->max_variation_sale_price = $child_sale_price;
+			}
+	
+	    	$this->min_variation_price = ($this->min_variation_sale_price==='' || $this->min_variation_regular_price < $this->min_variation_sale_price) ? $this->min_variation_regular_price : $this->min_variation_sale_price;
+			$this->max_variation_price = ($this->max_variation_sale_price==='' || $this->max_variation_regular_price > $this->max_variation_sale_price) ? $this->max_variation_regular_price : $this->max_variation_sale_price;
+		}
+		
+		update_post_meta( $this->id, '_price', $this->min_variation_price );
+		update_post_meta( $this->id, '_min_variation_price', $this->min_variation_price );
+		update_post_meta( $this->id, '_max_variation_price', $this->max_variation_price );
+		update_post_meta( $this->id, '_min_variation_regular_price', $this->min_variation_regular_price );
+		update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
+		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
+		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
+		
+		$woocommerce->clear_product_transients( $this->id );
+	}
+	
 }
 
 /** Depreciated */

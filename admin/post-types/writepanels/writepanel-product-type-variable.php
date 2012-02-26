@@ -719,32 +719,29 @@ function process_product_meta_variable( $post_id ) {
 		'post_parent' 	=> $post_parent,
 		'posts_per_page'=> -1,
 		'post_type' 	=> 'product_variation',
-		'fields' 		=> 'ids'
+		'fields' 		=> 'ids',
+		'post_status'	=> 'any'
 	));
-	$lowest_price = '';
-	$lowest_regular_price = '';
-	$lowest_sale_price = '';
-	$highest_price = '';
-	$highest_regular_price = '';
-	$highest_sale_price = '';
-	if ($children) :
-		foreach ($children as $child) :
-			$child_price = get_post_meta($child, '_price', true);
-			$child_sale_price = get_post_meta($child, '_sale_price', true);
+	
+	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';
+	
+	if ($children) {
+		foreach ($children as $child) {
+			$child_price 		= get_post_meta($child, '_price', true);
+			$child_sale_price 	= get_post_meta($child, '_sale_price', true);
 			
 			// Low price
 			if (!is_numeric($lowest_regular_price) || $child_price < $lowest_regular_price) $lowest_regular_price = $child_price;
-			if (!empty($child_sale_price) && (!is_numeric($lowest_sale_price) || $child_sale_price < $lowest_sale_price)) $lowest_sale_price = $child_sale_price;
+			if ($child_sale_price!=='' && (!is_numeric($lowest_sale_price) || $child_sale_price < $lowest_sale_price)) $lowest_sale_price = $child_sale_price;
 			
 			// High price
-			if (!is_numeric($highest_regular_price) || @child_price > $highest_regular_price) $highest_regular_price = $child_price;
-			if (!empty($child_sale_price) && (!is_numeric($highest_sale_price) || $child_sale_price > $highest_sale_price)) $highest_sale_price = $child_sale_price;
-			
-		endforeach;
+			if (!is_numeric($highest_regular_price) || $child_price > $highest_regular_price) $highest_regular_price = $child_price;
+			if ($child_sale_price!=='' && (!is_numeric($highest_sale_price) || $child_sale_price > $highest_sale_price)) $highest_sale_price = $child_sale_price;
+		}
 
-    $lowest_price = empty($lowest_sale_price) ? $lowest_regular_price : $lowest_sale_price;
-    $highest_price = empty($highest_sale_price) ? $highest_regular_price : $highest_sale_price;
-	endif;
+    	$lowest_price = ($lowest_sale_price==='' || $lowest_regular_price < $lowest_sale_price) ? $lowest_regular_price : $lowest_sale_price;
+		$highest_price = ($highest_sale_price==='' || $highest_regular_price > $highest_sale_price) ? $highest_regular_price : $highest_sale_price;
+	}
 	
 	update_post_meta( $post_parent, '_price', $lowest_price );
 	update_post_meta( $post_parent, '_min_variation_price', $lowest_price );
