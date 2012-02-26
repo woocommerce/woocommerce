@@ -300,12 +300,13 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array(  
 		'name' => __( 'Shop Base Page', 'woocommerce' ),
-		'desc' 		=> sprintf( __( 'This sets the base page of your shop.', 'woocommerce' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
+		'desc' 		=> sprintf( __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
 		'id' 		=> 'woocommerce_shop_page_id',
 		'type' 		=> 'single_select_page',
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -314,7 +315,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_shop_page_title',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> 'All Products' // Default value for the page title - changed in settings
+		'std' 		=> 'All Products', // Default value for the page title - changed in settings
+		'desc_tip'	=>  true,
 	),
 
 	array(  
@@ -325,7 +327,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'type' 		=> 'single_select_page'
+		'type' 		=> 'single_select_page',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -354,7 +357,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_product_category_slug',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> ''
+		'std' 		=> '',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -363,7 +367,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_product_tag_slug',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> ''
+		'std' 		=> '',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -386,7 +391,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array( 'type' => 'sectionend', 'id' => 'permalink_options' ),
 	
-	array( 'name' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin.', 'woocommerce' ) ),
+	array( 'name' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them.', 'woocommerce' ) ),
 	
 	array(  
 		'name' => __( 'Cart Page', 'woocommerce' ),
@@ -396,6 +401,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -406,6 +412,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -416,6 +423,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -426,6 +434,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -436,6 +445,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -446,6 +456,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -456,6 +467,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -466,6 +478,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),	
 	
 	array( 'type' => 'sectionend', 'id' => 'page_options'),
@@ -886,11 +899,11 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 	
-	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', '', 'id' => 'email_options' ),
+	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce'), 'id' => 'email_options' ),
 	
 	array(  
 		'name' => __( '"From" name', 'woocommerce' ),
-		'desc' 		=> __( 'The sender name for WooCommerce emails.', 'woocommerce' ),
+		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_name',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
@@ -899,7 +912,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array(  
 		'name' => __( '"From" email address', 'woocommerce' ),
-		'desc' 		=> __( 'The sender email address for WooCommerce emails.', 'woocommerce' ),
+		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_address',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
