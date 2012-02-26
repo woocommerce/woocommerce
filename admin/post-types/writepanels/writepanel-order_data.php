@@ -16,7 +16,7 @@
  */
 function woocommerce_order_data_meta_box($post) {
 	
-	global $post, $wpdb, $thepostid, $order_status;
+	global $post, $wpdb, $thepostid, $order_status, $woocommerce;
 	
 	$thepostid = $post->ID;
 	
@@ -117,7 +117,9 @@ function woocommerce_order_data_meta_box($post) {
 								),
 							'country' => array( 
 								'label' => __('Country', 'woocommerce'), 
-								'show'	=> false
+								'show'	=> false,
+								'type'	=> 'select',
+								'options' => $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array( 
 								'label' => __('State/County', 'woocommerce'), 
@@ -147,7 +149,15 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__('Load customer billing address', 'woocommerce').'</button></p>';
 						
 						foreach ( $billing_data as $key => $field ) :
-							woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+							if (!isset($field['type'])) $field['type'] = 'text';
+							switch ($field['type']) {
+								case "select" :
+									woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+								break;
+								default :
+									woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+								break;
+							}
 						endforeach;
 						
 						echo '</div>';
@@ -188,7 +198,9 @@ function woocommerce_order_data_meta_box($post) {
 								),
 							'country' => array( 
 								'label' => __('Country', 'woocommerce'), 
-								'show'	=> false
+								'show'	=> false,
+								'type'	=> 'select',
+								'options' => $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array( 
 								'label' => __('State/County', 'woocommerce'), 
@@ -212,7 +224,15 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_shipping">'.__('Load customer shipping address', 'woocommerce').'</button></p>';
 						
 						foreach ( $shipping_data as $key => $field ) :
-							woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+							if (!isset($field['type'])) $field['type'] = 'text';
+							switch ($field['type']) {
+								case "select" :
+									woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+								break;
+								default :
+									woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+								break;
+							}
 						endforeach;
 						
 						echo '</div>';

@@ -222,7 +222,8 @@ mark.amount {
   display: block;
   padding: 0 0 3px;
 }
-#order_data .order_data_right .form-field input {
+#order_data .order_data_right .form-field input,
+#order_data .order_data_right .form-field select {
   width: 95%;
 }
 #order_data .order_data_right ._billing_company_field,
@@ -233,6 +234,9 @@ mark.amount {
 #order_data .order_data_right ._billing_company_field input,
 #order_data .order_data_right ._shipping_company_field input {
   width: 97.5%;
+}
+#order_data .order_data_right ._billing_email_field {
+  clear: left;
 }
 #order_data .order_data_right div.edit_address {
   display: none;
