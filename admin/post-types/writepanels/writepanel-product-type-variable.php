@@ -722,33 +722,37 @@ function process_product_meta_variable( $post_id ) {
 		'fields' 		=> 'ids'
 	));
 	$lowest_price = '';
+	$lowest_regular_price = '';
+	$lowest_sale_price = '';
 	$highest_price = '';
+	$highest_regular_price = '';
+	$highest_sale_price = '';
 	if ($children) :
 		foreach ($children as $child) :
 			$child_price = get_post_meta($child, '_price', true);
 			$child_sale_price = get_post_meta($child, '_sale_price', true);
 			
 			// Low price
-			if (!is_numeric($lowest_price) || $child_price<$lowest_price) $lowest_price = $child_price;
-			if (!empty($child_sale_price) && $child_sale_price<$lowest_price) $lowest_price = $child_sale_price;
+			if (!is_numeric($lowest_regular_price) || $child_price < $lowest_regular_price) $lowest_regular_price = $child_price;
+			if (!empty($child_sale_price) && (!is_numeric($lowest_sale_price) || $child_sale_price < $lowest_sale_price)) $lowest_sale_price = $child_sale_price;
 			
 			// High price
-			if (!empty($child_sale_price)) :
-				if ($child_sale_price>$highest_price) :
-					$highest_price = $child_sale_price;
-				endif;	
-			else :
-				if ($child_price>$highest_price) :
-					$highest_price = $child_price;
-				endif;
-			endif;
+			if (!is_numeric($highest_regular_price) || @child_price > $highest_regular_price) $highest_regular_price = $child_price;
+			if (!empty($child_sale_price) && (!is_numeric($highest_sale_price) || $child_sale_price > $highest_sale_price)) $highest_sale_price = $child_sale_price;
 			
 		endforeach;
+
+    $lowest_price = empty($lowest_sale_price) ? $lowest_regular_price : $lowest_sale_price;
+    $highest_price = empty($highest_sale_price) ? $highest_regular_price : $highest_sale_price;
 	endif;
 	
 	update_post_meta( $post_parent, '_price', $lowest_price );
 	update_post_meta( $post_parent, '_min_variation_price', $lowest_price );
 	update_post_meta( $post_parent, '_max_variation_price', $highest_price );
+	update_post_meta( $post_parent, '_min_variation_regular_price', $lowest_regular_price );
+	update_post_meta( $post_parent, '_max_variation_regular_price', $highest_regular_price );
+	update_post_meta( $post_parent, '_min_variation_sale_price', $lowest_sale_price );
+	update_post_meta( $post_parent, '_max_variation_sale_price', $highest_sale_price );
 	
 	// Update default attribute options setting
 	$default_attributes = array();
