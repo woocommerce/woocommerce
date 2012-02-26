@@ -8,6 +8,19 @@
  */
  
 /**
+ * Disable auto-save
+ **/
+add_action('admin_print_scripts', 'woocommerce_disable_autosave_for_orders');
+
+function woocommerce_disable_autosave_for_orders(){
+    global $post;
+    
+    if($post && get_post_type($post->ID) === 'shop_order'){
+        wp_dequeue_script('autosave');
+    }
+}
+
+/**
  * Columns for order page
  **/
 add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
