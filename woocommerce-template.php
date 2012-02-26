@@ -330,15 +330,17 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		            $image_link = '';
 		        }
 		
-		        $available_variations[] = array(
+		        $available_variations[] = apply_filters('woocommerce_available_variation', array(
 		            'variation_id' => $variation->get_variation_id(),
 		            'attributes' => $variation_attributes,
 		            'image_src' => $image,
 		            'image_link' => $image_link,
 		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
 		            'availability_html' => $availability_html,
-		            'sku' => __('SKU:', 'woocommerce') . ' ' . $variation->sku
-		        );
+		            'sku' => __('SKU:', 'woocommerce') . ' ' . $variation->sku,
+		            'min_qty' => 1,
+		            'max_qty' => $variation->stock
+		        ), $product, $variation);
 		    }
 		}
 		woocommerce_get_template('single-product/add-to-cart/variable.php', array(

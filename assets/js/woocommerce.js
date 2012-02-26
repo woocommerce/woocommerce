@@ -389,6 +389,18 @@ jQuery(document).ready(function($) {
         } else {
         	 $('.product_meta').find('.sku').text('');
         }
+        
+        if (variation.min_qty) {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-min', variation.min_qty).val(variation.min_qty);
+        } else {
+        	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-min');
+        }
+        
+        if (variation.max_qty) {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', variation.max_qty);
+        } else {
+        	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-max');
+        }
 
         $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown
     }
