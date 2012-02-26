@@ -161,7 +161,7 @@ function woocommerce_dashboard_widget_right_now() {
 
 	<div class="versions">
 		<p id="wp-version-message">
-			<?php printf( __( 'You are using <span class="b">WooCommerce %s</span>.', 'woocommerce' ), $woocommerce->version ); ?>
+			<?php printf( __( 'You are using <strong>WooCommerce %s</strong>.', 'woocommerce' ), $woocommerce->version ); ?>
 		</p>
 	</div>
 	<?php
