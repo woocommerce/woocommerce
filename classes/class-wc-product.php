@@ -42,6 +42,10 @@ class WC_Product {
 	var $sale_price_dates_to;
 	var $min_variation_price;
 	var $max_variation_price;
+	var $min_variation_regular_price;
+	var $max_variation_regular_price;
+	var $min_variation_sale_price;
+	var $max_variation_sale_price;
 	var $featured;
 	var $shipping_class;
 	var $dimensions;
@@ -84,6 +88,10 @@ class WC_Product {
 			'sale_price_dates_to' 	=> '',
 			'min_variation_price'	=> '',
 			'max_variation_price'	=> '',
+			'min_variation_regular_price'	=> '',
+			'max_variation_regular_price'	=> '',
+			'min_variation_sale_price'	=> '',
+			'max_variation_sale_price'	=> '',
 			'featured'		=> 'no'
 		);
 		
@@ -536,13 +544,45 @@ class WC_Product {
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
 		elseif ($this->is_type('variable')) :
-			
-			if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
-			
-			$price .= woocommerce_price($this->get_price());
-			
-			$price = apply_filters('woocommerce_variable_price_html', $price, $this);
-			
+			if ($this->price > 0) :
+				if ($this->is_on_sale() && isset($this->min_variation_price)) :
+
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+					$price .= '<del>'.woocommerce_price( $this->min_variation_regular_price ).'</del> <ins>'.woocommerce_price($this->get_price()).'</ins>';
+
+					$price = apply_filters('woocommerce_variable_sale_price_html', $price, $this);
+
+				else :
+
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+					$price .= woocommerce_price($this->get_price());
+
+					$price = apply_filters('woocommerce_variable_price_html', $price, $this);
+
+				endif;
+			elseif ($this->price === '' ) :
+
+				$price = apply_filters('woocommerce_variable_empty_price_html', '', $this);
+
+			elseif ($this->price == 0 ) :
+
+				if ($this->is_on_sale() && isset($this->min_variation_regular_price)) :
+
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+					$price .= '<del>'.woocommerce_price( $this->min_variation_regular_price ).'</del> <ins>'.__('Free!', 'woocommerce').'</ins>';
+
+					$price = apply_filters('woocommerce_variable_free_sale_price_html', $price, $this);
+
+				else :
+
+					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) $price .= '<span class="from">' . _x('From:', 'min_price', 'woocommerce') . ' </span>';
+					$price = __('Free!', 'woocommerce');
+
+					$price = apply_filters('woocommerce_variable_free_price_html', $price, $this);
+
+				endif;
+
+			endif;
 		else :
 			if ($this->price > 0) :
 				if ($this->is_on_sale() && isset($this->regular_price)) :
