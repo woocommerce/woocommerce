@@ -516,7 +516,7 @@ class WC_Order {
 	}
 	
 	/** Output items for display in html emails */
-	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_image = false ) {
+	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_image = false, $image_size = array( 32, 32 ) ) {
 
 		$return = '';
 		
@@ -528,7 +528,7 @@ class WC_Order {
 			
 			if ($show_image) :
 				$src = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail');
-				$image = apply_filters('woocommerce_order_product_image', '<img src="'.$src[0].'" alt="Product Image" height="32" width="32" style="vertical-align:middle; margin-right: 10px;" />', $_product);
+				$image = apply_filters('woocommerce_order_product_image', '<img src="'.$src[0].'" alt="Product Image" height="'.$image_size[1].'" width="'.$image_size[0].'" style="vertical-align:middle; margin-right: 10px;" />', $_product);
 			endif;
 			
 			if ($show_sku && $_product->get_sku()) :
