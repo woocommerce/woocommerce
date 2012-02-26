@@ -63,7 +63,7 @@ function woocommerce_product_data_box() {
 				
 				// Button text
 				woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __('Button text', 'woocommerce'), 'placeholder' => __('Buy product', 'woocommerce'), 'description' => __('This text will be shown on the button linking to the external product.', 'woocommerce') ) );
-			
+							
 			echo '</div>';
 				
 			echo '<div class="options_group pricing show_if_simple show_if_external">';
