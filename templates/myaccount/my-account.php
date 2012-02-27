@@ -80,7 +80,7 @@ else :
 endif;
 ?>
 
-<h2><?php _e('My Addresses', 'woocommerce'); ?></h2>	
+<h2><?php _e('My Address', 'woocommerce'); ?></h2>	
 <p><?php _e('The following addresses will be used on the checkout page by default.', 'woocommerce'); ?></p>
 <?php woocommerce_get_template('myaccount/my-address.php'); ?>
 

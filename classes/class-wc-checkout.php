@@ -481,6 +481,9 @@ class WC_Checkout {
 				// Order is saved
 				do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
 				
+				// Prevent timeout
+				set_time_limit(0); 
+				
 				// Process payment
 				if ($woocommerce->cart->needs_payment()) :
 					

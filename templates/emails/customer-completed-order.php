@@ -44,22 +44,6 @@
 	<p><strong><?php _e('Tel:', 'woocommerce'); ?></strong> <?php echo $order->billing_phone; ?></p>
 <?php endif; ?>
 
-<div style="float:left; width: 49%;">
-
-	<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
-	
-	<p><?php echo $order->get_formatted_billing_address(); ?></p>
-
-</div>
-
-<div style="float:right; width: 49%;">
-
-	<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
-	
-	<p><?php echo $order->get_formatted_shipping_address(); ?></p>
-
-</div>
-
-<div style="clear:both;"></div>
+<?php woocommerce_get_template('emails/email-addresses.php', array( 'order' => $order )); ?>
 
 <?php do_action('woocommerce_email_footer'); ?>

@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * More reliable un-force https code
 * Reset link for variations
 * Better grouped price code
+* Hidden shipping address from account page and mails when disabled
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

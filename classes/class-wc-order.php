@@ -634,29 +634,19 @@ class WC_Order {
 	 */
 	function add_order_note( $note, $is_customer_note = 0 ) {
 		
-		$comment_post_ID = $this->id;
-		$comment_author = 'WooCommerce';
-		$comment_author_email = 'woocommerce@' . str_replace('www.', '', str_replace('http://', '', site_url()));
-		$comment_author_url = '';
-		$comment_content = $note;
-		$comment_type = '';
-		$comment_parent = 0;
+		$comment_post_ID 		= $this->id;
+		$comment_author 		= 'WooCommerce';
+		$comment_author_email 	= 'woocommerce@' . str_replace('www.', '', $_SERVER['HTTP_HOST']);
+		$comment_author_url 	= '';
+		$comment_content 		= esc_attr( $note );
+		$comment_agent			= 'WooCommerce';
+		$commentdata 			= compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent');
 		
-		$commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID');
-		
-		$commentdata['comment_author_IP'] = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
-		if (isset($_SERVER['HTTP_USER_AGENT'])) $commentdata['comment_agent']     = substr($_SERVER['HTTP_USER_AGENT'], 0, 254);
-	
-		$commentdata['comment_date']     = current_time('mysql');
-		$commentdata['comment_date_gmt'] = current_time('mysql', 1);
-	
 		$comment_id = wp_insert_comment( $commentdata );
 		
 		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
 		
-		if ($is_customer_note) :
-			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
-		endif;
+		if ($is_customer_note) do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
 		
 		return $comment_id;
 		
@@ -668,33 +658,30 @@ class WC_Order {
 	 * @param   string	$new_status		Status to change the order to
 	 * @param   string	$note			Optional note to add
 	 */
-	function update_status( $new_status, $note = '' ) {
+	function update_status( $new_status_slug, $note = '' ) {
 		
 		if ($note) $note .= ' ';
-	
-		$new_status = get_term_by( 'slug', sanitize_title( $new_status ), 'shop_order_status');
+				
+		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status');
 		if ($new_status) {
-		
-			wp_set_object_terms($this->id, $new_status->slug, 'shop_order_status');
+			
+			wp_set_object_terms($this->id, array( $new_status->slug ), 'shop_order_status', false);
 			
 			if ( $this->status != $new_status->slug ) {
 				// Status was changed
-				do_action( 'woocommerce_order_status_'.$new_status->slug, $this->id );
-				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
+				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
+				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
 				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $this->status, $new_status->slug ) );
-				
+
 				// Date
-				if ($new_status->slug=='completed') 
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
 				
 				// Sales
-				if ($new_status->slug=='processing' || $new_status->slug=='completed') 
-					$this->record_product_sales();
+				if ($new_status->slug=='processing' || $new_status->slug=='completed' || $new_status->slug=='on-hold') $this->record_product_sales();
 				
 			}
-		
+
 		}
-		
 	}
 	
 	/**
@@ -950,7 +937,6 @@ class order_item_meta {
 /** Depreciated */
 class woocommerce_order extends WC_Order {
 	public function __construct( $id = '' ) { 
-		// _deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' ); Depreciated, but leaving uncommented until all gateways are updated
 		parent::__construct( $id ); 
 	} 
 }

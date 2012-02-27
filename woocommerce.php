@@ -602,7 +602,7 @@ class Woocommerce {
 	    register_taxonomy( 'shop_order_status',
 	        array('shop_order'),
 	        array(
-	            'hierarchical' 			=> true,
+	            'hierarchical' 			=> false,
 	            'update_count_callback' => '_update_post_term_count',
 	            'labels' => array(
 	                    'name' 				=> __( 'Order statuses', 'woocommerce'),
