@@ -535,7 +535,11 @@ class WC_Product {
 			
 			$child_prices = array_unique( $child_prices );
 			
-			$min_price = min( $child_prices );
+			if ( ! empty( $all_prices ) ) {
+				$min_price = min( $all_prices );
+			} else {
+				$min_price = '';
+			}
 			
 			if (sizeof($child_prices)>1) $price .= $this->get_price_html_from_text();
 
