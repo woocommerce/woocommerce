@@ -42,13 +42,13 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		if ( !empty($instance['title']) ) $title = $instance['title']; else $title = __('Cart', 'woocommerce');
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
 		$hide_if_empty = (isset($instance['hide_if_empty']) && $instance['hide_if_empty']) ? '1' : '0';
-		
-		if ($hide_if_empty && sizeof($woocommerce->cart->get_cart())==0) return;
-		
+				
 		echo $before_widget;
 		if ( $title ) echo $before_title . $title . $after_title;
 		
-		echo '<ul class="cart_list product_list_widget">';
+		echo '<ul class="cart_list product_list_widget ';
+		if ($hide_if_empty) echo 'hide_cart_widget_if_empty';
+		echo '">';
 		if (sizeof($woocommerce->cart->get_cart())>0) : 
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
 				$_product = $cart_item['data'];
@@ -77,6 +77,17 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 			echo '<p class="buttons"><a href="'.$woocommerce->cart->get_cart_url().'" class="button">'.__('View Cart &rarr;', 'woocommerce').'</a> <a href="'.$woocommerce->cart->get_checkout_url().'" class="button checkout">'.__('Checkout &rarr;', 'woocommerce').'</a></p>';
 		endif;
 		echo $after_widget;
+		
+		if ($hide_if_empty && sizeof($woocommerce->cart->get_cart())==0) {
+			$inline_js = "
+				jQuery('.hide_cart_widget_if_empty').parent().hide();
+				jQuery('body').bind('adding_to_cart', function(){
+					jQuery(this).find('.hide_cart_widget_if_empty').parent().fadeIn();
+				});
+			";
+			
+			$woocommerce->add_inline_js( $inline_js );
+		}
 	}
 
 	/** @see WP_Widget->update */
