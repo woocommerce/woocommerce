@@ -191,6 +191,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Reset link for variations
 * Better grouped price code
 * Hidden shipping address from account page and mails when disabled
+* Option to limit products which are downloadable and virtual to 1 per cart
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping

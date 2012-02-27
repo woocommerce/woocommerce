@@ -63,8 +63,12 @@ global $woocommerce;
 							echo apply_filters('woocommerce_cart_item_data_min', '', $_product);
 							
 						?>" data-max="<?php 
-						
-							echo apply_filters('woocommerce_cart_item_data_max', ($_product->backorders_allowed()) ? '' : $_product->get_stock_quantity(), $_product); 
+							
+							$data_max = ($_product->backorders_allowed()) ? '' : $_product->get_stock_quantity();
+							
+							if (get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $_product->is_downloadable() && $_product->is_virtual()) $data_max = 1;
+							
+							echo apply_filters('woocommerce_cart_item_data_max', $data_max, $_product); 
 							
 						?>" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 						<td class="product-subtotal"><?php 

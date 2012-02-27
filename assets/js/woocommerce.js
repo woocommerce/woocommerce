@@ -406,6 +406,10 @@ jQuery(document).ready(function($) {
         } else {
         	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-max');
         }
+        
+        if (variation.is_virtual=='yes' && variation.is_downloadable=='yes' && woocommerce_params.option_limit_download_qty=='yes') {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', 1);
+        }
 
         $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown
     }

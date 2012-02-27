@@ -214,7 +214,25 @@ function woocommerce_update_cart_action() {
 		if (sizeof($woocommerce->cart->get_cart())>0) : 
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 				
-				if (isset($cart_totals[$cart_item_key]['qty'])) $woocommerce->cart->set_quantity( $cart_item_key, $cart_totals[$cart_item_key]['qty'] );
+				$_product = $values['data'];
+				$quantity = (isset($cart_totals[$cart_item_key]['qty'])) ? $cart_totals[$cart_item_key]['qty'] : '';
+				
+				if (!$quantity) continue;
+				
+				// Update cart validation
+	    		$passed_validation 	= apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity);
+	    		
+	    		// Check downloadable items
+				if ( get_option('woocommerce_limit_downloadable_product_qty')=='yes' ) :
+					if ( $_product->is_downloadable() && $_product->is_virtual() && $quantity > 1 ) :
+						$woocommerce->add_error( sprintf(__('You can only have 1 %s in your cart.', 'woocommerce'), $_product->get_title()) );
+						$passed_validation = false;
+					endif;
+				endif;
+	    		
+	    		if ($passed_validation) {
+		    		$woocommerce->cart->set_quantity( $cart_item_key, $quantity );
+	    		}
 				
 			endforeach;
 		endif;

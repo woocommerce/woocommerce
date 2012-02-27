@@ -273,6 +273,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
+		'name' => __('Limit quantity', 'woocommerce'),
+		'desc' 		=> __( 'Limit the quantity of items that are both downloadable + virtual to 1', 'woocommerce' ),
+		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
+	),
+	
+	array(  
 		'name' => __('Mixed cart handling', 'woocommerce'),
 		'desc' 		=> __('Grant access to downloadable products after payment. Turn this option off to only grant access when an order is "complete".', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
