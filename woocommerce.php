@@ -135,6 +135,7 @@ class Woocommerce {
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
 			add_action( 'wp', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
+			add_action( 'wp_head', array(&$this, 'generator') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
@@ -379,11 +380,16 @@ class Woocommerce {
 	}
 	
 	/**
-	 * Output generator to aid debugging and add body classes
+	 * Output generator to aid debugging
+	 **/
+	function generator() {
+		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
+	}
+	
+	/**
+	 * Add body classes
 	 **/
 	function wp_head() {
-		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
-		
 		$this->add_body_class('theme-' . strtolower( get_current_theme() ));
 	
 		if (is_woocommerce()) $this->add_body_class('woocommerce');

@@ -276,9 +276,14 @@ jQuery(document).ready(function($) {
 	$('.shipping-calculator-button').click(function() {
 		$('.shipping-calculator-form').slideToggle('slow');
 		return false;
-	}); 
+	});
 	
 	// Variations
+	
+	$('.reset_variations').click(function(){
+		$('.variations select').val('').change();
+		return false;
+	}).css('visibility','hidden');
 	
 	//check if two arrays of attributes match
     function variations_match(attrs1, attrs2) {        
@@ -408,6 +413,7 @@ jQuery(document).ready(function($) {
 	//when one of attributes is changed - check everything to show only valid options
     function check_variations( exclude ) {
 		var all_set = true;
+		var any_set = false;
 		var current_settings = {};
         
 		$('.variations select').each(function(){
@@ -418,8 +424,12 @@ jQuery(document).ready(function($) {
 				current_settings[$(this).attr('name')] = '';
 				
 			} else {
-				if ($(this).val().length == 0) all_set = false;
-
+				if ($(this).val().length == 0) {
+					all_set = false;
+				} else {
+					any_set = true;
+				}
+				
             	// Encode entities
             	value = $(this).val()
 		            .replace(/&/g, '&amp;')
@@ -448,6 +458,12 @@ jQuery(document).ready(function($) {
         } else {
             update_variation_values(matching_variations);
         }
+        
+        if(any_set) {
+        	if ($('.reset_variations').css('visibility') == 'hidden') $('.reset_variations').css('visibility','visible').hide().fadeIn();
+        } else {
+			$('.reset_variations').css('visibility','hidden');
+		}
     }
 
 	$('.variations select').change(function(){
