@@ -154,7 +154,22 @@ function woocommerce_wp_text_input( $field ) {
 	
 	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+		
+	echo '</p>';
+}
+
+function woocommerce_wp_textarea_input( $field ) {
+	global $thepostid, $post;
+	
+	if (!$thepostid) $thepostid = $post->ID;
+	if (!isset($field['placeholder'])) $field['placeholder'] = '';
+	if (!isset($field['class'])) $field['class'] = 'short';
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><textarea class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" placeholder="'.$field['placeholder'].'" rows="2" cols="20">'.esc_textarea( $field['value'] ).'</textarea> ';
+	
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }
@@ -173,7 +188,7 @@ function woocommerce_wp_checkbox( $field ) {
 	
 	echo ' /> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }
@@ -197,7 +212,7 @@ function woocommerce_wp_select( $field ) {
 	
 	echo '</select> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }

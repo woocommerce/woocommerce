@@ -516,7 +516,7 @@ class WC_Order {
 	}
 	
 	/** Output items for display in html emails */
-	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_image = false, $image_size = array( 32, 32 ) ) {
+	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ) ) {
 
 		$return = '';
 		
@@ -565,6 +565,13 @@ class WC_Order {
 			$return .= '	
 				</td>
 			</tr>';
+			
+			// Show any purchase notes
+			if ($show_purchase_note) :
+				if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
+					$return .= '<tr><td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
+				endif;
+			endif;
 			
 		endforeach;	
 

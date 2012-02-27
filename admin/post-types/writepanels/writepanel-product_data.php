@@ -137,6 +137,13 @@ function woocommerce_product_data_box() {
 			
 			echo '</div>';
 			
+			echo '<div class="options_group">';
+			
+				// Purchase note
+				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __('Purchase Note', 'woocommerce'), 'description' => __('Enter an optional note to send the customer after purchase.', 'woocommerce') ) );
+			
+			echo '</div>';
+			
 			echo '<div class="options_group show_if_downloadable">';
 			
 				// File URL
@@ -498,6 +505,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 	update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
 	update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
 	if (isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 		
 	// Dimensions

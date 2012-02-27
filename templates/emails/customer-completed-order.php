@@ -29,7 +29,7 @@
 		?>
 	</tfoot>
 	<tbody>
-		<?php echo $order->email_order_items_table( true ); ?>
+		<?php echo $order->email_order_items_table( true, false, true ); ?>
 	</tbody>
 </table>
 

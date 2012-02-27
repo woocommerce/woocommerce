@@ -57,6 +57,13 @@ $order = new WC_Order( $order_id );
 
 				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
 				
+				// Show any purchase notes
+				if ($order->status=='completed' || $order->status=='processing') :
+					if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
+						echo '<tr class="product-purchase-note"><td colspan="3">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
+					endif;
+				endif;
+				
 			endforeach;
 		endif;
 

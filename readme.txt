@@ -143,9 +143,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.4.5 =
+= 1.5 =
 * Quick edit products
 * Bulk edit products
+* Purchase notes - add text to a product to include in order tables after payment
 * Downloadable Product Permissions management via orders page - grant and revoke access to files
 * See how many times a download has been downloaded
 * Option for downloadable files to expire after X days
