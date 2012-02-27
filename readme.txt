@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Enhanced variation price display (thanks pixeltrix) and tweaked get_price_html - new filters for variation prices
 * email_order_items_table image thumbnail support
 * Hiding the cart widget option now shows the widget if adding to cart via ajax
+* More reliable un-force https code
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
