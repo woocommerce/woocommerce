@@ -3,7 +3,9 @@
  * Edit Address Form
  */
  
-global $woocommerce;
+global $woocommerce, $current_user;
+
+get_currentuserinfo();
 ?>
 
 <?php $woocommerce->show_messages(); ?>
@@ -20,7 +22,9 @@ global $woocommerce;
 		
 		<?php 
 		foreach ($address as $key => $field) :
-			woocommerce_form_field( $key, $field, get_user_meta( get_current_user_id(), $key, true ) );
+			$value = (isset($_POST[$key])) ? $_POST[$key] : get_user_meta( get_current_user_id(), $key, true );
+			if (!$value && $key=='billing_email') $value = $current_user->user_email;
+			woocommerce_form_field( $key, $field, $value );
 		endforeach;
 		?>
 		

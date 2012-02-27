@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * More reliable un-force https code
 * Reset link for variations
 * Better grouped price code
+* My account remembers post data upon error
 * Hidden shipping address from account page and mails when disabled
 * Option to limit products which are downloadable and virtual to 1 per cart
 
