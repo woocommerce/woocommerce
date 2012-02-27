@@ -529,15 +529,17 @@ class WC_Product {
 	function get_price_html( $price = '' ) {
 		if ($this->is_type('grouped')) :
 			
-			$min_price = $max_price = '';
+			$child_prices = array();
 			
-			foreach ($this->get_children() as $child_id) :
-				$child_price = get_post_meta( $child_id, '_price', true);
-				if ($child_price<$min_price || $min_price == '') $min_price = $child_price;
-				if ($child_price>$max_price || $max_price == '') $max_price = $child_price;
-			endforeach;
+			foreach ($this->get_children() as $child_id) $child_prices[] = get_post_meta( $child_id, '_price', true );
 			
-			$price .= $this->get_price_html_from_text() . woocommerce_price( $min_price );	
+			$child_prices = array_unique( $child_prices );
+			
+			$min_price = min( $child_prices );
+			
+			if (sizeof($child_prices)>1) $price .= $this->get_price_html_from_text();
+
+			$price .= woocommerce_price( $min_price );	
 			
 			$price = apply_filters('woocommerce_grouped_price_html', $price, $this);
 				
