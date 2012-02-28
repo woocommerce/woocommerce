@@ -62,7 +62,7 @@ function woocommerce_product_data_box() {
 				woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __('Product URL', 'woocommerce'), 'placeholder' => 'http://', 'description' => __('Enter the external URL to the product.', 'woocommerce') ) );
 				
 				// Button text
-				woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __('Button text', 'woocommerce'), 'placeholder' => __('Buy product', 'woocommerce'), 'description' => __('This text will be shown on the button linking to the external product.', 'woocommerce') ) );
+				woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __('Button text', 'woocommerce'), 'placeholder' => _x('Buy product', 'placeholder', 'woocommerce'), 'description' => __('This text will be shown on the button linking to the external product.', 'woocommerce') ) );
 							
 			echo '</div>';
 				
@@ -84,10 +84,10 @@ function woocommerce_product_data_box() {
 							<label for="'.$field['id'].'_from">'.$field['label'].'</label>
 							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
 				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
-				echo '" placeholder="' . __('From&hellip;', 'woocommerce') . '" maxlength="10" />
+				echo '" placeholder="' . _x('From&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
 				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
-				echo '" placeholder="' . __('To&hellip;', 'woocommerce') . '" maxlength="10" />
+				echo '" placeholder="' . _x('To&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<a href="#" class="cancel_sale_schedule">'. __('Cancel', 'woocommerce') .'</a>
 						</p>';
 						
