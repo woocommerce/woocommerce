@@ -34,18 +34,18 @@ class WC_Checkout {
 			'account_username' => array( 
 				'type' => 'text', 
 				'label' => __('Account username', 'woocommerce'), 
-				'placeholder' => __('Username', 'woocommerce') 
+				'placeholder' => _x('Username', 'placeholder', 'woocommerce') 
 				),
 			'account_password' => array( 
 				'type' => 'password', 
 				'label' => __('Account password', 'woocommerce'), 
-				'placeholder' => __('Password', 'woocommerce'),
+				'placeholder' => _x('Password', 'placeholder', 'woocommerce'),
 				'class' => array('form-row-first')
 				),
 			'account_password-2' => array( 
 				'type' => 'password', 
 				'label' => __('Account password', 'woocommerce'), 
-				'placeholder' => __('Password', 'woocommerce'),
+				'placeholder' => _x('Password', 'placeholder', 'woocommerce'),
 				'class' => array('form-row-last'), 
 				'label_class' => array('hidden')
 				)
@@ -55,7 +55,7 @@ class WC_Checkout {
 				'type' => 'textarea', 
 				'class' => array('notes'), 
 				'label' => __('Order Notes', 'woocommerce'), 
-				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woocommerce') 
+				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce') 
 				)
 			);
 		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
