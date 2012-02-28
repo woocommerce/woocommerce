@@ -509,7 +509,7 @@ class WC_Countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woocommerce') ) : __($value, 'woocommerce') ) .'</option>';
+    			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
 	}
