@@ -1270,9 +1270,9 @@ class Woocommerce {
 	function cart_has_contents_cookie( $set ) {
 		if (!headers_sent()) {
 			if ($set) 
-				setcookie("wc-cart-has-contents", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false);
+				setcookie("woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false);
 			else 
-				setcookie("wc-cart-has-contents", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false);
+				setcookie("woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false);
 		}
 	}
 		
