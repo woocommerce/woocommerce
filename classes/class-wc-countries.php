@@ -281,6 +281,7 @@ class WC_Countries {
 				'WA' => __('Western Australia', 'woocommerce') 
 			),
 			'AT' => array(),
+			'BE' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woocommerce'),
 			    'AC' => __('Acre', 'woocommerce'),
@@ -650,6 +651,12 @@ class WC_Countries {
 					'state'		=> array(
 						'required' => false
 					)
+				),
+				'BE' => array(
+					'postcode_before_city' => true,
+					'state' => array(
+						'required' => false,
+					),
 				),
 				'CA' => array(
 					'state'	=> array(
