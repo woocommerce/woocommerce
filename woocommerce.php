@@ -81,7 +81,10 @@ class Woocommerce {
 		
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
-		
+
+		// Set up localisation
+		$this->load_plugin_textdomain();
+
 		// Include required files
 		$this->includes();
 		
@@ -266,10 +269,6 @@ class Woocommerce {
 	 * Init WooCommerce when WordPress Initialises
 	 **/
 	function init() {
-		
-		// Set up localisation
-		$this->load_plugin_textdomain();
-
 		// Register globals for WC environment
 		$this->register_globals();
 
