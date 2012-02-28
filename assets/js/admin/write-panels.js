@@ -24,12 +24,12 @@ jQuery( function($){
 		window.onbeforeunload = '';
 	});
 	
-	$('a.edit_address').click(function(){
+	$('a.edit_address').click(function(event){
 		
 		$(this).hide();
 		$(this).closest('.order_data').find('div.address').hide();
 		$(this).closest('.order_data').find('div.edit_address').show();
-
+		event.preventDefault();
 	});
 	
 	// Chosen selects
