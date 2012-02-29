@@ -274,7 +274,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __('Limit quantity', 'woocommerce'),
-		'desc' 		=> __( 'Limit the quantity of items that are both downloadable + virtual to 1', 'woocommerce' ),
+		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
