@@ -29,7 +29,7 @@ function woocommerce_layered_nav_init() {
 	    	$name = 'filter_' . $attribute;
 	    	$query_type_name = 'query_type_' . $attribute;
 	    	
-	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) :
+	    	if (isset($_GET[$name]) && $_GET[$name] && taxonomy_exists($taxonomy)) :
 	    		$_chosen_attributes[$taxonomy]['terms'] = explode(',', $_GET[$name] );
 	    		if (isset($_GET[$query_type_name]) && $_GET[$query_type_name]=='or') :
 	    			$_chosen_attributes[$taxonomy]['query_type'] = 'or';
@@ -173,18 +173,51 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 			echo $before_widget . $before_title . $title . $after_title;
 			
+			// Force found when option is selected
+			if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+				
 			if ($display_type=='dropdown') {
 			
 				$taxonomy_filter = str_replace('pa_', '', $taxonomy);
-				
-				$found = true;
 				
 				echo '<select id="dropdown_layered_nav_'.$taxonomy_filter.'">';
 				
 				echo '<option value="">'. sprintf( __('Any %s', 'woocommerce'), $woocommerce->attribute_label( $taxonomy ) ) .'</option>';
 				
 				foreach ($terms as $term) {
+				
+					// Get count based on current view - uses transients
+					$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
+					
+					if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
+			
+						$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
+					
+						set_transient( $transient_name, $_products_in_term );
+					}
+					
+					$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']));
+					
+					// If this is an AND query, only show options with count > 0
+					if ($query_type=='and') {
+						
+						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
+	
+						if ($count>0) $found = true;
+					
+						if ($count==0 && !$option_is_set) continue;
+					
+					// If this is an OR query, show all options so search can be expanded
+					} else {
+						
+						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
+						
+						if ($count>0) $found = true;
+	
+					}
+										
 					echo '<option value="'.$term->term_id.'" '.selected( (isset($_GET['filter_'.$taxonomy_filter])) ? $_GET['filter_'.$taxonomy_filter] : '' , $term->term_id, false).'>'.$term->name.'</option>';
+					
 				}
 					
 				echo '</select>';
@@ -203,10 +236,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				
 				// List display
 				echo "<ul>";
-				
-				// Force found when option is selected
-				if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
-				
+
 				foreach ($terms as $term) {
 					
 					// Get count based on current view - uses transients

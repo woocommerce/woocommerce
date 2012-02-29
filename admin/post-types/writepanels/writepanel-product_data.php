@@ -854,8 +854,10 @@ add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
 
 function woocommerce_change_insert_into_post( $translation, $original ) {
     if( !isset( $_REQUEST['from'] ) ) return $translation;
-
-    if( $_REQUEST['from'] == 'wc01' && $original == 'Insert into Post' ) return __('Insert into URL field', 'woocommerce' );
+	
+	$original = strtolower($original);
+	
+    if( $_REQUEST['from'] == 'wc01' && ($original == 'insert into post' || $original == 'use this image') ) return __('Use this file', 'woocommerce' );
 
     return $translation;
 }
