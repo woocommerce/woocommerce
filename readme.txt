@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Downloadable Product Permissions management via orders page - grant and revoke access to files
 * See how many times a download has been downloaded
 * Option for downloadable files to expire after X days
+* Define extra flat rate addons - e.g. priority shipping for an extra $5
 * PayPal standard goes straight to PayPal via a GET request - no more pay page/forms
 * Better mixed cart handling - option to give access to downloads after payment (processing order status)
 * Added basic API for payment gateways to hook into (for IPN etc)

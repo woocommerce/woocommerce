@@ -39,6 +39,10 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->tax_status	= $this->settings['tax_status'];
 		$this->cost 		= $this->settings['cost'];
 		$this->fee 			= $this->settings['fee']; 
+		$this->options 		= isset($this->settings['options']) ? $this->settings['options'] : ''; 
+		
+		// Get options
+		$this->options		= (array) explode("\n", $this->options);
 		
 		// Load Flat rates
 		$this->get_flat_rates();
@@ -116,6 +120,12 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ), 
 							'type' 			=> 'text', 
 							'description'	=> __('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce'),
+							'default'		=> ''
+						),
+			'options' => array(
+							'title' 		=> __( 'Shipping Options', 'woocommerce' ), 
+							'type' 			=> 'textarea', 
+							'description'	=> __('Optional extra shipping options with additional costs (one per line). Format: <code>Option Name|Cost|Cost is per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use "Calculation Type" setting.', 'woocommerce'),
 							'default'		=> ''
 						),
 			);
@@ -232,6 +242,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			
 			// Per item shipping so we pass an array of costs (per item) instead of a single value
 			$costs = array();
+			$total_quantity = 0;
 			
 			// Shipping per item
 			foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
@@ -252,6 +263,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 					
 					$costs[$item_id] = (( $cost + $fee ) * $values['quantity']);
 					
+					$total_quantity += $values['quantity'];
+					
 				endif;
 			endforeach;
 			
@@ -263,9 +276,47 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			);
 			
 		endif;	
-		
+
 		// Register the rate
 		$this->add_rate( $rate );  
+		
+		// Add any extra rates
+		if (sizeof($this->options) > 0) foreach ($this->options as $option) {
+			
+			$this_option = explode('|', $option);
+			
+			if (sizeof($this_option)!==3) continue;
+			
+			$extra_rate = $rate;
+			
+			$extra_rate['id'] 		= $this->id . ':' . sanitize_title($this_option[0]);
+			$extra_rate['label'] 	= $this_option[0];
+			
+			$per_order_cost = ($this_option[2]=='yes') ? 1 : 0;
+			$this_cost = $this_option[1];
+			
+			if (is_array($extra_rate['cost'])) {
+				
+				if ($per_order_cost) {
+					$extra_rate['cost']['order'] = $this_cost;
+				} else {
+					// Per-product shipping
+					$extra_rate['cost']['order'] = $this_cost * $total_quantity;
+				}
+				
+			} else {
+
+				// If using shipping per class, multiple the cost by the classes we found
+				if (!$per_order_cost && $this->type=='class') {
+					$this_cost = $this_cost * $found_shipping_classes;
+				}
+				
+				$extra_rate['cost'] = $extra_rate['cost'] + $this_cost;
+			}
+			
+			$this->add_rate( $extra_rate );  
+			
+		}
     } 
 
 	/**
