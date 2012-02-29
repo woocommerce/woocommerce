@@ -201,7 +201,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					// If this is an AND query, only show options with count > 0
 					if ($query_type=='and') {
 						
-						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
+						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
 	
 						if ($count>0) $found = true;
 					
