@@ -428,7 +428,9 @@ class WC_Countries {
 
 	/** get countries we allow only */
 	function get_allowed_countries() {
-	
+		
+		asort($this->countries);
+		
 		if (get_option('woocommerce_allowed_countries')!=='specific') return $this->countries;
 
 		$allowed_countries = array();
@@ -441,8 +443,8 @@ class WC_Countries {
 			
 		endforeach;
 		
-		asort($allowed_countries);
-		
+		var_dump($allowed_countries);
+
 		return $allowed_countries;
 	}
 	
@@ -495,7 +497,7 @@ class WC_Countries {
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
 		asort($this->countries);
-		
+
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
