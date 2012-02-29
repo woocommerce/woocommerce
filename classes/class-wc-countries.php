@@ -442,8 +442,6 @@ class WC_Countries {
 			$allowed_countries[$country] = $this->countries[$country];
 			
 		endforeach;
-		
-		var_dump($allowed_countries);
 
 		return $allowed_countries;
 	}
