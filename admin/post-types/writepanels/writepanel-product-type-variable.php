@@ -44,7 +44,15 @@ function variable_product_type_options() {
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper">
 	
 		<?php if (!$variation_attribute_found) : ?>
-			<div class="inline updated"><p><?php _e('Before you can start adding variations you must set up and save some variable attributes via the <strong>Attributes</strong> tab.', 'woocommerce'); ?></p></div>
+		
+			<div id="message" class="inline woocommerce-message">
+				<div class="squeezer">
+					<h4><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></h4>
+					
+					<p class="submit"><a class="button-primary" href="http://www.woothemes.com/woocommerce-docs/user-guide/product-variations/" target="_blank"><?php _e('Learn more', 'woocommerce'); ?></a></p>
+				</div>
+			</div>
+
 		<?php else : ?>
 	
 			<p class="toolbar">

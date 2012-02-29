@@ -125,7 +125,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			'options' => array(
 							'title' 		=> __( 'Shipping Options', 'woocommerce' ), 
 							'type' 			=> 'textarea', 
-							'description'	=> __('Optional extra shipping options with additional costs (one per line). Format: <code>Option Name|Cost|Cost is per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use "Calculation Type" setting.', 'woocommerce'),
+							'description'	=> __('Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the "Calculation Type" setting.', 'woocommerce'),
 							'default'		=> ''
 						),
 			);
