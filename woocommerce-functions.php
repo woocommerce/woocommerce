@@ -748,7 +748,7 @@ function woocommerce_download_product() {
 		endif;
 		
 		$download_result = $wpdb->get_row( $wpdb->prepare("
-			SELECT order_id, downloads_remaining,user_id 
+			SELECT order_id, downloads_remaining,user_id,download_count,access_expires
 			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s

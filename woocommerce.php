@@ -81,7 +81,10 @@ class Woocommerce {
 		
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
-		
+
+		// Set up localisation
+		$this->load_plugin_textdomain();
+
 		// Include required files
 		$this->includes();
 		
@@ -266,10 +269,6 @@ class Woocommerce {
 	 * Init WooCommerce when WordPress Initialises
 	 **/
 	function init() {
-		
-		// Set up localisation
-		$this->load_plugin_textdomain();
-
 		// Register globals for WC environment
 		$this->register_globals();
 
@@ -1271,9 +1270,9 @@ class Woocommerce {
 	function cart_has_contents_cookie( $set ) {
 		if (!headers_sent()) {
 			if ($set) 
-				setcookie("wc-cart-has-contents", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false);
+				setcookie("woocommerce_items_in_cart", "1", 0, COOKIEPATH, COOKIE_DOMAIN, false);
 			else 
-				setcookie("wc-cart-has-contents", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false);
+				setcookie("woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false);
 		}
 	}
 		

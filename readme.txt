@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * My account remembers post data upon error
 * Hidden shipping address from account page and mails when disabled
 * Option to limit products which are downloadable and virtual to 1 per cart
+* woocommerce_items_in_cart cookie when cart has contents (can be used for caching plugins)
 
 = 1.4.4 - 18/02/2012 = 
 * Fix for remove coupon links after ajax update of shipping
