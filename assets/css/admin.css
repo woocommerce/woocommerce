@@ -1261,22 +1261,22 @@ table.wc_shipping .radio {
   background-position: 9px 9px;
 }
 #woocommerce-product-data ul.product_data_tabs li.tax_options a {
-  background-position: -141px 9px;
+  background-position: 9px -51px;
 }
 #woocommerce-product-data ul.product_data_tabs li.inventory_options a {
-  background-position: -289px 9px;
+  background-position: 9px -111px;
 }
 #woocommerce-product-data ul.product_data_tabs li.crosssell_options a {
-  background-position: 9px -40px;
+  background-position: 9px -171px;
 }
 #woocommerce-product-data ul.product_data_tabs li.attribute_options a {
-  background-position: -141px -40px;
+  background-position: 9px -231px;
 }
 #woocommerce-product-data ul.product_data_tabs li.grouping_options a {
-  background-position: -289px -40px;
+  background-position: 9px -291px;
 }
 #woocommerce-product-data ul.product_data_tabs li.variation_options a {
-  background-position: -141px -91px;
+  background-position: 9px -411px;
 }
 #woocommerce-product-data ul.product_data_tabs li.active a {
   background-color: #f8f8f8;
