@@ -86,7 +86,7 @@ jQuery( function($){
 				};
 				
 				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
-
+					
 					result = jQuery.parseJSON( response );
 					$row.find('input.line_subtotal_tax').val( result.line_subtotal_tax );
 					$row.find('input.line_tax').val( result.line_tax );

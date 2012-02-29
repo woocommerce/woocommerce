@@ -274,5 +274,4 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 		
 	endif;
 	
-	update_post_meta( $post_id, '_order_taxes', $order_taxes );
 }

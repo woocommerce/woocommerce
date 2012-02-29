@@ -733,6 +733,8 @@ function woocommerce_calc_line_taxes() {
 	$item_id		= esc_attr($_POST['item_id']);
 	$tax_class 		= esc_attr($_POST['tax_class']);
 	
+	if (!$item_id) return;
+	
 	// Get product details
 	$_product			= new WC_Product($item_id);
 	$item_tax_status 	= $_product->get_tax_status();

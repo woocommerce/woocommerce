@@ -621,7 +621,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	$woocommerce_errors = array();
 	
 	// Add key
-		add_post_meta( $post_id, '_order_key', uniqid('order_') );
+		add_post_meta( $post_id, '_order_key', uniqid('order_'), true );
 
 	// Update post data
 		update_post_meta( $post_id, '_billing_first_name', stripslashes( $_POST['_billing_first_name'] ));
@@ -685,7 +685,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;
 		
 		update_post_meta( $post_id, '_order_taxes', $order_taxes );
-	
+		
 	// Order items
 		$order_items = array();
 	
