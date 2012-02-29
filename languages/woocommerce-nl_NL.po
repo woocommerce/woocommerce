@@ -94,7 +94,7 @@ msgstr "0"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:371
 #: admin/post-types/writepanels/writepanel-order_data.php:377
-#: classes/shipping/class-wc-flat-rate.php:295
+#: classes/shipping/class-wc-flat-rate.php:346
 #: woocommerce-ajax.php:693
 #: woocommerce-ajax.php:699
 #@ woocommerce
@@ -103,14 +103,15 @@ msgstr "Prijs"
 
 #: admin/post-types/product.php:488
 #: admin/post-types/product.php:711
+#: admin/post-types/writepanels/writepanel-coupon_data.php:33
 #: admin/post-types/writepanels/writepanel-order_data.php:371
 #: admin/post-types/writepanels/writepanel-order_data.php:373
 #: admin/post-types/writepanels/writepanel-order_data.php:377
 #: admin/post-types/writepanels/writepanel-order_data.php:379
-#: classes/shipping/class-wc-flat-rate.php:324
-#: classes/shipping/class-wc-flat-rate.php:325
-#: classes/shipping/class-wc-flat-rate.php:356
-#: classes/shipping/class-wc-flat-rate.php:357
+#: classes/shipping/class-wc-flat-rate.php:375
+#: classes/shipping/class-wc-flat-rate.php:376
+#: classes/shipping/class-wc-flat-rate.php:407
+#: classes/shipping/class-wc-flat-rate.php:408
 #: woocommerce-ajax.php:693
 #: woocommerce-ajax.php:695
 #: woocommerce-ajax.php:699
@@ -592,7 +593,7 @@ msgstr "Nieuwe producttag naam"
 msgid "Shipping Classes"
 msgstr "Verzendingsklassen"
 
-#: classes/shipping/class-wc-flat-rate.php:294
+#: classes/shipping/class-wc-flat-rate.php:345
 #: woocommerce.php:578
 #@ woocommerce
 msgid "Shipping Class"
@@ -1452,7 +1453,7 @@ msgid "There are no product orders yet."
 msgstr "Er zijn nog geen bestellingen van dit product."
 
 #: admin/woocommerce-admin-dashboard.php:255
-#: classes/class-wc-product.php:692
+#: classes/class-wc-product.php:688
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
@@ -2330,7 +2331,7 @@ msgstr "Selecteer landen/staten &hellip;"
 #: admin/post-types/writepanels/writepanel-product_data.php:179
 #: admin/woocommerce-admin-settings-forms.php:412
 #: admin/woocommerce-admin-settings-forms.php:575
-#: classes/shipping/class-wc-flat-rate.php:106
+#: classes/shipping/class-wc-flat-rate.php:110
 #: classes/shipping/class-wc-international-delivery.php:83
 #@ woocommerce
 msgid "None"
@@ -2402,7 +2403,7 @@ msgid "No countries selected"
 msgstr "Geen laden geselecteerd"
 
 #: admin/woocommerce-admin-settings-forms.php:652
-#: classes/shipping/class-wc-flat-rate.php:365
+#: classes/shipping/class-wc-flat-rate.php:416
 #@ woocommerce
 msgid "Delete the selected rates?"
 msgstr "Verwijderd de geselecteerde tarieven?"
@@ -2603,8 +2604,8 @@ msgstr "Alle landen"
 
 #: admin/woocommerce-admin-settings.php:83
 #: admin/woocommerce-admin-settings.php:88
-#: classes/shipping/class-wc-flat-rate.php:77
 #: classes/shipping/class-wc-flat-rate.php:81
+#: classes/shipping/class-wc-flat-rate.php:85
 #: classes/shipping/class-wc-free-shipping.php:78
 #: classes/shipping/class-wc-free-shipping.php:82
 #: classes/shipping/class-wc-local-delivery.php:92
@@ -3289,6 +3290,7 @@ msgstr "Verberg out-of-stock producten op de catalogus"
 
 #: admin/woocommerce-admin-settings.php:763
 #: admin/woocommerce-admin-settings.php:1187
+#: classes/shipping/class-wc-flat-rate.php:126
 #@ woocommerce
 msgid "Shipping Options"
 msgstr "Verzendingsopties"
@@ -3756,6 +3758,8 @@ msgstr "Verzendadres"
 msgid "Paying Customer?"
 msgstr "Betalende klant?"
 
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+#: admin/post-types/writepanels/writepanel-coupon_data.php:48
 #: admin/woocommerce-admin-users.php:61
 #: admin/woocommerce-admin-users.php:80
 #: templates/order/order-details.php:94
@@ -4135,7 +4139,7 @@ msgstr "Promotieprijs"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:128
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:299
 #: admin/post-types/writepanels/writepanel-product_data.php:102
-#: classes/class-wc-product.php:900
+#: classes/class-wc-product.php:896
 #@ woocommerce
 msgid "Weight"
 msgstr "Gewicht"
@@ -5168,7 +5172,7 @@ msgid "Cancel"
 msgstr "Annuleren"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:110
-#: classes/class-wc-product.php:909
+#: classes/class-wc-product.php:905
 #@ woocommerce
 msgid "Dimensions"
 msgstr "Afmetingen"
@@ -5210,14 +5214,14 @@ msgid "Enter the number of days before a download link expires, or leave blank."
 msgstr ""
 
 #: admin/post-types/writepanels/writepanel-product_data.php:176
-#: classes/shipping/class-wc-flat-rate.php:100
+#: classes/shipping/class-wc-flat-rate.php:104
 #: classes/shipping/class-wc-international-delivery.php:77
 #@ woocommerce
 msgid "Tax Status"
 msgstr "BTW Status"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:177
-#: classes/shipping/class-wc-flat-rate.php:105
+#: classes/shipping/class-wc-flat-rate.php:109
 #: classes/shipping/class-wc-international-delivery.php:82
 #@ woocommerce
 msgid "Taxable"
@@ -5335,11 +5339,6 @@ msgstr "Schakel deze optie in als het product niet verzonden wordt"
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
 msgstr "Schakel deze optie in als de aankoop van het product toegang geeft tot een downloadbaar bestand"
 
-#: admin/post-types/writepanels/writepanel-product_data.php:858
-#@ woocommerce
-msgid "Insert into URL field"
-msgstr "Invoegen in URL-veld"
-
 #: admin/post-types/writepanels/writepanels-init.php:32
 #@ woocommerce
 msgid "Order Data"
@@ -5430,10 +5429,10 @@ msgstr "U kunt niet dit aantal van dit product toevoegen aan uw winkelwagen omda
 
 #: classes/class-wc-cart.php:1128
 #: classes/class-wc-order.php:444
-#: classes/class-wc-product.php:588
-#: classes/class-wc-product.php:597
-#: classes/class-wc-product.php:628
-#: classes/class-wc-product.php:634
+#: classes/class-wc-product.php:584
+#: classes/class-wc-product.php:593
+#: classes/class-wc-product.php:624
+#: classes/class-wc-product.php:630
 #@ woocommerce
 msgid "Free!"
 msgstr "Gratis!"
@@ -5468,6 +5467,7 @@ msgstr "Kortingsbon bestaat niet!"
 msgid "Account username"
 msgstr "Account gebruikersnaam"
 
+#: classes/class-wc-checkout.php:37
 #: templates/myaccount/form-login.php:18
 #: templates/myaccount/form-login.php:44
 #: templates/shop/form-login.php:14
@@ -5482,6 +5482,8 @@ msgstr "Gebruikersnaam"
 msgid "Account password"
 msgstr "Account wachtwoord"
 
+#: classes/class-wc-checkout.php:42
+#: classes/class-wc-checkout.php:48
 #: templates/myaccount/form-login.php:22
 #: templates/myaccount/form-login.php:54
 #: templates/shop/form-login.php:18
@@ -7568,13 +7570,13 @@ msgstr "(backorders toegestaan)"
 msgid "Available on backorder"
 msgstr "Verkrijgbaar als backorder. "
 
-#: classes/class-wc-product.php:648
+#: classes/class-wc-product.php:644
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
 msgstr "Vanaf:"
 
-#: classes/class-wc-product.php:692
+#: classes/class-wc-product.php:688
 #: templates/single-product-reviews.php:29
 #, php-format
 #@ woocommerce
@@ -7594,7 +7596,7 @@ msgstr "Bank overschrijving"
 #: classes/gateways/class-wc-bacs.php:50
 #: classes/gateways/class-wc-cheque.php:45
 #: classes/gateways/class-wc-paypal.php:97
-#: classes/shipping/class-wc-flat-rate.php:59
+#: classes/shipping/class-wc-flat-rate.php:63
 #: classes/shipping/class-wc-free-shipping.php:47
 #: classes/shipping/class-wc-international-delivery.php:36
 #@ woocommerce
@@ -7619,7 +7621,7 @@ msgstr "Titel"
 #: classes/gateways/class-wc-bacs.php:58
 #: classes/gateways/class-wc-cheque.php:53
 #: classes/gateways/class-wc-paypal.php:105
-#: classes/shipping/class-wc-flat-rate.php:67
+#: classes/shipping/class-wc-flat-rate.php:71
 #: classes/shipping/class-wc-free-shipping.php:55
 #: classes/shipping/class-wc-international-delivery.php:44
 #: classes/shipping/class-wc-local-delivery.php:65
@@ -7958,7 +7960,7 @@ msgid "Flat rate"
 msgstr "Vast bedrag"
 
 #: classes/shipping/class-wc-flat-rate.php:19
-#: classes/shipping/class-wc-flat-rate.php:288
+#: classes/shipping/class-wc-flat-rate.php:339
 #@ woocommerce
 msgid "Flat Rates"
 msgstr "Vast bedrag"
@@ -7968,25 +7970,25 @@ msgstr "Vast bedrag"
 msgid "Flat rates let you define a standard rate per item, or per order."
 msgstr "Vast bedrag staat toe om een vast bedrag per product of per bestelling te kiezen."
 
-#: classes/shipping/class-wc-flat-rate.php:61
+#: classes/shipping/class-wc-flat-rate.php:65
 #: classes/shipping/class-wc-international-delivery.php:38
 #@ woocommerce
 msgid "Enable this shipping method"
 msgstr "Deze verzendmethode activeren"
 
-#: classes/shipping/class-wc-flat-rate.php:65
+#: classes/shipping/class-wc-flat-rate.php:69
 #: classes/shipping/class-wc-free-shipping.php:53
 #: classes/shipping/class-wc-international-delivery.php:42
 #@ woocommerce
 msgid "Method Title"
 msgstr "Methode naam"
 
-#: classes/shipping/class-wc-flat-rate.php:68
+#: classes/shipping/class-wc-flat-rate.php:72
 #@ woocommerce
 msgid "Flat Rate"
 msgstr "Vast Bedrag"
 
-#: classes/shipping/class-wc-flat-rate.php:71
+#: classes/shipping/class-wc-flat-rate.php:75
 #: classes/shipping/class-wc-free-shipping.php:72
 #: classes/shipping/class-wc-local-delivery.php:86
 #: classes/shipping/class-wc-local-pickup.php:63
@@ -7994,7 +7996,7 @@ msgstr "Vast Bedrag"
 msgid "Method availability"
 msgstr "Methode beschikbaarheid"
 
-#: classes/shipping/class-wc-flat-rate.php:76
+#: classes/shipping/class-wc-flat-rate.php:80
 #: classes/shipping/class-wc-free-shipping.php:77
 #: classes/shipping/class-wc-local-delivery.php:91
 #: classes/shipping/class-wc-local-pickup.php:68
@@ -8002,86 +8004,86 @@ msgstr "Methode beschikbaarheid"
 msgid "All allowed countries"
 msgstr "Alle toegestane landen"
 
-#: classes/shipping/class-wc-flat-rate.php:89
+#: classes/shipping/class-wc-flat-rate.php:93
 #: classes/shipping/class-wc-international-delivery.php:66
 #@ woocommerce
 msgid "Calculation Type"
 msgstr "Berekening Type"
 
-#: classes/shipping/class-wc-flat-rate.php:94
+#: classes/shipping/class-wc-flat-rate.php:98
 #: classes/shipping/class-wc-international-delivery.php:71
 #@ woocommerce
 msgid "Per Order - charge shipping for the entire order as a whole"
 msgstr "Per bestelling"
 
-#: classes/shipping/class-wc-flat-rate.php:95
+#: classes/shipping/class-wc-flat-rate.php:99
 #: classes/shipping/class-wc-international-delivery.php:72
 #@ woocommerce
 msgid "Per Item - charge shipping for each item individually"
 msgstr "Per product"
 
-#: classes/shipping/class-wc-flat-rate.php:96
+#: classes/shipping/class-wc-flat-rate.php:100
 #: classes/shipping/class-wc-international-delivery.php:73
 #@ woocommerce
 msgid "Per Class - charge shipping for each shipping class in an order"
 msgstr "Per verzendingsklasse"
 
-#: classes/shipping/class-wc-flat-rate.php:110
+#: classes/shipping/class-wc-flat-rate.php:114
 #: classes/shipping/class-wc-international-delivery.php:87
 #@ woocommerce
 msgid "Default Cost"
 msgstr "Standaard kosten"
 
-#: classes/shipping/class-wc-flat-rate.php:112
+#: classes/shipping/class-wc-flat-rate.php:116
 #: classes/shipping/class-wc-international-delivery.php:89
 #@ woocommerce
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
 msgstr "Prijs excl. BTW"
 
-#: classes/shipping/class-wc-flat-rate.php:116
+#: classes/shipping/class-wc-flat-rate.php:120
 #: classes/shipping/class-wc-international-delivery.php:93
 #@ woocommerce
 msgid "Default Handling Fee"
 msgstr "Standaard administratiekosten"
 
-#: classes/shipping/class-wc-flat-rate.php:118
+#: classes/shipping/class-wc-flat-rate.php:122
 #: classes/shipping/class-wc-international-delivery.php:95
 #@ woocommerce
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
 msgstr "Behandelingskosten excl. BTW. Vul een bedrag in of percentage (bv 5%). Leeg laten voor 0."
 
-#: classes/shipping/class-wc-flat-rate.php:295
+#: classes/shipping/class-wc-flat-rate.php:346
 #@ woocommerce
 msgid "Cost, excluding tax."
 msgstr "Kosten excl. BTW."
 
-#: classes/shipping/class-wc-flat-rate.php:296
+#: classes/shipping/class-wc-flat-rate.php:347
 #@ woocommerce
 msgid "Handling Fee"
 msgstr "Behandelingskosten"
 
-#: classes/shipping/class-wc-flat-rate.php:296
+#: classes/shipping/class-wc-flat-rate.php:347
 #@ woocommerce
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr "Kosten ex belasting. Als bedrag (bv 2.50) of procenten (bv 5%)."
 
-#: classes/shipping/class-wc-flat-rate.php:301
+#: classes/shipping/class-wc-flat-rate.php:352
 #@ woocommerce
 msgid "+ Add Flat Rate"
 msgstr "+ Toevoegen Vast Bedrag"
 
-#: classes/shipping/class-wc-flat-rate.php:302
+#: classes/shipping/class-wc-flat-rate.php:353
 #@ woocommerce
 msgid "Add rates for shipping classes here &mdash; they will override the default costs defined above."
 msgstr ""
 
-#: classes/shipping/class-wc-flat-rate.php:302
+#: classes/shipping/class-wc-flat-rate.php:353
 #@ woocommerce
 msgid "Delete selected rates"
 msgstr "Verwijder de geselecteerde tarieven"
 
-#: classes/shipping/class-wc-flat-rate.php:319
-#: classes/shipping/class-wc-flat-rate.php:351
+#: classes/shipping/class-wc-flat-rate.php:370
+#: classes/shipping/class-wc-flat-rate.php:402
 #@ woocommerce
 msgid "Select a class&hellip;"
 msgstr "Selecteer een klasse &hellip;"
@@ -9141,7 +9143,7 @@ msgstr "Bestsellers"
 #: widgets/widget-best_sellers.php:116
 #: widgets/widget-cart.php:104
 #: widgets/widget-featured_products.php:113
-#: widgets/widget-layered_nav.php:353
+#: widgets/widget-layered_nav.php:383
 #: widgets/widget-onsale.php:149
 #: widgets/widget-price_filter.php:195
 #: widgets/widget-product_categories.php:225
@@ -9218,43 +9220,43 @@ msgstr "Toont een speciale eigenschap in een widget zodat u de producten kunt fi
 msgid "WooCommerce Layered Nav"
 msgstr "WooCommerce Gelaagde Navigatie"
 
-#: widgets/widget-layered_nav.php:184
+#: widgets/widget-layered_nav.php:185
 #, php-format
 #@ woocommerce
 msgid "Any %s"
 msgstr "Alle %s"
 
-#: widgets/widget-layered_nav.php:356
+#: widgets/widget-layered_nav.php:386
 #@ woocommerce
 msgid "Attribute:"
 msgstr "Eigenschap:"
 
-#: widgets/widget-layered_nav.php:376
+#: widgets/widget-layered_nav.php:406
 #@ woocommerce
 msgid "Display Type:"
 msgstr "Weergave Type:"
 
-#: widgets/widget-layered_nav.php:378
+#: widgets/widget-layered_nav.php:408
 #@ woocommerce
 msgid "List"
 msgstr "Lijst"
 
-#: widgets/widget-layered_nav.php:379
+#: widgets/widget-layered_nav.php:409
 #@ woocommerce
 msgid "Dropdown"
 msgstr "Dropdown"
 
-#: widgets/widget-layered_nav.php:382
+#: widgets/widget-layered_nav.php:412
 #@ woocommerce
 msgid "Query Type:"
 msgstr "Query Type:"
 
-#: widgets/widget-layered_nav.php:384
+#: widgets/widget-layered_nav.php:414
 #@ woocommerce
 msgid "AND"
 msgstr "EN"
 
-#: widgets/widget-layered_nav.php:385
+#: widgets/widget-layered_nav.php:415
 #@ woocommerce
 msgid "OR"
 msgstr "OF"
@@ -9510,31 +9512,6 @@ msgstr "WooCommerce Hoogst Gewaardeerde Producten"
 msgid "Top Rated Products"
 msgstr "Best gewaardeerde producten"
 
-#: admin/post-types/writepanels/writepanel-coupon_data.php:33
-#@ woocommerce
-msgctxt "placeholder"
-msgid "0.00"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-coupon_data.php:45
-#: admin/post-types/writepanels/writepanel-coupon_data.php:48
-#@ woocommerce
-msgctxt "placeholder"
-msgid "N/A"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-coupon_data.php:51
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Unlimited usage"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-coupon_data.php:54
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Never expire"
-msgstr ""
-
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
 msgctxt "placeholder"
@@ -9576,25 +9553,6 @@ msgstr ""
 #: classes/class-wc-cart.php:448
 #@ woocommerce
 msgid "You already have this item in your cart."
-msgstr ""
-
-#: classes/class-wc-checkout.php:37
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Username"
-msgstr ""
-
-#: classes/class-wc-checkout.php:42
-#: classes/class-wc-checkout.php:48
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Password"
-msgstr ""
-
-#: classes/class-wc-checkout.php:58
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
 #: classes/class-wc-countries.php:850
@@ -9709,9 +9667,34 @@ msgstr ""
 msgid "http://woothemes.com"
 msgstr ""
 
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+#@ woocommerce
+msgid "Unlimited usage"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+#@ woocommerce
+msgid "Never expire"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:860
+#@ woocommerce
+msgid "Use this file"
+msgstr ""
+
+#: classes/class-wc-checkout.php:58
+#@ woocommerce
+msgid "Notes about your order, e.g. special notes for delivery."
+msgstr ""
+
+#: classes/shipping/class-wc-flat-rate.php:128
+#@ woocommerce
+msgid "Optional extra shipping options with additional costs (one per line). Format: <code>Option Name|Cost|Cost is per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use \"Calculation Type\" setting."
+msgstr ""
+
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
 #@ woocommerce
-msgid "1.4.5"
+msgid "1.5"
 msgstr ""
 
