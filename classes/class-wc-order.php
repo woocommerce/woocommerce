@@ -668,7 +668,8 @@ class WC_Order {
 	function update_status( $new_status_slug, $note = '' ) {
 		
 		if ($note) $note .= ' ';
-				
+		
+		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status');
 		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status');
 		if ($new_status) {
 			
@@ -678,7 +679,7 @@ class WC_Order {
 				// Status was changed
 				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $this->status, $new_status->slug ) );
+				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $old_status->name, $new_status->name ) );
 
 				// Date
 				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
