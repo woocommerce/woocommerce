@@ -2221,13 +2221,13 @@ msgstr "BTW Tarieven"
 #: admin/woocommerce-admin-settings-forms.php:449
 #@ woocommerce
 msgid "Export rates"
-msgstr ""
+msgstr "Exporteer tarieven"
 
 #: admin/woocommerce-admin-settings-forms.php:378
 #: admin/woocommerce-admin-settings-forms.php:450
 #@ woocommerce
 msgid "Import rates"
-msgstr ""
+msgstr "Importeer tarieven"
 
 #: admin/woocommerce-admin-settings-forms.php:379
 #, php-format
@@ -2655,7 +2655,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:129
 #@ woocommerce
 msgid "Enable Guest Checkout (no account required)"
-msgstr ""
+msgstr "Activeer Gast Afrekenen (geen account nodig)"
 
 #: admin/woocommerce-admin-settings.php:137
 #@ woocommerce
@@ -4289,7 +4289,7 @@ msgstr "Totaal van de bestelling"
 #: admin/post-types/shop_order.php:40
 #@ woocommerce
 msgid "Customer Notes"
-msgstr ""
+msgstr "Klant Opmerkingen"
 
 #: admin/post-types/shop_order.php:42
 #@ woocommerce
@@ -4584,7 +4584,7 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:437
 #@ woocommerce
 msgid "Calc totals &rarr;"
-msgstr ""
+msgstr "Bereken totalen &rarr;"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:452
 #@ woocommerce
@@ -4755,7 +4755,7 @@ msgstr "Handmatig voorraadbeheer afgerond."
 #: admin/post-types/writepanels/writepanel-order_downloads.php:154
 #@ woocommerce
 msgid "Revoke Access"
-msgstr ""
+msgstr "Toegang Terugtrekken"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:40
 #, php-format
@@ -4784,7 +4784,7 @@ msgstr "Ongelimiteerd"
 #: admin/post-types/writepanels/writepanel-order_downloads.php:167
 #@ woocommerce
 msgid "Access Expires"
-msgstr ""
+msgstr "Toegang Verlopen"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:52
 #: admin/post-types/writepanels/writepanel-order_downloads.php:168
@@ -4802,7 +4802,7 @@ msgstr "Kies een product&hellip;"
 #: admin/post-types/writepanels/writepanel-order_downloads.php:115
 #@ woocommerce
 msgid "Grant Access"
-msgstr ""
+msgstr "Toegang Openstellen"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:176
 #@ woocommerce
@@ -4970,7 +4970,7 @@ msgstr "Verzendklasse:"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:317
 #@ woocommerce
 msgid "Same as parent"
-msgstr ""
+msgstr "Zelfde als ouder"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:156
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:324
@@ -5123,7 +5123,7 @@ msgstr "Groeperen"
 #: admin/post-types/writepanels/writepanel-product_data.php:50
 #@ woocommerce
 msgid "Stock Keeping Unit"
-msgstr ""
+msgstr "Artikel Nummer"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:62
 #@ woocommerce
@@ -5138,7 +5138,7 @@ msgstr "Geef een externe URL op."
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
 msgid "Button text"
-msgstr ""
+msgstr "Knop tekst"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
@@ -9108,7 +9108,7 @@ msgstr "op"
 #: templates/single-product/review.php:25
 #@ woocommerce
 msgid "M jS Y"
-msgstr ""
+msgstr "jS M Y"
 
 #: templates/single-product/up-sells.php:11
 #@ woocommerce
@@ -9641,7 +9641,7 @@ msgstr ""
 #: woocommerce.php:915
 #@ woocommerce
 msgid "required"
-msgstr ""
+msgstr "verplicht"
 
 #. translators: plugin header field 'PluginURI'
 #: woocommerce.php:0
@@ -9670,7 +9670,7 @@ msgstr "http://woothemes.com"
 #: admin/post-types/writepanels/writepanel-coupon_data.php:51
 #@ woocommerce
 msgid "Unlimited usage"
-msgstr ""
+msgstr "Ongelimiteerd gebruik"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:54
 #@ woocommerce
