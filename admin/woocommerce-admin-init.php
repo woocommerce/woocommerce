@@ -70,6 +70,8 @@ function woocommerce_admin_notices_styles() {
 	
 	// Installed notices
 	if ( get_option('woocommerce_installed')==1 ) {
+	
+		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		
 		if (get_option('skip_install_woocommerce_pages')!=1 && woocommerce_get_page_id('shop')<1 && !isset($_GET['install_woocommerce_pages']) && !isset($_GET['skip_install_woocommerce_pages'])) {
 			add_action( 'admin_notices', 'woocommerce_admin_install_notice' );
