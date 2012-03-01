@@ -77,7 +77,7 @@ msgstr "Art"
 #: admin/woocommerce-admin-attributes.php:167
 #@ woocommerce
 msgid "Terms"
-msgstr "Allgemeine Geschäftsbedingungen (AGB)"
+msgstr "Attribute"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:87
 #: admin/post-types/writepanels/writepanel-order_data.php:168
