@@ -105,7 +105,7 @@ msgstr "Löschen"
 #: admin/woocommerce-admin-attributes.php:199
 #@ woocommerce
 msgid "Configure&nbsp;terms"
-msgstr "AGB&nbsp;konfigurieren"
+msgstr "Begriff&nbsp;konfigurieren"
 
 #: admin/woocommerce-admin-attributes.php:203
 #@ woocommerce
@@ -213,7 +213,7 @@ msgid "Total:"
 msgstr "Gesamt:"
 
 #: admin/woocommerce-admin-dashboard.php:255
-#: classes/class-wc-product.php:688
+#: classes/class-wc-product.php:692
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
@@ -890,7 +890,7 @@ msgstr "Monatliche Verkäufe pro Jahr"
 msgid "Sales"
 msgstr "Umsatz"
 
-#: admin/woocommerce-admin-reports.php:916
+#: admin/woocommerce-admin-reports.php:917
 #@ woocommerce
 msgid "Product does not exist"
 msgstr "Dieses Produkt existiert nicht."
@@ -1846,7 +1846,6 @@ msgstr "Rabatt-Art"
 
 #: admin/post-types/product.php:488
 #: admin/post-types/product.php:711
-#: admin/post-types/writepanels/writepanel-coupon_data.php:33
 #: admin/post-types/writepanels/writepanel-order_data.php:371
 #: admin/post-types/writepanels/writepanel-order_data.php:373
 #: admin/post-types/writepanels/writepanel-order_data.php:377
@@ -1878,8 +1877,6 @@ msgstr "Individueller Gebrauch"
 msgid "Check this box if the coupon cannot be used in conjunction with other coupons"
 msgstr "Wenn der Gutschein nicht in Verbindung mit anderen Gutscheinen verwendet werden darf, müssen Sie hier ein Häckchen setzen"
 
-#: admin/post-types/writepanels/writepanel-coupon_data.php:45
-#: admin/post-types/writepanels/writepanel-coupon_data.php:48
 #: admin/woocommerce-admin-users.php:61
 #: admin/woocommerce-admin-users.php:80
 #: templates/order/order-details.php:94
@@ -1890,18 +1887,8 @@ msgstr "nicht lieferbar"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:51
 #@ woocommerce
-msgid "Unlimited usage"
-msgstr "Unbegrenzte Verwendung"
-
-#: admin/post-types/writepanels/writepanel-coupon_data.php:51
-#@ woocommerce
 msgid "(optional) How many times this coupon can be used before it is void"
 msgstr "(optional) So oft kann dieser Gutschein verwendet werden, bevor er ungültig wird"
-
-#: admin/post-types/writepanels/writepanel-coupon_data.php:54
-#@ woocommerce
-msgid "Never expire"
-msgstr "Niemals ablaufen"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:54
 #@ woocommerce
@@ -2047,8 +2034,8 @@ msgstr "Anzahl"
 msgid "Cost"
 msgstr "Preis"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:85
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:263
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:93
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:271
 #: admin/post-types/writepanels/writepanel-product_data.php:271
 #: admin/post-types/writepanels/writepanel-product_data.php:347
 #: admin/woocommerce-admin-init.php:221
@@ -2190,7 +2177,7 @@ msgid "added %s ago"
 msgstr "vor %s hinzugefügt"
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:37
-#: woocommerce-ajax.php:786
+#: woocommerce-ajax.php:788
 #@ woocommerce
 msgid "Delete note"
 msgstr "Hinweis löschen"
@@ -2226,8 +2213,8 @@ msgstr "Hinzufügen"
 msgid "File path"
 msgstr "Dateipfad"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:331
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #: admin/post-types/writepanels/writepanel-product_data.php:153
 #@ woocommerce
 msgid "File path/URL"
@@ -2243,8 +2230,8 @@ msgstr "Datei hochladen"
 msgid "Download Limit"
 msgstr "Download Limit"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:170
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 #@ woocommerce
 msgid "Leave blank for unlimited re-downloads."
@@ -2252,27 +2239,27 @@ msgstr "Leer lassen für unbegrenzte Downloads"
 
 #: admin/post-types/product.php:192
 #: admin/post-types/product.php:347
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:156
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:324
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:332
 #: admin/post-types/writepanels/writepanel-product_data.php:844
 #@ woocommerce
 msgid "Downloadable"
 msgstr "Herunterladbar"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "Bulk edit:"
 msgstr "Massenbearbeitung:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:98
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:271
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:106
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:279
 #@ woocommerce
 msgid "Any"
 msgstr "Jeder"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:124
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:295
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:132
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:303
 #: templates/single-product/meta.php:11
 #: woocommerce-template.php:340
 #@ woocommerce
@@ -2281,77 +2268,77 @@ msgstr "ArtNr.:"
 
 #: admin/post-types/product.php:486
 #: admin/post-types/product.php:695
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:128
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:299
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:136
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:307
 #: admin/post-types/writepanels/writepanel-product_data.php:102
-#: classes/class-wc-product.php:896
+#: classes/class-wc-product.php:900
 #@ woocommerce
 msgid "Weight"
 msgstr "Gewicht"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:126
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:297
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:134
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:305
 #@ woocommerce
 msgid "Stock Qty:"
 msgstr "Lagerbestand Anzahl:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:137
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:308
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:145
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:316
 #: widgets/widget-price_filter.php:173
 #@ woocommerce
 msgid "Price:"
 msgstr "Preis:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:139
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:310
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:147
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:318
 #@ woocommerce
 msgid "Sale Price:"
 msgstr "Angebotspreis:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:160
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:328
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:168
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:336
 #@ woocommerce
 msgid "Enabled"
 msgstr "Aktiv"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:183
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:191
 #: woocommerce.php:716
 #@ woocommerce
 msgid "Add Variation"
 msgstr "Variante hinzufügen"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:185
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:193
 #@ woocommerce
 msgid "Link all variations"
 msgstr "Alle Varianten verlinken"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:236
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:244
 #@ woocommerce
 msgid "You must add some attributes via the \"Product Data\" panel and save before adding a new variation."
 msgstr "Sie müssen Attribute über das Feld  \"Product Data\" hinzufügen and speichern, bevor Sie eine neue Variante hinzufügen können."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:394
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:402
 #@ woocommerce
 msgid "Are you sure you want to remove this variation?"
 msgstr "Sind Sie sicher, dass Sie diese Variante entfernen wollen?"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:467
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:473
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:475
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:481
 #@ woocommerce
 msgid "Enter a price"
 msgstr "Preis eingeben"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:479
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:487
 #@ woocommerce
 msgid "Enter stock quantity"
 msgstr "Lagerbestandsmenge eingeben"
 
 #: admin/post-types/product.php:190
 #: admin/post-types/product.php:351
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:158
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:326
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:166
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:334
 #: admin/post-types/writepanels/writepanel-product_data.php:842
 #@ woocommerce
 msgid "Virtual"
@@ -2400,7 +2387,7 @@ msgid "Sale Price Dates"
 msgstr "Zeitraum des Angebotspreises"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:110
-#: classes/class-wc-product.php:905
+#: classes/class-wc-product.php:909
 #@ woocommerce
 msgid "Dimensions"
 msgstr "Abmessungen"
@@ -2614,37 +2601,37 @@ msgstr "Entschuldigung, wir haben nicht ausreichend \"%s\" auf Lager, um Ihre Be
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr "Entschuldigung, wir haben nicht ausreichend \"%s\" auf Lager, um Ihre Bestellung auszuführen. Bitte bearbeiten Sie Ihren Warenkorb und versuchen Sie es erneut. Wir bedauern die Unannehmlichkeiten die hierdurch verursacht wurden."
 
-#: classes/class-wc-cart.php:1128
+#: classes/class-wc-cart.php:1130
 #: classes/class-wc-order.php:444
-#: classes/class-wc-product.php:584
-#: classes/class-wc-product.php:593
-#: classes/class-wc-product.php:624
-#: classes/class-wc-product.php:630
+#: classes/class-wc-product.php:588
+#: classes/class-wc-product.php:597
+#: classes/class-wc-product.php:628
+#: classes/class-wc-product.php:634
 #@ woocommerce
 msgid "Free!"
 msgstr "Kostenlos!"
 
-#: classes/class-wc-cart.php:1138
+#: classes/class-wc-cart.php:1140
 #@ woocommerce
 msgid "via"
 msgstr "über"
 
-#: classes/class-wc-cart.php:1170
+#: classes/class-wc-cart.php:1172
 #@ woocommerce
 msgid "Discount code already applied!"
 msgstr "Gutscheincode bereits angewandt!"
 
-#: classes/class-wc-cart.php:1176
+#: classes/class-wc-cart.php:1178
 #@ woocommerce
 msgid "Invalid coupon."
 msgstr "Ungültiger Gutschein."
 
-#: classes/class-wc-cart.php:1194
+#: classes/class-wc-cart.php:1196
 #@ woocommerce
 msgid "Discount code applied successfully."
 msgstr "Gutscheincode wurde erfolgreich verarbeitet."
 
-#: classes/class-wc-cart.php:1198
+#: classes/class-wc-cart.php:1200
 #@ woocommerce
 msgid "Coupon does not exist!"
 msgstr "Gutschein existiert nicht!"
@@ -2692,7 +2679,6 @@ msgstr "Füllen Sie die Angaben unten aus und legen Sie damit ein Kundenkonto an
 msgid "Account username"
 msgstr "Konto-Benutzername"
 
-#: classes/class-wc-checkout.php:37
 #: templates/myaccount/form-login.php:18
 #: templates/myaccount/form-login.php:44
 #: templates/shop/form-login.php:14
@@ -2707,8 +2693,6 @@ msgstr "Benutzername"
 msgid "Account password"
 msgstr "Konto-Passwort"
 
-#: classes/class-wc-checkout.php:42
-#: classes/class-wc-checkout.php:48
 #: templates/myaccount/form-login.php:22
 #: templates/myaccount/form-login.php:54
 #: templates/shop/form-login.php:18
@@ -2731,11 +2715,6 @@ msgstr "Lieferung an diesselbe Adresse?"
 #@ woocommerce
 msgid "Shipping Address"
 msgstr "Lieferadresse"
-
-#: classes/class-wc-checkout.php:58
-#@ woocommerce
-msgid "Notes about your order, e.g. special notes for delivery."
-msgstr "Hinweise zu Ihrer Bestellung, z.B. spezielle Wünsche zur Lieferung."
 
 #: templates/cart/shipping-calculator.php:18
 #: woocommerce-template.php:679
@@ -3096,7 +3075,7 @@ msgstr "Lagerbestand der bestellten Produkte erfolgreich reduziert."
 msgid "Available on backorder"
 msgstr "Verfügbar bei Nachlieferung"
 
-#: classes/class-wc-product.php:688
+#: classes/class-wc-product.php:692
 #: templates/single-product-reviews.php:29
 #, php-format
 #@ woocommerce
@@ -5595,7 +5574,7 @@ msgstr "Entschuldigung, aber Ihre Sitzung ist abgelaufen."
 msgid "Return to homepage &rarr;"
 msgstr "Zurück zur Startseite &rarr;"
 
-#: woocommerce-ajax.php:862
+#: woocommerce-ajax.php:864
 #@ woocommerce
 msgid "No products found"
 msgstr "Keine Produkte gefunden"
@@ -6307,7 +6286,7 @@ msgstr "Produkt-IDs ausschließen"
 msgid "(optional) Comma separate IDs which must not be in the cart to use this coupon or, for \"Product Discounts\", which products are not discounted."
 msgstr "(optional) Trennen Sie die IDs mit Komma, welche nicht im Warenkorb sein dürfen, um diesen Gutschein verwenden zu können. Oder für \"Produkt Rabatte\", um die Produkte zu kennzeichnen, auf die kein Nachlass entfällt."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:199
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:207
 #@ woocommerce
 msgid "No default"
 msgstr "Kein Standard"
@@ -6530,113 +6509,113 @@ msgstr "Lieferadresse"
 msgid "Variations for variable products are defined here."
 msgstr "Varianten für Produktausführungen werden hier definiert."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "Prices"
 msgstr "Preise"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "Sale prices"
 msgstr "Sonderpreise"
 
 #: admin/post-types/product.php:73
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #: admin/woocommerce-admin-content.php:41
 #@ woocommerce
 msgid "Stock"
 msgstr "Lagerbestand"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "File paths"
 msgstr "Dateipfade"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "Download limits"
 msgstr "Download Limits"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:124
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:295
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:132
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:303
 #@ woocommerce
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
 msgstr "Geben Sie eine ArtNr. für diese Variante ein oder lassen Sie das Feld leer, um die übergeordnete ArtNr. zu verwenden."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:128
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:299
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:136
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:307
 #@ woocommerce
 msgid "Enter a weight for this variation or leave blank to use the parent product weight."
 msgstr "Gewicht für diese Ausführung eingeben oder leer lassen, um das Gewicht des übergeordneten Produkts zu verwenden."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:126
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:297
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:134
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:305
 #@ woocommerce
 msgid "Enter a quantity to manage stock for this variation, or leave blank to use the variable product stock options."
 msgstr "Menge eingeben, um den Lagerbestand dieser Ausführung zu verwalten oder leer lassen, um die variablen Produkt-Lagerbestandsoptionen."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:156
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:324
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:332
 #@ woocommerce
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product."
 msgstr "Diese Einstellung aktivieren, um Zugriff auf ein Download-Produkt zu gewähren für den Kauf eines Produkts."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:158
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:326
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:166
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:334
 #@ woocommerce
 msgid "Enable this option if a product is not shipped or there is no shipping cost."
 msgstr "Diese Einstellung aktivieren, wenn ein Produkt nicht versandt wird oder es keine Versandkosten gibt."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:331
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #@ woocommerce
 msgid "File path:"
 msgstr "Dateipfad:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:331
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #@ woocommerce
 msgid "Enter a File Path to make this variation a downloadable product, or leave blank."
 msgstr "Geben Sie einen Dateipfad an, um diese Ausführung zu einem Download-Produkt zu machen oder leer lassen."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:331
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #@ woocommerce
 msgid "&uarr;"
 msgstr "&uarr;"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:331
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #@ woocommerce
 msgid "Upload"
 msgstr "Hochladen"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:170
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
 #@ woocommerce
 msgid "Download Limit:"
 msgstr "Download Limit:"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:48
 #: admin/post-types/writepanels/writepanel-order_downloads.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:170
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 #@ woocommerce
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:504
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:512
 #@ woocommerce
 msgid "Enter a file path/URL"
 msgstr "Dateipfad/URL eingeben"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:510
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:518
 #@ woocommerce
 msgid "Enter a download limit"
 msgstr "Downloadlimit eingeben"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:587
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:595
 #@ woocommerce
 msgid "Variable product"
 msgstr "Produktausführung"
@@ -6983,12 +6962,12 @@ msgstr "WooCommerce Sonderangebot"
 msgid "On Sale"
 msgstr "Sonderangebot"
 
-#: woocommerce-ajax.php:857
+#: woocommerce-ajax.php:859
 #@ woocommerce
 msgid "Cross-sell"
 msgstr "Cross-Sell"
 
-#: woocommerce-ajax.php:857
+#: woocommerce-ajax.php:859
 #@ woocommerce
 msgid "Up-sell"
 msgstr "Up-Sell"
@@ -7191,15 +7170,10 @@ msgstr "Zahlungsmethode:"
 #: admin/post-types/writepanels/writepanel-order_notes.php:48
 #@ woocommerce
 msgid "Add a note for your reference, or add a customer note (the user will be notified)."
-msgstr "Füge eine Notiz für deine Bestellreferenznummer oder für einen Kunden hinzu (Der Kunde wird benachrichtigt)."
+msgstr "Füge einen Hinweis für deine Bestellreferenznummer oder für einen Kunden hinzu (Der Kunde wird benachrichtigt)."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:47
-#@ woocommerce
-msgid "Before you can start adding variations you must set up and save some variable attributes via the <strong>Attributes</strong> tab."
-msgstr "Bevor du Variationen hinzufügen kannst, musst du erst variable Attribute via dem <strong>Attributes</strong>-Tab hinzufügen."
-
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:131
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:302
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:139
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:310
 #@ woocommerce
 msgid "Dimensions (L&times;W&times;H)"
 msgstr "Maßeinheiten (L&times;W&times;H)"
@@ -7250,7 +7224,7 @@ msgstr "Verkäufe pro Tag"
 msgid "Sales by month"
 msgstr "Verkäufe pro Monat"
 
-#: admin/woocommerce-admin-reports.php:1013
+#: admin/woocommerce-admin-reports.php:1014
 #@ woocommerce
 msgid "Product no longer exists"
 msgstr "Produkt existiert nicht mehr"
@@ -7821,7 +7795,7 @@ msgstr "Warenkorb Zwischensumme:"
 msgid "Download:"
 msgstr "Download:"
 
-#: classes/class-wc-product.php:644
+#: classes/class-wc-product.php:648
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
@@ -7939,7 +7913,7 @@ msgstr "Zurückgestellt"
 #: languages/strings.php:16
 #@ woocommerce
 msgid "processing"
-msgstr "verarbeitet"
+msgstr "in Arbeit"
 
 #: languages/strings.php:17
 #@ woocommerce
@@ -8181,27 +8155,27 @@ msgstr "Berechnet die lineare Gebühr &uarr;"
 msgid "Calc totals &rarr;"
 msgstr "Berechnet die Summe &rarr;"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:357
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:365
 #@ woocommerce
 msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
-msgstr "Bist du dir sicher, dass du alle Varianten verlinken möchtest? Das wird eine neue Variation für wirklich jede mögliche Kombination aller Variationsattribute kreieren (max 50 pro Durchlauf)."
+msgstr "Sind Sie sich sicher, dass Sie alle Varianten verlinken möchten? Das wird eine neue Variation für wirklich jede mögliche Kombination aller Variationsattribute kreieren (max 50 pro Durchlauf)."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:378
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:386
 #@ default
 msgid "variation added"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:380
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:388
 #@ default
 msgid "variations added"
 msgstr ""
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:429
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:437
 #@ woocommerce
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "Sind Sie sicher Sie wollen alle Variationen löschen? Dies kann nicht Rückgängig gemacht werden."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:432
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:440
 #@ woocommerce
 msgid "Last warning, are you sure?"
 msgstr "Letzte Warnung, sind Sie sicher?"
@@ -8228,7 +8202,7 @@ msgstr "Katalog &amp; Suche"
 #: admin/post-types/writepanels/writepanel-product_data.php:133
 #@ woocommerce
 msgid "Define the loops this product should be visible in. It will still be accessible directly."
-msgstr "Definiert die Loops, in denen dein Produkt sichtbar sein soll. Du kannst immer noch direkt darauf zugreifen."
+msgstr "Definiert die Loops, in denen dein Produkt sichtbar sein soll. Sie können immer noch direkt darauf zugreifen."
 
 #: admin/woocommerce-admin-content.php:22
 #@ woocommerce
@@ -8363,7 +8337,7 @@ msgstr "l jS \\of F Y h:i:s A"
 #: admin/woocommerce-admin-init.php:227
 #@ woocommerce
 msgid "Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually."
-msgstr "Berechnet die Summe basierend auf bestellter Ware, Rabattmenge und Versand. Notiz: Du wirst (optional) Steuern und Warenkorbrabatte manuell berechnen müssen."
+msgstr "Berechnet die Summe basierend auf bestellter Ware, Rabattmenge und Versand. Hinweis: Sie werden (optional) Steuern und Warenkorbrabatte manuell berechnen müssen."
 
 #: admin/woocommerce-admin-init.php:228
 #@ woocommerce
@@ -8850,27 +8824,27 @@ msgstr "Länder"
 msgid "Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode."
 msgstr " "
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:51
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:59
 #: admin/post-types/writepanels/writepanel-product_data.php:236
 #@ woocommerce
 msgid "Close all"
 msgstr "Alle schließen"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:51
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:59
 #: admin/post-types/writepanels/writepanel-product_data.php:236
 #@ woocommerce
 msgid "Expand all"
 msgstr "Alle anzeigen"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
 #@ woocommerce
 msgid "Delete all"
 msgstr "Alle löschen"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:39
 #: admin/post-types/writepanels/writepanel-order_downloads.php:155
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:86
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:264
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:94
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:272
 #: admin/post-types/writepanels/writepanel-product_data.php:272
 #: admin/post-types/writepanels/writepanel-product_data.php:348
 #: admin/woocommerce-admin-init.php:222
@@ -8879,24 +8853,24 @@ msgstr "Alle löschen"
 msgid "Click to toggle"
 msgstr "Hin- und herschalten"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:144
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:313
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:152
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:321
 #@ woocommerce
 msgid "Shipping class:"
 msgstr "Versandklasse:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:148
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:317
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:156
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:325
 #@ woocommerce
 msgid "Same as parent"
 msgstr "Gleich wie Eltern"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:187
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:195
 #@ woocommerce
 msgid "Default selections:"
 msgstr "Standardauswahl:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:382
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:390
 #@ default
 msgid "No variations added"
 msgstr ""
@@ -9087,31 +9061,31 @@ msgstr "Dies ist nicht Ihr Download Link."
 #: admin/post-types/product.php:668
 #@ woocommerce
 msgid "Regular price"
-msgstr ""
+msgstr "Regulärer Preis"
 
 #: admin/post-types/product.php:476
 #: admin/post-types/product.php:674
 #@ woocommerce
 msgid "Sale"
-msgstr ""
+msgstr "Angebot"
 
 #: admin/post-types/product.php:478
 #: admin/post-types/product.php:690
 #@ woocommerce
 msgid "Sale price"
-msgstr ""
+msgstr "Angebotspreis"
 
 #: admin/post-types/product.php:494
 #: admin/post-types/product.php:716
 #@ woocommerce
 msgid "L/W/H"
-msgstr ""
+msgstr "L/B/H"
 
 #: admin/post-types/product.php:528
 #: admin/post-types/product.php:775
 #@ woocommerce
 msgid "In stock?"
-msgstr ""
+msgstr "Auf Lager?"
 
 #: admin/post-types/product.php:657
 #: admin/post-types/product.php:679
@@ -9133,32 +9107,32 @@ msgstr ""
 #: admin/post-types/product.php:818
 #@ woocommerce
 msgid "Change to:"
-msgstr ""
+msgstr "Ändere in:"
 
 #: admin/post-types/product.php:763
 #: admin/post-types/product.php:799
 #: admin/post-types/shop_order.php:149
 #@ woocommerce
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: admin/post-types/product.php:764
 #: admin/post-types/product.php:800
 #: admin/post-types/shop_order.php:151
 #@ woocommerce
 msgid "No"
-msgstr ""
+msgstr "Nein"
 
 #: admin/post-types/shop_order.php:40
 #@ woocommerce
 msgid "Customer Notes"
-msgstr ""
+msgstr "Kundenhinweise"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:38
 #: admin/post-types/writepanels/writepanel-order_downloads.php:154
 #@ woocommerce
 msgid "Revoke Access"
-msgstr ""
+msgstr "Zugriff Entziehen"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:40
 #, php-format
@@ -9172,104 +9146,104 @@ msgstr[1] ""
 #: admin/post-types/writepanels/writepanel-order_downloads.php:162
 #@ woocommerce
 msgid "Downloads Remaining"
-msgstr ""
+msgstr "Downloads Verbleiben"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:51
 #: admin/post-types/writepanels/writepanel-order_downloads.php:167
 #@ woocommerce
 msgid "Access Expires"
-msgstr ""
+msgstr "Zugang läuft ab"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:52
 #: admin/post-types/writepanels/writepanel-order_downloads.php:168
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 #@ woocommerce
 msgid "Never"
-msgstr ""
+msgstr "Niemals"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:65
 #@ woocommerce
 msgid "Choose a downloadable product&hellip;"
-msgstr ""
+msgstr "Wählen Sie ein herunterladbares Produkt&hellip;"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:115
 #@ woocommerce
 msgid "Grant Access"
-msgstr ""
+msgstr "Zugang Gewähren"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:176
 #@ woocommerce
 msgid "Could not grant access - the user may already have permission for this file."
-msgstr ""
+msgstr "Konnte keinen Zugang gewähren - der Benutzer hat möglicherweise bereits die Berechtigung für diese Datei."
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:198
 #@ woocommerce
 msgid "Are you sure you want to revoke access to this download?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie den Zugriff auf diesen Download entziehen wollen? "
 
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
 msgid "Button text"
-msgstr ""
+msgstr "Button text"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Buy product"
-msgstr ""
+msgstr "Produkt kaufen"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:65
 #@ woocommerce
 msgid "This text will be shown on the button linking to the external product."
-msgstr ""
+msgstr "Dieser Text wird auf dem Button angezeigt, welcher auf das externe Produkt verweist."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:87
 #@ woocommerce
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr ""
+msgstr "Von&hellip;"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:90
 #@ woocommerce
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr ""
+msgstr "Zu&hellip;"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:143
 #@ woocommerce
 msgid "Purchase Note"
-msgstr ""
+msgstr "Kaufhinweis"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:143
 #@ woocommerce
 msgid "Enter an optional note to send the customer after purchase."
-msgstr ""
+msgstr "Geben sie einen optionalen Hinweis ein, welcher dem Kunden nach dem Kauf übermittelt werden soll."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 #@ woocommerce
 msgid "Download Expiry"
-msgstr ""
+msgstr "Download Ablauf"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 #@ woocommerce
 msgid "Enter the number of days before a download link expires, or leave blank."
-msgstr ""
+msgstr "Geben Sie eine Zahl von Tagen ein, bevor der Downloadlink abläuft. oder lassen Sie das Feld leer."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:860
 #@ woocommerce
 msgid "Use this file"
-msgstr ""
+msgstr "Benutzen Sie diese Datei"
 
 #: admin/post-types/writepanels/writepanels-init.php:36
 #@ woocommerce
 msgid "Downloadable Product Permissions <small>&ndash; Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.</small>"
-msgstr ""
+msgstr "Berechtigungen für herunterladbare Produkte <small>&ndash; Hinweis: Berechtigungen für Bestellposten werden automatisch erteilt, sobald der Bestellstatus von in Arbeit zu Fertig wechselt.</small>"
 
 #: admin/woocommerce-admin-attributes.php:165
 #: admin/woocommerce-admin-attributes.php:223
 #@ woocommerce
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:41
@@ -9287,8 +9261,8 @@ msgstr ""
 #@ woocommerce
 msgid "Product"
 msgid_plural "Products"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Produkt"
+msgstr[1] "Produkte"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:55
@@ -9296,8 +9270,8 @@ msgstr[1] ""
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Produktkategie"
+msgstr[1] "Produktkategorien"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:69
@@ -9305,78 +9279,78 @@ msgstr[1] ""
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Produkt Schlagwort"
+msgstr[1] "Produkt Schlagwörter"
 
 #: admin/woocommerce-admin-dashboard.php:83
 #@ woocommerce
 msgid "Attribute"
 msgid_plural "Attributes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Attribut"
+msgstr[1] "Attribute"
 
 #: admin/woocommerce-admin-dashboard.php:164
 #, php-format
 #@ woocommerce
 msgid "You are using <strong>WooCommerce %s</strong>."
-msgstr ""
+msgstr "Sie benutzen <strong>WooCommerce %s</strong>."
 
 #: admin/woocommerce-admin-dashboard.php:191
 #@ woocommerce
 msgid "WooCommerce Right Now"
-msgstr ""
+msgstr "WooCommerce in diesem Augenblick"
 
 #: admin/woocommerce-admin-dashboard.php:193
 #@ woocommerce
 msgid "WooCommerce Recent Orders"
-msgstr ""
+msgstr "WooCommerce Letzte Bestellungen"
 
 #: admin/woocommerce-admin-init.php:46
 #@ woocommerce
 msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
-msgstr ""
+msgstr "<strong>Willkommen bei WooCommerce</strong> &#8211; Sie sind fast fertig um mit dem Verkaufen anzufangen :)"
 
 #: admin/woocommerce-admin-init.php:56
 #@ woocommerce
 msgid "<strong>WooCommerce has been installed</strong> &#8211; You're ready to start selling :)"
-msgstr ""
+msgstr "<strong>WooCommerce wurde installiert</strong> &#8211; Sie können jetzt mit dem Verkaufen anfangen :)"
 
 #: admin/woocommerce-admin-init.php:438
 #, php-format
 #@ woocommerce
 msgid "Product updated. <a href=\"%s\">View Product</a>"
-msgstr ""
+msgstr "Produkt aktualisiert. <a href=\"%s\">Produkt ansehen</a>"
 
 #: admin/woocommerce-admin-init.php:439
 #: admin/woocommerce-admin-init.php:454
 #: admin/woocommerce-admin-init.php:469
 #@ woocommerce
 msgid "Custom field updated."
-msgstr ""
+msgstr "Benutzerdefiniertes Feld aktualisiert."
 
 #: admin/woocommerce-admin-init.php:440
 #: admin/woocommerce-admin-init.php:455
 #: admin/woocommerce-admin-init.php:470
 #@ woocommerce
 msgid "Custom field deleted."
-msgstr ""
+msgstr "Benutzerdefiniertes Feld gelöscht."
 
 #: admin/woocommerce-admin-init.php:441
 #@ woocommerce
 msgid "Product updated."
-msgstr ""
+msgstr "Produkt aktualisiert."
 
 #: admin/woocommerce-admin-init.php:442
 #, php-format
 #@ woocommerce
 msgid "Product restored to revision from %s"
-msgstr ""
+msgstr "Produkt wiederhergestellt zur Version vom %s"
 
 #: admin/woocommerce-admin-init.php:443
 #, php-format
 #@ woocommerce
 msgid "Product published. <a href=\"%s\">View Contact</a>"
-msgstr ""
+msgstr "Produkt veröffentlicht. <a href=\"%s\">Kontakt anzeigen</a>"
 
 #: admin/woocommerce-admin-init.php:444
 #@ default
@@ -9387,13 +9361,13 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "Produkt hinzugefügt. <a target=\"_blank\" href=\"%s\">Produktvorschau</a>"
 
 #: admin/woocommerce-admin-init.php:446
 #, php-format
 #@ woocommerce
 msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
-msgstr ""
+msgstr "Produkt geplant für: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Produktvorschau</a>"
 
 #: admin/woocommerce-admin-init.php:447
 #: admin/woocommerce-admin-init.php:462
@@ -9406,20 +9380,20 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
+msgstr "Produktentwurf aktualisiert. <a target=\"_blank\" href=\"%s\">Produktvorschau</a>"
 
 #: admin/woocommerce-admin-init.php:453
 #: admin/woocommerce-admin-init.php:456
 #: admin/woocommerce-admin-init.php:458
 #@ woocommerce
 msgid "Order updated."
-msgstr ""
+msgstr "Bestellung aktualisiert."
 
 #: admin/woocommerce-admin-init.php:457
 #, php-format
 #@ woocommerce
 msgid "Order restored to revision from %s"
-msgstr ""
+msgstr "Bestellung wurde zur Version vom %s wiederhergestellt"
 
 #: admin/woocommerce-admin-init.php:459
 #@ default
@@ -9429,31 +9403,31 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:460
 #@ woocommerce
 msgid "Order submitted."
-msgstr ""
+msgstr "Bestellung hinzugefügt."
 
 #: admin/woocommerce-admin-init.php:461
 #, php-format
 #@ woocommerce
 msgid "Order scheduled for: <strong>%1$s</strong>."
-msgstr ""
+msgstr "Bestellung geplant für: <strong>%1$s</strong>."
 
 #: admin/woocommerce-admin-init.php:463
 #@ woocommerce
 msgid "Order draft updated."
-msgstr ""
+msgstr "Bestellungsentwurf aktualisiert."
 
 #: admin/woocommerce-admin-init.php:468
 #: admin/woocommerce-admin-init.php:471
 #: admin/woocommerce-admin-init.php:473
 #@ woocommerce
 msgid "Coupon updated."
-msgstr ""
+msgstr "Coupon aktualisiert."
 
 #: admin/woocommerce-admin-init.php:472
 #, php-format
 #@ woocommerce
 msgid "Coupon restored to revision from %s"
-msgstr ""
+msgstr "Coupon wurde in der Version vom %s wiederhergestellt"
 
 #: admin/woocommerce-admin-init.php:474
 #@ default
@@ -9463,221 +9437,275 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:475
 #@ woocommerce
 msgid "Coupon submitted."
-msgstr ""
+msgstr "Coupon hinzugefügt."
 
 #: admin/woocommerce-admin-init.php:476
 #, php-format
 #@ woocommerce
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
-msgstr ""
+msgstr "Coupon geplant für: <strong>%1$s</strong>."
 
 #: admin/woocommerce-admin-init.php:478
 #@ woocommerce
 msgid "Coupon draft updated."
-msgstr ""
+msgstr "Couponentwurf aktualisiert."
 
 #: admin/woocommerce-admin-settings.php:106
 #@ woocommerce
 msgid "Checkout and Accounts"
-msgstr ""
+msgstr "Kasse und Konten"
 
 #: admin/woocommerce-admin-settings.php:106
 #@ woocommerce
 msgid "The following options control the behaviour of the checkout process and customer accounts."
-msgstr ""
+msgstr "Die folgenden Einstellungen betreffen das Verhalten des Bestell-und Bezahlvorgangs und der Kundenkonten."
 
 #: admin/woocommerce-admin-settings.php:129
 #@ woocommerce
 msgid "Enable Guest Checkout (no account required)"
-msgstr ""
+msgstr "Einkaufen mit Gastkonto aktivieren (Kein Benutzerkonto erforderlich)"
 
 #: admin/woocommerce-admin-settings.php:154
 #@ woocommerce
 msgid "Allow unregistered users to register from the Checkout"
-msgstr ""
+msgstr "Erlaube nicht registrierten Benutzern sich auf der Kassenseite zu registrieren."
 
 #: admin/woocommerce-admin-settings.php:162
 #@ woocommerce
 msgid "Allow unregistered users to register from \"My Account\""
-msgstr ""
+msgstr "Erlaube unregistrierten Benutzern sich von \"Mein Konto\" aus registrieren zu können"
 
 #: admin/woocommerce-admin-settings.php:187
 #@ woocommerce
 msgid "Styles and Scripts"
-msgstr ""
+msgstr "Styles und Skripte"
 
 #: admin/woocommerce-admin-settings.php:187
 #@ woocommerce
 msgid "The following options affect the styling of your store, as well as how certain features behave."
-msgstr ""
+msgstr "Die folgenden Einstellungen betreffen das Aussehen, wie auch das Verhalten bestimmter Features ihres Shops."
 
 #: admin/woocommerce-admin-settings.php:240
 #@ woocommerce
 msgid "Output WooCommerce JavaScript in the footer"
-msgstr ""
+msgstr "WooCommerce JavaScript im Footer ausgeben."
 
 #: admin/woocommerce-admin-settings.php:249
 #@ woocommerce
 msgid "Digital Downloads"
-msgstr ""
+msgstr "Digitale Downloads"
 
 #: admin/woocommerce-admin-settings.php:249
 #@ woocommerce
 msgid "The following options are specific to downloadable products."
-msgstr ""
+msgstr "Die folgenden Einstellungen betreffen nur herunterladbare Produkte."
 
 #: admin/woocommerce-admin-settings.php:276
 #@ woocommerce
 msgid "Limit quantity"
-msgstr ""
-
-#: admin/woocommerce-admin-settings.php:277
-#@ woocommerce
-msgid "Limit the quantity of items that are both downloadable + virtual to 1"
-msgstr ""
+msgstr "Menge begrenzen"
 
 #: admin/woocommerce-admin-settings.php:284
 #@ woocommerce
 msgid "Mixed cart handling"
-msgstr ""
+msgstr "Zugang bei herunterladbaren Dateien"
 
 #: admin/woocommerce-admin-settings.php:285
 #@ woocommerce
 msgid "Grant access to downloadable products after payment. Turn this option off to only grant access when an order is \"complete\"."
-msgstr ""
+msgstr "Gewähre den Zugang zu herunterladbaren Produkten nach dem Bezahlen. Schalten Sie diese Option aus, um den Zugang nur zu gewähren, wenn eine Bestellung den Status \"Fertig\" hat."
 
 #: admin/woocommerce-admin-settings.php:311
 #@ woocommerce
 msgid "This sets the base page of your shop - this is where your product archive will be."
-msgstr ""
+msgstr "Dies setzt die Hauptseite ihres Shops - dies ist der Ort, wo ihr Produktarchiv sein wird."
 
 #: admin/woocommerce-admin-settings.php:402
 #@ woocommerce
 msgid "The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them."
-msgstr ""
+msgstr "Die folgenden Seiten müssen so ausgewählt werden, dass WooCommerce weiss, wo sie liegen. Diese Seiten sollten beim Installieren des Plugins angelegt worden sein. Wenn das nicht der Fall sein sollte, müssen Sie diese selbst erstellen."
 
 #: admin/woocommerce-admin-settings.php:910
 #@ woocommerce
 msgid "The following options affect the sender (email address and name) used in WooCommerce emails."
-msgstr ""
+msgstr "Die folgenden Einstellungen betreffen den Sender (E-Mail Adresse und Name) die in WooCommerce E-mails benutzt wird. "
 
 #: classes/class-wc-cart.php:448
 #@ woocommerce
 msgid "You already have this item in your cart."
-msgstr ""
+msgstr "Sie haben diese Ware schon in ihrem Warenkorb."
 
 #: classes/class-wc-countries.php:850
 #@ woocommerce
 msgctxt "placeholder"
 msgid "First Name"
-msgstr ""
+msgstr "Vorname"
 
 #: classes/class-wc-countries.php:856
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Last Name"
-msgstr ""
+msgstr "Nachname"
 
 #: classes/class-wc-countries.php:863
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Company (optional)"
-msgstr ""
+msgstr "Firma (optional)"
 
 #: classes/class-wc-countries.php:868
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Address"
-msgstr ""
+msgstr "Adresse"
 
 #: classes/class-wc-countries.php:874
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Address 2 (optional)"
-msgstr ""
+msgstr "Adresse 2 (optional)"
 
 #: classes/class-wc-countries.php:881
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Town/City"
-msgstr ""
+msgstr "Ort"
 
 #: classes/class-wc-countries.php:887
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Postcode/Zip"
-msgstr ""
+msgstr "PLZ"
 
 #: classes/class-wc-countries.php:895
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Country"
-msgstr ""
+msgstr "Land"
 
 #: classes/class-wc-countries.php:902
 #@ woocommerce
 msgctxt "placeholder"
 msgid "State/County"
-msgstr ""
+msgstr "Bundesland/Kanton"
 
 #: classes/class-wc-countries.php:932
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Email Address"
-msgstr ""
+msgstr "E-mail Adresse"
 
 #: classes/class-wc-countries.php:938
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Phone"
-msgstr ""
-
-#: classes/shipping/class-wc-flat-rate.php:128
-#@ woocommerce
-msgid "Optional extra shipping options with additional costs (one per line). Format: <code>Option Name|Cost|Cost is per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use \"Calculation Type\" setting."
-msgstr ""
+msgstr "Telefon"
 
 #: templates/myaccount/my-account.php:83
 #@ woocommerce
 msgid "My Address"
-msgstr ""
+msgstr "Meine Adresse"
 
 #: templates/single-product/add-to-cart/variable.php:43
 #@ woocommerce
 msgid "Reset selection"
-msgstr ""
+msgstr "Auswahl zurücksetzen"
 
 #: templates/single-product/review.php:25
 #@ woocommerce
 msgid "M jS Y"
-msgstr ""
+msgstr "j M Y"
 
 #: woocommerce-core-functions.php:446
 #: woocommerce-core-functions.php:507
 #@ woocommerce
 msgid "Download Permissions Granted"
-msgstr ""
+msgstr "Downloadberechtigungen Erteilt"
 
 #: woocommerce-functions.php:228
 #, php-format
 #@ woocommerce
 msgid "You can only have 1 %s in your cart."
-msgstr ""
+msgstr "Sie dürfen nur 1 %s in ihrem Warenkorb haben."
 
 #: woocommerce-functions.php:799
 #@ woocommerce
 msgid "Sorry, this download has expired"
-msgstr ""
+msgstr "Verzeihung, dieser Download ist abgelaufen."
 
 #: woocommerce-template.php:671
 #: woocommerce.php:915
 #@ woocommerce
 msgid "required"
-msgstr ""
+msgstr "erforderlich"
 
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
 #@ woocommerce
 msgid "1.5"
-msgstr ""
+msgstr "1.5"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:33
+#@ woocommerce
+msgctxt "placeholder"
+msgid "0.00"
+msgstr "0.00"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:45
+#: admin/post-types/writepanels/writepanel-coupon_data.php:48
+#@ woocommerce
+msgctxt "placeholder"
+msgid "N/A"
+msgstr "k.A."
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:51
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Unlimited usage"
+msgstr "Unbegrenzte Benutzung"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:54
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Never expire"
+msgstr "Läuft nie ab"
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:50
+#@ woocommerce
+msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
+msgstr "Bevor Sie Variationen hinzufügen, fügen und speichern Sie einige Attribute im <strong>Attribut</strong> Reiter hinzu."
+
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#@ woocommerce
+msgid "Learn more"
+msgstr "Mehr erfahren"
+
+#: admin/woocommerce-admin-settings.php:277
+#@ woocommerce
+msgid "Limit the purchasable quantity of downloadable-virtual items to 1."
+msgstr "Begrenze die kaufbare Menge an downloadbaren/virtuellen Waren auf 1. "
+
+#: classes/class-wc-checkout.php:37
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Username"
+msgstr "Benutzername"
+
+#: classes/class-wc-checkout.php:42
+#: classes/class-wc-checkout.php:48
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Password"
+msgstr "Passwort"
+
+#: classes/class-wc-checkout.php:58
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Notes about your order, e.g. special notes for delivery."
+msgstr "Hinweise für ihre Bestellungen, z.B.: besondere Hinweise für die Lieferung."
+
+#: classes/shipping/class-wc-flat-rate.php:128
+#@ woocommerce
+msgid "Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the \"Calculation Type\" setting."
+msgstr "Optionale zusätzliche Versandoptionen mit zusätzlichen Kosten (eine pro Zeile). Beispiel: <code>Optionsname|Kosten|Pro-Bestellung (Ja oder Nein)</code>. Beispiel: <code>Express Brief 6,95|Ja</code>. Wenn Pro-Bestellung auf Nein eingestellt ist, wird  \"Berechnungs Typ\" verwendet."
 
