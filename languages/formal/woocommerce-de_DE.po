@@ -105,7 +105,7 @@ msgstr "Löschen"
 #: admin/woocommerce-admin-attributes.php:199
 #@ woocommerce
 msgid "Configure&nbsp;terms"
-msgstr "Begriff&nbsp;konfigurieren"
+msgstr "Attribut&nbsp;konfigurieren"
 
 #: admin/woocommerce-admin-attributes.php:203
 #@ woocommerce
@@ -653,8 +653,8 @@ msgstr "Bestellung #%s"
 #: admin/post-types/shop_order.php:77
 #: admin/post-types/writepanels/writepanel-order_data.php:71
 #: admin/woocommerce-admin-reports.php:301
-#: woocommerce-functions.php:1000
-#: woocommerce-functions.php:1050
+#: woocommerce-functions.php:1004
+#: woocommerce-functions.php:1054
 #@ woocommerce
 msgid "Guest"
 msgstr "Gast"
@@ -2746,7 +2746,7 @@ msgstr "Bitte geben Sie ein Passwort für das Konto ein."
 
 #: classes/class-wc-checkout.php:211
 #: shortcodes/shortcode-my_account.php:224
-#: woocommerce-functions.php:645
+#: woocommerce-functions.php:649
 #@ woocommerce
 msgid "Passwords do not match."
 msgstr "Passwörter stimmen nicht überein."
@@ -5058,8 +5058,8 @@ msgstr "Ihre Bestellung wurde bereits bezahlt. Bitte nehmen Sie mit uns Kontakt 
 #: shortcodes/shortcode-my_account.php:256
 #: shortcodes/shortcode-pay.php:53
 #: shortcodes/shortcode-pay.php:106
-#: woocommerce-functions.php:723
-#: woocommerce-functions.php:785
+#: woocommerce-functions.php:727
+#: woocommerce-functions.php:789
 #@ woocommerce
 msgid "Invalid order."
 msgstr "Ungültige Bestellung."
@@ -5317,7 +5317,7 @@ msgid "No products in the cart."
 msgstr "Es befinden sich keine Produkte im Warenkorb."
 
 #: widgets/widget-cart.php:77
-#: woocommerce-functions.php:416
+#: woocommerce-functions.php:420
 #@ woocommerce
 msgid "View Cart &rarr;"
 msgstr "Warenkorb anzeigen &rarr;"
@@ -5539,12 +5539,12 @@ msgstr "Kunde"
 msgid "Shop Manager"
 msgstr "Shop-Manager"
 
-#: woocommerce-functions.php:1190
+#: woocommerce-functions.php:1194
 #@ woocommerce
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr "Sie haben zu lange gebraucht. Bitte gehen Sie zurück und aktualisieren Sie die Seite."
 
-#: woocommerce-functions.php:1193
+#: woocommerce-functions.php:1197
 #@ woocommerce
 msgid "Please rate the product."
 msgstr "Bitte bewerten Sie das Produkt."
@@ -5580,49 +5580,49 @@ msgid "No products found"
 msgstr "Keine Produkte gefunden"
 
 #: woocommerce-functions.php:203
-#: woocommerce-functions.php:240
+#: woocommerce-functions.php:244
 #@ woocommerce
 msgid "Cart updated."
 msgstr "Warenkorb aktualisiert."
 
-#: woocommerce-functions.php:268
-#: woocommerce-functions.php:308
+#: woocommerce-functions.php:272
+#: woocommerce-functions.php:312
 #@ woocommerce
 msgid "Please choose product options&hellip;"
 msgstr "Bitte wählen Sie die Produktoptionen&hellip;"
 
-#: woocommerce-functions.php:339
+#: woocommerce-functions.php:343
 #@ woocommerce
 msgid "Please choose a quantity&hellip;"
 msgstr "Bitte wählen Sie die Menge&hellip;"
 
-#: woocommerce-functions.php:347
+#: woocommerce-functions.php:351
 #@ woocommerce
 msgid "Please choose a product&hellip;"
 msgstr "Bitte wählen Sie ein Produkt&hellip;"
 
-#: woocommerce-functions.php:549
+#: woocommerce-functions.php:553
 #@ woocommerce
 msgid "Username is required."
 msgstr "Benutzername wird benötigt."
 
-#: woocommerce-functions.php:550
-#: woocommerce-functions.php:643
+#: woocommerce-functions.php:554
+#: woocommerce-functions.php:647
 #@ woocommerce
 msgid "Password is required."
 msgstr "Passwort wird benötigt."
 
-#: woocommerce-functions.php:712
+#: woocommerce-functions.php:716
 #@ woocommerce
 msgid "Order cancelled by customer."
 msgstr "Bestellung wurde durch den Kunden abgebrochen."
 
-#: woocommerce-functions.php:715
+#: woocommerce-functions.php:719
 #@ woocommerce
 msgid "Your order was cancelled."
 msgstr "Ihre Bestellung wurde abgebrochen."
 
-#: woocommerce-functions.php:719
+#: woocommerce-functions.php:723
 #@ woocommerce
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr "Ihre Bestellung hat die Warteschleife bereits verlassen und konnte daher nicht mehr abgebrochen werden. Bitte kontaktieren Sie uns, wenn Sie weitere Hilfestellung benötigen."
@@ -6321,18 +6321,18 @@ msgstr "WooCommerce Verkaufsschlager"
 msgid "Best Sellers"
 msgstr "Verkaufsschlager"
 
-#: woocommerce-functions.php:1152
+#: woocommerce-functions.php:1156
 #@ woocommerce
 msgid "New products"
 msgstr "Neue Produkte"
 
-#: woocommerce-functions.php:1160
+#: woocommerce-functions.php:1164
 #, php-format
 #@ woocommerce
 msgid "New products added to %s"
 msgstr "Neue Produkte hinzugefügt zu %s"
 
-#: woocommerce-functions.php:1168
+#: woocommerce-functions.php:1172
 #, php-format
 #@ woocommerce
 msgid "New products tagged %s"
@@ -6972,12 +6972,12 @@ msgstr "Cross-Sell"
 msgid "Up-sell"
 msgstr "Up-Sell"
 
-#: woocommerce-functions.php:644
+#: woocommerce-functions.php:648
 #@ woocommerce
 msgid "Re-enter your password."
 msgstr "Passwort bestätigen."
 
-#: woocommerce-functions.php:648
+#: woocommerce-functions.php:652
 #@ woocommerce
 msgid "Anti-spam field was filled in."
 msgstr "Antispamfeld wurde ausgefüllt."
@@ -8358,19 +8358,19 @@ msgstr "Mehr Funktionen und Schnittstellen sind via <a href=\"%s\" target=\"_bla
 #: classes/class-wc-checkout.php:276
 #: widgets/widget-login.php:227
 #: widgets/widget-login.php:230
-#: woocommerce-functions.php:624
-#: woocommerce-functions.php:626
-#: woocommerce-functions.php:629
-#: woocommerce-functions.php:634
-#: woocommerce-functions.php:636
-#: woocommerce-functions.php:639
-#: woocommerce-functions.php:662
+#: woocommerce-functions.php:628
+#: woocommerce-functions.php:630
+#: woocommerce-functions.php:633
+#: woocommerce-functions.php:638
+#: woocommerce-functions.php:640
+#: woocommerce-functions.php:643
+#: woocommerce-functions.php:666
 #@ woocommerce
 msgid "ERROR"
 msgstr "FEHLER"
 
 #: classes/class-wc-checkout.php:276
-#: woocommerce-functions.php:662
+#: woocommerce-functions.php:666
 #@ woocommerce
 msgid "Couldn&#8217;t register you... please contact us if you continue to have problems."
 msgstr "Wir konnten Sie nicht registrieren... Bitte kontaktieren Sie uns falls Sie weiterhin Probleme haben."
@@ -8506,7 +8506,7 @@ msgid "My Account &rarr;"
 msgstr "Mein Konto &rarr;"
 
 #: widgets/widget-login.php:227
-#: woocommerce-functions.php:624
+#: woocommerce-functions.php:628
 #@ woocommerce
 msgid "Please enter a username."
 msgstr "Bitte geben Sie einen Benutzernamen ein."
@@ -8521,68 +8521,68 @@ msgstr "Zeige nur Unterkategorien und aktuelle Kategorie "
 msgid "Select a category"
 msgstr "Wählen Sie eine Kategorie"
 
-#: woocommerce-functions.php:412
+#: woocommerce-functions.php:416
 #@ woocommerce
 msgid "Continue Shopping &rarr;"
 msgstr "Einkauf fortfahren &rarr;"
 
-#: woocommerce-functions.php:412
 #: woocommerce-functions.php:416
+#: woocommerce-functions.php:420
 #@ woocommerce
 msgid "Product successfully added to your cart."
 msgstr "Produkt wurde Ihrem Warenkorb erfolgreich hinzugefügt."
 
-#: woocommerce-functions.php:626
+#: woocommerce-functions.php:630
 #@ woocommerce
 msgid "This username is invalid because it uses illegal characters. Please enter a valid username."
 msgstr "Der Benutzername ist ungültig, da es ungültige Zeichen verwendet. Bitte geben Sie einen gültigen Benutzernamen ein. "
 
-#: woocommerce-functions.php:629
+#: woocommerce-functions.php:633
 #@ woocommerce
 msgid "This username is already registered, please choose another one."
 msgstr "Dieser Benutzername wurde schon registriert. Bitte wählen Sei einen anderen."
 
-#: woocommerce-functions.php:634
+#: woocommerce-functions.php:638
 #@ woocommerce
 msgid "Please type your e-mail address."
 msgstr "Bitte geben Sie Ihre E-Mail Adresse ein."
 
-#: woocommerce-functions.php:636
+#: woocommerce-functions.php:640
 #@ woocommerce
 msgid "The email address isn&#8217;t correct."
 msgstr "Die E-Mail Adresse ist nicht korrekt."
 
-#: woocommerce-functions.php:639
+#: woocommerce-functions.php:643
 #@ woocommerce
 msgid "This email is already registered, please choose another one."
 msgstr "Diese E-Mail wurde für eine Registrierung schon verwendet. Bitte wählen Sie eine andere."
 
-#: woocommerce-functions.php:747
+#: woocommerce-functions.php:751
 #@ woocommerce
 msgid "Invalid email address."
 msgstr "Ungültige E-Mail Adresse."
 
-#: woocommerce-functions.php:747
-#: woocommerce-functions.php:759
-#: woocommerce-functions.php:785
-#: woocommerce-functions.php:792
-#: woocommerce-functions.php:799
-#: woocommerce-functions.php:971
+#: woocommerce-functions.php:751
+#: woocommerce-functions.php:763
+#: woocommerce-functions.php:789
+#: woocommerce-functions.php:796
+#: woocommerce-functions.php:803
+#: woocommerce-functions.php:975
 #@ woocommerce
 msgid "Go to homepage &rarr;"
 msgstr "Zur Startseite gehen &rarr;"
 
-#: woocommerce-functions.php:759
+#: woocommerce-functions.php:763
 #@ woocommerce
 msgid "Invalid download."
 msgstr "fehlerhafter download."
 
-#: woocommerce-functions.php:792
+#: woocommerce-functions.php:796
 #@ woocommerce
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Tut uns leid, Sie haben Ihr Download-Limit für diese Datei erreicht."
 
-#: woocommerce-functions.php:971
+#: woocommerce-functions.php:975
 #@ woocommerce
 msgid "File not found"
 msgstr "Datei nicht gefunden"
@@ -9042,17 +9042,17 @@ msgstr "Liste"
 msgid "Dropdown"
 msgstr "Dropdown"
 
-#: woocommerce-functions.php:771
+#: woocommerce-functions.php:775
 #@ woocommerce
 msgid "You must be logged in to download files."
 msgstr "Sie müssen angemeldet sein, um Dateien herunterzuladen."
 
-#: woocommerce-functions.php:771
+#: woocommerce-functions.php:775
 #@ woocommerce
 msgid "Login &rarr;"
 msgstr "Login &rarr;"
 
-#: woocommerce-functions.php:776
+#: woocommerce-functions.php:780
 #@ woocommerce
 msgid "This is not your download link."
 msgstr "Dies ist nicht Ihr Download Link."
@@ -9622,13 +9622,13 @@ msgstr "j M Y"
 msgid "Download Permissions Granted"
 msgstr "Downloadberechtigungen Erteilt"
 
-#: woocommerce-functions.php:228
+#: woocommerce-functions.php:232
 #, php-format
 #@ woocommerce
 msgid "You can only have 1 %s in your cart."
 msgstr "Sie dürfen nur 1 %s in ihrem Warenkorb haben."
 
-#: woocommerce-functions.php:799
+#: woocommerce-functions.php:803
 #@ woocommerce
 msgid "Sorry, this download has expired"
 msgstr "Verzeihung, dieser Download ist abgelaufen."
