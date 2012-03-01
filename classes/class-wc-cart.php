@@ -477,7 +477,9 @@ class WC_Cart {
 				)));
 			
 			endif;
-	
+			
+			$woocommerce->cart_has_contents_cookie( true );
+
 			$this->set_session();
 			
 			return true;
