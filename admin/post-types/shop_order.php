@@ -88,7 +88,7 @@ function woocommerce_custom_order_columns($column) {
 						
 		break;
 		case "billing_address" :
-			if ($order->get_formatted_shipping_address()) :
+			if ($order->get_formatted_billing_address()) :
 			
         		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q='.urlencode( $order->get_billing_address() ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->get_formatted_billing_address()) .'</a>';
         	else :
