@@ -215,10 +215,14 @@ function woocommerce_update_cart_action() {
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
 				
 				$_product = $values['data'];
-				$quantity = (isset($cart_totals[$cart_item_key]['qty'])) ? $cart_totals[$cart_item_key]['qty'] : '';
-				
-				if (!$quantity) continue;
-				
+
+				// Skip product if no updated quantity was posted
+				if ( ! isset( $cart_totals[$cart_item_key]['qty'] ) )
+					continue;
+
+				// Clean the quantity input
+				$quantity = absint( $cart_totals[$cart_item_key]['qty'] );
+
 				// Update cart validation
 	    		$passed_validation 	= apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity);
 	    		
