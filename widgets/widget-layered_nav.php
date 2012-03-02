@@ -163,7 +163,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 		/* KIA */
 		global $_attributes_array;
-		if ( !is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' ) && !in_array(get_query_var('taxonomy'), $_attributes_array ) ) return;
+		if ( !is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' ) && !is_tax($_attributes_array ) ) return;
 		
 		$current_term = (is_tax($_attributes_array)) ? get_queried_object()->term_id : NULL;
 		$current_tax = (is_tax($_attributes_array)) ? get_queried_object()->taxonomy: NULL;
