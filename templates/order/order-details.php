@@ -82,10 +82,14 @@ $order = new WC_Order( $order_id );
 ?>
 </dl>
 
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+
 <div class="col2-set addresses">
 
 	<div class="col-1">
 
+<?php endif; ?>
+	
 		<header class="title">
 			<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
 		</header>
@@ -95,10 +99,12 @@ $order = new WC_Order( $order_id );
 			?>
 		</p></address>
 
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+
 	</div><!-- /.col-1 -->
 	
 	<div class="col-2">
-
+	
 		<header class="title">
 			<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
 		</header>
@@ -111,5 +117,7 @@ $order = new WC_Order( $order_id );
 	</div><!-- /.col-2 -->
 
 </div><!-- /.col2-set -->
+
+<?php endif; ?>
 
 <div class="clear"></div>
