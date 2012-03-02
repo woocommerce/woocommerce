@@ -989,11 +989,7 @@ class Woocommerce {
 	function plugin_url() { 
 		if($this->plugin_url) return $this->plugin_url;
 		
-		if (is_ssl()) :
-			return $this->plugin_url = str_replace('http://', 'https://', WP_PLUGIN_URL) . "/" . plugin_basename( dirname(__FILE__)); 
-		else :
-			return $this->plugin_url = WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)); 
-		endif;
+		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), __THIS__ );
 	}
 	
 	/**
