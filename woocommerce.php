@@ -989,7 +989,7 @@ class Woocommerce {
 	function plugin_url() { 
 		if($this->plugin_url) return $this->plugin_url;
 		
-		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), __THIS__ );
+		return $this->plugin_url = plugin_dir_url( __FILE__ );
 	}
 	
 	/**
@@ -997,7 +997,8 @@ class Woocommerce {
 	 */
 	function plugin_path() { 	
 		if($this->plugin_path) return $this->plugin_path;
-		return $this->plugin_path = WP_PLUGIN_DIR . "/" . plugin_basename( dirname(__FILE__)); 
+		
+		return $this->plugin_path = plugin_dir_path( __FILE__ );
 	 }
 	 
 	/**
