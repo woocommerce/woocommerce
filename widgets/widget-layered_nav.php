@@ -232,15 +232,16 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				// List display
 				echo "<ul>";
 				
-				// Force found when option is selected
-				if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;  
-//print_r($_chosen_attributes);
-
+				/* KIA */
+				// Force found when option is selected - do not force found on taxonomy attributes
+				if (!is_tax($_attributes_array) && is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes) && $current_term !== $term->term_id) $found = true;  
+				/* end KIA */
+				
 				foreach ($terms as $term) { 
 		
 					/* KIA */
 					//if on a term page, skip that term in widget list
-					if( $term->term_id == get_queried_object()->term_id ) continue;
+					//if( $term->term_id == get_queried_object()->term_id ) continue;
 					/* end KIA */
 					
 					// Get count based on current view - uses transients
@@ -261,14 +262,19 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					}
 					/* end KIA */	
 					
-					$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms'])); 
-		
+					$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms'])) ; 
+	
 					// If this is an AND query, only show options with count > 0
 					if ($query_type=='and') {
 						
 						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
-	
-						if ($count>0) $found = true;
+
+						/* KIA */
+						// skip the term for the current archive
+						if ( $current_term == $term->term_id ) continue ; 
+						/* end  KIA */
+						
+						if ($count>0 && $current_term !== $term->term_id ) $found = true;
 					
 						if ($count==0 && !$option_is_set) continue;
 					
