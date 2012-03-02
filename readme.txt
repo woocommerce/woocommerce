@@ -143,7 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5 =
+= 1.5 - 01/03/2012 =
 * Quick edit products
 * Bulk edit products
 * Purchase notes - add text to a product to include in order tables after payment
