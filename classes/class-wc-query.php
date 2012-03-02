@@ -25,19 +25,15 @@ class WC_Query {
 	/**
 	 * Hook into pre_get_posts to do the main product query
 	 */
-	function pre_get_posts( $q ) {
+	function pre_get_posts( $q ) { 
 		
-		// Only apply to product categories, the product post archive, the shop page, and product tags
+		// Apply to the product post archive, the shop page, and any taxonomy (ie attributes) associated with the product post type
 	    if 	( 
-	    		( !$q->is_main_query() ) || (
-	    			!$q->is_tax( 'product_cat' ) 
-	    			&& !$q->is_tax( 'product_tag' ) 
-	    			&& !$q->is_post_type_archive( 'product' ) 
-	    		)
+	    		!$q->is_main_query()  && !$q->is_post_type_archive( 'product' ) && !$q->is_tax && !in_array( $q->queried_object->taxonomy,  get_object_taxonomies('product') ) 
 	    	) 
 	    return;
-	    
-	    $this->product_query( $q );
+
+	    $this->product_query( $q ); 
 	    
 	    // We're on a shop page so queue the woocommerce_get_products_in_view function
 	    add_action('wp', array( &$this, 'get_products_in_view' ), 2);
@@ -60,7 +56,7 @@ class WC_Query {
 		$ordering = $this->get_catalog_ordering_args();
 		
 		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
-		$post__in = array_unique(apply_filters('loop_shop_post_in', array()));
+		$post__in = array_unique(apply_filters('loop_shop_post_in', array()));  
 		
 		// Ordering query vars
 		$q->set( 'orderby', $ordering['orderby'] );
@@ -88,7 +84,7 @@ class WC_Query {
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
 	 */
-	function get_products_in_view() {
+	function get_products_in_view() {  
 		global $wp_query;
 		
 		$unfiltered_product_ids = array();
@@ -101,7 +97,7 @@ class WC_Query {
 		$transient_name = 'woocommerce_unfiltered_product_ids_' . sanitize_key( http_build_query($current_wp_query) );
 		$transient_name = (is_search()) ? $transient_name . '_search' : $transient_name;
 		
-		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
+		//if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
 
 			// Get all visible posts, regardless of filters
 		    $unfiltered_product_ids = get_posts(
@@ -118,11 +114,11 @@ class WC_Query {
 				)
 			);
 		
-			set_transient( $transient_name, $unfiltered_product_ids );
-		}
+			//set_transient( $transient_name, $unfiltered_product_ids );
+		//}
 		
 		// Store the variable
-		$this->unfiltered_product_ids = $unfiltered_product_ids;
+		$this->unfiltered_product_ids = $unfiltered_product_ids; 
 		
 		// Also store filtered posts ids...
 		if (sizeof($this->post__in)>0) :
