@@ -134,9 +134,17 @@ class WC_Email {
 		
 		// Get contents
 		$message = ob_get_clean();
+		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_new_order_headers', '');
+		if(empty($headers))
+			$headers = false;
 	
+		// Attachments
+		$attachments = apply_filters('woocommerce_new_order_attachments', '');
+
 		// Send the mail	
-		$this->send( get_option('woocommerce_new_order_email_recipient'), $subject, $message );
+		$this->send( get_option('woocommerce_new_order_email_recipient'), $subject, $message, $headers, $attachments);
 	}
 
 	/**
@@ -164,11 +172,16 @@ class WC_Email {
 		// Get contents
 		$message = ob_get_clean();
 		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_customer_processing_order_headers', '');
+		if(empty($headers))
+			$headers = false;
+		
 		// Attachments
 		$attachments = apply_filters('woocommerce_customer_processing_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message, false, $attachments );
+		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
 	}
 
 	/**
@@ -204,11 +217,16 @@ class WC_Email {
 		// Get contents
 		$message = ob_get_clean();
 		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_customer_completed_order_headers', '');
+		if(empty($headers))
+			$headers = false;
+		
 		// Attachments
 		$attachments = apply_filters('woocommerce_customer_completed_order_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message, false, $attachments );
+		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
 	}
 
 	/**
@@ -236,11 +254,16 @@ class WC_Email {
 		// Get contents
 		$message = ob_get_clean();
 		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_customer_invoice_headers', '');
+		if(empty($headers))
+			$headers = false;
+		
 		// Attachments
 		$attachments = apply_filters('woocommerce_customer_invoice_attachments', '');
 		
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message, $attachments );
+		$this->send( $order->billing_email, $subject, $message, $attachments, $headers, $attachments );
 	}
 
 	/**
@@ -279,9 +302,17 @@ class WC_Email {
 		
 		// Get contents
 		$message = ob_get_clean();
+		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_customer_note_headers', '');
+		if(empty($headers))
+			$headers = false;
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_customer_note_attachments', '');
 	
 		// Send the mail	
-		$this->send( $order->billing_email, $subject, $message );
+		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
 	}
 	
 	/**
@@ -295,8 +326,16 @@ class WC_Email {
 		
 		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is low in stock.', 'woocommerce');
 	
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_low_stock_headers', '');
+		if(empty($headers))
+			$headers = '';
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_low_stock_attachments', '');
+		
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
 	}
 	
 	/**
@@ -310,8 +349,16 @@ class WC_Email {
 		
 		$message = '#' . $product->id .' '. $product->get_title() . ' ('. $product->sku.') ' . __('is out of stock.', 'woocommerce');
 	
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_no_stock_headers', '');
+		if(empty($headers))
+			$headers = '';
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_no_stock_attachments', '');
+
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
 	}
 	
 	
@@ -338,8 +385,16 @@ class WC_Email {
 	
 		$message = sprintf(__('%s units of #%s %s (%s) have been backordered in order #%s.', 'woocommerce'), $quantity, $product->id, $product->get_title(), $product->sku, $order_id );
 	
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_backorder_headers', '');
+		if(empty($headers))
+			$headers = '';
+		
+		// Attachments
+		$attachments = apply_filters('woocommerce_backorder_attachments', '');
+		
 		// Send the mail
-		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message );
+		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
 	}
 
 	/**
@@ -400,9 +455,17 @@ class WC_Email {
 		
 		// Get contents
 		$message = ob_get_clean();
+		
+		//	CC, BCC, additional headers
+		$headers = apply_filters('woocommerce_customer_new_account_headers', '');
+		if(empty($headers))
+			$headers = '';
 	
+		// Attachments
+		$attachments = apply_filters('woocommerce_customer_new_account_attachments', '');
+		
 		// Send the mail	
-		$this->send( $user_email, $subject, $message );
+		$this->send( $user_email, $subject, $message, $headers, $attachments );
 	}
 
 }
