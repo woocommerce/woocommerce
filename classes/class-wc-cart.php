@@ -265,10 +265,12 @@ class WC_Cart {
 				
 				foreach ($other_data as $data) :
 					
+					$display_value = (isset($data['display']) && $data['display']) ? $data['display'] : $data['value'];
+					
 					if ($flat) :
-						$data_list[] = $data['name'].': '.$data['value'];
+						$data_list[] = $data['name'].': '.$display_value;
 					else :
-						$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$data['value'].'</dd>';
+						$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$display_value.'</dd>';
 					endif;
 					
 				endforeach;
