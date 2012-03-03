@@ -35,7 +35,7 @@ class WC_Query {
 	    			!$q->is_post_type_archive( 'product' ) 
 					&& !$q->is_tax( 'product_cat' ) 
 	    			&& !$q->is_tax( 'product_tag' ) 
-					&& !$q->is_tax($_attributes_array)
+					&& ( $_attributes_array && !$q->is_tax( $_attributes_array ) )
 	    		) 
 	    	) 
 	    return;

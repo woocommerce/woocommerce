@@ -147,6 +147,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Error suppression on set_time_out
 * Order-details removed shipping when disabled
 * Updated Turkish translation
+* Layered nav for attribute pages (thanks helgatheviking)
+* Fixed dates in dashboard stats
 
 = 1.5 - 01/03/2012 =
 * Quick edit products

@@ -6,12 +6,9 @@
  * @category	Widgets
  * @author		WooThemes
  */
- 
- 
 if (is_active_widget( false, false, 'woocommerce_layered_nav', 'true' ) && !is_admin()) :
-	add_action('parse_query', 'woocommerce_layered_nav_init', 1);
+	add_action('init', 'woocommerce_layered_nav_init', 1);
 	add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
-	
 endif;
 
 
@@ -31,24 +28,21 @@ function woocommerce_layered_nav_init( ) {
 	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
 	    	$taxonomy = $woocommerce->attribute_taxonomy_name($attribute);  
 			
-			/* KIA */
 			// create an array of product attribute taxonomies
 			$_attributes_array[] = $taxonomy;
-			/* end KIA */
+			
 	    	$name = 'filter_' . $attribute;
 	    	$query_type_name = 'query_type_' . $attribute;
 	    	
-	    	if (isset($_GET[$name]) && taxonomy_exists($taxonomy)) : 
+	    	if (isset($_GET[$name]) && $_GET[$name] && taxonomy_exists($taxonomy)) : 
 	    		$_chosen_attributes[$taxonomy]['terms'] = explode(',', $_GET[$name] );
 	    		if (isset($_GET[$query_type_name]) && $_GET[$query_type_name]=='or') :
 	    			$_chosen_attributes[$taxonomy]['query_type'] = 'or';
 	    		else :
 	    			$_chosen_attributes[$taxonomy]['query_type'] = 'and';
 	    		endif;
-			/* KIA */
-			elseif ( $taxonomy == get_queried_object()->taxonomy ) :
+			elseif ( isset(get_queried_object()->taxonomy) && $taxonomy == get_queried_object()->taxonomy ) :
 				$_chosen_attributes[$taxonomy]['terms'] = array( get_queried_object()->term_id );
-			/* end KIA */
 			endif;
 	    endforeach;    	
     endif;  	
@@ -159,16 +153,13 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 	function widget( $args, $instance ) {
 		extract($args);
 				
-		global $_chosen_attributes, $woocommerce;
+		global $_chosen_attributes, $woocommerce, $_attributes_array;
 
-		/* KIA */
-		global $_attributes_array;
-		if ( !is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' ) && !is_tax($_attributes_array ) ) return;
+		if ( !is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' ) && (sizeof($_attributes_array)>0 && !is_tax($_attributes_array )) ) return;
 		
-		$current_term = (is_tax($_attributes_array)) ? get_queried_object()->term_id : NULL;
-		$current_tax = (is_tax($_attributes_array)) ? get_queried_object()->taxonomy: NULL;
-		/* end KIA*/
-					
+		$current_term 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->term_id : '';
+		$current_tax 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->taxonomy : '';
+			
 		$title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
 		$taxonomy 	= $woocommerce->attribute_taxonomy_name($instance['attribute']);
 		$query_type = (isset($instance['query_type'])) ? $instance['query_type'] : 'and';
@@ -180,11 +171,6 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			'hide_empty' => '1'
 		);
 		$terms = get_terms( $taxonomy, $args );  
-
-		/* KIA */
-		//fix get_terms() that aren't sorting properly 
-		usort($terms, array($this, 'kia_term_sort_function'));
-		/* end KIA */
 		
 		$count = count($terms);
 		
@@ -195,54 +181,54 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 			echo $before_widget . $before_title . $title . $after_title;
 			
+			// Force found when option is selected - do not force found on taxonomy attributes
+			if ((!$_attributes_array || !is_tax($_attributes_array)) && is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+			
 			if ($display_type=='dropdown') { 
 			
-				$taxonomy_filter = str_replace('pa_', '', $taxonomy);
-				
-				$found = true;
-				
-				echo '<select id="dropdown_layered_nav_'.$taxonomy_filter.'">';
-				
-				echo '<option value="">'. sprintf( __('Any %s', 'woocommerce'), $woocommerce->attribute_label( $taxonomy ) ) .'</option>';
-				
-				foreach ($terms as $term) {
+				// skip when viewing the taxonomy
+				if ( $current_tax && $taxonomy == $current_tax ) {
 					
-					/* KIA */
-					//if on a term page, skip that term in widget list
-					if( $term->term_id == get_queried_object()->term_id ) continue;
-					/* end KIA */
+					$found = false;
 					
-					echo '<option value="'.$term->term_id.'" '.selected( (isset($_GET['filter_'.$taxonomy_filter])) ? $_GET['filter_'.$taxonomy_filter] : '' , $term->term_id, false).'>'.$term->name.'</option>';
+				} else {
+			
+					$taxonomy_filter = str_replace('pa_', '', $taxonomy);
+					
+					$found = true;
+					
+					echo '<select id="dropdown_layered_nav_'.$taxonomy_filter.'">';
+					
+					echo '<option value="">'. sprintf( __('Any %s', 'woocommerce'), $woocommerce->attribute_label( $taxonomy ) ) .'</option>';
+					
+					foreach ($terms as $term) {
+						
+						//if on a term page, skip that term in widget list
+						if( $term->term_id == $current_term ) continue;
+						
+						echo '<option value="'.$term->term_id.'" '.selected( (isset($_GET['filter_'.$taxonomy_filter])) ? $_GET['filter_'.$taxonomy_filter] : '' , $term->term_id, false).'>'.$term->name.'</option>';
+					}
+						
+					echo '</select>';
+					
+					$woocommerce->add_inline_js("
+						
+						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
+							
+							location.href = '".home_url(remove_query_arg('filter_' . $taxonomy_filter, add_query_arg('filtering', '1')))."&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
+							
+						});
+						
+					");
+				
 				}
-					
-				echo '</select>';
-				
-				$woocommerce->add_inline_js("
-					
-					jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
-						
-						location.href = '".home_url(remove_query_arg('filter_' . $taxonomy_filter, add_query_arg('filtering', '1')))."&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
-						
-					});
-					
-				");
 			
 			} else {
 
 				// List display
 				echo "<ul>";
 				
-				/* KIA */
-				// Force found when option is selected - do not force found on taxonomy attributes
-				if (!is_tax($_attributes_array) && is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes) && $current_term !== $term->term_id) $found = true;  
-				/* end KIA */
-				
 				foreach ($terms as $term) { 
-		
-					/* KIA */
-					//if on a term page, skip that term in widget list
-					//if( $term->term_id == get_queried_object()->term_id ) continue;
-					/* end KIA */
 					
 					// Get count based on current view - uses transients
 					$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
@@ -254,14 +240,6 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 						set_transient( $transient_name, $_products_in_term );
 					}
 					
-					/* KIA */					
-					//this is adding an additional chosen attribute on tax pages			
-					//change: if there are no terms in array then don't add $taxonomy to array		
-					if (is_array($_chosen_attributes[$taxonomy]['terms'])) { 
-						$_chosen_attributes[$taxonomy]['terms'] = $_chosen_attributes[$taxonomy]['terms'];
-					}
-					/* end KIA */	
-					
 					$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms'])) ; 
 	
 					// If this is an AND query, only show options with count > 0
@@ -269,10 +247,8 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 						
 						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
 
-						/* KIA */
 						// skip the term for the current archive
-						if ( $current_term == $term->term_id ) continue ; 
-						/* end  KIA */
+						if ( $current_term == $term->term_id ) continue; 
 						
 						if ($count>0 && $current_term !== $term->term_id ) $found = true;
 					
@@ -280,6 +256,9 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					
 					// If this is an OR query, show all options so search can be expanded
 					} else { 
+						
+						// skip the term for the current archive
+						if ( $current_term == $term->term_id ) continue;
 						
 						$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
 						
@@ -307,25 +286,22 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					endif;   
 			
 					// All current filters
-
 					if ($_chosen_attributes) : 	
-					foreach ($_chosen_attributes as $name => $data) : 
-						if ($name!==$taxonomy  ) :  
-							
-							/* KIA */
-							//exclude query arg for current term archive term						
-							while(in_array($current_term, $data['terms'])) {
-								$key = array_search($current_term, $data);
-								unset($data['terms'][$key]);
-							}
-
-							if(!empty($data['terms'])){
-								$link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'filter_', $name))), implode(',', $data['terms']), $link );  
-							}
-							/* end KIA */
-							
-							if ($data['query_type']=='or') $link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'query_type_', $name))), 'or', $link ); 
-						endif; 
+						foreach ($_chosen_attributes as $name => $data) : 
+							if ( $name!==$taxonomy ) :  
+								
+								//exclude query arg for current term archive term						
+								while(in_array($current_term, $data['terms'])) {
+									$key = array_search($current_term, $data);
+									unset($data['terms'][$key]);
+								}
+	
+								if(!empty($data['terms'])){
+									$link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'filter_', $name))), implode(',', $data['terms']), $link );  
+								}
+								
+								if ($data['query_type']=='or') $link = add_query_arg( strtolower(sanitize_title(str_replace('pa_', 'query_type_', $name))), 'or', $link ); 
+							endif; 
 						endforeach;
 					endif;
 					
@@ -394,13 +370,6 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			
 		}
 	}
-	
-	/** @see WP_Widget->kia_term_sort 
-		used by usort() to fix get_terms() that aren't sorting properly */
-	function kia_term_sort_function($a, $b) {
-		return strcmp($a->name, $b->name);
-	}
-
 	
 	/** @see WP_Widget->update */
 	function update( $new_instance, $old_instance ) {

@@ -632,7 +632,7 @@ class Woocommerce {
 		    	
 		    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					
-					$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', false, $name);
+					$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', true, $name);
 					
 		    		register_taxonomy( $name,
 				        array('product'),
