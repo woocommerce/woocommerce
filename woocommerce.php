@@ -988,8 +988,7 @@ class Woocommerce {
 	 */
 	function plugin_url() { 
 		if($this->plugin_url) return $this->plugin_url;
-		
-		return $this->plugin_url = plugin_dir_url( __FILE__ );
+		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
 	}
 	
 	/**
