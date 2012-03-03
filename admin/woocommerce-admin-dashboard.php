@@ -172,15 +172,16 @@ function woocommerce_dashboard_widget_right_now() {
  */
 function woocommerce_init_dashboard_widgets() {
 
-	global $current_month_offset;
+	global $current_month_offset, $the_month_num, $the_year;
 						
-	$current_month_offset = (int) date('m');
+	$current_month_offset = 0;
 	
 	if (isset($_GET['month'])) $current_month_offset = (int) $_GET['month'];
 	
-	$sales_heading = '';
+	$the_month_num 	= date('n', strtotime('NOW '.($current_month_offset).' MONTH'));
+	$the_year 		= date('Y', strtotime('NOW '.($current_month_offset).' MONTH'));
 	
-	$the_month_num = date('n', strtotime('NOW '.($current_month_offset-1).' MONTH'));
+	$sales_heading = '';
 	
 	if ($the_month_num!=date('m')) : 
 		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
@@ -268,10 +269,10 @@ function woocommerce_dashboard_recent_reviews() {
  * Orders this month filter function
  */
 function orders_this_month( $where = '' ) {
-	global $current_month_offset;
+	global $the_month_num, $the_year;
 	
-	$month = $current_month_offset;
-	$year = (int) date('Y');
+	$month = $the_month_num;
+	$year = (int) $the_year;
 	
 	$first_day = strtotime("{$year}-{$month}-01");
 	//$last_day = strtotime('-1 second', strtotime('+1 month', $first_day));
@@ -305,7 +306,7 @@ function woocommerce_dashboard_sales_js() {
 	
 	if (!$screen || $screen->id!=='dashboard') return;
 	
-	global $current_month_offset;
+	global $current_month_offset, $the_month_num, $the_year;
 	
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_this_month' );
@@ -332,13 +333,13 @@ function woocommerce_dashboard_sales_js() {
 	$order_amounts = array();
 		
 	// Blank date ranges to begin
-	$month = $current_month_offset;
-	$year = (int) date('Y');
+	$month = $the_month_num;
+	$year = (int) $the_year;
 	
 	$first_day = strtotime("{$year}-{$month}-01");
 	$last_day = strtotime('-1 second', strtotime('+1 month', $first_day));
 	
-	if ((date('m') - $current_month_offset)==0) :
+	if ((date('m') - $the_month_num)==0) :
 		$up_to = date('d', strtotime('NOW'));
 	else :
 		$up_to = date('d', $last_day);
