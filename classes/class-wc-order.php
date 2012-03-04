@@ -679,7 +679,7 @@ class WC_Order {
 				// Status was changed
 				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $old_status->name, $new_status->name ) );
+				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __($old_status->name, 'woocommerce'), __($new_status->name, 'woocommerce') ) );
 
 				// Date
 				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
