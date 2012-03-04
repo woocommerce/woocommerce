@@ -236,7 +236,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
 			
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
-			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woocommerce'), $order->id);
+			$item_names = array();
+			
+			if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
+				if ($item['qty']) $item_names[] = $item['name'] . ' x ' . $item['qty'];
+			endforeach; endif;
+			
+			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woocommerce'), $order->id) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
 			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() + $order->get_order_discount(), 2, '.', '');
 			
