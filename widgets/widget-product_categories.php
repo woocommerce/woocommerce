@@ -241,7 +241,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woocommerce' ); ?></label><br/>
 		
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('show_children_only') ); ?>" name="<?php echo esc_attr( $this->get_field_name('show_children_only') ); ?>"<?php checked( $show_children_only ); ?> />
-		<label for="<?php echo $this->get_field_id('show_children_only'); ?>"><?php _e( 'Show children of current category only ', 'woocommerce' ); ?></label></p>
+		<label for="<?php echo $this->get_field_id('show_children_only'); ?>"><?php _e( 'Show children of current category only', 'woocommerce' ); ?></label></p>
 <?php
 	}
 
