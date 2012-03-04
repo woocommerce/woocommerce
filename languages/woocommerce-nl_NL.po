@@ -1702,7 +1702,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:477
 #@ default
 msgid "M j, Y @ G:i"
-msgstr ""
+msgstr "M j, Y @ G:i"
 
 #: admin/woocommerce-admin-init.php:448
 #, php-format
@@ -1763,7 +1763,7 @@ msgstr ""
 #, fuzzy
 #@ default
 msgid "Coupon saved."
-msgstr "Kortingsbon"
+msgstr "Kortingsbon opgeslagen."
 
 #: admin/woocommerce-admin-init.php:475
 #, fuzzy
