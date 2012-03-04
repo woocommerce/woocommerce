@@ -573,7 +573,7 @@ jQuery( function($){
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
 				
 				// Add custom attribute row
-				$('.woocommerce_attributes').append('<div class="woocommerce_attribute">\
+				$('.woocommerce_attributes').append('<div class="woocommerce_attribute wc-metabox">\
 						<h3>\
 							<button type="button" class="remove_row button">' + woocommerce_writepanel_params.remove_label + '</button>\
 							<div class="handlediv" title="' + woocommerce_writepanel_params.click_to_toggle + '"></div>\

@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Layered nav for attribute pages (thanks helgatheviking)
 * Fixed dates in dashboard stats
 * Download expiry was backwards
+* Fix styling of new attribute
 
 = 1.5 - 01/03/2012 =
 * Quick edit products
