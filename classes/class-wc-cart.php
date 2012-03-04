@@ -45,8 +45,7 @@ class WC_Cart {
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
 		
-		add_action('init', array(&$this, 'init'), 1);				// Get cart on init
-		//add_action('wp', array(&$this, 'calculate_totals'), 1);		// Defer calculate totals so we can detect page
+		add_action('init', array(&$this, 'init'), 5);						// Get cart on init
 	}
     
     /**
@@ -159,17 +158,47 @@ class WC_Cart {
 			$_SESSION['shipping_total'] = $this->shipping_total;
 			$_SESSION['shipping_tax_total'] = $this->shipping_tax_total;
 			$_SESSION['shipping_label'] = $this->shipping_label;
+			
+			if (get_current_user_id()) $this->persistent_cart_update();
+			
+			do_action('woocommerce_cart_updated');
 		}
 		
 		/**
 		 * Empty the cart data and destroy the session
 		 */
-		function empty_cart() {
+		function empty_cart( $clear_persistent_cart = true ) {
+		
 			$this->cart_contents = array();
 			$this->reset();
+			
 			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'], $_SESSION['coupons'], $_SESSION['cart'] );
+			
+			if ($clear_persistent_cart && get_current_user_id()) $this->persistent_cart_destroy();
+			
+			do_action('woocommerce_cart_emptied');
 		}
 
+ 	/*-----------------------------------------------------------------------------------*/
+	/* Persistent cart handling */
+	/*-----------------------------------------------------------------------------------*/ 
+		
+		/**
+		 * Save the persistent cart when updated
+		 */
+		function persistent_cart_update() {
+			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
+				'cart' => $_SESSION['cart'],
+			));
+		}
+		
+		/**
+		 * Delete the persistent cart
+		 */
+		function persistent_cart_destroy() {
+			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
+		}
+		
  	/*-----------------------------------------------------------------------------------*/
 	/* Cart Data Functions */
 	/*-----------------------------------------------------------------------------------*/ 
@@ -351,7 +380,7 @@ class WC_Cart {
 			
 			return $merged_taxes;
 		}	
-	
+		
  	/*-----------------------------------------------------------------------------------*/
 	/* Add to cart handling */
 	/*-----------------------------------------------------------------------------------*/ 

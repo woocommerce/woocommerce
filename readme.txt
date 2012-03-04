@@ -144,6 +144,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.1 =
+* Persistent (logged-in) customer carts (thanks dominic-p)
 * Error suppression on set_time_out
 * Order-details removed shipping when disabled
 * Updated Turkish translation

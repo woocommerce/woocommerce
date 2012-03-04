@@ -54,7 +54,24 @@ if (!function_exists('woocommerce_empty_cart')) {
 		
 		if (!isset($woocommerce->cart) || $woocommerce->cart == '' ) $woocommerce->cart = new WC_Cart();
 		
-		$woocommerce->cart->empty_cart();
+		$woocommerce->cart->empty_cart( false );
+	}
+}
+
+/**
+ * Load the cart upon login
+ **/
+function woocommerce_load_persistent_cart( $user_login, $user ) {
+	global $woocommerce;
+	
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
+	
+	if ($saved_cart) {
+		if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart']) || sizeof($_SESSION['cart'])==0) {
+			
+			$_SESSION['cart'] = $saved_cart['cart'];
+			
+		}
 	}
 }
 
