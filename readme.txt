@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fixed dates in dashboard stats
 * Download expiry was backwards
 * Fix styling of new attribute
+* When passing aggregate orders to paypal, include item names
 
 = 1.5 - 01/03/2012 =
 * Quick edit products
