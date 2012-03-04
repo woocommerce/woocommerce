@@ -241,8 +241,7 @@ class WC_Customer {
 		endif;
 		
 		return apply_filters('woocommerce_customer_get_downloadable_products', $downloads);
-		
-	}
+	}	
 }
 
 /** Depreciated */

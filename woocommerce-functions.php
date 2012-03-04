@@ -462,7 +462,6 @@ function woocommerce_clear_cart_after_payment() {
 	endif;
 }
 
-
 /**
  * Process the checkout form
  **/
