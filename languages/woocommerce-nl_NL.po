@@ -482,8 +482,8 @@ msgstr "Productcategorieën"
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
-msgstr[0] "Productcategorie"
-msgstr[1] "Productcategorieën"
+msgstr[0] "Product Categorie"
+msgstr[1] "Product Categorieën"
 
 #: woocommerce.php:520
 #@ woocommerce
@@ -543,8 +543,8 @@ msgstr "Tags"
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
-msgstr[0] "Producttag"
-msgstr[1] "Producttags"
+msgstr[0] "Product Tag"
+msgstr[1] "Product Tags"
 
 #: woocommerce.php:549
 #@ woocommerce
@@ -2425,8 +2425,8 @@ msgstr[1] "(%s staten"
 #@ woocommerce
 msgid "and 1 state"
 msgid_plural "and %s states"
-msgstr[0] "en 1 staat"
-msgstr[1] "en %s staten"
+msgstr[0] "en 1 provincie"
+msgstr[1] "en %s provincies"
 
 #: admin/woocommerce-admin-settings-forms.php:753
 #, php-format
