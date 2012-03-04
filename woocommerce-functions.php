@@ -798,7 +798,7 @@ function woocommerce_download_product() {
 			
 		endif;
 		
-		if ($access_expires > 0 && strtotime($access_expires) > current_time('timestamp')) :
+		if ($access_expires > 0 && strtotime($access_expires) < current_time('timestamp')) :
 		
 			wp_die( __('Sorry, this download has expired', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 			exit;
