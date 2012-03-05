@@ -191,6 +191,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'SGD' :
 		case 'USD' : $currency_symbol = '&#36;'; break;
 		case 'EUR' : $currency_symbol = '&euro;'; break;
+		case 'RMB' :
 		case 'JPY' : $currency_symbol = '&yen;'; break;
 		case 'TRY' : $currency_symbol = 'TL'; break;
 		case 'NOK' : $currency_symbol = 'kr'; break;
