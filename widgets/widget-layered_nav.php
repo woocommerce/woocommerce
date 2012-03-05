@@ -41,8 +41,6 @@ function woocommerce_layered_nav_init( ) {
 	    		else :
 	    			$_chosen_attributes[$taxonomy]['query_type'] = 'and';
 	    		endif;
-			elseif ( isset(get_queried_object()->taxonomy) && $taxonomy == get_queried_object()->taxonomy ) :
-				$_chosen_attributes[$taxonomy]['terms'] = array( get_queried_object()->term_id );
 			endif;
 	    endforeach;    	
     endif;  	
