@@ -155,6 +155,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * When passing aggregate orders to paypal, include item names
 * Localisation improvements
 * Fix local method availability
+* Show order even if free
+* Removed duplicate order on tracking page
 
 = 1.5 - 01/03/2012 =
 * Quick edit products

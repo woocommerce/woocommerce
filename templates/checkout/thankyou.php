@@ -44,12 +44,14 @@ global $woocommerce;
 				<?php _e('Total:', 'woocommerce'); ?>
 				<strong><?php echo woocommerce_price($order->order_total); ?></strong>
 			</li>
+			<?php if ($order->payment_method_title) : ?>
 			<li class="method">
 				<?php _e('Payment method:', 'woocommerce'); ?>
 				<strong><?php 
 					echo $order->payment_method_title;
 				?></strong>
 			</li>
+			<?php endif; ?>
 		</ul>
 		<div class="clear"></div>
 				
