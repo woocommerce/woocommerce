@@ -57,7 +57,7 @@ function woocommerce_admin_help_tab_content() {
 	) );   	
 
 	$screen->set_help_sidebar(
-		'<p><strong>' . __('For more information:') . '</strong></p>' .
+		'<p><strong>' . __('For more information:', 'woocommerce') . '</strong></p>' .
 		'<p>' . __('<a href="http://www.woothemes.com/woocommerce/" target="_blank">WooCommerce</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="http://wordpress.org/extend/plugins/woocommerce/" target="_blank">Project on WordPress.org</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="https://github.com/woothemes/woocommerce" target="_blank">Project on Github</a>', 'woocommerce') . '</p>' .
