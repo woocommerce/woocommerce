@@ -38,7 +38,7 @@ function get_woocommerce_view_order() {
 function woocommerce_my_account( $atts ) {
 	global $woocommerce, $current_user;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 
 	if ( ! is_user_logged_in() ) :
 		
@@ -77,7 +77,7 @@ function woocommerce_my_account( $atts ) {
 function woocommerce_edit_address() {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 	
 	if ( ! is_user_logged_in() ) return;
 
@@ -171,15 +171,10 @@ add_action( 'template_redirect', 'woocommerce_save_address' );
  * @since 1.4
  */
 function woocommerce_get_address_to_edit() {
-	$load_address = 'billing';
 
-	if ( isset( $_GET[ 'address' ] ) )
-		$load_address = esc_attr( $_GET[ 'address' ] );
-
-	if ( $load_address == 'billing' )
-		$load_address = 'billing'; 
-	else 
-		$load_address = 'shipping';
+	$load_address = ( isset( $_GET[ 'address' ] ) ) ? esc_attr( $_GET[ 'address' ] ) : '';
+	
+	$load_address = ( $load_address == 'billing' || $load_address == 'shipping' ) ? $load_address : '';
 
 	return $load_address;
 }
@@ -249,7 +244,7 @@ add_action( 'template_redirect', 'woocommerce_save_password' );
 function woocommerce_view_order() {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 
 	if ( ! is_user_logged_in() ) return;
 	
@@ -268,7 +263,7 @@ function woocommerce_view_order() {
 	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date_i18n(get_option('date_format'), strtotime($order->order_date)) )
 	. sprintf( __('. Order status: <mark>%s</mark>', 'woocommerce'), __($status->name, 'woocommerce') )
 	. '.</p>';
-
+	
 	$notes = $order->get_customer_order_notes();
 	if ($notes) :
 		?>

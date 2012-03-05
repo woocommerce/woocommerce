@@ -8,6 +8,12 @@
  * @category 	Admin Write Panels
  * @package 	WooCommerce
  */
+ 
+include_once('writepanel-product_data.php');
+include_once('writepanel-coupon_data.php');
+include_once('writepanel-order_data.php');
+include_once('writepanel-order_notes.php');
+include_once('writepanel-order_downloads.php');
 
 /**
  * Init the meta boxes
@@ -27,6 +33,7 @@ function woocommerce_meta_boxes() {
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woocommerce'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
 	add_meta_box( 'woocommerce-order-totals', __('Order Totals', 'woocommerce'), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
 	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woocommerce'), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-downloads', __('Downloadable Product Permissions <small>&ndash; Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.</small>', 'woocommerce'), 'woocommerce_order_downloads_meta_box', 'shop_order', 'normal', 'default');
 	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woocommerce'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'high');
 	
 	remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );
@@ -147,7 +154,22 @@ function woocommerce_wp_text_input( $field ) {
 	
 	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+		
+	echo '</p>';
+}
+
+function woocommerce_wp_textarea_input( $field ) {
+	global $thepostid, $post;
+	
+	if (!$thepostid) $thepostid = $post->ID;
+	if (!isset($field['placeholder'])) $field['placeholder'] = '';
+	if (!isset($field['class'])) $field['class'] = 'short';
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><textarea class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" placeholder="'.$field['placeholder'].'" rows="2" cols="20">'.esc_textarea( $field['value'] ).'</textarea> ';
+	
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }
@@ -166,7 +188,7 @@ function woocommerce_wp_checkbox( $field ) {
 	
 	echo ' /> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }
@@ -190,7 +212,7 @@ function woocommerce_wp_select( $field ) {
 	
 	echo '</select> ';
 	
-	if (isset($field['description'])) echo '<span class="description">' .$field['description'] . '</span>';
+	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
 		
 	echo '</p>';
 }

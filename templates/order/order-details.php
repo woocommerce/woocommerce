@@ -42,12 +42,14 @@ $order = new WC_Order( $order_id );
 
 				echo '
 					<tr>
-						<td class="product-name">'.$item['name'];
+						<td class="product-name">';
+						
+				echo '<a href="'.get_permalink( $item['id'] ).'">' . $item['name'] . '</a>';
 
 				$item_meta = new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
 				
-				if ($_product->exists && $_product->is_downloadable() && $order->status=='completed') :
+				if ($_product->exists && $_product->is_downloadable() && ($order->status=='completed' || (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing'))) :
 					
 					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woocommerce') . '</a></small>';
 		
@@ -55,8 +57,17 @@ $order = new WC_Order( $order_id );
 
 				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
 				
+				// Show any purchase notes
+				if ($order->status=='completed' || $order->status=='processing') :
+					if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
+						echo '<tr class="product-purchase-note"><td colspan="3">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
+					endif;
+				endif;
+				
 			endforeach;
 		endif;
+
+		do_action( 'woocommerce_order_items_table', $order );
 		?>
 	</tbody>
 </table>
@@ -71,10 +82,14 @@ $order = new WC_Order( $order_id );
 ?>
 </dl>
 
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+
 <div class="col2-set addresses">
 
 	<div class="col-1">
 
+<?php endif; ?>
+	
 		<header class="title">
 			<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
 		</header>
@@ -84,10 +99,12 @@ $order = new WC_Order( $order_id );
 			?>
 		</p></address>
 
+<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+
 	</div><!-- /.col-1 -->
 	
 	<div class="col-2">
-
+	
 		<header class="title">
 			<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
 		</header>
@@ -100,5 +117,7 @@ $order = new WC_Order( $order_id );
 	</div><!-- /.col-2 -->
 
 </div><!-- /.col2-set -->
+
+<?php endif; ?>
 
 <div class="clear"></div>

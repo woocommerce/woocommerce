@@ -70,6 +70,12 @@
 	width: 100%;
 	height: 100%;
 	background: #fff;
+	-webkit-border-radius:1em;
+	-moz-border-radius:1em;
+	border-radius:1em;
+	-webkit-box-shadow:0 0 1em rgba(0,0,0,0.6);
+	-moz-box-shadow:0 0 1em rgba(0,0,0,0.6);
+	box-shadow:0 0 1em rgba(0,0,0,0.6);
 }
 
 #fancybox-content {
@@ -81,6 +87,9 @@
 	overflow: hidden;
 	z-index: 1102;
 	border: 0px solid #fff;
+	-webkit-border-radius:1em;
+	-moz-border-radius:1em;
+	border-radius:1em;
 }
 
 #fancybox-hide-sel-frame {
@@ -97,12 +106,32 @@
 	position: absolute;
 	top: -15px;
 	right: -15px;
-	width: 25px;
-	height: 25px;
-	background: transparent url('../images/fancybox/fancybox.png') -40px 0px;
+	width: 24px;
+	height: 24px;
+	line-height: 24px !important;
+	font-size:16px !important;
+	font-family: sans-serif !important;
 	cursor: pointer;
 	z-index: 1103;
 	display: none;
+	text-align: center;
+	background: #000;
+	display: inline-block;
+	border:2px solid #fff;
+	-webkit-border-radius:2em;
+	-moz-border-radius:2em;
+	border-radius:2em;
+	font-weight: bold;
+	color: #fff;
+	text-shadow:none;
+	-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.8);
+	-moz-box-shadow:0 1px 3px rgba(0,0,0,0.8);
+	box-shadow:0 1px 3px rgba(0,0,0,0.8);
+	-webkit-transition:all ease-in-out .2s;
+}
+
+#fancybox-close:hover {
+	background: #a36396;
 }
 
 #fancybox-error {
@@ -195,129 +224,26 @@
 	z-index: 1001;
 }
 
-#fancybox-bg-n {
-	top: -20px;
-	left: 0;
-	width: 100%;
-	background-image: url('../images/fancybox/fancybox-x.png');
-}
-
-#fancybox-bg-ne {
-	top: -20px;
-	right: -20px;
-	background-image: url('../images/fancybox/fancybox.png');
-	background-position: -40px -162px;
-}
-
-#fancybox-bg-e {
-	top: 0;
-	right: -20px;
-	height: 100%;
-	background-image: url('../images/fancybox/fancybox-y.png');
-	background-position: -20px 0px;
-}
-
-#fancybox-bg-se {
-	bottom: -20px;
-	right: -20px;
-	background-image: url('../images/fancybox/fancybox.png');
-	background-position: -40px -182px; 
-}
-
-#fancybox-bg-s {
-	bottom: -20px;
-	left: 0;
-	width: 100%;
-	background-image: url('../images/fancybox/fancybox-x.png');
-	background-position: 0px -20px;
-}
-
-#fancybox-bg-sw {
-	bottom: -20px;
-	left: -20px;
-	background-image: url('../images/fancybox/fancybox.png');
-	background-position: -40px -142px;
-}
-
-#fancybox-bg-w {
-	top: 0;
-	left: -20px;
-	height: 100%;
-	background-image: url('../images/fancybox/fancybox-y.png');
-}
-
-#fancybox-bg-nw {
-	top: -20px;
-	left: -20px;
-	background-image: url('../images/fancybox/fancybox.png');
-	background-position: -40px -122px;
-}
-
 #fancybox-title {
 	font-family: Helvetica;
 	font-size: 12px;
 	z-index: 1102;
-}
-
-.fancybox-title-inside {
-	padding-bottom: 10px;
 	text-align: center;
-	color: #333;
-	background: #fff;
-	position: relative;
+	padding-top:10px;
 }
 
-.fancybox-title-outside {
-	padding-top: 10px;
-	color: #fff;
-}
-
-.fancybox-title-over {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	color: #FFF;
-	text-align: left;
-}
-
-#fancybox-title-over {
-	padding: 10px;
-	background-image: url('../images/fancybox/fancy_title_over.png');
-	display: block;
-}
-
-.fancybox-title-float {
-	position: absolute;
-	left: 0;
-	bottom: -20px;
-	height: 32px;
-}
-
-#fancybox-title-float-wrap {
-	border: none;
-	border-collapse: collapse;
-	width: auto;
-}
-
-#fancybox-title-float-wrap td {
-	border: none;
-	white-space: nowrap;
-}
-
-#fancybox-title-float-left {
-	padding: 0 0 0 15px;
-	background: url('../images/fancybox/fancybox.png') -40px -90px no-repeat;
-}
-
-#fancybox-title-float-main {
-	color: #FFF;
-	line-height: 29px;
+#fancybox-title-float {
+	padding:3px 10px;
+	background: #000;
+	display: inline-block;
+	border:2px solid #fff;
+	-webkit-border-radius:2em;
+	-moz-border-radius:2em;
+	border-radius:2em;
 	font-weight: bold;
-	padding: 0 0 3px 0;
-	background: url('../images/fancybox/fancybox-x.png') 0px -40px;
-}
-
-#fancybox-title-float-right {
-	padding: 0 0 0 15px;
-	background: url('../images/fancybox/fancybox.png') -55px -90px no-repeat;
+	color: #fff;
+	text-shadow:none;
+	-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.8);
+	-moz-box-shadow:0 1px 3px rgba(0,0,0,0.8);
+	box-shadow:0 1px 3px rgba(0,0,0,0.8);
 }

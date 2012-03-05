@@ -35,28 +35,98 @@ function woocommerce_admin_menu() {
 }
 
 /**
+ * Admin Notices
+ */
+add_action( "admin_print_styles", 'woocommerce_admin_notices_styles' );
+
+function woocommerce_admin_install_notice() {
+	?>
+	<div id="message" class="updated woocommerce-message wc-connect">
+		<div class="squeezer">
+			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; You\'re almost ready to start selling :)', 'woocommerce' ); ?></h4>
+			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
+		</div>
+	</div>
+	<?php
+}
+function woocommerce_admin_installed_notice() {
+	?>
+	<div id="message" class="updated woocommerce-message wc-connect">
+		<div class="squeezer">
+			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; You\'re ready to start selling :)', 'woocommerce' ); ?></h4>
+			
+			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e('Documentation', 'woocommerce'); ?></a></p>
+			
+			<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
+		</div>
+	</div>
+	<?php
+	
+	// Set installed option
+	update_option('woocommerce_installed', 0);
+}
+function woocommerce_admin_notices_styles() {
+	
+	// Installed notices
+	if ( get_option('woocommerce_installed')==1 ) {
+	
+		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
+		
+		if (get_option('skip_install_woocommerce_pages')!=1 && woocommerce_get_page_id('shop')<1 && !isset($_GET['install_woocommerce_pages']) && !isset($_GET['skip_install_woocommerce_pages'])) {
+			add_action( 'admin_notices', 'woocommerce_admin_install_notice' );
+		} elseif ( !isset($_GET['page']) || $_GET['page']!='woocommerce' ) {
+			add_action( 'admin_notices', 'woocommerce_admin_installed_notice' );
+		}
+		
+	}
+}
+
+/**
  * Admin Includes - loaded conditionally
  */
 add_action('admin_init', 'woocommerce_admin_init');
 
 function woocommerce_admin_init() {
-	global $pagenow;
+	global $pagenow, $typenow;
 	
 	ob_start();
-
-	if ( $pagenow=='index.php' ) :
-		include_once( 'woocommerce-admin-dashboard.php' );
-	elseif ( $pagenow=='import.php' ) :
-		include_once( 'woocommerce-admin-import.php' );
-	elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) :
-		include_once( 'post-types/post-types-init.php' );
-	elseif ( $pagenow=='edit-tags.php' ) :
-		include_once( 'woocommerce-admin-taxonomies.php' );
-	elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) :
-		include_once( 'woocommerce-admin-users.php' );
+	
+	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) :
+		$typenow = $post->post_type;
+	elseif (empty($typenow) && !empty($_GET['post'])) :
+	    $post = get_post($_GET['post']);
+	    $typenow = $post->post_type;
 	endif;
+
+	if ( $pagenow=='index.php' ) {
+	
+		include_once( 'woocommerce-admin-dashboard.php' );
+		
+	} elseif ( $pagenow=='admin.php' && isset($_GET['import']) ) {
+	
+		include_once( 'woocommerce-admin-import.php' );
+		
+	} elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) {
+	
+		include_once( 'post-types/writepanels/writepanels-init.php' );	
+		
+		if (in_array($typenow, array('product', 'shop_coupon', 'shop_order'))) add_action('admin_print_styles', 'woocommerce_admin_help_tab');
+		
+	} elseif ( $pagenow=='edit-tags.php' ) {
+	
+		include_once( 'woocommerce-admin-taxonomies.php' );
+		
+	} elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) {
+	
+		include_once( 'woocommerce-admin-users.php' );
+		
+	}
 }
 
+include_once( 'post-types/product.php' );
+include_once( 'post-types/shop_coupon.php' );
+include_once( 'post-types/shop_order.php' );
 include_once( 'woocommerce-admin-hooks.php' );
 include_once( 'woocommerce-admin-functions.php' );
 
@@ -82,8 +152,8 @@ function woocommerce_attributes_page() {
  */
 function activate_woocommerce() {
 	include_once( 'woocommerce-admin-install.php' );
-	update_option( "woocommerce_installed", 1 );
 	update_option( 'skip_install_woocommerce_pages', 0 );
+	update_option( 'woocommerce_installed', 1 );
 	do_install_woocommerce();
 }
 function install_woocommerce() {
@@ -353,4 +423,60 @@ add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_acti
 function woocommerce_duplicate_product_action() {
 	include_once('includes/duplicate_product.php');
 	woocommerce_duplicate_product();
+}
+
+/**
+ * Post updated messages
+ */
+add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
+
+function woocommerce_product_updated_messages( $messages ) {
+	global $post, $post_ID;
+	
+	$messages['product'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => sprintf( __('Product updated. <a href="%s">View Product</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Product updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Product restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => sprintf( __('Product published. <a href="%s">View Contact</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
+		7 => __('Product saved.'),
+		8 => sprintf( __('Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+		9 => sprintf( __('Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink($post_ID) ) ),
+		10 => sprintf( __('Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+	);
+	
+	$messages['shop_order'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => __('Order updated.', 'woocommerce'),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Order updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Order restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __('Order updated.', 'woocommerce'),
+		7 => __('Order saved.'),
+		8 => __('Order submitted.', 'woocommerce'),
+		9 => sprintf( __('Order scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ) ),
+		10 => __('Order draft updated.', 'woocommerce')
+	);
+
+	$messages['shop_coupon'] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => __('Coupon updated.', 'woocommerce'),
+		2 => __('Custom field updated.', 'woocommerce'),
+		3 => __('Custom field deleted.', 'woocommerce'),
+		4 => __('Coupon updated.', 'woocommerce'),
+		5 => isset($_GET['revision']) ? sprintf( __('Coupon restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __('Coupon updated.', 'woocommerce'),
+		7 => __('Coupon saved.'),
+		8 => __('Coupon submitted.', 'woocommerce'),
+		9 => sprintf( __('Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ) ),
+		10 => __('Coupon draft updated.', 'woocommerce')
+	);
+	
+	return $messages;
 }

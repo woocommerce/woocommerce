@@ -9,6 +9,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 ?>
 <div class="cart_totals <?php if (isset($_SESSION['calculated_shipping']) && $_SESSION['calculated_shipping']) echo 'calculated_shipping'; ?>">
 	
+	<?php do_action('woocommerce_before_cart_totals'); ?>
+	
 	<?php if ( !$woocommerce->shipping->enabled || $available_methods || !$woocommerce->customer->get_shipping_country() || !isset($_SESSION['calculated_shipping']) || !$_SESSION['calculated_shipping'] ) : ?>
 	
 		<h2><?php _e('Cart Totals', 'woocommerce'); ?></h2>
@@ -23,7 +25,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_before_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Cart Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1') ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
+					<th><?php _e('Cart Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '1', $woocommerce->cart->get_cart_url()) ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_before_tax(); ?></td>
 				</tr>
 				
@@ -72,7 +74,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								echo '<select name="shipping_method" id="shipping_method">';
 								foreach ( $available_methods as $method ) {
 									echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
-									echo $method->full_label;
+									echo strip_tags( $method->full_label );
 									echo '</option>';
 								}
 								echo '</select>';
@@ -83,7 +85,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						} else {
 
 							if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() || ! $woocommerce->customer->get_shipping_postcode() ) {
-								echo '<p>'.__('Please fill in your details above to see available shipping methods.', 'woocommerce').'</p>';
+								echo '<p>'.__('Please fill in your details to see available shipping methods.', 'woocommerce').'</p>';
 							} else {
 								echo '<p>'.__('Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce').'</p>';
 							}
@@ -153,7 +155,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php if ($woocommerce->cart->get_discounts_after_tax()) : ?>
 				
 				<tr class="discount">
-					<th><?php _e('Order Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2') ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
+					<th><?php _e('Order Discount', 'woocommerce'); ?> <a href="<?php echo add_query_arg('remove_discounts', '2', $woocommerce->cart->get_cart_url()) ?>"><?php _e('[Remove]', 'woocommerce'); ?></a></th>
 					<td>-<?php echo $woocommerce->cart->get_discounts_after_tax(); ?></td>
 				</tr>
 				
@@ -209,4 +211,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 		<?php endif; ?>
 		
 	<?php endif; ?>
+	
+	<?php do_action('woocommerce_after_cart_totals'); ?>
+	
 </div>

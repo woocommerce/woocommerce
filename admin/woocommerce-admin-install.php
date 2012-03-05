@@ -19,13 +19,18 @@ function do_install_woocommerce() {
 	woocommerce_default_options();
 	woocommerce_tables_install();
 	woocommerce_install_custom_fields();
+	
+	// Register post types
+	$woocommerce->init_taxonomy();
+
+	// Add default taxonomies
 	woocommerce_default_taxonomies();
 	
 	// Install folder for uploading files and prevent hotlinking
 	$upload_dir 	=  wp_upload_dir();
 	$downloads_url 	= $upload_dir['basedir'] . '/woocommerce_uploads';
 	if ( wp_mkdir_p($downloads_url) && !file_exists($downloads_url.'/.htaccess') ) :
-		if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
+		if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
 			fwrite($file_handle, 'deny from all');
 			fclose($file_handle);
 		endif;
@@ -34,14 +39,14 @@ function do_install_woocommerce() {
 	// Install folder for logs
 	$logs_url 		= WP_PLUGIN_DIR . "/" . plugin_basename( dirname(dirname(__FILE__))) . '/logs';
 	if ( wp_mkdir_p($logs_url) && !file_exists($logs_url.'/.htaccess') ) :
-		if ($file_handle = fopen( $logs_url . '/.htaccess', 'w' )) :
+		if ($file_handle = @fopen( $logs_url . '/.htaccess', 'w' )) :
 			fwrite($file_handle, 'deny from all');
 			fclose($file_handle);
 		endif;
 	endif;
 	
-	// Clear transient cache (if this is an upgrade then woocommerce_class will be defined)
-	if ( $woocommerce instanceof woocommerce ) $woocommerce->clear_product_transients();
+	// Clear transient cache
+	$woocommerce->clear_product_transients();
 	
 	// Update version
 	update_option( "woocommerce_db_version", $woocommerce->version );
@@ -221,6 +226,9 @@ function woocommerce_tables_install() {
         user_email			varchar(200) NOT NULL,
         user_id				mediumint(9) NULL,
         downloads_remaining	varchar(9) NULL,
+        access_granted 		datetime NOT NULL default '0000-00-00 00:00:00',
+        access_expires 		datetime NULL default null,
+        download_count 		mediumint(9) NOT NULL DEFAULT 0,
         PRIMARY KEY id (product_id,order_id,order_key)) $collate;";
     dbDelta($sql);
     
@@ -282,27 +290,6 @@ function woocommerce_tables_install() {
  * Adds the default terms for taxonomies - product types and order statuses. Modify at your own risk.
  */
 function woocommerce_default_taxonomies() {
-	
-	if (!post_type_exists('product')) :
-		register_post_type('product',
-			array(
-				'public' => true,
-				'show_ui' => true,
-				'capability_type' => 'post',
-				'publicly_queryable' => true,
-				'exclude_from_search' => false,
-				'hierarchical' => true,
-				'query_var' => true,			
-				'supports' => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments' ),
-				'show_in_nav_menus' => false,
-			)
-		);
-	endif;
-	
-	if (!taxonomy_exists('product_type')) :
-		register_taxonomy( 'product_type', array('post', 'product'));
-		register_taxonomy( 'shop_order_status', array('post', 'product'));
-	endif;
 	
 	$product_types = array(
 		'simple',

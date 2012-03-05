@@ -60,7 +60,10 @@ function woocommerce_product_data_box() {
 			
 				// External URL
 				woocommerce_wp_text_input( array( 'id' => '_product_url', 'label' => __('Product URL', 'woocommerce'), 'placeholder' => 'http://', 'description' => __('Enter the external URL to the product.', 'woocommerce') ) );
-			
+				
+				// Button text
+				woocommerce_wp_text_input( array( 'id' => '_button_text', 'label' => __('Button text', 'woocommerce'), 'placeholder' => _x('Buy product', 'placeholder', 'woocommerce'), 'description' => __('This text will be shown on the button linking to the external product.', 'woocommerce') ) );
+							
 			echo '</div>';
 				
 			echo '<div class="options_group pricing show_if_simple show_if_external">';
@@ -81,10 +84,10 @@ function woocommerce_product_data_box() {
 							<label for="'.$field['id'].'_from">'.$field['label'].'</label>
 							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
 				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
-				echo '" placeholder="' . __('From&hellip;', 'woocommerce') . '" maxlength="10" />
+				echo '" placeholder="' . _x('From&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
 				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
-				echo '" placeholder="' . __('To&hellip;', 'woocommerce') . '" maxlength="10" />
+				echo '" placeholder="' . _x('To&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<a href="#" class="cancel_sale_schedule">'. __('Cancel', 'woocommerce') .'</a>
 						</p>';
 						
@@ -134,6 +137,13 @@ function woocommerce_product_data_box() {
 			
 			echo '</div>';
 			
+			echo '<div class="options_group">';
+			
+				// Purchase note
+				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __('Purchase Note', 'woocommerce'), 'description' => __('Enter an optional note to send the customer after purchase.', 'woocommerce') ) );
+			
+			echo '</div>';
+			
 			echo '<div class="options_group show_if_downloadable">';
 			
 				// File URL
@@ -145,11 +155,10 @@ function woocommerce_product_data_box() {
 				</p>';
 					
 				// Download Limit
-				$download_limit = get_post_meta($post->ID, '_download_limit', true);
-				$field = array( 'id' => '_download_limit', 'label' => __('Download Limit', 'woocommerce') );
-				echo '<p class="form-field">
-					<label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$download_limit.'" placeholder="'.__('Unlimited', 'woocommerce').'" /> <span class="description">' . __('Leave blank for unlimited re-downloads.', 'woocommerce') . '</span></p>';
+				woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __('Download Limit', 'woocommerce'), 'placeholder' => __('Unlimited', 'woocommerce'), 'description' => __('Leave blank for unlimited re-downloads.', 'woocommerce') ) );
+				
+				// Expirey
+				woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __('Download Expiry', 'woocommerce'), 'placeholder' => __('Never', 'woocommerce'), 'description' => __('Enter the number of days before a download link expires, or leave blank.', 'woocommerce') ) );
 				
 				do_action('woocommerce_product_options_downloads');
 				
@@ -221,9 +230,13 @@ function woocommerce_product_data_box() {
 			
 		</div>
 
-		<div id="woocommerce_attributes" class="panel">
+		<div id="woocommerce_attributes" class="panel wc-metaboxes-wrapper">
 			
-			<div class="woocommerce_attributes">
+			<p class="toolbar">
+				<a href="#" class="close_all"><?php _e('Close all', 'woocommerce'); ?></a><a href="#" class="expand_all"><?php _e('Expand all', 'woocommerce'); ?></a>
+			</p>
+			
+			<div class="woocommerce_attributes wc-metaboxes">
 			
 				<?php
 					$attribute_taxonomies = $woocommerce->get_attribute_taxonomies();	// Array of defined attribute taxonomies
@@ -253,13 +266,13 @@ function woocommerce_product_data_box() {
 				    		$has_terms = (is_wp_error($post_terms) || !$post_terms || sizeof($post_terms)==0) ? 0 : 1;
 				    		
 				    		?>
-				    		<div class="woocommerce_attribute closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
+				    		<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
 								<h3>
 									<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 									<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 									<strong class="attribute_name"><?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?></strong>
 								</h3>
-								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">
+								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 									<tbody>	
 										<tr>
 											<td class="attribute_name">
@@ -329,13 +342,13 @@ function woocommerce_product_data_box() {
 			    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
 						
 						?>
-			    		<div class="woocommerce_attribute closed" rel="<?php echo $position; ?>">
+			    		<div class="woocommerce_attribute wc-metabox closed" rel="<?php echo $position; ?>">
 							<h3>
 								<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 								<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
 								<strong class="attribute_name"><?php echo esc_attr( $attribute['name'] ); ?></strong>
 							</h3>
-							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data">
+							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 								<tbody>	
 									<tr>
 										<td class="attribute_name">
@@ -492,6 +505,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
 	update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
 	update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
+	update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
 	if (isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
 		
 	// Dimensions
@@ -509,8 +523,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 	// Unique SKU 
 	$sku = get_post_meta($post_id, '_sku', true);
-	$new_sku = stripslashes( $_POST['_sku'] );
-	if ($new_sku!==$sku) :
+	$new_sku = esc_html(stripslashes( $_POST['_sku'] ));
+	if ($new_sku=='') :
+		update_post_meta( $post_id, '_sku', '' );
+	elseif ($new_sku!==$sku) :
 		if ($new_sku && !empty($new_sku)) :
 			if (
 				$wpdb->get_var($wpdb->prepare("
@@ -754,6 +770,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 		if (isset($_POST['_file_path']) && $_POST['_file_path']) update_post_meta( $post_id, '_file_path', esc_attr($_POST['_file_path']) );
 		if (isset($_POST['_download_limit'])) update_post_meta( $post_id, '_download_limit', esc_attr($_POST['_download_limit']) );
+		if (isset($_POST['_download_expiry'])) update_post_meta( $post_id, '_download_expiry', esc_attr($_POST['_download_expiry']) );
 		
 	endif;
 	
@@ -761,6 +778,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	if ($product_type=='external') :
 		
 		if (isset($_POST['_product_url']) && $_POST['_product_url']) update_post_meta( $post_id, '_product_url', esc_attr($_POST['_product_url']) );
+		if (isset($_POST['_button_text']) && $_POST['_button_text']) update_post_meta( $post_id, '_button_text', esc_attr($_POST['_button_text']) );
 		
 	endif;
 			
@@ -836,8 +854,10 @@ add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
 
 function woocommerce_change_insert_into_post( $translation, $original ) {
     if( !isset( $_REQUEST['from'] ) ) return $translation;
-
-    if( $_REQUEST['from'] == 'wc01' && $original == 'Insert into Post' ) return __('Insert into URL field', 'woocommerce' );
+	
+	$original = strtolower($original);
+	
+    if( $_REQUEST['from'] == 'wc01' && ($original == 'insert into post' || $original == 'use this image') ) return __('Use this file', 'woocommerce' );
 
     return $translation;
 }

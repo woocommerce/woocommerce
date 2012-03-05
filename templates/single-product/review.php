@@ -22,7 +22,7 @@ global $post;
 				<p class="meta"><em><?php _e('Your comment is awaiting approval', 'woocommerce'); ?></em></p>
 			<?php else : ?>
 				<p class="meta">
-					<?php _e('Rating by', 'woocommerce'); ?> <strong itemprop="author"><?php comment_author(); ?></strong> <?php _e('on', 'woocommerce'); ?> <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date('M jS Y'); ?></time>:
+					<?php _e('Rating by', 'woocommerce'); ?> <strong itemprop="author"><?php comment_author(); ?></strong> <?php _e('on', 'woocommerce'); ?> <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__('M jS Y', 'woocommerce')); ?></time>:
 				</p>
 			<?php endif; ?>
 			

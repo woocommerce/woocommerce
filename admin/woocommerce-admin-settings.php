@@ -25,7 +25,8 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_default_country',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GB',
-		'type' 		=> 'single_select_country'
+		'type' 		=> 'single_select_country',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -37,6 +38,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> 'GBP',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
+		'desc_tip'	=>  true,
 		'options' => array_unique(apply_filters('woocommerce_currencies', array( 
 			'USD' => __( 'US Dollars (&#36;)', 'woocommerce' ),
 			'EUR' => __( 'Euros (&euro;)', 'woocommerce' ),
@@ -75,6 +77,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 		'options' => array(  
 			'all'  => __( 'All Countries', 'woocommerce' ),
 			'specific' => __( 'Specific Countries', 'woocommerce' )			
@@ -89,31 +92,18 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'std' 		=> '',
 		'type' 		=> 'multi_select_countries'
 	),
-
+	
 	array(  
-		'name' => __( 'Checkout Fields', 'woocommerce' ),
-		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
+		'name' => __('Localisation', 'woocommerce'),
+		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
+		'id' 		=> 'woocommerce_informal_localisation_type',
+		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
 	),
 	
-	array(  
-		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_order_comments',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
+	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
-	array(  
-		'desc' 		=> __( 'Allow unregistered users to register from the checkout page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
+	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
 
 	array(  
 		'name' => __( 'Security', 'woocommerce' ),
@@ -133,23 +123,47 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup'		=> 'end',
 		'show_if_checked' => 'yes',
 	),
-
-	array(  
-		'name' => __( 'Customer Accounts', 'woocommerce' ),
-		'desc' 		=> __( 'Allow unregistered users to register from the My Account page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_myaccount_registration',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
 	
 	array(  
 		'name' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Allow users to checkout without signing up for an account', 'woocommerce' ),
+		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_guest_checkout',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> ''
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_order_comments',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'desc' 		=> __( 'Allow unregistered users to register from the Checkout', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(  
+		'desc' 		=> __( 'Allow unregistered users to register from "My Account"', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_myaccount_registration',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
 	),
 	
 	array(  
@@ -167,6 +181,10 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
+
+	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
+	
+	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce'), 'id' => 'script_styling_options' ),
 	
 	array(  
 		'name' => __( 'Styling', 'woocommerce' ),
@@ -219,13 +237,17 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-	    'desc'     => __( 'Output WooCommerce JavaScript in the footer (<code>wp_footer</code>)', 'woocommerce' ),
+	    'desc'     => __( 'Output WooCommerce JavaScript in the footer', 'woocommerce' ),
 	    'id'     => 'woocommerce_scripts_position',
 	    'std'     => 'yes',
 	    'type'     => 'checkbox',
 	    'checkboxgroup'		=> 'end'
 	),
 
+	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
+	
+	array(	'name' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __('The following options are specific to downloadable products.', 'woocommerce'), 'id' => 'digital_download_options' ),
+	
 	array(  
 		'name' => __('File download method', 'woocommerce'),
 		'desc' 		=> __('Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce'),
@@ -234,6 +256,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'class'		=> 'chosen_select',
 		'css' 		=> 'min-width:300px;',
 		'std'		=> 'force',
+		'desc_tip'	=>  true,
 		'options' => array(  
 			'force'  	=> __( 'Force Downloads', 'woocommerce' ),
 			'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
@@ -250,19 +273,34 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Localisation', 'woocommerce'),
-		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
-		'id' 		=> 'woocommerce_informal_localisation_type',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
+		'name' => __('Limit quantity', 'woocommerce'),
+		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox'
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'general_options'),
+	array(  
+		'name' => __('Mixed cart handling', 'woocommerce'),
+		'desc' 		=> __('Grant access to downloadable products after payment. Turn this option off to only grant access when an order is "complete".', 'woocommerce'),
+		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'yes',
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
 
 )); // End general settings
 
+// Get shop page
 $shop_page_id = woocommerce_get_page_id('shop');
+
 $base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $shop_page_id ) : 'shop';	
+
+$woocommerce_prepend_shop_page_to_products_warning = '';
+
+if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 )
+	$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __('Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce') . '</mark>';
 	
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
@@ -270,12 +308,13 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array(  
 		'name' => __( 'Shop Base Page', 'woocommerce' ),
-		'desc' 		=> sprintf( __( 'This sets the base page of your shop.', 'woocommerce' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
+		'desc' 		=> sprintf( __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
 		'id' 		=> 'woocommerce_shop_page_id',
 		'type' 		=> 'single_select_page',
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -284,7 +323,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_shop_page_title',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> 'All Products' // Default value for the page title - changed in settings
+		'std' 		=> 'All Products', // Default value for the page title - changed in settings
+		'desc_tip'	=>  true,
 	),
 
 	array(  
@@ -295,7 +335,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'type' 		=> 'single_select_page'
+		'type' 		=> 'single_select_page',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -324,7 +365,8 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_product_category_slug',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> ''
+		'std' 		=> '',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -333,12 +375,13 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'id' 		=> 'woocommerce_product_tag_slug',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
-		'std' 		=> ''
+		'std' 		=> '',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
 		'name' => __( 'Product base page', 'woocommerce' ),
-		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug),
+		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug) . $woocommerce_prepend_shop_page_to_products_warning,
 		'id' 		=> 'woocommerce_prepend_shop_page_to_products',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
@@ -356,7 +399,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	
 	array( 'type' => 'sectionend', 'id' => 'permalink_options' ),
 	
-	array( 'name' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows which are which. These pages should have been created upon installation of the plugin.', 'woocommerce' ) ),
+	array( 'name' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them.', 'woocommerce' ) ),
 	
 	array(  
 		'name' => __( 'Cart Page', 'woocommerce' ),
@@ -366,6 +409,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -376,6 +420,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -386,6 +431,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -396,6 +442,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -406,6 +453,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -416,6 +464,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -426,6 +475,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -436,6 +486,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
 	),	
 	
 	array( 'type' => 'sectionend', 'id' => 'page_options'),
@@ -856,11 +907,11 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 	
-	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', '', 'id' => 'email_options' ),
+	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce'), 'id' => 'email_options' ),
 	
 	array(  
 		'name' => __( '"From" name', 'woocommerce' ),
-		'desc' 		=> __( 'The sender name for WooCommerce emails.', 'woocommerce' ),
+		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_name',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
@@ -869,7 +920,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array(  
 		'name' => __( '"From" email address', 'woocommerce' ),
-		'desc' 		=> __( 'The sender email address for WooCommerce emails.', 'woocommerce' ),
+		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_address',
 		'type' 		=> 'text',
 		'css' 		=> 'min-width:300px;',
@@ -878,7 +929,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	
 	array( 'type' => 'sectionend', 'id' => 'email_options' ),
 	
-	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__('This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommmerce/emails/</code>.', 'woocommerce'), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
+	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__('This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce'), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
 	
 	array(  
 		'name' => __( 'Header image', 'woocommerce' ),
@@ -1006,10 +1057,12 @@ function woocommerce_settings() {
     
     $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
     
-    if( isset( $_POST ) && $_POST ) :
-    	if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
+    // Save settings
+    if( isset( $_POST ) && $_POST ) {
+    	if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) 
+    		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
     	
-    	switch ( $current_tab ) :
+    	switch ( $current_tab ) {
 			case "general" :
 			case "pages" :
 			case "catalog" :
@@ -1020,81 +1073,70 @@ function woocommerce_settings() {
 			case "integration" :
 				woocommerce_update_options( $woocommerce_settings[$current_tab] );
 			break;
-		endswitch;
+		}
 		
 		do_action( 'woocommerce_update_options' );
 		do_action( 'woocommerce_update_options_' . $current_tab );
 		
-		// Backwards compat 1.4 <
-		if ($current_tab=='shipping') do_action( 'woocommerce_update_options_shipping_methods' );
+		if ($current_tab=='shipping') do_action( 'woocommerce_update_options_shipping_methods' ); // Shipping Methods
 		
 		flush_rewrite_rules( false );
+		
 		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
-    endif;
+		
+		exit;
+		
+	}
     
-    if (isset($_GET['saved']) && $_GET['saved']) :
+    // Settings saved message
+    if (isset($_GET['saved']) && $_GET['saved']) {
     	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
+        
         flush_rewrite_rules( false );
         
         do_action('woocommerce_settings_saved');
-    endif;
+    }
+    
+    // Hide WC Link
+    if (isset($_GET['hide-wc-extensions-message'])) 
+    	update_option('hide-wc-extensions-message', 1);
     
     // Install/page installer
     $install_complete = false;
-    $show_page_installer = false;
-    
-    // Hide WC Link
-    if (isset($_GET['hide-wc-extensions-message'])) update_option('hide-wc-extensions-message', 1);
     
     // Add pages button
-    if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) :
+    if (isset($_GET['install_woocommerce_pages']) && $_GET['install_woocommerce_pages']) {
+		
 		require_once( 'woocommerce-admin-install.php' );
     	woocommerce_create_pages();
     	update_option('skip_install_woocommerce_pages', 1);
     	$install_complete = true;
 	
 	// Skip button
-    elseif (isset($_GET['skip_install_woocommerce_pages']) && $_GET['skip_install_woocommerce_pages']) :
+    } elseif (isset($_GET['skip_install_woocommerce_pages']) && $_GET['skip_install_woocommerce_pages']) {
     	
     	update_option('skip_install_woocommerce_pages', 1);
     	$install_complete = true;
     	
-    // If we have just activated WooCommerce...
-    elseif (isset($_GET['installed']) && $_GET['installed']) :
-    	
-    	flush_rewrite_rules( false );
-    	
-		if (woocommerce_get_page_id('shop')>0) :
-			$install_complete = true;
-		else :
-			$show_page_installer = true;
-		endif;
-		
-	// If we havn't just installed, but page installed has not been skipped and shop page does not exist...
-	elseif (!get_option('skip_install_woocommerce_pages') && !woocommerce_get_page_id('shop')) :
-		
-		$show_page_installer = true;
-		
-	endif;
+    }
 	
-	if ($show_page_installer) :
+	if ($install_complete) {
+		?>
+    	<div id="message" class="updated woocommerce-message wc-connect">
+			<div class="squeezer">
+				<h4><?php _e( '<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ); ?></h4>
+				<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
+			</div>
+		</div>
+		<?php
     	
-    	echo '<div id="message" class="updated fade">
-    		<p><strong>' . __( 'Welcome to WooCommerce!', 'woocommerce' ) . '</strong></p>
-    		<p>'. __('WooCommerce requires several WordPress pages containing shortcodes in order to work correctly; these include Shop, Cart, Checkout and My Account. To add these pages automatically please click the \'Automatically add pages\' button below, otherwise you can set them up manually. See the \'Pages\' tab in settings for more information.', 'woocommerce') .'</p>
-    		<p><a href="'.remove_query_arg('installed', add_query_arg('install_woocommerce_pages', 'true')).'" class="button button-primary">'. __('Automatically add pages', 'woocommerce') .'</a> <a href="'.remove_query_arg('installed', add_query_arg('skip_install_woocommerce_pages', 'true')).'" class="button">'. __('Skip setup', 'woocommerce') .'</a></p>
-    	</div>';
-    	
-    elseif ($install_complete) :
-
-    	echo '<div id="message" class="updated fade">
-    		<p style="float:right;">' . __( 'Like WooCommerce? <a href="http://wordpress.org/extend/plugins/woocommerce/">Support us by leaving a rating!</a>', 'woocommerce' ) . '</p>
-    		<p><strong>' . __( 'WooCommerce has been installed and setup. Enjoy :)', 'woocommerce' ) . '</strong></p>
-    	</div>';
-    	
-    	flush_rewrite_rules( false );
-    	
-    endif;
+		// Flush rules after install
+		flush_rewrite_rules( false );
+		
+		// Set installed option
+		update_option('woocommerce_installed', 0);
+	}
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">

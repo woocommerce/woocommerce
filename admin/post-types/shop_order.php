@@ -8,11 +8,25 @@
  */
  
 /**
+ * Disable auto-save
+ **/
+add_action('admin_print_scripts', 'woocommerce_disable_autosave_for_orders');
+
+function woocommerce_disable_autosave_for_orders(){
+    global $post;
+    
+    if($post && get_post_type($post->ID) === 'shop_order'){
+        wp_dequeue_script('autosave');
+    }
+}
+
+/**
  * Columns for order page
  **/
 add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
 
 function woocommerce_edit_order_columns($columns){
+	global $woocommerce;
 	
 	$columns = array();
 	
@@ -22,12 +36,13 @@ function woocommerce_edit_order_columns($columns){
 	$columns["billing_address"] = __("Billing", 'woocommerce');
 	$columns["shipping_address"] = __("Shipping", 'woocommerce');
 	$columns["total_cost"] = __("Order Total", 'woocommerce');
+	$columns["order_comments"] = '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . esc_url( admin_url( 'images/comment-grey-bubble.png' ) ) . '" />';
+	$columns["note"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/note_head.png" alt="' . __("Customer Notes", 'woocommerce') . '" class="tips" tip="' . __("Customer Notes", 'woocommerce') . '" />';
 	$columns["order_date"] = __("Date", 'woocommerce');
 	$columns["order_actions"] = __("Actions", 'woocommerce');
 	
 	return $columns;
 }
-
 
 /**
  * Custom Columns for order page
@@ -36,7 +51,7 @@ add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_co
 
 function woocommerce_custom_order_columns($column) {
 
-	global $post;
+	global $post, $woocommerce;
 	$order = new WC_Order( $post->ID );
 	
 	switch ($column) {
@@ -73,7 +88,7 @@ function woocommerce_custom_order_columns($column) {
 						
 		break;
 		case "billing_address" :
-			if ($order->get_formatted_shipping_address()) :
+			if ($order->get_formatted_billing_address()) :
 			
         		echo '<a target="_blank" href="' . esc_url( 'http://maps.google.com/maps?&q='.urlencode( $order->get_billing_address() ).'&z=16' ) . '">'. preg_replace('#<br\s*/?>#i', ', ', $order->get_formatted_billing_address()) .'</a>';
         	else :
@@ -104,15 +119,14 @@ function woocommerce_custom_order_columns($column) {
 		
 			if ( '0000-00-00 00:00:00' == $post->post_date ) :
 				$t_time = $h_time = __( 'Unpublished', 'woocommerce' );
-				$time_diff = 0;
 			else :
 				$t_time = get_the_time( __( 'Y/m/d g:i:s A', 'woocommerce' ), $post );
-				$time = strtotime($post->post_date);
-
-				$time_diff = current_time('timestamp') - $time;
-
+				
+				$gmt_time = strtotime($post->post_date_gmt);
+				$time_diff = current_time('timestamp', 1) - $gmt_time;
+				
 				if ( $time_diff > 0 && $time_diff < 24*60*60 )
-					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $time ) );
+					$h_time = sprintf( __( '%s ago', 'woocommerce' ), human_time_diff( $gmt_time, current_time('timestamp', 1) ) );
 				else
 					$h_time = get_the_time( __( 'Y/m/d', 'woocommerce' ), $post );
 			endif;
@@ -128,6 +142,20 @@ function woocommerce_custom_order_columns($column) {
 				<a class="button" href="<?php echo admin_url('post.php?post='.$post->ID.'&action=edit'); ?>"><?php _e('View', 'woocommerce'); ?></a>
 			</p><?php
 			
+		break;
+		case "note" :
+			
+			if ($order->customer_note) 
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" tip="'. __('Yes', 'woocommerce') .'" />';
+			else 
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" tip="'. __('No', 'woocommerce') .'" />';
+			
+		break;
+		case "order_comments" :
+			
+			echo '<div class="post-com-count-wrapper">
+				<a href="'. admin_url('post.php?post='.$post->ID.'&action=edit') .'" class="post-com-count"><span class="comment-count">'. $post->comment_count .'</span></a>			
+				</div>';
 		break;
 	}
 }
@@ -260,6 +288,7 @@ function woocommerce_custom_shop_order_sort($columns) {
 		'order_total'	=> 'order_total',
 		'order_date'	=> 'date'
 	);
+	unset($columns['comments']);
 	return wp_parse_args($custom, $columns);
 }
 

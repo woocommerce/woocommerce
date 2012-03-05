@@ -13,7 +13,7 @@ global $post, $woocommerce;
 
 	<?php else : ?>
 	
-		<img src="<?php echo $woocommerce->plugin_url() ?>/assets/images/placeholder.png" alt="Placeholder" />
+		<img src="<?php echo woocommerce_placeholder_img_src(); ?>" alt="Placeholder" />
 	
 	<?php endif; ?>
 

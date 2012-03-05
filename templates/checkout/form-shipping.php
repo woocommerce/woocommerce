@@ -21,7 +21,8 @@ global $woocommerce;
 	?>
 
 	<p class="form-row" id="shiptobilling">
-		<input class="input-checkbox" <?php checked($shiptobilling, 1); ?> type="checkbox" name="shiptobilling" value="1" /> <label for="shiptobilling" class="checkbox"><?php _e('Ship to same address?', 'woocommerce'); ?></label>
+		<input id="shiptobilling-checkbox" class="input-checkbox" <?php checked($shiptobilling, 1); ?> type="checkbox" name="shiptobilling" value="1" />
+		<label for="shiptobilling-checkbox" class="checkbox"><?php _e('Ship to same address?', 'woocommerce'); ?></label>
 	</p>
 			
 	<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>

@@ -25,6 +25,7 @@ class WC_Settings_API {
 	 */
 	function admin_options() { ?>
 		<h3><?php echo (isset($this->method_title)) ? $this->method_title : __('Settings','woocommerce') ; ?></h3>
+		<?php echo (isset($this->method_description)) ? wpautop($this->method_description) : ''; ?>
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><?php

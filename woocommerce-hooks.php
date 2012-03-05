@@ -119,6 +119,7 @@ add_action( 'init', 'woocommerce_update_catalog_ordering' );
 /* Cart Actions */
 add_action( 'init', 'woocommerce_update_cart_action' );
 add_action( 'init', 'woocommerce_add_to_cart_action' );
+add_action( 'wp_login', 'woocommerce_load_persistent_cart', 1, 2);
 
 /* Checkout Actions */
 add_action( 'init', 'woocommerce_checkout_action' );

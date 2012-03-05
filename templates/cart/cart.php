@@ -21,6 +21,8 @@ global $woocommerce;
 		</tr>
 	</thead>
 	<tbody>
+		<?php do_action( 'woocommerce_before_cart_contents' ); ?>
+		
 		<?php
 		if (sizeof($woocommerce->cart->get_cart())>0) : 
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
@@ -56,7 +58,19 @@ global $woocommerce;
 							endif;
 							
 						?></td>
-						<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
+						<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" data-min="<?php 
+							
+							echo apply_filters('woocommerce_cart_item_data_min', '', $_product);
+							
+						?>" data-max="<?php 
+							
+							$data_max = ($_product->backorders_allowed()) ? '' : $_product->get_stock_quantity();
+							
+							if (get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $_product->is_downloadable() && $_product->is_virtual()) $data_max = 1;
+							
+							echo apply_filters('woocommerce_cart_item_data_max', $data_max, $_product); 
+							
+						?>" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
 						<td class="product-subtotal"><?php 
 
 							echo $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] )	;
@@ -80,6 +94,8 @@ global $woocommerce;
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
 			</td>
 		</tr>
+		
+		<?php do_action( 'woocommerce_after_cart_contents' ); ?>
 	</tbody>
 </table>
 </form>

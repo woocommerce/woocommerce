@@ -26,16 +26,20 @@ class WC_Query {
 	 * Hook into pre_get_posts to do the main product query
 	 */
 	function pre_get_posts( $q ) {
-		
-		// Only apply to product categories, the product post archive, the shop page, and product tags
+
+		global $_attributes_array;
+
+		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
 	    if 	( 
-	    		( !is_main_query() ) || (
-	    			!$q->is_tax( 'product_cat' ) 
+	    		( !$q->is_main_query() ) || (
+	    			!$q->is_post_type_archive( 'product' ) 
+					&& !$q->is_tax( 'product_cat' ) 
 	    			&& !$q->is_tax( 'product_tag' ) 
-	    			&& !$q->is_post_type_archive( 'product' ) 
-	    		)
+					&& ( $_attributes_array && !$q->is_tax( $_attributes_array ) )
+	    		) 
 	    	) 
 	    return;
+
 	    
 	    $this->product_query( $q );
 	    
@@ -119,6 +123,7 @@ class WC_Query {
 			);
 		
 			set_transient( $transient_name, $unfiltered_product_ids );
+
 		}
 		
 		// Store the variable

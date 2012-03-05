@@ -137,14 +137,14 @@ class WC_BACS extends WC_Payment_Gateway {
 		
 		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
 		
-		$fields = array(
+		$fields = apply_filters('woocommerce_bacs_fields', array(
 			'account_name' 	=> __('Account Name', 'woocommerce'), 
 			'account_number'=> __('Account Number', 'woocommerce'),  
 			'sort_code'		=> __('Sort Code', 'woocommerce'),  
 			'bank_name'		=> __('Bank Name', 'woocommerce'),  
 			'iban'			=> __('IBAN', 'woocommerce'), 
 			'bic'			=> __('BIC', 'woocommerce')
-		);
+		));
 		
 		foreach ($fields as $key=>$value) :
 		    if(!empty($this->$key)) :
@@ -170,14 +170,14 @@ class WC_BACS extends WC_Payment_Gateway {
 		
 		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
 		
-		$fields = array(
+		$fields = apply_filters('woocommerce_bacs_fields', array(
 			'account_name' 	=> __('Account Name', 'woocommerce'), 
 			'account_number'=> __('Account Number', 'woocommerce'),  
 			'sort_code'		=> __('Sort Code', 'woocommerce'),  
 			'bank_name'		=> __('Bank Name', 'woocommerce'),  
 			'iban'			=> __('IBAN', 'woocommerce'), 
 			'bic'			=> __('BIC', 'woocommerce')
-		);
+		));
 		
 		foreach ($fields as $key=>$value) :
 		    if(!empty($this->$key)) :

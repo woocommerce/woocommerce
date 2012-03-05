@@ -912,11 +912,11 @@ function woocommerce_top_sellers() {
 					$product = get_post($product_id);
 					if ($product) :
 						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					else :
 						$product_name = __('Product does not exist', 'woocommerce');
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold');
 					endif;
-					
-					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
 					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.$sales.'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 
@@ -1009,11 +1009,11 @@ function woocommerce_top_earners() {
 					$product = get_post($product_id);
 					if ($product) :
 						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					else :
 						$product_name = __('Product no longer exists', 'woocommerce');
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold');
 					endif;
-					
-					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					
 					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.woocommerce_price($sales).'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
 				endforeach; 

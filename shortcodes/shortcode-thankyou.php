@@ -20,7 +20,7 @@ function get_woocommerce_thankyou( $atts ) {
 function woocommerce_thankyou( $atts ) {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 
 	$order = false;
 	

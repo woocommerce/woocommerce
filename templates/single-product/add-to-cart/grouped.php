@@ -56,7 +56,7 @@ endforeach;
 	
 		<?php do_action('woocommerce_before_add_to_cart_button'); ?>
 	
-		<button type="submit" class="button alt"><?php _e('Add to cart', 'woocommerce'); ?></button>
+		<button type="submit" class="button alt"><?php echo apply_filters('single_add_to_cart_text', __('Add to cart', 'woocommerce'), $product->product_type); ?></button>
 	
 		<?php do_action('woocommerce_after_add_to_cart_button'); ?>
 	

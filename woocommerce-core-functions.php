@@ -10,6 +10,15 @@
  */
  
 /**
+ * Get the placeholder for products etc
+ **/
+function woocommerce_placeholder_img_src() {
+	global $woocommerce;
+	
+	return apply_filters('woocommerce_placeholder_img_src', $woocommerce->plugin_url().'/assets/images/placeholder.png');
+}
+ 
+/**
  * HTML emails from WooCommerce
  **/
 function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
@@ -18,15 +27,6 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 	$mailer = $woocommerce->mailer();
 		
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
-}
-
-/**
- * Prevent caching
- **/
-function woocommerce_nocache() {
-  	if(!defined('DONOTCACHEPAGE')) {
-		define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
-	}
 }
 
 /**
@@ -54,7 +54,24 @@ if (!function_exists('woocommerce_empty_cart')) {
 		
 		if (!isset($woocommerce->cart) || $woocommerce->cart == '' ) $woocommerce->cart = new WC_Cart();
 		
-		$woocommerce->cart->empty_cart();
+		$woocommerce->cart->empty_cart( false );
+	}
+}
+
+/**
+ * Load the cart upon login
+ **/
+function woocommerce_load_persistent_cart( $user_login, $user ) {
+	global $woocommerce;
+	
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
+	
+	if ($saved_cart) {
+		if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart']) || sizeof($_SESSION['cart'])==0) {
+			
+			$_SESSION['cart'] = $saved_cart['cart'];
+			
+		}
 	}
 }
 
@@ -113,14 +130,22 @@ if (!function_exists('is_ajax')) {
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
 	global $woocommerce;
-	if ($name=='shop' && !locate_template(array( 'loop-shop.php', $woocommerce->template_url . 'loop-shop.php' ))) {
-		load_template( $woocommerce->plugin_path() . '/templates/loop-shop.php',false );
-		return;
-	} elseif ($name=='shop' && locate_template(array( $woocommerce->template_url . 'loop-shop.php' ))) {
-		get_template_part( $woocommerce->template_url . $slug, $name );
-		return;
-	}
-	get_template_part( $slug, $name );
+	$template = '';
+	
+	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php
+	if ( $name ) 
+		$template = locate_template( array ( "{$slug}-{$name}.php", "{$woocommerce->template_url}{$slug}-{$name}.php" ) );
+	
+	// Get default slug-name.php
+	if ( !$template && $name && file_exists( $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php" ) )
+		$template = $woocommerce->plugin_path() . "/templates/{$slug}-{$name}.php";
+
+	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
+	if ( !$template ) 
+		$template = locate_template( array ( "{$slug}.php", "{$woocommerce->template_url}{$slug}.php" ) );
+
+	if ( $template ) 
+		load_template( $template, false );
 }
 
 /**
@@ -430,8 +455,12 @@ function woocommerce_exclude_order_comments_from_feed_where( $where ) {
  **/
 add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
 
+if (get_option('woocommerce_downloads_grant_access_after_payment')=='yes') add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions');
+
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
+	
+	if (get_post_meta( $order_id, __('Download Permissions Granted', 'woocommerce'), true)==1) return; // Only do this once
 	
 	$order = new WC_Order( $order_id );
 	
@@ -456,28 +485,34 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 				endif;
 				
 				$limit = trim(get_post_meta($download_id, '_download_limit', true));
+				$expiry = trim(get_post_meta($download_id, '_download_expiry', true));
 				
-				if (!empty($limit)) :
-					$limit = (int) $limit;
-				else :
-					$limit = '';
-				endif;
+				$limit = (empty($limit)) ? '' : (int) $limit;
+				$expiry = (empty($expiry)) ? '' : (int) $expiry;
+				
+				if ($expiry) $expiry = date("Y-m-d", strtotime('NOW + ' . $expiry . ' DAY'));
 				
 				// Downloadable product - give access to the customer
 				$wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
-					'product_id' => $download_id, 
-					'user_id' => $order->user_id,
-					'user_email' => $user_email,
-					'order_id' => $order->id,
-					'order_key' => $order->order_key,
-					'downloads_remaining' => $limit
+					'product_id' 			=> $download_id, 
+					'user_id' 				=> $order->user_id,
+					'user_email' 			=> $user_email,
+					'order_id' 				=> $order->id,
+					'order_key' 			=> $order->order_key,
+					'downloads_remaining' 	=> $limit,
+					'access_granted'		=> current_time('mysql'),
+					'access_expires'		=> $expiry,
+					'download_count'		=> 0
 				), array( 
 					'%s', 
 					'%s', 
 					'%s', 
 					'%s', 
 					'%s',
-					'%s'
+					'%s',
+					'%s',
+					'%s',
+					'%d'
 				) );	
 				
 			endif;
@@ -485,6 +520,8 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 		endif;
 	
 	endforeach;
+	
+	update_post_meta( $order_id,  __('Download Permissions Granted', 'woocommerce'), 1);
 }
 
 /**

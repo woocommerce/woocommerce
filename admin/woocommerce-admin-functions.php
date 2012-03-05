@@ -30,7 +30,7 @@ function woocomerce_check_download_folder_protection() {
 		
 		// Force method - protect, add rules to the htaccess file
 		if (!file_exists($downloads_url.'/.htaccess')) :
-			if ($file_handle = fopen( $downloads_url . '/.htaccess', 'w' )) :
+			if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
 				fwrite($file_handle, 'deny from all');
 				fclose($file_handle);
 			endif;
@@ -101,30 +101,6 @@ function woocommerce_prevent_admin_access() {
 	if ( get_option('woocommerce_lock_down_admin')=='yes' && !is_ajax() && !current_user_can('edit_posts') ) :
 		wp_safe_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 		exit;
-	endif;
-}
-
-/**
- * Redirect to settings after installation
- */
-function install_woocommerce_redirect() {
-	global $pagenow, $woocommerce;
-
-	if ( is_admin() && isset( $_GET['activate'] ) && ($_GET['activate'] == true) && $pagenow == 'plugins.php' && get_option( "woocommerce_installed" ) == 1 ) :
-		
-		// Clear transient cache
-		$woocommerce->clear_product_transients();
-		
-		// Unset installed flag
-		update_option( "woocommerce_installed", 0 );
-		
-		// Flush rewrites
-		flush_rewrite_rules( false );
-		
-		// Redirect to settings
-		wp_redirect(admin_url('admin.php?page=woocommerce&installed=true'));
-		exit;
-		
 	endif;
 }
 

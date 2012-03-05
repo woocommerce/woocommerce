@@ -25,7 +25,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 		$cat_obj = $wp_query->get_queried_object();
 		$this_category = $cat_obj->term_id;
 		$this_category = get_category( $this_category );
-		if ($thisCat->parent != 0) :
+		if ($this_category->parent != 0) :
 			$parent_category = get_category( $this_category->parent );
 			echo get_category_parents($parent_category, TRUE, $delimiter );
 		endif;

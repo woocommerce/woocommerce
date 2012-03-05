@@ -86,6 +86,18 @@ class WC_Shipping_Method extends WC_Settings_API {
 							endforeach;
 							
 						endforeach;
+						
+						// Add any cost for the order - order costs are in the key 'order' 
+						if (isset($cost['order'])) {
+							
+							$rates = $_tax->get_shipping_tax_rates();
+							$item_taxes = $_tax->calc_shipping_tax( $cost['order'], $rates );
+					
+							// Sum the item taxes
+							foreach (array_keys($taxes + $item_taxes) as $key) :
+								$taxes[$key] = (isset($item_taxes[$key]) ? $item_taxes[$key] : 0) + (isset($taxes[$key]) ? $taxes[$key] : 0);
+							endforeach;
+						}
 
 					endif;
 

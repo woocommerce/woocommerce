@@ -16,7 +16,7 @@
  */
 function woocommerce_order_data_meta_box($post) {
 	
-	global $post, $wpdb, $thepostid, $order_status;
+	global $post, $wpdb, $thepostid, $order_status, $woocommerce;
 	
 	$thepostid = $post->ID;
 	
@@ -117,7 +117,9 @@ function woocommerce_order_data_meta_box($post) {
 								),
 							'country' => array( 
 								'label' => __('Country', 'woocommerce'), 
-								'show'	=> false
+								'show'	=> false,
+								'type'	=> 'select',
+								'options' => $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array( 
 								'label' => __('State/County', 'woocommerce'), 
@@ -147,7 +149,15 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__('Load customer billing address', 'woocommerce').'</button></p>';
 						
 						foreach ( $billing_data as $key => $field ) :
-							woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+							if (!isset($field['type'])) $field['type'] = 'text';
+							switch ($field['type']) {
+								case "select" :
+									woocommerce_wp_select( array( 'id' => '_billing_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+								break;
+								default :
+									woocommerce_wp_text_input( array( 'id' => '_billing_' . $key, 'label' => $field['label'] ) );
+								break;
+							}
 						endforeach;
 						
 						echo '</div>';
@@ -188,7 +198,9 @@ function woocommerce_order_data_meta_box($post) {
 								),
 							'country' => array( 
 								'label' => __('Country', 'woocommerce'), 
-								'show'	=> false
+								'show'	=> false,
+								'type'	=> 'select',
+								'options' => $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array( 
 								'label' => __('State/County', 'woocommerce'), 
@@ -212,7 +224,15 @@ function woocommerce_order_data_meta_box($post) {
 						echo '<div class="edit_address"><p><button class="button load_customer_shipping">'.__('Load customer shipping address', 'woocommerce').'</button></p>';
 						
 						foreach ( $shipping_data as $key => $field ) :
-							woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+							if (!isset($field['type'])) $field['type'] = 'text';
+							switch ($field['type']) {
+								case "select" :
+									woocommerce_wp_select( array( 'id' => '_shipping_' . $key, 'label' => $field['label'], 'options' => $field['options'] ) );
+								break;
+								default :
+									woocommerce_wp_text_input( array( 'id' => '_shipping_' . $key, 'label' => $field['label'] ) );
+								break;
+							}
 						endforeach;
 						
 						echo '</div>';
@@ -410,7 +430,7 @@ function woocommerce_order_items_meta_box($post) {
 			?>
 		</select>
 		
-		<button type="button" class="button button-primary add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
+		<button type="button" class="button add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e('Calc line tax &uarr;', 'woocommerce'); ?></button>
@@ -601,7 +621,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	$woocommerce_errors = array();
 	
 	// Add key
-		add_post_meta( $post_id, '_order_key', uniqid('order_') );
+		add_post_meta( $post_id, '_order_key', uniqid('order_'), true );
 
 	// Update post data
 		update_post_meta( $post_id, '_billing_first_name', stripslashes( $_POST['_billing_first_name'] ));
@@ -640,7 +660,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		if (isset($_POST['_order_taxes_label'])) :
 			
 			$order_taxes_label		= $_POST['_order_taxes_label'];
-			$order_taxes_compound 	= $_POST['_order_taxes_compound'];
+			$order_taxes_compound 	= isset($_POST['_order_taxes_compound']) ? $_POST['_order_taxes_compound'] : array();
 			$order_taxes_cart 		= $_POST['_order_taxes_cart'];
 			$order_taxes_shipping 	= $_POST['_order_taxes_shipping'];
 			
@@ -665,7 +685,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;
 		
 		update_post_meta( $post_id, '_order_taxes', $order_taxes );
-	
+		
 	// Order items
 		$order_items = array();
 	
@@ -764,14 +784,14 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						$order->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $order_item['id'], $old_stock, $new_quantity) );
 							
 						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $order_item['id'], 'order_id' => $post_id, 'quantity' => $order_item['qty']));
+							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $post_id, 'quantity' => $order_item['qty']));
 						endif;
 						
 						// stock status notifications
 						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock', $order_item['id']);
+							do_action('woocommerce_no_stock', $_product);
 						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock', $order_item['id']);
+							do_action('woocommerce_low_stock', $_product);
 						endif;
 						
 					endif;

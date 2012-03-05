@@ -209,7 +209,7 @@ if (!function_exists('woocommerce_get_product_thumbnail')) {
 		if (!$placeholder_width) $placeholder_width = $woocommerce->get_image_size('shop_catalog_image_width');
 		if (!$placeholder_height) $placeholder_height = $woocommerce->get_image_size('shop_catalog_image_height');
 
-		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'.$woocommerce->plugin_url(). '/assets/images/placeholder.png" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
+		if ( has_post_thumbnail() ) return get_the_post_thumbnail($post->ID, $size); else return '<img src="'. woocommerce_placeholder_img_src() .'" alt="Placeholder" width="'.$placeholder_width.'" height="'.$placeholder_height.'" />';
 	}
 }
 
@@ -330,15 +330,19 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		            $image_link = '';
 		        }
 		
-		        $available_variations[] = array(
+		        $available_variations[] = apply_filters('woocommerce_available_variation', array(
 		            'variation_id' => $variation->get_variation_id(),
 		            'attributes' => $variation_attributes,
 		            'image_src' => $image,
 		            'image_link' => $image_link,
 		            'price_html' => '<span class="price">'.$variation->get_price_html().'</span>',
 		            'availability_html' => $availability_html,
-		            'sku' => __('SKU:', 'woocommerce') . ' ' . $variation->sku
-		        );
+		            'sku' => __('SKU:', 'woocommerce') . ' ' . $variation->sku,
+		            'min_qty' => 1,
+		            'max_qty' => $variation->stock,
+		            'is_downloadable' => $variation->is_downloadable(),
+		            'is_virtual' => $variation->is_virtual()
+		        ), $product, $variation);
 		    }
 		}
 		woocommerce_get_template('single-product/add-to-cart/variable.php', array(
@@ -350,7 +354,17 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 }
 if (!function_exists('woocommerce_external_add_to_cart')) {
 	function woocommerce_external_add_to_cart() {
-		woocommerce_get_template('single-product/add-to-cart/external.php');
+		global $product;
+		
+		$product_url = get_post_meta( $product->id, '_product_url', true );
+		$button_text = get_post_meta( $product->id, '_button_text', true );
+		
+		if (!$product_url) return;
+
+		woocommerce_get_template('single-product/add-to-cart/external.php', array(
+			'product_url' => $product_url,
+			'button_text' => ($button_text) ? $button_text : __('Buy product', 'woocommerce'),
+		));
 	}
 }
 
@@ -362,10 +376,11 @@ if (!function_exists('woocommerce_quantity_input')) {
 		$defaults = array(
 			'input_name' 	=> 'quantity',
 			'input_value' 	=> '1',
-			'max_value'		=> ''
+			'max_value'		=> '',
+			'min_value'		=> '0'
 		);
 
-		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters('woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ));
 		
 		woocommerce_get_template('single-product/add-to-cart/quantity.php', $args);
 	}
@@ -610,7 +625,7 @@ if (!function_exists('woocommerce_subcategory_thumbnail')) {
 			$image = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
 			$image = $image[0];
 		else :
-			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+			$image = woocommerce_placeholder_img_src();
 		endif;
 	
 		echo '<img src="'.$image.'" alt="'.$category->name.'" width="'.$image_width.'" height="'.$image_height.'" />';
@@ -653,11 +668,13 @@ if (!function_exists('woocommerce_form_field')) {
 		
 		if ((isset($args['clear']) && $args['clear'])) $after = '<div class="clear"></div>'; else $after = '';
 		
+		$required = ( $args['required'] ) ? ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>' : '';
+		
 		switch ($args['type']) :
 			case "country" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required .'</label>
 					<select name="'.$key.'" id="'.$key.'" class="country_to_state '.implode(' ', $args['class']).'">
 						<option value="">'.__('Select a country&hellip;', 'woocommerce').'</option>';
 				
@@ -671,7 +688,7 @@ if (!function_exists('woocommerce_form_field')) {
 			case "state" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>';
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>';
 				
 				/* Get Country */
 				$country_key = ($key=='billing_state') ? 'billing_country' : 'shipping_country';
@@ -709,7 +726,7 @@ if (!function_exists('woocommerce_form_field')) {
 			case "textarea" :
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required .'</label>
 					<textarea name="'.$key.'" class="input-text" id="'.$key.'" placeholder="'.$args['placeholder'].'" cols="5" rows="2">'. esc_textarea( $value ).'</textarea>
 				</p>'.$after;
 				
@@ -718,28 +735,33 @@ if (!function_exists('woocommerce_form_field')) {
 				
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
 					<input type="'.$args['type'].'" class="input-checkbox" name="'.$key.'" id="'.$key.'" value="1" '.checked($value, 1, false).' />
-					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="checkbox '.implode(' ', $args['label_class']).'">'.$args['label'] . $required . '</label>
 				</p>'.$after;
 				
 			break;
 			case "password" :
 		
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>
 					<input type="password" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $value.'" />
 				</p>'.$after;
 
 			break;
-			default :
+			case "text" :
 			
 				$field = '<p class="form-row '.implode(' ', $args['class']).'" id="'.$key.'_field">
-					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label'].'</label>
+					<label for="'.$key.'" class="'.implode(' ', $args['label_class']).'">'.$args['label']. $required . '</label>
 					<input type="text" class="input-text" name="'.$key.'" id="'.$key.'" placeholder="'.$args['placeholder'].'" value="'. $value.'" />
 				</p>'.$after;
 				
 			break;
+			default :
+			
+				$field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
+			
+			break;
 		endswitch;
-		
+
 		if ($args['return']) return $field; else echo $field;
 	}
 }

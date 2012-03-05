@@ -281,6 +281,7 @@ class WC_Countries {
 				'WA' => __('Western Australia', 'woocommerce') 
 			),
 			'AT' => array(),
+			'BE' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woocommerce'),
 			    'AC' => __('Acre', 'woocommerce'),
@@ -427,7 +428,9 @@ class WC_Countries {
 
 	/** get countries we allow only */
 	function get_allowed_countries() {
-	
+		
+		asort($this->countries);
+		
 		if (get_option('woocommerce_allowed_countries')!=='specific') return $this->countries;
 
 		$allowed_countries = array();
@@ -439,9 +442,7 @@ class WC_Countries {
 			$allowed_countries[$country] = $this->countries[$country];
 			
 		endforeach;
-		
-		asort($allowed_countries);
-		
+
 		return $allowed_countries;
 	}
 	
@@ -494,7 +495,7 @@ class WC_Countries {
 	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
 		
 		asort($this->countries);
-		
+
 		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
@@ -509,7 +510,7 @@ class WC_Countries {
 			else :
     			echo '<option';
     			if ($selected_country==$key && $selected_state=='*') echo ' selected="selected"';
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woocommerce') ) : __($value, 'woocommerce') ) .'</option>';
+    			echo ' value="'.$key.'">'. ($escape ? esc_js( $value ) : $value) .'</option>';
 			endif;
 		endforeach;
 	}
@@ -650,6 +651,12 @@ class WC_Countries {
 					'state'		=> array(
 						'required' => false
 					)
+				),
+				'BE' => array(
+					'postcode_before_city' => true,
+					'state' => array(
+						'required' => false,
+					),
 				),
 				'CA' => array(
 					'state'	=> array(
@@ -840,39 +847,44 @@ class WC_Countries {
 		$fields = array(
 			'first_name' => array( 
 				'label' 		=> __('First Name', 'woocommerce'), 
+				'placeholder' 	=> _x('First Name', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-first'),
 				),
 			'last_name' => array( 
 				'label' 		=> __('Last Name', 'woocommerce'), 
+				'placeholder' 	=> _x('Last Name', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'clear'			=> true
 				),
 			'company' 	=> array( 
 				'label' 		=> __('Company Name', 'woocommerce'), 
-				'placeholder' 	=> __('Company (optional)', 'woocommerce'),
+				'placeholder' 	=> _x('Company (optional)', 'placeholder', 'woocommerce'), 
 				'clear'			=> true
 				),
 			'address_1' 	=> array( 
 				'label' 		=> __('Address', 'woocommerce'), 
+				'placeholder' 	=> _x('Address', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				),
 			'address_2' => array( 
 				'label' 		=> __('Address 2', 'woocommerce'), 
-				'placeholder' 	=> __('Address 2 (optional)', 'woocommerce'), 
+				'placeholder' 	=> _x('Address 2 (optional)', 'placeholder', 'woocommerce'), 
 				'class' 		=> array('form-row-last'), 
 				'label_class' 	=> array('hidden'),
 				'clear'			=> true
 				),
 			'city' 		=> array( 
 				'label' 		=> __('Town/City', 'woocommerce'), 
+				'placeholder' 	=> _x('Town/City', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first'),
 				),
 			'postcode' 	=> array( 
 				'label' 		=> __('Postcode/Zip', 'woocommerce'), 
+				'placeholder' 	=> _x('Postcode/Zip', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class'			=> array('form-row-last', 'update_totals_on_change'),
 				'clear'			=> true
@@ -880,12 +892,14 @@ class WC_Countries {
 			'country' 	=> array( 
 				'type'			=> 'country', 
 				'label' 		=> __('Country', 'woocommerce'), 
+				'placeholder' 	=> _x('Country', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'),
 				),
 			'state' 	=> array( 
 				'type'			=> 'state', 
 				'label' 		=> __('State/County', 'woocommerce'), 
+				'placeholder' 	=> _x('State/County', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last', 'update_totals_on_change'),
 				'clear'			=> true
@@ -915,11 +929,13 @@ class WC_Countries {
 
 			$address_fields['billing_email'] = array(
 				'label' 		=> __('Email Address', 'woocommerce'), 
+				'placeholder' 	=> _x('Email Address', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-first')
 			);	
 			$address_fields['billing_phone'] = array(
 				'label' 		=> __('Phone', 'woocommerce'), 
+				'placeholder' 	=> _x('Phone', 'placeholder', 'woocommerce'), 
 				'required' 		=> true, 
 				'class' 		=> array('form-row-last'),
 				'clear'			=> true

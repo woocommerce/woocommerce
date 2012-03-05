@@ -170,7 +170,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $post_max ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__('Max price', 'woocommerce').'" />
 					<button type="submit" class="button">'.__('Filter', 'woocommerce').'</button>
 					<div class="price_label" style="display:none;">
-						'.__('Price:', 'woocommerce').' <span></span>
+						'.__('Price:', 'woocommerce').' <span class="from"></span> &mdash; <span class="to"></span>
 					</div>
 					'.$fields.'
 					<div class="clear"></div>

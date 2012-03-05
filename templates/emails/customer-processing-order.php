@@ -29,7 +29,7 @@
 		?>
 	</tfoot>
 	<tbody>
-		<?php echo $order->email_order_items_table( false, true ); ?>
+		<?php echo $order->email_order_items_table( (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing') ? true : false, true, ($order->status=='processing') ? true : false ); ?>
 	</tbody>
 </table>
 
@@ -44,22 +44,6 @@
 	<p><strong><?php _e('Tel:', 'woocommerce'); ?></strong> <?php echo $order->billing_phone; ?></p>
 <?php endif; ?>
 
-<div style="float:left; width: 49%;">
-
-	<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
-	
-	<p><?php echo $order->get_formatted_billing_address(); ?></p>
-
-</div>
-
-<div style="float:right; width: 49%;">
-
-	<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
-	
-	<p><?php echo $order->get_formatted_shipping_address(); ?></p>
-
-</div>
-
-<div style="clear:both;"></div>
+<?php woocommerce_get_template('emails/email-addresses.php', array( 'order' => $order )); ?>
 
 <?php do_action('woocommerce_email_footer'); ?>

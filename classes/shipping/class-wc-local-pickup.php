@@ -59,6 +59,24 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ), 
 				'default'		=> __( 'Local Pickup', 'woocommerce' )
 			),
+			'availability' => array(
+							'title' 		=> __( 'Method availability', 'woocommerce' ), 
+							'type' 			=> 'select', 
+							'default' 		=> 'all',
+							'class'			=> 'availability',
+							'options'		=> array(
+								'all' 		=> __('All allowed countries', 'woocommerce'),
+								'specific' 	=> __('Specific Countries', 'woocommerce')
+							)
+						),
+			'countries' => array(
+							'title' 		=> __( 'Specific Countries', 'woocommerce' ), 
+							'type' 			=> 'multiselect', 
+							'class'			=> 'chosen_select',
+							'css'			=> 'width: 450px;',
+							'default' 		=> '',
+							'options'		=> $woocommerce->countries->countries
+						)	
 		);
 	}
 
@@ -71,6 +89,28 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     	</table> <?php
 	}
 
+    function is_available() {
+    	global $woocommerce;
+    	
+    	if ($this->enabled=="no") return false;
+
+		$ship_to_countries = '';
+		
+		if ($this->availability == 'specific') :
+			$ship_to_countries = $this->countries;
+		else :
+			if (get_option('woocommerce_allowed_countries')=='specific') :
+				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
+			endif;
+		endif; 
+		
+		if (is_array($ship_to_countries)) :
+			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
+		endif;
+		
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
+    } 
+    
 }
 
 function add_local_pickup_method($methods) { $methods[] = 'WC_Local_Pickup'; return $methods; }

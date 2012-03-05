@@ -128,6 +128,18 @@ jQuery(document).ready(function($) {
 	// Quantity buttons
 	$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 	
+	$("div.quantity:not(.cart div.quantity), td.quantity").find('.qty').each(function(){
+		
+		var min = parseInt($(this).attr('data-min'));
+		
+		if (min && min > 1 && parseInt($(this).val()) < min) {
+			
+			$(this).val(min);
+			
+		}
+		
+	});
+	
 	$(".plus").live('click', function() {
 	    var currentVal = parseInt($(this).prev(".qty").val());
 	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 0;
@@ -145,9 +157,19 @@ jQuery(document).ready(function($) {
 	});
 	
 	$(".minus").live('click', function() {
-	    var currentVal = parseInt($(this).next(".qty").val());
-	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 1;
-	    if (currentVal > 0)  $(this).next(".qty").val(currentVal - 1);
+		var currentVal = parseInt($(this).next(".qty").val());
+	    if (!currentVal || currentVal=="" || currentVal == "NaN") currentVal = 0;
+	    
+	    $qty = $(this).next(".qty");
+	    
+	    var min = parseInt($qty.attr('data-min'));
+	    if (min=="" || min == "NaN") min = 0;
+	    
+	    if (min && (min==currentVal || currentVal<min)) {
+	    	$qty.val(min); 
+	    } else if (currentVal > 0) {
+	    	$qty.val(currentVal - 1);
+	    }
 	});
 	
 	/* states */
@@ -254,9 +276,14 @@ jQuery(document).ready(function($) {
 	$('.shipping-calculator-button').click(function() {
 		$('.shipping-calculator-form').slideToggle('slow');
 		return false;
-	}); 
+	});
 	
 	// Variations
+	
+	$('.reset_variations').click(function(){
+		$('.variations select').val('').change();
+		return false;
+	}).css('visibility','hidden');
 	
 	//check if two arrays of attributes match
     function variations_match(attrs1, attrs2) {        
@@ -367,6 +394,22 @@ jQuery(document).ready(function($) {
         } else {
         	 $('.product_meta').find('.sku').text('');
         }
+        
+        if (variation.min_qty) {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-min', variation.min_qty).val(variation.min_qty);
+        } else {
+        	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-min');
+        }
+        
+        if (variation.max_qty) {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', variation.max_qty);
+        } else {
+        	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-max');
+        }
+        
+        if (variation.is_virtual=='yes' && variation.is_downloadable=='yes' && woocommerce_params.option_limit_download_qty=='yes') {
+        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', 1);
+        }
 
         $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown
     }
@@ -374,6 +417,7 @@ jQuery(document).ready(function($) {
 	//when one of attributes is changed - check everything to show only valid options
     function check_variations( exclude ) {
 		var all_set = true;
+		var any_set = false;
 		var current_settings = {};
         
 		$('.variations select').each(function(){
@@ -384,8 +428,12 @@ jQuery(document).ready(function($) {
 				current_settings[$(this).attr('name')] = '';
 				
 			} else {
-				if ($(this).val().length == 0) all_set = false;
-
+				if ($(this).val().length == 0) {
+					all_set = false;
+				} else {
+					any_set = true;
+				}
+				
             	// Encode entities
             	value = $(this).val()
 		            .replace(/&/g, '&amp;')
@@ -405,7 +453,7 @@ jQuery(document).ready(function($) {
         if(all_set) {
         	var variation = matching_variations.pop();
         	if (variation) {
-            	$('form input[name=variation_id]').val(variation.variation_id);
+            	$('form input[name=variation_id]').val(variation.variation_id).change();
             	show_variation(variation);
             } else {
             	// Nothing found - reset fields
@@ -414,11 +462,17 @@ jQuery(document).ready(function($) {
         } else {
             update_variation_values(matching_variations);
         }
+        
+        if(any_set) {
+        	if ($('.reset_variations').css('visibility') == 'hidden') $('.reset_variations').css('visibility','visible').hide().fadeIn();
+        } else {
+			$('.reset_variations').css('visibility','hidden');
+		}
     }
 
 	$('.variations select').change(function(){
 		
-		$('form input[name=variation_id]').val('');
+		$('form input[name=variation_id]').val('').change();
         $('.single_variation_wrap').hide();
         $('.single_variation').text('');
 		check_variations();
@@ -570,7 +624,7 @@ jQuery(document).ready(function($) {
 		});
 		$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
 			clearTimeout(updateTimer);
-			updateTimer = setTimeout("update_checkout()", '1000');
+			updateTimer = setTimeout(update_checkout, '1000');
 		});
 		$('select#billing_country, select#billing_state, select#shipping_country, select#shipping_state, #shiptobilling input, .update_totals_on_change').live('change', function(){
 			$('body').trigger('update_checkout');
@@ -614,6 +668,7 @@ jQuery(document).ready(function($) {
 		/* Localisation */
 		var locale_json = woocommerce_params.locale.replace(/&quot;/g, '"');
 		var locale = $.parseJSON( locale_json );
+		var required = ' <abbr class="required" title="' + woocommerce_params.required_text + '">*</abbr>';
 	
 		// Handle locale
 		$('body').bind('country_to_state_changing', function( event, country, wrapper ){
@@ -631,8 +686,23 @@ jQuery(document).ready(function($) {
 				var field = thisform.find('#billing_state_field, #shipping_state_field');
 				
 				if ( thislocale['state']['label'] ) {
-					field.find('label').text( thislocale['state']['label'] );
+
+					field.find('label').html( thislocale['state']['label'] );
+					
+				} 
+				
+				field.find('label abbr').remove();
+
+				if ( typeof thislocale['state']['required'] == 'undefined' || thislocale['state']['required'] == true ) {
+					
+					field.find('label').append( required );
+	
 				}
+				
+			} else {
+				
+				if (field.find('label abbr').size()==0) field.find('label').append( required );
+				
 			}
 			
 			var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
@@ -640,16 +710,47 @@ jQuery(document).ready(function($) {
 				
 			// City Handling
 			if ( thislocale['city'] ) {
+			
 				if ( thislocale['city']['label'] ) {
-					cityfield.find('label').text( thislocale['city']['label'] );
+					
+					cityfield.find('label').html( thislocale['city']['label'] );
+					
+				} 
+				
+				cityfield.find('label abbr').remove();
+				
+				if ( typeof thislocale['city']['required'] == 'undefined' || thislocale['city']['required'] == true ) {
+					
+					cityfield.find('label').append( required );
+	
 				}
+				
+			} else {
+				if (cityfield.find('label abbr').size()==0) cityfield.find('label').append( required );
+				
 			}
 			
 			// Postcode Handling
 			if ( thislocale['postcode'] ) {
+			
 				if ( thislocale['postcode']['label'] ) {
-					postcodefield.find('label').text( thislocale['postcode']['label'] );
+					
+					postcodefield.find('label').html( thislocale['postcode']['label'] );
+					
+				} 
+				
+				postcodefield.find('label abbr').remove();
+
+				if ( typeof thislocale['postcode']['required'] == 'undefined' || thislocale['postcode']['required'] == true ) {
+					
+					postcodefield.find('label').append( required );
+	
 				}
+				
+			} else {
+			
+				if (postcodefield.find('label abbr').size()==0) postcodefield.find('label').append( required );
+				
 			}
 			
 			// Re-order postcode/city

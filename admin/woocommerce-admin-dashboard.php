@@ -9,76 +9,161 @@
 
 // Only hook in admin parts if the user has admin access
 if (current_user_can('manage_woocommerce')) :
-	add_action('right_now_content_table_end', 'woocommerce_content_right_now');
-	add_action('right_now_table_end', 'woocommerce_right_now');
 	add_action('wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
-	add_action('admin_footer', 'woocommmerce_dashboard_sales_js');
+	add_action('admin_footer', 'woocommerce_dashboard_sales_js');
 endif;
 
 /**
- * Right now widget hooks/content
+ * WooCommerce Right Now widget.
+ * Adds a dashboard widget with shop statistics.
  */
-function woocommerce_content_right_now() {
-	
+function woocommerce_dashboard_widget_right_now() {
 	global $woocommerce;
-	?>
-	</table>
-	<p class="sub woocommerce_sub"><?php _e('Shop Content', 'woocommerce'); ?></p>
-	<table>
-		<tr>
-			<td class="first b"><a href="edit.php?post_type=product"><?php
-				$num_posts = wp_count_posts( 'product' );
-				$num = number_format_i18n( $num_posts->publish );
-				echo $num;
-			?></a></td>
-			<td class="t"><a href="edit.php?post_type=product"><?php _e('Products', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="first b"><a href="edit-tags.php?taxonomy=product_cat&post_type=product"><?php
-				echo wp_count_terms('product_cat');
-			?></a></td>
-			<td class="t"><a href="edit-tags.php?taxonomy=product_cat&post_type=product"><?php _e('Product Categories', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="first b"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php
-				echo wp_count_terms('product_tag');
-			?></a></td>
-			<td class="t"><a href="edit-tags.php?taxonomy=product_tag&post_type=product"><?php _e('Product Tags', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="first b"><a href="admin.php?page=woocommerce_attributes"><?php 
-				echo sizeof($woocommerce->get_attribute_taxonomies());
-			?></a></td>
-			<td class="t"><a href="admin.php?page=woocommerce_attributes"><?php _e('Attribute taxonomies', 'woocommerce'); ?></a></td>
-		</tr>
-	<?php
-}
 
-function woocommerce_right_now() {
-	$pending_count 		= get_term_by( 'slug', 'pending', 'shop_order_status' )->count;
-	$completed_count  	= get_term_by( 'slug', 'completed', 'shop_order_status' )->count;
-	$on_hold_count    	= get_term_by( 'slug', 'on-hold', 'shop_order_status' )->count;
-	$processing_count 	= get_term_by( 'slug', 'processing', 'shop_order_status' )->count;
+	$product_count      = wp_count_posts( 'product' );
+	$product_cat_count  = wp_count_terms( 'product_cat' );
+	$product_tag_count  = wp_count_terms( 'product_tag' );
+	$product_attr_count = count( $woocommerce->get_attribute_taxonomies() );
+
+	$pending_count      = get_term_by( 'slug', 'pending', 'shop_order_status' )->count;
+	$completed_count    = get_term_by( 'slug', 'completed', 'shop_order_status' )->count;
+	$on_hold_count      = get_term_by( 'slug', 'on-hold', 'shop_order_status' )->count;
+	$processing_count   = get_term_by( 'slug', 'processing', 'shop_order_status' )->count;
 	?>
-	</table>
-	<p class="sub woocommerce_sub"><?php _e('Orders', 'woocommerce'); ?></p>
-	<table>
-		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=pending"><span class="total-count"><?php echo $pending_count; ?></span></a></td>
-			<td class="last t"><a class="pending" href="edit.php?post_type=shop_order&shop_order_status=pending"><?php _e('Pending', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=on-hold"><span class="total-count"><?php echo $on_hold_count; ?></span></a></td>
-			<td class="last t"><a class="onhold" href="edit.php?post_type=shop_order&shop_order_status=on-hold"><?php _e('On-Hold', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=processing"><span class="total-count"><?php echo $processing_count; ?></span></a></td>
-			<td class="last t"><a class="processing" href="edit.php?post_type=shop_order&shop_order_status=processing"><?php _e('Processing', 'woocommerce'); ?></a></td>
-		</tr>
-		<tr>
-			<td class="b"><a href="edit.php?post_type=shop_order&shop_order_status=completed"><span class="total-count"><?php echo $completed_count; ?></span></a></td>
-			<td class="last t"><a class="complete" href="edit.php?post_type=shop_order&shop_order_status=completed"><?php _e('Completed', 'woocommerce'); ?></a></td>
-		</tr>
+
+	<div class="table table_shop_content">
+		<p class="sub woocommerce_sub"><?php _e( 'Shop Content', 'woocommerce' ); ?></p>
+		<table>
+			<tr class="first">
+
+				<?php
+					$num  = number_format_i18n( $product_count->publish );
+					$text = _n( 'Product', 'Products', intval($product_count->publish), 'woocommerce' );
+					$link = add_query_arg( array( 'post_type' => 'product' ), get_admin_url( null, 'edit.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="first b b-products"><?php echo $num; ?></td>
+				<td class="t products"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $product_cat_count );
+					$text = _n( 'Product Category', 'Product Categories', $product_cat_count, 'woocommerce' );
+					$link = add_query_arg( array( 'taxonomy' => 'product_cat', 'post_type' => 'product' ), get_admin_url( null, 'edit-tags.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="first b b-product_cats"><?php echo $num; ?></td>
+				<td class="t product_cats"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $product_tag_count );
+					$text = _n( 'Product Tag', 'Product Tags', $product_tag_count, 'woocommerce' );
+					$link = add_query_arg( array( 'taxonomy' => 'product_tag', 'post_type' => 'product' ), get_admin_url( null, 'edit-tags.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="first b b-product_tags"><?php echo $num; ?></td>
+				<td class="t product_tags"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $product_attr_count );
+					$text = _n( 'Attribute', 'Attributes', $product_attr_count, 'woocommerce' );
+					$link = add_query_arg( array( 'page' => 'woocommerce_attributes' ), get_admin_url( null, 'admin.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="first b b-attributes"><?php echo $num; ?></td>
+				<td class="t attributes"><?php echo $text; ?></td>
+			</tr>
+
+			<?php do_action( 'woocommerce_right_now_shop_content_table_end' ); ?>
+
+		</table>
+	</div>
+
+	<div class="table table_orders">
+		<p class="sub woocommerce_sub"><?php _e( 'Orders', 'woocommerce' ); ?></p>
+		<table>
+			<tr class="first">
+
+				<?php
+					$num  = number_format_i18n( $pending_count );
+					$text = __( 'Pending', 'woocommerce' );
+					$link = add_query_arg( array( 'post_type' => 'shop_order', 'shop_order_status' => 'pending' ), get_admin_url( null, 'edit.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="b b-pending"><?php echo $num; ?></td>
+				<td class="last t pending"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $on_hold_count );
+					$text = __( 'On-Hold', 'woocommerce' );
+					$link = add_query_arg( array( 'post_type' => 'shop_order', 'shop_order_status' => 'on-hold' ), get_admin_url( null, 'edit.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="b b-on-hold"><?php echo $num; ?></td>
+				<td class="last t on-hold"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $processing_count );
+					$text = __( 'Processing', 'woocommerce' );
+					$link = add_query_arg( array( 'post_type' => 'shop_order', 'shop_order_status' => 'processing' ), get_admin_url( null, 'edit.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="b b-processing"><?php echo $num; ?></td>
+				<td class="last t processing"><?php echo $text; ?></td>
+			</tr>
+
+			<tr>
+				
+				<?php
+					$num  = number_format_i18n( $completed_count );
+					$text = __( 'Completed', 'woocommerce' );
+					$link = add_query_arg( array( 'taxonomy' => 'product_cat', 'post_type' => 'completed' ), get_admin_url( null, 'edit-tags.php' ) );
+					$num  = '<a href="' . $link . '">' . $num  . '</a>';
+					$text = '<a href="' . $link . '">' . $text . '</a>';
+				?>
+
+				<td class="b b-completed"><?php echo $num; ?></td>
+				<td class="last t completed"><?php echo $text; ?></td>
+			</tr>
+
+			<?php do_action( 'woocommerce_right_now_orders_table_end' ); ?>
+
+		</table>
+	</div>
+
+	<div class="versions">
+		<p id="wp-version-message">
+			<?php printf( __( 'You are using <strong>WooCommerce %s</strong>.', 'woocommerce' ), $woocommerce->version ); ?>
+		</p>
+	</div>
 	<?php
 }
 
@@ -87,15 +172,16 @@ function woocommerce_right_now() {
  */
 function woocommerce_init_dashboard_widgets() {
 
-	global $current_month_offset;
+	global $current_month_offset, $the_month_num, $the_year;
 						
-	$current_month_offset = (int) date('m');
+	$current_month_offset = 0;
 	
 	if (isset($_GET['month'])) $current_month_offset = (int) $_GET['month'];
 	
-	$sales_heading = '';
+	$the_month_num 	= date('n', strtotime('NOW '.($current_month_offset).' MONTH'));
+	$the_year 		= date('Y', strtotime('NOW '.($current_month_offset).' MONTH'));
 	
-	$the_month_num = date('n', strtotime('NOW '.($current_month_offset-1).' MONTH'));
+	$sales_heading = '';
 	
 	if ($the_month_num!=date('m')) : 
 		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
@@ -103,15 +189,16 @@ function woocommerce_init_dashboard_widgets() {
 	
 	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
-	wp_add_dashboard_widget('woocommmerce_dashboard_sales', $sales_heading, 'woocommmerce_dashboard_sales');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_orders', __('WooCommerce recent orders', 'woocommerce'), 'woocommmerce_dashboard_recent_orders');
-	wp_add_dashboard_widget('woocommmerce_dashboard_recent_reviews', __('WooCommerce recent reviews', 'woocommerce'), 'woocommmerce_dashboard_recent_reviews');
+	wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
+	wp_add_dashboard_widget('woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales');
+	wp_add_dashboard_widget('woocommerce_dashboard_recent_orders', __('WooCommerce Recent Orders', 'woocommerce'), 'woocommerce_dashboard_recent_orders');
+	wp_add_dashboard_widget('woocommerce_dashboard_recent_reviews', __('WooCommerce Recent Reviews', 'woocommerce'), 'woocommerce_dashboard_recent_reviews');
 } 
 				     		
 /**
  * Recent orders widget
  */
-function woocommmerce_dashboard_recent_orders() {
+function woocommerce_dashboard_recent_orders() {
 
 	$args = array(
 	    'numberposts'     => 8,
@@ -143,7 +230,7 @@ function woocommmerce_dashboard_recent_orders() {
 /**
  * Recent reviews widget
  */
-function woocommmerce_dashboard_recent_reviews() {
+function woocommerce_dashboard_recent_reviews() {
 	global $wpdb;
 	$comments = $wpdb->get_results("SELECT *, SUBSTRING(comment_content,1,100) AS comment_excerpt
 	FROM $wpdb->comments
@@ -182,10 +269,10 @@ function woocommmerce_dashboard_recent_reviews() {
  * Orders this month filter function
  */
 function orders_this_month( $where = '' ) {
-	global $current_month_offset;
+	global $the_month_num, $the_year;
 	
-	$month = $current_month_offset;
-	$year = (int) date('Y');
+	$month = $the_month_num;
+	$year = (int) $the_year;
 	
 	$first_day = strtotime("{$year}-{$month}-01");
 	//$last_day = strtotime('-1 second', strtotime('+1 month', $first_day));
@@ -203,7 +290,7 @@ function orders_this_month( $where = '' ) {
 /**
  * Sales widget
  */
-function woocommmerce_dashboard_sales() {
+function woocommerce_dashboard_sales() {
 		
 	?><div id="placeholder" style="width:100%; height:300px; position:relative;"></div><?php
 }
@@ -211,7 +298,7 @@ function woocommmerce_dashboard_sales() {
 /**
  * Sales widget javascript
  */
-function woocommmerce_dashboard_sales_js() {
+function woocommerce_dashboard_sales_js() {
 	
 	global $woocommerce;
 	
@@ -219,7 +306,7 @@ function woocommmerce_dashboard_sales_js() {
 	
 	if (!$screen || $screen->id!=='dashboard') return;
 	
-	global $current_month_offset;
+	global $current_month_offset, $the_month_num, $the_year;
 	
 	// Get orders to display in widget
 	add_filter( 'posts_where', 'orders_this_month' );
@@ -246,13 +333,13 @@ function woocommmerce_dashboard_sales_js() {
 	$order_amounts = array();
 		
 	// Blank date ranges to begin
-	$month = $current_month_offset;
-	$year = (int) date('Y');
+	$month = $the_month_num;
+	$year = (int) $the_year;
 	
 	$first_day = strtotime("{$year}-{$month}-01");
 	$last_day = strtotime('-1 second', strtotime('+1 month', $first_day));
 	
-	if ((date('m') - $current_month_offset)==0) :
+	if ((date('m') - $the_month_num)==0) :
 		$up_to = date('d', strtotime('NOW'));
 	else :
 		$up_to = date('d', $last_day);

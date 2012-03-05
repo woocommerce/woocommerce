@@ -17,7 +17,7 @@ function get_woocommerce_cart( $atts ) {
 function woocommerce_cart( $atts ) {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 	
 	if (!defined('WOOCOMMERCE_CART')) define('WOOCOMMERCE_CART', true);
 	
@@ -52,7 +52,8 @@ function woocommerce_cart( $atts ) {
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 		
 		else :
-		
+			
+			$woocommerce->customer->set_to_base();
 			$woocommerce->customer->set_shipping_to_base();
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 			

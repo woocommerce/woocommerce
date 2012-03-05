@@ -34,18 +34,18 @@ class WC_Checkout {
 			'account_username' => array( 
 				'type' => 'text', 
 				'label' => __('Account username', 'woocommerce'), 
-				'placeholder' => __('Username', 'woocommerce') 
+				'placeholder' => _x('Username', 'placeholder', 'woocommerce') 
 				),
 			'account_password' => array( 
 				'type' => 'password', 
 				'label' => __('Account password', 'woocommerce'), 
-				'placeholder' => __('Password', 'woocommerce'),
+				'placeholder' => _x('Password', 'placeholder', 'woocommerce'),
 				'class' => array('form-row-first')
 				),
 			'account_password-2' => array( 
 				'type' => 'password', 
 				'label' => __('Account password', 'woocommerce'), 
-				'placeholder' => __('Password', 'woocommerce'),
+				'placeholder' => _x('Password', 'placeholder', 'woocommerce'),
 				'class' => array('form-row-last'), 
 				'label_class' => array('hidden')
 				)
@@ -55,7 +55,7 @@ class WC_Checkout {
 				'type' => 'textarea', 
 				'class' => array('notes'), 
 				'label' => __('Order Notes', 'woocommerce'), 
-				'placeholder' => __('Notes about your order, e.g. special notes for delivery.', 'woocommerce') 
+				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce') 
 				)
 			);
 		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
@@ -269,8 +269,8 @@ class WC_Checkout {
 	                // if there are no errors, let's create the user account
 					if ( !$reg_errors->get_error_code() ) :
 	
-		                $user_pass = $this->posted['account_password'];
-		                $user_id = wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
+		                $user_pass 	= esc_attr( $this->posted['account_password'] );
+		                $user_id 	= wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
 		               
 		               if ( !$user_id ) :
 		                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you... please contact us if you continue to have problems.', 'woocommerce') );
@@ -282,7 +282,7 @@ class WC_Checkout {
 	
 	                    // send the user a confirmation and their login details
 	                    $mailer = $woocommerce->mailer();
-						$mailer->customer_new_account( $user_id, $password );
+						$mailer->customer_new_account( $user_id, $user_pass );
 	
 	                    // set the WP login cookie
 	                    $secure_cookie = is_ssl() ? true : false;
@@ -302,6 +302,7 @@ class WC_Checkout {
 					'post_type' 	=> 'shop_order',
 					'post_title' 	=> 'Order &ndash; '.date('F j, Y @ h:i A'),
 					'post_status' 	=> 'publish',
+					'ping_status'	=> 'closed',
 					'post_excerpt' 	=> $this->posted['order_comments'],
 					'post_author' 	=> 1
 				);
@@ -480,6 +481,9 @@ class WC_Checkout {
 				// Order is saved
 				do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
 				
+				// Prevent timeout
+				@set_time_limit(0); 
+				
 				// Process payment
 				if ($woocommerce->cart->needs_payment()) :
 					
@@ -498,7 +502,7 @@ class WC_Checkout {
 							echo json_encode( $result );
 							exit;
 						else :
-							wp_safe_redirect( $result['redirect'] );
+							wp_redirect( $result['redirect'] );
 							exit;
 						endif;
 						
@@ -550,8 +554,11 @@ class WC_Checkout {
 		global $woocommerce;
 		
 		if (isset( $_POST[$input] ) && !empty($_POST[$input])) :
+		
 			return esc_attr($_POST[$input]);
+			
 		elseif (is_user_logged_in()) :
+		
 			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
 			
 			$current_user = wp_get_current_user();
@@ -560,10 +567,22 @@ class WC_Checkout {
 			endif;
 			
 		else :
-
-			if ($input == "billing_country") :
-				return $woocommerce->countries->get_base_country();
-			endif;
+		
+			$default_country = apply_filters('default_checkout_country', $woocommerce->countries->get_base_country());
+			$default_state = apply_filters('default_checkout_state', $woocommerce->countries->get_base_state());
+		
+			// If we are here then the user is not logged in - try to use the session data, otherwise default to base
+			if ($input == "billing_country") return ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $default_country;
+			
+			if ($input == "billing_state") return ($woocommerce->customer->get_state()) ? $woocommerce->customer->get_state() : $default_state;
+			
+			if ($input == "billing_postcode") return ($woocommerce->customer->get_postcode()) ? $woocommerce->customer->get_postcode() : '';
+			
+			if ($input == "shipping_country") return ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $default_country;
+			
+			if ($input == "shipping_state") return ($woocommerce->customer->get_shipping_state()) ? $woocommerce->customer->get_shipping_state() : $default_state;
+			
+			if ($input == "shipping_postcode") return ($woocommerce->customer->get_shipping_postcode()) ? $woocommerce->customer->get_shipping_postcode() : '';
 			
 		endif;
 	}

@@ -17,13 +17,13 @@ function get_woocommerce_checkout( $atts ) {
 function woocommerce_checkout( $atts ) {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 
 	if (sizeof($woocommerce->cart->get_cart())==0) return;
 	
 	do_action('woocommerce_check_cart_items');
 	
-	if ( $woocommerce->error_count()>0 ) {
+	if ( !isset($_POST) && $woocommerce->error_count()>0 ) {
 		
 		woocommerce_get_template('checkout/cart-errors.php');
 		

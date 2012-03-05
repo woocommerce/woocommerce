@@ -12,9 +12,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 	<table class="shop_table">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woocommerce'); ?></th>
-				<th><?php _e('Qty', 'woocommerce'); ?></th>
-				<th><?php _e('Totals', 'woocommerce'); ?></th>
+				<th class="product-name"><?php _e('Product', 'woocommerce'); ?></th>
+				<th class="product-quantity"><?php _e('Qty', 'woocommerce'); ?></th>
+				<th class="product-total"><?php _e('Totals', 'woocommerce'); ?></th>
 			</tr>
 		</thead>
 		<tfoot>
@@ -76,7 +76,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							echo '<select name="shipping_method" id="shipping_method">';
 							foreach ( $available_methods as $method ) {
 								echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
-								echo $method->full_label;
+								echo strip_tags( $method->full_label );
 								echo '</option>';
 							}
 							echo '</select>';
@@ -180,12 +180,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							echo '
 								<tr>
 									<td class="product-name">'.$_product->get_title().$woocommerce->cart->get_item_data( $values ).'</td>
-									<td>'.$values['quantity'].'</td>
-									<td>' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
+									<td class="product-quantity">'.$values['quantity'].'</td>
+									<td class="product-total">' . $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ) . '</td>
 								</tr>';
 						endif;
 					endforeach; 
 				endif;
+
+				do_action( 'woocommerce_cart_contents_review_order' );
 			?>
 		</tbody>
 	</table>

@@ -139,6 +139,11 @@ class WC_Order {
 		$this->status = (isset($terms[0])) ? $terms[0] : 'pending';
 	}
 	
+	function key_is_valid( $key ) {
+		if ($key==$this->order_key) return true; 
+		return false;
+	}
+	
 	function get_formatted_billing_address() {
 		if (!$this->formatted_billing_address) :
 			global $woocommerce;
@@ -511,7 +516,7 @@ class WC_Order {
 	}
 	
 	/** Output items for display in html emails */
-	function email_order_items_table( $show_download_links = false, $show_sku = false ) {
+	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ) ) {
 
 		$return = '';
 		
@@ -519,7 +524,12 @@ class WC_Order {
 			
 			$_product = $this->get_product_from_item( $item );
 			
-			$file = $sku = $variation = '';
+			$file = $sku = $variation = $image = '';
+			
+			if ($show_image) :
+				$src = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail');
+				$image = apply_filters('woocommerce_order_product_image', '<img src="'.$src[0].'" alt="Product Image" height="'.$image_size[1].'" width="'.$image_size[0].'" style="vertical-align:middle; margin-right: 10px;" />', $_product);
+			endif;
 			
 			if ($show_sku && $_product->get_sku()) :
 				$sku = ' (#' . $_product->get_sku() . ')';
@@ -541,9 +551,9 @@ class WC_Order {
 			endif;
 			
 			$return .= '<tr>
-				<td style="text-align:left; border: 1px solid #eee;">' . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
-				<td style="text-align:left; border: 1px solid #eee;">'.$item['qty'].'</td>
-				<td style="text-align:left; border: 1px solid #eee;">';
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'. $image . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'.$item['qty'].'</td>
+				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">';
 					
 					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
 						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
@@ -556,8 +566,17 @@ class WC_Order {
 				</td>
 			</tr>';
 			
+			// Show any purchase notes
+			if ($show_purchase_note) :
+				if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
+					$return .= '<tr><td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
+				endif;
+			endif;
+			
 		endforeach;	
-		
+
+		$return = apply_filters( 'woocommerce_email_order_items_table', $return );
+
 		return $return;	
 		
 	}
@@ -622,29 +641,19 @@ class WC_Order {
 	 */
 	function add_order_note( $note, $is_customer_note = 0 ) {
 		
-		$comment_post_ID = $this->id;
-		$comment_author = 'WooCommerce';
-		$comment_author_email = 'woocommerce@' . str_replace('www.', '', str_replace('http://', '', site_url()));
-		$comment_author_url = '';
-		$comment_content = $note;
-		$comment_type = '';
-		$comment_parent = 0;
+		$comment_post_ID 		= $this->id;
+		$comment_author 		= 'WooCommerce';
+		$comment_author_email 	= 'woocommerce@' . str_replace('www.', '', $_SERVER['HTTP_HOST']);
+		$comment_author_url 	= '';
+		$comment_content 		= esc_attr( $note );
+		$comment_agent			= 'WooCommerce';
+		$commentdata 			= compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent');
 		
-		$commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID');
-		
-		$commentdata['comment_author_IP'] = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
-		$commentdata['comment_agent']     = substr($_SERVER['HTTP_USER_AGENT'], 0, 254);
-	
-		$commentdata['comment_date']     = current_time('mysql');
-		$commentdata['comment_date_gmt'] = current_time('mysql', 1);
-	
 		$comment_id = wp_insert_comment( $commentdata );
 		
 		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
 		
-		if ($is_customer_note) :
-			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
-		endif;
+		if ($is_customer_note) do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
 		
 		return $comment_id;
 		
@@ -656,36 +665,31 @@ class WC_Order {
 	 * @param   string	$new_status		Status to change the order to
 	 * @param   string	$note			Optional note to add
 	 */
-	function update_status( $new_status, $note = '' ) {
+	function update_status( $new_status_slug, $note = '' ) {
 		
 		if ($note) $note .= ' ';
-	
-		$new_status = get_term_by( 'slug', sanitize_title( $new_status ), 'shop_order_status');
-		if ($new_status) :
 		
-			wp_set_object_terms($this->id, $new_status->slug, 'shop_order_status');
+		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status');
+		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status');
+		if ($new_status) {
 			
-			if ( $this->status != $new_status->slug ) :
+			wp_set_object_terms($this->id, array( $new_status->slug ), 'shop_order_status', false);
+			
+			if ( $this->status != $new_status->slug ) {
 				// Status was changed
-				do_action( 'woocommerce_order_status_'.$new_status->slug, $this->id );
-				do_action( 'woocommerce_order_status_'.$this->status.'_to_'.$new_status->slug, $this->id );
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), $this->status, $new_status->slug ) );
-				clean_term_cache( '', 'shop_order_status' );
-				
+				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
+				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
+				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __($old_status->name, 'woocommerce'), __($new_status->name, 'woocommerce') ) );
+
 				// Date
-				if ($new_status->slug=='completed') :
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-				endif;
+				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
 				
 				// Sales
-				if ($this->status == 'on-hold' && ($new_status->slug=='processing' || $new_status->slug=='completed')) :
-					$this->record_product_sales();
-				endif;
+				if ($new_status->slug=='processing' || $new_status->slug=='completed' || $new_status->slug=='on-hold') $this->record_product_sales();
 				
-			endif;
-		
-		endif;
-		
+			}
+
+		}
 	}
 	
 	/**
@@ -835,7 +839,9 @@ class WC_Order {
 		
 		foreach ($comments as $comment) :
 			$is_customer_note = get_comment_meta($comment->comment_ID, 'is_customer_note', true);
-			if ($is_customer_note) $notes[] = $comment;
+			$comment->comment_content = make_clickable($comment->comment_content);
+			if ($is_customer_note) 
+				$notes[] = $comment;
 		endforeach;
 		
 		add_filter('comments_clauses', 'woocommerce_exclude_order_comments');
@@ -939,7 +945,6 @@ class order_item_meta {
 /** Depreciated */
 class woocommerce_order extends WC_Order {
 	public function __construct( $id = '' ) { 
-		// _deprecated_function( 'woocommerce_order', '1.4', 'WC_Order()' ); Depreciated, but leaving uncommented until all gateways are updated
 		parent::__construct( $id ); 
 	} 
 }

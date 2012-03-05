@@ -20,7 +20,7 @@ function get_woocommerce_pay( $atts ) {
 function woocommerce_pay() {
 	global $woocommerce;
 	
-	woocommerce_nocache();
+	$woocommerce->nocache();
 	
 	do_action('before_woocommerce_pay');
 	

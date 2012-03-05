@@ -20,7 +20,7 @@ function woocommerce_add_category_thumbnail_field() {
 	?>
 	<div class="form-field">
 		<label><?php _e('Thumbnail', 'woocommerce'); ?></label>
-		<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png' ?>" width="60px" height="60px" /></div>
+		<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /></div>
 		<div style="line-height:60px;">
 			<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" />
 			<button type="submit" class="upload_image_button button"><?php _e('Upload/Add image', 'woocommerce'); ?></button>
@@ -55,7 +55,7 @@ function woocommerce_add_category_thumbnail_field() {
 			});
 			
 			jQuery('.remove_image_button').live('click', function(){
-				jQuery('#product_cat_thumbnail img').attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
+				jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 				jQuery('#product_cat_thumbnail_id').val('');
 				return false;
 			});
@@ -74,7 +74,7 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 	if ($thumbnail_id) :
 		$image = wp_get_attachment_url( $thumbnail_id );
 	else :
-		$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+		$image = woocommerce_placeholder_img_src();
 	endif;
 	?>
 	<tr class="form-field">
@@ -115,7 +115,7 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 				});
 				
 				jQuery('.remove_image_button').live('click', function(){
-					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo $woocommerce->plugin_url().'/assets/images/placeholder.png'; ?>');
+					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
 					return false;
 				});
@@ -216,7 +216,7 @@ function woocommerce_fix_edit_posts_per_page( $per_page, $post_type ) {
  		if ($thumbnail_id) :
  			$image = wp_get_attachment_url( $thumbnail_id );
  		else :
- 			$image = $woocommerce->plugin_url().'/assets/images/placeholder.png';
+ 			$image = woocommerce_placeholder_img_src();
  		endif;
  		
  		$columns .= '<img src="'.$image.'" alt="Thumbnail" class="wp-post-image" height="48" width="48" />';
