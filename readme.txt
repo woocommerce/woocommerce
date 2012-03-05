@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Download expiry was backwards
 * Fix styling of new attribute
 * When passing aggregate orders to paypal, include item names
+* Localisation improvements
 
 = 1.5 - 01/03/2012 =
 * Quick edit products

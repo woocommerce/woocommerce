@@ -36,7 +36,7 @@ function woocommerce_order_downloads_meta_box() {
 		    		<div class="wc-metabox closed">
 						<h3 class="fixed">
 							<button type="button" rel="<?php echo $download->product_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
-							<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
+							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
 							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title() . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count), $download->download_count); ?></strong>
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
@@ -152,7 +152,7 @@ function woocommerce_order_downloads_meta_box() {
 					jQuery('.order_download_permissions .wc-metaboxes').append('<div class="wc-metabox closed">\
 						<h3 class="fixed">\
 							<button type="button" rel="' + new_download.download_id + '" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>\
-							<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>\
+							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
 							<strong>#' + new_download.download_id + ' &mdash; ' + new_download.title + '</strong>\
 						</h3>\
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">\

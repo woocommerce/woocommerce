@@ -91,7 +91,7 @@ function variable_product_type_options() {
 					<div class="woocommerce_variation wc-metabox closed">
 						<h3 class="fixed">
 							<button type="button" class="remove_variation button" rel="<?php echo $variation->ID; ?>"><?php _e('Remove', 'woocommerce'); ?></button>
-							<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
+							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
 							<strong>#<?php echo $variation->ID; ?> &mdash; </strong>
 							<?php
 								foreach ($attributes as $attribute) :
@@ -269,7 +269,7 @@ function variable_product_type_options() {
 				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation wc-metabox">\
 					<h3 class="handle">\
 						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php _e('Remove', 'woocommerce'); ?></button>\
-						<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>\
+						<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
 						<strong>#' + variation_id + ' &mdash; </strong>\
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
@@ -383,11 +383,11 @@ function variable_product_type_options() {
 					}
 					
 					if (count==1) {
-						alert( count + ' <?php _e("variation added"); ?>');
+						alert( count + ' <?php _e("variation added", 'woocommerce'); ?>');
 					} else if (count==0 || count>1) {
-						alert( count + ' <?php _e("variations added"); ?>');
+						alert( count + ' <?php _e("variations added", 'woocommerce'); ?>');
 					} else {
-						alert('<?php _e("No variations added"); ?>');
+						alert('<?php _e("No variations added", 'woocommerce'); ?>');
 					}
 					
 					jQuery('#variable_product_options').unblock();

@@ -269,7 +269,7 @@ function woocommerce_product_data_box() {
 				    		<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
 								<h3>
 									<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
-									<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
+									<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
 									<strong class="attribute_name"><?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?></strong>
 								</h3>
 								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
@@ -345,7 +345,7 @@ function woocommerce_product_data_box() {
 			    		<div class="woocommerce_attribute wc-metabox closed" rel="<?php echo $position; ?>">
 							<h3>
 								<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
-								<div class="handlediv" title="<?php _e('Click to toggle'); ?>"></div>
+								<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
 								<strong class="attribute_name"><?php echo esc_attr( $attribute['name'] ); ?></strong>
 							</h3>
 							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">

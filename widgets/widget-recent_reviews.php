@@ -82,7 +82,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 				
 				echo $rating_html;
 				
-				echo sprintf(_x('by %1$s', 'woocommerce'), get_comment_author()) . '</li>';
+				echo sprintf(_x('by %1$s', 'by comment author', 'woocommerce'), get_comment_author()) . '</li>';
 				
 			endforeach;
 
