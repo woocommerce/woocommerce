@@ -159,6 +159,13 @@ function woocommerce_wp_text_input( $field ) {
 	echo '</p>';
 }
 
+function woocommerce_wp_hidden_input( $field ) {
+	global $thepostid, $post;
+	if (!$thepostid) $thepostid = $post->ID;
+	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	echo '<input type="hidden" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" /> ';
+}
+
 function woocommerce_wp_textarea_input( $field ) {
 	global $thepostid, $post;
 	
