@@ -28,6 +28,8 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		// Define user set variables
 		$this->enabled		= $this->settings['enabled'];
 		$this->title		= $this->settings['title'];
+		$this->availability	= $this->settings['availability'];
+		$this->countries	= $this->settings['countries'];
 		
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 	}
@@ -104,9 +106,9 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 			endif;
 		endif; 
 		
-		if (is_array($ship_to_countries)) :
-			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries)) return false;
-		endif;
+		if (is_array($ship_to_countries))
+			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+				return false;
 		
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
     } 

@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix styling of new attribute
 * When passing aggregate orders to paypal, include item names
 * Localisation improvements
+* Fix local method availability
 
 = 1.5 - 01/03/2012 =
 * Quick edit products
