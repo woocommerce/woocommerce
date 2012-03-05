@@ -113,10 +113,6 @@ function woocommerce_admin_init() {
 		
 		if (in_array($typenow, array('product', 'shop_coupon', 'shop_order'))) add_action('admin_print_styles', 'woocommerce_admin_help_tab');
 		
-	} elseif ( $pagenow=='edit-tags.php' ) {
-	
-		include_once( 'woocommerce-admin-taxonomies.php' );
-		
 	} elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) {
 	
 		include_once( 'woocommerce-admin-users.php' );
@@ -129,6 +125,7 @@ include_once( 'post-types/shop_coupon.php' );
 include_once( 'post-types/shop_order.php' );
 include_once( 'woocommerce-admin-hooks.php' );
 include_once( 'woocommerce-admin-functions.php' );
+include_once( 'woocommerce-admin-taxonomies.php' );
 
 /**
  * Includes for admin pages - only load functions when needed
