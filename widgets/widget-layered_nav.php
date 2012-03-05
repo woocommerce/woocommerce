@@ -155,7 +155,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				
 		global $_chosen_attributes, $woocommerce, $_attributes_array;
 
-		if ( !is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' ) && (sizeof($_attributes_array)>0 && !is_tax($_attributes_array )) ) return;
+		if ( !is_post_type_archive('product') && !is_tax( array_merge( $_attributes_array, array('product_cat', 'product_tag') ) ) ) return;
 		
 		$current_term 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->term_id : '';
 		$current_tax 	= ($_attributes_array && is_tax($_attributes_array)) ? get_queried_object()->taxonomy : '';
@@ -182,7 +182,8 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 			echo $before_widget . $before_title . $title . $after_title;
 			
 			// Force found when option is selected - do not force found on taxonomy attributes
-			if ((!$_attributes_array || !is_tax($_attributes_array)) && is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
+			if ( !$_attributes_array || !is_tax($_attributes_array) )
+				if (is_array($_chosen_attributes) && array_key_exists($taxonomy, $_chosen_attributes)) $found = true;
 			
 			if ($display_type=='dropdown') { 
 			

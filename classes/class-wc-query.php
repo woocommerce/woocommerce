@@ -27,19 +27,16 @@ class WC_Query {
 	 */
 	function pre_get_posts( $q ) {
 
-		global $_attributes_array;
+		global $woocommerce;
 
 		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
 	    if 	( 
-	    		( !$q->is_main_query() ) || (
+	    		!$q->is_main_query() || (
 	    			!$q->is_post_type_archive( 'product' ) 
-					&& !$q->is_tax( 'product_cat' ) 
-	    			&& !$q->is_tax( 'product_tag' ) 
-					&& ( $_attributes_array && !$q->is_tax( $_attributes_array ) )
-	    		) 
+					&& !$q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) )
+				)
 	    	) 
 	    return;
-
 	    
 	    $this->product_query( $q );
 	    

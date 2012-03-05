@@ -1151,6 +1151,20 @@ class Woocommerce {
 		endif;
 	}
 	
+	/**
+	 * Get an array of product attribute taxonomies
+	 */
+	function get_attribute_taxonomy_names() {
+		$taxonomy_names = array();
+		$attribute_taxonomies = $this->get_attribute_taxonomies();  
+		if ( $attribute_taxonomies ) {
+			foreach ($attribute_taxonomies as $tax) {
+				$taxonomy_names[] = $this->attribute_taxonomy_name( strtolower(sanitize_title($tax->attribute_name)) );  
+			}
+		}
+		return $taxonomy_names;
+	}
+	
 	/** Coupon Helpers ********************************************************/
 		
 	/**
