@@ -104,7 +104,23 @@ function clearPlaceholdersBeforeSubmit(form){form.find(':input[placeholder]').ea
  */
 jQuery(function(){
 
-    jQuery(".tips, .help_tip").tipTip({
+	// Live validation
+	jQuery('body').on(
+		'keyup', 
+		'.wc_input_price',
+		function() {
+			var $this = jQuery(this);
+			var value = jQuery(this).val();
+			if ( value !== '' && !jQuery.isNumeric( value ) ) {
+				$this.addClass('wc-error');
+			} else {
+				$this.removeClass('wc-error');
+			}
+		}
+	).keyup();
+	
+	// Tooltips
+	jQuery(".tips, .help_tip").tipTip({
     	'attribute' : 'tip',
     	'fadeIn' : 50,
     	'fadeOut' : 50

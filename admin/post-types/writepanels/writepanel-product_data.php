@@ -69,10 +69,10 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group pricing show_if_simple show_if_external">';
 			
 				// Price
-				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'label' => __('Regular Price', 'woocommerce') . ' ('.get_woocommerce_currency_symbol().')' ) );
+				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __('Regular Price', 'woocommerce') . ' ('.get_woocommerce_currency_symbol().')' ) );
 				
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'label' => __('Sale Price', 'woocommerce') . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __('Schedule', 'woocommerce') . '</a>' ) );
+				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __('Sale Price', 'woocommerce') . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __('Schedule', 'woocommerce') . '</a>' ) );
 						
 				// Special Price date range
 				$field = array( 'id' => '_sale_price_dates', 'label' => __('Sale Price Dates', 'woocommerce') );
