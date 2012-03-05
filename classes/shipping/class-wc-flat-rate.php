@@ -404,8 +404,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	               				?>\
 	               			</select>\
 	               		</td>\
-	                    <td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
-	                    <td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="<?php _e('0.00', 'woocommerce'); ?>" size="4" /></td>\
+	                    <td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" /></td>\
+	                    <td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="0.00" size="4" /></td>\
                     </tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
 					
 					return false;

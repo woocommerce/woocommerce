@@ -364,19 +364,19 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 						
 						<td class="quantity" width="1%">
-							<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="<?php _e('0', 'woocommerce'); ?>" value="<?php echo esc_attr( $item['qty'] ); ?>" size="2" class="quantity" />
+							<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="2" class="quantity" />
 						</td>
 						
 						<td class="line_subtotal" width="1%">
-							<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_subtotal[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_subtotal'])) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
+							<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_subtotal[<?php echo $loop; ?>]" placeholder="0.00" value="<?php if (isset($item['line_subtotal'])) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
 							
-							<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_subtotal_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_subtotal_tax'])) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></label>
+							<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_subtotal_tax[<?php echo $loop; ?>]" placeholder="0.00" value="<?php if (isset($item['line_subtotal_tax'])) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></label>
 						</td>
 						
 						<td class="line_total" width="1%">
-							<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_total[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_total'])) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
+							<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_total[<?php echo $loop; ?>]" placeholder="0.00" value="<?php if (isset($item['line_total'])) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
 							
-							<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="<?php if (isset($item['line_tax'])) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
+							<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_tax[<?php echo $loop; ?>]" placeholder="0.00" value="<?php if (isset($item['line_tax'])) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
 						</td>
 						
 					</tr>

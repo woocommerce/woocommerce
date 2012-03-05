@@ -485,7 +485,7 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<label>  
 				    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
 				    <span class="input-text-wrap">  
-						<input type="text" name="_weight" class="text weight" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="">
+						<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
 					</span> 
 				</label>
 				<br class="clear" />
@@ -708,7 +708,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					</span> 
 				</label>
 				<label class="alignright">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php _e('0.00', 'woocommerce'); ?>" value="">
+					<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
 				</label>
 			</div>
 			<div class="inline-edit-group dimensions">

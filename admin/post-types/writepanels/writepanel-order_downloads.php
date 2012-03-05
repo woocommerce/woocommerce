@@ -37,7 +37,7 @@ function woocommerce_order_downloads_meta_box() {
 						<h3 class="fixed">
 							<button type="button" rel="<?php echo $download->product_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
-							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title() . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count), $download->download_count); ?></strong>
+							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title() . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count, 'woocommerce'), $download->download_count); ?></strong>
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 							<tbody>	
