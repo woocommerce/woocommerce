@@ -91,7 +91,7 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 		<?php echo $after_widget; ?>
 <?php
 		// Reset the global $the_post as this query will have stomped on it
-		//wp_reset_postdata();
+		wp_reset_query();
 
 		endif;
 
