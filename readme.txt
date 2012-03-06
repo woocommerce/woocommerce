@@ -157,6 +157,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix local method availability
 * Show order even if free
 * Removed duplicate order on tracking page
+* Improved coupon page
+* Added option to limit coupons to a category
 
 = 1.5 - 01/03/2012 =
 * Quick edit products
