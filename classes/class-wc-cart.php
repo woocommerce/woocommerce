@@ -562,7 +562,9 @@ class WC_Cart {
 		 * Function to apply discounts to a product and get the discounted price (before tax is applied)
 		 */
 		function get_discounted_price( $values, $price, $add_totals = false ) {
-	
+			
+			if (!$price) return $price;
+			
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
 				$coupon = new WC_Coupon( $code );
 				
@@ -649,8 +651,11 @@ class WC_Cart {
 							 */
 							
 							// Get item discount by dividing item cost by subtotal to get a %
-							$discount_percent = ($values['data']->get_price_excluding_tax()*$values['quantity']) / $this->subtotal_ex_tax;
-							
+							if ($this->subtotal_ex_tax) 
+								$discount_percent = ($values['data']->get_price_excluding_tax()*$values['quantity']) / $this->subtotal_ex_tax;
+							else
+								$discount_percent = 0;
+								
 							// Use pence to help prevent rounding errors
 							$coupon_amount_pence = $coupon->amount * 100;
 							
@@ -699,7 +704,7 @@ class WC_Cart {
 				endif;
 			endforeach;
 			
-			return apply_filters( 'woocommerce_get_discounted_price_', $price, $values, $this );
+			return apply_filters( 'woocommerce_get_discounted_price', $price, $values, $this );
 		}
 		
 		/** 
