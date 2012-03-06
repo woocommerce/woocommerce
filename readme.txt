@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Added option to limit coupons to a category
 * Hooks for locate template functions (Thanks Lucas)
 * Better language loading (GeertDD and deckerweb #win)
+* Fix for grouped product from price
 
 = 1.5 - 01/03/2012 =
 * Quick edit products

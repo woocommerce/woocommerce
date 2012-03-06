@@ -535,8 +535,8 @@ class WC_Product {
 			
 			$child_prices = array_unique( $child_prices );
 			
-			if ( ! empty( $all_prices ) ) {
-				$min_price = min( $all_prices );
+			if ( ! empty( $child_prices ) ) {
+				$min_price = min( $child_prices );
 			} else {
 				$min_price = '';
 			}
