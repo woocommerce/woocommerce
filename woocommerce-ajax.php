@@ -816,6 +816,76 @@ function woocommerce_delete_order_note() {
 }
 
 /**
+ * Search for products and return json
+ */
+add_action('wp_ajax_woocommerce_json_search_products', 'woocommerce_json_search_products');
+
+function woocommerce_json_search_products() {
+	
+	check_ajax_referer( 'search-products', 'security' );
+	
+	$term = (string) urldecode(stripslashes(strip_tags($_GET['term'])));
+	
+	if (empty($term)) die();
+	
+	if (is_numeric($term)) {
+		
+		$args = array(
+			'post_type'			=> 'product',
+			'post_status'	 	=> 'publish',
+			'posts_per_page' 	=> -1,
+			'post__in' 			=> array(0, $term),
+			'fields'			=> 'ids'
+		);
+		
+		$posts = get_posts( $args );
+		
+	} else {
+	
+		$args = array(
+			'post_type'			=> array('product', 'product_variation'),
+			'post_status' 		=> 'publish',
+			'posts_per_page' 	=> -1,
+			's' 				=> $term,
+			'fields'			=> 'ids'
+		);
+		
+		$args2 = array(
+			'post_type'			=> array('product', 'product_variation'),
+			'post_status' 		=> 'publish',
+			'posts_per_page' 	=> -1,
+			'meta_query' 		=> array(
+				array(
+				'key' 	=> '_sku',
+				'value' => $term,
+				'compare' => 'LIKE'
+				)
+			),
+			'fields'			=> 'ids'
+		);
+		
+		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ) ));
+	
+	}
+	
+	$found_products = array();
+
+	if ($posts) foreach ($posts as $post) {
+		
+		$SKU = get_post_meta($post, '_sku', true);
+		
+		if (isset($SKU) && $SKU) $SKU = ' (SKU: ' . $SKU . ')';
+		
+		$found_products[$post] = get_the_title($post) . $SKU;
+		
+	}
+	
+	echo json_encode( $found_products );
+	
+	die();
+}
+
+/**
  * Search for products for upsells/crosssells
  */
 add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');

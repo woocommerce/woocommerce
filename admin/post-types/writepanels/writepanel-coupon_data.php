@@ -25,7 +25,9 @@ function woocommerce_coupon_data_meta_box($post) {
 	</style>
 	<div id="coupon_options" class="panel woocommerce_options_panel">
 		<?php
-
+			
+			echo '<div class="options_group">';
+			
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woocommerce'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 				
@@ -41,17 +43,63 @@ function woocommerce_coupon_data_meta_box($post) {
 			// Free Shipping
 			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woocommerce'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woocommerce'), admin_url('admin.php?page=woocommerce&tab=shipping_methods&subtab=shipping-free_shipping')) ) );
 			
+			echo '</div><div class="options_group">';
+			
 			// Product ids
-			woocommerce_wp_text_input( array( 'id' => 'product_ids', 'label' => __('Product IDs', 'woocommerce'), 'placeholder' => _x('N/A', 'placeholder', 'woocommerce'), 'description' => __('(optional) Comma separate IDs which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce') ) );
+			?>
+			<p class="form-field"><label for="product_ids"><?php _e('Products', 'woocommerce') ?></label>
+			<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+				<?php
+					$product_ids = get_post_meta( $post->ID, 'product_ids', true );
+					if ($product_ids) {
+						$product_ids = explode(',', $product_ids);
+						foreach ($product_ids as $product_id) {
+							$title 	= get_the_title($product_id);
+							$sku 	= get_post_meta($product_id, '_sku', true);
+							
+							if (!$title) continue;
+			
+							if (isset($sku) && $sku) $sku = ' (SKU: ' . $sku . ')';
+			
+							echo '<option value="'.$product_id.'" selected="selected">'. $title . $sku .'</option>';
+						}
+					}
+				?>
+			</select> <img class="help_tip" tip="<?php _e('Products which need to be in the cart to use this coupon or, for "Product Discounts", which products are discounted.', 'woocommerce') ?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			<?php
 			
 			// Exclude Product ids
-			woocommerce_wp_text_input( array( 'id' => 'exclude_product_ids', 'label' => __('Exclude Product IDs', 'woocommerce'), 'placeholder' => _x('N/A', 'placeholder', 'woocommerce'), 'description' => __('(optional) Comma separate IDs which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce') ) );
+			?>
+			<p class="form-field"><label for="exclude_product_ids"><?php _e('Exclude Products', 'woocommerce') ?></label>
+			<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product…', 'woocommerce'); ?>">
+				<?php
+					$product_ids = get_post_meta( $post->ID, 'exclude_product_ids', true );
+					if ($product_ids) {
+						$product_ids = explode(',', $product_ids);
+						foreach ($product_ids as $product_id) {
+							$title 	= get_the_title($product_id);
+							$sku 	= get_post_meta($product_id, '_sku', true);
+							
+							if (!$title) continue;
+			
+							if (isset($sku) && $sku) $sku = ' (SKU: ' . $sku . ')';
+			
+							echo '<option value="'.$product_id.'" selected="selected">'. $title . $sku .'</option>';
+						}
+					}
+				?>
+			</select> <img class="help_tip" tip="<?php _e('Products which must not be in the cart to use this coupon or, for "Product Discounts", which products are not discounted.', 'woocommerce') ?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			<?php
+			
+			echo '</div><div class="options_group">';
 			
 			// Usage limit
-			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woocommerce'), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __('(optional) How many times this coupon can be used before it is void', 'woocommerce') ) );
+			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woocommerce'), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __('How many times this coupon can be used before it is void', 'woocommerce') ) );
 				
 			// Expiry date
-			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woocommerce'), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __('(optional) The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woocommerce'), 'class' => 'short date-picker' ) );
+			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __('Expiry date', 'woocommerce'), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __('The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woocommerce'), 'class' => 'short date-picker' ) );
+			
+			echo '</div>';
 			
 			do_action('woocommerce_coupon_options');
 			
@@ -75,14 +123,26 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	// Add/Replace data to array
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
 		$amount 		= strip_tags(stripslashes( $_POST['coupon_amount'] ));
-		$product_ids 	= strip_tags(stripslashes( $_POST['product_ids'] ));
-		$exclude_product_ids = strip_tags(stripslashes( $_POST['exclude_product_ids'] ));
 		$usage_limit 	= (isset($_POST['usage_limit']) && $_POST['usage_limit']>0) ? (int) $_POST['usage_limit'] : '';
 		$individual_use = isset($_POST['individual_use']) ? 'yes' : 'no';
 		$expiry_date 	= strip_tags(stripslashes( $_POST['expiry_date'] ));
 		$apply_before_tax = isset($_POST['apply_before_tax']) ? 'yes' : 'no';
 		$free_shipping = isset($_POST['free_shipping']) ? 'yes' : 'no';
-	
+		
+		if (isset($_POST['product_ids'])) {
+			$product_ids 			= (array) $_POST['product_ids'];
+			$product_ids 			= implode(',', array_filter(array_map('intval', $product_ids)));
+		} else {
+			$product_ids = '';
+		}
+		
+		if (isset($_POST['exclude_product_ids'])) {
+			$exclude_product_ids 	= (array) $_POST['exclude_product_ids'];
+			$exclude_product_ids 	= implode(',', array_filter(array_map('intval', $exclude_product_ids)));
+		} else {
+			$exclude_product_ids = '';
+		}
+		
 	// Save
 		update_post_meta( $post_id, 'discount_type', $type );
 		update_post_meta( $post_id, 'coupon_amount', $amount );

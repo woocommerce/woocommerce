@@ -640,7 +640,7 @@ function process_product_meta_variable( $post_id ) {
 			// Disabled if downloadable and no URL
 			if ($is_downloadable=='yes' && !$variable_file_path[$i]) $post_status = 'private';
 			
-			// Generate a useful post title
+			/*// Generate a useful post title
 			$title = array();
 			
 			foreach ($attributes as $attribute) :
@@ -650,14 +650,16 @@ function process_product_meta_variable( $post_id ) {
 				endif;
 			endforeach;
 			
-			$sku_string = '#'.$variation_id;
-			if ($variable_sku[$i]) $sku_string .= ' SKU: ' . $variable_sku[$i];
+			$sku_string = ($variable_sku[$i]) ? sprintf(__('(SKU: %s)', 'woocommerce'), $variable_sku[$i]) : sprintf(__('(ID: #%s)', 'woocommerce'), $variation_id);
+			*/
+			
+			$variation_post_title = sprintf(__('Variation #%s of %s', 'woocommerce'), $variation_id, get_the_title($post_id));
 			
 			// Update or Add post
 			if (!$variation_id) :
 				
 				$variation = array(
-					'post_title' => '#' . $post_id . ' Variation ('.$sku_string.') - ' . implode(', ', $title),
+					'post_title' => $variation_post_title,
 					'post_content' => '',
 					'post_status' => $post_status,
 					'post_author' => get_current_user_id(),
@@ -668,7 +670,7 @@ function process_product_meta_variable( $post_id ) {
 
 			else :
 				
-				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => '#' . $post_id . ' Variation ('.$sku_string.') - ' . implode(', ', $title) ), array( 'ID' => $variation_id ) );
+				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title ), array( 'ID' => $variation_id ) );
 			
 			endif;
 

@@ -179,6 +179,7 @@ function woocommerce_admin_scripts() {
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget', 'jquery-ui-core'), '1.0' );
 	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), '1.0' );
 	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker') );
+	wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/ajax-chosen.jquery'.$suffix.'.js', array('jquery', 'chosen'), '1.0' );
 	wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
 	
 	// Get admin screen id
@@ -189,6 +190,7 @@ function woocommerce_admin_scripts() {
     
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
+    	wp_enqueue_script( 'ajax-chosen' );
     	wp_enqueue_script( 'chosen' );
     	wp_enqueue_script('jquery-ui-sortable');
 
@@ -209,6 +211,7 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'media-upload' );
 		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_script( 'ajax-chosen' );
 		wp_enqueue_script( 'chosen' );
 		
 		$woocommerce_witepanel_params = array( 
@@ -241,7 +244,7 @@ function woocommerce_admin_scripts() {
 			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
-			'upsell_crosssell_search_products_nonce' => wp_create_nonce("search-products"),
+			'search_products_nonce' => wp_create_nonce("search-products"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
 			'post_id'						=> $post->ID
 		 );

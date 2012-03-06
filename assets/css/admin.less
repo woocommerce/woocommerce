@@ -1167,33 +1167,12 @@ table.wc_gateways, table.wc_shipping {
 	}
 }
 
-
+img.help_tip {
+	vertical-align: middle;
+	margin: 0 0 0 9px;
+}
+	
 .woocommerce {
-	table.widefat {
-		table.coupon_rows {
-			border: 0 !important;
-			width: 100%;
-			thead {
-				th {
-					padding: 1px;
-					border: 0;
-					font-weight: normal;
-					font-size: 11px;
-					color: #999;
-				}
-			}
-			tbody {
-				td {
-					padding: 3px 3px 0 0;
-					border: 0;
-					vertical-align: middle;
-					input.text {
-						width: 95px;
-					}
-				}
-			}
-		}
-	}
 	table.form-table {
 		margin: 0 0 0;
 		textarea.input-text {
@@ -1208,6 +1187,7 @@ table.wc_gateways, table.wc_shipping {
 			margin: -4px 0 0 5px;
 			vertical-align: middle;
 			cursor: help;
+			line-height: 1;
 		}
 	}
 }
@@ -1340,7 +1320,7 @@ table.wc_gateways, table.wc_shipping {
 	}
 }
 
-#woocommerce-product-data .inside, #woocommerce-product-type-options .inside, #woocommerce-order-data .inside, #woocommerce-product-type .inside, #woocommerce-order-downloads .inside {
+#woocommerce-product-data .inside, #woocommerce-product-type-options .inside, #woocommerce-order-data .inside, #woocommerce-product-type .inside, #woocommerce-order-downloads .inside, #woocommerce-coupon-data .inside {
 	padding: 0;
 	margin: 0;
 }
@@ -1356,12 +1336,17 @@ table.wc_gateways, table.wc_shipping {
 	margin: 0;
 }
 .woocommerce_options_panel p, #woocommerce-product-type-options .panel p {
-	overflow: hidden;
-	zoom: 1;
 	margin: 0 0 9px;
 	font-size: 12px;
 	padding: 5px 9px;
 	line-height: 24px;
+	&:after {
+	    content: ".";
+	    display: block;
+	    height: 0;
+	    clear: both;
+	    visibility: hidden;
+	}
 }
 .woocommerce_options_panel p {
 	margin: 9px 0 9px;
@@ -1948,6 +1933,13 @@ table.bar_chart {
 	display: inline-block;
 	.chzn-drop {
 		width: 300px !important;
+	}
+}
+.form-field .chzn-container {
+	width: 60% !important;
+	float: left;
+	li.search-field input {
+		width: 100% !important;
 	}
 }
 .chzn-container .chzn-drop {

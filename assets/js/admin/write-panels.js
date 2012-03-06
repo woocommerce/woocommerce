@@ -19,6 +19,77 @@ jQuery( function($){
 		return false;
 	});
 	
+	// Chosen selects
+	jQuery("select.chosen_select").chosen();
+			
+	jQuery("select.chosen_select_nostd").chosen({
+		allow_single_deselect: 'true'
+	});
+	
+	// Ajax Chosen Product Selector
+	jQuery("select.ajax_chosen_select_products").ajaxChosen({
+	    method: 	'GET',
+	    url: 		woocommerce_writepanel_params.ajax_url,
+	    dataType: 	'json',
+	    data:		{
+	    	action: 		'woocommerce_json_search_products',
+			security: 		woocommerce_writepanel_params.search_products_nonce
+	    }
+	}, function (data) {
+	
+		var terms = {};
+	
+	    $.each(data, function (i, val) {
+	        terms[i] = val;
+	    });
+	
+	    return terms;
+	});	
+	
+	$('.multi_select_products #product_search').bind('keyup click', function(){
+		
+		$('.multi_select_products_source').addClass('loading');
+		$('.multi_select_products_source li:not(.product_search)').remove();
+		
+		
+		
+		var search = $(this).val();
+		var input = this;
+		var name = $(this).attr('rel');
+		
+		if (search.length<3) {
+			$('.multi_select_products_source').removeClass('loading');
+			return;
+		}
+		
+		var data = {
+			name: 			name,
+			search: 		encodeURI(search),
+			action: 		'woocommerce_upsell_crosssell_search_products',
+			security: 		woocommerce_writepanel_params.search_products_nonce
+		};
+		
+		xhr = $.ajax({
+			url: woocommerce_writepanel_params.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
+			
+				$('.multi_select_products_source').removeClass('loading');
+				$('.multi_select_products_source li:not(.product_search)').remove();
+				$(input).parent().parent().append( response );
+				
+			}
+		});
+ 			
+	});	
+	
+	
+	
+	
+	
+	
+
 	// ORDERS
 	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
 		window.onbeforeunload = '';
@@ -32,13 +103,6 @@ jQuery( function($){
 		event.preventDefault();
 	});
 	
-	// Chosen selects
-	jQuery("select.chosen_select").chosen();
-			
-	jQuery("select.chosen_select_nostd").chosen({
-		allow_single_deselect: 'true'
-	});
-	
 	$('#order_items_list .remove_row').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){
@@ -47,7 +111,6 @@ jQuery( function($){
 		}
 		return false;
 	});
-	
 	
 	$('button.calc_line_taxes').live('click', function(){
 		// Block write panel
@@ -184,10 +247,7 @@ jQuery( function($){
 	}, function() {
 		$('#woocommerce-order-totals .calculated').css('background-color', '');
 	});
-	
-	
-
-	
+		
 	$('button.add_shop_order_item').click(function(){
 		
 		var add_item_id = $('select.add_item_id').val();
@@ -733,7 +793,7 @@ jQuery( function($){
 			name: 			name,
 			search: 		encodeURI(search),
 			action: 		'woocommerce_upsell_crosssell_search_products',
-			security: 		woocommerce_writepanel_params.upsell_crosssell_search_products_nonce
+			security: 		woocommerce_writepanel_params.search_products_nonce
 		};
 		
 		xhr = $.ajax({
