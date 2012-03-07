@@ -139,7 +139,17 @@ class WC_Cart {
 			$this->calculate_totals();
 			
 			// Set cart and coupon session data
-			$_SESSION['cart'] = $this->cart_contents;
+			$cart_session = array();
+			
+			if ($this->cart_contents) foreach ($this->cart_contents as $key => $values) {
+				
+				$cart_session[$key] = $values;
+				
+				// Unset product object
+				unset($cart_session[$key]['data']);
+			}
+			
+			$_SESSION['cart'] = $cart_session;
 			$_SESSION['coupons'] = $this->applied_coupons;
 			
 			// Store totals to avoid re-calc on page load
