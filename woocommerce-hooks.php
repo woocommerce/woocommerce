@@ -122,8 +122,8 @@ add_action( 'init', 'woocommerce_add_to_cart_action' );
 add_action( 'wp_login', 'woocommerce_load_persistent_cart', 1, 2);
 
 /* Checkout Actions */
-add_action( 'init', 'woocommerce_checkout_action' );
-add_action( 'init', 'woocommerce_pay_action' );
+add_action( 'init', 'woocommerce_checkout_action', 10 );
+add_action( 'init', 'woocommerce_pay_action', 10 );
 
 /* Login and Registration */
 add_action( 'init', 'woocommerce_process_login' );

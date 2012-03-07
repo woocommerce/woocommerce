@@ -13,6 +13,8 @@
 function woocommerce_import_start() {
 	global $wpdb;
 	
+	if (!isset($_POST['import_id'])) return;
+	
 	$id = (int) $_POST['import_id'];
 	$file = get_attached_file( $id );
 

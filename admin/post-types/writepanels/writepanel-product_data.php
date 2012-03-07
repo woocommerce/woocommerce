@@ -536,7 +536,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				    WHERE $wpdb->posts.post_type = 'product'
 				    AND $wpdb->posts.post_status = 'publish' 
 				    AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-				    );
 				 ", $new_sku))
 				) :
 				$woocommerce_errors[] = __('Product SKU must be unique.', 'woocommerce');

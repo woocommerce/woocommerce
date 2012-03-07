@@ -475,6 +475,8 @@ function woocommerce_checkout_action() {
 			exit;
 		endif;
 		
+		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+		
 		$woocommerce_checkout = $woocommerce->checkout();
 		$woocommerce_checkout->process_checkout();
 	
