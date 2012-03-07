@@ -203,6 +203,8 @@ class WC_Product_Variation extends WC_Product {
 	 * @param   int		$by		Amount to reduce by
 	 */
 	function reduce_stock( $by = 1 ) {
+		global $woocommerce;
+		
 		if ($this->variation_has_stock) :
 			if ($this->managing_stock()) :
 				
