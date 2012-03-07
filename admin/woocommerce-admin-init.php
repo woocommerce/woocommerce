@@ -21,7 +21,7 @@ function woocommerce_admin_menu() {
 	
 	if ( current_user_can( 'manage_woocommerce' ) ) $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 	
-    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', $woocommerce->plugin_url() . '/assets/images/icons/menu_icon_wc.png', 55);
+    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, 55);
     add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
     $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
@@ -37,7 +37,7 @@ function woocommerce_admin_menu() {
 /**
  * Admin Notices
  */
-add_action( "admin_print_styles", 'woocommerce_admin_notices_styles' );
+add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
 
 function woocommerce_admin_install_notice() {
 	?>
@@ -303,6 +303,17 @@ function woocommerce_admin_css() {
 	
 	do_action('woocommerce_admin_css');
 }
+
+/**
+ * Queue admin menu icons CSS
+ * 
+ */
+function woocommerce_admin_menu_styles() {
+	global $woocommerce;
+	wp_enqueue_style( 'woocommerce_admin_menu_styles', $woocommerce->plugin_url() . '/assets/css/menu.css' );
+}
+add_action( 'admin_print_styles', 'woocommerce_admin_menu_styles' );
+
 
 /**
  * Order admin menus
