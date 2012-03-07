@@ -68,7 +68,7 @@ class WC_Cart {
 			global $woocommerce;
 			
 			// Load the coupons
-			$this->applied_coupons = (isset($_SESSION['coupons'])) ? array_filter((array) $_SESSION['coupons']) : array();
+			$this->applied_coupons = (isset($_SESSION['coupons'])) ? array_unique(array_filter((array) $_SESSION['coupons'])) : array();
 			
 			// Load the cart
 			if ( isset($_SESSION['cart']) && is_array($_SESSION['cart']) ) :
@@ -577,7 +577,7 @@ class WC_Cart {
 			
 			if (!empty($this->applied_coupons)) foreach ($this->applied_coupons as $code) :
 				$coupon = new WC_Coupon( $code );
-				
+
 				if ( $coupon->apply_before_tax() && $coupon->is_valid() ) :
 					
 					switch ($coupon->type) :

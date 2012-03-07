@@ -45,6 +45,11 @@ function woocommerce_coupon_data_meta_box($post) {
 			
 			echo '</div><div class="options_group">';
 			
+			// minimum spend
+			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __('Minimum amount', 'woocommerce'), 'placeholder' => __('No minimum', 'woocommerce'), 'description' => __('This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce') ) );
+			
+			echo '</div><div class="options_group">';
+			
 			// Product ids
 			?>
 			<p class="form-field"><label for="product_ids"><?php _e('Products', 'woocommerce') ?></label>
@@ -164,6 +169,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$expiry_date 	= strip_tags(stripslashes( $_POST['expiry_date'] ));
 		$apply_before_tax = isset($_POST['apply_before_tax']) ? 'yes' : 'no';
 		$free_shipping = isset($_POST['free_shipping']) ? 'yes' : 'no';
+		$minimum_amount = strip_tags(stripslashes( $_POST['minimum_amount'] ));
 		
 		if (isset($_POST['product_ids'])) {
 			$product_ids 			= (array) $_POST['product_ids'];
@@ -194,6 +200,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		update_post_meta( $post_id, 'free_shipping', $free_shipping );
 		update_post_meta( $post_id, 'product_categories', $product_categories );
 		update_post_meta( $post_id, 'exclude_product_categories', $exclude_product_categories );
+		update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
 		
 		do_action('woocommerce_coupon_options');
 	

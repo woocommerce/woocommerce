@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Better language loading (GeertDD and deckerweb #win)
 * Fix for grouped product from price
 * Store less cart data in sessions to reduce file sizes
+* Minimum spend option for coupons (thanks to jason whitaker)
 
 = 1.5 - 01/03/2012 =
 * Quick edit products

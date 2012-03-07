@@ -24,6 +24,7 @@ class WC_Coupon {
 	var $free_shipping;
 	var $product_categories;
 	var $exclude_product_categories;
+	var $minimum_amount;
 	
 	/** get coupon with $code */
 	function __construct( $code ) {
@@ -47,6 +48,7 @@ class WC_Coupon {
             $this->free_shipping = $coupon_data['free_shipping'];
             $this->product_categories = $coupon_data['product_categories'];
             $this->exclude_product_categories = $coupon_data['exclude_product_categories'];
+            $this->minimum_amount = $coupon_data['minimum_amount'];
             return true;
         else:
             $coupon_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE BINARY post_title = %s AND post_type= %s", $this->code, 'shop_coupon' ) );
@@ -68,6 +70,7 @@ class WC_Coupon {
                 $this->free_shipping = get_post_meta($coupon->ID, 'free_shipping', true);
                 $this->product_categories = array_filter(array_map('trim', (array) get_post_meta($coupon->ID, 'product_categories', true)));
            		$this->exclude_product_categories = array_filter(array_map('trim', (array) get_post_meta($coupon->ID, 'exclude_product_categories', true)));
+           		$this->minimum_amount = get_post_meta($coupon->ID, 'minimum_amount', true);
                 return true;
             endif;
         endif;
@@ -109,6 +112,13 @@ class WC_Coupon {
 			// Expired
 			if ($this->expiry_date) :
 				if (strtotime('NOW')>$this->expiry_date) :
+					$valid = false;
+				endif;
+			endif;
+			
+			// Minimum spend
+			if ($this->minimum_amount>0) :
+				if ( $this->minimum_amount >= $woocommerce->cart->subtotal ) :
 					$valid = false;
 				endif;
 			endif;
