@@ -563,7 +563,7 @@ function woocommerce_product_cat_filter_post_link( $permalink, $post, $leavename
 
     if ( empty( $terms ) ) :
     	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $permalink = str_replace( '%product_cat%', __('product', 'woocommerce'), $permalink );
+        $permalink = str_replace( '%product_cat%', _x('product', 'slug', 'woocommerce'), $permalink );
     else :
     	// Replace the placeholder rewrite tag with the first term's slug
         $first_term = array_shift( $terms );

@@ -485,7 +485,7 @@ class Woocommerce {
 		
 		$tag_slug = (get_option('woocommerce_product_tag_slug')) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woocommerce');
 		
-		$product_base = (get_option('woocommerce_prepend_shop_page_to_products')=='yes') ? trailingslashit($base_slug) : trailingslashit(__('product', 'woocommerce'));
+		$product_base = (get_option('woocommerce_prepend_shop_page_to_products')=='yes') ? trailingslashit($base_slug) : trailingslashit(_x('product', 'slug', 'woocommerce'));
 		
 		if (get_option('woocommerce_prepend_category_to_products')=='yes') $product_base .= trailingslashit('%product_cat%');
 		
