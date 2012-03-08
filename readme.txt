@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, store, sh
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.5
+Stable tag: 1.5.1
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
@@ -143,7 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.1 =
+= 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
 * Error suppression on set_time_out
 * Order-details removed shipping when disabled
@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix for grouped product from price
 * Store less cart data in sessions to reduce file sizes
 * Minimum spend option for coupons (thanks to jason whitaker)
+* 5 digit UK postcode handling
 
 = 1.5 - 01/03/2012 =
 * Quick edit products
