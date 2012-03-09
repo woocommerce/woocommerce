@@ -21,6 +21,8 @@ function woocommerce_thankyou( $atts ) {
 	global $woocommerce;
 	
 	$woocommerce->nocache();
+	
+	$woocommerce->show_messages();
 
 	$order = false;
 	

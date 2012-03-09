@@ -494,19 +494,19 @@ class WC_Paypal extends WC_Payment_Gateway {
 					if (!in_array($posted['txn_type'], $accepted_types)) :
 						if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
 					endif;
+					
+					 // Store PP Details
+	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
+	                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
+	                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
+	                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
+	                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
 	            	
 	            	// Payment completed
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
 	                $order->payment_complete();
 	                
 	                if ($this->debug=='yes') $this->log->add( 'paypal', 'Payment complete.' );
-	                
-	                // Store PP Details
-	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
-	                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
-	                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
 	                
 	            break;
 	            case 'denied' :
