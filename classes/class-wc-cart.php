@@ -182,7 +182,7 @@ class WC_Cart {
 			$this->cart_contents = array();
 			$this->reset();
 			
-			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'], $_SESSION['coupons'], $_SESSION['cart'] );
+			unset( $_SESSION['coupons'], $_SESSION['cart'] );
 			
 			if ($clear_persistent_cart && get_current_user_id()) $this->persistent_cart_destroy();
 			
@@ -566,6 +566,8 @@ class WC_Cart {
 			$this->discount_cart = 0;
 			$this->shipping_total = 0;
 			$this->taxes = array();
+			
+			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'] );
 		}
 		
 		/** 
