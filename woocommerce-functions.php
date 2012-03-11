@@ -1084,7 +1084,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 				'<?php echo $_product->sku; ?>',      	// SKU/code - required
 				'<?php echo $item['name']; ?>',        	// product name
 				'<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>',   // category or variation
-				'<?php echo ($item['line_cost']/$item['qty']); ?>',         // unit price - required
+				'<?php echo ($item['line_total']/$item['qty']); ?>',         // unit price - required
 				'<?php echo $item['qty']; ?>'           // quantity - required
 			]);
 		<?php endforeach; ?>
