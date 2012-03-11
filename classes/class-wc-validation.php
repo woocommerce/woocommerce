@@ -113,13 +113,9 @@ class WC_Validation {
 		$postcode = trim(preg_replace('/[\s]/', '', $postcode));
 		
 		if ($country=='GB') :
-			if (strlen($postcode)==7) 
-				$postcode = substr_replace($postcode, ' ', 4, 0);
-			elseif (strlen($postcode)==5) 
-				$postcode = substr_replace($postcode, ' ', 2, 0);
-			else 
-				$postcode = substr_replace($postcode, ' ', 3, 0);
+			$postcode = substr_replace($postcode, ' ', -3, 0);
 		endif;
+		
 		return $postcode;
 	}
 	

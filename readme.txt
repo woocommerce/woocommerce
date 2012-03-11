@@ -143,6 +143,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.5.2 = 
+* Fixed notice in GA code
+* Postcode format tweak
+
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
 * Error suppression on set_time_out
