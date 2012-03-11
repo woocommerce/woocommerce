@@ -1,1 +1,4 @@
 logs/
+/nbproject/private/
+project.xml
+project.properties
