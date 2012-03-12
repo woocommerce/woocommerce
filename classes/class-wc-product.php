@@ -362,7 +362,7 @@ class WC_Product {
 	
 	/** Returns whether or not the product needs to notify the customer on backorder */
 	function backorders_require_notification() {
-		if ($this->backorders=='notify') return true;
+		if ($this->managing_stock() && $this->backorders=='notify') return true;
 		return false;
 	}
 	

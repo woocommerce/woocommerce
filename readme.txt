@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Disable admin bar for customers when admin access if locked down
 * Add to cart shortcode for variations
 * woocommerce_messages shortcode for showing error/success messages on a page
+* backorders_require_notification returns false if stock is disabled
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
