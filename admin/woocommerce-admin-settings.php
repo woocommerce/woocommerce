@@ -124,22 +124,15 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup'		=> 'end',
 		'show_if_checked' => 'yes',
 	),
-	
-	array(  
-		'name' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_guest_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'start'
-	),
 
 	array(
+		'name' => __( 'Coupons', 'woocommerce' ),
 		'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
 		'id'            => 'woocommerce_enable_coupons',
 		'std'           => 'yes',
 		'type'          => 'checkbox',
-		'checkboxgroup' => '',
+		'checkboxgroup' => 'start',
+		'show_if_checked' => 'option'
 	),
 
 	array(  
@@ -147,7 +140,17 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'	=> 'end',
+		'show_if_checked' => 'yes'
+	),
+
+	array(
+		'name' => __( 'Checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_guest_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> 'start'
 	),
 	
 	array(  

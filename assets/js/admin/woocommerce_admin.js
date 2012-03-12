@@ -135,33 +135,32 @@ jQuery(function(){
 	}).change();
 	
 	// Hidden options
-	jQuery('.hide_options_if_checked input:eq(0)').change(function() {
-		
-		if (jQuery(this).is(':checked')) {
-			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
-		} else {
-			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
-		}
-		
-	}).change();
+	jQuery('.hide_options_if_checked').each(function(){
 	
-	jQuery('.show_options_if_checked input:eq(0)').change(function() {
+		jQuery(this).find('input:eq(0)').change(function() {
+			
+			if (jQuery(this).is(':checked')) {
+				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+			} else {
+				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+			}
+			
+		}).change();
 		
-		if (jQuery(this).is(':checked')) {
-			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
-		} else {
-			jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
-		}
+	});
+	
+	jQuery('.show_options_if_checked').each(function(){
+	
+		jQuery(this).find('input:eq(0)').change(function() {
+			
+			if (jQuery(this).is(':checked')) {
+				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
+			} else {
+				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
+			}
+			
+		}).change();
 		
-	}).change();
-
-	// Enable/disable the coupon form on checkout checkbox
-	var $woocommerce_enable_coupons = jQuery('#woocommerce_enable_coupons'),
-		$woocommerce_enable_coupon_form_on_checkout = jQuery('#woocommerce_enable_coupon_form_on_checkout'),
-		toggle_woocommerce_enable_coupon_form_on_checkout = function () {
-			$woocommerce_enable_coupon_form_on_checkout.closest('fieldset').attr('disabled', ! $woocommerce_enable_coupons.is(':checked'));
-		};
-	toggle_woocommerce_enable_coupon_form_on_checkout();
-	$woocommerce_enable_coupons.change(toggle_woocommerce_enable_coupon_form_on_checkout);
+	});
 
 });

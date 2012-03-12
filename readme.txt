@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Billing email sets user email address
 * Other profile fields filled in based on billing info
 * COD reduce stock
+* Option to disable coupons (by GeertDD)
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
