@@ -154,7 +154,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 					<tr class="tax">
 						<th colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
-						<td><?php _ex( 'NA', 'Relating to tax', 'woocommerce' ); ?></td>
+						<td><?php _ex( 'N/A', 'Relating to tax', 'woocommerce' ); ?></td>
 					</tr>
 
 				<?php

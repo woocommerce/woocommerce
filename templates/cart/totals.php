@@ -149,6 +149,15 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							<?php
 						
 						endif;	
+					elseif (get_option('woocommerce_display_cart_taxes_if_zero')=='yes') :
+						
+						?>
+						<tr class="tax">
+							<th><?php _e('Tax', 'woocommerce'); ?></th>
+							<td><?php _ex( 'N/A', 'Relating to tax', 'woocommerce' ); ?></td>
+						</tr>
+						<?php
+							
 					endif;
 				?>
 	

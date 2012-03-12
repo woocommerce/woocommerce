@@ -506,7 +506,9 @@ class WC_Order {
 			endif;
 
 		elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) :
-			$total_rows[ $woocommerce->countries->tax_or_vat() ] = _x( 'NA', 'Relating to tax', 'woocommerce' );
+		
+			$total_rows[ $woocommerce->countries->tax_or_vat() ] = _x( 'N/A', 'Relating to tax', 'woocommerce' );
+			
 		endif;
 		
 		if ($this->get_order_discount() > 0)

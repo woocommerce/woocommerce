@@ -836,7 +836,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 
 	array(
-		'desc'          => __( 'Also display tax row if no taxes are applicable', 'woocommerce' ),
+		'desc'          => __( 'Display taxes even when the amount if zero', 'woocommerce' ),
 		'id'            => 'woocommerce_display_cart_taxes_if_zero',
 		'std'           => 'no',
 		'type'          => 'checkbox',
