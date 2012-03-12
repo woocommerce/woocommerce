@@ -1411,7 +1411,7 @@ msgstr "WooCommerce Recente Reviews"
 #: admin/woocommerce-admin-dashboard.php:219
 #@ woocommerce
 msgid "l jS \\of F Y h:i:s A"
-msgstr "l jS \\of F Y h:i:s A"
+msgstr "l j F Y H:i"
 
 #: admin/woocommerce-admin-dashboard.php:220
 #: admin/woocommerce-admin-reports.php:307
