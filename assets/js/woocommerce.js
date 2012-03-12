@@ -125,6 +125,15 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 	
+	$('#review_form #submit').live('click', function(){
+		var rating = $('#rating').val();
+		
+		if (!rating) {
+			alert(woocommerce_params.required_rating_text);
+			return false;
+		}
+	});
+	
 	// Quantity buttons
 	$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 	
