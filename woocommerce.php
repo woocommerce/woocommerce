@@ -703,8 +703,7 @@ class Woocommerce {
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
 				'has_archive' 			=> $base_slug,
-				'show_in_nav_menus' 	=> false,
-				'menu_icon'				=> $this->plugin_url() . '/assets/images/icons/menu_icon_products.png'
+				'show_in_nav_menus' 	=> false
 			)
 		);
 		
@@ -832,7 +831,7 @@ class Woocommerce {
 				'rewrite' 				=> false,
 				'query_var' 			=> false,			
 				'supports' 				=> array( 'title' ),
-				'show_in_nav_menus'		=> false,
+				'show_in_nav_menus'		=> false
 			)
 		);
 	}
