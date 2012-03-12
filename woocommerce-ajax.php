@@ -819,9 +819,10 @@ function woocommerce_delete_order_note() {
  * Search for products and return json
  */
 add_action('wp_ajax_woocommerce_json_search_products', 'woocommerce_json_search_products');
+add_action('wp_ajax_woocommerce_json_search_products_and_variations', 'woocommerce_json_search_products_and_variations');
 
-function woocommerce_json_search_products() {
-	
+function woocommerce_json_search_products( $x = '', $post_types = array('product') ) {
+
 	check_ajax_referer( 'search-products', 'security' );
 	
 	$term = (string) urldecode(stripslashes(strip_tags($_GET['term'])));
@@ -831,7 +832,7 @@ function woocommerce_json_search_products() {
 	if (is_numeric($term)) {
 		
 		$args = array(
-			'post_type'			=> 'product',
+			'post_type'			=> $post_types,
 			'post_status'	 	=> 'publish',
 			'posts_per_page' 	=> -1,
 			'post__in' 			=> array(0, $term),
@@ -843,7 +844,7 @@ function woocommerce_json_search_products() {
 	} else {
 	
 		$args = array(
-			'post_type'			=> array('product', 'product_variation'),
+			'post_type'			=> $post_types,
 			'post_status' 		=> 'publish',
 			'posts_per_page' 	=> -1,
 			's' 				=> $term,
@@ -851,7 +852,7 @@ function woocommerce_json_search_products() {
 		);
 		
 		$args2 = array(
-			'post_type'			=> array('product', 'product_variation'),
+			'post_type'			=> $post_types,
 			'post_status' 		=> 'publish',
 			'posts_per_page' 	=> -1,
 			'meta_query' 		=> array(
@@ -883,6 +884,12 @@ function woocommerce_json_search_products() {
 	echo json_encode( $found_products );
 	
 	die();
+}
+
+function woocommerce_json_search_products_and_variations() {
+
+	woocommerce_json_search_products( '', array('product', 'product_variation') );
+	
 }
 
 /**

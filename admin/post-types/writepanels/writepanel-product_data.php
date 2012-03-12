@@ -401,35 +401,44 @@ function woocommerce_product_data_box() {
 			<div class="clear"></div>
 		</div>	
 		<div id="upsells_and_crosssells_product_data" class="panel woocommerce_options_panel">
-			<div class="multi_select_products_wrapper"><h4><?php _e('Products', 'woocommerce'); ?></h4>
-				<ul class="multi_select_products multi_select_products_source">
-					<li class="product_search"><input type="search" rel="upsell_ids" name="product_search" id="product_search" placeholder="<?php _e('Search for product', 'woocommerce'); ?>" /><div class="clear"></div></li>
-				</ul>
-			</div>
-			<div class="multi_select_products_wrapper multi_select_products_wrapper-alt">
-				
-				<h4><?php _e('Up-Sells', 'woocommerce'); ?></h4>
-				<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce'); ?>
-				<ul class="multi_select_products multi_select_products_target_upsell">
-					<?php
-						$upsell_ids = get_post_meta($thepostid, '_upsell_ids', true);
-						if (!$upsell_ids) $upsell_ids = array(0);
-						woocommerce_product_selection_list_remove($upsell_ids, 'upsell_ids');
-					?>
-				</ul>
-				
-				<h4><?php _e('Cross-Sells', 'woocommerce'); ?></h4>
-				<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce'); ?>
-				<ul class="multi_select_products multi_select_products_target_crosssell">
-					<?php
-					$crosssell_ids = get_post_meta($thepostid, '_crosssell_ids', true);
-					if (!$crosssell_ids) $crosssell_ids = array(0);
-					woocommerce_product_selection_list_remove($crosssell_ids, 'crosssell_ids');
-					?>
-				</ul>
-				
-			</div>
-			<div class="clear"></div>
+			
+			<p class="form-field"><label for="upsell_ids"><?php _e('Up-Sells', 'woocommerce'); ?></label>
+			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+				<?php
+					$product_ids = get_post_meta( $post->ID, '_upsell_ids', true );
+					if ($product_ids) {
+						foreach ($product_ids as $product_id) {
+							$title 	= get_the_title($product_id);
+							$sku 	= get_post_meta($product_id, '_sku', true);
+							
+							if (!$title) continue;
+			
+							if (isset($sku) && $sku) $sku = ' (SKU: ' . $sku . ')';
+			
+							echo '<option value="'.$product_id.'" selected="selected">'. $title . $sku .'</option>';
+						}
+					}
+				?>
+			</select> <img class="help_tip" tip='<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+		
+			<p class="form-field"><label for="crosssell_ids"><?php _e('Cross-Sells', 'woocommerce'); ?></label>
+			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+				<?php
+					$product_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
+					if ($product_ids) {
+						foreach ($product_ids as $product_id) {
+							$title 	= get_the_title($product_id);
+							$sku 	= get_post_meta($product_id, '_sku', true);
+							
+							if (!$title) continue;
+			
+							if (isset($sku) && $sku) $sku = ' (SKU: ' . $sku . ')';
+			
+							echo '<option value="'.$product_id.'" selected="selected">'. $title . $sku .'</option>';
+						}
+					}
+				?>
+			</select> <img class="help_tip" tip='<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
 					
 		</div>
 		<div id="grouping_product_data" class="panel woocommerce_options_panel">
@@ -789,33 +798,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 	// Save errors
 	update_option('woocommerce_errors', $woocommerce_errors);
-}
-
-/**
-* Outputs product list in selection boxes
-**/
-function woocommerce_product_selection_list_remove( $posts_to_display, $name ) {
-	global $thepostid;
-	
-	$args = array(
-		'post_type'	=> 'product',
-		'post_status'     => 'publish',
-		'numberposts' => -1,
-		'orderby' => 'title',
-		'order' => 'asc',
-		'include' => $posts_to_display,
-	);
-	$related_posts = get_posts($args);
-	$loop = 0;
-	if ($related_posts) : foreach ($related_posts as $related_post) :
-		
-		if ($related_post->ID==$thepostid) continue;
-		
-		$SKU = get_post_meta($related_post->ID, '_sku', true);
-		
-		?><li rel="<?php echo $related_post->ID; ?>"><button type="button" name="Remove" class="button remove" title="Remove">&times;</button><strong><?php echo $related_post->post_title; ?></strong> &ndash; #<?php echo $related_post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[]" value="<?php echo esc_attr( $related_post->ID ); ?>" /></li><?php 
-
-	endforeach; endif;
 }
 
 /**

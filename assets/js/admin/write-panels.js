@@ -26,7 +26,7 @@ jQuery( function($){
 		allow_single_deselect: 'true'
 	});
 	
-	// Ajax Chosen Product Selector
+	// Ajax Chosen Product Selectors
 	jQuery("select.ajax_chosen_select_products").ajaxChosen({
 	    method: 	'GET',
 	    url: 		woocommerce_writepanel_params.ajax_url,
@@ -46,49 +46,24 @@ jQuery( function($){
 	    return terms;
 	});	
 	
-	$('.multi_select_products #product_search').bind('keyup click', function(){
-		
-		$('.multi_select_products_source').addClass('loading');
-		$('.multi_select_products_source li:not(.product_search)').remove();
-		
-		
-		
-		var search = $(this).val();
-		var input = this;
-		var name = $(this).attr('rel');
-		
-		if (search.length<3) {
-			$('.multi_select_products_source').removeClass('loading');
-			return;
-		}
-		
-		var data = {
-			name: 			name,
-			search: 		encodeURI(search),
-			action: 		'woocommerce_upsell_crosssell_search_products',
+	jQuery("select.ajax_chosen_select_products_and_variations").ajaxChosen({
+	    method: 	'GET',
+	    url: 		woocommerce_writepanel_params.ajax_url,
+	    dataType: 	'json',
+	    data:		{
+	    	action: 		'woocommerce_json_search_products_and_variations',
 			security: 		woocommerce_writepanel_params.search_products_nonce
-		};
+	    }
+	}, function (data) {
+	
+		var terms = {};
 		
-		xhr = $.ajax({
-			url: woocommerce_writepanel_params.ajax_url,
-			data: data,
-			type: 'POST',
-			success: function( response ) {
-			
-				$('.multi_select_products_source').removeClass('loading');
-				$('.multi_select_products_source li:not(.product_search)').remove();
-				$(input).parent().parent().append( response );
-				
-			}
-		});
- 			
-	});	
+	    $.each(data, function (i, val) {
+	        terms[i] = val;
+	    });
 	
-	
-	
-	
-	
-	
+	    return terms;
+	});
 
 	// ORDERS
 	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
@@ -734,82 +709,6 @@ jQuery( function($){
 				row_indexes();
 			}
 		});
-
-		
-
-	// Cross sells/Up sells
-	$('.multi_select_products button').live('click', function(){
-		
-		var wrapper = $(this).parent().parent().parent().parent();
-		
-		var button = $(this);
-		var button_parent = button.parent().parent();
-		
-		if (button_parent.is('.multi_select_products_target_upsell') || button_parent.is('.multi_select_products_target_crosssell')) {	
-			button.parent().remove();
-		} else {
-			if (button.is('.add_upsell')) {
-				var target = $('.multi_select_products_target_upsell', $(wrapper));
-				var product_id_field_name = 'upsell_ids[]';
-			} else {
-				var target = $('.multi_select_products_target_crosssell', $(wrapper));
-				var product_id_field_name = 'crosssell_ids[]';
-			}
-		
-			var exists = $('li[rel=' + button.parent().attr('rel') + ']', target);
-			
-			if ($(exists).size()>0) return false;
-			
-			var cloned_item = button.parent().clone();
-			
-			cloned_item.find('button:eq(0)').html('&times;');
-			cloned_item.find('button:eq(1)').remove();
-			cloned_item.find('input').val( button.parent().attr('rel') );
-			cloned_item.find('.product_id').attr('name', product_id_field_name);
-			
-			cloned_item.appendTo(target);
-		}
-	});
-	
-	var xhr;
-	
-	$('.multi_select_products #product_search').bind('keyup click', function(){
-		
-		$('.multi_select_products_source').addClass('loading');
-		$('.multi_select_products_source li:not(.product_search)').remove();
-		
-		if (xhr) xhr.abort();
-		
-		var search = $(this).val();
-		var input = this;
-		var name = $(this).attr('rel');
-		
-		if (search.length<3) {
-			$('.multi_select_products_source').removeClass('loading');
-			return;
-		}
-		
-		var data = {
-			name: 			name,
-			search: 		encodeURI(search),
-			action: 		'woocommerce_upsell_crosssell_search_products',
-			security: 		woocommerce_writepanel_params.search_products_nonce
-		};
-		
-		xhr = $.ajax({
-			url: woocommerce_writepanel_params.ajax_url,
-			data: data,
-			type: 'POST',
-			success: function( response ) {
-			
-				$('.multi_select_products_source').removeClass('loading');
-				$('.multi_select_products_source li:not(.product_search)').remove();
-				$(input).parent().parent().append( response );
-				
-			}
-		});
- 			
-	});
 	
 	// Uploading files
 	var file_path_field;
