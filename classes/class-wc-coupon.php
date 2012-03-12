@@ -127,7 +127,7 @@ class WC_Coupon {
 			if (sizeof( $this->product_ids )>0) :
 				$valid_for_cart = false;
 				if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
-					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids)) :
+					if (in_array($cart_item['product_id'], $this->product_ids) || in_array($cart_item['variation_id'], $this->product_ids) || in_array($cart_item['data']->get_parent(), $this->product_ids)) :
 						$valid_for_cart = true;
 					endif;
 				endforeach; endif;
@@ -154,7 +154,7 @@ class WC_Coupon {
 				if (sizeof( $this->exclude_product_ids )>0) :
 					$valid_for_cart = true;
 					if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
-						if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids)) :
+						if (in_array($cart_item['product_id'], $this->exclude_product_ids) || in_array($cart_item['variation_id'], $this->exclude_product_ids) || in_array($cart_item['data']->get_parent(), $this->exclude_product_ids)) :
 							$valid_for_cart = false;
 						endif;
 					endforeach; endif;

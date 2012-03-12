@@ -156,6 +156,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Add to cart shortcode for variations
 * woocommerce_messages shortcode for showing error/success messages on a page
 * backorders_require_notification returns false if stock is disabled
+* Minimum spend subtotal fix
+* Product id rules for coupons apply to a products parent (useful for grouped products)
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

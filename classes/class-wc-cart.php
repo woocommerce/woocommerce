@@ -109,7 +109,7 @@ class WC_Cart {
 				$woocommerce->cart_has_contents_cookie( true );
 			else 
 				$woocommerce->cart_has_contents_cookie( false );
-				
+			
 			// Load totals
 			$this->cart_contents_total 	= isset($_SESSION['cart_contents_total']) ? $_SESSION['cart_contents_total'] : 0;
 			$this->cart_contents_weight = isset($_SESSION['cart_contents_weight']) ? $_SESSION['cart_contents_weight'] : 0;
@@ -128,13 +128,14 @@ class WC_Cart {
 			$this->shipping_label		= isset($_SESSION['shipping_label']) ? $_SESSION['shipping_label'] : '';
 			
 			// Queue re-calc if subtotal is not set
-			if (!$this->subtotal && sizeof($this->cart_contents)>0) add_action('wp', array(&$this, 'calculate_totals'), 1);
+			if (!$this->subtotal && sizeof($this->cart_contents)>0) $this->set_session();
 		}
 		
 		/**
 		 * Sets the php session data for the cart and coupons and re-calculates totals
 		 */
 		function set_session() {
+			
 			// Re-calc totals
 			$this->calculate_totals();
 			
@@ -552,6 +553,7 @@ class WC_Cart {
 		 * Reset totals
 		 */
 		private function reset() {
+		
 			$this->total = 0;
 			$this->cart_contents_total = 0;
 			$this->cart_contents_weight = 0;
@@ -594,7 +596,7 @@ class WC_Cart {
 							// Specific products get the discount
 							if (sizeof($coupon->product_ids)>0) {
 								
-								if ((in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids))) 
+								if (in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids) || in_array($values['data']->get_parent(), $coupon->product_ids)) 
 									$this_item_is_discounted = true;
 							
 							// Category discounts
@@ -612,7 +614,7 @@ class WC_Cart {
 				
 							// Specific product ID's excluded from the discount
 							if (sizeof($coupon->exclude_product_ids)>0) 
-								if ((in_array($values['product_id'], $coupon->exclude_product_ids) || in_array($values['variation_id'], $coupon->exclude_product_ids)))
+								if (in_array($values['product_id'], $coupon->exclude_product_ids) || in_array($values['variation_id'], $coupon->exclude_product_ids) || in_array($values['data']->get_parent(), $coupon->exclude_product_ids))
 									$this_item_is_discounted = false;
 							
 							// Specific categories excluded from the discount
@@ -738,7 +740,7 @@ class WC_Cart {
 					// Specific products get the discount
 					if (sizeof($coupon->product_ids)>0) {
 						
-						if ((in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids))) 
+						if (in_array($values['product_id'], $coupon->product_ids) || in_array($values['variation_id'], $coupon->product_ids) || in_array($values['data']->get_parent(), $coupon->product_ids)) 
 							$this_item_is_discounted = true;
 					
 					// Category discounts
@@ -756,7 +758,7 @@ class WC_Cart {
 		
 					// Specific product ID's excluded from the discount
 					if (sizeof($coupon->exclude_product_ids)>0) 
-						if ((in_array($values['product_id'], $coupon->exclude_product_ids) || in_array($values['variation_id'], $coupon->exclude_product_ids)))
+						if (in_array($values['product_id'], $coupon->exclude_product_ids) || in_array($values['variation_id'], $coupon->exclude_product_ids) || in_array($values['data']->get_parent(), $coupon->exclude_product_ids))
 							$this_item_is_discounted = false;
 					
 					// Specific categories excluded from the discount
@@ -829,7 +831,9 @@ class WC_Cart {
 			global $woocommerce;
 			
 			$this->reset();
+			
 			do_action('woocommerce_before_calculate_totals', $this);
+			
 			// Get count of all items + weights + subtotal (we may need this for discounts)
 			if (sizeof($this->cart_contents)>0) foreach ($this->cart_contents as $cart_item_key => $values) :
 				
@@ -1254,7 +1258,9 @@ class WC_Cart {
 				endforeach;
 				
 				$this->applied_coupons[] = $coupon_code;
+				
 				$this->set_session();
+				
 				$woocommerce->add_message( __('Discount code applied successfully.', 'woocommerce') );
 				return true;
 			

@@ -310,6 +310,12 @@ class WC_Product {
 		return apply_filters('woocommerce_product_title', apply_filters('the_title', $this->post->post_title), $this);
 	}
 	
+	/** Get the parent of the post */
+	function get_parent() {
+		$this->get_post_data();
+		return apply_filters('woocommerce_product_parent', $this->post->post_parent, $this);
+	}
+	
 	/** Get the add to url */
 	function add_to_cart_url() {
 		global $woocommerce;
