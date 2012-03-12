@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Download permissions fix
 * Billing email sets user email address
 * Other profile fields filled in based on billing info
+* COD reduce stock
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

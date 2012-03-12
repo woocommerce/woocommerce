@@ -77,13 +77,25 @@ class WC_COD extends WC_Payment_Gateway {
     // Process the payment
 	function process_payment ($order_id) {
 		global $woocommerce;
-		$order = new woocommerce_order ($order_id);
+
+		$order = new WC_Order( $order_id );
+
+		// Mark as on-hold (we're awaiting the cheque)
 		$order->update_status('on-hold', __('Payment to be made upon delivery.', 'woocommerce'));
-		$woocommerce->cart->empty_cart(); // Dump the cart
-		unset($_SESSION['order_awaiting_payment']); // Lose our session	
-		return array( // Return and let's visit the order completed page
+		
+		// Reduce stock levels
+		$order->reduce_order_stock();
+		
+		// Remove cart
+		$woocommerce->cart->empty_cart();
+		
+		// Empty awaiting payment session
+		unset($_SESSION['order_awaiting_payment']);
+			
+		// Return thankyou redirect
+		return array(
 			'result' 	=> 'success',
-			'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(get_option('woocommerce_thanks_page_id'))))
+			'redirect'	=> add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(woocommerce_get_page_id('thanks'))))
 		);
 	}
 	
