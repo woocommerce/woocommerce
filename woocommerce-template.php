@@ -26,19 +26,19 @@ if (!function_exists('woocommerce_content')) {
 if (!function_exists('woocommerce_archive_product_content')) {
 	function woocommerce_archive_product_content() {
 		
-		if (!is_search()) :
+		if (!is_search()) {
 			$shop_page = get_post( woocommerce_get_page_id('shop') );
 			$shop_page_title = apply_filters('the_title', (get_option('woocommerce_shop_page_title')) ? get_option('woocommerce_shop_page_title') : $shop_page->post_title);
-			$shop_page_content = $shop_page->post_content;
-		else :
+			if( is_object( $shop_page ) ) $shop_page_content = $shop_page->post_content;
+    } else {
 			$shop_page_title = __('Search Results:', 'woocommerce') . ' &ldquo;' . get_search_query() . '&rdquo;'; 
 			if (get_query_var('paged')) $shop_page_title .= ' &mdash; ' . __('Page', 'woocommerce') . ' ' . get_query_var('paged');
 			$shop_page_content = '';
-		endif;
+    }
 		
 		?><h1 class="page-title"><?php echo $shop_page_title ?></h1>
 		
-		<?php echo apply_filters('the_content', $shop_page_content); ?>
+		<?php if( ! empty( $shop_page_content ) ) echo apply_filters('the_content', $shop_page_content); ?>
 		
 		<?php woocommerce_get_template_part( 'loop', 'shop' ); ?>
 		
