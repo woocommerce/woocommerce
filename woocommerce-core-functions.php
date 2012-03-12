@@ -493,15 +493,6 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 				
 				$user_email = $order->billing_email;
 				
-				if ($order->user_id>0) :
-					$user_info = get_userdata($order->user_id);
-					if ($user_info->user_email) :
-						$user_email = $user_info->user_email;
-					endif;
-				else :
-					$order->user_id = 0;
-				endif;
-				
 				$limit = trim(get_post_meta($download_id, '_download_limit', true));
 				$expiry = trim(get_post_meta($download_id, '_download_expiry', true));
 				

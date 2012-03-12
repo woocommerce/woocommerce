@@ -159,6 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Minimum spend subtotal fix
 * Product id rules for coupons apply to a products parent (useful for grouped products)
 * Download permissions fix
+* Billing email sets user email address
+* Other profile fields filled in based on billing info
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

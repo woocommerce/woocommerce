@@ -406,6 +406,20 @@ class WC_Checkout {
 						// User
 						if ($user_id>0) :
 							update_user_meta( $user_id, $key, $this->posted[$key] );
+							
+							// Special fields
+							switch ($key) {
+								case "billing_emaill" :
+									if (!email_exists($this->posted[$key])) wp_update_user( array ( 'ID' => $user_id, 'user_email' => $this->posted[$key] ) ) ;
+								break;
+								case "billing_first_name" :
+									wp_update_user( array ( 'ID' => $user_id, 'first_name' => $this->posted[$key] ) ) ;
+								break;
+								case "billing_last_name" :
+									wp_update_user( array ( 'ID' => $user_id, 'last_name' => $this->posted[$key] ) ) ;
+								break;
+							}
+
 						endif;
 						
 					endforeach;
