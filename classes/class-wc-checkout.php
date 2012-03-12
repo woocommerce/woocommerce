@@ -404,7 +404,7 @@ class WC_Checkout {
 						update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
 						
 						// User
-						if ($user_id>0) :
+						if ($user_id>0 && !empty($this->posted[$key])) :
 							update_user_meta( $user_id, $key, $this->posted[$key] );
 							
 							// Special fields
