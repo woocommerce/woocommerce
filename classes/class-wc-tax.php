@@ -19,14 +19,14 @@ class WC_Tax {
 		if (!is_array($this->parsed_rates)) :
 			global $woocommerce;
 			
-			$tax_rates 			= (array) get_option('woocommerce_tax_rates');
-			$local_tax_rates 	= (array) get_option('woocommerce_local_tax_rates');
+			$tax_rates 			= array_filter((array) get_option('woocommerce_tax_rates'));
+			$local_tax_rates 	= array_filter((array) get_option('woocommerce_local_tax_rates'));
 			
 			$parsed_rates 		= array();
 			$flat_rates			= array();
 			$index 				= 0;
 			
-			if ($tax_rates) foreach( $tax_rates as $rate ) :
+			if (!empty($tax_rates)) foreach( $tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
