@@ -268,7 +268,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     	case 'variation' :
     		
     		// Only allow integer variation ID - if its not set, redirect to the product page
-    		if (empty($_POST['variation_id']) || !is_numeric($_POST['variation_id']) || $_POST['variation_id']<1) {
+    		if (empty($_REQUEST['variation_id']) || !is_numeric($_REQUEST['variation_id']) || $_REQUEST['variation_id']<1) {
     			$woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
     			wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
     			exit;
@@ -276,8 +276,8 @@ function woocommerce_add_to_cart_action( $url = false ) {
     		
     		// Get product ID to add and quantity
     		$product_id 		= (int) apply_filters('woocommerce_add_to_cart_product_id', $_REQUEST['product_id']);
-    		$variation_id 		= (int) $_POST['variation_id'];
-    		$quantity 			= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
+    		$variation_id 		= (int) $_REQUEST['variation_id'];
+    		$quantity 			= (isset($_REQUEST['quantity'])) ? (int) $_REQUEST['quantity'] : 1;
     		$attributes 		= (array) maybe_unserialize(get_post_meta($product_id, '_product_attributes', true));
     		$variations 		= array();
     		$all_variations_set = true;
@@ -287,9 +287,9 @@ function woocommerce_add_to_cart_action( $url = false ) {
                 if ( !$attribute['is_variation'] ) continue;
 
                 $taxonomy = 'attribute_' . sanitize_title($attribute['name']);
-                if (!empty($_POST[$taxonomy])) {
+                if (!empty($_REQUEST[$taxonomy])) {
                     // Get value from post data
-                    $value = esc_attr(stripslashes($_POST[$taxonomy]));
+                    $value = esc_attr(stripslashes($_REQUEST[$taxonomy]));
 
                     // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
                     $variations[esc_attr($attribute['name'])] = $value;
@@ -319,11 +319,11 @@ function woocommerce_add_to_cart_action( $url = false ) {
     	// Grouped Products
     	case 'group' :
     	
-			if (isset($_POST['quantity']) && is_array($_POST['quantity'])) {
+			if (isset($_REQUEST['quantity']) && is_array($_REQUEST['quantity'])) {
 				
 				$quantity_set = false;
 				
-				foreach ($_POST['quantity'] as $item => $quantity) {
+				foreach ($_REQUEST['quantity'] as $item => $quantity) {
 					if ($quantity<1) continue;
 					
 					$quantity_set = true;
@@ -364,7 +364,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     		
     		// Get product ID to add and quantity
     		$product_id		= (int) $_REQUEST['add-to-cart'];
-    		$quantity 		= (isset($_POST['quantity'])) ? (int) $_POST['quantity'] : 1;
+    		$quantity 		= (isset($_REQUEST['quantity'])) ? (int) $_REQUEST['quantity'] : 1;
     		
     		// Add to cart validation
     		$passed_validation 	= apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);

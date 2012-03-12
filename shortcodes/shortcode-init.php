@@ -221,23 +221,61 @@ function woocommerce_product_add_to_cart($atts){
 		return;
 	endif;
 	
-	if ($product_data->post_type!=='product') return;
-	
-	$product = $woocommerce->setup_product_data( $product_data );
+	if ($product_data->post_type=='product') {
 		
-	if (!$product->is_visible()) continue; 
-	
-	ob_start();
-	?>
-	<p class="product" style="<?php echo $atts['style']; ?>">
-	
-		<?php echo $product->get_price_html(); ?>
+		$product = $woocommerce->setup_product_data( $product_data );
+			
+		if (!$product->is_visible()) continue; 
 		
-		<?php woocommerce_template_loop_add_to_cart(); ?>
-					
-	</p><?php 
+		ob_start();
+		?>
+		<p class="product" style="<?php echo $atts['style']; ?>">
+		
+			<?php echo $product->get_price_html(); ?>
+			
+			<?php woocommerce_template_loop_add_to_cart(); ?>
+						
+		</p><?php 
+		
+		return ob_get_clean();  
 	
-	return ob_get_clean();  
+	} elseif ($product_data->post_type=='product_variation') {
+		
+		$product = new WC_Product( $product_data->post_parent );
+		
+		$GLOBALS['product'] = $product;
+		
+		$variation = new WC_Product_Variation( $product_data->ID );
+			
+		if (!$product->is_visible()) continue; 
+		
+		ob_start();
+		?>
+		<p class="product product-variation" style="<?php echo $atts['style']; ?>">
+		
+			<?php echo $product->get_price_html(); ?>
+			
+			<?php
+			
+			$link 	= $product->add_to_cart_url();
+			
+			$label 	= apply_filters('add_to_cart_text', __('Add to cart', 'woocommerce'));
+			
+			$link = add_query_arg( 'variation_id', $variation->variation_id, $link );
+			
+			foreach ($variation->variation_data as $key => $data) {
+				if ($data) $link = add_query_arg( $key, $data, $link );
+			}
+			
+			echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', esc_url( $link ), $product->id, $product->product_type, $label);
+			
+			?>
+						
+		</p><?php 
+		
+		return ob_get_clean();  
+
+	}
 }
 
 
@@ -346,6 +384,17 @@ function woocommerce_product_page_shortcode($atts){
 }	
 
 /**
+ * Show messages
+ **/
+function woocommerce_messages_shortcode() {
+	ob_start();
+	
+	woocommerce_show_messages();
+	
+	return ob_get_clean();
+}
+
+/**
  * Shortcode creation
  **/
 add_shortcode('product', 'woocommerce_product');
@@ -365,3 +414,4 @@ add_shortcode('woocommerce_change_password', 'get_woocommerce_change_password');
 add_shortcode('woocommerce_view_order', 'get_woocommerce_view_order');
 add_shortcode('woocommerce_pay', 'get_woocommerce_pay');
 add_shortcode('woocommerce_thankyou', 'get_woocommerce_thankyou');
+add_shortcode('woocommerce_messages', 'woocommerce_messages_shortcode');
