@@ -142,12 +142,6 @@ msgstr "Geen producten gevonden"
 msgid "Download Permissions Granted"
 msgstr "Download Toestemming Verleend"
 
-#: woocommerce-core-functions.php:566
-#: woocommerce.php:488
-#@ woocommerce
-msgid "product"
-msgstr "product"
-
 #: woocommerce-core-functions.php:656
 #@ woocommerce
 msgid "Select a category"
@@ -428,23 +422,23 @@ msgstr "Selecteer een land&hellip;"
 msgid "Select a state&hellip;"
 msgstr "Selecteer een staat&hellip;"
 
-#: woocommerce.php:416
+#: woocommerce.php:428
 #@ woocommerce
 msgid "Customer"
 msgstr "Klant"
 
-#: woocommerce.php:423
+#: woocommerce.php:435
 #@ woocommerce
 msgid "Shop Manager"
 msgstr "Winkelmanager"
 
-#: woocommerce.php:484
+#: woocommerce.php:496
 #@ woocommerce
 msgctxt "slug"
 msgid "product-category"
 msgstr "product-categorie"
 
-#: woocommerce.php:486
+#: woocommerce.php:498
 #@ woocommerce
 msgctxt "slug"
 msgid "product-tag"
@@ -452,220 +446,220 @@ msgstr "product-tag"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:103
 #: widgets/widget-product_categories.php:40
-#: woocommerce.php:516
-#: woocommerce.php:518
+#: woocommerce.php:528
+#: woocommerce.php:530
 #@ woocommerce
 msgid "Product Categories"
 msgstr "Productcategorieën"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:55
-#: woocommerce.php:519
+#: woocommerce.php:531
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
 msgstr[0] "Productcategorie"
 msgstr[1] "Productcategorieën"
 
-#: woocommerce.php:520
+#: woocommerce.php:532
 #@ woocommerce
 msgid "Search Product Categories"
 msgstr "Zoek productcategorie"
 
-#: woocommerce.php:521
+#: woocommerce.php:533
 #@ woocommerce
 msgid "All Product Categories"
 msgstr "Alle Productcategorieën"
 
-#: woocommerce.php:522
+#: woocommerce.php:534
 #@ woocommerce
 msgid "Parent Product Category"
 msgstr "Hoofdproductcategorie"
 
-#: woocommerce.php:523
+#: woocommerce.php:535
 #@ woocommerce
 msgid "Parent Product Category:"
 msgstr "Hoofdproductcategorie:"
 
-#: woocommerce.php:524
+#: woocommerce.php:536
 #@ woocommerce
 msgid "Edit Product Category"
 msgstr "Bewerk Productcategorie"
 
-#: woocommerce.php:525
+#: woocommerce.php:537
 #@ woocommerce
 msgid "Update Product Category"
 msgstr "Productcategorie bijwerken"
 
-#: woocommerce.php:526
+#: woocommerce.php:538
 #@ woocommerce
 msgid "Add New Product Category"
 msgstr "Nieuwe productcategorie toevoegen"
 
-#: woocommerce.php:527
+#: woocommerce.php:539
 #@ woocommerce
 msgid "New Product Category Name"
 msgstr "Nieuwe productcategorie naam"
 
 #: widgets/widget-product_tag_cloud.php:42
-#: woocommerce.php:545
+#: woocommerce.php:557
 #@ woocommerce
 msgid "Product Tags"
 msgstr "Producttags"
 
 #: admin/post-types/product.php:78
-#: woocommerce.php:547
+#: woocommerce.php:559
 #@ woocommerce
 msgid "Tags"
 msgstr "Tags"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:69
-#: woocommerce.php:548
+#: woocommerce.php:560
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
 msgstr[0] "Producttag"
 msgstr[1] "Producttags"
 
-#: woocommerce.php:549
+#: woocommerce.php:561
 #@ woocommerce
 msgid "Search Product Tags"
 msgstr "Zoek producttags"
 
-#: woocommerce.php:550
+#: woocommerce.php:562
 #@ woocommerce
 msgid "All Product Tags"
 msgstr "Alle producttags"
 
-#: woocommerce.php:551
+#: woocommerce.php:563
 #@ woocommerce
 msgid "Parent Product Tag"
 msgstr "Hoofdproducttag"
 
-#: woocommerce.php:552
+#: woocommerce.php:564
 #@ woocommerce
 msgid "Parent Product Tag:"
 msgstr "Hoofdproducttag:"
 
-#: woocommerce.php:553
+#: woocommerce.php:565
 #@ woocommerce
 msgid "Edit Product Tag"
 msgstr "Producttag bewerken"
 
-#: woocommerce.php:554
+#: woocommerce.php:566
 #@ woocommerce
 msgid "Update Product Tag"
 msgstr "Producttag bijwerken"
 
-#: woocommerce.php:555
+#: woocommerce.php:567
 #@ woocommerce
 msgid "Add New Product Tag"
 msgstr "Nieuwe producttag toevoegen"
 
-#: woocommerce.php:556
+#: woocommerce.php:568
 #@ woocommerce
 msgid "New Product Tag Name"
 msgstr "Nieuwe producttag naam"
 
-#: woocommerce.php:575
-#: woocommerce.php:577
+#: woocommerce.php:587
+#: woocommerce.php:589
 #@ woocommerce
 msgid "Shipping Classes"
 msgstr "Verzendingsklassen"
 
 #: classes/shipping/class-wc-flat-rate.php:345
-#: woocommerce.php:578
+#: woocommerce.php:590
 #@ woocommerce
 msgid "Shipping Class"
 msgstr "Verzendklassen"
 
-#: woocommerce.php:579
+#: woocommerce.php:591
 #@ woocommerce
 msgid "Search Shipping Classes"
 msgstr "Zoek verzendingsklassen"
 
-#: woocommerce.php:580
+#: woocommerce.php:592
 #@ woocommerce
 msgid "All Shipping Classes"
 msgstr "Alle Verzendingsklassen"
 
-#: woocommerce.php:581
+#: woocommerce.php:593
 #@ woocommerce
 msgid "Parent Shipping Class"
 msgstr "Hoofdverzendingsklasse"
 
-#: woocommerce.php:582
+#: woocommerce.php:594
 #@ woocommerce
 msgid "Parent Shipping Class:"
 msgstr "Hoofdverzendingsklasse:"
 
-#: woocommerce.php:583
+#: woocommerce.php:595
 #@ woocommerce
 msgid "Edit Shipping Class"
 msgstr "Verzendingsklasse bewerken"
 
-#: woocommerce.php:584
+#: woocommerce.php:596
 #@ woocommerce
 msgid "Update Shipping Class"
 msgstr "Verzendingsklasse bijwerken"
 
-#: woocommerce.php:585
+#: woocommerce.php:597
 #@ woocommerce
 msgid "Add New Shipping Class"
 msgstr "Nieuwe verzendingsklasse toevoegen"
 
-#: woocommerce.php:586
+#: woocommerce.php:598
 #@ woocommerce
 msgid "New Shipping Class Name"
 msgstr "Nieuwe verzendingsklassenaam"
 
-#: woocommerce.php:607
+#: woocommerce.php:619
 #@ woocommerce
 msgid "Order statuses"
 msgstr "Bestelstatussen"
 
-#: woocommerce.php:608
+#: woocommerce.php:620
 #@ woocommerce
 msgid "Order status"
 msgstr "Bestelstatus"
 
-#: woocommerce.php:609
+#: woocommerce.php:621
 #@ woocommerce
 msgid "Search Order statuses"
 msgstr "Zoek bestelstatussen"
 
-#: woocommerce.php:610
+#: woocommerce.php:622
 #@ woocommerce
 msgid "All  Order statuses"
 msgstr "Toon alle bestelstatussen"
 
-#: woocommerce.php:611
+#: woocommerce.php:623
 #@ woocommerce
 msgid "Parent Order status"
 msgstr "Hoofdbestelstatus"
 
-#: woocommerce.php:612
+#: woocommerce.php:624
 #@ woocommerce
 msgid "Parent Order status:"
 msgstr "Hoofdbestelstatus:"
 
-#: woocommerce.php:613
+#: woocommerce.php:625
 #@ woocommerce
 msgid "Edit Order status"
 msgstr "Bestelstatus bewerken"
 
-#: woocommerce.php:614
+#: woocommerce.php:626
 #@ woocommerce
 msgid "Update Order status"
 msgstr "Bestelstatus bijwerken"
 
-#: woocommerce.php:615
+#: woocommerce.php:627
 #@ woocommerce
 msgid "Add New Order status"
 msgstr "Nieuwe bestelstatus toevoegen"
 
-#: woocommerce.php:616
+#: woocommerce.php:628
 #@ woocommerce
 msgid "New Order status Name"
 msgstr "Nieuwe bestelstatus naam"
@@ -674,20 +668,20 @@ msgstr "Nieuwe bestelstatus naam"
 #: admin/post-types/product.php:746
 #: admin/post-types/writepanels/writepanel-product_data.php:131
 #: widgets/widget-product_search.php:50
-#: woocommerce.php:644
+#: woocommerce.php:656
 #@ woocommerce
 msgid "Search"
 msgstr "Zoek"
 
 #: admin/woocommerce-admin-settings-forms.php:412
 #: admin/woocommerce-admin-settings-forms.php:575
-#: woocommerce.php:645
+#: woocommerce.php:657
 #@ woocommerce
 msgid "All"
 msgstr "Alle"
 
-#: woocommerce.php:646
-#: woocommerce.php:647
+#: woocommerce.php:658
+#: woocommerce.php:659
 #@ woocommerce
 msgid "Parent"
 msgstr "Ouder"
@@ -701,34 +695,34 @@ msgstr "Ouder"
 #: admin/woocommerce-admin-settings-forms.php:570
 #: templates/myaccount/my-address.php:21
 #: templates/myaccount/my-address.php:52
-#: woocommerce.php:648
-#: woocommerce.php:674
-#: woocommerce.php:718
-#: woocommerce.php:759
-#: woocommerce.php:803
+#: woocommerce.php:660
+#: woocommerce.php:686
+#: woocommerce.php:729
+#: woocommerce.php:770
+#: woocommerce.php:814
 #@ woocommerce
 msgid "Edit"
 msgstr "Bewerken"
 
 #: admin/woocommerce-admin-attributes.php:138
-#: woocommerce.php:649
+#: woocommerce.php:661
 #@ woocommerce
 msgid "Update"
 msgstr "Bijwerken"
 
-#: woocommerce.php:650
+#: woocommerce.php:662
 #@ woocommerce
 msgid "Add New"
 msgstr "Nieuwe toevoegen"
 
-#: woocommerce.php:651
+#: woocommerce.php:663
 #@ woocommerce
 msgid "New"
 msgstr "Nieuwe"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:55
 #: admin/post-types/writepanels/writepanel-product_data.php:404
-#: woocommerce.php:670
+#: woocommerce.php:682
 #@ woocommerce
 msgid "Products"
 msgstr "Producten"
@@ -745,118 +739,118 @@ msgstr "Producten"
 #: templates/emails/customer-note.php:18
 #: templates/emails/customer-processing-order.php:14
 #: templates/order/order-details.php:14
-#: woocommerce.php:671
+#: woocommerce.php:683
 #@ woocommerce
 msgid "Product"
 msgid_plural "Products"
 msgstr[0] "Product"
 msgstr[1] "Producten"
 
-#: woocommerce.php:672
+#: woocommerce.php:684
 #@ woocommerce
 msgid "Add Product"
 msgstr "Product toevoegen"
 
-#: woocommerce.php:673
+#: woocommerce.php:685
 #@ woocommerce
 msgid "Add New Product"
 msgstr "Nieuw product toevoegen"
 
-#: woocommerce.php:675
+#: woocommerce.php:687
 #@ woocommerce
 msgid "Edit Product"
 msgstr "Product bewerken"
 
-#: woocommerce.php:676
+#: woocommerce.php:688
 #@ woocommerce
 msgid "New Product"
 msgstr "Nieuw product"
 
-#: woocommerce.php:677
-#: woocommerce.php:678
+#: woocommerce.php:689
+#: woocommerce.php:690
 #@ woocommerce
 msgid "View Product"
 msgstr "Bekijk product"
 
-#: woocommerce.php:679
+#: woocommerce.php:691
 #@ woocommerce
 msgid "Search Products"
 msgstr "Zoek producten"
 
-#: woocommerce.php:680
+#: woocommerce.php:692
 #@ woocommerce
 msgid "No Products found"
 msgstr "Geen producten gevonden"
 
-#: woocommerce.php:681
+#: woocommerce.php:693
 #@ woocommerce
 msgid "No Products found in trash"
 msgstr "Geen producten gevonden in de prullenbak"
 
-#: woocommerce.php:682
+#: woocommerce.php:694
 #@ woocommerce
 msgid "Parent Product"
 msgstr "Hoofdproduct"
 
-#: woocommerce.php:684
+#: woocommerce.php:696
 #@ woocommerce
 msgid "This is where you can add new products to your store."
 msgstr "Dit is waar u nieuwe producten kunt toevoegen aan uw winkel."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:19
-#: woocommerce.php:714
+#: woocommerce.php:725
 #@ woocommerce
 msgid "Variations"
 msgstr "Variaties"
 
-#: woocommerce.php:715
+#: woocommerce.php:726
 #@ woocommerce
 msgid "Variation"
 msgstr "Variatie"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:191
-#: woocommerce.php:716
+#: woocommerce.php:727
 #@ woocommerce
 msgid "Add Variation"
 msgstr "Variatie toevoegen"
 
-#: woocommerce.php:717
+#: woocommerce.php:728
 #@ woocommerce
 msgid "Add New Variation"
 msgstr "Variatie toevoegen"
 
-#: woocommerce.php:719
+#: woocommerce.php:730
 #@ woocommerce
 msgid "Edit Variation"
 msgstr "Variatie bewerken"
 
-#: woocommerce.php:720
+#: woocommerce.php:731
 #@ woocommerce
 msgid "New Variation"
 msgstr "Nieuwe variatie"
 
-#: woocommerce.php:721
-#: woocommerce.php:722
+#: woocommerce.php:732
+#: woocommerce.php:733
 #@ woocommerce
 msgid "View Variation"
 msgstr "Variaties bekijken"
 
-#: woocommerce.php:723
+#: woocommerce.php:734
 #@ woocommerce
 msgid "Search Variations"
 msgstr "Variatie zoeken"
 
-#: woocommerce.php:724
+#: woocommerce.php:735
 #@ woocommerce
 msgid "No Variations found"
 msgstr "Geen variaties gevonden"
 
-#: woocommerce.php:725
+#: woocommerce.php:736
 #@ woocommerce
 msgid "No Variations found in trash"
 msgstr "Geen variaties in de prullenbak gevonden"
 
-#: woocommerce.php:726
+#: woocommerce.php:737
 #@ woocommerce
 msgid "Parent Variation"
 msgstr "Hoofdvariatie"
@@ -864,166 +858,166 @@ msgstr "Hoofdvariatie"
 #: admin/woocommerce-admin-content.php:46
 #: admin/woocommerce-admin-dashboard.php:99
 #: admin/woocommerce-admin-users.php:21
-#: woocommerce.php:755
+#: woocommerce.php:766
 #@ woocommerce
 msgid "Orders"
 msgstr "Bestellingen"
 
 #: admin/post-types/shop_order.php:35
-#: woocommerce.php:756
+#: woocommerce.php:767
 #@ woocommerce
 msgid "Order"
 msgstr "Bestelling"
 
-#: woocommerce.php:757
+#: woocommerce.php:768
 #@ woocommerce
 msgid "Add Order"
 msgstr "Bestelling toevoegen"
 
-#: woocommerce.php:758
+#: woocommerce.php:769
 #@ woocommerce
 msgid "Add New Order"
 msgstr "Bestelling toevoegen"
 
-#: woocommerce.php:760
+#: woocommerce.php:771
 #@ woocommerce
 msgid "Edit Order"
 msgstr "Bestelling bewerken"
 
-#: woocommerce.php:761
+#: woocommerce.php:772
 #@ woocommerce
 msgid "New Order"
 msgstr "Nieuwe bestelling"
 
 #: admin/woocommerce-admin-install.php:173
-#: woocommerce.php:762
-#: woocommerce.php:763
+#: woocommerce.php:773
+#: woocommerce.php:774
 #@ woocommerce
 msgid "View Order"
 msgstr "Bekijk Bestelling"
 
-#: woocommerce.php:764
+#: woocommerce.php:775
 #@ woocommerce
 msgid "Search Orders"
 msgstr "Zoek bestellingen"
 
-#: woocommerce.php:765
+#: woocommerce.php:776
 #@ woocommerce
 msgid "No Orders found"
 msgstr "Geen bestellingen gevonden"
 
-#: woocommerce.php:766
+#: woocommerce.php:777
 #@ woocommerce
 msgid "No Orders found in trash"
 msgstr "Geen bestellingen gevonden in de prullenbak"
 
-#: woocommerce.php:767
+#: woocommerce.php:778
 #@ woocommerce
 msgid "Parent Orders"
 msgstr "Hoofd Bestellingen"
 
-#: woocommerce.php:769
+#: woocommerce.php:780
 #@ woocommerce
 msgid "This is where store orders are stored."
 msgstr "Hier worden bestellingen worden opgeslagen."
 
 #: admin/woocommerce-admin-content.php:54
-#: woocommerce.php:799
+#: woocommerce.php:810
 #@ woocommerce
 msgid "Coupons"
 msgstr "Kortingsbonnen"
 
 #: classes/shipping/class-wc-free-shipping.php:65
 #: templates/cart/cart.php:90
-#: woocommerce.php:800
+#: woocommerce.php:811
 #@ woocommerce
 msgid "Coupon"
 msgstr "Kortingsbon"
 
-#: woocommerce.php:801
+#: woocommerce.php:812
 #@ woocommerce
 msgid "Add Coupon"
 msgstr "Kortingsbon toevoegen"
 
-#: woocommerce.php:802
+#: woocommerce.php:813
 #@ woocommerce
 msgid "Add New Coupon"
 msgstr "Kortingsbon toevoegen"
 
-#: woocommerce.php:804
+#: woocommerce.php:815
 #@ woocommerce
 msgid "Edit Coupon"
 msgstr "Kortingsbon bewerken"
 
-#: woocommerce.php:805
+#: woocommerce.php:816
 #@ woocommerce
 msgid "New Coupon"
 msgstr "Nieuwe kortingsbon"
 
-#: woocommerce.php:806
+#: woocommerce.php:817
 #@ woocommerce
 msgid "View Coupons"
 msgstr "Kortingsbonnen bekijken"
 
-#: woocommerce.php:807
+#: woocommerce.php:818
 #@ woocommerce
 msgid "View Coupon"
 msgstr "Kortingsbonnen bekijken"
 
-#: woocommerce.php:808
+#: woocommerce.php:819
 #@ woocommerce
 msgid "Search Coupons"
 msgstr "Zoek kortingsbonnen"
 
-#: woocommerce.php:809
+#: woocommerce.php:820
 #@ woocommerce
 msgid "No Coupons found"
 msgstr "Geen kortingsbonnen gevonden"
 
-#: woocommerce.php:810
+#: woocommerce.php:821
 #@ woocommerce
 msgid "No Coupons found in trash"
 msgstr "Geen coupons gevonden in de prullenbak"
 
-#: woocommerce.php:811
+#: woocommerce.php:822
 #@ woocommerce
 msgid "Parent Coupon"
 msgstr "Hoofd Coupon"
 
-#: woocommerce.php:813
+#: woocommerce.php:824
 #@ woocommerce
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr "Hier kunt u nieuwe kortingscodes toevoegen."
 
-#: woocommerce.php:914
+#: woocommerce.php:925
 #@ woocommerce
 msgid "Select an option&hellip;"
 msgstr "Selecteer een optie&hellip;"
 
 #: templates/cart/totals.php:28
 #: templates/checkout/review-order.php:30
-#: woocommerce.php:1176
+#: woocommerce.php:1187
 #@ woocommerce
 msgid "Cart Discount"
 msgstr "Winkelwagen Korting"
 
-#: woocommerce.php:1177
+#: woocommerce.php:1188
 #@ woocommerce
 msgid "Cart % Discount"
 msgstr "Winkelwagen % Korting"
 
-#: woocommerce.php:1178
+#: woocommerce.php:1189
 #@ woocommerce
 msgid "Product Discount"
 msgstr "Product Korting"
 
-#: woocommerce.php:1179
+#: woocommerce.php:1190
 #@ woocommerce
 msgid "Product % Discount"
 msgstr "Product Korting %"
 
 #: admin/woocommerce-admin-settings.php:1064
-#: woocommerce.php:1221
+#: woocommerce.php:1232
 #@ woocommerce
 msgid "Action failed. Please refresh the page and retry."
 msgstr "Actie niet gelukt. Ververs de pagina en probeer opnieuw."
@@ -1266,7 +1260,7 @@ msgstr "De rapporten kunnen gevonden worden in het menu aan de linkerkant. Hier 
 #: admin/woocommerce-admin-content.php:39
 #: admin/woocommerce-admin-reports.php:903
 #: admin/woocommerce-admin-reports.php:1000
-#: admin/woocommerce-admin-reports.php:1133
+#: admin/woocommerce-admin-reports.php:1135
 #@ woocommerce
 msgid "Sales"
 msgstr "Verkopen"
@@ -1392,7 +1386,7 @@ msgstr "U gebruikt nu <strong>WooCommerce %s</strong>."
 msgid "Monthly Sales"
 msgstr "Maandelijkse verkopen"
 
-#: admin/woocommerce-admin-dashboard.php:192
+#: admin/woocommerce-admin-dashboard.php:193
 #@ woocommerce
 msgid "WooCommerce Right Now"
 msgstr "WooCommerce op dit moment"
@@ -1408,12 +1402,12 @@ msgstr "WooCommerce recente bestellingen"
 msgid "WooCommerce Recent Reviews"
 msgstr "WooCommerce Recente Reviews"
 
-#: admin/woocommerce-admin-dashboard.php:219
+#: admin/woocommerce-admin-dashboard.php:224
 #@ woocommerce
 msgid "l jS \\of F Y h:i:s A"
 msgstr "l j F Y H:i"
 
-#: admin/woocommerce-admin-dashboard.php:220
+#: admin/woocommerce-admin-dashboard.php:225
 #: admin/woocommerce-admin-reports.php:307
 #@ woocommerce
 msgid "item"
@@ -1421,7 +1415,7 @@ msgid_plural "items"
 msgstr[0] "item"
 msgstr[1] "items"
 
-#: admin/woocommerce-admin-dashboard.php:220
+#: admin/woocommerce-admin-dashboard.php:225
 #: admin/woocommerce-admin-reports.php:307
 #: shortcodes/shortcode-pay.php:81
 #: templates/checkout/thankyou.php:44
@@ -1429,12 +1423,12 @@ msgstr[1] "items"
 msgid "Total:"
 msgstr "Totaal:"
 
-#: admin/woocommerce-admin-dashboard.php:226
+#: admin/woocommerce-admin-dashboard.php:231
 #@ woocommerce
 msgid "There are no product orders yet."
 msgstr "Er zijn nog geen bestellingen van dit product."
 
-#: admin/woocommerce-admin-dashboard.php:256
+#: admin/woocommerce-admin-dashboard.php:261
 #: classes/class-wc-product.php:694
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
@@ -1443,7 +1437,7 @@ msgstr "Er zijn nog geen bestellingen van dit product."
 msgid "out of 5"
 msgstr "van de 5"
 
-#: admin/woocommerce-admin-dashboard.php:264
+#: admin/woocommerce-admin-dashboard.php:269
 #@ woocommerce
 msgid "There are no product reviews yet."
 msgstr "Er zijn nog geen reviews van dit product."
@@ -1613,147 +1607,147 @@ msgstr "BTW op winkelwagen:"
 msgid "Shipping Tax:"
 msgstr "BTW op verzendkosten:"
 
-#: admin/woocommerce-admin-init.php:385
+#: admin/woocommerce-admin-init.php:396
 #@ woocommerce
 msgid "Exclude image"
 msgstr "Uit te sluiten afbeelding"
 
-#: admin/woocommerce-admin-init.php:394
+#: admin/woocommerce-admin-init.php:405
 #@ woocommerce
 msgid "Enabling this option will hide it from the product page image gallery."
 msgstr "Inschakelen van deze optie activeert het verbergen van het productpagina-afbeelding galerij."
 
-#: admin/woocommerce-admin-init.php:438
+#: admin/woocommerce-admin-init.php:449
 #, php-format
 #@ woocommerce
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr "Product bijgewerkt. <a href=\"%s\">Bekijk Product</a>"
 
-#: admin/woocommerce-admin-init.php:439
-#: admin/woocommerce-admin-init.php:454
-#: admin/woocommerce-admin-init.php:469
+#: admin/woocommerce-admin-init.php:450
+#: admin/woocommerce-admin-init.php:465
+#: admin/woocommerce-admin-init.php:480
 #@ woocommerce
 msgid "Custom field updated."
 msgstr "Aangepast veld bijgewerkt."
 
-#: admin/woocommerce-admin-init.php:440
-#: admin/woocommerce-admin-init.php:455
-#: admin/woocommerce-admin-init.php:470
+#: admin/woocommerce-admin-init.php:451
+#: admin/woocommerce-admin-init.php:466
+#: admin/woocommerce-admin-init.php:481
 #@ woocommerce
 msgid "Custom field deleted."
 msgstr "Aangepast veld verwijderd."
 
-#: admin/woocommerce-admin-init.php:441
+#: admin/woocommerce-admin-init.php:452
 #@ woocommerce
 msgid "Product updated."
 msgstr "Product bijgewerkt."
 
-#: admin/woocommerce-admin-init.php:442
+#: admin/woocommerce-admin-init.php:453
 #, php-format
 #@ woocommerce
 msgid "Product restored to revision from %s"
 msgstr "Product revisie teruggezet van %s"
 
-#: admin/woocommerce-admin-init.php:443
+#: admin/woocommerce-admin-init.php:454
 #, php-format
 #@ woocommerce
 msgid "Product published. <a href=\"%s\">View Contact</a>"
 msgstr "Product gepubliceerd. <a href=\"%s\">Bekijk Product</a>"
 
-#: admin/woocommerce-admin-init.php:444
+#: admin/woocommerce-admin-init.php:455
 #@ woocommerce
 msgid "Product saved."
 msgstr "Product opgeslagen."
 
-#: admin/woocommerce-admin-init.php:445
+#: admin/woocommerce-admin-init.php:456
 #, php-format
 #@ woocommerce
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Product verzonden. <a target=\"_blank\" href=\"%s\">Product Voorbeeld</a>"
 
-#: admin/woocommerce-admin-init.php:446
+#: admin/woocommerce-admin-init.php:457
 #, php-format
 #@ woocommerce
 msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
 msgstr "Product publicatie geplanned voor <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Product Voorbeeld</a>"
 
-#: admin/woocommerce-admin-init.php:447
-#: admin/woocommerce-admin-init.php:462
-#: admin/woocommerce-admin-init.php:477
+#: admin/woocommerce-admin-init.php:458
+#: admin/woocommerce-admin-init.php:473
+#: admin/woocommerce-admin-init.php:488
 #@ woocommerce
 msgid "M j, Y @ G:i"
 msgstr "M j, Y @ G:i"
 
-#: admin/woocommerce-admin-init.php:448
+#: admin/woocommerce-admin-init.php:459
 #, php-format
 #@ woocommerce
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Product klad bijgewerkt. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 
-#: admin/woocommerce-admin-init.php:453
-#: admin/woocommerce-admin-init.php:456
-#: admin/woocommerce-admin-init.php:458
+#: admin/woocommerce-admin-init.php:464
+#: admin/woocommerce-admin-init.php:467
+#: admin/woocommerce-admin-init.php:469
 #@ woocommerce
 msgid "Order updated."
 msgstr "Bestelling bijgewerkt."
 
-#: admin/woocommerce-admin-init.php:457
+#: admin/woocommerce-admin-init.php:468
 #, php-format
 #@ woocommerce
 msgid "Order restored to revision from %s"
 msgstr "Bestelling revisie teruggezet van %s"
 
-#: admin/woocommerce-admin-init.php:459
+#: admin/woocommerce-admin-init.php:470
 #@ woocommerce
 msgid "Order saved."
 msgstr "Bestelling opgeslagen."
 
-#: admin/woocommerce-admin-init.php:460
+#: admin/woocommerce-admin-init.php:471
 #@ woocommerce
 msgid "Order submitted."
 msgstr "Bestelling ingevoerd."
 
-#: admin/woocommerce-admin-init.php:461
+#: admin/woocommerce-admin-init.php:472
 #, php-format
 #@ woocommerce
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr "Bestelling geplanned voor: <strong>%1$s</strong>. "
 
-#: admin/woocommerce-admin-init.php:463
+#: admin/woocommerce-admin-init.php:474
 #@ woocommerce
 msgid "Order draft updated."
 msgstr "Bestelling klad bijgewerkt."
 
-#: admin/woocommerce-admin-init.php:468
-#: admin/woocommerce-admin-init.php:471
-#: admin/woocommerce-admin-init.php:473
+#: admin/woocommerce-admin-init.php:479
+#: admin/woocommerce-admin-init.php:482
+#: admin/woocommerce-admin-init.php:484
 #@ woocommerce
 msgid "Coupon updated."
 msgstr "Kortingsbon bijgewerkt."
 
-#: admin/woocommerce-admin-init.php:472
+#: admin/woocommerce-admin-init.php:483
 #, php-format
 #@ woocommerce
 msgid "Coupon restored to revision from %s"
 msgstr "Kortingsbon teruggezet naar revisie %s"
 
-#: admin/woocommerce-admin-init.php:474
+#: admin/woocommerce-admin-init.php:485
 #@ woocommerce
 msgid "Coupon saved."
 msgstr "Kortingsbon opgeslagen."
 
-#: admin/woocommerce-admin-init.php:475
+#: admin/woocommerce-admin-init.php:486
 #@ woocommerce
 msgid "Coupon submitted."
 msgstr "Kortingsbon toegevoegd."
 
-#: admin/woocommerce-admin-init.php:476
+#: admin/woocommerce-admin-init.php:487
 #, php-format
 #@ woocommerce
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr "Kortingsbon geplanned voor: <strong>%1$s</strong>."
 
-#: admin/woocommerce-admin-init.php:478
+#: admin/woocommerce-admin-init.php:489
 #@ woocommerce
 msgid "Coupon draft updated."
 msgstr "Kortingsbon klad bijgewerkt."
@@ -1932,12 +1926,12 @@ msgstr "Totaal verkopen"
 #: admin/woocommerce-admin-reports.php:757
 #: admin/woocommerce-admin-reports.php:763
 #: admin/woocommerce-admin-reports.php:769
-#: admin/woocommerce-admin-reports.php:1211
-#: admin/woocommerce-admin-reports.php:1217
-#: admin/woocommerce-admin-reports.php:1223
-#: admin/woocommerce-admin-reports.php:1229
-#: admin/woocommerce-admin-reports.php:1235
-#: admin/woocommerce-admin-reports.php:1241
+#: admin/woocommerce-admin-reports.php:1213
+#: admin/woocommerce-admin-reports.php:1219
+#: admin/woocommerce-admin-reports.php:1225
+#: admin/woocommerce-admin-reports.php:1231
+#: admin/woocommerce-admin-reports.php:1237
+#: admin/woocommerce-admin-reports.php:1243
 #@ woocommerce
 msgid "n/a"
 msgstr "n.v.t."
@@ -1992,7 +1986,7 @@ msgstr "Naar:"
 #: admin/woocommerce-admin-reports.php:744
 #: admin/woocommerce-admin-reports.php:897
 #: admin/woocommerce-admin-reports.php:994
-#: admin/woocommerce-admin-reports.php:1126
+#: admin/woocommerce-admin-reports.php:1128
 #@ woocommerce
 msgid "Show"
 msgstr "Tonen"
@@ -2062,73 +2056,73 @@ msgstr "Product bestaat niet"
 msgid "Product no longer exists"
 msgstr "Product bestaat niet meer"
 
-#: admin/woocommerce-admin-reports.php:1101
+#: admin/woocommerce-admin-reports.php:1103
 #@ woocommerce
 msgid "Product:"
 msgstr "Product:"
 
-#: admin/woocommerce-admin-reports.php:1104
+#: admin/woocommerce-admin-reports.php:1106
 #@ woocommerce
 msgid "Choose an product&hellip;"
 msgstr "Kies een product&hellip;"
 
-#: admin/woocommerce-admin-reports.php:1132
+#: admin/woocommerce-admin-reports.php:1134
 #@ woocommerce
 msgid "Month"
 msgstr "Maand"
 
-#: admin/woocommerce-admin-reports.php:1150
+#: admin/woocommerce-admin-reports.php:1152
 #@ woocommerce
 msgid "No sales :("
 msgstr "Geen verkopen : ("
 
-#: admin/woocommerce-admin-reports.php:1209
+#: admin/woocommerce-admin-reports.php:1211
 #@ woocommerce
 msgid "Total customers"
 msgstr "Totaal aantal klanten"
 
-#: admin/woocommerce-admin-reports.php:1215
+#: admin/woocommerce-admin-reports.php:1217
 #@ woocommerce
 msgid "Total customer sales"
 msgstr "Totale verkoop aan klanten"
 
-#: admin/woocommerce-admin-reports.php:1221
+#: admin/woocommerce-admin-reports.php:1223
 #@ woocommerce
 msgid "Total guest sales"
 msgstr "Totale verkoop aan bezoekers"
 
-#: admin/woocommerce-admin-reports.php:1227
+#: admin/woocommerce-admin-reports.php:1229
 #@ woocommerce
 msgid "Total customer orders"
 msgstr "Totaal aantal bestellingen van klanten"
 
-#: admin/woocommerce-admin-reports.php:1233
+#: admin/woocommerce-admin-reports.php:1235
 #@ woocommerce
 msgid "Total guest orders"
 msgstr "Totaal aantal bestellingen van bezoekers"
 
-#: admin/woocommerce-admin-reports.php:1239
+#: admin/woocommerce-admin-reports.php:1241
 #@ woocommerce
 msgid "Average orders per customer"
 msgstr "Gemiddeld aantal bestellingen per klant"
 
-#: admin/woocommerce-admin-reports.php:1247
+#: admin/woocommerce-admin-reports.php:1249
 #@ woocommerce
 msgid "Signups per day"
 msgstr "Registraties per dag"
 
-#: admin/woocommerce-admin-reports.php:1481
+#: admin/woocommerce-admin-reports.php:1483
 #@ woocommerce
 msgid "Low stock"
 msgstr "Lage voorraad"
 
-#: admin/woocommerce-admin-reports.php:1491
-#: admin/woocommerce-admin-reports.php:1513
+#: admin/woocommerce-admin-reports.php:1493
+#: admin/woocommerce-admin-reports.php:1515
 #@ woocommerce
 msgid " in stock"
 msgstr " op voorraad"
 
-#: admin/woocommerce-admin-reports.php:1495
+#: admin/woocommerce-admin-reports.php:1497
 #@ woocommerce
 msgid "No products are low in stock."
 msgstr "Er zijn geen producten met een lage voorraad."
@@ -2137,7 +2131,7 @@ msgstr "Er zijn geen producten met een lage voorraad."
 #: admin/post-types/product.php:534
 #: admin/post-types/product.php:782
 #: admin/post-types/writepanels/writepanel-product_data.php:202
-#: admin/woocommerce-admin-reports.php:1503
+#: admin/woocommerce-admin-reports.php:1505
 #: classes/class-wc-product.php:401
 #: classes/class-wc-product.php:423
 #: classes/class-wc-product.php:432
@@ -2145,7 +2139,7 @@ msgstr "Er zijn geen producten met een lage voorraad."
 msgid "Out of stock"
 msgstr "Uitverkocht"
 
-#: admin/woocommerce-admin-reports.php:1517
+#: admin/woocommerce-admin-reports.php:1519
 #@ woocommerce
 msgid "No products are out in stock."
 msgstr "Er zijn geen producten uitverkocht."
@@ -2793,7 +2787,7 @@ msgstr "Winkel basispagina"
 #: admin/woocommerce-admin-settings.php:312
 #@ woocommerce
 msgid "This sets the base page of your shop - this is where your product archive will be."
-msgstr ""
+msgstr "Stel de basis pagina van de winkel in, hieronder valt het product archief."
 
 #: admin/woocommerce-admin-settings.php:322
 #@ woocommerce
@@ -3589,7 +3583,7 @@ msgstr "Instellingen opgeslagen."
 #: admin/woocommerce-admin-settings.php:1128
 #@ woocommerce
 msgid "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)"
-msgstr ""
+msgstr "<strong>Gefeliciteerd!</strong> &#8211; WooCommerce is geinstalleerd. Veel plezier :-)"
 
 #: admin/woocommerce-admin-settings.php:1153
 #: admin/woocommerce-admin-settings.php:1257
@@ -4648,42 +4642,42 @@ msgstr "Betalingsmethode:"
 msgid "Payment method..."
 msgstr "Betalingsmethode..."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:770
+#: admin/post-types/writepanels/writepanel-order_data.php:762
 #@ woocommerce
 msgid "Manually reducing stock."
 msgstr "Handmatig voorraad verminderen."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:784
+#: admin/post-types/writepanels/writepanel-order_data.php:776
 #: classes/class-wc-order.php:798
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Vooraad voor product #%s verlaagd van %s naar %s."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:801
-#: admin/post-types/writepanels/writepanel-order_data.php:831
+#: admin/post-types/writepanels/writepanel-order_data.php:793
+#: admin/post-types/writepanels/writepanel-order_data.php:823
 #, php-format
 #@ woocommerce
 msgid "Item %s %s not found, skipping."
 msgstr "Product %s %s niet gevonden, overgeslagen."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:807
+#: admin/post-types/writepanels/writepanel-order_data.php:799
 #@ woocommerce
 msgid "Manual stock reduction complete."
 msgstr "Handmatige voorraadvermindering voltooid."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:811
+#: admin/post-types/writepanels/writepanel-order_data.php:803
 #@ woocommerce
 msgid "Manually restoring stock."
 msgstr "Handmatig de voorraad hersteld."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:825
+#: admin/post-types/writepanels/writepanel-order_data.php:817
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Vooraad voor product #%s verhoogt van %s naar %s."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:837
+#: admin/post-types/writepanels/writepanel-order_data.php:829
 #@ woocommerce
 msgid "Manual stock restore complete."
 msgstr "Handmatig voorraadbeheer afgerond."
@@ -5135,7 +5129,7 @@ msgstr "Downloadlimiet"
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 #@ woocommerce
 msgid "Download Expiry"
-msgstr ""
+msgstr "Download Vervaltijd"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 #@ woocommerce
@@ -5356,7 +5350,7 @@ msgstr "U kunt dit product niet toevoegen aan uw winkelwagen omdat het product n
 msgid "You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart."
 msgstr "U kunt niet dit aantal van dit product toevoegen aan uw winkelwagen omdat er niet genoeg voorraad is. We hebben %s op voorraad en u heeft op dit moment al %s in uw winkelwagen."
 
-#: classes/class-wc-cart.php:1190
+#: classes/class-wc-cart.php:1192
 #: classes/class-wc-order.php:444
 #: classes/class-wc-product.php:590
 #: classes/class-wc-product.php:599
@@ -5366,27 +5360,27 @@ msgstr "U kunt niet dit aantal van dit product toevoegen aan uw winkelwagen omda
 msgid "Free!"
 msgstr "Gratis!"
 
-#: classes/class-wc-cart.php:1200
+#: classes/class-wc-cart.php:1202
 #@ woocommerce
 msgid "via"
 msgstr "via"
 
-#: classes/class-wc-cart.php:1238
+#: classes/class-wc-cart.php:1240
 #@ woocommerce
 msgid "Discount code already applied!"
 msgstr "Kortingscode al gebruikt!"
 
-#: classes/class-wc-cart.php:1232
+#: classes/class-wc-cart.php:1234
 #@ woocommerce
 msgid "Invalid coupon."
 msgstr "Ongeldige kortingsbon."
 
-#: classes/class-wc-cart.php:1256
+#: classes/class-wc-cart.php:1258
 #@ woocommerce
 msgid "Discount code applied successfully."
 msgstr "Kortingscode succesvol gebruikt."
 
-#: classes/class-wc-cart.php:1260
+#: classes/class-wc-cart.php:1262
 #@ woocommerce
 msgid "Coupon does not exist!"
 msgstr "Kortingsbon bestaat niet!"
@@ -7415,11 +7409,6 @@ msgstr "niet meer op voorraad."
 msgid "Product Backorder"
 msgstr "Product Backorder"
 
-#: classes/class-wc-email.php:414
-#@ woocommerce
-msgid "Note:"
-msgstr "Opmerking:"
-
 #: classes/class-wc-email.php:425
 #@ woocommerce
 msgid "Order information"
@@ -7839,30 +7828,30 @@ msgstr "Order annuleren &amp; winkelwagen herstelen"
 msgid "Thank you for your order, please click the button below to pay with PayPal."
 msgstr "Dank u voor uw bestelling, klik op onderstaande knop om te betalen met PayPal."
 
-#: classes/gateways/class-wc-paypal.php:499
+#: classes/gateways/class-wc-paypal.php:508
 #@ woocommerce
 msgid "IPN payment completed"
 msgstr "IPN betaling voltooid"
 
-#: classes/gateways/class-wc-paypal.php:517
-#: classes/gateways/class-wc-paypal.php:524
+#: classes/gateways/class-wc-paypal.php:519
+#: classes/gateways/class-wc-paypal.php:526
 #, php-format
 #@ woocommerce
 msgid "Payment %s via IPN."
 msgstr "Betaling %s via IPN."
 
-#: classes/gateways/class-wc-paypal.php:527
+#: classes/gateways/class-wc-paypal.php:529
 #@ woocommerce
 msgid "Order refunded/reversed"
 msgstr "Bestelling terugbetaald"
 
-#: classes/gateways/class-wc-paypal.php:528
+#: classes/gateways/class-wc-paypal.php:530
 #, php-format
 #@ woocommerce
 msgid "Order #%s has been marked as refunded - PayPal reason code: %s"
 msgstr "Bestelling #%s is gemarkeerd als terugbetaald. Paypal redenen: %s"
 
-#: classes/gateways/class-wc-paypal.php:532
+#: classes/gateways/class-wc-paypal.php:534
 #, php-format
 #@ woocommerce
 msgid "Payment for order #%s refunded/reversed"
@@ -9535,7 +9524,7 @@ msgid "You can only have 1 %s in your cart."
 msgstr "U kan slechts eenmaal &s in uw winkelwagen hebben."
 
 #: woocommerce-template.php:671
-#: woocommerce.php:915
+#: woocommerce.php:926
 #@ woocommerce
 msgid "required"
 msgstr "verplicht"
@@ -9568,12 +9557,6 @@ msgstr "http://woothemes.com"
 #@ woocommerce
 msgid "Use this file"
 msgstr "Gebruik dit bestand"
-
-#. translators: plugin header field 'Version'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "1.5"
-msgstr "1.5"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:138
 #@ woocommerce
@@ -9746,4 +9729,22 @@ msgstr "Product #%s - %s"
 #@ woocommerce
 msgid "%s units of %s have been backordered in order #%s."
 msgstr "%s stuks van %s zijn als backorder geplaatst in bestelling #%s."
+
+#: classes/class-wc-email.php:414
+#@ woocommerce
+msgid "Note"
+msgstr ""
+
+#: woocommerce-core-functions.php:566
+#: woocommerce.php:500
+#@ woocommerce
+msgctxt "slug"
+msgid "product"
+msgstr "product"
+
+#. translators: plugin header field 'Version'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "1.5.1"
+msgstr "1.5.1"
 
