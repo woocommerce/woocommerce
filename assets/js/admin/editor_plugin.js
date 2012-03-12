@@ -33,6 +33,10 @@
 								
 								b.addSeparator();
 								
+								a.addImmediate(b,"Shop Messages", '[woocommerce_messages]');
+								
+								b.addSeparator();
+								
 								c=b.addMenu({title:"WooCommerce Pages"});
 										a.addImmediate(c,"Cart","[woocommerce_cart]" );
 										a.addImmediate(c,"Checkout","[woocommerce_checkout]" );
