@@ -413,6 +413,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
         
+        if ($this->debug=='yes') $this->log->add( 'paypal', 'IPN Response: ' . print_r($response, true) );
+        
         // check to see if the request was valid
         if ( !is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && (strcmp( $response['body'], "VERIFIED") == 0)) {
             if ($this->debug=='yes') $this->log->add( 'paypal', 'Received valid response from PayPal' );
