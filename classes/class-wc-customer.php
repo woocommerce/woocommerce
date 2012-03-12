@@ -226,7 +226,7 @@ class WC_Customer {
 					endif;
 					
 					$downloads[] = array(
-						'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $user_info->user_email, home_url()))),
+						'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $result->user_email, home_url()))),
 						'product_id' => $result->product_id,
 						'download_name' => $download_name,
 						'order_id' => $order->id,
