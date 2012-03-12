@@ -59,6 +59,16 @@ if (!function_exists('woocommerce_empty_cart')) {
 }
 
 /**
+ * WooCommerce disable admin bar
+ *
+ **/
+if (!function_exists('woocommerce_disable_admin_bar')) {
+	function woocommerce_disable_admin_bar() {
+		add_filter('show_admin_bar', '__return_false');
+	}
+}
+
+/**
  * Load the cart upon login
  **/
 function woocommerce_load_persistent_cart( $user_login, $user ) {

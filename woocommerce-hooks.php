@@ -110,8 +110,10 @@ add_filter( 'wp_nav_menu_items', 'woocommerce_nav_menu_items', 10, 2 );
 
 /* Clear the cart */
 if (get_option('woocommerce_clear_cart_on_logout')=='yes') add_action( 'wp_logout', 'woocommerce_empty_cart' );
-	
 add_action( 'wp', 'woocommerce_clear_cart_after_payment' );
+
+/* Disable admin bar */
+if (get_option('woocommerce_lock_down_admin')=='yes') add_action( 'init', 'woocommerce_disable_admin_bar' );
 
 /* Catalog sorting/ordering */
 add_action( 'init', 'woocommerce_update_catalog_ordering' );
