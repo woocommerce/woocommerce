@@ -127,8 +127,8 @@ class WC_Cart {
 			$this->shipping_tax_total 	= isset($_SESSION['shipping_tax_total']) ? $_SESSION['shipping_tax_total'] : 0;
 			$this->shipping_label		= isset($_SESSION['shipping_label']) ? $_SESSION['shipping_label'] : '';
 			
-			// Queue re-calc if total is not set
-			if (!$this->total && sizeof($this->cart_contents)) add_action('wp', array(&$this, 'calculate_totals'), 1);
+			// Queue re-calc if subtotal is not set
+			if (!$this->subtotal && sizeof($this->cart_contents)>0) add_action('wp', array(&$this, 'calculate_totals'), 1);
 		}
 		
 		/**
