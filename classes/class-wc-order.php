@@ -505,7 +505,7 @@ class WC_Order {
 			
 			endif;
 
-		else:
+		elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) :
 			$total_rows[ $woocommerce->countries->tax_or_vat() ] = _x( 'NA', 'Relating to tax', 'woocommerce' );
 		endif;
 		

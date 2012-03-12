@@ -824,6 +824,14 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'checkboxgroup'		=> ''
 	),
 
+	array(
+		'desc'          => __( 'Also display tax row if no taxes are applicable', 'woocommerce' ),
+		'id'            => 'woocommerce_display_cart_taxes_if_zero',
+		'std'           => 'no',
+		'type'          => 'checkbox',
+		'checkboxgroup' => '',
+	),
+
 	array(  
 		'desc' 		=> __( 'Round tax at subtotal level, instead of per line', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_round_at_subtotal',

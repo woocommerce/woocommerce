@@ -149,7 +149,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						<?php
 					
 					endif;	
-				else :
+				elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) :
 				?>
 
 					<tr class="tax">
