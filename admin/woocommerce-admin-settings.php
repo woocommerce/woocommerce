@@ -135,7 +135,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'desc'          => __( 'Enable coupons', 'woocommerce' ),
+		'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
 		'id'            => 'woocommerce_enable_coupons',
 		'std'           => 'yes',
 		'type'          => 'checkbox',
