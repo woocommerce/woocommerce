@@ -86,9 +86,13 @@ global $woocommerce;
 		?>
 		<tr>
 			<td colspan="6" class="actions">
-				<div class="coupon">
-					<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
-				</div>
+
+				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) { ?>
+					<div class="coupon">
+						<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
+					</div>
+				<?php } ?>
+
 				<?php $woocommerce->nonce_field('cart') ?>
 				<input type="submit" class="button" name="update_cart" value="<?php _e('Update Cart', 'woocommerce'); ?>" /> <a href="<?php echo esc_url( $woocommerce->cart->get_checkout_url() ); ?>" class="checkout-button button alt"><?php _e('Proceed to Checkout &rarr;', 'woocommerce'); ?></a>
 				<?php do_action('woocommerce_proceed_to_checkout'); ?>
