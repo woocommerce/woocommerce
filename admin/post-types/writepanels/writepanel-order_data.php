@@ -748,14 +748,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;	
 	
 		update_post_meta( $post_id, '_order_items', $order_items );
-
-	// Give a password - not used, but can protect the content/comments from theme functions
-		if ($post->post_password=='') :
-			$order_post = array();
-			$order_post['ID'] = $post_id;
-			$order_post['post_password'] = uniqid('order_');
-			wp_update_post( $order_post );
-		endif;
 		
 	// Order data saved, now get it so we can manipulate status
 		$order = new WC_Order( $post_id );

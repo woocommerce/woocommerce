@@ -304,7 +304,8 @@ class WC_Checkout {
 					'post_status' 	=> 'publish',
 					'ping_status'	=> 'closed',
 					'post_excerpt' 	=> $this->posted['order_comments'],
-					'post_author' 	=> 1
+					'post_author' 	=> 1,
+					'post_password'	=> uniqid('order_')	// Protects the post just in case
 				);
 
 				// Cart items

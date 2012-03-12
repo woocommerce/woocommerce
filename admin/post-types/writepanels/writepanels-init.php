@@ -68,16 +68,14 @@ function woocommerce_enter_title_here( $text, $post ) {
 add_action( 'save_post', 'woocommerce_meta_boxes_save', 1, 2 );
 
 function woocommerce_meta_boxes_save( $post_id, $post ) {
-	global $wpdb;
-	
-	if ( !$_POST ) return $post_id;
-	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
-	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-	if ( !isset($_POST['woocommerce_meta_nonce']) || (isset($_POST['woocommerce_meta_nonce']) && !wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ))) return $post_id;
-	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
-	if ( $post->post_type != 'product' && $post->post_type != 'shop_order' && $post->post_type != 'shop_coupon' ) return $post_id;
-	
+	if ( empty($post_id) || empty($post) || empty($_POST) ) return;
+	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
+	if ( is_int( wp_is_post_revision( $post ) ) ) return;
+	if ( is_int( wp_is_post_autosave( $post ) ) ) return;
+	if ( empty($_POST['woocommerce_meta_nonce']) || !wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' )) return;
+	if ( !current_user_can( 'edit_post', $post_id )) return;
+	if ( $post->post_type != 'product' && $post->post_type != 'shop_order' && $post->post_type != 'shop_coupon' ) return;
+		
 	do_action( 'woocommerce_process_'.$post->post_type.'_meta', $post_id, $post );
 }
 
