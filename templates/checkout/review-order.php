@@ -143,12 +143,21 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 						?>
 						<tr class="tax">
-							<th colspan="2"><?php _e('Tax', 'woocommerce'); ?></th>
+							<th colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
 							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
 					
 					endif;	
+				else :
+				?>
+
+					<tr class="tax">
+						<th colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
+						<td><?php _ex( 'NA', 'Relating to tax', 'woocommerce' ); ?></td>
+					</tr>
+
+				<?php
 				endif;
 			?>
 

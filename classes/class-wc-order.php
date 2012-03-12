@@ -504,7 +504,9 @@ class WC_Order {
 				$total_rows[ $woocommerce->countries->tax_or_vat() ] = woocommerce_price($this->get_total_tax());
 			
 			endif;
-			
+
+		else:
+			$total_rows[ $woocommerce->countries->tax_or_vat() ] = _x( 'NA', 'Relating to tax', 'woocommerce' );
 		endif;
 		
 		if ($this->get_order_discount() > 0)
