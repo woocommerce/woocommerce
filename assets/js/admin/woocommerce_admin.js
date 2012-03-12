@@ -154,5 +154,14 @@ jQuery(function(){
 		}
 		
 	}).change();
-    
+
+	// Enable/disable the coupon form on checkout checkbox
+	var $woocommerce_enable_coupons = jQuery('#woocommerce_enable_coupons'),
+		$woocommerce_enable_coupon_form_on_checkout = jQuery('#woocommerce_enable_coupon_form_on_checkout'),
+		toggle_woocommerce_enable_coupon_form_on_checkout = function () {
+			$woocommerce_enable_coupon_form_on_checkout.closest('fieldset').attr('disabled', ! $woocommerce_enable_coupons.is(':checked'));
+		};
+	toggle_woocommerce_enable_coupon_form_on_checkout();
+	$woocommerce_enable_coupons.change(toggle_woocommerce_enable_coupon_form_on_checkout);
+
 });

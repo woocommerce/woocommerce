@@ -1224,7 +1224,10 @@ class WC_Cart {
 		 */
 		function add_discount( $coupon_code ) {
 			global $woocommerce;
-			
+
+			// Coupons are globally disabled
+			if ( get_option( 'woocommerce_enable_coupons' ) == 'no' ) return false;
+
 			$the_coupon = new WC_Coupon($coupon_code);
 			
 			if ($the_coupon->id) :

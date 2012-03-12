@@ -590,7 +590,10 @@ function woocommerce_process_login() {
  **/
 function woocommerce_process_coupon_form() {
 	global $woocommerce;
-	
+
+	// Do nothing if coupons are globally disabled
+	if ( get_option( 'woocommerce_enable_coupons' ) == 'no' ) return;
+
 	if (isset($_POST['coupon_code']) && $_POST['coupon_code']) :
 	
 		$coupon_code = stripslashes(trim($_POST['coupon_code']));
