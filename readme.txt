@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * More granular rights on dashboard widgets by role (thanks jdiderik)
 * More logging in paypal class
 * Menu tweaks + new icons
+* My account ssl (added by justinstern)
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

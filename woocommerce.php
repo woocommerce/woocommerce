@@ -360,25 +360,34 @@ class Woocommerce {
 	 * Redirect to https if Force SSL is enabled
 	 **/
 	function ssl_redirect() {
-		if (!is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && is_checkout()) :
-			wp_safe_redirect( str_replace('http:', 'https:', get_permalink(woocommerce_get_page_id('checkout'))), 301 );
-			exit;
-		elseif (!is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && is_account_page()) :
-			wp_safe_redirect( 'https://'.$_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], 301 );
-			exit;
-		// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
-		elseif (is_ssl() && get_option('woocommerce_force_ssl_checkout')=='yes' && get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(woocommerce_get_page_id('thanks')) && !is_ajax() && !is_account_page()) :
-			
-			if ( 0 === strpos($_SERVER['REQUEST_URI'], 'http') ) {
-				wp_redirect(preg_replace('|^https://|', 'http://', $_SERVER['REQUEST_URI']));
-				exit();
-			} else {
-				wp_redirect('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-				exit();
-			}
+		if (get_option('woocommerce_force_ssl_checkout')=='no') return;
 		
-			exit;
-		endif;
+		if (!is_ssl()) {
+			if (is_checkout()) {
+				wp_redirect( str_replace('http:', 'https:', get_permalink(woocommerce_get_page_id('checkout'))), 301 );
+				exit;
+			} elseif (is_account_page()) {
+				if ( 0 === strpos($_SERVER['REQUEST_URI'], 'http') ) {
+					wp_redirect(preg_replace('|^http://|', 'https://', $_SERVER['REQUEST_URI']));
+					exit;
+				} else {
+					wp_redirect('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+					exit;
+				}
+				exit;
+			}
+		} else {
+			// Break out of SSL if we leave the checkout/my accounts (anywhere but thanks)
+			if (get_option('woocommerce_unforce_ssl_checkout')=='yes' && $_SERVER['REQUEST_URI'] && !is_checkout() && !is_page(woocommerce_get_page_id('thanks')) && !is_ajax() && !is_account_page()) {
+				if ( 0 === strpos($_SERVER['REQUEST_URI'], 'http') ) {
+					wp_redirect(preg_replace('|^https://|', 'http://', $_SERVER['REQUEST_URI']));
+					exit;
+				} else {
+					wp_redirect('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+					exit;
+				}
+			}
+		}
 	}
 	
 	/**
