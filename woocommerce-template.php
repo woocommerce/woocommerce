@@ -318,6 +318,8 @@ if (!function_exists('woocommerce_variable_add_to_cart')) {
 		    if($variation instanceof WC_Product_Variation) {
 		
 		    	if (get_post_status( $variation->get_variation_id() ) != 'publish') continue; // Disabled
+		    	
+		    	if (!$variation->is_visible()) continue; // Visible setting - may be hidden if out of stock
 		
 		        $variation_attributes = $variation->get_variation_attributes();
 		        $availability = $variation->get_availability();
