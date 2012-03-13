@@ -87,8 +87,6 @@ if (!function_exists('woocommerce_single_product_content')) {
 				
 				<div class="summary">
 					
-					<h1 itemprop="name" class="product_title page-title"><?php the_title(); ?></h1>
-					
 					<?php do_action( 'woocommerce_single_product_summary'); ?>
 		
 				</div>
@@ -250,6 +248,11 @@ if (!function_exists('woocommerce_show_product_thumbnails')) {
 if (!function_exists('woocommerce_output_product_data_tabs')) {
 	function woocommerce_output_product_data_tabs() {
 		woocommerce_get_template('single-product/tabs.php');
+	}
+}
+if (!function_exists('woocommerce_template_single_title')) {
+	function woocommerce_template_single_title() {
+		woocommerce_get_template('single-product/title.php');
 	}
 }
 if (!function_exists('woocommerce_template_single_price')) {
