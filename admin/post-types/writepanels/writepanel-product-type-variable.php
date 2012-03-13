@@ -66,7 +66,7 @@ function variable_product_type_options() {
 					'post_type'	=> 'product_variation',
 					'post_status' => array('private', 'publish'),
 					'numberposts' => -1,
-					'orderby' => 'id',
+					'orderby' => 'menu_order',
 					'order' => 'asc',
 					'post_parent' => $post->ID
 				);
@@ -89,7 +89,7 @@ function variable_product_type_options() {
 					if ($classes && !is_wp_error($classes)) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
 					?>
 					<div class="woocommerce_variation wc-metabox closed">
-						<h3 class="fixed">
+						<h3>
 							<button type="button" class="remove_variation button" rel="<?php echo $variation->ID; ?>"><?php _e('Remove', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
 							<strong>#<?php echo $variation->ID; ?> &mdash; </strong>
@@ -123,6 +123,7 @@ function variable_product_type_options() {
 								endforeach;
 							?>
 							<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation->ID ); ?>" />
+							<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">
 							<tbody>	
@@ -294,7 +295,7 @@ function variable_product_type_options() {
 								echo '</select>';
 	
 							endforeach;
-					?><input type="hidden" name="variable_post_id[' + loop + ']" value="' + variation_id + '" /></h3>\
+					?><input type="hidden" name="variable_post_id[' + loop + ']" value="' + variation_id + '" /><input type="hidden" class="variation_menu_order" name="variation_menu_order[' + loop + ']" value="' + loop + '" /></h3>\
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">\
 						<tbody>\
 							<tr>\
@@ -532,6 +533,32 @@ function variable_product_type_options() {
 		
 		jQuery('input.variable_is_downloadable').change();
 		
+		// Ordering
+		$('.woocommerce_variations').sortable({
+			items:'.woocommerce_variation',
+			cursor:'move',
+			axis:'y',
+			handle: 'h3',
+			scrollSensitivity:40,
+			forcePlaceholderSize: true,
+			helper: 'clone',
+			opacity: 0.65,
+			placeholder: 'wc-metabox-sortable-placeholder',
+			start:function(event,ui){
+				ui.item.css('background-color','#f6f6f6');
+			},
+			stop:function(event,ui){
+				ui.item.removeAttr('style');
+				variation_row_indexes();
+			}
+		});
+		
+		function variation_row_indexes() {
+			$('.woocommerce_variations .woocommerce_variation').each(function(index, el){ 
+				$('.variation_menu_order', el).val( parseInt( $(el).index('.woocommerce_variations .woocommerce_variation') ) ); 
+			});
+		};
+		
 		<?php endif; ?>
 		
 		var current_field_wrapper;
@@ -623,6 +650,7 @@ function process_product_meta_variable( $post_id ) {
 		$variable_file_path = $_POST['variable_file_path'];
 		$variable_download_limit = $_POST['variable_download_limit'];
 		$variable_shipping_class = $_POST['variable_shipping_class'];
+		$variable_menu_order = $_POST['variation_menu_order'];
 		
 		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
 		
@@ -640,19 +668,7 @@ function process_product_meta_variable( $post_id ) {
 			// Disabled if downloadable and no URL
 			if ($is_downloadable=='yes' && !$variable_file_path[$i]) $post_status = 'private';
 			
-			/*// Generate a useful post title
-			$title = array();
-			
-			foreach ($attributes as $attribute) :
-				if ( $attribute['is_variation'] ) :
-					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
-					if ($value) $title[] = $attribute['name'].': '.$value;
-				endif;
-			endforeach;
-			
-			$sku_string = ($variable_sku[$i]) ? sprintf(__('(SKU: %s)', 'woocommerce'), $variable_sku[$i]) : sprintf(__('(ID: #%s)', 'woocommerce'), $variation_id);
-			*/
-			
+			// Generate a useful post title
 			$variation_post_title = sprintf(__('Variation #%s of %s', 'woocommerce'), $variation_id, get_the_title($post_id));
 			
 			// Update or Add post
@@ -664,13 +680,14 @@ function process_product_meta_variable( $post_id ) {
 					'post_status' => $post_status,
 					'post_author' => get_current_user_id(),
 					'post_parent' => $post_id,
-					'post_type' => 'product_variation'
+					'post_type' => 'product_variation',
+					'menu_order' => $variable_menu_order[$i]
 				);
 				$variation_id = wp_insert_post( $variation );
 
 			else :
 				
-				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title ), array( 'ID' => $variation_id ) );
+				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[$i] ), array( 'ID' => $variation_id ) );
 			
 			endif;
 

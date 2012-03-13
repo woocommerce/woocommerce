@@ -591,7 +591,7 @@ jQuery( function($){
 		})
 		$(woocommerce_attribute_items).each( function(idx, itm) { $('.woocommerce_attributes').append(itm); } );
 		
-		function row_indexes() {
+		function attribute_row_indexes() {
 			$('.woocommerce_attributes .woocommerce_attribute').each(function(index, el){ 
 				$('.attribute_position', el).val( parseInt( $(el).index('.woocommerce_attributes .woocommerce_attribute') ) ); 
 			});
@@ -652,7 +652,7 @@ jQuery( function($){
 				var thisrow = $('.woocommerce_attributes .woocommerce_attribute.' + attribute_type);
 				$('.woocommerce_attributes').append( $(thisrow) );
 				$(thisrow).show().find('.woocommerce_attribute_data').show();
-				row_indexes();
+				attribute_row_indexes();
 				
 			}
 			
@@ -686,7 +686,7 @@ jQuery( function($){
 				} else {
 					$parent.find('select, input[type=text]').val('');
 					$parent.hide();
-					row_indexes();
+					attribute_row_indexes();
 				}
 			}
 			return false;
@@ -708,7 +708,7 @@ jQuery( function($){
 			},
 			stop:function(event,ui){
 				ui.item.removeAttr('style');
-				row_indexes();
+				attribute_row_indexes();
 			}
 		});
 	
