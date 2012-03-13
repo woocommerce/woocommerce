@@ -26,6 +26,8 @@ function woocomerce_check_download_folder_protection() {
 			unlink( $downloads_url . '/.htaccess' );
 		endif;
 		
+		flush_rewrite_rules( true );
+		
 	else :
 		
 		// Force method - protect, add rules to the htaccess file
@@ -36,8 +38,30 @@ function woocomerce_check_download_folder_protection() {
 			endif;
 		endif;
 		
+		flush_rewrite_rules( true );
+		
 	endif;
 } 
+
+/**
+ * Protect downlodas from ms-files.php in multisite
+ */
+function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
+    global $wp_rewrite;
+    
+    $download_method	= get_option('woocommerce_file_download_method');
+    
+    if (!is_multisite() || $download_method=='redirect') return $rewrite;
+	
+	$rule  = "\n# WooCommerce Rules - Protect Files from ms-files.php\n\n";
+	$rule .= "<IfModule mod_rewrite.c>\n";
+	$rule .= "RewriteEngine On\n";
+	$rule .= "RewriteCond %{QUERY_STRING} file=woocommerce_uploads/ [NC]\n";
+	$rule .= "RewriteRule /ms-files.php$ - [F]\n";
+	$rule .= "</IfModule>\n\n";
+
+	return $rule . $rewrite;
+}
  
 /**
  * Deleting products sync

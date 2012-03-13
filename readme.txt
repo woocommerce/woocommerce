@@ -167,6 +167,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Upsells/cross sells interface
 * Danish translation by Frederik Svarre
 * Single product title template file now hooked in
+* variation menu_order for organisation (drag and drop)
+* Prevent ms-files.php accessing protected downloads when multisite is enabled
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
