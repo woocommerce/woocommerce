@@ -701,6 +701,40 @@ function woocommerce_process_registration() {
 }
 
 /**
+ * Place a previous order again
+ **/
+function woocommerce_order_again() {
+	global $woocommerce;
+
+	// Nothing to do
+	if ( ! isset( $_GET['order_again'] ) )
+		return;
+
+	// TODO: nonce check
+
+	// Load the current user ID
+	// Stop if the user is not logged in
+	$user_id = get_current_user_id();
+	if ( empty( $user_id ) ) return;
+
+	// Load the previous order
+	// Stop if the order does not exist
+	$order = new WC_Order( (int) $_GET['order_again'] );
+	if ( empty( $order->id ) ) return;
+
+	// Make sure the previous order belongs to the current customer
+	if ( $order->user_id != $user_id ) return;
+
+	// TODO: Copy products from the order to the cart
+
+	if ( 'TODO: everything done' ) {
+		$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce') );
+		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+		exit;
+	}
+}
+
+/**
  * Cancel a pending order
  **/
 function woocommerce_cancel_order() {
