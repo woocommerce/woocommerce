@@ -60,7 +60,7 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		
 		add_filter( 'posts_clauses',  array(&$this, 'order_by_rating_post_clauses') );
 		
-		$query_args = array('posts_per_page' => $number, 'post_status' => 'publish', 'post_type' => 'product' );
+		$query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 		$top_rated_posts = new WP_Query( $query_args );
 		
 		if ($top_rated_posts->have_posts()) :

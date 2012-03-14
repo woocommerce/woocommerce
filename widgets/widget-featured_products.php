@@ -61,7 +61,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 			$number = 15;
 ?>
 
-   		<?php $query_args = array('posts_per_page' => $number, 'nopaging' => 0, 'post_status' => 'publish', 'post_type' => 'product',  'meta_key' => '_featured', 'meta_value' => 'yes');
+   		<?php $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product',  'meta_key' => '_featured', 'meta_value' => 'yes');
 
 		$r = new WP_Query($query_args);
 		

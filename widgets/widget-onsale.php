@@ -92,7 +92,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		    
     	$query_args = array(
     		'posts_per_page' 	=> $number, 
-    		'nopaging' 		=> 0, 
+    		'no_found_rows' => 1,
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
     		'orderby' 		=> 'rand',

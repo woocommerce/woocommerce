@@ -14,6 +14,7 @@ if (sizeof($upsells)==0) return;
 		'post_type'	=> 'product',
 		'ignore_sticky_posts'	=> 1,
 		'posts_per_page' => 4,
+		'no_found_rows' => 1,
 		'orderby' => 'rand',
 		'post__in' => $upsells
 	);

@@ -60,11 +60,11 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
     	$query_args = array(
     		'posts_per_page' 	=> $number, 
-    		'nopaging' 		=> 0, 
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
     		'meta_key' 		=> 'total_sales',
-    		'orderby' 		=> 'meta_value'
+    		'orderby' 		=> 'meta_value',
+    		'no_found_rows' => 1
     	);
 
 		$r = new WP_Query($query_args);

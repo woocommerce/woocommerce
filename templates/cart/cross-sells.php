@@ -15,6 +15,7 @@ $woocommerce_loop['columns'] = 2;
 		'post_type'	=> 'product',
 		'ignore_sticky_posts'	=> 1,
 		'posts_per_page' => 2,
+		'no_found_rows' => 1,
 		'orderby' => 'rand',
 		'post__in' => $crosssells
 	);

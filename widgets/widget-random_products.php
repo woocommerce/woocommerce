@@ -35,6 +35,7 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 			'post_status'    => 'publish',
 			'posts_per_page' => $instance['number'],
 			'orderby'        => 'rand',
+			'no_found_rows'  => 1
 		);
 
 		if ( $instance['show_variations'] ) {

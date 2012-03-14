@@ -171,6 +171,7 @@ function woocommerce_product($atts){
   	$args = array(
     	'post_type' => 'product',
     	'posts_per_page' => 1,
+    	'no_found_rows' => 1,
     	'post_status' => 'publish',
     	'meta_query' => array(
 			array(
@@ -360,6 +361,7 @@ function woocommerce_product_page_shortcode($atts){
     	'post_type'	=> 'product',
     	'post_status' => 'publish',
     	'ignore_sticky_posts'	=> 1,
+    	'no_found_rows' => 1
   	);
 
   	if(isset($atts['sku'])){
