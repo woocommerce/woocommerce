@@ -240,7 +240,7 @@ class WC_Cart {
 				if (is_array($coupon->customer_email) && sizeof($coupon->customer_email)>0) {
 					if (is_user_logged_in()) {
 						$current_user = wp_get_current_user();
-						//$check_emails[] = $current_user->user_email;
+						$check_emails[] = $current_user->user_email;
 					}
 					$check_emails[] = $posted['billing_email'];
 					

@@ -707,78 +707,52 @@ jQuery(document).ready(function($) {
 			} else {
 				var thislocale = locale['default'];
 			}
-				
-			// State Handling
-			if ( thislocale['state'] ) {
-				var field = thisform.find('#billing_state_field, #shipping_state_field');
-				
-				if ( thislocale['state']['label'] ) {
-
-					field.find('label').html( thislocale['state']['label'] );
-					
-				} 
-				
-				field.find('label abbr').remove();
-
-				if ( typeof thislocale['state']['required'] == 'undefined' || thislocale['state']['required'] == true ) {
-					
-					field.find('label').append( required );
-	
-				}
-				
-			} else {
-				
-				if (field.find('label abbr').size()==0) field.find('label').append( required );
-				
-			}
 			
+			// Handle locale fields
+			var locale_fields = { 
+				'address_2'	: 	'#billing_address_2_field, #shipping_address_2_field', 
+				'state'		: 	'#billing_state_field, #shipping_state_field', 
+				'postcode'	:	'#billing_postcode_field, #shipping_postcode_field',
+				'city'		: 	'#billing_city_field, #shipping_city_field'
+			}; 
+			
+			$.each( locale_fields, function( key, value ) { 
+				
+				var field = thisform.find( value );
+				
+				if ( thislocale[key] ) {
+					
+					if ( thislocale[key]['label'] ) {
+						field.find('label').html( thislocale[key]['label'] );
+					} 
+					
+					field.find('label abbr').remove();
+	
+					if ( typeof thislocale[key]['required'] == 'undefined' || thislocale[key]['required'] == true ) {
+						field.find('label').append( required );
+					}
+					
+					if ( key !== 'state' ) {
+						if ( thislocale[key]['hidden'] == true ) {
+							field.fadeOut(200).find('input').val('');
+						} else {
+							field.fadeIn(500);
+						}
+					}
+					
+				} else {
+					if ( locale['default'][key]['required'] == true ) {
+						if (field.find('label abbr').size()==0) field.find('label').append( required );
+					}
+					if ( key !== 'state' && (typeof locale['default'][key]['hidden'] == 'undefined' || locale['default'][key]['hidden'] == false) ) {
+						field.fadeIn(500);
+					}
+				}
+			
+			});
+
 			var postcodefield = thisform.find('#billing_postcode_field, #shipping_postcode_field');
 			var cityfield = thisform.find('#billing_city_field, #shipping_city_field');
-				
-			// City Handling
-			if ( thislocale['city'] ) {
-			
-				if ( thislocale['city']['label'] ) {
-					
-					cityfield.find('label').html( thislocale['city']['label'] );
-					
-				} 
-				
-				cityfield.find('label abbr').remove();
-				
-				if ( typeof thislocale['city']['required'] == 'undefined' || thislocale['city']['required'] == true ) {
-					
-					cityfield.find('label').append( required );
-	
-				}
-				
-			} else {
-				if (cityfield.find('label abbr').size()==0) cityfield.find('label').append( required );
-				
-			}
-			
-			// Postcode Handling
-			if ( thislocale['postcode'] ) {
-			
-				if ( thislocale['postcode']['label'] ) {
-					
-					postcodefield.find('label').html( thislocale['postcode']['label'] );
-					
-				} 
-				
-				postcodefield.find('label abbr').remove();
-
-				if ( typeof thislocale['postcode']['required'] == 'undefined' || thislocale['postcode']['required'] == true ) {
-					
-					postcodefield.find('label').append( required );
-	
-				}
-				
-			} else {
-			
-				if (postcodefield.find('label abbr').size()==0) postcodefield.find('label').append( required );
-				
-			}
 			
 			// Re-order postcode/city
 			if ( thislocale['postcode_before_city'] ) {

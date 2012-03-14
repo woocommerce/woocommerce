@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Optimised queries with no_found_rows
 * Template Loader - Support for taxonomy-product_cat-SLUG.php template files
 * Stock checker works with items on multiple rows
+* Vietnam locale and support for hiding fields
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

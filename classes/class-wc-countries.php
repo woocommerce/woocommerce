@@ -406,7 +406,8 @@ class WC_Countries {
 				'AA' => __('Americas', 'woocommerce') ,
 				'AE' => __('Europe', 'woocommerce') ,
 				'AP' => __('Pacific', 'woocommerce') 
-			)
+			),
+			'VN' => array()
 		);
 	}
 
@@ -575,6 +576,7 @@ class WC_Countries {
 				'SE' => $postcode_before_city,
 				'TR' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city} {state}\n{country}",
 				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state} {postcode}\n{country}",
+				'VN' => "{name}\n{company}\n{address_1}\n{city}\n{country}",
 			));
 		endif;
 		
@@ -817,20 +819,38 @@ class WC_Countries {
 						'label' => __('County', 'woocommerce')
 					)
 				),
-						
+				'VN' => array(
+					'state'		=> array(
+						'required' => false
+					),
+					'postcode' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					),
+					'address_2' => array(
+						'required' 	=> false,
+						'hidden'	=> true
+					)
+				),						
 			));
 			
 			$this->locale = array_intersect_key($this->locale, $this->get_allowed_countries());
 			
 			$this->locale['default'] = apply_filters('woocommerce_localisation_default_address_fields', array(
+				'address_2'	=> array(
+					'required' 	=> false
+				),
 				'postcode'	=> array(
-					'label' => __('Postcode/Zip', 'woocommerce')
+					'label' 	=> __('Postcode/Zip', 'woocommerce'),
+					'required' 	=> true
 				),
 				'city'	=> array(
-					'label'	=> __('Town/City', 'woocommerce')
+					'label'		=> __('Town/City', 'woocommerce'),
+					'required' 	=> true
 				),
 				'state'		=> array(
-					'label' => __('State/County', 'woocommerce')
+					'label' 	=> __('State/County', 'woocommerce'),
+					'required' 	=> true
 				)
 			));
 			

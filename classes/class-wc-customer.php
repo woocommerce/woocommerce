@@ -245,7 +245,7 @@ class WC_Customer {
 }
 
 /** Depreciated */
-class woocommerce_customer extends WC_Coupon {
+class woocommerce_customer extends WC_Customer {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_customer', '1.4', 'WC_Customer()' );
 		parent::__construct(); 
