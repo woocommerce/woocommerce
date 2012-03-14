@@ -228,21 +228,37 @@ class Woocommerce {
 	 */
 	function template_loader( $template ) {
 		
-		if ( is_single() && get_post_type() == 'product' ) 
-			$find = 'single-product.php';
-		elseif ( is_tax('product_cat') )
-			$find = 'taxonomy-product_cat.php';
-		elseif ( is_tax('product_tag') )
-			$find = 'taxonomy-product_tag.php';
-		elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') ))
-			$find = 'archive-product.php';
-		else
-			$find = false;
+		$find 	= array( 'woocommerce.php' );
+		$file 	= '';
+		
+		if ( is_single() && get_post_type() == 'product' ) {
 			
-		if ($find) :
-			$template = locate_template( array( 'woocommerce.php', $find, $this->template_url . $find ) );
-			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $find;
-		endif;
+			$file 	= 'single-product.php';
+			$find[] = $file;
+			$find[] = $this->template_url . $file;
+
+		} elseif ( is_tax('product_cat') || is_tax('product_tag') ) {
+			
+			$term = get_queried_object();
+			
+			$file 	= 'taxonomy-' . $term->taxonomy . '.php';
+			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= $this->template_url . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= $file;
+			$find[] 	= $this->template_url . $file;
+						
+		} elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') )) {
+			
+			$file 	= 'archive-product.php';
+			$find[] = $file;
+			$find[] = $this->template_url . $file;
+			
+		}
+		
+		if ($file) {
+			$template = locate_template( $find );
+			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $file;
+		}
 		
 		return $template;
 	}
