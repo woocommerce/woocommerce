@@ -707,10 +707,10 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) )
-		return;
+	if ( ! isset( $_GET['order_again'] ) ) return;
 
-	// TODO: nonce check
+	// Nonce security check
+	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) ) return;
 
 	// Load the current user ID
 	// Stop if the user is not logged in
