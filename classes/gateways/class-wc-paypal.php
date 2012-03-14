@@ -218,7 +218,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			// If we are sending shipping, send shipping address instead of billing
 			$paypal_args['first_name']		= $order->shipping_first_name;
 			$paypal_args['last_name']		= $order->shipping_last_name;
-			$paypal_args['company']			= $order->billing_company;
+			$paypal_args['company']			= $order->shipping_company;
 			$paypal_args['address1']		= $order->shipping_address_1;
 			$paypal_args['address2']		= $order->shipping_address_2;
 			$paypal_args['city']			= $order->shipping_city;
