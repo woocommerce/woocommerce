@@ -521,6 +521,24 @@ class WC_Paypal extends WC_Payment_Gateway {
 	                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
 	            break;
 	            case "refunded" :
+	            
+	            	// Only handle full refunds, not partial
+	            	if ($order->get_order_total() == ($posted['mc_gross']*-1)) {
+	            	
+		            	// Mark order as refunded
+		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
+		            	
+						$message = woocommerce_mail_template( 
+							__('Order refunded/reversed', 'woocommerce'),
+							sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->id, $posted['reason_code'] )
+						);
+					
+						// Send the mail
+						woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woocommerce'), $order->id), $message );
+					
+					}
+	            
+	            break;
 	            case "reversed" :
 	            case "chargeback" :
 	            	
