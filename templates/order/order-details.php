@@ -72,6 +72,8 @@ $order = new WC_Order( $order_id );
 	</tbody>
 </table>
 
+<p><a href="<?php echo esc_url( add_query_arg( 'order_again', $order->id, get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ); ?>" class="button"><?php _e('Order again', 'woocommerce'); ?></a></p>
+
 <header>
 	<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 </header>
