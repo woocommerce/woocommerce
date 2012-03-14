@@ -731,7 +731,7 @@ function woocommerce_order_again() {
 		$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['id'] );
 		$quantity     = (int) $item['qty'];
 		$variation_id = (int) $item['variation_id'];
-		$variations   = '';
+		$variations   = array();
 		foreach ( $item['item_meta'] as $meta ) {
 			if ( ! substr( $meta['meta_name'], 0, 3) === 'pa_' ) continue;
 			$variations[$meta['meta_name']] = $meta['meta_value'];
