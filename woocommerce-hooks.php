@@ -146,6 +146,7 @@ add_action( 'wp_head', 'woocommerce_products_rss_feed' );
 
 /* Order actions */
 add_action( 'init', 'woocommerce_cancel_order' );
+add_action( 'init', 'woocommerce_order_again' );
 add_action( 'woocommerce_new_order', 'woocommerce_increase_coupon_counts' );
 
 /* Star Ratings */

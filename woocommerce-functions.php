@@ -700,6 +700,55 @@ function woocommerce_process_registration() {
 }
 
 /**
+ * Place a previous order again
+ **/
+function woocommerce_order_again() {
+	global $woocommerce;
+
+	// Nothing to do
+	if ( ! isset( $_GET['order_again'] ) ) return;
+
+	// Nonce security check
+	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) ) return;
+
+	// Load the current user ID
+	// Stop if the user is not logged in
+	$user_id = get_current_user_id();
+	if ( empty( $user_id ) ) return;
+
+	// Load the previous order
+	// Stop if the order does not exist
+	$order = new WC_Order( (int) $_GET['order_again'] );
+	if ( empty( $order->id ) ) return;
+
+	// Make sure the previous order belongs to the current customer
+	if ( $order->user_id != $user_id ) return;
+
+	// Copy products from the order to the cart
+	foreach ( $order->get_items() as $item ) {
+		// Load all product info including variation data
+		$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['id'] );
+		$quantity     = (int) $item['qty'];
+		$variation_id = (int) $item['variation_id'];
+		$variations   = array();
+		foreach ( $item['item_meta'] as $meta ) {
+			if ( ! substr( $meta['meta_name'], 0, 3) === 'pa_' ) continue;
+			$variations[$meta['meta_name']] = $meta['meta_value'];
+		}
+
+		// Add to cart validation
+		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity ) ) continue;
+
+		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations );
+	}
+
+	// Redirect to cart
+	$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce' ) );
+	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+	exit;
+}
+
+/**
  * Cancel a pending order
  **/
 function woocommerce_cancel_order() {
