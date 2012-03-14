@@ -113,10 +113,15 @@ class WC_Settings_API {
     		}
     	}
     	
-    	$this->settings = $existing_settings;
+    	// Set and decode escaped values
+    	$this->settings = array_map( array(&$this, 'format_settings'), $existing_settings );
     	
     	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) ) { $this->enabled = 'yes'; }
     } // End init_settings()
+    
+    function format_settings( $value ) {
+    	return (is_array($value)) ? $value : html_entity_decode($value);
+    }
     
     /**
      * Generate Settings HTML.
@@ -211,7 +216,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'.esc_attr($this->settings[$key]).'</textarea>';
+				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'.esc_textarea($this->settings[$key]).'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -368,7 +373,7 @@ class WC_Settings_API {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
-    		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    		$text = esc_attr( trim( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
     	}
     	
     	return $text;
@@ -405,7 +410,7 @@ class WC_Settings_API {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
     	
     	if ( isset( $_POST[$this->plugin_id . $this->id . '_' . $key] ) ) {
-    		$text = esc_attr( woocommerce_clean( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
+    		$text = esc_attr( trim( $_POST[$this->plugin_id . $this->id . '_' . $key] ) );
     	}
     	
     	return $text;
