@@ -725,13 +725,16 @@ function woocommerce_order_again() {
 	// Make sure the previous order belongs to the current customer
 	if ( $order->user_id != $user_id ) return;
 
-	// TODO: Copy products from the order to the cart
-
-	if ( 'TODO: everything done' ) {
-		$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce') );
-		wp_safe_redirect( $woocommerce->cart->get_cart_url() );
-		exit;
+	// Copy products from the order to the cart
+	foreach ( $order->get_items() as $item ) {
+		// TODO: variation data
+		$woocommerce->cart->add_to_cart( $item['id'], $item['qty'], $item['variation_id'] );
 	}
+
+	// Redirect to cart
+	$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce') );
+	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+	exit;
 }
 
 /**
