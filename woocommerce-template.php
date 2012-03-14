@@ -703,26 +703,21 @@ if (!function_exists('woocommerce_form_field')) {
 				elseif (is_user_logged_in()) :
 					$current_cc = get_user_meta( get_current_user_id(), $country_key, true );
 				else :
-					$current_cc = $woocommerce->countries->get_base_country();
+					$current_cc = apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
 				endif;
-
-				if (!$current_cc) $current_cc = $woocommerce->customer->get_country();
-				
-				// Get State
-				$current_r = ($value) ? $value : $woocommerce->customer->get_state();
 
 				$states = $woocommerce->countries->states;	
 					
-				if (isset( $states[$current_cc][$current_r] )) :
+				if (isset( $states[$current_cc][$value] )) :
 					// Dropdown
 					$field .= '<select name="'.$key.'" id="'.$key.'" class="state_select"><option value="">'.__('Select a state&hellip;', 'woocommerce').'</option>';
 					foreach($states[$current_cc] as $ckey=>$cvalue) :
-						$field .= '<option value="'.$ckey.'" '.selected($current_r, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
+						$field .= '<option value="'.$ckey.'" '.selected($value, $ckey, false).'>'.__($cvalue, 'woocommerce').'</option>';
 					endforeach;
 					$field .= '</select>';
 				else :
 					// Input
-					$field .= '<input type="text" class="input-text" value="'.$current_r.'"  placeholder="'.$args['placeholder'].'" name="'.$key.'" id="'.$key.'" />';
+					$field .= '<input type="text" class="input-text" value="'.$value.'"  placeholder="'.$args['placeholder'].'" name="'.$key.'" id="'.$key.'" />';
 				endif;
 	
 				$field .= '</p>'.$after;

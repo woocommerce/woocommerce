@@ -602,11 +602,12 @@ class WC_Checkout {
 			
 			$default_billing_country 	= apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
 			
-			$default_billing_state 		= apply_filters('default_checkout_state', ($woocommerce->customer->get_state()) ? $woocommerce->customer->get_state() : $woocommerce->countries->get_base_state());
+			// ($woocommerce->customer->get_state()) ? $woocommerce->customer->get_state() : $woocommerce->countries->get_base_state()
+			$default_billing_state 		= apply_filters('default_checkout_state', '');
 			
 			$default_shipping_country 	= apply_filters('default_checkout_country', ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country());
 			
-			$default_shipping_state 	= apply_filters('default_checkout_state', ($woocommerce->customer->get_shipping_state()) ? $woocommerce->customer->get_shipping_state() : $woocommerce->countries->get_base_state());
+			$default_shipping_state 	= apply_filters('default_checkout_state', '');
 			
 			if ($input == "billing_country") return $default_billing_country;
 			
