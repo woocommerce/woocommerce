@@ -590,18 +590,20 @@ function variable_product_type_options() {
 
 		window.send_to_cproduct = function(html) {
 			
-			var img = jQuery(html).find('img');
+			jQuery('body').append('<div id="temp_image">' + html + '</div>');
+				
+			var img = jQuery('#temp_image').find('img');
 			
-			imgurl = jQuery(img).attr('src');
-			imgclass = jQuery(img).attr('class');
+			imgurl 		= img.attr('src');
+			imgclass 	= img.attr('class');
+			imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
 
-			imgid = parseInt(imgclass.replace(/\D/g, ''), 10);
-			
 			jQuery('.upload_image_id', current_field_wrapper).val(imgid);
 			jQuery('.upload_image_button', current_field_wrapper).addClass('remove');
 
 			jQuery('img', current_field_wrapper).attr('src', imgurl);
 			tb_remove();
+			
 			window.send_to_editor = window.send_to_editor_default;
 			
 		}
