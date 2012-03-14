@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-03-13 21:32+0100\n"
+"PO-Revision-Date: 2012-03-14 00:55+0100\n"
 "Last-Translator: Frederik Svarre <FRS@FSLab.dk>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2767,18 +2767,18 @@ msgstr " lande/stater valgt"
 #: admin/woocommerce-admin-settings-forms.php:570
 #: admin/woocommerce-admin-settings-forms.php:741
 msgid "No countries selected"
-msgstr "Inden lande valgt"
+msgstr "Ingen lande valgt"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:652
 #: classes/shipping/class-wc-flat-rate.php:416
 msgid "Delete the selected rates?"
-msgstr "Slet valgte rater?"
+msgstr "Slet valgte satser?"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:666
 msgid "Duplicate the selected rates?"
-msgstr "Dupliker valgte rater?"
+msgstr "Dupliker valgte satser?"
 
 #@ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:745
