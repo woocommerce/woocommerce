@@ -674,6 +674,8 @@ jQuery(document).ready(function($) {
 								    scrollTop: ($('form.checkout').offset().top - 100)
 								}, 1000);
 								
+							} else {
+								throw "Invalid response";
 							}
 						}
 						catch(err) {

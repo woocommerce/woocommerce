@@ -216,15 +216,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['address_override'] = 1;
 			
 			// If we are sending shipping, send shipping address instead of billing
-			$paypal_args['first_name']	= $order->shipping_first_name;
-			$paypal_args['last_name']	= $order->shipping_last_name;
-			$paypal_args['company']		= $order->shipping_company;
-			$paypal_args['address1']	= $order->shipping_address_1;
-			$paypal_args['address2']	= $order->shipping_address_2;
-			$paypal_args['city']		= $order->shipping_city;
-			$paypal_args['state']		= $order->shipping_state;
-			$paypal_args['zip']			= $order->shipping_postcode;
-			$paypal_args['country']		= $order->shipping_country;
+			$paypal_args['SHIPTONAME']			= $order->shipping_first_name . ' ' . $order->shipping_last_name;
+			$paypal_args['SHIPTOSTREET']		= $order->shipping_address_1;
+			$paypal_args['SHIPTOSTREET2']		= $order->shipping_address_2;
+			$paypal_args['SHIPTOCITY']			= $order->shipping_city;
+			$paypal_args['SHIPTOSTATE']			= $order->shipping_state;
+			$paypal_args['SHIPTOCOUNTRYCODE']	= $order->shipping_country;
+			$paypal_args['SHIPTOZIP']			= $order->shipping_postcode;
 		else :
 			$paypal_args['no_shipping'] = 1;
 		endif;
@@ -356,6 +354,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 		$paypal_args = $this->get_paypal_args( $order );
 		
+		$paypal_args = http_build_query( $paypal_args );
+		
 		if ( $this->testmode == 'yes' ):
 			$paypal_adr = $this->testurl . '?test_ipn=1&';		
 		else :
@@ -364,7 +364,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		return array(
 			'result' 	=> 'success',
-			'redirect'	=> $paypal_adr . http_build_query( $paypal_args )
+			'redirect'	=> $paypal_adr . $paypal_args
 			//'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))))
 		);
 		
