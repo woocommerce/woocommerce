@@ -727,12 +727,24 @@ function woocommerce_order_again() {
 
 	// Copy products from the order to the cart
 	foreach ( $order->get_items() as $item ) {
-		// TODO: variation data
-		$woocommerce->cart->add_to_cart( $item['id'], $item['qty'], $item['variation_id'] );
+		// Load all product info including variation data
+		$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['id'] );
+		$quantity     = (int) $item['qty'];
+		$variation_id = (int) $item['variation_id'];
+		$variations   = '';
+		foreach ( $item['item_meta'] as $meta ) {
+			if ( ! substr( $meta['meta_name'], 0, 3) === 'pa_' ) continue;
+			$variations[$meta['meta_name']] = $meta['meta_value'];
+		}
+
+		// Add to cart validation
+		if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity ) ) continue;
+
+		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations );
 	}
 
 	// Redirect to cart
-	$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce') );
+	$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce' ) );
 	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 	exit;
 }
