@@ -134,6 +134,11 @@ function woocommerce_coupon_data_meta_box($post) {
 			
 			echo '</div><div class="options_group">';
 			
+			// Customers
+			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __('Customer Emails', 'woocommerce'), 'placeholder' => __('Any customer', 'woocommerce'), 'description' => __('Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce'), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true )) ) );
+			
+			echo '</div><div class="options_group">';
+			
 			// Usage limit
 			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __('Usage limit', 'woocommerce'), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __('How many times this coupon can be used before it is void', 'woocommerce') ) );
 				
@@ -170,6 +175,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$apply_before_tax = isset($_POST['apply_before_tax']) ? 'yes' : 'no';
 		$free_shipping = isset($_POST['free_shipping']) ? 'yes' : 'no';
 		$minimum_amount = strip_tags(stripslashes( $_POST['minimum_amount'] ));
+		$customer_email = array_filter(array_map('trim', explode(',', strip_tags(stripslashes( $_POST['customer_email'] )))));
 		
 		if (isset($_POST['product_ids'])) {
 			$product_ids 			= (array) $_POST['product_ids'];
@@ -201,6 +207,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		update_post_meta( $post_id, 'product_categories', $product_categories );
 		update_post_meta( $post_id, 'exclude_product_categories', $exclude_product_categories );
 		update_post_meta( $post_id, 'minimum_amount', $minimum_amount );
+		update_post_meta( $post_id, 'customer_email', $customer_email );
 		
 		do_action('woocommerce_coupon_options');
 	

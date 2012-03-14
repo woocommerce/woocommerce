@@ -25,6 +25,10 @@ class WC_Coupon {
 	var $product_categories;
 	var $exclude_product_categories;
 	var $minimum_amount;
+	var $customer_email;
+	var $coupon_custom_fields;
+	var $discount_type;
+	var $coupon_amount;
 	
 	/** get coupon with $code */
 	function __construct( $code ) {
@@ -49,6 +53,7 @@ class WC_Coupon {
             $this->product_categories = $coupon_data['product_categories'];
             $this->exclude_product_categories = $coupon_data['exclude_product_categories'];
             $this->minimum_amount = $coupon_data['minimum_amount'];
+            $this->customer_email = $coupon_data['customer_email'];
             return true;
         else:
             $coupon_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE BINARY post_title = %s AND post_type= %s", $this->code, 'shop_coupon' ) );
@@ -56,21 +61,42 @@ class WC_Coupon {
             
             // Check titles match
             if ($this->code!==$coupon->post_title) return false;
+            
             if ($coupon && $coupon->post_status == 'publish') :
-                $this->id = $coupon->ID;
-                $this->type = get_post_meta($coupon->ID, 'discount_type', true);
-                $this->amount = get_post_meta($coupon->ID, 'coupon_amount', true);
-                $this->individual_use = get_post_meta($coupon->ID, 'individual_use', true);
-                $this->product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'product_ids', true))));
-                $this->exclude_product_ids = array_filter(array_map('trim', explode(',', get_post_meta($coupon->ID, 'exclude_product_ids', true))));
-                $this->usage_limit = get_post_meta($coupon->ID, 'usage_limit', true);
-                $this->usage_count = (int) get_post_meta($coupon->ID, 'usage_count', true);
-                $this->expiry_date = ($expires = get_post_meta($coupon->ID, 'expiry_date', true)) ? strtotime($expires) : '';
-                $this->apply_before_tax = get_post_meta($coupon->ID, 'apply_before_tax', true);
-                $this->free_shipping = get_post_meta($coupon->ID, 'free_shipping', true);
-                $this->product_categories = array_filter(array_map('trim', (array) get_post_meta($coupon->ID, 'product_categories', true)));
-           		$this->exclude_product_categories = array_filter(array_map('trim', (array) get_post_meta($coupon->ID, 'exclude_product_categories', true)));
-           		$this->minimum_amount = get_post_meta($coupon->ID, 'minimum_amount', true);
+                $this->id 					= $coupon->ID;
+                $this->coupon_custom_fields = get_post_custom( $this->id );
+                 
+                $load_data = array(
+                	'discount_type'					=> 'fixed_cart',
+                	'coupon_amount'					=> 0,
+                	'individual_use'				=> 'no',
+                	'product_ids'					=> '',
+                	'exclude_product_ids'			=> '',
+                	'usage_limit'					=> '',
+                	'usage_count'					=> '',
+                	'expiry_date'					=> '',
+                	'apply_before_tax'				=> 'yes',
+                	'free_shipping'					=> 'no',
+                	'product_categories'			=> array(),
+                	'exclude_product_categories'	=> array(),
+                	'minimum_amount'				=> '',
+                	'customer_email'				=> array()
+                );
+                 
+                foreach ($load_data as $key => $default) $this->$key = (isset($this->coupon_custom_fields[$key][0]) && $this->coupon_custom_fields[$key][0]!=='') ? $this->coupon_custom_fields[$key][0] : $default; 
+                 
+                // Alias
+                $this->type 				= $this->discount_type;
+                $this->amount 				= $this->coupon_amount;
+                
+                // Formatting
+                $this->product_ids = array_filter(array_map('trim', explode(',', $this->product_ids)));
+                $this->exclude_product_ids = array_filter(array_map('trim', explode(',', $this->exclude_product_ids)));
+     			$this->expiry_date = ($this->expiry_date) ? strtotime($this->expiry_date) : '';
+                $this->product_categories = array_filter(array_map('trim', (array) maybe_unserialize($this->product_categories)));
+           		$this->exclude_product_categories = array_filter(array_map('trim', (array) maybe_unserialize($this->exclude_product_categories)));
+   				$this->customer_email = array_filter(array_map('trim', (array) maybe_unserialize($this->customer_email)));
+
                 return true;
             endif;
         endif;

@@ -657,8 +657,24 @@ jQuery(document).ready(function($) {
 				success: 	function( code ) {
 					$('.woocommerce_error, .woocommerce_message').remove();
 						try {
-							success = $.parseJSON( code );					
-							window.location = decodeURI(success.redirect);
+							result = $.parseJSON( code );	
+							
+							if (result.result=='success') {
+								
+								window.location = decodeURI(result.redirect);
+								
+							} else if (result.result=='failure') {
+								
+								$form.prepend( result.messages );
+								$form.removeClass('processing').unblock(); 
+							
+								if (result.refresh=='true') $('body').trigger('update_checkout');
+								
+								$('html, body').animate({
+								    scrollTop: ($('form.checkout').offset().top - 100)
+								}, 1000);
+								
+							}
 						}
 						catch(err) {
 						  	$form.prepend( code );

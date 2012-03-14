@@ -539,7 +539,6 @@ function woocommerce_pay_action() {
 	endif;
 }
 
-
 /**
  * Process the login form
  **/

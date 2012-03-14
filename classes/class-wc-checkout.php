@@ -563,7 +563,20 @@ class WC_Checkout {
 		
 		// If we reached this point then there were errors
 		if (is_ajax()) : 
+		
+			ob_start();
 			$woocommerce->show_messages();
+			$messages = ob_get_clean();
+			
+			echo json_encode( 
+				array(
+					'result'	=> 'failure',
+					'messages' 	=> $messages,
+					'refresh' 	=> (isset($_SESSION['refresh_totals'])) ? 'true' : 'false'
+				) 
+			);
+			
+			unset($_SESSION['refresh_totals']);
 			exit;
 		endif;
 	}

@@ -170,6 +170,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * variation menu_order for organisation (drag and drop)
 * Prevent ms-files.php accessing protected downloads when multisite is enabled
 * is visible for variations - means you can hide out of stock variations
+* Customer email field for coupons - limit to user/billing email
+* Optimised coupon class loading
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)
