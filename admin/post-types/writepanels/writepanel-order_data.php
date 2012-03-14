@@ -644,8 +644,6 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_shipping_postcode', stripslashes( $_POST['_shipping_postcode'] ));
 		update_post_meta( $post_id, '_shipping_country', stripslashes( $_POST['_shipping_country'] ));
 		update_post_meta( $post_id, '_shipping_state', stripslashes( $_POST['_shipping_state'] ));
-		update_post_meta( $post_id, '_shipping_method', stripslashes( $_POST['_shipping_method'] ));
-		update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
 		update_post_meta( $post_id, '_order_shipping', stripslashes( $_POST['_order_shipping'] ));
 		update_post_meta( $post_id, '_cart_discount', stripslashes( $_POST['_cart_discount'] ));
 		update_post_meta( $post_id, '_order_discount', stripslashes( $_POST['_order_discount'] ));
@@ -653,6 +651,18 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_customer_user', (int) $_POST['customer_user'] );
 		update_post_meta( $post_id, '_order_tax', stripslashes( $_POST['_order_tax'] ));
 		update_post_meta( $post_id, '_order_shipping_tax', stripslashes( $_POST['_order_shipping_tax'] ));
+		
+		// Shipping method handling
+		if ( get_post_meta( $post_id, '_shipping_method', true ) !== stripslashes( $_POST['_shipping_method'] ) ) {
+			update_post_meta( $post_id, '_shipping_method', stripslashes( $_POST['_shipping_method'] ));
+			update_post_meta( $post_id, '_shipping_method_title', stripslashes( $_POST['_shipping_method'] ));
+		}
+		
+		// Payment method handling
+		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
+			update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
+			update_post_meta( $post_id, '_payment_method_title', stripslashes( $_POST['_payment_method'] ));
+		}
 	
 	// Tax rows
 		$order_taxes = array();
