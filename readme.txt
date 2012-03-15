@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Vietnam locale and support for hiding fields
 * Based on user feedback, empty default state on checkout to prevent submission errors
 * Fix shipping_method_title in manual orders
+* Option to reorder items by GeertDD
 
 = 1.5.1 - 08/03/2012 =
 * Persistent (logged-in) customer carts (thanks dominic-p)

@@ -191,6 +191,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_lock_down_admin',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Allow customers to reorder items from past orders.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_allow_customers_to_reorder',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 

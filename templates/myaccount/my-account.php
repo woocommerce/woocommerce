@@ -66,7 +66,6 @@ if ($customer_orders) :
 							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woocommerce'); ?></a>
 						<?php endif; ?>
 						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>" class="button"><?php _e('View', 'woocommerce'); ?></a>
-						<a href="<?php echo esc_url( $woocommerce->nonce_url( 'order_again', add_query_arg( 'order_again', $order->id, get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) ) ); ?>" class="button"><?php _e('Order again', 'woocommerce'); ?></a>
 					</td>
 				</tr><?php
 			endforeach;

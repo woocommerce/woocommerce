@@ -706,23 +706,17 @@ function woocommerce_order_again() {
 	global $woocommerce;
 
 	// Nothing to do
-	if ( ! isset( $_GET['order_again'] ) ) return;
+	if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || get_option('woocommerce_allow_customers_to_reorder') == 'no' ) return;
 
 	// Nonce security check
 	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) ) return;
 
-	// Load the current user ID
-	// Stop if the user is not logged in
-	$user_id = get_current_user_id();
-	if ( empty( $user_id ) ) return;
-
-	// Load the previous order
-	// Stop if the order does not exist
+	// Load the previous order - Stop if the order does not exist
 	$order = new WC_Order( (int) $_GET['order_again'] );
 	if ( empty( $order->id ) ) return;
 
 	// Make sure the previous order belongs to the current customer
-	if ( $order->user_id != $user_id ) return;
+	if ( $order->user_id != get_current_user_id() ) return;
 
 	// Copy products from the order to the cart
 	foreach ( $order->get_items() as $item ) {
@@ -743,7 +737,7 @@ function woocommerce_order_again() {
 	}
 
 	// Redirect to cart
-	$woocommerce->add_message( __('We filled your cart with the items of your previous order.', 'woocommerce' ) );
+	$woocommerce->add_message( __('The cart has been filled with the items from your previous order.', 'woocommerce' ) );
 	wp_safe_redirect( $woocommerce->cart->get_cart_url() );
 	exit;
 }
