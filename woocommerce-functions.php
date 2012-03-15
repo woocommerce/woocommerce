@@ -713,7 +713,10 @@ function woocommerce_order_again() {
 
 	// Load the previous order - Stop if the order does not exist
 	$order = new WC_Order( (int) $_GET['order_again'] );
+	
 	if ( empty( $order->id ) ) return;
+	
+	if ( $order->status!='completed' ) return;
 
 	// Make sure the previous order belongs to the current customer
 	if ( $order->user_id != get_current_user_id() ) return;
