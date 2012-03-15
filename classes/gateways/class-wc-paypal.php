@@ -120,7 +120,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 			'send_shipping' => array(
 							'title' => __( 'Shipping details', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option.', 'woocommerce' ), 
+							'label' => __( 'Send shipping details to PayPal.', 'woocommerce' ), 
+							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 							'default' => 'no'
 						), 
 			'testmode' => array(
