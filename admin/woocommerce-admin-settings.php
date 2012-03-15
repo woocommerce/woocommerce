@@ -195,7 +195,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Allow customers to reorder items from past orders.', 'woocommerce' ),
+		'desc' 		=> __( 'Allow customers to reorder items from past orders', 'woocommerce' ),
 		'id' 		=> 'woocommerce_allow_customers_to_reorder',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
