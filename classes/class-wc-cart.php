@@ -531,13 +531,13 @@ class WC_Cart {
 		 * @param   int     variation_id
 		 * @param   array   variation attribute values
 		 */
-		function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '' ) {
+		function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 			global $woocommerce;
 			
 			if ($quantity < 1) return false;
 			
 			// Load cart item data - may be added by other plugins
-			$cart_item_data = (array) apply_filters('woocommerce_add_cart_item_data', array(), $product_id);
+			$cart_item_data = (array) apply_filters('woocommerce_add_cart_item_data', $cart_item_data, $product_id);
 			
 			// Generate a ID based on product ID, variation ID, variation data, and other cart item data
 			$cart_id = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
