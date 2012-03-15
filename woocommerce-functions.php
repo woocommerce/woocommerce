@@ -1129,7 +1129,7 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 		<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
 			_gaq.push(['_addItem',
 				'<?php echo $order_id; ?>',           	// order ID - required
-				'<?php if (isset($_product['sku']) && !empty($_product['sku'])){ echo $_product->sku; } else { echo $_product->id; }; ?>',      	// SKU/code - required
+				'<?php if (isset($_product->sku) && !empty($_product->sku)){ echo $_product->sku; } else { echo $_product->id; }; ?>',      	// SKU/code - required
 				'<?php echo $item['name']; ?>',        	// product name
 				'<?php if (isset($_product->variation_data)){
                                             echo woocommerce_get_formatted_variation( $_product->variation_data, true ); 
