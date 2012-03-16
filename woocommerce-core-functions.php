@@ -64,7 +64,9 @@ if (!function_exists('woocommerce_empty_cart')) {
  **/
 if (!function_exists('woocommerce_disable_admin_bar')) {
 	function woocommerce_disable_admin_bar() {
-		add_filter('show_admin_bar', '__return_false');
+		if ( get_option('woocommerce_lock_down_admin')=='yes' && !current_user_can('edit_posts') ) {
+			add_filter('show_admin_bar', '__return_false');
+		}
 	}
 }
 
