@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v1.5.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-16 00:42+0100\n"
-"PO-Revision-Date: 2012-03-16 01:18+0100\n"
+"POT-Creation-Date: 2012-03-16 21:29+0100\n"
+"PO-Revision-Date: 2012-03-16 23:28+0100\n"
 "Last-Translator: Frederik Svarre <FRS@FSLab.dk>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -111,20 +111,20 @@ msgid "No products found"
 msgstr "Ingen produkter fundet"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:481
-#: woocommerce-core-functions.php:533
+#: woocommerce-core-functions.php:485
+#: woocommerce-core-functions.php:537
 msgid "Download Permissions Granted"
 msgstr "Download tilladelse givet"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:567
+#: woocommerce-core-functions.php:571
 #: woocommerce.php:516
 msgctxt "slug"
 msgid "product"
 msgstr "produkt"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:657
+#: woocommerce-core-functions.php:661
 msgid "Select a category"
 msgstr "Vælg en kategori"
 
@@ -331,29 +331,35 @@ msgid "Guest"
 msgstr "Gæst"
 
 # @ woocommerce
-#: woocommerce-functions.php:1205
+#: woocommerce-functions.php:1133
+#: woocommerce-template.php:345
+msgid "SKU:"
+msgstr "Varenummer:"
+
+# @ woocommerce
+#: woocommerce-functions.php:1219
 msgid "New products"
 msgstr "Nye produkter"
 
 # @ woocommerce
-#: woocommerce-functions.php:1213
+#: woocommerce-functions.php:1227
 #, php-format
 msgid "New products added to %s"
 msgstr "Nye produkter tilføjet til %s"
 
 # @ woocommerce
-#: woocommerce-functions.php:1221
+#: woocommerce-functions.php:1235
 #, php-format
 msgid "New products tagged %s"
 msgstr "Nye produkter tagged %s"
 
 # @ woocommerce
-#: woocommerce-functions.php:1243
+#: woocommerce-functions.php:1257
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr "Du har brugt for lang tid. Gå venligst tilbage og opdater siden."
 
 # @ woocommerce
-#: woocommerce-functions.php:1246
+#: woocommerce-functions.php:1260
 msgid "Please rate the product."
 msgstr "Bedøm venligst produktet."
 
@@ -371,11 +377,6 @@ msgstr "Side"
 #: woocommerce-template.php:170
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr "Dette er en demobutik til testformål &mdash; ingen ordrer vil blive opfyldt."
-
-# @ woocommerce
-#: woocommerce-template.php:345
-msgid "SKU:"
-msgstr "Varenummer:"
 
 # @ woocommerce
 #: woocommerce-template.php:371
@@ -1329,6 +1330,16 @@ msgid "There are no product reviews yet."
 msgstr "Der er ingen produktanmeldelser endnu."
 
 # @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:393
+msgid "Number of sales"
+msgstr "Antal af salg"
+
+# @ woocommerce
+#: admin/woocommerce-admin-dashboard.php:394
+msgid "Sales aumount"
+msgstr "Salgs beløb"
+
+# @ woocommerce
 #: admin/woocommerce-admin-functions.php:106
 msgid "Email preview"
 msgstr "E-mail forhåndsvisning"
@@ -1513,8 +1524,8 @@ msgstr "Produkt genoprettet for revision fra %s"
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:454
 #, php-format
-msgid "Product published. <a href=\"%s\">View Contact</a>"
-msgstr "Produkt udgivet. <a href=\"%s\">Vis kontakt</a>"
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "Produkt udgivet. <a href=\"%s\">Vis produkt</a>"
 
 # @ default
 #: admin/woocommerce-admin-init.php:455
@@ -9314,32 +9325,32 @@ msgid "WooCommerce Product Categories"
 msgstr "WooCommerce produktkategorier"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:228
+#: widgets/widget-product_categories.php:229
 msgid "Order by:"
 msgstr "Sorter efter:"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:230
+#: widgets/widget-product_categories.php:231
 msgid "Category Order"
 msgstr "Kategorisortering"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:235
+#: widgets/widget-product_categories.php:236
 msgid "Show as dropdown"
 msgstr "Vis som dropdown"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:238
+#: widgets/widget-product_categories.php:239
 msgid "Show post counts"
 msgstr "Vis indlægsoptælling"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:241
+#: widgets/widget-product_categories.php:242
 msgid "Show hierarchy"
 msgstr "Vis hierarki"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:244
+#: widgets/widget-product_categories.php:245
 msgid "Show children of current category only"
 msgstr "Vis kun underkateorier af den aktuelle kategori "
 
