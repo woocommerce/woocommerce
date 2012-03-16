@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.5.2
+Stable tag: 1.5.2.1
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
@@ -143,8 +143,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.3 =
+= 1.5.2.1 =
+* Fix - Redirect when no payment is required
 * Fix - Admin bar hide option only for customers, not everyone
+* Fix - Removed admin bar css and spacing when disabled
 * Fix - Placeholder support for non-supporting browsers
 * Tweak - e-commerce tracking - SKU and Category (thanks jdiderik)
 * Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
@@ -670,6 +672,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.5.2.1 =
+Minor update. Note, titles are now hooked in to single-product.php - if you have overridden this template and have double titles, update your single-product.php template with that from core.
 
 = 1.4.4 =
 Minor update fixing a few bugs. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.

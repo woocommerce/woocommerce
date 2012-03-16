@@ -541,6 +541,7 @@ class WC_Checkout {
 					if (is_ajax()) : 
 						echo json_encode( 
 							array(
+								'result' 	=> 'success',
 								'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
 							) 
 						);
