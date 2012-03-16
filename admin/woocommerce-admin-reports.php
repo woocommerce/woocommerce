@@ -1143,7 +1143,7 @@ function woocommerce_product_sales() {
 	
 					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
 	
-					echo '<tr><th><a href="'.$orders_link.'">'.date('F', strtotime($date.'01')).'</a></th>
+					echo '<tr><th><a href="'.$orders_link.'">'.date_i18n('F', strtotime($date.'01')).'</a></th>
 					<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
 					<td class="bars">
 						<span style="width:'.$width.'%">&nbsp;</span>

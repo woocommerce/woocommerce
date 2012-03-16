@@ -184,10 +184,10 @@ function woocommerce_init_dashboard_widgets() {
 	$sales_heading = '';
 	
 	if ($the_month_num!=date('m')) : 
-		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
+		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date_i18n('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
 	endif;
 	
-	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
+	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
 	if(current_user_can('manage_woocommerce_orders')){
             wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
@@ -388,8 +388,10 @@ function woocommerce_dashboard_sales_js() {
 	remove_filter( 'posts_where', 'orders_this_month' );
 	
 	/* Script variables */
-	$params = array( 
-		'currency_symbol' 				=> get_woocommerce_currency_symbol() 
+	$params = array(
+		'currency_symbol' => get_woocommerce_currency_symbol(),
+		'number_of_sales' => __( 'Number of sales', 'woocommerce' ),
+		'sales_amount'    => __( 'Sales aumount', 'woocommerce' ),
 	);
 	
 	$order_counts_array = array();
