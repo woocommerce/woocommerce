@@ -451,7 +451,7 @@ function woocommerce_product_updated_messages( $messages ) {
 		3 => __('Custom field deleted.', 'woocommerce'),
 		4 => __('Product updated.', 'woocommerce'),
 		5 => isset($_GET['revision']) ? sprintf( __('Product restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-		6 => sprintf( __('Product published. <a href="%s">View Contact</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
+		6 => sprintf( __('Product published. <a href="%s">View Product</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
 		7 => __('Product saved.', 'woocommerce'),
 		8 => sprintf( __('Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
 		9 => sprintf( __('Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce'),
