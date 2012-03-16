@@ -80,9 +80,9 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 
 		if ($hide_if_empty && sizeof($woocommerce->cart->get_cart())==0) {
 			$inline_js = "
-				jQuery('.hide_cart_widget_if_empty').parent().hide();
+				jQuery('.hide_cart_widget_if_empty').closest('widget').hide();
 				jQuery('body').bind('adding_to_cart', function(){
-					jQuery(this).find('.hide_cart_widget_if_empty').parent().fadeIn();
+					jQuery(this).find('.hide_cart_widget_if_empty').closest('widget').fadeIn();
 				});
 			";
 
