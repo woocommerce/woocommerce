@@ -99,7 +99,7 @@ class WC_Product {
 		foreach ($load_data as $key => $default) $this->$key = (isset($this->product_custom_fields['_' . $key][0]) && $this->product_custom_fields['_' . $key][0]!=='') ? $this->product_custom_fields['_' . $key][0] : $default;
 			
 		// Get product type
-		$transient_name = 'woocommerce_product_type_' . $this->id;
+		$transient_name = 'wc_product_type_' . $this->id;
 		
 		if ( false === ( $this->product_type = get_transient( $transient_name ) ) ) :
 			$terms = wp_get_object_terms( $id, 'product_type', array('fields' => 'names') );
@@ -129,7 +129,7 @@ class WC_Product {
         
         if (is_null($this->total_stock)) :
         
-        	$transient_name = 'woocommerce_product_total_stock_' . $this->id;
+        	$transient_name = 'wc_product_total_stock_' . $this->id;
         
         	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) :
         
@@ -167,7 +167,7 @@ class WC_Product {
 			
 				$child_post_type = ($this->is_type('variable')) ? 'product_variation' : 'product';
 				
-				$transient_name = 'woocommerce_product_children_ids_' . $this->id;
+				$transient_name = 'wc_product_children_ids_' . $this->id;
         
 	        	if ( false === ( $this->children = get_transient( $transient_name ) ) ) :
 	        			
@@ -665,7 +665,7 @@ class WC_Product {
 		if ($location) $location = '_'.$location;
 		$star_size = apply_filters('woocommerce_star_rating_size'.$location, 16);
 
-		if ( false === ( $average_rating = get_transient( $this->id . '_woocommerce_average_rating' ) ) ) :
+		if ( false === ( $average_rating = get_transient( 'wc_average_rating_' . $this->id ) ) ) :
 		
 			global $wpdb;
 
@@ -692,7 +692,7 @@ class WC_Product {
 				$average_rating = '';
 			endif;
 			
-			set_transient( $this->id . '_woocommerce_average_rating', $average_rating );
+			set_transient( 'wc_average_rating_' . $this->id, $average_rating );
 		
 		endif;
 
@@ -1148,7 +1148,7 @@ class WC_Product {
 		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
 		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
 		
-		$woocommerce->clear_product_transients( $this->id );
+		if ( $this->min_variation_price !== '' ) $woocommerce->clear_product_transients( $this->id );
 	}
 	
 }

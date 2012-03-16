@@ -99,8 +99,8 @@ class WC_Query {
 		unset($current_wp_query['paged']);
 		
 		// Generate a transient name based on current query
-		$transient_name = 'woocommerce_unfiltered_product_ids_' . sanitize_key( http_build_query($current_wp_query) );
-		$transient_name = (is_search()) ? $transient_name . '_search' : $transient_name;
+		$transient_name = 'wc_uf_pid_' . md5( http_build_query($current_wp_query) );
+		$transient_name = (is_search()) ? $transient_name . '_s' : $transient_name;
 		
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
 
@@ -209,7 +209,7 @@ class WC_Query {
 	 */
 	function get_hidden_product_ids() {
 		
-		$transient_name = (is_search()) ? 'woocommerce_hidden_from_search_product_ids' : 'woocommerce_hidden_product_ids';
+		$transient_name = (is_search()) ? 'wc_hidden_product_ids_search' : 'wc_hidden_product_ids';
 		
 		if ( false === ( $hidden_product_ids = get_transient( $transient_name ) ) ) {
 			

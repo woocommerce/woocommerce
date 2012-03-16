@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed admin bar css and spacing when disabled
 * Fix - Placeholder support for non-supporting browsers
 * Tweak - e-commerce tracking - SKU and Category (thanks jdiderik)
+* Tweak - renamed transients (some generated transients were too long)
 * Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
 * Localization - Updated Danish Translation (by FrederikRS)
 

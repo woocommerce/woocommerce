@@ -60,7 +60,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 			$number = 15;
 
 		// Get products on sale
-		if ( false === ( $product_ids_on_sale = get_transient( 'woocommerce_products_onsale' ) ) ) :
+		if ( false === ( $product_ids_on_sale = get_transient( 'wc_products_onsale' ) ) ) :
 		
 			$meta_query = array();
 		    $meta_query[] = array(
@@ -80,7 +80,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 			
 			$product_ids_on_sale = array_unique(array_merge(array_values($on_sale), array_keys($on_sale)));
 			
-			set_transient( 'woocommerce_products_onsale', $product_ids_on_sale );
+			set_transient( 'wc_products_onsale', $product_ids_on_sale );
 					
 		endif;
 		

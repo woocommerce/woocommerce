@@ -1322,23 +1322,31 @@ class Woocommerce {
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
 		
-		delete_transient('woocommerce_products_onsale');
-		delete_transient('woocommerce_hidden_product_ids');
-		delete_transient('woocommerce_hidden_from_search_product_ids');
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` IN ('woocommerce_products_onsale', 'woocommerce_hidden_product_ids', 'woocommerce_hidden_from_search_product_ids')");
+		var_dump("CLEAR");
+
+		delete_transient('wc_products_onsale');
+		delete_transient('wc_hidden_product_ids');
+		delete_transient('wc_hidden_product_ids_search');
+		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` IN ('wc_products_onsale', 'wc_hidden_product_ids', 'wc_hidden_product_ids_search')");
 		
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_unfiltered_product_ids_%')");
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_layered_nav_count_%')");
+		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%')");
+		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%')");
 
 		if ($post_id>0) :
 			$post_id = (int) $post_id;
-			delete_transient('woocommerce_product_total_stock_'.$post_id);
-			delete_transient('woocommerce_product_children_ids_'.$post_id);
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_children_ids_$post_id%')");
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_total_stock_$post_id%')");
+			delete_transient('wc_product_total_stock_'.$post_id);
+			delete_transient('wc_product_children_ids_'.$post_id);
+			delete_transient('wc_average_rating_'.$post_id);
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` IN 
+				(
+					'_transient_wc_product_children_ids_$post_id', 
+					'_transient_wc_product_total_stock_$post_id', 
+					'_transient_wc_average_rating_$post_id'
+				)");
 		else :
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_children_ids_%')");
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_woocommerce_product_total_stock_%')");
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_children_ids_%')");
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_total_stock_%')");
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_average_rating_%')");
 		endif;
 	}
 	

@@ -1245,7 +1245,7 @@ function woocommerce_add_comment_rating($comment_id) {
 		global $post;
 		if (!$_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0) $_POST['rating'] = 5; 
 		add_comment_meta( $comment_id, 'rating', esc_attr($_POST['rating']), true );
-		delete_transient( esc_attr($post->ID) . '_woocommerce_average_rating' );
+		delete_transient( 'wc_average_rating_' . esc_attr($post->ID) );
 	endif;
 }
 

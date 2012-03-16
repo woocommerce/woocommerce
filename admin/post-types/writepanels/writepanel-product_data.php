@@ -644,7 +644,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_virtual', $is_virtual );
 	
 	// Set transient for product type
-	set_transient( 'woocommerce_product_type_' . $post_id, $product_type );
+	set_transient( 'wc_product_type_' . $post_id, $product_type );
 
 	// Sales and prices
 	if ($product_type=='simple' || $product_type=='external') :

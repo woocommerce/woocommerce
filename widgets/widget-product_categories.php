@@ -39,7 +39,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
 		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Product Categories', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		$c = $instance['count'] ? '1' : '0';
-		$h = $instance['hierarchical'] ? '1' : '0';
+		$h = $instance['hierarchical'] ? true : false;
 		$s = (isset($instance['show_children_only']) && $instance['show_children_only']) ? '1' : '0';
 		$d = $instance['dropdown'] ? '1' : '0';
 		$o = isset($instance['orderby']) ? $instance['orderby'] : 'order';
@@ -83,7 +83,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			global $wp_query, $post;
 			
 			$cat_args['title_li'] = '';
-			$cat_args['hierarchical'] = 1;
+			$cat_args['hierarchical'] = true;
 			$cat_args['child_of'] = 0;
 			$cat_args['pad_counts'] = 1;
 			
@@ -117,7 +117,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 				
 				echo '<li class="cat-item cat-item-'.$cat->term_id;
 				
-				if ($this->current_cat->term_id == $cat->term_id || is_tax('product_cat', $cat->slug)) echo ' current-cat';
+				if ( ($this->current_cat && $this->current_cat->term_id == $cat->term_id) || is_tax('product_cat', $cat->slug) ) echo ' current-cat';
 				if (
 					$this->current_cat 
 					&& in_array( $cat->term_id, $this->cat_ancestors )
@@ -146,7 +146,8 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			echo '<ul>';
 			
 			$cat_args['title_li'] = '';
-			wp_list_categories(apply_filters('woocommerce_product_categories_widget_args', $cat_args));
+			
+			wp_list_categories( apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
 	
 			echo '</ul>';
 		}
@@ -158,7 +159,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$cat_args = array();
 		
 		$cat_args['title_li'] = '';
-		$cat_args['hierarchical'] = 1;
+		$cat_args['hierarchical'] = true;
 		$cat_args['child_of'] = 0;
 		$cat_args['pad_counts'] = 1;
 		$cat_args['parent'] = $parent;
@@ -204,7 +205,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['orderby'] = strip_tags($new_instance['orderby']);
 		$instance['count'] = !empty($new_instance['count']) ? 1 : 0;
-		$instance['hierarchical'] = !empty($new_instance['hierarchical']) ? 1 : 0;
+		$instance['hierarchical'] = !empty($new_instance['hierarchical']) ? true : false;
 		$instance['dropdown'] = !empty($new_instance['dropdown']) ? 1 : 0;
 		$instance['show_children_only'] = !empty($new_instance['show_children_only']) ? 1 : 0;
 

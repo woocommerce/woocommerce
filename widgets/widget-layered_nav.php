@@ -230,12 +230,12 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 				foreach ($terms as $term) { 
 					
 					// Get count based on current view - uses transients
-					$transient_name = 'woocommerce_layered_nav_count_' . sanitize_key($taxonomy) . sanitize_key( $term->term_id );
+					$transient_name = 'wc_ln_count_' . md5( sanitize_key($taxonomy) . sanitize_key( $term->term_id ) );
 					
 					if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
 			
 						$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-					
+	
 						set_transient( $transient_name, $_products_in_term );
 					}
 					
