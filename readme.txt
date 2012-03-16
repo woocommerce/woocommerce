@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.3 =
 * Fix - Admin bar hide option only for customers, not everyone
+* Fix - Placeholder support for non-supporting browsers
 * Tweak - e-commerce tracking - SKU and Category (thanks jdiderik)
 * Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
 * Localization - Updated Danish Translation (by FrederikRS)
