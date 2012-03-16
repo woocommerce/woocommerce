@@ -143,11 +143,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.2.1 =
+= 1.5.2.1 - 16/03/2012 =
 * Fix - Redirect when no payment is required
 * Fix - Admin bar hide option only for customers, not everyone
 * Fix - Removed admin bar css and spacing when disabled
-* Fix - Placeholder support for non-supporting browsers
+* Fix - Placeholder support for old browsers
 * Tweak - e-commerce tracking - SKU and Category (thanks jdiderik)
 * Tweak - renamed transients (some generated transients were too long)
 * Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
