@@ -1322,8 +1322,6 @@ class Woocommerce {
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
 		
-		var_dump("CLEAR");
-
 		delete_transient('wc_products_onsale');
 		delete_transient('wc_hidden_product_ids');
 		delete_transient('wc_hidden_product_ids_search');
