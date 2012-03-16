@@ -143,6 +143,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.5.3 =
+* Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
+* Localization - Updated Danish Translation (by FrederikRS)
+
 = 1.5.2 - 15/03/2012 = 
 * Feature - My account ssl (added by justinstern)
 * Feature - Product id rules for coupons apply to a products parent (useful for grouped products)
