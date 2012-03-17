@@ -422,6 +422,7 @@ class WC_Product {
 					if ($this->backorders_allowed()) :
 						if ($this->backorders_require_notification()) :
 							$availability = __('Available on backorder', 'woocommerce');
+							$class = 'available-on-backorder';
 						else :
 							$availability = __('In stock', 'woocommerce');
 						endif;
@@ -434,6 +435,7 @@ class WC_Product {
 			else :
 				if ($this->backorders_allowed()) :
 					$availability = __('Available on backorder', 'woocommerce');
+					$class = 'available-on-backorder';
 				else :
 					$availability = __('Out of stock', 'woocommerce');
 					$class = 'out-of-stock';
