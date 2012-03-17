@@ -776,7 +776,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	// Downloadable options
 	if ($is_downloadable=='yes') :
 		
-		if (isset($_POST['_file_path']) && $_POST['_file_path']) update_post_meta( $post_id, '_file_path', esc_attr($_POST['_file_path']) );
+		if (isset($_POST['_file_path'])) update_post_meta( $post_id, '_file_path', esc_attr($_POST['_file_path']) );
 		if (isset($_POST['_download_limit'])) update_post_meta( $post_id, '_download_limit', esc_attr($_POST['_download_limit']) );
 		if (isset($_POST['_download_expiry'])) update_post_meta( $post_id, '_download_expiry', esc_attr($_POST['_download_expiry']) );
 		
