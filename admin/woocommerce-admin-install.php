@@ -211,15 +211,7 @@ function woocommerce_tables_install() {
     dbDelta($sql);
     
     // Table for storing user and guest download permissions
-    $downloadable_products_table = $wpdb->prefix . "woocommerce_downloadable_product_permissions";
-   
-    // Drop primary key first
-    if ($wpdb->get_var("SHOW TABLES LIKE '$downloadable_products_table'") == $downloadable_products_table) {
-		$wpdb->query("ALTER TABLE $downloadable_products_table DROP PRIMARY KEY");
-	}
-
-    // Now create it
-    $sql = "CREATE TABLE ". $downloadable_products_table ." (
+    $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions" ." (
         product_id 			mediumint(9) NOT NULL,
         order_id			mediumint(9) NOT NULL DEFAULT 0,
         order_key			varchar(200) NOT NULL,
