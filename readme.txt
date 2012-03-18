@@ -143,6 +143,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.5.3 =
+* Fix - Make download links use billing email, not user email
+* Localization - Spanish update by Héctor Carranza
+
 = 1.5.2.1 - 16/03/2012 =
 * Fix - Redirect when no payment is required
 * Fix - Admin bar hide option only for customers, not everyone
