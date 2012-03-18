@@ -136,13 +136,13 @@ msgstr "Up-sell"
 msgid "No products found"
 msgstr "Geen producten gevonden"
 
-#: woocommerce-core-functions.php:481
-#: woocommerce-core-functions.php:533
+#: woocommerce-core-functions.php:485
+#: woocommerce-core-functions.php:537
 #@ woocommerce
 msgid "Download Permissions Granted"
 msgstr "Download Toestemming Verleend"
 
-#: woocommerce-core-functions.php:657
+#: woocommerce-core-functions.php:661
 #@ woocommerce
 msgid "Select a category"
 msgstr "Selecteer een categorie"
@@ -271,17 +271,17 @@ msgstr "Anti-spam veld is reeds ingevuld."
 msgid "Couldn&#8217;t register you... please contact us if you continue to have problems."
 msgstr "Kan u niet registreren... gelieve ons te contacteren als u verdere problemen ondervindt."
 
-#: woocommerce-functions.php:762
+#: woocommerce-functions.php:765
 #@ woocommerce
 msgid "Order cancelled by customer."
 msgstr "Bestelling door klant geannuleerd."
 
-#: woocommerce-functions.php:765
+#: woocommerce-functions.php:768
 #@ woocommerce
 msgid "Your order was cancelled."
 msgstr "Uw bestelling is geannuleerd."
 
-#: woocommerce-functions.php:769
+#: woocommerce-functions.php:772
 #@ woocommerce
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr "Er is reeds een betaling gebeurd voor deze bestelling. Neem contact met ons op als u hulp nodig heeft."
@@ -289,58 +289,58 @@ msgstr "Er is reeds een betaling gebeurd voor deze bestelling. Neem contact met 
 #: shortcodes/shortcode-my_account.php:256
 #: shortcodes/shortcode-pay.php:53
 #: shortcodes/shortcode-pay.php:108
-#: woocommerce-functions.php:773
-#: woocommerce-functions.php:835
+#: woocommerce-functions.php:776
+#: woocommerce-functions.php:838
 #@ woocommerce
 msgid "Invalid order."
 msgstr "Onbekende bestelling."
 
-#: woocommerce-functions.php:797
+#: woocommerce-functions.php:800
 #@ woocommerce
 msgid "Invalid email address."
 msgstr "Ongeldig e-mailadres."
 
-#: woocommerce-functions.php:797
-#: woocommerce-functions.php:809
-#: woocommerce-functions.php:835
-#: woocommerce-functions.php:842
-#: woocommerce-functions.php:849
-#: woocommerce-functions.php:1021
+#: woocommerce-functions.php:800
+#: woocommerce-functions.php:812
+#: woocommerce-functions.php:838
+#: woocommerce-functions.php:845
+#: woocommerce-functions.php:852
+#: woocommerce-functions.php:1024
 #@ woocommerce
 msgid "Go to homepage &rarr;"
 msgstr "Ga naar de homepage &rarr;"
 
-#: woocommerce-functions.php:809
+#: woocommerce-functions.php:812
 #@ woocommerce
 msgid "Invalid download."
 msgstr "Ongeldige download."
 
-#: woocommerce-functions.php:821
+#: woocommerce-functions.php:824
 #@ woocommerce
 msgid "You must be logged in to download files."
 msgstr "U dient ingelogd zijn om bestanden te downloaden."
 
-#: woocommerce-functions.php:821
+#: woocommerce-functions.php:824
 #@ woocommerce
 msgid "Login &rarr;"
 msgstr "Login &rarr;"
 
-#: woocommerce-functions.php:826
+#: woocommerce-functions.php:829
 #@ woocommerce
 msgid "This is not your download link."
 msgstr "Dit is niet uw download link."
 
-#: woocommerce-functions.php:842
+#: woocommerce-functions.php:845
 #@ woocommerce
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "Sorry, het maximum aantal downloads voor dit bestand is overschreden"
 
-#: woocommerce-functions.php:849
+#: woocommerce-functions.php:852
 #@ woocommerce
 msgid "Sorry, this download has expired"
 msgstr "Het spijt ons. Deze download is vervallen."
 
-#: woocommerce-functions.php:1021
+#: woocommerce-functions.php:1024
 #@ woocommerce
 msgid "File not found"
 msgstr "Bestand niet gevonden"
@@ -348,35 +348,35 @@ msgstr "Bestand niet gevonden"
 #: admin/post-types/shop_order.php:77
 #: admin/post-types/writepanels/writepanel-order_data.php:71
 #: admin/woocommerce-admin-reports.php:301
-#: woocommerce-functions.php:1050
-#: woocommerce-functions.php:1100
+#: woocommerce-functions.php:1053
+#: woocommerce-functions.php:1103
 #@ woocommerce
 msgid "Guest"
 msgstr "Bezoeker"
 
-#: woocommerce-functions.php:1202
+#: woocommerce-functions.php:1219
 #@ woocommerce
 msgid "New products"
 msgstr "Nieuwe producten"
 
-#: woocommerce-functions.php:1210
+#: woocommerce-functions.php:1227
 #, php-format
 #@ woocommerce
 msgid "New products added to %s"
 msgstr "Nieuwe producten toegevoegd aan %s"
 
-#: woocommerce-functions.php:1218
+#: woocommerce-functions.php:1235
 #, php-format
 #@ woocommerce
 msgid "New products tagged %s"
 msgstr "Nieuwe producten tagged als %s"
 
-#: woocommerce-functions.php:1240
+#: woocommerce-functions.php:1257
 #@ woocommerce
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr "U heeft te lang gewacht. Keer terug en probeer het nogmaals."
 
-#: woocommerce-functions.php:1243
+#: woocommerce-functions.php:1260
 #@ woocommerce
 msgid "Please rate the product."
 msgstr "Becijfer het product."
@@ -400,6 +400,7 @@ msgstr "Dit is een demo winkel, voor test doeleinden. Bestellingen worden niet a
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:133
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:304
 #: templates/single-product/meta.php:11
+#: woocommerce-functions.php:1133
 #: woocommerce-template.php:345
 #@ woocommerce
 msgid "SKU:"
@@ -1035,7 +1036,7 @@ msgstr "Wijzig Eigenschap"
 #: admin/woocommerce-admin-attributes.php:217
 #: admin/woocommerce-admin-init.php:220
 #: templates/single-product-reviews.php:79
-#: widgets/widget-product_categories.php:231
+#: widgets/widget-product_categories.php:232
 #@ woocommerce
 msgid "Name"
 msgstr "Naam"
@@ -1429,7 +1430,7 @@ msgid "There are no product orders yet."
 msgstr "Er zijn nog geen bestellingen van dit product."
 
 #: admin/woocommerce-admin-dashboard.php:261
-#: classes/class-wc-product.php:700
+#: classes/class-wc-product.php:702
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
@@ -1647,12 +1648,6 @@ msgstr "Product bijgewerkt."
 #@ woocommerce
 msgid "Product restored to revision from %s"
 msgstr "Product revisie teruggezet van %s"
-
-#: admin/woocommerce-admin-init.php:454
-#, php-format
-#@ woocommerce
-msgid "Product published. <a href=\"%s\">View Contact</a>"
-msgstr "Product gepubliceerd. <a href=\"%s\">Bekijk Product</a>"
 
 #: admin/woocommerce-admin-init.php:455
 #@ woocommerce
@@ -2133,8 +2128,8 @@ msgstr "Er zijn geen producten met een lage voorraad."
 #: admin/post-types/writepanels/writepanel-product_data.php:202
 #: admin/woocommerce-admin-reports.php:1505
 #: classes/class-wc-product.php:407
-#: classes/class-wc-product.php:429
-#: classes/class-wc-product.php:438
+#: classes/class-wc-product.php:430
+#: classes/class-wc-product.php:440
 #@ woocommerce
 msgid "Out of stock"
 msgstr "Uitverkocht"
@@ -4021,7 +4016,7 @@ msgstr "Verander"
 #: admin/post-types/product.php:533
 #: admin/post-types/product.php:781
 #: admin/post-types/writepanels/writepanel-product_data.php:201
-#: classes/class-wc-product.php:426
+#: classes/class-wc-product.php:427
 #@ woocommerce
 msgid "In stock"
 msgstr "Op voorraad"
@@ -4096,7 +4091,7 @@ msgstr "Promotieprijs"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:137
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:308
 #: admin/post-types/writepanels/writepanel-product_data.php:102
-#: classes/class-wc-product.php:908
+#: classes/class-wc-product.php:910
 #@ woocommerce
 msgid "Weight"
 msgstr "Gewicht"
@@ -4253,7 +4248,7 @@ msgid "Actions"
 msgstr "Acties"
 
 #: admin/post-types/shop_order.php:80
-#: classes/gateways/class-wc-paypal.php:245
+#: classes/gateways/class-wc-paypal.php:246
 #, php-format
 #@ woocommerce
 msgid "Order #%s"
@@ -5096,7 +5091,7 @@ msgid "Cancel"
 msgstr "Annuleren"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:110
-#: classes/class-wc-product.php:917
+#: classes/class-wc-product.php:919
 #@ woocommerce
 msgid "Dimensions"
 msgstr "Afmetingen"
@@ -5349,10 +5344,10 @@ msgstr "U kunt niet dit aantal van dit product toevoegen aan uw winkelwagen omda
 
 #: classes/class-wc-cart.php:1285
 #: classes/class-wc-order.php:444
-#: classes/class-wc-product.php:596
-#: classes/class-wc-product.php:605
-#: classes/class-wc-product.php:636
-#: classes/class-wc-product.php:642
+#: classes/class-wc-product.php:598
+#: classes/class-wc-product.php:607
+#: classes/class-wc-product.php:638
+#: classes/class-wc-product.php:644
 #@ woocommerce
 msgid "Free!"
 msgstr "Gratis!"
@@ -7471,18 +7466,18 @@ msgid "(backorders allowed)"
 msgstr "(backorders toegestaan)"
 
 #: classes/class-wc-product.php:424
-#: classes/class-wc-product.php:436
+#: classes/class-wc-product.php:437
 #@ woocommerce
 msgid "Available on backorder"
 msgstr "Verkrijgbaar als backorder."
 
-#: classes/class-wc-product.php:656
+#: classes/class-wc-product.php:658
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
 msgstr "Vanaf:"
 
-#: classes/class-wc-product.php:700
+#: classes/class-wc-product.php:702
 #: templates/single-product-reviews.php:29
 #, php-format
 #@ woocommerce
@@ -7780,79 +7775,74 @@ msgstr "Vul uw PayPal e-mailadres in; dit is nodig om de betaling te volbrengen.
 msgid "Shipping details"
 msgstr "Verzendinformatie"
 
-#: classes/gateways/class-wc-paypal.php:123
-#@ woocommerce
-msgid "Send shipping details to PayPal. Since PayPal verifies addresses sent to it this can cause errors, therefore we recommend disabling this option."
-msgstr ""
-
-#: classes/gateways/class-wc-paypal.php:127
+#: classes/gateways/class-wc-paypal.php:128
 #@ woocommerce
 msgid "PayPal sandbox"
 msgstr "PayPal sandbox"
 
-#: classes/gateways/class-wc-paypal.php:129
+#: classes/gateways/class-wc-paypal.php:130
 #@ woocommerce
 msgid "Enable PayPal sandbox"
 msgstr "Activeer PayPal sandbox"
 
-#: classes/gateways/class-wc-paypal.php:133
+#: classes/gateways/class-wc-paypal.php:134
 #@ woocommerce
 msgid "Debug"
 msgstr "Debug"
 
-#: classes/gateways/class-wc-paypal.php:135
+#: classes/gateways/class-wc-paypal.php:136
 #@ woocommerce
 msgid "Enable logging (<code>woocommerce/logs/paypal.txt</code>)"
 msgstr "Activeer logging (<code>woocommerce/logs/paypal.txt</code>)"
 
-#: classes/gateways/class-wc-paypal.php:324
+#: classes/gateways/class-wc-paypal.php:325
 #@ woocommerce
 msgid "Thank you for your order. We are now redirecting you to PayPal to make payment."
 msgstr "Bedankt voor uw bestelling. Wij sturen u nu door naar PayPal om uw betaling over te maken."
 
-#: classes/gateways/class-wc-paypal.php:345
+#: classes/gateways/class-wc-paypal.php:346
 #@ woocommerce
 msgid "Pay via PayPal"
 msgstr "Betaal met PayPal"
 
-#: classes/gateways/class-wc-paypal.php:345
+#: classes/gateways/class-wc-paypal.php:346
 #@ woocommerce
 msgid "Cancel order &amp; restore cart"
 msgstr "Order annuleren &amp; winkelwagen herstellen"
 
-#: classes/gateways/class-wc-paypal.php:380
+#: classes/gateways/class-wc-paypal.php:381
 #@ woocommerce
 msgid "Thank you for your order, please click the button below to pay with PayPal."
 msgstr "Dank u voor uw bestelling, klik op onderstaande knop om te betalen met PayPal."
 
-#: classes/gateways/class-wc-paypal.php:510
+#: classes/gateways/class-wc-paypal.php:511
 #@ woocommerce
 msgid "IPN payment completed"
 msgstr "IPN betaling voltooid"
 
-#: classes/gateways/class-wc-paypal.php:521
-#: classes/gateways/class-wc-paypal.php:529
-#: classes/gateways/class-wc-paypal.php:546
+#: classes/gateways/class-wc-paypal.php:522
+#: classes/gateways/class-wc-paypal.php:530
+#: classes/gateways/class-wc-paypal.php:547
 #, php-format
 #@ woocommerce
 msgid "Payment %s via IPN."
 msgstr "Betaling %s via IPN."
 
-#: classes/gateways/class-wc-paypal.php:532
-#: classes/gateways/class-wc-paypal.php:549
+#: classes/gateways/class-wc-paypal.php:533
+#: classes/gateways/class-wc-paypal.php:550
 #@ woocommerce
 msgid "Order refunded/reversed"
 msgstr "Bestelling terugbetaald"
 
-#: classes/gateways/class-wc-paypal.php:533
-#: classes/gateways/class-wc-paypal.php:550
+#: classes/gateways/class-wc-paypal.php:534
+#: classes/gateways/class-wc-paypal.php:551
 #, php-format
 #@ woocommerce
 msgid "Order #%s has been marked as refunded - PayPal reason code: %s"
 msgstr "Bestelling #%s is gemarkeerd als terugbetaald. Paypal redenen: %s"
 
-#: classes/gateways/class-wc-paypal.php:537
-#: classes/gateways/class-wc-paypal.php:554
+#: classes/gateways/class-wc-paypal.php:538
+#: classes/gateways/class-wc-paypal.php:555
 #, php-format
 #@ woocommerce
 msgid "Payment for order #%s refunded/reversed"
@@ -9051,7 +9041,7 @@ msgstr "Bestsellers"
 #: widgets/widget-layered_nav.php:391
 #: widgets/widget-onsale.php:149
 #: widgets/widget-price_filter.php:195
-#: widgets/widget-product_categories.php:225
+#: widgets/widget-product_categories.php:226
 #: widgets/widget-product_search.php:69
 #: widgets/widget-product_tag_cloud.php:70
 #: widgets/widget-random_products.php:103
@@ -9274,27 +9264,27 @@ msgstr "Een lijst of uitklapmenu van de productcategorieën."
 msgid "WooCommerce Product Categories"
 msgstr "WooCommerce Productcategorieën"
 
-#: widgets/widget-product_categories.php:228
+#: widgets/widget-product_categories.php:229
 #@ woocommerce
 msgid "Order by:"
 msgstr "Sorteer op:"
 
-#: widgets/widget-product_categories.php:230
+#: widgets/widget-product_categories.php:231
 #@ woocommerce
 msgid "Category Order"
 msgstr "Categorie volgorde"
 
-#: widgets/widget-product_categories.php:235
+#: widgets/widget-product_categories.php:236
 #@ woocommerce
 msgid "Show as dropdown"
 msgstr "Toon als uitklapmenu"
 
-#: widgets/widget-product_categories.php:238
+#: widgets/widget-product_categories.php:239
 #@ woocommerce
 msgid "Show post counts"
 msgstr "Toon bericht aantallen"
 
-#: widgets/widget-product_categories.php:241
+#: widgets/widget-product_categories.php:242
 #@ woocommerce
 msgid "Show hierarchy"
 msgstr "Hiërarchie bekijken"
@@ -9611,13 +9601,13 @@ msgstr "Notities over uw bestelling, vb. opmerkingen over levering."
 msgid "Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the \"Calculation Type\" setting."
 msgstr ""
 
-#: classes/gateways/class-wc-paypal.php:251
-#: classes/gateways/class-wc-paypal.php:288
+#: classes/gateways/class-wc-paypal.php:252
+#: classes/gateways/class-wc-paypal.php:289
 #@ woocommerce
 msgid "Shipping via"
 msgstr "Verzending via"
 
-#: widgets/widget-product_categories.php:244
+#: widgets/widget-product_categories.php:245
 #@ woocommerce
 msgid "Show children of current category only"
 msgstr "Toon alleen subcategoriën van de huidige categorie"
@@ -9739,18 +9729,12 @@ msgstr "%s stuks van %s zijn als backorder geplaatst in bestelling #%s."
 msgid "Note"
 msgstr "Notitie"
 
-#: woocommerce-core-functions.php:567
+#: woocommerce-core-functions.php:571
 #: woocommerce.php:516
 #@ woocommerce
 msgctxt "slug"
 msgid "product"
 msgstr "product"
-
-#. translators: plugin header field 'Version'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "1.5.1"
-msgstr "1.5.1"
 
 #: admin/woocommerce-admin-settings.php:130
 #@ woocommerce
@@ -9806,8 +9790,40 @@ msgstr "Sorry, het lijkt erop dat de kortingscode \"%s\" u niet toebehoort. De k
 msgid "Order Again"
 msgstr "Bestel opnieuw"
 
-#: woocommerce-functions.php:740
+#: woocommerce-functions.php:743
 #@ woocommerce
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Uw winkelwagen werd gevuld met de producten van uw vorige bestellingen."
+
+#: admin/woocommerce-admin-dashboard.php:393
+#@ woocommerce
+msgid "Number of sales"
+msgstr "Aantal verkoop transacties"
+
+#: admin/woocommerce-admin-dashboard.php:394
+#@ woocommerce
+msgid "Sales aumount"
+msgstr "Verkoop hoeveelheid"
+
+#: admin/woocommerce-admin-init.php:454
+#, php-format
+#@ woocommerce
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr "Product gepubliceerd. <a href=\"%s\">Bekijk Product</a>"
+
+#: classes/gateways/class-wc-paypal.php:123
+#@ woocommerce
+msgid "Send shipping details to PayPal."
+msgstr "Stuur verzendings details naar PayPal."
+
+#: classes/gateways/class-wc-paypal.php:124
+#@ woocommerce
+msgid "PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled)."
+msgstr ""
+
+#. translators: plugin header field 'Version'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "1.5.2.1"
+msgstr "1.5.2.1"
 
