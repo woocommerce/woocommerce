@@ -206,7 +206,7 @@ msgstr[0] "artículo"
 msgstr[1] "artículos"
 
 #: admin/woocommerce-admin-dashboard.php:261
-#: classes/class-wc-product.php:700
+#: classes/class-wc-product.php:702
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
@@ -896,8 +896,8 @@ msgstr "No hay productos en existencias bajas"
 #: admin/post-types/writepanels/writepanel-product_data.php:202
 #: admin/woocommerce-admin-reports.php:1505
 #: classes/class-wc-product.php:407
-#: classes/class-wc-product.php:429
-#: classes/class-wc-product.php:438
+#: classes/class-wc-product.php:430
+#: classes/class-wc-product.php:440
 #@ woocommerce
 msgid "Out of stock"
 msgstr "Fuera de stock"
@@ -2066,7 +2066,7 @@ msgstr "SKU:"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:137
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:308
 #: admin/post-types/writepanels/writepanel-product_data.php:102
-#: classes/class-wc-product.php:908
+#: classes/class-wc-product.php:910
 #@ woocommerce
 msgid "Weight"
 msgstr "Peso"
@@ -2190,7 +2190,7 @@ msgid "Sale Price Dates"
 msgstr "Fechas de Precio Rebajado"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:110
-#: classes/class-wc-product.php:917
+#: classes/class-wc-product.php:919
 #@ woocommerce
 msgid "Dimensions"
 msgstr "Dimensiones"
@@ -2252,7 +2252,7 @@ msgstr "Situación del stock"
 #: admin/post-types/product.php:533
 #: admin/post-types/product.php:781
 #: admin/post-types/writepanels/writepanel-product_data.php:201
-#: classes/class-wc-product.php:426
+#: classes/class-wc-product.php:427
 #@ woocommerce
 msgid "In stock"
 msgstr "En stock"
@@ -2412,10 +2412,10 @@ msgstr "Lo sentimos, no tenemos suficientes \"%s\" en stock para completar su pe
 
 #: classes/class-wc-cart.php:1285
 #: classes/class-wc-order.php:444
-#: classes/class-wc-product.php:596
-#: classes/class-wc-product.php:605
-#: classes/class-wc-product.php:636
-#: classes/class-wc-product.php:642
+#: classes/class-wc-product.php:598
+#: classes/class-wc-product.php:607
+#: classes/class-wc-product.php:638
+#: classes/class-wc-product.php:644
 #@ woocommerce
 msgid "Free!"
 msgstr "Gratis!"
@@ -2868,12 +2868,12 @@ msgid "Order item stock reduced successfully."
 msgstr "Stock del producto del pedido reducido con éxito."
 
 #: classes/class-wc-product.php:424
-#: classes/class-wc-product.php:436
+#: classes/class-wc-product.php:437
 #@ woocommerce
 msgid "Available on backorder"
 msgstr "Disponible para reservar"
 
-#: classes/class-wc-product.php:700
+#: classes/class-wc-product.php:702
 #: templates/single-product-reviews.php:29
 #, php-format
 #@ woocommerce
@@ -7539,7 +7539,7 @@ msgstr "Subtotal del carrito:"
 msgid "Download:"
 msgstr "Descarga:"
 
-#: classes/class-wc-product.php:656
+#: classes/class-wc-product.php:658
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
@@ -9819,7 +9819,7 @@ msgstr "El carrito ha sido llenado con artículos de tus pedidos anteriores."
 #: woocommerce.php:0
 #@ woocommerce
 msgid "1.5.2.1"
-msgstr ""
+msgstr "1.5.2.1"
 
 #: woocommerce.php:943
 #@ woocommerce
