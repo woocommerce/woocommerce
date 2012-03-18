@@ -627,13 +627,6 @@ class WC_Order {
 	 	
 	 	$user_email = $this->billing_email;
 				
-		if ($this->user_id>0) :
-			$user_info = get_userdata($this->user_id);
-			if ($user_info->user_email) :
-				$user_email = $user_info->user_email;
-			endif;
-		endif;
-				
 	 	return add_query_arg('download_file', $download_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, trailingslashit( home_url() ))));
 	 }
 	 
