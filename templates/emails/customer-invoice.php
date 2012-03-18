@@ -33,7 +33,9 @@
 	?>
 	</tfoot>
 	<tbody>
-		<?php echo $order->email_order_items_table(); ?>
+		<?php 
+			echo $order->email_order_items_table( (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing') ? true : false, true, ($order->status=='processing') ? true : false ); 
+		?>
 	</tbody>
 </table>
 

@@ -522,64 +522,19 @@ class WC_Order {
 	/** Output items for display in html emails */
 	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ) ) {
 
-		$return = '';
+		ob_start();
 		
-		foreach($this->get_items() as $item) : 
-			
-			$_product = $this->get_product_from_item( $item );
-			
-			$file = $sku = $variation = $image = '';
-			
-			if ($show_image) :
-				$src = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail');
-				$image = apply_filters('woocommerce_order_product_image', '<img src="'.$src[0].'" alt="Product Image" height="'.$image_size[1].'" width="'.$image_size[0].'" style="vertical-align:middle; margin-right: 10px;" />', $_product);
-			endif;
-			
-			if ($show_sku && $_product->get_sku()) :
-				$sku = ' (#' . $_product->get_sku() . ')';
-			endif;
-			
-			$item_meta = new order_item_meta( $item['item_meta'] );					
-			$variation = '<br/><small>' . $item_meta->display( true, true ) . '</small>';
-			
-			if ($show_download_links) :
-				
-				if ($_product->exists) :
-			
-					if ($_product->is_downloadable()) :
-						$file = '<br/><small>'.__('Download:', 'woocommerce').' <a href="' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . $this->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>';
-					endif;
+		woocommerce_get_template( 'emails/email-order-items.php', array( 
+			'order'					=> $this,
+			'items' 				=> $this->get_items(), 
+			'show_download_links'	=> $show_download_links,
+			'show_sku'				=> $show_sku,
+			'show_purchase_note'	=> $show_purchase_note,
+			'show_image' 			=> $show_image,
+			'image_size'			=> $image_size
+		) );
 		
-				endif;	
-					
-			endif;
-			
-			$return .= '<tr>
-				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'. $image . apply_filters('woocommerce_order_product_title', $item['name'], $_product) . $sku . $file . $variation . '</td>
-				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">'.$item['qty'].'</td>
-				<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;">';
-					
-					if ( $this->display_cart_ex_tax || !$this->prices_include_tax ) :	
-						$ex_tax_label = ( $this->prices_include_tax ) ? 1 : 0;
-						$return .= woocommerce_price( $this->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ));
-					else :
-						$return .= woocommerce_price( $this->get_line_subtotal( $item, true ) );
-					endif;
-			
-			$return .= '	
-				</td>
-			</tr>';
-			
-			// Show any purchase notes
-			if ($show_purchase_note) :
-				if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
-					$return .= '<tr><td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee;">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
-				endif;
-			endif;
-			
-		endforeach;	
-
-		$return = apply_filters( 'woocommerce_email_order_items_table', $return );
+		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean() );
 
 		return $return;	
 		
