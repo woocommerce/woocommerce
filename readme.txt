@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.3 =
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
+* Fix - Put chosen frontend script back
 * Fix - Make download links use billing email, not user email
 * Localization - Spanish update by Héctor Carranza
 

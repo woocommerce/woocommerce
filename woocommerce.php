@@ -909,15 +909,22 @@ class Woocommerce {
 		
 		// Woocommerce.min.js is minified and contains woocommerce_plugins
 		wp_enqueue_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+		
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-			wp_enqueue_script( 'woocommerce_plugins', $this->plugin_url() . '/assets/js/woocommerce_plugins'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+			wp_enqueue_script( 'woocommerce_plugins', $this->plugin_url() . '/assets/js/woocommerce_plugins.js', array('jquery'), '1.0', $scripts_position );
 		}
 		
 		if ($lightbox_en) 
 			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
 		
-		if ($chosen_en && is_checkout()) 
+		// Chosen.jquery.min.js is minified and contains the frontend code for chosen selects
+		if ($chosen_en && is_checkout()) {
 			wp_enqueue_script( 'chosen', $this->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
+			
+			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+				wp_enqueue_script( 'chosen_frontend', $this->plugin_url() . '/assets/js/chosen.frontend.js', array('chosen'), '1.0', $scripts_position );
+			}
+		}
 		
 		if ($jquery_ui_en) :
 			wp_enqueue_script( 'jqueryui', $this->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
