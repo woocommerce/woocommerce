@@ -232,29 +232,76 @@ function woocommerce_sales_overview() {
 	$total_sales = 0;
 	$total_orders = 0;
 	$order_items = 0;
+	$discount_total = 0;
+	$shipping_total = 0;
 	
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'DESC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish',
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-	foreach ($orders as $order) :
-		$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
-		foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
-		$total_sales += get_post_meta($order->ID, '_order_total', true);
-		$total_orders++;
-	endforeach;
+	$order_totals = $wpdb->get_row("
+		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		= '_order_total'
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+	");
+	
+	$total_sales 	= $order_totals->total_sales;
+	$total_orders 	= $order_totals->total_orders;
+	
+	$discount_total = $wpdb->get_var("
+		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		IN ('_order_discount', '_cart_discount')
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+	");	
+	
+	$shipping_total = $wpdb->get_var("
+		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		= '_order_shipping'
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+	");	
+	
+	$order_items_serialized = $wpdb->get_col("
+		SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		= '_order_items'
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+	");
+	
+	if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
+		$order_items_array = maybe_unserialize($order_items_array);
+		if (is_array($order_items_array)) foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+	}
 	
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
@@ -284,35 +331,15 @@ function woocommerce_sales_overview() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Last 5 orders', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e('Discounts used', 'woocommerce'); ?></span></h3>
 				<div class="inside">
-					<?php
-					if ($orders) :
-						$count = 0;
-						echo '<ul class="recent-orders">';
-						foreach ($orders as $order) :
-							
-							$this_order = new WC_Order( $order->ID );
-							
-							if ($this_order->user_id > 0) :
-								$customer = get_user_by('id', $this_order->user_id);
-								$customer = $customer->user_login;
-							else :
-								$customer = __('Guest', 'woocommerce');
-							endif;
-							
-							echo '
-							<li>
-								<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords($this_order->status).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">'.date_i18n('jS M Y (h:i A)', strtotime($this_order->order_date)).'</a><br />
-								<small>'.sizeof($this_order->items).' '._n('item', 'items', sizeof($this_order->items), 'woocommerce').' <span class="order-cost">'.__('Total:', 'woocommerce') . ' ' . woocommerce_price($this_order->order_total).'</span> <span class="order-customer">'.$customer.'</span></small>
-							</li>';
-							
-							$count++;
-							if ($count==5) break;
-						endforeach;
-						echo '</ul>';
-					endif;
-					?>
+					<p class="stat"><?php if ($discount_total>0) echo woocommerce_price($discount_total); else _e('n/a', 'woocommerce'); ?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Total shipping costs', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php if ($shipping_total>0) echo woocommerce_price($shipping_total); else _e('n/a', 'woocommerce'); ?></p>
 				</div>
 			</div>
 		</div>
@@ -1177,33 +1204,52 @@ function woocommerce_customer_overview() {
 		) );
 	$customers = $users_query->get_results();
 	$total_customers = (int) sizeof($customers);
+
+	$customer_orders = $wpdb->get_row("
+		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		= '_order_total'
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		posts.ID			IN (
+			SELECT post_id FROM {$wpdb->postmeta}
+			WHERE 	meta_key 		= '_customer_user'
+			AND		meta_value		> 0
+		)
+	");	
 	
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'DESC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-	foreach ($orders as $order) :
-		if (get_post_meta( $order->ID, '_customer_user', true )>0) :
-			$total_customer_sales += get_post_meta($order->ID, '_order_total', true);
-			$total_customer_orders++;
-		else :
-			$total_guest_sales += get_post_meta($order->ID, '_order_total', true);
-			$total_guest_orders++;
-		endif;
-	endforeach;
+	$total_customer_sales	= $customer_orders->total_sales;
+	$total_customer_orders	= $customer_orders->total_orders;
 	
+	$guest_orders = $wpdb->get_row("
+		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	meta.meta_key 		= '_order_total'
+		AND 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		posts.ID			IN (
+			SELECT post_id FROM {$wpdb->postmeta}
+			WHERE 	meta_key 		= '_customer_user'
+			AND		meta_value		= 0
+		)
+	");	
+	
+	$total_guest_sales	= $guest_orders->total_sales;
+	$total_guest_orders	= $guest_orders->total_orders;
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -1345,46 +1391,7 @@ function woocommerce_customer_overview() {
 function woocommerce_stock_overview() {
 
 	global $start_date, $end_date, $woocommerce, $wpdb;
-	
-	$total_customers = 0;
-	$total_customer_sales = 0;
-	$total_guest_sales = 0;
-	$total_customer_orders = 0;
-	$total_guest_orders = 0;
-	
-	$users_query = new WP_User_Query( array( 
-		'fields' => array('user_registered'), 
-		'role' => 'customer'
-		) );
-	$customers = $users_query->get_results();
-	$total_customers = (int) sizeof($customers);
-	
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'DESC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-	foreach ($orders as $order) :
-		if (get_post_meta( $order->ID, '_customer_user', true )>0) :
-			$total_customer_sales += get_post_meta($order->ID, '_order_total', true);
-			$total_customer_orders++;
-		else :
-			$total_guest_sales += get_post_meta($order->ID, '_order_total', true);
-			$total_guest_orders++;
-		endif;
-	endforeach;
-	
+		
 	// Low/No stock lists
 	$lowstockamount = get_option('woocommerce_notify_low_stock_amount');
 	if (!is_numeric($lowstockamount)) $lowstockamount = 1;
