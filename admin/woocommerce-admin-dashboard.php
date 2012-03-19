@@ -391,7 +391,7 @@ function woocommerce_dashboard_sales_js() {
 	$params = array(
 		'currency_symbol' => get_woocommerce_currency_symbol(),
 		'number_of_sales' => __( 'Number of sales', 'woocommerce' ),
-		'sales_amount'    => __( 'Sales aumount', 'woocommerce' ),
+		'sales_amount'    => __( 'Sales amount', 'woocommerce' ),
 	);
 	
 	$order_counts_array = array();
