@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Put chosen frontend script back
 * Fix - Make download links use billing email, not user email
 * Localization - Spanish update by Héctor Carranza
+* Fix - ' in prices (thousand separator)
 
 = 1.5.2.1 - 16/03/2012 =
 * Fix - Redirect when no payment is required
