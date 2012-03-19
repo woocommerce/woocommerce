@@ -204,7 +204,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
 	
-	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce'), 'id' => 'script_styling_options' ),
+	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce'), 'id' => 'script_styling_options' ),
 	
 	array(  
 		'name' => __( 'Styling', 'woocommerce' ),
@@ -517,9 +517,24 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings', array(
 
 	array(	'name' => __( 'Catalog Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
-
+	
 	array(  
-		'name' => __( 'Subcategories', 'woocommerce' ),
+		'name' => __( 'Default product sorting', 'woocommerce' ),
+		'desc' 		=> __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_default_catalog_orderby',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> 'title',
+		'type' 		=> 'select',
+		'options' => apply_filters('woocommerce_default_catalog_orderby_options', array( 
+			'title'  => __( 'Sort by title', 'woocommerce' ),
+			'date'   => __( 'Sort by date', 'woocommerce' ),
+			'price' => __( 'Sort by price', 'woocommerce' ),
+		)),
+		'desc_tip'	=>  true,
+	),
+	
+	array(  
+		'name' => __( 'Show subcategories', 'woocommerce' ),
 		'desc' 		=> __( 'Show subcategories on category pages', 'woocommerce' ),
 		'id' 		=> 'woocommerce_show_subcategories',
 		'std' 		=> 'no',
@@ -542,6 +557,27 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
+	
+	array(
+		'name' => __( 'Redirects', 'woocommerce' ),
+		'desc' 		=> __( 'Redirect to cart after adding a product to the cart (on single product pages)', 'woocommerce' ),
+		'id' 		=> 'woocommerce_cart_redirect_after_add',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
+	array(
+		'desc' 		=> __( 'Redirect to the product page on a single matching search result', 'woocommerce' ),
+		'id' 		=> 'woocommerce_redirect_on_single_search_result',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
+	
+	array(	'name' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the fields available on the edit product page.', 'woocommerce'), 'id' => 'product_data_options' ),
 	
 	array(  
 		'name' => __( 'Product fields', 'woocommerce' ),
@@ -588,6 +624,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'g'   => __( 'g', 'woocommerce' ),
 			'lbs' => __( 'lbs', 'woocommerce' ),
 		),
+		'desc_tip'	=>  true,
 	),
 
 	array(  
@@ -603,28 +640,12 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'mm' => __( 'mm', 'woocommerce' ),
 			'in' => __( 'in', 'woocommerce' ),
 		),
-	),
-
-	array(
-		'name' => __( 'Redirects', 'woocommerce' ),
-		'desc' 		=> __( 'Redirect to cart after adding a product to the cart (on single product pages)', 'woocommerce' ),
-		'id' 		=> 'woocommerce_cart_redirect_after_add',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-
-	array(
-		'desc' 		=> __( 'Redirect to the product page on a single matching search result', 'woocommerce' ),
-		'id' 		=> 'woocommerce_redirect_on_single_search_result',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'desc_tip'	=>  true,
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
+	array( 'type' => 'sectionend', 'id' => 'product_data_options' ),
 	
-	array(	'name' => __( 'Pricing Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'pricing_options' ),
+	array(	'name' => __( 'Pricing Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect how prices are displayed on the frontend.', 'woocommerce'), 'id' => 'pricing_options' ),
 	
 	array(  
 		'name' => __( 'Currency Position', 'woocommerce' ),
@@ -639,7 +660,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'right' => __( 'Right', 'woocommerce' ),
 			'left_space' => __( 'Left (with space)', 'woocommerce' ),
 			'right_space' => __( 'Right (with space)', 'woocommerce' )
-		)
+		),
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -650,6 +672,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'css' 		=> 'width:30px;',
 		'std' 		=> ',',
 		'type' 		=> 'text',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -660,6 +683,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'css' 		=> 'width:30px;',
 		'std' 		=> '.',
 		'type' 		=> 'text',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -670,11 +694,12 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'css' 		=> 'width:30px;',
 		'std' 		=> '2',
 		'type' 		=> 'text',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
-		'name'		=> __( 'Trim zeros', 'woocommerce' ),
-		'desc' 		=> __( 'Trim zeros after the decimal point when displaying prices', 'woocommerce' ),
+		'name'		=> __( 'Trailing zeros', 'woocommerce' ),
+		'desc' 		=> __( 'Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>$10</code>', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_trim_zeros',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
@@ -690,7 +715,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_catalog_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
-		'std' 		=> '150'
+		'std' 		=> '150',
+		'desc_tip'	=>  true,
 	),
 
 	array(  
@@ -699,7 +725,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_single_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
-		'std' 		=> '300'
+		'std' 		=> '300',
+		'desc_tip'	=>  true,
 	),
 	
 	array(  
@@ -708,7 +735,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_thumbnail_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
-		'std' 		=> '90'
+		'std' 		=> '90',
+		'desc_tip'	=>  true,
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'image_options' ),
@@ -1110,6 +1138,8 @@ function woocommerce_settings() {
 		
 		flush_rewrite_rules( false );
 		
+		unset($_SESSION['orderby']);
+		
 		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
 		
 		exit;
@@ -1172,8 +1202,8 @@ function woocommerce_settings() {
 				<?php
 					$tabs = array(
 						'general' => __( 'General', 'woocommerce' ),
-						'pages' => __( 'Pages', 'woocommerce' ),
 						'catalog' => __( 'Catalog', 'woocommerce' ),
+						'pages' => __( 'Pages', 'woocommerce' ),
 						'inventory' => __( 'Inventory', 'woocommerce' ),
 						'tax' => __( 'Tax', 'woocommerce'),
 						'shipping' => __( 'Shipping', 'woocommerce' ),

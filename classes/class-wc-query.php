@@ -145,7 +145,7 @@ class WC_Query {
 	 * Returns an array of arguments for ordering products based on the selected values
 	 */
 	function get_catalog_ordering_args() {
-		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : apply_filters('woocommerce_default_catalog_orderby', 'title');
+		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : apply_filters('woocommerce_default_catalog_orderby', get_option('woocommerce_default_catalog_orderby'));
 		
 		switch ($current_order) :
 			case 'date' :

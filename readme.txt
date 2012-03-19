@@ -144,6 +144,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.3 =
+* Feature - Control default catalog sort order from Catalog Settings
 * Tweak - Order items table (for emails) moved to template file
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
 * Fix - Put chosen frontend script back
