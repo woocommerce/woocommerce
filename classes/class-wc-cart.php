@@ -44,8 +44,6 @@ class WC_Cart {
 		$this->prices_include_tax = (get_option('woocommerce_prices_include_tax')=='yes') ? true : false;
 		$this->display_totals_ex_tax = (get_option('woocommerce_display_totals_excluding_tax')=='yes') ? true : false;
 		$this->display_cart_ex_tax = (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') ? true : false;
-		
-		add_action('init', array(&$this, 'init'), 5);						// Get cart on init
 	}
     
     /**

@@ -265,6 +265,7 @@ class Woocommerce {
 			
 			// Class instances
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
+			$this->cart->init();
 			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 			
