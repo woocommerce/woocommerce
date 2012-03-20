@@ -75,6 +75,7 @@ class WC_Product_Variation extends WC_Product {
 		foreach ($load_data as $key => $default) $this->$key = (isset($parent_custom_fields['_' . $key][0]) && $parent_custom_fields['_' . $key][0]!=='') ? $parent_custom_fields['_' . $key][0] : $default;
 
 		$this->product_type = 'variable';
+		$this->visibility = 'visible';
 		
 		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
