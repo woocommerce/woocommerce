@@ -187,4 +187,3 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	echo $wrap_after;
 
 endif;
-		

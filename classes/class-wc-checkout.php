@@ -163,6 +163,7 @@ class WC_Checkout {
 							if (!$validation->is_phone( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid number.', 'woocommerce') ); endif;
 						break;
 						case "billing_email" :
+							$this->posted[$key] = strtolower( $this->posted[$key] );
 							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') ); endif;
 						break;
 					endswitch;

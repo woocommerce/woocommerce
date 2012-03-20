@@ -29,10 +29,10 @@ class WC_Tax {
 			if (!empty($tax_rates)) foreach( $tax_rates as $rate ) :
 			
 				// Standard Rate?
-				if (!$rate['class']) $rate['class'] = '*';
+				if ( isset( $rate['class'] ) && !$rate['class']) $rate['class'] = '*';
 				
 				// Add entry for each country/state - each will hold all matching rates
-				if ($rate['countries']) foreach ($rate['countries'] as $country => $states) :
+				if ( isset( $rate['countries'] ) && $rate['countries']) foreach ($rate['countries'] as $country => $states) :
 					
 					if ($states) :
 						
@@ -65,13 +65,13 @@ class WC_Tax {
 				endforeach;
 				
 			endforeach;
-			
-			if (!empty($local_tax_rates)) foreach( $local_tax_rates as $rate ) :
+
+			if ( isset( $rate['countries'] ) && !empty($local_tax_rates)) foreach( $local_tax_rates as $rate ) :
 			
 				// Standard Rate?
 				if (!$rate['class']) $rate['class'] = '*';
 				
-				if (!$rate['label']) :
+				if ( isset( $rate['label'] ) && !$rate['label']) :
 					$rate['label'] = $woocommerce->countries->tax_or_vat();
 					
 					// Add % to label
