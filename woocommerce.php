@@ -92,8 +92,9 @@ class Woocommerce {
 		if ( is_admin() && !defined('DOING_AJAX') ) $this->install();
 
 		// Actions
-		add_action( 'init', array(&$this, 'init'), 0);
-		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
+		add_action( 'init', array( &$this, 'init' ), 0 );
+		add_action( 'init', array( &$this, 'include_template_functions' ), 25 );
+		add_action( 'after_setup_theme', array( &$this, 'compatibility' ) );
 		
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -173,7 +174,7 @@ class Woocommerce {
 		register_activation_hook( __FILE__, 'activate_woocommerce' );
 		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
 		if ( get_option('woocommerce_db_version') != $this->version ) 
-			add_action('init', 'install_woocommerce', 0);
+			add_action( 'init', 'install_woocommerce', 1 );
 	}
 	
 	/**
@@ -187,9 +188,11 @@ class Woocommerce {
 		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
 
 		// Load class instances
-		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
 		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
 		$this->countries 			= new WC_Countries();			// Countries class
+		
+		// Init shipping and payment gateways
 		$this->shipping->init();
 		$this->payment_gateways->init();
 
@@ -200,13 +203,9 @@ class Woocommerce {
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
-			$this->cart->init();
 	
 			// Load messages
 			$this->load_messages();
-
-			// Load functions
-			$this->include_template_functions();
 
 			// Hooks
 			add_filter( 'template_include', array(&$this, 'template_loader') );
