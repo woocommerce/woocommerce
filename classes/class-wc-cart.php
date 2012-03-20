@@ -246,13 +246,16 @@ class WC_Cart {
 					$coupon = new WC_Coupon( $code );
 					
 					if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
+						
 						if ( is_user_logged_in() ) {
 							$current_user = wp_get_current_user();
 							$check_emails[] = $current_user->user_email;
 						}
 						$check_emails[] = $posted['billing_email'];
 						
-						if ( ! in_array($check_emails, $coupon->customer_email) ) {
+						$check_emails = array_map( 'strtolower', $check_emails );
+
+						if ( sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) == 0 ) {
 							$woocommerce->add_error( sprintf( __('Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce'), $code ) );
 							// Remove the coupon
 							unset( $this->applied_coupons[$key] );
