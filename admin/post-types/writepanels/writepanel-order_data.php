@@ -265,13 +265,13 @@ function woocommerce_order_items_meta_box($post) {
 					<th class="name"><?php _e('Item', 'woocommerce'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					
-					<th class="tax_class"><?php _e('Tax Class', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Tax class for the line item', 'woocommerce'); ?>." href="#">[?]</a></th>
+					<th class="tax_class"><?php _e('Tax Class', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Tax class for the line item', 'woocommerce'); ?>." href="#">[?]</a></th>
 
 					<th class="quantity"><?php _e('Qty', 'woocommerce'); ?></th>
 					
-					<th class="line_subtotal"><?php _e('Line&nbsp;Subtotal', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Line cost and line tax before pre-tax discounts', 'woocommerce'); ?>" href="#">[?]</a></th>
+					<th class="line_subtotal"><?php _e('Line&nbsp;Subtotal', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Line cost and line tax before pre-tax discounts', 'woocommerce'); ?>" href="#">[?]</a></th>
 					
-					<th class="line_total"><?php _e('Line&nbsp;Total', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Line cost and line tax after pre-tax discounts', 'woocommerce'); ?>" href="#">[?]</a></th>
+					<th class="line_total"><?php _e('Line&nbsp;Total', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Line cost and line tax after pre-tax discounts', 'woocommerce'); ?>" href="#">[?]</a></th>
 
 				</tr>
 			</thead>
@@ -295,7 +295,7 @@ function woocommerce_order_items_meta_box($post) {
 					?>
 					<tr class="item" rel="<?php echo $loop; ?>">
 						<td class="product-id">
-							<img class="tips" tip="<?php
+							<img class="tips" data-tip="<?php
 								echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $item['id'];
 								echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if ($item['variation_id']) echo $item['variation_id']; else echo '-';
 								echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
@@ -449,13 +449,13 @@ function woocommerce_order_items_meta_box($post) {
 function woocommerce_order_actions_meta_box($post) {
 	?>
 	<ul class="order_actions">
-		<li><input type="submit" class="button button-primary tips" name="save" value="<?php _e('Save Order', 'woocommerce'); ?>" tip="<?php _e('Save/update the order', 'woocommerce'); ?>" /></li>
+		<li><input type="submit" class="button button-primary tips" name="save" value="<?php _e('Save Order', 'woocommerce'); ?>" data-tip="<?php _e('Save/update the order', 'woocommerce'); ?>" /></li>
 
-		<li><input type="submit" class="button tips" name="reduce_stock" value="<?php _e('Reduce stock', 'woocommerce'); ?>" tip="<?php _e('Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid.', 'woocommerce'); ?>" /></li>
+		<li><input type="submit" class="button tips" name="reduce_stock" value="<?php _e('Reduce stock', 'woocommerce'); ?>" data-tip="<?php _e('Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid.', 'woocommerce'); ?>" /></li>
 		
-		<li><input type="submit" class="button tips" name="restore_stock" value="<?php _e('Restore stock', 'woocommerce'); ?>" tip="<?php _e('Restores stock for each item in the order; useful after refunding or canceling the entire order.', 'woocommerce'); ?>" /></li>
+		<li><input type="submit" class="button tips" name="restore_stock" value="<?php _e('Restore stock', 'woocommerce'); ?>" data-tip="<?php _e('Restores stock for each item in the order; useful after refunding or canceling the entire order.', 'woocommerce'); ?>" /></li>
 		
-		<li><input type="submit" class="button tips" name="invoice" value="<?php _e('Email invoice', 'woocommerce'); ?>" tip="<?php _e('Email the order to the customer. Unpaid orders will include a payment link.', 'woocommerce'); ?>" /></li>
+		<li><input type="submit" class="button tips" name="invoice" value="<?php _e('Email invoice', 'woocommerce'); ?>" data-tip="<?php _e('Email the order to the customer. Unpaid orders will include a payment link.', 'woocommerce'); ?>" /></li>
 		
 		<?php do_action('woocommerce_order_actions', $post->ID); ?>
 		
@@ -526,7 +526,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>" href="#">[?]</a></h4>
+		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>" href="#">[?]</a></h4>
 		<div id="tax_rows">
 			<?php 
 				$loop = 0;

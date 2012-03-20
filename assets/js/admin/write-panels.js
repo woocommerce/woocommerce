@@ -248,7 +248,7 @@ jQuery( function($){
 				$('table.woocommerce_order_items').unblock();
 				$('select.add_item_id').css('border-color', '').val('');
 				    jQuery(".tips").tipTip({
-				    	'attribute' : 'tip',
+				    	'attribute' : 'data-tip',
 				    	'fadeIn' : 50,
 				    	'fadeOut' : 50
 				    });				

@@ -419,7 +419,7 @@ function woocommerce_product_data_box() {
 						}
 					}
 				?>
-			</select> <img class="help_tip" tip='<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
 		
 			<p class="form-field"><label for="crosssell_ids"><?php _e('Cross-Sells', 'woocommerce'); ?></label>
 			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
@@ -438,7 +438,7 @@ function woocommerce_product_data_box() {
 						}
 					}
 				?>
-			</select> <img class="help_tip" tip='<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			</select> <img class="help_tip" data-tip='<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
 					
 		</div>
 		<div id="grouping_product_data" class="panel woocommerce_options_panel">

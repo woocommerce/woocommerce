@@ -638,7 +638,7 @@ function woocommerce_add_order_item() {
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
 		<td class="product-id">
-			<img class="tips" tip="<?php
+			<img class="tips" data-tip="<?php
 				echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $_product->id;
 				echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if (isset($_product->variation_id) && $_product->variation_id) echo $_product->variation_id; else echo '-';
 				echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
