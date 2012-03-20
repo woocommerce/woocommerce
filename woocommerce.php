@@ -85,68 +85,15 @@ class Woocommerce {
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
 
-		// Set up localisation
-		$this->load_plugin_textdomain();
-
 		// Include required files
 		$this->includes();
 		
 		// Installation
 		if ( is_admin() && !defined('DOING_AJAX') ) $this->install();
 
-		// Load class instances
-		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
-		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
-		$this->countries 			= new WC_Countries();			// Countries class
-		
-		// Variables
-		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
-		
 		// Actions
-		add_action( 'init', array(&$this, 'init'), 0 );
-		add_action( 'after_setup_theme', array( &$this, 'compatibility' ) );
-		add_action( 'the_post', array( &$this, 'setup_product_data' ) );
-		add_action( 'plugins_loaded', array( &$this->shipping, 'init' ), 1 ); 			// Load shipping methods - some more may be added by plugins
-		add_action( 'plugins_loaded', array( &$this->payment_gateways, 'init' ), 1 ); 	// Load payment methods - some more may be added by plugins
-		add_action( 'admin_footer', array( &$this, 'output_inline_js' ), 25 );
-		
-		// Email Actions
-		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
-		
-		foreach ( $email_actions as $action ) add_action( $action, array( &$this, 'send_transactional_email') );
-		
-		// Actions for SSL
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
-			add_action( 'wp', array( &$this, 'ssl_redirect' ) );
-			
-			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
-			foreach ( $filters as $filter ) add_filter( $filter, array( &$this, 'force_ssl') );
-		}
-		
-		// Classes/actions loaded for the frontend and for ajax requests
-		if ( ! is_admin() || defined('DOING_AJAX') ) {
-			
-			// Class instances
-			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
-			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
-			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
-			
-			// Load messages
-			$this->load_messages();
-			
-			// Hooks
-			add_filter( 'template_include', array(&$this, 'template_loader') );
-			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
-			add_action( 'init', array(&$this, 'include_template_functions'), 25 );
-			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
-			add_action( 'wp', array(&$this, 'buffer_checkout') );
-			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
-			add_action( 'wp_head', array(&$this, 'generator') );
-			add_action( 'wp_head', array(&$this, 'wp_head') );
-			add_filter( 'body_class', array(&$this, 'output_body_class') );
-			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25 );
-		
-		}
+		add_action( 'init', array(&$this, 'init'), 0);
+		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
 	}
 
 	/**
@@ -288,6 +235,63 @@ class Woocommerce {
 	 * Init WooCommerce when WordPress Initialises
 	 **/
 	function init() {
+		// Set up localisation
+		$this->load_plugin_textdomain();
+
+		// Variables
+		$this->template_url			= apply_filters( 'woocommerce_template_url', 'woocommerce/' );
+
+		// Load class instances
+		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods, and handles incoming requests such as IPN
+		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
+		$this->countries 			= new WC_Countries();			// Countries class
+		$this->shipping->init();
+		$this->payment_gateways->init();
+
+		// Classes/actions loaded for the frontend and for ajax requests
+		if ( ! is_admin() || defined('DOING_AJAX') ) {
+	
+			// Class instances
+			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
+			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
+			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
+			$this->cart->init();
+	
+			// Load messages
+			$this->load_messages();
+
+			// Load functions
+			$this->include_template_functions();
+
+			// Hooks
+			add_filter( 'template_include', array(&$this, 'template_loader') );
+			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
+			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
+			add_action( 'wp', array(&$this, 'buffer_checkout') );
+			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
+			add_action( 'wp_head', array(&$this, 'generator') );
+			add_action( 'wp_head', array(&$this, 'wp_head') );
+			add_filter( 'body_class', array(&$this, 'output_body_class') );
+			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25 );
+		}
+
+		// Actions
+		add_action( 'the_post', array( &$this, 'setup_product_data' ) );
+		add_action( 'admin_footer', array( &$this, 'output_inline_js' ), 25 );
+
+		// Email Actions
+		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
+		
+		foreach ( $email_actions as $action ) add_action( $action, array( &$this, 'send_transactional_email') );
+
+		// Actions for SSL
+		if ( ! is_admin() || defined('DOING_AJAX') ) {
+			add_action( 'wp', array( &$this, 'ssl_redirect' ) );
+	
+			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+			foreach ( $filters as $filter ) add_filter( $filter, array( &$this, 'force_ssl') );
+		}
+
 		// Register globals for WC environment
 		$this->register_globals();
 
