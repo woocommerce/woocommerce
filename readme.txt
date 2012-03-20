@@ -147,10 +147,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Control default catalog sort order from Catalog Settings
 * Tweak - Order items table (for emails) moved to template file
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
+* Tweak - Remove case sensitively from order tracking and force email lowercase on checkout
 * Fix - Put chosen frontend script back
 * Fix - Make download links use billing email, not user email
-* Localization - Spanish update by Héctor Carranza
 * Fix - ' in prices (thousand separator)
+* Fix - Admin menu highlighting when adding orders
+* Localization - Spanish update by Héctor Carranza
 
 = 1.5.2.1 - 16/03/2012 =
 * Fix - Redirect when no payment is required

@@ -34,7 +34,7 @@ function woocommerce_order_tracking( $atts ) {
 		
 		if ($order->id && $order_email) :
 
-			if ($order->billing_email == $order_email) :
+			if (strtolower($order->billing_email) == strtolower($order_email)) :
 			
 				woocommerce_get_template( 'order/tracking.php', array(
 					'order' => $order
