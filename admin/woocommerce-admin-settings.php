@@ -845,6 +845,15 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'checkboxgroup'		=> 'end'
 	),
 	
+	array(  
+		'name' 		=> __( 'Shipping method name on checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Show the shipping method name on the checkout', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shipping_name_during_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+	
 	array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
 
 )); // End shipping settings
