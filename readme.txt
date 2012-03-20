@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.3 =
 * Feature - Control default catalog sort order from Catalog Settings
+* Tweak - Hook for product availability
 * Tweak - Order items table (for emails) moved to template file
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
 * Tweak - Remove case sensitively from order tracking and force email lowercase on checkout

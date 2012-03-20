@@ -443,7 +443,7 @@ class WC_Product {
 			endif;
 		endif;
 		
-		return array( 'availability' => $availability, 'class' => $class);
+		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class), $this );
 	}
 	
 	/** Returns whether or not the product is featured */
