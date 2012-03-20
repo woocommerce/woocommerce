@@ -94,6 +94,9 @@ class Woocommerce {
 		// Actions
 		add_action( 'init', array(&$this, 'init'), 0);
 		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
+		
+		// Loaded action
+		do_action( 'woocommerce_loaded' );
 	}
 
 	/**
@@ -161,64 +164,6 @@ class Woocommerce {
 	 **/
 	function include_template_functions() {
 		include( 'woocommerce-template.php' );
-	}
-	
-	/**
-	 * template_loader
-	 * 
-	 * Handles template usage so that we can use our own templates instead of the themes.
-	 *
-	 * Templates are in the 'templates' folder. woocommerce looks for theme 
-	 * overides in /theme/woocommerce/ by default
-	 *
-	 * For beginners, it also looks for a woocommerce.php template first. If the user adds 
-	 * this to the theme (containing a woocommerce() inside) this will be used for all 
-	 * woocommerce templates.
-	 */
-	function template_loader( $template ) {
-		
-		$find 	= array( 'woocommerce.php' );
-		$file 	= '';
-		
-		if ( is_single() && get_post_type() == 'product' ) {
-			
-			$file 	= 'single-product.php';
-			$find[] = $file;
-			$find[] = $this->template_url . $file;
-
-		} elseif ( is_tax('product_cat') || is_tax('product_tag') ) {
-			
-			$term = get_queried_object();
-			
-			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
-			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $this->template_url . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$find[] 	= $file;
-			$find[] 	= $this->template_url . $file;
-						
-		} elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') )) {
-			
-			$file 	= 'archive-product.php';
-			$find[] = $file;
-			$find[] = $this->template_url . $file;
-			
-		}
-		
-		if ( $file ) {
-			$template = locate_template( $find );
-			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $file;
-		}
-		
-		return $template;
-	}
-	
-	function comments_template_loader( $template ) {
-		if( get_post_type() !== 'product' ) return $template;
-	
-		if (file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
-			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php'; 
-		else
-			return $this->plugin_path() . '/templates/single-product-reviews.php';
 	}
 	
 	/**
@@ -334,6 +279,64 @@ class Woocommerce {
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages/'.$variable_lang );
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages');
 	}
+	
+	/**
+	 * template_loader
+	 * 
+	 * Handles template usage so that we can use our own templates instead of the themes.
+	 *
+	 * Templates are in the 'templates' folder. woocommerce looks for theme 
+	 * overides in /theme/woocommerce/ by default
+	 *
+	 * For beginners, it also looks for a woocommerce.php template first. If the user adds 
+	 * this to the theme (containing a woocommerce() inside) this will be used for all 
+	 * woocommerce templates.
+	 */
+	function template_loader( $template ) {
+		
+		$find 	= array( 'woocommerce.php' );
+		$file 	= '';
+		
+		if ( is_single() && get_post_type() == 'product' ) {
+			
+			$file 	= 'single-product.php';
+			$find[] = $file;
+			$find[] = $this->template_url . $file;
+
+		} elseif ( is_tax('product_cat') || is_tax('product_tag') ) {
+			
+			$term = get_queried_object();
+			
+			$file 		= 'taxonomy-' . $term->taxonomy . '.php';
+			$find[] 	= 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= $this->template_url . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
+			$find[] 	= $file;
+			$find[] 	= $this->template_url . $file;
+						
+		} elseif ( is_post_type_archive('product') ||  is_page( woocommerce_get_page_id('shop') )) {
+			
+			$file 	= 'archive-product.php';
+			$find[] = $file;
+			$find[] = $this->template_url . $file;
+			
+		}
+		
+		if ( $file ) {
+			$template = locate_template( $find );
+			if ( ! $template ) $template = $this->plugin_path() . '/templates/' . $file;
+		}
+		
+		return $template;
+	}
+	
+	function comments_template_loader( $template ) {
+		if( get_post_type() !== 'product' ) return $template;
+	
+		if (file_exists( STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php' ))
+			return STYLESHEETPATH . '/' . $this->template_url . 'single-product-reviews.php'; 
+		else
+			return $this->plugin_path() . '/templates/single-product-reviews.php';
+	}	
 	
 	/**
 	 * Output buffering on the checkout allows gateways to do header redirects
