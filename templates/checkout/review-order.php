@@ -48,6 +48,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 							if ( $method->cost > 0 ) {
 								$method->full_label .= ' &mdash; ';
+								
+								if(get_option('woocommerce_shipping_name_during_checkout')!='yes') $method->full_label = '';
 
 								// Append price to label using the correct tax settings
 								if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
@@ -143,12 +145,21 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 						?>
 						<tr class="tax">
-							<th colspan="2"><?php _e('Tax', 'woocommerce'); ?></th>
+							<th colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
 							<td><?php echo $woocommerce->cart->get_cart_tax(); ?></td>
 						</tr>
 						<?php
 					
 					endif;	
+				elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) :
+				?>
+
+					<tr class="tax">
+						<th colspan="2"><?php echo $woocommerce->countries->tax_or_vat(); ?></th>
+						<td><?php _ex( 'N/A', 'Relating to tax', 'woocommerce' ); ?></td>
+					</tr>
+
+				<?php
 				endif;
 			?>
 
