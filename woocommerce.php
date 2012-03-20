@@ -91,21 +91,6 @@ class Woocommerce {
 		// Actions
 		add_action( 'init', array(&$this, 'init'), 0);
 		add_action( 'after_setup_theme', array(&$this, 'compatibility'));
-		add_action( 'the_post', array(&$this, 'setup_product_data') );
-		add_action( 'admin_footer', array(&$this, 'output_inline_js'), 25);
-		
-		// Email Actions
-		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
-		
-		foreach ($email_actions as $action) add_action($action, array( &$this, 'send_transactional_email'));
-		
-		// Actions for SSL
-		if (!is_admin() || defined('DOING_AJAX')) :
-			add_action( 'wp', array( &$this, 'ssl_redirect'));
-			
-			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
-			foreach ($filters as $filter) add_filter($filter, array( &$this, 'force_ssl'));
-		endif;
 	}
 
 	/**
@@ -285,6 +270,23 @@ class Woocommerce {
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25);
 		
+		endif;
+
+		// Actions
+		add_action( 'the_post', array(&$this, 'setup_product_data') );
+		add_action( 'admin_footer', array(&$this, 'output_inline_js'), 25);
+
+		// Email Actions
+		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
+		
+		foreach ($email_actions as $action) add_action($action, array( &$this, 'send_transactional_email'));
+		
+		// Actions for SSL
+		if (!is_admin() || defined('DOING_AJAX')) :
+			add_action( 'wp', array( &$this, 'ssl_redirect'));
+			
+			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
+			foreach ($filters as $filter) add_filter($filter, array( &$this, 'force_ssl'));
 		endif;
 
 		// Register globals for WC environment
