@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Order items table (for emails) moved to template file
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
 * Tweak - Remove case sensitively from order tracking and force email lowercase on checkout
+* Fix - Multiple variation image upload
 * Fix - User email check for coupons
 * Fix - Put chosen frontend script back
 * Fix - Make download links use billing email, not user email

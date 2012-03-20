@@ -603,6 +603,7 @@ function variable_product_type_options() {
 
 			jQuery('img', current_field_wrapper).attr('src', imgurl);
 			tb_remove();
+			jQuery('#temp_image').remove();
 			
 			window.send_to_editor = window.send_to_editor_default;
 			
