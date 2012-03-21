@@ -35,6 +35,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$this->testmode		= $this->settings['testmode'];		
 		$this->send_shipping= $this->settings['send_shipping'];
 		$this->debug		= $this->settings['debug'];	
+		$this->form_submission_method = ( isset( $this->settings['form_submission_method'] ) && $this->settings['form_submission_method'] == 'yes' ) ? true : false;
 		
 		// Logs
 		if ($this->debug=='yes') $this->log = $woocommerce->logger();
@@ -122,6 +123,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'type' => 'checkbox', 
 							'label' => __( 'Send shipping details to PayPal.', 'woocommerce' ), 
 							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
+							'default' => 'no'
+						), 
+			'form_submission_method' => array(
+							'title' => __( 'Submission method', 'woocommerce' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Use form submission method.', 'woocommerce' ), 
+							'description' => __( 'Enable this to post order data to PayPal via a form instead of using a redirect/querystring.', 'woocommerce' ),
 							'default' => 'no'
 						), 
 			'testmode' => array(
@@ -341,7 +349,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			jQuery("#submit_paypal_payment_form").click();
 		');
 		
-		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form">
+		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
 				' . implode('', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woocommerce').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woocommerce').'</a>
 			</form>';
@@ -355,21 +363,31 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 		$order = new WC_Order( $order_id );
 		
-		$paypal_args = $this->get_paypal_args( $order );
+		if ( ! $this->form_submission_method ) {
 		
-		$paypal_args = http_build_query( $paypal_args );
+			$paypal_args = $this->get_paypal_args( $order );
+			
+			$paypal_args = http_build_query( $paypal_args );
+			
+			if ( $this->testmode == 'yes' ):
+				$paypal_adr = $this->testurl . '?test_ipn=1&';		
+			else :
+				$paypal_adr = $this->liveurl . '?';		
+			endif;
+	
+			return array(
+				'result' 	=> 'success',
+				'redirect'	=> $paypal_adr . $paypal_args
+			);
 		
-		if ( $this->testmode == 'yes' ):
-			$paypal_adr = $this->testurl . '?test_ipn=1&';		
-		else :
-			$paypal_adr = $this->liveurl . '?';		
-		endif;
-
-		return array(
-			'result' 	=> 'success',
-			'redirect'	=> $paypal_adr . $paypal_args
-			//'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))))
-		);
+		} else {
+			
+			return array(
+				'result' 	=> 'success',
+				'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))))
+			);
+			
+		}
 		
 	}
 	

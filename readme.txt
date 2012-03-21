@@ -145,6 +145,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.3 =
 * Feature - Control default catalog sort order from Catalog Settings
+* Feature - Option to use post instead of get to submit paypal standard - form also has target="_top" to work when in iframes
+* Tweak - Layered nav dropdown code to filter displayed terms based on view
 * Tweak - Improved wording of stock panel to make less confusing
 * Tweak - tip -> data-tip
 * Tweak - Revised load order so that localisation is done at init
