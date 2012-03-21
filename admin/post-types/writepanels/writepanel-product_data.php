@@ -196,12 +196,6 @@ function woocommerce_product_data_box() {
 			
 			<?php
 						
-			// Stock status
-			woocommerce_wp_select( array( 'id' => '_stock_status', 'label' => __('Stock status', 'woocommerce'), 'options' => array(
-				'instock' => __('In stock', 'woocommerce'),
-				'outofstock' => __('Out of stock', 'woocommerce')
-			) ) );
-			
 			if (get_option('woocommerce_manage_stock')=='yes') {
 			
 				// manage stock
@@ -212,21 +206,36 @@ function woocommerce_product_data_box() {
 				echo '<div class="stock_fields show_if_simple show_if_variable">';
 				
 				// Stock
-				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __('Stock Qty', 'woocommerce') ) );
-	
-				// Backorders?
-				woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __('Allow Backorders?', 'woocommerce'), 'options' => array(
-					'no' => __('Do not allow', 'woocommerce'),
-					'notify' => __('Allow, but notify customer', 'woocommerce'),
-					'yes' => __('Allow', 'woocommerce')
-				) ) );
-			
+				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __('Stock Qty', 'woocommerce'), 'desc_tip' => true, 'description' => __('Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce') ) );
+
 				do_action('woocommerce_product_options_stock_fields');
 				
 				echo '</div>';
 			
 			}
-			?>			
+			
+			// Stock status
+			woocommerce_wp_select( array( 'id' => '_stock_status', 'label' => __('Stock status', 'woocommerce'), 'options' => array(
+				'instock' => __('In stock', 'woocommerce'),
+				'outofstock' => __('Out of stock', 'woocommerce')
+			), 'desc_tip' => true, 'description' => __('Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce') ) );
+			
+			if (get_option('woocommerce_manage_stock')=='yes') {
+				
+				echo '<div class="show_if_simple show_if_variable">';
+				
+				// Backorders?
+				woocommerce_wp_select( array( 'id' => '_backorders', 'label' => __('Allow Backorders?', 'woocommerce'), 'options' => array(
+					'no' => __('Do not allow', 'woocommerce'),
+					'notify' => __('Allow, but notify customer', 'woocommerce'),
+					'yes' => __('Allow', 'woocommerce')
+				), 'desc_tip' => true, 'description' => __('If managing stock, this controls whether or not backorders are allowed for this product and variations. If enabled, stock quantity can go below 0.', 'woocommerce') ) );
+				
+				echo '</div>';
+			
+			}
+			
+			?>
 			
 		</div>
 
@@ -512,7 +521,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_sale_price', stripslashes( $_POST['_sale_price'] ) );
 	update_post_meta( $post_id, '_tax_status', stripslashes( $_POST['_tax_status'] ) );
 	update_post_meta( $post_id, '_tax_class', stripslashes( $_POST['_tax_class'] ) );
-	update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
 	update_post_meta( $post_id, '_visibility', stripslashes( $_POST['_visibility'] ) );
 	update_post_meta( $post_id, '_purchase_note', stripslashes( $_POST['_purchase_note'] ) );
 	if (isset($_POST['_featured'])) update_post_meta( $post_id, '_featured', 'yes' ); else update_post_meta( $post_id, '_featured', 'no' );
@@ -721,33 +729,49 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	endif;
 	
 	// Stock Data
-	if (get_option('woocommerce_manage_stock')=='yes') :
-		// Manage Stock Checkbox
-		if ($product_type!=='grouped' && isset($_POST['_manage_stock']) && $_POST['_manage_stock']) :
-
-			update_post_meta( $post_id, '_stock', $_POST['_stock'] );
-			update_post_meta( $post_id, '_manage_stock', 'yes' );
-			update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
+	if ( get_option('woocommerce_manage_stock') == 'yes' ) {
+	
+		if ( $product_type == 'grouped' ) {
 			
-			if ($product_type!=='variable' && $_POST['_backorders']=='no' && $_POST['_stock']<1) :
-				update_post_meta( $post_id, '_stock_status', 'outofstock' );
-			endif;
-			
-		elseif ($product_type!=='external') :
-			
-			update_post_meta( $post_id, '_stock', '0' );
+			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+			update_post_meta( $post_id, '_stock', '' );
 			update_post_meta( $post_id, '_manage_stock', 'no' );
 			update_post_meta( $post_id, '_backorders', 'no' );
-		
-		else :
-		
+			
+		} elseif ( $product_type == 'external' ) {
+			
 			update_post_meta( $post_id, '_stock_status', 'instock' );
-			update_post_meta( $post_id, '_stock', '0' );
+			update_post_meta( $post_id, '_stock', '' );
 			update_post_meta( $post_id, '_manage_stock', 'no' );
 			update_post_meta( $post_id, '_backorders', 'no' );
-				
-		endif;
-	endif;
+
+		} elseif ( ! empty( $_POST['_manage_stock'] ) ) {
+			
+			// Manage stock
+			update_post_meta( $post_id, '_stock', (int) $_POST['_stock'] );
+			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+			update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
+			update_post_meta( $post_id, '_manage_stock', 'yes' );
+			
+			// Check stock level
+			if ( $product_type !== 'variable' && $_POST['_backorders'] == 'no' && (int) $_POST['_stock'] < 1 )
+				update_post_meta( $post_id, '_stock_status', 'outofstock' );
+			
+		} else {
+		
+			// Don't manage stock
+			update_post_meta( $post_id, '_stock', '' );
+			update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+			update_post_meta( $post_id, '_backorders', stripslashes( $_POST['_backorders'] ) );
+			update_post_meta( $post_id, '_manage_stock', 'no' );
+		
+		}
+		
+	} else {
+	
+		update_post_meta( $post_id, '_stock_status', stripslashes( $_POST['_stock_status'] ) );
+		
+	}
 	
 	// Upsells
 	if (isset($_POST['upsell_ids'])) :

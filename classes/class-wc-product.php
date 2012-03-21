@@ -336,8 +336,8 @@ class WC_Product {
 	
 	/** Returns whether or not the product is stock managed */
 	function managing_stock() {
-		if (!isset($this->manage_stock) || $this->manage_stock=='no') return false;
-		if (get_option('woocommerce_manage_stock')=='yes') return true;
+		if ( ! isset( $this->manage_stock ) || $this->manage_stock == 'no' ) return false;
+		if ( get_option('woocommerce_manage_stock') == 'yes' ) return true;
 		return false;
 	}
 	

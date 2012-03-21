@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.3 =
 * Feature - Control default catalog sort order from Catalog Settings
+* Tweak - Improved wording of stock panel to make less confusing
 * Tweak - tip -> data-tip
 * Tweak - Revised load order so that localisation is done at init
 * Tweak - Hook for product availability
