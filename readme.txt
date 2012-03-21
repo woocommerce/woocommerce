@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - ' in prices (thousand separator)
 * Fix - Admin menu highlighting when adding orders
 * Localization - Spanish update by Héctor Carranza
+* Localization - Added Russian translation by Orlov Sergei
 
 = 1.5.2.1 - 16/03/2012 =
 * Fix - Redirect when no payment is required
