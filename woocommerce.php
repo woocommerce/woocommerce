@@ -1191,7 +1191,7 @@ class Woocommerce {
 			$label = $name;
 		}
 
-		return apply_filters('woocommerce_attribute_label', $label);
+		return apply_filters('woocommerce_attribute_label', $label, $name);
 	}
 	
 	/**
