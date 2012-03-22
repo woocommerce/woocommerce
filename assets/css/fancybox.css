@@ -132,6 +132,7 @@
 
 #fancybox-close:hover {
 	background: #a36396;
+	text-decoration:none !important;
 }
 
 #fancybox-error {
