@@ -37,38 +37,37 @@ function woocommerce_price_filter_init() {
 function woocommerce_price_filter($filtered_posts) {
     global $wpdb;
     
-    if (isset($_GET['max_price']) && isset($_GET['min_price'])) :
+    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
 
         $matched_products = array();
-        $low = floatval($_GET['min_price']);
-        $high = floatval($_GET['max_price']);
+        $min 	= floatval( $_GET['min_price'] );
+        $max 	= floatval( $_GET['max_price'] );
         
-        $matched_products_query = $wpdb->get_results(
-                $wpdb->prepare(
-                        "SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
-                             INNER JOIN $wpdb->postmeta ON ID = post_id
-                             WHERE (post_type='product' OR post_type='product_variation') AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d", '_price', $low, $high), OBJECT_K);
+        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
+			INNER JOIN $wpdb->postmeta ON ID = post_id
+			WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
+		", '_price', $min, $max ), OBJECT_K );
 
-
-        if ($matched_products_query) :
-            foreach ($matched_products_query as $product) :
-                if ($product->post_type == 'product')
+        if ( $matched_products_query ) {
+            foreach ( $matched_products_query as $product ) {
+                if ( $product->post_type == 'product' )
                     $matched_products[] = $product->ID;
-                if ($product->post_parent > 0 && !in_array($product->post_parent, $matched_products))
+                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
                     $matched_products[] = $product->post_parent;
-            endforeach;
-        endif;
+            }
+        }
 
         // Filter the id's
-        if (sizeof($filtered_posts) == 0) :
+        if ( sizeof( $filtered_posts ) == 0) {
             $filtered_posts = $matched_products;
             $filtered_posts[] = 0;
-        else :
-            $filtered_posts = array_intersect($filtered_posts, $matched_products);
+        } else {
+            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
             $filtered_posts[] = 0;
-        endif;
+        }
 
-    endif;
+    }
 
     return (array) $filtered_posts;
 }
