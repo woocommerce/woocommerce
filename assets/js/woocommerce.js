@@ -366,6 +366,9 @@ jQuery(document).ready(function($) {
 	        }
         	
         });
+
+		// Custom event for when variations have been updated
+		$(document).trigger('woocommerce_update_variation_values');
         
     }
     
