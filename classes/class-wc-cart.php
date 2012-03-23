@@ -880,6 +880,8 @@ class WC_Cart {
 					if ( $coupon->type != 'fixed_product' && $coupon->type != 'percent_product' ) continue;
 					
 					if ( !$coupon->apply_before_tax() && $coupon->is_valid() ) {
+					
+						$product_cats = wp_get_post_terms( $values['product_id'], 'product_cat', array("fields" => "ids") );
 						
 						$this_item_is_discounted = false;
 			

@@ -158,6 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Queries on report pages to replace get_posts to resolve issues on stores with a shed load of orders
 * Tweak - Remove case sensitively from order tracking and force email lowercase on checkout
 * Tweak - woocommerce_update_variation_values trigger in JS
+* Fix - After tax coupons for categories
 * Fix - Multiple variation image upload
 * Fix - User email check for coupons
 * Fix - Put chosen frontend script back
