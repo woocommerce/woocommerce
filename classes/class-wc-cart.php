@@ -624,7 +624,7 @@ class WC_Cart {
 			if ( get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $product_data->is_downloadable() && $product_data->is_virtual() ) {
 				$qty = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
 				if ( $qty > 1 ) {
-					$woocommerce->add_error( __('You already have this item in your cart.', 'woocommerce') );
+					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
 					return false;
 				}
 			}			
