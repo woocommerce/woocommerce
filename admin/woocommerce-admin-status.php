@@ -189,7 +189,7 @@ function woocommerce_status() {
 			</thead>
 			
 			<tbody>
-				<tr>
+				<tr class="alternate">
                     <td><?php _e('Transients','woocommerce')?></td>
                     <td>
                     	<p>
