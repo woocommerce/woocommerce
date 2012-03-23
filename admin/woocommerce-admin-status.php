@@ -83,7 +83,7 @@ function woocommerce_status() {
     						}
 						}
 						
-						echo implode( '</br>', $wc_plugins )
+						if ( sizeof( $wc_plugins ) == 0 ) echo '-'; else echo implode( '</br>', $wc_plugins )
 	
              		?></td>
              	</tr>
