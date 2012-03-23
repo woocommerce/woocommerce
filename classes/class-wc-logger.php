@@ -33,7 +33,7 @@ class WC_Logger {
 		
 		if (isset($this->handles[$handle])) return true;
 		
-		if ($this->handles[$handle] = fopen( $woocommerce->plugin_path() . '/logs/' . $handle . '.txt', 'a' )) return true;
+		if ($this->handles[$handle] = @fopen( $woocommerce->plugin_path() . '/logs/' . $handle . '.txt', 'a' )) return true;
 		
 		return false;
 	}

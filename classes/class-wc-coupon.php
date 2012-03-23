@@ -95,7 +95,7 @@ class WC_Coupon {
      			$this->expiry_date = ($this->expiry_date) ? strtotime($this->expiry_date) : '';
                 $this->product_categories = array_filter(array_map('trim', (array) maybe_unserialize($this->product_categories)));
            		$this->exclude_product_categories = array_filter(array_map('trim', (array) maybe_unserialize($this->exclude_product_categories)));
-   				$this->customer_email = array_filter(array_map('trim', (array) maybe_unserialize($this->customer_email)));
+   				$this->customer_email = array_filter(array_map('trim', array_map('strtolower', (array) maybe_unserialize($this->customer_email))));
 
                 return true;
             endif;

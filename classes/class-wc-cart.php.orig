@@ -292,7 +292,11 @@ class WC_Cart {
 					/**
 					 * Check the stock for this item individually
 					 */
+<<<<<<< HEAD
 					if (!$_product->is_in_stock() || !$_product->has_enough_stock( $values['quantity'] + $quantity )) {
+=======
+					if ( ! $_product->is_in_stock() || ! $_product->has_enough_stock( $values['quantity'] ) ) {
+>>>>>>> upstream/master
 						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
 						return $error;
 					}
@@ -334,14 +338,22 @@ class WC_Cart {
 				
 					if ( $values['variation_id'] && $_product->variation_has_stock && isset( $product_qty_in_cart[$values['variation_id']] ) ) {
 						
+<<<<<<< HEAD
 						if (!$_product->has_enough_stock( $product_qty_in_cart[$values['variation_id']] + $quantity )) {
+=======
+						if ( ! $_product->has_enough_stock( $product_qty_in_cart[$values['variation_id']] ) ) {
+>>>>>>> upstream/master
 							$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 					
 					} elseif ( isset( $product_qty_in_cart[$values['product_id']] ) ) {
 						
+<<<<<<< HEAD
 						if (!$_product->has_enough_stock( $product_qty_in_cart[$values['product_id']] + $quantity )) {
+=======
+						if ( ! $_product->has_enough_stock( $product_qty_in_cart[$values['product_id']] ) ) {
+>>>>>>> upstream/master
 							$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
@@ -616,7 +628,11 @@ class WC_Cart {
 			}
 	
 			// Stock check - only check if we're managing stock and backorders are not allowed
+<<<<<<< HEAD
 			if ( !$product_data->has_enough_stock( $quantity ) || true !== $this->check_cart_item_stock( $product_data->id, $quantity ) ) :
+=======
+			if ( ! $product_data->has_enough_stock( $quantity ) ) {
+>>>>>>> upstream/master
 				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woocommerce'), $product_data->get_stock_quantity() ));
 				return false; 
 			} elseif ( ! $product_data->is_in_stock() ) {

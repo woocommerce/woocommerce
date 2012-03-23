@@ -202,8 +202,38 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					
 					foreach ($terms as $term) {
 						
-						//if on a term page, skip that term in widget list
+						// If on a term page, skip that term in widget list
 						if( $term->term_id == $current_term ) continue;
+						
+						// Get count based on current view - uses transients
+						$transient_name = 'wc_ln_count_' . md5( sanitize_key($taxonomy) . sanitize_key( $term->term_id ) );
+	
+						if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
+	
+							$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
+	
+							set_transient( $transient_name, $_products_in_term );
+						}
+	
+						$option_is_set = (isset($_chosen_attributes[$taxonomy]) && in_array($term->term_id, $_chosen_attributes[$taxonomy]['terms']));
+	
+						// If this is an AND query, only show options with count > 0
+						if ($query_type=='and') {
+	
+							$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->filtered_product_ids));
+	
+							if ($count>0) $found = true;
+	
+							if ($count==0 && !$option_is_set) continue;
+	
+						// If this is an OR query, show all options so search can be expanded
+						} else {
+	
+							$count = sizeof(array_intersect($_products_in_term, $woocommerce->query->unfiltered_product_ids));
+	
+							if ($count>0) $found = true;
+	
+						}
 						
 						echo '<option value="'.$term->term_id.'" '.selected( (isset($_GET['filter_'.$taxonomy_filter])) ? $_GET['filter_'.$taxonomy_filter] : '' , $term->term_id, false).'>'.$term->name.'</option>';
 					}

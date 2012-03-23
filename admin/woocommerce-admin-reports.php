@@ -9,11 +9,11 @@
 
 function woocommerce_reports() {
 
-	$current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : __('sales', 'woocommerce');
+	$current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'sales';
 	$current_chart = (isset($_GET['chart'])) ? $_GET['chart'] : 0;
 	
 	$charts = apply_filters('woocommerce_reports_charts', array(
-		__('sales', 'woocommerce') => array(
+		'sales' => array(
 			array(
 				'title' => __('Overview', 'woocommerce'),
 				'description' => '',
@@ -46,7 +46,7 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_top_earners'
 			)
 		),
-		__('customers', 'woocommerce') => array(
+		'customers' => array(
 			array(
 				'title' => __('Overview', 'woocommerce'),
 				'description' => '',
@@ -54,7 +54,7 @@ function woocommerce_reports() {
 				'function' => 'woocommerce_customer_overview'
 			),
 		),
-		__('stock', 'woocommerce') => array(
+		'stock' => array(
 			array(
 				'title' => __('Overview', 'woocommerce'),
 				'description' => '',
@@ -69,7 +69,7 @@ function woocommerce_reports() {
 			<?php
 				foreach ($charts as $name => $value) :
 					echo '<a href="'.admin_url('admin.php?page=woocommerce_reports&tab='.$name).'" class="nav-tab ';
-					if($current_tab==$name) echo 'nav-tab-active';
+					if( $current_tab == $name ) echo 'nav-tab-active';
 					echo '">'.ucfirst($name).'</a>';
 				endforeach;
 			?>

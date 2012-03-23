@@ -34,49 +34,42 @@ function woocommerce_price_filter_init() {
 /**
  * Price Filter post filter
  */
-function woocommerce_price_filter( $filtered_posts ) {
+function woocommerce_price_filter($filtered_posts) {
+    global $wpdb;
+    
+    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
 
-	if (isset($_GET['max_price']) && isset($_GET['min_price'])) :
-		
-		$matched_products = array();
-		
-		$matched_products_query = get_posts(array(
-			'post_type' => array(
-				'product_variation',
-				'product'
-			),
-			'post_status' => 'publish',
-			'posts_per_page' => -1,
-			'meta_query' => array(
-				array(
-					'key' => '_price',
-					'value' => array( $_GET['min_price'], $_GET['max_price'] ),
-					'type' => 'NUMERIC',
-					'compare' => 'BETWEEN'
-				)
-			)
-		));
+        $matched_products = array();
+        $min 	= floatval( $_GET['min_price'] );
+        $max 	= floatval( $_GET['max_price'] );
+        
+        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
+			INNER JOIN $wpdb->postmeta ON ID = post_id
+			WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
+		", '_price', $min, $max ), OBJECT_K );
 
-		if ($matched_products_query) :
-			foreach ($matched_products_query as $product) :
-				if ($product->post_type == 'product') $matched_products[] = $product->ID;
-				if ($product->post_parent>0 && !in_array($product->post_parent, $matched_products))
-					$matched_products[] = $product->post_parent;
-			endforeach;
-		endif;
-		
-		// Filter the id's
-		if (sizeof($filtered_posts)==0) :
-			$filtered_posts = $matched_products;
-			$filtered_posts[] = 0;
-		else :
-			$filtered_posts = array_intersect($filtered_posts, $matched_products);
-			$filtered_posts[] = 0;
-		endif;
-		
-	endif;
-	
-	return (array) $filtered_posts;
+        if ( $matched_products_query ) {
+            foreach ( $matched_products_query as $product ) {
+                if ( $product->post_type == 'product' )
+                    $matched_products[] = $product->ID;
+                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
+                    $matched_products[] = $product->post_parent;
+            }
+        }
+
+        // Filter the id's
+        if ( sizeof( $filtered_posts ) == 0) {
+            $filtered_posts = $matched_products;
+            $filtered_posts[] = 0;
+        } else {
+            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
+            $filtered_posts[] = 0;
+        }
+
+    }
+
+    return (array) $filtered_posts;
 }
 
 /**

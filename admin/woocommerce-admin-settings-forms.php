@@ -189,31 +189,31 @@ function woocommerce_update_options($options) {
 function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
-    foreach ($options as $value) :
-    	if (!isset( $value['name'] ) ) $value['name'] = '';
-    	if (!isset( $value['class'] )) $value['class'] = '';
-    	if (!isset( $value['css'] )) $value['css'] = '';
-    	if (!isset( $value['std'] )) $value['std'] = '';
-    	if (!isset( $value['desc'] )) $value['desc'] = '';
-    	if (!isset( $value['desc_tip'] )) $value['desc_tip'] = false;
+    foreach ( $options as $value ) {
+    	if ( ! isset( $value['name'] ) ) $value['name'] = '';
+    	if ( ! isset( $value['class'] ) ) $value['class'] = '';
+    	if ( ! isset( $value['css'] ) ) $value['css'] = '';
+    	if ( ! isset( $value['std'] ) ) $value['std'] = '';
+    	if ( ! isset( $value['desc'] ) ) $value['desc'] = '';
+    	if ( ! isset( $value['desc_tip'] ) ) $value['desc_tip'] = false;
     	
-    	if ($value['desc_tip']) {
-    		$description = '<img class="help_tip" tip="'.$value['desc'].'" src="'.$woocommerce->plugin_url().'/assets/images/help.png" />';
+    	if ( $value['desc_tip'] ) {
+    		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
     	} else {
-    		$description = '<span class="description">'.$value['desc'].'</span>';
+    		$description = '<span class="description">' . $value['desc'] . '</span>';
     	}
     	
-        switch($value['type']) :
+        switch($value['type']) {
             case 'title':
-            	if (isset($value['name']) && $value['name']) echo '<h3>'.$value['name'].'</h3>'; 
-            	if (isset($value['desc']) && $value['desc']) echo wpautop(wptexturize($value['desc']));
+            	if ( isset($value['name'] ) && $value['name'] ) echo '<h3>' . $value['name'] . '</h3>'; 
+            	if ( isset($value['desc'] ) && $value['desc'] ) echo wpautop( wptexturize( $value['desc'] ) );
             	echo '<table class="form-table">'. "\n\n";
-            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']));
+            	if ( isset($value['id'] ) && $value['id'] ) do_action( 'woocommerce_settings_' . sanitize_title($value['id'] ) );
             break;
             case 'sectionend':
-            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']).'_end');
+            	if ( isset($value['id'] ) && $value['id'] ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
             	echo '</table>';
-            	if (isset($value['id']) && $value['id']) do_action('woocommerce_settings_'.sanitize_title($value['id']).'_after');
+            	if ( isset($value['id'] ) && $value['id'] ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
             break;
             case 'text':
             	?><tr valign="top">
@@ -383,10 +383,10 @@ function woocommerce_admin_fields($options) {
 		            				<th class="check-column"><input type="checkbox"></th>
 		            				<th class="country"><?php _e('Countries/states', 'woocommerce'); ?></th>
 		            				<th><?php _e('Tax Class', 'woocommerce'); ?></th>
-		            				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
-		            				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
-		            				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
-		            				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
+		            				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
 		            			</tr>
 		            		</thead>
 		            		<tfoot>
@@ -453,12 +453,12 @@ function woocommerce_admin_fields($options) {
 				    		<thead>
 				    			<tr>
 				    				<th class="check-column"><input type="checkbox"></th>
-				    				<th class="country"><?php _e('Post/zip codes', 'woocommerce'); ?> <a class="tips" tip="<?php _e('List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woocommerce'); ?>">[?]</a></th>
+				    				<th class="country"><?php _e('Post/zip codes', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woocommerce'); ?>">[?]</a></th>
 				    				<th><?php _e('Tax Class', 'woocommerce'); ?></th>
-				    				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
-				    				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
-				    				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
-				    				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Compound', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce'); ?>">[?]</a></th>
+				    				<th><?php _e('Shipping', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce'); ?>">[?]</a></th>
 				    			</tr>
 				    		</thead>
 				    		<tfoot>
@@ -701,8 +701,8 @@ function woocommerce_admin_fields($options) {
             default:
             	do_action( 'woocommerce_admin_field_'.$value['type'], $value );
             break;
-        endswitch;
-    endforeach;
+    	}
+	}
 }
 
 

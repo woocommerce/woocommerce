@@ -76,8 +76,8 @@ function woocommerce_edit_product_columns($columns){
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
 	$columns["product_tags"] = __("Tags", 'woocommerce');
-	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" tip="' . __("Featured", 'woocommerce') . '" />';
-	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" tip="' . __("Type", 'woocommerce') . '" />';
+	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" />';
+	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" />';
 	$columns["date"] = __("Date", 'woocommerce');
 	
 	return $columns;
@@ -181,24 +181,24 @@ function woocommerce_custom_product_columns( $column ) {
 		break;
 		case "product_type" :
 			if( $product->product_type == 'grouped' ):
-				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Grouped', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Grouped', 'woocommerce') . '"></span>';
 			elseif ( $product->product_type == 'external' ):
-				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('External/Affiliate', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('External/Affiliate', 'woocommerce') . '"></span>';
 			elseif ( $product->product_type == 'simple' ):
 				
 				if ($product->is_virtual()) {
-					echo '<span class="product-type tips virtual" tip="' . __('Virtual', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips virtual" data-tip="' . __('Virtual', 'woocommerce') . '"></span>';
 				} elseif ($product->is_downloadable()) {
-					echo '<span class="product-type tips downloadable" tip="' . __('Downloadable', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips downloadable" data-tip="' . __('Downloadable', 'woocommerce') . '"></span>';
 				} else {
-					echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Simple', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Simple', 'woocommerce') . '"></span>';
 				}
 				
 			elseif ( $product->product_type == 'variable' ):
-				echo '<span class="product-type tips '.$product->product_type.'" tip="' . __('Variable', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Variable', 'woocommerce') . '"></span>';
 			else:
 				// Assuming that we have other types in future
-				echo '<span class="product-type tips '.$product->product_type.'" tip="' . ucwords($product->product_type) . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . ucwords($product->product_type) . '"></span>';
 			endif;
 		break;
 		case "price":

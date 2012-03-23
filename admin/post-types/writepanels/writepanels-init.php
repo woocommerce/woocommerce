@@ -143,7 +143,7 @@ function woocommerce_meta_boxes_save_errors() {
  * Output write panel form elements
  */
 function woocommerce_wp_text_input( $field ) {
-	global $thepostid, $post;
+	global $thepostid, $post, $woocommerce;
 	
 	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['placeholder'])) $field['placeholder'] = '';
@@ -152,8 +152,15 @@ function woocommerce_wp_text_input( $field ) {
 	
 	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
 	
-	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+	if ( isset( $field['description'] ) && $field['description'] ) {
 		
+		if ( isset( $field['desc_tip'] ) ) {
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+		} else {
+			echo '<span class="description">' . $field['description'] . '</span>';
+		}
+
+	}		
 	echo '</p>';
 }
 
@@ -165,7 +172,7 @@ function woocommerce_wp_hidden_input( $field ) {
 }
 
 function woocommerce_wp_textarea_input( $field ) {
-	global $thepostid, $post;
+	global $thepostid, $post, $woocommerce;
 	
 	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['placeholder'])) $field['placeholder'] = '';
@@ -174,8 +181,15 @@ function woocommerce_wp_textarea_input( $field ) {
 	
 	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><textarea class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" placeholder="'.$field['placeholder'].'" rows="2" cols="20">'.esc_textarea( $field['value'] ).'</textarea> ';
 	
-	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+	if ( isset( $field['description'] ) && $field['description'] ) {
 		
+		if ( isset( $field['desc_tip'] ) ) {
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+		} else {
+			echo '<span class="description">' . $field['description'] . '</span>';
+		}
+
+	}		
 	echo '</p>';
 }
 
@@ -199,7 +213,7 @@ function woocommerce_wp_checkbox( $field ) {
 }
 
 function woocommerce_wp_select( $field ) {
-	global $thepostid, $post;
+	global $thepostid, $post, $woocommerce;
 	
 	if (!$thepostid) $thepostid = $post->ID;
 	if (!isset($field['class'])) $field['class'] = 'select short';
@@ -217,7 +231,15 @@ function woocommerce_wp_select( $field ) {
 	
 	echo '</select> ';
 	
-	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+	if ( isset( $field['description'] ) && $field['description'] ) {
+		
+		if ( isset( $field['desc_tip'] ) ) {
+			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+		} else {
+			echo '<span class="description">' . $field['description'] . '</span>';
+		}
+
+	}
 		
 	echo '</p>';
 }

@@ -121,7 +121,7 @@ jQuery(function(){
 	
 	// Tooltips
 	jQuery(".tips, .help_tip").tipTip({
-    	'attribute' : 'tip',
+    	'attribute' : 'data-tip',
     	'fadeIn' : 50,
     	'fadeOut' : 50
     });

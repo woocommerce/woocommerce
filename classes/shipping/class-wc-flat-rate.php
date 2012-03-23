@@ -343,8 +343,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	            			<tr>
 	            				<th class="check-column"><input type="checkbox"></th>
 	            				<th class="shipping_class"><?php _e('Shipping Class', 'woocommerce'); ?></th>
-	        	            	<th><?php _e('Cost', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Cost, excluding tax.', 'woocommerce'); ?>">[?]</a></th>
-	        	            	<th><?php _e('Handling Fee', 'woocommerce'); ?> <a class="tips" tip="<?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%.', 'woocommerce'); ?>">[?]</a></th>
+	        	            	<th><?php _e('Cost', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Cost, excluding tax.', 'woocommerce'); ?>">[?]</a></th>
+	        	            	<th><?php _e('Handling Fee', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%.', 'woocommerce'); ?>">[?]</a></th>
 	            			</tr>
 	            		</thead>
 	            		<tfoot>
