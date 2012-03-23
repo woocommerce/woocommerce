@@ -1184,14 +1184,14 @@ class Woocommerce {
 		if ( strstr( $name, 'pa_' ) ) {
 			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
 
-			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 			
-			if ( ! $label) $label = ucfirst($name);
+			if ( ! $label ) $label = ucfirst( $name );
 		} else {
 			$label = $name;
 		}
 
-		return apply_filters('woocommerce_attribute_label', $label, $name);
+		return apply_filters( 'woocommerce_attribute_label', $label, $name );
 	}
 	
 	/**

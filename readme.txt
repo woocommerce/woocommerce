@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Remove case sensitively from order tracking and force email lowercase on checkout
 * Tweak - woocommerce_update_variation_values trigger in JS
 * Tweak - Optimised price filter query (Thanks Lucas Stark)
+* Tweak - woocommerce_attribute_label filter
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload
 * Fix - User email check for coupons
