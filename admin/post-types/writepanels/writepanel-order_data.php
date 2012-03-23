@@ -393,7 +393,7 @@ function woocommerce_order_items_meta_box($post) {
 				$args = array(
 					'post_type' 		=> 'product',
 					'posts_per_page' 	=> -1,
-					'post_status'		=> 'publish',
+					'post_status'		=> array( 'publish', 'private' ),
 					'post_parent'		=> 0,
 					'order'				=> 'ASC',
 					'orderby'			=> 'title'
