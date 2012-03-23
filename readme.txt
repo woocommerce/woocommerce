@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Make download links use billing email, not user email
 * Fix - ' in prices (thousand separator)
 * Fix - Admin menu highlighting when adding orders
+* Localization - Removed translations from reports page tab URLS
 * Localization - Spanish update by Héctor Carranza
 * Localization - Added Russian translation by Orlov Sergei
 
