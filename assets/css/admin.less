@@ -138,6 +138,9 @@
 .icon32-woocommerce-reports {
 	background-position: -591px -6px !important;
 }
+.icon32-woocommerce-status {
+	background-position: -417px -6px !important;
+}
 
 .wrap.woocommerce div.updated, .wrap.woocommerce div.error {
 	margin-top: 10px;
@@ -149,6 +152,27 @@ mark.amount {
 input.wc-error {
 	color: #D8000C;
 	background-color: #FFBABA;
+}
+
+/* Status page */
+table.wc_status_table {
+	th {
+		font-weight: bold;
+	}
+	td {
+		mark {
+			background: transparent none;
+		}
+		mark.yes {
+			color: green;
+		}
+		mark.no {
+			color: #999;
+		}	
+		mark.error {
+			color: red;
+		}
+	}
 }
 
 /* Bulk/Quick edit */
