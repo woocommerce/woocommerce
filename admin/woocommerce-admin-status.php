@@ -13,7 +13,7 @@ function woocommerce_status() {
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br></div>
-		<h2><?php _e( 'WooCommerce Status', 'woocommerce' ); ?></h2>
+		<h2><?php _e( 'WooCommerce Status', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce'); ?></a></h2>
 		
 		<?php
 			if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -41,6 +41,7 @@ function woocommerce_status() {
 			}
 		?>
 		<br/>
+		<textarea id="debug-report" readonly="readonly"></textarea>
 		<table class="wc_status_table widefat" cellspacing="0">
 			
 			<thead>
@@ -59,7 +60,7 @@ function woocommerce_status() {
                     <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
                 </tr>
              	<tr class="alternate">
-             		<td><?php _e('Installed WooCommerce plugins','woocommerce')?></td>
+             		<td><?php _e('Installed plugins','woocommerce')?></td>
              		<td><?php
              			$active_plugins = (array) get_option( 'active_plugins', array() );
              			
@@ -71,7 +72,7 @@ function woocommerce_status() {
 						$wc_plugins = array();
 						
 						foreach ( $active_plugins as $plugin ) {
-							if ( strstr( $plugin, 'woocommerce' ) ) {
+							//if ( strstr( $plugin, 'woocommerce' ) ) {
 							
 								$plugin_data = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 	    						
@@ -80,13 +81,122 @@ function woocommerce_status() {
 	    							$wc_plugins[] = $plugin_data['Name'] . ' ' . __('by', 'woocommerce') . ' ' . $plugin_data['Author'] . ' ' . __('version', 'woocommerce') . ' ' . $plugin_data['Version'];
 	    							
 	    						}
-    						}
+    						//}
 						}
 						
-						if ( sizeof( $wc_plugins ) == 0 ) echo '-'; else echo implode( '</br>', $wc_plugins )
+						if ( sizeof( $wc_plugins ) == 0 ) echo '-'; else echo '<ul><li>' . implode( ', </li><li>', $wc_plugins ) . '</li></ul>';
 	
              		?></td>
              	</tr>
+			</tbody>
+
+			<thead>
+				<tr>
+					<th colspan="2"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+                <tr class="alternate">
+                    <td><?php _e('Home URL','woocommerce')?></td>
+                    <td><?php echo home_url(); ?></td>
+                </tr>
+                <tr>
+                    <td><?php _e('Site URL','woocommerce')?></td>
+                    <td><?php echo site_url(); ?></td>
+                </tr>
+                <tr class="alternate">
+                    <td><?php _e('Force SSL','woocommerce')?></td>
+                    <td><?php echo ucwords(get_option('woocommerce_force_ssl_checkout')); ?></td>
+                </tr>
+			</tbody>
+
+			<thead>
+				<tr>
+					<th colspan="2"><?php _e( 'Shop Pages', 'woocommerce' ); ?></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<?php
+					$check_pages = array(
+						__('Shop base page', 'woocommerce') => array(
+								'option' => 'woocommerce_shop_page_id',
+								'shortcode' => ''
+							),
+						__('Cart Page', 'woocommerce') => array(
+								'option' => 'woocommerce_cart_page_id',
+								'shortcode' => '[woocommerce_cart]'
+							),
+						__('Checkout Page', 'woocommerce') => array(
+								'option' => 'woocommerce_checkout_page_id',
+								'shortcode' => '[woocommerce_checkout]'
+							),
+						__('Pay Page', 'woocommerce') => array(
+								'option' => 'woocommerce_pay_page_id',
+								'shortcode' => '[woocommerce_pay]'
+							),
+						__('Thanks Page', 'woocommerce') => array(
+								'option' => 'woocommerce_thanks_page_id',
+								'shortcode' => '[woocommerce_thankyou]'
+							),
+						__('My Account Page', 'woocommerce') => array(
+								'option' => 'woocommerce_myaccount_page_id',
+								'shortcode' => '[woocommerce_my_account]'
+							),
+						__('Edit Address Page', 'woocommerce') => array(
+								'option' => 'woocommerce_edit_address_page_id',
+								'shortcode' => '[woocommerce_edit_address]'
+							),
+						__('View Order Page', 'woocommerce') => array(
+								'option' => 'woocommerce_view_order_page_id',
+								'shortcode' => '[woocommerce_view_order]'
+							),
+						__('Change Password Page', 'woocommerce') => array(
+								'option' => 'woocommerce_change_password_page_id',
+								'shortcode' => '[woocommerce_change_password]'
+							)
+					);
+					
+					$alt = 1;
+					
+					foreach ( $check_pages as $page_name => $values ) {
+						
+						if ( $alt == 1 ) echo '<tr class="alternate">'; else echo '<tr>';
+						
+						echo '<td>' . $page_name . '</td><td>';
+						
+						$error = false;
+						
+						$page_id = get_option($values['option']);
+						
+						// Page ID check
+						if ( ! $page_id ) {
+							echo '<mark class="error">' . __('Page not set', 'woocommerce') . '</mark>';
+							$error = true;
+						} else {
+							
+							// Shortcode check
+							if ( $values['shortcode'] ) {
+								$page = get_post( $page_id );
+								
+								if ( ! strstr( $page->post_content, $values['shortcode'] ) ) {
+									
+									echo '<mark class="error">' . sprintf(__('Page does not contain the shortcode: %s', 'woocommerce'), $values['shortcode'] ) . '</mark>';
+									$error = true;
+									
+								}
+							}
+							
+						}
+						
+						if ( ! $error ) echo '<mark class="yes">#' . $page_id . ' - ' . get_permalink( $page_id ) . '</mark>'; 
+						
+						echo '</td></tr>';
+						
+						$alt = $alt * -1;
+					}
+				?>
 			</tbody>
 			
 			<thead>
@@ -151,6 +261,29 @@ function woocommerce_status() {
             
             <thead>
 				<tr>
+					<th colspan="2"><?php _e( 'PHP Sessions', 'woocommerce' ); ?></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+            	<tr class="alternate">
+                    <td><?php _e('Session save path','woocommerce')?></td>
+					<td><?php
+						$save_path = session_save_path();
+						
+						if ( ! is_dir( $save_path ) ) {
+							echo '<mark class="error">' . sprintf( __('<code>%s</code> does not exist - contact your host to resolve the problem.', 'woocommerce'), $save_path ). '</mark>'; 
+						} elseif ( ! is_writeable( $save_path ) ) {
+							echo '<mark class="error">' . sprintf( __('<code>%s</code> is not writable - contact your host to resolve the problem.', 'woocommerce'), $save_path ). '</mark>'; 
+						} else {
+							echo '<mark class="yes">' . sprintf( __('<code>%s</code> is writable.', 'woocommerce'), $save_path ). '</mark>'; 
+						}
+                    ?></td>
+                </tr>
+            </tbody>
+            
+            <thead>
+				<tr>
 					<th colspan="2"><?php _e( 'Remote Posting/IPN', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
@@ -182,13 +315,13 @@ function woocommerce_status() {
                 </tr>
             </tbody>
             
-            <thead>
+            <thead class="tools">
 				<tr>
 					<th colspan="2"><?php _e( 'Tools', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
 			
-			<tbody>
+			<tbody class="tools">
 				<tr class="alternate">
                     <td><?php _e('Transients','woocommerce')?></td>
                     <td>
@@ -211,5 +344,53 @@ function woocommerce_status() {
 		</table>
 
 	</div>
+	<script type="text/javascript">
+		
+		jQuery('a.debug-report').click(function(){
+			
+			if ( ! jQuery('#debug-report').val() ) {
+			
+				// Generate report - user can paste into forum
+				var report = '`';
+				
+				jQuery('thead:not(".tools"), tbody:not(".tools")', '.wc_status_table').each(function(){
+					
+					$this = jQuery( this );
+					
+					if ( $this.is('thead') ) {
+						
+						report = report + "\n=============================================================================================\n";
+						report = report + " " + jQuery.trim( $this.text() ) + "\n";
+						report = report + "=============================================================================================\n";
+						
+					} else {
+						
+						jQuery('tr', $this).each(function(){
+							
+							$this = jQuery( this );
+							
+							report = report + $this.find('td:eq(0)').text() + ": \t";
+							report = report + $this.find('td:eq(1)').text() + "\n";
+							
+						});
+						
+					}
+				
+				});
+				
+				report = report + '`';
+				
+				jQuery('#debug-report').val( report );
+			}
+			
+			jQuery('#debug-report').slideToggle('500', function() {
+				jQuery(this).select();
+			});
+
+      		return false;
+			
+		});
+		
+	</script>
 	<?php
 }
