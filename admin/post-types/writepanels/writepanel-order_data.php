@@ -236,6 +236,8 @@ function woocommerce_order_data_meta_box($post) {
 						endforeach;
 						
 						echo '</div>';
+						
+						do_action('woocommerce_admin_order_data_after_shipping_address');
 					?>
 				</div>
 			</div>
