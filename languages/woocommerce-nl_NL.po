@@ -9835,72 +9835,72 @@ msgstr ""
 #: admin/woocommerce-admin-dashboard.php:394
 #@ woocommerce
 msgid "Sales amount"
-msgstr ""
+msgstr "Verkoop bedrag"
 
 #: admin/woocommerce-admin-debug.php:16
 #@ woocommerce
 msgid "Debugging Information"
-msgstr ""
+msgstr "Debugging Informatie"
 
 #: admin/woocommerce-admin-debug.php:16
 #@ woocommerce
 msgid "Generate report"
-msgstr ""
+msgstr "Genereer rapport"
 
 #: admin/woocommerce-admin-debug.php:24
 #@ woocommerce
 msgid "Product Transients Cleared"
-msgstr ""
+msgstr "Product Transients Gewist"
 
 #: admin/woocommerce-admin-debug.php:38
 #@ woocommerce
 msgid "Roles successfully reset"
-msgstr ""
+msgstr "Rollen gereset"
 
 #: admin/woocommerce-admin-debug.php:49
 #@ woocommerce
 msgid "Versions"
-msgstr ""
+msgstr "Versies"
 
 #: admin/woocommerce-admin-debug.php:55
 #@ woocommerce
 msgid "WooCommerce version"
-msgstr ""
+msgstr "WooCommerce versie"
 
 #: admin/woocommerce-admin-debug.php:59
 #@ woocommerce
 msgid "WordPress version"
-msgstr ""
+msgstr "WordPress versie"
 
 #: admin/woocommerce-admin-debug.php:63
 #@ woocommerce
 msgid "Installed plugins"
-msgstr ""
+msgstr "Geinstalleerde plugins"
 
 #: admin/woocommerce-admin-debug.php:81
 #@ woocommerce
 msgid "by"
-msgstr ""
+msgstr "door"
 
 #: admin/woocommerce-admin-debug.php:81
 #@ woocommerce
 msgid "version"
-msgstr ""
+msgstr "versie"
 
 #: admin/woocommerce-admin-debug.php:101
 #@ woocommerce
 msgid "Home URL"
-msgstr ""
+msgstr "Home URL"
 
 #: admin/woocommerce-admin-debug.php:105
 #@ woocommerce
 msgid "Site URL"
-msgstr ""
+msgstr "Site URL"
 
 #: admin/woocommerce-admin-debug.php:109
 #@ woocommerce
 msgid "Force SSL"
-msgstr ""
+msgstr "Forceer SSL"
 
 #: admin/woocommerce-admin-debug.php:123
 #@ woocommerce
@@ -10004,12 +10004,12 @@ msgstr ""
 #: admin/woocommerce-admin-debug.php:287
 #@ woocommerce
 msgid "Remote Posting/IPN"
-msgstr ""
+msgstr "Remote Posting/IPN"
 
 #: admin/woocommerce-admin-debug.php:293
 #@ woocommerce
 msgid "fsockopen/Curl"
-msgstr ""
+msgstr "fsockopen/Curl"
 
 #: admin/woocommerce-admin-debug.php:296
 #@ woocommerce
@@ -10034,17 +10034,17 @@ msgstr ""
 #: admin/woocommerce-admin-debug.php:313
 #@ woocommerce
 msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error: "
-msgstr ""
+msgstr "wp_remote_post() mislukt. PayPal IPN werkt niet op uw server. Neem contact op met uw hosting provider."
 
 #: admin/woocommerce-admin-debug.php:320
 #@ woocommerce
 msgid "Tools"
-msgstr ""
+msgstr "Tools"
 
 #: admin/woocommerce-admin-debug.php:326
 #@ woocommerce
 msgid "Transients"
-msgstr ""
+msgstr "Transients"
 
 #: admin/woocommerce-admin-debug.php:329
 #@ woocommerce
@@ -10074,27 +10074,27 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:33
 #@ woocommerce
 msgid "WooCommerce Debug"
-msgstr ""
+msgstr "WooCommerce Debug"
 
 #: admin/woocommerce-admin-init.php:33
 #@ woocommerce
 msgid "WC Debug"
-msgstr ""
+msgstr "WooCommerce Debug"
 
 #: admin/woocommerce-admin-reports.php:334
 #@ woocommerce
 msgid "Discounts used"
-msgstr ""
+msgstr "Kortingen gebruikt"
 
 #: admin/woocommerce-admin-reports.php:340
 #@ woocommerce
 msgid "Total shipping costs"
-msgstr ""
+msgstr "Totale verzendkosten"
 
 #: admin/woocommerce-admin-settings.php:522
 #@ woocommerce
 msgid "Default product sorting"
-msgstr ""
+msgstr "Standaard product sortering"
 
 #: admin/woocommerce-admin-settings.php:523
 #@ woocommerce
