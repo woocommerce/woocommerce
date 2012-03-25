@@ -1544,7 +1544,7 @@ msgstr "Bereken het totaal gebaseerd op aantal producten, hoeveelheid korting en
 #: admin/woocommerce-admin-init.php:257
 #@ woocommerce
 msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
-msgstr ""
+msgstr "Bereken belasting per regel. De berekening is afhankelijk van het in het land geldende belasting tarief. Indien geen land is opgegeven worden de belasting van het thuisland gebruikt."
 
 #: admin/woocommerce-admin-init.php:258
 #@ woocommerce
@@ -2172,7 +2172,7 @@ msgstr "Importeer tarieven"
 #, php-format
 #@ woocommerce
 msgid "Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href=\"%s\">Download sample csv.</a>"
-msgstr ""
+msgstr "Definieer belasting tarieven per land en staat hieronder, of upload een CSV tabel voorzien van deze gegevens naar <code>wp-content/woocommerce_tax_rates.csv</code>. <a href=\"%s\">Download voorbeeld CSV.</a>"
 
 #: admin/woocommerce-admin-settings-forms.php:384
 #@ woocommerce
@@ -9819,7 +9819,7 @@ msgstr ""
 #: admin/woocommerce-admin-content.php:27
 #@ woocommerce
 msgid "Debugging Info &amp; Tools"
-msgstr ""
+msgstr "Debugging Info &amp; Tools"
 
 #: admin/woocommerce-admin-content.php:29
 #, php-format
@@ -9905,83 +9905,83 @@ msgstr "Forceer SSL"
 #: admin/woocommerce-admin-debug.php:123
 #@ woocommerce
 msgid "Shop base page"
-msgstr ""
+msgstr "Winkel basis pagina"
 
 #: admin/woocommerce-admin-debug.php:175
 #@ woocommerce
 msgid "Page not set"
-msgstr ""
+msgstr "Pagina niet ingesteld"
 
 #: admin/woocommerce-admin-debug.php:185
 #, php-format
 #@ woocommerce
 msgid "Page does not contain the shortcode: %s"
-msgstr ""
+msgstr "Pagina bevat niet de shortcode: %s"
 
 #: admin/woocommerce-admin-debug.php:204
 #@ woocommerce
 msgid "Server Environment"
-msgstr ""
+msgstr "Server Omgeving"
 
 #: admin/woocommerce-admin-debug.php:210
 #@ woocommerce
 msgid "PHP Version"
-msgstr ""
+msgstr "PHP Versie"
 
 #: admin/woocommerce-admin-debug.php:216
 #@ woocommerce
 msgid "Server Software"
-msgstr ""
+msgstr "Server Software"
 
 #: admin/woocommerce-admin-debug.php:222
 #@ woocommerce
 msgid "WP Max Upload Size"
-msgstr ""
+msgstr "WordPress Max Upload Size"
 
 #: admin/woocommerce-admin-debug.php:228
 #@ woocommerce
 msgid "Server upload_max_filesize"
-msgstr ""
+msgstr "Server upload_max_filesize"
 
 #: admin/woocommerce-admin-debug.php:235
 #@ woocommerce
 msgid "Server post_max_size"
-msgstr ""
+msgstr "Server post_max_size"
 
 #: admin/woocommerce-admin-debug.php:242
 #@ woocommerce
 msgid "WP Memory Limit"
-msgstr ""
+msgstr "WordPress Memory Limit"
 
 #: admin/woocommerce-admin-debug.php:248
 #@ woocommerce
 msgid "WP Debug Mode"
-msgstr ""
+msgstr "WordPress Debug Modus"
 
 #: admin/woocommerce-admin-debug.php:252
 #@ woocommerce
 msgid "WC Logging"
-msgstr ""
+msgstr "WooCommerce Logging"
 
 #: admin/woocommerce-admin-debug.php:255
 #@ woocommerce
 msgid "Log directory is writable."
-msgstr ""
+msgstr "Log map (<code>woocommerce/logs/</code>) is beschrijfbaar."
 
 #: admin/woocommerce-admin-debug.php:257
 #@ woocommerce
 msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
-msgstr ""
+msgstr "Log map (<code>woocommerce/logs/</code>) is NIET beschrijfbaar. Loggen vind niet plaats."
 
 #: admin/woocommerce-admin-debug.php:264
 #@ woocommerce
 msgid "PHP Sessions"
-msgstr ""
+msgstr "PHP Sessies"
 
 #: admin/woocommerce-admin-debug.php:270
 #@ woocommerce
 msgid "Session save path"
-msgstr ""
+msgstr "Sessies opslag pad"
 
 #: admin/woocommerce-admin-debug.php:275
 #, php-format
@@ -10024,12 +10024,12 @@ msgstr ""
 #: admin/woocommerce-admin-debug.php:301
 #@ woocommerce
 msgid "WP Remote Post Check"
-msgstr ""
+msgstr "WP Remote Post Check"
 
 #: admin/woocommerce-admin-debug.php:311
 #@ woocommerce
 msgid "wp_remote_post() was successful - PayPal IPN is working."
-msgstr ""
+msgstr "wp_remote_post() is gelukt. PayPal IPN werkt."
 
 #: admin/woocommerce-admin-debug.php:313
 #@ woocommerce
@@ -10049,7 +10049,7 @@ msgstr "Transients"
 #: admin/woocommerce-admin-debug.php:329
 #@ woocommerce
 msgid "Clear Transients"
-msgstr ""
+msgstr "Wis Transients"
 
 #: admin/woocommerce-admin-debug.php:330
 #@ woocommerce
@@ -10104,22 +10104,22 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:529
 #@ woocommerce
 msgid "Sort by title"
-msgstr ""
+msgstr "Sorteer op titel"
 
 #: admin/woocommerce-admin-settings.php:530
 #@ woocommerce
 msgid "Sort by date"
-msgstr ""
+msgstr "Sorteer op datum"
 
 #: admin/woocommerce-admin-settings.php:531
 #@ woocommerce
 msgid "Sort by price"
-msgstr ""
+msgstr "Sorteer op prijs"
 
 #: admin/woocommerce-admin-settings.php:537
 #@ woocommerce
 msgid "Show subcategories"
-msgstr ""
+msgstr "Toon subcategorieën"
 
 #: admin/woocommerce-admin-settings.php:580
 #@ woocommerce
@@ -10149,12 +10149,12 @@ msgstr ""
 #: classes/gateways/class-wc-paypal.php:129
 #@ woocommerce
 msgid "Submission method"
-msgstr ""
+msgstr "Submissie methode"
 
 #: classes/gateways/class-wc-paypal.php:131
 #@ woocommerce
 msgid "Use form submission method."
-msgstr ""
+msgstr "Gebruik formulier submissie methode."
 
 #: classes/gateways/class-wc-paypal.php:132
 #@ woocommerce
