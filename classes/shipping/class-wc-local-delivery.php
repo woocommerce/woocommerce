@@ -30,7 +30,9 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		$this->title		= $this->settings['title'];
 		$this->fee			= $this->settings['fee'];
 		$this->type			= $this->settings['type'];	
-		$this->codes		= $this->settings['codes'];
+		$this->codes		= $this->settings['codes'];	
+		$this->availability	= $this->settings['availability'];
+		$this->countries	= $this->settings['countries'];
 		
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 	}
@@ -88,6 +90,24 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma.', 'woocommerce' ), 
 				'default'		=> ''
 			),
+			'availability' => array(
+							'title' 		=> __( 'Method availability', 'woocommerce' ), 
+							'type' 			=> 'select', 
+							'default' 		=> 'all',
+							'class'			=> 'availability',
+							'options'		=> array(
+								'all' 		=> __('All allowed countries', 'woocommerce'),
+								'specific' 	=> __('Specific Countries', 'woocommerce')
+							)
+						),
+			'countries' => array(
+							'title' 		=> __( 'Specific Countries', 'woocommerce' ), 
+							'type' 			=> 'multiselect', 
+							'class'			=> 'chosen_select',
+							'css'			=> 'width: 450px;',
+							'default' 		=> '',
+							'options'		=> $woocommerce->countries->countries
+						)	
 		);
 	}
 
@@ -105,15 +125,33 @@ class WC_Local_Delivery extends WC_Shipping_Method {
     	
     	if ($this->enabled=="no") return false;
 		
+		// If post codes are listed, let's use them.
 		$codes = '';
-		foreach(explode(',',$this->codes) as $code) {
-			$codes[] = $this->clean($code);
+		if($this->codes != '') {
+			foreach(explode(',',$this->codes) as $code) {
+				$codes[] = $this->clean($code);
+			}
 		}
-							
+		
 		if (is_array($codes))
 			if (!in_array($this->clean($woocommerce->customer->get_shipping_postcode()), $codes))
 				return false;
+		
+		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatability.
+		$ship_to_countries = '';
+		if ($this->availability == 'specific') :
+			$ship_to_countries = $this->countries;
+		else :
+			if (get_option('woocommerce_allowed_countries')=='specific') :
+				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
+			endif;
+		endif; 
 
+		if (is_array($ship_to_countries))
+			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+				return false;
+		
+		// Yay! We passed!
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
     } 
     
