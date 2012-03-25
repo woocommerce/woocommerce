@@ -17,9 +17,24 @@ function woocommerce_admin_help_tab_content() {
 	
 	$screen->add_help_tab( array(
 	    'id'	=> 'woocommerce_overview_tab',
+	    'title'	=> __('Overview', 'woocommerce'),
+	    'content'	=> 
+	    
+	    	'<p>' . sprintf(__( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href="%s">read the documentation</a>. For further assistance you can use the <a href="%s">community forum</a> or if you have access, <a href="%s">the members forum</a>.', 'woocommerce' ), 'http://www.woothemes.com/woocommerce-docs/', 'http://www.woothemes.com/support-forum/?viewforum=150', 'http://www.woothemes.com/support-forum/') . '</p>' . 
+	    	
+	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the debugging page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
+	    	
+	    	'<p><a href="' . admin_url('tools.php?page=woocommerce_debug') . '" class="button">' . __( 'Debugging Info &amp; Tools', 'woocommerce' ) . '</a></p>' .
+	    	
+	    	'<p>' . sprintf(__( 'If you come across a bug, or wish to contribute to the project you can also <a href="%s">get involved on GitHub</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce') . '</p>'
+	    	
+	) );
+
+	$screen->add_help_tab( array(
+	    'id'	=> 'woocommerce_settings_tab',
 	    'title'	=> __('Settings', 'woocommerce'),
 	    'content'	=> 
-	    	'<p>' . __( 'Welcome to WooCommerce Admin. Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:', 'woocommerce' ) . '</p>' . 
+	    	'<p>' . __( 'Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:', 'woocommerce' ) . '</p>' . 
 	    	'<p><strong>' . __( 'General', 'woocommerce' ) . '</strong> - ' . __( 'General settings such as your shop base, currency, and script/styling options which affect features used in your store.', 'woocommerce' ) . '</p>' .
 	    	'<p><strong>' . __( 'Pages', 'woocommerce' ) . '</strong> - ' . __( 'This is where important store page are defined. You can also set up other pages (such as a Terms page) here.', 'woocommerce' ) . '</p>' .
 	    	'<p><strong>' . __( 'Catalog', 'woocommerce' ) . '</strong> - ' . __( 'Options for how things like price, images and weights appear in your product catalog.', 'woocommerce' ) . '</p>' .
