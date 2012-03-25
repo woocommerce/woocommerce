@@ -2201,7 +2201,7 @@ msgstr "Label"
 #: admin/woocommerce-admin-settings-forms.php:458
 #@ woocommerce
 msgid "Optionally, enter a label for this rate - this will appear in the totals table"
-msgstr ""
+msgstr "Optioneel, voer een label in voor dit tarief. Dit verschijnt in de totalen tabel"
 
 #: admin/woocommerce-admin-settings-forms.php:387
 #: admin/woocommerce-admin-settings-forms.php:431
@@ -2247,7 +2247,7 @@ msgstr "+ BTW-percentage"
 #: admin/woocommerce-admin-settings-forms.php:468
 #@ woocommerce
 msgid "All matching rates will be applied, and non-compound rates will be summed."
-msgstr ""
+msgstr "Alle matchende tarieven worden toegepast, tarieven worden bij elkaar opgeteld."
 
 #: admin/woocommerce-admin-settings-forms.php:397
 #: admin/woocommerce-admin-settings-forms.php:469
@@ -3471,7 +3471,7 @@ msgstr "ShareThis"
 #: admin/woocommerce-admin-settings.php:1050
 #@ woocommerce
 msgid "ShareThis offers a sharing widget which will allow customers to share links to products with their friends."
-msgstr ""
+msgstr "ShareThis geeft de mogelijkheid om een widget aan de product pagina toe te voegen welke de bezoeker de mogelijkheid geeft de producten met hun vrienden op sociale media te delen."
 
 #: admin/woocommerce-admin-settings.php:1053
 #@ woocommerce
@@ -3561,7 +3561,7 @@ msgstr "Betalingsgateways"
 #, php-format
 #@ woocommerce
 msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
-msgstr ""
+msgstr "Meer functionaliteit en betalings gateway opties zijn beschikbaar via <a href=\"%s\" target=\"_blank\">WC officiele extensions</a>."
 
 #: admin/woocommerce-admin-settings.php:1260
 #@ woocommerce
@@ -4448,7 +4448,7 @@ msgstr "Regel&nbsp;Subtotaal"
 #: admin/post-types/writepanels/writepanel-order_data.php:272
 #@ woocommerce
 msgid "Line cost and line tax before pre-tax discounts"
-msgstr ""
+msgstr "Regel kosten en belasting voor pre-belasting korting"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:274
 #@ woocommerce
@@ -4458,7 +4458,7 @@ msgstr "Regel&nbsp;Totaal"
 #: admin/post-types/writepanels/writepanel-order_data.php:274
 #@ woocommerce
 msgid "Line cost and line tax after pre-tax discounts"
-msgstr ""
+msgstr "Regel kosten en belasting na pre-belasting korting"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:352
 #@ woocommerce
@@ -4705,7 +4705,7 @@ msgstr "Toegang Openstellen"
 #: admin/post-types/writepanels/writepanel-order_downloads.php:176
 #@ woocommerce
 msgid "Could not grant access - the user may already have permission for this file."
-msgstr ""
+msgstr "Permissie toestaan mislukt. De gebruiker heeft reeds toegang tot dit bestand."
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:198
 #@ woocommerce
@@ -4813,7 +4813,7 @@ msgstr "Alle"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:304
 #@ woocommerce
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
-msgstr ""
+msgstr "Voereen SKU in voor deze variatie of laag deze leeg om het ouder product SKU te gebruiken."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:135
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:306
@@ -4825,7 +4825,7 @@ msgstr "Voorraad:"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:308
 #@ woocommerce
 msgid "Enter a weight for this variation or leave blank to use the parent product weight."
-msgstr ""
+msgstr "Voer een gewicht in voor deze variatie of laat deze leeg om het ouder product gewicht te gebruiken."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:140
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:311
@@ -8000,7 +8000,7 @@ msgstr "Internationale Bezorging"
 #: classes/shipping/class-wc-international-delivery.php:23
 #@ woocommerce
 msgid "International delivery based on flat rate shipping."
-msgstr ""
+msgstr "Internationale levering is gebaseerd op een vast bedrag als verzendkosten. "
 
 #: classes/shipping/class-wc-international-delivery.php:48
 #@ woocommerce
@@ -9035,7 +9035,7 @@ msgstr "Aantal producten om weer te geven:"
 #: widgets/widget-cart.php:24
 #@ woocommerce
 msgid "Display the user's Shopping Cart in the sidebar."
-msgstr ""
+msgstr "Toon de winkelwagen in de zijbalk."
 
 #: widgets/widget-cart.php:26
 #@ woocommerce
@@ -9126,7 +9126,7 @@ msgstr "OF"
 #: widgets/widget-login.php:22
 #@ woocommerce
 msgid "Display a login area and \"My Account\" links in the sidebar."
-msgstr ""
+msgstr "Toont een login veld en \"Mijn Account\" link in de zijbalk."
 
 #: widgets/widget-login.php:24
 #@ woocommerce
@@ -9987,19 +9987,19 @@ msgstr "Sessies opslag pad"
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> does not exist - contact your host to resolve the problem."
-msgstr ""
+msgstr "<code>%s</code> bestaat niet. Neem contact op met uw provider om het probleem te verhelpen."
 
 #: admin/woocommerce-admin-debug.php:277
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> is not writable - contact your host to resolve the problem."
-msgstr ""
+msgstr "<code>%s</code> is niet beschrijfbaar. Neem contact op met uw host om het probleem op te lossen."
 
 #: admin/woocommerce-admin-debug.php:279
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> is writable."
-msgstr ""
+msgstr "<code>%s</code> is beschrijfbaar."
 
 #: admin/woocommerce-admin-debug.php:287
 #@ woocommerce
@@ -10014,7 +10014,7 @@ msgstr "fsockopen/Curl"
 #: admin/woocommerce-admin-debug.php:296
 #@ woocommerce
 msgid "Your server has fsockopen or Curl enabled."
-msgstr ""
+msgstr "Uw server heeft fsockopen en/of Curl geactiveerd."
 
 #: admin/woocommerce-admin-debug.php:298
 #@ woocommerce
@@ -10054,17 +10054,17 @@ msgstr "Wis Transients"
 #: admin/woocommerce-admin-debug.php:330
 #@ woocommerce
 msgid "This tool will clear the product/shop transients cache."
-msgstr ""
+msgstr "Deze tool wist product en winkel transients."
 
 #: admin/woocommerce-admin-debug.php:335
 #@ woocommerce
 msgid "Capabilities"
-msgstr ""
+msgstr "Capaciteiten"
 
 #: admin/woocommerce-admin-debug.php:338
 #@ woocommerce
 msgid "Reset Capabilities"
-msgstr ""
+msgstr "Reset Capaciteiten"
 
 #: admin/woocommerce-admin-debug.php:339
 #@ woocommerce
@@ -10099,7 +10099,7 @@ msgstr "Standaard product sortering"
 #: admin/woocommerce-admin-settings.php:523
 #@ woocommerce
 msgid "This controls the default sort order of the catalog."
-msgstr ""
+msgstr "Deze instelling wordt gebruikt om de sorteer volgorde van de catalogus in te stellen."
 
 #: admin/woocommerce-admin-settings.php:529
 #@ woocommerce
@@ -10124,17 +10124,17 @@ msgstr "Toon subcategorieën"
 #: admin/woocommerce-admin-settings.php:580
 #@ woocommerce
 msgid "The following options affect the fields available on the edit product page."
-msgstr ""
+msgstr "De volgende opties van invloed op de velden die beschikbaar zijn op de pagina productpagina."
 
 #: admin/woocommerce-admin-settings.php:648
 #@ woocommerce
 msgid "The following options affect how prices are displayed on the frontend."
-msgstr ""
+msgstr "De volgende opties van invloed op de velden die beschikbaar zijn voor de klant."
 
 #: admin/woocommerce-admin-settings.php:701
 #@ woocommerce
 msgid "Trailing zeros"
-msgstr ""
+msgstr "Eind nullen"
 
 #: admin/woocommerce-admin-settings.php:702
 #@ woocommerce
@@ -10144,7 +10144,7 @@ msgstr ""
 #: admin/woocommerce-admin-settings.php:875
 #@ woocommerce
 msgid "Display taxes even when the amount is zero"
-msgstr ""
+msgstr "Toon belastingen ook wanneer deze 0 zijn"
 
 #: classes/gateways/class-wc-paypal.php:129
 #@ woocommerce
