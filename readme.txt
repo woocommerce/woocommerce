@@ -148,6 +148,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Control default catalog sort order from Catalog Settings
 * Feature - Option to use post instead of get to submit paypal standard - form also has target="_top" to work when in iframes
 * Feature - Local delivery postcode limiting
+* Feature - Visual editor for except (thanks Andrew Benbow - http://www.chromeorange.co.uk/)
+* Feature - Allow shortcodes in excerpts
 * Tweak - get order number function complete with filter
 * Tweak - View cart link in 'you already have this in your cart' message
 * Tweak - When viewing a product, give shop menu item a class
@@ -163,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Optimised price filter query (Thanks Lucas Stark)
 * Tweak - woocommerce_attribute_label filter
 * Tweak - When mix and max price are the same, don't show price filter
+* Fix - Search/filter compatibility with relevanssi
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload
 * Fix - User email check for coupons
