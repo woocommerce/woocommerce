@@ -21,7 +21,7 @@ class WC_Countries {
 	 */
 	function __construct() {
 	
-		$this->countries = array(
+		$this->countries = apply_filters('woocommerce_countries', array(
 			'AF' => __('Afghanistan', 'woocommerce'),
 			'AX' => __('Aland Islands', 'woocommerce'),
 			'AL' => __('Albania', 'woocommerce'),
@@ -267,9 +267,9 @@ class WC_Countries {
 			'YE' => __('Yemen', 'woocommerce'),
 			'ZM' => __('Zambia', 'woocommerce'),
 			'ZW' => __('Zimbabwe', 'woocommerce')
-		);
+		));
 					
-		$this->states = array(
+		$this->states = apply_filters('woocommerce_states', array(
 			'AU' => array(
 				'ACT' => __('Australian Capital Territory', 'woocommerce') ,
 				'NSW' => __('New South Wales', 'woocommerce') ,
@@ -408,7 +408,7 @@ class WC_Countries {
 				'AP' => __('Pacific', 'woocommerce') 
 			),
 			'VN' => array()
-		);
+		));
 	}
 
 	/** get base country */
