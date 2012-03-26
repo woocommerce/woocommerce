@@ -34,7 +34,17 @@
 	</tfoot>
 	<tbody>
 		<?php 
-			echo $order->email_order_items_table( (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing') ? true : false, true, ($order->status=='processing') ? true : false ); 
+			switch ( $order->status ) {
+				case "completed" :
+					echo $order->email_order_items_table( true, false, true );
+				break;
+				case "processing" :
+					echo $order->email_order_items_table( get_option('woocommerce_downloads_grant_access_after_payment')=='yes' ? true : false, true, true ); 
+				break;
+				default :
+					echo $order->email_order_items_table( false, true, false ); 
+				break;
+			}
 		?>
 	</tbody>
 </table>
