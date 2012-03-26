@@ -179,19 +179,25 @@ class WC_Checkout {
 		$woocommerce->customer->set_postcode( $this->posted['billing_postcode'] );
 		
 		// Shipping Information
-		if (!$skipped_shipping) :
+		if ( ! $skipped_shipping ) :
 			
 			// Update customer location to posted location so we can correctly check available shipping methods
-			$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
-			$woocommerce->customer->set_shipping_state( $this->posted['shipping_state'] );  
-			$woocommerce->customer->set_shipping_postcode( $this->posted['shipping_postcode'] ); 
+			if ( isset( $this->posted['shipping_country'] ) ) 
+				$woocommerce->customer->set_shipping_country( $this->posted['shipping_country'] );
+			if ( isset( $this->posted['shipping_state'] ) ) 
+				$woocommerce->customer->set_shipping_state( $this->posted['shipping_state'] );  
+			if ( isset( $this->posted['shipping_postcode'] ) ) 
+				$woocommerce->customer->set_shipping_postcode( $this->posted['shipping_postcode'] ); 
 			
 		else :
 		
 			// Update customer location to posted location so we can correctly check available shipping methods
-			$woocommerce->customer->set_shipping_country( $this->posted['billing_country'] );
-			$woocommerce->customer->set_shipping_state( $this->posted['billing_state'] );
-			$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
+			if ( isset( $this->posted['billing_country'] ) ) 
+				$woocommerce->customer->set_shipping_country( $this->posted['billing_country'] );
+			if ( isset( $this->posted['billing_state'] ) ) 
+				$woocommerce->customer->set_shipping_state( $this->posted['billing_state'] );
+			if ( isset( $this->posted['billing_postcode'] ) ) 
+				$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 			
 		endif;
 
