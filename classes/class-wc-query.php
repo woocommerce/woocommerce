@@ -19,6 +19,7 @@ class WC_Query {
 	/** constructor */
 	function __construct() {
 		add_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+		add_filter( 'the_posts', array( &$this, 'the_posts'), 11, 2 );
 		add_filter( 'wp', array( &$this, 'remove_product_query') );
 	}
 
@@ -26,15 +27,13 @@ class WC_Query {
 	 * Hook into pre_get_posts to do the main product query
 	 */
 	function pre_get_posts( $q ) {
-
 		global $woocommerce;
 
 		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
 	    if 	( 
-	    		!$q->is_main_query() || (
-	    			!$q->is_post_type_archive( 'product' ) 
-					&& !$q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) )
-				)
+	    		( ! $q->is_main_query() ) // Abort if this isn't the main query
+	    		|| 
+	    		( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
 	    	) 
 	    return;
 	    
@@ -45,6 +44,51 @@ class WC_Query {
 	    
 	    // And remove the pre_get_posts hook
 	    remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+	}
+
+	/**
+	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
+	 */
+	function the_posts( $posts, $query = false ) {
+		global $woocommerce;
+		
+	    if 	( 
+	    		( ! $query ) // Abort if theres no query
+	    		||
+	    		( empty( $this->post__in ) ) // Abort if we're not filtering posts
+	    		||
+	    		( ! empty( $query->wc_query ) ) // Abort if this query is already done
+	    		||
+	    		( empty( $query->query_vars["s"] ) ) // Abort if this isn't a search query
+	    		|| 
+	    		( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
+	    	) 
+	    return $posts;
+	    
+	    $filtered_posts = array();
+	    $queried_post_ids = array();
+	    
+	    foreach ( $posts as $post ) {
+	    	if ( in_array( $post->ID, $this->post__in ) ) {
+	    		$filtered_posts[] = $post;
+	    		$queried_post_ids[] = $post->ID;
+	    	}	
+	    }
+
+	    $query->posts = $filtered_posts;
+		$query->post_count = count( $filtered_posts );
+		
+		// Ensure filters are set
+		$this->unfiltered_product_ids = $queried_post_ids;
+		$this->filtered_product_ids = $queried_post_ids;
+
+		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
+			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
+		} else {
+			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
+		}
+
+	    return $filtered_posts;
 	}
 	
 	/**
@@ -73,6 +117,9 @@ class WC_Query {
 		$q->set( 'meta_query', $meta_query );
 	    $q->set( 'post__in', $post__in );
 	    $q->set( 'posts_per_page', ($q->get('posts_per_page')) ? $q->get('posts_per_page') : apply_filters('loop_shop_per_page', get_option('posts_per_page') ) );
+	    
+	    // Set a special variable
+	    $q->set( 'wc_query', true );
 	    
 	    // Store variables
 	    $this->post__in = $post__in;
@@ -128,14 +175,14 @@ class WC_Query {
 		
 		// Also store filtered posts ids...
 		if (sizeof($this->post__in)>0) :
-			$this->filtered_product_ids = array_intersect($this->unfiltered_product_ids, $this->post__in);
+			$this->filtered_product_ids = array_intersect( $this->unfiltered_product_ids, $this->post__in );
 		else :
 			$this->filtered_product_ids = $this->unfiltered_product_ids;
 		endif;
 		
 		// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
-		if (sizeof($this->layered_nav_post__in)>0) :
-			$this->layered_nav_product_ids = array_intersect($this->unfiltered_product_ids, $this->layered_nav_post__in);
+		if ( sizeof( $this->layered_nav_post__in ) > 0 ) :
+			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
 		else :
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
 		endif;

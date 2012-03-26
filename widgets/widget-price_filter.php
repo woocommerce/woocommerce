@@ -105,7 +105,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query;
 		
-		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return;
+		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return; // Not on product page - return
+		
+		if ( sizeof( $woocommerce->query->unfiltered_product_ids ) == 0 ) return; // None shown - return
 
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
@@ -130,7 +132,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$min = $max = 0;
 		$post_min = $post_max = '';
 		
-		if (sizeof($woocommerce->query->layered_nav_product_ids)==0) :
+		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) == 0 ) :
 
 			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0) 
 			FROM $wpdb->posts
