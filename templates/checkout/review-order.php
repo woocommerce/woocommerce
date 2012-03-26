@@ -35,6 +35,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			
 			<?php if ($woocommerce->cart->needs_shipping()) : ?>
 			
+			<?php do_action('woocommerce_review_order_before_shipping'); ?>
+			
 			<tr class="shipping">
 				<th colspan="2"><?php _e('Shipping', 'woocommerce'); ?></th>
 				<td>
@@ -96,6 +98,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				?></td>
 				
 			</tr>
+			
+			<?php do_action('woocommerce_review_order_after_shipping'); ?>
 
 			<?php endif; ?>
 			
