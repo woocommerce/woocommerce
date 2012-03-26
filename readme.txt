@@ -167,6 +167,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_attribute_label filter
 * Tweak - When mix and max price are the same, don't show price filter
 * Tweak - Hooks for countries and states
+* Tweak - Updated UK locale
+* Tweak - Locale settings change placeholder dynamically like the label
 * Fix - Search/filter compatibility with relevanssi
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload

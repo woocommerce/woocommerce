@@ -727,6 +727,10 @@ jQuery(document).ready(function($) {
 					
 					if ( thislocale[key]['label'] ) {
 						field.find('label').html( thislocale[key]['label'] );
+					}
+					
+					if ( thislocale[key]['placeholder'] ) {
+						field.find('input').attr( 'placeholder', thislocale[key]['placeholder'] );
 					} 
 					
 					field.find('label abbr').remove();
