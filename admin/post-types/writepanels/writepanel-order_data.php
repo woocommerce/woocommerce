@@ -65,6 +65,10 @@ function woocommerce_order_data_meta_box($post) {
 						endforeach;
 					?>
 				</select></p>
+				
+				<p class="form-field last"><label for="order_date"><?php _e('Order Date:', 'woocommerce') ?></label>
+					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date('Y-m-d', strtotime( $post->post_date ) ); ?>" /> @ <input type="text" class="hour" placeholder="<?php _e('h', 'woocommerce') ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date('H', strtotime( $post->post_date ) ); ?>" />:<input type="text" class="minute" placeholder="<?php _e('m', 'woocommerce') ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date('i', strtotime( $post->post_date ) ); ?>" />
+				</p>
 	
 				<p class="form-field form-field-wide"><label for="customer_user"><?php _e('Customer:', 'woocommerce') ?></label>
 				<select id="customer_user" name="customer_user" class="chosen_select">
@@ -140,7 +144,7 @@ function woocommerce_order_data_meta_box($post) {
 							
 							foreach ( $billing_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
 								$field_name = 'billing_'.$key;
-								echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
+								if ( $order->$field_name ) echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
 							endforeach;
 						
 						echo '</div>';
@@ -215,7 +219,7 @@ function woocommerce_order_data_meta_box($post) {
 							
 							foreach ( $shipping_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
 								$field_name = 'shipping_'.$key;
-								echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
+								if ( $order->$field_name ) echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
 							endforeach;
 						
 						echo '</div>';
@@ -665,6 +669,15 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
 			update_post_meta( $post_id, '_payment_method_title', stripslashes( $_POST['_payment_method'] ));
 		}
+	
+	// Update date
+		if ( empty( $_POST['order_date'] ) ) {
+			$date = current_time('timestamp');
+		} else {
+			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
+		}
+		
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s WHERE ID = %s", date('Y-m-d H:i:s', $date), $post_id ) );
 	
 	// Tax rows
 		$order_taxes = array();

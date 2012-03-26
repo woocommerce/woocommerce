@@ -221,7 +221,7 @@ function woocommerce_admin_scripts() {
     	wp_enqueue_script('farbtastic');
     	wp_enqueue_script( 'ajax-chosen' );
     	wp_enqueue_script( 'chosen' );
-    	wp_enqueue_script('jquery-ui-sortable');
+    	wp_enqueue_script( 'jquery-ui-sortable' );
 
     endif;
     

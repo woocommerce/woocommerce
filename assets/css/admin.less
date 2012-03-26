@@ -265,7 +265,7 @@ table.wc_status_table {
 		}
 		.form-field {
 			float: left;
-			width: 50%;
+			width: 48%;
 			padding: 0;
 			margin: 9px 0 0 0;
 			label {
@@ -283,10 +283,28 @@ table.wc_status_table {
 					display: none;
 				}
 			}
+			.chzn-container {
+				width: 100% !important;
+			}
+			.date-picker-field {
+				width: 9em;
+			}
+			.hour, .minute {
+				width: 2.5em;
+			}
+		}
+		.form-field.last {
+			float: right;
 		}
 		.form-field-wide {
 			width: 100%;
 			clear: both;
+			input, textarea {
+				width: 100%;
+			}
+			select {
+				width: 100%;
+			}
 		}
 	}
 	.order_data_right {
@@ -1936,6 +1954,9 @@ table.bar_chart {
 	li.search-field input {
 		width: 100% !important;
 	}
+}
+.form-field-wide .chzn-container {
+	width: 100% !important;
 }
 .chzn-container .chzn-drop {
   background: #fff;

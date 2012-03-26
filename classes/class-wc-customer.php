@@ -210,10 +210,12 @@ class WC_Customer {
 					$order = new WC_Order( $result->order_id );
 					
 					if ( $order->status!='completed' && $order->status!='processing' ) continue;
-						
+					
 					$product_post = get_post( $result->product_id );
+					
+					if ( ! $product_post ) continue;
 	
-					if ($product_post->post_type=='product_variation') :
+					if ( $product_post->post_type == 'product_variation' ) :
 						$_product = new WC_Product_Variation( $result->product_id );
 					else :
 						$_product = new WC_Product( $result->product_id );

@@ -555,6 +555,12 @@ jQuery( function($){
 		buttonImageOnly: true
 	});
 	
+	$( ".date-picker-field" ).datepicker({
+		dateFormat: "yy-mm-dd",
+		numberOfMonths: 1,
+		showButtonPanel: true,
+	});
+	
 	// META BOXES
 	
 		jQuery('.expand_all').click(function(){

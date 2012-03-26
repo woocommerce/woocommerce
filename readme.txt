@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Local delivery postcode limiting
 * Feature - Visual editor for except (thanks Andrew Benbow - http://www.chromeorange.co.uk/)
 * Feature - Allow shortcodes in excerpts
+* Feature - Update/set order dates
 * Tweak - get order number function complete with filter
 * Tweak - View cart link in 'you already have this in your cart' message
 * Tweak - When viewing a product, give shop menu item a class
