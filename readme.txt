@@ -148,6 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Control default catalog sort order from Catalog Settings
 * Feature - Option to use post instead of get to submit paypal standard - form also has target="_top" to work when in iframes
 * Feature - Local delivery postcode limiting
+* Tweak - get order number function complete with filter
 * Tweak - View cart link in 'you already have this in your cart' message
 * Tweak - When viewing a product, give shop menu item a class
 * Tweak - Layered nav dropdown code to filter displayed terms based on view

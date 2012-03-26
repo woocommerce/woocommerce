@@ -251,7 +251,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				if ($item['qty']) $item_names[] = $item['name'] . ' x ' . $item['qty'];
 			endforeach; endif;
 			
-			$paypal_args['item_name_1'] 	= sprintf(__('Order #%s' , 'woocommerce'), $order->id) . " - " . implode(', ', $item_names);
+			$paypal_args['item_name_1'] 	= sprintf( __('Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
 			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() + $order->get_order_discount(), 2, '.', '');
 			
@@ -549,11 +549,11 @@ class WC_Paypal extends WC_Payment_Gateway {
 		            	
 						$message = woocommerce_mail_template( 
 							__('Order refunded/reversed', 'woocommerce'),
-							sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->id, $posted['reason_code'] )
+							sprintf(__('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
 						);
 					
 						// Send the mail
-						woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woocommerce'), $order->id), $message );
+						woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
 					
 					}
 	            
@@ -562,15 +562,15 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case "chargeback" :
 	            	
 	            	// Mark order as refunded
-	            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
+	            	$order->update_status('refunded', sprintf( __('Payment %s via IPN.', 'woocommerce'), strtolower( $posted['payment_status'] ) ) );
 	            	
 					$message = woocommerce_mail_template( 
 						__('Order refunded/reversed', 'woocommerce'),
-						sprintf(__('Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->id, $posted['reason_code'] )
+						sprintf(__('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
 					);
 				
 					// Send the mail
-					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf(__('Payment for order #%s refunded/reversed', 'woocommerce'), $order->id), $message );
+					woocommerce_mail( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
 	            	
 	            break;
 	            default:

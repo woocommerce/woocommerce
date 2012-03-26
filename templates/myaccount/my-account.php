@@ -52,7 +52,7 @@ if ($customer_orders) :
 				$order = new WC_Order();
 				$order->populate($customer_order);
 				?><tr class="order">
-					<td class="order-number"><?php echo $order->id; ?></td>
+					<td class="order-number"><?php echo $order->get_order_number(); ?></td>
 					<td class="order-date"><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
 					<td class="order-shipto"><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
 					<td class="order-total"><?php echo woocommerce_price($order->order_total); ?></td>

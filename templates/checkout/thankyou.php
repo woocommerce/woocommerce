@@ -34,7 +34,7 @@ global $woocommerce;
 		<ul class="order_details">
 			<li class="order">
 				<?php _e('Order:', 'woocommerce'); ?>
-				<strong># <?php echo $order->id; ?></strong>
+				<strong><?php echo $order->get_order_number(); ?></strong>
 			</li>
 			<li class="date">
 				<?php _e('Date:', 'woocommerce'); ?>

@@ -144,6 +144,19 @@ class WC_Order {
 		return false;
 	}
 	
+	
+	/**
+	 * get_order_number function.
+	 *
+	 * Gets the order number for display (by default, order ID)
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function get_order_number() {
+		return apply_filters( 'woocommerce_order_number', '#' . $this->id, $this );
+	}
+	
 	function get_formatted_billing_address() {
 		if (!$this->formatted_billing_address) :
 			global $woocommerce;

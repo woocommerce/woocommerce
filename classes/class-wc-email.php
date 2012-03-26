@@ -230,7 +230,7 @@ class WC_Email {
 		
 		$order = $pay_for_order;
 		
-		$email_heading = sprintf(__('Invoice for Order #%s', 'woocommerce'), $order->id);
+		$email_heading = sprintf( __('Invoice for Order %s', 'woocommerce'), $order->get_order_number() );
 		
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 		

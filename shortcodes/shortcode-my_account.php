@@ -260,7 +260,7 @@ function woocommerce_view_order() {
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 	
 	echo '<p>'
-	. sprintf( __('Order <mark>#%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->id, date_i18n(get_option('date_format'), strtotime($order->order_date)) )
+	. sprintf( __('Order <mark>%s</mark> made on <mark>%s</mark>', 'woocommerce'), $order->get_order_number(), date_i18n(get_option('date_format'), strtotime($order->order_date)) )
 	. sprintf( __('. Order status: <mark>%s</mark>', 'woocommerce'), __($status->name, 'woocommerce') )
 	. '.</p>';
 	
