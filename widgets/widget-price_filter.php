@@ -152,6 +152,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		endif;
 		
+		if ( $min == $max ) return;
+		
 		if (isset($_SESSION['min_price'])) $post_min = $_SESSION['min_price'];
 		if (isset($_SESSION['max_price'])) $post_max = $_SESSION['max_price'];
 		

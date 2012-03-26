@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_update_variation_values trigger in JS
 * Tweak - Optimised price filter query (Thanks Lucas Stark)
 * Tweak - woocommerce_attribute_label filter
+* Tweak - When mix and max price are the same, don't show price filter
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload
 * Fix - User email check for coupons
