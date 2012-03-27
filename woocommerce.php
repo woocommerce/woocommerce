@@ -355,6 +355,7 @@ class Woocommerce {
 	 * When the_post is called, get product data too
 	 **/
 	function setup_product_data( $post ) {
+		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
 		$GLOBALS['product'] = new WC_Product( $post->ID );
