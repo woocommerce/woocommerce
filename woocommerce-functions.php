@@ -1244,8 +1244,8 @@ function woocommerce_products_rss_feed() {
 function woocommerce_add_comment_rating($comment_id) {
 	if ( isset($_POST['rating']) ) :
 		global $post;
-		if (!$_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0) $_POST['rating'] = 5; 
-		add_comment_meta( $comment_id, 'rating', esc_attr($_POST['rating']), true );
+		if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) return;
+		add_comment_meta( $comment_id, 'rating', (int) esc_attr($_POST['rating']), true );
 		delete_transient( 'wc_average_rating_' . esc_attr($post->ID) );
 	endif;
 }
@@ -1254,10 +1254,10 @@ function woocommerce_check_comment_rating($comment_data) {
 	global $woocommerce;
 	
 	// If posting a comment (not trackback etc) and not logged in
-	if ( isset($_POST['rating']) && !$woocommerce->verify_nonce('comment_rating') )
+	if ( isset( $_POST['rating'] ) && ! $woocommerce->verify_nonce('comment_rating') )
 		wp_die( __('You have taken too long. Please go back and refresh the page.', 'woocommerce') );
 		
-	elseif ( isset($_POST['rating']) && empty($_POST['rating']) && $comment_data['comment_type']== '' ) {
+	elseif ( isset( $_POST['rating'] ) && empty( $_POST['rating'] ) && $comment_data['comment_type'] == '' && get_option('woocommerce_review_rating_required') == 'yes' ) {
 		wp_die( __('Please rate the product.', 'woocommerce') );
 		exit;
 	}

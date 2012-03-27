@@ -958,6 +958,7 @@ class Woocommerce {
 			'select_state_text' 			=> __('Select an option&hellip;', 'woocommerce'),
 			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
 			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'review_rating_required'		=> get_option('woocommerce_review_rating_required'),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),
 			'get_variation_nonce' 			=> wp_create_nonce("get-variation"),

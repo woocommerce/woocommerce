@@ -644,7 +644,30 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'product_data_options' ),
+
+	array(	'name' => __( 'Product Reviews', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect product reviews (comments).', 'woocommerce'), 'id' => 'product_review_options' ),
 	
+	array(  
+		'name' => __( 'Ratings', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the star rating field on the review form', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_review_rating',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start',
+		'show_if_checked' => 'option',
+	),
+
+	array(  
+		'desc' 		=> __( 'Ratings are required to leave a review', 'woocommerce' ),
+		'id' 		=> 'woocommerce_review_rating_required',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end',
+		'show_if_checked' => 'yes',
+	),	
+	
+	array( 'type' => 'sectionend', 'id' => 'product_review_options' ),
+
 	array(	'name' => __( 'Pricing Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect how prices are displayed on the frontend.', 'woocommerce'), 'id' => 'pricing_options' ),
 	
 	array(  

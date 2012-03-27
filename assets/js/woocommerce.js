@@ -128,7 +128,7 @@ jQuery(document).ready(function($) {
 	$('#review_form #submit').live('click', function(){
 		var rating = $('#rating').val();
 		
-		if (!rating) {
+		if ( $('#rating').size() > 0 && !rating && woocommerce_params.review_rating_required == 'yes' ) {
 			alert(woocommerce_params.required_rating_text);
 			return false;
 		}
