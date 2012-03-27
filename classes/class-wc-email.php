@@ -320,7 +320,7 @@ class WC_Email {
 		
 		$sku = ($product->sku) ? '(' . $product->sku . ') ' : '';
 
-		if ($product->variation_id) 
+		if ( ! empty( $product->variation_id ) ) 
 			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
 		else 
 			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . ' ' . $sku;
@@ -348,7 +348,7 @@ class WC_Email {
 
 		$sku = ($product->sku) ? '(' . $product->sku . ') ' : '';
 
-		if ($product->variation_id) 
+		if ( ! empty( $product->variation_id ) ) 
 			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
 		else 
 			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . ' ' . $sku;
@@ -389,7 +389,7 @@ class WC_Email {
 		
 		$sku = ($product->sku) ? ' (' . $product->sku . ')' : '';
 
-		if ($product->variation_id) 
+		if ( ! empty( $product->variation_id ) ) 
 			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . $sku;
 		else 
 			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . $sku;
