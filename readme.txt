@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Locale settings change placeholder dynamically like the label
 * Tweak - PayPal standard - separate option for address_override
 * Fix - Search/filter compatibility with relevanssi
+* Fix - Ecommerce tracking enable/disable option
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload
 * Fix - User email check for coupons

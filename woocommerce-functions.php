@@ -1039,22 +1039,21 @@ function woocommerce_download_product() {
 function woocommerce_google_tracking() {
 	global $woocommerce;
 	
-	if (!get_option('woocommerce_ga_standard_tracking_enabled')) return;
-	if (is_admin()) return; // Don't track admin
+	if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_standard_tracking_enabled') == "no" ) return;
 	
 	$tracking_id = get_option('woocommerce_ga_id');
 	
-	if (!$tracking_id) return;
+	if ( ! $tracking_id ) return;
 	
-	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
-	if (is_user_logged_in()) :
+	$loggedin 	= ( is_user_logged_in() ) ? 'yes' : 'no';
+	if ( is_user_logged_in() ) {
 		$user_id 		= get_current_user_id();
 		$current_user 	= get_user_by('id', $user_id);
 		$username 		= $current_user->user_login;
-	else :
+	} else {
 		$user_id 		= '';
 		$username 		= __('Guest', 'woocommerce');
-	endif;
+	}
 	?>
 	<script type="text/javascript">
 	
@@ -1083,12 +1082,11 @@ function woocommerce_google_tracking() {
 function woocommerce_ecommerce_tracking( $order_id ) {
 	global $woocommerce;
 	
-	if (!get_option('woocommerce_ga_ecommerce_tracking_enabled')) return;
-	if (current_user_can('manage_options')) return; // Don't track admin
+	if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_ecommerce_tracking_enabled') == "no" ) return;
 	
 	$tracking_id = get_option('woocommerce_ga_id');
 	
-	if (!$tracking_id) return;
+	if ( ! $tracking_id ) return;
 	
 	// Doing eCommerce tracking so unhook standard tracking from the footer
 	remove_action('wp_footer', 'woocommerce_google_tracking');
@@ -1097,14 +1095,14 @@ function woocommerce_ecommerce_tracking( $order_id ) {
 	$order = new WC_Order($order_id);
 	
 	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
-	if (is_user_logged_in()) :
+	if (is_user_logged_in()) {
 		$user_id 		= get_current_user_id();
 		$current_user 	= get_user_by('id', $user_id);
 		$username 		= $current_user->user_login;
-	else :
+	} else {
 		$user_id 		= '';
 		$username 		= __('Guest', 'woocommerce');
-	endif;
+	}
 	?>
 	<script type="text/javascript">
 		var _gaq = _gaq || [];
