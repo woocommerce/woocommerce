@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Hooks for countries and states
 * Tweak - Updated UK locale
 * Tweak - Locale settings change placeholder dynamically like the label
+* Tweak - PayPal standard - separate option for address_override
 * Fix - Search/filter compatibility with relevanssi
 * Fix - After tax coupons for categories
 * Fix - Multiple variation image upload

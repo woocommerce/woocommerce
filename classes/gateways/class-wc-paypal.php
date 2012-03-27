@@ -29,12 +29,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 		
 		// Define user set variables
-		$this->title 		= $this->settings['title'];
-		$this->description 	= $this->settings['description'];
-		$this->email 		= $this->settings['email'];
-		$this->testmode		= $this->settings['testmode'];		
-		$this->send_shipping= $this->settings['send_shipping'];
-		$this->debug		= $this->settings['debug'];	
+		$this->title 			= $this->settings['title'];
+		$this->description 		= $this->settings['description'];
+		$this->email 			= $this->settings['email'];
+		$this->testmode			= $this->settings['testmode'];		
+		$this->send_shipping	= $this->settings['send_shipping'];
+		$this->address_override	= isset( $this->settings['address_override'] ) ? $this->settings['address_override'] : 'no';
+		$this->debug			= $this->settings['debug'];	
 		$this->form_submission_method = ( isset( $this->settings['form_submission_method'] ) && $this->settings['form_submission_method'] == 'yes' ) ? true : false;
 		
 		// Logs
@@ -121,7 +122,14 @@ class WC_Paypal extends WC_Payment_Gateway {
 			'send_shipping' => array(
 							'title' => __( 'Shipping details', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Send shipping details to PayPal.', 'woocommerce' ), 
+							'label' => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ), 
+							'description' => '',
+							'default' => 'no'
+						), 
+			'address_override' => array(
+							'title' => __( 'address_override', 'woocommerce' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Enable address_override - the address sent to PayPal cannot be changed.', 'woocommerce' ), 
 							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 							'default' => 'no'
 						), 
@@ -212,7 +220,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'zip'					=> $order->billing_postcode,
 				'country'				=> $order->billing_country,
 				'email'					=> $order->billing_email,
-	
+				
 				// Payment Info
 				'invoice' 				=> $order->order_key
 			), 
@@ -220,9 +228,10 @@ class WC_Paypal extends WC_Payment_Gateway {
 		);
 		
 		// Shipping
-		if ($this->send_shipping=='yes') :
+		if ( $this->send_shipping=='yes' ) {
+			$paypal_args['address_override'] = ( $this->address_override == 'yes' ) ? 1 : 0;
+			
 			$paypal_args['no_shipping'] = 0;
-			$paypal_args['address_override'] = 1;
 			
 			// If we are sending shipping, send shipping address instead of billing
 			$paypal_args['first_name']		= $order->shipping_first_name;
@@ -234,9 +243,9 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['state']			= $order->shipping_state;
 			$paypal_args['country']			= $order->shipping_country;
 			$paypal_args['zip']				= $order->shipping_postcode;
-		else :
+		} else {
 			$paypal_args['no_shipping'] = 1;
-		endif;
+		}
 		
 		// If prices include tax or have order discounts, send the whole order
 		if ( get_option('woocommerce_prices_include_tax')=='yes' || $order->get_order_discount() > 0 ) :
