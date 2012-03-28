@@ -124,12 +124,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'type' => 'checkbox', 
 							'label' => __( 'Send shipping details to PayPal instead of billing.', 'woocommerce' ), 
 							'description' => '',
+							'description' => __( 'PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing.', 'woocommerce' ),
 							'default' => 'no'
 						), 
 			'address_override' => array(
-							'title' => __( 'address_override', 'woocommerce' ), 
+							'title' => __( 'Address override', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable address_override - the address sent to PayPal cannot be changed.', 'woocommerce' ), 
+							'label' => __( 'Enable "address_override" to prevent address information from being changed.', 'woocommerce' ), 
 							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 							'default' => 'no'
 						), 
@@ -144,13 +145,15 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'title' => __( 'PayPal sandbox', 'woocommerce' ), 
 							'type' => 'checkbox', 
 							'label' => __( 'Enable PayPal sandbox', 'woocommerce' ), 
-							'default' => 'yes'
+							'default' => 'yes',
+							'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a developer account <a href="%s">here</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 						),
 			'debug' => array(
-							'title' => __( 'Debug', 'woocommerce' ), 
+							'title' => __( 'Debug Log', 'woocommerce' ), 
 							'type' => 'checkbox', 
-							'label' => __( 'Enable logging (<code>woocommerce/logs/paypal.txt</code>)', 'woocommerce' ), 
-							'default' => 'no'
+							'label' => __( 'Enable logging', 'woocommerce' ), 
+							'default' => 'no',
+							'description' => __( 'Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal.txt</code>' ),
 						)
 			);
     
