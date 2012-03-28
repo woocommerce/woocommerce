@@ -481,25 +481,34 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<br class="clear" />
 			</div>
 			
+			<?php if ( get_option('woocommerce_enable_weight') == "yes" || get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
 			<div class="dimension_fields">
-				<label>  
-				    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
-				    <span class="input-text-wrap">  
-						<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
-					</span> 
-				</label>
-				<br class="clear" />
-				<div class="inline-edit-group dimensions">
-					<div>
-					    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
+			
+				<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
+					<label>  
+					    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
 					    <span class="input-text-wrap">  
-							<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
-							<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
-							<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
-						</span>  
-					</div> 
-				</div>
+							<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
+						</span> 
+					</label>
+					<br class="clear" />
+				<?php endif; ?>
+				
+				<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
+					<div class="inline-edit-group dimensions">
+						<div>
+						    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
+						    <span class="input-text-wrap">  
+								<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
+								<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
+								<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+							</span>  
+						</div> 
+					</div>
+				<?php endif; ?>
+				
 			</div>
+			<?php endif; ?>
 			
 			<label class="alignleft">  
 			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>  
@@ -690,50 +699,57 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Sale price', 'woocommerce'); ?>" value="">
 				</label>
 			</div>
-			<div class="inline-edit-group">  
-				<label class="alignleft">  
-				    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
-				    <span class="input-text-wrap">  
-				    	<select class="change_weight change_to" name="change_weight">
-						<?php
-							$options = array(
-								'' 	=> __('— No Change —', 'woocommerce'),
-								'1' => __('Change to:', 'woocommerce')
-							);
-							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
-							}
-						?>
-						</select> 
-					</span> 
-				</label>
-				<label class="alignright">
-					<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
-				</label>
-			</div>
-			<div class="inline-edit-group dimensions">
-				<label class="alignleft">  
-				    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
-				    <span class="input-text-wrap">  
-				    	<select class="change_dimensions change_to" name="change_dimensions">
-						<?php
-							$options = array(
-								'' 	=> __('— No Change —', 'woocommerce'),
-								'1' => __('Change to:', 'woocommerce')
-							);
-							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
-							}
-						?>
-						</select> 
-					</span>  
-				</label>
-				<div class="alignright">
-					<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+			
+			<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
+				<div class="inline-edit-group">  
+					<label class="alignleft">  
+					    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>  
+					    <span class="input-text-wrap">  
+					    	<select class="change_weight change_to" name="change_weight">
+							<?php
+								$options = array(
+									'' 	=> __('— No Change —', 'woocommerce'),
+									'1' => __('Change to:', 'woocommerce')
+								);
+								foreach ($options as $key => $value) {
+									echo '<option value="'.$key.'">'. $value .'</option>';
+								}
+							?>
+							</select> 
+						</span> 
+					</label>
+					<label class="alignright">
+						<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
+					</label>
 				</div>
-			</div>
+			<?php endif; ?>
+			
+			<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
+				<div class="inline-edit-group dimensions">
+					<label class="alignleft">  
+					    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>  
+					    <span class="input-text-wrap">  
+					    	<select class="change_dimensions change_to" name="change_dimensions">
+							<?php
+								$options = array(
+									'' 	=> __('— No Change —', 'woocommerce'),
+									'1' => __('Change to:', 'woocommerce')
+								);
+								foreach ($options as $key => $value) {
+									echo '<option value="'.$key.'">'. $value .'</option>';
+								}
+							?>
+							</select> 
+						</span>  
+					</label>
+					<div class="alignright">
+						<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
+						<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
+						<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+					</div>
+				</div>
+			<?php endif; ?>
+			
 			<label>  
 			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>  
 			    <span class="input-text-wrap"> 
