@@ -232,6 +232,45 @@ class WC_Cart {
 		}
 		
 		/**
+		 * Get cart items quantities - merged so we can do accurate stock checks
+		 * 
+		 * @access public
+		 * @return array
+		 */
+		function get_cart_item_quantities() {
+			$quantities = array();
+			
+			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			
+				if ( $values['data']->managing_stock() ) {
+					
+					if ( $values['variation_id'] > 0 ) {
+						
+						if ( $values['data']->variation_has_stock ) {
+							
+							// Variation has stock levels defined so its handled individually
+							$quantities[ $values['variation_id'] ] = isset( $quantities[ $values['variation_id'] ] ) ? $quantities[ $values['variation_id'] ] + $values['quantity'] : $values['quantity'];
+							
+						} else {
+						
+							// Variation has no stock levels defined so use parents
+							$quantities[ $values['product_id'] ] = isset( $quantities[ $values['product_id'] ] ) ? $quantities[ $values['product_id'] ] + $values['quantity'] : $values['quantity'];
+							
+						}
+						
+					} else {
+					
+						$quantities[ $values['product_id'] ] = isset( $quantities[ $values['product_id'] ] ) ? $quantities[ $values['product_id'] ] + $values['quantity'] : $values['quantity'];
+						
+					}
+
+				}
+				
+			}			
+			return $quantities;
+		}
+		
+		/**
 		 * Check for user coupons (now we have billing email)
 		 * 
 		 * @access public
@@ -275,7 +314,7 @@ class WC_Cart {
 		function check_cart_item_stock() {
 			$error = new WP_Error();
 			
-			$product_qty_in_cart = array();
+			$product_qty_in_cart = $this->get_cart_item_quantities();
 			
 			// First stock check loop
 			foreach ( $this->get_cart() as $cart_item_key => $values ) {
@@ -296,38 +335,8 @@ class WC_Cart {
 					}
 					
 					/**
-					 * Put the item in the array to merge stock levels for items on multiple rows
+					 * Next check entire cart quantities
 					 */
-					if ($values['variation_id']>0) {
-						if ($_product->variation_has_stock) {
-							// Variation has stock levels defined so its handled individually
-							$product_qty_in_cart[$values['variation_id']] = (isset($product_qty_in_cart[$values['variation_id']])) ? $product_qty_in_cart[$values['variation_id']] + $values['quantity'] : $values['quantity'];
-						} else {
-							// Variation has no stock levels defined so use parents
-							$product_qty_in_cart[$values['product_id']] = (isset($product_qty_in_cart[$values['product_id']])) ? $product_qty_in_cart[$values['product_id']] + $values['quantity'] : $values['quantity'];
-						}
-					} else {
-						$product_qty_in_cart[$values['product_id']] = (isset($product_qty_in_cart[$values['product_id']])) ? $product_qty_in_cart[$values['product_id']] + $values['quantity'] : $values['quantity'];
-					}
-				
-				/**
-				 * Check stock based on stock-status
-				 */
-				} else {
-					if ( ! $_product->is_in_stock() ) {
-						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title() ) );
-						return $error;
-					}
-				}
-			}
-			
-			// This time check merged rows
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
-				
-				$_product = $values['data'];
-
-				if ( $_product->managing_stock() ) {
-				
 					if ( $values['variation_id'] && $_product->variation_has_stock && isset( $product_qty_in_cart[$values['variation_id']] ) ) {
 						
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[$values['variation_id']] ) ) {
@@ -344,8 +353,15 @@ class WC_Cart {
 						
 					}
 				
+				/**
+				 * Check stock based on stock-status
+				 */
+				} else {
+					if ( ! $_product->is_in_stock() ) {
+						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title() ) );
+						return $error;
+					}
 				}
-				
 			}
 
 			return true;
@@ -627,19 +643,37 @@ class WC_Cart {
 					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
 					return false;
 				}
+			}
+			
+			// Stock check - this time accounting for whats already in-cart
+			$product_qty_in_cart = $this->get_cart_item_quantities();
+			
+			if ( $product_data->managing_stock() ) {
+				
+				// Variations
+				if ( $variation_id && $product_data->variation_has_stock ) {
+						
+					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
+						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
+						return false;
+					}
+				
+				// Products
+				} else {
+					
+					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
+						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
+						return false;
+					}
+					
+				}
+				
 			}			
-			if ($cart_item_key) {
+			
+			// If cart_item_key is set, the item is already in the cart
+			if ( $cart_item_key ) {
 	
 				$quantity = $quantity + $this->cart_contents[$cart_item_key]['quantity'];
-				
-				// Stock check - this time accounting for whats already in-cart
-				if ( ! $product_data->has_enough_stock( $quantity ) ) {
-					$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock and you already have %s in your cart.', 'woocommerce'), $product_data->get_stock_quantity(), $this->cart_contents[$cart_item_key]['quantity'] ));
-					return false; 
-				} elseif ( ! $product_data->is_in_stock() ) {
-					$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
-					return false;
-				}
 	
 				$this->set_quantity( $cart_item_key, $quantity );
 	

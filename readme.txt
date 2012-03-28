@@ -148,11 +148,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Control default catalog sort order from Catalog Settings
 * Feature - Option to use post instead of get to submit paypal standard - form also has target="_top" to work when in iframes
 * Feature - Local delivery postcode limiting
-* Feature - Visual editor for except (thanks Andrew Benbow - http://www.chromeorange.co.uk/)
+* Feature - Visual editor for excerpt (thanks Andrew Benbow - http://www.chromeorange.co.uk/)
 * Feature - Allow shortcodes in excerpts
 * Feature - Update/set order dates
 * Feature - 'Invoice' for completed/pending emails re-sends download links etc
 * Feature - Option to enable/disable review star rating
+* Tweak - Improved stock check upon add to cart
 * Tweak - get order number function complete with filter
 * Tweak - View cart link in 'you already have this in your cart' message
 * Tweak - When viewing a product, give shop menu item a class
@@ -167,7 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_update_variation_values trigger in JS
 * Tweak - Optimised price filter query (Thanks Lucas Stark)
 * Tweak - woocommerce_attribute_label filter
-* Tweak - When mix and max price are the same, don't show price filter
+* Tweak - When min and max price are the same, don't show price filter
 * Tweak - Hooks for countries and states
 * Tweak - Updated UK locale
 * Tweak - Locale settings change placeholder dynamically like the label
