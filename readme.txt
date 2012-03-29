@@ -143,7 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.3 =
+= 1.5.3 - 29/03/2012 =
 * Feature - Debug/status page with some handy functions to resolve common issues
 * Feature - Control default catalog sort order from Catalog Settings
 * Feature - Option to use post instead of get to submit paypal standard - form also has target="_top" to work when in iframes
