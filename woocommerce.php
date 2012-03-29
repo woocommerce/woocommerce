@@ -960,14 +960,14 @@ class Woocommerce {
 			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
 			'review_rating_required'		=> get_option('woocommerce_review_rating_required'),
 			'plugin_url' 					=> $this->plugin_url(),
-			'ajax_url' 						=> (!is_ssl()) ? str_replace('https', 'http', admin_url('admin-ajax.php')) : admin_url('admin-ajax.php'),
+			'ajax_url' 						=> $this->ajax_url(),
 			'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
 			'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
 			'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
 			'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
 			'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
 			'option_limit_download_qty' 	=> get_option('woocommerce_limit_downloadable_product_qty'),
-			'checkout_url'					=> admin_url('admin-ajax.php?action=woocommerce-checkout'),
+			'checkout_url'					=> add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
 			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart'),
 			'is_checkout'					=> ( is_page(woocommerce_get_page_id('checkout')) ) ? 1 : 0,
 			'is_pay_page'					=> ( is_page(woocommerce_get_page_id('pay')) ) ? 1 : 0,
@@ -1044,7 +1044,18 @@ class Woocommerce {
 		if ( $this->plugin_path ) return $this->plugin_path;
 		
 		return $this->plugin_path = plugin_dir_path( __FILE__ );
-	 }
+	}
+	 
+	/**
+	 * Domain-mapping safe ajax url
+	 */ 
+	function ajax_url() { 
+		$url = ( is_admin() ) ? admin_url( 'admin-ajax.php' ) : home_url( 'wp-admin/admin-ajax.php' );
+		
+		$url = ( is_ssl() ) ? $url : str_replace( 'https', 'http', $url );
+	
+		return $url; 
+	} 
 	 
 	/**
 	 * Return the URL with https if SSL is on
