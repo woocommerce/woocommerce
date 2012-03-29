@@ -1047,7 +1047,7 @@ class Woocommerce {
 	}
 	 
 	/**
-	 * Domain-mapping safe ajax url
+	 * Ajax URL
 	 */ 
 	function ajax_url() { 
 		$url = admin_url( 'admin-ajax.php' );
