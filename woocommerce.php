@@ -1050,7 +1050,7 @@ class Woocommerce {
 	 * Domain-mapping safe ajax url
 	 */ 
 	function ajax_url() { 
-		$url = ( is_admin() ) ? admin_url( 'admin-ajax.php' ) : home_url( 'wp-admin/admin-ajax.php' );
+		$url = admin_url( 'admin-ajax.php' );
 		
 		$url = ( is_ssl() ) ? $url : str_replace( 'https', 'http', $url );
 	

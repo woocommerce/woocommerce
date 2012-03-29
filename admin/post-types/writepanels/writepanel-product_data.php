@@ -510,6 +510,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 
 	$woocommerce_errors = array();
 	
+	// Add any default post meta
+	add_post_meta( $post_id, 'total_sales', '0', true );
+	
 	// Get types
 	$product_type = sanitize_title( stripslashes( $_POST['product-type'] ) );
 	$is_downloadable = (isset($_POST['_downloadable'])) ? 'yes' : 'no';

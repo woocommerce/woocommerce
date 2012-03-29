@@ -452,7 +452,7 @@ function woocommerce_exclude_image_from_product_page_field_save( $post, $attachm
 }
 
 function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
-	add_post_meta( $post_id, '_woocommerce_exclude_image', 0);
+	add_post_meta( $post_id, '_woocommerce_exclude_image', 0, true );
 }
 
 /**

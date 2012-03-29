@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Locale settings change placeholder dynamically like the label
 * Tweak - PayPal standard - separate option for address_override
 * Tweak - Only show weight/dimensions in bulk/quick edit when enabled
+* Tweak - Add total sales meta to products even if unsold
 * Fix - Search/filter compatibility with relevanssi
 * Fix - Ecommerce tracking enable/disable option
 * Fix - After tax coupons for categories
