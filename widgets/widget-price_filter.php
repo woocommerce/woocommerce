@@ -111,9 +111,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
-		
-		echo $before_widget . $before_title . $title . $after_title;
-		
+				
 		// Remember current filters/search
 		$fields = '';
 		
@@ -158,7 +156,9 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		
 		if (isset($_SESSION['min_price'])) $post_min = $_SESSION['min_price'];
 		if (isset($_SESSION['max_price'])) $post_max = $_SESSION['max_price'];
-		
+
+		echo $before_widget . $before_title . $title . $after_title;
+
 		echo '<form method="get">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
