@@ -208,6 +208,7 @@ class WC_Settings_API {
     	$html = '';
     	
     	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
