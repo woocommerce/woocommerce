@@ -26,13 +26,13 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		$this->init_settings();
 		
 		// Define user set variables
-		$this->enabled		= $this->settings['enabled'];
-		$this->title		= $this->settings['title'];
-		$this->fee			= $this->settings['fee'];
-		$this->type			= $this->settings['type'];	
-		$this->codes		= $this->settings['codes'];	
-		$this->availability	= $this->settings['availability'];
-		$this->countries	= $this->settings['countries'];
+		$this->enabled		= empty( $this->settings['enabled'] ) ? 'no' : $this->settings['enabled'];
+		$this->title		= empty( $this->settings['title'] ) ? '' : $this->settings['title'];
+		$this->fee			= empty( $this->settings['fee'] ) ? '' : $this->settings['fee'];
+		$this->type			= empty( $this->settings['type'] ) ? '' : $this->settings['type'];	
+		$this->codes		= empty( $this->settings['codes'] ) ? '' : $this->settings['codes'];	
+		$this->availability	= empty( $this->settings['availability'] ) ? '' : $this->settings['availability'];
+		$this->countries	= empty( $this->settings['countries'] ) ? '' : $this->settings['countries'];
 		
 		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
 	}
