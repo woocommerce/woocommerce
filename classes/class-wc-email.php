@@ -449,7 +449,7 @@ class WC_Email {
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 		
 		$subject		= apply_filters( 'woocommerce_email_subject_customer_new_account', sprintf( __( 'Your account on %s', 'woocommerce'), $blogname ), $user );
-		$email_heading 	= __('Your account details', 'woocommerce');
+		$email_heading 	= sprintf( __( 'Welcome to %s', 'woocommerce'), $blogname );
 	
 		// Buffer
 		ob_start();

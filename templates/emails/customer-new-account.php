@@ -2,14 +2,9 @@
 
 <?php do_action('woocommerce_email_header', $email_heading); ?>
 
-<p><?php echo sprintf(__("Thanks for registering on %s. Your login details are below:", 'woocommerce'), $blogname); ?></p>
+<p><?php echo sprintf(__("Thanks for creating an account on %s. Your username is <strong>%s</strong>.", 'woocommerce'), $blogname, $user_login); ?></p>
 
-<ul>
-	<li><?php echo sprintf(__('Username: %s', 'woocommerce'), $user_login); ?></li>
-	<li><?php echo sprintf(__('Password: %s', 'woocommerce'), $user_pass); ?></li>
-</ul>
-
-<p><?php echo sprintf(__("You can login to your account area here: %s.", 'woocommerce'), get_permalink(woocommerce_get_page_id('myaccount'))); ?></p>
+<p><?php echo sprintf(__("You can access your account area here: %s.", 'woocommerce'), get_permalink(woocommerce_get_page_id('myaccount'))); ?></p>
 
 <div style="clear:both;"></div>
 
