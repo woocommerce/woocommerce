@@ -36,7 +36,7 @@ function woocommerce_product_data_box() {
 			
 			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woocommerce'); ?></a></li>
 			
-			<li class="grouping_tab show_if_simple grouping_options"><a href="#grouping_product_data"><?php _e('Grouping', 'woocommerce'); ?></a></li>
+			<li class="grouping_tab show_if_simple show_if_external grouping_options"><a href="#grouping_product_data"><?php _e('Grouping', 'woocommerce'); ?></a></li>
 			
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 

@@ -143,6 +143,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.5.4 =
+* Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
+
 = 1.5.3 - 29/03/2012 =
 * Feature - Debug/status page with some handy functions to resolve common issues
 * Feature - Control default catalog sort order from Catalog Settings

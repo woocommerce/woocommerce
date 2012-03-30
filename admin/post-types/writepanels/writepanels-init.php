@@ -29,9 +29,11 @@ function woocommerce_meta_boxes() {
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woocommerce'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
 	
 	// Excerpt
-	remove_meta_box( 'postexcerpt', 'product', 'normal' );
-	add_meta_box( 'postexcerpt', __('Product Summary', 'woocommerce'), 'woocommerce_product_summary_meta_box', 'product', 'normal' );
-		
+	if ( function_exists('wp_editor') ) {
+		remove_meta_box( 'postexcerpt', 'product', 'normal' );
+		add_meta_box( 'postexcerpt', __('Product Summary', 'woocommerce'), 'woocommerce_product_summary_meta_box', 'product', 'normal' );
+	}
+	
 	// Orders
 	add_meta_box( 'woocommerce-order-data', __('Order Data', 'woocommerce'), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
 	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woocommerce'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
@@ -89,10 +91,10 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
  * Replaces excerpt with a visual editor
  */
 function woocommerce_product_summary_meta_box( $post ) {
-
+	
 	$settings = array(
 		'quicktags' 	=> array( 'buttons' => 'em,strong,link' ),
-		'text_area_name'=> 'excerpt',
+		'textarea_name'	=> 'excerpt',
 		'quicktags' 	=> true,
 		'tinymce' 		=> true,
 		'editor_css'	=> '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}</style>'
