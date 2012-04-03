@@ -678,9 +678,11 @@ class WC_Cart {
 				$this->set_quantity( $cart_item_key, $quantity );
 	
 			} else {
+			
+				$cart_item_key = $cart_id;
 				
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item
-				$this->cart_contents[$cart_id] = apply_filters( 'woocommerce_add_cart_item', array_merge( $cart_item_data, array(
+				$this->cart_contents[$cart_item_key] = apply_filters( 'woocommerce_add_cart_item', array_merge( $cart_item_data, array(
 					'product_id'	=> $product_id,
 					'variation_id'	=> $variation_id,
 					'variation' 	=> $variation,
@@ -689,6 +691,8 @@ class WC_Cart {
 				) ) );
 			
 			}
+			
+			do_action( 'woocommerce_add_to_cart', $product_id, $cart_item_key );
 			
 			$woocommerce->cart_has_contents_cookie( true );
 
