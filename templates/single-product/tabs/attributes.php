@@ -4,13 +4,15 @@
  */
  
 global $woocommerce, $post, $product;
-?>
-<div class="panel" id="tab-attributes">
 
-	<?php $heading = apply_filters('woocommerce_product_additional_information_heading', __('Additional Information', 'woocommerce')); ?>
+if ($product->has_attributes() || $product->has_dimensions() || $product->has_weight()) : ?>
+	<div class="panel" id="tab-attributes">
 	
-	<h2><?php echo $heading; ?></h2>
+		<?php $heading = apply_filters('woocommerce_product_additional_information_heading', __('Additional Information', 'woocommerce')); ?>
+		
+		<h2><?php echo $heading; ?></h2>
+		
+		<?php $product->list_attributes(); ?>
 	
-	<?php $product->list_attributes(); ?>
-
-</div>
+	</div>
+<?php endif; ?>
