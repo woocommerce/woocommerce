@@ -692,7 +692,7 @@ class WC_Cart {
 			
 			}
 			
-			do_action( 'woocommerce_add_to_cart', $product_id, $cart_item_key );
+			do_action( 'woocommerce_add_to_cart', $cart_item_key );
 			
 			$woocommerce->cart_has_contents_cookie( true );
 

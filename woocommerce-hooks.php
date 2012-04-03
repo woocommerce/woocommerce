@@ -160,3 +160,4 @@ add_filter( 'woocommerce_short_description', 'convert_chars'      );
 add_filter( 'woocommerce_short_description', 'wpautop'            );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop'  );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
+add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
