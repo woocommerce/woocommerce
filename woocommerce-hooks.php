@@ -152,3 +152,11 @@ add_action( 'woocommerce_new_order', 'woocommerce_increase_coupon_counts' );
 /* Star Ratings */
 add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
 add_filter( 'preprocess_comment', 'woocommerce_check_comment_rating', 0 );
+
+/* Text filters */
+add_filter( 'woocommerce_short_description', 'wptexturize'        );
+add_filter( 'woocommerce_short_description', 'convert_smilies'    );
+add_filter( 'woocommerce_short_description', 'convert_chars'      );
+add_filter( 'woocommerce_short_description', 'wpautop'            );
+add_filter( 'woocommerce_short_description', 'shortcode_unautop'  );
+add_filter( 'woocommerce_short_description', 'prepend_attachment' );
