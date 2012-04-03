@@ -148,6 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Don't send password in new account email (some customers complained/privacy concerns)
 * Localization - Canada post code locale
 * Localization - RMB paypal
+* Localization - Bundled translation updates
 
 = 1.5.3 - 29/03/2012 =
 * Feature - Debug/status page with some handy functions to resolve common issues

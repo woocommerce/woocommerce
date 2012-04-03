@@ -31,7 +31,7 @@ function woocommerce_meta_boxes() {
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
-		add_meta_box( 'postexcerpt', __('Product Summary', 'woocommerce'), 'woocommerce_product_summary_meta_box', 'product', 'normal' );
+		add_meta_box( 'postexcerpt', __('Short Description', 'woocommerce'), 'woocommerce_product_short_description_meta_box', 'product', 'normal' );
 	}
 	
 	// Orders
@@ -86,11 +86,11 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
 }
 
 /**
- * Product Summary
+ * Product Short Description
  * 
  * Replaces excerpt with a visual editor
  */
-function woocommerce_product_summary_meta_box( $post ) {
+function woocommerce_product_short_description_meta_box( $post ) {
 	
 	$settings = array(
 		'quicktags' 	=> array( 'buttons' => 'em,strong,link' ),
