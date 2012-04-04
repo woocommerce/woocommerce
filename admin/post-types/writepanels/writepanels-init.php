@@ -23,6 +23,7 @@ include_once('writepanel-order_downloads.php');
 add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
 
 function woocommerce_meta_boxes() {
+	global $post;
 	
 	// Products
 	add_meta_box( 'woocommerce-product-type', __('Product Type', 'woocommerce'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
@@ -31,7 +32,16 @@ function woocommerce_meta_boxes() {
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
-		add_meta_box( 'postexcerpt', __('Product Summary', 'woocommerce'), 'woocommerce_product_summary_meta_box', 'product', 'normal' );
+		add_meta_box( 'postexcerpt', __('Product Short Description', 'woocommerce'), 'woocommerce_product_short_description_meta_box', 'product', 'normal' );
+	}
+	
+	// Comments/Reviews
+	remove_meta_box( 'commentstatusdiv', 'product', 'normal' );
+	add_meta_box( 'commentstatusdiv', __('Product Reviews', 'woocommerce'), 'woocommerce_product_review_status_meta_box', 'product', 'normal' );
+	
+	if ( ('publish' == $post->post_status || 'private' == $post->post_status) ) {
+		remove_meta_box( 'commentsdiv', 'product', 'normal' );
+		add_meta_box( 'commentsdiv', __('Reviews', 'woocommerce'), 'post_comment_meta_box', 'product', 'normal' );
 	}
 	
 	// Orders
@@ -86,11 +96,11 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
 }
 
 /**
- * Product Summary
+ * Product Short Description
  * 
  * Replaces excerpt with a visual editor
  */
-function woocommerce_product_summary_meta_box( $post ) {
+function woocommerce_product_short_description_meta_box( $post ) {
 	
 	$settings = array(
 		'quicktags' 	=> array( 'buttons' => 'em,strong,link' ),
@@ -102,6 +112,23 @@ function woocommerce_product_summary_meta_box( $post ) {
 		
 	wp_editor( htmlspecialchars_decode( $post->post_excerpt ), 'excerpt', $settings );
 }
+	
+	
+/**
+ * Display comments status form fields.
+ *
+ * @param object $post
+ */
+function woocommerce_product_review_status_meta_box( $post ) {
+	?>
+	<input name="advanced_view" type="hidden" value="1" />
+	<p class="meta-options">
+		<label for="comment_status" class="selectit"><input name="comment_status" type="checkbox" id="comment_status" value="open" <?php checked($post->comment_status, 'open'); ?> /> <?php _e( 'Allow reviews.', 'woocommerce' ) ?></label><br />
+		<label for="ping_status" class="selectit"><input name="ping_status" type="checkbox" id="ping_status" value="open" <?php checked($post->ping_status, 'open'); ?> /> <?php printf( __( 'Allow <a href="%s" target="_blank">trackbacks and pingbacks</a> on this page.' ), __( 'http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments' ) ); ?></label>
+		<?php do_action('post_comment_status_meta_box-options', $post); ?>
+	</p>
+	<?php
+}	
 	
 /**
  * Product data

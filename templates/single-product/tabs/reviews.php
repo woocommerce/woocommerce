@@ -4,9 +4,11 @@
  */
  
 global $woocommerce, $post;
-?>
-<div class="panel" id="tab-reviews">
 
-	<?php comments_template(); ?>
-
-</div>
+if ( comments_open() ) : ?>
+	<div class="panel" id="tab-reviews">
+	
+		<?php comments_template(); ?>
+	
+	</div>
+<?php endif; ?>
