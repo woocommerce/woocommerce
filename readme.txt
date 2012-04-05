@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Don't send password in new account email (some customers complained/privacy concerns)
 * Tweak - Don't show unused tabs on the frontend (description and reviews)
 * Tweak - Rename comments meta box to reviews
+* Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Localization - Canada post code locale
 * Localization - RMB paypal
 * Localization - Bundled translation updates
