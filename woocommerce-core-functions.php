@@ -642,19 +642,22 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
  * WooCommerce Dropdown categories
  * 
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
- * We use a custom walker, just like WordPress does it
+ * We use a custom walker, just like WordPress does
  */
 function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
-	global $wp_query;
+	global $wp_query, $woocommerce;
+	
+	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
 	
 	$r = array();
-	$r['pad_counts'] = 1;
-	$r['hierarchal'] = $hierarchal;
-	$r['hide_empty'] = 1;
-	$r['show_count'] = 1;
-	$r['selected'] = (isset($wp_query->query['product_cat'])) ? $wp_query->query['product_cat'] : '';
+	$r['pad_counts'] 	= 1;
+	$r['hierarchal'] 	= $hierarchal;
+	$r['hide_empty'] 	= 1;
+	$r['show_count'] 	= 1;
+	$r['selected'] 		= ( isset( $wp_query->query['product_cat'] ) ) ? $wp_query->query['product_cat'] : '';
 	
 	$terms = get_terms( 'product_cat', $r );
+	
 	if (!$terms) return;
 	
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
@@ -670,36 +673,14 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
  */
 function woocommerce_walk_category_dropdown_tree() {
 	$args = func_get_args();
+	
 	// the user's options are the third parameter
 	if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') )
-		$walker = new WC_Walker_CategoryDropdown;
+		$walker = new WC_Product_Cat_Dropdown_Walker;
 	else
 		$walker = $args[2]['walker'];
 
 	return call_user_func_array(array( &$walker, 'walk' ), $args );
-}
-
-/**
- * Create HTML dropdown list of Product Categories.
- */
-class WC_Walker_CategoryDropdown extends Walker {
-
-	var $tree_type = 'category';
-	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
-
-	function start_el(&$output, $category, $depth, $args) {
-		$pad = str_repeat('&nbsp;', $depth * 3);
-
-		$cat_name = apply_filters('list_product_cats', $category->name, $category);
-		$output .= "\t<option class=\"level-$depth\" value=\"".$category->slug."\"";
-		if ( $category->slug == $args['selected'] )
-			$output .= ' selected="selected"';
-		$output .= '>';
-		$output .= $pad.$cat_name;
-		if ( $args['show_count'] )
-			$output .= '&nbsp;('. $category->count .')';
-		$output .= "</option>\n";
-	}
 }
 
 /**

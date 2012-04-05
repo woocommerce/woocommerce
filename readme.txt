@@ -145,10 +145,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.4 =
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
-* Tweaked - For the short description, removed the_content filter and used woocommerce_short_description
+* Tweak - For the short description, removed the_content filter and used woocommerce_short_description
 * Tweak - Don't send password in new account email (some customers complained/privacy concerns)
 * Tweak - Don't show unused tabs on the frontend (description and reviews)
 * Tweak - Rename comments meta box to reviews
+* Tweak - Rewritten widgets to use category walkers
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Localization - Canada post code locale
 * Localization - RMB paypal
