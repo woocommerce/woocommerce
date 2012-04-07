@@ -87,7 +87,7 @@ class WC_Shipping {
 				
 			endforeach;
 			
-			return $_available_methods;
+			return apply_filters( 'woocommerce_available_shipping_methods', $_available_methods );
 			
 		endif;
 	}

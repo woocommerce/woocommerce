@@ -217,7 +217,7 @@ function woocommerce_order_data_meta_box($post) {
 						
 							if ($order->get_formatted_shipping_address()) echo '<p><strong>'.__('Address', 'woocommerce').':</strong><br/> ' .$order->get_formatted_shipping_address().'</p>'; else echo '<p class="none_set"><strong>'.__('Address', 'woocommerce').':</strong> ' . __('No shipping address set.', 'woocommerce') . '</p>';
 							
-							foreach ( $shipping_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
+							if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) : if (isset($field['show']) && !$field['show']) continue;
 								$field_name = 'shipping_'.$key;
 								if ( $order->$field_name ) echo '<p><strong>'.$field['label'].':</strong> '.$order->$field_name.'</p>';
 							endforeach;
@@ -227,7 +227,7 @@ function woocommerce_order_data_meta_box($post) {
 						// Display form
 						echo '<div class="edit_address"><p><button class="button load_customer_shipping">'.__('Load customer shipping address', 'woocommerce').'</button></p>';
 						
-						foreach ( $shipping_data as $key => $field ) :
+						if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) :
 							if (!isset($field['type'])) $field['type'] = 'text';
 							switch ($field['type']) {
 								case "select" :

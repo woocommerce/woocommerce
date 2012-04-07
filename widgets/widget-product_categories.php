@@ -78,26 +78,19 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			</script>
 			<?php
 			
-		} elseif ( $s ) {
+		} else {
 			
-			global $wp_query, $post;
-			
-			$cat_args['title_li'] = '';
-			$cat_args['hierarchical'] = true;
-			$cat_args['child_of'] = 0;
-			$cat_args['pad_counts'] = 1;
-			
-			$cats = get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
+			global $wp_query, $post, $woocommerce;
 			
 			$this->current_cat = false;
 			$this->cat_ancestors = array();
 				
-			if (is_tax('product_cat')) :
+			if ( is_tax('product_cat') ) :
 			
 				$this->current_cat = $wp_query->queried_object;
 				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 			
-			elseif (is_singular('product')) :
+			elseif ( is_singular('product') ) :
 				
 				$product_category = wp_get_post_terms( $post->ID, 'product_cat' ); 
 				
@@ -107,96 +100,26 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 				endif;
 				
 			endif;
-
+			
+			include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-list-walker.php' );
+			
+			$cat_args['walker'] 			= new WC_Product_Cat_List_Walker;
+			$cat_args['title_li'] 			= '';
+			$cat_args['show_children_only']	= ( $instance['show_children_only'] ) ? 1 : 0;
+			$cat_args['pad_counts'] 		= 1;
+			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce');
+			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';
+			$cat_args['current_category_ancestors']	= $this->cat_ancestors;
+			
 			echo '<ul>';
 			
-			foreach ($cats as $cat) : 
-				
-				// Only show top level for now
-				if ($cat->parent) continue;
-				
-				echo '<li class="cat-item cat-item-'.$cat->term_id;
-				
-				if ( ($this->current_cat && $this->current_cat->term_id == $cat->term_id) || is_tax('product_cat', $cat->slug) ) echo ' current-cat';
-				if (
-					$this->current_cat 
-					&& in_array( $cat->term_id, $this->cat_ancestors )
-					) echo ' current-cat-parent';
-				
-				echo '"><a href="'.get_term_link( $cat->slug, 'product_cat' ).'">'.$cat->name.'</a>';
-				
-				if ($c) echo ' <span class="count">('.$cat->count.')</span>';
-				
-				if ( is_tax('product_cat', $cat->slug) || (in_array( $cat->term_id, $this->cat_ancestors ))) :
-					
-					$children = $this->get_children_cats( $cat->term_id );
-					
-					$this->output_children_cats( $children, $c );
-					
-				endif;
-				
-				echo '</li>';
-				
-			endforeach;
+			wp_list_categories( apply_filters( 'woocommerce_product_categories_widget_args', $cat_args ) );
 			
 			echo '</ul>';
-			
-		} else {
 
-			echo '<ul>';
-			
-			$cat_args['title_li'] = '';
-			
-			wp_list_categories( apply_filters('woocommerce_product_categories_widget_args', $cat_args) );
-	
-			echo '</ul>';
 		}
 
 		echo $after_widget;
-	}
-	
-	function get_children_cats( $parent ) {
-		$cat_args = array();
-		
-		$cat_args['title_li'] = '';
-		$cat_args['hierarchical'] = true;
-		$cat_args['child_of'] = 0;
-		$cat_args['pad_counts'] = 1;
-		$cat_args['parent'] = $parent;
-			
-		return get_terms( 'product_cat', apply_filters('woocommerce_product_categories_widget_subcat_args', $cat_args) );
-	}
-	
-	function output_children_cats( $children, $c ) {
-		
-		echo '<ul class="children">';
-						
-		foreach ($children as $child) {
-			
-			echo '<li class="cat-item cat-item-'.$child->term_id;
-				
-			if ($this->current_cat->term_id == $child->term_id || is_tax('product_cat', $child->slug)) echo ' current-cat';
-			if (
-				$this->current_cat 
-				&& in_array( $child->term_id, $this->cat_ancestors )
-				) echo ' current-cat-parent';
-			
-			echo '"><a href="'.get_term_link( $child->slug, 'product_cat' ).'">'.$child->name.'</a>';
-			
-			if ($c) echo ' <span class="count">('.$child->count.')</span>';
-			
-			if ( is_tax('product_cat', $child->slug) || (in_array( $child->term_id, $this->cat_ancestors ))) {
-
-				$children_children = $this->get_children_cats( $child->term_id );
-				
-				if ($children_children) $this->output_children_cats( $children_children, $c );
-			
-			}
-			
-			echo '</li>';		
-		}
-		
-		echo '</ul>';
 	}
 
 	/** @see WP_Widget->update */

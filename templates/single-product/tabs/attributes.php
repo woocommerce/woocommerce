@@ -5,7 +5,10 @@
  
 global $woocommerce, $post, $product;
 
-if ($product->has_attributes() || $product->has_dimensions() || $product->has_weight()) : ?>
+$show_attr = ( get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' ? true : false );
+
+if ( $product->has_attributes() || ( $show_attr && $product->has_dimensions() ) || ( $show_attr && $product->has_weight() ) ) {
+	?>
 	<div class="panel" id="tab-attributes">
 	
 		<?php $heading = apply_filters('woocommerce_product_additional_information_heading', __('Additional Information', 'woocommerce')); ?>
@@ -15,4 +18,6 @@ if ($product->has_attributes() || $product->has_dimensions() || $product->has_we
 		<?php $product->list_attributes(); ?>
 	
 	</div>
-<?php endif; ?>
+	<?php
+}
+?>
