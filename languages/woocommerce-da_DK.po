@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v1.5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-01 20:24+0100\n"
-"PO-Revision-Date: 2012-04-01 22:09+0100\n"
+"POT-Creation-Date: 2012-04-07 18:24+0100\n"
+"PO-Revision-Date: 2012-04-08 23:12+0100\n"
 "Last-Translator: Frederik Svarre <FRS@FSLab.dk>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -124,7 +124,7 @@ msgid "product"
 msgstr "produkt"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:661
+#: woocommerce-core-functions.php:664
 msgid "Select a category"
 msgstr "Vælg en kategori"
 
@@ -5520,55 +5520,74 @@ msgid "Use this file"
 msgstr "Brug denne fil"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:34
-msgid "Product Summary"
-msgstr "Produktoversigt"
+#: admin/post-types/writepanels/writepanels-init.php:35
+msgid "Product Short Description"
+msgstr "Kort produktbeskrivelse"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:38
+#: admin/post-types/writepanels/writepanels-init.php:44
+msgid "Reviews"
+msgstr "Anmeldelser"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:48
 msgid "Order Data"
 msgstr "Ordredata"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:39
+#: admin/post-types/writepanels/writepanels-init.php:49
 msgid "Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item's stock levels.</small>"
 msgstr "Ordreprotukter <small>&ndash; Bemærk: hvis du redigerer mængder eller fjerner produkter fra bestillingen, bliver du nødt til manuelt at ændre produktets lagerstatus.</small>"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:40
+#: admin/post-types/writepanels/writepanels-init.php:50
 msgid "Order Totals"
 msgstr "Ordre totaler"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:41
+#: admin/post-types/writepanels/writepanels-init.php:51
 #: classes/class-wc-checkout.php:57
 msgid "Order Notes"
 msgstr "Ordrebemærkninger"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:42
+#: admin/post-types/writepanels/writepanels-init.php:52
 msgid "Downloadable Product Permissions <small>&ndash; Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.</small>"
 msgstr "Download-bare produkt tilladelser <small>&ndash; Bemærk: Tilladelse for ordreprodukter vil automatisk blive givet når ordrestatus ændres til behandler/afsluttet.</small>"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:43
+#: admin/post-types/writepanels/writepanels-init.php:53
 msgid "Order Actions"
 msgstr "Ordrehandlinger"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:51
+#: admin/post-types/writepanels/writepanels-init.php:61
 msgid "Coupon Data"
 msgstr "Kupondata"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:64
+#: admin/post-types/writepanels/writepanels-init.php:74
 msgid "Coupon code"
 msgstr "Kuponkode"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanels-init.php:65
+#: admin/post-types/writepanels/writepanels-init.php:75
 msgid "Product name"
 msgstr "Produktnavn"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanels-init.php:126
+msgid "Allow reviews."
+msgstr "Tillad anmeldelser."
+
+#: admin/post-types/writepanels/writepanels-init.php:127
+#, php-format
+msgid "Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this page."
+msgstr "Tillad <a href=\"%s\" target=\"_blank\">trackbacks og pingbacks</a> til denne side."
+
+#: admin/post-types/writepanels/writepanels-init.php:127
+msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
 
 #: classes/class-wc-cart.php:297
 #, php-format
@@ -5623,7 +5642,7 @@ msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the 
 msgstr "<a href=\"%s\" class=\"button\">%s</a> Du kan ikke tilføje den mængde til kurven &mdash; Vi har %s på lager, og du har allerede %s i din kurv."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1399
+#: classes/class-wc-cart.php:1403
 #: classes/class-wc-order.php:457
 #: classes/class-wc-product.php:598
 #: classes/class-wc-product.php:607
@@ -5633,27 +5652,27 @@ msgid "Free!"
 msgstr "Gratis!"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1411
+#: classes/class-wc-cart.php:1415
 msgid "via"
 msgstr "via"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1448
+#: classes/class-wc-cart.php:1452
 msgid "Invalid coupon."
 msgstr "Ugyldig kupon."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1454
+#: classes/class-wc-cart.php:1458
 msgid "Discount code already applied!"
 msgstr "Rabatkode allerede anvendt!"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1474
+#: classes/class-wc-cart.php:1478
 msgid "Discount code applied successfully."
 msgstr "Rabatkode anvendt med succes."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1478
+#: classes/class-wc-cart.php:1482
 msgid "Coupon does not exist!"
 msgstr "Kupon eksisterer ikke!"
 
@@ -8696,11 +8715,6 @@ msgstr[0] "%s anmeldelse af %s"
 msgstr[1] "%s anmeldelser af %s"
 
 # @ woocommerce
-#: templates/single-product-reviews.php:37
-msgid "Reviews"
-msgstr "Anmeldelser"
-
-# @ woocommerce
 #: templates/single-product-reviews.php:53
 msgid "<span class=\"meta-nav\">&larr;</span> Previous"
 msgstr "<span class=\"meta-nav\">&larr;</span> Forrige"
@@ -8852,6 +8866,7 @@ msgstr "Indkøbskurv totaler"
 
 # @ woocommerce
 #: templates/cart/totals.php:21
+#: templates/checkout/review-order.php:23
 msgid "Cart Subtotal"
 msgstr "Indkøbskurv subtotal"
 
@@ -8868,12 +8883,15 @@ msgstr "Udfyld venligst dine oplysninger for at se mulige forsendelsesmetoder."
 
 # @ woocommerce
 #: templates/cart/totals.php:90
+#: templates/checkout/review-order.php:94
 msgid "Sorry, it seems that there are no available shipping methods for your state. Please contact us if you require assistance or wish to make alternate arrangements."
 msgstr "Beklager, det ser ud til, at der ikke er en mulig forsendelsesmetode til din stat. Kontakt os venligst hvis du behøver assistance eller ønsker at lave en alternativ aftale."
 
 # @ woocommerce
 #: templates/cart/totals.php:114
 #: templates/cart/totals.php:135
+#: templates/checkout/review-order.php:119
+#: templates/checkout/review-order.php:139
 msgid "incl."
 msgstr "inkl."
 
@@ -8884,6 +8902,7 @@ msgstr "Subtotal"
 
 # @ woocommerce
 #: templates/cart/totals.php:167
+#: templates/checkout/review-order.php:171
 msgid "Order Discount"
 msgstr "Ordrerabat"
 
@@ -9086,7 +9105,6 @@ msgstr ". Din ordre er som følgende:"
 #: templates/emails/admin-new-order.php:38
 #: templates/emails/customer-completed-order.php:38
 #: templates/emails/customer-note.php:42
-#: templates/emails/customer-processing-order.php:38
 msgid "Customer details"
 msgstr "Kundeoplysninger"
 
@@ -9430,7 +9448,7 @@ msgid "Reset selection"
 msgstr "Nulstil valg"
 
 # @ woocommerce
-#: templates/single-product/tabs/description.php:10
+#: templates/single-product/tabs/description.php:11
 msgid "Product Description"
 msgstr "Produktbeskrivelse"
 
@@ -9452,11 +9470,30 @@ msgstr "Best Sellers"
 # @ woocommerce
 #: widgets/widget-best_sellers.php:116
 #: widgets/widget-cart.php:104
+#: widgets/widget-featured_products.php:113
+#: widgets/widget-layered_nav.php:421
+#: widgets/widget-onsale.php:149
+#: widgets/widget-price_filter.php:192
+#: widgets/widget-product_categories.php:149
+#: widgets/widget-product_search.php:69
+#: widgets/widget-product_tag_cloud.php:70
+#: widgets/widget-random_products.php:103
+#: widgets/widget-recently_viewed.php:116
+#: widgets/widget-recent_products.php:129
+#: widgets/widget-recent_reviews.php:120
+#: widgets/widget-top_rated_products.php:135
 msgid "Title:"
 msgstr "Titel:"
 
 # @ woocommerce
 #: widgets/widget-best_sellers.php:119
+#: widgets/widget-featured_products.php:116
+#: widgets/widget-onsale.php:152
+#: widgets/widget-random_products.php:108
+#: widgets/widget-recently_viewed.php:119
+#: widgets/widget-recent_products.php:132
+#: widgets/widget-recent_reviews.php:123
+#: widgets/widget-top_rated_products.php:138
 msgid "Number of products to show:"
 msgstr "Antal af produkter at vise:"
 
@@ -9660,32 +9697,37 @@ msgid "WooCommerce Product Categories"
 msgstr "WooCommerce produktkategorier"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:229
+#: widgets/widget-product_categories.php:110
+msgid "No product categories exist."
+msgstr "Der eksisterer ingen produktkategorier."
+
+# @ woocommerce
+#: widgets/widget-product_categories.php:152
 msgid "Order by:"
 msgstr "Sorter efter:"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:231
+#: widgets/widget-product_categories.php:154
 msgid "Category Order"
 msgstr "Kategorisortering"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:236
+#: widgets/widget-product_categories.php:159
 msgid "Show as dropdown"
 msgstr "Vis som dropdown"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:239
+#: widgets/widget-product_categories.php:162
 msgid "Show post counts"
 msgstr "Vis indlægsoptælling"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:242
+#: widgets/widget-product_categories.php:165
 msgid "Show hierarchy"
 msgstr "Vis hierarki"
 
 # @ woocommerce
-#: widgets/widget-product_categories.php:245
+#: widgets/widget-product_categories.php:168
 msgid "Show children of current category only"
 msgstr "Vis kun underkateorier af den aktuelle kategori "
 
