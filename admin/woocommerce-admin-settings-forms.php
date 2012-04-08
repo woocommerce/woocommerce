@@ -376,7 +376,7 @@ function woocommerce_admin_fields($options) {
                     <td class="forminp">
                     	<!--<a class="button export_rates"><?php _e('Export rates', 'woocommerce'); ?></a>
                     	<a class="button import_rates"><?php _e('Import rates', 'woocommerce'); ?></a>
-                    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
+                    	<p style="margin-top:0;" class="description"><?php printf(__('Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
                     	<table class="taxrows widefat" cellspacing="0">
 		            		<thead>
 		            			<tr>
@@ -448,7 +448,7 @@ function woocommerce_admin_fields($options) {
 				    <td class="forminp">
 				    	<!--<a class="button export_rates"><?php _e('Export rates', 'woocommerce'); ?></a>
 				    	<a class="button import_rates"><?php _e('Import rates', 'woocommerce'); ?></a>
-				    	<p style="margin-top:0;" class="description"><?php echo sprintf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
+				    	<p style="margin-top:0;" class="description"><?php printf(__('Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href="%s">Download sample csv.</a>', 'woocommerce'), ''); ?></p>-->
 				    	<table class="taxrows widefat" cellspacing="0">
 				    		<thead>
 				    			<tr>

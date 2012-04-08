@@ -250,6 +250,39 @@ function woocommerce_mark_order_processing() {
 add_action('wp_ajax_woocommerce-mark-order-processing', 'woocommerce_mark_order_processing');
 
 /**
+ * Add a new attribute via ajax function
+ */
+add_action('wp_ajax_woocommerce_add_new_attribute', 'woocommerce_add_new_attribute');
+
+function woocommerce_add_new_attribute() {
+	
+	check_ajax_referer( 'add-attribute', 'security' );
+	
+	$taxonomy = esc_attr( $_POST['taxonomy'] );
+	$term = stripslashes( $_POST['term'] );
+	
+	if ( taxonomy_exists( $taxonomy ) ) {
+		
+		$result = wp_insert_term( $term, $taxonomy );
+		
+		if ( is_wp_error($result) ) {
+   			echo json_encode(array(
+				'error'			=> $result->get_error_message()
+			));
+   		} else {
+	   		echo json_encode(array(
+				'term_id'		=> $result['term_id'],
+				'name'			=> $term,
+				'slug'  		=> sanitize_title( $term ),
+			));
+		}
+	}
+	
+	die();
+	
+}
+
+/**
  * Delete variation via ajax function
  */
 add_action('wp_ajax_woocommerce_remove_variation', 'woocommerce_remove_variation');

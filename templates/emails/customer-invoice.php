@@ -4,7 +4,7 @@
 
 <?php if ($order->status=='pending') : ?>
 
-	<p><?php echo sprintf( __( 'An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: <a href="%s">Pay</a>', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ); ?></p>
+	<p><?php printf( __( 'An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: <a href="%s">Pay</a>', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ); ?></p>
 	
 <?php endif; ?>
 

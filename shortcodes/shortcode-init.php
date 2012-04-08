@@ -268,7 +268,7 @@ function woocommerce_product_add_to_cart($atts){
 				if ($data) $link = add_query_arg( $key, $data, $link );
 			}
 			
-			echo sprintf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', esc_url( $link ), $product->id, $product->product_type, $label);
+			printf('<a href="%s" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', esc_url( $link ), $product->id, $product->product_type, $label);
 			
 			?>
 						

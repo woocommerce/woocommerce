@@ -254,25 +254,25 @@ function woocommerce_product_data_box() {
 					$i = -1;
 					
 					// Taxonomies
-					if ( $attribute_taxonomies ) :
-				    	foreach ($attribute_taxonomies as $tax) : $i++;
+					if ( $attribute_taxonomies ) {
+				    	foreach ( $attribute_taxonomies as $tax ) { $i++;
 				    		
 				    		// Get name of taxonomy we're now outputting (pa_xxx)
-				    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name($tax->attribute_name);
+				    		$attribute_taxonomy_name = $woocommerce->attribute_taxonomy_name( $tax->attribute_name );
 				    		
 				    		// Ensure it exists
-				    		if (!taxonomy_exists($attribute_taxonomy_name)) continue;		    	
+				    		if ( ! taxonomy_exists($attribute_taxonomy_name ) ) continue;		    	
 				    		
 				    		// Get product data values for current taxonomy - this contains ordering and visibility data	
-				    		if (isset($attributes[$attribute_taxonomy_name])) $attribute = $attributes[$attribute_taxonomy_name];
+				    		if ( isset( $attributes[$attribute_taxonomy_name] ) ) $attribute = $attributes[$attribute_taxonomy_name];
 				    		
-				    		$position = (isset($attribute['position'])) ? $attribute['position'] : 0;
+				    		$position = ( isset( $attribute['position'] ) ) ? $attribute['position'] : 0;
 				    		
 				    		// Get terms of this taxonomy associated with current product
 				    		$post_terms = wp_get_post_terms( $thepostid, $attribute_taxonomy_name );
 				    		
 				    		// Any set?
-				    		$has_terms = (is_wp_error($post_terms) || !$post_terms || sizeof($post_terms)==0) ? 0 : 1;
+				    		$has_terms = ( is_wp_error( $post_terms ) || ! $post_terms || sizeof( $post_terms ) == 0 ) ? 0 : 1;
 				    		
 				    		?>
 				    		<div class="woocommerce_attribute wc-metabox closed taxonomy <?php echo $attribute_taxonomy_name; ?>" rel="<?php echo $position; ?>" <?php if (!$has_terms) echo 'style="display:none"'; ?>>
@@ -295,7 +295,7 @@ function woocommerce_product_data_box() {
 											<td rowspan="3">
 												<label><?php _e('Value(s)', 'woocommerce'); ?>:</label>
 												<?php if ($tax->attribute_type=="select") : ?>
-													<select multiple="multiple" data-placeholder="<?php _e('Select terms', 'woocommerce'); ?>" class="multiselect" name="attribute_values[<?php echo $i; ?>][]">
+													<select multiple="multiple" data-placeholder="<?php _e('Select terms', 'woocommerce'); ?>" class="multiselect attribute_values" name="attribute_values[<?php echo $i; ?>][]">
 														<?php
 							        					$all_terms = get_terms( $attribute_taxonomy_name, 'orderby=name&hide_empty=0' );
 						        						if ($all_terms) :
@@ -306,7 +306,11 @@ function woocommerce_product_data_box() {
 														endif;
 														?>			
 													</select>
+													
 													<button class="button plus select_all_attributes"><?php _e('Select all', 'woocommerce'); ?></button> <button class="button minus select_no_attributes"><?php _e('Select none', 'woocommerce'); ?></button>
+													
+													<button class="button fr plus add_new_attribute" data-attribute="<?php echo $attribute_taxonomy_name; ?>"><?php _e('Add new', 'woocommerce'); ?></button>
+														
 												<?php elseif ($tax->attribute_type=="text") : ?>
 													<input type="text" name="attribute_values[<?php echo $i; ?>]" value="<?php 
 														
@@ -339,8 +343,8 @@ function woocommerce_product_data_box() {
 								</table>
 							</div>
 				    		<?php
-				    	endforeach;
-				    endif;
+				    	}
+				    }
 					
 					// Custom Attributes
 					if ($attributes && sizeof($attributes)>0) foreach ($attributes as $attribute) : 

@@ -144,6 +144,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.4 =
+* Feature - Allow attributes to be added from the edit product page
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
 * Tweak - For the short description, removed the_content filter and used woocommerce_short_description
 * Tweak - Don't send password in new account email (some customers complained/privacy concerns)

@@ -196,7 +196,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 			endif;
 			
-			echo sprintf(__('Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information.', 'woocommerce'), $estimated_text ); 
+			printf(__('Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information.', 'woocommerce'), $estimated_text ); 
 		?></small></p>
 	
 	<?php else : ?>

@@ -684,7 +684,7 @@ jQuery( function($){
 			return false;
 		});
 		
-		$('.woocommerce_attributes').on('click', 'button.remove_row', function(){
+		$('.woocommerce_attributes').on('click', 'button.remove_row', function() {
 			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
 			if (answer){
 				var $parent = $(this).parent().parent();
@@ -719,6 +719,47 @@ jQuery( function($){
 				ui.item.removeAttr('style');
 				attribute_row_indexes();
 			}
+		});
+		
+		// Add a new attribute (via ajax)
+		$('.woocommerce_attributes').on('click', 'button.add_new_attribute', function() {
+			
+			$('.woocommerce_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			var attribute = $(this).attr('data-attribute');
+			var $wrapper = $(this).closest('.woocommerce_attribute_data');
+			var new_attribute_name = prompt( woocommerce_writepanel_params.new_attribute_prompt );
+			
+			if ( new_attribute_name ) {
+				
+				var data = {
+					action: 		'woocommerce_add_new_attribute',
+					taxonomy:		attribute,
+					term:			new_attribute_name,
+					security: 		woocommerce_writepanel_params.add_attribute_nonce
+				};
+				
+				$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
+					
+					result = jQuery.parseJSON( response );
+					
+					if ( result.error ) {
+						// Error
+						alert( result.error );
+					} else if ( result.slug ) {
+						// Success
+						$wrapper.find('select.attribute_values').append('<option value="' + result.slug + '" selected="selected">' + result.name + '</option>');
+						$wrapper.find('select.attribute_values').trigger("liszt:updated");
+					}
+					
+					$('.woocommerce_attributes').unblock();
+					
+				});
+				
+			}
+			
+			return false;
+			
 		});
 	
 	// Uploading files
