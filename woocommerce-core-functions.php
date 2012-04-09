@@ -612,11 +612,11 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	if (!$found) return $clauses;
 	
 	// Meta name
-	if (strstr($taxonomies[0], 'pa_')) :
+	if ( ! empty( $taxonomies[0] ) && strstr($taxonomies[0], 'pa_') ) {
 		$meta_name =  'order_' . esc_attr($taxonomies[0]);
-	else :
+	} else {
 		$meta_name = 'order';
-	endif;
+	}
 
 	// query fields
 	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';

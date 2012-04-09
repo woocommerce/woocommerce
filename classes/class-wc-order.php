@@ -746,15 +746,15 @@ class WC_Order {
 	 */
 	function reduce_order_stock() {
 		
-		if (get_option('woocommerce_manage_stock')=='yes' && sizeof($this->get_items())>0) :
+		if ( get_option('woocommerce_manage_stock') == 'yes' && sizeof( $this->get_items() ) > 0 ) {
 		
 			// Reduce stock levels and do any other actions with products in the cart
-			foreach ($this->get_items() as $item) :
+			foreach ( $this->get_items() as $item ) {
 			
-				if ($item['id']>0) :
+				if ($item['id']>0) {
 					$_product = $this->get_product_from_item( $item );
 					
-					if ( $_product && $_product->exists && $_product->managing_stock() ) :
+					if ( $_product && $_product->exists && $_product->managing_stock() ) {
 					
 						$old_stock = $_product->stock;
 						
@@ -762,26 +762,26 @@ class WC_Order {
 						
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
 							
-						if ($new_quantity<0) :
+						if ($new_quantity<0)
 							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $this->id, 'quantity' => $item['qty']));
-						endif;
 						
 						// stock status notifications
-						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
+						if ( get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount') >= $new_quantity )
 							do_action('woocommerce_no_stock', $_product);
-						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
+						elseif ( get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount') >= $new_quantity )
 							do_action('woocommerce_low_stock', $_product);
-						endif;
 						
-					endif;
+					}
 					
-				endif;
+				}
 			 	
-			endforeach;
+			}
+			
+			do_action( 'woocommerce_reduce_order_stock', $this );
 			
 			$this->add_order_note( __('Order item stock reduced successfully.', 'woocommerce') );
-		
-		endif;
+			
+		}
 			
 	}
 	

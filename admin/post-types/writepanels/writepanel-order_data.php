@@ -851,6 +851,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	
 			endforeach;
 			
+			do_action( 'woocommerce_restore_order_stock', $order );
+			
 			$order->add_order_note( __('Manual stock restore complete.', 'woocommerce') );
 		
 		elseif (isset($_POST['invoice']) && $_POST['invoice']) :
