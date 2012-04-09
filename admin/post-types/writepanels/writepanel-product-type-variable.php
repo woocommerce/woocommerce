@@ -179,8 +179,8 @@ function variable_product_type_options() {
 										<label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 										</div>
 									</td>
-																
-								</tr>	
+								</tr>
+								<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data ); ?>
 							</tbody>
 						</table>
 					</div>
@@ -344,6 +344,7 @@ function variable_product_type_options() {
 									<div class="show_if_variation_downloadable" style="display:none;"><label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" /></div>\
 								</td>\
 							</tr>\
+							<?php do_action( 'woocommerce_product_after_variable_attributes_js' ); ?> \
 						</tbody>\
 					</table>\
 				</div>');
