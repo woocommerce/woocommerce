@@ -146,6 +146,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.5.4 =
 * Feature - Allow attributes to be added from the edit product page
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
+* Tweak - Changed recent order tables to make them slightly more compact
+* Tweak - Moved recent order table to a template file
+* Tweak - Improved default view-order page when order id is not defined - instead of stating "invalid order" it will list recent orders
 * Tweak - For the short description, removed the_content filter and used woocommerce_short_description
 * Tweak - Don't send password in new account email (some customers complained/privacy concerns)
 * Tweak - Don't show unused tabs on the frontend (description and reviews)

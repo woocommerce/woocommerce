@@ -249,13 +249,18 @@ function woocommerce_view_order() {
 	if ( ! is_user_logged_in() ) return;
 	
 	$user_id      	= get_current_user_id();
-	$order_id		= (isset($_GET['order'])) ? $_GET['order'] : 0;
+	$order_id		= ( isset( $_GET['order'] ) ) ? $_GET['order'] : 0;
 	$order 			= new WC_Order( $order_id );
-
-	if ( $order_id==0 || $order->user_id != $user_id ) :
+	
+	if ( $order_id == 0 ) {
+		woocommerce_get_template('myaccount/my-orders.php', array( 'recent_orders' => 10 ));
+		return;
+	}
+	
+	if ( $order->user_id != $user_id ) {
 		echo '<div class="woocommerce_error">' . __('Invalid order.', 'woocommerce') . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __('My Account &rarr;', 'woocommerce') .'</a>' . '</div>';
 		return;
-	endif;
+	}
 	
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 	

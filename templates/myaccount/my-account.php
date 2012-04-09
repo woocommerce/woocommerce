@@ -22,63 +22,7 @@ global $woocommerce;
 <?php endif; ?>	
 
 <h2><?php _e('Recent Orders', 'woocommerce'); ?></h2>
-<?php
-$customer_id = get_current_user_id();
-
-$args = array(
-    'numberposts'     => $recent_orders,
-    'meta_key'        => '_customer_user',
-    'meta_value'	  => $customer_id,
-    'post_type'       => 'shop_order',
-    'post_status'     => 'publish' 
-);
-$customer_orders = get_posts($args);
-if ($customer_orders) :
-?>
-	<table class="shop_table my_account_orders">
-	
-		<thead>
-			<tr>
-				<th class="order-number"><span class="nobr"><?php _e('#', 'woocommerce'); ?></span></th>
-				<th class="order-date"><span class="nobr"><?php _e('Date', 'woocommerce'); ?></span></th>
-				<th class="order-shipto"><span class="nobr"><?php _e('Ship to', 'woocommerce'); ?></span></th>
-				<th class="order-total"><span class="nobr"><?php _e('Total', 'woocommerce'); ?></span></th>
-				<th class="order-status" colspan="2"><span class="nobr"><?php _e('Status', 'woocommerce'); ?></span></th>
-			</tr>
-		</thead>
-		
-		<tbody><?php
-			foreach ($customer_orders as $customer_order) :
-				$order = new WC_Order();
-				$order->populate($customer_order);
-				?><tr class="order">
-					<td class="order-number"><?php echo $order->get_order_number(); ?></td>
-					<td class="order-date"><time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time></td>
-					<td class="order-shipto"><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
-					<td class="order-total"><?php echo woocommerce_price($order->order_total); ?></td>
-					<td class="order-status"><?php
-						$status = get_term_by('slug', $order->status, 'shop_order_status');
-						echo __($status->name, 'woocommerce'); 
-					?></td>
-					<td class="order-actions" style="text-align:right; white-space:nowrap;">
-						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
-							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woocommerce'); ?></a>
-							<a href="<?php echo esc_url( $order->get_cancel_order_url() ); ?>" class="button cancel"><?php _e('Cancel', 'woocommerce'); ?></a>
-						<?php endif; ?>
-						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>" class="button"><?php _e('View', 'woocommerce'); ?></a>
-					</td>
-				</tr><?php
-			endforeach;
-		?></tbody>
-	
-	</table>
-<?php
-else :
-?>
-	<p><?php _e('You have no recent orders.', 'woocommerce'); ?></p>
-<?php
-endif;
-?>
+<?php woocommerce_get_template('myaccount/my-orders.php', array( 'recent_orders' => $recent_orders )); ?>
 
 <h2><?php _e('My Address', 'woocommerce'); ?></h2>	
 <p><?php _e('The following addresses will be used on the checkout page by default.', 'woocommerce'); ?></p>
