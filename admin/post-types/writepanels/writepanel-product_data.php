@@ -416,7 +416,7 @@ function woocommerce_product_data_box() {
 		<div id="upsells_and_crosssells_product_data" class="panel woocommerce_options_panel">
 			
 			<p class="form-field"><label for="upsell_ids"><?php _e('Up-Sells', 'woocommerce'); ?></label>
-			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>">
 				<?php
 					$product_ids = get_post_meta( $post->ID, '_upsell_ids', true );
 					if ($product_ids) {
@@ -435,7 +435,7 @@ function woocommerce_product_data_box() {
 			</select> <img class="help_tip" data-tip='<?php _e('Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
 		
 			<p class="form-field"><label for="crosssell_ids"><?php _e('Cross-Sells', 'woocommerce'); ?></label>
-			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+			<select id="crosssell_ids" name="crosssell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>">
 				<?php
 					$product_ids = get_post_meta( $post->ID, '_crosssell_ids', true );
 					if ($product_ids) {

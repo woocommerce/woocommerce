@@ -392,51 +392,9 @@ function woocommerce_order_items_meta_box($post) {
 	</div>
 	
 	<p class="buttons">
-		<select name="add_item_id" class="add_item_id chosen_select_nostd" data-placeholder="<?php _e('Choose an item&hellip;', 'woocommerce') ?>">
-			<?php
-				echo '<option value=""></option>';
-				
-				$args = array(
-					'post_type' 		=> 'product',
-					'posts_per_page' 	=> -1,
-					'post_status'		=> array( 'publish', 'private' ),
-					'post_parent'		=> 0,
-					'order'				=> 'ASC',
-					'orderby'			=> 'title'
-				);
-				$products = get_posts( $args );
-				
-				if ($products) foreach ($products as $product) :
-					
-					$sku = get_post_meta($product->ID, '_sku', true);
-					
-					if ($sku) $sku = ' SKU: '.$sku;
-					
-					echo '<option value="'.$product->ID.'">'.$product->post_title.$sku.' (#'.$product->ID.''.$sku.')</option>';
-					
-					$args_get_children = array(
-						'post_type' => array( 'product_variation', 'product' ),
-						'posts_per_page' 	=> -1,
-						'order'				=> 'ASC',
-						'orderby'			=> 'title',
-						'post_parent'		=> $product->ID
-					);	
-						
-					if ( $children_products =& get_children( $args_get_children ) ) :
+		<select id="add_item_id" name="add_item_id[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>" style="width: 400px"></select>
 		
-						foreach ($children_products as $child) :
-							
-							echo '<option value="'.$child->ID.'">&nbsp;&nbsp;&mdash;&nbsp;'.$child->post_title.'</option>';
-							
-						endforeach;
-						
-					endif;
-					
-				endforeach;
-			?>
-		</select>
-		
-		<button type="button" class="button add_shop_order_item"><?php _e('Add item', 'woocommerce'); ?></button>
+		<button type="button" class="button add_shop_order_item"><?php _e('Add item(s)', 'woocommerce'); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e('Calc line tax &uarr;', 'woocommerce'); ?></button>

@@ -146,6 +146,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.5.4 =
 * Feature - Allow attributes to be added from the edit product page
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
+* Tweak - Adding an item to an order now uses the ajax style product finder
+* Tweak - Updated chosen to latest release
 * Tweak - Changed recent order tables to make them slightly more compact
 * Tweak - Moved recent order table to a template file
 * Tweak - Improved default view-order page when order id is not defined - instead of stating "invalid order" it will list recent orders

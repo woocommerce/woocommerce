@@ -910,7 +910,7 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 		
 		if (isset($SKU) && $SKU) $SKU = ' (SKU: ' . $SKU . ')';
 		
-		$found_products[$post] = get_the_title($post) . $SKU;
+		$found_products[$post] = get_the_title( $post ) . ' &ndash; #' . $post . $SKU;
 		
 	}
 	

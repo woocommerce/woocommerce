@@ -893,7 +893,6 @@ class Woocommerce {
 	 * Init frontend CSS
 	 */
 	function init_styles() {
-		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 		$chosen_en = ( get_option('woocommerce_enable_chosen') == 'yes' ) ? true : false;
 		$lightbox_en = ( get_option('woocommerce_enable_lightbox') == 'yes' ) ? true : false;
 		
@@ -904,8 +903,8 @@ class Woocommerce {
 			wp_enqueue_style( 'woocommerce_frontend_styles' );
 		}
     
-    	if ($lightbox_en) wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox'.$suffix.'.css' );
-    	if ($chosen_en) wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen'.$suffix.'.css' );
+    	if ($lightbox_en) wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox.css' );
+    	if ($chosen_en) wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen.css' );
 	}
 	
 	/**
