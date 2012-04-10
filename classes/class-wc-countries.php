@@ -870,7 +870,7 @@ class WC_Countries {
 			));
 			
 			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout
-			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) $this->locale[ $this->get_base_country() ] = array();
+			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) $this->locale[ $this->get_base_country() ] = $this->locale['default'];
 			
 			$this->locale['default'] 					= apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
 			$this->locale[ $this->get_base_country() ] 	= apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );			

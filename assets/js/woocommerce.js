@@ -748,7 +748,7 @@ jQuery(document).ready(function($) {
 						}
 					}
 					
-				} else {
+				} else if ( locale['default'][key] ) {
 					if ( locale['default'][key]['required'] == true ) {
 						if (field.find('label abbr').size()==0) field.find('label').append( required );
 					}
