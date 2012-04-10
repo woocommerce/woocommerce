@@ -10,6 +10,97 @@
  */
  
 /**
+ * woocommerce_get_dimension function.
+ * 
+ * Normalise dimensions, unify to cm then convert to wanted unit value
+ *
+ * Usage: woocommerce_get_dimension(55, 'in');
+ *
+ * @access public
+ * @param mixed $dim
+ * @param mixed $unit 'in', 'm', 'cm', 'm'
+ * @return void
+ */
+function woocommerce_get_dimension( $dim, $to_unit ) {
+	
+	$from_unit 	= strtolower( get_option('woocommerce_dimension_unit') );
+	$to_unit	= strtolower( $to_unit );
+	
+	// Unify all units to cm first
+	if ( $from_unit !== $to_unit ) {
+
+		switch ( $from_unit ) {
+			case 'in':
+				$dim *= 2.54;
+			break;
+			case 'm':
+				$dim *= 100;
+			break;
+			case 'mm':
+				$dim *= 0.1;
+			break;
+		}
+
+		// Output desired unit
+		switch ( $to_unit ) {
+			case 'in':
+				$dim *= 0.3937;
+			break;
+			case 'm':
+				$dim *= 0.01;
+			break;
+			case 'mm':
+				$dim *= 10;
+			break;
+		}
+	}
+	return ( $dim < 0.001 ) ? 0.001 : $dim;
+}
+
+/**
+ * woocommerce_get_weight function.
+ * 
+ * Normalise weights, unify to cm then convert to wanted unit value
+ *
+ * Usage: woocommerce_get_weight(55, 'kg');
+ *
+ * @access public
+ * @param mixed $weight
+ * @param mixed $unit 'g', 'kg', 'lbs'
+ * @return void
+ */
+function woocommerce_get_weight( $weight, $to_unit ) {
+	
+	$from_unit 	= strtolower( get_option('woocommerce_weight_unit') );
+	$to_unit	= strtolower( $to_unit );
+		
+	//Unify all units to kg first
+	if ( $from_unit !== $to_unit ) {
+		
+		switch ( $from_unit ) {
+			case 'g':
+				$weight *= 0.001;
+			break;
+			case 'lbs':
+				$weight *= 0.4535;
+			break;
+		}
+
+		// Output desired unit
+		switch ( $to_unit ) {
+			case 'g':
+				$weight *= 1000;
+			break;
+			case 'lbs':
+				$weight *= 2.204;
+			break;
+		}
+	}
+	return ( $weight < 0.1 ) ? 0.1 : $weight;
+}
+
+
+/**
  * Get the placeholder for products etc
  **/
 function woocommerce_placeholder_img_src() {
