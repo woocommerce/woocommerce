@@ -163,6 +163,8 @@ jQuery(document).ready(function($) {
 	    } else {
 	    	$qty.val(currentVal + 1); 
 	    }
+	    
+	    $qty.trigger('change');
 	});
 	
 	$(".minus").live('click', function() {
@@ -179,6 +181,8 @@ jQuery(document).ready(function($) {
 	    } else if (currentVal > 0) {
 	    	$qty.val(currentVal - 1);
 	    }
+	    
+	    $qty.trigger('change');
 	});
 	
 	/* states */
