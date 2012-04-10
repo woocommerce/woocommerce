@@ -35,6 +35,8 @@ global $woocommerce;
 		
 	<?php endif; ?>
 	
+	<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
+	
 	<div class="create-account">
 	
 		<p><?php _e('Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page.', 'woocommerce'); ?></p>
@@ -46,5 +48,7 @@ global $woocommerce;
 		<?php endforeach; ?>
 	
 	</div>
+	
+	<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
 					
 <?php endif; ?>

@@ -289,6 +289,9 @@ class WC_Checkout {
 	
 	                    // Change role
 	                    wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
+	                    
+	                    // Action
+	                    do_action( 'woocommerce_created_customer', $user_id );
 	
 	                    // send the user a confirmation and their login details
 	                    $mailer = $woocommerce->mailer();
@@ -297,7 +300,7 @@ class WC_Checkout {
 	                    // set the WP login cookie
 	                    $secure_cookie = is_ssl() ? true : false;
 	                    wp_set_auth_cookie($user_id, true, $secure_cookie);
-					
+
 					else :
 						$woocommerce->add_error( $reg_errors->get_error_message() );
 	                	break;                    
