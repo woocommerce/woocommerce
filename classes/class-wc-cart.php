@@ -673,9 +673,9 @@ class WC_Cart {
 			// If cart_item_key is set, the item is already in the cart
 			if ( $cart_item_key ) {
 	
-				$quantity = $quantity + $this->cart_contents[$cart_item_key]['quantity'];
+				$new_quantity = $quantity + $this->cart_contents[$cart_item_key]['quantity'];
 	
-				$this->set_quantity( $cart_item_key, $quantity );
+				$this->set_quantity( $cart_item_key, $new_quantity );
 	
 			} else {
 			
@@ -692,7 +692,7 @@ class WC_Cart {
 			
 			}
 			
-			do_action( 'woocommerce_add_to_cart', $cart_item_key );
+			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 			
 			$woocommerce->cart_has_contents_cookie( true );
 
