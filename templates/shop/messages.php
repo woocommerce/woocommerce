@@ -2,6 +2,9 @@
 /**
  * Messages
  */
-if (!$messages || !isset($messages[0])) return;
+if ( ! $messages ) return;
 ?>
-<div class="woocommerce_message"><?php echo $messages[0]; ?></div>
+
+<?php foreach ( $messages as $message ) : ?>
+	<div class="woocommerce_message"><?php echo $message; ?></div>
+<?php endforeach; ?>

@@ -128,7 +128,9 @@ if (!function_exists('woocommerce_show_messages')) {
 				'errors' => $woocommerce->get_errors()
 			));
 			
-		} elseif ( $woocommerce->message_count() > 0 ) {
+		}
+		
+		if ( $woocommerce->message_count() > 0 ) {
 		
 			woocommerce_get_template('shop/messages.php', array(
 				'messages' => $woocommerce->get_messages()
