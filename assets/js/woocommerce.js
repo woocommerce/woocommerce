@@ -713,6 +713,7 @@ jQuery(document).ready(function($) {
 			
 			// Handle locale fields
 			var locale_fields = { 
+				'address_1'	: 	'#billing_address_1_field, #shipping_address_1_field', 
 				'address_2'	: 	'#billing_address_2_field, #shipping_address_2_field', 
 				'state'		: 	'#billing_state_field, #shipping_state_field', 
 				'postcode'	:	'#billing_postcode_field, #shipping_postcode_field',

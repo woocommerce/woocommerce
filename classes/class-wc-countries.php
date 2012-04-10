@@ -644,10 +644,10 @@ class WC_Countries {
 	
 	/** Get country locale settings */
 	function get_country_locale() {
-		if (!$this->locale) :
+		if ( ! $this->locale ) {
 		
 			// Locale information used by the checkout
-			$this->locale = apply_filters('woocommerce_localisation_address_fields', array(
+			$this->locale = apply_filters('woocommerce_get_country_locale', array(
 				'AT' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
@@ -846,9 +846,9 @@ class WC_Countries {
 				),						
 			));
 			
-			$this->locale = array_intersect_key($this->locale, $this->get_allowed_countries());
+			$this->locale = array_intersect_key( $this->locale, $this->get_allowed_countries() );
 			
-			$this->locale['default'] = apply_filters('woocommerce_localisation_default_address_fields', array(
+			$this->locale['default'] = apply_filters('woocommerce_get_country_locale_default', array(
 				'address_2'	=> array(
 					'required' 	=> false
 				),
@@ -869,7 +869,13 @@ class WC_Countries {
 				)
 			));
 			
-		endif;
+			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout
+			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) $this->locale[ $this->get_base_country() ] = array();
+			
+			$this->locale['default'] 					= apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
+			$this->locale[ $this->get_base_country() ] 	= apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );			
+			
+		}
 		
 		return $this->locale;
 		

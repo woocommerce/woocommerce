@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Canada post code locale
 * Localization - RMB paypal
 * Localization - Bundled translation updates
+* Localization - Changed the filters for checkout field locales - lets you override the base country labels
 
 = 1.5.3 - 29/03/2012 =
 * Feature - Debug/status page with some handy functions to resolve common issues
