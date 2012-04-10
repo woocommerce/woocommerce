@@ -590,37 +590,39 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		 	
 		 	$is_taxonomy = ($attribute_is_taxonomy[$i]) ? 1 : 0;
 		 	
-		 	if ($is_taxonomy) :
-		 		// Format values
-		 		if (is_array($attribute_values[$i])) :
-			 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
-			 	else :
-			 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
-			 		// Text based, separate by pipe
-			 		$values = explode('|', $values);
-			 		$values = array_map('trim', $values);
-			 	endif;
+		 	if ( $is_taxonomy ) {
+		 		if ( isset( $attribute_values[$i] ) ) {
+		 		
+			 		// Format values
+			 		if ( is_array( $attribute_values[$i] ) ) {
+				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
+				 	} else {
+				 		$values = htmlspecialchars(stripslashes($attribute_values[$i]));
+				 		// Text based, separate by pipe
+				 		$values = explode('|', $values);
+				 		$values = array_map('trim', $values);
+				 	}
+				 	
+				 	// Remove empty items in the array
+				 	$values = array_filter( $values );
 			 	
-			 	// Remove empty items in the array
-			 	$values = array_filter( $values );
-		 	
-		 		// Update post terms
-		 		if (taxonomy_exists( $attribute_names[$i] )) :
-		 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
-		 		endif;
-
-		 		if ($values) :
-			 		// Add attribute to array, but don't set values
-			 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
-				 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
-				 		'value' 		=> '',
-				 		'position' 		=> $attribute_position[$i],
-				 		'is_visible' 	=> $is_visible,
-				 		'is_variation' 	=> $is_variation,
-				 		'is_taxonomy' 	=> $is_taxonomy
-				 	);
-			 	endif;
-		 	else :
+			 		// Update post terms
+			 		if ( taxonomy_exists( $attribute_names[$i] ) )
+			 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
+	
+			 		if ( $values ) {
+				 		// Add attribute to array, but don't set values
+				 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
+					 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+					 		'value' 		=> '',
+					 		'position' 		=> $attribute_position[$i],
+					 		'is_visible' 	=> $is_visible,
+					 		'is_variation' 	=> $is_variation,
+					 		'is_taxonomy' 	=> $is_taxonomy
+					 	);
+				 	}
+			 	}
+		 	} else {
 		 		if (!$attribute_values[$i]) continue;
 		 		// Format values
 		 		$values = esc_html(stripslashes($attribute_values[$i]));
@@ -638,7 +640,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			 		'is_variation' 	=> $is_variation,
 			 		'is_taxonomy' 	=> $is_taxonomy
 			 	);
-		 	endif;
+		 	}
 		 	
 		 endfor; 
 	endif;	

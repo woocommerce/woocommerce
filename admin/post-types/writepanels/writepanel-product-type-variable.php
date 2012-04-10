@@ -658,7 +658,9 @@ function process_product_meta_variable( $post_id ) {
 		
 		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
 		
-		for ($i=0; $i<sizeof($variable_sku); $i++) :
+		for ( $i=0; $i <= max( array_keys( $_POST['variable_post_id'] ) ); $i++ ) :
+			
+			if ( ! isset( $variable_post_id[$i] ) ) continue;
 			
 			$variation_id = (int) $variable_post_id[$i];
 			
