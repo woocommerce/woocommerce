@@ -286,7 +286,7 @@ function woocommerce_admin_fields($options) {
 	            <legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
 					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
-					<?php echo $value['desc'] ?></label><br>
+					<?php echo $value['desc'] ?></label><br />
 				<?php
 				
 				if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :

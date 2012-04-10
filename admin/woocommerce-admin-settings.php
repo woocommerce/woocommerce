@@ -1221,7 +1221,7 @@ function woocommerce_settings() {
     ?>
 	<div class="wrap woocommerce">
 		<form method="post" id="mainform" action="">
-			<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+			<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 				<?php
 					$tabs = array(
 						'general' => __( 'General', 'woocommerce' ),

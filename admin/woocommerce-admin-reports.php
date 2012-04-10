@@ -65,7 +65,7 @@ function woocommerce_reports() {
 	));
     ?>
 	<div class="wrap woocommerce">
-		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
 				foreach ($charts as $name => $value) :
 					echo '<a href="'.admin_url('admin.php?page=woocommerce_reports&tab='.$name).'" class="nav-tab ';

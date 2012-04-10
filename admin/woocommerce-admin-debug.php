@@ -12,7 +12,7 @@ function woocommerce_debug() {
 	
     ?>
 	<div class="wrap woocommerce">
-		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br></div>
+		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
 		<h2><?php _e( 'Debugging Information', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce'); ?></a></h2>
 		
 		<?php
