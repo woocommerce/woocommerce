@@ -548,41 +548,54 @@ function woocommerce_grant_access_to_download() {
 	$limit = trim(get_post_meta($product_id, '_download_limit', true));
 	$expiry = trim(get_post_meta($product_id, '_download_expiry', true));
 	
-	$limit = (empty($limit)) ? '' : (int) $limit;
-	$expiry = (empty($expiry)) ? '' : (int) $expiry;
+    $limit = (empty($limit)) ? '' : (int) $limit;
+
+    // Default value is NULL in the table schema
+	$expiry = (empty($expiry)) ? null : (int) $expiry;
 	
 	if ($expiry) $expiry = date("Y-m-d", strtotime('NOW + ' . $expiry . ' DAY'));
 				
 	$wpdb->hide_errors();
 
-	$success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 
-		'product_id' => $product_id, 
-		'user_id' => $order->user_id,
-		'user_email' => $user_email,
-		'order_id' => $order->id,
-		'order_key' => $order->order_key,
-		'downloads_remaining' => $limit,
-		'access_granted'		=> current_time('mysql'),
-		'access_expires'		=> $expiry,
-		'download_count'		=> 0
-	), array( 
-		'%s', 
-		'%s', 
-		'%s', 
-		'%s', 
-		'%s',
-		'%s',
-		'%s',
-		'%s',
-		'%d'
-	) );
-	
+    $data = array(
+        'product_id' 			=> $product_id, 
+        'user_id' 				=> $order->user_id,
+        'user_email' 			=> $user_email,
+        'order_id' 				=> $order->id,
+        'order_key' 			=> $order->order_key,
+        'downloads_remaining' 	=> $limit,
+        'access_granted'		=> current_time('mysql'),
+        'download_count'		=> 0
+    );
+
+    $format = array(
+        '%s', 
+        '%s', 
+        '%s', 
+        '%s', 
+        '%s',
+        '%s',
+        '%s',
+        '%d'
+    );
+
+    if ( ! is_null($expiry)) {
+        $data['access_expires'] = $expiry;
+        $format[] = '%s';
+    }
+
+    // Downloadable product - give access to the customer
+    $success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', 
+        $data,
+        $format
+    );	
+
 	if ($success) {
 		echo json_encode(array(
 			'success'		=> 1,
 			'download_id'  	=> $product_id,
 			'title'			=> get_the_title($product_id),
-			'expires'		=> $expiry,
+			'expires'		=> is_null($expiry) ? '' : $expiry,
 			'remaining'		=> $limit
 		));
 	}
