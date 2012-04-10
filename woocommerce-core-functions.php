@@ -54,7 +54,7 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 			break;
 		}
 	}
-	return ( $dim < 0.001 ) ? 0.001 : $dim;
+	return ( $dim < 0 ) ? 0 : $dim;
 }
 
 /**
@@ -96,7 +96,7 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 			break;
 		}
 	}
-	return ( $weight < 0.1 ) ? 0.1 : $weight;
+	return ( $weight < 0 ) ? 0 : $weight;
 }
 
 
