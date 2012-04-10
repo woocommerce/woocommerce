@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Don't show unused tabs on the frontend (description and reviews)
 * Tweak - Rename comments meta box to reviews
 * Tweak - Rewritten widgets to use category walkers
+* Tweak - Improved installation code (dbdelta)
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Localization - Canada post code locale
 * Localization - RMB paypal

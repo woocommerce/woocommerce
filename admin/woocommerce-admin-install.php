@@ -194,43 +194,52 @@ function woocommerce_tables_install() {
 	$wpdb->hide_errors();
 
 	$collate = '';
-    if($wpdb->supports_collation()) {
-		if(!empty($wpdb->charset)) $collate = "DEFAULT CHARACTER SET $wpdb->charset";
-		if(!empty($wpdb->collate)) $collate .= " COLLATE $wpdb->collate";
+    if( $wpdb->supports_collation() ) {
+		if( ! empty($wpdb->charset ) ) $collate .= "DEFAULT CHARACTER SET $wpdb->charset";
+		if( ! empty($wpdb->collate ) ) $collate .= " COLLATE $wpdb->collate";
     }
     
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    
+
     // Table for storing attribute taxonomies - these are user defined
-    $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies" ." (
-        attribute_id 		mediumint(9) NOT NULL AUTO_INCREMENT,
-        attribute_name		varchar(200) NOT NULL,
-        attribute_label		longtext NULL,
-        attribute_type		varchar(200) NOT NULL,
-        PRIMARY KEY id (attribute_id)) $collate;";
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies (
+  attribute_id bigint(20) NOT NULL auto_increment,
+  attribute_name varchar(200) NOT NULL,
+  attribute_label longtext NULL,
+  attribute_type varchar(200) NOT NULL,
+  PRIMARY KEY  (attribute_id)
+) $collate;
+";
     dbDelta($sql);
     
     // Table for storing user and guest download permissions
-    $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions" ." (
-        product_id 			mediumint(9) NOT NULL,
-        order_id			mediumint(9) NOT NULL DEFAULT 0,
-        order_key			varchar(200) NOT NULL,
-        user_email			varchar(200) NOT NULL,
-        user_id				mediumint(9) NULL,
-        downloads_remaining	varchar(9) NULL,
-        access_granted 		datetime NOT NULL default '0000-00-00 00:00:00',
-        access_expires 		datetime NULL default null,
-        download_count 		mediumint(9) NOT NULL DEFAULT 0,
-        PRIMARY KEY id (product_id,order_id,order_key)) $collate;";
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
+  product_id bigint(20) NOT NULL,
+  order_id bigint(20) NOT NULL DEFAULT 0,
+  order_key varchar(200) NOT NULL,
+  user_email varchar(200) NOT NULL,
+  user_id bigint(20) NULL,
+  downloads_remaining varchar(9) NULL,
+  access_granted datetime NOT NULL default '0000-00-00 00:00:00',
+  access_expires datetime NULL default null,
+  download_count bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY  (product_id,order_id,order_key)
+) $collate;
+";
     dbDelta($sql);
     
     // Term meta table - sadly WordPress does not have termmeta so we need our own
-    $sql = "CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta" ." (
-		meta_id 			bigint(20) NOT NULL AUTO_INCREMENT,
-      	woocommerce_term_id bigint(20) NOT NULL,
-      	meta_key 			varchar(255) NULL,
-      	meta_value 			longtext NULL,
-      	PRIMARY KEY id (meta_id)) $collate;";
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL AUTO_INCREMENT,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id)
+) $collate;
+";
     dbDelta($sql);
     
     /**
