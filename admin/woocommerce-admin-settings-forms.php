@@ -247,9 +247,13 @@ function woocommerce_admin_fields($options) {
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>">
                         <?php
                         foreach ($value['options'] as $key => $val) {
-                        ?>
-                            <option value="<?php echo esc_attr( $key ); ?>" <?php if (get_option($value['id']) == $key) { ?> selected="selected" <?php } ?>><?php echo $val ?></option>
-                        <?php
+                        	$_current = get_option( $value['id'] );
+							if ( ! $_current ) {
+								$_current = $value['std'];
+							}
+                        	?>
+                        	<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $_current, $key ); ?>><?php echo $val ?></option>
+                        	<?php
                         }
                         ?>
                        </select> <?php echo $description; ?>
