@@ -20,21 +20,23 @@
 			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Price', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
-	<tfoot>
-		<?php 
-			if ($totals = $order->get_order_item_totals()) foreach ($totals as $label => $value) :
-				?>
-				<tr>
-					<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; border-top-width: 4px;"><?php echo $label; ?></th>
-					<td style="text-align:left; border: 1px solid #eee; border-top-width: 4px;"><?php echo $value; ?></td>
-				</tr>
-				<?php 
-			endforeach; 
-		?>
-	</tfoot>
 	<tbody>
 		<?php if ($order->status=='completed') echo $order->email_order_items_table( true, true ); else echo $order->email_order_items_table( false, true ); ?>
 	</tbody>
+	<tfoot>
+		<?php 
+			if ( $totals = $order->get_order_item_totals() ) {
+				$i = 0;
+				foreach ( $totals as $label => $value ) {
+					$i++;
+					?><tr>
+						<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $label; ?></th>
+						<td style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $value; ?></td>
+					</tr><?php 
+				}
+			}
+		?>
+	</tfoot>
 </table>
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>

@@ -16,21 +16,23 @@
 			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e('Price', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
-	<tfoot>
-		<?php 
-			if ($totals = $order->get_order_item_totals()) foreach ($totals as $label => $value) :
-				?>
-				<tr>
-					<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; border-top-width: 4px;"><?php echo $label; ?></th>
-					<td style="text-align:left; border: 1px solid #eee; border-top-width: 4px;"><?php echo $value; ?></td>
-				</tr>
-				<?php 
-			endforeach; 
-		?>
-	</tfoot>
 	<tbody>
 		<?php echo $order->email_order_items_table( (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing') ? true : false, true, ($order->status=='processing') ? true : false ); ?>
 	</tbody>
+	<tfoot>
+		<?php 
+			if ( $totals = $order->get_order_item_totals() ) {
+				$i = 0;
+				foreach ( $totals as $label => $value ) {
+					$i++;
+					?><tr>
+						<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $label; ?></th>
+						<td style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $value; ?></td>
+					</tr><?php 
+				}
+			}
+		?>
+	</tfoot>
 </table>
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>
