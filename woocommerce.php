@@ -1042,7 +1042,7 @@ class Woocommerce {
 	function plugin_path() { 	
 		if ( $this->plugin_path ) return $this->plugin_path;
 		
-		return $this->plugin_path = plugin_dir_path( __FILE__ );
+		return $this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 	}
 	 
 	/**

@@ -256,7 +256,7 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
 /**
  * Get other templates (e.g. product attributes) passing attributes and including the file
  */
-function woocommerce_get_template($template_name, $args = array(), $template_path = '' ) {
+function woocommerce_get_template( $template_name, $args = array(), $template_path = '' ) {
 	global $woocommerce;
 	
 	if ( $args && is_array($args) ) 
@@ -277,14 +277,14 @@ function woocommerce_get_template($template_name, $args = array(), $template_pat
 function woocommerce_locate_template( $template_name, $template_path = '' ) {
 	global $woocommerce;
 	
-    $template = (!empty($template_path)) ? locate_template( array( $template_path . $template_name , $template_name ) ) : '';
+    $template = ( ! empty( $template_path ) ) ? locate_template( array( $template_path . $template_name , $template_name ) ) : '';
         
 	// Look in yourtheme/woocommerce/template-name and yourtheme/template-name
-	if (!$template) $template = locate_template( array( $woocommerce->template_url . $template_name , $template_name ) );
+	if ( ! $template ) $template = locate_template( array( $woocommerce->template_url . $template_name , $template_name ) );
 	
 	// Get default template
-	if (!$template) $template = $woocommerce->plugin_path() . '/templates/' . $template_name;
-	
+	if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/' . $template_name;
+
 	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
 }
 /**
