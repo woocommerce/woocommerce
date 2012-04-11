@@ -258,7 +258,7 @@ jQuery(document).ready(function($) {
 		
 		$('body').delay(200).trigger('country_to_state_changing', [country, $(this).closest('div')]);
 		
-	}).change();
+	});
 	
 	/* Tabs */
 	$('div.woocommerce_tabs .panel').hide();
@@ -292,7 +292,6 @@ jQuery(document).ready(function($) {
 	});
 	
 	// Variations
-	
 	$('.reset_variations').click(function(){
 		$('.variations select').val('').change();
 		return false;
@@ -791,5 +790,8 @@ jQuery(document).ready(function($) {
 
 
 	}
+	
+	// Get this show on the road - update locale when loaded
+	$('select.country_to_state').change();
 
 });
