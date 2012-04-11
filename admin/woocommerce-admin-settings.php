@@ -1134,43 +1134,54 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
-    $current_tab = (isset($_GET['tab'])) ? $_GET['tab'] : 'general';
+    $current_tab = ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
+    $current_section = ( empty( $_GET['section'] ) ) ? '' : urldecode( $_GET['section'] );
     
     // Save settings
-    if( isset( $_POST ) && $_POST ) {
+    if ( ! empty( $_POST ) ) {
     	if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) 
     		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
     	
-    	switch ( $current_tab ) {
-			case "general" :
-			case "pages" :
-			case "catalog" :
-			case "inventory" :
-			case "shipping" :
-			case "tax" :
-			case "email" :
-			case "integration" :
-				woocommerce_update_options( $woocommerce_settings[$current_tab] );
-			break;
+    	if ( ! $current_section ) {
+    	
+	    	switch ( $current_tab ) {
+				case "general" :
+				case "pages" :
+				case "catalog" :
+				case "inventory" :
+				case "shipping" :
+				case "tax" :
+				case "email" :
+				case "integration" :
+					woocommerce_update_options( $woocommerce_settings[$current_tab] );
+				break;
+			}
+		
+			do_action( 'woocommerce_update_options' );
+			do_action( 'woocommerce_update_options_' . $current_tab );
+			
+		} else {
+		
+			// Save section only
+			do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section );
+			
 		}
 		
-		do_action( 'woocommerce_update_options' );
-		do_action( 'woocommerce_update_options_' . $current_tab );
-		
-		if ($current_tab=='shipping') do_action( 'woocommerce_update_options_shipping_methods' ); // Shipping Methods
-		
+		// Flush rules and clear any unwanted data
 		flush_rewrite_rules( false );
-		
 		unset($_SESSION['orderby']);
 		
-		wp_redirect( add_query_arg( 'subtab', esc_attr(str_replace('#', '', $_POST['subtab'])), add_query_arg( 'saved', 'true', admin_url( 'admin.php?page=woocommerce&tab=' . $current_tab ) )) );
+		// Redirect back
+		$redirect = add_query_arg( 'saved', 'true' );
 		
+		if ( ! empty( $_POST['subtab'] ) ) $redirect = add_query_arg( 'subtab', esc_attr( str_replace( '#', '', $_POST['subtab'] ) ), $redirect ); 
+		
+		wp_redirect( $redirect );
 		exit;
-		
 	}
     
     // Settings saved message
-    if (isset($_GET['saved']) && $_GET['saved']) {
+    if ( ! empty( $_GET['saved'] ) ) {
     	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
         
         flush_rewrite_rules( false );
@@ -1237,11 +1248,11 @@ function woocommerce_settings() {
 					
 					$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
 					
-					foreach ($tabs as $name => $label) :
+					foreach ( $tabs as $name => $label ) {
 						echo '<a href="' . admin_url( 'admin.php?page=woocommerce&tab=' . $name ) . '" class="nav-tab ';
-						if( $current_tab==$name ) echo 'nav-tab-active';
+						if( $current_tab == $name ) echo 'nav-tab-active';
 						echo '">' . $label . '</a>';
-					endforeach;
+					}
 					
 					do_action( 'woocommerce_settings_tabs' ); 
 				?>
@@ -1265,71 +1276,75 @@ function woocommerce_settings() {
 					break;
 					case "shipping" :
 						
-						$links = array( '<a href="#shipping-options">'.__('Shipping Options', 'woocommerce').'</a>' );
+						$current = ( empty( $_GET['section'] ) ) ? 'class="current"' : '';
+
+						$links = array( '<a href="' . remove_query_arg( 'saved', remove_query_arg( 'section' ) ) . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
 						
-						foreach ( $woocommerce->shipping->shipping_methods as $method ) :
+						foreach ( $woocommerce->shipping->shipping_methods as $method ) {
 							$title = ( isset( $method->method_title ) && $method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
-							$links[] = '<a href="#shipping-'.$method->id.'">'.$title.'</a>';
-						endforeach;
+							$current = ( ! empty( $_GET['section'] ) && $method->id == urldecode( $_GET['section'] ) ) ? 'class="current"' : '';
+							
+							$links[] = '<a href="' . remove_query_arg( 'saved', add_query_arg( 'section', $method->id ) ) . '"' . $current . '>' . $title . '</a>';
+						}
 						
-						echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+						echo '<ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
 						
 						// Gateway ordering
-						echo '<div class="section" id="shipping-options">';
+						if ( empty( $_GET['section'] ) ) {
 						
-						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+							?>
+							<h3><?php _e('Shipping Methods', 'woocommerce'); ?></h3>
+							<p><?php _e('Your activated shipping methods are listed below. Drag and drop rows to re-order them for display on the frontend.', 'woocommerce'); ?></p>
+							<table class="wc_shipping widefat" cellspacing="0">
+								<thead>
+									<tr>
+										<th><?php _e('Default', 'woocommerce'); ?></th>
+										<th><?php _e('Shipping Method', 'woocommerce'); ?></th>
+										<th><?php _e('Status', 'woocommerce'); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+							    	<?php
+							    	foreach ( $woocommerce->shipping->shipping_methods as $method ) {
+							    	
+								    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
+								    	
+								    	echo '<tr>
+								    		<td width="1%" class="radio">
+								    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
+								    			<input type="hidden" name="method_order[]" value="' . $method->id . '" />
+								    			<td>
+								    				<p><strong>' . $method->title . '</strong><br/>
+								    				<small>' . __('Method ID', 'woocommerce') . ': ' . $method->id . '</small></p>
+								    			</td>
+								    			<td>';
+								    		
+							    		if ($method->enabled == 'yes') 
+							    			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
+										else 
+											echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';	
+							    			
+							    		echo '</td>
+							    		</tr>';
+							    		
+							    	}
+							    	?>
+								</tbody>
+							</table>
+							<?php
+							
+						} else {
 						
-						?>
-						<h3><?php _e('Shipping Methods', 'woocommerce'); ?></h3>
-						<p><?php _e('Your activated shipping methods are listed below. Drag and drop rows to re-order them for display on the frontend.', 'woocommerce'); ?></p>
-						<table class="wc_shipping widefat" cellspacing="0">
-							<thead>
-								<tr>
-									<th><?php _e('Default', 'woocommerce'); ?></th>
-									<th><?php _e('Shipping Method', 'woocommerce'); ?></th>
-									<th><?php _e('Status', 'woocommerce'); ?></th>
-								</tr>
-							</thead>
-							<tbody>
-						    	<?php
-						    	foreach ( $woocommerce->shipping->shipping_methods as $method ) :
-						    	
-						    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
-						    	
-						    	echo '<tr>
-						    		<td width="1%" class="radio">
-						    			<input type="radio" name="default_shipping_method" value="'.$method->id.'" '.checked($default_shipping_method, $method->id, false).' />
-						    			<input type="hidden" name="method_order[]" value="'.$method->id.'" />
-						    			<td>
-						    				<p><strong>'.$method->title.'</strong><br/>
-						    				<small>'.__('Method ID', 'woocommerce').': '.$method->id.'</small></p>
-						    			</td>
-						    			<td>';
-						    		
-						    		if ($method->enabled == 'yes') 
-						    			echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
-									else 
-										echo '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';	
-						    			
-						    		echo '</td>
-						    		</tr>';
-						    		
-						    	endforeach; 
-						    	?>
-							</tbody>
-						</table>
-						<?php
-						
-						echo '</div>';
-						
-						// Specific method options
-		            	foreach ($woocommerce->shipping->shipping_methods as $method) :
-		            		echo '<div class="section" id="shipping-'.$method->id.'">';
-		            		$method->admin_options();
-		            		echo '</div>';
-		            	endforeach; 
+							// Specific method options
+			            	foreach ( $woocommerce->shipping->shipping_methods as $method ) {
+			            		if ( $method->id == urldecode( $_GET['section'] ) ) {
+			            			$method->admin_options();
+			            			break;
+			            		}
+			            	}
 		            	
-		            	echo '</div>';
+		            	}
             	
 					break;
 					case "payment_gateways" : 	
@@ -1415,10 +1430,10 @@ function woocommerce_settings() {
 			jQuery(window).load(function(){
 			
 				// Subsubsub tabs
-				jQuery('ul.subsubsub li a:eq(0)').addClass('current');
-				jQuery('.subsubsub_section .section:gt(0)').hide();
+				jQuery('div.subsubsub_section ul.subsubsub li a:eq(0)').addClass('current');
+				jQuery('div.subsubsub_section .section:gt(0)').hide();
 				
-				jQuery('ul.subsubsub li a').click(function(){
+				jQuery('div.subsubsub_section ul.subsubsub li a').click(function(){
 					jQuery('a', jQuery(this).closest('ul.subsubsub')).removeClass('current');
 					jQuery(this).addClass('current');
 					jQuery('.section', jQuery(this).closest('.subsubsub_section')).hide();
@@ -1427,7 +1442,7 @@ function woocommerce_settings() {
 					return false;
 				});
 				
-				<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
+				<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("div.subsubsub_section ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
 				
 				// Countries
 				jQuery('select#woocommerce_allowed_countries').change(function(){

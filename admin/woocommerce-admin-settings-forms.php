@@ -14,9 +14,9 @@
  */
 function woocommerce_update_options($options) {
     
-    if(!isset($_POST) || !$_POST) return false;
+    if ( empty( $_POST ) ) return false;
     
-    foreach ($options as $value) {
+    foreach ( $options as $value ) {
     	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
     		
     		// Tax rates saving

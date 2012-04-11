@@ -13,7 +13,7 @@
 class WC_Local_Delivery extends WC_Shipping_Method {
 	
 	function __construct() { 
-		$this->id			= 'local-delivery';
+		$this->id			= 'local_delivery';
 		$this->method_title = __('Local Delivery', 'woocommerce');
 		$this->init();
 	} 
@@ -34,7 +34,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		$this->availability	= empty( $this->settings['availability'] ) ? '' : $this->settings['availability'];
 		$this->countries	= empty( $this->settings['countries'] ) ? '' : $this->settings['countries'];
 		
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_local_delivery', array(&$this, 'process_admin_options'));
 	}
 	 
 	function calculate_shipping() {

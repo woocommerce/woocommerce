@@ -33,7 +33,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 		$this->requires_coupon 	= $this->settings['requires_coupon'];
 		
 		// Actions
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_free_shipping', array(&$this, 'process_admin_options'));
     }
 
 	/**

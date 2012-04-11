@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Rewritten widgets to use category walkers
 * Tweak - Improved installation code (dbdelta)
 * Tweak - Email tfoot compatibility for outlook
+* Tweak - Separate sections for each shipping method, due to the volume of data being posted upon save.
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Localization - Canada post code locale
@@ -743,6 +744,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.5.4 =
+Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably.
 
 = 1.5.2.1 =
 Minor update. Note, titles are now hooked in to single-product.php - if you have overridden this template and have double titles, update your single-product.php template with that from core.

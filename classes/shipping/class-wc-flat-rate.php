@@ -48,8 +48,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->get_flat_rates();
 		
     	// Add Actions
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
-		add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_flat_rates'));
+		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_flat_rates'));
     }
 
 	/**
