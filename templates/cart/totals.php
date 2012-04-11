@@ -31,7 +31,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 				<?php endif; ?>
 				
-				<?php if ($woocommerce->cart->needs_shipping() && ( $available_methods || get_option('woocommerce_enable_shipping_calc') == 'yes' )) : ?>
+				<?php if ( $woocommerce->cart->needs_shipping() && ( $available_methods || get_option( 'woocommerce_enable_shipping_calc' ) == 'yes' ) && get_option( 'woocommerce_hide_shipping_address' ) != 'yes' ) { ?>
 				
 				<tr class="shipping">
 					<th><?php _e('Shipping', 'woocommerce'); ?></th>
@@ -95,7 +95,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 				</tr>
 	
-				<?php endif; ?>
+				<?php } ?>
 				
 				<?php 
 					if (get_option('woocommerce_display_cart_taxes')=='yes' && $woocommerce->cart->get_cart_tax()) :

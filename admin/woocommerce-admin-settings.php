@@ -848,6 +848,15 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_enable_shipping_calc',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+
+	array(  
+		'name' 		=> __( 'Shipping calculations', 'woocommerce' ),
+		'desc' 		=> __( 'Hide shipping costs until address is entered', 'woocommerce' ),
+		'id' 		=> 'woocommerce_hide_shipping_address',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 	
