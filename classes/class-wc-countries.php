@@ -323,7 +323,7 @@ class WC_Countries {
 				'NU' => __('Nunavut', 'woocommerce') ,
 				'ON' => __('Ontario', 'woocommerce') ,
 				'PE' => __('Prince Edward Island', 'woocommerce') ,
-				'PQ' => __('Quebec', 'woocommerce') ,
+				'QC' => __('Quebec', 'woocommerce') ,
 				'SK' => __('Saskatchewan', 'woocommerce') ,
 				'YT' => __('Yukon Territory', 'woocommerce') 
 			),
