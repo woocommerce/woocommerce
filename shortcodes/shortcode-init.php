@@ -67,6 +67,48 @@ function woocommerce_product_category($atts){
 	return ob_get_clean();
 }
 
+
+function woocommerce_product_categories( $atts ) { 
+	global $woocommerce_loop;
+
+	extract( shortcode_atts( array (
+		'number'     => null,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+		'columns' 	 => '4',
+		'hide_empty' => 1
+		), $atts ) );
+
+	if ( isset( $atts[ 'ids' ] ) ) {
+		$ids = explode( ',', $atts[ 'ids' ] );
+	  	$ids = array_map( 'trim', $ids );
+	} else {
+		$ids = array();
+	}
+
+	$hide_empty = ( $hide_empty == true || $hide_empty == 1 ) ? 1 : 0;
+	
+  	$args = array(
+  		'number'     => $number,
+  		'orderby'    => $orderby,
+  		'order'      => $order,
+  		'hide_empty' => $hide_empty,
+		'include'    => $ids
+	);
+	
+  	$terms = get_terms( 'product_cat', $args );
+
+  	$woocommerce_loop['columns'] = $columns;
+  	$woocommerce_loop['loop'] = 0;
+	
+  	ob_start();
+  	echo '<ul class="products">';
+	woocommerce_get_template( 'loop-product-cats.php', array( 'product_categories' => $terms, 'product_category_parent' => false ) );
+	echo '</ul>';
+	wp_reset_query();
+	return ob_get_clean();
+}
+
 /**
  * Recent Products shortcode
  **/
@@ -403,6 +445,7 @@ function woocommerce_messages_shortcode() {
 add_shortcode('product', 'woocommerce_product');
 add_shortcode('product_page', 'woocommerce_product_page_shortcode');
 add_shortcode('product_category', 'woocommerce_product_category');
+add_shortcode('product_categories', 'woocommerce_product_categories');
 add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
 add_shortcode('add_to_cart_url', 'woocommerce_product_add_to_cart_url');
 add_shortcode('products', 'woocommerce_products');
