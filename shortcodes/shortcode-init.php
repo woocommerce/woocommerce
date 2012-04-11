@@ -129,6 +129,7 @@ function woocommerce_products($atts){
 		'ignore_sticky_posts'	=> 1,
 		'orderby' => $orderby,
 		'order' => $order,
+		'posts_per_page' => -1,
 		'meta_query' => array(
 			array(
 				'key' 		=> '_visibility',
