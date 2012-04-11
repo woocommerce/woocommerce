@@ -22,6 +22,7 @@ class WC_Product_Variation extends WC_Product {
 	var $variation_has_stock;
 	var $variation_has_sku;
 	var $variation_shipping_class;
+	var $variation_has_tax_class;
 	
 	/**
 	 * Loads all product data from custom fields
@@ -134,6 +135,11 @@ class WC_Product_Variation extends WC_Product {
 			$this->virtual = 'yes';
 		} else {
 			$this->virtual = 'no';
+		}
+		
+		if ( isset( $product_custom_fields['_tax_class'][0] ) ) {
+			$this->variation_has_tax_class = true;
+			$this->tax_class = $product_custom_fields['_tax_class'][0];
 		}
 		
 		$this->total_stock = $this->stock;

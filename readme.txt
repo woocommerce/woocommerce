@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.3
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
@@ -143,12 +143,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.4 =
+= 1.5.4 - 12/04/2012 =
 * Feature - Allow attributes to be added from the edit product page
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
 * Feature - Added woocommerce_get_dimension/woocommerce_get_weight helpers for normalisation. Thanks Andy Zhang
 * Feature - Pass page_style to paypal standard if defined
 * Feature - Option to hide shipping costs until an address is entered on the cart/checkout
+* Feature - Tax class selection for variations
+* Tweak - Redesigned variation panels and variation bulk edit to make them easier to use and expand.
 * Tweak - Show multiple success messages/error messages if added, rather than one or the other
 * Tweak - Adding an item to an order now uses the ajax style product finder
 * Tweak - Updated chosen to latest release
