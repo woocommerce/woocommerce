@@ -26,10 +26,10 @@ class WC_Customer {
         	endif;
 			$data = array(
 				'country' 			=> $country,
-				'state' 			=> $state,
+				'state' 			=> '',
 				'postcode' 			=> '',
 				'shipping_country' 	=> $country,
-				'shipping_state' 	=> $state,
+				'shipping_state' 	=> '',
 				'shipping_postcode' => '',
 				'is_vat_exempt' 	=> false
 			);			

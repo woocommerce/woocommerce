@@ -33,7 +33,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			
 			<?php endif; ?>
 			
-			<?php if ($woocommerce->cart->needs_shipping()) : ?>
+			<?php if ( $woocommerce->cart->needs_shipping() && $woocommerce->cart->show_shipping() ) : ?>
 			
 			<?php do_action('woocommerce_review_order_before_shipping'); ?>
 			

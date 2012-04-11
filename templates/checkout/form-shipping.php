@@ -5,7 +5,7 @@
 global $woocommerce;
 ?>
 	
-<?php if ($woocommerce->cart->needs_shipping() && !$woocommerce->cart->ship_to_billing_address_only()) : ?>
+<?php if ( $woocommerce->cart->needs_shipping() && ! $woocommerce->cart->ship_to_billing_address_only() ) : ?>
 			
 	<?php 
 		if (!isset($_POST) || !$_POST) :

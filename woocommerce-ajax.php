@@ -80,9 +80,9 @@ function woocommerce_ajax_update_shipping_method() {
 	
 	check_ajax_referer( 'update-shipping-method', 'security' );
 	
-	if (!defined('WOOCOMMERCE_CART')) define('WOOCOMMERCE_CART', true);
+	if ( ! defined('WOOCOMMERCE_CART') ) define( 'WOOCOMMERCE_CART', true );
 	
-	if (isset($_POST['shipping_method'])) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
+	if ( isset( $_POST['shipping_method'] ) ) $_SESSION['_chosen_shipping_method'] = $_POST['shipping_method'];
 	
 	$woocommerce->cart->calculate_totals();
 	

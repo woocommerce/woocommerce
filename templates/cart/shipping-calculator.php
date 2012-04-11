@@ -5,7 +5,7 @@
  
 global $woocommerce;
 
-if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart->needs_shipping()) return;
+if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->cart->needs_shipping() ) return;
 ?>
 
 <?php do_action( 'woocommerce_before_shipping_calculator' ); ?>
@@ -47,7 +47,7 @@ if (get_option('woocommerce_enable_shipping_calc')=='no' || !$woocommerce->cart-
 				else :
 					// Input
 					?>
-					<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('state', 'woocommerce'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
+					<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('State', 'woocommerce'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
 					<?php
 				endif;
 			?>

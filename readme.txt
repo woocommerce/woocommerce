@@ -148,6 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
 * Feature - Added woocommerce_get_dimension/woocommerce_get_weight helpers for normalisation. Thanks Andy Zhang
 * Feature - Pass page_style to paypal standard if defined
+* Feature - Option to hide shipping costs until an address is entered on the cart/checkout
 * Tweak - Show multiple success messages/error messages if added, rather than one or the other
 * Tweak - Adding an item to an order now uses the ajax style product finder
 * Tweak - Updated chosen to latest release

@@ -1327,7 +1327,7 @@ class WC_Cart {
 		function calculate_shipping() {
 			global $woocommerce;
 			
-			if ( $this->needs_shipping() ) {
+			if ( $this->needs_shipping() && $this->show_shipping() ) {
 				$woocommerce->shipping->calculate_shipping();
 			} else {
 				$woocommerce->shipping->reset_shipping(); 
@@ -1358,6 +1358,31 @@ class WC_Cart {
 			}
 			
 			return apply_filters( 'woocomerce_cart_needs_shipping', $needs_shipping );
+		}
+		
+		/** 
+		 * show_shipping
+		 *
+		 * Sees if the customer has entered enough data to calc the shipping yet
+		 *
+		 * @return bool
+		 */
+		function show_shipping() {
+			global $woocommerce;
+			
+			if ( get_option('woocommerce_calc_shipping')=='no' ) return false;
+			if ( ! is_array( $this->cart_contents ) ) return false;
+			
+			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
+				if ( empty( $_SESSION['calculated_shipping'] ) ) {
+					if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() ) return false;
+				}
+			}
+		
+			$show_shipping = true;
+			
+			return apply_filters( 'woocomerce_cart_ready_to_calc_shipping', $show_shipping );
+
 		}
 		
 		/** 
