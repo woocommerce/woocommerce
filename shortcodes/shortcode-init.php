@@ -67,7 +67,9 @@ function woocommerce_product_category($atts){
 	return ob_get_clean();
 }
 
-
+/**
+ * List all (or limited) product categories
+ **/
 function woocommerce_product_categories( $atts ) { 
 	global $woocommerce_loop;
 
