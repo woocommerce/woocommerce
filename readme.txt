@@ -747,7 +747,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Upgrade Notice ==
 
 = 1.5.4 =
-Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably.
+Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 
+
+Also note, there was a mistake in the code for Quebec -> PQ to QC. If you have rates for Quebec ensure you re-save them.
 
 = 1.5.2.1 =
 Minor update. Note, titles are now hooked in to single-product.php - if you have overridden this template and have double titles, update your single-product.php template with that from core.
