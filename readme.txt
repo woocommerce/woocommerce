@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved installation code (dbdelta)
 * Tweak - Email tfoot compatibility for outlook
 * Tweak - Separate sections for each shipping method, due to the volume of data being posted upon save.
+* Tweak - Removed shortcode wrappers/cache for main pages since they are only ever called once per page load
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Localization - Canada post code locale

@@ -59,10 +59,6 @@ class Woocommerce {
 	/** Taxonomies ************************************************************/
 	
 	var $attribute_taxonomies; // Stores the attribute taxonomies used in the store
-
-	/** Cache *****************************************************************/
-
-	private $_cache;
 	
 	/** Body Classes **********************************************************/
 	
@@ -1284,40 +1280,19 @@ class Woocommerce {
 		return false;
 	}
 	
-	/** Cache Helpers *********************************************************/
+	/** Shortcode Helpers *********************************************************/
 	
 	/**
-	 * Cache API
+	 * Shortcode Wrapper
 	 */
-	function cache( $id, $data, $args=array() ) {
-
-		if ( ! isset( $this->_cache[ $id ] ) ) $this->_cache[ $id ] = array();
-		
-		if ( empty( $args ) ) $this->_cache[ $id ][0] = $data;
-		else $this->_cache[ $id ][ serialize($args) ] = $data;
-		
-		return $data;
-		
-	}
-	function cache_get( $id, $args=array() ) {
-
-		if ( ! isset( $this->_cache[ $id ] ) ) return null;
-		
-		if ( empty( $args ) && isset( $this->_cache[ $id ][0] ) ) return $this->_cache[ $id ][0];
-		elseif ( isset( $this->_cache[ $id ][ serialize($args) ] ) ) return $this->_cache[ $id ][ serialize($args) ];
-	}
-	
-	/**
-	 * Shortcode cache
-	 */
-	function shortcode_wrapper($function, $atts=array()) {
-		if ( $content = $this->cache_get( $function . '-shortcode', $atts ) ) return $content;
-		
+	function shortcode_wrapper( $function, $atts = array() ) {
 		ob_start();
 		call_user_func( $function, $atts );
-		return $this->cache( $function . '-shortcode', ob_get_clean(), $atts);
+		return ob_get_clean();
 	}
-	
+
+	/** Cache Helpers *********************************************************/
+
 	/**
 	 * nocache
 	 *
