@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Fix - nofollow add to cart links to prevent indexing
+* Fix - Add to cart shortcode and hidden products
 * Localization - Canada post code locale
 * Localization - RMB paypal
 * Localization - Bundled translation updates
