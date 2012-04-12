@@ -339,11 +339,13 @@ function woocommerce_price( $price, $args = array() ) {
 	$num_decimals = (int) get_option('woocommerce_price_num_decimals');
 	$currency_pos = get_option('woocommerce_currency_pos');
 	$currency_symbol = get_woocommerce_currency_symbol();
-	$price = number_format( (double) $price, $num_decimals, stripslashes(get_option('woocommerce_price_decimal_sep')), stripslashes(get_option('woocommerce_price_thousand_sep')) );
 	
-	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) :
+	$price = apply_filters( 'raw_woocommerce_price', (double) $price );
+	
+	$price = number_format( $price, $num_decimals, stripslashes(get_option('woocommerce_price_decimal_sep')), stripslashes(get_option('woocommerce_price_thousand_sep')) );
+	
+	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0) 
 		$price = woocommerce_trim_zeros($price);
-	endif;
 	
 	switch ($currency_pos) :
 		case 'left' :

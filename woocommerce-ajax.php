@@ -972,7 +972,7 @@ function woocommerce_upsell_crosssell_search_products() {
 	
 	endif;
 	
-	$posts = get_posts( $args );
+	$posts = apply_filters('woocommerce_upsell_crosssell_search_products', get_posts( $args ));
 	
 	if ($posts) : foreach ($posts as $post) : 
 		
