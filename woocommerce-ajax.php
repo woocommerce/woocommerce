@@ -683,14 +683,14 @@ function woocommerce_add_order_item() {
 	endif;
 	?>
 	<tr class="item" rel="<?php echo $index; ?>">
-		<td class="product-id">
-			<img class="tips" data-tip="<?php
+		<td class="thumb">
+			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
 				echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $_product->id;
 				echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if (isset($_product->variation_id) && $_product->variation_id) echo $_product->variation_id; else echo '-';
 				echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-			?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
+			?>"><?php echo $_product->get_image(); ?></a>
 		</td>
-		<td class="sku">
+		<td class="sku" width="1%">
 			<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
 			<input type="hidden" class="item_id" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
 			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />

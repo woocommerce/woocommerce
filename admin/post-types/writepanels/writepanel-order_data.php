@@ -266,9 +266,9 @@ function woocommerce_order_items_meta_box($post) {
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
 			<thead>
 				<tr>
-					<th class="product-id" width="1%"><?php _e('ID', 'woocommerce'); ?></th>
+					<th class="thumb" width="1%"><?php _e('Item', 'woocommerce'); ?></th>
 					<th class="sku"><?php _e('SKU', 'woocommerce'); ?></th>
-					<th class="name"><?php _e('Item', 'woocommerce'); ?></th>
+					<th class="name"><?php _e('Name', 'woocommerce'); ?></th>
 					<?php do_action('woocommerce_admin_order_item_headers'); ?>
 					
 					<th class="tax_class"><?php _e('Tax Class', 'woocommerce'); ?>&nbsp;<a class="tips" data-tip="<?php _e('Tax class for the line item', 'woocommerce'); ?>." href="#">[?]</a></th>
@@ -300,12 +300,12 @@ function woocommerce_order_items_meta_box($post) {
 					endif;
 					?>
 					<tr class="item" rel="<?php echo $loop; ?>">
-						<td class="product-id">
-							<img class="tips" data-tip="<?php
+						<td class="thumb">
+							<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
 								echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $item['id'];
 								echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if ($item['variation_id']) echo $item['variation_id']; else echo '-';
 								echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-							?>" src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/tip.png" />
+							?>"><?php echo $_product->get_image(); ?></a>
 						</td>
 						<td class="sku" width="1%">
 							<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
