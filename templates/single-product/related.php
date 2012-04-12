@@ -7,7 +7,7 @@ global $product, $woocommerce_loop;
 
 $related = $product->get_related(); 
 
-if (sizeof($related)==0) return;
+if ( sizeof($related) == 0 ) return;
 ?>
 <div class="related products"><h2><?php _e('Related Products', 'woocommerce'); ?></h2>
 	<?php

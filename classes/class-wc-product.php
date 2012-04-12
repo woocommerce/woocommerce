@@ -247,8 +247,8 @@ class WC_Product {
 	 * Backwards compat with downloadable/virtual
 	 */
 	function is_type( $type ) {
-		if (is_array($type) && in_array($this->product_type, $type)) return true;
-		if ($this->product_type==$type) return true;
+		if ( is_array( $type ) && in_array( $this->product_type, $type ) ) return true;
+		if ( $this->product_type == $type ) return true;
 		return false;
 	}
 	
