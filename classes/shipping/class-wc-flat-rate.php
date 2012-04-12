@@ -39,6 +39,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->tax_status	= $this->settings['tax_status'];
 		$this->cost 		= $this->settings['cost'];
 		$this->fee 			= $this->settings['fee']; 
+		$this->minimum_fee 	= isset($this->settings['minimum_fee']) ? $this->settings['minimum_fee'] : ''; 
 		$this->options 		= isset($this->settings['options']) ? $this->settings['options'] : ''; 
 		
 		// Get options
@@ -120,6 +121,12 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ), 
 							'type' 			=> 'text', 
 							'description'	=> __('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce'),
+							'default'		=> ''
+						),
+			'minimum_fee' => array(
+							'title' 		=> __( 'Minimum Fee', 'woocommerce' ), 
+							'type' 			=> 'text', 
+							'description'	=> __('Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce'),
 							'default'		=> ''
 						),
 			'options' => array(

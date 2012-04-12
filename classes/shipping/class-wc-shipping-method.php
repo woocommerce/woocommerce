@@ -19,6 +19,7 @@ class WC_Shipping_Method extends WC_Settings_API {
 	var $countries;
 	var $type;
 	var $fee				= 0;
+	var $minimum_fee		= null;
 	var $min_amount			= null;
 	var $enabled			= false;
 	
@@ -144,11 +145,11 @@ class WC_Shipping_Method extends WC_Settings_API {
     } 
     
     function get_fee( $fee, $total ) {
-		if (strstr($fee, '%')) :
-			return ($total/100) * str_replace('%', '', $fee);
-		else :
-			return $fee;
+		if ( strstr( $fee, '%' ) ) :
+			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
 		endif;
+		if ( ! empty( $this->minimum_fee ) && $this->minimum_fee > $fee ) $fee = $this->minimum_fee;
+		return $fee;
 	}	
 }
 

@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Option to hide shipping costs until an address is entered on the cart/checkout
 * Feature - Tax class selection for variations
 * Feature - Shortcode to show a list of all product categories
+* Feature - Minimum fee option for flat rate shipping
 * Tweak - Redesigned variation panels and variation bulk edit to make them easier to use and expand.
 * Tweak - Show multiple success messages/error messages if added, rather than one or the other
 * Tweak - Adding an item to an order now uses the ajax style product finder
