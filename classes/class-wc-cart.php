@@ -513,7 +513,7 @@ class WC_Cart {
 		 * @return array contents of the cart
 		 */
 		function get_cart() {
-			return (array) $this->cart_contents;
+			return array_filter( (array) $this->cart_contents );
 		}
 		
 		/**
