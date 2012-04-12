@@ -271,8 +271,6 @@ function woocommerce_product_add_to_cart($atts){
 		
 		$product = $woocommerce->setup_product_data( $product_data );
 			
-		if (!$product->is_visible()) continue; 
-		
 		ob_start();
 		?>
 		<p class="product" style="<?php echo $atts['style']; ?>">
@@ -293,8 +291,6 @@ function woocommerce_product_add_to_cart($atts){
 		
 		$variation = new WC_Product_Variation( $product_data->ID );
 			
-		if (!$product->is_visible()) continue; 
-		
 		ob_start();
 		?>
 		<p class="product product-variation" style="<?php echo $atts['style']; ?>">
