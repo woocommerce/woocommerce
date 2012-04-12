@@ -907,7 +907,7 @@ class WC_Product {
 					$alt = $alt*-1;
 					echo '<tr class="';
 					if ($alt==1) echo 'alt';
-					echo '"><th>'.__('Weight', 'woocommerce').'</th><td>'. $this->get_weight() . get_option('woocommerce_weight_unit') .'</td></tr>';
+					echo '"><th>'.__('Weight', 'woocommerce').'</th><td>'. $this->get_weight() . ' ' . get_option('woocommerce_weight_unit') .'</td></tr>';
 					
 				endif;
 				
