@@ -688,7 +688,7 @@ class WC_Cart {
 					'variation' 	=> $variation,
 					'quantity' 		=> $quantity,
 					'data'			=> $product_data
-				) ) );
+				) ), $cart_item_key );
 			
 			}
 			
@@ -713,7 +713,7 @@ class WC_Cart {
 				unset( $this->cart_contents[$cart_item_key] );
 			} else {
 				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
-				do_action( 'woocommerce_after_cart_item_quantity_update', $this->cart_contents[$cart_item_key], $quantity );
+				do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity );
 			}
 			
 			$this->set_session();

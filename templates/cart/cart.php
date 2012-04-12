@@ -25,10 +25,10 @@ global $woocommerce;
 		<?php do_action( 'woocommerce_before_cart_contents' ); ?>
 		
 		<?php
-		if (sizeof($woocommerce->cart->get_cart())>0) : 
-			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) : 
+			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) :
 				$_product = $values['data'];
-				if ($_product->exists() && $values['quantity']>0) :
+				if ( $_product->exists() && $values['quantity'] > 0 ) :
 				
 					?>
 					<tr>
