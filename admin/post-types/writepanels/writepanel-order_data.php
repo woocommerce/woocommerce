@@ -646,8 +646,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			$order_taxes_compound 	= isset($_POST['_order_taxes_compound']) ? $_POST['_order_taxes_compound'] : array();
 			$order_taxes_cart 		= $_POST['_order_taxes_cart'];
 			$order_taxes_shipping 	= $_POST['_order_taxes_shipping'];
+			$order_taxes_label_count = sizeof( $order_taxes_label );
 			
-			for ($i=0; $i<sizeof($order_taxes_label); $i++) :
+			for ($i=0; $i<$order_taxes_label_count; $i++) :
 				
 				// Add to array if the tax amount is set
 				if (!$order_taxes_cart[$i] && !$order_taxes_shipping[$i]) continue;
@@ -673,59 +674,62 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		$order_items = array();
 	
 		if (isset($_POST['item_id'])) :
-			 $item_id			= $_POST['item_id'];
-			 $item_variation	= $_POST['item_variation'];
-			 $item_name 		= $_POST['item_name'];
-			 $item_quantity 	= $_POST['item_quantity'];
-			 
-			 $line_subtotal		= $_POST['line_subtotal'];
-			 $line_subtotal_tax	= $_POST['line_subtotal_tax'];
-			 
-			 $line_total 		= $_POST['line_total'];
-			 $line_tax		 	= $_POST['line_tax'];
-			 
-			 $item_meta_names 	= (isset($_POST['meta_name'])) ? $_POST['meta_name'] : '';
-			 $item_meta_values 	= (isset($_POST['meta_value'])) ? $_POST['meta_value'] : '';
-			 
-			 $item_tax_class	= $_POST['item_tax_class'];
-	
-			 for ($i=0; $i<sizeof($item_id); $i++) :
+			$item_id			= $_POST['item_id'];
+			$item_variation	= $_POST['item_variation'];
+			$item_name 		= $_POST['item_name'];
+			$item_quantity 	= $_POST['item_quantity'];
+			
+			$line_subtotal		= $_POST['line_subtotal'];
+			$line_subtotal_tax	= $_POST['line_subtotal_tax'];
+			
+			$line_total 		= $_POST['line_total'];
+			$line_tax		 	= $_POST['line_tax'];
+			
+			$item_meta_names 	= (isset($_POST['meta_name'])) ? $_POST['meta_name'] : '';
+			$item_meta_values 	= (isset($_POST['meta_value'])) ? $_POST['meta_value'] : '';
+			
+			$item_tax_class	= $_POST['item_tax_class'];
+			
+			$item_id_count = sizeof( $item_id );
+			
+			for ($i=0; $i<$item_id_count; $i++) :
+				
+				if (!isset($item_id[$i]) || !$item_id[$i]) continue;
+				if (!isset($item_name[$i])) continue;
+				if (!isset($item_quantity[$i]) || $item_quantity[$i] < 1) continue;
+				if (!isset($line_total[$i])) continue;
+				if (!isset($line_tax[$i])) continue;
+				
+				// Meta
+				$item_meta 		= new order_item_meta();
+				
+				if (isset($item_meta_names[$i]) && isset($item_meta_values[$i])) :
+			 	$meta_names 	= $item_meta_names[$i];
+			 	$meta_values 	= $item_meta_values[$i];
+			 	$meta_names_count = sizeof( $meta_names );
 			 	
-			 	if (!isset($item_id[$i]) || !$item_id[$i]) continue;
-			 	if (!isset($item_name[$i])) continue;
-			 	if (!isset($item_quantity[$i]) || $item_quantity[$i] < 1) continue;
-			 	if (!isset($line_total[$i])) continue;
-			 	if (!isset($line_tax[$i])) continue;
-			 	
-			 	// Meta
-			 	$item_meta 		= new order_item_meta();
-			 	
-			 	if (isset($item_meta_names[$i]) && isset($item_meta_values[$i])) :
-				 	$meta_names 	= $item_meta_names[$i];
-				 	$meta_values 	= $item_meta_values[$i];
-				 	
-				 	for ($ii=0; $ii<sizeof($meta_names); $ii++) :
-				 		$meta_name 		= esc_attr( $meta_names[$ii] );
-				 		$meta_value 	= esc_attr( $meta_values[$ii] );
-				 		if ($meta_name && $meta_value) :
-				 			$item_meta->add( $meta_name, $meta_value );
-				 		endif;
-				 	endfor;
-			 	endif;
-			 	
-			 	// Add to array	 	
-			 	$order_items[] = apply_filters('update_order_item', array(
-			 		'id' 				=> htmlspecialchars(stripslashes($item_id[$i])),
-			 		'variation_id' 		=> (int) $item_variation[$i],
-			 		'name' 				=> htmlspecialchars(stripslashes($item_name[$i])),
-			 		'qty' 				=> (int) $item_quantity[$i],
-			 		'line_total' 		=> rtrim(rtrim(number_format(woocommerce_clean($line_total[$i]), 4, '.', ''), '0'), '.'),
-			 		'line_tax'			=> rtrim(rtrim(number_format(woocommerce_clean($line_tax[$i]), 4, '.', ''), '0'), '.'),
-			 		'line_subtotal'		=> rtrim(rtrim(number_format(woocommerce_clean($line_subtotal[$i]), 4, '.', ''), '0'), '.'),
-			 		'line_subtotal_tax' => rtrim(rtrim(number_format(woocommerce_clean($line_subtotal_tax[$i]), 4, '.', ''), '0'), '.'),
-			 		'item_meta'			=> $item_meta->meta,
-			 		'tax_class'			=> woocommerce_clean($item_tax_class[$i])
-			 	));
+			 	for ($ii=0; $ii<$meta_names_count; $ii++) :
+			 		$meta_name 		= esc_attr( $meta_names[$ii] );
+			 		$meta_value 	= esc_attr( $meta_values[$ii] );
+			 		if ($meta_name && $meta_value) :
+			 			$item_meta->add( $meta_name, $meta_value );
+			 		endif;
+			 	endfor;
+				endif;
+				
+				// Add to array	 	
+				$order_items[] = apply_filters('update_order_item', array(
+					'id' 				=> htmlspecialchars(stripslashes($item_id[$i])),
+					'variation_id' 		=> (int) $item_variation[$i],
+					'name' 				=> htmlspecialchars(stripslashes($item_name[$i])),
+					'qty' 				=> (int) $item_quantity[$i],
+					'line_total' 		=> rtrim(rtrim(number_format(woocommerce_clean($line_total[$i]), 4, '.', ''), '0'), '.'),
+					'line_tax'			=> rtrim(rtrim(number_format(woocommerce_clean($line_tax[$i]), 4, '.', ''), '0'), '.'),
+					'line_subtotal'		=> rtrim(rtrim(number_format(woocommerce_clean($line_subtotal[$i]), 4, '.', ''), '0'), '.'),
+					'line_subtotal_tax' => rtrim(rtrim(number_format(woocommerce_clean($line_subtotal_tax[$i]), 4, '.', ''), '0'), '.'),
+					'item_meta'			=> $item_meta->meta,
+					'tax_class'			=> woocommerce_clean($item_tax_class[$i])
+				));
 			 	
 			 endfor; 
 		endif;	

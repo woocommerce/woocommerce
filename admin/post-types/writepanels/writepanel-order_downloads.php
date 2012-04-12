@@ -257,8 +257,8 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 		$order_key = get_post_meta($post->ID, '_order_key', true);
 		$customer_email = get_post_meta($post->ID, '_billing_email', true);
 		$customer_user = (int) get_post_meta($post->ID, '_customer_user', true);
-
-		for ($i=0; $i<sizeof($download_ids); $i++) :
+		$download_ids_count = sizeof( $download_ids );
+		for ($i=0; $i<$download_ids_count; $i++) :
 
             $data = array(
 				'user_id'				=> $customer_user,

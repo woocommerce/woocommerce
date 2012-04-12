@@ -28,8 +28,8 @@ function woocommerce_update_options($options) {
     		$tax_postcode 		= (isset($_POST['tax_postcode'])) ? $_POST['tax_postcode'] : array();
     		$tax_compound 		= (isset($_POST['tax_compound'])) ? $_POST['tax_compound'] : array();
     		$tax_label 			= (isset($_POST['tax_label'])) ? $_POST['tax_label'] : array();
-			
-			for ($i=0; $i<sizeof($tax_classes); $i++) :
+			$tax_classes_count	= sizeof( $tax_classes );
+			for ($i=0; $i<$tax_classes_count; $i++) :
 				
 				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && is_numeric($tax_rate[$i])) :
 					
@@ -84,8 +84,8 @@ function woocommerce_update_options($options) {
     		$tax_postcode 		= (isset($_POST['local_tax_postcode'])) ? $_POST['local_tax_postcode'] : array();
     		$tax_compound 		= (isset($_POST['local_tax_compound'])) ? $_POST['local_tax_compound'] : array();
     		$tax_label 			= (isset($_POST['local_tax_label'])) ? $_POST['local_tax_label'] : array();
-			
-			for ($i=0; $i<sizeof($tax_classes); $i++) :
+			$tax_classes_count	= sizeof( $tax_classes );
+			for ($i=0; $i<$tax_classes_count; $i++) :
 			
 				if (isset($tax_classes[$i]) && isset($tax_countries[$i]) && isset($tax_rate[$i]) && is_numeric($tax_rate[$i])) :
 					

@@ -751,7 +751,9 @@ function process_product_meta_variable( $post_id ) {
 			
 		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
 		
-		for ( $i=0; $i <= max( array_keys( $_POST['variable_post_id'] ) ); $i++ ) :
+		$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
+		
+		for ( $i=0; $i <= $max_loop; $i++ ) :
 			
 			if ( ! isset( $variable_post_id[$i] ) ) continue;
 			

@@ -575,24 +575,26 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	$attributes = array();
 	
 	if (isset($_POST['attribute_names'])) :
-		 $attribute_names = $_POST['attribute_names'];
-		 $attribute_values = $_POST['attribute_values'];
-		 if (isset($_POST['attribute_visibility'])) $attribute_visibility = $_POST['attribute_visibility'];
-		 if (isset($_POST['attribute_variation'])) $attribute_variation = $_POST['attribute_variation'];
-		 $attribute_is_taxonomy = $_POST['attribute_is_taxonomy'];
-		 $attribute_position = $_POST['attribute_position'];
-
-		 for ($i=0; $i<sizeof($attribute_names); $i++) :
-		 	if (!($attribute_names[$i])) continue;
-		 	
-		 	$is_visible = (isset($attribute_visibility[$i])) ? 1 : 0;
-		 	$is_variation = (isset($attribute_variation[$i])) ? 1 : 0;
-		 	
-		 	$is_taxonomy = ($attribute_is_taxonomy[$i]) ? 1 : 0;
-		 	
-		 	if ( $is_taxonomy ) {
-		 		if ( isset( $attribute_values[$i] ) ) {
-		 		
+		$attribute_names = $_POST['attribute_names'];
+		$attribute_values = $_POST['attribute_values'];
+		if (isset($_POST['attribute_visibility'])) $attribute_visibility = $_POST['attribute_visibility'];
+		if (isset($_POST['attribute_variation'])) $attribute_variation = $_POST['attribute_variation'];
+		$attribute_is_taxonomy = $_POST['attribute_is_taxonomy'];
+		$attribute_position = $_POST['attribute_position'];
+		
+		$attribute_names_count = sizeof( $attribute_names );
+		
+		for ($i=0; $i<$attribute_names_count; $i++) :
+			if (!($attribute_names[$i])) continue;
+			
+			$is_visible = (isset($attribute_visibility[$i])) ? 1 : 0;
+			$is_variation = (isset($attribute_variation[$i])) ? 1 : 0;
+			
+			$is_taxonomy = ($attribute_is_taxonomy[$i]) ? 1 : 0;
+			
+			if ( $is_taxonomy ) {
+				if ( isset( $attribute_values[$i] ) ) {
+				
 			 		// Format values
 			 		if ( is_array( $attribute_values[$i] ) ) {
 				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
@@ -609,7 +611,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			 		// Update post terms
 			 		if ( taxonomy_exists( $attribute_names[$i] ) )
 			 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
-	
+			
 			 		if ( $values ) {
 				 		// Add attribute to array, but don't set values
 				 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(

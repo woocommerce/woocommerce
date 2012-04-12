@@ -114,7 +114,8 @@ function woocommerce_duplicate_post_taxonomies($id, $new_id, $post_type) {
 	$taxonomies = get_object_taxonomies($post_type); //array("category", "post_tag");
 	foreach ($taxonomies as $taxonomy) {
 		$post_terms = wp_get_object_terms($id, $taxonomy);
-		for ($i=0; $i<count($post_terms); $i++) {
+		$post_terms_count = sizeof( $post_terms );
+		for ($i=0; $i<$post_terms_count; $i++) {
 			wp_set_object_terms($new_id, $post_terms[$i]->slug, $taxonomy, true);
 		}
 	}
