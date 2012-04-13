@@ -106,7 +106,7 @@ class WC_International_Delivery extends WC_Flat_Rate {
 	/**
      * Availability
      */
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -114,13 +114,13 @@ class WC_International_Delivery extends WC_Flat_Rate {
 		if ($this->availability=='including') :
 			
 			if (is_array($this->countries)) :
-				if (!in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+				if ( ! in_array( $package['destination']['country'], $this->countries) ) return false;
 			endif;
 			
 		else :
 			
 			if (is_array($this->countries)) :
-				if (in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+				if ( in_array( $package['destination']['country'], $this->countries) ) return false;
 			endif;
 			
 		endif;

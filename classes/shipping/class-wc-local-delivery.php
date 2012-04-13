@@ -120,7 +120,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
     	</table> <?php
 	}
 
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -134,7 +134,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		}
 		
 		if (is_array($codes))
-			if (!in_array($this->clean($woocommerce->customer->get_shipping_postcode()), $codes))
+			if ( ! in_array($this->clean( $package['destination']['postcode'] ), $codes))
 				return false;
 		
 		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatability.
@@ -148,7 +148,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		endif; 
 
 		if (is_array($ship_to_countries))
-			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+			if (!in_array( $package['destination']['country'] , $ship_to_countries))
 				return false;
 		
 		// Yay! We passed!

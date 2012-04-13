@@ -87,7 +87,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     	</table> <?php
 	}
 
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -103,7 +103,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		endif; 
 		
 		if (is_array($ship_to_countries))
-			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
 				return false;
 		
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );

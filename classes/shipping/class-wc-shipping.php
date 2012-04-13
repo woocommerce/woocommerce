@@ -165,7 +165,7 @@ class WC_Shipping {
 			
 			foreach ( $this->shipping_methods as $shipping_method ) {
 					
-				if ( $shipping_method->is_available() ) {
+				if ( $shipping_method->is_available( $package ) ) {
 				
 					// Reset Rates
 					$shipping_method->rates = array();
