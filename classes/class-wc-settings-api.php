@@ -153,7 +153,7 @@ class WC_Settings_API {
     function generate_text_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
@@ -181,7 +181,7 @@ class WC_Settings_API {
     function generate_password_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
@@ -209,7 +209,7 @@ class WC_Settings_API {
     function generate_textarea_html( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -238,7 +238,7 @@ class WC_Settings_API {
     function generate_checkbox_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title'];
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	if ( isset( $data['label'] ) && $data['label'] != '' ) $label = $data['label']; else $label = $data['title'];
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -266,7 +266,7 @@ class WC_Settings_API {
     function generate_select_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -300,7 +300,7 @@ class WC_Settings_API {
     function generate_multiselect_html ( $key, $data ) {
     	$html = '';
     	
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) { $title = $data['title']; }
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
