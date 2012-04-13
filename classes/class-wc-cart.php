@@ -1321,22 +1321,62 @@ class WC_Cart {
 	/* Shipping related functions */
 	/*-----------------------------------------------------------------------------------*/ 
 
-		/** 
-		 * Use the shipping class to calculate shipping
+		/**
+		 * calculate_shipping function.
+		 * 
+		 * Uses the shipping class to calculate shipping then gets the totals when its finished.
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function calculate_shipping() {
 			global $woocommerce;
 			
 			if ( $this->needs_shipping() && $this->show_shipping() ) {
-				$woocommerce->shipping->calculate_shipping();
+				$woocommerce->shipping->calculate_shipping( $this->get_shipping_packages() );
 			} else {
 				$woocommerce->shipping->reset_shipping(); 
 			}
 			
+			// Get totals for the chosen shipping method
 			$this->shipping_total 		= $woocommerce->shipping->shipping_total;	// Shipping Total
 			$this->shipping_label 		= $woocommerce->shipping->shipping_label;	// Shipping Label
 			$this->shipping_taxes		= $woocommerce->shipping->shipping_taxes;	// Shipping Taxes
 			$this->shipping_tax_total 	= $this->tax->get_tax_total( $this->shipping_taxes );	// Shipping tax amount
+		}
+		
+		/**
+		 * get_shipping_packages function.
+		 *
+		 * Get packages to calculate shipping for - this lets us calculate costs 
+		 * for carts that are shipped to multiple locations.
+		 *
+		 * Shipping methods are responsble for looping through these packages.
+		 *
+		 * By default we pass the cart itself as a package - plugins can change this
+		 * through the filter and break it up.
+		 * 
+		 * @since 1.5.4
+		 * @access public
+		 * @return array of cart items
+		 */
+		function get_shipping_packages() {
+			global $woocommerce;
+			
+			// Packages array for storing 'carts'
+			$packages = array();
+			
+			$packages[0]['contents'] 				= $this->get_cart();	// Items in the package
+			$packages[0]['contents_cost'] 			= 0;					// Cost of items in the package
+			$packages[0]['destination']['country'] 	= $woocommerce->customer->get_shipping_country();
+			$packages[0]['destination']['state'] 	= $woocommerce->customer->get_shipping_state();
+			$packages[0]['destination']['postcode'] = $woocommerce->customer->get_shipping_postcode();
+			
+			foreach ( $this->get_cart() as $item ) 
+				if ( $item['data']->needs_shipping() ) 
+					$packages[0]['contents_cost'] += $item['line_total'];
+			
+			return apply_filters( 'woocommerce_cart_shipping_packages', $packages );
 		}
 		
 		/** 

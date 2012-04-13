@@ -37,12 +37,12 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		add_action('woocommerce_update_options_shipping_local_delivery', array(&$this, 'process_admin_options'));
 	}
 	 
-	function calculate_shipping() {
+	function calculate_shipping( $package = array() ) {
 		global $woocommerce;
-		$_tax = new WC_Tax();
-		$fee = (trim($this->fee) == '') ? 0 : $this->fee;
-		if ($this->type=='fixed') 		$shipping_total 	= $this->fee;
-		if ($this->type=='percent') 	$shipping_total 	= $woocommerce->cart->cart_contents_total * ($this->fee/100);
+
+		$fee = ( trim( $this->fee ) == '' ) ? 0 : $this->fee;
+		if ( $this->type =='fixed' ) 	$shipping_total 	= $this->fee;
+		if ( $this->type =='percent' ) 	$shipping_total 	= $package['contents_cost'] * ( $this->fee / 100 );
 		
 		$rate = array(
 			'id' 		=> $this->id,

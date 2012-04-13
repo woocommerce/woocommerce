@@ -34,15 +34,11 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		add_action('woocommerce_update_options_shipping_local_pickup', array(&$this, 'process_admin_options'));
 	}
 	
-	function calculate_shipping() {
-		global $woocommerce;
-		$_tax = new WC_Tax();
-		
+	function calculate_shipping() {		
 		$rate = array(
 			'id' 		=> $this->id,
 			'label' 	=> $this->title,
 		);
-		
 		$this->add_rate($rate);  
 	}
 	

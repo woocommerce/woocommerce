@@ -18,7 +18,10 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->flat_rate_option 		= 'woocommerce_flat_rates';
 		$this->admin_page_heading 		= __('Flat Rates', 'woocommerce');
 		$this->admin_page_description 	= __('Flat rates let you define a standard rate per item, or per order.', 'woocommerce');
-    	
+
+		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_flat_rates'));
+
     	$this->init();
     } 
     
@@ -47,10 +50,6 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		
 		// Load Flat rates
 		$this->get_flat_rates();
-		
-    	// Add Actions
-		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_admin_options'));
-		add_action('woocommerce_update_options_shipping_flat_rate', array(&$this, 'process_flat_rates'));
     }
 
 	/**
@@ -139,141 +138,34 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     
     } // End init_form_fields()
     
-    function calculate_shipping() {
+    function calculate_shipping( $package = array() ) {
     	global $woocommerce;
     	
-    	$this->rates 	= array();
-    	$shipping_total = 0;
+    	$this->rates = array();
     	
-    	if ($this->type=='order') :
+    	if ( $this->type == 'order' ) {
     		
-    		$cost 	= null;
-	    	$fee 	= null;
-	    		
-    		if (sizeof($this->flat_rates)>0) :
+    		$shipping_total = $this->order_shipping( $package );
     		
-	    		$found_shipping_classes = array();
-	    		
-	    		// Find shipping classes for products in the cart
-	    		if (sizeof($woocommerce->cart->get_cart())>0) : 
-	    			foreach ($woocommerce->cart->get_cart() as $item_id => $values) : 
-	    				if ( $values['data']->needs_shipping() ) :
-	    					$found_shipping_classes[] = $values['data']->get_shipping_class(); 
-	    				endif;
-	    			endforeach; 
-	    		endif;
-	
-	    		$found_shipping_classes = array_unique($found_shipping_classes);
-	    		
-	    		// Find most expensive class (if found)
-	    		foreach ($found_shipping_classes as $shipping_class) :
-	    			if (isset($this->flat_rates[$shipping_class])) :
-	    				if ($this->flat_rates[$shipping_class]['cost'] > $cost) :
-	    					$cost 	= $this->flat_rates[$shipping_class]['cost'];
-	    					$fee	= $this->flat_rates[$shipping_class]['fee'];
-	    				endif;
-	    			else :
-	    				// No matching classes so use defaults
-	    				if ($this->cost > $cost) :
-	    					$cost 	= $this->cost;
-	    					$fee	= $this->fee;
-	    				endif;
-	    			endif;
-	    		endforeach;
-
-    		endif;
-    		
-    		// Default rates
-    		if (is_null($cost)) :
-    			$cost = $this->cost;
-    			$fee = $this->fee;
-    		endif;
-    		
-			// Shipping for whole order
-			$shipping_total = $cost + $this->get_fee( $fee, $woocommerce->cart->cart_contents_total );
-			
-			$rate = array(
+    		$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
 				'cost' 	=> $shipping_total
 			);
-			
-		elseif ($this->type=='class') :
-			// Shipping per class
-    		$cost 	= null;
-	    	$fee 	= null;
-	    		
-    		if (sizeof($this->flat_rates)>0) :
     		
-	    		$found_shipping_classes = array();
-	    		
-	    		// Find shipping classes for products in the cart. Store prices too, so we can calc a fee for the class.
-	    		if (sizeof($woocommerce->cart->get_cart())>0) : 
-	    			foreach ($woocommerce->cart->get_cart() as $item_id => $values) : 
-	    				if ( $values['data']->needs_shipping() ) :
-	    					if (isset($found_shipping_classes[$values['data']->get_shipping_class()])) :
-	    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']) + $found_shipping_classes[$values['data']->get_shipping_class()];
-	    					else :
-	    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']);
-	    					endif;
-	    				endif;
-	    			endforeach; 
-	    		endif;
-	
-	    		$found_shipping_classes = array_unique($found_shipping_classes);
-	    		
-	    		// For each found class, add up the costs and fees
-	    		foreach ($found_shipping_classes as $shipping_class => $class_price) :
-	    			if (isset($this->flat_rates[$shipping_class])) :
-	    				$cost 	+= $this->flat_rates[$shipping_class]['cost'];
-	    				$fee	+= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $class_price );
-	    			else :
-	    				// Class not set so we use default rate
-	    				$cost 	+= $this->cost;
-	    				$fee	+= $this->get_fee( $this->fee, $class_price );
-	    			endif;
-	    		endforeach;
-
-    		endif;
- 			
- 			// Total
- 			$shipping_total = $cost + $fee;
-			
-			$rate = array(
+		} elseif ( $this->type == 'class' ) {
+		
+			$shipping_total = $this->class_shipping( $package );
+    		
+    		$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
 				'cost' 	=> $shipping_total
 			);
 
-		elseif ($this->type=='item') :
+		} elseif ( $this->type == 'item' ) {
 			
-			// Per item shipping so we pass an array of costs (per item) instead of a single value
-			$costs = array();
-			$total_quantity = 0;
-			
-			// Shipping per item
-			foreach ($woocommerce->cart->get_cart() as $item_id => $values) :
-				
-				$_product = $values['data'];
-				
-				if ($values['quantity']>0 && $_product->needs_shipping()) :
-				
-					$shipping_class = $_product->get_shipping_class();
-					
-					if (isset($this->flat_rates[$shipping_class])) :
-						$cost 	= $this->flat_rates[$shipping_class]['cost'];
-	    				$fee	= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $_product->get_price() );
-					else :
-						$cost 	= $this->cost;
-						$fee	= $this->get_fee( $this->fee, $_product->get_price() );
-					endif;
-					
-					$costs[$item_id] = (( $cost + $fee ) * $values['quantity']);
-					
-					$total_quantity += $values['quantity'];
-					
-				endif;
-			endforeach;
+			$costs = $this->item_shipping( $package );
 			
 			$rate = array(
 				'id' 		=> $this->id,
@@ -281,14 +173,13 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				'cost' 		=> $costs,
 				'calc_tax' 	=> 'per_item'
 			);
-			
-		endif;	
+		}
 
 		// Register the rate
 		$this->add_rate( $rate );  
 		
 		// Add any extra rates
-		if (sizeof($this->options) > 0) foreach ($this->options as $option) {
+		if ( sizeof( $this->options ) > 0) foreach ( $this->options as $option ) {
 			
 			$this_option = explode('|', $option);
 			
@@ -325,6 +216,125 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 			
 		}
     } 
+    
+    function order_shipping( $package ) {
+    	$cost 	= null;
+    	$fee 	= null;
+    		
+		if ( sizeof( $this->flat_rates ) > 0 ) {
+			
+    		$found_shipping_classes = array();
+    		
+    		// Find shipping classes for products in the cart
+    		if ( sizeof( $package['contents'] ) > 0 ) {
+    			foreach ( $package['contents'] as $item_id => $values ) {
+    				if ( $values['data']->needs_shipping() )
+    					$found_shipping_classes[] = $values['data']->get_shipping_class(); 
+    			}
+    		}
+
+    		$found_shipping_classes = array_unique( $found_shipping_classes );
+    		
+    		// Find most expensive class (if found)
+    		foreach ( $found_shipping_classes as $shipping_class ) {
+    			if (isset($this->flat_rates[$shipping_class])) {
+    				if ($this->flat_rates[$shipping_class]['cost'] > $cost) {
+    					$cost 	= $this->flat_rates[$shipping_class]['cost'];
+    					$fee	= $this->flat_rates[$shipping_class]['fee'];
+    				}
+    			} else {
+    				// No matching classes so use defaults
+    				if ($this->cost > $cost) {
+    					$cost 	= $this->cost;
+    					$fee	= $this->fee;
+    				}
+    			}
+    		}
+
+		}
+		
+		// Default rates
+		if ( is_null( $cost ) ) {
+			$cost = $this->cost;
+			$fee = $this->fee;
+		}
+		
+		// Shipping for whole order
+		return $cost + $this->get_fee( $fee, $package['contents_cost'] );
+    }
+    
+    function class_shipping( $package ) {
+		$cost 	= null;
+    	$fee 	= null;
+    		
+		if ( sizeof( $this->flat_rates ) > 0 ) {
+		
+    		$found_shipping_classes = array();
+    		
+    		// Find shipping classes for products in the cart. Store prices too, so we can calc a fee for the class.
+    		if ( sizeof( $package['contents'] ) > 0 ) {
+    			foreach ( $package['contents'] as $item_id => $values ) {
+    				if ( $values['data']->needs_shipping() ) :
+    					if ( isset( $found_shipping_classes[$values['data']->get_shipping_class()] ) ) {
+    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']) + $found_shipping_classes[$values['data']->get_shipping_class()];
+    					} else {
+    						$found_shipping_classes[$values['data']->get_shipping_class()] = ($values['data']->get_price() * $values['quantity']);
+    					}
+    				endif;
+    			}
+    		}
+
+    		$found_shipping_classes = array_unique($found_shipping_classes);
+    		
+    		// For each found class, add up the costs and fees
+    		foreach ($found_shipping_classes as $shipping_class => $class_price) :
+    			if (isset($this->flat_rates[$shipping_class])) :
+    				$cost 	+= $this->flat_rates[$shipping_class]['cost'];
+    				$fee	+= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $class_price );
+    			else :
+    				// Class not set so we use default rate
+    				$cost 	+= $this->cost;
+    				$fee	+= $this->get_fee( $this->fee, $class_price );
+    			endif;
+    		endforeach;
+
+		}
+			
+		// Total
+		return $cost + $fee;
+    }
+    
+    function item_shipping( $package ) {
+		// Per item shipping so we pass an array of costs (per item) instead of a single value
+		$costs = array();
+		$total_quantity = 0;
+		
+		// Shipping per item
+		foreach ( $package['contents'] as $item_id => $values ) {
+			
+			$_product = $values['data'];
+			
+			if ( $values['quantity'] > 0 && $_product->needs_shipping() ) {
+			
+				$shipping_class = $_product->get_shipping_class();
+				
+				if ( isset( $this->flat_rates[$shipping_class] ) ) {
+					$cost 	= $this->flat_rates[$shipping_class]['cost'];
+    				$fee	= $this->get_fee( $this->flat_rates[$shipping_class]['fee'], $_product->get_price() );
+				} else {
+					$cost 	= $this->cost;
+					$fee	= $this->get_fee( $this->fee, $_product->get_price() );
+				}
+				
+				$costs[$item_id] = ( ( $cost + $fee ) * $values['quantity'] );
+				
+				$total_quantity += $values['quantity'];
+				
+			}
+		}
+		
+		return $costs;
+    }
 
 	/**
 	 * Admin Panel Options 

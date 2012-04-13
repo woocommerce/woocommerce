@@ -21,7 +21,10 @@ class WC_International_Delivery extends WC_Flat_Rate {
 		$this->flat_rate_option	 		= 'woocommerce_international_delivery_flat_rates';
 		$this->admin_page_heading 		= __('International Delivery', 'woocommerce');
 		$this->admin_page_description 	= __('International delivery based on flat rate shipping.', 'woocommerce');
-    	
+
+		add_action('woocommerce_update_options_shipping_international_delivery', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_international_delivery', array(&$this, 'process_flat_rates'));
+
     	$this->init();
     } 
 
