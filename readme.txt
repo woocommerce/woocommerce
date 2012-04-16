@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Fix - nofollow add to cart links to prevent indexing
 * Fix - Add to cart shortcode and hidden products
+* Fix - Local rates were being ignored if no main rates were set
 * Localization - Canada post code locale
 * Localization - RMB paypal
 * Localization - Bundled translation updates
