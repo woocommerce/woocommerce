@@ -223,7 +223,7 @@ class WC_Cart {
 		 */
 		function check_cart_items() {
 			global $woocommerce;
-			
+
 			// Check item stock
 			$result = $this->check_cart_item_stock();
 			
