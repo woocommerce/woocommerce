@@ -254,7 +254,10 @@ class WC_Order {
 		endif;
 		return $this->taxes;
 	}
-	
+
+
+	/** Total Getters *******************************************************/
+
 	/** Gets shipping and product tax */
 	function get_total_tax() {
 		return $this->order_tax + $this->order_shipping_tax;
@@ -353,6 +356,9 @@ class WC_Order {
 		_deprecated_function( __FUNCTION__, '1.4', 'get_row_cost()' );
 		return $this->get_line_total( $item, $inc_tax );
 	}
+	
+	/** End Total Getters *******************************************************/
+
 	
 	/** Gets line subtotal - formatted for display */
 	function get_formatted_line_subtotal( $item ) {
