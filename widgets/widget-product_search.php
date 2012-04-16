@@ -41,17 +41,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		echo $before_widget;
 		
 		if ($title) echo $before_title . $title . $after_title;
-		
-		?>
-		<form role="search" method="get" id="searchform" action="<?php echo esc_url( home_url() ); ?>">
-			<div>
-				<label class="screen-reader-text" for="s"><?php _e('Search for:', 'woocommerce'); ?></label>
-				<input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Search for products', 'woocommerce'); ?>" />
-				<input type="submit" id="searchsubmit" value="<?php _e('Search', 'woocommerce'); ?>" />
-				<input type="hidden" name="post_type" value="product" />
-			</div>
-		</form>
-		<?php
+		woocommerce_get_template( 'widgets/product-searchform.php' );
 		
 		echo $after_widget;
 	}
