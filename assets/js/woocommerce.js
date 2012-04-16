@@ -626,7 +626,7 @@ jQuery(document).ready(function($) {
 		}
 		
 		$('.payment_methods input.input-radio').live('click', function(){
-			$('div.payment_box').hide();
+			$('div.payment_box').filter(':visible').slideUp();
 			if ($(this).is(':checked')) {
 				$('div.payment_box.' + $(this).attr('ID')).slideDown();
 			}
