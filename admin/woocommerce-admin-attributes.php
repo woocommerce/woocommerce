@@ -33,7 +33,7 @@ function woocommerce_attributes() {
 		
 			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
 						
-			wp_safe_redirect( get_admin_url() . 'admin.php?page=woocommerce_attributes' );
+			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 			exit;
 			
 		endif;
@@ -51,7 +51,7 @@ function woocommerce_attributes() {
 		
 		endif;
 		
-		wp_safe_redirect( get_admin_url() . 'admin.php?page=woocommerce_attributes' );
+		wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 		exit;
 			
 	elseif (isset($_GET['delete'])) :
@@ -75,7 +75,7 @@ function woocommerce_attributes() {
 				
 				endif;
 				
-				wp_safe_redirect( get_admin_url() . 'admin.php?page=woocommerce_attributes' );
+				wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 				exit;
 										
 			endif;
