@@ -612,7 +612,10 @@ class WC_Order {
 		$comment_author_url 	= '';
 		$comment_content 		= esc_attr( $note );
 		$comment_agent			= 'WooCommerce';
-		$commentdata 			= compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent');
+		$comment_type			= '';
+		$comment_parent			= 0;
+		$comment_approved 		= 1;
+		$commentdata 			= compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' );
 		
 		$comment_id = wp_insert_comment( $commentdata );
 		

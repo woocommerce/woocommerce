@@ -21,7 +21,10 @@ class WC_International_Delivery extends WC_Flat_Rate {
 		$this->flat_rate_option	 		= 'woocommerce_international_delivery_flat_rates';
 		$this->admin_page_heading 		= __('International Delivery', 'woocommerce');
 		$this->admin_page_description 	= __('International delivery based on flat rate shipping.', 'woocommerce');
-    	
+
+		add_action('woocommerce_update_options_shipping_international_delivery', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_international_delivery', array(&$this, 'process_flat_rates'));
+
     	$this->init();
     } 
 
@@ -103,7 +106,7 @@ class WC_International_Delivery extends WC_Flat_Rate {
 	/**
      * Availability
      */
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -111,13 +114,13 @@ class WC_International_Delivery extends WC_Flat_Rate {
 		if ($this->availability=='including') :
 			
 			if (is_array($this->countries)) :
-				if (!in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+				if ( ! in_array( $package['destination']['country'], $this->countries) ) return false;
 			endif;
 			
 		else :
 			
 			if (is_array($this->countries)) :
-				if (in_array($woocommerce->customer->get_shipping_country(), $this->countries)) return false;
+				if ( in_array( $package['destination']['country'], $this->countries) ) return false;
 			endif;
 			
 		endif;

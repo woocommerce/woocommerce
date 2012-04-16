@@ -16,7 +16,7 @@
  * @category Core
  * @author WooThemes
  */
-
+ 
 if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( !class_exists( 'Woocommerce' ) ) {
@@ -1331,6 +1331,7 @@ class Woocommerce {
 		
 		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%')");
 		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%')");
+		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%')");
 
 		if ($post_id>0) {
 			$post_id = (int) $post_id;

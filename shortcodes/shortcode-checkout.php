@@ -20,7 +20,10 @@ function woocommerce_checkout( $atts ) {
 	$woocommerce->nocache();
 
 	if (sizeof($woocommerce->cart->get_cart())==0) return;
-	
+
+	// Calc totals
+	$woocommerce->cart->calculate_totals();
+
 	do_action('woocommerce_check_cart_items');
 	
 	if ( (!isset($_POST) || !$_POST) && $woocommerce->error_count()>0 ) {

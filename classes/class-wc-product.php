@@ -891,64 +891,9 @@ class WC_Product {
 
 	/** Lists a table of attributes for the product page */
 	function list_attributes() {
-		global $woocommerce;
-		
-		$attributes = $this->get_attributes();
-		
-		if (sizeof($attributes)>0 || ($this->enable_dimensions_display() && ($this->has_dimensions() || $this->has_weight()))) :
-			
-			echo '<table class="shop_attributes">';
-			$alt = 1;
-			
-			if ($this->enable_dimensions_display()) :
-				
-				if ($this->has_weight()) :
-					
-					$alt = $alt*-1;
-					echo '<tr class="';
-					if ($alt==1) echo 'alt';
-					echo '"><th>'.__('Weight', 'woocommerce').'</th><td>'. $this->get_weight() . ' ' . get_option('woocommerce_weight_unit') .'</td></tr>';
-					
-				endif;
-				
-				if ($this->has_dimensions()) :
-					
-					$alt = $alt*-1;
-					echo '<tr class="';
-					if ($alt==1) echo 'alt';
-					echo '"><th>'.__('Dimensions', 'woocommerce').'</th><td>'.$this->get_dimensions().'</td></tr>';
-					
-				endif;
-				
-			endif;
-			
-			foreach ($attributes as $attribute) :
-				if (!isset($attribute['is_visible']) || !$attribute['is_visible']) continue;
-				
-				$alt = $alt*-1;
-				echo '<tr class="';
-				if ($alt==1) echo 'alt';
-				echo '"><th>'.$woocommerce->attribute_label( $attribute['name'] ).'</th><td>';
-				
-				if ($attribute['is_taxonomy']) :
-					$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
-					$values = array();
-					foreach ($post_terms as $term) :
-						$values[] = $term->name;
-					endforeach;
-					echo implode(', ', $values);
-				else :
-					// Convert pipes to commas
-					$value = explode('|', $attribute['value']);
-					$value = implode(', ', $value);
-					echo wpautop(wptexturize($value));
-				endif;
-				
-				echo '</td></tr>';
-			endforeach;
-			echo '</table>';
-
-		endif;
+		woocommerce_get_template('single-product/product-attributes.php', array(
+			'product' => $this
+		));
 	}
 	
 	/**

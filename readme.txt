@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Tax class selection for variations
 * Feature - Shortcode to show a list of all product categories
 * Feature - Minimum fee option for flat rate shipping
+* Feature - "Package" support for shipping calculations - allows third parties to split the cart up to calc shipping. Also caches packages meaning the cart shipping only needs to be calculated once (until totals or customer location changes)
 * Tweak - Redesigned variation panels and variation bulk edit to make them easier to use and expand.
 * Tweak - Show multiple success messages/error messages if added, rather than one or the other
 * Tweak - Adding an item to an order now uses the ajax style product finder
@@ -170,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed shortcode wrappers/cache for main pages since they are only ever called once per page load
 * Tweak - woocommerce_after_cart_item_quantity_update action sends cart item key instead of object
 * Tweak - Product images on orders page
+* Tweak - Moved product attribute table to a template file for easier customisation.
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Fix - nofollow add to cart links to prevent indexing

@@ -34,15 +34,11 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		add_action('woocommerce_update_options_shipping_local_pickup', array(&$this, 'process_admin_options'));
 	}
 	
-	function calculate_shipping() {
-		global $woocommerce;
-		$_tax = new WC_Tax();
-		
+	function calculate_shipping() {		
 		$rate = array(
 			'id' 		=> $this->id,
 			'label' 	=> $this->title,
 		);
-		
 		$this->add_rate($rate);  
 	}
 	
@@ -91,7 +87,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     	</table> <?php
 	}
 
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -107,7 +103,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		endif; 
 		
 		if (is_array($ship_to_countries))
-			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
 				return false;
 		
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );

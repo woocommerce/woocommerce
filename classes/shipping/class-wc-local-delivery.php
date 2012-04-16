@@ -37,12 +37,12 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		add_action('woocommerce_update_options_shipping_local_delivery', array(&$this, 'process_admin_options'));
 	}
 	 
-	function calculate_shipping() {
+	function calculate_shipping( $package = array() ) {
 		global $woocommerce;
-		$_tax = new WC_Tax();
-		$fee = (trim($this->fee) == '') ? 0 : $this->fee;
-		if ($this->type=='fixed') 		$shipping_total 	= $this->fee;
-		if ($this->type=='percent') 	$shipping_total 	= $woocommerce->cart->cart_contents_total * ($this->fee/100);
+
+		$fee = ( trim( $this->fee ) == '' ) ? 0 : $this->fee;
+		if ( $this->type =='fixed' ) 	$shipping_total 	= $this->fee;
+		if ( $this->type =='percent' ) 	$shipping_total 	= $package['contents_cost'] * ( $this->fee / 100 );
 		
 		$rate = array(
 			'id' 		=> $this->id,
@@ -120,7 +120,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
     	</table> <?php
 	}
 
-    function is_available() {
+    function is_available( $package ) {
     	global $woocommerce;
     	
     	if ($this->enabled=="no") return false;
@@ -134,7 +134,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		}
 		
 		if (is_array($codes))
-			if (!in_array($this->clean($woocommerce->customer->get_shipping_postcode()), $codes))
+			if ( ! in_array($this->clean( $package['destination']['postcode'] ), $codes))
 				return false;
 		
 		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatability.
@@ -148,7 +148,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		endif; 
 
 		if (is_array($ship_to_countries))
-			if (!in_array($woocommerce->customer->get_shipping_country(), $ship_to_countries))
+			if (!in_array( $package['destination']['country'] , $ship_to_countries))
 				return false;
 		
 		// Yay! We passed!
