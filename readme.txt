@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed shortcode wrappers/cache for main pages since they are only ever called once per page load
 * Tweak - woocommerce_after_cart_item_quantity_update action sends cart item key instead of object
 * Tweak - Product images on orders page
+* Tweak - Payment method transition
 * Tweak - Moved product attribute table to a template file for easier customisation.
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.

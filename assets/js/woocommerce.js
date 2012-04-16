@@ -626,9 +626,9 @@ jQuery(document).ready(function($) {
 		}
 		
 		$('.payment_methods input.input-radio').live('click', function(){
-			$('div.payment_box').filter(':visible').slideUp();
+			$('div.payment_box').filter(':visible').slideUp(250);
 			if ($(this).is(':checked')) {
-				$('div.payment_box.' + $(this).attr('ID')).slideDown();
+				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
 			}
 		});
 		
