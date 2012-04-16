@@ -1287,13 +1287,13 @@ function woocommerce_settings() {
 						
 						$current = ( empty( $_GET['section'] ) ) ? 'class="current"' : '';
 
-						$links = array( '<a href="' . remove_query_arg( 'saved', remove_query_arg( 'section' ) ) . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
+						$links = array( '<a href="' . admin_url('admin.php?page=woocommerce&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
 						
 						foreach ( $woocommerce->shipping->shipping_methods as $method ) {
 							$title = ( isset( $method->method_title ) && $method->method_title) ? ucwords($method->method_title) : ucwords($method->id);
 							$current = ( ! empty( $_GET['section'] ) && $method->id == urldecode( $_GET['section'] ) ) ? 'class="current"' : '';
 							
-							$links[] = '<a href="' . remove_query_arg( 'saved', add_query_arg( 'section', $method->id ) ) . '"' . $current . '>' . $title . '</a>';
+							$links[] = '<a href="' . add_query_arg( 'section', $method->id, admin_url('admin.php?page=woocommerce&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
 						}
 						
 						echo '<ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';

@@ -28,6 +28,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 		// Define user set variables
 		$this->enabled		= empty( $this->settings['enabled'] ) ? 'no' : $this->settings['enabled'];
 		$this->title		= empty( $this->settings['title'] ) ? '' : $this->settings['title'];
+		$this->type 		= $this->settings['type'];
 		$this->fee			= empty( $this->settings['fee'] ) ? '' : $this->settings['fee'];
 		$this->type			= empty( $this->settings['type'] ) ? '' : $this->settings['type'];	
 		$this->codes		= empty( $this->settings['codes'] ) ? '' : $this->settings['codes'];	
@@ -39,10 +40,22 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 	 
 	function calculate_shipping( $package = array() ) {
 		global $woocommerce;
-
+		
+		$shipping_total = 0;
 		$fee = ( trim( $this->fee ) == '' ) ? 0 : $this->fee;
+		
 		if ( $this->type =='fixed' ) 	$shipping_total 	= $this->fee;
+		
 		if ( $this->type =='percent' ) 	$shipping_total 	= $package['contents_cost'] * ( $this->fee / 100 );
+		
+		if ( $this->type == 'product' )	{
+			foreach ( $woocommerce->cart->get_cart() as $item_id => $values ) {
+				$_product = $values['data'];
+				
+				if ( $values['quantity'] > 0 && $_product->needs_shipping() )
+					$shipping_total += $this->fee * $values['quantity'];
+			}
+		}
 		
 		$rate = array(
 			'id' 		=> $this->id,
@@ -74,8 +87,9 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				'description' 	=> __( 'How to calculate delivery charges', 'woocommerce' ),  
 				'default' 		=> 'fixed',
 				'options' 		=> array(
-					'fixed' 	=> __('Fixed Amount', 'woocommerce'),
-					'percent'	=> __('Percentage of Cart Total', 'woocommerce'),
+					'fixed' 	=> __('Fixed amount', 'woocommerce'),
+					'percent'	=> __('Percentage of cart total', 'woocommerce'),
+					'product'	=> __('Fixed amount per product', 'woocommerce'),
 				),
 			),
 			'fee' => array(
