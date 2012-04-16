@@ -5,7 +5,7 @@
 global $woocommerce;
 ?>
 
-<?php if ($woocommerce->cart->ship_to_billing_address_only()) : ?>
+<?php if ( $woocommerce->cart->ship_to_billing_address_only() && $woocommerce->cart->needs_shipping() ) : ?>
 	
 	<h3><?php _e('Billing &amp; Shipping', 'woocommerce'); ?></h3>
 	

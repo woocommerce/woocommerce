@@ -105,7 +105,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			
 			$cat_args['walker'] 			= new WC_Product_Cat_List_Walker;
 			$cat_args['title_li'] 			= '';
-			$cat_args['show_children_only']	= ( $instance['show_children_only'] ) ? 1 : 0;
+			$cat_args['show_children_only']	= ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? 1 : 0;
 			$cat_args['pad_counts'] 		= 1;
 			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce');
 			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';
