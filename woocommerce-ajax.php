@@ -875,7 +875,7 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 	
 	if (empty($term)) die();
 	
-	if (is_numeric($term)) {
+	if ( is_numeric( $term ) ) {
 		
 		$args = array(
 			'post_type'			=> $post_types,
@@ -885,7 +885,15 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 			'fields'			=> 'ids'
 		);
 		
-		$posts = get_posts( $args );
+		$args2 = array(
+			'post_type'			=> $post_types,
+			'post_status'	 	=> 'publish',
+			'posts_per_page' 	=> -1,
+			'post_parent' 		=> $term,
+			'fields'			=> 'ids'
+		);
+		
+		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ) ));
 		
 	} else {
 	

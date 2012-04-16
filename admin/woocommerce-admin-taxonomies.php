@@ -28,6 +28,8 @@ function woocommerce_add_category_thumbnail_field() {
 		</div>
 		<script type="text/javascript">
 			
+			window.send_to_editor_default = window.send_to_editor;
+
 			window.send_to_termmeta = function(html) {
 				
 				jQuery('body').append('<div id="temp_image">' + html + '</div>');
@@ -43,6 +45,8 @@ function woocommerce_add_category_thumbnail_field() {
 				jQuery('#temp_image').remove();
 				
 				tb_remove();
+				
+				window.send_to_editor = window.send_to_editor_default;
 			}
 			
 			jQuery('.upload_image_button').live('click', function(){
