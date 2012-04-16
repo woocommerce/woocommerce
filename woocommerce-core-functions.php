@@ -287,11 +287,19 @@ function woocommerce_locate_template( $template_name, $template_path = '' ) {
 
 	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
 }
+
+/**
+ * Get Currency
+ **/
+function get_woocommerce_currency() {
+	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
+}
+
 /**
  * Currency
  **/
 function get_woocommerce_currency_symbol( $currency = '' ) {
-	if (!$currency) $currency = get_option('woocommerce_currency');
+	if ( ! $currency ) $currency = get_woocommerce_currency();
 	$currency_symbol = '';
 	switch ($currency) :
 		case 'BRL' : $currency_symbol = 'R&#36;'; break; // in Brazil the correct is R$ 0.00,00
@@ -322,7 +330,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'GBP' : 
 		default    : $currency_symbol = '&pound;'; break;
 	endswitch;
-	return apply_filters('woocommerce_currency_symbol', $currency_symbol, $currency);
+	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
 
 /**

@@ -55,7 +55,7 @@ class WC_Paypal extends WC_Payment_Gateway {
      * Check if this gateway is enabled and available in the user's country
      */
     function is_valid_for_use() {
-        if (!in_array(get_option('woocommerce_currency'), array('AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB'))) return false;
+        if (!in_array(get_woocommerce_currency(), array('AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB'))) return false;
 
         return true;
     }
@@ -206,7 +206,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'cmd' 					=> '_cart',
 				'business' 				=> $this->email,
 				'no_note' 				=> 1,
-				'currency_code' 		=> get_option('woocommerce_currency'),
+				'currency_code' 		=> get_woocommerce_currency(),
 				'charset' 				=> 'UTF-8',
 				'rm' 					=> 2,
 				'upload' 				=> 1,

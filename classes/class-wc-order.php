@@ -292,8 +292,7 @@ class WC_Order {
 	function get_order_total() {
 		return $this->order_total;
 	}
-	
-	
+		
 	/** Get item subtotal - this is the cost before discount */
 	function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		if ($inc_tax) :
