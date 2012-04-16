@@ -40,6 +40,15 @@ function variable_product_type_options() {
 			break;
 		endif;
 	}
+	
+	// Get tax classes
+	$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+	$tax_class_options = array();
+	$tax_class_options['parent'] =__('Same as parent', 'woocommerce');
+	$tax_class_options[''] = __('Standard', 'woocommerce');
+	if ($tax_classes) foreach ( $tax_classes as $class )
+		$tax_class_options[sanitize_title($class)] = $class;
+
 	?>
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper">
 	
@@ -100,14 +109,8 @@ function variable_product_type_options() {
 					
 					$classes = get_the_terms( $variation->ID, 'product_shipping_class' );
 					if ( $classes && ! is_wp_error( $classes ) ) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
-					
-					$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
-					$tax_class_options = array();
-					$parent_tax_class = get_post_meta( $post->ID, '_tax_class', true );
-					$tax_class_options['parent'] =__('Same as parent', 'woocommerce');
-					$tax_class_options[''] = __('Standard', 'woocommerce');
-		    		if ($tax_classes) foreach ( $tax_classes as $class )
-		    			$tax_class_options[sanitize_title($class)] = $class;
+							    			
+		    		$parent_tax_class = get_post_meta( $post->ID, '_tax_class', true );
 					?>
 					<div class="woocommerce_variation wc-metabox closed">
 						<h3>
