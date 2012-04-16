@@ -143,7 +143,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.4 - 12/04/2012 =
+= 1.5.4 - 16/04/2012 =
 * Feature - Allow attributes to be added from the edit product page
 * Feature - Allow external products to be a part of a grouped product. Button titles will be respected when displayed.
 * Feature - Added woocommerce_get_dimension/woocommerce_get_weight helpers for normalisation. Thanks Andy Zhang

@@ -380,8 +380,8 @@ jQuery(document).ready(function($) {
     function show_variation(variation) {
         var img = $('div.images img:eq(0)');
         var link = $('div.images a.zoom:eq(0)');
-        var o_src = $(img).attr('original-src');
-        var o_link = $(link).attr('original-href');
+        var o_src = $(img).attr('data-o_src');
+        var o_href = $(link).attr('data-o_href');
 
         var variation_image = variation.image_src;
         var variation_link = variation.image_link;
@@ -390,11 +390,11 @@ jQuery(document).ready(function($) {
         $('.single_variation').html( variation.price_html + variation.availability_html );
 
         if (!o_src) {
-            $(img).attr('original-src', $(img).attr('src'));
+            $(img).attr('data-o_src', $(img).attr('src'));
         }
 
-        if (!o_link) {
-            $(link).attr('original-href', $(link).attr('href'));
+        if (!o_href) {
+            $(link).attr('data-o_href', $(link).attr('href'));
         }
 
         if (variation_image && variation_image.length > 1) {	
@@ -402,7 +402,7 @@ jQuery(document).ready(function($) {
             $(link).attr('href', variation_link);
         } else {
             $(img).attr('src', o_src);
-            $(link).attr('href', o_link);
+            $(link).attr('href', o_href);
         }
         
         if (variation.sku) {
@@ -435,7 +435,7 @@ jQuery(document).ready(function($) {
 		var all_set = true;
 		var any_set = false;
 		var current_settings = {};
-        
+		        
 		$('.variations select').each(function(){
 			
 			if ( exclude && $(this).attr('name') == exclude ) {
@@ -488,6 +488,17 @@ jQuery(document).ready(function($) {
 
 	$('.variations select').change(function(){
 		
+		// Reset image
+		var img = $('div.images img:eq(0)');
+        var link = $('div.images a.zoom:eq(0)');
+		var o_src = $(img).attr('data-o_src');
+        var o_href = $(link).attr('data-o_href');
+        
+        if ( o_src && o_href ) {
+	        $(img).attr('src', o_src);
+            $(link).attr('href', o_href);
+        }
+
 		$('form input[name=variation_id]').val('').change();
         $('.single_variation_wrap').hide();
         $('.single_variation').text('');
