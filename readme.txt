@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Minimum fee option for flat rate shipping
 * Feature - "Package" support for shipping calculations - allows third parties to split the cart up to calc shipping. Also caches packages meaning the cart shipping only needs to be calculated once (until totals or customer location changes)
 * Feature - Local delivery cost per item condition
+* Feature - get_product_search_form function, used in product search widget
 * Tweak - Redesigned variation panels and variation bulk edit to make them easier to use and expand.
 * Tweak - Show multiple success messages/error messages if added, rather than one or the other
 * Tweak - Adding an item to an order now uses the ajax style product finder
@@ -174,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Product images on orders page
 * Tweak - Payment method transition
 * Tweak - Moved product attribute table to a template file for easier customisation.
+* Tweak - If the "Only ship to the users billing address" admin option is set to true, the checkout form displayed "Billing & Shipping". Even when a cart contains only virtual goods and does not require shipping. (Thanks thenbrent)
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Fix - nofollow add to cart links to prevent indexing
