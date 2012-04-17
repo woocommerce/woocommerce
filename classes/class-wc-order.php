@@ -774,9 +774,9 @@ class WC_Order {
 							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $this->id, 'quantity' => $item['qty']));
 						
 						// stock status notifications
-						if ( get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount') >= $new_quantity )
+						if ( get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount') >= $new_quantity && get_option( 'woocommerce_notify_low_stock' ) == 'yes' )
 							do_action('woocommerce_no_stock', $_product);
-						elseif ( get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount') >= $new_quantity )
+						elseif ( get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount') >= $new_quantity && get_option( 'woocommerce_notify_no_stock' ) == 'yes' )
 							do_action('woocommerce_low_stock', $_product);
 						
 					}
