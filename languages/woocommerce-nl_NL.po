@@ -9866,7 +9866,7 @@ msgstr "wp_remote_post() is gelukt. PayPal IPN werkt."
 #: admin/woocommerce-admin-debug.php:313
 #@ woocommerce
 msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error: "
-msgstr "wp_remote_post() mislukt. PayPal IPN werkt niet op uw server. Neem contact op met uw hosting provider."
+msgstr "wp_remote_post() mislukt. PayPal IPN werkt niet op uw server. Neem contact op met uw hosting provider.  "
 
 #: admin/woocommerce-admin-debug.php:320
 #@ woocommerce
@@ -9996,19 +9996,19 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-order_data.php:69
 #@ woocommerce
 msgid "Order Date:"
-msgstr ""
+msgstr "Bestel Datum:"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:70
 #@ woocommerce
 msgid "h"
-msgstr ""
+msgstr "h"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:395
 #: admin/post-types/writepanels/writepanel-product_data.php:419
 #: admin/post-types/writepanels/writepanel-product_data.php:438
 #@ woocommerce
 msgid "Search for a product&hellip;"
-msgstr ""
+msgstr "Zoek naar een product &hellip;"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:397
 #@ woocommerce
@@ -10085,7 +10085,7 @@ msgstr[1] "%d op voorraad"
 #: admin/woocommerce-admin-settings.php:56
 #@ woocommerce
 msgid "Malaysian Ringgits (RM)"
-msgstr ""
+msgstr "Malaysische Ringgits (RM)"
 
 #: admin/woocommerce-admin-settings.php:648
 #@ woocommerce
@@ -10198,7 +10198,7 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "Order %s"
-msgstr ""
+msgstr "Bestelling %s"
 
 #: classes/gateways/class-wc-paypal.php:573
 #: classes/gateways/class-wc-paypal.php:590
@@ -10302,5 +10302,5 @@ msgstr ""
 #: woocommerce.php:0
 #@ woocommerce
 msgid "1.5.4"
-msgstr ""
+msgstr "1.5.4"
 
