@@ -10079,8 +10079,8 @@ msgstr ""
 #@ woocommerce
 msgid "%d in stock"
 msgid_plural "%d in stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d op voorraad"
+msgstr[1] "%d op voorraad"
 
 #: admin/woocommerce-admin-settings.php:56
 #@ woocommerce
