@@ -228,6 +228,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Put chosen frontend script back
 * Fix - Make download links use billing email, not user email
 * Fix - ' in prices (thousand separator)
+* Fix - exclude products in coupons panel now looks for variations.
 * Fix - Admin menu highlighting when adding orders
 * Localization - Removed translations from reports page tab URLS
 * Localization - Spanish update by Héctor Carranza

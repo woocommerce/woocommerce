@@ -536,6 +536,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            	$accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
 					if (!in_array($posted['txn_type'], $accepted_types)) :
 						if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
+						exit;
 					endif;
 					
 					 // Store PP Details

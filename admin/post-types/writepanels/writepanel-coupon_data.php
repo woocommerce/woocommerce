@@ -76,7 +76,7 @@ function woocommerce_coupon_data_meta_box($post) {
 			// Exclude Product ids
 			?>
 			<p class="form-field"><label for="exclude_product_ids"><?php _e('Exclude Products', 'woocommerce') ?></label>
-			<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product…', 'woocommerce'); ?>">
+			<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e('Search for a product…', 'woocommerce'); ?>">
 				<?php
 					$product_ids = get_post_meta( $post->ID, 'exclude_product_ids', true );
 					if ($product_ids) {
