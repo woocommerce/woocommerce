@@ -769,15 +769,8 @@ class WC_Order {
 						$new_quantity = $_product->reduce_stock( $item['qty'] );
 						
 						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
-							
-						if ($new_quantity<0)
-							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $this->id, 'quantity' => $item['qty']));
 						
-						// stock status notifications
-						if ( get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount') >= $new_quantity && get_option( 'woocommerce_notify_low_stock' ) == 'yes' )
-							do_action('woocommerce_no_stock', $_product);
-						elseif ( get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount') >= $new_quantity && get_option( 'woocommerce_notify_no_stock' ) == 'yes' )
-							do_action('woocommerce_low_stock', $_product);
+						$this->send_stock_notifications( $_product, $new_quantity, $item['qty'] );
 						
 					}
 					
@@ -791,6 +784,29 @@ class WC_Order {
 			
 		}
 			
+	}
+	
+	/**
+	 * send_stock_notifications function.
+	 */
+	function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
+		
+		// Backorders
+		if ( $new_stock < 0 )
+			do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $this->id, 'quantity' => $qty_ordered ) );
+		
+		// stock status notifications
+		$notification_sent = false;
+		
+		if ( get_option( 'woocommerce_notify_no_stock' ) == 'yes' && get_option('woocommerce_notify_no_stock_amount') >= $new_stock ) {
+			do_action( 'woocommerce_no_stock', $product );
+			$notification_sent = true;
+		}
+		if ( ! $notification_sent && get_option( 'woocommerce_notify_low_stock' ) == 'yes' && get_option('woocommerce_notify_low_stock_amount') >= $new_stock ) {
+			do_action( 'woocommerce_low_stock', $product );
+			$notification_sent = true;
+		}
+
 	}
 	
 	/**

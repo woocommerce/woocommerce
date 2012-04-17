@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Moved product attribute table to a template file for easier customisation.
 * Tweak - If the "Only ship to the users billing address" admin option is set to true, the checkout form displayed "Billing & Shipping". Even when a cart contains only virtual goods and does not require shipping. (Thanks thenbrent)
 * Tweak - Separate sections for each shipping method, due to the volume of data being posted upon save. NOTE TO DEVELOPERS: The save hook for shipping options is woocommerce_update_options_shipping_{your method id}
+* Tweak - $order->send_stock_notifications function
 * Fix - Product cat sortable when item cannot be moved.
 * Fix - Do not show the Additional Information tab on product single page if contents are hidden or not existing.
 * Fix - nofollow add to cart links to prevent indexing

@@ -754,24 +754,15 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 				
 				if ($_product->exists) :
 				
-				 	if ($_product->managing_stock()) :
+				 	if ( $_product->managing_stock() ) :
 						
 						$old_stock = $_product->stock;
 						
 						$new_quantity = $_product->reduce_stock( $order_item['qty'] );
 						
 						$order->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $order_item['id'], $old_stock, $new_quantity) );
-							
-						if ($new_quantity<0) :
-							do_action('woocommerce_product_on_backorder', array( 'product' => $_product, 'order_id' => $post_id, 'quantity' => $order_item['qty']));
-						endif;
 						
-						// stock status notifications
-						if (get_option('woocommerce_notify_no_stock_amount') && get_option('woocommerce_notify_no_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_no_stock', $_product);
-						elseif (get_option('woocommerce_notify_low_stock_amount') && get_option('woocommerce_notify_low_stock_amount')>=$new_quantity) :
-							do_action('woocommerce_low_stock', $_product);
-						endif;
+						$order->send_stock_notifications( $_product, $new_quantity, $order_item['qty'] );
 						
 					endif;
 				
