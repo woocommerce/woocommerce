@@ -1180,6 +1180,7 @@ function woocommerce_settings() {
 		// Flush rules and clear any unwanted data
 		flush_rewrite_rules( false );
 		unset($_SESSION['orderby']);
+		$woocommerce->clear_product_transients();
 		
 		// Redirect back
 		$redirect = add_query_arg( 'saved', 'true' );
