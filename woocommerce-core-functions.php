@@ -23,7 +23,7 @@
  */
 function woocommerce_get_dimension( $dim, $to_unit ) {
 	
-	$from_unit 	= strtolower( get_option('woocommerce_dimension_unit') );
+	$from_unit 	= strtolower( get_option( 'woocommerce_dimension_unit' ) );
 	$to_unit	= strtolower( $to_unit );
 	
 	// Unify all units to cm first
@@ -39,6 +39,9 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 			case 'mm':
 				$dim *= 0.1;
 			break;
+			case 'yd':
+				$dim *= 0.010936133;
+			break;
 		}
 
 		// Output desired unit
@@ -51,6 +54,9 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 			break;
 			case 'mm':
 				$dim *= 10;
+			break;
+			case 'yd':
+				$dim *= 91.44;
 			break;
 		}
 	}
