@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v1.5.3\n"
+"Project-Id-Version: WooCommerce v1.5.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-07 18:24+0100\n"
-"PO-Revision-Date: 2012-04-08 23:12+0100\n"
+"POT-Creation-Date: 2012-04-18 14:33+0100\n"
+"PO-Revision-Date: 2012-04-18 14:34+0100\n"
 "Last-Translator: Frederik Svarre <FRS@FSLab.dk>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -43,88 +43,88 @@ msgid "You have taken too long. Please go back and retry."
 msgstr "Du har brugt for lang tid. Gå venligst tilbage og prøv igen."
 
 # @ woocommerce
-#: woocommerce-ajax.php:642
+#: woocommerce-ajax.php:688
 msgid "Product ID:"
 msgstr "Produkt ID:"
 
 # @ woocommerce
-#: woocommerce-ajax.php:643
+#: woocommerce-ajax.php:689
 msgid "Variation ID:"
 msgstr "Variant ID:"
 
 # @ woocommerce
-#: woocommerce-ajax.php:644
+#: woocommerce-ajax.php:690
 msgid "Product SKU:"
 msgstr "Produkt varenummer:"
 
 # @ woocommerce
-#: woocommerce-ajax.php:656
+#: woocommerce-ajax.php:702
 msgid "Delete item"
 msgstr "Slet produkt"
 
 # @ woocommerce
-#: woocommerce-ajax.php:657
+#: woocommerce-ajax.php:703
 msgid "View product"
 msgstr "Vis produkt"
 
 # @ woocommerce
-#: woocommerce-ajax.php:665
+#: woocommerce-ajax.php:711
 msgid "Add&nbsp;meta"
 msgstr "Tilføj&nbsp;meta"
 
 # @ woocommerce
-#: woocommerce-ajax.php:679
+#: woocommerce-ajax.php:725
 msgid "Standard"
 msgstr "Standard"
 
 # @ woocommerce
-#: woocommerce-ajax.php:693
-#: woocommerce-ajax.php:699
+#: woocommerce-ajax.php:739
+#: woocommerce-ajax.php:745
 msgid "Cost"
 msgstr "Omkostninger"
 
 # @ woocommerce
-#: woocommerce-ajax.php:695
-#: woocommerce-ajax.php:701
+#: woocommerce-ajax.php:741
+#: woocommerce-ajax.php:747
 #: admin/woocommerce-admin-content.php:42
 msgid "Tax"
 msgstr "Moms"
 
 # @ woocommerce
-#: woocommerce-ajax.php:788
+#: woocommerce-ajax.php:834
 msgid "Delete note"
 msgstr "Slet bemærkning"
 
 # @ woocommerce
-#: woocommerce-ajax.php:936
+#: woocommerce-ajax.php:990
 msgid "Cross-sell"
 msgstr "Cross-salg"
 
 # @ woocommerce
-#: woocommerce-ajax.php:936
+#: woocommerce-ajax.php:990
 msgid "Up-sell"
 msgstr "Mersalg"
 
 # @ woocommerce
-#: woocommerce-ajax.php:941
+#: woocommerce-ajax.php:995
 msgid "No products found"
 msgstr "Ingen produkter fundet"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:485
-#: woocommerce-core-functions.php:537
+#: woocommerce-core-functions.php:586
+#: woocommerce-core-functions.php:650
 msgid "Download Permissions Granted"
-msgstr "Download tilladelse givet"
+msgstr "Downloadtilladelse givet"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:571
-#: woocommerce.php:527
+#: woocommerce-core-functions.php:684
+#: woocommerce.php:524
 msgctxt "slug"
 msgid "product"
 msgstr "produkt"
 
 # @ woocommerce
-#: woocommerce-core-functions.php:664
+#: woocommerce-core-functions.php:777
 msgid "Select a category"
 msgstr "Vælg en kategori"
 
@@ -307,7 +307,7 @@ msgstr "Log ind &rarr;"
 # @ woocommerce
 #: woocommerce-functions.php:832
 msgid "This is not your download link."
-msgstr "Dette er ikke dit download link."
+msgstr "Dette er ikke dit downloadlink."
 
 # @ woocommerce
 #: woocommerce-functions.php:848
@@ -332,7 +332,7 @@ msgstr "Gæst"
 
 # @ woocommerce
 #: woocommerce-functions.php:1134
-#: woocommerce-template.php:345
+#: woocommerce-template.php:347
 msgid "SKU:"
 msgstr "Varenummer:"
 
@@ -374,55 +374,65 @@ msgid "Page"
 msgstr "Side"
 
 # @ woocommerce
-#: woocommerce-template.php:170
+#: woocommerce-template.php:172
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr "Dette er en demobutik til testformål &mdash; ingen ordrer vil blive opfyldt."
 
 # @ woocommerce
-#: woocommerce-template.php:371
+#: woocommerce-template.php:373
 msgid "Buy product"
 msgstr "Køb produkt"
 
 # @ woocommerce
-#: woocommerce-template.php:684
+#: woocommerce-template.php:686
 msgid "Select a country&hellip;"
 msgstr "Vælg et land&hellip;"
 
 # @ woocommerce
-#: woocommerce-template.php:713
+#: woocommerce-template.php:715
 msgid "Select a state&hellip;"
 msgstr "Vælg en stat&hellip;"
 
 # @ woocommerce
-#: woocommerce.php:455
+#: woocommerce-template.php:785
+msgid "Search for:"
+msgstr "Søg efter:"
+
+# @ woocommerce
+#: woocommerce-template.php:786
+msgid "Search for products"
+msgstr "Søg efter produkter"
+
+# @ woocommerce
+#: woocommerce.php:452
 msgid "Customer"
 msgstr "Kunde"
 
 # @ woocommerce
-#: woocommerce.php:462
+#: woocommerce.php:459
 msgid "Shop Manager"
 msgstr "Butiksadministrator"
 
 # @ woocommerce
-#: woocommerce.php:523
+#: woocommerce.php:520
 msgctxt "slug"
 msgid "product-category"
 msgstr "produkt-kategori"
 
 # @ woocommerce
-#: woocommerce.php:525
+#: woocommerce.php:522
 msgctxt "slug"
 msgid "product-tag"
 msgstr "produkt-tag"
 
 # @ woocommerce
-#: woocommerce.php:555
-#: woocommerce.php:557
+#: woocommerce.php:552
+#: woocommerce.php:554
 msgid "Product Categories"
 msgstr "Produktkategorier"
 
 # @ woocommerce
-#: woocommerce.php:558
+#: woocommerce.php:555
 #: admin/woocommerce-admin-dashboard.php:55
 msgid "Product Category"
 msgid_plural "Product Categories"
@@ -430,57 +440,57 @@ msgstr[0] "Produktkategori"
 msgstr[1] "Produktkategorier"
 
 # @ woocommerce
-#: woocommerce.php:559
+#: woocommerce.php:556
 msgid "Search Product Categories"
 msgstr "Søg produktkategorier"
 
 # @ woocommerce
-#: woocommerce.php:560
+#: woocommerce.php:557
 msgid "All Product Categories"
 msgstr "Alle produktkategorier"
 
 # @ woocommerce
-#: woocommerce.php:561
+#: woocommerce.php:558
 msgid "Parent Product Category"
 msgstr "Forælder Produkt Kategori"
 
 # @ woocommerce
-#: woocommerce.php:562
+#: woocommerce.php:559
 msgid "Parent Product Category:"
 msgstr "Forælder Produkt Kategori:"
 
 # @ woocommerce
-#: woocommerce.php:563
+#: woocommerce.php:560
 msgid "Edit Product Category"
 msgstr "Rediger produktkategori"
 
 # @ woocommerce
-#: woocommerce.php:564
+#: woocommerce.php:561
 msgid "Update Product Category"
 msgstr "Opdater produktkategori"
 
 # @ woocommerce
-#: woocommerce.php:565
+#: woocommerce.php:562
 msgid "Add New Product Category"
 msgstr "Tilføj ny produktkategori"
 
 # @ woocommerce
-#: woocommerce.php:566
+#: woocommerce.php:563
 msgid "New Product Category Name"
 msgstr "Nyt produktkategori navn"
 
 # @ woocommerce
-#: woocommerce.php:584
+#: woocommerce.php:582
 msgid "Product Tags"
 msgstr "Produkt tags"
 
 # @ woocommerce
-#: woocommerce.php:586
+#: woocommerce.php:584
 msgid "Tags"
 msgstr "Tags"
 
 # @ woocommerce
-#: woocommerce.php:587
+#: woocommerce.php:585
 #: admin/woocommerce-admin-dashboard.php:69
 msgid "Product Tag"
 msgid_plural "Product Tags"
@@ -488,195 +498,195 @@ msgstr[0] "Produkt tag"
 msgstr[1] "Produkt tags"
 
 # @ woocommerce
-#: woocommerce.php:588
+#: woocommerce.php:586
 msgid "Search Product Tags"
 msgstr "Søg Produkt Nøgleord"
 
 # @ woocommerce
-#: woocommerce.php:589
+#: woocommerce.php:587
 msgid "All Product Tags"
 msgstr "Alle Produkt Nøgleord"
 
 # @ woocommerce
-#: woocommerce.php:590
+#: woocommerce.php:588
 msgid "Parent Product Tag"
 msgstr "Forælder produkt tag"
 
 # @ woocommerce
-#: woocommerce.php:591
+#: woocommerce.php:589
 msgid "Parent Product Tag:"
 msgstr "Forælder produkt tag:"
 
 # @ woocommerce
-#: woocommerce.php:592
+#: woocommerce.php:590
 msgid "Edit Product Tag"
 msgstr "Rediger produkt tag"
 
 # @ woocommerce
-#: woocommerce.php:593
+#: woocommerce.php:591
 msgid "Update Product Tag"
 msgstr "Opdater produkt tag"
 
 # @ woocommerce
-#: woocommerce.php:594
+#: woocommerce.php:592
 msgid "Add New Product Tag"
 msgstr "Tilføj nyt produkt tag"
 
 # @ woocommerce
-#: woocommerce.php:595
+#: woocommerce.php:593
 msgid "New Product Tag Name"
 msgstr "Nyt produkt tag navn"
 
 # @ woocommerce
+#: woocommerce.php:612
 #: woocommerce.php:614
-#: woocommerce.php:616
 msgid "Shipping Classes"
 msgstr "Forsendelsesklasser"
 
 # @ woocommerce
-#: woocommerce.php:617
+#: woocommerce.php:615
 msgid "Shipping Class"
 msgstr "Forsendelsesklasse"
 
 # @ woocommerce
-#: woocommerce.php:618
+#: woocommerce.php:616
 msgid "Search Shipping Classes"
 msgstr "Søg forsendelsesklasse"
 
 # @ woocommerce
-#: woocommerce.php:619
+#: woocommerce.php:617
 msgid "All Shipping Classes"
 msgstr "Alle forsendelsesklasser"
 
 # @ woocommerce
-#: woocommerce.php:620
+#: woocommerce.php:618
 msgid "Parent Shipping Class"
 msgstr "Forælder Fragt Kategori"
 
 # @ woocommerce
-#: woocommerce.php:621
+#: woocommerce.php:619
 msgid "Parent Shipping Class:"
 msgstr "Forælder Fragt Kategori:"
 
 # @ woocommerce
-#: woocommerce.php:622
+#: woocommerce.php:620
 msgid "Edit Shipping Class"
 msgstr "Rediger Forsendelsesklasse"
 
 # @ woocommerce
-#: woocommerce.php:623
+#: woocommerce.php:621
 msgid "Update Shipping Class"
 msgstr "Opdater forsendelsesklasse"
 
 # @ woocommerce
-#: woocommerce.php:624
+#: woocommerce.php:622
 msgid "Add New Shipping Class"
 msgstr "Tilføj ny forsendelsesklasse"
 
 # @ woocommerce
-#: woocommerce.php:625
+#: woocommerce.php:623
 msgid "New Shipping Class Name"
 msgstr "Nyt forsendelsesklasse navn"
 
 # @ woocommerce
-#: woocommerce.php:646
+#: woocommerce.php:644
 msgid "Order statuses"
 msgstr "Ordrestatusser"
 
 # @ woocommerce
-#: woocommerce.php:647
+#: woocommerce.php:645
 msgid "Order status"
 msgstr "Ordrestatus"
 
 # @ woocommerce
-#: woocommerce.php:648
+#: woocommerce.php:646
 msgid "Search Order statuses"
 msgstr "Søg ordrestatusser"
 
 # @ woocommerce
-#: woocommerce.php:649
+#: woocommerce.php:647
 msgid "All  Order statuses"
 msgstr "Alle ordrestatusser"
 
 # @ woocommerce
-#: woocommerce.php:650
+#: woocommerce.php:648
 msgid "Parent Order status"
 msgstr "Forælder ordrestatus"
 
 # @ woocommerce
-#: woocommerce.php:651
+#: woocommerce.php:649
 msgid "Parent Order status:"
 msgstr "Forælder ordrestatus:"
 
 # @ woocommerce
-#: woocommerce.php:652
+#: woocommerce.php:650
 msgid "Edit Order status"
 msgstr "Rediger ordrestatus"
 
 # @ woocommerce
-#: woocommerce.php:653
+#: woocommerce.php:651
 msgid "Update Order status"
 msgstr "Opdater ordrestatus"
 
 # @ woocommerce
-#: woocommerce.php:654
+#: woocommerce.php:652
 msgid "Add New Order status"
 msgstr "Tilføj ny ordrestatus"
 
 # @ woocommerce
-#: woocommerce.php:655
+#: woocommerce.php:653
 msgid "New Order status Name"
 msgstr "Ny ordrestatus navn"
 
 # @ woocommerce
-#: woocommerce.php:683
+#: woocommerce.php:681
 msgid "Search"
 msgstr "Søg"
 
 # @ woocommerce
-#: woocommerce.php:684
+#: woocommerce.php:682
 msgid "All"
 msgstr "Alle"
 
 # @ woocommerce
-#: woocommerce.php:685
-#: woocommerce.php:686
+#: woocommerce.php:683
+#: woocommerce.php:684
 msgid "Parent"
 msgstr "Forælder"
 
 # @ woocommerce
-#: woocommerce.php:687
-#: woocommerce.php:713
-#: woocommerce.php:756
-#: woocommerce.php:797
-#: woocommerce.php:841
+#: woocommerce.php:685
+#: woocommerce.php:711
+#: woocommerce.php:754
+#: woocommerce.php:795
+#: woocommerce.php:839
 #: admin/woocommerce-admin-attributes.php:179
 msgid "Edit"
 msgstr "Rediger"
 
 # @ woocommerce
-#: woocommerce.php:688
+#: woocommerce.php:686
 #: admin/woocommerce-admin-attributes.php:138
 msgid "Update"
 msgstr "Opdater"
 
 # @ woocommerce
-#: woocommerce.php:689
+#: woocommerce.php:687
 msgid "Add New"
 msgstr "Tilføj ny"
 
 # @ woocommerce
-#: woocommerce.php:690
+#: woocommerce.php:688
 msgid "New"
 msgstr "Ny"
 
 # @ woocommerce
-#: woocommerce.php:709
+#: woocommerce.php:707
 msgid "Products"
 msgstr "Produkter"
 
 # @ woocommerce
-#: woocommerce.php:710
+#: woocommerce.php:708
 #: admin/woocommerce-admin-dashboard.php:41
 msgid "Product"
 msgid_plural "Products"
@@ -684,268 +694,268 @@ msgstr[0] "Produkt"
 msgstr[1] "Produkter"
 
 # @ woocommerce
-#: woocommerce.php:711
+#: woocommerce.php:709
 msgid "Add Product"
 msgstr "Tilføj produkt"
 
 # @ woocommerce
-#: woocommerce.php:712
+#: woocommerce.php:710
 msgid "Add New Product"
 msgstr "Tilføj nyt produkt"
 
 # @ woocommerce
-#: woocommerce.php:714
+#: woocommerce.php:712
 msgid "Edit Product"
 msgstr "Rediger produkt"
 
 # @ woocommerce
-#: woocommerce.php:715
+#: woocommerce.php:713
 msgid "New Product"
 msgstr "Nyt produkt"
 
 # @ woocommerce
-#: woocommerce.php:716
-#: woocommerce.php:717
+#: woocommerce.php:714
+#: woocommerce.php:715
 msgid "View Product"
 msgstr "Vis produkt"
 
 # @ woocommerce
-#: woocommerce.php:718
+#: woocommerce.php:716
 msgid "Search Products"
 msgstr "Produktsøgning"
 
 # @ woocommerce
-#: woocommerce.php:719
+#: woocommerce.php:717
 msgid "No Products found"
 msgstr "Ingen produkter fundet"
 
 # @ woocommerce
-#: woocommerce.php:720
+#: woocommerce.php:718
 msgid "No Products found in trash"
 msgstr "Ingen produkter fundet i papirkurven"
 
 # @ woocommerce
-#: woocommerce.php:721
+#: woocommerce.php:719
 msgid "Parent Product"
 msgstr "Forælder Produkt"
 
 # @ woocommerce
-#: woocommerce.php:723
+#: woocommerce.php:721
 msgid "This is where you can add new products to your store."
 msgstr "Her kan du tilføje nye produkter til din butik."
 
 # @ woocommerce
-#: woocommerce.php:752
+#: woocommerce.php:750
 msgid "Variations"
 msgstr "Varianter"
 
 # @ woocommerce
-#: woocommerce.php:753
+#: woocommerce.php:751
 msgid "Variation"
 msgstr "Variant"
 
 # @ woocommerce
-#: woocommerce.php:754
+#: woocommerce.php:752
 msgid "Add Variation"
 msgstr "Tilføj variant"
 
 # @ woocommerce
-#: woocommerce.php:755
+#: woocommerce.php:753
 msgid "Add New Variation"
 msgstr "Tilføj ny variant"
 
 # @ woocommerce
-#: woocommerce.php:757
+#: woocommerce.php:755
 msgid "Edit Variation"
 msgstr "Rediger variant"
 
 # @ woocommerce
-#: woocommerce.php:758
+#: woocommerce.php:756
 msgid "New Variation"
 msgstr "Ny variant"
 
 # @ woocommerce
-#: woocommerce.php:759
-#: woocommerce.php:760
+#: woocommerce.php:757
+#: woocommerce.php:758
 msgid "View Variation"
 msgstr "Vis variant"
 
 # @ woocommerce
-#: woocommerce.php:761
+#: woocommerce.php:759
 msgid "Search Variations"
 msgstr "Variantsøgning"
 
 # @ woocommerce
-#: woocommerce.php:762
+#: woocommerce.php:760
 msgid "No Variations found"
 msgstr "Ingen varianter fundet"
 
 # @ woocommerce
-#: woocommerce.php:763
+#: woocommerce.php:761
 msgid "No Variations found in trash"
 msgstr "Ingen varianter fundet i papirkurven"
 
 # @ woocommerce
-#: woocommerce.php:764
+#: woocommerce.php:762
 msgid "Parent Variation"
 msgstr "Forælder Variant"
 
 # @ woocommerce
-#: woocommerce.php:793
+#: woocommerce.php:791
 #: admin/woocommerce-admin-content.php:61
 #: admin/woocommerce-admin-dashboard.php:99
 msgid "Orders"
 msgstr "Ordrer"
 
 # @ woocommerce
-#: woocommerce.php:794
+#: woocommerce.php:792
 msgid "Order"
 msgstr "Ordre"
 
 # @ woocommerce
-#: woocommerce.php:795
+#: woocommerce.php:793
 msgid "Add Order"
 msgstr "Tilføj ordre"
 
 # @ woocommerce
-#: woocommerce.php:796
+#: woocommerce.php:794
 msgid "Add New Order"
 msgstr "Tilføj ny ordre"
 
 # @ woocommerce
-#: woocommerce.php:798
+#: woocommerce.php:796
 msgid "Edit Order"
 msgstr "Rediger ordre"
 
 # @ woocommerce
-#: woocommerce.php:799
+#: woocommerce.php:797
 msgid "New Order"
 msgstr "Ny ordre"
 
 # @ woocommerce
-#: woocommerce.php:800
-#: woocommerce.php:801
+#: woocommerce.php:798
+#: woocommerce.php:799
 msgid "View Order"
 msgstr "Vis ordre"
 
 # @ woocommerce
-#: woocommerce.php:802
+#: woocommerce.php:800
 msgid "Search Orders"
 msgstr "Ordresøgning"
 
 # @ woocommerce
-#: woocommerce.php:803
+#: woocommerce.php:801
 msgid "No Orders found"
 msgstr "Ingen ordre fundet"
 
 # @ woocommerce
-#: woocommerce.php:804
+#: woocommerce.php:802
 msgid "No Orders found in trash"
 msgstr "Ingen ordre fundet i papirkurven"
 
 # @ woocommerce
-#: woocommerce.php:805
+#: woocommerce.php:803
 msgid "Parent Orders"
 msgstr "Forælder ordrer"
 
 # @ woocommerce
-#: woocommerce.php:807
+#: woocommerce.php:805
 msgid "This is where store orders are stored."
 msgstr "Her gemmes butiksordrer"
 
 # @ woocommerce
-#: woocommerce.php:837
+#: woocommerce.php:835
 #: admin/woocommerce-admin-content.php:69
 msgid "Coupons"
 msgstr "Kuponer"
 
 # @ woocommerce
-#: woocommerce.php:838
+#: woocommerce.php:836
 msgid "Coupon"
 msgstr "Kupon"
 
 # @ woocommerce
-#: woocommerce.php:839
+#: woocommerce.php:837
 msgid "Add Coupon"
 msgstr "Tilføj kupon"
 
 # @ woocommerce
-#: woocommerce.php:840
+#: woocommerce.php:838
 msgid "Add New Coupon"
 msgstr "Tilføj ny kupon"
 
 # @ woocommerce
-#: woocommerce.php:842
+#: woocommerce.php:840
 msgid "Edit Coupon"
 msgstr "Rediger kupon"
 
 # @ woocommerce
-#: woocommerce.php:843
+#: woocommerce.php:841
 msgid "New Coupon"
 msgstr "Ny kupon"
 
 # @ woocommerce
-#: woocommerce.php:844
+#: woocommerce.php:842
 msgid "View Coupons"
 msgstr "Vis kuponer"
 
 # @ woocommerce
-#: woocommerce.php:845
+#: woocommerce.php:843
 msgid "View Coupon"
 msgstr "Vis kupon"
 
 # @ woocommerce
-#: woocommerce.php:846
+#: woocommerce.php:844
 msgid "Search Coupons"
 msgstr "Kuponsøgning"
 
 # @ woocommerce
-#: woocommerce.php:847
+#: woocommerce.php:845
 msgid "No Coupons found"
 msgstr "Ingen kuponer findet"
 
 # @ woocommerce
-#: woocommerce.php:848
+#: woocommerce.php:846
 msgid "No Coupons found in trash"
 msgstr "Ingen kuponer fundet i papirkurven"
 
 # @ woocommerce
-#: woocommerce.php:849
+#: woocommerce.php:847
 msgid "Parent Coupon"
 msgstr "Forælder Kupon"
 
 # @ woocommerce
-#: woocommerce.php:851
+#: woocommerce.php:849
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr "Her kan du tilføje nye kuponer, som kunder kan bruge i din butik."
 
 # @ woocommerce
-#: woocommerce.php:958
+#: woocommerce.php:955
 msgid "Select an option&hellip;"
 msgstr "Vælg en indstilling&hellip;"
 
 # @ woocommerce
-#: woocommerce.php:1232
+#: woocommerce.php:1229
 msgid "Cart Discount"
 msgstr "Indkøbskurv rabat"
 
 # @ woocommerce
-#: woocommerce.php:1233
+#: woocommerce.php:1230
 msgid "Cart % Discount"
 msgstr "Indkøbskurv % rabat"
 
 # @ woocommerce
-#: woocommerce.php:1234
+#: woocommerce.php:1231
 msgid "Product Discount"
 msgstr "Produktrabat"
 
 # @ woocommerce
-#: woocommerce.php:1235
+#: woocommerce.php:1232
 msgid "Product % Discount"
 msgstr "Produkt % rabat"
 
 # @ woocommerce
-#: woocommerce.php:1277
+#: woocommerce.php:1274
 msgid "Action failed. Please refresh the page and retry."
 msgstr "Handling mislykkedes. Opdater siden og prøv venligst igen."
 
@@ -958,7 +968,7 @@ msgstr "Rediger egenskab"
 #: admin/woocommerce-admin-attributes.php:117
 #: admin/woocommerce-admin-attributes.php:164
 #: admin/woocommerce-admin-attributes.php:217
-#: admin/woocommerce-admin-init.php:249
+#: admin/woocommerce-admin-init.php:258
 msgid "Name"
 msgstr "Navn"
 
@@ -1077,7 +1087,7 @@ msgstr "Hvis du finder fejl eller ønsker at bidrage til projektet, kan du også
 #: admin/woocommerce-admin-content.php:35
 #: admin/woocommerce-admin-debug.php:95
 #: admin/woocommerce-admin-init.php:27
-#: admin/woocommerce-admin-init.php:83
+#: admin/woocommerce-admin-init.php:92
 msgid "Settings"
 msgstr "Indstillinger"
 
@@ -1643,273 +1653,277 @@ msgid "WC Debug"
 msgstr "WC Fejlret"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:71
+#: admin/woocommerce-admin-init.php:80
 msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
 msgstr "<strong>Velkommen til WooCommerce</strong> &#8211; Du er næsten klar til at starte med at sælge :)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:72
+#: admin/woocommerce-admin-init.php:81
 msgid "Install WooCommerce Pages"
 msgstr "Installer WooCommerce sider"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:72
+#: admin/woocommerce-admin-init.php:81
 msgid "Skip setup"
 msgstr "Spring over opsætning"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:81
+#: admin/woocommerce-admin-init.php:90
 msgid "<strong>WooCommerce has been installed</strong> &#8211; You're ready to start selling :)"
 msgstr "<strong>WooCommerce blev installeret</strong> &#8211; Du er nu klar til at sælge :)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:83
+#: admin/woocommerce-admin-init.php:92
 msgid "Documentation"
 msgstr "Dokumentation"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:247
+#: admin/woocommerce-admin-init.php:256
 msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
 msgstr "Fjern dette element? Hvis du tidligere har reduceret dette produkts lagerstatus, eller denne ordre blev indsendt af en kunde, bliver du nødt til manuelt at gendanne produktets lagerstatus."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:248
+#: admin/woocommerce-admin-init.php:257
 msgid "Remove this attribute?"
 msgstr "Fjern denne egenskab?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:250
+#: admin/woocommerce-admin-init.php:259
 msgid "Remove"
 msgstr "Fjern"
 
 # @ default
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:251
+#: admin/woocommerce-admin-init.php:260
 msgid "Click to toggle"
 msgstr "Klik for at skifte"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:252
+#: admin/woocommerce-admin-init.php:261
 msgid "Value(s)"
 msgstr "Værdi(er)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:253
+#: admin/woocommerce-admin-init.php:262
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Angiv noget tekst eller nogle egenskaber separeret med rør (|)."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:254
+#: admin/woocommerce-admin-init.php:263
 msgid "Visible on the product page"
 msgstr "Synlig på produktsiden"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:255
+#: admin/woocommerce-admin-init.php:264
 msgid "Used for variations"
 msgstr "Brugt til varianter"
 
+#: admin/woocommerce-admin-init.php:265
+msgid "Enter a name for the new attribute term:"
+msgstr "Angiv et navn for det nye egenskabsbegreb:"
+
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:256
+#: admin/woocommerce-admin-init.php:266
 msgid "Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually."
 msgstr "Beregn totaler baseret på ordrens produkter, rabat størrelse og forsendelse? Bemærk, du bliver nødt til (valgfrit) at beregne moms rækker og kurv rabatter manuelt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:257
+#: admin/woocommerce-admin-init.php:267
 msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
 msgstr "Beregn linjemoms? Dette vil beregne moms baseret på kundens land. Hvis der ikke er defineret nogen fakturering/forsendelse, vil butikkens baseland blive anvendt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:258
+#: admin/woocommerce-admin-init.php:268
 msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
 msgstr "Kopier faktureringsoplysninger til forsendelsesoplysninger? Dette vil fjerne enhver allerede indtastet forsendelsesoplysning."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:259
+#: admin/woocommerce-admin-init.php:269
 msgid "Load the customer's billing information? This will remove any currently entered billing information."
 msgstr "Indlæs kundens faktureringsoplysninger? Dette vil fjerne enhver allerede indtastet faktureringsoplysning."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:260
+#: admin/woocommerce-admin-init.php:270
 msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
 msgstr "Indlæs kundens forsendelsesoplysninger? Dette vil fjerne enhver allerede indtastet forsendelsesoplysning."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:264
+#: admin/woocommerce-admin-init.php:274
 msgid "Meta Name"
 msgstr "Meta navn"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:265
+#: admin/woocommerce-admin-init.php:275
 msgid "Meta Value"
 msgstr "Meta værdi"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:266
+#: admin/woocommerce-admin-init.php:276
 msgid "No customer selected"
 msgstr "Ingen kunde valgt"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:267
+#: admin/woocommerce-admin-init.php:277
 msgid "Tax Label:"
 msgstr "Moms etiket:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:268
+#: admin/woocommerce-admin-init.php:278
 msgid "Compound:"
 msgstr "Sammensatte:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:269
+#: admin/woocommerce-admin-init.php:279
 msgid "Cart Tax:"
 msgstr "Kurv Moms:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:270
+#: admin/woocommerce-admin-init.php:280
 msgid "Shipping Tax:"
 msgstr "Fragt Moms:"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:425
+#: admin/woocommerce-admin-init.php:436
 msgid "Exclude image"
 msgstr "Udelad billede"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:434
+#: admin/woocommerce-admin-init.php:445
 msgid "Enabling this option will hide it from the product page image gallery."
 msgstr "Aktivering af denne indstilling vil skjule det fra produktsidens billedgalleri."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:478
+#: admin/woocommerce-admin-init.php:489
 #, php-format
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr "Product opdateret. <a href=\"%s\">Se produkt</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:479
-#: admin/woocommerce-admin-init.php:494
-#: admin/woocommerce-admin-init.php:509
+#: admin/woocommerce-admin-init.php:490
+#: admin/woocommerce-admin-init.php:505
+#: admin/woocommerce-admin-init.php:520
 msgid "Custom field updated."
 msgstr "Brugerdefineret felt opdateret."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:480
-#: admin/woocommerce-admin-init.php:495
-#: admin/woocommerce-admin-init.php:510
+#: admin/woocommerce-admin-init.php:491
+#: admin/woocommerce-admin-init.php:506
+#: admin/woocommerce-admin-init.php:521
 msgid "Custom field deleted."
 msgstr "Brugerdefineret felt slettet."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:481
+#: admin/woocommerce-admin-init.php:492
 msgid "Product updated."
 msgstr "Produkt opdateret."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:482
+#: admin/woocommerce-admin-init.php:493
 #, php-format
 msgid "Product restored to revision from %s"
 msgstr "Produkt genoprettet for revision fra %s"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:483
+#: admin/woocommerce-admin-init.php:494
 #, php-format
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr "Produkt udgivet. <a href=\"%s\">Vis produkt</a>"
 
 # @ default
-#: admin/woocommerce-admin-init.php:484
+#: admin/woocommerce-admin-init.php:495
 msgid "Product saved."
 msgstr "Produkt gemt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:485
+#: admin/woocommerce-admin-init.php:496
 #, php-format
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Produkt indsendt. <a target=\"_blank\" href=\"%s\">Forhåndsvis produkt</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:486
+#: admin/woocommerce-admin-init.php:497
 #, php-format
 msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
 msgstr "Produkt planlagt til: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Forhåndsvis produkt</a>"
 
 # @ default
-#: admin/woocommerce-admin-init.php:487
-#: admin/woocommerce-admin-init.php:502
-#: admin/woocommerce-admin-init.php:517
+#: admin/woocommerce-admin-init.php:498
+#: admin/woocommerce-admin-init.php:513
+#: admin/woocommerce-admin-init.php:528
 msgid "M j, Y @ G:i"
 msgstr "M j, Y @ G:i"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:488
+#: admin/woocommerce-admin-init.php:499
 #, php-format
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Produktudkast opdateret. <a target=\"_blank\" href=\"%s\">Forhåndsvis produkt</a>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:493
-#: admin/woocommerce-admin-init.php:496
-#: admin/woocommerce-admin-init.php:498
+#: admin/woocommerce-admin-init.php:504
+#: admin/woocommerce-admin-init.php:507
+#: admin/woocommerce-admin-init.php:509
 msgid "Order updated."
 msgstr "Ordre opdateret."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:497
+#: admin/woocommerce-admin-init.php:508
 #, php-format
 msgid "Order restored to revision from %s"
 msgstr "Ordre genoprettet for revision fra %s"
 
 # @ default
-#: admin/woocommerce-admin-init.php:499
+#: admin/woocommerce-admin-init.php:510
 msgid "Order saved."
 msgstr "Ordre gemt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:500
+#: admin/woocommerce-admin-init.php:511
 msgid "Order submitted."
 msgstr "Ordre indsendt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:501
+#: admin/woocommerce-admin-init.php:512
 #, php-format
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr "Ordre planlagt til: <strong>%1$s</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:503
+#: admin/woocommerce-admin-init.php:514
 msgid "Order draft updated."
 msgstr "Ordreforslag opdateret."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:508
-#: admin/woocommerce-admin-init.php:511
-#: admin/woocommerce-admin-init.php:513
+#: admin/woocommerce-admin-init.php:519
+#: admin/woocommerce-admin-init.php:522
+#: admin/woocommerce-admin-init.php:524
 msgid "Coupon updated."
 msgstr "Kupon opdateret."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:512
+#: admin/woocommerce-admin-init.php:523
 #, php-format
 msgid "Coupon restored to revision from %s"
 msgstr "Kupon genoprettet for revision fra %s"
 
 # @ default
-#: admin/woocommerce-admin-init.php:514
+#: admin/woocommerce-admin-init.php:525
 msgid "Coupon saved."
 msgstr "Kupon gemt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:515
+#: admin/woocommerce-admin-init.php:526
 msgid "Coupon submitted."
 msgstr "Kupon indsendt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:516
+#: admin/woocommerce-admin-init.php:527
 #, php-format
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr "Kupon planlagt til: <strong>%1$s</strong>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-init.php:518
+#: admin/woocommerce-admin-init.php:529
 msgid "Coupon draft updated."
 msgstr "Kuponforslag opdateret."
 
@@ -2261,8 +2275,11 @@ msgstr "Lav lagerstatus"
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1500
 #: admin/woocommerce-admin-reports.php:1522
-msgid " in stock"
-msgstr " på lager"
+#, php-format
+msgid "%d in stock"
+msgid_plural "%d in stock"
+msgstr[0] "%d på lager"
+msgstr[1] "%d på lager"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1504
@@ -2271,9 +2288,9 @@ msgstr "Ingen produkter har lav lagerstatus."
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:1512
-#: admin/post-types/product.php:225
-#: admin/post-types/product.php:543
-#: admin/post-types/product.php:798
+#: admin/post-types/product.php:231
+#: admin/post-types/product.php:549
+#: admin/post-types/product.php:804
 #: admin/post-types/writepanels/writepanel-product_data.php:220
 msgid "Out of stock"
 msgstr "Ikke på lager"
@@ -2285,16 +2302,18 @@ msgstr "Ingen produkter er ikke på lager"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:235
-#: admin/post-types/product.php:503
-#: admin/post-types/product.php:747
+#: admin/post-types/product.php:509
+#: admin/post-types/product.php:753
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:76
 #: admin/post-types/writepanels/writepanel-product_data.php:112
 msgid "Width"
 msgstr "Bredde"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:237
-#: admin/post-types/product.php:504
-#: admin/post-types/product.php:748
+#: admin/post-types/product.php:510
+#: admin/post-types/product.php:754
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:77
 #: admin/post-types/writepanels/writepanel-product_data.php:113
 msgid "Height"
 msgstr "Højde"
@@ -2305,220 +2324,220 @@ msgid "Hard Crop"
 msgstr "Hård beskæring"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:330
+#: admin/woocommerce-admin-settings-forms.php:334
 msgid "Select a page..."
 msgstr "Vælg en side..."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:346
+#: admin/woocommerce-admin-settings-forms.php:350
 msgid "Choose a country&hellip;"
 msgstr "Vælg et land&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:359
+#: admin/woocommerce-admin-settings-forms.php:363
 msgid "Choose countries&hellip;"
 msgstr "Vælg lande&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:375
+#: admin/woocommerce-admin-settings-forms.php:379
 msgid "Tax Rates"
 msgstr "Momssatser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:377
-#: admin/woocommerce-admin-settings-forms.php:449
+#: admin/woocommerce-admin-settings-forms.php:381
+#: admin/woocommerce-admin-settings-forms.php:453
 msgid "Export rates"
 msgstr "Eksportsatser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:378
-#: admin/woocommerce-admin-settings-forms.php:450
+#: admin/woocommerce-admin-settings-forms.php:382
+#: admin/woocommerce-admin-settings-forms.php:454
 msgid "Import rates"
 msgstr "Importsatser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:379
+#: admin/woocommerce-admin-settings-forms.php:383
 #, php-format
 msgid "Define tax rates for countries and states below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_tax_rates.csv</code> instead. <a href=\"%s\">Download sample csv.</a>"
 msgstr "Definer momssatser for lande og stater nedenfor, eller alternativt upload en CSV-fil indeholdende dine satser <code>wp-content/woocommerce_tax_rates.csv</code> i stedet for. <a href=\"%s\">Download prøve csv.</a>\""
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:384
+#: admin/woocommerce-admin-settings-forms.php:388
 msgid "Countries/states"
 msgstr "Lande/Stater"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:385
-#: admin/woocommerce-admin-settings-forms.php:457
+#: admin/woocommerce-admin-settings-forms.php:389
+#: admin/woocommerce-admin-settings-forms.php:461
 #: admin/post-types/writepanels/writepanel-order_data.php:274
 #: admin/post-types/writepanels/writepanel-product_data.php:189
 msgid "Tax Class"
 msgstr "Momsklasse"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:386
-#: admin/woocommerce-admin-settings-forms.php:428
-#: admin/woocommerce-admin-settings-forms.php:458
-#: admin/woocommerce-admin-settings-forms.php:498
-#: admin/woocommerce-admin-settings-forms.php:589
-#: admin/woocommerce-admin-settings-forms.php:632
+#: admin/woocommerce-admin-settings-forms.php:390
+#: admin/woocommerce-admin-settings-forms.php:432
+#: admin/woocommerce-admin-settings-forms.php:462
+#: admin/woocommerce-admin-settings-forms.php:502
+#: admin/woocommerce-admin-settings-forms.php:593
+#: admin/woocommerce-admin-settings-forms.php:636
 msgid "Label"
 msgstr "Etiket"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:386
-#: admin/woocommerce-admin-settings-forms.php:458
+#: admin/woocommerce-admin-settings-forms.php:390
+#: admin/woocommerce-admin-settings-forms.php:462
 msgid "Optionally, enter a label for this rate - this will appear in the totals table"
 msgstr "Du kan også indtaste en etiket for denne sats - dette vil blive vist i totaler tabellen"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:387
-#: admin/woocommerce-admin-settings-forms.php:431
-#: admin/woocommerce-admin-settings-forms.php:459
-#: admin/woocommerce-admin-settings-forms.php:501
-#: admin/woocommerce-admin-settings-forms.php:592
-#: admin/woocommerce-admin-settings-forms.php:635
+#: admin/woocommerce-admin-settings-forms.php:391
+#: admin/woocommerce-admin-settings-forms.php:435
+#: admin/woocommerce-admin-settings-forms.php:463
+#: admin/woocommerce-admin-settings-forms.php:505
+#: admin/woocommerce-admin-settings-forms.php:596
+#: admin/woocommerce-admin-settings-forms.php:639
 msgid "Rate"
 msgstr "Sats"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:387
-#: admin/woocommerce-admin-settings-forms.php:459
+#: admin/woocommerce-admin-settings-forms.php:391
+#: admin/woocommerce-admin-settings-forms.php:463
 msgid "Enter a tax rate (percentage) to 4 decimal places."
 msgstr "Indtast en momssats (i procent) til 4 decimaler."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:388
-#: admin/woocommerce-admin-settings-forms.php:460
+#: admin/woocommerce-admin-settings-forms.php:392
+#: admin/woocommerce-admin-settings-forms.php:464
 msgid "Compound"
 msgstr "Sammensat"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:388
-#: admin/woocommerce-admin-settings-forms.php:460
+#: admin/woocommerce-admin-settings-forms.php:392
+#: admin/woocommerce-admin-settings-forms.php:464
 msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
 msgstr "Vælg om dette skal være en sammensat sats. Sammensatte momssatser anvendes over andre momssatser."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:389
-#: admin/woocommerce-admin-settings-forms.php:461
+#: admin/woocommerce-admin-settings-forms.php:393
+#: admin/woocommerce-admin-settings-forms.php:465
 msgid "Choose whether or not this tax rate also gets applied to shipping."
 msgstr "Vælg hvorvidt denne momssats også bliver anvendt ved forsendelse."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:394
-#: admin/woocommerce-admin-settings-forms.php:466
+#: admin/woocommerce-admin-settings-forms.php:398
+#: admin/woocommerce-admin-settings-forms.php:470
 msgid "+ Add Tax Rate"
 msgstr "+ Tilføj momssats"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:396
-#: admin/woocommerce-admin-settings-forms.php:468
+#: admin/woocommerce-admin-settings-forms.php:400
+#: admin/woocommerce-admin-settings-forms.php:472
 msgid "All matching rates will be applied, and non-compound rates will be summed."
 msgstr "Alle matchende satser vil blive anvendt og ikke-sammensatte satser vil blive lagt sammen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:397
-#: admin/woocommerce-admin-settings-forms.php:469
+#: admin/woocommerce-admin-settings-forms.php:401
+#: admin/woocommerce-admin-settings-forms.php:473
 msgid "Duplicate selected rows"
 msgstr "Dupliker valgte rækker"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:397
-#: admin/woocommerce-admin-settings-forms.php:469
+#: admin/woocommerce-admin-settings-forms.php:401
+#: admin/woocommerce-admin-settings-forms.php:473
 msgid "Delete selected rows"
 msgstr "Slet valgte rækker "
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:409
-#: admin/woocommerce-admin-settings-forms.php:572
+#: admin/woocommerce-admin-settings-forms.php:413
+#: admin/woocommerce-admin-settings-forms.php:576
 msgid "Select countries/states&hellip;"
 msgstr "Vælg lande/stater&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:412
-#: admin/woocommerce-admin-settings-forms.php:575
+#: admin/woocommerce-admin-settings-forms.php:416
+#: admin/woocommerce-admin-settings-forms.php:579
 #: admin/post-types/writepanels/writepanel-product_data.php:179
 msgid "None"
 msgstr "Ingen"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:412
-#: admin/woocommerce-admin-settings-forms.php:575
+#: admin/woocommerce-admin-settings-forms.php:416
+#: admin/woocommerce-admin-settings-forms.php:579
 msgid "US States"
 msgstr "US stater"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:412
-#: admin/woocommerce-admin-settings-forms.php:575
+#: admin/woocommerce-admin-settings-forms.php:416
+#: admin/woocommerce-admin-settings-forms.php:579
 msgid "EU States"
 msgstr "EU stater"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:417
-#: admin/woocommerce-admin-settings-forms.php:487
-#: admin/woocommerce-admin-settings-forms.php:580
-#: admin/woocommerce-admin-settings-forms.php:623
+#: admin/woocommerce-admin-settings-forms.php:421
+#: admin/woocommerce-admin-settings-forms.php:491
+#: admin/woocommerce-admin-settings-forms.php:584
+#: admin/woocommerce-admin-settings-forms.php:627
 msgid "Standard Rate"
 msgstr "Standard sats"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:447
+#: admin/woocommerce-admin-settings-forms.php:451
 msgid "Local Tax Rates"
 msgstr "Lokale momssatser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:451
+#: admin/woocommerce-admin-settings-forms.php:455
 #, php-format
 msgid "Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href=\"%s\">Download sample csv.</a>"
 msgstr "\"Definer lokale momssatser nedenfor, eller alternativt upload en CSV-fil indeholdende dine satser <code>wp-content/woocommerce_local_tax_rates.csv</code> i stedet for. <a href=\"%s\">Download prøve csv.</a>\"\""
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:456
-#: admin/woocommerce-admin-settings-forms.php:483
-#: admin/woocommerce-admin-settings-forms.php:619
+#: admin/woocommerce-admin-settings-forms.php:460
+#: admin/woocommerce-admin-settings-forms.php:487
+#: admin/woocommerce-admin-settings-forms.php:623
 msgid "Post/zip codes"
 msgstr "Post/zip numre"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:456
+#: admin/woocommerce-admin-settings-forms.php:460
 msgid "List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;"
 msgstr "Angiv postnumre/zips som denne sats gælder for separeret af semikolon. Du kan også indtaste intervaller for nummeriske postnumre. Fx 12345-12349;23456;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:480
-#: admin/woocommerce-admin-settings-forms.php:616
+#: admin/woocommerce-admin-settings-forms.php:484
+#: admin/woocommerce-admin-settings-forms.php:620
 msgid "Select a country/state&hellip;"
 msgstr "Vælg et lande/en stater&hellip;"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:526
+#: admin/woocommerce-admin-settings-forms.php:530
 msgid "Done"
 msgstr "Færdig"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:554
+#: admin/woocommerce-admin-settings-forms.php:558
 msgid " countries/states selected"
 msgstr " lande/stater valgt"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:570
-#: admin/woocommerce-admin-settings-forms.php:741
+#: admin/woocommerce-admin-settings-forms.php:574
+#: admin/woocommerce-admin-settings-forms.php:745
 msgid "No countries selected"
 msgstr "Ingen lande valgt"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:652
+#: admin/woocommerce-admin-settings-forms.php:656
 msgid "Delete the selected rates?"
 msgstr "Slet valgte satser?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:666
+#: admin/woocommerce-admin-settings-forms.php:670
 msgid "Duplicate the selected rates?"
 msgstr "Dupliker valgte satser?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:745
+#: admin/woocommerce-admin-settings-forms.php:749
 #, php-format
 msgid "(1 state)"
 msgid_plural "(%s states)"
@@ -2526,7 +2545,7 @@ msgstr[0] "(1 stat)"
 msgstr[1] "(%s stater)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:751
+#: admin/woocommerce-admin-settings-forms.php:755
 #, php-format
 msgid "and 1 state"
 msgid_plural "and %s states"
@@ -2534,7 +2553,7 @@ msgstr[0] "og 1 stat"
 msgstr[1] "og %s stater"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings-forms.php:753
+#: admin/woocommerce-admin-settings-forms.php:757
 #, php-format
 msgid "1 country"
 msgid_plural "%1$s countries"
@@ -2633,8 +2652,8 @@ msgstr "Japanske Yen (&yen;)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:56
-msgid "Malaysian Ringgits"
-msgstr "Malaysiske Ringgits"
+msgid "Malaysian Ringgits (RM)"
+msgstr "Malaysiske Ringgits (RM)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:57
@@ -2869,7 +2888,7 @@ msgstr "Følgende indstillinger er specificeret til download-bare produkter."
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:272
 msgid "File download method"
-msgstr "Fil download metode"
+msgstr "Fil downloadmetode"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:273
@@ -3139,8 +3158,8 @@ msgstr "Omdirigerer til produktsiden ved et enkelt matchende søgeresultat"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:580
-#: admin/post-types/product.php:453
-#: admin/post-types/product.php:657
+#: admin/post-types/product.php:459
+#: admin/post-types/product.php:663
 msgid "Product Data"
 msgstr "Produktdata"
 
@@ -3425,7 +3444,7 @@ msgstr "Skjul produkter der ikke er på laget fra kataloget"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:834
-#: admin/woocommerce-admin-settings.php:1268
+#: admin/woocommerce-admin-settings.php:1290
 msgid "Shipping Options"
 msgstr "Forsendelsesmuligheder"
 
@@ -3437,6 +3456,7 @@ msgstr "Forsendelse kan aktiveres og deaktiveres fra denne sektion"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:837
 #: admin/woocommerce-admin-settings.php:846
+#: admin/woocommerce-admin-settings.php:855
 msgid "Shipping calculations"
 msgstr "Forsendelsesberegninger"
 
@@ -3450,422 +3470,426 @@ msgstr "Aktiver forsendelse"
 msgid "Enable the shipping calculator on the cart page"
 msgstr "Aktiver forsendelsesberegneren på kurvsiden"
 
+#: admin/woocommerce-admin-settings.php:856
+msgid "Hide shipping costs until an address is entered"
+msgstr "Skjul forsendelsesomkostninger indtil en adresse er angivet"
+
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:855
+#: admin/woocommerce-admin-settings.php:864
 msgid "Shipping destination"
 msgstr "Forsendelsesdestination"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:856
+#: admin/woocommerce-admin-settings.php:865
 msgid "Only ship to the users billing address"
 msgstr "Send kun til kundens faktureringsadresse"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:864
+#: admin/woocommerce-admin-settings.php:873
 msgid "Ship to billing address by default"
 msgstr "Send til faktureringsadresse som standard"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:878
+#: admin/woocommerce-admin-settings.php:887
 msgid "Tax Options"
 msgstr "Momsegenskaber"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:881
+#: admin/woocommerce-admin-settings.php:890
 msgid "Tax calculations"
 msgstr "Momsberegninger"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:882
+#: admin/woocommerce-admin-settings.php:891
 msgid "Enable taxes and tax calculations"
 msgstr "Aktiver moms og momsberegninger"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:890
+#: admin/woocommerce-admin-settings.php:899
 msgid "Display taxes on cart page"
 msgstr "Vis moms på kurvsiden"
 
-#: admin/woocommerce-admin-settings.php:898
+#: admin/woocommerce-admin-settings.php:907
 msgid "Display taxes even when the amount is zero"
 msgstr "Vis moms selvom beløbet er nul"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:906
+#: admin/woocommerce-admin-settings.php:915
 msgid "Round tax at subtotal level, instead of per line"
 msgstr "Afrund moms ved subtotal niveau i stedet for pr. linje"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:914
+#: admin/woocommerce-admin-settings.php:923
 msgid "Catalog Prices"
 msgstr "Katalog priser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:915
+#: admin/woocommerce-admin-settings.php:924
 msgid "Catalog prices defined including tax"
 msgstr "Katalogpriser defineret incl. moms"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:924
+#: admin/woocommerce-admin-settings.php:933
 msgid "Display cart contents excluding tax"
 msgstr "Vis kurvindhold ekskl. moms"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:933
+#: admin/woocommerce-admin-settings.php:942
 msgid "Display cart totals excluding tax"
 msgstr "Vis kurvtotaler ekskl. moms"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:942
+#: admin/woocommerce-admin-settings.php:951
 msgid "Additional Tax classes"
 msgstr "Yderligere momsklasser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:943
+#: admin/woocommerce-admin-settings.php:952
 msgid "List 1 per line. This is in addition to the default <em>Standard Rate</em>."
 msgstr "List 1 pr. linje. Dette er i tillæg med standardindstillingen <em>Standardsats</em>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:944
+#: admin/woocommerce-admin-settings.php:953
 msgid "List product and shipping tax classes here, e.g. Zero Tax, Reduced Rate."
 msgstr "List produkt og forsendelsesmoms klasser her, fx ingen moms, reduceret sats."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:948
+#: admin/woocommerce-admin-settings.php:957
 #, php-format
 msgid "Reduced Rate%sZero Rate"
 msgstr "Reduceret sats%snulsats"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:952
+#: admin/woocommerce-admin-settings.php:961
 msgid "Tax rates"
 msgstr "Momssatser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:953
+#: admin/woocommerce-admin-settings.php:962
 msgid "All fields are required."
 msgstr "Alle felter er påkrævet."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:954
+#: admin/woocommerce-admin-settings.php:963
 msgid "To avoid rounding errors, insert tax rates with 4 decimal places."
 msgstr "For at undgå afrundingsfejl, indsæt momssatser med 4 decimaler."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:967
+#: admin/woocommerce-admin-settings.php:976
 msgid "Email Recipient Options"
 msgstr "E-mail modtagerindstillinger"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:970
+#: admin/woocommerce-admin-settings.php:979
 msgid "New order notifications"
 msgstr "Ny ordre notifikationer"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:971
+#: admin/woocommerce-admin-settings.php:980
 msgid "The recipient of new order emails. Defaults to the admin email."
 msgstr "Modtageren af ny ordre e-mails. Standard til admin e-mail."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:979
+#: admin/woocommerce-admin-settings.php:988
 msgid "Inventory notifications"
 msgstr "Beholdningsmeddelelser"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:980
+#: admin/woocommerce-admin-settings.php:989
 msgid "The recipient of stock emails. Defaults to the admin email."
 msgstr "Modtageren af lager e-mails. Standard til admin e-mailen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:989
+#: admin/woocommerce-admin-settings.php:998
 msgid "Email Sender Options"
 msgstr "E-mail sendeindstillinger"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:989
+#: admin/woocommerce-admin-settings.php:998
 msgid "The following options affect the sender (email address and name) used in WooCommerce emails."
 msgstr "Følgende indstillinger påvirker afsenderen (e-mailadresse og navn) brugt i WooCommerce e-mails."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:992
+#: admin/woocommerce-admin-settings.php:1001
 msgid "\"From\" name"
 msgstr "Afsendernavn"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1001
+#: admin/woocommerce-admin-settings.php:1010
 msgid "\"From\" email address"
 msgstr "Afsender e-mailadresse"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1011
+#: admin/woocommerce-admin-settings.php:1020
 msgid "Email template"
 msgstr "E-mail template"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1011
+#: admin/woocommerce-admin-settings.php:1020
 #, php-format
 msgid "This section lets you customise the WooCommerce emails. <a href=\"%s\" target=\"_blank\">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>."
 msgstr "Denne sektion lader dig konfigurerer WooCommerce e-mails. <a href=\"%s\" target=\"_blank\">Klik her for at se din e-mailtemplate</a>. For mere advanceret kontrol kopier <code>woocommerce/templates/emails/</code> til <code>dittema/woocommerce/emails/</code>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1014
+#: admin/woocommerce-admin-settings.php:1023
 msgid "Header image"
 msgstr "Header billede"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1015
+#: admin/woocommerce-admin-settings.php:1024
 #, php-format
 msgid "Enter a URL to an image you want to show in the email's header. Upload your image using the <a href=\"%s\">media uploader</a>."
 msgstr "Angiv en URL til billedet du vil vise i e-mail header'en. Upload dit billede ved at bruge <a href=\"%s\">Medie uploader</a>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1023
+#: admin/woocommerce-admin-settings.php:1032
 msgid "Email footer text"
 msgstr "E-mail footer tekst"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1024
+#: admin/woocommerce-admin-settings.php:1033
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr "Teksten der vises i bunden af WooCommerce e-mails."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1028
+#: admin/woocommerce-admin-settings.php:1037
 msgid "Powered by WooCommerce"
 msgstr "Leveret af WooCommerce"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1032
+#: admin/woocommerce-admin-settings.php:1041
 msgid "Base colour"
 msgstr "Basis farve"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1033
+#: admin/woocommerce-admin-settings.php:1042
 msgid "The base colour for WooCommerce email templates. Default <code>#557da1</code>."
 msgstr "Basisfarven for WooCommerce e-mail templates. Standard <code>#557da1</code>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1041
+#: admin/woocommerce-admin-settings.php:1050
 msgid "Background colour"
 msgstr "Baggrundsfarve"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1042
+#: admin/woocommerce-admin-settings.php:1051
 msgid "The background colour for WooCommerce email templates. Default <code>#eeeeee</code>."
 msgstr "Baggrundsfarven for WooCommerce e-mail templates. Standard <code>#eeeeee</code>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1050
+#: admin/woocommerce-admin-settings.php:1059
 msgid "Email body background colour"
 msgstr "E-mail body baggrundsfarve"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1051
+#: admin/woocommerce-admin-settings.php:1060
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr "Body baggrundsfarven. Standard <code>#fdfdfd</code>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1059
+#: admin/woocommerce-admin-settings.php:1068
 msgid "Email body text colour"
 msgstr "E-mail body tekst farve"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1060
+#: admin/woocommerce-admin-settings.php:1069
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr "Body tekst farven. Standard <code>#505050</code>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1073
+#: admin/woocommerce-admin-settings.php:1082
 msgid "ShareThis"
 msgstr "ShareThis"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1073
+#: admin/woocommerce-admin-settings.php:1082
 msgid "ShareThis offers a sharing widget which will allow customers to share links to products with their friends."
 msgstr "ShareThis tilbyder en delings widget, som tillader kunder at dele produktlinks til deres venner."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1076
+#: admin/woocommerce-admin-settings.php:1085
 msgid "ShareThis Publisher ID"
 msgstr "ShareThis udgiver ID"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1077
+#: admin/woocommerce-admin-settings.php:1086
 #, php-format
 msgid "Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages."
 msgstr "Angiv dit %1$sShareThis udgiver ID%2$s for at vise delingsknapper på produktsider."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1086
+#: admin/woocommerce-admin-settings.php:1095
 msgid "ShareDaddy"
 msgstr "ShareDaddy"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1086
+#: admin/woocommerce-admin-settings.php:1095
 msgid "ShareDaddy is a sharing plugin bundled with JetPack."
 msgstr "ShareDaddy er et delingsplugin bundtet med JetPack."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1089
+#: admin/woocommerce-admin-settings.php:1098
 msgid "Output ShareDaddy button?"
 msgstr "Vis ShareDaddy knap?"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1090
+#: admin/woocommerce-admin-settings.php:1099
 msgid "Enable this option to show the ShareDaddy button (if installed) on the product page."
 msgstr "Aktiver denne indstilling for at vise ShareDaddy knappen (hvis installeret) på produktsider."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1098
+#: admin/woocommerce-admin-settings.php:1107
 msgid "Google Analytics"
 msgstr "Google Analytics"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1098
+#: admin/woocommerce-admin-settings.php:1107
 msgid "Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website."
 msgstr "Google Analytics er en gratis service leveret af Google, som genererer detaljeret statistik omkring besøg på en hjemmeside.."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1101
+#: admin/woocommerce-admin-settings.php:1110
 msgid "Google Analytics ID"
 msgstr "Google Analytics ID"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1102
+#: admin/woocommerce-admin-settings.php:1111
 msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
 msgstr "Log ind på din Google Analytics konto for at finde dit ID. Fx <code>UA-XXXXX-X</code>"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1109
-#: admin/woocommerce-admin-settings.php:1117
+#: admin/woocommerce-admin-settings.php:1118
+#: admin/woocommerce-admin-settings.php:1126
 msgid "Tracking code"
 msgstr "Tracking kode"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1110
+#: admin/woocommerce-admin-settings.php:1119
 msgid "Add tracking code to your site's footer. You don't need to enable this if using a 3rd party analytics plugin."
 msgstr "Tilføj tracking kode til din sides footer. Du behøver ikke aktivere dette, hvis du bruger et tredjeparts Analytics plugin."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1118
+#: admin/woocommerce-admin-settings.php:1127
 msgid "Add eCommerce tracking code to the thankyou page"
 msgstr "Tilføj eCommerce tracking kode til takkesiden"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1174
+#: admin/woocommerce-admin-settings.php:1194
 msgid "Your settings have been saved."
 msgstr "Dine indstillinger er blevet gemt."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1208
+#: admin/woocommerce-admin-settings.php:1228
 msgid "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)"
 msgstr "<strong>Tillykke!</strong> &#8211; WooCommerce er blevet installeret og opsat. God fornøjelse :)"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1233
-#: admin/woocommerce-admin-settings.php:1337
-#: admin/woocommerce-admin-settings.php:1350
+#: admin/woocommerce-admin-settings.php:1253
+#: admin/woocommerce-admin-settings.php:1361
+#: admin/woocommerce-admin-settings.php:1374
 msgid "Payment Gateways"
 msgstr "Betalings Gateways"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1252
+#: admin/woocommerce-admin-settings.php:1272
 #, php-format
 msgid "More functionality and gateway options available via <a href=\"%s\" target=\"_blank\">WC official extensions</a>."
 msgstr "Mere funktionalitet og flere gatewayindstillinger tilgængelige via <a href=\"%s\" target=\"_blank\">WC officielle udvidelser</a>."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1283
+#: admin/woocommerce-admin-settings.php:1306
 msgid "Shipping Methods"
 msgstr "Forsendelsesmetoder"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1284
+#: admin/woocommerce-admin-settings.php:1307
 msgid "Your activated shipping methods are listed below. Drag and drop rows to re-order them for display on the frontend."
 msgstr "Dine aktiverede fragtmetoder er listet nedenfor. Træk og slip rækker for at organisere dem til visning på brugerfladen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1288
-#: admin/woocommerce-admin-settings.php:1355
+#: admin/woocommerce-admin-settings.php:1311
+#: admin/woocommerce-admin-settings.php:1379
 msgid "Default"
 msgstr "Standard"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1289
+#: admin/woocommerce-admin-settings.php:1312
 msgid "Shipping Method"
 msgstr "Forsendelsesmetode"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1290
-#: admin/woocommerce-admin-settings.php:1357
+#: admin/woocommerce-admin-settings.php:1313
+#: admin/woocommerce-admin-settings.php:1381
 #: admin/post-types/shop_order.php:34
 msgid "Status"
 msgstr "Status"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1305
+#: admin/woocommerce-admin-settings.php:1328
 msgid "Method ID"
 msgstr "Metode ID"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1351
+#: admin/woocommerce-admin-settings.php:1375
 msgid "Your activated payment gateways are listed below. Drag and drop rows to re-order them for display on the checkout."
 msgstr "Dine aktiverede betalings gateways er listet nedenfor. Træk og slip rækker for at organisere dem til visning ved kassen."
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1356
+#: admin/woocommerce-admin-settings.php:1380
 msgid "Gateway"
 msgstr "Gateway"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1373
+#: admin/woocommerce-admin-settings.php:1397
 msgid "Gateway ID"
 msgstr "Gateway ID"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1409
+#: admin/woocommerce-admin-settings.php:1433
 msgid "Save changes"
 msgstr "Gem ændringer"
 
 # @ woocommerce
-#: admin/woocommerce-admin-settings.php:1464
+#: admin/woocommerce-admin-settings.php:1488
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr "Ændringerne du har foretaget dig vil gå tabt hvis du navigerer væk fra denne side."
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:22
-#: admin/woocommerce-admin-taxonomies.php:81
+#: admin/woocommerce-admin-taxonomies.php:85
 msgid "Thumbnail"
 msgstr "Miniature"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:26
-#: admin/woocommerce-admin-taxonomies.php:86
+#: admin/woocommerce-admin-taxonomies.php:90
 msgid "Upload/Add image"
 msgstr "Upload/Tilføj billede"
 
 # @ woocommerce
 #: admin/woocommerce-admin-taxonomies.php:27
-#: admin/woocommerce-admin-taxonomies.php:87
+#: admin/woocommerce-admin-taxonomies.php:91
 msgid "Remove image"
 msgstr "Fjern billede"
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:146
+#: admin/woocommerce-admin-taxonomies.php:150
 msgid "Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the \"screen options\" link at the top of the page."
 msgstr "Produktkategorier til din butik kan administreres her. For at ændre rækkefølgen af kategorier på front-end delen kan du trække og slippe for at sortere. Hvis du vil se flere kategorier opført så klik på \"skærmindstillinger\" linket øverst på siden."
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:157
+#: admin/woocommerce-admin-taxonomies.php:161
 msgid "Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products."
 msgstr "Forsendelsesklasser kan bruges til at gruppere produkter af lignende type. Disse grupper kan bruges ved visse forsendelsesmetoder for at give forskellige satser for forskellige produkter."
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:204
+#: admin/woocommerce-admin-taxonomies.php:208
 #: admin/post-types/product.php:65
 msgid "Image"
 msgstr "Billede"
 
 # @ woocommerce
-#: admin/woocommerce-admin-taxonomies.php:241
+#: admin/woocommerce-admin-taxonomies.php:245
 msgid "Configure shipping class"
 msgstr "Konfigurer forsendelsesklasse"
 
@@ -4021,16 +4045,18 @@ msgstr "Kopier til et nyt udkast"
 
 # @ woocommerce
 #: admin/post-types/product.php:70
-#: admin/post-types/product.php:458
+#: admin/post-types/product.php:464
 #: admin/post-types/writepanels/writepanel-order_data.php:270
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:157
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:367
 #: admin/post-types/writepanels/writepanel-product_data.php:50
 msgid "SKU"
 msgstr "Varenummer"
 
 # @ woocommerce
 #: admin/post-types/product.php:75
-#: admin/post-types/product.php:469
-#: admin/post-types/product.php:661
+#: admin/post-types/product.php:475
+#: admin/post-types/product.php:667
 msgid "Price"
 msgstr "Pris"
 
@@ -4041,8 +4067,8 @@ msgstr "Kategorier"
 
 # @ woocommerce
 #: admin/post-types/product.php:79
-#: admin/post-types/product.php:533
-#: admin/post-types/product.php:773
+#: admin/post-types/product.php:539
+#: admin/post-types/product.php:779
 #: admin/post-types/writepanels/writepanel-product_data.php:136
 msgid "Featured"
 msgstr "Udvalgte"
@@ -4091,7 +4117,7 @@ msgstr "Slet dette element permanent"
 # @ default
 # @ woocommerce
 #: admin/post-types/product.php:132
-#: admin/post-types/writepanels/writepanel-order_data.php:472
+#: admin/post-types/writepanels/writepanel-order_data.php:430
 msgid "Delete Permanently"
 msgstr "Slet permanent"
 
@@ -4131,21 +4157,21 @@ msgstr "Ekstern/Partner"
 
 # @ woocommerce
 #: admin/post-types/product.php:190
-#: admin/post-types/product.php:351
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
-#: admin/post-types/writepanels/writepanel-product_data.php:850
+#: admin/post-types/product.php:357
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:243
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:442
+#: admin/post-types/writepanels/writepanel-product_data.php:858
 msgid "Virtual"
 msgstr "Virtuel"
 
 # @ woocommerce
 #: admin/post-types/product.php:192
-#: admin/post-types/product.php:347
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:165
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:333
-#: admin/post-types/writepanels/writepanel-product_data.php:852
+#: admin/post-types/product.php:353
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:241
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:440
+#: admin/post-types/writepanels/writepanel-product_data.php:860
 msgid "Downloadable"
 msgstr "Kan downloades"
 
@@ -4156,164 +4182,166 @@ msgstr "Simpel"
 
 # @ woocommerce
 #: admin/post-types/product.php:198
-#: admin/post-types/product.php:331
+#: admin/post-types/product.php:337
 msgid "Variable"
 msgstr "Variable"
 
 # @ woocommerce
-#: admin/post-types/product.php:215
+#: admin/post-types/product.php:221
 msgid "Change"
 msgstr "Ændre"
 
 # @ woocommerce
-#: admin/post-types/product.php:223
-#: admin/post-types/product.php:542
-#: admin/post-types/product.php:797
+#: admin/post-types/product.php:229
+#: admin/post-types/product.php:548
+#: admin/post-types/product.php:803
 #: admin/post-types/writepanels/writepanel-product_data.php:219
 msgid "In stock"
 msgstr "På lager"
 
 # @ woocommerce
-#: admin/post-types/product.php:317
+#: admin/post-types/product.php:323
 msgid "Show all product types"
 msgstr "Vis alle produkttyper"
 
 # @ woocommerce
-#: admin/post-types/product.php:325
-#: admin/post-types/writepanels/writepanel-product_data.php:846
+#: admin/post-types/product.php:331
+#: admin/post-types/writepanels/writepanel-product_data.php:854
 msgid "Grouped product"
 msgstr "Grupperet produkt"
 
 # @ woocommerce
-#: admin/post-types/product.php:327
-#: admin/post-types/writepanels/writepanel-product_data.php:847
+#: admin/post-types/product.php:333
+#: admin/post-types/writepanels/writepanel-product_data.php:855
 msgid "External/Affiliate product"
 msgstr "Eksternt/Partner produkt"
 
 # @ woocommerce
-#: admin/post-types/product.php:329
-#: admin/post-types/writepanels/writepanel-product_data.php:845
+#: admin/post-types/product.php:335
+#: admin/post-types/writepanels/writepanel-product_data.php:853
 msgid "Simple product"
 msgstr "Simpelt produkt"
 
 # @ woocommerce
-#: admin/post-types/product.php:343
+#: admin/post-types/product.php:349
 msgid "Show all sub-types"
 msgstr "Vis alle undertyper"
 
 # @ woocommerce
-#: admin/post-types/product.php:428
+#: admin/post-types/product.php:434
 #, php-format
 msgid "[%s with SKU of %s]"
 msgstr "[%s med varenummer af %s]"
 
 # @ woocommerce
-#: admin/post-types/product.php:434
+#: admin/post-types/product.php:440
 #, php-format
 msgid "[%s with ID of %d]"
 msgstr "[%s med ID af %d]"
 
 # @ woocommerce
-#: admin/post-types/product.php:471
-#: admin/post-types/product.php:677
+#: admin/post-types/product.php:477
+#: admin/post-types/product.php:683
 msgid "Regular price"
 msgstr "Regulær pris"
 
 # @ woocommerce
-#: admin/post-types/product.php:476
-#: admin/post-types/product.php:683
+#: admin/post-types/product.php:482
+#: admin/post-types/product.php:689
 msgid "Sale"
 msgstr "Salg"
 
 # @ woocommerce
-#: admin/post-types/product.php:478
-#: admin/post-types/product.php:699
+#: admin/post-types/product.php:484
+#: admin/post-types/product.php:705
 msgid "Sale price"
 msgstr "Salgspris"
 
 # @ woocommerce
-#: admin/post-types/product.php:489
-#: admin/post-types/product.php:706
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:137
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:308
+#: admin/post-types/product.php:495
+#: admin/post-types/product.php:712
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:74
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:386
 #: admin/post-types/writepanels/writepanel-product_data.php:102
 msgid "Weight"
 msgstr "Vægt"
 
 # @ woocommerce
-#: admin/post-types/product.php:500
-#: admin/post-types/product.php:730
+#: admin/post-types/product.php:506
+#: admin/post-types/product.php:736
 msgid "L/W/H"
 msgstr "L/B/H"
 
 # @ woocommerce
-#: admin/post-types/product.php:502
-#: admin/post-types/product.php:746
+#: admin/post-types/product.php:508
+#: admin/post-types/product.php:752
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:75
 #: admin/post-types/writepanels/writepanel-product_data.php:111
 msgid "Length"
 msgstr "Længde"
 
 # @ woocommerce
-#: admin/post-types/product.php:514
-#: admin/post-types/product.php:754
+#: admin/post-types/product.php:520
+#: admin/post-types/product.php:760
 #: admin/post-types/writepanels/writepanel-product_data.php:128
 msgid "Visibility"
 msgstr "Synlighed"
 
 # @ woocommerce
-#: admin/post-types/product.php:519
-#: admin/post-types/product.php:760
+#: admin/post-types/product.php:525
+#: admin/post-types/product.php:766
 #: admin/post-types/writepanels/writepanel-product_data.php:129
 msgid "Catalog &amp; search"
 msgstr "Katalog &amp; søgning"
 
 # @ woocommerce
-#: admin/post-types/product.php:522
-#: admin/post-types/product.php:763
+#: admin/post-types/product.php:528
+#: admin/post-types/product.php:769
 #: admin/post-types/writepanels/writepanel-product_data.php:132
 msgid "Hidden"
 msgstr "Skjult"
 
 # @ woocommerce
-#: admin/post-types/product.php:537
-#: admin/post-types/product.php:791
+#: admin/post-types/product.php:543
+#: admin/post-types/product.php:797
 msgid "In stock?"
 msgstr "På lager?"
 
 # @ woocommerce
-#: admin/post-types/product.php:558
-#: admin/post-types/product.php:809
+#: admin/post-types/product.php:564
+#: admin/post-types/product.php:815
 #: admin/post-types/writepanels/writepanel-product_data.php:202
 msgid "Manage stock?"
 msgstr "Administrer lager"
 
 # @ woocommerce
-#: admin/post-types/product.php:562
-#: admin/post-types/product.php:828
-#: admin/post-types/product.php:844
+#: admin/post-types/product.php:568
+#: admin/post-types/product.php:834
+#: admin/post-types/product.php:850
 #: admin/post-types/writepanels/writepanel-product_data.php:209
 msgid "Stock Qty"
 msgstr "Lager stk."
 
 # @ default
-#: admin/post-types/product.php:666
-#: admin/post-types/product.php:688
-#: admin/post-types/product.php:711
-#: admin/post-types/product.php:735
-#: admin/post-types/product.php:759
-#: admin/post-types/product.php:778
-#: admin/post-types/product.php:796
-#: admin/post-types/product.php:814
-#: admin/post-types/product.php:833
+#: admin/post-types/product.php:672
+#: admin/post-types/product.php:694
+#: admin/post-types/product.php:717
+#: admin/post-types/product.php:741
+#: admin/post-types/product.php:765
+#: admin/post-types/product.php:784
+#: admin/post-types/product.php:802
+#: admin/post-types/product.php:820
+#: admin/post-types/product.php:839
 msgid "— No Change —"
 msgstr "— Ingen ændring —"
 
 # @ woocommerce
-#: admin/post-types/product.php:667
-#: admin/post-types/product.php:689
-#: admin/post-types/product.php:712
-#: admin/post-types/product.php:736
-#: admin/post-types/product.php:834
+#: admin/post-types/product.php:673
+#: admin/post-types/product.php:695
+#: admin/post-types/product.php:718
+#: admin/post-types/product.php:742
+#: admin/post-types/product.php:840
 msgid "Change to:"
 msgstr "Skift til:"
 
@@ -4494,8 +4522,6 @@ msgstr "Dette felt lader dig definere en minimums subtotal for at kunne bruge ku
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-coupon_data.php:56
-#: admin/post-types/writepanels/writepanel-product_data.php:415
-#: admin/post-types/writepanels/writepanel-product_data.php:434
 msgid "Search for a product..."
 msgstr "Søger efter et produkt..."
 
@@ -4669,11 +4695,6 @@ msgstr "Indlæs kunde leveringsadresse."
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:269
-msgid "ID"
-msgstr "ID"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:271
 msgid "Item"
 msgstr "Produkt"
 
@@ -4714,180 +4735,182 @@ msgstr "Momsklasse"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_data.php:395
-msgid "Choose an item&hellip;"
-msgstr "Vælg et produkt&hellip;"
+#: admin/post-types/writepanels/writepanel-product_data.php:419
+#: admin/post-types/writepanels/writepanel-product_data.php:438
+msgid "Search for a product&hellip;"
+msgstr "Søg efter et produkt&hellip;"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:439
-msgid "Add item"
-msgstr "Tilføj produkt"
+#: admin/post-types/writepanels/writepanel-order_data.php:397
+msgid "Add item(s)"
+msgstr "Tilføj produkt(er)"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:442
+#: admin/post-types/writepanels/writepanel-order_data.php:400
 msgid "Calc line tax &uarr;"
 msgstr "Beregn punkt moms &uarr;"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:443
+#: admin/post-types/writepanels/writepanel-order_data.php:401
 msgid "Calc totals &rarr;"
 msgstr "Beregn totaler &rarr;"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:458
+#: admin/post-types/writepanels/writepanel-order_data.php:416
 msgid "Save Order"
 msgstr "Gem ordre"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:458
+#: admin/post-types/writepanels/writepanel-order_data.php:416
 msgid "Save/update the order"
 msgstr "Gem/Opdater ordren"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:460
+#: admin/post-types/writepanels/writepanel-order_data.php:418
 msgid "Reduce stock"
 msgstr "Reducer lagerstatus"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:460
+#: admin/post-types/writepanels/writepanel-order_data.php:418
 msgid "Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid."
 msgstr "Reducer lager for produkter i ordren;  Hensigtsmæssigt efter manuel oprettelse af ordre  eller manuelle markeringer af ordre som betalt."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:462
+#: admin/post-types/writepanels/writepanel-order_data.php:420
 msgid "Restore stock"
 msgstr "Gendan lager"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:462
+#: admin/post-types/writepanels/writepanel-order_data.php:420
 msgid "Restores stock for each item in the order; useful after refunding or canceling the entire order."
 msgstr "Gendanner lager for hvert element i ordren; Hensigtsmæssigt efter refusion eller annulering af hele ordren."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:464
+#: admin/post-types/writepanels/writepanel-order_data.php:422
 msgid "Email invoice"
 msgstr "E-mail faktura"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:464
+#: admin/post-types/writepanels/writepanel-order_data.php:422
 msgid "Email the order to the customer. Unpaid orders will include a payment link."
 msgstr "E-mail ordren til kunden. Ubetalte ordrer vil inkludere et betalingslink."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:474
+#: admin/post-types/writepanels/writepanel-order_data.php:432
 msgid "Move to Trash"
 msgstr "Flyt til papirkurv"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:494
+#: admin/post-types/writepanels/writepanel-order_data.php:452
 msgid "Discounts"
 msgstr "Rabatter"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:498
+#: admin/post-types/writepanels/writepanel-order_data.php:456
 msgid "Cart Discount:"
 msgstr "Kuv rabat:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:505
+#: admin/post-types/writepanels/writepanel-order_data.php:463
 msgid "Order Discount:"
 msgstr "Ordrerabat:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:519
+#: admin/post-types/writepanels/writepanel-order_data.php:477
 msgid "Cost ex. tax:"
 msgstr "Omkostninger ekskl. moms:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:520
+#: admin/post-types/writepanels/writepanel-order_data.php:478
 msgid "(ex. tax)"
 msgstr "(ekskl. moms)"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:525
+#: admin/post-types/writepanels/writepanel-order_data.php:483
 msgid "Method:"
 msgstr "Metode:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:528
+#: admin/post-types/writepanels/writepanel-order_data.php:486
 msgid "Shipping method..."
 msgstr "Forsendelses metode..."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:535
+#: admin/post-types/writepanels/writepanel-order_data.php:493
 msgid "Tax Rows"
 msgstr "Moms rækker"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:535
+#: admin/post-types/writepanels/writepanel-order_data.php:493
 msgid "These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total."
 msgstr "Disse rækker indeholder moms for denne ordre. Dette giver dig mulighed for at vise flere eller sammensatte afgifter frem for en enkel i alt."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:569
+#: admin/post-types/writepanels/writepanel-order_data.php:527
 msgid "+ Add tax row"
 msgstr "+ Tilføj moms række"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:573
+#: admin/post-types/writepanels/writepanel-order_data.php:531
 msgid "Tax Totals"
 msgstr "Moms total"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:594
+#: admin/post-types/writepanels/writepanel-order_data.php:552
 msgid "Total"
 msgstr "Total"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:598
+#: admin/post-types/writepanels/writepanel-order_data.php:556
 msgid "Order Total:"
 msgstr "Ordre total:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:605
+#: admin/post-types/writepanels/writepanel-order_data.php:563
 msgid "Payment Method:"
 msgstr "Betalings metode:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:608
+#: admin/post-types/writepanels/writepanel-order_data.php:566
 msgid "Payment method..."
 msgstr "Betalings motode..."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:787
+#: admin/post-types/writepanels/writepanel-order_data.php:749
 msgid "Manually reducing stock."
 msgstr "Manuel lagerstatus reducering."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:801
+#: admin/post-types/writepanels/writepanel-order_data.php:763
 #, php-format
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Produkt #%s lager reduceret fra %s til %s."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:818
-#: admin/post-types/writepanels/writepanel-order_data.php:848
+#: admin/post-types/writepanels/writepanel-order_data.php:771
+#: admin/post-types/writepanels/writepanel-order_data.php:801
 #, php-format
 msgid "Item %s %s not found, skipping."
 msgstr "Produkt %s %s ikke fundet, springer over."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:824
+#: admin/post-types/writepanels/writepanel-order_data.php:777
 msgid "Manual stock reduction complete."
 msgstr "Manuel lager reduktion gennemført."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:828
+#: admin/post-types/writepanels/writepanel-order_data.php:781
 msgid "Manually restoring stock."
 msgstr "Manuel genoprettelse af lagerstatus."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:842
+#: admin/post-types/writepanels/writepanel-order_data.php:795
 #, php-format
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Produkt #%s lager øget fra %s til %s."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-order_data.php:854
+#: admin/post-types/writepanels/writepanel-order_data.php:809
 msgid "Manual stock restore complete."
 msgstr "Manuel lagergenoprettelse fuldført."
 
@@ -4914,8 +4937,8 @@ msgstr "Resterende downloads"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_downloads.php:48
 #: admin/post-types/writepanels/writepanel-order_downloads.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:179
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:344
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 msgid "Unlimited"
 msgstr "Ubegrænset"
@@ -4986,7 +5009,7 @@ msgstr "Privat bemærkning"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-order_notes.php:54
-#: admin/post-types/writepanels/writepanel-product_data.php:395
+#: admin/post-types/writepanels/writepanel-product_data.php:399
 msgid "Add"
 msgstr "Tilføj"
 
@@ -4996,263 +5019,254 @@ msgid "Variations for variable products are defined here."
 msgstr "Varianter for variable produkter bliver defineret her."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:50
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:47
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:200
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:407
+msgid "Same as parent"
+msgstr "Samme som forælder"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:59
 msgid "Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab."
 msgstr "Før du begynder at tilføje varianter, skal du oprette og gemme nogle egenskaber under <strong>Egenskaber</ strong>."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:52
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:61
 msgid "Learn more"
 msgstr "Lær mere"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:59
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:68
 #: admin/post-types/writepanels/writepanel-product_data.php:245
 msgid "Close all"
 msgstr "Luk alle"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:59
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:68
 #: admin/post-types/writepanels/writepanel-product_data.php:245
 msgid "Expand all"
 msgstr "Udvid alle"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:69
 msgid "Bulk edit:"
 msgstr "Masse redigering"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:71
 msgid "Prices"
 msgstr "Priser"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:72
 msgid "Sale prices"
 msgstr "Salgspris"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:169
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:337
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:78
+msgid "File Path"
+msgstr "Filsti"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:79
+msgid "Download limit"
+msgstr "Downloadbegrænsning"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:239
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:438
 msgid "Enabled"
 msgstr "Aktiveret"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
-msgid "File paths"
-msgstr "Fil stier"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
-msgid "Download limits"
-msgstr "Download begrænsning"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:60
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:82
 msgid "Delete all"
 msgstr "Slet alle"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:106
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:280
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:130
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
 msgid "Any"
 msgstr "Vilkårlig"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:133
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:304
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:157
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:367
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
 msgstr "Angiv et varenummer for denne variant eller undlad for at anvende forælder produkt varenummeret."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:135
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:306
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
 msgid "Stock Qty:"
 msgstr "Lager stk:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:135
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:306
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
 msgid "Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options."
 msgstr "Angiv et antal for at aktivere lageradministration for denne variant, eller efterlad blank for at bruge det variable produkts lagerindstillinger."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:137
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:308
-msgid "Enter a weight for this variation or leave blank to use the parent product weight."
-msgstr "Angiv en vægt for denne variant eller undlad for at anvende forælder produktets vægt."
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:140
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:311
-msgid "Dimensions (L&times;W&times;H)"
-msgstr "Dimensioner (L&gange;B&gange;H)"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:146
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:317
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:171
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:380
 msgid "Price:"
 msgstr "Pris:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:148
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:319
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:381
 msgid "Sale Price:"
 msgstr "Salgspris:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:153
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:322
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:386
+msgid "Enter a weight for this variation or leave blank to use the parent product weight."
+msgstr "Angiv en vægt for denne variant eller undlad for at anvende forælder produktets vægt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:184
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:392
+msgid "Dimensions (L&times;W&times;H)"
+msgstr "Dimensioner (L&gange;B&gange;H)"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:196
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:403
 msgid "Shipping class:"
 msgstr "Forsendelsesklasse:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:157
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:326
-msgid "Same as parent"
-msgstr "Samme som forælder"
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:207
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:414
+msgid "Tax class:"
+msgstr "Momsklasse:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:165
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:333
-msgid "Enable this option if access is given to a downloadable file upon purchase of a product."
-msgstr "Aktiver denne indstilling, hvis der gives adgang til en download-fil ved køb af et produkt."
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
-msgid "Enable this option if a product is not shipped or there is no shipping cost."
-msgstr "Aktiver denne indstilling hvis et produkt ikke er sendt, eller der ikke er nogen forsendelsesomkostninger"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:340
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
 msgid "File path:"
 msgstr "Filsti:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:340
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
 msgid "Enter a File Path to make this variation a downloadable product, or leave blank."
 msgstr "Angiv en filsti for at gøre denne produktvariant kan downloades, eller efterlad blank."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:340
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
 #: admin/post-types/writepanels/writepanel-product_data.php:153
 msgid "File path/URL"
 msgstr "Filsti/URL"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:340
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
 msgid "&uarr;"
 msgstr "&uarr;"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:340
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
 msgid "Upload"
 msgstr "Upload"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:179
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:344
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 msgid "Download Limit:"
-msgstr "Download begrænsning:"
+msgstr "Downloadbegrænsning:"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:179
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:344
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 msgid "Leave blank for unlimited re-downloads."
 msgstr "Efterlad blank for ubegrænsede re-downloads."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:194
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:241
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:440
+msgid "Enable this option if access is given to a downloadable file upon purchase of a product."
+msgstr "Aktiver denne indstilling, hvis der gives adgang til en download-fil ved køb af et produkt."
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:243
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:442
+msgid "Enable this option if a product is not shipped or there is no shipping cost."
+msgstr "Aktiver denne indstilling hvis et produkt ikke er sendt, eller der ikke er nogen forsendelsesomkostninger"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:257
 msgid "Link all variations"
 msgstr "Link alle varianter"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:196
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:259
 msgid "Default selections:"
 msgstr "Standardvalg"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:208
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:271
 msgid "No default"
 msgstr "Ingen standard"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:245
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:308
 msgid "You must add some attributes via the \"Product Data\" panel and save before adding a new variation."
 msgstr "Du bliver nødt til at tilføje nogle egenskaber via \"Produktdata\" panelet og gemme før tilføjelse af en ny variant."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:366
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:468
 msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
 msgstr "Er du sikker på, at du vil linke alle varianter? Dette vil oprette en ny variant for hver mulig kombination af variantegenskaber (maks. 50 pr. kørsel)."
 
 # @ default
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:387
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:489
 msgid "variation added"
 msgstr "variant tilføjet"
 
 # @ default
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:389
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:491
 msgid "variations added"
 msgstr "varianter tilføjet"
 
 # @ default
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:391
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:493
 msgid "No variations added"
 msgstr "Ingen varianter tilføjet"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:403
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:505
 msgid "Are you sure you want to remove this variation?"
 msgstr "Er du sikker på, at du vil fjerne denne variant?"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:438
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:540
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "Er du sikker på, at du vil slette alle varianter? Dette kan ikke fortrydes."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:441
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:543
 msgid "Last warning, are you sure?"
 msgstr "Sidste advarsel, er du sikker?"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:476
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:482
-msgid "Enter a price"
-msgstr "Angiv en pris"
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:579
+msgid "Enter a value"
+msgstr "Angiv en værdi"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:488
-msgid "Enter stock quantity"
-msgstr "Angiv lagerstatus"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:513
-msgid "Enter a file path/URL"
-msgstr "Angiv en filsti/URL"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:519
-msgid "Enter a download limit"
-msgstr "Angiv en download grænse"
-
-# @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:625
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:715
 msgid "Variable product"
 msgstr "Variabelt produkt"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:675
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:776
 #, php-format
 msgid "Variation #%s of %s"
 msgstr "Variant #%s af %s"
@@ -5264,7 +5278,7 @@ msgstr "Mersalg/Cross-salg"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:39
-#: admin/post-types/writepanels/writepanel-product_data.php:483
+#: admin/post-types/writepanels/writepanel-product_data.php:487
 msgid "Grouping"
 msgstr "Gruppering"
 
@@ -5374,12 +5388,12 @@ msgstr "Upload en fil"
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:158
 msgid "Download Limit"
-msgstr "Downoad Begrænsning"
+msgstr "Downloadbegrænsning"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:161
 msgid "Download Expiry"
-msgstr "Downoad udløb"
+msgstr "Download udløb"
 
 # @ woocommerce
 #: admin/post-types/writepanels/writepanel-product_data.php:161
@@ -5444,78 +5458,83 @@ msgid "Select terms"
 msgstr "Vælg betingelser"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:309
+#: admin/post-types/writepanels/writepanel-product_data.php:310
 msgid "Select all"
 msgstr "Vælg alle"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:309
+#: admin/post-types/writepanels/writepanel-product_data.php:310
 msgid "Select none"
 msgstr "Vælg ingen"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:322
+#: admin/post-types/writepanels/writepanel-product_data.php:312
+msgid "Add new"
+msgstr "Tilføj ny"
+
+# @ woocommerce
+#: admin/post-types/writepanels/writepanel-product_data.php:326
 msgid "Pipe separate terms"
 msgstr "Rør separate betingelser"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:397
+#: admin/post-types/writepanels/writepanel-product_data.php:401
 msgid "Custom product attribute"
 msgstr "Tilpasset produkt egenskab"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:414
+#: admin/post-types/writepanels/writepanel-product_data.php:418
 msgid "Up-Sells"
 msgstr "Mersalg"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:431
+#: admin/post-types/writepanels/writepanel-product_data.php:435
 msgid "Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive."
 msgstr "Mersalg er produkter, som du anbefaler i stedet for det aktuelt viste produkt, fx produkter der er mere rentable, bedre kvalitet eller dyrere."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:433
+#: admin/post-types/writepanels/writepanel-product_data.php:437
 msgid "Cross-Sells"
 msgstr "Cross-salg"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:450
+#: admin/post-types/writepanels/writepanel-product_data.php:454
 msgid "Cross-sells are products which you promote in the cart, based on the current product."
 msgstr "Cross-salg er produkter som du fremmer i vognen, baseret på det aktuelle produkt."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:459
+#: admin/post-types/writepanels/writepanel-product_data.php:463
 msgid "Choose a grouped product&hellip;"
 msgstr "Vælg et grupperet produkt&hellip;"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:486
+#: admin/post-types/writepanels/writepanel-product_data.php:490
 msgctxt "ordering"
 msgid "Sort Order"
 msgstr "Sorter ordre"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:561
+#: admin/post-types/writepanels/writepanel-product_data.php:565
 msgid "Product SKU must be unique."
 msgstr "Produkt varenummer skal være unikt."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:844
+#: admin/post-types/writepanels/writepanel-product_data.php:852
 msgid "Product Type"
 msgstr "Produkttype"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:850
+#: admin/post-types/writepanels/writepanel-product_data.php:858
 msgid "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Aktiver denne indstilling hvis et produkt ikke er sendt, eller der ikke er nogen forsendelsesomkostninger"
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:852
+#: admin/post-types/writepanels/writepanel-product_data.php:860
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
 msgstr "Aktiver denne indstilling, hvis der gives adgang til en download-fil ved køb af et produkt."
 
 # @ woocommerce
-#: admin/post-types/writepanels/writepanel-product_data.php:868
+#: admin/post-types/writepanels/writepanel-product_data.php:876
 msgid "Use this file"
 msgstr "Brug denne fil"
 
@@ -5642,8 +5661,8 @@ msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the 
 msgstr "<a href=\"%s\" class=\"button\">%s</a> Du kan ikke tilføje den mængde til kurven &mdash; Vi har %s på lager, og du har allerede %s i din kurv."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1403
-#: classes/class-wc-order.php:457
+#: classes/class-wc-cart.php:1468
+#: classes/class-wc-order.php:462
 #: classes/class-wc-product.php:598
 #: classes/class-wc-product.php:607
 #: classes/class-wc-product.php:638
@@ -5652,27 +5671,27 @@ msgid "Free!"
 msgstr "Gratis!"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1415
+#: classes/class-wc-cart.php:1480
 msgid "via"
 msgstr "via"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1452
+#: classes/class-wc-cart.php:1517
 msgid "Invalid coupon."
 msgstr "Ugyldig kupon."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1458
+#: classes/class-wc-cart.php:1523
 msgid "Discount code already applied!"
 msgstr "Rabatkode allerede anvendt!"
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1478
+#: classes/class-wc-cart.php:1543
 msgid "Discount code applied successfully."
 msgstr "Rabatkode anvendt med succes."
 
 # @ woocommerce
-#: classes/class-wc-cart.php:1482
+#: classes/class-wc-cart.php:1547
 msgid "Coupon does not exist!"
 msgstr "Kupon eksisterer ikke!"
 
@@ -7605,89 +7624,89 @@ msgstr "Land"
 # @ woocommerce
 #: classes/class-wc-countries.php:856
 #: classes/class-wc-countries.php:857
-#: classes/class-wc-countries.php:921
+#: classes/class-wc-countries.php:927
 msgid "Postcode/Zip"
 msgstr "Postnummer/ZIP"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:861
 #: classes/class-wc-countries.php:862
-#: classes/class-wc-countries.php:915
+#: classes/class-wc-countries.php:921
 msgid "Town/City"
 msgstr "By"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:885
+#: classes/class-wc-countries.php:891
 msgctxt "placeholder"
 msgid "First Name"
 msgstr "Fornavn"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:891
+#: classes/class-wc-countries.php:897
 msgctxt "placeholder"
 msgid "Last Name"
 msgstr "Efternavn"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:897
+#: classes/class-wc-countries.php:903
 msgid "Company Name"
 msgstr "Firmanavn"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:898
+#: classes/class-wc-countries.php:904
 msgctxt "placeholder"
 msgid "Company (optional)"
 msgstr "Firmanavn (valgfri)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:903
+#: classes/class-wc-countries.php:909
 msgctxt "placeholder"
 msgid "Address"
 msgstr "Adresse"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:909
+#: classes/class-wc-countries.php:915
 msgctxt "placeholder"
 msgid "Address 2 (optional)"
 msgstr "Adresse 2 (valgfri)"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:916
+#: classes/class-wc-countries.php:922
 msgctxt "placeholder"
 msgid "Town/City"
 msgstr "By"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:922
+#: classes/class-wc-countries.php:928
 msgctxt "placeholder"
 msgid "Postcode/Zip"
 msgstr "Postnummer/ZIP"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:930
+#: classes/class-wc-countries.php:936
 msgctxt "placeholder"
 msgid "Country"
 msgstr "Land"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:937
+#: classes/class-wc-countries.php:943
 msgctxt "placeholder"
 msgid "State/County"
 msgstr "Stat/Land"
 
 # @ woocommerce
-#: classes/class-wc-countries.php:966
-msgid "Email Address"
-msgstr "E-mailadresse"
-
-# @ woocommerce
-#: classes/class-wc-countries.php:967
-msgctxt "placeholder"
+#: classes/class-wc-countries.php:972
 msgid "Email Address"
 msgstr "E-mailadresse"
 
 # @ woocommerce
 #: classes/class-wc-countries.php:973
+msgctxt "placeholder"
+msgid "Email Address"
+msgstr "E-mailadresse"
+
+# @ woocommerce
+#: classes/class-wc-countries.php:979
 msgctxt "placeholder"
 msgid "Phone"
 msgstr "Telefon"
@@ -7828,40 +7847,40 @@ msgid "Welcome to %s"
 msgstr "Velkommen til %s"
 
 # @ woocommerce
-#: classes/class-wc-order.php:454
+#: classes/class-wc-order.php:459
 #, php-format
 msgid " <small>%svia %s</small>"
 msgstr " <small>%svia %s</small>"
 
 # @ woocommerce
-#: classes/class-wc-order.php:483
+#: classes/class-wc-order.php:488
 msgid "Cart Subtotal:"
 msgstr "Indkøbskurv subtotal:"
 
 # @ woocommerce
-#: classes/class-wc-order.php:489
+#: classes/class-wc-order.php:494
 msgid "Shipping:"
 msgstr "Fragt:"
 
 # @ woocommerce
-#: classes/class-wc-order.php:505
+#: classes/class-wc-order.php:516
 msgid "Subtotal:"
 msgstr "Subtotal:"
 
 # @ woocommerce
-#: classes/class-wc-order.php:523
+#: classes/class-wc-order.php:534
 msgctxt "Relating to tax"
 msgid "N/A"
 msgstr "N/A"
 
 # @ woocommerce
-#: classes/class-wc-order.php:647
+#: classes/class-wc-order.php:660
 #, php-format
 msgid "Order status changed from %s to %s."
 msgstr "Ordrestatus ændret fra %s til %s."
 
 # @ woocommerce
-#: classes/class-wc-order.php:782
+#: classes/class-wc-order.php:788
 msgid "Order item stock reduced successfully."
 msgstr "Ordreprodukters lagerstatus reduceret korrekt."
 
@@ -8082,7 +8101,7 @@ msgstr "Betalingsmetode titel som kunden vil se på din hjemmeside."
 
 # @ woocommerce
 #: classes/gateways/class-wc-cod.php:59
-#: classes/gateways/class-wc-paypal.php:111
+#: classes/gateways/class-wc-paypal.php:112
 msgid "Description"
 msgstr "Beskrivelse"
 
@@ -8112,186 +8131,195 @@ msgid "Paypal"
 msgstr "PayPal"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:71
+#: classes/gateways/class-wc-paypal.php:72
 msgid "PayPal standard"
 msgstr "PayPal standard"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:72
+#: classes/gateways/class-wc-paypal.php:73
 msgid "PayPal standard works by sending the user to PayPal to enter their payment information."
 msgstr "PayPal Standard virker ved at sende kunden til PayPal for at indtaste deres betalingsinformationer."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:83
+#: classes/gateways/class-wc-paypal.php:84
 msgid "Gateway Disabled"
 msgstr "Gateway deaktiveret"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:83
+#: classes/gateways/class-wc-paypal.php:84
 msgid "PayPal does not support your store currency."
 msgstr "PayPal understøtter ikke din butiksvaluta."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:101
+#: classes/gateways/class-wc-paypal.php:102
 msgid "Enable PayPal standard"
 msgstr "Aktiver PayPal standard"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:108
+#: classes/gateways/class-wc-paypal.php:109
 msgid "PayPal"
 msgstr "PayPal"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:113
+#: classes/gateways/class-wc-paypal.php:114
 msgid "This controls the description which the user sees during checkout."
 msgstr "Dette kontrollerer beskrivelsen som kunden ser under kassen."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:114
+#: classes/gateways/class-wc-paypal.php:115
 msgid "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account"
 msgstr "Betal via PayPal; Du kan betale med dit kreditkort, hvis du ikke har en PayPal konto"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:117
+#: classes/gateways/class-wc-paypal.php:118
 msgid "PayPal Email"
 msgstr "PayPal e-mail"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:119
+#: classes/gateways/class-wc-paypal.php:120
 msgid "Please enter your PayPal email address; this is needed in order to take payment."
 msgstr "Indtast venligst din PayPal e-mail adresse; dette er nødvendigt for at modtage betaling."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:123
+#: classes/gateways/class-wc-paypal.php:124
 msgid "Shipping details"
 msgstr "Forsendelsesoplysninger"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:125
+#: classes/gateways/class-wc-paypal.php:126
 msgid "Send shipping details to PayPal instead of billing."
 msgstr "Send forsendelsesoplysninger til PayPal i stedet for faktureringsoplysninger."
 
-#: classes/gateways/class-wc-paypal.php:127
+#: classes/gateways/class-wc-paypal.php:128
 msgid "PayPal allows us to send 1 address. If you are using PayPal for shipping labels you may prefer to send the shipping address rather than billing."
 msgstr "PayPal tillader os at sende 1 adresse. Hvis du anvender PayPal til forsendelsesetiketter foretrækker du måske at sende forsendelsesadressen frem for faktureringsadressen."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:131
+#: classes/gateways/class-wc-paypal.php:132
 msgid "Address override"
 msgstr "Overskriv adresse"
 
-#: classes/gateways/class-wc-paypal.php:133
+#: classes/gateways/class-wc-paypal.php:134
 msgid "Enable \"address_override\" to prevent address information from being changed."
 msgstr "Aktiver \"adresse_overskrivning\" for at forhindre at adresseinformation bliver ændret."
 
-#: classes/gateways/class-wc-paypal.php:134
+#: classes/gateways/class-wc-paypal.php:135
 msgid "PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled)."
 msgstr "PayPal verificere adresser, derfor kan denne indstilling forsage fejl (vi anbefaler, at den er deaktiveret)."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:138
+#: classes/gateways/class-wc-paypal.php:139
 msgid "Submission method"
 msgstr "Indsendelsesmetode"
 
-#: classes/gateways/class-wc-paypal.php:140
+#: classes/gateways/class-wc-paypal.php:141
 msgid "Use form submission method."
 msgstr "Brug formularafsendelses metode."
 
-#: classes/gateways/class-wc-paypal.php:141
+#: classes/gateways/class-wc-paypal.php:142
 msgid "Enable this to post order data to PayPal via a form instead of using a redirect/querystring."
 msgstr "Aktiver denne for at sende ordredata til PayPal via en formular i stedet for brug af omdirigering/querystring."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:145
+#: classes/gateways/class-wc-paypal.php:146
+msgid "Page Style"
+msgstr "Side style"
+
+#: classes/gateways/class-wc-paypal.php:148
+msgid "Optionally enter the name of the page style you wish to use. These are defined within your PayPal account."
+msgstr "Eventuelt angiv navnet på den side-style du ønsker at bruge. Disse er defineret i din PayPal konto."
+
+# @ woocommerce
+#: classes/gateways/class-wc-paypal.php:152
 msgid "PayPal sandbox"
 msgstr "PayPal sandbox"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:147
+#: classes/gateways/class-wc-paypal.php:154
 msgid "Enable PayPal sandbox"
 msgstr "Aktiver PayPal sandbox"
 
-#: classes/gateways/class-wc-paypal.php:149
+#: classes/gateways/class-wc-paypal.php:156
 #, php-format
 msgid "PayPal sandbox can be used to test payments. Sign up for a developer account <a href=\"%s\">here</a>."
 msgstr "PayPal sandbox kan anvendes til at teste betalinger. Opret en udviklerkonto <a href=\"%s\">her</a>."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:152
+#: classes/gateways/class-wc-paypal.php:159
 msgid "Debug Log"
 msgstr "Fejlret log"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:154
+#: classes/gateways/class-wc-paypal.php:161
 msgid "Enable logging"
 msgstr "Aktiver logning"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:156
+#: classes/gateways/class-wc-paypal.php:163
 msgid "Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal.txt</code>"
 msgstr "Log PayPal hændelser, såsom IPN forespørgsler, i <code>woocommerce/logs/paypal.txt</code>"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:266
+#: classes/gateways/class-wc-paypal.php:274
 #, php-format
 msgid "Order %s"
 msgstr "Ordre %s"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:272
-#: classes/gateways/class-wc-paypal.php:309
+#: classes/gateways/class-wc-paypal.php:280
+#: classes/gateways/class-wc-paypal.php:317
 msgid "Shipping via"
 msgstr "Forsendelse via"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:345
+#: classes/gateways/class-wc-paypal.php:353
 msgid "Thank you for your order. We are now redirecting you to PayPal to make payment."
 msgstr "Tak for din bestilling. Vi omdirirgerer dig nu til PayPal for at gennemføre betalingen."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:366
+#: classes/gateways/class-wc-paypal.php:374
 msgid "Pay via PayPal"
 msgstr "Betal via PayPal"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:366
+#: classes/gateways/class-wc-paypal.php:374
 msgid "Cancel order &amp; restore cart"
 msgstr "Annuler ordre og gendan kurv"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:411
+#: classes/gateways/class-wc-paypal.php:419
 msgid "Thank you for your order, please click the button below to pay with PayPal."
 msgstr "Tak for din bestilling, klik venligst på knappen nedenfor for at betale med PayPal."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:541
+#: classes/gateways/class-wc-paypal.php:550
 msgid "IPN payment completed"
 msgstr "IPN betaling gennemført"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:552
-#: classes/gateways/class-wc-paypal.php:560
-#: classes/gateways/class-wc-paypal.php:577
+#: classes/gateways/class-wc-paypal.php:561
+#: classes/gateways/class-wc-paypal.php:569
+#: classes/gateways/class-wc-paypal.php:586
 #, php-format
 msgid "Payment %s via IPN."
 msgstr "Betaling %s via IPN."
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:563
-#: classes/gateways/class-wc-paypal.php:580
+#: classes/gateways/class-wc-paypal.php:572
+#: classes/gateways/class-wc-paypal.php:589
 msgid "Order refunded/reversed"
 msgstr "Ordre refunderet/taget tilbage"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:564
-#: classes/gateways/class-wc-paypal.php:581
+#: classes/gateways/class-wc-paypal.php:573
+#: classes/gateways/class-wc-paypal.php:590
 #, php-format
 msgid "Order %s has been marked as refunded - PayPal reason code: %s"
 msgstr "Ordre %s er blevet markeret som refunderet - PayPal årsagskode: %s"
 
 # @ woocommerce
-#: classes/gateways/class-wc-paypal.php:568
-#: classes/gateways/class-wc-paypal.php:585
+#: classes/gateways/class-wc-paypal.php:577
+#: classes/gateways/class-wc-paypal.php:594
 #, php-format
 msgid "Payment for order %s refunded/reversed"
 msgstr "Betaling for ordre %s refunderet/taget tilbage"
@@ -8303,7 +8331,7 @@ msgstr "Fast sats"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:19
-#: classes/shipping/class-wc-flat-rate.php:339
+#: classes/shipping/class-wc-flat-rate.php:356
 msgid "Flat Rates"
 msgstr "Faste satser"
 
@@ -8314,14 +8342,14 @@ msgstr "Faste satser lader dig definere en standard sats pr. produkt eller pr or
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:65
-#: classes/shipping/class-wc-international-delivery.php:38
+#: classes/shipping/class-wc-international-delivery.php:41
 msgid "Enable this shipping method"
 msgstr "Aktiver denne forsendelsesmetode"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:69
 #: classes/shipping/class-wc-free-shipping.php:53
-#: classes/shipping/class-wc-international-delivery.php:42
+#: classes/shipping/class-wc-international-delivery.php:45
 msgid "Method Title"
 msgstr "Metodetitel"
 
@@ -8333,111 +8361,120 @@ msgstr "Fast sats"
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:75
 #: classes/shipping/class-wc-free-shipping.php:72
-#: classes/shipping/class-wc-local-delivery.php:94
-#: classes/shipping/class-wc-local-pickup.php:65
+#: classes/shipping/class-wc-local-delivery.php:108
+#: classes/shipping/class-wc-local-pickup.php:61
 msgid "Method availability"
 msgstr "Metodetilgængelighed"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:80
 #: classes/shipping/class-wc-free-shipping.php:77
-#: classes/shipping/class-wc-local-delivery.php:99
-#: classes/shipping/class-wc-local-pickup.php:70
+#: classes/shipping/class-wc-local-delivery.php:113
+#: classes/shipping/class-wc-local-pickup.php:66
 msgid "All allowed countries"
 msgstr "Alle tilladte lande"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:93
-#: classes/shipping/class-wc-international-delivery.php:66
+#: classes/shipping/class-wc-international-delivery.php:69
 msgid "Calculation Type"
 msgstr "Beregningstype"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:98
-#: classes/shipping/class-wc-international-delivery.php:71
+#: classes/shipping/class-wc-international-delivery.php:74
 msgid "Per Order - charge shipping for the entire order as a whole"
 msgstr "Pr. ordre - opkræv forsendelse for hele ordren som en helhed"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:99
-#: classes/shipping/class-wc-international-delivery.php:72
+#: classes/shipping/class-wc-international-delivery.php:75
 msgid "Per Item - charge shipping for each item individually"
 msgstr "Pr. produkt - opkræv forsendelse for hvert enkelt produkt individuelt"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:100
-#: classes/shipping/class-wc-international-delivery.php:73
+#: classes/shipping/class-wc-international-delivery.php:76
 msgid "Per Class - charge shipping for each shipping class in an order"
 msgstr "Pr. klasse - opkræv forsendelses for hver forsendelsesklasse i en ordre"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:114
-#: classes/shipping/class-wc-international-delivery.php:87
+#: classes/shipping/class-wc-international-delivery.php:90
 msgid "Default Cost"
 msgstr "Standardomkostninger"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:116
-#: classes/shipping/class-wc-international-delivery.php:89
+#: classes/shipping/class-wc-international-delivery.php:92
 msgid "Cost excluding tax. Enter an amount, e.g. 2.50."
 msgstr "Omkostninger ekskl. moms. Angiv et beløb, fx 2,50."
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:120
-#: classes/shipping/class-wc-international-delivery.php:93
+#: classes/shipping/class-wc-international-delivery.php:96
 msgid "Default Handling Fee"
 msgstr "Standard ekspeditionsgebyr"
 
 # @ woocommerce
 #: classes/shipping/class-wc-flat-rate.php:122
-#: classes/shipping/class-wc-international-delivery.php:95
+#: classes/shipping/class-wc-international-delivery.php:98
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable."
 msgstr "Gebyr ekskl. moms. Angiv et beløb, fx 2,50, eller en procentdel, fx 5%. Efterlad blank for at deaktivere."
 
 # @ woocommerce
+#: classes/shipping/class-wc-flat-rate.php:126
+msgid "Minimum Fee"
+msgstr "Minimumsgebyr"
+
 #: classes/shipping/class-wc-flat-rate.php:128
+msgid "Enter a minimum fee amount. Fee's less than this will be increased. Leave blank to disable."
+msgstr "Angiv et minimums gebyrbeløb. Gebyr mindre end denne vil blive øget. Efterlad blank for at deaktivere."
+
+# @ woocommerce
+#: classes/shipping/class-wc-flat-rate.php:134
 msgid "Optional extra shipping options with additional costs (one per line). Example: <code>Option Name|Cost|Per-order (yes or no)</code>. Example: <code>Priority Mail|6.95|yes</code>. If per-order is set to no, it will use the \"Calculation Type\" setting."
 msgstr "Valgfri ekstra forsendelsesindstillinger med ekstra omkostninger (én pr linje). Eksempel: <code>Indstillingsnavn|Pris|Pris er pr. ordre (yes eller no)</code>. Eksempel: <code>Prioriteret Post|6,95|yes</code>. Hvis pr. ordre er sat til no, vil \"Beregningstype\" indstillingen blive anvendt."
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:346
+#: classes/shipping/class-wc-flat-rate.php:363
 msgid "Cost, excluding tax."
 msgstr "Omkostning ekskl. moms"
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:347
+#: classes/shipping/class-wc-flat-rate.php:364
 msgid "Handling Fee"
 msgstr "Ekspeditionsgebyr"
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:347
+#: classes/shipping/class-wc-flat-rate.php:364
 msgid "Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%."
 msgstr "Gebyr ekskl. moms. Angiv et beløb, fx 2,50, eller en procentdel, fx 5%."
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:352
+#: classes/shipping/class-wc-flat-rate.php:369
 msgid "+ Add Flat Rate"
 msgstr "+ Tilføj fast sats"
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:353
+#: classes/shipping/class-wc-flat-rate.php:370
 msgid "Add rates for shipping classes here &mdash; they will override the default costs defined above."
 msgstr "Tilføj satser for forsendelsesklasser her &mdash; disse vil overskrive standard omkostningerne defineret ovenfor."
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:353
+#: classes/shipping/class-wc-flat-rate.php:370
 msgid "Delete selected rates"
 msgstr "Slet valgte satser?"
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:370
-#: classes/shipping/class-wc-flat-rate.php:402
+#: classes/shipping/class-wc-flat-rate.php:387
+#: classes/shipping/class-wc-flat-rate.php:419
 msgid "Select a class&hellip;"
 msgstr "Vælg en klasse&hellip;"
 
 # @ woocommerce
-#: classes/shipping/class-wc-flat-rate.php:375
-#: classes/shipping/class-wc-flat-rate.php:376
+#: classes/shipping/class-wc-flat-rate.php:392
+#: classes/shipping/class-wc-flat-rate.php:393
 msgid "0.00"
 msgstr "0,00"
 
@@ -8485,7 +8522,7 @@ msgstr "Fri fragt - gør hvad der står."
 # @ woocommerce
 #: classes/shipping/class-wc-international-delivery.php:19
 #: classes/shipping/class-wc-international-delivery.php:22
-#: classes/shipping/class-wc-international-delivery.php:45
+#: classes/shipping/class-wc-international-delivery.php:48
 msgid "International Delivery"
 msgstr "International levering"
 
@@ -8495,99 +8532,104 @@ msgid "International delivery based on flat rate shipping."
 msgstr "International levering baseret på fast sats forsendelse."
 
 # @ woocommerce
-#: classes/shipping/class-wc-international-delivery.php:48
+#: classes/shipping/class-wc-international-delivery.php:51
 msgid "Availability"
 msgstr "Tilgængelighed"
 
 # @ woocommerce
-#: classes/shipping/class-wc-international-delivery.php:53
+#: classes/shipping/class-wc-international-delivery.php:56
 msgid "Selected countries"
 msgstr " Valgte lande"
 
 # @ woocommerce
-#: classes/shipping/class-wc-international-delivery.php:54
+#: classes/shipping/class-wc-international-delivery.php:57
 msgid "Excluding selected countries"
 msgstr "Eksklusive valgte lande"
 
 # @ woocommerce
-#: classes/shipping/class-wc-international-delivery.php:58
+#: classes/shipping/class-wc-international-delivery.php:61
 msgid "Countries"
 msgstr "Lande"
 
 # @ woocommerce
 #: classes/shipping/class-wc-local-delivery.php:17
-#: classes/shipping/class-wc-local-delivery.php:69
+#: classes/shipping/class-wc-local-delivery.php:82
 msgid "Local Delivery"
 msgstr "Lokal levering"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:60
-#: classes/shipping/class-wc-local-pickup.php:53
+#: classes/shipping/class-wc-local-delivery.php:73
+#: classes/shipping/class-wc-local-pickup.php:49
 msgid "Enable"
 msgstr "Aktiver"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:62
+#: classes/shipping/class-wc-local-delivery.php:75
 msgid "Enable local delivery"
 msgstr "Aktiver lokal levering"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:72
+#: classes/shipping/class-wc-local-delivery.php:85
 msgid "Fee Type"
 msgstr "Gebyr type"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:74
+#: classes/shipping/class-wc-local-delivery.php:87
 msgid "How to calculate delivery charges"
 msgstr "Hvordan forsendelsesomkostninger beregnes"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:77
-msgid "Fixed Amount"
+#: classes/shipping/class-wc-local-delivery.php:90
+msgid "Fixed amount"
 msgstr "Fast beløb"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:78
-msgid "Percentage of Cart Total"
+#: classes/shipping/class-wc-local-delivery.php:91
+msgid "Percentage of cart total"
 msgstr "Procentdel af kurv total"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:82
+#: classes/shipping/class-wc-local-delivery.php:92
+msgid "Fixed amount per product"
+msgstr "Fast beløb pr. produkt"
+
+# @ woocommerce
+#: classes/shipping/class-wc-local-delivery.php:96
 msgid "Delivery Fee"
 msgstr "Leveringsgebyr"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:84
+#: classes/shipping/class-wc-local-delivery.php:98
 msgid "What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable."
 msgstr "Hvilket gebyr vil du opkræve for lokal levering? Tilsidesæt hvis du vælger, at det skal være gratis. Efterlad blank for at deaktivere."
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:88
+#: classes/shipping/class-wc-local-delivery.php:102
 msgid "Zip/Post Codes"
 msgstr "Post/zip numre"
 
-#: classes/shipping/class-wc-local-delivery.php:90
+#: classes/shipping/class-wc-local-delivery.php:104
 msgid "What zip/post codes would you like to offer delivery to? Separate codes with a comma."
 msgstr "Hvilke zip/postnumre vil du tilbyde levering til? Separer koder med et kommategn."
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-delivery.php:117
+#: classes/shipping/class-wc-local-delivery.php:131
 msgid "Local delivery is a simple shipping method for delivering orders locally."
 msgstr "Lokal levering er en simpel forsendelsesmetode til at levere ordre lokalt."
 
 # @ woocommerce
 #: classes/shipping/class-wc-local-pickup.php:17
-#: classes/shipping/class-wc-local-pickup.php:62
+#: classes/shipping/class-wc-local-pickup.php:58
 msgid "Local Pickup"
 msgstr "Lokal afhentning"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-pickup.php:55
+#: classes/shipping/class-wc-local-pickup.php:51
 msgid "Enable local pickup"
 msgstr "Aktiver lokal afhentning"
 
 # @ woocommerce
-#: classes/shipping/class-wc-local-pickup.php:88
+#: classes/shipping/class-wc-local-pickup.php:84
 msgid "Local pickup is a simple method which allows the customer to pick up their order themselves."
 msgstr "Lokal afhentning er en simpel metode som tillader kunder selv at afhente deres ordre."
 
@@ -8638,12 +8680,12 @@ msgid "Shipping costs updated."
 msgstr "Forsendelsesomkostninger opdateret."
 
 # @ woocommerce
-#: shortcodes/shortcode-checkout.php:34
+#: shortcodes/shortcode-checkout.php:43
 msgid "The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page."
 msgstr "Ordretotalerne er blevet opdateret. Bekræft venligst ordren ved at klikke på knappen, Placer ordre, i bunden af siden."
 
 # @ woocommerce
-#: shortcodes/shortcode-init.php:263
+#: shortcodes/shortcode-init.php:304
 msgid "Add to cart"
 msgstr "Tilføj til kurv"
 
@@ -8653,24 +8695,24 @@ msgid "Please enter your password."
 msgstr "Indtast venligst din adgangskode."
 
 # @ woocommerce
-#: shortcodes/shortcode-my_account.php:256
+#: shortcodes/shortcode-my_account.php:261
 msgid "My Account &rarr;"
 msgstr "Min konto &rarr;"
 
 # @ woocommerce
-#: shortcodes/shortcode-my_account.php:263
+#: shortcodes/shortcode-my_account.php:268
 #, php-format
 msgid "Order <mark>%s</mark> made on <mark>%s</mark>"
 msgstr "Ordre <mark>%s</mark> foretaget <mark>%s</mark>"
 
 # @ woocommerce
-#: shortcodes/shortcode-my_account.php:264
+#: shortcodes/shortcode-my_account.php:269
 #, php-format
 msgid ". Order status: <mark>%s</mark>"
 msgstr ". Ordrestatus: <mark>%s</mark>"
 
 # @ woocommerce
-#: shortcodes/shortcode-my_account.php:270
+#: shortcodes/shortcode-my_account.php:275
 msgid "Order Updates"
 msgstr "Ordreopdateringer"
 
@@ -8850,11 +8892,6 @@ msgid "Calculate Shipping"
 msgstr "Beregn forsendelse"
 
 # @ woocommerce
-#: templates/cart/shipping-calculator.php:50
-msgid "state"
-msgstr "stat"
-
-# @ woocommerce
 #: templates/cart/shipping-calculator.php:60
 msgid "Update Totals"
 msgstr "Opdateringstotaler"
@@ -8946,7 +8983,7 @@ msgstr "&larr; Tilbage til kurv"
 
 # @ woocommerce
 #: templates/checkout/form-billing.php:10
-msgid "Billing &amp Shipping"
+msgid "Billing &amp; Shipping"
 msgstr "Fakturering &amp forsendelse"
 
 # @ woocommerce
@@ -8955,7 +8992,7 @@ msgid "Create an account?"
 msgstr "Opret en konto?"
 
 # @ woocommerce
-#: templates/checkout/form-billing.php:40
+#: templates/checkout/form-billing.php:42
 msgid "Create an account by entering the information below. If you are a returning customer please login with your username at the top of the page."
 msgstr "Opret en konto ved at udfylde informationerne nedenfor. Hvis du er en tilbagevendende kunde, log da venligst ind med dit brugernavn i toppen af siden."
 
@@ -9102,9 +9139,9 @@ msgid ". Their order is as follows:"
 msgstr ". Din ordre er som følgende:"
 
 # @ woocommerce
-#: templates/emails/admin-new-order.php:38
-#: templates/emails/customer-completed-order.php:38
-#: templates/emails/customer-note.php:42
+#: templates/emails/admin-new-order.php:40
+#: templates/emails/customer-completed-order.php:40
+#: templates/emails/customer-note.php:44
 msgid "Customer details"
 msgstr "Kundeoplysninger"
 
@@ -9269,27 +9306,12 @@ msgid "Recent Orders"
 msgstr "Seneste ordrer"
 
 # @ woocommerce
-#: templates/myaccount/my-account.php:42
-msgid "#"
-msgstr "#"
-
-# @ woocommerce
-#: templates/myaccount/my-account.php:44
-msgid "Ship to"
-msgstr "Send til"
-
-# @ woocommerce
-#: templates/myaccount/my-account.php:78
-msgid "You have no recent orders."
-msgstr "Du har ingen seneste ordrer."
-
-# @ woocommerce
-#: templates/myaccount/my-account.php:83
+#: templates/myaccount/my-account.php:27
 msgid "My Address"
 msgstr "Min adresse"
 
 # @ woocommerce
-#: templates/myaccount/my-account.php:84
+#: templates/myaccount/my-account.php:28
 msgid "The following addresses will be used on the checkout page by default."
 msgstr "Følgende adresser vil blive anvendt ved kassen som standard."
 
@@ -9302,6 +9324,20 @@ msgstr "Du har ikke angivet en faktureringsadresse endnu."
 #: templates/myaccount/my-address.php:70
 msgid "You have not set up a shipping address yet."
 msgstr "Du har ikke angivet en leveringsadresse endnu."
+
+# @ woocommerce
+#: templates/myaccount/my-orders.php:28
+msgid "Ship to"
+msgstr "Send til"
+
+#: templates/myaccount/my-orders.php:51
+msgid "Click to cancel this order"
+msgstr "Klik for at annullere denne ordre"
+
+# @ woocommerce
+#: templates/myaccount/my-orders.php:72
+msgid "You have no recent orders."
+msgstr "Du har ingen seneste ordrer."
 
 # @ woocommerce
 #: templates/order/form-tracking.php:11
@@ -9475,13 +9511,11 @@ msgstr "Best Sellers"
 #: widgets/widget-onsale.php:149
 #: widgets/widget-price_filter.php:192
 #: widgets/widget-product_categories.php:149
-#: widgets/widget-product_search.php:69
+#: widgets/widget-product_search.php:60
 #: widgets/widget-product_tag_cloud.php:70
 #: widgets/widget-random_products.php:103
 #: widgets/widget-recently_viewed.php:116
 #: widgets/widget-recent_products.php:129
-#: widgets/widget-recent_reviews.php:120
-#: widgets/widget-top_rated_products.php:135
 msgid "Title:"
 msgstr "Titel:"
 
@@ -9492,8 +9526,6 @@ msgstr "Titel:"
 #: widgets/widget-random_products.php:108
 #: widgets/widget-recently_viewed.php:119
 #: widgets/widget-recent_products.php:132
-#: widgets/widget-recent_reviews.php:123
-#: widgets/widget-top_rated_products.php:138
 msgid "Number of products to show:"
 msgstr "Antal af produkter at vise:"
 
@@ -9740,16 +9772,6 @@ msgstr "Et søgefelt udelukkende for produkter."
 #: widgets/widget-product_search.php:25
 msgid "WooCommerce Product Search"
 msgstr "WooCommerce produktsøgning"
-
-# @ woocommerce
-#: widgets/widget-product_search.php:48
-msgid "Search for:"
-msgstr "Søg efter:"
-
-# @ woocommerce
-#: widgets/widget-product_search.php:49
-msgid "Search for products"
-msgstr "Søg efter produkter"
 
 # @ woocommerce
 #: widgets/widget-product_tag_cloud.php:23
