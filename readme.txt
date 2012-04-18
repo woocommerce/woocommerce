@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added minus symbol before discount on view order page
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers
+* Fix - update_count_callback for tags
 
 = 1.5.4 - 16/04/2012 =
 * Feature - Allow attributes to be added from the edit product page

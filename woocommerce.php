@@ -578,6 +578,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
+	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Tags', 'woocommerce'),
