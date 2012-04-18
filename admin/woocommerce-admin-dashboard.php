@@ -72,8 +72,8 @@ function woocommerce_dashboard_widget_right_now() {
 					$text = '<a href="' . $link . '">' . $text . '</a>';
 				?>
 
-				<td class="first b b-product_tags"><?php echo $num; ?></td>
-				<td class="t product_tags"><?php echo $text; ?></td>
+				<td class="first b b-product_tag"><?php echo $num; ?></td>
+				<td class="t product_tag"><?php echo $text; ?></td>
 			</tr>
 
 			<tr>
