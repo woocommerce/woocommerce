@@ -488,7 +488,7 @@ class WC_Order {
 			$total_rows[ __( 'Cart Subtotal:', 'woocommerce' ) ] = $subtotal;
 		
 		if ( $this->get_cart_discount() > 0 ) 
-			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = woocommerce_price( $this->get_cart_discount() );
+			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = '-' . woocommerce_price( $this->get_cart_discount() );
 		
 		if ( $this->get_shipping() > 0 )
 			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
