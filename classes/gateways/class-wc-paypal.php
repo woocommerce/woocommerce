@@ -387,7 +387,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 			$paypal_args = $this->get_paypal_args( $order );
 			
-			$paypal_args = http_build_query( $paypal_args );
+			$paypal_args = http_build_query( $paypal_args, '', '&' );
 			
 			if ( $this->testmode == 'yes' ):
 				$paypal_adr = $this->testurl . '?test_ipn=1&';		
