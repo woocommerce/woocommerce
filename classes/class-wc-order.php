@@ -530,7 +530,7 @@ class WC_Order {
 		endif;
 		
 		if ($this->get_order_discount() > 0)
-			$total_rows[ __('Order Discount:', 'woocommerce') ] = woocommerce_price($this->get_order_discount());
+			$total_rows[ __('Order Discount:', 'woocommerce') ] = '-'.woocommerce_price($this->get_order_discount());
 		
 		$total_rows[ __('Order Total:', 'woocommerce') ] = woocommerce_price($this->get_order_total());
 		
