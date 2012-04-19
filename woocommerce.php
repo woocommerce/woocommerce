@@ -425,7 +425,7 @@ class Woocommerce {
 	 **/
 	function wp_head() {
 		$theme_name = ( function_exists( 'wp_get_theme' ) ) ? wp_get_theme() : get_current_theme();
-		$this->add_body_class( 'theme-' . strtolower( $theme_name ) );
+		$this->add_body_class( "theme-{$theme_name}" );
 
 		if ( is_woocommerce() ) $this->add_body_class('woocommerce');
 		
@@ -1356,7 +1356,7 @@ class Woocommerce {
 	/** Body Classes **********************************************************/
 	
 	function add_body_class( $class ) {
-		$this->_body_classes[] = $class;
+		$this->_body_classes[] = sanitize_html_class( strtolower($class) );
 	}
 	
 	function output_body_class( $classes ) {
