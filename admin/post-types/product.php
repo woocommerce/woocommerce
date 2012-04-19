@@ -75,7 +75,7 @@ function woocommerce_edit_product_columns($columns){
 	$columns["price"] = __("Price", 'woocommerce');
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
-	$columns["product_tags"] = __("Tags", 'woocommerce');
+	$columns["product_tag"] = __("Tags", 'woocommerce');
 	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" />';
 	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" />';
 	$columns["date"] = __("Date", 'woocommerce');
@@ -205,10 +205,16 @@ function woocommerce_custom_product_columns( $column ) {
 			if ($product->get_price_html()) echo $product->get_price_html(); else echo '<span class="na">&ndash;</span>';
 		break;
 		case "product_cat" :
-			if (!$terms = get_the_term_list($post->ID, 'product_cat', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
-		break;
-		case "product_tags" :
-			if (!$terms = get_the_term_list($post->ID, 'product_tag', '', ', ','')) echo '<span class="na">&ndash;</span>'; else echo $terms;
+		case "product_tag" :
+			if ( ! $terms = get_the_terms( $post->ID, $column ) ) {
+				echo '<span class="na">&ndash;</span>';
+			} else {
+				foreach ( $terms as $term ) {
+					$termlist[] = '<a href="' . admin_url( 'edit.php?' . $column . '=' . $term->slug . '&post_type=product' ) . ' ">' . $term->name . '</a>';
+				}
+
+				echo implode( ', ', $termlist );
+			}
 		break;
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );

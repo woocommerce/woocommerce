@@ -639,6 +639,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 			'cm' => __( 'cm', 'woocommerce' ),
 			'mm' => __( 'mm', 'woocommerce' ),
 			'in' => __( 'in', 'woocommerce' ),
+			'yd' => __( 'yd', 'woocommerce' ),
 		),
 		'desc_tip'	=>  true,
 	),
@@ -1179,6 +1180,7 @@ function woocommerce_settings() {
 		// Flush rules and clear any unwanted data
 		flush_rewrite_rules( false );
 		unset($_SESSION['orderby']);
+		$woocommerce->clear_product_transients();
 		
 		// Redirect back
 		$redirect = add_query_arg( 'saved', 'true' );

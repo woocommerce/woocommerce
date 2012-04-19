@@ -424,8 +424,9 @@ class Woocommerce {
 	 * Add body classes
 	 **/
 	function wp_head() {
-		$this->add_body_class('theme-' . get_current_theme() );
-	
+		$theme_name = ( function_exists( 'wp_get_theme' ) ) ? wp_get_theme() : get_current_theme();
+		$this->add_body_class( "theme-{$theme_name}" );
+
 		if ( is_woocommerce() ) $this->add_body_class('woocommerce');
 		
 		if ( is_checkout() ) $this->add_body_class('woocommerce-checkout');
@@ -577,6 +578,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
+	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
 	                    'name' 				=> __( 'Tags', 'woocommerce'),
