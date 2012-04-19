@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added minus symbol before discount on view order page
 * Tweak - Added yards as dimensions unit
 * Tweak - Allow more readable flat rate options to be entered
+* Tweak - Changed category and tag link to filter product list in admin panel
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers
