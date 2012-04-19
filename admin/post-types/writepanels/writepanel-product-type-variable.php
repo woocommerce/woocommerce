@@ -432,7 +432,7 @@ function variable_product_type_options() {
 								</td>\
 							</tr>\
 							<tr>\
-								<td class="upload_image"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo $image ?>" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
+								<td class="upload_image"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo woocommerce_placeholder_img_src() ?>" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
 								<td class="options">\
 									\
 									<label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /> <?php _e('Enabled', 'woocommerce'); ?></label>\
