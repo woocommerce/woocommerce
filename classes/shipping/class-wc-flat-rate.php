@@ -181,7 +181,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		// Add any extra rates
 		if ( sizeof( $this->options ) > 0) foreach ( $this->options as $option ) {
 			
-			$this_option = explode('|', $option);
+			$this_option = preg_split( '~\s*\|\s*~', trim( $option ) );
 			
 			if (sizeof($this_option)!==3) continue;
 			
