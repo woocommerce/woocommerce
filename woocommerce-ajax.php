@@ -185,30 +185,30 @@ function woocommerce_process_checkout() {
  */
 function woocommerce_feature_product() {
 
-	if( !is_admin() ) die;
+	if( ! is_admin() ) die;
 	
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if( ! current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
 	
-	if( !check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if( ! check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	
-	$post_id = isset($_GET['product_id']) && (int)$_GET['product_id'] ? (int)$_GET['product_id'] : '';
+	$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
 	
 	if(!$post_id) die;
 	
 	$post = get_post($post_id);
-	if(!$post) die;
 	
-	if($post->post_type !== 'product') die;
+	if( ! $post || $post->post_type !== 'product' ) die;
 	
-	$product = new WC_Product($post->ID);
+	$featured = get_post_meta( $post->ID, '_featured', true );
 
-	if ($product->is_featured()) update_post_meta($post->ID, '_featured', 'no');
-	else update_post_meta($post->ID, '_featured', 'yes');
+	if ( $featured == 'yes' ) 
+		update_post_meta($post->ID, '_featured', 'no');
+	else 
+		update_post_meta($post->ID, '_featured', 'yes');
 	
-	$sendback = remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() );
-	wp_safe_redirect( $sendback );
-
+	wp_safe_redirect( remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() ) );
 }
+
 add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product');
 
 /**
