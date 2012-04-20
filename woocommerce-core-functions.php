@@ -200,13 +200,13 @@ if (!function_exists('is_shop')) {
 	}
 }
 if (!function_exists('is_product_category')) {
-	function is_product_category() {
-		return is_tax( 'product_cat' );
+	function is_product_category( $term = '' ) {
+		return is_tax( 'product_cat', $term );
 	}
 }
 if (!function_exists('is_product_tag')) {
-	function is_product_tag() {
-		return is_tax( 'product_tag' );
+	function is_product_tag( $term = '' ) {
+		return is_tax( 'product_tag', $term );
 	}
 }
 if (!function_exists('is_product')) {

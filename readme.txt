@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.5.5 =
 * Feature - is_sold_individually() function for disabling quantity inputs for products
 * Tweak - Cart.php display with more filters
+* Tweak - is_product_category and is_product_tag support term argument
 * Tweak - Added minus symbol before discount on view order page
 * Tweak - Added yards as dimensions unit
 * Tweak - Allow more readable flat rate options to be entered
