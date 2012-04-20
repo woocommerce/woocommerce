@@ -13,7 +13,6 @@ class WC_Product {
 	
 	var $id;
 	var $product_custom_fields;
-	var $exists;
 	var $attributes;
 	var $children;
 	var $post;
@@ -61,8 +60,6 @@ class WC_Product {
 
 		$this->product_custom_fields = get_post_custom( $this->id );
 		
-		$this->exists = (sizeof($this->product_custom_fields)>0) ? true : false;
-
 		// Define the data we're going to load: Key => Default value
 		$load_data = array(
 			'sku'			=> '',
@@ -280,7 +277,8 @@ class WC_Product {
 	
 	/** Returns whether or not the product post exists */
 	function exists() {
-		if ($this->exists) return true;
+		global $wpdb;
+		if ( $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ) return true;
 		return false;
 	}
 	

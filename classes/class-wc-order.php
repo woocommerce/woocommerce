@@ -571,7 +571,7 @@ class WC_Order {
 			
 			$_product = $this->get_product_from_item( $item );
 
-			if ($_product->exists && $_product->is_downloadable()) :
+			if ($_product->exists() && $_product->is_downloadable()) :
 				$has_downloadable_item = true;
 			endif;
 			
@@ -767,7 +767,7 @@ class WC_Order {
 				if ($item['id']>0) {
 					$_product = $this->get_product_from_item( $item );
 					
-					if ( $_product && $_product->exists && $_product->managing_stock() ) {
+					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
 					
 						$old_stock = $_product->stock;
 						

@@ -79,7 +79,7 @@ class WC_Cart {
 					else
 						$_product = new WC_Product( $values['product_id'] );
 					
-					if ( $_product->exists && $values['quantity'] > 0 ) {
+					if ( $_product->exists() && $values['quantity'] > 0 ) {
 						
 						// Put session data into array. Run through filter so other plugins can load their own session data
 						$this->cart_contents[$key] = apply_filters( 'woocommerce_get_cart_item_from_session', array(

@@ -752,7 +752,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						
 				$_product = $order->get_product_from_item( $order_item );
 				
-				if ($_product->exists) :
+				if ( $_product->exists() ) :
 				
 				 	if ( $_product->managing_stock() ) :
 						
@@ -784,7 +784,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 						
 				$_product = $order->get_product_from_item( $order_item );
 				
-				if ($_product->exists) :
+				if ( $_product->exists() ) :
 				
 				 	if ($_product->managing_stock()) :
 						

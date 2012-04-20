@@ -34,9 +34,7 @@ class WC_Product_Variation extends WC_Product {
 		$this->variation_id = $variation_id;
 	
 		$product_custom_fields = get_post_custom( $this->variation_id );
-		
-		$this->exists = ( sizeof( $product_custom_fields) > 0 ) ? true : false;
-		
+				
 		$this->variation_data = array();
 		
 		foreach ( $product_custom_fields as $name => $value ) :

@@ -221,7 +221,7 @@ class WC_Customer {
 						$_product = new WC_Product( $result->product_id );
 					endif;					
 					
-					if ($_product->exists) :
+					if ( $_product->exists() ) :
 						$download_name = $_product->get_title();
 					else :
 						$download_name = '#' . $result->product_id;
