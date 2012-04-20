@@ -13,8 +13,8 @@ global $woocommerce;
 <table class="shop_table cart" cellspacing="0">
 	<thead>
 		<tr>
-			<th class="product-remove"></th>
-			<th class="product-thumbnail"></th>
+			<th class="product-remove">&nbsp;</th>
+			<th class="product-thumbnail">&nbsp;</th>
 			<th class="product-name"><span class="nobr"><?php _e('Product Name', 'woocommerce'); ?></span></th>
 			<th class="product-price"><span class="nobr"><?php _e('Unit Price', 'woocommerce'); ?></span></th>
 			<th class="product-quantity"><?php _e('Quantity', 'woocommerce'); ?></th>
@@ -25,63 +25,75 @@ global $woocommerce;
 		<?php do_action( 'woocommerce_before_cart_contents' ); ?>
 		
 		<?php
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) : 
-			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) :
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 				$_product = $values['data'];
-				if ( $_product->exists() && $values['quantity'] > 0 ) :
-				
+				if ( $_product->exists() && $values['quantity'] > 0 ) {
 					?>
 					<tr>
-						<td class="product-remove"><a href="<?php echo esc_url( $woocommerce->cart->get_remove_url($cart_item_key) ); ?>" class="remove" title="<?php _e('Remove this item', 'woocommerce'); ?>">&times;</a></td>
-						<td class="product-thumbnail">
-							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>">
+						<!-- Remove from cart link -->
+						<td class="product-remove">
 							<?php 
-								echo $_product->get_image();
+								echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf('<a href="%s" class="remove" title="%s">&times;</a>', esc_url( $woocommerce->cart->get_remove_url( $cart_item_key ) ), __('Remove this item', 'woocommerce') ), $cart_item_key ); 
 							?>
-							</a>
 						</td>
+						
+						<!-- The thumbnail -->
+						<td class="product-thumbnail">
+							<?php 
+								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $_product->get_image() ); 
+							?>
+						</td>
+						
+						<!-- Product Name -->
 						<td class="product-name">
-							<a href="<?php echo esc_url( get_permalink(apply_filters('woocommerce_in_cart_product_id', $values['product_id'])) ); ?>"><?php echo apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $_product); ?></a>
-							<?php
+							<?php 
+								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $_product) );
+							
 								// Meta data
 								echo $woocommerce->cart->get_item_data( $values );
                    				
                    				// Backorder notification
-                   				if ($_product->backorders_require_notification() && $_product->get_total_stock()<1) echo '<p class="backorder_notification">'.__('Available on backorder.', 'woocommerce').'</p>';
+                   				if ( $_product->backorders_require_notification() && $_product->get_total_stock() < 1 ) 
+                   					echo '<p class="backorder_notification">' . __('Available on backorder.', 'woocommerce') . '</p>';
 							?>
 						</td>
-						<td class="product-price"><?php 
 						
-							if (get_option('woocommerce_display_cart_prices_excluding_tax')=='yes') :
-								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $_product->get_price_excluding_tax() ), $values, $cart_item_key ); 
-							else :
-								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $_product->get_price() ), $values, $cart_item_key ); 
-							endif;
+						<!-- Product price -->
+						<td class="product-price">
+							<?php 							
+								$product_price = ( get_option('woocommerce_display_cart_prices_excluding_tax') == 'yes' ) ? $_product->get_price_excluding_tax() : $_product->get_price();
 							
-						?></td>
-						<td class="product-quantity"><div class="quantity"><input name="cart[<?php echo $cart_item_key; ?>][qty]" data-min="<?php 
-							
-							echo apply_filters('woocommerce_cart_item_data_min', '', $_product);
-							
-						?>" data-max="<?php 
-							
-							$data_max = ($_product->backorders_allowed()) ? '' : $_product->get_stock_quantity();
-							
-							if (get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $_product->is_downloadable() && $_product->is_virtual()) $data_max = 1;
-							
-							echo apply_filters('woocommerce_cart_item_data_max', $data_max, $_product); 
-							
-						?>" value="<?php echo esc_attr( $values['quantity'] ); ?>" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div></td>
-						<td class="product-subtotal"><?php 
-
-							echo $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] )	;
-													
-						?></td>
+								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $values, $cart_item_key ); 
+							?>
+						</td>
+						
+						<!-- Quantity inputs -->
+						<td class="product-quantity">
+							<?php 
+								if ( $_product->is_sold_individually() ) {
+									echo '1';
+								} else {
+									$data_min = apply_filters( 'woocommerce_cart_item_data_min', '', $_product );
+									$data_max = ( $_product->backorders_allowed() ) ? '' : $_product->get_stock_quantity();
+									$data_max = apply_filters( 'woocommerce_cart_item_data_max', $data_max, $_product ); 
+									
+									printf( '<div class="quantity"><input name="cart[%s][qty]" data-min="%s" data-max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $data_min, $data_max, esc_attr( $values['quantity'] ) );
+								}
+							?>
+						</td>
+						
+						<!-- Product subtotal -->
+						<td class="product-subtotal">
+							<?php 
+								echo $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ); 
+							?>
+						</td>
 					</tr>
 					<?php
-				endif;
-			endforeach; 
-		endif;
+				}
+			}
+		}
 		
 		do_action( 'woocommerce_cart_contents' );
 		?>

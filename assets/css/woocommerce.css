@@ -803,6 +803,9 @@ table.shop_table td {
   padding: 6px 12px;
   vertical-align: middle;
 }
+table.shop_table td.product-quantity {
+  text-align: center;
+}
 table.shop_table tfoot td {
   font-weight: bold;
 }
@@ -949,10 +952,14 @@ td.quantity {
 .quantity {
   width: 60px;
   position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  zoom: 1;
 }
 .quantity input.qty {
   width: 40px;
   height: 28px;
+  float: left;
   padding: 0;
   text-align: center;
   border: 1px solid #969696;

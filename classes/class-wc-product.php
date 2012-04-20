@@ -153,7 +153,12 @@ class WC_Product {
 		return (int) $this->total_stock;
     }
     
-	/** Returns the product's children */
+	/**
+	 * Return the products children posts.
+	 * 
+	 * @access public
+	 * @return array
+	 */
 	function get_children() {
 		
 		if (!is_array($this->children)) :
@@ -181,6 +186,13 @@ class WC_Product {
 		return (array) $this->children;
 	}
 	
+	/**
+	 * get_child function.
+	 * 
+	 * @access public
+	 * @param mixed $child_id
+	 * @return object WC_Product or WC_Product_variation
+	 */
 	function get_child( $child_id ) {
 		if ($this->is_type('variable')) :
 			$child = new WC_Product_Variation( $child_id, $this->id, $this->product_custom_fields );
@@ -253,26 +265,43 @@ class WC_Product {
 	 * Checks if a product is downloadable
 	 */
 	function is_downloadable() {
-		if ( $this->downloadable=='yes' ) return true; else return false;
+		if ( $this->downloadable == 'yes' ) return true; else return false;
 	}
 	
 	/**
 	 * Checks if a product is virtual (has no shipping)
 	 */
 	function is_virtual() {
-		if ( $this->virtual=='yes' ) return true; else return false;
+		if ( $this->virtual == 'yes' ) return true; else return false;
 	}
 	
 	/**
 	 * Checks if a product needs shipping
 	 */
 	function needs_shipping() {
-		if ($this->is_virtual()) return false; else return true;
+		if ( $this->is_virtual() ) return false; else return true;
+	}
+	
+	/**
+	 * Check if a product is sold individually (no quantities)
+	 * 
+	 * @access public
+	 * @return bool
+	 */
+	function is_sold_individually() {
+		$return = false;
+		
+		// Sold individually if downloadable, virtual, and the option is enabled
+		if ( $this->is_downloadable() && $this->is_virtual() && get_option('woocommerce_limit_downloadable_product_qty') == 'yes' ) {
+			$return = true;
+		}
+		
+		return apply_filters( 'woocommerce_is_sold_individually', $return, $this );
 	}
 	
 	/** Returns whether or not the product has any child product */
 	function has_child() {
-		return sizeof($this->get_children()) ? true : false;
+		return sizeof( $this->get_children() ) ? true : false;
 	}
 	
 	/** Returns whether or not the product post exists */

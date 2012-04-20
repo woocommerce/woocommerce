@@ -144,6 +144,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.5 =
+* Feature - is_sold_individually() function for disabling quantity inputs for products
+* Tweak - Cart.php display with more filters
 * Tweak - Added minus symbol before discount on view order page
 * Tweak - Added yards as dimensions unit
 * Tweak - Allow more readable flat rate options to be entered
