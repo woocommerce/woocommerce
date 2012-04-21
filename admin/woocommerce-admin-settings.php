@@ -875,6 +875,14 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'id' 		=> 'woocommerce_ship_to_same_address',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Collect shipping address even when not required', 'woocommerce' ),
+		'id' 		=> 'woocommerce_require_shipping_address',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
 	
