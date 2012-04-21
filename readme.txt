@@ -157,6 +157,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers
 * Fix - update_count_callback for tags
 * Fix - Pass shipping calc state to checkout
+* Fix - Removed space from postcode validation
 * Localization - Slovak translation by Dušan Beleščák
 * Localization - Updated localisations
 
