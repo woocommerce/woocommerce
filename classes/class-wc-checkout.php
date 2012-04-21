@@ -103,7 +103,7 @@ class WC_Checkout {
 		$this->posted['shipping_method']	= isset($_POST['shipping_method']) ? woocommerce_clean($_POST['shipping_method']) : '';
 		
 		// Ship to billing only option
-		if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 1;
+		if ( $woocommerce->cart->ship_to_billing_address_only() ) $this->posted['shiptobilling'] = 1;
 		
 		// Update customer shipping and payment method to posted method
 		$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
@@ -122,7 +122,7 @@ class WC_Checkout {
 		foreach ($this->checkout_fields as $fieldset_key => $fieldset) :
 			
 			// Skip shipping if its not needed
-			if ($fieldset_key=='shipping' && (!$woocommerce->cart->needs_shipping() || $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'])) :
+			if ( $fieldset_key=='shipping' && ( ! $woocommerce->cart->needs_shipping() || $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'] ) ) :
 				$skipped_shipping = true;
 				continue;
 			endif;
@@ -203,18 +203,17 @@ class WC_Checkout {
 				$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 			
 		}
-
-		if (is_user_logged_in()) :
-			$this->creating_account = false;
-		elseif (isset($this->posted['createaccount']) && $this->posted['createaccount']) :
-			$this->creating_account = true;
-		elseif ($this->must_create_account) :
-			$this->creating_account = true;
-		else :
-			$this->creating_account = false;
-		endif;
 		
-		if ($this->creating_account) :
+		if ( is_user_logged_in() )
+			$this->creating_account = false;
+		elseif ( ! empty( $this->posted['createaccount'] ) )
+			$this->creating_account = true;
+		elseif ($this->must_create_account)
+			$this->creating_account = true;
+		else 
+			$this->creating_account = false;
+		
+		if ( $this->creating_account ) {
 		
 			if ( empty($this->posted['account_username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woocommerce') );
 			if ( empty($this->posted['account_password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
@@ -232,7 +231,7 @@ class WC_Checkout {
 				$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woocommerce') );
 			endif;
 			
-		endif;
+		}
 		
 		// Terms
 		if (!isset($_POST['woocommerce_checkout_update_totals']) && empty($this->posted['terms']) && woocommerce_get_page_id('terms')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
@@ -437,7 +436,7 @@ class WC_Checkout {
 						
 					endforeach;
 				endif;
-				if ($this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping()) :
+				if ( $this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping() ) :
 					foreach ($this->checkout_fields['shipping'] as $key => $field) :
 						
 						if ($this->posted['shiptobilling']) :
