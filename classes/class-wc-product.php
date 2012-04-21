@@ -530,13 +530,13 @@ class WC_Product {
 	
 	/** Returns the product's price */
 	function get_price() {
-		return $this->price;
+		return apply_filters( 'woocommerce_get_price', $this->price, $this );
 	}
 	
 	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
 	function get_price_excluding_tax() {
 		
-		$price = $this->price;
+		$price = $this->get_price();
 
 		if ( $this->is_taxable() && get_option('woocommerce_prices_include_tax')=='yes' ) :
 			
@@ -549,7 +549,7 @@ class WC_Product {
 		
 		endif;
 		
-		return $price;
+		return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $this );
 	}
 	
 	/** Returns the tax class */
