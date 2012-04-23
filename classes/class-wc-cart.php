@@ -710,6 +710,7 @@ class WC_Cart {
 		function set_quantity( $cart_item_key, $quantity = 1 ) {
 		
 			if ( $quantity == 0 || $quantity < 0 ) {
+				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
 				unset( $this->cart_contents[$cart_item_key] );
 			} else {
 				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
