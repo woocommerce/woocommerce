@@ -291,6 +291,11 @@ class WC_Order {
 		return $this->order_shipping;
 	}
 	
+	/** Gets shipping tax amount */
+	function get_shipping_tax() {
+		return $this->order_shipping_tax;
+	}
+	
 	/** Gets order total */
 	function get_order_total() {
 		return $this->order_total;
