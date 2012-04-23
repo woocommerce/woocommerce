@@ -85,7 +85,7 @@ if (!function_exists('woocommerce_single_product_content')) {
 				
 				<?php do_action('woocommerce_before_single_product_summary'); ?>
 				
-				<div class="summary">
+				<div class="summary" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 					
 					<?php do_action( 'woocommerce_single_product_summary'); ?>
 		
