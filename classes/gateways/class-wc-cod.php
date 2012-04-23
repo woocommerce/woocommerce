@@ -44,7 +44,7 @@ class WC_COD extends WC_Payment_Gateway {
     	$this->form_fields = array(
 			'enabled' => array(
 				'title' => __( 'Enable COD', 'woocommerce' ), 
-				'label' => __( 'Turn on Cash on Delivery for WooCommerce', 'woocommerce' ), 
+				'label' => __( 'Enable Cash on Delivery', 'woocommerce' ), 
 				'type' => 'checkbox', 
 				'description' => '', 
 				'default' => 'no'
