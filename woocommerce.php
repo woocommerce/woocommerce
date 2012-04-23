@@ -377,6 +377,12 @@ class Woocommerce {
 			if ( isset( $_SERVER['QUERY_STRING'] ) ) 
 				$_SERVER['REQUEST_URI'].='?'.$_SERVER['QUERY_STRING'];
 		}
+		
+		// NGINX Proxy
+		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_SERVER['HTTP_REMOTE_ADDR'] ) )
+			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
+		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_HTTPS'] ) )
+			$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
 	}
 
 	/**
