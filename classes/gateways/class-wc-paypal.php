@@ -208,7 +208,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'no_note' 				=> 1,
 				'currency_code' 		=> get_woocommerce_currency(),
 				'charset' 				=> 'UTF-8',
-				'rm' 					=> 2,
+				'rm' 					=> is_ssl() ? 2 : 1,
 				'upload' 				=> 1,
 				'return' 				=> $this->get_return_url( $order ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
