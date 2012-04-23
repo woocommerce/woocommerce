@@ -198,6 +198,14 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				if ($per_order_cost) {
 					$extra_rate['cost']['order'] = $this_cost;
 				} else {
+				
+					$total_quantity = 0;
+		
+					// Shipping per item
+					foreach ( $package['contents'] as $item_id => $values )
+						if ( $values['quantity'] > 0 && $values['data']->needs_shipping() )
+							$total_quantity += $values['quantity'];
+				
 					// Per-product shipping
 					$extra_rate['cost']['order'] = $this_cost * $total_quantity;
 				}
@@ -307,7 +315,6 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     function item_shipping( $package ) {
 		// Per item shipping so we pass an array of costs (per item) instead of a single value
 		$costs = array();
-		$total_quantity = 0;
 		
 		// Shipping per item
 		foreach ( $package['contents'] as $item_id => $values ) {
@@ -327,9 +334,6 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 				}
 				
 				$costs[$item_id] = ( ( $cost + $fee ) * $values['quantity'] );
-				
-				$total_quantity += $values['quantity'];
-				
 			}
 		}
 		
