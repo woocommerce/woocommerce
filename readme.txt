@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.5.5 =
 * Feature - is_sold_individually() function for disabling quantity inputs for products
 * Feature - Collect shipping address even when not required option
+* Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount
 * Tweak - Cart.php display with more filters
 * Tweak - is_product_category and is_product_tag support term argument
 * Tweak - Added minus symbol before discount on view order page
@@ -158,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - When sending the order as a whole to paypal, send the shipping separately.
 * Tweak - Clear cache along with transients
 * Tweak - Protocol-relative AJAX URL
+* Tweak - Hidden some uncommon settings
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers

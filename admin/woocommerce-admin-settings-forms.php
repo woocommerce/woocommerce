@@ -190,6 +190,7 @@ function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
     foreach ( $options as $value ) {
+    	if ( ! isset( $value['type'] ) ) continue;
     	if ( ! isset( $value['name'] ) ) $value['name'] = '';
     	if ( ! isset( $value['class'] ) ) $value['class'] = '';
     	if ( ! isset( $value['css'] ) ) $value['css'] = '';

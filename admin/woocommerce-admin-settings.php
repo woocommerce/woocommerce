@@ -15,6 +15,14 @@
  */
 global $woocommerce_settings;
 
+$localisation_setting = ( defined('WPLANG') ) ? array(  
+	'name' => __('Localisation', 'woocommerce'),
+	'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
+	'id' 		=> 'woocommerce_informal_localisation_type',
+	'type' 		=> 'checkbox',
+	'std' 		=> 'no',
+) : array();
+
 $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings', array(
 
 	array( 'name' => __( 'General Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
@@ -32,7 +40,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(  
 		'name' => __( 'Currency', 'woocommerce' ),
 		'desc' 		=> __("This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GBP',
@@ -94,13 +101,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'multi_select_countries'
 	),
 	
-	array(  
-		'name' => __('Localisation', 'woocommerce'),
-		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
-		'id' 		=> 'woocommerce_informal_localisation_type',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
-	),
+	$localisation_setting,
 	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
@@ -195,7 +196,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Allow customers to reorder items from past orders', 'woocommerce' ),
+		'desc' 		=> __( 'Allow customers to repurchase past orders', 'woocommerce' ),
 		'id' 		=> 'woocommerce_allow_customers_to_reorder',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -644,12 +645,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'desc_tip'	=>  true,
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'product_data_options' ),
-
-	array(	'name' => __( 'Product Reviews', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect product reviews (comments).', 'woocommerce'), 'id' => 'product_review_options' ),
-	
 	array(  
-		'name' => __( 'Ratings', 'woocommerce' ),
+		'name' => __( 'Product Ratings', 'woocommerce' ),
 		'desc' 		=> __( 'Enable the star rating field on the review form', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_review_rating',
 		'std' 		=> 'yes',
@@ -823,6 +820,21 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'id' 		=> 'woocommerce_hide_out_of_stock_items',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox'
+	),
+	
+	array(  
+		'name' => __( 'Stock display format', 'woocommerce' ),
+		'desc' 		=> __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_stock_format',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array( 
+			''  			=> __( 'Always show stock e.g. "12 in stock"', 'woocommerce' ),
+			'low_amount'	=> __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In Stock"', 'woocommerce' ),
+			'no_amount' 	=> __( 'Never show stock amount', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'inventory_options'),

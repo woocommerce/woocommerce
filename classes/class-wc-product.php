@@ -436,9 +436,25 @@ class WC_Product {
 			endif;
 		else :
 			if ($this->is_in_stock()) :
-				if ($this->get_total_stock() > 0) :
+				if ( $this->get_total_stock() > 0 ) :
 				
-					$availability = sprintf( __('%s in stock', 'woocommerce'), $this->stock );
+					$format_option = get_option( 'woocommerce_stock_format' );
+					
+					switch ( $format_option ) {
+						case 'no_amount' :
+							$format = __('In stock', 'woocommerce');
+						break;
+						case 'low_amount' :
+							$low_amount = get_option( 'woocommerce_notify_low_stock_amount' );
+							
+							$format = ( $this->get_total_stock() <= $low_amount ) ? __('Only %s left in stock', 'woocommerce') : __('In stock', 'woocommerce');
+						break;
+						default :
+							$format = __('%s in stock', 'woocommerce');
+						break;
+					}
+					
+					$availability = sprintf( $format, $this->stock );
 					
 					if ($this->backorders_allowed() && $this->backorders_require_notification()) :	
 						$availability .= ' ' . __('(backorders allowed)', 'woocommerce');
