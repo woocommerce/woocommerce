@@ -163,6 +163,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Pass shipping calc state to checkout
 * Fix - Removed space from postcode validation
 * Fix - per product flat rate.
+* Fix - Use term_id instead of term slug to get term link (allows numeric slugs for product categories)
+* Fix - Replace spaces with + signs in download url after decode (allows + characters in email addresses for downloads)
 * Localization - Slovak translation by Dušan Beleščák
 * Localization - Updated localisations
 
