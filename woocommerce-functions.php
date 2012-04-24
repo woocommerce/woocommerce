@@ -797,7 +797,7 @@ function woocommerce_download_product() {
 		
 		$download_file = (int) urldecode($_GET['download_file']);
 		$order_key = urldecode( $_GET['order'] );
-		$email = urldecode( $_GET['email'] );
+		$email = str_replace( ' ', '+', urldecode( $_GET['email'] ) );
 		
 		if (!is_email($email)) :
 			wp_die( __('Invalid email address.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
