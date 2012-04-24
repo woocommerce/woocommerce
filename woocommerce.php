@@ -1357,6 +1357,8 @@ class Woocommerce {
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_total_stock_%')");
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_average_rating_%')");
 		}
+		
+		wp_cache_flush();
 	}
 	
 	/** Body Classes **********************************************************/

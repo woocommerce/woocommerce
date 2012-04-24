@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Only use rm=2 for paypal when SSL is enabled, to avoid security warnings when returning to the site.
 * Tweak - Show sku in stock reports.
 * Tweak - When sending the order as a whole to paypal, send the shipping separately.
+* Tweak - Clear cache along with transients
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers

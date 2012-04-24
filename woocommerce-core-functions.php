@@ -877,9 +877,10 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index=0, $ter
 	// no nextid meaning our term is in last position
 	if( $term_in_level && null === $next_id )
 		$index = woocommerce_set_term_order($id, $index+1, $taxonomy, true);
+
+	wp_cache_flush();
 	
 	return $index;
-	
 }
 
 /**
