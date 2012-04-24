@@ -1053,11 +1053,7 @@ class Woocommerce {
 	 * Ajax URL
 	 */ 
 	function ajax_url() { 
-		$url = admin_url( 'admin-ajax.php' );
-		
-		$url = ( is_ssl() ) ? $url : str_replace( 'https', 'http', $url );
-	
-		return $url; 
+		return str_replace( array('https:', 'http:'), '', admin_url( 'admin-ajax.php' ) );
 	} 
 	 
 	/**
