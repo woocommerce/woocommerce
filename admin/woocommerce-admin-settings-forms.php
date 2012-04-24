@@ -198,8 +198,10 @@ function woocommerce_admin_fields($options) {
     	if ( ! isset( $value['desc'] ) ) $value['desc'] = '';
     	if ( ! isset( $value['desc_tip'] ) ) $value['desc_tip'] = false;
     	
-    	if ( $value['desc_tip'] ) {
+    	if ( $value['desc_tip'] === true ) {
     		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+    	} elseif ( $value['desc_tip'] ) {
+    		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc_tip'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
     	} else {
     		$description = '<span class="description">' . $value['desc'] . '</span>';
     	}
@@ -291,7 +293,7 @@ function woocommerce_admin_fields($options) {
 	            <legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
 					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
-					<?php echo $value['desc'] ?></label><br />
+					<?php echo $value['desc'] ?></label> <?php if ( $value['desc_tip'] ) echo $description; ?><br />
 				<?php
 				
 				if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :

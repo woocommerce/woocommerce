@@ -107,18 +107,36 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
 
+	array(
+		'name' => __( 'Checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Enable guest checkout (no account required)', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_guest_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_order_comments',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+
 	array(  
 		'name' => __( 'Security', 'woocommerce' ),
-		'desc' 		=> __( 'Force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS (an SSL Certificate is required)', 'woocommerce' ),
+		'desc' 		=> __( 'Force secure checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start',
 		'show_if_checked' => 'option',
+		'desc_tip'	=>  __('Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce'),
 	),
 	
 	array(  
-		'desc' 		=> __( 'Un-force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS when leaving the checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Un-force HTTPS when leaving the checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_unforce_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -128,7 +146,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'name' => __( 'Coupons', 'woocommerce' ),
-		'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
+		'desc'          => __( 'Enable coupons', 'woocommerce' ),
 		'id'            => 'woocommerce_enable_coupons',
 		'std'           => 'yes',
 		'type'          => 'checkbox',
@@ -143,23 +161,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'	=> 'end',
 		'show_if_checked' => 'yes'
-	),
-
-	array(
-		'name' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_guest_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'start'
-	),
-	
-	array(  
-		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_order_comments',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
@@ -242,7 +243,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Enable "chosen" (enhanced select input) for country selection inputs', 'woocommerce' ),
+		'desc' 		=> __( 'Enable enhanced country select boxes', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_chosen',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
@@ -287,15 +288,16 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __('Require login to download', 'woocommerce'),
-		'desc' 		=> __('Do not allow downloads if a user is not logged in. This setting does not apply to guest downloads.', 'woocommerce'),
+		'desc' 		=> __('Do not allow downloads if a user is not logged in', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
+		'desc_tip'	=> __('This setting does not apply to guest downloads.', 'woocommerce')
 	),
 	
 	array(  
 		'name' => __('Limit quantity', 'woocommerce'),
-		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1.', 'woocommerce' ),
+		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1', 'woocommerce' ),
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
@@ -303,10 +305,11 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __('Mixed cart handling', 'woocommerce'),
-		'desc' 		=> __('Grant access to downloadable products after payment. Turn this option off to only grant access when an order is "complete".', 'woocommerce'),
+		'desc' 		=> __('Grant access to downloadable products after payment', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'yes',
+		'desc_tip'	=> __('Turn this option off to only grant access when an order is "complete"', 'woocommerce')
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
