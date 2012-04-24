@@ -60,7 +60,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) )
 			$output .= ' current-cat-parent';
 		
-		$output .=  '"><a href="' . get_term_link( $cat->slug, 'product_cat' ) . '">' . $cat->name . '</a>';
+		$output .=  '"><a href="' . get_term_link( (int)$cat->term_id, 'product_cat' ) . '">' . $cat->name . '</a>';
 		
 		if ( $args['show_count'] ) 
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
