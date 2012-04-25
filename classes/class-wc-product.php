@@ -356,8 +356,7 @@ class WC_Product {
 		else :
 			$url = add_query_arg('add-to-cart', $this->id);
 		endif;
-		
-		$url = $woocommerce->nonce_url( 'add_to_cart', $url );
+
 		return $url;
 	}
 	

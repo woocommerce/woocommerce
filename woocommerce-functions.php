@@ -261,7 +261,7 @@ function woocommerce_update_cart_action() {
 function woocommerce_add_to_cart_action( $url = false ) {
 	global $woocommerce;
 
-	if (empty($_REQUEST['add-to-cart']) || !$woocommerce->verify_nonce('add_to_cart', '_REQUEST')) return;
+	if ( empty( $_REQUEST['add-to-cart'] ) ) return;
     
     $added_to_cart 		= false;
     
