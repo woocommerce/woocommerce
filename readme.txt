@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - is_sold_individually() function for disabling quantity inputs for products
 * Feature - Collect shipping address even when not required option
 * Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount
+* Feature - woocommerce_form_field select type
 * Tweak - Cart.php display with more filters
 * Tweak - is_product_category and is_product_tag support term argument
 * Tweak - Added minus symbol before discount on view order page
