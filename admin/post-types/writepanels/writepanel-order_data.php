@@ -487,6 +487,7 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 	
 		</ul>
+		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $post->ID ) ?>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
