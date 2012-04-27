@@ -384,7 +384,7 @@ class WC_Order {
 	/** Gets order total - formatted for display */
 	function get_formatted_order_total() {
 
-		$fomatted_total = woocommerce_price( $this->order_total );
+		$formatted_total = woocommerce_price( $this->order_total );
 
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
