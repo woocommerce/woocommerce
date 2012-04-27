@@ -551,7 +551,7 @@ class WC_Order {
 		if ( $this->get_order_discount() > 0 )
 			$total_rows[ __( 'Order Discount:', 'woocommerce' ) ] = '-' . woocommerce_price( $this->get_order_discount() );
 		
-		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = woocommerce_price( $this->get_order_total() );
+		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = $this->get_formatted_order_total();
 		
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
 	}
