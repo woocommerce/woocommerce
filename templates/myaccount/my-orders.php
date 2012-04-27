@@ -44,7 +44,7 @@ if ($customer_orders) :
 						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>"><?php echo $order->get_order_number(); ?></a> &ndash; <time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time>
 					</td>
 					<td class="order-shipto"><address><?php if ($order->get_formatted_shipping_address()) echo $order->get_formatted_shipping_address(); else echo '&ndash;'; ?></address></td>
-					<td class="order-total" width="1%"><?php echo woocommerce_price($order->order_total); ?></td>
+					<td class="order-total" width="1%"><?php echo $order->get_formatted_order_total(); ?></td>
 					<td class="order-status" style="text-align:left; white-space:nowrap;">
 						<?php echo ucfirst( __( $status->name, 'woocommerce' ) ); ?>
 						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
