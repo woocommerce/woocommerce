@@ -377,7 +377,16 @@ class WC_Order {
 		else :
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item, true ) );
 		endif;
-		return $subtotal;
+
+		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
+	}
+	
+	/** Gets order total - formatted for display */
+	function get_formatted_order_total() {
+
+		$fomatted_total = woocommerce_price( $this->order_total );
+
+		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
 	
 	/** Gets subtotal - subtotal is shown before discounts, but with localised taxes */
