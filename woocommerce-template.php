@@ -91,9 +91,9 @@ if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
 					<?php do_action( 'woocommerce_single_product_summary' ); ?>
 
 				</div>
-
+	
 				<?php do_action( 'woocommerce_after_single_product_summary' ); ?>
-
+				
 			</div>
 
 			<?php do_action( 'woocommerce_after_single_product' ); ?>

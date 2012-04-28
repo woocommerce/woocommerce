@@ -46,7 +46,7 @@ if (!isset($woocommerce_loop['columns']) || !$woocommerce_loop['columns']) $wooc
 		
 	endwhile; endif;
 	
-	if ($woocommerce_loop['loop']==0) echo '<li class="info">'.__('No products found which match your selection.', 'woocommerce').'</li>'; 
+	if ($woocommerce_loop['loop']==0) echo '<li class="woocommerce_info">'.__('No products found which match your selection.', 'woocommerce').'</li>'; 
 
 	?>
 

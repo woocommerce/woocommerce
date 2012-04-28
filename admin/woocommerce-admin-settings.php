@@ -1116,7 +1116,7 @@ $woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_se
 	
 	array( 'type' => 'sectionend', 'id' => 'share_this'),
 
-	array( 'name' => __( 'ShareDaddy', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce'), 'id' => 'share_this' ),
+	array( 'name' => __( 'ShareDaddy', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce'), 'id' => 'sharedaddy' ),
 
 	array(  
 		'name' => __( 'Output ShareDaddy button?', 'woocommerce' ),
@@ -1126,7 +1126,19 @@ $woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_se
 		'std' 		=> 'no',
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'share_this'),
+	array( 'type' => 'sectionend', 'id' => 'sharedaddy'),
+	
+	array( 'name' => __( 'ShareYourCart', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products.', 'woocommerce'), 'id' => 'shareyourcart' ),
+
+	array(  
+		'name' => __( 'ShareYourCart integration', 'woocommerce' ),
+		'desc' 		=> __( 'Enable this option to enable ShareYourCart', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shareyourcart',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'no',
+	),
+	
+	array( 'type' => 'sectionend', 'id' => 'shareyourcart'),
 	
 	array( 'name' => __( 'Google Analytics', 'woocommerce' ), 'type' => 'title', 'desc' => __('Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce'), 'id' => 'google_analytics' ),
 	

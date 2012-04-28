@@ -17,6 +17,8 @@
  * @author WooThemes
  */
 
+//if ( get_option('woocommerce_shareyourcart') == 'yes' ) require_once("integration/shareyourcart/class.shareyourcart-wp-woo-commerce.php");
+
 if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( !class_exists( 'Woocommerce' ) ) {

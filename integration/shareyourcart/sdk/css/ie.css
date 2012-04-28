@@ -1,0 +1,43 @@
+.shareyourcart-button-orange{color: #623505 !important;}
+
+.shareyourcart-button-orange p, 
+.shareyourcart-button-blue p
+{
+    margin: 0px; 
+    padding: 0px; 
+    margin-bottom: 0px !important; 
+    line-height: 17px;    
+}
+.shareyourcart-button-orange small,
+.shareyourcart-button-blue small
+{
+    display: block; 
+    font-size: 11px; 
+    font-weight: normal; 
+    margin: 0px; 
+    padding: 0px; 
+    line-height: 17px;    
+}
+
+.vertical{right: 0px;}
+.vertical-left{left:0px;}
+
+
+/* IE NEEDED STYLES (because ie doesn't display the button vertical on hover) */
+.shareyourcart-button-blue.vertical:hover,
+.shareyourcart-button-blue.vertical:active,
+.shareyourcart-button-orange.vertical:hover,
+.shareyourcart-button-orange.vertical:active
+{
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f4fbff', EndColorStr='#d1e6ef')
+            progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+.shareyourcart-button-blue.vertical-left:hover,
+.shareyourcart-button-blue.vertical-left:active,
+.shareyourcart-button-orange.vertical-left:hover,
+.shareyourcart-button-orange.vertical-left:active
+{
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f4fbff', EndColorStr='#d1e6ef')
+            progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
