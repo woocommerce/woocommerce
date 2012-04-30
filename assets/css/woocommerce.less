@@ -1,19 +1,19 @@
 @import "mixins";
 
 /* Colours */
-@primary: 		#ad74a2; 	/* Primary colour for buttons (alt) */
-@secondary: 	#f6f6f6;	/* Secondary buttons */
-@tertiary: 		#1982D1; 	/* Price slider bar / layered nav UI */
-@quaternary: 	#333; 		/* Price slider bg */
+@primary: 		#ad74a2; 								/* Primary colour for buttons (alt) */
+@secondary: 	desaturate(lighten(@primary,40%),18%);	/* Secondary buttons */
+@tertiary: 		spin(@primary,-95); 					/* Price slider bar / layered nav UI */
+@quaternary: 	desaturate(darken(@tertiary,40%),20%); 					/* Price slider bg */
 
-@primarytext: 	#fff;		/* Text on primary colour bg */
-@secondarytext: #555;		/* Text on secondary colour bg */
-@tertiarytext: 	#fff;		/* Text on tertiary colour bg */
+@primarytext: 	lighten(@primary,33%);					/* Text on primary colour bg */
+@secondarytext: darken(@secondary,60%);					/* Text on secondary colour bg */
+@tertiarytext: 	lighten(spin(@primary,-85),33%);		/* Text on tertiary colour bg */
 
-@highlight: 	#829d1c; 	/* Prices, In stock labels, sales flash */
-@fade: 			#777; 		/* small, breadcrumbs etc */
+@highlight: 	spin(@primary,150); 					/* Prices, In stock labels, sales flash */
+@fade: 			#777; 									/* small, breadcrumbs etc */
 
-@tabactive: 	#fff; 		/* Tabs (active state) */
+@tabactive: 	#fff; 									/* Tabs (active state) */
 	
 /* =Global styles/layout
 -------------------------------------------------------------- */
@@ -477,7 +477,7 @@ a.button, button.button, input.button, #respond input#submit, #content input.but
     font-weight:bold;
     .border_radius(2px);
     left: auto;
-    
+    text-shadow:0 1px 0 @secondary + #111;
     color: @secondarytext;
     .darkorlighttextshadow( @secondarytext );
     border: 1px solid darken( @secondary, 20 );
@@ -541,6 +541,8 @@ a.button, button.button, input.button, #respond input#submit, #content input.but
 		
 		&:hover {
 			.vertical_gradient( @primary, darken( @primary, 15 ) );
+			color:@primarytext + #111;
+			.darkorlighttextshadow( @primarytext + #111, 0.6 );
 		}
 	}
 }
@@ -929,7 +931,7 @@ table.cart, #content table.cart {
 				padding: 6px 6px 5px;
 				margin: 0 4px 0 0;
 				outline: 0;
-				background: lighten(@secondary, 5) none;
+				//background: lighten(@secondary, 5) none;
 				font-size: 14px;
 				line-height: 1em;
 			}
@@ -1133,16 +1135,9 @@ form {
 			-webkit-box-sizing:border-box;
 			-moz-box-sizing:border-box;
 			box-sizing:border-box;
-			
-			.inset_box_shadow(0, 1px, 4px, 0, rgba(0,0,0,0.1));
-			
-			border: 1px solid darken( @secondary, 10 );
 			width: 100%;
-			padding: 6px;
 			margin: 0;
 			outline: 0;
-			background: lighten(@secondary, 5) none;
-			font-size: 14px;
 			line-height: 1em;
 		}
 		textarea {
@@ -1152,9 +1147,6 @@ form {
 			-moz-box-shadow:none;
 			-webkit-box-shadow:none;
 			box-shadow:none;
-		}
-		input.input-text:focus, textarea:focus {
-			.inset_box_shadow(0, 0, 0, 3px, @secondary);
 		}
 	}
 	.form-row-first, .form-row-last {
@@ -1213,7 +1205,7 @@ form.login, form.checkout_coupon {
 
 /* Payment box - appears on checkout and page page */
 #payment {
-	background: rgba(0,0,0,0.025);
+	background: @secondary;
 	.border_radius(5px);
 	
 	ul.payment_methods {
