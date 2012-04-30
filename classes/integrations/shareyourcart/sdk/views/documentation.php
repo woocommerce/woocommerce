@@ -1,4 +1,3 @@
-<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <?php if(!$this->isActive()) return; //if the plugin is not active, do not show this page ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/documentation']);

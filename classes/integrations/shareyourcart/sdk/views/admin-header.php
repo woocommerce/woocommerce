@@ -1,4 +1,3 @@
-<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <link rel="stylesheet" type="text/css" href="<?php echo $this->createUrl(dirname(__FILE__).'/../css/admin-style.css'); ?>" />
 <script type="text/javascript">
 

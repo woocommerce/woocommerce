@@ -1101,75 +1101,6 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 )); // End email settings
 
-$woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_settings', array(
-	
-	array( 'name' => __( 'ShareThis', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareThis offers a sharing widget which will allow customers to share links to products with their friends.', 'woocommerce'), 'id' => 'share_this' ),
-
-	array(  
-		'name' => __( 'ShareThis Publisher ID', 'woocommerce' ),
-		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woocommerce' ), '<a href="http://sharethis.com/account/">', '</a>' ),
-		'id' 		=> 'woocommerce_sharethis',
-		'type' 		=> 'text',
-		'std' 		=> '',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'share_this'),
-
-	array( 'name' => __( 'ShareDaddy', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce'), 'id' => 'sharedaddy' ),
-
-	array(  
-		'name' => __( 'Output ShareDaddy button?', 'woocommerce' ),
-		'desc' 		=> __( 'Enable this option to show the ShareDaddy button (if installed) on the product page.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_sharedaddy',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'sharedaddy'),
-	
-	array( 'name' => __( 'ShareYourCart', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareYourCart helps you get more customers by motivating satisfied customers to talk with their friends about your products.', 'woocommerce'), 'id' => 'shareyourcart' ),
-
-	array(  
-		'name' => __( 'ShareYourCart integration', 'woocommerce' ),
-		'desc' 		=> __( 'Enable this option to enable ShareYourCart', 'woocommerce' ),
-		'id' 		=> 'woocommerce_shareyourcart',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'shareyourcart'),
-	
-	array( 'name' => __( 'Google Analytics', 'woocommerce' ), 'type' => 'title', 'desc' => __('Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce'), 'id' => 'google_analytics' ),
-	
-	array(  
-		'name' => __('Google Analytics ID', 'woocommerce'),
-		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_id',
-		'type' 		=> 'text',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woocommerce'),
-		'desc' 		=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woocommerce'),
-		'desc' 		=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-					
-	array( 'type' => 'sectionend', 'id' => 'google_analytics'),
-
-)); // End integration settings
-
 /**
  * Settings page
  * 
@@ -1179,11 +1110,12 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
-    $current_tab = ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
-    $current_section = ( empty( $_GET['section'] ) ) ? '' : urldecode( $_GET['section'] );
+    $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
+    $current_section 	= ( empty( $_REQUEST['section'] ) ) ? '' : urldecode( $_REQUEST['section'] );
     
     // Save settings
     if ( ! empty( $_POST ) ) {
+    
     	if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) 
     		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
     	
@@ -1197,7 +1129,6 @@ function woocommerce_settings() {
 				case "shipping" :
 				case "tax" :
 				case "email" :
-				case "integration" :
 					woocommerce_update_options( $woocommerce_settings[$current_tab] );
 				break;
 			}
@@ -1225,13 +1156,28 @@ function woocommerce_settings() {
 		wp_redirect( $redirect );
 		exit;
 	}
-    
-    // Settings saved message
+	
+	// Get any returned messages
+	$error 		= ( empty( $_GET['wc_error'] ) ) ? '' : urldecode( stripslashes( $_GET['wc_error'] ) );
+	$message 	= ( empty( $_GET['wc_message'] ) ) ? '' : urldecode( stripslashes( $_GET['wc_message'] ) );
+	
+	if ( $error || $message ) {
+
+		if ( $error ) {
+			echo '<div id="message" class="error fade"><p><strong>' . wptexturize( $error ) . '</strong></p></div>';
+		} else {
+			echo '<div id="message" class="updated fade"><p><strong>' . wptexturize( $message ) . '</strong></p></div>';
+		}
+		
+	} elseif ( ! empty( $_GET['saved'] ) ) {
+		
+		echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
+		
+	}
+	
+    // Were the settings saved?
     if ( ! empty( $_GET['saved'] ) ) {
-    	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
-        
         flush_rewrite_rules( false );
-        
         do_action('woocommerce_settings_saved');
     }
     
@@ -1317,7 +1263,6 @@ function woocommerce_settings() {
 					case "inventory" :
 					case "tax" :
 					case "email" :
-					case "integration" :
 						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 					break;
 					case "shipping" :
@@ -1460,6 +1405,25 @@ function woocommerce_settings() {
 		            	
 		            	echo '</div>';
             	
+					break;
+					case "integration" :
+						
+						$integrations = $woocommerce->integrations->get_integrations();
+						
+						$section = empty( $_GET['section'] ) ? key( $integrations ) : urldecode( $_GET['section'] );
+						
+						foreach ( $integrations as $integration ) {
+							$title = ( isset( $integration->method_title ) && $integration->method_title) ? ucwords( $integration->method_title ) : ucwords( $method->id );
+							$current = ( $integration->id == $section ) ? 'class="current"' : '';
+							
+							$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce&tab=integration') ) . '"' . $current . '>' . $title . '</a>';
+						}
+						
+						echo '<ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+						
+						if ( isset( $integrations[ $section ] ) )
+							$integrations[ $section ]->admin_options();
+					
 					break;
 					default :
 						do_action( 'woocommerce_settings_tabs_' . $current_tab );

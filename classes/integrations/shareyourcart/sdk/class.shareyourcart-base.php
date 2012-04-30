@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 	CLASS: Share Your Cart Base
  * 	AUTHOR: Barandi Solutions
@@ -16,7 +17,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 	//this array is used to hold function calls between different instances of this class
 	private static $_SINGLE_FUNCTIONS_CALLS = array();
-	private static $_SDK_VERSION = '1.7';  //the first one is the SDK main version, while the second one is it's revision
+	private static $_SDK_VERSION = '1.6';  //the first one is the SDK main version, while the second one is it's revision
 	protected static $_DB_VERSION = '1.1';
 	
 	/**
@@ -422,8 +423,6 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		$button_img_hover = $this->getConfigValue("btn-img-h");
 		$button_img_hover_width = $this->getConfigValue("btn-img-h-width");
 		$button_img_hover_height = $this->getConfigValue("btn-img-h-height");
-		
-		$is_product_page = $this->isSingleProduct();
 
 		switch ($current_button_type)
 		{
@@ -690,7 +689,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		}
 		
 		//make sure there is a session variable setup
-		if ( ! session_id() ) session_start();
+		session_start();
 		
 		//since switching the API status has a great impact on how the UI looks, refresh the page
 		//just to make sure the UI is using the latest value
@@ -765,7 +764,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 
 			if($_FILES["button-img"]["name"]!='') {
 
-				$target_path = $this->getUploadDir();
+				$target_path = dirname(__FILE__). "/img/";
 
 				$target_path = $target_path . 'button-img.png';
 
@@ -783,7 +782,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 			}
 
 			if($_FILES["button-img-hover"]["name"]!='') {
-				$target_path = $this->getUploadDir();
+				$target_path = dirname(__FILE__). "/img/";
 
 				$target_path = $target_path . 'btn-img-hover.png';
 
@@ -819,10 +818,6 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		include(dirname(__FILE__) . '/views/button-settings-page.php');
 		return ob_get_clean();
 	}
-    
-    public function getUploadDir(){
-      return dirname(_FILE_). "/img/";
-    }
 
 	/**
 	 * showDocumentation
@@ -959,7 +954,7 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 		
 		//we can't relly on the fact that the table has been properly created, so check it!
 		if(!$this->existsTable($tableName))
-			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName,'{sql}' => nl2br($sql))));
+			throw new Exception(SyC::t('sdk','Cannot create table "{table_name}". Check your database permissions.', array('{table_name}' => $tableName)));
 	}
 	
 	/**
@@ -982,12 +977,11 @@ abstract class ShareYourCartBase extends ShareYourCartAPI {
 	 */
 	protected function dropTable($tableName) {
 
-		$sql = "DROP TABLE $tableName";
-		$this->executeNonQuery($sql);
+		$this->executeNonQuery("DROP TABLE $tableName");
 		
 		//we can't relly on the fact that the table has been properly droped, so check it!
-		if($this->existsTable($tableName))
-			throw new Exception(SyC::t('sdk','Cannot drop table "{table_name}". Check your database permissions or manually run the following SQL command and try again:<br /><strong>{sql}</strong>', array('{table_name}' => $tableName, '{sql}' => nl2br($sql))));
+		if(!$this->existsTable($tableName))
+			throw new Exception(SyC::t('sdk','Cannot drop table "{table_name}". Check your database permissions.', array('{table_name}' => $tableName)));
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.5.4
+ * Version: 1.5.5
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
@@ -16,8 +16,6 @@
  * @category Core
  * @author WooThemes
  */
-
-//if ( get_option('woocommerce_shareyourcart') == 'yes' ) require_once("integration/shareyourcart/class.shareyourcart-wp-woo-commerce.php");
 
 if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -34,7 +32,7 @@ class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.5.4';
+	var $version = '1.5.5';
 	
 	/** URLS ******************************************************************/
 	
@@ -57,6 +55,7 @@ class Woocommerce {
 	var $countries;
 	var $woocommerce_email;
 	var $checkout;
+	var $integrations;
 
 	/** Taxonomies ************************************************************/
 	
@@ -113,11 +112,17 @@ class Woocommerce {
 		include( 'classes/class-wc-product.php' );				// Product class
 		include( 'classes/class-wc-product-variation.php' );	// Product variation class
 		include( 'classes/class-wc-tax.php' );					// Tax class
+		include( 'classes/class-wc-settings-api.php' );			// Settings API
 		
-		// Include shipping modules and gateways
-		include( 'classes/class-wc-settings-api.php' );
+		// Include Core Payment Gateways
 		include( 'classes/gateways/class-wc-payment-gateways.php' );
 		include( 'classes/gateways/class-wc-payment-gateway.php' );
+		include( 'classes/gateways/class-wc-bacs.php' );
+		include( 'classes/gateways/class-wc-cheque.php' );
+		include( 'classes/gateways/class-wc-paypal.php' );
+		include( 'classes/gateways/class-wc-cod.php' );
+		
+		// Include Core Shipping Methods
 		include( 'classes/shipping/class-wc-shipping.php' );
 		include( 'classes/shipping/class-wc-shipping-method.php' );
 		include( 'classes/shipping/class-wc-flat-rate.php' );
@@ -125,10 +130,14 @@ class Woocommerce {
 		include( 'classes/shipping/class-wc-free-shipping.php' );
 		include( 'classes/shipping/class-wc-local-delivery.php' );
 		include( 'classes/shipping/class-wc-local-pickup.php' );
-		include( 'classes/gateways/class-wc-bacs.php' );
-		include( 'classes/gateways/class-wc-cheque.php' );
-		include( 'classes/gateways/class-wc-paypal.php' );
-		include( 'classes/gateways/class-wc-cod.php' );
+		
+		// Include Core Integrations
+		include( 'classes/integrations/class-wc-integration.php' );
+		include( 'classes/integrations/class-wc-integrations.php' );
+		include( 'classes/integrations/google-analytics/class-wc-google-analytics.php' );
+		include( 'classes/integrations/sharethis/class-wc-sharethis.php' );
+		include( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
+		include( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
 	}
 	
 	/**
@@ -189,10 +198,12 @@ class Woocommerce {
 		$this->payment_gateways 	= new WC_Payment_gateways();	// Payment gateways. Loads and stores payment methods
 		$this->shipping 			= new WC_Shipping();			// Shipping class. loads and stores shipping methods
 		$this->countries 			= new WC_Countries();			// Countries class
+		$this->integrations			= new WC_Integrations();		// Integrations class
 		
-		// Init shipping and payment gateways
+		// Init shipping, payment gateways, and integrations
 		$this->shipping->init();
 		$this->payment_gateways->init();
+		$this->integrations->init();
 
 		// Classes/actions loaded for the frontend and for ajax requests
 		if ( ! is_admin() || defined('DOING_AJAX') ) {

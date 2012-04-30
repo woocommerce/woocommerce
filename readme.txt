@@ -28,8 +28,8 @@ Keep a birds-eye view of incoming sales and reviews, stock levels and general st
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
-= BUNDLED GATEWAYS AND SHIPPING =
-WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways and shipping methods:
+= BUNDLED GATEWAYS, SHIPPING AND INTEGRATIONS =
+WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways, shipping methods and third party integrations:
 
 * PayPal Standard
 * BACS
@@ -40,6 +40,10 @@ WooCommerce has enough power to be used straight out of the box and comes with t
 * International delivery
 * Local delivery
 * Local Pickup
+* Google Analytics
+* Sharedaddy
+* ShareThis
+* ShareYourCart
 
 = EXTENSIONS =
 Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that: [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
@@ -144,6 +148,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.5 =
+* Feature - New integration section which allows other class-based integrations to be added.
+* Feature - ShareYourCart integration built in.
 * Feature - is_sold_individually() function for disabling quantity inputs for products
 * Feature - Collect shipping address even when not required option
 * Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount

@@ -104,7 +104,11 @@ global $woocommerce;
 
 				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) { ?>
 					<div class="coupon">
+					
 						<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
+						
+						<?php do_action('woocommerce_cart_coupon'); ?>
+						
 					</div>
 				<?php } ?>
 
