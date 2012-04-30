@@ -40,7 +40,7 @@ div.product .woocommerce_tabs .panel,#content div.product .woocommerce_tabs .pan
 div.product p.cart,#content div.product p.cart{float:right;}
 div.product form.cart,#content div.product form.cart{margin-bottom:2em;}div.product form.cart:after,#content div.product form.cart:after{content:"";display:block;clear:both;}
 div.product form.cart div.quantity,#content div.product form.cart div.quantity{float:left;margin:0 4px 0 0;}
-div.product form.cart table,#content div.product form.cart table{font-size:12px;border-width:0 0 1px 0;}div.product form.cart table td,#content div.product form.cart table td{padding:4px 4px 4px 0;}
+div.product form.cart table,#content div.product form.cart table{border-width:0 0 1px 0;}div.product form.cart table td,#content div.product form.cart table td{padding-left:0;}
 div.product form.cart table div.quantity,#content div.product form.cart table div.quantity{float:none;margin:0;width:72px;}
 div.product form.cart table small.stock,#content div.product form.cart table small.stock{display:block;float:none;}
 div.product form.cart .variations label,#content div.product form.cart .variations label{font-weight:bold;}
