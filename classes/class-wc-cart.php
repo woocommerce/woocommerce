@@ -1369,6 +1369,7 @@ class WC_Cart {
 			
 			$packages[0]['contents'] 				= $this->get_cart();	// Items in the package
 			$packages[0]['contents_cost'] 			= 0;					// Cost of items in the package
+			$packages[0]['applied_coupons']			= $this->applied_coupons; // Applied coupons - some, like free shipping, affect costs
 			$packages[0]['destination']['country'] 	= $woocommerce->customer->get_shipping_country();
 			$packages[0]['destination']['state'] 	= $woocommerce->customer->get_shipping_state();
 			$packages[0]['destination']['postcode'] = $woocommerce->customer->get_shipping_postcode();
