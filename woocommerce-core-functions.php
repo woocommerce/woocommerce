@@ -528,9 +528,37 @@ if (!function_exists('woocommerce_hex_lighter')) {
 	   	return $color;          
 	}
 }
+
+/**
+ * Detect if we should use a light or dark colour on a background colour
+ **/
 if (!function_exists('woocommerce_light_or_dark')) {
 	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
-	    return (hexdec($color) > 0xffffff/2) ? $dark : $light;
+	    //return ( hexdec( $color ) > 0xffffff / 2 ) ? $dark : $light;
+	    $hex = str_replace( '#', '', $color );
+
+		$c_r = hexdec( substr( $hex, 0, 2 ) );
+		$c_g = hexdec( substr( $hex, 2, 2 ) );
+		$c_b = hexdec( substr( $hex, 4, 2 ) );
+		$brightness = ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000;
+		
+		return $brightness > 155 ? $dark : $light;
+	}
+}
+
+/**
+ * Format string as hex
+ **/
+if (!function_exists('woocommerce_format_hex')) {
+	function woocommerce_format_hex( $hex ) {
+	    
+	    $hex = trim( str_replace( '#', '', $hex ) );
+	    
+	    if ( strlen( $hex ) == 3 ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	    }
+	    
+	    if ( $hex ) return '#' . $hex;
 	}
 }
 

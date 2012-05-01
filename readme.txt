@@ -148,6 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.5 =
+* Feature - Settings now include colours for things like buttons and tabs.
 * Feature - New integration section which allows other class-based integrations to be added.
 * Feature - ShareYourCart integration built in.
 * Feature - is_sold_individually() function for disabling quantity inputs for products

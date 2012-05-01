@@ -164,7 +164,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'name' => __( 'Registration', 'woocommerce' ),
 		'desc' 		=> __( 'Allow unregistered users to register from the Checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
 		'std' 		=> 'yes',
@@ -177,20 +177,21 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_myaccount_registration',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'end'
 	),
 	
+	array(  
+		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woocommerce' ),
+		'id' 		=> 'woocommerce_lock_down_admin',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
 	array(  
 		'desc' 		=> __( 'Clear cart when logging out', 'woocommerce' ),
 		'id' 		=> 'woocommerce_clear_cart_on_logout',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
-	
-	array(  
-		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woocommerce' ),
-		'id' 		=> 'woocommerce_lock_down_admin',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
@@ -210,19 +211,25 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __( 'Styling', 'woocommerce' ),
-		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woocommerce' ),
-		'id' 		=> 'woocommerce_frontend_css',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
 		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woocommerce' ),
 		'id' 		=> 'woocommerce_demo_store',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'end'
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woocommerce' ),
+		'id' 		=> 'woocommerce_frontend_css',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' 		=> __( 'Colours', 'woocommerce' ),
+		'std' 		=> '#ad74a2',
+		'type' 		=> 'woocommerce_frontend_css_colors'
 	),
 	
 	array(  
@@ -287,12 +294,22 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Require login to download', 'woocommerce'),
-		'desc' 		=> __('Do not allow downloads if a user is not logged in', 'woocommerce'),
+		'name' => __('Access Restrictions', 'woocommerce'),
+		'desc' 		=> __('Must be logged in to download files', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
-		'desc_tip'	=> __('This setting does not apply to guest downloads.', 'woocommerce')
+		'desc_tip'	=> __('This setting does not apply to guest downloads.', 'woocommerce'),
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __('Grant access to downloadable products after payment', 'woocommerce'),
+		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'yes',
+		'desc_tip'	=> __('Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce'),
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
@@ -301,15 +318,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
-	),
-	
-	array(  
-		'name' => __('Mixed cart handling', 'woocommerce'),
-		'desc' 		=> __('Grant access to downloadable products after payment', 'woocommerce'),
-		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'yes',
-		'desc_tip'	=> __('Turn this option off to only grant access when an order is "complete"', 'woocommerce')
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
@@ -1110,6 +1118,7 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
+    // Get current tab/section
     $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
     $current_section 	= ( empty( $_REQUEST['section'] ) ) ? '' : urldecode( $_REQUEST['section'] );
     
@@ -1120,7 +1129,10 @@ function woocommerce_settings() {
     		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
     	
     	if ( ! $current_section ) {
-    	
+    	 	
+    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
+    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
+    	 	
 	    	switch ( $current_tab ) {
 				case "general" :
 				case "pages" :
@@ -1135,6 +1147,32 @@ function woocommerce_settings() {
 		
 			do_action( 'woocommerce_update_options' );
 			do_action( 'woocommerce_update_options_' . $current_tab );
+						
+			// Handle Colour Settings
+			if ( $current_tab == 'general' && get_option('woocommerce_frontend_css') == 'yes' ) {
+				
+				// Save settings
+				$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
+				$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
+				$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
+				$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
+				$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
+								
+				$colors = array(
+					'primary' 	=> $primary,
+					'secondary' => $secondary,
+					'highlight' => $highlight,
+					'content_bg' => $content_bg,
+					'subtext' => $subtext
+				);
+				
+				$old_colors = get_option( 'woocommerce_frontend_css_colors' );
+				update_option( 'woocommerce_frontend_css_colors', $colors );
+				
+				if ( $old_colors != $colors )
+					woocommerce_compile_less_styles();
+				
+			}
 			
 		} else {
 		
@@ -1148,7 +1186,7 @@ function woocommerce_settings() {
 		unset($_SESSION['orderby']);
 		$woocommerce->clear_product_transients();
 		
-		// Redirect back
+		// Redirect back to the settings page
 		$redirect = add_query_arg( 'saved', 'true' );
 		
 		if ( ! empty( $_POST['subtab'] ) ) $redirect = add_query_arg( 'subtab', esc_attr( str_replace( '#', '', $_POST['subtab'] ) ), $redirect ); 

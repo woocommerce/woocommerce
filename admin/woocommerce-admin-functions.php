@@ -222,3 +222,61 @@ function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
 	
 }
+
+/**
+ * Compile styles
+ */
+function woocommerce_compile_less_styles() {
+	global $woocommerce;
+	
+	$colors 		= get_option( 'woocommerce_frontend_css_colors' );
+	$base_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
+	$less_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.less';
+	$css_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
+
+	// Write less file				
+	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
+		
+		// Colours changed - recompile less
+		include_once('includes/lessc.inc.php');
+		include_once('includes/cssmin.inc.php');
+
+		try {
+			// Set default if colours not set
+			if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
+			if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
+			if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
+			if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
+			if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
+		
+			// Write new color to base file
+			$color_rules = "
+@primary: 		" . $colors['primary'] . ";
+@primarytext: 	" . woocommerce_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
+
+@secondary: 	" . $colors['secondary'] . ";
+@secondarytext: " . woocommerce_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
+
+@highlight: 	" . $colors['highlight'] . ";
+@highlightext:	" . woocommerce_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
+
+@contentbg:		" . $colors['content_bg'] . ";
+
+@subtext:		" . $colors['subtext'] . ";
+			";
+			
+			file_put_contents( $base_file, $color_rules );
+		
+		    $less 			= new lessc( $less_file );
+			$compiled_css 	= $less->parse();
+		    
+		    $compiled_css = CssMin::minify( $compiled_css );
+		    
+		    if ( $compiled_css )
+		    	file_put_contents( $css_file, $compiled_css );
+		    
+		} catch ( exception $ex ) {
+			wp_die( __('Could not compile woocommerce.less: ', 'woocommerce') . $ex->getMessage() );
+		}
+	}
+}
