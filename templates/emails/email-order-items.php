@@ -35,18 +35,7 @@ foreach ($items as $item) :
 					
 		?></td>
 		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $item['qty'] ;?></td>
-		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php
-					
-			// Tax
-			if ( $order->display_cart_ex_tax || !$order->prices_include_tax ) :	
-				$ex_tax_label = ( $order->prices_include_tax ) ? 1 : 0;
-				echo woocommerce_price( $order->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ));
-			else :
-				echo woocommerce_price( $order->get_line_subtotal( $item, true ) );
-			endif;
-					
-		?></td>
-	
+		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 	</tr>
 	
 	<?php if ($show_purchase_note && $purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) : ?>
