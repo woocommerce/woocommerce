@@ -158,10 +158,11 @@ class WC_Settings_API {
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">';
+			$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">' . $title . '</label>';
+			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
 				$html .= '<input class="input-text wide-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
@@ -186,10 +187,11 @@ class WC_Settings_API {
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">';
+			$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">' . $title . '</label>';
+			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
 				$html .= '<input class="input-text wide-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
@@ -215,10 +217,11 @@ class WC_Settings_API {
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">';
+			$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">' . $title . '</label>';
+			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
 				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'. $value .'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
@@ -272,10 +275,11 @@ class WC_Settings_API {
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">';
+			$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">' . $title . '</label>';
+			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
 				$html .= '<select name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" class="select '.$data['class'].'">';
 				
 				foreach ($data['options'] as $option_key => $option_value) :
@@ -306,10 +310,11 @@ class WC_Settings_API {
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">';
+			$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">' . $title . '</label>';
+			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
 				$html .= '<select multiple="multiple" style="'.$data['css'].'" class="multiselect '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '[]" id="' . $this->plugin_id . $this->id . '_' . $key . '">';
 				
 				foreach ($data['options'] as $option_key => $option_value) :
