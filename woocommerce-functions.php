@@ -168,7 +168,7 @@ function woocommerce_list_pages($pages){
  **/
 function woocommerce_nav_menu_items( $items, $args ) {
 	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() ) :
-		$items .= '<li><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
+		$items .= '<li class="logout"><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
 	endif;
 	
     return $items;
