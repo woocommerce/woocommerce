@@ -39,11 +39,7 @@ class WC_ShareYourCart extends WC_Integration {
 		if ( $this->enabled == 'yes' ) {
 			add_action( 'wp_enqueue_scripts', array(&$this, 'styles') );
 			
-			// Share your cart api class
-			include_once('class-shareyourcart-woocommerce.php'); 
-			
-			// Init the class
-			$this->shareYourCartWooCommerce = new ShareYourCartWooCommerce( $this->settings );
+			$this->init_share_your_cart();
 		}
     } 
 
@@ -58,6 +54,24 @@ class WC_ShareYourCart extends WC_Integration {
 	}
 	
 	/**
+	 * init_share_your_cart function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function init_share_your_cart() {
+		
+		if ( ! $this->shareYourCartWooCommerce ) {
+			// Share your cart api class
+			include_once('class-shareyourcart-woocommerce.php'); 
+			
+			// Init the class
+			$this->shareYourCartWooCommerce = new ShareYourCartWooCommerce( $this->settings );
+		}
+		
+	}
+	
+	/**
 	 * process_forms function.
 	 * 
 	 * @access public
@@ -65,6 +79,8 @@ class WC_ShareYourCart extends WC_Integration {
 	function process_forms() {
 		
 		if ( ! empty( $_REQUEST['syc-account'] ) && $_REQUEST['syc-account'] == 'create' ) {
+			
+			$this->init_share_your_cart();
 			
 			$error = $message = '';
 			
@@ -105,6 +121,8 @@ class WC_ShareYourCart extends WC_Integration {
 			exit;
 			
 		} elseif ( ! empty( $_REQUEST['syc-account'] ) && $_REQUEST['syc-account'] == 'recover' ) {
+			
+			$this->init_share_your_cart();
 			
 			$error = $message = '';
 			
