@@ -79,7 +79,7 @@ function woocommerce_pay() {
 					</li>
 					<li class="total">
 						<?php _e('Total:', 'woocommerce'); ?>
-						<strong><?php echo woocommerce_price($order->order_total); ?></strong>
+						<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 					</li>
 					<?php if ($order->payment_method_title) : ?>
 					<li class="method">

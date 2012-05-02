@@ -113,7 +113,7 @@ function woocommerce_custom_order_columns($column) {
         	endif;
 		break;
 		case "total_cost" :
-			echo woocommerce_price($order->order_total);
+			echo $order->get_formatted_order_total();
 		break;
 		case "order_date" :
 		
