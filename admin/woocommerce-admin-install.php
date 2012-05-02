@@ -48,6 +48,33 @@ function do_install_woocommerce() {
 	// Clear transient cache
 	$woocommerce->clear_product_transients();
 	
+	// Recompile LESS styles if they are custom
+	if ( get_option('woocommerce_frontend_css') == 'yes' ) {
+	
+		// Handle Colour Settings
+		$colors 		= get_option( 'woocommerce_frontend_css_colors' );
+		
+		if  (  (
+				! empty( $colors['primary'] ) &&
+				! empty( $colors['secondary'] ) &&
+				! empty( $colors['highlight'] ) &&
+				! empty( $colors['content_bg'] ) &&
+				! empty( $colors['subtext'] ) 
+			) && (
+				$colors['primary'] != '#ad74a2' ||
+				$colors['secondary'] != '#f7f6f7' ||
+				$colors['highlight'] != '#85ad74' ||
+				$colors['content_bg'] != '#ffffff' ||
+				$colors['subtext'] != '#777777'
+				) ) {
+			
+			// Write less file				
+			woocommerce_compile_less_styles();
+			
+		}
+		
+	}
+	
 	// Update version
 	update_option( "woocommerce_db_version", $woocommerce->version );
 }
@@ -85,7 +112,7 @@ function woocommerce_default_options() {
 	
 		foreach ($section as $value) :
 	
-	        if (isset($value['std'])) :
+	        if (isset($value['std']) && isset($value['id'])) :
 	        
 	        	if ($value['type']=='image_width') :
 	        		

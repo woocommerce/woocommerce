@@ -15,6 +15,14 @@
  */
 global $woocommerce_settings;
 
+$localisation_setting = ( defined('WPLANG') ) ? array(  
+	'name' => __('Localisation', 'woocommerce'),
+	'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
+	'id' 		=> 'woocommerce_informal_localisation_type',
+	'type' 		=> 'checkbox',
+	'std' 		=> 'no',
+) : array();
+
 $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings', array(
 
 	array( 'name' => __( 'General Options', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'general_options' ),
@@ -32,7 +40,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(  
 		'name' => __( 'Currency', 'woocommerce' ),
 		'desc' 		=> __("This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.", 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency',
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> 'GBP',
@@ -94,30 +101,42 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'multi_select_countries'
 	),
 	
-	array(  
-		'name' => __('Localisation', 'woocommerce'),
-		'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
-		'id' 		=> 'woocommerce_informal_localisation_type',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
-	),
+	$localisation_setting,
 	
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 	
 	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
 
+	array(
+		'name' => __( 'Checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Enable guest checkout (no account required)', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_guest_checkout',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_order_comments',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+
 	array(  
 		'name' => __( 'Security', 'woocommerce' ),
-		'desc' 		=> __( 'Force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS (an SSL Certificate is required)', 'woocommerce' ),
+		'desc' 		=> __( 'Force secure checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_force_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start',
 		'show_if_checked' => 'option',
+		'desc_tip'	=>  __('Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce'),
 	),
 	
 	array(  
-		'desc' 		=> __( 'Un-force <abbr title="Secure Sockets Layer, a computing protocol that ensures the security of data sent via the Internet by using encryption">SSL</abbr>/HTTPS when leaving the checkout', 'woocommerce' ),
+		'desc' 		=> __( 'Un-force HTTPS when leaving the checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_unforce_ssl_checkout',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -127,7 +146,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'name' => __( 'Coupons', 'woocommerce' ),
-		'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
+		'desc'          => __( 'Enable coupons', 'woocommerce' ),
 		'id'            => 'woocommerce_enable_coupons',
 		'std'           => 'yes',
 		'type'          => 'checkbox',
@@ -143,26 +162,9 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup'	=> 'end',
 		'show_if_checked' => 'yes'
 	),
-
-	array(
-		'name' => __( 'Checkout', 'woocommerce' ),
-		'desc' 		=> __( 'Enable Guest Checkout (no account required)', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_guest_checkout',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'start'
-	),
 	
 	array(  
-		'desc' 		=> __( 'Show order comments section', 'woocommerce' ),
-		'id' 		=> 'woocommerce_enable_order_comments',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-	
-	array(  
-		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'name' => __( 'Registration', 'woocommerce' ),
 		'desc' 		=> __( 'Allow unregistered users to register from the Checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_signup_and_login_from_checkout',
 		'std' 		=> 'yes',
@@ -175,9 +177,18 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'id' 		=> 'woocommerce_enable_myaccount_registration',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'end'
 	),
 	
+	array(  
+		'name' => __( 'Customer Accounts', 'woocommerce' ),
+		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woocommerce' ),
+		'id' 		=> 'woocommerce_lock_down_admin',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'start'
+	),
+
 	array(  
 		'desc' 		=> __( 'Clear cart when logging out', 'woocommerce' ),
 		'id' 		=> 'woocommerce_clear_cart_on_logout',
@@ -187,15 +198,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Prevent customers from accessing WordPress admin', 'woocommerce' ),
-		'id' 		=> 'woocommerce_lock_down_admin',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
-	
-	array(  
-		'desc' 		=> __( 'Allow customers to reorder items from past orders', 'woocommerce' ),
+		'desc' 		=> __( 'Allow customers to repurchase past orders', 'woocommerce' ),
 		'id' 		=> 'woocommerce_allow_customers_to_reorder',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -208,19 +211,25 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	
 	array(  
 		'name' => __( 'Styling', 'woocommerce' ),
-		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woocommerce' ),
-		'id' 		=> 'woocommerce_frontend_css',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
 		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woocommerce' ),
 		'id' 		=> 'woocommerce_demo_store',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'	=> 'end'
+		'checkboxgroup'	=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __( 'Enable WooCommerce CSS styles', 'woocommerce' ),
+		'id' 		=> 'woocommerce_frontend_css',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end'
+	),
+	
+	array(  
+		'name' 		=> __( 'Colours', 'woocommerce' ),
+		'std' 		=> '#ad74a2',
+		'type' 		=> 'woocommerce_frontend_css_colors'
 	),
 	
 	array(  
@@ -241,7 +250,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Enable "chosen" (enhanced select input) for country selection inputs', 'woocommerce' ),
+		'desc' 		=> __( 'Enable enhanced country select boxes', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_chosen',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
@@ -285,27 +294,30 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'name' => __('Require login to download', 'woocommerce'),
-		'desc' 		=> __('Do not allow downloads if a user is not logged in. This setting does not apply to guest downloads.', 'woocommerce'),
+		'name' => __('Access Restrictions', 'woocommerce'),
+		'desc' 		=> __('Must be logged in to download files', 'woocommerce'),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
+		'desc_tip'	=> __('This setting does not apply to guest downloads.', 'woocommerce'),
+		'checkboxgroup'		=> 'start'
+	),
+	
+	array(  
+		'desc' 		=> __('Grant access to downloadable products after payment', 'woocommerce'),
+		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
+		'type' 		=> 'checkbox',
+		'std' 		=> 'yes',
+		'desc_tip'	=> __('Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce'),
+		'checkboxgroup'		=> 'end'
 	),
 	
 	array(  
 		'name' => __('Limit quantity', 'woocommerce'),
-		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1.', 'woocommerce' ),
+		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1', 'woocommerce' ),
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox'
-	),
-	
-	array(  
-		'name' => __('Mixed cart handling', 'woocommerce'),
-		'desc' 		=> __('Grant access to downloadable products after payment. Turn this option off to only grant access when an order is "complete".', 'woocommerce'),
-		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'yes',
 	),
 	
 	array( 'type' => 'sectionend', 'id' => 'digital_download_options' ),
@@ -644,12 +656,8 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'desc_tip'	=>  true,
 	),
 	
-	array( 'type' => 'sectionend', 'id' => 'product_data_options' ),
-
-	array(	'name' => __( 'Product Reviews', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect product reviews (comments).', 'woocommerce'), 'id' => 'product_review_options' ),
-	
 	array(  
-		'name' => __( 'Ratings', 'woocommerce' ),
+		'name' => __( 'Product Ratings', 'woocommerce' ),
 		'desc' 		=> __( 'Enable the star rating field on the review form', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_review_rating',
 		'std' 		=> 'yes',
@@ -825,6 +833,21 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'type' 		=> 'checkbox'
 	),
 	
+	array(  
+		'name' => __( 'Stock display format', 'woocommerce' ),
+		'desc' 		=> __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_stock_format',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array( 
+			''  			=> __( 'Always show stock e.g. "12 in stock"', 'woocommerce' ),
+			'low_amount'	=> __( 'Only show stock when low e.g. "Only 2 left in stock" vs. "In Stock"', 'woocommerce' ),
+			'no_amount' 	=> __( 'Never show stock amount', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
+	),
+	
 	array( 'type' => 'sectionend', 'id' => 'inventory_options'),
 
 )); // End inventory settings
@@ -874,6 +897,14 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'desc' 		=> __( 'Ship to billing address by default', 'woocommerce' ),
 		'id' 		=> 'woocommerce_ship_to_same_address',
 		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(  
+		'desc' 		=> __( 'Collect shipping address even when not required', 'woocommerce' ),
+		'id' 		=> 'woocommerce_require_shipping_address',
+		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
@@ -1078,63 +1109,6 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 )); // End email settings
 
-$woocommerce_settings['integration'] = apply_filters('woocommerce_intregation_settings', array(
-	
-	array( 'name' => __( 'ShareThis', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareThis offers a sharing widget which will allow customers to share links to products with their friends.', 'woocommerce'), 'id' => 'share_this' ),
-
-	array(  
-		'name' => __( 'ShareThis Publisher ID', 'woocommerce' ),
-		'desc' 		=> sprintf( __( 'Enter your %1$sShareThis publisher ID%2$s to show social sharing buttons on product pages.', 'woocommerce' ), '<a href="http://sharethis.com/account/">', '</a>' ),
-		'id' 		=> 'woocommerce_sharethis',
-		'type' 		=> 'text',
-		'std' 		=> '',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'share_this'),
-
-	array( 'name' => __( 'ShareDaddy', 'woocommerce' ), 'type' => 'title', 'desc' => __('ShareDaddy is a sharing plugin bundled with JetPack.', 'woocommerce'), 'id' => 'share_this' ),
-
-	array(  
-		'name' => __( 'Output ShareDaddy button?', 'woocommerce' ),
-		'desc' 		=> __( 'Enable this option to show the ShareDaddy button (if installed) on the product page.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_sharedaddy',
-		'type' 		=> 'checkbox',
-		'std' 		=> 'no',
-	),
-	
-	array( 'type' => 'sectionend', 'id' => 'share_this'),
-	
-	array( 'name' => __( 'Google Analytics', 'woocommerce' ), 'type' => 'title', 'desc' => __('Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce'), 'id' => 'google_analytics' ),
-	
-	array(  
-		'name' => __('Google Analytics ID', 'woocommerce'),
-		'desc' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_id',
-		'type' 		=> 'text',
-        'css' 		=> 'min-width:300px;',
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woocommerce'),
-		'desc' 		=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_standard_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-	
-	array(  
-		'name' => __('Tracking code', 'woocommerce'),
-		'desc' 		=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
-		'id' 		=> 'woocommerce_ga_ecommerce_tracking_enabled',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-					
-	array( 'type' => 'sectionend', 'id' => 'google_analytics'),
-
-)); // End integration settings
-
 /**
  * Settings page
  * 
@@ -1144,16 +1118,21 @@ if (!function_exists('woocommerce_settings')) {
 function woocommerce_settings() {
     global $woocommerce, $woocommerce_settings;
     
-    $current_tab = ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
-    $current_section = ( empty( $_GET['section'] ) ) ? '' : urldecode( $_GET['section'] );
+    // Get current tab/section
+    $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
+    $current_section 	= ( empty( $_REQUEST['section'] ) ) ? '' : urldecode( $_REQUEST['section'] );
     
     // Save settings
     if ( ! empty( $_POST ) ) {
+    
     	if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) 
     		die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) ); 
     	
     	if ( ! $current_section ) {
-    	
+    	 	
+    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
+    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
+    	 	
 	    	switch ( $current_tab ) {
 				case "general" :
 				case "pages" :
@@ -1162,13 +1141,38 @@ function woocommerce_settings() {
 				case "shipping" :
 				case "tax" :
 				case "email" :
-				case "integration" :
 					woocommerce_update_options( $woocommerce_settings[$current_tab] );
 				break;
 			}
 		
 			do_action( 'woocommerce_update_options' );
 			do_action( 'woocommerce_update_options_' . $current_tab );
+						
+			// Handle Colour Settings
+			if ( $current_tab == 'general' && get_option('woocommerce_frontend_css') == 'yes' ) {
+				
+				// Save settings
+				$primary 		= ( ! empty( $_POST['woocommerce_frontend_css_primary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_primary'] ) : '';
+				$secondary 		= ( ! empty( $_POST['woocommerce_frontend_css_secondary'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_secondary'] ) : '';
+				$highlight 		= ( ! empty( $_POST['woocommerce_frontend_css_highlight'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_highlight'] ) : '';
+				$content_bg 	= ( ! empty( $_POST['woocommerce_frontend_css_content_bg'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_content_bg'] ) : '';
+				$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
+								
+				$colors = array(
+					'primary' 	=> $primary,
+					'secondary' => $secondary,
+					'highlight' => $highlight,
+					'content_bg' => $content_bg,
+					'subtext' => $subtext
+				);
+				
+				$old_colors = get_option( 'woocommerce_frontend_css_colors' );
+				update_option( 'woocommerce_frontend_css_colors', $colors );
+				
+				if ( $old_colors != $colors )
+					woocommerce_compile_less_styles();
+				
+			}
 			
 		} else {
 		
@@ -1182,7 +1186,7 @@ function woocommerce_settings() {
 		unset($_SESSION['orderby']);
 		$woocommerce->clear_product_transients();
 		
-		// Redirect back
+		// Redirect back to the settings page
 		$redirect = add_query_arg( 'saved', 'true' );
 		
 		if ( ! empty( $_POST['subtab'] ) ) $redirect = add_query_arg( 'subtab', esc_attr( str_replace( '#', '', $_POST['subtab'] ) ), $redirect ); 
@@ -1190,13 +1194,28 @@ function woocommerce_settings() {
 		wp_redirect( $redirect );
 		exit;
 	}
-    
-    // Settings saved message
+	
+	// Get any returned messages
+	$error 		= ( empty( $_GET['wc_error'] ) ) ? '' : urldecode( stripslashes( $_GET['wc_error'] ) );
+	$message 	= ( empty( $_GET['wc_message'] ) ) ? '' : urldecode( stripslashes( $_GET['wc_message'] ) );
+	
+	if ( $error || $message ) {
+
+		if ( $error ) {
+			echo '<div id="message" class="error fade"><p><strong>' . wptexturize( $error ) . '</strong></p></div>';
+		} else {
+			echo '<div id="message" class="updated fade"><p><strong>' . wptexturize( $message ) . '</strong></p></div>';
+		}
+		
+	} elseif ( ! empty( $_GET['saved'] ) ) {
+		
+		echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
+		
+	}
+	
+    // Were the settings saved?
     if ( ! empty( $_GET['saved'] ) ) {
-    	echo '<div id="message" class="updated fade"><p><strong>' . __( 'Your settings have been saved.', 'woocommerce' ) . '</strong></p></div>';
-        
         flush_rewrite_rules( false );
-        
         do_action('woocommerce_settings_saved');
     }
     
@@ -1282,7 +1301,6 @@ function woocommerce_settings() {
 					case "inventory" :
 					case "tax" :
 					case "email" :
-					case "integration" :
 						woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 					break;
 					case "shipping" :
@@ -1425,6 +1443,25 @@ function woocommerce_settings() {
 		            	
 		            	echo '</div>';
             	
+					break;
+					case "integration" :
+						
+						$integrations = $woocommerce->integrations->get_integrations();
+						
+						$section = empty( $_GET['section'] ) ? key( $integrations ) : urldecode( $_GET['section'] );
+						
+						foreach ( $integrations as $integration ) {
+							$title = ( isset( $integration->method_title ) && $integration->method_title) ? ucwords( $integration->method_title ) : ucwords( $method->id );
+							$current = ( $integration->id == $section ) ? 'class="current"' : '';
+							
+							$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce&tab=integration') ) . '"' . $current . '>' . $title . '</a>';
+						}
+						
+						echo '<ul class="subsubsub"><li>' . implode(' | </li><li>', $links) . '</li></ul><br class="clear" />';
+						
+						if ( isset( $integrations[ $section ] ) )
+							$integrations[ $section ]->admin_options();
+					
 					break;
 					default :
 						do_action( 'woocommerce_settings_tabs_' . $current_tab );

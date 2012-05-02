@@ -291,6 +291,11 @@ class WC_Order {
 		return $this->order_shipping;
 	}
 	
+	/** Gets shipping tax amount */
+	function get_shipping_tax() {
+		return $this->order_shipping_tax;
+	}
+	
 	/** Gets order total */
 	function get_order_total() {
 		return $this->order_total;
@@ -372,7 +377,16 @@ class WC_Order {
 		else :
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item, true ) );
 		endif;
-		return $subtotal;
+
+		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
+	}
+	
+	/** Gets order total - formatted for display */
+	function get_formatted_order_total() {
+
+		$formatted_total = woocommerce_price( $this->order_total );
+
+		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
 	
 	/** Gets subtotal - subtotal is shown before discounts, but with localised taxes */
@@ -537,7 +551,7 @@ class WC_Order {
 		if ( $this->get_order_discount() > 0 )
 			$total_rows[ __( 'Order Discount:', 'woocommerce' ) ] = '-' . woocommerce_price( $this->get_order_discount() );
 		
-		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = woocommerce_price( $this->get_order_total() );
+		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = $this->get_formatted_order_total();
 		
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
 	}

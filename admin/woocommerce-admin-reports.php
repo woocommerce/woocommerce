@@ -1490,19 +1490,32 @@ function woocommerce_stock_overview() {
 				<h3><span><?php _e('Low stock', 'woocommerce'); ?></span></h3>
 				<div class="inside">
 					<?php
-					if ($low_in_stock) :
+					if ( $low_in_stock ) {
 						echo '<ul class="stock_list">';
-						foreach ($low_in_stock as $product) :
-							$stock = (int) get_post_meta($product->ID, '_stock', true);
+						foreach ( $low_in_stock as $product ) {
+							
+							$stock 	= (int) get_post_meta( $product->ID, '_stock', true );
+							$sku	= get_post_meta( $product->ID, '_sku', true );
+							
 							if ( $stock <= $nostockamount ) continue;
-							echo '<li><a href="';
-							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
-							echo '"><small>' . sprintf( _n('%d in stock', '%d in stock', $stock, 'woocommerce'), $stock ) . '</small> ' . $product->post_title . '</a></li>';
-						endforeach;
+
+							$title = $product->post_title;
+							
+							if ( $sku )
+								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';
+							
+							if ( $product->post_type=='product' ) 
+								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' ); 
+							else 
+								$product_url = admin_url( 'post.php?post=' . $product->post_parent . '&action=edit' );
+								
+							printf( '<li><a href="%s"><small>' .  _n('%d in stock', '%d in stock', $stock, 'woocommerce') . '</small> %s</a></li>', $product_url, $stock, $title );
+
+						}
 						echo '</ul>';
-					else :
+					} else {
 						echo '<p>'.__('No products are low in stock.', 'woocommerce').'</p>';
-					endif;
+					}
 					?>
 				</div>
 			</div>
@@ -1512,19 +1525,32 @@ function woocommerce_stock_overview() {
 				<h3><span><?php _e('Out of stock', 'woocommerce'); ?></span></h3>
 				<div class="inside">
 					<?php
-					if ($low_in_stock) :
+					if ( $low_in_stock ) {
 						echo '<ul class="stock_list">';
-						foreach ($low_in_stock as $product) :
-							$stock = (int) get_post_meta($product->ID, '_stock', true);
+						foreach ( $low_in_stock as $product ) {
+						
+							$stock 	= (int) get_post_meta( $product->ID, '_stock', true );
+							$sku	= get_post_meta( $product->ID, '_sku', true );
+							
 							if ( $stock > $nostockamount ) continue;
-							echo '<li><a href="';
-							if ($product->post_type=='product') echo admin_url('post.php?post='.$product->ID.'&action=edit'); else echo admin_url('post.php?post='.$product->post_parent.'&action=edit');
-							echo '"><small>' . sprintf( _n('%d in stock', '%d in stock', $stock, 'woocommerce'), $stock ) . '</small> ' . $product->post_title . '</a></li>';
-						endforeach;
+
+							$title = $product->post_title;
+							
+							if ( $sku )
+								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';
+							
+							if ( $product->post_type=='product' ) 
+								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' ); 
+							else 
+								$product_url = admin_url( 'post.php?post=' . $product->post_parent . '&action=edit' );
+								
+							printf( '<li><a href="%s"><small>' .  _n('%d in stock', '%d in stock', $stock, 'woocommerce') . '</small> %s</a></li>', $product_url, $stock, $title );
+						
+						}
 						echo '</ul>';
-					else :
+					} else {
 						echo '<p>'.__('No products are out in stock.', 'woocommerce').'</p>';
-					endif;
+					}
 					?>
 				</div>
 			</div>

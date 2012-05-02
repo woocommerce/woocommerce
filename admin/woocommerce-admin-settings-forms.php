@@ -17,7 +17,7 @@ function woocommerce_update_options($options) {
     if ( empty( $_POST ) ) return false;
     
     foreach ( $options as $value ) {
-    	if (isset($value['id']) && $value['id']=='woocommerce_tax_rates') :
+    	if ( isset( $value['id'] ) && $value['id'] == 'woocommerce_tax_rates' ) {
     		
     		// Tax rates saving
     		$tax_rates 			= array();
@@ -128,32 +128,32 @@ function woocommerce_update_options($options) {
 			
 			update_option( 'woocommerce_local_tax_rates', $local_tax_rates );
 		
-		elseif (isset($value['type']) && $value['type']=='multi_select_countries') :
+		} elseif ( isset( $value['type'] ) && $value['type'] == 'multi_select_countries' ) {
 		
 			// Get countries array
 			if (isset($_POST[$value['id']])) $selected_countries = $_POST[$value['id']]; else $selected_countries = array();
 			update_option($value['id'], $selected_countries);
 		
-		elseif ( isset($value['id']) && ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) ):
+		} elseif ( isset( $value['id'] ) && ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) ) {
 			
 			// price separators get a special treatment as they should allow a spaces (don't trim)
-			if( isset( $_POST[ $value['id'] ] )  ) {
+			if ( isset( $_POST[ $value['id'] ] )  ) {
 				update_option($value['id'], $_POST[$value['id']] );
 			} else {
                 delete_option($value['id']);
             }
             
-        elseif (isset($value['type']) && $value['type']=='checkbox') :
+        } elseif ( isset( $value['type'] ) && $value['type'] == 'checkbox' ) {
             
-            if(isset($value['id']) && isset($_POST[$value['id']])) {
+            if ( isset( $value['id'] ) && isset( $_POST[$value['id']] ) ) {
             	update_option($value['id'], 'yes');
             } else {
                 update_option($value['id'], 'no');
             }
             
-        elseif (isset($value['type']) && $value['type']=='image_width') :
+        } elseif (isset( $value['type'] ) && $value['type'] == 'image_width' ) {
             	
-            if(isset($value['id']) && isset($_POST[$value['id'].'_width'])) {
+            if ( isset( $value['id'] ) && isset( $_POST[$value['id'] . '_width'] ) ) {
               	update_option($value['id'].'_width', woocommerce_clean($_POST[$value['id'].'_width']));
             	update_option($value['id'].'_height', woocommerce_clean($_POST[$value['id'].'_height']));
 				if (isset($_POST[$value['id'].'_crop'])) :
@@ -166,16 +166,20 @@ function woocommerce_update_options($options) {
             	update_option($value['id'].'_height', $value['std']);
             	update_option($value['id'].'_crop', 1);
             }	
+            
+        } elseif ( isset( $value['type'] ) && $value['type'] == 'woocommerce_frontend_css_colors' ) {
+        
+        	
             	
-    	else :
+    	} else {
 		    
-    		if(isset($value['id']) && isset($_POST[$value['id']])) {
+    		if ( isset( $value['id'] ) && isset( $_POST[$value['id']] ) ) {
             	update_option($value['id'], woocommerce_clean($_POST[$value['id']]));
-            } else {
+            } elseif( isset( $value['id'] ) ) {
                 delete_option($value['id']);
             }
         
-        endif;
+		}
         
     }
     return true;
@@ -190,6 +194,7 @@ function woocommerce_admin_fields($options) {
 	global $woocommerce;
 
     foreach ( $options as $value ) {
+    	if ( ! isset( $value['type'] ) ) continue;
     	if ( ! isset( $value['name'] ) ) $value['name'] = '';
     	if ( ! isset( $value['class'] ) ) $value['class'] = '';
     	if ( ! isset( $value['css'] ) ) $value['css'] = '';
@@ -197,8 +202,10 @@ function woocommerce_admin_fields($options) {
     	if ( ! isset( $value['desc'] ) ) $value['desc'] = '';
     	if ( ! isset( $value['desc_tip'] ) ) $value['desc_tip'] = false;
     	
-    	if ( $value['desc_tip'] ) {
+    	if ( $value['desc_tip'] === true ) {
     		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
+    	} elseif ( $value['desc_tip'] ) {
+    		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc_tip'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
     	} else {
     		$description = '<span class="description">' . $value['desc'] . '</span>';
     	}
@@ -217,13 +224,17 @@ function woocommerce_admin_fields($options) {
             break;
             case 'text':
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name']; ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo esc_attr( $value['type'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" /> <?php echo $description; ?></td>
                 </tr><?php
             break;
             case 'color' :
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name']; ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="text" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" class="colorpick" /> <?php echo $description; ?> <div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div></td>
                 </tr><?php
             break;
@@ -243,7 +254,9 @@ function woocommerce_admin_fields($options) {
             break;
             case 'select':
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>">
                         <?php
                         foreach ($value['options'] as $key => $val) {
@@ -290,7 +303,7 @@ function woocommerce_admin_fields($options) {
 	            <legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
 					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
-					<?php echo $value['desc'] ?></label><br />
+					<?php echo $value['desc'] ?></label> <?php if ( $value['desc_tip'] ) echo $description; ?><br />
 				<?php
 				
 				if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :
@@ -308,7 +321,9 @@ function woocommerce_admin_fields($options) {
             break;
             case 'textarea':
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp">
                         <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>"><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea> <?php echo $description; ?>
                     </td>
@@ -346,7 +361,9 @@ function woocommerce_admin_fields($options) {
             		$state = '*';
             	endif;
             	?><tr valign="top">
-                    <th scope="rpw" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e('Choose a country&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">	
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>          
 			        </select> <?php echo $description; ?>
@@ -358,7 +375,9 @@ function woocommerce_admin_fields($options) {
             	asort($countries);
             	$selections = (array) get_option($value['id']);
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
                     <td class="forminp">
 	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e('Choose countries&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">	
 				        	<?php
@@ -702,6 +721,57 @@ function woocommerce_admin_fields($options) {
 				</script>   
                 <?php
             break;
+            case 'woocommerce_frontend_css_colors' :
+            
+            	?><tr valign="top" class="woocommerce_frontend_css_colors">
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
+                    <td class="forminp"><?php
+                    
+                		$base_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
+						$css_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
+		
+						if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
+                			
+                			// Get settings
+                			$colors = (array) get_option( 'woocommerce_frontend_css_colors' );
+                			
+                			// Defaults
+                			if ( empty( $colors['primary'] ) ) $colors['primary'] = '#ad74a2';
+                			if ( empty( $colors['secondary'] ) ) $colors['secondary'] = '#f7f6f7';
+                			if ( empty( $colors['highlight'] ) ) $colors['highlight'] = '#85ad74';
+                			if ( empty( $colors['content_bg'] ) ) $colors['content_bg'] = '#ffffff';
+                			
+                			// Show inputs
+                    		woocommerce_frontend_css_color_picker( __('Primary', 'woocommerce'), 'woocommerce_frontend_css_primary', $colors['primary'], __('Call to action buttons/price slider/layered nav UI', 'woocommerce') );
+                    		woocommerce_frontend_css_color_picker( __('Secondary', 'woocommerce'), 'woocommerce_frontend_css_secondary', $colors['secondary'], __('Buttons and tabs', 'woocommerce') );
+                    		woocommerce_frontend_css_color_picker( __('Highlight', 'woocommerce'), 'woocommerce_frontend_css_highlight', $colors['highlight'], __('Price labels and Sale Flashes', 'woocommerce') );
+                    		
+                    		echo '<div class="color_box_clear clear"></div>';
+                    		
+                    		woocommerce_frontend_css_color_picker( __('Content BG', 'woocommerce'), 'woocommerce_frontend_css_content_bg', $colors['content_bg'], __('Your themes page background - used for tab active states', 'woocommerce') );
+                    		woocommerce_frontend_css_color_picker( __('Subtext', 'woocommerce'), 'woocommerce_frontend_css_subtext', $colors['subtext'], __('Used for certain text and asides - breadcrumbs, small text etc.', 'woocommerce') );
+                    		                    
+                    	} else {
+                    		
+                    		echo '<span class="description">' . __( 'To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href="http://codex.wordpress.org/Changing_File_Permissions">the Codex</a> for more information.', 'woocommerce' ) . '</span>';
+                    		
+                    	}
+                    	
+                    ?></td>
+               	</tr>
+               	<script type="text/javascript">
+               		jQuery('input#woocommerce_frontend_css').change(function() {
+               			if (jQuery(this).is(':checked')) {
+               				jQuery('tr.woocommerce_frontend_css_colors').show();
+               			} else {
+               				jQuery('tr.woocommerce_frontend_css_colors').hide();
+               			}
+               		}).change();
+               	</script>
+               	<?php	
+            
             default:
             	do_action( 'woocommerce_admin_field_'.$value['type'], $value );
             break;
@@ -709,6 +779,19 @@ function woocommerce_admin_fields($options) {
 	}
 }
 
+/**
+ * Color Picker Input
+ * 
+ * Shows a color picker for our options
+ */
+function woocommerce_frontend_css_color_picker( $name, $id, $value, $desc = '' ) {
+	global $woocommerce;
+	
+	echo '<div class="color_box"><strong><img class="help_tip" data-tip="' . $desc . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" /> ' . $name . '</strong>
+   		<input name="' . esc_attr( $id ). '" id="' . $id . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
+    </div>';
+    
+}
 
 /**
  * Tax Row Label

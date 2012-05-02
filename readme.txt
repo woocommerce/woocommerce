@@ -28,8 +28,8 @@ Keep a birds-eye view of incoming sales and reviews, stock levels and general st
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
 
-= BUNDLED GATEWAYS AND SHIPPING =
-WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways and shipping methods:
+= BUNDLED GATEWAYS, SHIPPING AND INTEGRATIONS =
+WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways, shipping methods and third party integrations:
 
 * PayPal Standard
 * BACS
@@ -40,6 +40,10 @@ WooCommerce has enough power to be used straight out of the box and comes with t
 * International delivery
 * Local delivery
 * Local Pickup
+* Google Analytics
+* Sharedaddy
+* ShareThis
+* ShareYourCart
 
 = EXTENSIONS =
 Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that: [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
@@ -144,18 +148,38 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.5 =
+* Feature - Settings now include colours for things like buttons and tabs.
+* Feature - New integration section which allows other class-based integrations to be added.
+* Feature - ShareYourCart integration built in.
 * Feature - is_sold_individually() function for disabling quantity inputs for products
+* Feature - Collect shipping address even when not required option
+* Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount
+* Feature - woocommerce_form_field select type
+* Tweak - Removed nonces from add to cart urls, this makes them easier to make use of; you can hardcode add to cart links or link to your add to cart link from other places without needing to use WC functions.
 * Tweak - Cart.php display with more filters
+* Tweak - is_product_category and is_product_tag support term argument
 * Tweak - Added minus symbol before discount on view order page
 * Tweak - Added yards as dimensions unit
 * Tweak - Allow more readable flat rate options to be entered
 * Tweak - Changed category and tag link to filter product list in admin panel
 * Tweak - Removed product 'exists' variable in favour of the exists() method. Tweaked exist method to look for ID in DB.
+* Tweak - Only use rm=2 for paypal when SSL is enabled, to avoid security warnings when returning to the site.
+* Tweak - Show sku in stock reports.
+* Tweak - When sending the order as a whole to paypal, send the shipping separately.
+* Tweak - Clear cache along with transients
+* Tweak - Protocol-relative AJAX URL
+* Tweak - Hidden some uncommon settings
+* Tweak - Fixed labels for settings API.
+* Tweak - New WC_Order Class Formatting Filters and Function for totals (thanks thenbrent)
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers
 * Fix - update_count_callback for tags
 * Fix - Pass shipping calc state to checkout
+* Fix - Removed space from postcode validation
+* Fix - per product flat rate.
+* Fix - Use term_id instead of term slug to get term link (allows numeric slugs for product categories)
+* Fix - Replace spaces with + signs in download url after decode (allows + characters in email addresses for downloads)
 * Localization - Slovak translation by Dušan Beleščák
 * Localization - Updated localisations
 

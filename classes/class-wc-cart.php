@@ -710,6 +710,7 @@ class WC_Cart {
 		function set_quantity( $cart_item_key, $quantity = 1 ) {
 		
 			if ( $quantity == 0 || $quantity < 0 ) {
+				do_action( 'woocommerce_before_cart_item_quantity_zero', $cart_item_key );
 				unset( $this->cart_contents[$cart_item_key] );
 			} else {
 				$this->cart_contents[$cart_item_key]['quantity'] = $quantity;
@@ -1368,6 +1369,7 @@ class WC_Cart {
 			
 			$packages[0]['contents'] 				= $this->get_cart();	// Items in the package
 			$packages[0]['contents_cost'] 			= 0;					// Cost of items in the package
+			$packages[0]['applied_coupons']			= $this->applied_coupons; // Applied coupons - some, like free shipping, affect costs
 			$packages[0]['destination']['country'] 	= $woocommerce->customer->get_shipping_country();
 			$packages[0]['destination']['state'] 	= $woocommerce->customer->get_shipping_state();
 			$packages[0]['destination']['postcode'] = $woocommerce->customer->get_shipping_postcode();

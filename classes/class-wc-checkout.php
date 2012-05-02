@@ -103,7 +103,7 @@ class WC_Checkout {
 		$this->posted['shipping_method']	= isset($_POST['shipping_method']) ? woocommerce_clean($_POST['shipping_method']) : '';
 		
 		// Ship to billing only option
-		if ($woocommerce->cart->ship_to_billing_address_only()) $this->posted['shiptobilling'] = 1;
+		if ( $woocommerce->cart->ship_to_billing_address_only() ) $this->posted['shiptobilling'] = 1;
 		
 		// Update customer shipping and payment method to posted method
 		$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
@@ -119,13 +119,13 @@ class WC_Checkout {
 		$validation = $woocommerce->validation();
 		
 		// Get posted checkout_fields and do validation
-		foreach ($this->checkout_fields as $fieldset_key => $fieldset) :
+		foreach ($this->checkout_fields as $fieldset_key => $fieldset) :		
 			
 			// Skip shipping if its not needed
-			if ($fieldset_key=='shipping' && (!$woocommerce->cart->needs_shipping() || $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'])) :
+			if ( $fieldset_key == 'shipping' && ( $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'] || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
 				$skipped_shipping = true;
 				continue;
-			endif;
+			}
 			
 			foreach ($fieldset as $key => $field) :
 				
@@ -203,18 +203,17 @@ class WC_Checkout {
 				$woocommerce->customer->set_shipping_postcode( $this->posted['billing_postcode'] );
 			
 		}
-
-		if (is_user_logged_in()) :
-			$this->creating_account = false;
-		elseif (isset($this->posted['createaccount']) && $this->posted['createaccount']) :
-			$this->creating_account = true;
-		elseif ($this->must_create_account) :
-			$this->creating_account = true;
-		else :
-			$this->creating_account = false;
-		endif;
 		
-		if ($this->creating_account) :
+		if ( is_user_logged_in() )
+			$this->creating_account = false;
+		elseif ( ! empty( $this->posted['createaccount'] ) )
+			$this->creating_account = true;
+		elseif ($this->must_create_account)
+			$this->creating_account = true;
+		else 
+			$this->creating_account = false;
+		
+		if ( $this->creating_account ) {
 		
 			if ( empty($this->posted['account_username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woocommerce') );
 			if ( empty($this->posted['account_password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
@@ -232,7 +231,7 @@ class WC_Checkout {
 				$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woocommerce') );
 			endif;
 			
-		endif;
+		}
 		
 		// Terms
 		if (!isset($_POST['woocommerce_checkout_update_totals']) && empty($this->posted['terms']) && woocommerce_get_page_id('terms')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
@@ -410,14 +409,14 @@ class WC_Checkout {
 				// UPDATE ORDER META
 				
 				// Save billing and shipping first, also save to user meta if logged in
-				if ($this->checkout_fields['billing']) :
-					foreach ($this->checkout_fields['billing'] as $key => $field) :
+				if ($this->checkout_fields['billing']) {
+					foreach ($this->checkout_fields['billing'] as $key => $field) {
 						
 						// Post
 						update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
 						
 						// User
-						if ($user_id>0 && !empty($this->posted[$key])) :
+						if ($user_id>0 && !empty($this->posted[$key])) {
 							update_user_meta( $user_id, $key, $this->posted[$key] );
 							
 							// Special fields
@@ -433,31 +432,28 @@ class WC_Checkout {
 								break;
 							}
 
-						endif;
-						
-					endforeach;
-				endif;
-				if ($this->checkout_fields['shipping'] && $woocommerce->cart->needs_shipping()) :
-					foreach ($this->checkout_fields['shipping'] as $key => $field) :
-						
-						if ($this->posted['shiptobilling']) :
+						}
+					}
+				}
+
+				if ( $this->checkout_fields['shipping'] && ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) ) {
+					foreach ($this->checkout_fields['shipping'] as $key => $field) {
+						if ( $this->posted['shiptobilling'] ) {
 							
 							$field_key = str_replace('shipping_', 'billing_', $key);
 							
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$field_key] );
-						else :
+						} else {
 							// Post
 							update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
 							
 							// User
-							if ($user_id>0) :
+							if ( $user_id > 0 ) 
 								update_user_meta( $user_id, $key, $this->posted[$key] );
-							endif;
-						endif;
-						
-					endforeach;
-				endif;
+						}
+					}
+				}
 				
 				// Save any other user meta
 				if ($user_id) do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);

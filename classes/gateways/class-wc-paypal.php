@@ -208,7 +208,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'no_note' 				=> 1,
 				'currency_code' 		=> get_woocommerce_currency(),
 				'charset' 				=> 'UTF-8',
-				'rm' 					=> 2,
+				'rm' 					=> is_ssl() ? 2 : 1,
 				'upload' 				=> 1,
 				'return' 				=> $this->get_return_url( $order ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
@@ -234,6 +234,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				
 				// Payment Info
 				'invoice' 				=> $order->order_key
+				
 			), 
 			$phone_args
 		);
@@ -258,7 +259,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['no_shipping'] = 1;
 		}
 		
-		// If prices include tax or have order discounts, send the whole order
+		// If prices include tax or have order discounts, send the whole order as a single item
 		if ( get_option('woocommerce_prices_include_tax')=='yes' || $order->get_order_discount() > 0 ) :
 			
 			// Discount
@@ -273,14 +274,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 			
 			$paypal_args['item_name_1'] 	= sprintf( __('Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
-			if ($order->get_shipping()>0) :
+			$paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
+			
+			/*if ( $order->get_shipping() > 0 ) :
 				$paypal_args['item_name_2'] = __('Shipping via', 'woocommerce') . ' ' . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
-			endif;
+			endif;*/
 					
 		else :
 			
@@ -311,7 +314,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				endif;
 			endforeach; endif;
 		
-			// Shipping Cost
+			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
 			if ($order->get_shipping()>0) :
 				$item_loop++;
 				$paypal_args['item_name_'.$item_loop] = __('Shipping via', 'woocommerce') . ucwords($order->shipping_method_title);

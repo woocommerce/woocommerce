@@ -1,8 +1,6 @@
 (
 	function(){
 	
-		var icon_url = '../wp-content/plugins/woocommerce/assets/images/icons/wc_icon.png';
-	
 		tinymce.create(
 			"tinymce.plugins.WooCommerceShortcodes",
 			{
@@ -14,7 +12,6 @@
 					
 						d=e.createMenuButton( "woocommerce_shortcodes_button",{
 							title:"Insert WooCommerce Shortcode",
-							image:icon_url,
 							icons:false
 							});
 							

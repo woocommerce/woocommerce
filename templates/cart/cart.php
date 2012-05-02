@@ -72,14 +72,16 @@ global $woocommerce;
 						<td class="product-quantity">
 							<?php 
 								if ( $_product->is_sold_individually() ) {
-									echo '1';
+									$product_quantity = '1';
 								} else {
 									$data_min = apply_filters( 'woocommerce_cart_item_data_min', '', $_product );
 									$data_max = ( $_product->backorders_allowed() ) ? '' : $_product->get_stock_quantity();
 									$data_max = apply_filters( 'woocommerce_cart_item_data_max', $data_max, $_product ); 
 									
-									printf( '<div class="quantity"><input name="cart[%s][qty]" data-min="%s" data-max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $data_min, $data_max, esc_attr( $values['quantity'] ) );
+									$product_quantity = sprintf( '<div class="quantity"><input name="cart[%s][qty]" data-min="%s" data-max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $data_min, $data_max, esc_attr( $values['quantity'] ) );
 								}
+								
+								echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key ); 					
 							?>
 						</td>
 						
@@ -102,7 +104,11 @@ global $woocommerce;
 
 				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) { ?>
 					<div class="coupon">
+					
 						<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
+						
+						<?php do_action('woocommerce_cart_coupon'); ?>
+						
 					</div>
 				<?php } ?>
 

@@ -1,0 +1,406 @@
+.shareyourcart-button-orange {
+    position: relative;
+    display: block;
+    padding: 15px 20px !important;
+    text-align: center !important;
+    border: 1px solid #a15400;
+    width: 170px;
+    color: #623505 !important;
+    font-size: 16px !important;
+    font-weight: bold;
+    text-shadow: 0 1px 1px #ffce97 !important;
+
+    background-color: #fcc436 !important;
+    background-image: -moz-linear-gradient(top, #fcc436, #ff7a01) !important;
+    background-image: -o-linear-gradient(top, #fcc436, #ff7a01) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#fcc436), to(#ff7a01)) !important;
+
+    background-image: linear-gradient(top, #fcc436, #ff7a01) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#fcc436', EndColorStr='#ff7a01') !important;
+
+    border-radius: 10px !important;
+    -moz-border-radius: 10px !important;
+    -webkit-border-radius: 10px !important;
+
+    box-shadow: 0 2px 2px #bfc7cb, inset 0 1px 0px #fee6a9;
+    -moz-box-shadow: 0 2px 2px #bfc7cb, inset 0 1px 0px #fee6a9;
+    -webkit-box-shadow: 0 2px 2px #bfc7cb, inset 0 1px 0px #fee6a9;       
+
+    text-decoration: none;
+}
+
+.shareyourcart-button-blue {
+    position: relative;
+    display: block;
+    padding: 15px 20px !important;
+    text-align: center !important;
+    border: 1px solid #688da9;
+    width: 170px;
+    color: #005fa9 !important;
+
+    font-size: 16px !important;
+    font-weight: bold;
+    text-shadow: 0 1px 1px #fcfdfe !important;
+
+    background-color: #cde5f5 !important;
+    background-image: -moz-linear-gradient(top, #ebf5fb, #b3d8ef) !important;
+    background-image: -o-linear-gradient(top, #ebf5fb, #b3d8ef) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf5fb), to(#b3d8ef)) !important;
+    background-image: -webkit-linear-gradient(top, #ebf5fb, #b3d8ef) !important;
+    background-image: linear-gradient(top, #ebf5fb, #b3d8ef) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#ebf5fb', EndColorStr='#b3d8ef');
+
+    border-radius: 10px !important;
+    -moz-border-radius: 10px !important;
+    -webkit-border-radius: 10px !important;
+
+    box-shadow: 0 2px 2px #fcfdfe, inset 0 1px 0px #fcfdfe;
+    -moz-box-shadow: 0 2px 2px #fcfdfe, inset 0 1px 0px #fcfdfe;
+    -webkit-box-shadow: inset 0 1px 0px #fcfdfe;
+
+    text-decoration: none;
+}
+
+.shareyourcart-button-orange:hover
+{
+    background-color: #fff449 !important;
+    background-image: -moz-linear-gradient(top, #fff449, #ff9c01) !important;
+    background-image: -o-linear-gradient(top, #fff449, #ff9c01) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#fff449), to(#ff9c01)) !important;
+    background-image: -webkit-linear-gradient(top, #fff449, #ff9c01) !important;
+    background-image: linear-gradient(top, #fff449, #ff9c01) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#fff449', EndColorStr='#ff9c01');
+
+    text-shadow: 0 1px 1px #fff !important;
+    cursor:pointer;
+}
+
+.shareyourcart-button-blue:hover
+{    
+    background-color: #fff449;
+    background-image: -moz-linear-gradient(top, #f4fbff, #d1e6ef) !important;
+    background-image: -o-linear-gradient(top, #f4fbff, #d1e6ef) !important;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#f4fbff), to(#d1e6ef)) !important;
+    background-image: -webkit-linear-gradient(top, #f4fbff, #d1e6ef) !important;
+    background-image: linear-gradient(top, #f4fbff, #d1e6ef) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f4fbff', EndColorStr='#d1e6ef') !important;
+
+    text-shadow: 0 1px 1px #fff;
+    cursor:pointer;
+}
+.shareyourcart-button-blue:hover, .shareyourcart-button-blue:visited{
+    color: #005fa9;
+}
+
+.shareyourcart-button-orange:active {
+    background-image: -moz-linear-gradient(top, #ff7a01, #fcc436);
+    background-image: -o-linear-gradient(top, #ff7a01, #fcc436);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ff7a01), to(#fcc436));
+    background-image: -webkit-linear-gradient(top, #ff7a01, #fcc436);
+    background-image: linear-gradient(top, #ff7a01, #fcc436);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#ff7a01', EndColorStr='#fcc436');
+
+    box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+    -moz-box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+    -webkit-box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+}
+
+.shareyourcart-button-blue:active {
+    background-image: -moz-linear-gradient(top, #d1e6ef, #f4fbff);
+    background-image: -o-linear-gradient(top, #d1e6ef, #f4fbff);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#d1e6ef), to(#f4fbff));
+    background-image: -webkit-linear-gradient(top, #d1e6ef, #f4fbff);
+    background-image: linear-gradient(top, #d1e6ef, #f4fbff);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#d1e6ef', EndColorStr='#f4fbff');
+
+    box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+    -moz-box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+    -webkit-box-shadow: 0 0 2px #888, inset 0 1px 0px #fee6a9;
+}
+
+.shareyourcart-button-orange p, .shareyourcart-button-blue p{ 
+    margin: 0px; 
+    padding: 0px !important; 
+    margin-bottom: 0px !important; 
+}
+
+.shareyourcart-button-orange small, .shareyourcart-button-blue small{
+    display: block; 
+    font-size: 11px; 
+    font-weight: normal; 
+    margin: 0px; 
+    padding: 0px;
+}
+
+.shareyourcart-button-orange img, .shareyourcart-button-blue img{
+    float: left; 
+    margin-top: 2px;
+}
+
+/* PLUGIN OPTIONS STYLE*/
+.shareyourcart-logo{
+    margin-top: 15px; 
+    display: block; 
+    float: left;
+    height: 100%;
+}
+
+#button_skin{
+    width: 150px;
+}
+
+.form-table th{
+    padding-left: 0px; 
+}
+
+.form-table a {
+    color:blue;
+    font-weight:bold;
+}
+
+.form-table a:hover {
+    text-decoration:underline;
+}
+
+div.updated p, div.error p{
+    margin: 1em 0px;
+}
+
+.regular-text {
+    width:320px;
+}
+
+li#toplevel_page_shareyourcart .wp-menu-toggle{
+    width:0px;
+}
+
+.form-table {
+    width:90%;
+}
+
+.form-table-api {
+    width:80%;
+}
+
+.table-small {
+    width:45%;    
+}
+
+.table-small tr th {
+	text-align: left;
+    width: 50%;    
+}
+
+.table-small tr td {
+	text-align: left;  
+}
+
+.form-table td {
+    padding-bottom:8px;
+	padding-top:12px;
+}
+
+.form-table th {
+    padding-top: 7px;
+	text-align: center;
+}
+
+table tr td {
+    padding: 5px 0;
+}
+
+.buttonOption {
+    float:left;
+    width:33%;
+    height: 290px;
+    background: url('../img/spacer.png') right top repeat-y;
+}
+
+.buttonOption.last {
+    background: none;
+}
+
+label {
+    float:none !important;
+    
+}
+
+pre {
+    background-color: #F9F9F9;
+    border: 1px dashed #2F6FAB;
+    color: black;
+    line-height: 1.1em;
+    padding: 1em;
+    font-family: sans-serif;
+	overflow:auto;
+}
+
+hr {
+    margin:0;
+    background-color:#d8d7cf;
+}
+
+select {
+    width: 150px;  
+}
+
+.syc-slogan {
+	float: left;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+.syc-update-nag {
+	line-height: 19px;
+	padding: 5px 0;
+	font-size: 12px;
+	text-align: center;
+	/*margin: 0 15px;*/
+	border-width: 1px;
+	border-style: solid;
+	/*border-top-width: 0;
+	border-top-style: none;*/
+	-moz-border-radius: 0 0 3px 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+	-khtml-border-bottom-right-radius: 3px;
+	-khtml-border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
+	
+	background-color: #FFFBCC;
+	border-color: #E6DB55;
+	color: #555;
+}
+
+.clr {
+	clear:both;
+}
+
+.wrap {
+	padding:10px;
+}
+
+.api-status {
+	line-height: 25px;
+    float: right;
+}
+
+.api-button {
+	width: 120px;
+	text-align: center !important;
+}
+
+.api-link {
+	color: #1122CC;
+	font-weight:bold;
+	text-decoration:underline;
+}
+
+.api-link:hover {
+	color: #1122CC;
+	font-weight:bold;
+}
+
+.green {
+	 color: #118C11;
+	 font-weight:bold;
+}
+
+.red {
+	color: #F71414;
+	font-weight:bold;
+}
+
+.buttonOptionLabel {
+    font-size: 18px;
+}
+
+.buttonOptionRadio {
+    margin:7px 5px 13px 0px;
+}
+
+.buttonTextarea {
+    width:280px;  
+    height:230px;
+}
+
+.buttonCheckbox {
+    margin:4px 4px 5px 0;
+}
+
+.configure-button-container{
+    margin: auto; 
+    margin-top: 10px; 
+    width: 212px;
+}
+
+#button-container{
+    margin: auto; 
+    width: 180px;
+}
+
+.button_iframe iframe
+{
+    width: 58px;
+    height: 230px;
+    position: fixed;
+    top:360px;
+    right:0px;
+}
+
+.button_iframe-normal iframe
+{
+    float:right;
+    height: 58px;
+    width: 230px;
+    position:relative;
+    z-index:99999;
+}
+
+
+/* ------- VERTICAL BUTTON STYLING -------------*/
+.vertical{
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    position: absolute !important;
+    right: -165px;
+    position: fixed;
+    height: 235px;
+    width: 235px;
+}
+
+.vertical-left
+{
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    position: absolute !important;
+    left: -85px;
+    position: fixed;
+}
+/* ------- VERTICAL BUTTON STYLING -------------*/
+
+/* -------- UPDATE MESSAGES --------------- */
+
+.wrap div.updated, .wrap div.error  {
+border-width: 1px;
+border-style: solid;
+padding: 0 .6em;
+margin: 5px 0 15px;
+-moz-border-radius: 3px;
+-khtml-border-radius: 3px;
+-webkit-border-radius: 3px;
+border-radius: 3px;
+
+background-color: lightYellow;
+border-color: #E6DB55;
+}
+
+/* -------- FINISH UPDATE MESSAGES --------------- */
+

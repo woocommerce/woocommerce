@@ -32,7 +32,7 @@ function woocommerce_product_data_box() {
 			
 			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li>
 			
-			<li class="upsells_and_crosssells_tab crosssell_options"><a href="#upsells_and_crosssells_product_data"><?php _e('Up-sells/Cross-sells', 'woocommerce'); ?></a></li>
+			<li class="related_product_tab related_product_options"><a href="#related_product_data"><?php _e('Related Products', 'woocommerce'); ?></a></li>
 			
 			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woocommerce'); ?></a></li>
 			
@@ -413,7 +413,7 @@ function woocommerce_product_data_box() {
 			
 			<div class="clear"></div>
 		</div>	
-		<div id="upsells_and_crosssells_product_data" class="panel woocommerce_options_panel">
+		<div id="related_product_data" class="panel woocommerce_options_panel">
 			
 			<p class="form-field"><label for="upsell_ids"><?php _e('Up-Sells', 'woocommerce'); ?></label>
 			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>">
@@ -452,6 +452,8 @@ function woocommerce_product_data_box() {
 					}
 				?>
 			</select> <img class="help_tip" data-tip='<?php _e('Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce') ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
+			
+			<?php do_action('woocommerce_product_options_related'); ?>
 					
 		</div>
 		<div id="grouping_product_data" class="panel woocommerce_options_panel">

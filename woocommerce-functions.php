@@ -168,7 +168,7 @@ function woocommerce_list_pages($pages){
  **/
 function woocommerce_nav_menu_items( $items, $args ) {
 	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() ) :
-		$items .= '<li><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
+		$items .= '<li class="logout"><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
 	endif;
 	
     return $items;
@@ -261,7 +261,7 @@ function woocommerce_update_cart_action() {
 function woocommerce_add_to_cart_action( $url = false ) {
 	global $woocommerce;
 
-	if (empty($_REQUEST['add-to-cart']) || !$woocommerce->verify_nonce('add_to_cart', '_REQUEST')) return;
+	if ( empty( $_REQUEST['add-to-cart'] ) ) return;
     
     $added_to_cart 		= false;
     
@@ -797,7 +797,7 @@ function woocommerce_download_product() {
 		
 		$download_file = (int) urldecode($_GET['download_file']);
 		$order_key = urldecode( $_GET['order'] );
-		$email = urldecode( $_GET['email'] );
+		$email = str_replace( ' ', '+', urldecode( $_GET['email'] ) );
 		
 		if (!is_email($email)) :
 			wp_die( __('Invalid email address.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
@@ -1032,136 +1032,6 @@ function woocommerce_download_product() {
 		
 	endif;
 }
-
-/**
- * Google Analytics standard tracking
- **/
-function woocommerce_google_tracking() {
-	global $woocommerce;
-	
-	if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_standard_tracking_enabled') == "no" ) return;
-	
-	$tracking_id = get_option('woocommerce_ga_id');
-	
-	if ( ! $tracking_id ) return;
-	
-	$loggedin 	= ( is_user_logged_in() ) ? 'yes' : 'no';
-	if ( is_user_logged_in() ) {
-		$user_id 		= get_current_user_id();
-		$current_user 	= get_user_by('id', $user_id);
-		$username 		= $current_user->user_login;
-	} else {
-		$user_id 		= '';
-		$username 		= __('Guest', 'woocommerce');
-	}
-	?>
-	<script type="text/javascript">
-	
-		var _gaq = _gaq || [];
-		_gaq.push(
-			['_setAccount', '<?php echo $tracking_id; ?>'],
-			['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
-			['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
-			['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
-			['_trackPageview']
-		);
-		
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-
-	</script>
-	<?php
-}
-			
-/**
- * Google Analytics eCommerce tracking
- **/
-function woocommerce_ecommerce_tracking( $order_id ) {
-	global $woocommerce;
-	
-	if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_ecommerce_tracking_enabled') == "no" ) return;
-	
-	$tracking_id = get_option('woocommerce_ga_id');
-	
-	if ( ! $tracking_id ) return;
-	
-	// Doing eCommerce tracking so unhook standard tracking from the footer
-	remove_action('wp_footer', 'woocommerce_google_tracking');
-	
-	// Get the order and output tracking code
-	$order = new WC_Order($order_id);
-	
-	$loggedin 	= (is_user_logged_in()) ? 'yes' : 'no';
-	if (is_user_logged_in()) {
-		$user_id 		= get_current_user_id();
-		$current_user 	= get_user_by('id', $user_id);
-		$username 		= $current_user->user_login;
-	} else {
-		$user_id 		= '';
-		$username 		= __('Guest', 'woocommerce');
-	}
-	?>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		
-		_gaq.push(
-			['_setAccount', '<?php echo $tracking_id; ?>'],
-			['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
-			['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
-			['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
-			['_trackPageview']
-		);
-		
-		_gaq.push(['_addTrans',
-			'<?php echo $order_id; ?>',           		// order ID - required
-			'<?php bloginfo('name'); ?>',  				// affiliation or store name
-			'<?php echo $order->order_total; ?>',   	// total - required
-			'<?php echo $order->get_total_tax(); ?>',   // tax
-			'<?php echo $order->get_shipping(); ?>',	// shipping
-			'<?php echo $order->billing_city; ?>',      // city
-			'<?php echo $order->billing_state; ?>',     // state or province
-			'<?php echo $order->billing_country; ?>'    // country
-		]);
-		
-		// Order items
-		<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
-			_gaq.push(['_addItem',
-				'<?php echo $order_id; ?>',           	// order ID - required
-				'<?php if (!empty($_product->sku)) 
-							echo __('SKU:', 'woocommerce') . ' ' . $_product->sku; 
-					   else 
-					   		echo $_product->id;
-				?>', // SKU/code - required
-				'<?php echo $item['name']; ?>',        	// product name
-				'<?php if (isset($_product->variation_data)){
-                            echo woocommerce_get_formatted_variation( $_product->variation_data, true ); 
-                       } else {
-                            $out = array();
-                            $categories = get_the_terms($_product->id, 'product_cat');
-                            foreach ( $categories as $category ){
-                                $out[] = $category->name;
-                            }
-                            echo join( "/", $out);
-                       }
-                 ?>',   // category or variation
-				'<?php echo ($item['line_total']/$item['qty']); ?>',         // unit price - required
-				'<?php echo $item['qty']; ?>'           // quantity - required
-			]);
-		<?php endforeach; ?>
-		
-		_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
-		
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
-	<?php
-} 
 
 /**
  * ecommerce tracking with piwik
