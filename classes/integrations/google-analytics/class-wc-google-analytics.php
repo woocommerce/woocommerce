@@ -120,7 +120,7 @@ class WC_Google_Analytics extends WC_Integration {
 		if ( ! $tracking_id ) return;
 		
 		// Doing eCommerce tracking so unhook standard tracking from the footer
-		remove_action('wp_footer', 'woocommerce_google_tracking');
+		remove_action('wp_footer', array( &$this, 'google_tracking_code' ) );
 		
 		// Get the order and output tracking code
 		$order = new WC_Order($order_id);
