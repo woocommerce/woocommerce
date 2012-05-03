@@ -282,10 +282,11 @@ class Woocommerce {
 	 **/
 	function load_plugin_textdomain() {
 		// Note: the first-loaded translation file overrides any following ones if the same translation is present
+		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 		$variable_lang = ( get_option( 'woocommerce_informal_localisation_type' ) == 'yes' ) ? 'informal' : 'formal';
-		load_textdomain( 'woocommerce', WP_LANG_DIR.'/woocommerce/woocommerce-'.get_locale().'.mo' );
+		load_textdomain( 'woocommerce', WP_LANG_DIR.'/woocommerce/woocommerce-'.$locale.'.mo' );
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages/'.$variable_lang );
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages');
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages' );
 	}
 	
 	/**
