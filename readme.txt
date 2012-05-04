@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Replace spaces with + signs in download url after decode (allows + characters in email addresses for downloads)
 * Localization - Slovak translation by Dušan Beleščák
 * Localization - Updated localisations
+* Localization - Updated French translation by mediana (Ticket 1000 in GitHub, woohoo!)
 
 = 1.5.4 - 16/04/2012 =
 * Feature - Allow attributes to be added from the edit product page
