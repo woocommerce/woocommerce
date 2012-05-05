@@ -31,7 +31,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 		$this->availability	= $this->settings['availability'];
 		$this->countries	= $this->settings['countries'];
 		
-		add_action('woocommerce_update_options_shipping_local_pickup', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
 	}
 	
 	function calculate_shipping() {		
