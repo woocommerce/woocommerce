@@ -508,7 +508,7 @@ jQuery(document).ready(function($) {
 			$.uniform.update();
 		}
 		
-	}).focus(function(){
+	}).bind( 'focusin', function() {
 		
 		check_variations( $(this).attr('name') );
 
