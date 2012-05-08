@@ -1,0 +1,59 @@
+#wpadminbar #wp-admin-bar-wootransmitter { float: right; margin-right: 1em; }
+
+#wpadminbar #wp-admin-bar-wootransmitter .ab-submenu li { margin-top: 0.3em; margin-bottom: 0.5em; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item { /*overflow: hidden !important; */color: #333; text-shadow: none !important; padding: 0 6px !important; height: auto; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .message-contents { display: block; margin-left: 10px; width: 270px !important; overflow: hidden !important; word-wrap: break-word; white-space: normal !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .title { color: #666666; text-shadow: none !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .excerpt { font: normal 11px/16px sans-serif !important; clear: both; display: block; text-shadow: none; float: none; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .mark-as-read { float: left; text-indent: -9999px; display: block; width: 16px; height: 16px; padding: 0; margin: 0; margin-top: 8px; margin-left: 5px; opacity: 0.4; background: transparent url('../images/ico-tick.png') no-repeat left top; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .mark-as-read:hover { opacity: 1; }
+#wpadminbar #wp-admin-bar-wootransmitter .ab-item .application { color: #FFFFFF; background: #999999; text-shadow: 1px 1px 1px #333; font-size: 0.75em; letter-spacing: 0.1em; padding: 2px 4px; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }
+
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-no-unread-messages .ab-item, 
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-notifications-disabled .ab-item { height: 75px; text-indent: 100px !important; }
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-no-unread-messages .ab-item { background-image: url(../images/ninja.png); background-repeat: no-repeat; background-position: 10px top; }
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-notifications-disabled .ab-item { background-image: url(../images/ninja-sad.png); background-repeat: no-repeat; background-position: 10px top; }
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-notifications-disabled .ab-item .title, 
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-no-unread-messages .ab-item .title { color: #999999; display: block; margin-top: 20px !important; }
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-notifications-disabled .ab-item:hover, 
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-no-unread-messages .ab-item:hover { background-color: #FFFFFF !important; }
+
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-item { background-image: none !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-sub-wrapper { margin-right: 321px !important; margin-top: -100%; position: absolute; z-index: 2; }
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-sub-wrapper .message-contents .excerpt { color: #666666 !important; font-size: 0.85em !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-sub-wrapper .message-contents a { text-shadow: none !important; display: inline !important; height: auto; padding: 0; margin: 0; font-size: inherit !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-sub-wrapper .message-contents br { line-height: 0.5 !important; }
+#wpadminbar #wp-admin-bar-wootransmitter .menupop .ab-sub-wrapper .ab-item:hover { background-color: #FFFFFF !important; }
+
+#wpadminbar #wp-admin-bar-wootransmitter #wp-admin-bar-notificatiion-status .ab-item a { text-shadow: none !important; text-align: right; font-size: 11px !important; }
+
+#wp-admin-bar-wootransmitter .message-count { padding: 2px 6px !important; margin: 0; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }
+
+#wp-admin-bar-wootransmitter .ab-sub-wrapper { /* max-height: 536px; overflow-y: hidden !important; overflow-x: hidden !important;*/ right: 0; left: auto; min-width: 320px; max-width: 320px; }
+
+#wp-admin-bar-wootransmitter .message-count.off { color: #999999; }
+
+#wp-admin-bar-wootransmitter .message-count.read,
+#wp-admin-bar-wootransmitter.hover .message-count.read {
+    background-image: -ms-linear-gradient(bottom, #d3d3d3, #e7e7e7) !important;
+    background-image: -moz-linear-gradient(bottom, #e7e7e7, #d3d3d3) !important;
+    background-image: -webkit-gradient(linear, left bottom, left top, from(#d3d3d3), to(#e7e7e7)) !important;
+    background-image: -webkit-linear-gradient(bottom, #e7e7e7, #d3d3d3) !important;
+    background-image: linear-gradient(bottom, #d3d3d3, #e7e7e7) !important;
+    -moz-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+#wp-admin-bar-wootransmitter .message-count.unread {
+    background-image: -ms-linear-gradient(bottom, #46729D, #7498B9) !important;
+    background-image: -moz-linear-gradient(bottom, #46729D, #7498B9) !important;
+    background-image: -webkit-gradient(linear, left bottom, left top, from(#46729D), to(#7498B9)) !important;
+    background-image: -webkit-linear-gradient(bottom, #46729D, #7498B9) !important;
+    background-image: linear-gradient(bottom, #46729D, #7498B9) !important;
+    background-color: #7498B9 !important;
+    -moz-box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    color: #fff !important;
+    text-shadow: 0 -1px 0 #24405C;
+}

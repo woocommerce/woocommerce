@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Collect shipping address even when not required option
 * Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount
 * Feature - woocommerce_form_field select type
+* Feature - WooTransmitter integration (security notifications etc from Woo)
 * Tweak - Removed nonces from add to cart urls, this makes them easier to make use of; you can hardcode add to cart links or link to your add to cart link from other places without needing to use WC functions.
 * Tweak - Cart.php display with more filters
 * Tweak - is_product_category and is_product_tag support term argument

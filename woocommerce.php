@@ -87,11 +87,12 @@ class Woocommerce {
 		
 		// Installation
 		if ( is_admin() && !defined('DOING_AJAX') ) $this->install();
-
+		
 		// Actions
 		add_action( 'init', array( &$this, 'init' ), 0 );
 		add_action( 'init', array( &$this, 'include_template_functions' ), 25 );
 		add_action( 'after_setup_theme', array( &$this, 'compatibility' ) );
+		add_action( 'woocommerce_loaded', array( &$this, 'wootransmitter_init' ) );
 		
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -138,6 +139,16 @@ class Woocommerce {
 		include( 'classes/integrations/sharethis/class-wc-sharethis.php' );
 		include( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 		include( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
+		include( 'classes/integrations/wootransmitter/wootransmitter.php' );
+	}
+	
+	/**
+	 * Set up WooTransmitter Notifications
+	 **/
+	function wootransmitter_init() {
+		global $wootransmitter;
+			
+		$wootransmitter->add_app_key( '379cd69e-b1f4-4128-8b66-8f3688ad0fa1', esc_attr( $this->version ) );
 	}
 	
 	/**
