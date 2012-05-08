@@ -19,7 +19,7 @@ class WooThemes_Transmitter {
 		$this->assets_url = $this->get_assets_url( $file );
 		$this->transient_expire_time = 60 * 60 * 24; // 24 Hours.
 		$this->app_keys = array();
-		$this->is_enabled = get_option( $this->token . '-status', true );
+		$this->is_enabled = get_option( $this->token . '-status', false );
 
 		// Initialise the script.
 		add_action( 'init', array( &$this, 'init' ) );
