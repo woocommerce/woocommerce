@@ -28,6 +28,7 @@ function woocommerce_meta_boxes() {
 	// Products
 	add_meta_box( 'woocommerce-product-type', __('Product Type', 'woocommerce'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woocommerce'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
+	remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 	
 	// Excerpt
 	if ( function_exists('wp_editor') ) {

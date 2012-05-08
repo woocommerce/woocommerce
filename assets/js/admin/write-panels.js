@@ -443,7 +443,7 @@ jQuery( function($){
 		// Get value
 		var select_val = $(this).val();
 		
-		$('.hide_if_grouped').show();
+		$('.hide_if_grouped, .hide_if_external').show();
 		$('.show_if_simple, .show_if_variable, .show_if_grouped, .show_if_external').hide();
 		
 		if (select_val=='simple') {
@@ -469,6 +469,7 @@ jQuery( function($){
 			$('.show_if_external').show();
 			$('input#_downloadable').prop('checked', false).change();
 			$('input#_virtual').removeAttr('checked').change();
+			$('.hide_if_external').hide();
 		}
 		
 		$('ul.tabs li:visible').eq(0).find('a').click();
