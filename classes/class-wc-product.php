@@ -47,6 +47,7 @@ class WC_Product {
 	var $max_variation_sale_price;
 	var $featured;
 	var $shipping_class;
+	var $shipping_classes;
 	var $dimensions;
 	
 	/**
@@ -768,12 +769,34 @@ class WC_Product {
 	}
 	
 	/** Returns the product shipping class */
+	/** Deprecated: use get_shipping_classes instead */
 	function get_shipping_class() {
 		if (!$this->shipping_class) :
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
 			if ($classes && !is_wp_error($classes)) $this->shipping_class = current($classes)->slug; else $this->shipping_class = '';
 		endif;
 		return $this->shipping_class;
+	}
+	
+	/**
+	 * Returns all the shipping classes for the product.
+	 *
+	 * @return array of product_shipping_class term objects
+	 */
+	function get_shipping_classes() {
+		// Return from cache if possible
+		if ( $this->shipping_classes !== NULL )
+			return $this->shipping_classes;
+
+		// Load all shipping classes
+		$this->shipping_classes = get_the_terms( $this->id, 'product_shipping_class' );
+
+		// Always return an array, also if no shipping classes were found
+		if ( ! $this->shipping_classes ) {
+			$this->shipping_classes = array();
+		}
+
+		return $this->shipping_classes;
 	}
 	
 	/** Get and return related products */
