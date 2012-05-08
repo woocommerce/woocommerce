@@ -743,6 +743,7 @@ function woocommerce_admin_fields($options) {
                 			if ( empty( $colors['secondary'] ) ) $colors['secondary'] = '#f7f6f7';
                 			if ( empty( $colors['highlight'] ) ) $colors['highlight'] = '#85ad74';
                 			if ( empty( $colors['content_bg'] ) ) $colors['content_bg'] = '#ffffff';
+                            if ( empty( $colors['subtext'] ) ) $colors['subtext'] = '#777777';
                 			
                 			// Show inputs
                     		woocommerce_frontend_css_color_picker( __('Primary', 'woocommerce'), 'woocommerce_frontend_css_primary', $colors['primary'], __('Call to action buttons/price slider/layered nav UI', 'woocommerce') );
