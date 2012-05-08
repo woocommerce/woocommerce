@@ -158,6 +158,7 @@ function woocommerce_custom_product_columns( $column ) {
 			/* Custom inline data for woocommerce */
 			echo '
 				<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
+					<div class="menu_order">' . $post->menu_order . '</div>
 					<div class="sku">' . $product->sku . '</div>
 					<div class="regular_price">' . $product->regular_price . '</div>
 					<div class="sale_price">' . $product->sale_price . '</div>
@@ -944,3 +945,22 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 	// Clear transient
 	$woocommerce->clear_product_transients( $post_id ); 
 }  
+
+/**
+ * Product sorting
+ *
+ * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+ **/
+add_filter( 'views_edit-product', 'woocommerce_default_sorting_link' );
+
+function woocommerce_default_sorting_link( $views ) {
+	global $post_type, $wp_query;
+	
+	$class = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
+	$query_string = remove_query_arg(array( 'orderby', 'order' ));
+	$query_string = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
+	$query_string = add_query_arg( 'order', urlencode('ASC'), $query_string );
+	$views['byorder'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Default sorting', 'woocommerce') . '</a>';
+	
+	return $views;
+}

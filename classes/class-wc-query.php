@@ -205,10 +205,15 @@ class WC_Query {
 				$order = 'asc';
 				$meta_key = '_price';
 			break;
-			default :
+			case 'title' :
 				$orderby = 'title';
 				$order = 'asc';
 				$meta_key = '';
+			break;
+			default :
+				$orderby = 'menu_order title';
+				$order = 'asc';
+				$meta_key = '';			
 			break;
 		endswitch;
 		

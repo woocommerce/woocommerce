@@ -1003,6 +1003,8 @@ function woocommerce_upsell_crosssell_search_products() {
 /**
  * Ajax request handling for categories ordering
  */
+add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
+
 function woocommerce_term_ordering() {
 	global $wpdb;
 	
@@ -1022,4 +1024,63 @@ function woocommerce_term_ordering() {
 		die;	
 	}
 }
-add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
+
+/**
+ * Ajax request handling for product ordering
+ *
+ * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+ */
+add_action( 'wp_ajax_woocommerce_product_ordering', 'woocommerce_product_ordering' );
+
+function woocommerce_product_ordering() {
+	// check permissions again and make sure we have what we need
+	if ( ! current_user_can('edit_others_pages') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) )
+		die(-1);
+	
+	// real post?
+	if ( ! $post = get_post( $_POST['id'] ) )
+		die(-1);
+	
+	$previd = isset( $_POST['previd'] ) ? $_POST['previd'] : false;
+	$nextid = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
+	$new_pos = array(); // store new positions for ajax
+	
+	$siblings = get_posts(array( 
+		'numberposts' 	=> -1, 
+		'post_type' 	=> 'product', 
+		'post_status' 	=> 'publish,pending,draft,future,private', 
+		'orderby' 		=> 'menu_order title', 
+		'order' 		=> 'ASC', 
+		'exclude' 		=> $post->ID 
+	)); // fetch all the siblings (relative ordering)
+	
+	$menu_order = 0;
+		
+	foreach( $siblings as $sibling ) :
+	
+		// if this is the post that comes after our repositioned post, set our repositioned post position and increment menu order
+		if ( $nextid == $sibling->ID ) {
+			wp_update_post(array( 'ID' => $post->ID, 'menu_order' => $menu_order ));
+			$new_pos[$post->ID] = $menu_order;
+			$menu_order++;
+		}
+		
+		// if repositioned post has been set, and new items are already in the right order, we can stop
+		if ( isset( $new_pos[$post->ID] ) && $sibling->menu_order >= $menu_order )
+			break;
+		
+		// set the menu order of the current sibling and increment the menu order
+		wp_update_post(array( 'ID' => $sibling->ID, 'menu_order' => $menu_order ));
+		$new_pos[$sibling->ID] = $menu_order;
+		$menu_order++;
+		
+		if ( ! $nextid && $previd == $sibling->ID ) {
+			wp_update_post(array( 'ID' => $post->ID, 'menu_order' => $menu_order ));
+			$new_pos[$post->ID] = $menu_order;
+			$menu_order++;
+		}
+		
+	endforeach;
+	
+	die( json_encode($new_pos) );
+}

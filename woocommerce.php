@@ -770,7 +770,7 @@ class Woocommerce {
 				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
-				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
+				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
 				'has_archive' 			=> $base_slug,
 				'show_in_nav_menus' 	=> false
 			)
