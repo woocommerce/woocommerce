@@ -570,6 +570,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
+	            'update_count_callback' => '_update_post_term_count',
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
@@ -707,6 +708,7 @@ class Woocommerce {
 				        array('product'),
 				        array(
 				            'hierarchical' 				=> $hierarchical,
+	            			'update_count_callback' 	=> '_update_post_term_count',
 				            'labels' => array(
 				                    'name' 						=> $label,
 				                    'singular_name' 			=> $label,

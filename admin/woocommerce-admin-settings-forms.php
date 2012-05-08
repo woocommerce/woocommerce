@@ -748,11 +748,8 @@ function woocommerce_admin_fields($options) {
                 			// Show inputs
                     		woocommerce_frontend_css_color_picker( __('Primary', 'woocommerce'), 'woocommerce_frontend_css_primary', $colors['primary'], __('Call to action buttons/price slider/layered nav UI', 'woocommerce') );
                     		woocommerce_frontend_css_color_picker( __('Secondary', 'woocommerce'), 'woocommerce_frontend_css_secondary', $colors['secondary'], __('Buttons and tabs', 'woocommerce') );
-                    		woocommerce_frontend_css_color_picker( __('Highlight', 'woocommerce'), 'woocommerce_frontend_css_highlight', $colors['highlight'], __('Price labels and Sale Flashes', 'woocommerce') );
-                    		
-                    		echo '<div class="color_box_clear clear"></div>';
-                    		
-                    		woocommerce_frontend_css_color_picker( __('Content BG', 'woocommerce'), 'woocommerce_frontend_css_content_bg', $colors['content_bg'], __('Your themes page background - used for tab active states', 'woocommerce') );
+                    		woocommerce_frontend_css_color_picker( __('Highlight', 'woocommerce'), 'woocommerce_frontend_css_highlight', $colors['highlight'], __('Price labels and Sale Flashes', 'woocommerce') );                    		
+                    		woocommerce_frontend_css_color_picker( __('Content', 'woocommerce'), 'woocommerce_frontend_css_content_bg', $colors['content_bg'], __('Your themes page background - used for tab active states', 'woocommerce') );
                     		woocommerce_frontend_css_color_picker( __('Subtext', 'woocommerce'), 'woocommerce_frontend_css_subtext', $colors['subtext'], __('Used for certain text and asides - breadcrumbs, small text etc.', 'woocommerce') );
                     		                    
                     	} else {
