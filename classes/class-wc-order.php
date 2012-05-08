@@ -313,7 +313,7 @@ class WC_Order {
 	
 	/** Get line subtotal - this is the cost before discount */
 	function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
-		if ($inc_tax) :
+		if ( $inc_tax ) :
 			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		else :
 			$price = $item['line_subtotal'];
@@ -371,9 +371,9 @@ class WC_Order {
 		
 		if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
 		
-		if ($this->display_cart_ex_tax || !$this->prices_include_tax) :	
-			if ($this->prices_include_tax) $ex_tax_label = 1; else $ex_tax_label = 0;
-			$subtotal = woocommerce_price( $this->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ));
+		if ( $this->display_cart_ex_tax || ! $this->prices_include_tax ) :	
+			if ( $this->prices_include_tax ) $ex_tax_label = 1; else $ex_tax_label = 0;
+			$subtotal = woocommerce_price( $this->get_line_subtotal( $item ), array('ex_tax_label' => $ex_tax_label ) );
 		else :
 			$subtotal = woocommerce_price( $this->get_line_subtotal( $item, true ) );
 		endif;
@@ -395,21 +395,21 @@ class WC_Order {
 		
 		$subtotal = 0;
 		
-		if ( !$compound ) :
+		if ( ! $compound ) :
 
 			foreach ($this->get_items() as $item) :
 				
-				if (!isset($item['line_subtotal']) || !isset($item['line_subtotal_tax'])) return;
+				if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) return;
 				
 				$subtotal += $this->get_line_subtotal( $item );
 				
-				if (!$this->display_cart_ex_tax) :
+				if ( ! $this->display_cart_ex_tax ) :
 					$subtotal += $item['line_subtotal_tax'];
 				endif;
 
 			endforeach;
-			
-			$subtotal = woocommerce_price($subtotal);
+					
+			$subtotal = woocommerce_price( $subtotal );
 			
 			if ($this->display_cart_ex_tax && $this->prices_include_tax) :	
 				$subtotal .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
@@ -417,7 +417,7 @@ class WC_Order {
 		
 		else :
 			
-			if ($this->prices_include_tax) return;
+			if ( $this->prices_include_tax ) return;
 			
 			foreach ($this->get_items() as $item) :
 				
@@ -429,13 +429,16 @@ class WC_Order {
 			$subtotal += $this->get_shipping();
 		
 			// Remove non-compound taxes
-			foreach ($this->get_taxes() as $tax) :
+			foreach ( $this->get_taxes() as $tax ) :
 				
 				if (isset($tax['compound']) && $tax['compound']) continue;
 				
 				$subtotal = $subtotal + $tax['cart_tax'] + $tax['shipping_tax'];
 			
 			endforeach;
+			
+			// Remove discounts
+			$subtotal = $subtotal - $this->get_cart_discount();
 			
 			$subtotal = woocommerce_price($subtotal);
 
