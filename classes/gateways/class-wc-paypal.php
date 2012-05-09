@@ -274,7 +274,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			
 			$paypal_args['item_name_1'] 	= sprintf( __('Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
 			$paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
@@ -566,7 +566,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case "refunded" :
 	            
 	            	// Only handle full refunds, not partial
-	            	if ($order->get_order_total() == ($posted['mc_gross']*-1)) {
+	            	if ($order->get_total() == ($posted['mc_gross']*-1)) {
 	            	
 		            	// Mark order as refunded
 		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );

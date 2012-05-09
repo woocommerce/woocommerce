@@ -260,21 +260,21 @@ class WC_Order {
 
 	/** Gets shipping and product tax */
 	function get_total_tax() {
-		return $this->order_tax + $this->order_shipping_tax;
+		return apply_filters( 'woocommerce_order_amount_total_tax', $this->order_tax + $this->order_shipping_tax );
 	}
 	
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_cart_discount() {
-		return $this->cart_discount; 
+		return apply_filters( 'woocommerce_order_amount_cart_discount', $this->cart_discount ); 
 	}
 	
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_order_discount() {
-		return $this->order_discount; 
+		return apply_filters( 'woocommerce_order_amount_order_discount', $this->order_discount ); 
 	}
 	
 	/**
@@ -282,23 +282,23 @@ class WC_Order {
 	 */
 	function get_total_discount() {
 		if ($this->order_discount || $this->cart_discount) :
-			return $this->order_discount + $this->cart_discount; 
+			return apply_filters( 'woocommerce_order_amount_total_discount', $this->order_discount + $this->cart_discount ); 
 		endif;
 	}
 	
 	/** Gets shipping */
 	function get_shipping() {
-		return $this->order_shipping;
+		return apply_filters( 'woocommerce_order_amount_shipping', $this->order_shipping );
 	}
 	
 	/** Gets shipping tax amount */
 	function get_shipping_tax() {
-		return $this->order_shipping_tax;
+		return apply_filters( 'woocommerce_order_amount_shipping_tax', $this->order_shipping_tax );
 	}
 	
 	/** Gets order total */
-	function get_order_total() {
-		return $this->order_total;
+	function get_total() {
+		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
 	}
 		
 	/** Get item subtotal - this is the cost before discount */
@@ -308,7 +308,7 @@ class WC_Order {
 		else :
 			$price = ( $item['line_subtotal'] / $item['qty'] );
 		endif;
-		return ($round) ? number_format( $price, 2, '.', '') : $price;
+		return apply_filters( 'woocommerce_order_amount_item_subtotal', ($round) ? number_format( $price, 2, '.', '') : $price );
 	}
 	
 	/** Get line subtotal - this is the cost before discount */
@@ -318,7 +318,7 @@ class WC_Order {
 		else :
 			$price = $item['line_subtotal'];
 		endif;
-		return ($round) ? number_format( $price, 2, '.', '') : $price;
+		return apply_filters( 'woocommerce_order_amount_line_subtotal', ($round) ? number_format( $price, 2, '.', '') : $price );
 	}
 	
 	/** Calculate item cost - useful for gateways */
@@ -328,30 +328,35 @@ class WC_Order {
 		else :
 			$price = $item['line_total'] / $item['qty'];
 		endif;
-		return ($round) ? number_format( $price, 2, '.', '') : $price;
+		return apply_filters( 'woocommerce_order_amount_item_total', ($round) ? number_format( $price, 2, '.', '') : $price );
 	}
 	
 	/** Calculate item tax - useful for gateways */
 	function get_item_tax( $item, $round = true ) {
 		$price = $item['line_tax'] / $item['qty'];
-		return ($round) ? number_format( $price, 2, '.', '') : $price;
+		return apply_filters( 'woocommerce_order_amount_item_tax', ($round) ? number_format( $price, 2, '.', '') : $price );
 	}
 	
 	/** Calculate line total - useful for gateways */
 	function get_line_total( $item, $inc_tax = false ) {
 		if ($inc_tax) :
-			return number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '');
+			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] + $item['line_tax'] , 2, '.', '') );
 		else :
-			return number_format( $item['line_total'] , 2, '.', '');
+			return apply_filters( 'woocommerce_order_amount_line_total', number_format( $item['line_total'] , 2, '.', '') );
 		endif;
 	}
 	
 	/** Calculate line tax - useful for gateways */
 	function get_line_tax( $item ) {
-		return number_format( $item['line_tax'], 2, '.', '');
+		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', '') );
 	}
 	
 	/** Depreciated functions */
+	
+	function get_order_total() {
+		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
+	}
+	
 	function get_item_cost( $item, $inc_tax = false ) {
 		_deprecated_function( __FUNCTION__, '1.4', 'get_item_total()' );
 		return $this->get_item_total( $item, $inc_tax );
