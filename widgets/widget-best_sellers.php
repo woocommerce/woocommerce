@@ -120,7 +120,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
-		if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) $hide_free_checked = ' checked="yes';
+		if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) $hide_free_checked = ' checked="checked"';
 
 		?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
