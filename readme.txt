@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
@@ -147,7 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.5 =
+= 1.5.5 - 09/05/2012 =
 * Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
 * Feature - Settings now include colours for things like buttons and tabs.
 * Feature - New integration section which allows other class-based integrations to be added.
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - New WC_Order Class Formatting Filters and Function for totals (thanks thenbrent)
 * Tweak - Free shipping availability check to deal with min amount and coupon rules together
 * Tweak - Shipping class added to product data panel instead of separate
+* Tweak - After getting a shipping quote, use the shipping address for taxes on the cart page
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers

@@ -1124,7 +1124,7 @@ class WC_Cart {
 							 * 	OR
 							 * ADJUST TAX - Checkout calculations when a tax class is modified
 							 */
-							if ( ( $woocommerce->customer->is_customer_outside_base() && defined('WOOCOMMERCE_CHECKOUT') ) || ( $_product->get_tax_class() !== $_product->tax_class ) ) {
+							if ( ( $woocommerce->customer->is_customer_outside_base() && ( defined('WOOCOMMERCE_CHECKOUT') || $woocommerce->customer->has_calculated_shipping() ) ) || ( $_product->get_tax_class() !== $_product->tax_class ) ) {
 								
 								// Get tax rate for the store base, ensuring we use the unmodified tax_class for the product
 								$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );
@@ -1416,7 +1416,7 @@ class WC_Cart {
 			if ( ! is_array( $this->cart_contents ) ) return false;
 			
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
-				if ( empty( $_SESSION['calculated_shipping'] ) ) {
+				if ( ! $woocommerce->customer->has_calculated_shipping() ) {
 					if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() ) return false;
 				}
 			}

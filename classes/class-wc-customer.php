@@ -39,6 +39,16 @@ class WC_Customer {
 		endif;
 	}
 	
+	/**
+	 * has_calculated_shipping function.
+	 * 
+	 * @access public
+	 * @return bool
+	 */
+	function has_calculated_shipping() {
+		if ( ! empty( $_SESSION['calculated_shipping'] ) && $_SESSION['calculated_shipping'] ) return true; else return false;
+	}
+	
 	/** set location to base location */
 	function set_to_base() {
 		$default = get_option('woocommerce_default_country');

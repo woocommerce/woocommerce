@@ -7,11 +7,11 @@ global $woocommerce;
 
 $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 ?>
-<div class="cart_totals <?php if ( isset( $_SESSION['calculated_shipping'] ) && $_SESSION['calculated_shipping'] ) echo 'calculated_shipping'; ?>">
+<div class="cart_totals <?php if ( $woocommerce->customer->has_calculated_shipping() ) echo 'calculated_shipping'; ?>">
 	
 	<?php do_action('woocommerce_before_cart_totals'); ?>
 	
-	<?php if ( ! $woocommerce->shipping->enabled || $available_methods || ! $woocommerce->customer->get_shipping_country() || empty( $_SESSION['calculated_shipping'] ) ) : ?>
+	<?php if ( ! $woocommerce->shipping->enabled || $available_methods || ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->has_calculated_shipping() ) : ?>
 	
 		<h2><?php _e('Cart Totals', 'woocommerce'); ?></h2>
 		<table cellspacing="0" cellpadding="0">
@@ -98,7 +98,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php } ?>
 				
 				<?php 
-					if (get_option('woocommerce_display_cart_taxes')=='yes' && $woocommerce->cart->get_cart_tax()) :
+					if ( get_option('woocommerce_display_cart_taxes') == 'yes' && $woocommerce->cart->get_cart_tax() ) :
 						
 						$taxes = $woocommerce->cart->get_taxes();
 						
@@ -149,7 +149,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							<?php
 						
 						endif;	
-					elseif (get_option('woocommerce_display_cart_taxes_if_zero')=='yes') :
+					elseif ( get_option('woocommerce_display_cart_taxes_if_zero') == 'yes' ) :
 						
 						?>
 						<tr class="tax">
@@ -185,18 +185,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				
 			</tbody>
 		</table>
+		
 		<p><small><?php 
-			if ($woocommerce->customer->is_customer_outside_base()) : 
-				
-				$estimated_text = ' ' . sprintf(__('(taxes estimated for %s)', 'woocommerce'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woocommerce') ); 
-			
-			else :
-			
-				$estimated_text = '';
-				
-			endif;
+		
+			$estimated_text = ( $woocommerce->customer->is_customer_outside_base() && ! $woocommerce->customer->has_calculated_shipping() ) ? sprintf( ' ' . __('(taxes estimated for %s)', 'woocommerce'), $woocommerce->countries->estimated_for_prefix() . __($woocommerce->countries->countries[ $woocommerce->countries->get_base_country() ], 'woocommerce') ) : '';
 			
 			printf(__('Note: Shipping and taxes are estimated%s and will be updated during checkout based on your billing and shipping information.', 'woocommerce'), $estimated_text ); 
+			
 		?></small></p>
 	
 	<?php elseif( $woocommerce->cart->needs_shipping() ) : ?>
