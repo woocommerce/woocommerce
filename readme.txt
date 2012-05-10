@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.5.6 =
 * Tweak - When the count of available shipping methods changes, reset to default
+* Tweak - Optimisations to monthly and product reports
 
 = 1.5.5 - 10/05/2012 =
 * Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
