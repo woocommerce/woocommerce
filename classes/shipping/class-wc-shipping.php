@@ -99,10 +99,7 @@ class WC_Shipping {
 		$this->shipping_label 	= null;
 		$this->packages 		= array();
 		$_cheapest_cost = $_cheapest_method = $chosen_method = '';
-		
-		if ( isset( $_SESSION['_chosen_shipping_method'] ) ) 
-			$chosen_method = $_SESSION['_chosen_shipping_method'];
-				
+						
 		// Calculate costs for passed packages
 		$package_keys 		= array_keys( $packages );
 		$package_keys_size 	= sizeof( $package_keys );
@@ -112,6 +109,12 @@ class WC_Shipping {
 		// Get available methods (in this case methods for all packages)
 		$_available_methods = $this->get_available_shipping_methods();
 		
+		// Get chosen method
+		if ( ! empty( $_SESSION['_chosen_shipping_method'] ) && isset( $_SESSION['_available_methods_count'] ) && $_SESSION['_available_methods_count'] == sizeof( $_available_methods ) ) 
+			$chosen_method = $_SESSION['_chosen_shipping_method'];
+		
+		$_SESSION['_available_methods_count'] = sizeof( $_available_methods );
+
 		if ( sizeof( $_available_methods ) > 0 ) {
 		
 			// If not set, set a default
