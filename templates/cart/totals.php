@@ -111,7 +111,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								if ($tax==0) continue;
 								?>
 								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-									<th><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+									<th>
+										<?php
+										if ( get_option( 'woocommerce_display_totals_excluding_tax' ) == 'no' && get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
+											_e( 'incl.', 'woocommerce' );
+										}
+										echo $woocommerce->cart->tax->get_rate_label( $key );
+										?>
+									</th>
 									<td><?php echo woocommerce_price($tax); ?></td>
 								</tr>
 								<?php
@@ -132,7 +139,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								if ($tax==0) continue;
 								?>
 								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-									<th><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+									<th>
+										<?php
+										if ( get_option( 'woocommerce_display_totals_excluding_tax' ) == 'no' && get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
+											_e( 'incl.', 'woocommerce' );
+										}
+										echo $woocommerce->cart->tax->get_rate_label( $key );
+										?>
+									</th>
 									<td><?php echo woocommerce_price($tax); ?></td>
 								</tr>
 								<?php
