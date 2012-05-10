@@ -774,7 +774,7 @@ class Woocommerce {
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
 				'has_archive' 			=> $base_slug,
-				'show_in_nav_menus' 	=> false
+				'show_in_nav_menus' 	=> true
 			)
 		);
 		
