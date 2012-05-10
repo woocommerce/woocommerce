@@ -481,12 +481,12 @@ class WC_Checkout {
 				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
 				update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method);
 				update_post_meta( $order_id, '_payment_method_title', 	$payment_method);
-				update_post_meta( $order_id, '_order_shipping', 		number_format($woocommerce->cart->shipping_total, 2, '.', ''));
-				update_post_meta( $order_id, '_order_discount', 		number_format($woocommerce->cart->get_order_discount_total(), 2, '.', ''));
-				update_post_meta( $order_id, '_cart_discount', 			number_format($woocommerce->cart->get_cart_discount_total(), 2, '.', ''));
-				update_post_meta( $order_id, '_order_tax', 				number_format($woocommerce->cart->tax_total, 2, '.', ''));
-				update_post_meta( $order_id, '_order_shipping_tax', 	number_format($woocommerce->cart->shipping_tax_total, 2, '.', ''));
-				update_post_meta( $order_id, '_order_total', 			number_format($woocommerce->cart->total, 2, '.', ''));
+				update_post_meta( $order_id, '_order_shipping', 		number_format( (float) $woocommerce->cart->shipping_total, 2, '.', '' ));
+				update_post_meta( $order_id, '_order_discount', 		number_format( (float) $woocommerce->cart->get_order_discount_total(), 2, '.', '' ));
+				update_post_meta( $order_id, '_cart_discount', 			number_format( (float) $woocommerce->cart->get_cart_discount_total(), 2, '.', '' ));
+				update_post_meta( $order_id, '_order_tax', 				number_format( (float) $woocommerce->cart->tax_total, 2, '.', '' ));
+				update_post_meta( $order_id, '_order_shipping_tax', 	number_format( (float) $woocommerce->cart->shipping_tax_total, 2, '.', '' ));
+				update_post_meta( $order_id, '_order_total', 			number_format( (float) $woocommerce->cart->total, 2, '.', '' ));
 				update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ));
 				update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
 				update_post_meta( $order_id, '_order_items', 			$order_items );

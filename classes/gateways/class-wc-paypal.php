@@ -444,7 +444,7 @@ class WC_Paypal extends WC_Payment_Gateway {
         	'body' 			=> $received_values,
         	'sslverify' 	=> false,
         	'timeout' 		=> 30,
-        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
+        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
         );
 
         // Get url
@@ -543,11 +543,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 					endif;
 					
 					 // Store PP Details
-	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
-	                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
-	                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
+	                if ( ! empty( $posted['payer_email'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email'] );
+	                if ( ! empty( $posted['txn_id'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id'] );
+	                if ( ! empty( $posted['first_name'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name'] );
+	                if ( ! empty( $posted['last_name'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name'] );
+	                if ( ! empty( $posted['payment_type'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type'] ); 
 	            	
 	            	// Payment completed
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );

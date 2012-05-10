@@ -147,7 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.5 - 09/05/2012 =
+= 1.5.5 - 10/05/2012 =
 * Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
 * Feature - Settings now include colours for things like buttons and tabs.
 * Feature - New integration section which allows other class-based integrations to be added.
