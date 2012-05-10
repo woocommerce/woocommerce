@@ -692,75 +692,64 @@ function woocommerce_monthly_sales() {
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
 	
-	$total_sales = 0;
-	$total_orders = 0;
-	$order_items = 0;
-	
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
-
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-	
-	$order_counts = array();
-	$order_amounts = array();
+	$total_sales = $total_orders = $order_items = 0;
+	$order_counts = $order_amounts = array();
 
 	// Blank date ranges to begin
 	$count = 0;
 	$months = ($end_date - $start_date) / (60 * 60 * 24 * 7 * 4);
 
-	while ($count < $months) :
+	while ( $count < $months ) :
 		$time = strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01').'000';
-
-		$order_counts[$time] = 0;
-		$order_amounts[$time] = 0;
-
+		
+		$month = date( 'Ym', strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01') );
+		
+		$months_orders = $wpdb->get_row("
+			SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
+			
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+	
+			WHERE 	meta.meta_key 		= '_order_total'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		");	
+		
+		$order_counts[$time] 	= (int) $months_orders->total_orders;
+		$order_amounts[$time] 	= (float) $months_orders->total_sales;
+		
+		$total_orders			+= (int) $months_orders->total_orders;
+		$total_sales			+= (float) $months_orders->total_sales;
+		
+		// Count order items
+		$order_items_serialized = $wpdb->get_col("
+			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
+			
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+	
+			WHERE 	meta.meta_key 		= '_order_items'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		");
+		
+		if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
+			$order_items_array = maybe_unserialize($order_items_array);
+			if (is_array($order_items_array)) foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+		}
+		
 		$count++;
 	endwhile;
-	
-	if ($orders) :
-		foreach ($orders as $order) :
-			
-			$order_total = get_post_meta($order->ID, '_order_total', true);			
-			$time = strtotime(date('Ym', strtotime($order->post_date)).'01').'000';
-			
-			$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
-			foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
-			$total_sales += $order_total;
-			$total_orders++;
-			
-			if (isset($order_counts[$time])) :
-				$order_counts[$time]++;
-			else :
-				$order_counts[$time] = 1;
-			endif;
-			
-			if (isset($order_amounts[$time])) :
-				$order_amounts[$time] = $order_amounts[$time] + $order_total;
-			else :
-				$order_amounts[$time] = (float) $order_total;
-			endif;
-			
-		endforeach;
-	endif;
-	
-	remove_filter( 'posts_where', 'orders_within_range' );
-	
 	?>
 	<form method="post" action="">
 		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label> 
