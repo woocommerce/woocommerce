@@ -92,7 +92,6 @@ class Woocommerce {
 		add_action( 'init', array( &$this, 'init' ), 0 );
 		add_action( 'init', array( &$this, 'include_template_functions' ), 25 );
 		add_action( 'after_setup_theme', array( &$this, 'compatibility' ) );
-		add_action( 'woocommerce_loaded', array( &$this, 'wootransmitter_init' ) );
 		
 		// Loaded action
 		do_action( 'woocommerce_loaded' );
@@ -139,17 +138,6 @@ class Woocommerce {
 		include( 'classes/integrations/sharethis/class-wc-sharethis.php' );
 		include( 'classes/integrations/sharedaddy/class-wc-sharedaddy.php' );
 		include( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
-	}
-	
-	/**
-	 * Set up WooTransmitter Notifications
-	 **/
-	function wootransmitter_init() {
-		// Include Woo Transmitter
-		include( 'classes/integrations/wootransmitter/wootransmitter.php' );
-	
-		// Add our app key
-		$GLOBALS['wootransmitter']->add_app_key( '379cd69e-b1f4-4128-8b66-8f3688ad0fa1', esc_attr( $this->version ) );
 	}
 	
 	/**
@@ -1356,7 +1344,6 @@ class Woocommerce {
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
 		
-		delete_transient('wootransmitter-messages');
 		delete_transient('wc_products_onsale');
 		delete_transient('wc_hidden_product_ids');
 		delete_transient('wc_hidden_product_ids_search');
