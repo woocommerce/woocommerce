@@ -45,20 +45,20 @@ class WC_Google_Analytics extends WC_Integration {
 				'title' 			=> __('Google Analytics ID', 'woocommerce'),
 				'description' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce'),
 				'type' 				=> 'text',
-		    	'default' 			=> get_option('woocommerce_ga_id')
+		    	'default' 			=> get_option('woocommerce_ga_id') // Backwards compat
 			),
 			'ga_standard_tracking_enabled' => array(  
 				'title' 			=> __('Tracking code', 'woocommerce'),
 				'label' 			=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce'),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
-				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'
+				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
-				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no' 
+				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
 			)
 		);
 		
@@ -70,9 +70,9 @@ class WC_Google_Analytics extends WC_Integration {
 	function google_tracking_code() {
 		global $woocommerce;
 		
-		if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_standard_tracking_enabled') == "no" ) return;
+		if ( is_admin() || current_user_can('manage_options') || $this->ga_standard_tracking_enabled == "no" ) return;
 		
-		$tracking_id = get_option('woocommerce_ga_id');
+		$tracking_id = $this->ga_id;
 		
 		if ( ! $tracking_id ) return;
 		
@@ -113,9 +113,9 @@ class WC_Google_Analytics extends WC_Integration {
 	function ecommerce_tracking_code( $order_id ) {
 		global $woocommerce;
 		
-		if ( is_admin() || current_user_can('manage_options') || get_option('woocommerce_ga_ecommerce_tracking_enabled') == "no" ) return;
+		if ( is_admin() || current_user_can('manage_options') || $this->ga_ecommerce_tracking_enabled == "no" ) return;
 		
-		$tracking_id = get_option('woocommerce_ga_id');
+		$tracking_id = $this->ga_id;
 		
 		if ( ! $tracking_id ) return;
 		
