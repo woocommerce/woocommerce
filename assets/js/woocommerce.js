@@ -411,20 +411,25 @@ jQuery(document).ready(function($) {
         	 $('.product_meta').find('.sku').text('');
         }
         
+        $('.single_variation_wrap').find('.quantity').show();
+        
         if (variation.min_qty) {
         	$('.single_variation_wrap').find('input[name=quantity]').attr('data-min', variation.min_qty).val(variation.min_qty);
         } else {
         	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-min');
         }
         
-        if (variation.max_qty) {
+        if ( variation.max_qty ) {
         	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', variation.max_qty);
         } else {
         	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-max');
         }
         
-        if (variation.is_virtual=='yes' && variation.is_downloadable=='yes' && woocommerce_params.option_limit_download_qty=='yes') {
-        	$('.single_variation_wrap').find('input[name=quantity]').attr('data-max', 1);
+        alert(variation.is_sold_individually);
+        
+        if ( variation.is_sold_individually == 'yes' ) {
+        	$('.single_variation_wrap').find('input[name=quantity]').val('1');
+        	$('.single_variation_wrap').find('.quantity').hide();
         }
 
         $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown

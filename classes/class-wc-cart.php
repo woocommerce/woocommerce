@@ -615,6 +615,10 @@ class WC_Cart {
 			else
 				$product_data = new WC_Product( $product_id );
 			
+			// Force quantity to 1 if sold individually
+			if ( $product_data->is_sold_individually() )
+				$quantity = 1;
+			
 			// Type/Exists check
 			if ( $product_data->is_type('external') || ! $product_data->exists() ) {
 				$woocommerce->add_error( __('This product cannot be purchased.', 'woocommerce') );
@@ -637,9 +641,11 @@ class WC_Cart {
 			}
 			
 			// Downloadable/virtual qty check
-			if ( get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $product_data->is_downloadable() && $product_data->is_virtual() ) {
-				$qty = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
-				if ( $qty > 1 ) {
+			if ( $product_data->is_sold_individually() ) {
+				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
+				
+				// If its greater than 1, its already in the cart
+				if ( $in_cart_quantity > 1 ) {
 					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
 					return false;
 				}
