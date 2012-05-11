@@ -1313,8 +1313,6 @@ function woocommerce_customer_overview() {
 		$count++;
 	endwhile;
 	
-	
-	
 	foreach ($customers as $customer) :
 		if (strtotime($customer->user_registered) > $start_date) :
 			$time = strtotime(date('Ymd', strtotime($customer->user_registered))).'000';
