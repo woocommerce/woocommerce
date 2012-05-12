@@ -885,6 +885,8 @@ function woocommerce_product_type_box() {
 	
 	woocommerce_wp_checkbox( array( 'id' => '_downloadable', 'wrapper_class' => 'show_if_simple', 'label' => __('Downloadable', 'woocommerce'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce') ) );
 	
+	do_action('woocommerce_product_options_product_type');
+	
 	echo '</div>';
 			
 }
