@@ -535,15 +535,6 @@ function woocommerce_grant_access_to_download() {
 	$order = new WC_Order( $order_id );
 	
 	$user_email = $order->billing_email;
-				
-	if ($order->user_id>0) :
-		$user_info = get_userdata($order->user_id);
-		if ($user_info->user_email) :
-			$user_email = $user_info->user_email;
-		endif;
-	else :
-		$order->user_id = 0;
-	endif;
 	
 	$limit = trim(get_post_meta($product_id, '_download_limit', true));
 	$expiry = trim(get_post_meta($product_id, '_download_expiry', true));
@@ -559,7 +550,7 @@ function woocommerce_grant_access_to_download() {
 
     $data = array(
         'product_id' 			=> $product_id, 
-        'user_id' 				=> $order->user_id,
+        'user_id' 				=> (int) $order->user_id,
         'user_email' 			=> $user_email,
         'order_id' 				=> $order->id,
         'order_key' 			=> $order->order_key,
