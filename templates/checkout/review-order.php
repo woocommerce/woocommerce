@@ -49,7 +49,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							$method->full_label = esc_html( $method->label );
 
 							if ( $method->cost > 0 ) {
-								$method->full_label .= ' &mdash; ';
+								$method->full_label .= ': ';
 
 								// Append price to label using the correct tax settings
 								if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
@@ -72,17 +72,30 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							echo $method->full_label;
 							echo '<input type="hidden" name="shipping_method" id="shipping_method" value="'.esc_attr( $method->id ).'">';
 
-						// Show multiple shipping methods in a select list
+						// Show multiple shipping methods
 						} else {
 
-							echo '<select name="shipping_method" id="shipping_method">';
-							foreach ( $available_methods as $method ) {
-								echo '<option value="'.esc_attr( $method->id ).'" '.selected( $method->id, $_SESSION['_chosen_shipping_method'], false).'>';
-								echo strip_tags( $method->full_label );
-								echo '</option>';
-							}
-							echo '</select>';
+							if ( get_option('woocommerce_shipping_method_format') == 'select' ) {
 
+								echo '<select name="shipping_method" id="shipping_method">';
+								
+								foreach ( $available_methods as $method ) 
+									echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $_SESSION['_chosen_shipping_method'], false ) . '>' . strip_tags( $method->full_label ) . '</option>';
+
+								echo '</select>';
+							
+							} else {
+							
+							
+								echo '<ul id="shipping_method">';
+								
+								foreach ( $available_methods as $method )
+									echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $_SESSION['_chosen_shipping_method'], false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . $method->full_label . '</label></li>';
+								
+								echo '</ul>';
+							
+							}
+							
 						}
 
 					// No shipping methods are available

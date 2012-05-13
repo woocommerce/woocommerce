@@ -148,9 +148,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.6 =
+* Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
+* Feature - Option to display shipping methods as a select box vs. radio buttons
 * Tweak - When the count of available shipping methods changes, reset to default
 * Tweak - Optimisations to monthly and product reports
 * Tweak - Individually sold variation handling
+* Tweak - Removed mdash; from shipping options
 * Fix - Google Analytics options fix
 * Fix - % discount rounding
 

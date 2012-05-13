@@ -884,6 +884,20 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
 	),
+
+	array(  
+		'name' => __( 'Shipping methods display format', 'woocommerce' ),
+		'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shipping_method_format',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array( 
+			''  			=> __( 'Radio buttons', 'woocommerce' ),
+			'select'		=> __( 'Select box', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
+	),
 	
 	array(  
 		'name' 		=> __( 'Shipping destination', 'woocommerce' ),
