@@ -974,12 +974,13 @@ class WC_Cart {
 								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
 								
 							} elseif ( $coupon->type == 'percent_product' ) {
-								$this->discount_total = $this->discount_total + ( $price / 100 ) * $coupon->amount;
+								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, 2 );
 							}
 						}
 					}
 				}
 			}
+						
 		}
 		
 		/**
@@ -1009,7 +1010,7 @@ class WC_Cart {
 								
 								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total , 2 ) / 100 ) * $coupon->amount;
 								
-								$this->discount_total = $this->discount_total + $percent_discount;
+								$this->discount_total = $this->discount_total + round( $percent_discount, 2 );
 								
 							break;
 							

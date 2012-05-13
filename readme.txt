@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Optimisations to monthly and product reports
 * Tweak - Individually sold variation handling
 * Fix - Google Analytics options fix
+* Fix - % discount rounding
 
 = 1.5.5 - 10/05/2012 =
 * Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
