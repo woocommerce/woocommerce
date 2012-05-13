@@ -90,7 +90,12 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 			echo $after_widget;
 		endif;
 
-		if (isset($args['widget_id']) && isset($cache[$args['widget_id']])) $cache[$args['widget_id']] = ob_get_flush();
+		$content = ob_get_clean();
+
+		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
+		
+		echo $content;
+
 		wp_cache_set('widget_recent_reviews', $cache, 'widget');
 	}
 
