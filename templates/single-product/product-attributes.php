@@ -44,8 +44,9 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 				if ( $attribute['is_taxonomy'] ) :
 					$post_terms = wp_get_post_terms( $product->id, $attribute['name'] );
 					$values = array();
-					foreach ($post_terms as $term) 
-						$values[] = $term->name;
+					foreach ( $post_terms as $term ) 
+						if ( ! empty( $term->name ) )
+							$values[] = $term->name;
 					echo implode( ', ', $values );
 				else :
 					// Convert pipes to commas
