@@ -262,13 +262,13 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
 /**
  * Get other templates (e.g. product attributes) passing attributes and including the file
  */
-function woocommerce_get_template( $template_name, $args = array(), $template_path = '' ) {
+function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	global $woocommerce;
 	
 	if ( $args && is_array($args) ) 
 		extract( $args );
 	
-	$located = woocommerce_locate_template( $template_name, $template_path );
+	$located = woocommerce_locate_template( $template_name, $template_path, $default_path );
 	
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located );
 	
@@ -278,19 +278,33 @@ function woocommerce_get_template( $template_name, $args = array(), $template_pa
 }
 
 /**
- * Locate a template and return the path for inclusion
+ * Locate a template and return the path for inclusion.
+ *
+ * This is the load order:
+ *
+ *		yourtheme		/	$template_path	/	$template_name
+ *		yourtheme		/	$template_name
+ *		$default_path	/	$template_name
  */
-function woocommerce_locate_template( $template_name, $template_path = '' ) {
+function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
 	global $woocommerce;
 	
-    $template = ( ! empty( $template_path ) ) ? locate_template( array( $template_path . $template_name , $template_name ) ) : '';
-        
-	// Look in yourtheme/woocommerce/template-name and yourtheme/template-name
-	if ( ! $template ) $template = locate_template( array( $woocommerce->template_url . $template_name , $template_name ) );
+	if ( ! $template_path ) $template_path = $woocommerce->template_url;
+	if ( ! $default_path ) $default_path = $woocommerce->plugin_path() . '/templates/';
 	
-	// Get default template
-	if ( ! $template ) $template = $woocommerce->plugin_path() . '/templates/' . $template_name;
+	// Look within passed path within the theme - this is priority
+	$template = locate_template( 
+		array( 
+			$template_path . $template_name,
+			$template_name
+		) 
+	);
 
+	// Get default template
+	if ( ! $template )
+		$template = $default_path . $template_name;
+
+	// Return what we found
 	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
 }
 
