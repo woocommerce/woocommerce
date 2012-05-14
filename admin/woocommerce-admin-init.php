@@ -49,21 +49,21 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 function woocommerce_admin_menu_highlight() {
 	global $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
-	$to_highlight = array( 'shop_order', 'shop_coupon' );
+	$to_highlight_types = array( 'shop_order', 'shop_coupon' );
 
 	if ( isset( $post_type ) ) {
-		if ( in_array( $post_type, $to_highlight ) ) {
+		if ( in_array( $post_type, $to_highlight_types ) ) {
 			$submenu_file = 'edit.php?post_type=' . $post_type;
 			$parent_file  = 'woocommerce';
 		}
 
-		$screen = get_current_screen();
+		if ( 'product' == $post_type ) {
+			$screen = get_current_screen();
 
-		$not_replace = array( 'product_shipping_class', 'product_cat', 'product_tag' );
-
-		if ( $screen->base == 'edit-tags' && ! in_array( $taxonomy, $not_replace ) ) {
-			$submenu_file = 'woocommerce_attributes';
-			$parent_file  = 'edit.php?post_type=' . $post_type;
+			if ( $screen->base == 'edit-tags' && 'pa_' == substr( $taxonomy, 0, 3 ) ) {
+				$submenu_file = 'woocommerce_attributes';
+				$parent_file  = 'edit.php?post_type=' . $post_type;
+			}
 		}
 	}
 }
@@ -209,7 +209,7 @@ function woocommerce_admin_help_tab() {
  * Admin Scripts
  */
 function woocommerce_admin_scripts() {
-	global $woocommerce, $pagenow, $post;
+	global $woocommerce, $pagenow, $post, $wp_query;
 	
 	$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	
@@ -308,6 +308,13 @@ function woocommerce_admin_scripts() {
 		wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
 		
 	endif;
+	
+	// Product sorting - only when sorting by menu order on the products page
+	if ( $screen->id == 'edit-product' && isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) {
+			
+		wp_enqueue_script( 'woocommerce_product_ordering', $woocommerce->plugin_url() . '/assets/js/admin/product-ordering.js', array('jquery-ui-sortable'), '1.0', true );
+		
+	}
 
 	// Reports pages
     if ($screen->id=='woocommerce_page_woocommerce_reports') :

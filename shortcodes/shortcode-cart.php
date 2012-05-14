@@ -37,7 +37,7 @@ function woocommerce_cart( $atts ) {
 		$state 		= $_POST['calc_shipping_state'];
 		$postcode 	= $_POST['calc_shipping_postcode'];
 		
-		if ($postcode && !$validation->is_postcode( $postcode, $country )) : 
+		if ($postcode && ! $validation->is_postcode( $postcode, $country )) : 
 			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woocommerce') ); 
 			$postcode = '';
 		elseif ($postcode) :

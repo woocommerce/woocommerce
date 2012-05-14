@@ -96,7 +96,7 @@ function woocommerce_product_data_box() {
 			echo '</div>';
 			
 			echo '<div class="options_group hide_if_virtual hide_if_grouped">';
-			
+								
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
 					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __('Weight', 'woocommerce') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00' ) );
@@ -118,6 +118,21 @@ function woocommerce_product_data_box() {
 					echo '<input type="hidden" name="_height" value="'.get_post_meta($thepostid, '_height', true).'" />';
 				endif;
 				
+				// Shipping Class
+				$classes = get_the_terms( $thepostid, 'product_shipping_class' );
+				if ( $classes && ! is_wp_error( $classes ) ) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
+
+				$args = array(
+					'taxonomy' 			=> 'product_shipping_class',
+					'hide_empty'		=> 0,
+					'show_option_none' 	=> __('No shipping class', 'woocommerce'),
+					'name' 				=> 'product_shipping_class',
+					'id'				=> 'product_shipping_class',
+					'selected'			=> $current_shipping_class,
+					'class'				=> 'select short'
+				);
+				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e('Shipping class', 'woocommerce'); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e('Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce'); ?></span></p><?php
+				
 				do_action('woocommerce_product_options_dimensions');
 			
 			echo '</div>';
@@ -137,7 +152,7 @@ function woocommerce_product_data_box() {
 			
 			echo '</div>';
 			
-			echo '<div class="options_group">';
+			echo '<div class="options_group hide_if_external">';
 			
 				// Purchase note
 				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __('Purchase Note', 'woocommerce'), 'description' => __('Enter an optional note to send the customer after purchase.', 'woocommerce') ) );
@@ -197,7 +212,7 @@ function woocommerce_product_data_box() {
 			<?php
 						
 			if (get_option('woocommerce_manage_stock')=='yes') {
-			
+				
 				// manage stock
 				woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Manage stock?', 'woocommerce') ) );
 				
@@ -488,8 +503,8 @@ function woocommerce_product_data_box() {
 				
 				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __('Grouping', 'woocommerce'), 'value' => $post->post_parent, 'options' => $post_parents ) );
 				
-				// Ordering
-				woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Sort Order', 'ordering', 'woocommerce'), 'value' => $post->menu_order ) );
+				// Ordering - removed due to adding page-attributes panel (same field)
+				//woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Sort Order', 'ordering', 'woocommerce'), 'value' => $post->menu_order ) );
 				
 				do_action('woocommerce_product_options_grouping');
 			
@@ -523,7 +538,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	$product_type = sanitize_title( stripslashes( $_POST['product-type'] ) );
 	$is_downloadable = (isset($_POST['_downloadable'])) ? 'yes' : 'no';
 	$is_virtual = (isset($_POST['_virtual'])) ? 'yes' : 'no';
-	if( !$product_type ) $product_type = 'simple';
+	if( ! $product_type ) $product_type = 'simple';
 	
 	// Update post meta
 	update_post_meta( $post_id, '_regular_price', stripslashes( $_POST['_regular_price'] ) );
@@ -546,6 +561,10 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		update_post_meta( $post_id, '_width', '' );
 		update_post_meta( $post_id, '_height', '' );
 	endif;
+	
+	// Save shipping class
+	$product_shipping_class = ( $_POST['product_shipping_class'] > 0 && $product_type != 'external' ) ? (int) $_POST['product_shipping_class'] : '';
+	wp_set_object_terms( $post_id, $product_shipping_class, 'product_shipping_class');
 		
 	// Unique SKU 
 	$sku = get_post_meta($post_id, '_sku', true);
@@ -595,8 +614,9 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 			$is_taxonomy = ($attribute_is_taxonomy[$i]) ? 1 : 0;
 			
 			if ( $is_taxonomy ) {
+
 				if ( isset( $attribute_values[$i] ) ) {
-				
+			
 			 		// Format values
 			 		if ( is_array( $attribute_values[$i] ) ) {
 				 		$values = array_map('htmlspecialchars', array_map('stripslashes', $attribute_values[$i]));
@@ -606,28 +626,32 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 				 		$values = explode('|', $values);
 				 		$values = array_map('trim', $values);
 				 	}
-				 	
+			 	
 				 	// Remove empty items in the array
 				 	$values = array_filter( $values );
 			 	
-			 		// Update post terms
-			 		if ( taxonomy_exists( $attribute_names[$i] ) )
-			 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
-			
-			 		if ( $values ) {
-				 		// Add attribute to array, but don't set values
-				 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
-					 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
-					 		'value' 		=> '',
-					 		'position' 		=> $attribute_position[$i],
-					 		'is_visible' 	=> $is_visible,
-					 		'is_variation' 	=> $is_variation,
-					 		'is_taxonomy' 	=> $is_taxonomy
-					 	);
-				 	}
+			 	} else {
+			 		$values = array();
 			 	}
+			 	
+		 		// Update post terms
+		 		if ( taxonomy_exists( $attribute_names[$i] ) )
+		 			wp_set_object_terms( $post_id, $values, $attribute_names[$i] );
+		
+		 		if ( $values ) {
+			 		// Add attribute to array, but don't set values
+			 		$attributes[ sanitize_title( $attribute_names[$i] ) ] = array(
+				 		'name' 			=> htmlspecialchars(stripslashes($attribute_names[$i])), 
+				 		'value' 		=> '',
+				 		'position' 		=> $attribute_position[$i],
+				 		'is_visible' 	=> $is_visible,
+				 		'is_variation' 	=> $is_variation,
+				 		'is_taxonomy' 	=> $is_taxonomy
+				 	);
+			 	}
+	
 		 	} else {
-		 		if (!$attribute_values[$i]) continue;
+		 		if ( ! $attribute_values[$i] ) continue;
 		 		// Format values
 		 		$values = esc_html(stripslashes($attribute_values[$i]));
 		 		// Text based, separate by pipe
@@ -860,6 +884,8 @@ function woocommerce_product_type_box() {
 	woocommerce_wp_checkbox( array( 'id' => '_virtual', 'wrapper_class' => 'show_if_simple', 'label' => __('Virtual', 'woocommerce'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce') ) );
 	
 	woocommerce_wp_checkbox( array( 'id' => '_downloadable', 'wrapper_class' => 'show_if_simple', 'label' => __('Downloadable', 'woocommerce'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce') ) );
+	
+	do_action('woocommerce_product_options_product_type');
 	
 	echo '</div>';
 			

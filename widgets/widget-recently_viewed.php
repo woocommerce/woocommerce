@@ -84,7 +84,12 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 
 		endif;
 
-		if (isset($args['widget_id']) && isset($cache[$args['widget_id']])) $cache[$args['widget_id']] = ob_get_flush();
+		$content = ob_get_clean();
+
+		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
+		
+		echo $content;
+		
 		wp_cache_set('recently_viewed_products', $cache, 'widget');
 	}
 

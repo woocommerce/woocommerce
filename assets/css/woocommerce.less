@@ -20,6 +20,7 @@
 	.text_shadow( 0, 1px, 0, lighten( @secondary, 4 ) );
 	list-style:none outside;
 	.clearfix();
+	width: auto;
 	
 	&:before {
 		content: "";
@@ -379,7 +380,7 @@ span.onsale {
 	.clearfix();
 	ul.products, ul {
 		float:none;
-		li {
+		li.product {
 			width: 48%;
 			img {
 				width: 100%;
@@ -390,7 +391,7 @@ span.onsale {
 }
 
 ul.products {
-	li {
+	li.product {
 		float:left;
 		margin: 0 3.8% 2.992em 0;
 		padding: 0;
@@ -1062,7 +1063,7 @@ ul.cart_list, ul.product_list_widget {
 				}
 			}
 			td, th {
-				padding: 6px 12px;
+				padding: 6px 3px;
 			}
 			small {
 				display:block;
@@ -1077,7 +1078,7 @@ ul.cart_list, ul.product_list_widget {
 		}
 		tr td, tr th {
 			border-top: 1px solid @secondary;
-			padding: 6px 24px;
+			padding: 6px 6px;
 		}
 		a.button.alt {
 			width: 193px;
@@ -1155,6 +1156,21 @@ form.login, form.checkout_coupon {
 	margin: 2em 0 2em 0px;
 	text-align:left;
 	.border_radius(5px);
+}
+
+ul#shipping_method {
+	list-style: none outside;
+	margin: 0;
+	padding: 0;
+	li {
+		margin: 0;
+		padding: .25em 0 .25em 22px;
+		text-indent: -22px;
+		list-style: none outside;
+	}
+	.amount {
+		font-weight: bold;
+	}
 }
 
 /* =Checkout

@@ -61,7 +61,7 @@ class WC_ShareYourCart extends WC_Integration {
 	 */
 	function init_share_your_cart() {
 		
-		if ( ! $this->shareYourCartWooCommerce ) {
+		if ( empty( $this->shareYourCartWooCommerce ) ) {
 			// Share your cart api class
 			include_once('class-shareyourcart-woocommerce.php'); 
 			

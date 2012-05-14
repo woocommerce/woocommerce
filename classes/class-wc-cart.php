@@ -615,6 +615,10 @@ class WC_Cart {
 			else
 				$product_data = new WC_Product( $product_id );
 			
+			// Force quantity to 1 if sold individually
+			if ( $product_data->is_sold_individually() )
+				$quantity = 1;
+			
 			// Type/Exists check
 			if ( $product_data->is_type('external') || ! $product_data->exists() ) {
 				$woocommerce->add_error( __('This product cannot be purchased.', 'woocommerce') );
@@ -637,9 +641,11 @@ class WC_Cart {
 			}
 			
 			// Downloadable/virtual qty check
-			if ( get_option('woocommerce_limit_downloadable_product_qty')=='yes' && $product_data->is_downloadable() && $product_data->is_virtual() ) {
-				$qty = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
-				if ( $qty > 1 ) {
+			if ( $product_data->is_sold_individually() ) {
+				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
+				
+				// If its greater than 1, its already in the cart
+				if ( $in_cart_quantity > 1 ) {
 					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
 					return false;
 				}
@@ -968,12 +974,13 @@ class WC_Cart {
 								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
 								
 							} elseif ( $coupon->type == 'percent_product' ) {
-								$this->discount_total = $this->discount_total + ( $price / 100 ) * $coupon->amount;
+								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, 2 );
 							}
 						}
 					}
 				}
 			}
+						
 		}
 		
 		/**
@@ -1003,7 +1010,7 @@ class WC_Cart {
 								
 								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total , 2 ) / 100 ) * $coupon->amount;
 								
-								$this->discount_total = $this->discount_total + $percent_discount;
+								$this->discount_total = $this->discount_total + round( $percent_discount, 2 );
 								
 							break;
 							
@@ -1124,7 +1131,7 @@ class WC_Cart {
 							 * 	OR
 							 * ADJUST TAX - Checkout calculations when a tax class is modified
 							 */
-							if ( ( $woocommerce->customer->is_customer_outside_base() && defined('WOOCOMMERCE_CHECKOUT') ) || ( $_product->get_tax_class() !== $_product->tax_class ) ) {
+							if ( ( $woocommerce->customer->is_customer_outside_base() && ( defined('WOOCOMMERCE_CHECKOUT') || $woocommerce->customer->has_calculated_shipping() ) ) || ( $_product->get_tax_class() !== $_product->tax_class ) ) {
 								
 								// Get tax rate for the store base, ensuring we use the unmodified tax_class for the product
 								$base_tax_rates 		= $this->tax->get_shop_base_rate( $_product->tax_class );
@@ -1416,7 +1423,7 @@ class WC_Cart {
 			if ( ! is_array( $this->cart_contents ) ) return false;
 			
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
-				if ( empty( $_SESSION['calculated_shipping'] ) ) {
+				if ( ! $woocommerce->customer->has_calculated_shipping() ) {
 					if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() ) return false;
 				}
 			}
@@ -1664,12 +1671,12 @@ class WC_Cart {
 			} else {
 			
 				// Display ex tax if the option is set, or prices exclude tax
-				if ($this->display_totals_ex_tax || !$this->prices_include_tax ) {
-					
+				if ( $this->display_totals_ex_tax || ! $this->prices_include_tax ) {
+																				
 					$return = woocommerce_price( $this->subtotal_ex_tax );
 					
 					if ( $this->tax_total>0 && $this->prices_include_tax ) {
-						$return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+						$return .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 					}
 					return $return;
 					
@@ -1678,7 +1685,7 @@ class WC_Cart {
 					$return = woocommerce_price( $this->subtotal );
 					
 					if ( $this->tax_total>0 && !$this->prices_include_tax ) {
-						$return .= ' <small>'.$woocommerce->countries->inc_tax_or_vat().'</small>';
+						$return .= ' <small>' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
 					}
 					return $return;
 				

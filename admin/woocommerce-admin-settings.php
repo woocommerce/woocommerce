@@ -538,9 +538,10 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'std' 		=> 'title',
 		'type' 		=> 'select',
 		'options' => apply_filters('woocommerce_default_catalog_orderby_options', array( 
-			'title'  => __( 'Sort by title', 'woocommerce' ),
-			'date'   => __( 'Sort by date', 'woocommerce' ),
-			'price' => __( 'Sort by price', 'woocommerce' ),
+			'menu_order'  	=> __( 'Default sorting', 'woocommerce' ),
+			'title'  		=> __( 'Sort alphabetically', 'woocommerce' ),
+			'date'   		=> __( 'Sort by most recent', 'woocommerce' ),
+			'price' 		=> __( 'Sort by price', 'woocommerce' ),
 		)),
 		'desc_tip'	=>  true,
 	),
@@ -882,6 +883,20 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
+	),
+
+	array(  
+		'name' => __( 'Shipping methods display format', 'woocommerce' ),
+		'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shipping_method_format',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array( 
+			''  			=> __( 'Radio buttons', 'woocommerce' ),
+			'select'		=> __( 'Select box', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
 	),
 	
 	array(  

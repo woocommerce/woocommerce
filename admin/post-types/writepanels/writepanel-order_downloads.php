@@ -268,7 +268,7 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 
             $format = array( '%d', '%s', '%s');
 
-            $expiry  = array_key_exists($i, $access_expires) ? date('Y-m-d', strtotime($access_expires[$i])) : null;
+            $expiry  = ( array_key_exists( $i, $access_expires ) && $access_expires[ $i ] != '' ) ? date( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 
             if ( ! is_null($expiry)) {
                 $data['access_expires'] = $expiry;

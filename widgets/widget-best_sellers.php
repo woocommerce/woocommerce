@@ -59,13 +59,17 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 			$number = 15;
 
     	$query_args = array(
-    		'posts_per_page' 	=> $number, 
-    		'post_status' 	=> 'publish', 
-    		'post_type' 	=> 'product',
-    		'meta_key' 		=> 'total_sales',
-    		'orderby' 		=> 'meta_value',
-    		'no_found_rows' => 1
+    		'posts_per_page' => $number, 
+    		'post_status' 	 => 'publish', 
+    		'post_type' 	 => 'product',
+    		'meta_key' 		 => 'total_sales',
+    		'orderby' 		 => 'meta_value',
+    		'no_found_rows'  => 1,
     	);
+
+    	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
+    		$query_args['meta_query'] = array( array( 'key' => '_price', 'value' => 0, 'compare' => '>' ) );
+    	}
 
 		$r = new WP_Query($query_args);
 		
@@ -85,7 +89,12 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 <?php
 		endif;
 
-		if (isset($args['widget_id']) && isset($cache[$args['widget_id']])) $cache[$args['widget_id']] = ob_get_flush();
+		$content = ob_get_clean();
+
+		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
+		
+		echo $content;
+
 		wp_cache_set('widget_best_sellers', $cache, 'widget');
 	}
 
@@ -93,7 +102,12 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['number'] = (int) $new_instance['number'];		
+		$instance['number'] = (int) $new_instance['number'];
+		$instance['hide_free'] = 0;
+
+		if ( isset( $new_instance['hide_free'] ) ) {
+			$instance['hide_free'] = 1;
+		}
 
 		$this->flush_widget_cache();
 
@@ -111,6 +125,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
+		if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) $hide_free_checked = ' checked="checked"';
 
 		?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
@@ -118,6 +133,9 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
 		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
+
+		<p><input id="<?php echo esc_attr( $this->get_field_id('hide_free') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hide_free') ); ?>" type="checkbox"<?php echo $hide_free_checked; ?> />
+		<label for="<?php echo $this->get_field_id('hide_free'); ?>"><?php _e('Hide free products', 'woocommerce'); ?></label></p>
 
 		<?php
 	}

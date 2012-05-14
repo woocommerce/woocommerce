@@ -33,7 +33,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 		$this->requires_coupon 	= $this->settings['requires_coupon'];
 		
 		// Actions
-		add_action('woocommerce_update_options_shipping_free_shipping', array(&$this, 'process_admin_options'));
+		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
     }
 
 	/**
@@ -115,50 +115,55 @@ class WC_Free_Shipping extends WC_Shipping_Method {
     function is_available( $package ) {
     	global $woocommerce;
     	
-    	if ($this->enabled=="no") return false;
-
+    	if ( $this->enabled == "no" ) return false;
+    	
 		$ship_to_countries = '';
 		
-		if ($this->availability == 'specific') :
+		if ( $this->availability == 'specific' ) {
 			$ship_to_countries = $this->countries;
-		else :
-			if (get_option('woocommerce_allowed_countries')=='specific') :
+		} else {
+			if ( get_option('woocommerce_allowed_countries') == 'specific' ) 
 				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
-			endif;
-		endif; 
+		}
 		
-		if (is_array($ship_to_countries)) :
-			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) return false;
-		endif;
+		if ( is_array( $ship_to_countries ) ) 
+			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) 
+				return false;
+	
+		// Enabled logic
+		$is_available = true;
 
-		if ($this->requires_coupon=="yes") :
+		if ( $this->requires_coupon == "yes" ) {
 			
-			if ($woocommerce->cart->applied_coupons) : foreach ($woocommerce->cart->applied_coupons as $code) :
-				$coupon = new WC_Coupon( $code );
+			if ( $woocommerce->cart->applied_coupons ) {
+				foreach ($woocommerce->cart->applied_coupons as $code) {
+					$coupon = new WC_Coupon( $code );
 				
-				if ( $coupon->enable_free_shipping() ) :
-					return true;
-				endif;
-				
-			endforeach; endif;
+					if ( $coupon->enable_free_shipping() ) 
+						return true;
+				}
+			}
 			
-			return false;
+			// No coupon found, as it stands, free shipping is disabled
+			$is_available = false;
 			
-		endif;
+		}
 
-		if (isset($woocommerce->cart->cart_contents_total)) :
+		if ( isset( $woocommerce->cart->cart_contents_total ) && ! empty( $this->min_amount ) ) {
 		
-			if ($woocommerce->cart->prices_include_tax) :
+			if ( $woocommerce->cart->prices_include_tax )
 				$total = $woocommerce->cart->tax_total + $woocommerce->cart->cart_contents_total;
-			else :
+			else
 				$total = $woocommerce->cart->cart_contents_total;
-			endif;
 			
-			if (isset($this->min_amount) && $this->min_amount && $this->min_amount > $total) return false;
+			if ( $this->min_amount > $total ) 
+				$is_available = false;
+			else 
+				$is_available = true;
 		
-		endif;
+		}
 		
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
     } 
     
     function calculate_shipping() {

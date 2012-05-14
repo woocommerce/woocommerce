@@ -7,7 +7,7 @@
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
- * Tested up to: 3.3
+ * Tested up to: 3.4
  * 
  * Text Domain: woocommerce
  * Domain Path: /languages/
@@ -87,7 +87,7 @@ class Woocommerce {
 		
 		// Installation
 		if ( is_admin() && !defined('DOING_AJAX') ) $this->install();
-
+		
 		// Actions
 		add_action( 'init', array( &$this, 'init' ), 0 );
 		add_action( 'init', array( &$this, 'include_template_functions' ), 25 );
@@ -282,10 +282,11 @@ class Woocommerce {
 	 **/
 	function load_plugin_textdomain() {
 		// Note: the first-loaded translation file overrides any following ones if the same translation is present
+		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 		$variable_lang = ( get_option( 'woocommerce_informal_localisation_type' ) == 'yes' ) ? 'informal' : 'formal';
-		load_textdomain( 'woocommerce', WP_LANG_DIR.'/woocommerce/woocommerce-'.get_locale().'.mo' );
+		load_textdomain( 'woocommerce', WP_LANG_DIR.'/woocommerce/woocommerce-'.$locale.'.mo' );
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages/'.$variable_lang );
-		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages');
+		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages' );
 	}
 	
 	/**
@@ -557,6 +558,7 @@ class Woocommerce {
 	        array('product'),
 	        array(
 	            'hierarchical' 			=> false,
+	            'update_count_callback' => '_update_post_term_count',
 	            'show_ui' 				=> false,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
@@ -694,6 +696,7 @@ class Woocommerce {
 				        array('product'),
 				        array(
 				            'hierarchical' 				=> $hierarchical,
+	            			'update_count_callback' 	=> '_update_post_term_count',
 				            'labels' => array(
 				                    'name' 						=> $label,
 				                    'singular_name' 			=> $label,
@@ -757,9 +760,9 @@ class Woocommerce {
 				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
-				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields' ),
+				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
 				'has_archive' 			=> $base_slug,
-				'show_in_nav_menus' 	=> false
+				'show_in_nav_menus' 	=> true
 			)
 		);
 		
@@ -982,7 +985,6 @@ class Woocommerce {
 			'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
 			'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
 			'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
-			'option_limit_download_qty' 	=> get_option('woocommerce_limit_downloadable_product_qty'),
 			'checkout_url'					=> add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
 			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart'),
 			'is_checkout'					=> ( is_page(woocommerce_get_page_id('checkout')) ) ? 1 : 0,

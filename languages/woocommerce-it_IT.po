@@ -2428,7 +2428,7 @@ msgstr "rintraccia-ordine"
 #: admin/woocommerce-admin-install.php:159
 #@ woocommerce
 msgid "Track your order"
-msgstr "Rintraccia il uo ordine"
+msgstr "Rintraccia il tuo ordine"
 
 #: admin/woocommerce-admin-install.php:162
 #@ woocommerce

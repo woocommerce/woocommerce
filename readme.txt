@@ -1,10 +1,10 @@
 === WooCommerce – excelling eCommerce ===
-Contributors: woothemes, mikejolley, jameskoster
+Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 
 WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anything. Beautifully.
 
@@ -147,7 +147,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.5 =
+= 1.5.6 =
+* Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
+* Feature - Option to display shipping methods as a select box vs. radio buttons
+* Tweak - When the count of available shipping methods changes, reset to default
+* Tweak - Optimisations to monthly and product reports
+* Tweak - Individually sold variation handling
+* Tweak - Removed mdash; from shipping options
+* Fix - Google Analytics options fix
+* Fix - % discount rounding
+
+= 1.5.5 - 10/05/2012 =
+* Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
 * Feature - Settings now include colours for things like buttons and tabs.
 * Feature - New integration section which allows other class-based integrations to be added.
 * Feature - ShareYourCart integration built in.
@@ -155,6 +166,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Collect shipping address even when not required option
 * Feature - Stock display options - show no stock amount, low stock amount, or always show stock amount
 * Feature - woocommerce_form_field select type
+* Feature - Add WooCommerce Products to Appearance->Menus
+* Feature - Optional hide free products from Best Sellers Widget
 * Tweak - Removed nonces from add to cart urls, this makes them easier to make use of; you can hardcode add to cart links or link to your add to cart link from other places without needing to use WC functions.
 * Tweak - Cart.php display with more filters
 * Tweak - is_product_category and is_product_tag support term argument
@@ -171,6 +184,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Hidden some uncommon settings
 * Tweak - Fixed labels for settings API.
 * Tweak - New WC_Order Class Formatting Filters and Function for totals (thanks thenbrent)
+* Tweak - Free shipping availability check to deal with min amount and coupon rules together
+* Tweak - Shipping class added to product data panel instead of separate
+* Tweak - After getting a shipping quote, use the shipping address for taxes on the cart page
 * Fix - Replacing use of deprecated function get_current_theme() with wp_get_theme()
 * Fix - Body classes now correct for WordPress themes with non alphanumeric characters
 * Fix - PayPal http_build_query &amp; -> & on some PHP 5.3 servers
@@ -180,8 +196,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - per product flat rate.
 * Fix - Use term_id instead of term slug to get term link (allows numeric slugs for product categories)
 * Fix - Replace spaces with + signs in download url after decode (allows + characters in email addresses for downloads)
+* Fix - Prevent setting download expire date to 1970-01-01 in rare cases
 * Localization - Slovak translation by Dušan Beleščák
 * Localization - Updated localisations
+* Localization - Updated French translation by mediana (Ticket 1000 in GitHub, woohoo!)
 
 = 1.5.4 - 16/04/2012 =
 * Feature - Allow attributes to be added from the edit product page

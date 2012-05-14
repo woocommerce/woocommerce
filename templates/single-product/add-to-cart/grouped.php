@@ -12,7 +12,7 @@ $quantites_required = false;
 foreach ( $product->get_children() as $child_id ) {
 	$child_product = $product->get_child( $child_id ); 
 	
-	if ( ! $child_product->is_downloadable() && ! $child_product->is_virtual() && ! $child_product->is_type('external') ) 
+	if ( ! $child_product->is_sold_individually() && ! $child_product->is_type('external') ) 
 		$quantites_required = true;
 	
 	$grouped_products[] = array(

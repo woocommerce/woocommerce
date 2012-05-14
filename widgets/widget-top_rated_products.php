@@ -86,8 +86,12 @@ class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 		wp_reset_query();
 		remove_filter( 'posts_clauses', array(&$this, 'order_by_rating_post_clauses') );
 		
-		$cache[$args['widget_id']] = ob_get_flush();
+		$content = ob_get_clean();
+
+		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
 		
+		echo $content;
+				
 		wp_cache_set('widget_top_rated_products', $cache, 'widget');
 	}
 	

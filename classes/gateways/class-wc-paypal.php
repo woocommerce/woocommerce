@@ -274,7 +274,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			
 			$paypal_args['item_name_1'] 	= sprintf( __('Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->get_order_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format($order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
 			$paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
@@ -444,7 +444,7 @@ class WC_Paypal extends WC_Payment_Gateway {
         	'body' 			=> $received_values,
         	'sslverify' 	=> false,
         	'timeout' 		=> 30,
-        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
+        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
         );
 
         // Get url
@@ -543,11 +543,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 					endif;
 					
 					 // Store PP Details
-	                update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email']);
-	                update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id']);
-	                update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name']);
-	                update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type']); 
+	                if ( ! empty( $posted['payer_email'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer PayPal address', $posted['payer_email'] );
+	                if ( ! empty( $posted['txn_id'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Transaction ID', $posted['txn_id'] );
+	                if ( ! empty( $posted['first_name'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer first name', $posted['first_name'] );
+	                if ( ! empty( $posted['last_name'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payer last name', $posted['last_name'] );
+	                if ( ! empty( $posted['payment_type'] ) ) 
+	                	update_post_meta( (int) $posted['custom'], 'Payment type', $posted['payment_type'] ); 
 	            	
 	            	// Payment completed
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
@@ -566,7 +571,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case "refunded" :
 	            
 	            	// Only handle full refunds, not partial
-	            	if ($order->get_order_total() == ($posted['mc_gross']*-1)) {
+	            	if ($order->get_total() == ($posted['mc_gross']*-1)) {
 	            	
 		            	// Mark order as refunded
 		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );

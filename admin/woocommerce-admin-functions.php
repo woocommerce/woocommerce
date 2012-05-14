@@ -238,8 +238,10 @@ function woocommerce_compile_less_styles() {
 	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
 		
 		// Colours changed - recompile less
-		include_once('includes/lessc.inc.php');
-		include_once('includes/cssmin.inc.php');
+		if ( ! class_exists( 'lessc' ) ) 
+			include_once('includes/lessc.inc.php');
+		if ( ! class_exists( 'cssmin' ) )
+			include_once('includes/cssmin.inc.php');
 
 		try {
 			// Set default if colours not set

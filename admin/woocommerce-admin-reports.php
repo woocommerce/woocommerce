@@ -692,75 +692,64 @@ function woocommerce_monthly_sales() {
 	$start_date = strtotime($start_date);
 	$end_date = strtotime($end_date);
 	
-	$total_sales = 0;
-	$total_orders = 0;
-	$order_items = 0;
-	
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
-
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-	
-	$order_counts = array();
-	$order_amounts = array();
+	$total_sales = $total_orders = $order_items = 0;
+	$order_counts = $order_amounts = array();
 
 	// Blank date ranges to begin
 	$count = 0;
 	$months = ($end_date - $start_date) / (60 * 60 * 24 * 7 * 4);
 
-	while ($count < $months) :
+	while ( $count < $months ) :
 		$time = strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01').'000';
-
-		$order_counts[$time] = 0;
-		$order_amounts[$time] = 0;
-
+		
+		$month = date( 'Ym', strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01') );
+		
+		$months_orders = $wpdb->get_row("
+			SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
+			
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+	
+			WHERE 	meta.meta_key 		= '_order_total'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		");	
+		
+		$order_counts[$time] 	= (int) $months_orders->total_orders;
+		$order_amounts[$time] 	= (float) $months_orders->total_sales;
+		
+		$total_orders			+= (int) $months_orders->total_orders;
+		$total_sales			+= (float) $months_orders->total_sales;
+		
+		// Count order items
+		$order_items_serialized = $wpdb->get_col("
+			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
+			
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+	
+			WHERE 	meta.meta_key 		= '_order_items'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		");
+		
+		if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
+			$order_items_array = maybe_unserialize($order_items_array);
+			if (is_array($order_items_array)) foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+		}
+		
 		$count++;
 	endwhile;
-	
-	if ($orders) :
-		foreach ($orders as $order) :
-			
-			$order_total = get_post_meta($order->ID, '_order_total', true);			
-			$time = strtotime(date('Ym', strtotime($order->post_date)).'01').'000';
-			
-			$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
-			foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
-			$total_sales += $order_total;
-			$total_orders++;
-			
-			if (isset($order_counts[$time])) :
-				$order_counts[$time]++;
-			else :
-				$order_counts[$time] = 1;
-			endif;
-			
-			if (isset($order_amounts[$time])) :
-				$order_amounts[$time] = $order_amounts[$time] + $order_total;
-			else :
-				$order_amounts[$time] = (float) $order_total;
-			endif;
-			
-		endforeach;
-	endif;
-	
-	remove_filter( 'posts_where', 'orders_within_range' );
-	
 	?>
 	<form method="post" action="">
 		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label> 
@@ -1061,127 +1050,133 @@ function woocommerce_top_earners() {
  */
 function woocommerce_product_sales() {
 	
-	global $start_date, $end_date, $woocommerce;
+	global $wpdb, $woocommerce;
 	
-	$chosen_product_id = (isset($_POST['product_id'])) ? $_POST['product_id'] : '';
+	$chosen_product_ids = ( isset( $_POST['product_ids'] ) ) ? (array) $_POST['product_ids'] : '';
 	
-	if ($chosen_product_id) :
-		$start_date = date('Ym', strtotime( '-12 MONTHS', current_time('timestamp') )).'01';
-		$end_date = date('Ymd', current_time('timestamp'));
+	if ( $chosen_product_ids && is_array( $chosen_product_ids ) ) {
+
+		$start_date = date( 'Ym', strtotime( '-12 MONTHS', current_time('timestamp') ) ) . '01';
+		$end_date 	= date( 'Ymd', current_time( 'timestamp' ) );
+
+		$max_sales = $max_totals = 0;
+		$product_sales = $product_totals = array();
 		
-		$start_date = strtotime($start_date);
-		$end_date = strtotime($end_date);
+		// Get titles and ID's related to product
+		$chosen_product_titles = array();
+		$children_ids = array();
 		
-		// Get orders to display in widget
-		add_filter( 'posts_where', 'orders_within_range' );
+		foreach ( $chosen_product_ids as $product_id ) {
+			$children = (array) get_posts( 'post_parent=' . $product_id . '&fields=ids&post_status=any&numberposts=-1' );
+			$children_ids = $children_ids + $children;
+			$chosen_product_titles[] = get_the_title( $product_id );
+		}
+		
+		// Get order items
+		$order_items = $wpdb->get_results("
+			SELECT meta.meta_value AS items, posts.post_date FROM {$wpdb->posts} AS posts
+			
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 	
-		$args = array(
-		    'numberposts'     => -1,
-		    'orderby'         => 'post_date',
-		    'order'           => 'ASC',
-		    'post_type'       => 'shop_order',
-		    'post_status'     => 'publish' ,
-		    'suppress_filters'=> 0,
-		    'tax_query' => array(
-		    	array(
-			    	'taxonomy' => 'shop_order_status',
-					'terms' => array('completed', 'processing', 'on-hold'),
-					'field' => 'slug',
-					'operator' => 'IN'
-				)
-		    )
-		);
-		$orders = get_posts( $args );
+			WHERE 	meta.meta_key 		= '_order_items'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		posts.post_date		> date_sub( NOW(), INTERVAL 1 YEAR )
+			ORDER BY posts.post_date ASC
+		");
 		
-		$max_sales = 0;
-		$max_totals = 0;
-		$product_sales = array();
-		$product_totals = array();
+		if ( $order_items ) {
 		
-		// Get ID's related to product
-		$chosen_product = new WC_Product( $chosen_product_id );
-		$child_ids = $chosen_product->get_children();
-		
-		if ($orders) :
-			foreach ($orders as $order) :
-				$date = date('Ym', strtotime( $order->post_date ));
-				$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
-				foreach ($order_items as $item) :
-					
-					if (isset($item['line_total'])) $row_cost = $item['line_total'];
-					elseif (isset($item['cost'])) $row_cost = $item['cost'] * $item['qty'];
-					else continue;
-					
-					if ($item['id']!=$chosen_product_id && !in_array($item['id'], $child_ids)) continue;
-					$product_sales[$date] = isset($product_sales[$date]) ? $product_sales[$date] + $item['qty'] : $item['qty'];
-					
-					$product_totals[$date] = isset($product_totals[$date]) ? $product_totals[$date] + $row_cost : $row_cost;
-					
-					if ($product_sales[$date] > $max_sales) $max_sales = $product_sales[$date];
-					if ($product_totals[$date] > $max_totals) $max_totals = $product_totals[$date];
-				endforeach;
-			endforeach;
-		endif;
-		
-		remove_filter( 'posts_where', 'orders_within_range' );
-	endif;
-	?>
-	<form method="post" action="">
-		<p><label for="from"><?php _e('Product:', 'woocommerce'); ?></label>
-		<select name="product_id" id="product_id">
-			<?php
-				echo '<option value="">'.__('Choose an product&hellip;', 'woocommerce').'</option>';
+			foreach ( $order_items as $order_item ) {
 				
-				$args = array(
-					'post_type' 		=> 'product',
-					'posts_per_page' 	=> -1,
-					'post_status'		=> 'publish',
-					'post_parent'		=> 0,
-					'order'				=> 'ASC',
-					'orderby'			=> 'title'
-				);
-				$products = get_posts( $args );
+				$date 	= date( 'Ym', strtotime( $order_item->post_date ) );
+				$items 	= maybe_unserialize( $order_item->items );
 				
-				if ($products) foreach ($products as $product) :
+				foreach ( $items as $item ) {
+				
+					if ( ! in_array( $item['id'], $chosen_product_ids ) && ! in_array( $item['id'], $children_ids ) ) 
+						continue;
 					
-					$sku = get_post_meta($product->ID, '_sku', true);
+					if ( isset( $item['line_total'] ) ) $row_cost = $item['line_total'];
+					else $row_cost = $item['cost'] * $item['qty'];
 					
-					if ($sku) $sku = ' SKU: '.$sku;
+					if ( ! $row_cost ) continue;
+						
+					$product_sales[ $date ] = isset( $product_sales[ $date ] ) ? $product_sales[$date] + $item['qty'] : $item['qty'];
+					$product_totals[ $date ] = isset( $product_totals[ $date ] ) ? $product_totals[ $date ] + $row_cost : $row_cost;
 					
-					echo '<option value="'.$product->ID.'" '.selected($chosen_product_id, $product->ID, false).'>'.$product->post_title.$sku.' (#'.$product->ID.''.$sku.')</option>';
+					if ( $product_sales[ $date ] > $max_sales ) $max_sales = $product_sales[ $date ];
+					if ( $product_totals[ $date ] > $max_totals ) $max_totals = $product_totals[ $date ];
+				}
+
+			}
+			
+		}
+		?>
+		<h4><?php printf( __( 'Sales for %s:', 'woocommerce' ), implode( ', ', $chosen_product_titles ) ); ?></h4>
+		<table class="bar_chart">
+			<thead>
+				<tr>
+					<th><?php _e('Month', 'woocommerce'); ?></th>
+					<th colspan="2"><?php _e('Sales', 'woocommerce'); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+					if (sizeof($product_sales)>0) foreach ($product_sales as $date => $sales) :
+						$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
+						$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
+		
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
+		
+						echo '<tr><th><a href="'.$orders_link.'">'.date_i18n('F', strtotime($date.'01')).'</a></th>
+						<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
+						<td class="bars">
+							<span style="width:'.$width.'%">&nbsp;</span>
+							<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
+						</td></tr>';
+					endforeach; else echo '<tr><td colspan="3">'.__('No sales :(', 'woocommerce').'</td></tr>';
+				?>
+			</tbody>
+		</table>
+		<?php
+		
+	} else {
+		?>
+		<form method="post" action="">
+			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+			<script type="text/javascript">
+				jQuery(function(){
+					// Ajax Chosen Product Selectors
+					jQuery("select.ajax_chosen_select_products").ajaxChosen({
+					    method: 	'GET',
+					    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
+					    dataType: 	'json',
+					     afterTypeDelay: 100,
+					    data:		{
+					    	action: 		'woocommerce_json_search_products',
+							security: 		'<?php echo wp_create_nonce("search-products"); ?>'
+					    }
+					}, function (data) {
 					
-				endforeach;
-			?>
-		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
-	</form>
-	<?php if ($chosen_product_id) : ?>
-	<table class="bar_chart">
-		<thead>
-			<tr>
-				<th><?php _e('Month', 'woocommerce'); ?></th>
-				<th colspan="2"><?php _e('Sales', 'woocommerce'); ?></th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php
-				if (sizeof($product_sales)>0) foreach ($product_sales as $date => $sales) :
-					$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
-					$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
-	
-					$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
-	
-					echo '<tr><th><a href="'.$orders_link.'">'.date_i18n('F', strtotime($date.'01')).'</a></th>
-					<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
-					<td class="bars">
-						<span style="width:'.$width.'%">&nbsp;</span>
-						<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
-					</td></tr>';
-				endforeach; else echo '<tr><td colspan="3">'.__('No sales :(', 'woocommerce').'</td></tr>';
-			?>
-		</tbody>
-	</table>
-	<?php
-	endif;
+						var terms = {};
+					
+					    jQuery.each(data, function (i, val) {
+					        terms[i] = val;
+					    });
+					
+					    return terms;
+					});
+				});
+			</script>
+		</form>
+		<?php
+	}
 }
 
 
@@ -1317,8 +1312,6 @@ function woocommerce_customer_overview() {
 
 		$count++;
 	endwhile;
-	
-	
 	
 	foreach ($customers as $customer) :
 		if (strtotime($customer->user_registered) > $start_date) :

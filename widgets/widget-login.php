@@ -94,7 +94,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 				
 				<p><label for="user_pass"><?php _e('Password', 'woocommerce'); ?></label> <input name="pwd" class="input-text" id="user_pass" type="password" /></p>		
 				
-				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &raquo;', 'woocommerce'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woocommerce'); ?></a></p>
+				<p><input type="submit" class="submitbutton" name="wp-submit" id="wp-submit" value="<?php _e('Login &rarr;', 'woocommerce'); ?>" /> <a href="<?php echo wp_lostpassword_url(); ?>"><?php echo __('Lost password?', 'woocommerce'); ?></a></p>
 				
 				<div>
 					<input type="hidden" name="redirect_to" class="redirect_to" value="<?php echo $redirect_to; ?>" />

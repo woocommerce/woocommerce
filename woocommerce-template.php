@@ -353,7 +353,8 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 						'min_qty' => 1,
 						'max_qty' => $variation->stock,
 						'is_downloadable' => $variation->is_downloadable() ,
-						'is_virtual' => $variation->is_virtual()
+						'is_virtual' => $variation->is_virtual(),
+						'is_sold_individually' => $variation->is_sold_individually() ? 'yes' : 'no',
 					) , $product, $variation );
 			}
 		}

@@ -212,7 +212,7 @@ function woocommerce_update_cart_action() {
 	// Update Cart
 	elseif (isset($_POST['update_cart']) && $_POST['update_cart']  && $woocommerce->verify_nonce('cart')) :
 		
-		$cart_totals = $_POST['cart'];
+		$cart_totals = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 		
 		if (sizeof($woocommerce->cart->get_cart())>0) : 
 			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
