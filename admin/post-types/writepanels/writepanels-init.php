@@ -108,7 +108,7 @@ function woocommerce_product_short_description_meta_box( $post ) {
 		'textarea_name'	=> 'excerpt',
 		'quicktags' 	=> true,
 		'tinymce' 		=> true,
-		'editor_css'	=> '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}</style>'
+		'editor_css'	=> '<style>#wp-excerpt-editor-container .wp-editor-area{height:175px; width:100%;}.wp_themeSkin iframe {background-color: #fff;}</style>'
 		);
 		
 	wp_editor( htmlspecialchars_decode( $post->post_excerpt ), 'excerpt', $settings );
