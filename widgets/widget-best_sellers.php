@@ -68,7 +68,12 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
     	);
 
     	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
-    		$query_args['meta_query'] = array( array( 'key' => '_price', 'value' => 0, 'compare' => '>' ) );
+    		$query_args['meta_query'] = array(
+    			array( 'key' => '_price', 'value' => 0, 'compare' => '>' ),
+    			array( 'key' => '_price', 'value' => '0.00', 'compare' => '!=' ),
+    		);
+
+    		$query_args['meta_query']['relation'] = 'AND';
     	}
 
 		$r = new WP_Query($query_args);
