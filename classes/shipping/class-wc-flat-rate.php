@@ -32,19 +32,20 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		$this->init_settings();
 		
 		// Define user set variables
-        $this->enabled		= $this->settings['enabled'];
-		$this->title 		= $this->settings['title'];
-		$this->availability = $this->settings['availability'];
-		$this->countries 	= $this->settings['countries'];
-		$this->type 		= $this->settings['type'];
-		$this->tax_status	= $this->settings['tax_status'];
-		$this->cost 		= $this->settings['cost'];
-		$this->fee 			= $this->settings['fee']; 
-		$this->minimum_fee 	= isset( $this->settings['minimum_fee'] ) ? $this->settings['minimum_fee'] : ''; 
-		$this->options 		= isset( $this->settings['options'] ) ? $this->settings['options'] : ''; 
+        $this->enabled		  = $this->settings['enabled'];
+		$this->title 		  = $this->settings['title'];
+		$this->availability   = $this->settings['availability'];
+		$this->countries 	  = $this->settings['countries'];
+		$this->type 		  = $this->settings['type'];
+		$this->tax_status	  = $this->settings['tax_status'];
+		$this->cost 		  = $this->settings['cost'];
+		$this->cost_per_order = isset( $this->settings['cost_per_order'] ) ? $this->settings['cost_per_order'] : '';
+		$this->fee 			  = $this->settings['fee']; 
+		$this->minimum_fee 	  = isset( $this->settings['minimum_fee'] ) ? $this->settings['minimum_fee'] : ''; 
+		$this->options 		  = isset( $this->settings['options'] ) ? $this->settings['options'] : ''; 
 		
 		// Get options
-		$this->options		= (array) explode( "\n", $this->options );
+		$this->options		  = (array) explode( "\n", $this->options );
 		
 		// Load Flat rates
 		$this->get_flat_rates();
@@ -68,6 +69,12 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 							'type' 			=> 'text', 
 							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ), 
 							'default'		=> __( 'Flat Rate', 'woocommerce' ),
+						),
+			'cost_per_order' => array(
+							'title' 		=> __( 'Cost per order', 'woocommerce' ), 
+							'type' 			=> 'text', 
+							'description'	=> __( 'Enter a cost per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
+							'default'		=> '',
 						),
 			'availability' => array(
 							'title' 		=> __( 'Method availability', 'woocommerce' ), 
@@ -140,6 +147,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     	global $woocommerce;
     	
     	$this->rates = array();
+    	$cost_per_order = ( isset( $this->cost_per_order ) && ! empty( $this->cost_per_order ) ) ? $this->cost_per_order : 0;
     	
     	if ( $this->type == 'order' ) {
     		$shipping_total = $this->order_shipping( $package );
@@ -147,7 +155,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     		$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total,
+				'cost' 	=> $shipping_total + $cost_per_order,
 			);
 		} elseif ( $this->type == 'class' ) {
 			$shipping_total = $this->class_shipping( $package );
@@ -155,10 +163,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     		$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total,
+				'cost' 	=> $shipping_total + $cost_per_order,
 			);
 		} elseif ( $this->type == 'item' ) {
 			$costs = $this->item_shipping( $package );
+			$costs['order'] = $cost_per_order;
 			
 			$rate = array(
 				'id' 		=> $this->id,
@@ -169,19 +178,19 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Register the rate
-		$this->add_rate( $rate );  
+		$this->add_rate( $rate ); 
 		
 		// Add any extra rates
 		if ( sizeof( $this->options ) > 0) foreach ( $this->options as $option ) {
 			
 			$this_option = preg_split( '~\s*\|\s*~', trim( $option ) );
 			
-			if (sizeof($this_option)!==3) continue;
+			if ( sizeof( $this_option ) !== 3 ) continue;
 			
 			$extra_rate = $rate;
 			
-			$extra_rate['id'] 		= $this->id . ':' . sanitize_title($this_option[0]);
-			$extra_rate['label'] 	= $this_option[0];
+			$extra_rate['id']    = $this->id . ':' . sanitize_title($this_option[0]);
+			$extra_rate['label'] = $this_option[0];
 			
 			$per_order_cost = ( $this_option[2] == 'yes' ) ? 1 : 0;
 			$this_cost = $this_option[1];
@@ -437,7 +446,6 @@ class WC_Flat_Rate extends WC_Shipping_Method {
     } // End admin_options()
     
     function process_flat_rates() {
-   		
 		// Save the rates
 		$flat_rate_class = array();
 		$flat_rate_cost = array();
