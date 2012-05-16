@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.5.6 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
 * Feature - Option to display shipping methods as a select box vs. radio buttons
+* Feature - Added support for cost per order to Flat Rate shipping
 * Tweak - When the count of available shipping methods changes, reset to default
 * Tweak - Optimisations to monthly and product reports
 * Tweak - Individually sold variation handling
