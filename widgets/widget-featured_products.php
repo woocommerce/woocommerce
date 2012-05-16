@@ -90,6 +90,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		echo $content;
 
 		wp_cache_set('widget_featured_products', $cache, 'widget');
+        wp_reset_postdata();
 	}
 
 	/** @see WP_Widget->update */
