@@ -121,7 +121,7 @@ class WC_Email {
 		
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 		
-		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (# %s)', 'woocommerce' ), $blogname, $order_id ), $order );
+		$subject = apply_filters( 'woocommerce_email_subject_new_order', sprintf( __( '[%s] New Customer Order (%s)', 'woocommerce' ), $blogname, $order->get_order_number() ), $order );
 		
 		// Buffer
 		ob_start();
