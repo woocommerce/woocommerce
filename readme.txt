@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Individually sold variation handling
 * Tweak - Removed mdash; from shipping options
 * Tweak - Made woocommerce_locate_template more useful for third party plugins - ability to pass a full path
+* Tweak - WC Debug page hooks
 * Fix - Google Analytics options fix
 * Fix - % discount rounding
 

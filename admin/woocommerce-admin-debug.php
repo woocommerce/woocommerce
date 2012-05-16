@@ -9,6 +9,7 @@
 
 function woocommerce_debug() {
 	global $woocommerce;
+	
 	$tools = apply_filters( 'wc_debug_tools', array(
 		'clear_transients' => array(
 			'name'		=> __('Transients','woocommerce'),
@@ -21,8 +22,7 @@ function woocommerce_debug() {
 			'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 		),
 	) );
-	$classes = array('alternate','');
-	$class = 0;
+	
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
@@ -30,6 +30,7 @@ function woocommerce_debug() {
 		
 		<?php
 			if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+				
 				switch ( $_GET['action'] ) {
 					case "clear_transients" :
 						$woocommerce->clear_product_transients();
@@ -51,8 +52,9 @@ function woocommerce_debug() {
 						echo '<div class="updated"><p>' . __('Roles successfully reset', 'woocommerce') . '</p></div>';
 					break;
 					default:
-						if( isset( $tools[$_GET['action']]['callback'] ) ) {
-							$callback = $tools[$_GET['action']]['callback'];
+						$action = esc_attr( $_GET['action'] );
+						if( isset( $tools[ $action ]['callback'] ) ) {
+							$callback = $tools[ $action ]['callback'];
 							$return = call_user_func( $callback );
 							if( $return === false ) {
 								if( is_array( $callback ) ) {
@@ -77,7 +79,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('WooCommerce version','woocommerce')?></td>
                     <td><?php echo $woocommerce->version; ?></td>
                 </tr>
@@ -85,7 +87,7 @@ function woocommerce_debug() {
                     <td><?php _e('WordPress version','woocommerce')?></td>
                     <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
                 </tr>
-             	<tr class="alternate">
+             	<tr>
              		<td><?php _e('Installed plugins','woocommerce')?></td>
              		<td><?php
              			$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -123,7 +125,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Home URL','woocommerce')?></td>
                     <td><?php echo home_url(); ?></td>
                 </tr>
@@ -131,7 +133,7 @@ function woocommerce_debug() {
                     <td><?php _e('Site URL','woocommerce')?></td>
                     <td><?php echo site_url(); ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Force SSL','woocommerce')?></td>
                     <td><?php echo ucwords(get_option('woocommerce_force_ssl_checkout')); ?></td>
                 </tr>
@@ -188,7 +190,7 @@ function woocommerce_debug() {
 					
 					foreach ( $check_pages as $page_name => $values ) {
 						
-						if ( $alt == 1 ) echo '<tr class="alternate">'; else echo '<tr>';
+						if ( $alt == 1 ) echo '<tr>'; else echo '<tr>';
 						
 						echo '<td>' . $page_name . '</td><td>';
 						
@@ -232,7 +234,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('PHP Version','woocommerce')?></td>
                     <td><?php 
                     	if ( function_exists( 'phpversion' ) ) echo phpversion(); 
@@ -244,7 +246,7 @@ function woocommerce_debug() {
                     	echo $_SERVER['SERVER_SOFTWARE']; 
                     ?></td>
                 </tr>
-				<tr class="alternate">
+				<tr>
                     <td><?php _e('WP Max Upload Size','woocommerce'); ?></td>
                     <td><?php 
                     	echo wp_convert_bytes_to_hr( wp_max_upload_size() );
@@ -257,7 +259,7 @@ function woocommerce_debug() {
                     		echo wp_convert_bytes_to_hr( woocommerce_let_to_num( ini_get('upload_max_filesize') ) );
                     ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Server post_max_size','woocommerce')?></td>
                     <td><?php 
                     	if(function_exists('phpversion')) 
@@ -270,7 +272,7 @@ function woocommerce_debug() {
                     	echo wp_convert_bytes_to_hr( woocommerce_let_to_num( WP_MEMORY_LIMIT ) ); 
                     ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('WP Debug Mode','woocommerce')?></td>
                     <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __('Yes', 'woocommerce') . '</mark>'; else echo '<mark class="no">' . __('No', 'woocommerce') . '</mark>'; ?></td>
                 </tr>
@@ -292,7 +294,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-            	<tr class="alternate">
+            	<tr>
                     <td><?php _e('Session save path','woocommerce')?></td>
 					<td><?php
 						$save_path = session_save_path();
@@ -348,7 +350,7 @@ function woocommerce_debug() {
             			
 			<tbody>
 			<?php foreach($posting as $post) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error'; ?>
-				<tr class="<?php echo $classes[$class%2]; $class++; ?>">
+				<tr>
                     <td><?php echo $post['name']; ?></td>
                     <td>
                     	<mark class="<?php echo $mark; ?>">
@@ -367,7 +369,7 @@ function woocommerce_debug() {
 
 			<tbody class="tools">
 			<?php foreach($tools as $action => $tool) { ?>
-				<tr class="<?php echo $classes[$class%2]; $class++; ?>">
+				<tr>
                     <td><?php echo $tool['name']; ?></td>
                     <td>
                     	<p>
