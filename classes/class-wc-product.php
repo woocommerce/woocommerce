@@ -692,7 +692,7 @@ class WC_Product {
 			endif;
 		endif;
 		
-		return $price;
+		return apply_filters('woocommerce_get_price_html', $price, $this);
 	}
 	
 	/** Functions for getting parts of a price, in html, used by get_price_html */
