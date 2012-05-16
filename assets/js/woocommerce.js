@@ -262,11 +262,11 @@ jQuery(document).ready(function($) {
 	});
 	
 	/* Tabs */
-	$('div.woocommerce_tabs .panel').hide();
-	$('div.woocommerce_tabs ul.tabs li a').click(function(){
+	$('.woocommerce_tabs .panel').hide();
+	$('.woocommerce_tabs ul.tabs li a').click(function(){
 		
 		var $tab = $(this);
-		var $tabs_wrapper = $tab.closest('div.woocommerce_tabs');
+		var $tabs_wrapper = $tab.closest('.woocommerce_tabs');
 		
 		$('ul.tabs li', $tabs_wrapper).removeClass('active');
 		$('div.panel', $tabs_wrapper).hide();
@@ -275,7 +275,7 @@ jQuery(document).ready(function($) {
 		
 		return false;	
 	});
-	$('div.woocommerce_tabs').each(function() {
+	$('.woocommerce_tabs').each(function() {
 		var hash = window.location.hash;
 		if (hash.toLowerCase().indexOf("comment-") >= 0) {
 			$('ul.tabs li.reviews_tab a', $(this)).click();
