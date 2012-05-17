@@ -68,7 +68,7 @@ class WC_Payment_Gateways {
 			
 		endforeach;
 
-		return $_available_gateways;
+		return apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways );
 	}
 	
 	function process_admin_options() {
