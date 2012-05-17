@@ -404,6 +404,9 @@ class WC_Product {
      * @return int
      */
     function get_stock_quantity() {
+    	if ( get_option( 'woocommerce_manage_stock' ) == 'no' )
+    		return '';
+
         return (int) $this->stock;
     }
 
