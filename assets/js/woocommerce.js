@@ -425,8 +425,6 @@ jQuery(document).ready(function($) {
         	$('.single_variation_wrap').find('input[name=quantity]').removeAttr('data-max');
         }
         
-        alert(variation.is_sold_individually);
-        
         if ( variation.is_sold_individually == 'yes' ) {
         	$('.single_variation_wrap').find('input[name=quantity]').val('1');
         	$('.single_variation_wrap').find('.quantity').hide();
