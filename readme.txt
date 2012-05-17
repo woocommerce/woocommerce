@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Made woocommerce_locate_template more useful for third party plugins - ability to pass a full path
 * Tweak - WC Debug page hooks
 * Tweak - Tidied up installer
+* Tweak - Removed unused get_hidden_product_ids
 * Fix - Google Analytics options fix
 * Fix - % discount rounding
 * Fix - get_stock_quantity returns '' if stock management is off in global settings
