@@ -20,6 +20,7 @@
  * @param mixed $dim
  * @param mixed $unit 'in', 'm', 'cm', 'm'
  * @return void
+ *                                                                      
  */
 function woocommerce_get_dimension( $dim, $to_unit ) {
 	
