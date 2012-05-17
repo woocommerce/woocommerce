@@ -172,8 +172,10 @@ class WC_Google_Analytics extends WC_Integration {
 						   } else {
 								$out = array();
 								$categories = get_the_terms($_product->id, 'product_cat');
-								foreach ( $categories as $category ){
-									$out[] = $category->name;
+								if ( $categories ) {
+									foreach ( $categories as $category ){
+										$out[] = $category->name;
+									}
 								}
 								echo join( "/", $out);
 						   }

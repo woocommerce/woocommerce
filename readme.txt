@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Google Analytics options fix
 * Fix - % discount rounding
 * Fix - get_stock_quantity returns '' if stock management is off in global settings
+* Fix - Prevent error in ecommerce tracking if no categories set
 
 = 1.5.5 - 10/05/2012 =
 * Feature - New 'default' sorting order using menu_order, with drag and drop sorting (based on http://wordpress.org/extend/plugins/simple-page-ordering/)
