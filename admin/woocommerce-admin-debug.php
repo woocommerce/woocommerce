@@ -10,6 +10,19 @@
 function woocommerce_debug() {
 	global $woocommerce;
 	
+	$tools = apply_filters( 'wc_debug_tools', array(
+		'clear_transients' => array(
+			'name'		=> __('Transients','woocommerce'),
+			'button'	=> __('Clear Transients','woocommerce'),
+			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+		),
+		'reset_roles' => array(
+			'name'		=> __('Capabilities','woocommerce'),
+			'button'	=> __('Reset Capabilities','woocommerce'),
+			'desc'		=> __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
+		),
+	) );
+	
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
@@ -17,6 +30,7 @@ function woocommerce_debug() {
 		
 		<?php
 			if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+				
 				switch ( $_GET['action'] ) {
 					case "clear_transients" :
 						$woocommerce->clear_product_transients();
@@ -37,6 +51,20 @@ function woocommerce_debug() {
 						
 						echo '<div class="updated"><p>' . __('Roles successfully reset', 'woocommerce') . '</p></div>';
 					break;
+					default:
+						$action = esc_attr( $_GET['action'] );
+						if( isset( $tools[ $action ]['callback'] ) ) {
+							$callback = $tools[ $action ]['callback'];
+							$return = call_user_func( $callback );
+							if( $return === false ) {
+								if( is_array( $callback ) ) {
+									echo '<div class="error"><p>' . sprintf( __('There was an error calling %s::%s', 'woocommerce'), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
+									
+								} else {
+									echo '<div class="error"><p>' . sprintf( __('There was an error calling %s', 'woocommerce'), $callback ) . '</p></div>';
+								}
+							}
+						}
 				}
 			}
 		?>
@@ -51,7 +79,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('WooCommerce version','woocommerce')?></td>
                     <td><?php echo $woocommerce->version; ?></td>
                 </tr>
@@ -59,7 +87,7 @@ function woocommerce_debug() {
                     <td><?php _e('WordPress version','woocommerce')?></td>
                     <td><?php if ( is_multisite() ) echo 'WPMU'; else echo 'WP'; ?> <?php echo bloginfo('version'); ?></td>
                 </tr>
-             	<tr class="alternate">
+             	<tr>
              		<td><?php _e('Installed plugins','woocommerce')?></td>
              		<td><?php
              			$active_plugins = (array) get_option( 'active_plugins', array() );
@@ -97,7 +125,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Home URL','woocommerce')?></td>
                     <td><?php echo home_url(); ?></td>
                 </tr>
@@ -105,7 +133,7 @@ function woocommerce_debug() {
                     <td><?php _e('Site URL','woocommerce')?></td>
                     <td><?php echo site_url(); ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Force SSL','woocommerce')?></td>
                     <td><?php echo ucwords(get_option('woocommerce_force_ssl_checkout')); ?></td>
                 </tr>
@@ -162,7 +190,7 @@ function woocommerce_debug() {
 					
 					foreach ( $check_pages as $page_name => $values ) {
 						
-						if ( $alt == 1 ) echo '<tr class="alternate">'; else echo '<tr>';
+						if ( $alt == 1 ) echo '<tr>'; else echo '<tr>';
 						
 						echo '<td>' . $page_name . '</td><td>';
 						
@@ -206,7 +234,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('PHP Version','woocommerce')?></td>
                     <td><?php 
                     	if ( function_exists( 'phpversion' ) ) echo phpversion(); 
@@ -218,7 +246,7 @@ function woocommerce_debug() {
                     	echo $_SERVER['SERVER_SOFTWARE']; 
                     ?></td>
                 </tr>
-				<tr class="alternate">
+				<tr>
                     <td><?php _e('WP Max Upload Size','woocommerce'); ?></td>
                     <td><?php 
                     	echo wp_convert_bytes_to_hr( wp_max_upload_size() );
@@ -231,7 +259,7 @@ function woocommerce_debug() {
                     		echo wp_convert_bytes_to_hr( woocommerce_let_to_num( ini_get('upload_max_filesize') ) );
                     ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('Server post_max_size','woocommerce')?></td>
                     <td><?php 
                     	if(function_exists('phpversion')) 
@@ -244,7 +272,7 @@ function woocommerce_debug() {
                     	echo wp_convert_bytes_to_hr( woocommerce_let_to_num( WP_MEMORY_LIMIT ) ); 
                     ?></td>
                 </tr>
-                <tr class="alternate">
+                <tr>
                     <td><?php _e('WP Debug Mode','woocommerce')?></td>
                     <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __('Yes', 'woocommerce') . '</mark>'; else echo '<mark class="no">' . __('No', 'woocommerce') . '</mark>'; ?></td>
                 </tr>
@@ -266,7 +294,7 @@ function woocommerce_debug() {
 			</thead>
 			
 			<tbody>
-            	<tr class="alternate">
+            	<tr>
                     <td><?php _e('Session save path','woocommerce')?></td>
 					<td><?php
 						$save_path = session_save_path();
@@ -288,31 +316,49 @@ function woocommerce_debug() {
 				</tr>
 			</thead>
 			
+			<?php
+				$posting = array();
+				
+				// fsockopen/Curl
+				$posting['fsockopen_curl']['name'] = __('fsockopen/Curl','woocommerce');
+				if( function_exists('fsockopen') || function_exists('curl_init') ) {
+            		$posting['fsockopen_curl']['note'] = __('Your server has fsockopen or Curl enabled.', 'woocommerce');
+            		$posting['fsockopen_curl']['success'] = true;
+				} else {
+            		$posting['fsockopen_curl']['note'] = __('Your server does not have fsockopen or Curl enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce'). '</mark>';
+            		$posting['fsockopen_curl']['success'] = false;
+            	}
+            	
+            	// WP Remote Post Check
+				$posting['wp_remote_post']['name'] = __('WP Remote Post Check','woocommerce');
+				$params = array( 
+					'sslverify' 	=> false,
+		        	'timeout' 		=> 30,
+		        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
+				);	
+				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
+				if ( ! is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
+            		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce'); 
+            		$posting['wp_remote_post']['success'] = true;
+            	} else {
+            		$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error: ', 'woocommerce') . $response->get_error_message();
+            		$posting['wp_remote_post']['success'] = false;
+            	}
+            	
+            	$posting = apply_filters( 'wc_debug_posting', $posting );
+            ?>
+            			
 			<tbody>
-            	<tr class="alternate">
-                    <td><?php _e('fsockopen/Curl','woocommerce')?></td>
-                    <td><?php 
-                    	if( function_exists('fsockopen') || function_exists('curl_init') ) 
-                    		echo '<mark class="yes">' . __('Your server has fsockopen or Curl enabled.', 'woocommerce'). '</mark>'; 
-                    	else 
-                    		echo '<mark class="error">' . __('Your server does not have fsockopen or Curl enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce'). '</mark>'; ?></td>
+			<?php foreach($posting as $post) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error'; ?>
+				<tr>
+                    <td><?php echo $post['name']; ?></td>
+                    <td>
+                    	<mark class="<?php echo $mark; ?>">
+	                    	<?php echo $post['note']; ?>
+                    	</mark>
+                    </td>
                 </tr>
-                <tr>
-                    <td><?php _e('WP Remote Post Check','woocommerce')?></td>
-                    <td><?php
-						$params = array( 
-							'sslverify' 	=> false,
-				        	'timeout' 		=> 30,
-				        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
-						);	
-						$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
-                    	 
-                    	if ( ! is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) 
-                    		echo '<mark class="yes">' . __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce'). '</mark>'; 
-                    	else 
-                    		echo '<mark class="error">' . __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error: ', 'woocommerce') . $response->get_error_message() . '</mark>';
-                    ?></td>
-                </tr>
+			<?php } ?>
             </tbody>
             
             <thead class="tools">
@@ -320,26 +366,19 @@ function woocommerce_debug() {
 					<th colspan="2"><?php _e( 'Tools', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
-			
+
 			<tbody class="tools">
-				<tr class="alternate">
-                    <td><?php _e('Transients','woocommerce')?></td>
-                    <td>
-                    	<p>
-	                    	<a href="<?php echo wp_nonce_url( admin_url('tools.php?page=woocommerce_debug&action=clear_transients'), 'debug_action' ); ?>" class="button"><?php _e('Clear Transients','woocommerce')?></a>
-	                    	<span class="description"><?php _e( 'This tool will clear the product/shop transients cache.', 'woocommerce' ); ?></span>
-                    	</p>
-                    </td>
-                </tr>
+			<?php foreach($tools as $action => $tool) { ?>
 				<tr>
-                    <td><?php _e('Capabilities','woocommerce')?></td>
+                    <td><?php echo $tool['name']; ?></td>
                     <td>
                     	<p>
-	                    	<a href="<?php echo wp_nonce_url( admin_url('tools.php?page=woocommerce_debug&action=reset_roles'), 'debug_action' ); ?>" class="button"><?php _e('Reset Capabilities','woocommerce')?></a>
-	                    	<span class="description"><?php _e( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ); ?></span>
+	                    	<a href="<?php echo wp_nonce_url( admin_url('tools.php?page=woocommerce_debug&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo $tool['button']; ?></a>
+	                    	<span class="description"><?php echo $tool['desc']; ?></span>
                     	</p>
                     </td>
                 </tr>
+			<?php } ?>
 			</tbody>
 		</table>
 

@@ -20,7 +20,7 @@ class WC_ShareThis extends WC_Integration {
 		
 		$this->default_code = '<div class="social">
 	<iframe src="https://www.facebook.com/plugins/like.php?href={permalink}&amp;layout=button_count&amp;show_faces=false&amp;width=100&amp;action=like&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:100px; height:21px;" allowTransparency="true"></iframe>
-	<span class="st_twitter"></span><span class="st_email"></span><span class="st_sharethis"></span><span class="st_plusone_button"></span>
+	<span class="st_twitter"></span><span class="st_email"></span><span class="st_sharethis" st_image="{image}"></span><span class="st_plusone_button"></span>
 </div>';
 
 		// Load the form fields.
@@ -33,7 +33,7 @@ class WC_ShareThis extends WC_Integration {
 		$this->publisher_id 	= $this->settings['publisher_id'];
 		$this->sharethis_code 	= $this->settings['sharethis_code'];
 
-		if ( ! $this->sharethis_code ) $this->sharethis_code = $this->default_code;
+		if ( ! $this->sharethis_code ) $this->settings['sharethis_code'] = $this->sharethis_code = $this->default_code;
 		
 		// Actions
 		add_action( 'woocommerce_update_options_integration_sharethis', array( &$this, 'process_admin_options') );
@@ -73,10 +73,15 @@ class WC_ShareThis extends WC_Integration {
     	global $post;
     	
     	if ( $this->publisher_id ) {
-    	
+    		
+    		$thumbnail = ( $thumbnail_id = get_post_thumbnail_id( $post->ID ) ) ? current(wp_get_attachment_image_src( $thumbnail_id, 'large' )) : '';
+    		
     		$sharethis = ( is_ssl() ) ? 'https://ws.sharethis.com/button/buttons.js' : 'http://w.sharethis.com/button/buttons.js';
     	
-    		echo str_replace( '{permalink}', urlencode(get_permalink($post->ID)), $this->sharethis_code );
+    		$sharethis_code = str_replace( '{permalink}', urlencode( get_permalink( $post->ID ) ), $this->sharethis_code );
+    		if ( isset( $thumbnail ) ) $sharethis_code = str_replace( '{image}', urlencode( $thumbnail ), $sharethis_code );
+    		
+    		echo $sharethis_code;
     		
     		echo '<script type="text/javascript">var switchTo5x=true;</script><script type="text/javascript" src="' . $sharethis . '"></script>';
 			echo '<script type="text/javascript">stLight.options({publisher:"' . $this->publisher_id . '"});</script>';

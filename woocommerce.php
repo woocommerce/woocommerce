@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.5.5
+ * Version: 1.5.6
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
@@ -32,7 +32,7 @@ class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.5.5';
+	var $version = '1.5.6';
 	
 	/** URLS ******************************************************************/
 	
@@ -220,7 +220,7 @@ class Woocommerce {
 			add_filter( 'template_include', array(&$this, 'template_loader') );
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
-			add_action( 'wp', array(&$this, 'buffer_checkout') );
+			add_action( 'get_header', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
 			add_action( 'wp_head', array(&$this, 'generator') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
@@ -239,7 +239,7 @@ class Woocommerce {
 
 		// Actions for SSL
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
-			add_action( 'wp', array( &$this, 'ssl_redirect' ) );
+			add_action( 'get_header', array( &$this, 'ssl_redirect' ) );
 	
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 			foreach ( $filters as $filter ) add_filter( $filter, array( &$this, 'force_ssl') );

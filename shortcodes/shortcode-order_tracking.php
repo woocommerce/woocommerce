@@ -27,10 +27,10 @@ function woocommerce_order_tracking( $atts ) {
 		
 		$woocommerce->verify_nonce( 'order_tracking' );
 		
-		if (isset($_POST['orderid']) && $_POST['orderid'] > 0) $order_id = (int) $_POST['orderid']; else $order_id = 0;
+		if (isset($_POST['orderid']) && $_POST['orderid']) $order_id = $_POST['orderid']; else $order_id = 0;
 		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
 		
-		$order = new WC_Order( $order_id );
+		$order = new WC_Order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 		
 		if ($order->id && $order_email) :
 

@@ -54,14 +54,10 @@ class WC_Query {
 		
 	    if 	( 
 	    		( ! $query ) // Abort if theres no query
-	    		||
-	    		( empty( $this->post__in ) ) // Abort if we're not filtering posts
-	    		||
-	    		( ! empty( $query->wc_query ) ) // Abort if this query is already done
-	    		||
-	    		( empty( $query->query_vars["s"] ) ) // Abort if this isn't a search query
-	    		|| 
-	    		( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
+	    		|| ( empty( $this->post__in ) ) // Abort if we're not filtering posts
+	    		|| ( ! empty( $query->wc_query ) ) // Abort if this query is already done
+	    		|| ( empty( $query->query_vars["s"] ) ) // Abort if this isn't a search query
+	    		|| ( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
 	    	) 
 	    return $posts;
 	    
@@ -110,13 +106,15 @@ class WC_Query {
 		// Ordering query vars
 		$q->set( 'orderby', $ordering['orderby'] );
 		$q->set( 'order', $ordering['order'] );
-		if (isset($ordering['meta_key'])) $q->set( 'meta_key', $ordering['meta_key'] );
+		if ( isset( $ordering['meta_key'] ) ) 
+			$q->set( 'meta_key', $ordering['meta_key'] );
 	
 		// Query vars that affect posts shown
-		if (!$q->is_tax( 'product_cat' ) && !$q->is_tax( 'product_tag' )) $q->set( 'post_type', 'product' );
+		if ( ! $q->is_tax( 'product_cat' ) && ! $q->is_tax( 'product_tag' ) ) 
+			$q->set( 'post_type', 'product' );
 		$q->set( 'meta_query', $meta_query );
 	    $q->set( 'post__in', $post__in );
-	    $q->set( 'posts_per_page', ($q->get('posts_per_page')) ? $q->get('posts_per_page') : apply_filters('loop_shop_per_page', get_option('posts_per_page') ) );
+	    $q->set( 'posts_per_page', $q->get('posts_per_page') ? $q->get('posts_per_page') : apply_filters('loop_shop_per_page', get_option('posts_per_page') ) );
 	    
 	    // Set a special variable
 	    $q->set( 'wc_query', true );
@@ -143,14 +141,14 @@ class WC_Query {
 		
 		// Get WP Query for current page (without 'paged')
 		$current_wp_query = $wp_query->query;
-		unset($current_wp_query['paged']);
+		unset( $current_wp_query['paged'] );
 		
 		// Generate a transient name based on current query
 		$transient_name = 'wc_uf_pid_' . md5( http_build_query($current_wp_query) );
-		$transient_name = (is_search()) ? $transient_name . '_s' : $transient_name;
+		$transient_name = ( is_search() ) ? $transient_name . '_s' : $transient_name;
 		
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
-
+			
 			// Get all visible posts, regardless of filters
 		    $unfiltered_product_ids = get_posts(
 				array_merge( 
@@ -255,33 +253,5 @@ class WC_Query {
 		endif;
 		return $meta_query;
 	}
-	
-	/**
-	 * Get a list of product id's which should be hidden from the frontend; useful for custom queries and loops. Makes use of transients.
-	 */
-	function get_hidden_product_ids() {
-		
-		$transient_name = (is_search()) ? 'wc_hidden_product_ids_search' : 'wc_hidden_product_ids';
-		
-		if ( false === ( $hidden_product_ids = get_transient( $transient_name ) ) ) {
-			
-			$meta_query = array();
-			$meta_query[] = $this->visibility_meta_query( 'NOT IN' );
-	    	$meta_query[] = $this->stock_status_meta_query( 'outofstock' );
-			
-			$hidden_product_ids = get_posts(array(
-				'post_type' 	=> 'product',
-				'numberposts' 	=> -1,
-				'post_status' 	=> 'publish',
-				'meta_query' 	=> $meta_query,
-				'fields' 		=> 'ids',
-				'no_found_rows' => true
-			));
-			
-			set_transient( $transient_name, $hidden_product_ids );
-		}
-				
-		return (array) $hidden_product_ids;
-	}	
- 
+	 
 }

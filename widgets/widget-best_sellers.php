@@ -68,7 +68,12 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
     	);
 
     	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
-    		$query_args['meta_query'] = array( array( 'key' => '_price', 'value' => 0, 'compare' => '>' ) );
+    		$query_args['meta_query'] = array( array(
+			    'key'     => '_price',
+			    'value'   => 0,
+			    'compare' => '>',
+			    'type'    => 'DECIMAL',
+			) );
     	}
 
 		$r = new WP_Query($query_args);
@@ -125,7 +130,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
-		if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) $hide_free_checked = ' checked="checked"';
+		$hide_free_checked = ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) ? ' checked="checked"' : '';
 
 		?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
