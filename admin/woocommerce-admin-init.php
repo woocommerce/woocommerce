@@ -165,7 +165,6 @@ include_once( 'woocommerce-admin-taxonomies.php' );
  * Includes for admin pages - only load functions when needed
  */
 function woocommerce_settings_page() {
-	include_once( 'woocommerce-admin-settings-forms.php' );
 	include_once( 'woocommerce-admin-settings.php' );
 	woocommerce_settings();
 }
