@@ -122,6 +122,16 @@ class WC_Shipping {
 				
 				$chosen_method = get_option('woocommerce_default_shipping_method');
 				
+				// Loops methods and find a match
+				if ( ! isset( $_available_methods[$chosen_method] ) ) {
+					foreach ( $_available_methods as $method_id => $method ) {
+						if ( strpos( $method->id, $chosen_method ) === 0 ) {
+							$chosen_method = $method->id;
+							break;
+						}
+					}
+				}
+				
 				if ( empty( $chosen_method ) || ! isset( $_available_methods[$chosen_method] ) ) {
 				
 					// Default to cheapest
