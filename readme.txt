@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 ==
 
+* Tweak - Layered nav child taxonomies support
 * Tweak - Change debug page to status page to make it more noticeable.
 * Tweak - Broken up settings pages to ease development
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.

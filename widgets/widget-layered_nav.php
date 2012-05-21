@@ -65,7 +65,22 @@ function woocommerce_layered_nav_query( $filtered_posts ) {
 			if (sizeof($data['terms'])>0) :  
 				foreach ($data['terms'] as $value) :
 					
-					$posts = get_objects_in_term( $value, $attribute );
+					$posts = get_posts(
+						array(
+							'post_type' 	=> 'product',
+							'numberposts' 	=> -1,
+							'post_status' 	=> 'publish',
+							'fields' 		=> 'ids',
+							'no_found_rows' => true,
+							'tax_query' => array(
+								array(
+									'taxonomy' 	=> $attribute,
+									'terms' 	=> $value,
+									'field' 	=> 'id'
+								)
+							)
+						)
+					);
 					
 					// AND or OR
 					if ($data['query_type']=='or') :
