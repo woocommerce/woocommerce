@@ -334,7 +334,7 @@ class WC_Countries {
 			'FR' => array(),
 			'HK' => array(
 				'HONG KONG' => __('Hong Kong Island', 'woocommerce'),
-				'KOWLOONG' => __('Kowloong', 'woocommerce'),
+				'KOWLOON' => __('Kowloon', 'woocommerce'),
 				'NEW TERRITORIES' => __('New Territories', 'woocommerce')
 			),
 			'HU' => array(),
