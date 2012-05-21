@@ -7,7 +7,7 @@
  * @package 	WooCommerce
  */
 
-function woocommerce_debug() {
+function woocommerce_status() {
 	global $woocommerce;
 	
 	$tools = apply_filters( 'wc_debug_tools', array(
@@ -26,7 +26,7 @@ function woocommerce_debug() {
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
-		<h2><?php _e( 'Debugging Information', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce'); ?></a></h2>
+		<h2><?php _e( 'System Status', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce'); ?></a></h2>
 		
 		<?php
 			if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -269,7 +269,13 @@ function woocommerce_debug() {
                 <tr>
                     <td><?php _e('WP Memory Limit','woocommerce')?></td>
                     <td><?php 
-                    	echo wp_convert_bytes_to_hr( woocommerce_let_to_num( WP_MEMORY_LIMIT ) ); 
+                    	$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
+                    	
+                    	if ( $memory < 67108864 ) {
+                    		echo '<mark class="error">' . sprintf( __('%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce'), wp_convert_bytes_to_hr( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+                    	} else {
+                    		echo '<mark class="yes">' . wp_convert_bytes_to_hr( $memory ) . '</mark>';
+                    	}
                     ?></td>
                 </tr>
                 <tr>
@@ -373,7 +379,7 @@ function woocommerce_debug() {
                     <td><?php echo $tool['name']; ?></td>
                     <td>
                     	<p>
-	                    	<a href="<?php echo wp_nonce_url( admin_url('tools.php?page=woocommerce_debug&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo $tool['button']; ?></a>
+	                    	<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=woocommerce_status&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo $tool['button']; ?></a>
 	                    	<span class="description"><?php echo $tool['desc']; ?></span>
                     	</p>
                     </td>

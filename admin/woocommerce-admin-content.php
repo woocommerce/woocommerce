@@ -22,9 +22,9 @@ function woocommerce_admin_help_tab_content() {
 	    
 	    	'<p>' . sprintf(__( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href="%s">read the documentation</a>. For further assistance you can use the <a href="%s">community forum</a> or if you have access, <a href="%s">the members forum</a>.', 'woocommerce' ), 'http://www.woothemes.com/woocommerce-docs/', 'http://www.woothemes.com/support-forum/?viewforum=150', 'http://www.woothemes.com/support-forum/') . '</p>' . 
 	    	
-	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the debugging page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
+	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
 	    	
-	    	'<p><a href="' . admin_url('tools.php?page=woocommerce_debug') . '" class="button">' . __( 'Debugging Info &amp; Tools', 'woocommerce' ) . '</a></p>' .
+	    	'<p><a href="' . admin_url('admin.php?page=woocommerce_status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>' .
 	    	
 	    	'<p>' . sprintf(__( 'If you come across a bug, or wish to contribute to the project you can also <a href="%s">get involved on GitHub</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce') . '</p>'
 	    	

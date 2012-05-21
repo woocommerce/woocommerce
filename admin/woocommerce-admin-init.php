@@ -15,6 +15,7 @@
  * Sets up the admin menus in wordpress.
  */
 add_action('admin_menu', 'woocommerce_admin_menu', 9);
+add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
 
 function woocommerce_admin_menu() {
 	global $menu, $woocommerce;
@@ -29,16 +30,20 @@ function woocommerce_admin_menu() {
     $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
     
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
-    
-    $status_page = add_submenu_page( 'tools.php', __('WooCommerce Debug', 'woocommerce'),  __('WC Debug', 'woocommerce') , 'manage_woocommerce', 'woocommerce_debug', 'woocommerce_debug_page');
-    
+        
     add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
     add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
     
-    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'tools_page_woocommerce_debug', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
+    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     
     foreach ( $print_css_on as $page ) 
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' ); 
+}
+
+function woocommerce_admin_menu_after() {
+
+	$status_page = add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+	
 }
 
 /**
@@ -176,9 +181,9 @@ function woocommerce_attributes_page() {
 	include_once( 'woocommerce-admin-attributes.php' );
 	woocommerce_attributes();
 }
-function woocommerce_debug_page() {
-	include_once( 'woocommerce-admin-debug.php' );
-	woocommerce_debug();
+function woocommerce_status_page() {
+	include_once( 'woocommerce-admin-status.php' );
+	woocommerce_status();
 }
 
 /**
