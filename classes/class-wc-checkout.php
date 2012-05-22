@@ -147,16 +147,17 @@ class WC_Checkout {
 				// Validation: Required fields
 				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
 				
-				if (!empty($this->posted[$key])) :
+				if ( ! empty( $this->posted[ $key ] ) ) :
 					// Special handling for validation and formatting
-					switch ($key) :
+					switch ( $key ) :
 						case "billing_postcode" :
 						case "shipping_postcode" :
-							$this->posted[$key] = strtoupper(str_replace(' ', '', $this->posted[$key]));
+							$validate_against = ( $key == 'billing_postcode' ) ? 'billing_country' : 'shipping_country'; 
+							$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 							
-							if (!$validation->is_postcode( $this->posted[$key], $_POST['billing_country'] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('(billing) is not a valid postcode/ZIP.', 'woocommerce') ); 
+							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) ) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __('(%s) is not a valid postcode/ZIP.', 'woocommerce'), $this->posted[ $key ] ) ); 
 							else :
-								$this->posted[$key] = $validation->format_postcode( $this->posted[$key], $_POST['billing_country'] );
+								$this->posted[ $key ] = $validation->format_postcode( $this->posted[$key], $_POST[ $validate_against ] );
 							endif;
 						break;
 						case "billing_phone" :
