@@ -120,7 +120,7 @@ class WC_Shipping {
 			// If not set, set a default
 			if ( empty( $chosen_method ) || ! isset( $_available_methods[$chosen_method] ) ) {
 				
-				$chosen_method = get_option('woocommerce_default_shipping_method');
+				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option('woocommerce_default_shipping_method'), $_available_methods );
 				
 				// Loops methods and find a match
 				if ( ! isset( $_available_methods[$chosen_method] ) ) {
