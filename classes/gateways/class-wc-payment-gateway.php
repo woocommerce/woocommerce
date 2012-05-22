@@ -111,6 +111,32 @@ class WC_Payment_Gateway extends WC_Settings_API {
         if ($this->description) echo wpautop(wptexturize($this->description));
     }
     
+	/**
+	 * Check if a gateway supports a given feature.
+	 * 
+	 * Gateways should override this to declare support (or lack of support) for a feature. 
+	 * For backward compatibility, gateways support 'products' by default, but nothing else. 
+	 * 
+	 * @param $feature string The name of a feature to test support for.
+	 * @return bool True if the gateway supports the feature, false otherwise. 
+	 * @since 1.5.7
+	 */
+	function is_supported( $feature ) {
+		switch ( $feature ) {
+			case 'products' :
+				$is_supported = true;
+				break;
+			case 'subscriptions' :
+				$is_supported = false;
+				break;
+			default :
+				$is_supported = false;
+				break;
+		}
+
+		return apply_filters( 'woocommerce_payment_gateway_support', $is_supported, $feature, $this );
+	}
+
 }
 
 /** Depreciated */
