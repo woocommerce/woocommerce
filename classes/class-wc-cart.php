@@ -1070,7 +1070,7 @@ class WC_Cart {
 							
 							// ADJUST BASE if tax rate is different (different region or modified tax class)
 							if ( $tax_rates !== $base_tax_rates ) {
-							
+								
 								$base_taxes			= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true );
 								$modded_taxes		= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 								$row_base_price 	= ( $row_base_price - array_sum( $base_taxes ) ) + array_sum( $modded_taxes );
@@ -1640,7 +1640,7 @@ class WC_Cart {
 		 * @return string formatted price
 		 */
 		function get_total() {
-			return woocommerce_price( $this->total );
+			return apply_filters( 'woocommerce_cart_total', woocommerce_price( $this->total ) );
 		}
 		
 		/**
@@ -1651,7 +1651,7 @@ class WC_Cart {
 		function get_total_ex_tax() {
 			$total = $this->total - $this->tax_total - $this->shipping_tax_total;
 			if ( $total < 0 ) $total = 0;
-			return woocommerce_price( $total );
+			return apply_filters( 'woocommerce_cart_total_ex_tax', woocommerce_price( $total ) );
 		}
 		
 		/**
