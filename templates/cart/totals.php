@@ -112,7 +112,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 				<?php 
 					if ( get_option('woocommerce_display_cart_taxes') == 'yes' && $woocommerce->cart->get_cart_tax() ) :
 						
-						$taxes = $woocommerce->cart->get_taxes();
+						$taxes = $woocommerce->cart->get_formatted_taxes();
 						
 						if (sizeof($taxes)>0) :
 						
@@ -131,7 +131,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo $woocommerce->cart->tax->get_rate_label( $key );
 										?>
 									</th>
-									<td><?php echo woocommerce_price($tax); ?></td>
+									<td><?php echo $tax; ?></td>
 								</tr>
 								<?php
 								
@@ -159,7 +159,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo $woocommerce->cart->tax->get_rate_label( $key );
 										?>
 									</th>
-									<td><?php echo woocommerce_price($tax); ?></td>
+									<td><?php echo $tax; ?></td>
 								</tr>
 								<?php
 								

@@ -530,9 +530,24 @@ class WC_Cart {
 			}
 			
 			return $merged_taxes;
-		}	
+		}
 		
- 	/*-----------------------------------------------------------------------------------*/
+		/**
+		 * Returns the cart and shipping taxes, merged & formatted
+		 * 
+		 * @return array merged taxes
+		 */
+		function get_formatted_taxes() {
+
+			$taxes = $this->get_taxes();
+
+			foreach ( $taxes as $key => $tax )
+				$taxes[$key] = woocommerce_price( $tax );
+
+			return apply_filters( 'woocommerce_cart_formatted_taxes', $taxes, $this );
+		}
+
+	/*-----------------------------------------------------------------------------------*/
 	/* Add to cart handling */
 	/*-----------------------------------------------------------------------------------*/ 
 	
@@ -1305,7 +1320,7 @@ class WC_Cart {
 			
 			// Allow plugins to hook and alter totals before final total is calculated
 			do_action( 'woocommerce_calculate_totals', $this );			
-					
+
 			/** 
 			 * Grand Total
 			 *
