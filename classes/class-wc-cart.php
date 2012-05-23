@@ -1791,9 +1791,11 @@ class WC_Cart {
 		 */
 		function get_discounts_before_tax() {
 			if ( $this->discount_cart ) {
-				return woocommerce_price( $this->discount_cart ); 
+				$discounts_before_tax = woocommerce_price( $this->discount_cart ); 
+			} else {
+				$discounts_before_tax = false;
 			}
-			return false;
+			return apply_filters( 'woocommerce_cart_discounts_before_tax', $discounts_before_tax, $this );
 		}
 		
 		/**
@@ -1803,9 +1805,11 @@ class WC_Cart {
 		 */
 		function get_discounts_after_tax() {
 			if ( $this->discount_total ) {
-				return woocommerce_price( $this->discount_total ); 
+				$discounts_after_tax = woocommerce_price( $this->discount_total ); 
+			} else {
+				$discounts_after_tax = false;
 			}
-			return false;
+			return apply_filters( 'woocommerce_cart_discounts_after_tax', $discounts_after_tax, $this );
 		}
 		
 		/**
@@ -1815,10 +1819,12 @@ class WC_Cart {
 		 */
 		function get_total_discount() {
 			if ( $this->discount_total || $this->discount_cart ) {
-				return woocommerce_price( $this->discount_total + $this->discount_cart ); 
+				$total_discount = woocommerce_price( $this->discount_total + $this->discount_cart );
+			} else {
+				$total_discount = false;
 			}
-			return false;
-		}	
+			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
+		}
 }
 
 /**
