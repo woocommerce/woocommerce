@@ -1665,32 +1665,31 @@ class WC_Cart {
 			// cart + shipping + non-compound taxes (after discount)
 			if ( $compound ) {
 				
-				return woocommerce_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false ) );
+				$cart_subtotal = woocommerce_price( $this->cart_contents_total + $this->shipping_total + $this->get_taxes_total( false ) );
 			
 			// Otherwise we show cart items totals only (before discount)
 			} else {
 			
 				// Display ex tax if the option is set, or prices exclude tax
 				if ( $this->display_totals_ex_tax || ! $this->prices_include_tax ) {
-																				
-					$return = woocommerce_price( $this->subtotal_ex_tax );
+
+					$cart_subtotal = woocommerce_price( $this->subtotal_ex_tax );
 					
 					if ( $this->tax_total>0 && $this->prices_include_tax ) {
-						$return .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 					}
-					return $return;
 					
 				} else {
 					
-					$return = woocommerce_price( $this->subtotal );
+					$cart_subtotal = woocommerce_price( $this->subtotal );
 					
 					if ( $this->tax_total>0 && !$this->prices_include_tax ) {
-						$return .= ' <small>' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small>' . $woocommerce->countries->inc_tax_or_vat() . '</small>';
 					}
-					return $return;
-				
 				}
 			}
+
+			return apply_filters( 'woocommerce_cart_subtotal', $cart_subtotal, $compound, $this );
 		}
 		
 		/** 
