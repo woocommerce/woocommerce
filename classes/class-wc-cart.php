@@ -1661,10 +1661,12 @@ class WC_Cart {
 		 */
 		function get_cart_total() {
 			if ( ! $this->prices_include_tax ) {
-				return woocommerce_price( $this->cart_contents_total );
+				$cart_contents_total = woocommerce_price( $this->cart_contents_total );
 			} else {
-				return woocommerce_price( $this->cart_contents_total + $this->tax_total );
+				$cart_contents_total = woocommerce_price( $this->cart_contents_total + $this->tax_total );
 			}
+
+			return apply_filters( 'woocommerce_cart_contents_total', $cart_contents_total );
 		}
 		
 		/**
