@@ -61,7 +61,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 
 	   				echo $woocommerce->cart->get_item_data( $cart_item );
 
-					echo '<span class="quantity">' .$cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</span></li>';
+					echo '<span class="quantity">' .$cart_item['quantity'].' &times; '. $_product->get_price_html() .'</span></li>';
 				endif;
 			endforeach;
 		else:
