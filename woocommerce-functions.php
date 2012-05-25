@@ -1044,7 +1044,9 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	// Call the Piwik ecommerce function if WP-Piwik is configured to add tracking codes to the page
 	$wp_piwik_global_settings = get_option('wp-piwik_global-settings');
 	
-	if (!isset($wp_piwik_global_settings['add_tracking_code']) || !$wp_piwik_global_settings['add_tracking_code']) return;
+	// Return if Piwik settings are not here, or if global is not set
+	if ( ! isset( $wp_piwik_global_settings['add_tracking_code'] ) || ! $wp_piwik_global_settings['add_tracking_code'] ) return;
+	if ( ! isset( $GLOBALS['wp_piwik'] ) ) return;
 	
 	// Remove WP-Piwik from wp_footer and run it here instead, to get Piwik 
 	// loaded *before* we do our ecommerce tracking calls
