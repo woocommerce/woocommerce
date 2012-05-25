@@ -476,7 +476,7 @@ class WC_Checkout {
 						'shipping_tax' => number_format($shipping_tax, 2, '.', '')
 					);
 				}
-								
+				error_log( 'storing order_taxes as = ' . print_r( $order_taxes, true ) );
 				// Save other order meta fields
 				update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
 				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
