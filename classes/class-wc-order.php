@@ -449,7 +449,7 @@ class WC_Order {
 
 		endif;
 		
-		return $subtotal;
+		return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
 	}
 
 	/** Gets shipping (formatted) */
@@ -484,7 +484,7 @@ class WC_Order {
 			$shipping = __('Free!', 'woocommerce');
 		endif;
 		
-		return $shipping;
+		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this );
 	}
 	
 	/** Get a product (either product or variation) */
