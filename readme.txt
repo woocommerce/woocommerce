@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == ==
 
 * Feature - 'supports' function for gateways.
+* Tweak - EU states for tax
 * Tweak - woocommerce_shipping_chosen_method hook
 * Tweak - Layered nav child taxonomies support
 * Tweak - Change debug page to status page to make it more noticeable.
