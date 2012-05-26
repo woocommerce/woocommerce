@@ -196,7 +196,7 @@ function woocommerce_tax_rates_setting() {
 		});
 		
 		jQuery('tr.tax_rate .select_europe').live('click', function(){
-			jQuery(this).closest('td').find('option[value="BE"],option[value="FR"],option[value="DE"],option[value="IT"],option[value="LU"],option[value="NL"],option[value="DK"],option[value="IE"],option[value="GR"],option[value="PT"],option[value="ES"],option[value="AT"],option[value="FI"],option[value="SE"],option[value="CY"],option[value="CZ"],option[value="EE"],option[value="HU"],option[value="LV"],option[value="LT"],option[value="MT"],option[value="PL"],option[value="SK"],option[value="SI"],option[value="RO"],option[value="BG"]').attr("selected","selected");
+			jQuery(this).closest('td').find('option[value="BE"],option[value="FR"],option[value="DE"],option[value="IT"],option[value="LU"],option[value="NL"],option[value="DK"],option[value="IE"],option[value="GR"],option[value="PT"],option[value="ES"],option[value="AT"],option[value="FI"],option[value="SE"],option[value="CY"],option[value="CZ"],option[value="EE"],option[value="HU"],option[value="LV"],option[value="LT"],option[value="MT"],option[value="PL"],option[value="SK"],option[value="SI"],option[value="RO"],option[value="BG"],option[value="IM"],option[value="GB"]').attr("selected","selected");
 			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 			return false;
 		});		
