@@ -121,7 +121,7 @@ class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool True if the gateway supports the feature, false otherwise. 
 	 * @since 1.5.7
 	 */
-	function is_supported( $feature ) {
+	function supports( $feature ) {
 		switch ( $feature ) {
 			case 'products' :
 				$is_supported = true;
@@ -133,8 +133,7 @@ class WC_Payment_Gateway extends WC_Settings_API {
 				$is_supported = false;
 				break;
 		}
-
-		return apply_filters( 'woocommerce_payment_gateway_support', $is_supported, $feature, $this );
+		return apply_filters( 'woocommerce_payment_gateway_supports', $is_supported, $feature, $this );
 	}
 
 }
