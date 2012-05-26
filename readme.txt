@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)
 * Fix - postcode validation when country is different for shipping vs billing
 * Fix - user_email typo
+* Fix - Cancelling adding an attribute blocks panel
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
