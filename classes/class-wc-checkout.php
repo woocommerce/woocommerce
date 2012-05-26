@@ -422,7 +422,7 @@ class WC_Checkout {
 							
 							// Special fields
 							switch ($key) {
-								case "billing_emaill" :
+								case "billing_email" :
 									if (!email_exists($this->posted[$key])) wp_update_user( array ( 'ID' => $user_id, 'user_email' => $this->posted[$key] ) ) ;
 								break;
 								case "billing_first_name" :
