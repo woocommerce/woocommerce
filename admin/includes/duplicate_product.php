@@ -51,31 +51,31 @@ function woocommerce_get_product_to_duplicate($id) {
 /**
  * Function to create the duplicate
  */
-function woocommerce_create_duplicate_from_product($post, $parent = 0) {
+function woocommerce_create_duplicate_from_product( $post, $parent = 0, $post_status = '' ) {
 	global $wpdb;
 
 	$new_post_author 	= wp_get_current_user();
 	$new_post_date 		= current_time('mysql');
 	$new_post_date_gmt 	= get_gmt_from_date($new_post_date);
 	
-	if ($parent>0) :
+	if ( $parent > 0 ) {
 		$post_parent		= $parent;
+		$post_status 		= $post_status ? $post_status : 'publish';
 		$suffix 			= '';
-		$post_status     	= 'publish';
-	else :
+	} else {
 		$post_parent		= $post->post_parent;
-		$post_status     	= 'draft';
+		$post_status 		= $post_status ? $post_status : 'draft';
 		$suffix 			= __(" (Copy)", 'woocommerce');
-	endif;
+	}
 	
-	$new_post_type 		= $post->post_type;
-	$post_content    	= str_replace("'", "''", $post->post_content);
-	$post_content_filtered = str_replace("'", "''", $post->post_content_filtered);
-	$post_excerpt    	= str_replace("'", "''", $post->post_excerpt);
-	$post_title      	= str_replace("'", "''", $post->post_title).$suffix;
-	$post_name       	= str_replace("'", "''", $post->post_name);
-	$comment_status  	= str_replace("'", "''", $post->comment_status);
-	$ping_status     	= str_replace("'", "''", $post->ping_status);
+	$new_post_type 			= $post->post_type;
+	$post_content    		= str_replace("'", "''", $post->post_content);
+	$post_content_filtered 	= str_replace("'", "''", $post->post_content_filtered);
+	$post_excerpt    		= str_replace("'", "''", $post->post_excerpt);
+	$post_title      		= str_replace("'", "''", $post->post_title).$suffix;
+	$post_name       		= str_replace("'", "''", $post->post_name);
+	$comment_status  		= str_replace("'", "''", $post->comment_status);
+	$ping_status     		= str_replace("'", "''", $post->ping_status);
 
 	// Insert the new template in the post table
 	$wpdb->query(
@@ -87,21 +87,21 @@ function woocommerce_create_duplicate_from_product($post, $parent = 0) {
 	$new_post_id = $wpdb->insert_id;
 
 	// Copy the taxonomies
-	woocommerce_duplicate_post_taxonomies($post->ID, $new_post_id, $post->post_type);
+	woocommerce_duplicate_post_taxonomies( $post->ID, $new_post_id, $post->post_type );
 
 	// Copy the meta information
-	woocommerce_duplicate_post_meta($post->ID, $new_post_id);
+	woocommerce_duplicate_post_meta( $post->ID, $new_post_id );
 	
 	// Copy the children (variations)
-	if ( $children_products =& get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) :
+	if ( $children_products =& get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
 
-		if ($children_products) foreach ($children_products as $child) :
+		if ($children_products) foreach ($children_products as $child) {
 			
-			woocommerce_create_duplicate_from_product(woocommerce_get_product_to_duplicate($child->ID), $new_post_id);
+			woocommerce_create_duplicate_from_product( woocommerce_get_product_to_duplicate( $child->ID ), $new_post_id, $child->post_status );
 			
-		endforeach;
+		}
 
-	endif;
+	}
 
 	return $new_post_id;
 }
