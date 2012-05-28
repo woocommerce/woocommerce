@@ -809,6 +809,27 @@ class Woocommerce {
 			)
 		);
 	    
+
+	        
+		if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
+			$order_statuses = get_terms( 'shop_order_status' );
+		    $order_count = false;
+		    foreach ( $order_statuses as $status ) {
+		        if( $status->slug === 'processing' ) {
+		            $order_count += $status->count;
+		            break;
+		        }
+		    }
+		    $order_count = apply_filters( 'woocommerce_admin_menu_count', $order_count );
+			set_transient( 'woocommerce_processing_order_count', $order_count );
+		}
+	        
+	    if ( $order_count === false ) {
+	        $menu_name = __('Orders', 'woocommerce');
+	    } else {
+	        $menu_name = __('Orders', 'woocommerce'). " <span class='awaiting-mod count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+	    }
+    
 	    register_post_type( "shop_order",
 			array(
 				'labels' => array(
@@ -824,7 +845,8 @@ class Woocommerce {
 						'search_items' 			=> __( 'Search Orders', 'woocommerce' ),
 						'not_found' 			=> __( 'No Orders found', 'woocommerce' ),
 						'not_found_in_trash' 	=> __( 'No Orders found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Orders', 'woocommerce' )
+						'parent' 				=> __( 'Parent Orders', 'woocommerce' ),
+						'menu_name'				=> $menu_name
 					),
 				'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
 				'public' 				=> true,
@@ -849,7 +871,7 @@ class Woocommerce {
 				'rewrite' 				=> false,
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
-				'has_archive' 			=> false
+				'has_archive' 			=> false,
 			)
 		);
 	

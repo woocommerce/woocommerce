@@ -700,6 +700,8 @@ class WC_Order {
 			}
 
 		}
+		
+		delete_transient( 'woocommerce_processing_order_count' );
 	}
 	
 	/**
