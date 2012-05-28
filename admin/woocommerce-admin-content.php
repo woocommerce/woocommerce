@@ -53,7 +53,7 @@ function woocommerce_admin_help_tab_content() {
 				'<p>' . __( 'The reports section can be accessed from the left-hand navigation menu. Here you can generate reports for sales and customers.', 'woocommerce' ) . '</p>' .
 				'<p><strong>' . __( 'Sales', 'woocommerce' ) . '</strong> - ' . __( 'Reports for sales based on date, top sellers and top earners.', 'woocommerce' ) . '</p>' .
 				'<p><strong>' . __( 'Customers', 'woocommerce' ) . '</strong> - ' . __( 'Customer reports, such as signups per day.', 'woocommerce' ) . '</p>' .
-				'<p><strong>' . __( 'Stock', 'woocommerce' ) . '</strong> - ' . __( 'Stock reports for low sotck and out of stock items.', 'woocommerce' ) . '</p>'
+				'<p><strong>' . __( 'Stock', 'woocommerce' ) . '</strong> - ' . __( 'Stock reports for low stock and out of stock items.', 'woocommerce' ) . '</p>'
 	) );
 	
 	$screen->add_help_tab( array(
