@@ -18,12 +18,28 @@ add_action('admin_menu', 'woocommerce_admin_menu', 9);
 add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
 
 function woocommerce_admin_menu() {
-	global $menu, $woocommerce;
+    global $menu, $woocommerce;
 	
-	if ( current_user_can( 'manage_woocommerce' ) ) 
-		$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
-	
-    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, 55);
+    if ( current_user_can( 'manage_woocommerce' ) ) 
+    $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
+
+    $order_statuses = get_terms('shop_order_status');
+    $order_count = false;
+    foreach ($order_statuses as $status) {
+        if($status->slug === 'pending') {
+            $order_count = $status->count;
+            break;
+        }
+    }
+    $order_count = apply_filters('admin_menu_count', $order_count, $orders);
+        
+    if($order_count === false) {
+        $menu_title = __('WooCommerce', 'woocommerce');
+    } else {
+        $menu_title = __('Commerce', 'woocommerce'). " <span class='awaiting-mod count-$order_count'><span class='pending-count'>" . number_format_i18n($order_count) . "</span></span>" ;
+    }
+		
+    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), $menu_title, 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, 55);
     
     add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
     
