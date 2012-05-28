@@ -78,6 +78,6 @@ function woocommerce_admin_help_tab_content() {
 		'<p>' . __('<a href="https://github.com/woothemes/woocommerce" target="_blank">Project on Github</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="http://www.woothemes.com/woocommerce-docs/" target="_blank">WooCommerce Docs</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="http://www.woothemes.com/extensions/woocommerce-extensions/" target="_blank">Official Extensions</a>', 'woocommerce') . '</p>' .
-		'<p>' . __('<a href="http://www.woothemes.com/themes/woocommerce-themes/" target="_blank">Offical Themes</a>', 'woocommerce') . '</p>'
+		'<p>' . __('<a href="http://www.woothemes.com/themes/woocommerce-themes/" target="_blank">Official Themes</a>', 'woocommerce') . '</p>'
 	);
 }
