@@ -820,7 +820,7 @@ class Woocommerce {
 		            break;
 		        }
 		    }
-		    $order_count = apply_filters( 'woocommerce_admin_menu_count', $order_count );
+		    $order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
 			set_transient( 'woocommerce_processing_order_count', $order_count );
 		}
 	        
