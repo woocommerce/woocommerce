@@ -118,9 +118,13 @@ class WC_Settings_API {
      * @since 1.0.0
      * @uses method_exists()
      */
-    function generate_settings_html () {
+    function generate_settings_html ( $form_fields ) {
+    	
+    	if ( ! $form_fields ) 
+    		$form_fields = $this->form_fields;
+    		
     	$html = '';
-    	foreach ( $this->form_fields as $k => $v ) {
+    	foreach ( $form_fields as $k => $v ) {
     		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
     		
     		if ( method_exists( $this, 'generate_' . $v['type'] . '_html' ) ) {
