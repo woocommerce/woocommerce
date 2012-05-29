@@ -223,24 +223,27 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	
 							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
 							
-							foreach ( $woocommerce->shipping->shipping_methods as $method ) {
+							$shipping_methods = $woocommerce->shipping->load_shipping_methods();
+							
+							foreach ( $shipping_methods as $method ) {
+								
+								if ( ! $method->has_settings() ) continue;
+								
 								$title = empty( $method->method_title ) ? ucwords( $method->id ) : ucwords( $method->method_title );
 								
 								$current = ( $method->id == $current_section ) ? 'class="current"' : '';
 								
 								$links[] = '<a href="' . add_query_arg( 'section', $method->id, admin_url('admin.php?page=woocommerce&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
+								
 							}
 							
 							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
 							
 							// Specific method options
 							if ( $current_section ) {
-				            	foreach ( $woocommerce->shipping->shipping_methods as $method ) {
-				            		if ( $method->id == $current_section ) {
-				            			$method->admin_options();
-				            			break;
-				            		}
-				            	}
+								if ( isset( $shipping_methods[ $current_section ] ) && $shipping_methods[ $current_section ]->has_settings() ) {
+			            			$shipping_methods[ $current_section ]->admin_options();
+			            		}
 			            	} else {
 			            		woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 			            	}

@@ -25,7 +25,7 @@ function woocommerce_shipping_methods_setting() {
 				</thead>
 				<tbody>
 			    	<?php
-			    	foreach ( $woocommerce->shipping->shipping_methods as $method ) {
+			    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
 			    	
 				    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
 				    	
