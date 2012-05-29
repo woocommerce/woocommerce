@@ -82,8 +82,16 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 				
 			} else {
 			
-				// Save section only
-				do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section );
+				// If saving a shipping methods options, load 'er up
+				if ( $current_tab == 'shipping' && class_exists( $current_section ) ) {
+					$current_section_class = new $current_section();
+					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
+				} else {
+					
+					// Save section only
+					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section );
+				
+				}
 				
 			}
 			
@@ -223,6 +231,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	
 							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
 							
+							// Load shipping methods so we can show any global options they may have
 							$shipping_methods = $woocommerce->shipping->load_shipping_methods();
 							
 							foreach ( $shipping_methods as $method ) {
@@ -231,9 +240,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 								
 								$title = empty( $method->method_title ) ? ucwords( $method->id ) : ucwords( $method->method_title );
 								
-								$current = ( $method->id == $current_section ) ? 'class="current"' : '';
+								$current = ( get_class( $method ) == $current_section ) ? 'class="current"' : '';
 								
-								$links[] = '<a href="' . add_query_arg( 'section', $method->id, admin_url('admin.php?page=woocommerce&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $method ), admin_url('admin.php?page=woocommerce&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
 								
 							}
 							
@@ -241,9 +250,12 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							
 							// Specific method options
 							if ( $current_section ) {
-								if ( isset( $shipping_methods[ $current_section ] ) && $shipping_methods[ $current_section ]->has_settings() ) {
-			            			$shipping_methods[ $current_section ]->admin_options();
-			            		}
+								foreach ( $shipping_methods as $method ) {
+									if ( get_class( $method ) == $current_section && $method->has_settings() ) {
+										$method->admin_options();
+										break;
+									}
+								}
 			            	} else {
 			            		woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
 			            	}

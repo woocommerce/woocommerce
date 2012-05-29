@@ -11,55 +11,133 @@
  */  
 class WC_Shipping {
 	
-	var $enabled			= false;
-	var $shipping_methods 	= array();
-	var $chosen_method		= null;
-	var $shipping_total 	= 0;
-	var $shipping_taxes		= array();
-	var $shipping_label		= null;
-	var $shipping_classes;
-	var $packages			= array();
+	var $enabled					= false;
+	var $shipping_methods 			= array();	// Stores methods loaded into woocommerce
+	var $available_shipping_methods = array(); 	// Stores available shipping method instances
+	var $chosen_method				= null;
+	var $shipping_total 			= 0;
+	var $shipping_taxes				= array();
+	var $shipping_label				= null;
+	var $shipping_classes			= array();
+	var $packages					= array();
 
     /**
      * init function.
-     * 
-     * Init the shipping - load methods and reorder based on settings.
      *
      * @access public
      */
     function init() {
+		do_action( 'woocommerce_shipping_init' );
 		
 		$this->enabled = ( get_option('woocommerce_calc_shipping') == 'no' ) ? false : true;
 		
-		do_action('woocommerce_shipping_init');
+		add_action( 'woocommerce_update_options_shipping', array( &$this, 'process_admin_options' ) );
+	}
+	
+	/**
+	 * load_shipping_methods function.
+	 *
+	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
+	 *
+	 * Methods are sorted into their user-defined order after being loaded.
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function load_shipping_methods( $package = false ) {
 		
-		$load_methods = apply_filters('woocommerce_shipping_methods', array() );
+		$this->unregister_shipping_methods();
+		
+		// Methods can register themselves through this hook
+		do_action( 'woocommerce_load_shipping_methods', $package );
+		
+		// Register methods through a filter
+		$shipping_methods_to_load = apply_filters( 'woocommerce_shipping_methods', array() );
+		
+		foreach ( $shipping_methods_to_load as $method )
+			$this->register_shipping_method( $method );	
+			
+		$this->sort_shipping_methods();
+		
+		return $this->shipping_methods;
+	}
+	
+	/**
+	 * Register a shipping method for use in calculations.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function register_shipping_method( $shipping_method ) {
+		
+		if ( ! is_object( $shipping_method ) )
+			$shipping_method = new $shipping_method();
+		
+		$this->shipping_methods[ $shipping_method->id ] = $shipping_method;
+	}
+	
+	/**
+	 * unregister_shipping_methods function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function unregister_shipping_methods() {
+		unset( $this->shipping_methods );
+	}
+
+	/**
+	 * sort_shipping_methods function.
+	 * 
+	 * Sorts shipping methods into the user defined order.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function sort_shipping_methods() {
+	
+		$sorted_shipping_methods = array();
 		
 		// Get order option
 		$ordering 	= (array) get_option('woocommerce_shipping_method_order');
 		$order_end 	= 999;
 		
-		// Load gateways in order
-		foreach ( $load_methods as $method ) {
-			
-			$load_method = new $method();
-			
-			if ( isset( $ordering[$load_method->id] ) && is_numeric( $ordering[$load_method->id] ) ) {
+		// Load shipping methods in order
+		foreach ( $this->shipping_methods as $method ) {
+
+			if ( isset( $ordering[ $method->id ] ) && is_numeric( $ordering[ $method->id ] ) ) {
 				// Add in position
-				$this->shipping_methods[$ordering[$load_method->id]] = $load_method;
+				$sorted_shipping_methods[ $ordering[ $method->id ] ][] = $method;
 			} else {
 				// Add to end of the array
-				$this->shipping_methods[$order_end] = $load_method;
-				$order_end++;
+				$sorted_shipping_methods[ $order_end ][] = $method;
 			}
 		}
 		
-		ksort($this->shipping_methods);
+		ksort( $sorted_shipping_methods );
 		
-		add_action( 'woocommerce_update_options_shipping', array( &$this, 'process_admin_options' ) );
-	}
-
-
+		$this->shipping_methods = array();
+		
+		foreach ( $sorted_shipping_methods as $methods )
+			foreach ( $methods as $method )
+				$this->shipping_methods[ $method->id ] = $method;
+			
+		return $this->shipping_methods;
+	}  
+	
+	/**
+	 * get_shipping_methods function.
+	 * 
+	 * Returns all registered shipping methods for usage.
+	 *
+	 * @access public
+	 * @param mixed $package
+	 * @return void
+	 */
+	function get_shipping_methods() {
+		return $this->shipping_methods;
+	}    
+	 
 	/**
 	 * get_shipping_classes function.
 	 * 
@@ -69,17 +147,10 @@ class WC_Shipping {
 	 * @return array
 	 */
 	function get_shipping_classes() {
-		if ( ! is_array( $this->shipping_classes ) ) :
-			
-			$classes = get_terms( 'product_shipping_class', array(
-				'hide_empty' => '0'
-			) );
-			
-			$this->shipping_classes = ($classes) ? $classes : array();
+		if ( ! is_array( $this->shipping_classes ) ) 
+			$this->shipping_classes = ( $classes = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) ) ) ? $classes : array();
 				
-		endif;
-		
-		return (array) $this->shipping_classes;
+		return $this->shipping_classes;
 	}	
 	
 	/**
@@ -103,6 +174,7 @@ class WC_Shipping {
 		// Calculate costs for passed packages
 		$package_keys 		= array_keys( $packages );
 		$package_keys_size 	= sizeof( $package_keys );
+		
 		for ( $i=0; $i < $package_keys_size; $i++ ) 
 			$this->packages[$package_keys[$i]] = $this->calculate_shipping_for_package( $packages[$package_keys[$i]] );
 		
@@ -123,7 +195,7 @@ class WC_Shipping {
 				$chosen_method = apply_filters( 'woocommerce_shipping_chosen_method', get_option('woocommerce_default_shipping_method'), $_available_methods );
 				
 				// Loops methods and find a match
-				if ( ! isset( $_available_methods[$chosen_method] ) ) {
+				if ( ! isset( $_available_methods[ $chosen_method ] ) ) {
 					foreach ( $_available_methods as $method_id => $method ) {
 						if ( strpos( $method->id, $chosen_method ) === 0 ) {
 							$chosen_method = $method->id;
@@ -141,7 +213,6 @@ class WC_Shipping {
 							$_cheapest_method 	= $method_id;
 						}
 					}
-					
 					$chosen_method = $_cheapest_method;
 				}
 			
@@ -176,10 +247,10 @@ class WC_Shipping {
 			// Calculate shipping method rates
 			$package['rates'] = array();
 			
-			foreach ( $this->shipping_methods as $shipping_method ) {
-					
-				if ( $shipping_method->is_available( $package ) ) {
+			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
 				
+				if ( $shipping_method->is_available( $package ) ) {
+					
 					// Reset Rates
 					$shipping_method->rates = array();
 					
@@ -189,8 +260,7 @@ class WC_Shipping {
 					// Place rates in package array
 					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) )
 						foreach ( $shipping_method->rates as $rate ) 
-							$package['rates'][$rate->id] = $rate;
-	
+							$package['rates'][$rate->id] = $rate;	
 				}
 				
 			}
@@ -258,7 +328,7 @@ class WC_Shipping {
 	 * @return void
 	 */
 	function reset_shipping() {
-		unset($_SESSION['_chosen_shipping_method']);
+		unset( $_SESSION['_chosen_shipping_method'] );
 		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->shipping_label = null;
@@ -281,16 +351,27 @@ class WC_Shipping {
 		
 		$order = array();
 		
-		if ( is_array( $method_order ) && sizeof( $method_order ) > 0 ) :
+		if ( is_array( $method_order ) && sizeof( $method_order ) > 0 ) {
 			$loop = 0;
 			foreach ($method_order as $method_id) {
 				$order[$method_id] = $loop;
 				$loop++;
 			}
-		endif;
+		}
 		
 		update_option( 'woocommerce_default_shipping_method', $default_shipping_method );
 		update_option( 'woocommerce_shipping_method_order', $order );
 	}
 	
+}
+
+/**
+ * Register a shipping method
+ *
+ * Registers a shipping method ready to be loaded. Accepts a class name (string) or a class object.
+ *
+ * @since 1.5.7
+ */
+function woocommerce_register_shipping_method( $shipping_method ) {
+	$GLOBALS['woocommerce']->shipping->register_shipping_method( $shipping_method );
 }
