@@ -7527,7 +7527,7 @@ msgstr "Download:"
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
-msgstr "Von:"
+msgstr "Ab:"
 
 #: classes/shipping/class-wc-flat-rate.php:71
 #@ woocommerce
