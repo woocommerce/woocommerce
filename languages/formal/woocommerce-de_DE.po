@@ -9981,7 +9981,7 @@ msgstr "Wieder bestellen"
 #, php-format
 #@ woocommerce
 msgid "Order %s which was made %s has the status &ldquo;%s&rdquo;"
-msgstr ""
+msgstr "Bestellung %s welche am %s erstellt wurde, hat den Status &ldquo;%s&rdquo;"
 
 #: widgets/widget-product_categories.php:168
 #@ woocommerce
@@ -10005,7 +10005,7 @@ msgstr "Produkt"
 #: woocommerce-functions.php:746
 #@ woocommerce
 msgid "The cart has been filled with the items from your previous order."
-msgstr ""
+msgstr "Ihr Warenkorb wurde mit den Artikeln aus ihrer vorherigen Bestellung gefüllt."
 
 #: woocommerce.php:979
 #@ woocommerce
@@ -10017,12 +10017,12 @@ msgstr ""
 #: admin/post-types/writepanels/writepanel-product_data.php:453
 #@ woocommerce
 msgid "Search for a product&hellip;"
-msgstr ""
+msgstr "Suchen Sie nach einem Produkt&hellip;"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:397
 #@ woocommerce
 msgid "Add item(s)"
-msgstr ""
+msgstr "Produkt(e) hinzufügen"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:78
 #@ woocommerce
@@ -10048,12 +10048,12 @@ msgstr "Bitte einen Wert eingeben"
 #: admin/post-types/writepanels/writepanel-product_data.php:327
 #@ woocommerce
 msgid "Add new"
-msgstr ""
+msgstr "Neu hinzufügen"
 
 #: admin/post-types/writepanels/writepanels-init.php:36
 #@ woocommerce
 msgid "Product Short Description"
-msgstr ""
+msgstr "Produkt Kurzbeschreibung"
 
 #: admin/post-types/writepanels/writepanels-init.php:127
 #@ woocommerce
@@ -10082,23 +10082,23 @@ msgstr ""
 #@ woocommerce
 msgid "%d in stock"
 msgid_plural "%d in stock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d auf Lager"
+msgstr[1] "%d auf Lager"
 
 #: admin/woocommerce-admin-settings.php:63
 #@ woocommerce
 msgid "Malaysian Ringgits (RM)"
-msgstr ""
+msgstr "Malaysischer Ringgit (RM)"
 
 #: admin/woocommerce-admin-settings.php:655
 #@ woocommerce
 msgid "yd"
-msgstr ""
+msgstr "yd"
 
 #: admin/woocommerce-admin-settings.php:881
 #@ woocommerce
 msgid "Hide shipping costs until an address is entered"
-msgstr ""
+msgstr "Versandkosten verbergen bis Adresse eingegeben wurde"
 
 #: classes/class-wc-email.php:452
 #, php-format
@@ -10114,7 +10114,7 @@ msgstr "Seitenstil"
 #: classes/gateways/class-wc-paypal.php:148
 #@ woocommerce
 msgid "Optionally enter the name of the page style you wish to use. These are defined within your PayPal account."
-msgstr ""
+msgstr "Optional können Sie den Namen des gewünschten Seitenstils eingeben. Dies wird innerhalb Ihres PayPal Kontos definiert."
 
 #: classes/shipping/class-wc-flat-rate.php:131
 #@ woocommerce
@@ -10124,7 +10124,7 @@ msgstr "Minimalgebühr"
 #: classes/shipping/class-wc-flat-rate.php:133
 #@ woocommerce
 msgid "Enter a minimum fee amount. Fee's less than this will be increased. Leave blank to disable."
-msgstr ""
+msgstr "Geben Sie einen Betrag für die Mindestgebühr ein. Gebühren weniger als dieser Betrag werden erhöht. Leer lassen um zu deaktivieren."
 
 #: classes/shipping/class-wc-local-delivery.php:90
 #@ woocommerce
@@ -10134,7 +10134,7 @@ msgstr "Fester Betrag"
 #: classes/shipping/class-wc-local-delivery.php:91
 #@ woocommerce
 msgid "Percentage of cart total"
-msgstr ""
+msgstr "Prozentual vom Gesamtbetrag"
 
 #: classes/shipping/class-wc-local-delivery.php:92
 #@ woocommerce
@@ -10144,19 +10144,19 @@ msgstr "Fester Betrag pro Produkt"
 #: templates/checkout/form-billing.php:10
 #@ woocommerce
 msgid "Billing &amp; Shipping"
-msgstr ""
+msgstr "Rechnung &amp; Versand"
 
 #: templates/emails/customer-new-account.php:5
 #, php-format
 #@ woocommerce
 msgid "Thanks for creating an account on %s. Your username is <strong>%s</strong>."
-msgstr ""
+msgstr "Vielen Dank, dass Sie ein Konto auf %s erstellt haben. Ihr Benutzername ist <strong>%s</strong>."
 
 #: templates/emails/customer-new-account.php:7
 #, php-format
 #@ woocommerce
 msgid "You can access your account area here: %s."
-msgstr ""
+msgstr "Sie können auf Ihr Kundenkonto hier zugreifen: %s."
 
 #: templates/myaccount/my-orders.php:51
 #@ woocommerce
@@ -10166,39 +10166,39 @@ msgstr "Klicken Sie, um diese Bestellung abzubrechen"
 #: widgets/widget-product_categories.php:110
 #@ woocommerce
 msgid "No product categories exist."
-msgstr ""
+msgstr "Es existieren keine Produktkategorien."
 
 #: admin/post-types/product.php:963
 #@ woocommerce
 msgid "Sort Products"
-msgstr ""
+msgstr "Produkte sortieren"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:128
 #@ woocommerce
 msgid "No shipping class"
-msgstr ""
+msgstr "Keine Versandklasse"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:134
 #@ woocommerce
 msgid "Shipping class"
-msgstr ""
+msgstr "Versandklasse"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:134
 #@ woocommerce
 msgid "Shipping classes are used by certain shipping methods to group similar products."
-msgstr ""
+msgstr "Versandklassen werden bei bestimmten Versandmethoden benutzt damit man ähnliche Produkte gruppiert."
 
 #: admin/woocommerce-admin-debug.php:61
 #, php-format
 #@ woocommerce
 msgid "There was an error calling %s::%s"
-msgstr ""
+msgstr "Ein Fehler ist aufgetreten: %s::%s"
 
 #: admin/woocommerce-admin-debug.php:64
 #, php-format
 #@ woocommerce
 msgid "There was an error calling %s"
-msgstr ""
+msgstr "Ein Fehler ist aufgetreten: %s"
 
 #: admin/woocommerce-admin-functions.php:281
 #@ woocommerce
@@ -10214,22 +10214,22 @@ msgstr ""
 #: admin/woocommerce-admin-settings-forms.php:749
 #@ woocommerce
 msgid "Primary"
-msgstr ""
+msgstr "Primäre"
 
 #: admin/woocommerce-admin-settings-forms.php:749
 #@ woocommerce
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "Call to action Buttons/Preis Slider/Layered Nav UI"
 
 #: admin/woocommerce-admin-settings-forms.php:750
 #@ woocommerce
 msgid "Secondary"
-msgstr ""
+msgstr "Sekundäre"
 
 #: admin/woocommerce-admin-settings-forms.php:750
 #@ woocommerce
 msgid "Buttons and tabs"
-msgstr ""
+msgstr "Buttons und Tabs"
 
 #: admin/woocommerce-admin-settings-forms.php:751
 #@ woocommerce
@@ -10249,27 +10249,27 @@ msgstr "Inhalt"
 #: admin/woocommerce-admin-settings-forms.php:752
 #@ woocommerce
 msgid "Your themes page background - used for tab active states"
-msgstr ""
+msgstr "Ihr Theme Seitenhintergrund - wird für Reiter im aktiven Status genutzt"
 
 #: admin/woocommerce-admin-settings-forms.php:753
 #@ woocommerce
 msgid "Subtext"
-msgstr ""
+msgstr "Subtext"
 
 #: admin/woocommerce-admin-settings-forms.php:753
 #@ woocommerce
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr ""
+msgstr "Genutzt für bestimmte Texte und Asides - Krümmelnavigation, kleine Text etc."
 
 #: admin/woocommerce-admin-settings-forms.php:757
 #@ woocommerce
 msgid "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more information."
-msgstr ""
+msgstr "Um Farben zu edititeren <code>woocommerce/assets/css/woocommerce-base.less</code> und <code>woocommerce.css</code> muss schreibbar sein. Schauen Sie sich den <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">Codex</a> für mehr Informationen an."
 
 #: admin/woocommerce-admin-settings.php:112
 #@ woocommerce
 msgid "Enable guest checkout (no account required)"
-msgstr ""
+msgstr "Bezahlvorgang als Gast ermöglichen (Kundenkonto nicht nötig)"
 
 #: admin/woocommerce-admin-settings.php:129
 #@ woocommerce
@@ -10299,7 +10299,7 @@ msgstr "Registrierung"
 #: admin/woocommerce-admin-settings.php:201
 #@ woocommerce
 msgid "Allow customers to repurchase past orders"
-msgstr ""
+msgstr "Kunden erlauben ehemalige Bestellungen wieder zu bestellen"
 
 #: admin/woocommerce-admin-settings.php:230
 #@ woocommerce
