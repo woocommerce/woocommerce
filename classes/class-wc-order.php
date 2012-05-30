@@ -76,6 +76,11 @@ class WC_Order {
 		return false;
 	}
 	
+	/** Gets an order from the database by order number */
+	function get_by_order_number( $order_number ) {
+		return $this->get_order( apply_filters( 'woocommerce_get_by_order_number', $order_number, $this ) );
+	}
+	
 	/** Populates an order from the loaded post data */
 	function populate( $result ) {
 		// Standard post data
