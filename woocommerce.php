@@ -17,9 +17,9 @@
  * @author WooThemes
  */
 
-if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( !class_exists( 'Woocommerce' ) ) {
+if ( ! class_exists( 'Woocommerce' ) ) {
 
 /**
  * Main WooCommerce Class
@@ -86,7 +86,7 @@ class Woocommerce {
 		$this->includes();
 		
 		// Installation
-		if ( is_admin() && !defined('DOING_AJAX') ) $this->install();
+		if ( is_admin() && ! defined('DOING_AJAX') ) $this->install();
 		
 		// Actions
 		add_action( 'init', array( &$this, 'init' ), 0 );
@@ -242,7 +242,9 @@ class Woocommerce {
 			add_action( 'get_header', array( &$this, 'ssl_redirect' ) );
 	
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
-			foreach ( $filters as $filter ) add_filter( $filter, array( &$this, 'force_ssl') );
+			
+			foreach ( $filters as $filter ) 
+				add_filter( $filter, array( &$this, 'force_ssl') );
 		}
 
 		// Register globals for WC environment
@@ -807,6 +809,27 @@ class Woocommerce {
 			)
 		);
 	    
+
+	        
+		if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
+			$order_statuses = get_terms( 'shop_order_status' );
+		    $order_count = false;
+		    foreach ( $order_statuses as $status ) {
+		        if( $status->slug === 'processing' ) {
+		            $order_count += $status->count;
+		            break;
+		        }
+		    }
+		    $order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
+			set_transient( 'woocommerce_processing_order_count', $order_count );
+		}
+	        
+	    if ( $order_count === false ) {
+	        $menu_name = __('Orders', 'woocommerce');
+	    } else {
+	        $menu_name = __('Orders', 'woocommerce'). " <span class='awaiting-mod count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+	    }
+    
 	    register_post_type( "shop_order",
 			array(
 				'labels' => array(
@@ -822,7 +845,8 @@ class Woocommerce {
 						'search_items' 			=> __( 'Search Orders', 'woocommerce' ),
 						'not_found' 			=> __( 'No Orders found', 'woocommerce' ),
 						'not_found_in_trash' 	=> __( 'No Orders found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Orders', 'woocommerce' )
+						'parent' 				=> __( 'Parent Orders', 'woocommerce' ),
+						'menu_name'				=> $menu_name
 					),
 				'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
 				'public' 				=> true,
@@ -847,7 +871,7 @@ class Woocommerce {
 				'rewrite' 				=> false,
 				'query_var' 			=> true,			
 				'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
-				'has_archive' 			=> false
+				'has_archive' 			=> false,
 			)
 		);
 	
@@ -1361,12 +1385,14 @@ class Woocommerce {
 				(
 					'_transient_wc_product_children_ids_$post_id', 
 					'_transient_wc_product_total_stock_$post_id', 
-					'_transient_wc_average_rating_$post_id'
+					'_transient_wc_average_rating_$post_id',
+					'_transient_wc_product_type_$post_id',
 				)");
 		} else {
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_children_ids_%')");
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_total_stock_%')");
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_average_rating_%')");
+			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_type_%')");
 		}
 		
 		wp_cache_flush();

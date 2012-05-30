@@ -767,6 +767,8 @@ jQuery( function($){
 					
 				});
 				
+			} else {
+				$('.woocommerce_attributes').unblock();
 			}
 			
 			return false;

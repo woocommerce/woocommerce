@@ -89,7 +89,7 @@ function woocommerce_default_options() {
 	global $woocommerce_settings;
 	
 	// Include settings so that we can run through defaults
-	include_once( 'woocommerce-admin-settings.php' );
+	include_once( 'settings/settings-init.php' );
 	
 	foreach ($woocommerce_settings as $section) {
 	

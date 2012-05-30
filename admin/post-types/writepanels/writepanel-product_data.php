@@ -836,10 +836,16 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	
 	// Downloadable options
 	if ($is_downloadable=='yes') :
+	
+		$_download_limit = (int) $_POST['_download_limit'];
+		if ( ! $_download_limit ) $_download_limit = ''; // 0 or blank = unlimited
+		
+		$_download_expiry = (int) $_POST['_download_expiry'];
+		if ( ! $_download_expiry ) $_download_expiry = ''; // 0 or blank = unlimited
 		
 		if (isset($_POST['_file_path'])) update_post_meta( $post_id, '_file_path', esc_attr($_POST['_file_path']) );
-		if (isset($_POST['_download_limit'])) update_post_meta( $post_id, '_download_limit', esc_attr($_POST['_download_limit']) );
-		if (isset($_POST['_download_expiry'])) update_post_meta( $post_id, '_download_expiry', esc_attr($_POST['_download_expiry']) );
+		if (isset($_POST['_download_limit'])) update_post_meta( $post_id, '_download_limit', esc_attr( $_download_limit ) );
+		if (isset($_POST['_download_expiry'])) update_post_meta( $post_id, '_download_expiry', esc_attr( $_download_expiry ) );
 		
 	endif;
 	

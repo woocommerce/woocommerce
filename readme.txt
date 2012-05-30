@@ -147,10 +147,23 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-==
+== ==
 
+* Feature - Menu count for orders requiring admin action
+* Feature - 'supports' function for gateways.
+* Tweak - EU states for tax
+* Tweak - woocommerce_shipping_chosen_method hook
+* Tweak - Layered nav child taxonomies support
+* Tweak - Change debug page to status page to make it more noticeable.
+* Tweak - Broken up settings pages to ease development
+* Tweak - Improved re-ordering prouducts performance
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)
+* Fix - postcode validation when country is different for shipping vs billing
+* Fix - user_email typo
+* Fix - Cancelling adding an attribute blocks panel
+* Fix - Variation duplication respects post status
+* Localization - Updated localisations
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.

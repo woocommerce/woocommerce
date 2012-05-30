@@ -24,8 +24,10 @@ class WC_Settings_API {
 	 * @since 1.0.0
 	 */
 	function admin_options() { ?>
-		<h3><?php echo (isset($this->method_title)) ? $this->method_title : __('Settings','woocommerce') ; ?></h3>
-		<?php echo (isset($this->method_description)) ? wpautop($this->method_description) : ''; ?>
+		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings','woocommerce' ) ; ?></h3>
+		
+		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
+		
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 		</table><?php
@@ -39,7 +41,7 @@ class WC_Settings_API {
 	 *
 	 * @since 1.0.0
 	 */
-	function init_form_fields () { return __( 'This function needs to be overridden by your payment gateway class.', 'woocommerce' ); }
+	function init_form_fields() { return __( 'This function needs to be overridden by your payment gateway class.', 'woocommerce' ); }
 	
 	/**
 	 * Admin Panel Options Processing
@@ -74,53 +76,38 @@ class WC_Settings_API {
      * @since 1.0.0
      * @uses get_option(), add_option()
      */
-    function init_settings () {
-    	if ( ! is_array( $this->settings ) ) { return; }
+    function init_settings() {
 
-    	$settings = array();
-    	$existing_settings = get_option( $this->plugin_id . $this->id . '_settings' );
-
-    	if ( ! $existing_settings ) {
+    	// Load form_field settings
+    	if ( $this->form_fields ) {
     	
-	    	// Get defaults
-	    	$defaults = array();
+    		$form_field_settings = ( array ) get_option( $this->plugin_id . $this->id . '_settings' );
 	    	
-	    	foreach ( $this->form_fields as $k => $v ) {
+	    	if ( ! $form_field_settings ) {
 	    		
-	    		// Backwards compatibility
-	    		if ( $value = get_option( $this->plugin_id . $this->id . '_' . $k ) ) :
-	    			$defaults[$k] = $value;
-	    		else :
-	    		
-		    		if ( isset( $v['default'] ) ) {
-		    			$defaults[$k] = $v['default'];
-		    		} else {
-		    			$defaults[$k] = '';
-		    		}
-	    		
-	    		endif;
-	    		
-	    	}
-    	
-    		$existing_settings = $defaults;
+	    		// If there are no settings defined, load defaults
+	    		foreach ( $this->form_fields as $k => $v )
+	    			$form_field_settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
+	    	
+	    	} else {
+		    	
+		    	// Prevent "undefined index" errors.
+		    	foreach ( $this->form_fields as $k => $v )
+    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : $v['default'];
     		
-    	} else {
-    		// Prevent "undefined index" errors.
-    		foreach ( $existing_settings as $k => $v ) {
-    			if ( ! isset( $existing_settings[$k] ) ) {
-    				$existing_settings[$k] = $v;
-    			}  
-    		}
+	    	}
+	    	
+	    	// Set and decode escaped values
+	    	$this->settings = array_map( array( &$this, 'format_settings' ), $form_field_settings );
     	}
     	
-    	// Set and decode escaped values
-    	$this->settings = array_map( array(&$this, 'format_settings'), $existing_settings );
-    	
-    	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) ) { $this->enabled = 'yes'; }
+    	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) ) 
+    		$this->enabled = 'yes';
+    		
     } // End init_settings()
     
     function format_settings( $value ) {
-    	return (is_array($value)) ? $value : html_entity_decode($value);
+    	return ( is_array( $value ) ) ? $value : html_entity_decode( $value );
     }
     
     /**
@@ -131,9 +118,13 @@ class WC_Settings_API {
      * @since 1.0.0
      * @uses method_exists()
      */
-    function generate_settings_html () {
+    function generate_settings_html ( $form_fields ) {
+    	
+    	if ( ! $form_fields ) 
+    		$form_fields = $this->form_fields;
+    		
     	$html = '';
-    	foreach ( $this->form_fields as $k => $v ) {
+    	foreach ( $form_fields as $k => $v ) {
     		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
     		
     		if ( method_exists( $this, 'generate_' . $v['type'] . '_html' ) ) {

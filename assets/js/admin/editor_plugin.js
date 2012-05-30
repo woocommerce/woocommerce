@@ -11,7 +11,7 @@
 					if(d=="woocommerce_shortcodes_button"){
 					
 						d=e.createMenuButton( "woocommerce_shortcodes_button",{
-							title:"Insert WooCommerce Shortcode",
+							title:"Insert Shortcode",
 							icons:false
 							});
 							
@@ -35,7 +35,7 @@
 								
 								b.addSeparator();
 								
-								c=b.addMenu({title:"WooCommerce Pages"});
+								c=b.addMenu({title:"Pages"});
 										a.addImmediate(c,"Cart","[woocommerce_cart]" );
 										a.addImmediate(c,"Checkout","[woocommerce_checkout]" );
 										a.addImmediate(c,"Order tracking","[woocommerce_order_tracking]" );

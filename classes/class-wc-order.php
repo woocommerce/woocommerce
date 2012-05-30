@@ -449,7 +449,7 @@ class WC_Order {
 
 		endif;
 		
-		return $subtotal;
+		return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
 	}
 
 	/** Gets shipping (formatted) */
@@ -484,7 +484,17 @@ class WC_Order {
 			$shipping = __('Free!', 'woocommerce');
 		endif;
 		
-		return $shipping;
+		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this );
+	}
+
+	/** Get cart discount (formatted)  */
+	function get_cart_discount_to_display() {
+		return apply_filters( 'woocommerce_order_cart_discount_to_display', woocommerce_price( $this->get_cart_discount() ), $this );
+	}
+	
+	/** Get cart discount (formatted)  */
+	function get_order_discount_to_display() {
+		return apply_filters( 'woocommerce_order_discount_to_display', woocommerce_price( $this->get_order_discount() ), $this );
 	}
 	
 	/** Get a product (either product or variation) */
@@ -510,7 +520,7 @@ class WC_Order {
 			$total_rows[ __( 'Cart Subtotal:', 'woocommerce' ) ] = $subtotal;
 		
 		if ( $this->get_cart_discount() > 0 ) 
-			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = '-' . woocommerce_price( $this->get_cart_discount() );
+			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = '-' . $this->get_cart_discount_to_display();
 		
 		if ( $this->get_shipping() > 0 )
 			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
@@ -557,7 +567,7 @@ class WC_Order {
 		}
 		
 		if ( $this->get_order_discount() > 0 )
-			$total_rows[ __( 'Order Discount:', 'woocommerce' ) ] = '-' . woocommerce_price( $this->get_order_discount() );
+			$total_rows[ __( 'Order Discount:', 'woocommerce' ) ] = '-' . $this->get_order_discount_to_display();
 		
 		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = $this->get_formatted_order_total();
 		
@@ -690,6 +700,8 @@ class WC_Order {
 			}
 
 		}
+		
+		delete_transient( 'woocommerce_processing_order_count' );
 	}
 	
 	/**

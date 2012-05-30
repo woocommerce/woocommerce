@@ -22,9 +22,9 @@ function woocommerce_admin_help_tab_content() {
 	    
 	    	'<p>' . sprintf(__( 'Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href="%s">read the documentation</a>. For further assistance you can use the <a href="%s">community forum</a> or if you have access, <a href="%s">the members forum</a>.', 'woocommerce' ), 'http://www.woothemes.com/woocommerce-docs/', 'http://www.woothemes.com/support-forum/?viewforum=150', 'http://www.woothemes.com/support-forum/') . '</p>' . 
 	    	
-	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the debugging page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
+	    	'<p>' . __( 'If you are having problems, or to assist us with support, please check the status page to identify any problems with your configuration:', 'woocommerce' ) . '</p>' .
 	    	
-	    	'<p><a href="' . admin_url('tools.php?page=woocommerce_debug') . '" class="button">' . __( 'Debugging Info &amp; Tools', 'woocommerce' ) . '</a></p>' .
+	    	'<p><a href="' . admin_url('admin.php?page=woocommerce_status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>' .
 	    	
 	    	'<p>' . sprintf(__( 'If you come across a bug, or wish to contribute to the project you can also <a href="%s">get involved on GitHub</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce') . '</p>'
 	    	
@@ -53,7 +53,7 @@ function woocommerce_admin_help_tab_content() {
 				'<p>' . __( 'The reports section can be accessed from the left-hand navigation menu. Here you can generate reports for sales and customers.', 'woocommerce' ) . '</p>' .
 				'<p><strong>' . __( 'Sales', 'woocommerce' ) . '</strong> - ' . __( 'Reports for sales based on date, top sellers and top earners.', 'woocommerce' ) . '</p>' .
 				'<p><strong>' . __( 'Customers', 'woocommerce' ) . '</strong> - ' . __( 'Customer reports, such as signups per day.', 'woocommerce' ) . '</p>' .
-				'<p><strong>' . __( 'Stock', 'woocommerce' ) . '</strong> - ' . __( 'Stock reports for low sotck and out of stock items.', 'woocommerce' ) . '</p>'
+				'<p><strong>' . __( 'Stock', 'woocommerce' ) . '</strong> - ' . __( 'Stock reports for low stock and out of stock items.', 'woocommerce' ) . '</p>'
 	) );
 	
 	$screen->add_help_tab( array(
@@ -78,6 +78,6 @@ function woocommerce_admin_help_tab_content() {
 		'<p>' . __('<a href="https://github.com/woothemes/woocommerce" target="_blank">Project on Github</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="http://www.woothemes.com/woocommerce-docs/" target="_blank">WooCommerce Docs</a>', 'woocommerce') . '</p>' .
 		'<p>' . __('<a href="http://www.woothemes.com/extensions/woocommerce-extensions/" target="_blank">Official Extensions</a>', 'woocommerce') . '</p>' .
-		'<p>' . __('<a href="http://www.woothemes.com/themes/woocommerce-themes/" target="_blank">Offical Themes</a>', 'woocommerce') . '</p>'
+		'<p>' . __('<a href="http://www.woothemes.com/themes/woocommerce-themes/" target="_blank">Official Themes</a>', 'woocommerce') . '</p>'
 	);
 }

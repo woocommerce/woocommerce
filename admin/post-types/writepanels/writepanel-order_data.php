@@ -818,6 +818,8 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			
 		endif;
 	
+	delete_transient( 'woocommerce_processing_order_count' );
+	
 	// Error Handling
 		if (sizeof($woocommerce_errors)>0) update_option('woocommerce_errors', $woocommerce_errors);
 }
