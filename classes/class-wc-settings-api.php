@@ -54,8 +54,10 @@ class WC_Settings_API {
     	
     	if ( count( $this->errors ) > 0 ) {
     		$this->display_errors();
+    		return false;
     	} else {
     		update_option( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields );
+    		return true;
     	}
     }
     
@@ -118,7 +120,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @uses method_exists()
      */
-    function generate_settings_html ( $form_fields ) {
+    function generate_settings_html ( $form_fields = false ) {
     	
     	if ( ! $form_fields ) 
     		$form_fields = $this->form_fields;
@@ -331,8 +333,14 @@ class WC_Settings_API {
      * @since 1.0.0
      * @uses method_exists()
      */
-    function validate_settings_fields () {
-    	foreach ( $this->form_fields as $k => $v ) {
+    function validate_settings_fields( $form_fields = false ) {
+    	
+    	if ( ! $form_fields ) 
+    		$form_fields = $this->form_fields;
+    	
+    	$this->sanitized_fields = array();
+    	
+    	foreach ( $form_fields as $k => $v ) {
     		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
     		
     		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
