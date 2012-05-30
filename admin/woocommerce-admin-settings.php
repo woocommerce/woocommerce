@@ -37,6 +37,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    	 	
 	    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
 	    	 	$old_base_color = get_option('woocommerce_frontend_css_base_color');
+
+	    	 	include_once( 'settings/settings-save.php' );
 	    	 	
 		    	switch ( $current_tab ) {
 					case "general" :
@@ -46,7 +48,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					case "shipping" :
 					case "tax" :
 					case "email" :
-						include_once( 'settings/settings-save.php' );
 						woocommerce_update_options( $woocommerce_settings[$current_tab] );
 					break;
 				}
