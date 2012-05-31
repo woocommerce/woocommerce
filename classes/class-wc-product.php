@@ -47,6 +47,7 @@ class WC_Product {
 	var $max_variation_sale_price;
 	var $featured;
 	var $shipping_class;
+	var $shipping_class_id;
 	var $dimensions;
 	
 	/**
@@ -772,11 +773,20 @@ class WC_Product {
 	
 	/** Returns the product shipping class */
 	function get_shipping_class() {
-		if (!$this->shipping_class) :
+		if ( ! $this->shipping_class ) :
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
 			if ($classes && !is_wp_error($classes)) $this->shipping_class = current($classes)->slug; else $this->shipping_class = '';
 		endif;
 		return $this->shipping_class;
+	}
+	
+	/** Returns the product shipping class ID */
+	function get_shipping_class_id() {
+		if ( ! $this->shipping_class_id ) :
+			$classes = get_the_terms( $this->id, 'product_shipping_class' );
+			if ($classes && !is_wp_error($classes)) $this->shipping_class_id = current($classes)->term_id; else $this->shipping_class_id = '';
+		endif;
+		return $this->shipping_class_id;
 	}
 	
 	/** Get and return related products */
