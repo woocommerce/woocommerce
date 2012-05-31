@@ -7365,7 +7365,7 @@ msgstr "Katalogpreise"
 #: admin/settings/settings-init.php:978
 #@ woocommerce
 msgid "Catalog prices defined including tax"
-msgstr "Katalogpreise inkl. Steuern anzeigen"
+msgstr "Katalogpreise sind inklusive Steuer angegeben"
 
 #: admin/settings/settings-init.php:987
 #@ woocommerce
