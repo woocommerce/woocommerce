@@ -8333,7 +8333,7 @@ msgstr "http://woothemes.com"
 #: admin/post-types/product.php:124
 #@ woocommerce
 msgid "Edit this item inline"
-msgstr ""
+msgstr "Artikel Inline bearbeiten"
 
 #: admin/post-types/product.php:124
 #@ woocommerce
@@ -9531,7 +9531,7 @@ msgstr "Bericht generieren"
 #: admin/woocommerce-admin-status.php:38
 #@ woocommerce
 msgid "Product Transients Cleared"
-msgstr ""
+msgstr "Produktcache geleert"
 
 #: admin/woocommerce-admin-debug.php:52
 #: admin/woocommerce-admin-status.php:52
@@ -9688,7 +9688,7 @@ msgstr "PHP Sessions"
 #: admin/woocommerce-admin-status.php:304
 #@ woocommerce
 msgid "Session save path"
-msgstr ""
+msgstr "Session Save Path"
 
 #: admin/woocommerce-admin-debug.php:303
 #: admin/woocommerce-admin-status.php:309
@@ -9763,31 +9763,31 @@ msgstr "Werkzeuge"
 #: admin/woocommerce-admin-status.php:15
 #@ woocommerce
 msgid "Transients"
-msgstr ""
+msgstr "Produktcache"
 
 #: admin/woocommerce-admin-debug.php:16
 #: admin/woocommerce-admin-status.php:16
 #@ woocommerce
 msgid "Clear Transients"
-msgstr ""
+msgstr "Produktcache leeren"
 
 #: admin/woocommerce-admin-debug.php:17
 #: admin/woocommerce-admin-status.php:17
 #@ woocommerce
 msgid "This tool will clear the product/shop transients cache."
-msgstr ""
+msgstr "Dieses Werkzeug leert den Produkt- Shopcache."
 
 #: admin/woocommerce-admin-debug.php:20
 #: admin/woocommerce-admin-status.php:20
 #@ woocommerce
 msgid "Capabilities"
-msgstr ""
+msgstr "Rechte"
 
 #: admin/woocommerce-admin-debug.php:21
 #: admin/woocommerce-admin-status.php:21
 #@ woocommerce
 msgid "Reset Capabilities"
-msgstr ""
+msgstr "Rechte zurücksetzen"
 
 #: admin/woocommerce-admin-debug.php:22
 #: admin/woocommerce-admin-status.php:22
@@ -9994,7 +9994,7 @@ msgstr "Logging aktivieren"
 #: classes/gateways/class-wc-paypal.php:163
 #@ default
 msgid "Log PayPal events, such as IPN requests, inside <code>woocommerce/logs/paypal.txt</code>"
-msgstr ""
+msgstr "PayPal Ereignisse, wie IPN Anfragen unter <code>woocommerce/logs/paypal.txt</code> loggen."
 
 #: admin/post-types/shop_order.php:80
 #: classes/gateways/class-wc-paypal.php:275
@@ -10086,7 +10086,7 @@ msgstr "Ihr Warenkorb wurde mit den Artikeln aus ihrer vorherigen Bestellung gef
 #: woocommerce.php:1003
 #@ woocommerce
 msgid "Please select a rating"
-msgstr ""
+msgstr "Bitte bewerten"
 
 #: admin/post-types/writepanels/writepanel-order_data.php:395
 #: admin/post-types/writepanels/writepanel-product_data.php:434
@@ -10140,17 +10140,17 @@ msgstr "Bewertungen erlauben."
 #, php-format
 #@ default
 msgid "Allow <a href=\"%s\" target=\"_blank\">trackbacks and pingbacks</a> on this page."
-msgstr ""
+msgstr "Erlaube <a href=\"%s\" target=\"_blank\">Trackbacks und Pingbacks</a> auf dieser Seite."
 
 #: admin/post-types/writepanels/writepanels-init.php:128
 #@ default
 msgid "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
-msgstr ""
+msgstr "http://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments"
 
 #: admin/woocommerce-admin-init.php:269
 #@ woocommerce
 msgid "Enter a name for the new attribute term:"
-msgstr ""
+msgstr "Geben Sie einen Namen für die neue Attributbezeichnung an:"
 
 #: admin/woocommerce-admin-reports.php:1505
 #: admin/woocommerce-admin-reports.php:1540
@@ -10287,7 +10287,7 @@ msgstr "Konnte woocommerce.less nicht kompilieren: "
 #, php-format
 #@ woocommerce
 msgid "Sales for %s:"
-msgstr ""
+msgstr "Verkäufe für %s:"
 
 #: admin/settings/settings-frontend-styles.php:35
 #: admin/woocommerce-admin-settings-forms.php:749
@@ -10317,13 +10317,13 @@ msgstr "Buttons und Tabs"
 #: admin/woocommerce-admin-settings-forms.php:751
 #@ woocommerce
 msgid "Highlight"
-msgstr ""
+msgstr "Hervorheben"
 
 #: admin/settings/settings-frontend-styles.php:37
 #: admin/woocommerce-admin-settings-forms.php:751
 #@ woocommerce
 msgid "Price labels and Sale Flashes"
-msgstr ""
+msgstr "Preislabel und Verkaufshinweise"
 
 #: admin/settings/settings-frontend-styles.php:38
 #: admin/woocommerce-admin-settings-forms.php:752
@@ -10373,7 +10373,7 @@ msgstr "SSL (HTTPS) auf Kassenseiten erzwingen (ein SSL Zertifikat wird benötig
 #: admin/settings/settings-init.php:133
 #@ woocommerce
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr ""
+msgstr "HTTPS nicht erzwingen wenn Kasse verlassen wird"
 
 #: admin/settings/settings-init.php:143
 #@ woocommerce
@@ -10393,7 +10393,7 @@ msgstr "Kunden erlauben ehemalige Bestellungen wieder zu bestellen"
 #: admin/settings/settings-init.php:245
 #@ woocommerce
 msgid "Enable enhanced country select boxes"
-msgstr ""
+msgstr "Erweiterte Länderauswahlfelder aktivieren"
 
 #: admin/settings/settings-init.php:289
 #@ woocommerce
@@ -10403,27 +10403,27 @@ msgstr "Zugangsbeschränkungen"
 #: admin/settings/settings-init.php:290
 #@ woocommerce
 msgid "Must be logged in to download files"
-msgstr ""
+msgstr "Muss eingeloggt sein um Dateien herunterzuladen"
 
 #: admin/settings/settings-init.php:294
 #@ woocommerce
 msgid "This setting does not apply to guest downloads."
-msgstr ""
+msgstr "Diese Einstellung betrifft nicht Downloads für Gäste zu."
 
 #: admin/settings/settings-init.php:299
 #@ woocommerce
 msgid "Grant access to downloadable products after payment"
-msgstr ""
+msgstr "Zugriff gewähren auf den downloadbaren Artikel nach Zahlung"
 
 #: admin/settings/settings-init.php:303
 #@ woocommerce
 msgid "Turn this option off to only grant access when an order is \"complete\", rather than \"processing\""
-msgstr ""
+msgstr "Deaktivieren Sie diese Option, um den Zugriff nur zu gewähren, wenn eine Bestellung \"Vollständig\", anstatt \"In Verarbeitung\" ist."
 
 #: admin/settings/settings-init.php:309
 #@ woocommerce
 msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
-msgstr ""
+msgstr "Begrenze die kaufbare Anzahl virtueller (downloadbarer) Artikel auf 1"
 
 #: admin/settings/settings-init.php:533
 #: templates/loop/sorting.php:10
