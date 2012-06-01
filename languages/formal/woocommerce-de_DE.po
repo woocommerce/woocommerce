@@ -6375,7 +6375,7 @@ msgstr "Versand aktivieren"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:19
 #@ woocommerce
 msgid "Variations for variable products are defined here."
-msgstr "Varianten für Produktausführungen werden hier definiert."
+msgstr "Varianten für Produktvariationen werden hier definiert."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:71
 #@ woocommerce
@@ -6460,7 +6460,7 @@ msgstr "Unbegrenzt"
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:715
 #@ woocommerce
 msgid "Variable product"
-msgstr "Produktausführung"
+msgstr "Produktvariation"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:62
 #@ woocommerce
