@@ -144,7 +144,7 @@ class WC_Coupon {
 			
 			// Minimum spend
 			if ($this->minimum_amount>0) :
-				if ( $this->minimum_amount >= $woocommerce->cart->subtotal ) :
+				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) :
 					$valid = false;
 				endif;
 			endif;
