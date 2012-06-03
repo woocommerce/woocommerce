@@ -784,9 +784,12 @@ class WC_Product {
 	function get_shipping_class_id() {
 		if ( ! $this->shipping_class_id ) :
 			$classes = get_the_terms( $this->id, 'product_shipping_class' );
-			if ($classes && !is_wp_error($classes)) $this->shipping_class_id = current($classes)->term_id; else $this->shipping_class_id = '';
+			if ( $classes && ! is_wp_error( $classes ) ) 
+				$this->shipping_class_id = current( $classes )->term_id; 
+			else 
+				$this->shipping_class_id = 0;
 		endif;
-		return $this->shipping_class_id;
+		return (int) $this->shipping_class_id;
 	}
 	
 	/** Get and return related products */

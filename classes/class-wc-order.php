@@ -724,49 +724,53 @@ class WC_Order {
 	 * If the cart contains only downloadable items then the order is 'complete' since the admin needs to take no action
 	 * Stock levels are reduced at this point
 	 * Sales are also recorded for products
+	 * Finally, record the date of payment
 	 */
 	function payment_complete() {
 		
-		unset($_SESSION['order_awaiting_payment']);
+		unset( $_SESSION['order_awaiting_payment'] );
 		
-		if ( $this->status=='on-hold' || $this->status=='pending' || $this->status=='failed' ) :
+		if ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) {
 		
 			$downloadable_order = false;
 			
-			if (sizeof($this->get_items())>0) foreach ($this->get_items() as $item) :
+			if ( sizeof( $this->get_items() ) > 0 ) {
+				foreach( $this->get_items() as $item ) {
 			
-				if ($item['id']>0) :
-				
-					$_product = $this->get_product_from_item( $item );
+					if ( $item['id'] > 0 ) {
 					
-					if ( $_product->is_downloadable() && $_product->is_virtual() ) :
-						$downloadable_order = true;
-						continue;
-					endif;
-					
-				endif;
-				
-				$downloadable_order = false;
-				break;
+						$_product = $this->get_product_from_item( $item );
+						
+						if ( $_product->is_downloadable() && $_product->is_virtual() ) {
+							$downloadable_order = true;
+							continue;
+						}
+						
+					}
+					$downloadable_order = false;
+					break;
+				}
+			}
 			
-			endforeach;
-			
-			if ($downloadable_order) :
-				$new_order_status = 'completed';
-			else :
-				$new_order_status = 'processing';
-			endif;
+			$new_order_status = ( $downloadable_order ) ? 'completed' : 'processing';
 			
 			$new_order_status = apply_filters('woocommerce_payment_complete_order_status', $new_order_status, $this->id);
 			
-			$this->update_status($new_order_status);
+			$this->update_status( $new_order_status );
 			
-			// Payment is complete so reduce stock levels
-			$this->reduce_order_stock();
+			add_post_meta( $this->id, '_paid_date', $meta_value, $unique);
+			
+			$this_order = array(
+				'ID' => $this->id,
+				'post_date' => current_time( 'mysql', 0 ),
+				'post_date_gmt' => current_time( 'mysql', 1 )
+			);
+			wp_update_post( $this_order );
+
+			$this->reduce_order_stock(); // Payment is complete so reduce stock levels
 			
 			do_action( 'woocommerce_payment_complete', $this->id );
-		
-		endif;
+		}
 	}
 	
 	/**
