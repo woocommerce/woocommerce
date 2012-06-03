@@ -56,9 +56,9 @@ class WC_Shipping {
 		
 		foreach ( $shipping_methods_to_load as $method )
 			$this->register_shipping_method( $method );	
-			
-		$this->sort_shipping_methods();
 		
+		$this->sort_shipping_methods();
+				
 		return $this->shipping_methods;
 	}
 	
@@ -68,12 +68,14 @@ class WC_Shipping {
 	 * @access public
 	 * @return void
 	 */
-	function register_shipping_method( $shipping_method ) {
+	function register_shipping_method( $method ) {
 		
-		if ( ! is_object( $shipping_method ) )
-			$shipping_method = new $shipping_method();
+		if ( ! is_object( $method ) )
+			$method = new $method();
 		
-		$this->shipping_methods[ $shipping_method->id ] = $shipping_method;
+		$id = empty( $method->instance_id ) ? $method->id : $method->instance_id;
+			
+		$this->shipping_methods[ $id ] = $method;
 	}
 	
 	/**
@@ -119,8 +121,10 @@ class WC_Shipping {
 		$this->shipping_methods = array();
 		
 		foreach ( $sorted_shipping_methods as $methods )
-			foreach ( $methods as $method )
-				$this->shipping_methods[ $method->id ] = $method;
+			foreach ( $methods as $method ) {
+				$id = empty( $method->instance_id ) ? $method->id : $method->instance_id;
+				$this->shipping_methods[ $id ] = $method;
+			}	
 			
 		return $this->shipping_methods;
 	}  
@@ -147,7 +151,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	function get_shipping_classes() {
-		if ( ! is_array( $this->shipping_classes ) ) 
+		if ( empty( $this->shipping_classes ) ) 
 			$this->shipping_classes = ( $classes = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) ) ) ? $classes : array();
 				
 		return $this->shipping_classes;
