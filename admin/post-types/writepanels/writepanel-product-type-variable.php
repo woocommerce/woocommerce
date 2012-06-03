@@ -769,9 +769,6 @@ function process_product_meta_variable( $post_id ) {
 			// Enabled or disabled
 			if (isset($variable_enabled[$i])) $post_status = 'publish'; else $post_status = 'private';
 			
-			// Disabled if downloadable and no URL
-			if ($is_downloadable=='yes' && !$variable_file_path[$i]) $post_status = 'private';
-			
 			// Generate a useful post title
 			$variation_post_title = sprintf(__('Variation #%s of %s', 'woocommerce'), $variation_id, get_the_title($post_id));
 			
