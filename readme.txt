@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Cancelling adding an attribute blocks panel
 * Fix - Variation duplication respects post status
 * Fix - Minimum coupon amount check
+* Fix - Prevent double add to cart with related products
 * Localization - Updated localisations
 
 = 1.5.6 - 17/05/2012 =

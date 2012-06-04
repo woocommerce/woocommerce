@@ -27,6 +27,10 @@ jQuery(document).ready(function($) {
 				// Ajax action
 				$.post( woocommerce_params.ajax_url, data, function(response) {
 					
+					var this_page = window.location.toString();
+					
+					this_page = this_page.split("?")[0];
+					
 					$thisbutton.removeClass('loading');
 	
 					// Get response
@@ -54,7 +58,7 @@ jQuery(document).ready(function($) {
 	
 					// Cart widget load
 					if ($('.widget_shopping_cart').size()>0) {
-						$('.widget_shopping_cart:eq(0)').load( window.location + ' .widget_shopping_cart:eq(0) > *', function() {
+						$('.widget_shopping_cart:eq(0)').load( this_page + ' .widget_shopping_cart:eq(0) > *', function() {
 							
 							// Replace fragments
 							if (fragments) {
@@ -81,7 +85,7 @@ jQuery(document).ready(function($) {
 					}
 					
 					// Cart page elements
-					$('.shop_table.cart').load( window.location + ' .shop_table.cart:eq(0) > *', function() {
+					$('.shop_table.cart').load( this_page + ' .shop_table.cart:eq(0) > *', function() {
 						
 						$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 						
@@ -90,7 +94,7 @@ jQuery(document).ready(function($) {
 						$('body').trigger('cart_page_refreshed');
 					});
 					
-					$('.cart_totals').load( window.location + ' .cart_totals:eq(0) > *', function() {
+					$('.cart_totals').load( this_page + ' .cart_totals:eq(0) > *', function() {
 						$('.cart_totals').css('opacity', '1').unblock();
 					});
 					
