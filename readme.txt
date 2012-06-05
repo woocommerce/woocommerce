@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Minimum coupon amount check
 * Fix - Prevent double add to cart with related products
 * Fix - Out of base tax rounding
+* Fix - Backorders for variations allow more than stock to be purchased now
 * Localization - Updated localisations
 
 = 1.5.6 - 17/05/2012 =

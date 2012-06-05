@@ -351,7 +351,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 						'availability_html' => $availability_html,
 						'sku' => __( 'SKU:', 'woocommerce' ) . ' ' . $variation->sku,
 						'min_qty' => 1,
-						'max_qty' => $variation->stock,
+						'max_qty' => $product->backorders_allowed() ? '' : $variation->stock,
 						'is_downloadable' => $variation->is_downloadable() ,
 						'is_virtual' => $variation->is_virtual(),
 						'is_sold_individually' => $variation->is_sold_individually() ? 'yes' : 'no',
