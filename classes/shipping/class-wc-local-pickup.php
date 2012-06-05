@@ -107,7 +107,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 			}
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
 	}
 
 }
