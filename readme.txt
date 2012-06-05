@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved re-ordering prouducts performance
 * Tweak - Load settings/settings-save.php on custom settings pages too
 * Tweak - Update order date upon payment
+* Tweak - hide cart note if taxes are disabled
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)
 * Fix - postcode validation when country is different for shipping vs billing
