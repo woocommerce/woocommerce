@@ -568,8 +568,8 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		
 	// Unique SKU 
 	$sku = get_post_meta($post_id, '_sku', true);
-	$new_sku = esc_html(stripslashes( $_POST['_sku'] ));
-	if ($new_sku=='') :
+	$new_sku = esc_html( trim( stripslashes( $_POST['_sku'] ) ) );
+	if ( $new_sku == '' ) :
 		update_post_meta( $post_id, '_sku', '' );
 	elseif ($new_sku!==$sku) :
 		if ($new_sku && !empty($new_sku)) :
