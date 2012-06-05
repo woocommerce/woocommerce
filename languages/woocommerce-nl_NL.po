@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce 1.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-05-10 10:56+0100\n"
-"PO-Revision-Date: 2012-05-10 11:25+0100\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2012-06-02 15:42+0100\n"
+"Last-Translator: Johan Daems <johan.daems@gmail.com>\n"
 "Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1064,12 +1064,12 @@ msgstr "Overzicht"
 #: admin/woocommerce-admin-content.php:23
 #, php-format
 msgid "Thank you for using WooCommerce :) Should you need help using or extending WooCommerce please <a href=\"%s\">read the documentation</a>. For further assistance you can use the <a href=\"%s\">community forum</a> or if you have access, <a href=\"%s\">the members forum</a>."
-msgstr ""
+msgstr "Bedankt voor het gebruik van WooCommerce :) Heeft u hulp nodig bij het gebruik of uitbreiden van WooCommerce, gelieve dan de <a href=\"%s\">documentatie te raadplegen</a>. Voor verdere hulp kunt u terecht op het<a href=\"%s\">community forum</a> of als u toegang hebt op het<a href=\"%s\">leden forum</a>."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:25
 msgid "If you are having problems, or to assist us with support, please check the debugging page to identify any problems with your configuration:"
-msgstr ""
+msgstr "Als u problemen heeft, of u wilt ons helpen met support, ga dan naar de debugging pagina om mogelijke problemen te vinden met uw configuratie."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:27
@@ -1080,7 +1080,7 @@ msgstr "Debugging Info &amp; Tools"
 #: admin/woocommerce-admin-content.php:29
 #, php-format
 msgid "If you come across a bug, or wish to contribute to the project you can also <a href=\"%s\">get involved on GitHub</a>."
-msgstr ""
+msgstr "Als u een bug ziet, of u wilt bijdragen aan het project kunt u gaan naar <a href=\"%s\">GitHub</a>."
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:35
@@ -1093,7 +1093,7 @@ msgstr "Instellingen"
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:37
 msgid "Here you can set up your store and customise it to fit your needs. The sections available from the settings page include:"
-msgstr ""
+msgstr "Hier kunt u de instellingen doen voor uw winkel volgens uw eigen wensen. De verschillende onderverdelingen van de pagina instellingen zijn:"
 
 # @ woocommerce
 #: admin/woocommerce-admin-content.php:38
@@ -1608,7 +1608,7 @@ msgstr "Uw server heeft fsockopen en/of Curl geactiveerd."
 # @ woocommerce
 #: admin/woocommerce-admin-debug.php:298
 msgid "Your server does not have fsockopen or Curl enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
-msgstr ""
+msgstr "Uw server heeft geen fsockopen of Curl ingeschakeld - PayPal IPN en andere script die communiceren met andere servers zullen niet werken. Contacteer uw hosting provider."
 
 # @ woocommerce
 #: admin/woocommerce-admin-debug.php:301
@@ -1658,7 +1658,7 @@ msgstr "Reset Capaciteiten"
 # @ woocommerce
 #: admin/woocommerce-admin-debug.php:339
 msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr ""
+msgstr "Deze tool zal de admin, klant en winkelmanager rollen opnieuw instellen. Gebruik dit als u gebruikers geen toegang hebben tot alle WooCommerce admin pagina's."
 
 # @ woocommerce
 #: admin/woocommerce-admin-functions.php:106
@@ -1667,7 +1667,7 @@ msgstr "E-mail preview"
 
 #: admin/woocommerce-admin-functions.php:279
 msgid "Could not compile woocommerce.less: "
-msgstr ""
+msgstr "Kan woocommerce.less niet compileren:"
 
 # @ woocommerce
 #: admin/woocommerce-admin-init.php:25
@@ -2456,7 +2456,7 @@ msgstr "Samengesteld"
 #: admin/woocommerce-admin-settings-forms.php:412
 #: admin/woocommerce-admin-settings-forms.php:484
 msgid "Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates."
-msgstr ""
+msgstr "Geef aan of dit een samengesteld tarief is. Samengestelde belastingtarieven worden toegepast bovenop andere belastingtarieven."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:413
@@ -2486,7 +2486,7 @@ msgstr "Dupliceer geselecteerde rijen"
 #: admin/woocommerce-admin-settings-forms.php:421
 #: admin/woocommerce-admin-settings-forms.php:493
 msgid "Delete selected rows"
-msgstr "Verwijderd geselecteerde rijen"
+msgstr "Verwijder geselecteerde rijen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:433
@@ -2529,7 +2529,7 @@ msgstr "Lokale BTW-tarieven"
 #: admin/woocommerce-admin-settings-forms.php:475
 #, php-format
 msgid "Define local tax rates below, or alternatively upload a CSV file containing your rates to <code>wp-content/woocommerce_local_tax_rates.csv</code> instead. <a href=\"%s\">Download sample csv.</a>"
-msgstr ""
+msgstr "Definieer lokale belastingtarieven hieronder, of upload een CSV bestand met de tarieven ipv <code>wp-content/woocommerce_local_tax_rates.csv</code>. <a href=\"%s\">Download een voorbeeld csv.</a>"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:480
@@ -2577,55 +2577,51 @@ msgstr "Dupliceer de geselecteerde tarieven?"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:749
-#, fuzzy
 msgid "Primary"
-msgstr "Betalen"
+msgstr "Primair"
 
 #: admin/woocommerce-admin-settings-forms.php:749
 msgid "Call to action buttons/price slider/layered nav UI"
-msgstr ""
+msgstr "Actieknoppen/prijzen schuifbalk/gelaagde navigatie UI"
 
 #: admin/woocommerce-admin-settings-forms.php:750
 msgid "Secondary"
-msgstr ""
+msgstr "Secundair"
 
 #: admin/woocommerce-admin-settings-forms.php:750
 msgid "Buttons and tabs"
-msgstr ""
+msgstr "Knoppen en tabbladen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:751
-#, fuzzy
 msgid "Highlight"
-msgstr "Hoogte"
+msgstr "Markeer"
 
 #: admin/woocommerce-admin-settings-forms.php:751
 msgid "Price labels and Sale Flashes"
-msgstr ""
+msgstr "Prijs labels en Koop Flashes"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:752
-#, fuzzy
 msgid "Content"
-msgstr "Winkelinhoud"
+msgstr "Inhoud"
 
 #: admin/woocommerce-admin-settings-forms.php:752
 msgid "Your themes page background - used for tab active states"
-msgstr ""
+msgstr "Uw thema's achtergrond - wordt gebruikt voor actieve tab"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:753
-#, fuzzy
 msgid "Subtext"
-msgstr "subtotaal"
+msgstr "Subtekst"
 
 #: admin/woocommerce-admin-settings-forms.php:753
 msgid "Used for certain text and asides - breadcrumbs, small text etc."
-msgstr ""
+msgstr "Wordt gebruikt voor bepaalde tekst en asides - breadcrumbs, small tekst, enz."
 
 #: admin/woocommerce-admin-settings-forms.php:757
 msgid "To edit colours <code>woocommerce/assets/css/woocommerce-base.less</code> and <code>woocommerce.css</code> need to be writable. See <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">the Codex</a> for more information."
-msgstr ""
+msgstr "Om kleuren aan te passen moeten <code>woocommerce/assets/css/woocommerce-base.less</code> en <code>woocommerce.css</code> schrijfbaar zijn. Bekijk <a href=\"http://codex.wordpress.org/Changing_File_Permissions\">de Codex</a> voor meer informatie."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings-forms.php:831
@@ -2868,17 +2864,16 @@ msgstr "Forceer secure checkout"
 
 #: admin/woocommerce-admin-settings.php:135
 msgid "Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)"
-msgstr ""
+msgstr "Gebruik SSL (HTTPS) op de afreken pagina's (een SSL certificaat is vereist)"
 
 #: admin/woocommerce-admin-settings.php:139
 msgid "Un-force HTTPS when leaving the checkout"
-msgstr ""
+msgstr "Gebruikt geen HTTPS meer bij het verlaten van de afreken pagina's"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:149
-#, fuzzy
 msgid "Enable coupons"
-msgstr "Schakel het gebruik van kortingscodes in"
+msgstr "Kortingsbonnen inschakelen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:158
@@ -2889,7 +2884,7 @@ msgstr "Toon kortingsbonformulier bij het afrekenen"
 #: admin/woocommerce-admin-settings.php:167
 #, fuzzy
 msgid "Registration"
-msgstr "Registreer"
+msgstr "Registratie"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:168
@@ -3034,7 +3029,7 @@ msgstr "Sta geen downloads toe als de klant niet ingelogd is. Deze instelling is
 
 #: admin/woocommerce-admin-settings.php:307
 msgid "Grant access to downloadable products after payment"
-msgstr ""
+msgstr "Geef toegang tot downloadbare producten na betaling"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:311
@@ -3049,12 +3044,12 @@ msgstr "Gelimiteerde hoeveelheid"
 
 #: admin/woocommerce-admin-settings.php:317
 msgid "Limit the purchasable quantity of downloadable-virtual items to 1"
-msgstr ""
+msgstr "Limiteer de aankoophoeveelheid van downloadbare-virtuele producten tot 1"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:335
 msgid "Note: The shop page has children - child pages will not work if you enable this option."
-msgstr ""
+msgstr "Opmerking: De winkel pagina heeft children - child pagina's zullen niet werken als deze optie geactiveerd is."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:339
@@ -3125,7 +3120,7 @@ msgstr "Productcategorie slug"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:396
 msgid "Shows in the product category URLs. Leave blank to use the default slug."
-msgstr ""
+msgstr "Wordt getoond in de productcategorie URL's. Leeglaten om de standaard slug te gebruiken."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:405
@@ -3135,7 +3130,7 @@ msgstr "Product tag slug"
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:406
 msgid "Shows in the product tag URLs. Leave blank to use the default slug."
-msgstr ""
+msgstr "Wordt getoond in de producttag URL's. Leeglaten om de standaard slug te gebruiken."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:415
@@ -3369,7 +3364,7 @@ msgstr "inch"
 
 #: admin/woocommerce-admin-settings.php:655
 msgid "yd"
-msgstr ""
+msgstr "yd"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:661
@@ -3475,7 +3470,7 @@ msgstr "Afbeeldingsopties"
 #: admin/woocommerce-admin-settings.php:743
 #, php-format
 msgid "These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href=\"%s\">regenerate your thumbnails</a>."
-msgstr ""
+msgstr "Deze instellingen zijn van toepassing op de grootte van de afbeeldingen in de catalogus. De grootte van de afbeeldingen zullen worden beïnvloed door CSS-stijlen. Na het aanpassen van de instellingen kan het zijn dat u de<a href=\"%s\">miniatuurafbeeldingen opnieuw moet genereren</a>."
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:746
@@ -3559,7 +3554,7 @@ msgstr "Verberg out-of-stock producten op de catalogus"
 
 #: admin/woocommerce-admin-settings.php:838
 msgid "Stock display format"
-msgstr ""
+msgstr "Weergave voorraad"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:839
@@ -3569,15 +3564,15 @@ msgstr "De volgende opties van invloed op de velden die beschikbaar zijn voor de
 
 #: admin/woocommerce-admin-settings.php:845
 msgid "Always show stock e.g. \"12 in stock\""
-msgstr ""
+msgstr "Toon altijd de voorraad - bv.  \"12 in voorraad\""
 
 #: admin/woocommerce-admin-settings.php:846
 msgid "Only show stock when low e.g. \"Only 2 left in stock\" vs. \"In Stock\""
-msgstr ""
+msgstr "Toon alleen de voorraad als deze laag is - bv.  \"Nog 2 op voorraad\" ipv \"In voorraad\""
 
 #: admin/woocommerce-admin-settings.php:847
 msgid "Never show stock amount"
-msgstr ""
+msgstr "Toon nooit het aantal in voorraad - \"In voorraad\" of \"Uitverkocht\""
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:859
@@ -5714,7 +5709,7 @@ msgstr "U heeft reeds dit product in uw winkelwagen."
 #: classes/class-wc-cart.php:665
 #, php-format
 msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
-msgstr ""
+msgstr "<a href=\"%s\" class=\"button\">%s</a> U kunt deze hoeveelheid niet toevoegen aan de winkelwagen. We hebben %s in voorraad en u heeft reeds %s in uw winkelwagen."
 
 # @ woocommerce
 #: classes/class-wc-cart.php:1470
