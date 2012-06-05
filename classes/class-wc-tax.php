@@ -351,7 +351,7 @@ class WC_Tax {
 	 * @param	bool	passed price includes tax
 	 * @return  array	array of rates/amounts
 	 */
-	function calc_tax( $price, $rates, $price_includes_tax = true ) {
+	function calc_tax( $price, $rates, $price_includes_tax = true, $supress_rounding = false ) {
 		
 		$price = $price * 100;	// To avoid float rounding errors, work with integers (pence)
 		
@@ -391,7 +391,7 @@ class WC_Tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				
@@ -413,7 +413,7 @@ class WC_Tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				
@@ -436,7 +436,7 @@ class WC_Tax {
 				$tax_amount = ($tax_amount / 100);
 				
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' ) :
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) :
 					$tax_amount = round( $tax_amount, 2 );
 				endif;
 				

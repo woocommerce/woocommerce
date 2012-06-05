@@ -1071,7 +1071,7 @@ class WC_Cart {
 							// ADJUST BASE if tax rate is different (different region or modified tax class)
 							if ( $tax_rates !== $base_tax_rates ) {
 								
-								$base_taxes			= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true );
+								$base_taxes			= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true, true );
 								$modded_taxes		= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 								$row_base_price 	= ( $row_base_price - array_sum( $base_taxes ) ) + array_sum( $modded_taxes );
 								
@@ -1139,12 +1139,12 @@ class WC_Cart {
 						if ( $_product->is_taxable() ) {
 							
 							// Get rates
-							$tax_rates			 		= $this->tax->get_rates( $_product->get_tax_class() );
-		
+							$tax_rates			 	= $this->tax->get_rates( $_product->get_tax_class() );
+							
 							/**
-							 * ADJUST TAX - Checkout calculations when customer is OUTSIDE the shop base country and prices INCLUDE tax
+							 * ADJUST TAX - Calculations when customer is OUTSIDE the shop base country/state and prices INCLUDE tax
 							 * 	OR
-							 * ADJUST TAX - Checkout calculations when a tax class is modified
+							 * ADJUST TAX - Calculations when a tax class is modified
 							 */
 							if ( ( $woocommerce->customer->is_customer_outside_base() && ( defined('WOOCOMMERCE_CHECKOUT') || $woocommerce->customer->has_calculated_shipping() ) ) || ( $_product->get_tax_class() !== $_product->tax_class ) ) {
 								
@@ -1153,7 +1153,7 @@ class WC_Cart {
 								
 								// Work out new price based on region
 								$row_base_price 		= $base_price * $values['quantity'];
-								$base_taxes				= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true );
+								$base_taxes				= $this->tax->calc_tax( $row_base_price, $base_tax_rates, true, true ); // Unrounded
 								$taxes					= $this->tax->calc_tax( $row_base_price - array_sum($base_taxes), $tax_rates, false );
 								
 								// Tax amount
@@ -1209,7 +1209,7 @@ class WC_Cart {
 											
 						// Line prices
 						$line_tax = ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) ? round( $discounted_tax_amount, 2 ) : $discounted_tax_amount;
-						$line_total 		= ( $discounted_price * $values['quantity'] ) - round( $line_tax, 2 );
+						$line_total 		= round( ( $discounted_price * $values['quantity'] ) - round( $line_tax, 2 ), 2 );
 												
 						// Add any product discounts (after tax)
 						$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
@@ -1743,7 +1743,7 @@ class WC_Cart {
 				
 				} elseif ( ! $this->display_cart_ex_tax && $tax_rates !== $base_tax_rates && $this->prices_include_tax ) {
 					
-					$base_taxes			= $this->tax->calc_tax( $price * $quantity, $base_tax_rates, true );
+					$base_taxes			= $this->tax->calc_tax( $price * $quantity, $base_tax_rates, true, true );
 					$modded_taxes		= $this->tax->calc_tax( ( $price * $quantity ) - array_sum( $base_taxes ), $tax_rates, false );
 					$row_price 			= (( $price * $quantity ) - array_sum( $base_taxes )) + array_sum( $modded_taxes );
 					

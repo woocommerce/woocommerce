@@ -1386,7 +1386,7 @@ class Woocommerce {
 					'_transient_wc_product_children_ids_$post_id', 
 					'_transient_wc_product_total_stock_$post_id', 
 					'_transient_wc_average_rating_$post_id',
-					'_transient_wc_product_type_$post_id',
+					'_transient_wc_product_type_$post_id'
 				)");
 		} else {
 			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_children_ids_%')");
