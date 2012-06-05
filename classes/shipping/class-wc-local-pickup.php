@@ -87,28 +87,29 @@ class WC_Local_Pickup extends WC_Shipping_Method {
     	</table> <?php
 	}
 
-    function is_available( $package ) {
-    	global $woocommerce;
-    	
-    	if ($this->enabled=="no") return false;
+	function is_available( $package ) {
+		global $woocommerce;
+		$is_available = true;
 
-		$ship_to_countries = '';
-		
-		if ($this->availability == 'specific') :
-			$ship_to_countries = $this->countries;
-		else :
-			if (get_option('woocommerce_allowed_countries')=='specific') :
-				$ship_to_countries = get_option('woocommerce_specific_allowed_countries');
-			endif;
-		endif; 
-		
-		if (is_array($ship_to_countries))
-			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
-				return false;
-		
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
-    } 
-    
+		if ( $this->enabled == 'no' ) {
+			$is_available = false;
+		} else {
+			$ship_to_countries = '';
+
+			if ( $this->availability == 'specific' ) {
+				$ship_to_countries = $this->countries;
+			} elseif ( get_option( 'woocommerce_allowed_countries' ) == 'specific' ) {
+				$ship_to_countries = get_option( 'woocommerce_specific_allowed_countries' );
+			}
+
+			if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
+				$is_available = false;
+			}
+		}
+
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
+	}
+
 }
 
 function add_local_pickup_method($methods) { $methods[] = 'WC_Local_Pickup'; return $methods; }
