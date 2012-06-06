@@ -8,7 +8,7 @@ global $woocommerce;
 
 <?php $woocommerce->show_messages(); ?>
 
-<p><?php printf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woocommerce'), $current_user->display_name, get_permalink(woocommerce_get_page_id('change_password'))); ?></p>
+<p class="myaccount_user"><?php printf( __('Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href="%s">change your password</a>.', 'woocommerce'), $current_user->display_name, get_permalink(woocommerce_get_page_id('change_password'))); ?></p>
 
 <?php do_action('woocommerce_before_my_account'); ?>
 
@@ -25,7 +25,7 @@ global $woocommerce;
 <?php woocommerce_get_template('myaccount/my-orders.php', array( 'recent_orders' => $recent_orders )); ?>
 
 <h2><?php _e('My Address', 'woocommerce'); ?></h2>	
-<p><?php _e('The following addresses will be used on the checkout page by default.', 'woocommerce'); ?></p>
+<p class="myaccount_address"><?php _e('The following addresses will be used on the checkout page by default.', 'woocommerce'); ?></p>
 <?php woocommerce_get_template('myaccount/my-address.php'); ?>
 
 <?php
