@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Key added to woocommerce_get_cart_item_from_session filter
 * Tweak - Changed menu position to avoid conflicts
 * Tweak - country_multiselect_options returns allowed countries only
+* Tweak - Add order - country should not set itself
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)
 * Fix - postcode validation when country is different for shipping vs billing

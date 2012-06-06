@@ -598,7 +598,7 @@ class WC_Countries {
 		$full_country 	= (isset($this->countries[$country])) ? $this->countries[$country] : $country;
 		
 		// Country is not needed if the same as base
-		if ($country==$this->get_base_country()) $format = str_replace('{country}', '', $format);
+		if ( $country == $this->get_base_country() ) $format = str_replace('{country}', '', $format);
 		
 		// Handle full state name
 		$full_state		= ($country && $state && isset($this->states[$country][$state])) ? $this->states[$country][$state] : $state;
