@@ -88,7 +88,7 @@ class WC_Cart {
 							'variation' 	=> $values['variation'],
 							'quantity' 		=> $values['quantity'],
 							'data'			=> $_product
-						), $values );
+						), $values, $key );
 	
 					}
 				}
