@@ -323,32 +323,32 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	if ( ! $currency ) $currency = get_woocommerce_currency();
 	$currency_symbol = '';
 	switch ($currency) :
-		case 'BRL' : $currency_symbol = 'R&#36;'; break; // in Brazil the correct is R$ 0.00,00
-		case 'AUD' :
-		case 'CAD' :
-		case 'MXN' :
-		case 'NZD' :
-		case 'HKD' :
-		case 'SGD' :
+		case 'BRL' : $currency_symbol = '&#82;&#36;'; break; // in Brazil the correct is R$ 0.00,00
+		case 'AUD' : $currency_symbol = '&#36;'; break;
+		case 'CAD' : $currency_symbol = '&#36;'; break;
+		case 'MXN' : $currency_symbol = '&#36;'; break;
+		case 'NZD' : $currency_symbol = '&#36;'; break;
+		case 'HKD' : $currency_symbol = '&#36;'; break;
+		case 'SGD' : $currency_symbol = '&#36;'; break;
 		case 'USD' : $currency_symbol = '&#36;'; break;
 		case 'EUR' : $currency_symbol = '&euro;'; break;
-		case 'RMB' :
+		case 'CNY' : $currency_symbol = '&yen;'; break;
 		case 'JPY' : $currency_symbol = '&yen;'; break;
-		case 'TRY' : $currency_symbol = 'TL'; break;
-		case 'NOK' : $currency_symbol = 'kr'; break;
-		case 'ZAR' : $currency_symbol = 'R'; break;
+		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
+		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
+		case 'ZAR' : $currency_symbol = '&#82;'; break;
 		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
-		case 'MYR' : $currency_symbol = 'RM'; break;
-		case 'DKK' :
-		case 'HUF' :
-		case 'ILS' :
-		case 'PHP' :
-		case 'PLN' :
-		case 'SEK' :
-		case 'CHF' :
-		case 'TWD' :
-		case 'THB' : $currency_symbol = $currency; break;
-		case 'GBP' : 
+		case 'MYR' : $currency_symbol = '&#82;&#77;'; break;
+		case 'DKK' : $currency_symbol = '&#107;&#114;'; break;
+		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
+		case 'ILS' : $currency_symbol = '&#8362;'; break;
+		case 'PHP' : $currency_symbol = '&#8369;'; break;
+		case 'PLN' : $currency_symbol = '&#322;&#122;'; break;
+		case 'SEK' : $currency_symbol = '&#107;&#114;'; break;
+		case 'CHF' : $currency_symbol = '&#67;&#72;&#70;'; break;
+		case 'TWD' : $currency_symbol = '&#78;&#84;&#36;'; break;
+		case 'THB' : $currency_symbol = '&#3647;'; break;
+		case 'GBP' : $currency_symbol = '&pound;'; break;
 		default    : $currency_symbol = '&pound;'; break;
 	endswitch;
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
