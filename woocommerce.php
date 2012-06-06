@@ -1147,12 +1147,12 @@ class Woocommerce {
 	/**
 	 * Add an error
 	 */
-	function add_error( $error ) { $this->errors[] = $error; }
+	function add_error( $error ) { $this->errors[] = apply_filters( 'woocommerce_add_error', $error ); }
 	
 	/**
 	 * Add a message
 	 */
-	function add_message( $message ) { $this->messages[] = $message; }
+	function add_message( $message ) { $this->messages[] = apply_filters( 'woocommerce_add_message', $message ); }
 	
 	/** Clear messages and errors from the session data */
 	function clear_messages() {
