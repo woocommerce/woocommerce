@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Out of base tax rounding
 * Fix - Backorders for variations allow more than stock to be purchased now
 * Localization - Updated localisations
+* Localization - Updated currency symbols
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
