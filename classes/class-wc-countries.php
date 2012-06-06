@@ -519,9 +519,7 @@ class WC_Countries {
 	/** Outputs the list of countries and states for use in multiselect boxes */
 	function country_multiselect_options( $selected_countries = '', $escape=false ) {
 		
-		asort($this->countries);
-		
-		if ( $this->countries ) foreach ( $this->countries as $key=>$value) :
+		foreach ( $this->get_allowed_countries() as $key => $value ) :
 			if ( $states =  $this->get_states($key) ) :
 				echo '<optgroup label="'.$value.'">';
     				foreach ($states as $state_key=>$state_value) :
