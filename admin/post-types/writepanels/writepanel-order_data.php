@@ -483,7 +483,7 @@ function woocommerce_order_totals_meta_box($post) {
 				<label><?php _e('Method:', 'woocommerce'); ?></label>
 				<input type="text" name="_shipping_method" id="_shipping_method" value="<?php 
 				if (isset($data['_shipping_method'][0])) echo $data['_shipping_method'][0];
-				?>" placeholder="<?php _e('Shipping method...', 'woocommerce'); ?>" />
+				?>" placeholder="<?php _e('Shipping method&hellip;', 'woocommerce'); ?>" />
 			</li>
 	
 		</ul>
@@ -564,7 +564,7 @@ function woocommerce_order_totals_meta_box($post) {
 				<label><?php _e('Payment Method:', 'woocommerce'); ?></label>
 				<input type="text" name="_payment_method" id="_payment_method" value="<?php 
 					if (isset($data['_payment_method'][0])) echo $data['_payment_method'][0];
-				?>" class="first" placeholder="<?php _e('Payment method...', 'woocommerce'); ?>" />
+				?>" class="first" placeholder="<?php _e('Payment method&hellip;', 'woocommerce'); ?>" />
 			</li>
 	
 		</ul>

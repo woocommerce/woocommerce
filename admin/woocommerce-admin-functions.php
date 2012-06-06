@@ -278,7 +278,7 @@ function woocommerce_compile_less_styles() {
 		    	file_put_contents( $css_file, $compiled_css );
 		    
 		} catch ( exception $ex ) {
-			wp_die( __('Could not compile woocommerce.less: ', 'woocommerce') . $ex->getMessage() );
+			wp_die( __('Could not compile woocommerce.less:', 'woocommerce') . ' ' . $ex->getMessage() );
 		}
 	}
 }

@@ -89,7 +89,7 @@
 	if ( get_option('woocommerce_enable_review_rating') == 'yes' ) {
 	
 		$comment_form['comment_field'] = '<p class="comment-form-rating"><label for="rating">' . __('Rating', 'woocommerce') .'</label><select name="rating" id="rating">
-			<option value="">'.__('Rate...', 'woocommerce').'</option>
+			<option value="">'.__('Rate&hellip;', 'woocommerce').'</option>
 			<option value="5">'.__('Perfect', 'woocommerce').'</option>
 			<option value="4">'.__('Good', 'woocommerce').'</option>
 			<option value="3">'.__('Average', 'woocommerce').'</option>

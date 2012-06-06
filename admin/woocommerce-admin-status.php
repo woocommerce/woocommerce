@@ -347,7 +347,7 @@ function woocommerce_status() {
             		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce'); 
             		$posting['wp_remote_post']['success'] = true;
             	} else {
-            		$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error: ', 'woocommerce') . $response->get_error_message();
+            		$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce') . ' ' . $response->get_error_message();
             		$posting['wp_remote_post']['success'] = false;
             	}
             	

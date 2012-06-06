@@ -13,7 +13,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 	
 	function __construct() { 
         $this->id 			= 'free_shipping';
-        $this->method_title = __('Free shipping', 'woocommerce');
+        $this->method_title = __('Free Shipping', 'woocommerce');
 		$this->init();
     } 
     

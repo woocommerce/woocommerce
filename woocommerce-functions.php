@@ -669,7 +669,7 @@ function woocommerce_process_registration() {
                 $user_id 	= wp_create_user( $sanitized_user_login, $password, $user_email );
                 
                 if ( !$user_id ) {
-                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you... please contact us if you continue to have problems.', 'woocommerce') );
+                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce') );
                     return;
                 }
 

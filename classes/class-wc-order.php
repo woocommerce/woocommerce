@@ -478,7 +478,7 @@ class WC_Order {
 			
 			endif;
 			
-			$shipping .= sprintf(__(' <small>%svia %s</small>', 'woocommerce'), $tax_text, ucwords($this->shipping_method_title));
+			$shipping .= sprintf( __('&nbsp;<small>%svia %s</small>', 'woocommerce'), $tax_text, ucwords( $this->shipping_method_title ) );
 			
 		else :
 			$shipping = __('Free!', 'woocommerce');

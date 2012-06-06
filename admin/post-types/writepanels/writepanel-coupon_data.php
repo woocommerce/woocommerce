@@ -53,7 +53,7 @@ function woocommerce_coupon_data_meta_box($post) {
 			// Product ids
 			?>
 			<p class="form-field"><label for="product_ids"><?php _e('Products', 'woocommerce') ?></label>
-			<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>">
+			<select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>">
 				<?php
 					$product_ids = get_post_meta( $post->ID, 'product_ids', true );
 					if ($product_ids) {

@@ -65,7 +65,7 @@ function woocommerce_create_duplicate_from_product( $post, $parent = 0, $post_st
 	} else {
 		$post_parent		= $post->post_parent;
 		$post_status 		= $post_status ? $post_status : 'draft';
-		$suffix 			= __(" (Copy)", 'woocommerce');
+		$suffix 			= ' ' . __("(Copy)", 'woocommerce');
 	}
 	
 	$new_post_type 			= $post->post_type;

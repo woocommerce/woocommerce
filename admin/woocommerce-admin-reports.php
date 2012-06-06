@@ -315,7 +315,7 @@ function woocommerce_sales_overview() {
 			<div class="postbox">
 				<h3><span><?php _e('Total orders', 'woocommerce'); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woocommerce').')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
@@ -581,7 +581,7 @@ function woocommerce_daily_sales() {
 			<div class="postbox">
 				<h3><span><?php _e('Total orders in range', 'woocommerce'); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woocommerce').')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
@@ -770,7 +770,7 @@ function woocommerce_monthly_sales() {
 			<div class="postbox">
 				<h3><span><?php _e('Total orders for year', 'woocommerce'); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo $total_orders. ' ('.$order_items.__(' items', 'woocommerce').')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
@@ -1149,7 +1149,7 @@ function woocommerce_product_sales() {
 	} else {
 		?>
 		<form method="post" action="">
-			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product...', 'woocommerce'); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
 			<script type="text/javascript">
 				jQuery(function(){
 					// Ajax Chosen Product Selectors

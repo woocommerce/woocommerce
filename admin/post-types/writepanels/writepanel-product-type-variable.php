@@ -238,9 +238,9 @@ function variable_product_type_options() {
 										
 										<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /> <?php _e('Enabled', 'woocommerce'); ?></label>
 										
-										<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['_downloadable'][0])) checked($variation_data['_downloadable'][0], 'yes'); ?> /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woocommerce'); ?>" href="#">[?]</a></label>
+										<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['_downloadable'][0])) checked($variation_data['_downloadable'][0], 'yes'); ?> /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce'); ?>" href="#">[?]</a></label>
 										
-										<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php if (isset($variation_data['_virtual'][0])) checked($variation_data['_virtual'][0], 'yes'); ?> /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost.', 'woocommerce'); ?>" href="#">[?]</a></label>
+										<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php if (isset($variation_data['_virtual'][0])) checked($variation_data['_virtual'][0], 'yes'); ?> /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce'); ?>" href="#">[?]</a></label>
 										
 									</td>
 								</tr>
@@ -437,9 +437,9 @@ function variable_product_type_options() {
 									\
 									<label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /> <?php _e('Enabled', 'woocommerce'); ?></label>\
 									\
-									<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[' + loop + ']" /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product.', 'woocommerce'); ?>" href="#">[?]</a></label>\
+									<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[' + loop + ']" /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce'); ?>" href="#">[?]</a></label>\
 									\
-									<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[' + loop + ']" /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost.', 'woocommerce'); ?>" href="#">[?]</a></label>\
+									<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[' + loop + ']" /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce'); ?>" href="#">[?]</a></label>\
 									\
 								</td>\
 							</tr>\

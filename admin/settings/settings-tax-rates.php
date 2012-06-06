@@ -192,7 +192,7 @@ function woocommerce_tax_rates_setting() {
 		
 		jQuery('tr.tax_rate .options select').live('change', function(){
 			jQuery(this).trigger("liszt:updated");
-			jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + '<?php _e(' countries/states selected', 'woocommerce') ?>' );
+			jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + ' ' + '<?php _e('countries/states selected', 'woocommerce') ?>' );
 		});
 		
 		jQuery('tr.tax_rate .select_europe').live('click', function(){

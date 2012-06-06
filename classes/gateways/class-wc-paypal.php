@@ -19,7 +19,7 @@ class WC_Paypal extends WC_Payment_Gateway {
         $this->has_fields 	= false;
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
-        $this->method_title     = __( 'Paypal', 'woocommerce' );
+        $this->method_title     = __( 'PayPal', 'woocommerce' );
 		
 		
 		// Load the form fields.
@@ -353,7 +353,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		
 		$woocommerce->add_inline_js('
 			jQuery("body").block({ 
-					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce').'", 
+					message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting&hellip;\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce').'", 
 					overlayCSS: 
 					{ 
 						background: "#fff", 

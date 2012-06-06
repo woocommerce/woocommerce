@@ -667,7 +667,7 @@ class Woocommerce {
 	                    'name' 				=> __( 'Order statuses', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Order status', 'woocommerce'),
 	                    'search_items' 		=> __( 'Search Order statuses', 'woocommerce'),
-	                    'all_items' 		=> __( 'All  Order statuses', 'woocommerce'),
+	                    'all_items' 		=> __( 'All Order statuses', 'woocommerce'),
 	                    'parent_item' 		=> __( 'Parent Order status', 'woocommerce'),
 	                    'parent_item_colon' => __( 'Parent Order status:', 'woocommerce'),
 	                    'edit_item' 		=> __( 'Edit Order status', 'woocommerce'),
