@@ -576,6 +576,7 @@ class Woocommerce {
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Categories', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Product Category', 'woocommerce'),
+						'menu_name'			=> _x( 'Product Categories', 'Admin menu name', 'woocommerce' ),
 	                    'search_items' 		=> __( 'Search Product Categories', 'woocommerce'),
 	                    'all_items' 		=> __( 'All Product Categories', 'woocommerce'),
 	                    'parent_item' 		=> __( 'Parent Product Category', 'woocommerce'),
@@ -606,6 +607,7 @@ class Woocommerce {
 	            'labels' => array(
 	                    'name' 				=> __( 'Tags', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Product Tag', 'woocommerce'),
+						'menu_name'			=> _x( 'Tags', 'Admin menu name', 'woocommerce' ),
 	                    'search_items' 		=> __( 'Search Product Tags', 'woocommerce'),
 	                    'all_items' 		=> __( 'All Product Tags', 'woocommerce'),
 	                    'parent_item' 		=> __( 'Parent Product Tag', 'woocommerce'),
@@ -636,6 +638,7 @@ class Woocommerce {
 	            'labels' => array(
 	                    'name' 				=> __( 'Shipping Classes', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Shipping Class', 'woocommerce'),
+						'menu_name'			=> _x( 'Shipping Classes', 'Admin menu name', 'woocommerce' ),
 	                    'search_items' 		=> __( 'Search Shipping Classes', 'woocommerce'),
 	                    'all_items' 		=> __( 'All Shipping Classes', 'woocommerce'),
 	                    'parent_item' 		=> __( 'Parent Shipping Class', 'woocommerce'),
@@ -730,6 +733,7 @@ class Woocommerce {
 				'labels' => array(
 						'name' 					=> __( 'Products', 'woocommerce' ),
 						'singular_name' 		=> __( 'Product', 'woocommerce' ),
+						'menu_name'				=> _x( 'Products', 'Admin menu name', 'woocommerce' ),
 						'add_new' 				=> __( 'Add Product', 'woocommerce' ),
 						'add_new_item' 			=> __( 'Add New Product', 'woocommerce' ),
 						'edit' 					=> __( 'Edit', 'woocommerce' ),
@@ -824,12 +828,11 @@ class Woocommerce {
 			set_transient( 'woocommerce_processing_order_count', $order_count );
 		}
 	        
-	    if ( $order_count === false ) {
-	        $menu_name = __('Orders', 'woocommerce');
-	    } else {
-	        $menu_name = __('Orders', 'woocommerce'). " <span class='awaiting-mod count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
-	    }
-    
+		$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
+		if ( $order_count ) {
+			$menu_name .= " <span class='awaiting-mod count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+		}
+
 	    register_post_type( "shop_order",
 			array(
 				'labels' => array(
@@ -880,6 +883,7 @@ class Woocommerce {
 				'labels' => array(
 						'name' 					=> __( 'Coupons', 'woocommerce' ),
 						'singular_name' 		=> __( 'Coupon', 'woocommerce' ),
+						'menu_name'				=> _x( 'Coupons', 'Admin menu name', 'woocommerce' ),
 						'add_new' 				=> __( 'Add Coupon', 'woocommerce' ),
 						'add_new_item' 			=> __( 'Add New Coupon', 'woocommerce' ),
 						'edit' 					=> __( 'Edit', 'woocommerce' ),
