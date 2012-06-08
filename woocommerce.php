@@ -117,10 +117,11 @@ class Woocommerce {
 		// Include Core Payment Gateways
 		include( 'classes/gateways/class-wc-payment-gateways.php' );
 		include( 'classes/gateways/class-wc-payment-gateway.php' );
-		include( 'classes/gateways/class-wc-bacs.php' );
-		include( 'classes/gateways/class-wc-cheque.php' );
-		include( 'classes/gateways/class-wc-paypal.php' );
-		include( 'classes/gateways/class-wc-cod.php' );
+		include( 'classes/gateways/bacs/class-wc-bacs.php' );
+		include( 'classes/gateways/cheque/class-wc-cheque.php' );
+		include( 'classes/gateways/paypal/class-wc-paypal.php' );
+		include( 'classes/gateways/cod/class-wc-cod.php' );
+		include( 'classes/gateways/mijireh/class-wc-mijireh-checkout.php' );
 		
 		// Include Core Shipping Methods
 		include( 'classes/shipping/class-wc-shipping.php' );

@@ -32,6 +32,7 @@ Seriously, WooCommerce has got more features than you can shake a stick at. But 
 WooCommerce has enough power to be used straight out of the box and comes with the following payment gateways, shipping methods and third party integrations:
 
 * PayPal Standard
+* Mijireh Checkout
 * BACS
 * Cheque
 * Cash on Delivery
@@ -149,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == ==
 
+* Feature - Mijireh Checkout Integration
 * Feature - Menu count for orders requiring admin action
 * Feature - 'supports' function for gateways.
 * Tweak - EU states for tax

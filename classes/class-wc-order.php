@@ -758,7 +758,7 @@ class WC_Order {
 			
 			$this->update_status( $new_order_status );
 			
-			add_post_meta( $this->id, '_paid_date', $meta_value, $unique);
+			add_post_meta( $this->id, '_paid_date', current_time('mysql'), true );
 			
 			$this_order = array(
 				'ID' => $this->id,
