@@ -520,7 +520,7 @@ class WC_Tax {
 	 * @return  float		
 	 */
 	function get_tax_total( $taxes ) {
-		return array_sum(array_map(array(&$this, 'round'), $taxes));
+		return apply_filters('woocommerce_modify_tax_total', array_sum(array_map(array(&$this, 'round'), $taxes)));
 	}
 	
 	/** 
