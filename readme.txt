@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent double add to cart with related products
 * Fix - Out of base tax rounding
 * Fix - Backorders for variations allow more than stock to be purchased now
+* Fix - Conflict with compfight.
 * Localization - Updated localisations
 * Localization - Updated currency symbols
 * Localization - translations for admin menu names

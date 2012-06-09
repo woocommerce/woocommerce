@@ -9,8 +9,7 @@
 
 // Only hook in admin parts if the user has admin access
 if (current_user_can('view_woocommerce_reports') || current_user_can('manage_woocommerce_orders')|| current_user_can('manage_woocommerce')) :
-	add_action('wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
-	add_action('admin_footer', 'woocommerce_dashboard_sales_js');
+	add_action( 'wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
 endif;
 
 /**
@@ -296,7 +295,9 @@ function orders_this_month( $where = '' ) {
  * Sales widget
  */
 function woocommerce_dashboard_sales() {
-		
+	
+	add_action( 'admin_footer', 'woocommerce_dashboard_sales_js' );
+	
 	?><div id="placeholder" style="width:100%; height:300px; position:relative;"></div><?php
 }
 
