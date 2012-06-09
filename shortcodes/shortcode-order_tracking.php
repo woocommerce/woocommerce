@@ -23,35 +23,46 @@ function woocommerce_order_tracking( $atts ) {
 	
 	global $post;
 	
-	if ($_POST) :
+	if ( ! empty( $_POST ) ) {
 		
 		$woocommerce->verify_nonce( 'order_tracking' );
 		
-		if (isset($_POST['orderid']) && $_POST['orderid']) $order_id = $_POST['orderid']; else $order_id = 0;
-		if (isset($_POST['order_email']) && $_POST['order_email']) $order_email = trim($_POST['order_email']); else $order_email = '';
+		$order_id 		= empty( $_POST['orderid'] ) ? 0 : absint( $_POST['orderid'] );
+		$order_email	= empty( $_POST['order_email'] ) ? '' : esc_attr( $_POST['order_email']) ;
 		
-		$order = new WC_Order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
-		
-		if ($order->id && $order_email) :
-
-			if (strtolower($order->billing_email) == strtolower($order_email)) :
+		if ( ! $order_id ) {
 			
-				woocommerce_get_template( 'order/tracking.php', array(
-					'order' => $order
-				) );
+			echo '<p class="woocommerce_error">' . __('Please enter a valid order ID', 'woocommerce') . '</p>';
+			
+		} elseif ( ! $order_email ) {
+			
+			echo '<p class="woocommerce_error">' . __('Please enter a valid order email', 'woocommerce') . '</p>';
+			
+		} else {
+		
+			$order = new WC_Order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
+		
+			if ( $order->id && $order_email ) {
+	
+				if ( strtolower( $order->billing_email ) == strtolower( $order_email ) ) {
 				
-				return;
-				
-			endif;
+					woocommerce_get_template( 'order/tracking.php', array(
+						'order' => $order
+					) );
 					
-		endif;
+					return;
+				}
+						
+			} else {
+				
+				echo '<p class="woocommerce_error">' . sprintf( __('Sorry, we could not find that order id in our database.', 'woocommerce'), get_permalink($post->ID ) ) . '</p>';
+				
+			}
 		
-		echo '<p>'.sprintf(__('Sorry, we could not find that order id in our database. <a href="%s">Want to retry?</a>', 'woocommerce'), get_permalink($post->ID)).'</p>';
-	
-	else :
-	
-		woocommerce_get_template( 'order/form-tracking.php' );
+		}
 		
-	endif;	
+	}
+	
+	woocommerce_get_template( 'order/form-tracking.php' );
 	
 }

@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Mijireh Checkout Integration
 * Feature - Menu count for orders requiring admin action
 * Feature - 'supports' function for gateways.
+* Tweak - Improvements to the order tracking code, including better error messages
 * Tweak - EU states for tax
 * Tweak - woocommerce_shipping_chosen_method hook
 * Tweak - Layered nav child taxonomies support
@@ -179,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Backorders for variations allow more than stock to be purchased now
 * Localization - Updated localisations
 * Localization - Updated currency symbols
+* Localization - translations for admin menu names
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
