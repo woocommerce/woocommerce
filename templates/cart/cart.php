@@ -88,7 +88,7 @@ global $woocommerce;
 						<!-- Product subtotal -->
 						<td class="product-subtotal">
 							<?php 
-								echo $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ); 
+								echo apply_filters( 'woocommerce_cart_item_subtotal', $woocommerce->cart->get_product_subtotal( $_product, $values['quantity'] ), $values, $cart_item_key ); 
 							?>
 						</td>
 					</tr>
