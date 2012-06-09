@@ -30,7 +30,7 @@ global $woocommerce;
 				$_product = $values['data'];
 				if ( $_product->exists() && $values['quantity'] > 0 ) {
 					?>
-					<tr>
+					<tr class = "<?php echo esc_attr( apply_filters('woocommerce_cart_table_item_class', 'cart_table_item', $values, $cart_item_key ) ); ?>">
 						<!-- Remove from cart link -->
 						<td class="product-remove">
 							<?php 
