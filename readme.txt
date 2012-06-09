@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Add order - country should not set itself
 * Tweak - Add error/message filters
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
+* Fix - Right now links.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)
 * Fix - postcode validation when country is different for shipping vs billing
 * Fix - user_email typo

@@ -145,7 +145,7 @@ function woocommerce_dashboard_widget_right_now() {
 				<?php
 					$num  = number_format_i18n( $completed_count );
 					$text = __( 'Completed', 'woocommerce' );
-					$link = add_query_arg( array( 'taxonomy' => 'product_cat', 'post_type' => 'completed' ), get_admin_url( null, 'edit-tags.php' ) );
+					$link = add_query_arg( array( 'post_type' => 'shop_order', 'shop_order_status' => 'completed' ), get_admin_url( null, 'edit.php' ) );
 					$num  = '<a href="' . $link . '">' . $num  . '</a>';
 					$text = '<a href="' . $link . '">' . $text . '</a>';
 				?>
