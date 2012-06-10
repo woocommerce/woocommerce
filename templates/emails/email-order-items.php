@@ -31,7 +31,7 @@ foreach ($items as $item) :
 			echo 	($show_download_links && $_product->exists() && $_product->is_downloadable()) ? '<br/><small>'.__('Download:', 'woocommerce').' <a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '" target="_blank">' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>' : '';
 					
 			// Variation
-			echo 	($item_meta->meta) ? '<br/><small>' . $item_meta->display( true, true ) . '</small>' : '';
+			echo 	($item_meta->meta) ? '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>' : '';
 					
 		?></td>
 		<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $item['qty'] ;?></td>

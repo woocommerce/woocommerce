@@ -928,21 +928,21 @@ class order_item_meta {
 	function display( $flat = false, $return = false ) {
 		global $woocommerce;
 		
-		if ($this->meta && is_array($this->meta)) :
+		if ( $this->meta && is_array( $this->meta ) ) :
 			
-			if (!$flat) $output = '<dl class="variation">'; else $output = '';
+			if ( ! $flat ) $output = '<dl class="variation">'; else $output = '';
 			
 			$meta_list = array();
 			
-			foreach ($this->meta as $meta) :
+			foreach ( $this->meta as $meta ) :
 				
 				$name 	= $meta['meta_name'];
 				$value	= $meta['meta_value'];
 				
-				if (!$value) continue;
+				if ( ! $value ) continue;
 				
 				// If this is a term slug, get the term's nice name
-	            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
+	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) :
 	            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
 	            	if (!is_wp_error($term) && $term->name) :
 	            		$value = $term->name;
@@ -960,7 +960,7 @@ class order_item_meta {
 			endforeach;
 			
 			if ($flat) :
-				$output .= implode(', ', $meta_list);
+				$output .= implode(", \n", $meta_list);
 			else :
 				$output .= implode('', $meta_list);
 			endif;

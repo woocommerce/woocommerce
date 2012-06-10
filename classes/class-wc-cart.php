@@ -400,15 +400,15 @@ class WC_Cart {
 		            	$value = ucfirst( $value );
 					}
 					
-					if ($flat)
+					if ( $flat )
 						$variation_list[] = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
 					else
-						$variation_list[] = '<dt>'.$woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
+						$variation_list[] = '<dt>' . $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
 					
 				}
 				
 				if ($flat)
-					$return .= implode( ', ', $variation_list );
+					$return .= implode( ", \n",, $variation_list );
 				else
 					$return .= implode( '', $variation_list );
 				

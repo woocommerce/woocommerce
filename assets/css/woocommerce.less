@@ -860,7 +860,7 @@ table.my_account_orders {
 
 td.product-name {
 	dl.variation {
-		margin: 0;
+		margin: .25em 0 .5em;
 		font-size: 0.8751em;
 		dt {
 			font-weight:bold;
@@ -870,7 +870,7 @@ td.product-name {
 			padding: 0;
 		}
 		dd {
-			margin-bottom: 0;
+			margin: 0 0 .25em 0;
 		}
 	}
 	p.backorder_notification {
@@ -886,6 +886,9 @@ td.product-quantity {
 -------------------------------------------------------------- */
 
 table.cart, #content table.cart {
+	.product-thumbnail {
+		min-width: 32px;
+	}
 	img {
 		width: 32px;
 		height:auto;
