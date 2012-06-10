@@ -118,8 +118,15 @@ class WC_Coupon {
 		$this->usage_count++;
 		update_post_meta($this->id, 'usage_count', $this->usage_count);
 	}
-	
-	/** Check coupon is valid */
+		
+	/**
+	 * is_valid function.
+	 *
+	 * Check if a coupon is valid. Return a reason code if invaid. Reason codes:
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	function is_valid() {
 		
 		global $woocommerce;
@@ -127,11 +134,13 @@ class WC_Coupon {
 		if ($this->id) :
 		
 			$valid = true;
+			$error = false;
 			
 			// Usage Limit
 			if ($this->usage_limit>0) :
 				if ($this->usage_count>=$this->usage_limit) :
 					$valid = false;
+					$error = __( 'Coupon usage limit has been reached.', 'woocommerce' );
 				endif;
 			endif;
 			
@@ -139,6 +148,7 @@ class WC_Coupon {
 			if ($this->expiry_date) :
 				if (strtotime('NOW')>$this->expiry_date) :
 					$valid = false;
+					$error = __( 'This coupon has expired.', 'woocommerce' );
 				endif;
 			endif;
 			
@@ -146,6 +156,7 @@ class WC_Coupon {
 			if ($this->minimum_amount>0) :
 				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) :
 					$valid = false;
+					$error = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), $this->minimum_amount );
 				endif;
 			endif;
 			
@@ -157,7 +168,7 @@ class WC_Coupon {
 						$valid_for_cart = true;
 					endif;
 				endforeach; endif;
-				if (!$valid_for_cart) $valid = false;
+				if ( ! $valid_for_cart ) $valid = false;
 			endif;
 			
 			// Category ids - If a product included is found in the cart then its valid
@@ -170,7 +181,7 @@ class WC_Coupon {
 					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) $valid_for_cart = true;
 					
 				endforeach; endif;
-				if (!$valid_for_cart) $valid = false;
+				if ( ! $valid_for_cart ) $valid = false;
 			endif;
 			
 			// Cart discounts cannot be added if non-eligble product is found in cart
@@ -184,7 +195,7 @@ class WC_Coupon {
 							$valid_for_cart = false;
 						endif;
 					endforeach; endif;
-					if (!$valid_for_cart) $valid = false;
+					if ( ! $valid_for_cart ) $valid = false;
 				endif;
 				
 				// Exclude Categories
@@ -197,18 +208,18 @@ class WC_Coupon {
 						if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) $valid_for_cart = false;
 
 					endforeach; endif;
-					if (!$valid_for_cart) $valid = false;
+					if ( ! $valid_for_cart ) $valid = false;
 				endif;
 			
 			endif;
 			
-			$valid = apply_filters('woocommerce_coupon_is_valid', $valid, $this);
+			$valid = apply_filters( 'woocommerce_coupon_is_valid', $valid, $this );
 			
-			if ($valid) return true;
+			if ( $valid ) return true;
 		
 		endif;
 		
-		return false;
+		return new WP_Error( 'coupon_error', apply_filters( 'woocommerce_coupon_error', $error, $this ) );
 	}
 }
 

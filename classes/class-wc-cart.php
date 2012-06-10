@@ -408,7 +408,7 @@ class WC_Cart {
 				}
 				
 				if ($flat)
-					$return .= implode( ", \n",, $variation_list );
+					$return .= implode( ", \n", $variation_list );
 				else
 					$return .= implode( '', $variation_list );
 				
@@ -1537,8 +1537,9 @@ class WC_Cart {
 			if ( $the_coupon->id ) {
 				
 				// Check it can be used with cart
-				if ( ! $the_coupon->is_valid() ) {
-					$woocommerce->add_error( __('Invalid coupon.', 'woocommerce') );
+				$return = $the_coupon->is_valid();
+				if ( ! $return || is_wp_error( $return ) ) {
+					$woocommerce->add_error( is_wp_error( $return ) ? $return->get_error_message() : __('Invalid coupon.', 'woocommerce') );
 					return false;
 				}
 				
