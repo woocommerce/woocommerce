@@ -21,7 +21,10 @@ global $woocommerce, $product, $post;
 						<option value=""><?php echo __('Choose an option', 'woocommerce') ?>&hellip;</option>
 						<?php if(is_array($options)) : ?>
 							<?php
-								$selected_value = (isset($selected_attributes[sanitize_title($name)])) ? $selected_attributes[sanitize_title($name)] : '';
+								if ( empty( $_POST ) )
+									$selected_value = ( isset( $selected_attributes[ sanitize_title( $name ) ] ) ) ? $selected_attributes[ sanitize_title( $name ) ] : '';
+								else
+									$selected_value = isset( $_POST[ 'attribute_' . sanitize_title( $name ) ] ) ? $_POST[ 'attribute_' . sanitize_title( $name ) ] : '';
 
 								// Get terms if this is a taxonomy - ordered
 								if (taxonomy_exists(sanitize_title($name))) :

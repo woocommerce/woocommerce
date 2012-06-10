@@ -654,7 +654,7 @@ class WC_Cart {
 				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
 				return false;
 			}
-			
+
 			// Downloadable/virtual qty check
 			if ( $product_data->is_sold_individually() ) {
 				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
