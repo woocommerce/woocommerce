@@ -38,7 +38,7 @@
 	<div class="col-2">
 	
 		<h2><?php _e('Register', 'woocommerce'); ?></h2>
-		<form method="post" class="register" autocomplete="off">
+		<form method="post" class="register">
 		
 			<p class="form-row form-row-first">
 				<label for="reg_username"><?php _e('Username', 'woocommerce'); ?> <span class="required">*</span></label>
@@ -46,22 +46,24 @@
 			</p>
 			<p class="form-row form-row-last">
 				<label for="reg_email"><?php _e('Email', 'woocommerce'); ?> <span class="required">*</span></label>
-				<input type="email" class="input-text" name="email" id="reg_email" <?php if (isset($_POST['email'])) echo esc_attr($_POST['email']); ?> />
+				<input type="email" class="input-text" name="email" id="reg_email" value="<?php if (isset($_POST['email'])) echo esc_attr($_POST['email']); ?>" />
 			</p>
 			<div class="clear"></div>
 			
 			<p class="form-row form-row-first">
 				<label for="reg_password"><?php _e('Password', 'woocommerce'); ?> <span class="required">*</span></label>
-				<input type="password" class="input-text" name="password" id="reg_password" />
+				<input type="password" class="input-text" name="password" id="reg_password" value="<?php if (isset($_POST['password'])) echo esc_attr($_POST['password']); ?>" />
 			</p>
 			<p class="form-row form-row-last">
 				<label for="reg_password2"><?php _e('Re-enter password', 'woocommerce'); ?> <span class="required">*</span></label>
-				<input type="password" class="input-text" name="password2" id="reg_password2" />
+				<input type="password" class="input-text" name="password2" id="reg_password2" value="<?php if (isset($_POST['password2'])) echo esc_attr($_POST['password2']); ?>" />
 			</p>
 			<div class="clear"></div>
 			
 			<!-- Spam Trap -->
 			<div style="left:-999em; position:absolute;"><label for="trap">Anti-spam</label><input type="text" name="email_2" id="trap" /></div>
+			
+			<?php do_action( 'register_form' ); ?>
 			
 			<p class="form-row">
 				<?php $woocommerce->nonce_field('register', 'register') ?>
