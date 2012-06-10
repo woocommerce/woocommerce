@@ -70,6 +70,28 @@ function woocommerce_sidebar_login_ajax_process() {
 }
 
 /**
+ * AJAX apply coupon on checkout page
+ */
+add_action('wp_ajax_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
+add_action('wp_ajax_nopriv_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
+
+function woocommerce_ajax_apply_coupon() {
+	global $woocommerce;
+	
+	check_ajax_referer( 'apply-coupon', 'security' );
+	
+	if ( ! empty( $_POST['coupon_code'] ) ) {
+		$woocommerce->cart->add_discount( stripslashes( trim( $_POST['coupon_code'] ) ) );
+	} else {
+		$woocommerce->add_error( __('Please enter a coupon code.', 'woocommerce') ); 
+	}
+	
+	$woocommerce->show_messages();
+	
+	die();
+}
+
+/**
  * AJAX update shipping method on cart page
  */
 add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');

@@ -130,7 +130,6 @@ add_action( 'init', 'woocommerce_pay_action', 10 );
 
 /* Login and Registration */
 add_action( 'init', 'woocommerce_process_login' );
-add_action( 'init', 'woocommerce_process_coupon_form' );
 add_action( 'init', 'woocommerce_process_registration' );
 
 /* Product Downloads */

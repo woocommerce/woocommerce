@@ -611,7 +611,7 @@ jQuery(document).ready(function($) {
 			update_checkout();
 		});
 			
-		$('p.password, form.login, form.checkout_coupon, div.shipping_address').hide();
+		$('p.password, form.login, .checkout_coupon, div.shipping_address').hide();
 		
 		$('input.show_password').change(function(){
 			$('p.password').slideToggle();
@@ -623,7 +623,7 @@ jQuery(document).ready(function($) {
 		});
 		
 		$('a.showcoupon').click(function(){
-			$('form.checkout_coupon').slideToggle();
+			$('.checkout_coupon').slideToggle();
 			return false;
 		});
 		
@@ -671,8 +671,42 @@ jQuery(document).ready(function($) {
 		// Update on page load
 		if (woocommerce_params.is_checkout==1) $('body').trigger('update_checkout');
 		
+		/* AJAX Coupon Form Submission */
+		$('form.checkout_coupon').submit( function() {
+			var $form = $(this);
+			
+			if ( $form.is('.processing') ) return false;
+			
+			$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+			
+			var data = {
+				action: 			'woocommerce_apply_coupon',
+				security: 			woocommerce_params.apply_coupon_nonce,
+				coupon_code:		$form.find('input[name=coupon_code]').val()
+			};
+			
+			$.ajax({
+				type: 		'POST',
+				url: 		woocommerce_params.ajax_url,
+				data: 		data,
+				success: 	function( code ) {
+					$('.woocommerce_error, .woocommerce_message').remove();
+					$form.removeClass('processing').unblock(); 
+					
+					if ( code ) {
+						$form.before( code );
+						$form.slideUp();
+					
+						$('body').trigger('update_checkout');
+					}
+				},
+				dataType: 	"html"
+			});
+			return false;
+		});
+		
 		/* AJAX Form Submission */
-		$('form.checkout').submit(function(){
+		$('form.checkout').submit( function() {
 			var $form = $(this);
 			
 			if ($form.is('.processing')) return false;

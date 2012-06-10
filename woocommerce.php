@@ -1013,6 +1013,7 @@ class Woocommerce {
 			'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
 			'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
 			'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
+			'apply_coupon_nonce' 			=> wp_create_nonce("apply-coupon"),
 			'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
 			'checkout_url'					=> add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
 			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart'),

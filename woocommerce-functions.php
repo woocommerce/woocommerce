@@ -247,6 +247,7 @@ function woocommerce_update_cart_action() {
 		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
 		
 		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
+		$referer = remove_query_arg( 'remove_discounts', $referer );
 		wp_safe_redirect( $referer );
 		exit;
 
@@ -582,28 +583,6 @@ function woocommerce_process_login() {
 				exit;
 			endif;
 			
-		endif;
-	
-	endif;	
-}
-
-/**
- * Process the coupon form on the checkout and cart
- **/
-function woocommerce_process_coupon_form() {
-	global $woocommerce;
-
-	// Do nothing if coupons are globally disabled
-	if ( get_option( 'woocommerce_enable_coupons' ) == 'no' ) return;
-
-	if (isset($_POST['coupon_code']) && $_POST['coupon_code']) :
-	
-		$coupon_code = stripslashes(trim($_POST['coupon_code']));
-		$woocommerce->cart->add_discount($coupon_code);
-		
-		if ( wp_get_referer() ) :
-			wp_safe_redirect( remove_query_arg('remove_discounts', wp_get_referer()) );
-			exit;
 		endif;
 	
 	endif;	

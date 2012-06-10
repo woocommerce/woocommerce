@@ -83,15 +83,14 @@ class WC_Checkout {
 	function process_checkout() {
 		global $wpdb, $woocommerce;
 
-		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
 		
 		$woocommerce->verify_nonce('process_checkout');
 		
 		do_action('woocommerce_before_checkout_process');
 
-		if (sizeof($woocommerce->cart->get_cart())==0) :
+		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 			$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce'), home_url()) );
-		endif;
 		
 		do_action('woocommerce_checkout_process');
 
