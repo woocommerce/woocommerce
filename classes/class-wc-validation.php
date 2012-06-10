@@ -119,6 +119,18 @@ class WC_Validation {
 		return $postcode;
 	}
 	
+	/**
+	 * format_phone function.
+	 * 
+	 * @access public
+	 * @param mixed $tel
+	 * @return void
+	 */
+	function format_phone( $tel ) {
+		$tel = str_replace( '.', '-', $tel );
+		return $tel;
+	}
+	
 }
 
 /** Depreciated */
