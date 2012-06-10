@@ -956,6 +956,7 @@ add_filter( 'views_edit-product', 'woocommerce_default_sorting_link' );
 function woocommerce_default_sorting_link( $views ) {
 	global $post_type, $wp_query;
 	
+	if ( ! current_user_can('edit_others_pages') ) return $views;
 	$class = ( isset( $wp_query->query['orderby'] ) && $wp_query->query['orderby'] == 'menu_order title' ) ? 'current' : '';
 	$query_string = remove_query_arg(array( 'orderby', 'order' ));
 	$query_string = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
