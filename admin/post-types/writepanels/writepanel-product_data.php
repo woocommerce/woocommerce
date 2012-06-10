@@ -527,9 +527,7 @@ function woocommerce_product_data_box() {
 add_action('woocommerce_process_product_meta', 'woocommerce_process_product_meta', 1, 2);
 
 function woocommerce_process_product_meta( $post_id, $post ) {
-	global $wpdb, $woocommerce;
-
-	$woocommerce_errors = array();
+	global $wpdb, $woocommerce, $woocommerce_errors;
 	
 	// Add any default post meta
 	add_post_meta( $post_id, 'total_sales', '0', true );
@@ -862,9 +860,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	
 	// Clear cache/transients
 	$woocommerce->clear_product_transients( $post_id );
-		
-	// Save errors
-	update_option('woocommerce_errors', $woocommerce_errors);
 }
 
 /**

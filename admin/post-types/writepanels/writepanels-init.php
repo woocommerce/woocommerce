@@ -94,6 +94,8 @@ function woocommerce_meta_boxes_save( $post_id, $post ) {
 	if ( $post->post_type != 'product' && $post->post_type != 'shop_order' && $post->post_type != 'shop_coupon' ) return;
 		
 	do_action( 'woocommerce_process_'.$post->post_type.'_meta', $post_id, $post );
+	
+	woocommerce_meta_boxes_save_errors();
 }
 
 /**
@@ -171,24 +173,42 @@ function woocommerce_order_data( $data ) {
 	return $data;
 }
 
-
 /**
  * Save errors
  * 
  * Stores error messages in a variable so they can be displayed on the edit post screen after saving.
  */
-add_action( 'admin_notices', 'woocommerce_meta_boxes_save_errors' );
+add_action( 'admin_footer', 'woocommerce_meta_boxes_save_errors' );
 
 function woocommerce_meta_boxes_save_errors() {
-	$woocommerce_errors = maybe_unserialize(get_option('woocommerce_errors'));
-    if ($woocommerce_errors && sizeof($woocommerce_errors)>0) :
+	global $woocommerce_errors;
+	
+	update_option( 'woocommerce_errors', $woocommerce_errors );
+}
+
+/**
+ * Show errors
+ * 
+ * Show errors which were saved
+ */
+add_action( 'admin_notices', 'woocommerce_meta_boxes_show_errors' );
+
+function woocommerce_meta_boxes_show_errors() {
+	global $woocommerce_errors;
+	
+	$woocommerce_errors = maybe_unserialize( get_option( 'woocommerce_errors' ) );
+	
+    if ( ! empty( $woocommerce_errors ) ) {
+    
     	echo '<div id="woocommerce_errors" class="error fade">';
-    	foreach ($woocommerce_errors as $error) :
-    		echo '<p>'.$error.'</p>';
-    	endforeach;
+    	foreach ( $woocommerce_errors as $error )
+    		echo '<p>' . $error . '</p>';
     	echo '</div>';
-    	update_option('woocommerce_errors', '');
-    endif; 
+    	
+    	// Clear
+    	update_option( 'woocommerce_errors', '' );
+    	$woocommerce_errors = array();
+    }
 }
 
 /**

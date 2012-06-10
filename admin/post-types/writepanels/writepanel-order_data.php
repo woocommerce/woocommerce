@@ -581,9 +581,7 @@ function woocommerce_order_totals_meta_box($post) {
 add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 1, 2);
 
 function woocommerce_process_shop_order_meta( $post_id, $post ) {
-	global $wpdb, $woocommerce;
-	
-	$woocommerce_errors = array();
+	global $wpdb, $woocommerce, $woocommerce_errors;
 	
 	// Add key
 		add_post_meta( $post_id, '_order_key', uniqid('order_'), true );
@@ -819,7 +817,4 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		endif;
 	
 	delete_transient( 'woocommerce_processing_order_count' );
-	
-	// Error Handling
-		if (sizeof($woocommerce_errors)>0) update_option('woocommerce_errors', $woocommerce_errors);
 }

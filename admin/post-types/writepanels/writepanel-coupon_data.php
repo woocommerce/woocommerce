@@ -162,9 +162,7 @@ function woocommerce_coupon_data_meta_box($post) {
 add_action('woocommerce_process_shop_coupon_meta', 'woocommerce_process_shop_coupon_meta', 1, 2);
 
 function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
-	global $wpdb;
-	
-	$woocommerce_errors = array();
+	global $wpdb, $woocommerce_errors;
 	
 	// Add/Replace data to array
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
@@ -210,7 +208,4 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		update_post_meta( $post_id, 'customer_email', $customer_email );
 		
 		do_action('woocommerce_coupon_options');
-	
-	// Error Handling
-		if (sizeof($woocommerce_errors)>0) update_option('woocommerce_errors', $woocommerce_errors);
 }
