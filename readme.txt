@@ -148,8 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-== ==
-
+== 1.5.7 - 14/05/2012 ==
 * Feature - Mijireh Checkout Integration
 * Feature - Menu count for orders requiring admin action
 * Feature - 'supports' function for gateways.
@@ -173,6 +172,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Only allow 1 shipping class in quick edit.
 * Tweak - Broke up variable add to cart function and added to product class.
 * Tweak - Format phone number dots to dashes
+* Tweak - Cart widget respects cart tax settings
+* Tweak - Exempt from VAT shows price ex VAT
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
 * Fix - Right now links.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)

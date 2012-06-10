@@ -48,7 +48,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 									$method->full_label .= ': ';
 
 									// Append price to label using the correct tax settings
-									if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
+									if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax || $woocommerce->customer->is_vat_exempt() ) {
 										$method->full_label .= woocommerce_price( $method->cost );
 										if ( $method->get_shipping_tax() > 0 && $woocommerce->cart->prices_include_tax ) {
 											$method->full_label .= ' '.$woocommerce->countries->ex_tax_or_vat();

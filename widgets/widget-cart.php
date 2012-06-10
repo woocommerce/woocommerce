@@ -36,12 +36,12 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	function widget( $args, $instance ) {
 		global $woocommerce;
 
-		if (is_cart() || is_checkout()) return;
+		if ( is_cart() || is_checkout() ) return;
 
 		extract($args);
-		if ( !empty($instance['title']) ) $title = $instance['title']; else $title = __('Cart', 'woocommerce');
+		if ( ! empty( $instance['title'] ) ) $title = $instance['title']; else $title = __('Cart', 'woocommerce');
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
-		$hide_if_empty = (isset($instance['hide_if_empty']) && $instance['hide_if_empty']) ? '1' : '0';
+		$hide_if_empty = isset( $instance['hide_if_empty'] ) && $instance['hide_if_empty']  ? '1' : '0';
 
 		echo $before_widget;
 		if ( $title ) echo $before_title . $title . $after_title;
@@ -49,36 +49,50 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		echo '<ul class="cart_list product_list_widget ';
 		if ($hide_if_empty) echo 'hide_cart_widget_if_empty';
 		echo '">';
-		if (sizeof($woocommerce->cart->get_cart())>0) :
-			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item) :
+		
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+		
+			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
+				
 				$_product = $cart_item['data'];
-				if ($_product->exists() && $cart_item['quantity']>0) :
+				
+				if ( $_product->exists() && $cart_item['quantity'] > 0 ) {
+				
 					echo '<li><a href="'.get_permalink($cart_item['product_id']).'">';
 
 					echo $_product->get_image();
 
-					echo apply_filters('woocommerce_cart_widget_product_title', $_product->get_title(), $_product).'</a>';
+					echo apply_filters('woocommerce_cart_widget_product_title', $_product->get_title(), $_product) . '</a>';
 
 	   				echo $woocommerce->cart->get_item_data( $cart_item );
 
-					echo '<span class="quantity">' .$cart_item['quantity'].' &times; '.woocommerce_price($_product->get_price()).'</span></li>';
-				endif;
-			endforeach;
-		else:
-			echo '<li class="empty">'.__('No products in the cart.', 'woocommerce').'</li>';
-		endif;
+	   				$product_price = get_option('woocommerce_display_cart_prices_excluding_tax') == 'yes' || $woocommerce->customer->is_vat_exempt() ? $_product->get_price_excluding_tax() : $_product->get_price();
+							
+					$product_price = apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $cart_item, $cart_item_key ); 		
+								
+					echo '<span class="quantity">' . $cart_item['quantity'] . ' &times; ' . $product_price . '</span></li>';
+				}
+				
+			}
+			
+		} else {
+			echo '<li class="empty">' . __('No products in the cart.', 'woocommerce') . '</li>';
+		}
 		echo '</ul>';
 
-		if (sizeof($woocommerce->cart->get_cart())>0) :
-			echo '<p class="total"><strong>' . __('Subtotal', 'woocommerce') . ':</strong> '. $woocommerce->cart->get_cart_total() . '</p>';
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+		
+			echo '<p class="total"><strong>' . __('Subtotal', 'woocommerce') . ':</strong> '. $woocommerce->cart->get_cart_subtotal() . '</p>';
 
 			do_action( 'woocommerce_widget_shopping_cart_before_buttons' );
 
-			echo '<p class="buttons"><a href="'.$woocommerce->cart->get_cart_url().'" class="button">'.__('View Cart &rarr;', 'woocommerce').'</a> <a href="'.$woocommerce->cart->get_checkout_url().'" class="button checkout">'.__('Checkout &rarr;', 'woocommerce').'</a></p>';
-		endif;
+			echo '<p class="buttons"><a href="' . $woocommerce->cart->get_cart_url() . '" class="button">' . __('View Cart &rarr;', 'woocommerce') . '</a> <a href="' . $woocommerce->cart->get_checkout_url() . '" class="button checkout">' . __('Checkout &rarr;', 'woocommerce') . '</a></p>';
+			
+		}
+		
 		echo $after_widget;
 
-		if ($hide_if_empty && sizeof($woocommerce->cart->get_cart())==0) {
+		if ( $hide_if_empty && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
 			$inline_js = "
 				jQuery('.hide_cart_widget_if_empty').closest('.widget').hide();
 				jQuery('body').bind('adding_to_cart', function(){
