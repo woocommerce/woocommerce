@@ -55,7 +55,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			
 		} else {
 			
-			$cat_args['orderby'] = $o;
+			$cat_args['orderby'] = 'title';
 			
 		}
 		

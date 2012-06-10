@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Backorders for variations allow more than stock to be purchased now
 * Fix - Conflict with compfight.
 * Fix - Tax calc JS NaN fix
+* Fix - Category widget name sorting.
 * Localization - Updated localisations
 * Localization - Updated currency symbols
 * Localization - translations for admin menu names
