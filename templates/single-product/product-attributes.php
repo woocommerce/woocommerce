@@ -41,19 +41,18 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		<tr class="<?php if ( $alt == 1 ) echo 'alt'; ?>">
 			<th><?php echo $woocommerce->attribute_label( $attribute['name'] ); ?></th>
 			<td><?php
-				if ( $attribute['is_taxonomy'] ) :
-					$post_terms = wp_get_post_terms( $product->id, $attribute['name'] );
-					$values = array();
-					foreach ( $post_terms as $term ) 
-						if ( ! empty( $term->name ) )
-							$values[] = $term->name;
-					echo implode( ', ', $values );
-				else :
+				if ( $attribute['is_taxonomy'] ) {
+
+					echo implode( ', ', woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' ) );
+					
+				} else {
+				
 					// Convert pipes to commas
 					$value = explode( '|', $attribute['value'] );
 					$value = implode( ', ', $value );
 					echo wpautop( wptexturize( $value ) );
-				endif;
+					
+				}
 			?></td>
 		</tr>
 				

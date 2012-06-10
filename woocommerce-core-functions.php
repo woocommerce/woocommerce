@@ -801,6 +801,47 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 }
 
 /**
+ * woocommerce_get_product_terms function.
+ *
+ * Gets product terms in the order they are defined in the backend.
+ * 
+ * @access public
+ * @param mixed $object_id
+ * @param mixed $taxonomy
+ * @param mixed $fields ids, names, slugs, all
+ * @return array
+ */
+function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' ) {
+	
+	$terms 			= array();
+	$object_terms 	= wp_get_object_terms( $object_id, $taxonomy );
+	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );
+	
+	switch ( $fields ) {
+		case 'names' :
+			foreach ( $object_terms as $term )
+				$terms[ $all_terms[ $term->term_id ] ] = $term->name;
+			break;
+		case 'ids' :
+			foreach ( $object_terms as $term )
+				$terms[ $all_terms[ $term->term_id ] ] = $term->term_id;
+			break;
+		case 'slugs' :
+			foreach ( $object_terms as $term )
+				$terms[ $all_terms[ $term->term_id ] ] = $term->slug;
+			break;
+		case 'all' :
+			foreach ( $object_terms as $term )
+				$terms[ $all_terms[ $term->term_id ] ] = $term;
+			break;
+	}
+	
+	ksort( $terms );
+	
+	return $terms;
+}
+
+/**
  * WooCommerce Dropdown categories
  * 
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258

@@ -153,6 +153,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Menu count for orders requiring admin action
 * Feature - 'supports' function for gateways.
 * Feature - Ajax powered coupon form on checkout.
+* Tweak - woocommerce_get_product_terms for getting terms in the user defined order.
+* Tweak - Variations that are disabled are not taken into consideration when displaying parent price.
 * Tweak - Variations maintain selections after adding to cart.
 * Tweak - Improvements to the order tracking code, including better error messages
 * Tweak - EU states for tax

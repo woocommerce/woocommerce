@@ -14,38 +14,37 @@ global $woocommerce, $product, $post;
 <form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
 	<table class="variations" cellspacing="0">
 		<tbody>
-			<?php $loop = 0; foreach ($attributes as $name => $options) : $loop++; ?>
+			<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
 				<tr>
 					<td><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
 					<td><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
 						<option value=""><?php echo __('Choose an option', 'woocommerce') ?>&hellip;</option>
-						<?php if(is_array($options)) : ?>
-							<?php
+						<?php 
+							if ( is_array( $options ) ) {
+							
 								if ( empty( $_POST ) )
 									$selected_value = ( isset( $selected_attributes[ sanitize_title( $name ) ] ) ) ? $selected_attributes[ sanitize_title( $name ) ] : '';
 								else
 									$selected_value = isset( $_POST[ 'attribute_' . sanitize_title( $name ) ] ) ? $_POST[ 'attribute_' . sanitize_title( $name ) ] : '';
 
 								// Get terms if this is a taxonomy - ordered
-								if (taxonomy_exists(sanitize_title($name))) :
-									$args = array('menu_order' => 'ASC');
-									$terms = get_terms( sanitize_title($name), $args );
+								if ( taxonomy_exists( sanitize_title( $name ) ) ) {
+
+									$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC') );
 	
-									foreach ($terms as $term) :
-										if (!in_array($term->slug, $options)) continue;
-										echo '<option value="'.$term->slug.'" '.selected($selected_value, $term->slug).'>'.$term->name.'</option>';
-									endforeach;
-								else :
-									foreach ($options as $option) :
-										echo '<option value="'.$option.'" '.selected($selected_value, $option).'>'.$option.'</option>';
-									endforeach;
-								endif;
-							?>
-						<?php endif;?>
+									foreach ( $terms as $term ) {
+										if ( ! in_array( $term->slug, $options ) ) continue;
+										echo '<option value="' . $term->slug . '" ' . selected( $selected_value, $term->slug ) . '>' . $term->name . '</option>';
+									}
+								} else {
+									foreach ($options as $option)
+										echo '<option value="' . $option . '" ' . selected( $selected_value, $option ) . '>' . $option . '</option>';
+								}
+							}
+						?>
 					</select> <?php
-						if ( sizeof($attributes) == $loop ) {
+						if ( sizeof($attributes) == $loop )
 							echo '<a class="reset_variations" href="#reset">'.__('Clear selection', 'woocommerce').'</a>';
-						}
 					?></td>
 				</tr>
 	        <?php endforeach;?>

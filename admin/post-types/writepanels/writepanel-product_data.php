@@ -503,9 +503,6 @@ function woocommerce_product_data_box() {
 				
 				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __('Grouping', 'woocommerce'), 'value' => $post->post_parent, 'options' => $post_parents ) );
 				
-				// Ordering - removed due to adding page-attributes panel (same field)
-				//woocommerce_wp_text_input( array( 'id' => 'menu_order', 'label' => _x('Sort Order', 'ordering', 'woocommerce'), 'value' => $post->menu_order ) );
-				
 				do_action('woocommerce_product_options_grouping');
 			
 			echo '</div>';

@@ -853,13 +853,14 @@ function process_product_meta_variable( $post_id ) {
 		'posts_per_page'=> -1,
 		'post_type' 	=> 'product_variation',
 		'fields' 		=> 'ids',
-		'post_status'	=> 'any'
+		'post_status'	=> 'publish'
 	));
 	
 	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';
 	
 	if ($children) {
 		foreach ($children as $child) {
+                	
 			$child_price 		= get_post_meta($child, '_price', true);
 			$child_sale_price 	= get_post_meta($child, '_sale_price', true);
 			

@@ -849,34 +849,21 @@ class WC_Product {
 		
 		$attr = sanitize_title( $attr );
 		
-		if (isset($attributes[$attr]) || isset($attributes['pa_' . $attr])) :
+		if ( isset( $attributes[ $attr ] ) || isset( $attributes[ 'pa_' . $attr ] ) ) {
 			
-			$attribute = isset($attributes[$attr]) ? $attributes[$attr] : $attributes['pa_' . $attr];
+			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
 			
-			if ($attribute['is_taxonomy']) :
+			if ( $attribute['is_taxonomy'] ) {
 				
-				// Get string with terms
-				$terms = get_the_terms( $this->id, $attribute['name'] );
+				return implode( ', ', woocommerce_get_product_terms( $this->id, $attribute['name'], 'names' ) );
 				
-				if ( $terms && ! is_wp_error( $terms ) ) :
-				
-					$terms_array = array();
-					
-					foreach ( $terms as $term ) :
-						$terms_array[] = $term->name;
-					endforeach;
-					
-					return implode( ', ', $terms_array );
-				
-				endif;	
-				
-			else :
+			} else {
 				
 				return $attribute['value'];
 				
-			endif;
+			}
 		
-		endif;
+		}
 		
 		return false;
 	}
@@ -1193,13 +1180,14 @@ class WC_Product {
 			'posts_per_page'=> -1,
 			'post_type' 	=> 'product_variation',
 			'fields' 		=> 'ids',
-			'post_status'	=> 'any'
+			'post_status'	=> 'publish'
 		));
 		
 		$this->min_variation_price = $this->min_variation_regular_price = $this->min_variation_sale_price = $this->max_variation_price = $this->max_variation_regular_price = $this->max_variation_sale_price = '';
 		
 		if ($children) {
-			foreach ($children as $child) {
+			foreach ( $children as $child ) {
+                	
 				$child_price 		= get_post_meta($child, '_price', true);
 				$child_sale_price 	= get_post_meta($child, '_sale_price', true);
 				
