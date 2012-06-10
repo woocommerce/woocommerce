@@ -363,20 +363,38 @@ function woocommerce_products_by_type() {
     endif;
 }
 
-add_filter( 'parse_query', 'woocommerce_products_subtype_query' );
+add_filter( 'parse_query', 'woocommerce_admin_product_filter_query' );
 
-function woocommerce_products_subtype_query($query) {
+function woocommerce_admin_product_filter_query( $query ) {
 	global $typenow, $wp_query;
-    if ($typenow=='product' && isset($_GET['product_subtype']) && $_GET['product_subtype']) :
-    	if ($_GET['product_subtype']=='downloadable') :
-        	$query->query_vars['meta_value'] 	= 'yes';
-        	$query->query_vars['meta_key'] 		= '_downloadable';
-        endif;
-        if ($_GET['product_subtype']=='virtual') :
-        	$query->query_vars['meta_value'] 	= 'yes';
-        	$query->query_vars['meta_key'] 		= '_virtual';
-        endif;
-	endif;
+	
+    if ( $typenow == 'product' ) {
+    
+    	// Subtypes
+    	if ( ! empty( $_GET['product_subtype'] ) ) {
+	    	if ( $_GET['product_subtype'] == 'downloadable' ) {
+	        	$query->query_vars['meta_value'] 	= 'yes';
+	        	$query->query_vars['meta_key'] 		= '_downloadable';
+	        } elseif ( $_GET['product_subtype'] == 'virtual' ) {
+	        	$query->query_vars['meta_value'] 	= 'yes';
+	        	$query->query_vars['meta_key'] 		= '_virtual';
+	        }
+        }
+        
+        // Categories
+        if ( isset( $_GET['product_cat'] ) && $_GET['product_cat'] == '0' ) {
+        	
+        	$query->query_vars['tax_query'][] = array(
+        		'taxonomy' => 'product_cat',
+        		'field' => 'id',
+				'terms' => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
+				'operator' => 'NOT IN'
+        	);
+        	
+        }
+        
+	}
+	
 }
 
 /**

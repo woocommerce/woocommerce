@@ -864,8 +864,9 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	if (!$terms) return;
 	
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="">'.__('Select a category', 'woocommerce').'</option>';
+	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__('Select a category', 'woocommerce').'</option>';
 	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
+	$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
 	$output .="</select>";
 	
 	echo $output;
