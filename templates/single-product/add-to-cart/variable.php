@@ -22,6 +22,7 @@ global $woocommerce, $product, $post;
 						<?php if(is_array($options)) : ?>
 							<?php
 								$selected_value = (isset($selected_attributes[sanitize_title($name)])) ? $selected_attributes[sanitize_title($name)] : '';
+
 								// Get terms if this is a taxonomy - ordered
 								if (taxonomy_exists(sanitize_title($name))) :
 									$args = array('menu_order' => 'ASC');
