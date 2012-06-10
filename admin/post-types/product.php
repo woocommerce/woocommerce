@@ -447,9 +447,9 @@ function woocommerce_admin_product_search_label($query) {
 /**
  * Custom quick edit
  **/
-add_action('quick_edit_custom_box',  'woocommerce_admin_product_quick_edit', 10, 2);
-add_action('admin_enqueue_scripts', 'woocommerce_admin_product_quick_edit_scripts', 10);  
-add_action('save_post', 'woocommerce_admin_product_quick_edit_save', 10, 2);  
+add_action( 'quick_edit_custom_box',  'woocommerce_admin_product_quick_edit', 10, 2 );
+add_action( 'admin_enqueue_scripts', 'woocommerce_admin_product_quick_edit_scripts', 10 );
+add_action( 'save_post', 'woocommerce_admin_product_quick_edit_save', 10, 2 );  
 
 function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 	if ($column_name != 'price' || $post_type != 'product') return;
@@ -581,10 +581,11 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 	<?php
 }
 
-function woocommerce_admin_product_quick_edit_scripts() {  
-	global $woocommerce;
+function woocommerce_admin_product_quick_edit_scripts( $hook ) {  
+	global $woocommerce, $post_type;
 	
-    wp_enqueue_script( 'woocommerce_quick-edit', $woocommerce->plugin_url() . '/assets/js/admin/quick-edit.js', array('jquery') ); 
+	if ( $hook == 'edit.php' && $post_type == 'product' )
+    	wp_enqueue_script( 'woocommerce_quick-edit', $woocommerce->plugin_url() . '/assets/js/admin/quick-edit.js', array('jquery') ); 
 }  
 
 function woocommerce_admin_product_quick_edit_save( $post_id, $post ) {  

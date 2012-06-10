@@ -102,4 +102,10 @@ jQuery(document).ready(function(){
     	}
     
     });
+    
+    jQuery('.product_shipping_class-checklist input').change(function(){
+    	
+    	jQuery(this).closest('li').siblings().find('input:checked').removeAttr('checked');
+    	
+    });
 });  
