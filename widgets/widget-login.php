@@ -127,20 +127,25 @@ class WooCommerce_Widget_Login extends WP_Widget {
 						user_password: 	jQuery('input[name=\"pwd\"]', thisform).val(),
 						redirect_to:	jQuery('.redirect_to:eq(0)', thisform).val()
 					};
-				
+					
 					// Ajax action
-					jQuery.post( '".admin_url('admin-ajax.php')."', data, function(response) {
-						jQuery('.woocommerce_error').remove();
-						
-						result = jQuery.parseJSON( response );
-						
-						if (result.success==1) {
-							window.location = result.redirect;
-						} else {
-							jQuery(thisform).prepend('<div class=\"woocommerce_error\">' + result.error + '</div>');
-							jQuery(thisform).unblock();
+					jQuery.ajax({
+						url: '".admin_url('admin-ajax.php')."',
+						data: data,
+						type: 'GET',
+						dataType: 'jsonp',
+						success: function( result ) {
+							jQuery('.woocommerce_error').remove();
+
+							if (result.success==1) {
+								window.location = result.redirect;
+							} else {
+								jQuery(thisform).prepend('<div class=\"woocommerce_error\">' + result.error + '</div>');
+								jQuery(thisform).unblock();
+							}
 						}
-					});
+						
+					});	
 					
 					return false;
 				});
@@ -212,14 +217,14 @@ function woocommerce_sidebar_login_process() {
 			}
 		}
 		
-		if ( !$secure_cookie && is_ssl() && force_ssl_login() && !force_ssl_admin() && ( 0 !== strpos($redirect_to, 'https') ) && ( 0 === strpos($redirect_to, 'http') ) )
-		$secure_cookie = false;
+		if ( force_ssl_admin() ) $secure_cookie = true;
+		if ( $secure_cookie == '' && force_ssl_login() ) $secure_cookie = false;
 
 		// Login
-		$user = wp_signon('', $secure_cookie);
+		$user = wp_signon( '', $secure_cookie );
 
 		// Redirect filter
-		if ( $secure_cookie && false !== strpos($redirect_to, 'wp-admin') ) $redirect_to = preg_replace('|^http://|', 'https://', $redirect_to);
+		if ( $secure_cookie && strstr($redirect_to, 'wp-admin') ) $redirect_to = str_replace('http:', 'https:', $redirect_to);
 		
 		// Check the username
 		if ( !$_POST['log'] ) :

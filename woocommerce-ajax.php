@@ -22,33 +22,33 @@ function woocommerce_sidebar_login_ajax_process() {
 	
 	// Get post data
 	$creds = array();
-	$creds['user_login'] 	= esc_attr($_POST['user_login']);
-	$creds['user_password'] = esc_attr($_POST['user_password']);
+	$creds['user_login'] 	= esc_attr($_REQUEST['user_login']);
+	$creds['user_password'] = esc_attr($_REQUEST['user_password']);
 	$creds['remember'] 		= 'forever';
-	$redirect_to 			= esc_attr($_POST['redirect_to']);
+	$redirect_to 			= esc_attr($_REQUEST['redirect_to']);
 	
 	// Check for Secure Cookie
 	$secure_cookie = '';
 	
 	// If the user wants ssl but the session is not ssl, force a secure cookie.
-	if ( !empty($_POST['log']) && !force_ssl_admin() ) {
-		$user_name = sanitize_user($_POST['log']);
-		if ( $user = get_user_by('login', $user_name) ) {
-			if ( get_user_option('use_ssl', $user->ID) ) {
+	if ( ! force_ssl_admin() ) {
+		$user_name = sanitize_user( $creds['user_login']  );
+		if ( $user = get_user_by('login',  $user_name ) ) {
+			if ( get_user_option( 'use_ssl', $user->ID ) ) {
 				$secure_cookie = true;
 				force_ssl_admin(true);
 			}
 		}
 	}
 	
-	if ( !$secure_cookie && is_ssl() && force_ssl_login() && !force_ssl_admin() && ( 0 !== strpos($redirect_to, 'https') ) && ( 0 === strpos($redirect_to, 'http') ) )
-	$secure_cookie = false;
+	if ( force_ssl_admin() ) $secure_cookie = true;
+	if ( $secure_cookie=='' && force_ssl_login() ) $secure_cookie = false;
 
 	// Login
-	$user = wp_signon($creds, $secure_cookie);
+	$user = wp_signon( $creds, $secure_cookie );
 	
 	// Redirect filter
-	if ( $secure_cookie && false !== strpos($redirect_to, 'wp-admin') ) $redirect_to = preg_replace('|^http://|', 'https://', $redirect_to);
+	if ( $secure_cookie && strstr($redirect_to, 'wp-admin') ) $redirect_to = str_replace('http:', 'https:', $redirect_to);
 
 	// Result
 	$result = array();
@@ -58,13 +58,19 @@ function woocommerce_sidebar_login_ajax_process() {
 		$result['redirect'] = $redirect_to;
 	else :
 		$result['success'] = 0;
-		foreach ($user->errors as $error) {
-			$result['error'] = $error[0];
-			break;
+		if ( $user->errors ) {
+			foreach ($user->errors as $error) {
+				$result['error'] = $error[0];
+				break;
+			}
+		} else {
+			$result['error'] = __('Please enter your username and password to login.', 'woocommerce');
 		}
 	endif;
 	
-	echo json_encode($result);
+	header('content-type: application/json; charset=utf-8');
+
+	echo $_GET['callback'] . '(' . json_encode( $result ) . ')';
 
 	die();
 }
