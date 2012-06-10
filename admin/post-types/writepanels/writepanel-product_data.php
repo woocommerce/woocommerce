@@ -856,15 +856,15 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		if (isset($_POST['_button_text']) && $_POST['_button_text']) update_post_meta( $post_id, '_button_text', esc_attr($_POST['_button_text']) );
 		
 	endif;
-			
+
+	// Save errors
+	update_option('woocommerce_errors', $woocommerce_errors);
+
 	// Do action for product type
 	do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 	
 	// Clear cache/transients
 	$woocommerce->clear_product_transients( $post_id );
-		
-	// Save errors
-	update_option('woocommerce_errors', $woocommerce_errors);
 }
 
 /**
