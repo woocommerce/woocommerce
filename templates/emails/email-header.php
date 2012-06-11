@@ -140,6 +140,9 @@
 			}
 
 		</style>
+
+		<?php do_action('woocommerce_email_head'); ?>
+
 	</head>
     <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" style="background: <?php echo get_option('woocommerce_email_background_color'); ?> url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAOklEQVQYGWP8//8/AyHAREgBIyOjMQPIJFwYaIAxSI6RbOvAViC7A90qmBXI4qRZh2EFunXYrEC2DgDc+VH0jS2AGAAAAABJRU5ErkJggg==);">
     	<center style="padding: 70px 0 0 0;">

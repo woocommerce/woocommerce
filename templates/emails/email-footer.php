@@ -35,5 +35,8 @@
                 </tr>
             </table>
         </center>
+
+		<?php do_action('woocommerce_email_footer'); ?>
+
     </body>
 </html>
