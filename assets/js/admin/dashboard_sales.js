@@ -48,6 +48,7 @@ jQuery(function(){
 		xaxis: { 
 			mode: "time",
 			timeformat: "%d %b", 
+			monthNames: params.month_names,
 			tickLength: 1,
 			minTickSize: [1, "day"]
 		},

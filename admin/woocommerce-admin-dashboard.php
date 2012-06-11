@@ -306,7 +306,7 @@ function woocommerce_dashboard_sales() {
  */
 function woocommerce_dashboard_sales_js() {
 	
-	global $woocommerce;
+	global $woocommerce, $wp_locale;
 	
 	$screen = get_current_screen();
 	
@@ -393,6 +393,7 @@ function woocommerce_dashboard_sales_js() {
 		'currency_symbol' => get_woocommerce_currency_symbol(),
 		'number_of_sales' => __( 'Number of sales', 'woocommerce' ),
 		'sales_amount'    => __( 'Sales amount', 'woocommerce' ),
+		'month_names'     => array_values( $wp_locale->month_abbrev ),
 	);
 	
 	$order_counts_array = array();
