@@ -227,7 +227,7 @@ function orders_within_range( $where = '' ) {
  */
 function woocommerce_sales_overview() {
 
-	global $start_date, $end_date, $woocommerce, $wpdb;
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 	
 	$total_sales = 0;
 	$total_orders = 0;
@@ -463,6 +463,7 @@ function woocommerce_sales_overview() {
 				xaxis: { 
 					mode: "time",
 					timeformat: "%d %b", 
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 					tickLength: 1,
 					minTickSize: [1, "day"]
 				},
@@ -484,7 +485,7 @@ function woocommerce_sales_overview() {
  */
 function woocommerce_daily_sales() {
 	
-	global $start_date, $end_date, $woocommerce, $wpdb;
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 	
 	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
 	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
@@ -653,6 +654,7 @@ function woocommerce_daily_sales() {
 				xaxis: { 
 					mode: "time",
 					timeformat: "%d %b", 
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 					tickLength: 1,
 					minTickSize: [1, "day"]
 				},
@@ -676,7 +678,7 @@ function woocommerce_daily_sales() {
  */
 function woocommerce_monthly_sales() {
 	
-	global $start_date, $end_date, $woocommerce, $wpdb;
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 	
 	$first_year = $wpdb->get_var("SELECT post_date FROM $wpdb->posts ORDER BY post_date ASC LIMIT 1;");
 	if ($first_year) $first_year = date('Y', strtotime($first_year)); else $first_year = date('Y');
@@ -838,6 +840,7 @@ function woocommerce_monthly_sales() {
 				xaxis: { 
 					mode: "time",
 					timeformat: "%b %y", 
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 					tickLength: 1,
 					minTickSize: [1, "month"]
 				},
@@ -1185,7 +1188,7 @@ function woocommerce_product_sales() {
  */
 function woocommerce_customer_overview() {
 
-	global $start_date, $end_date, $woocommerce, $wpdb;
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 	
 	$total_customers = 0;
 	$total_customer_sales = 0;
@@ -1362,6 +1365,7 @@ function woocommerce_customer_overview() {
 				xaxis: { 
 					mode: "time",
 					timeformat: "%d %b", 
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
 					tickLength: 1,
 					minTickSize: [1, "day"]
 				},
