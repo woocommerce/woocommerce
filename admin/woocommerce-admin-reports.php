@@ -14,95 +14,119 @@ function woocommerce_reports() {
 	
 	$charts = apply_filters('woocommerce_reports_charts', array(
 		'sales' => array(
-			array(
-				'title' => __('Overview', 'woocommerce'),
-				'description' => '',
-				'hide_title' => true,
-				'function' => 'woocommerce_sales_overview'
-			),
-			array(
-				'title' => __('Sales by day', 'woocommerce'),
-				'description' => '',
-				'function' => 'woocommerce_daily_sales'
-			),
-			array(
-				'title' => __('Sales by month', 'woocommerce'),
-				'description' => '',
-				'function' => 'woocommerce_monthly_sales'
-			),
-			array(
-				'title' => __('Product Sales', 'woocommerce'),
-				'description' => '',
-				'function' => 'woocommerce_product_sales'
-			),
-			array(
-				'title' => __('Top sellers', 'woocommerce'),
-				'description' => '',
-				'function' => 'woocommerce_top_sellers'
-			),
-			array(
-				'title' => __('Top earners', 'woocommerce'),
-				'description' => '',
-				'function' => 'woocommerce_top_earners'
+			'title' 	=>  __( 'Sales', 'woocommerce' ),
+			'charts' 	=> array(
+				array(
+					'title' => __('Overview', 'woocommerce'),
+					'description' => '',
+					'hide_title' => true,
+					'function' => 'woocommerce_sales_overview'
+				),
+				array(
+					'title' => __('Sales by day', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_daily_sales'
+				),
+				array(
+					'title' => __('Sales by month', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_monthly_sales'
+				),
+				array(
+					'title' => __('Product Sales', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_product_sales'
+				),
+				array(
+					'title' => __('Top sellers', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_top_sellers'
+				),
+				array(
+					'title' => __('Top earners', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_top_earners'
+				)
 			)
 		),
 		'customers' => array(
-			array(
-				'title' => __('Overview', 'woocommerce'),
-				'description' => '',
-				'hide_title' => true,
-				'function' => 'woocommerce_customer_overview'
-			),
+			'title' 	=>  __( 'Customers', 'woocommerce' ),
+			'charts' 	=> array(
+				array(
+					'title' => __('Overview', 'woocommerce'),
+					'description' => '',
+					'hide_title' => true,
+					'function' => 'woocommerce_customer_overview'
+				),
+			)
 		),
 		'stock' => array(
-			array(
-				'title' => __('Overview', 'woocommerce'),
-				'description' => '',
-				'hide_title' => true,
-				'function' => 'woocommerce_stock_overview'
-			),
+			'title' 	=>  __( 'Stock', 'woocommerce' ),
+			'charts' 	=> array(
+				array(
+					'title' => __('Overview', 'woocommerce'),
+					'description' => '',
+					'hide_title' => true,
+					'function' => 'woocommerce_stock_overview'
+				),
+			)
 		)
 	));
-
-	$chart_tab_titles = apply_filters( 'woocommerce_reports_chart_tab_titles', array(
-		'sales'     => __( 'Sales', 'woocommerce' ),
-		'customers' => __( 'Customers', 'woocommerce' ),
-		'stock'     => __( 'Stock', 'woocommerce' ),
-	) );
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
-				foreach ($charts as $name => $value) :
-					echo '<a href="'.admin_url( 'admin.php?page=woocommerce_reports&tab=' . urlencode($name) ).'" class="nav-tab ';
-					if( $current_tab == $name ) echo 'nav-tab-active';
-					echo '">'.esc_html( $chart_tab_titles[$name] ).'</a>';
-				endforeach;
+				foreach ( $charts as $key => $chart ) {
+					echo '<a href="'.admin_url( 'admin.php?page=woocommerce_reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
+					if ( $current_tab == $key ) echo 'nav-tab-active';
+					echo '">' . esc_html( $chart[ 'title' ] ) . '</a>';
+				}
 			?>
 			<?php do_action('woocommerce_reports_tabs'); ?>
 		</h2>
 		
-		<?php if (sizeof($charts[$current_tab])>1) : ?><ul class="subsubsub"><li><?php
-			$links = array();
-			foreach ($charts[$current_tab] as $key => $chart) :
-				$link = '<a href="admin.php?page=woocommerce_reports&tab=' . urlencode($current_tab) . '&amp;chart=' . urlencode($key) . '" class="';
-				if ($key==$current_chart) $link .= 'current';
-				$link .= '">'.$chart['title'].'</a>';
-				$links[] = $link;
-			endforeach;
-			echo implode(' | </li><li>', $links);
-		?></li></ul><br class="clear" /><?php endif; ?>
-		
-		<?php if (isset($charts[$current_tab][$current_chart])) : ?> 
-			<?php if (!isset($charts[$current_tab][$current_chart]['hide_title']) || $charts[$current_tab][$current_chart]['hide_title']!=true) : ?><h3><?php echo $charts[$current_tab][$current_chart]['title']; ?></h3>
-			<?php if ($charts[$current_tab][$current_chart]['description']) : ?><p><?php echo $charts[$current_tab][$current_chart]['description']; ?></p><?php endif; ?>
-			<?php endif; ?>
-			<?php
-				$func = $charts[$current_tab][$current_chart]['function'];
-				if ($func && function_exists($func)) $func();
+		<?php if ( sizeof( $charts[ $current_tab ]['charts'] ) > 1 ) {
 			?>
-		<?php endif; ?>
-
+			<ul class="subsubsub">
+				<li><?php
+					
+					$links = array();
+					
+					foreach ( $charts[ $current_tab ]['charts'] as $key => $chart ) {
+					
+						$link = '<a href="admin.php?page=woocommerce_reports&tab=' . urlencode( $current_tab ) . '&amp;chart=' . urlencode( $key ) . '" class="';
+						
+						if ( $key == $current_chart ) $link .= 'current';
+						
+						$link .= '">' . $chart['title'] . '</a>';
+						
+						$links[] = $link;
+						
+					}
+					
+					echo implode(' | </li><li>', $links);
+					
+				?></li>
+			</ul>
+			<br class="clear" />
+			<?php
+		}
+		
+		if ( isset( $charts[ $current_tab ][ 'charts' ][ $current_chart ] ) ) {
+			
+			$chart = $charts[ $current_tab ][ 'charts' ][ $current_chart ];
+			
+			if ( ! isset( $chart['hide_title'] ) || $chart['hide_title'] != true ) 
+				echo '<h3>' . $chart['title'] . '</h3>';
+				
+			if ( $chart['description'] ) 
+				echo '<p>' . $chart['description'] . '</p>';
+				
+			$func = $chart['function'];
+			if ( $func && function_exists( $func ) ) 
+				$func();
+		} 
+		?>
 	</div>
 	<?php
 }
