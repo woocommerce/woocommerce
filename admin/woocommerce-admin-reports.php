@@ -63,6 +63,12 @@ function woocommerce_reports() {
 			),
 		)
 	));
+
+	$chart_tab_titles = apply_filters( 'woocommerce_reports_chart_tab_titles', array(
+		'sales'     => __( 'Sales', 'woocommerce' ),
+		'customers' => __( 'Customers', 'woocommerce' ),
+		'stock'     => __( 'Stock', 'woocommerce' ),
+	) );
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
@@ -70,7 +76,7 @@ function woocommerce_reports() {
 				foreach ($charts as $name => $value) :
 					echo '<a href="'.admin_url( 'admin.php?page=woocommerce_reports&tab=' . urlencode($name) ).'" class="nav-tab ';
 					if( $current_tab == $name ) echo 'nav-tab-active';
-					echo '">'.ucfirst($name).'</a>';
+					echo '">'.esc_html( $chart_tab_titles[$name] ).'</a>';
 				endforeach;
 			?>
 			<?php do_action('woocommerce_reports_tabs'); ?>
