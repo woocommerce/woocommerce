@@ -325,13 +325,19 @@ function woocommerce_status() {
 			<?php
 				$posting = array();
 				
-				// fsockopen/Curl
-				$posting['fsockopen_curl']['name'] = __('fsockopen/Curl','woocommerce');
-				if( function_exists('fsockopen') || function_exists('curl_init') ) {
-            		$posting['fsockopen_curl']['note'] = __('Your server has fsockopen or Curl enabled.', 'woocommerce');
-            		$posting['fsockopen_curl']['success'] = true;
+				// fsockopen/cURL
+				$posting['fsockopen_curl']['name'] = __('fsockopen/cURL','woocommerce');
+				if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
+					if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
+						$posting['fsockopen_curl']['note'] = __('Your server has fsockopen and cURL enabled.', 'woocommerce');
+					} elseif ( function_exists( 'fsockopen' )) {
+						$posting['fsockopen_curl']['note'] = __('Your server has fsockopen enabled, cURL is disabled.', 'woocommerce');
+					} else {
+						$posting['fsockopen_curl']['note'] = __('Your server has cURL enabled, fsockopen is disabled.', 'woocommerce');
+					}
+					$posting['fsockopen_curl']['success'] = true;
 				} else {
-            		$posting['fsockopen_curl']['note'] = __('Your server does not have fsockopen or Curl enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce'). '</mark>';
+            		$posting['fsockopen_curl']['note'] = __('Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce'). '</mark>';
             		$posting['fsockopen_curl']['success'] = false;
             	}
             	
