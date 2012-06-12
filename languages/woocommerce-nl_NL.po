@@ -1,17 +1,17 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 1.2.0\n"
+"Project-Id-Version: WooCommerce 1.5.7\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-06-11 09:14+0100\n"
 "PO-Revision-Date: 2012-06-11 10:06+0100\n"
 "Last-Translator: \n"
-"Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>\n"
+"Language-Team: Ramon van Belzen <woocommerce@ramoonus.nl>, Geert De Deckere<geertdd@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Poedit-Language: Dutch\n"
-"X-Poedit-Country: NETHERLANDS\n"
+"X-Poedit-Country: Netherlands\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
 "X-Poedit-Basepath: ../\n"
@@ -313,7 +313,7 @@ msgstr "Ongeldige download."
 # @ woocommerce
 #: woocommerce-functions.php:806
 msgid "You must be logged in to download files."
-msgstr "U dient ingelogd zijn om bestanden te downloaden."
+msgstr "U dient ingelogd te zijn om bestanden te downloaden."
 
 # @ woocommerce
 #: woocommerce-functions.php:806
@@ -323,7 +323,7 @@ msgstr "Login &rarr;"
 # @ woocommerce
 #: woocommerce-functions.php:811
 msgid "This is not your download link."
-msgstr "Dit is niet uw download link."
+msgstr "Dit is niet uw downloadlink."
 
 # @ woocommerce
 #: woocommerce-functions.php:827
@@ -380,7 +380,7 @@ msgstr "Pagina"
 # @ woocommerce
 #: woocommerce-template.php:173
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
-msgstr "Dit is een demo winkel, voor test doeleinden. Bestellingen worden niet afgehandeld. "
+msgstr "Dit is een demowinkel, voor test doeleinden. Bestellingen worden niet afgehandeld."
 
 # @ woocommerce
 #: woocommerce-template.php:332
@@ -1886,7 +1886,7 @@ msgstr "Totaal bestellingen"
 #: admin/woocommerce-admin-reports.php:584
 #: admin/woocommerce-admin-reports.php:773
 msgid "items"
-msgstr "producten"
+msgstr "items"
 
 # @ woocommerce
 #: admin/woocommerce-admin-reports.php:322
@@ -2109,7 +2109,7 @@ msgstr "Instellingen opgeslagen."
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:164
 msgid "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)"
-msgstr "<strong>Gefeliciteerd!</strong> &#8211; WooCommerce is geinstalleerd. Veel plezier :-)"
+msgstr "<strong>Gefeliciteerd!</strong> &#8211; WooCommerce is geïnstalleerd. Veel plezier :-)"
 
 # @ woocommerce
 #: admin/woocommerce-admin-settings.php:189
@@ -2177,12 +2177,12 @@ msgstr "Kies landen &hellip;"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:15
 msgid "Transients"
-msgstr "Transients"
+msgstr "Tijdelijk geheugen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:16
 msgid "Clear Transients"
-msgstr "Wis Transients"
+msgstr "Wis tijdelijk geheugen"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:17
@@ -2197,12 +2197,12 @@ msgstr "Capaciteiten"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:21
 msgid "Reset Capabilities"
-msgstr "Reset Capaciteiten"
+msgstr "Reset capaciteiten"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:22
 msgid "This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages."
-msgstr "Deze tool zal de admin, klant en winkelmanager rollen opnieuw instellen. Gebruik dit als u gebruikers geen toegang hebben tot alle WooCommerce admin pagina's."
+msgstr "Deze tool zal de admin-, klant- en winkelmanagerrollen opnieuw instellen. Gebruik dit als uw gebruikers geen toegang hebben tot alle WooCommerce adminpagina's."
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:29
@@ -2247,7 +2247,7 @@ msgstr "WordPress versie"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:91
 msgid "Installed plugins"
-msgstr "Geinstalleerde plugins"
+msgstr "Geïnstalleerde plugins"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:109
@@ -2419,7 +2419,7 @@ msgstr "PHP Sessies"
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:304
 msgid "Session save path"
-msgstr "Sessies opslag pad"
+msgstr "Sessies opslagpad"
 
 # @ woocommerce
 #: admin/woocommerce-admin-status.php:309
@@ -2537,7 +2537,7 @@ msgstr "Betalende klant?"
 #: admin/woocommerce-admin-users.php:61
 #: admin/woocommerce-admin-users.php:80
 msgid "N/A"
-msgstr "NB"
+msgstr "N.B."
 
 # @ woocommerce
 #: admin/woocommerce-admin-users.php:102
