@@ -192,6 +192,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Cart widget respects cart tax settings
 * Tweak - Exempt from VAT shows price ex VAT
 * Tweak - Newlines for order meta (flat)
+* Tweak - Show method title when free
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.
 * Fix - Right now links.
 * Fix - fix for https://bugs.php.net/bug.php?id=61166 (thanks Max Rice)

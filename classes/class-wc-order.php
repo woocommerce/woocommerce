@@ -296,6 +296,11 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_amount_shipping_tax', $this->order_shipping_tax );
 	}
 	
+	/** Gets shipping method title */
+	function get_shipping_method() {
+		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ) );
+	}
+	
 	/** Gets order total */
 	function get_total() {
 		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
@@ -456,7 +461,7 @@ class WC_Order {
 	function get_shipping_to_display() {
 		global $woocommerce;
 		
-		if ($this->order_shipping > 0) :
+		if ( $this->order_shipping > 0 ) :
 			
 			$tax_text = '';
 			
@@ -478,8 +483,10 @@ class WC_Order {
 			
 			endif;
 			
-			$shipping .= sprintf( __('&nbsp;<small>%svia %s</small>', 'woocommerce'), $tax_text, ucwords( $this->shipping_method_title ) );
+			$shipping .= sprintf( __('&nbsp;<small>%svia %s</small>', 'woocommerce'), $tax_text, $this->get_shipping_method() );
 			
+		elseif ( $this->get_shipping_method() ) :
+			$shipping = $this->get_shipping_method();
 		else :
 			$shipping = __('Free!', 'woocommerce');
 		endif;
@@ -522,7 +529,7 @@ class WC_Order {
 		if ( $this->get_cart_discount() > 0 ) 
 			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = '-' . $this->get_cart_discount_to_display();
 		
-		if ( $this->get_shipping() > 0 )
+		if ( $this->get_shipping_method() )
 			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
 		
 		if ( $this->get_total_tax() > 0 ) {
