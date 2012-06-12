@@ -41,7 +41,8 @@ global $woocommerce;
 						<!-- The thumbnail -->
 						<td class="product-thumbnail">
 							<?php 
-								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $_product->get_image() ); 
+								$thumbnail = apply_filters('woocommerce_in_cart_product_thumbnail', '', $values);
+								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $thumbnail ? $thumbnail : $_product->get_image() ); 
 							?>
 						</td>
 						
@@ -49,7 +50,7 @@ global $woocommerce;
 						<td class="product-name">
 							<?php 
 								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ) );
-							
+
 								// Meta data
 								echo $woocommerce->cart->get_item_data( $values );
                    				
@@ -63,7 +64,7 @@ global $woocommerce;
 						<td class="product-price">
 							<?php 							
 								$product_price = get_option('woocommerce_display_cart_prices_excluding_tax') == 'yes' || $woocommerce->customer->is_vat_exempt() ? $_product->get_price_excluding_tax() : $_product->get_price();
-							
+
 								echo apply_filters('woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $values, $cart_item_key ); 
 							?>
 						</td>
@@ -77,10 +78,10 @@ global $woocommerce;
 									$data_min = apply_filters( 'woocommerce_cart_item_data_min', '', $_product );
 									$data_max = ( $_product->backorders_allowed() ) ? '' : $_product->get_stock_quantity();
 									$data_max = apply_filters( 'woocommerce_cart_item_data_max', $data_max, $_product ); 
-									
+
 									$product_quantity = sprintf( '<div class="quantity"><input name="cart[%s][qty]" data-min="%s" data-max="%s" value="%s" size="4" title="Qty" class="input-text qty text" maxlength="12" /></div>', $cart_item_key, $data_min, $data_max, esc_attr( $values['quantity'] ) );
 								}
-								
+
 								echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key ); 					
 							?>
 						</td>
@@ -96,7 +97,7 @@ global $woocommerce;
 				}
 			}
 		}
-		
+
 		do_action( 'woocommerce_cart_contents' );
 		?>
 		<tr>
