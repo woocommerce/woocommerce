@@ -135,7 +135,7 @@ function woocommerce_status() {
                 </tr>
                 <tr>
                     <td><?php _e('Force SSL','woocommerce')?></td>
-                    <td><?php echo ucwords(get_option('woocommerce_force_ssl_checkout')); ?></td>
+					<td><?php echo ( get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ) ? '<mark class="yes">'.__( 'Yes', 'woocommerce' ).'</mark>' : '<mark class="no">'.__( 'No', 'woocommerce' ).'</mark>'; ?></td>
                 </tr>
 			</tbody>
 
