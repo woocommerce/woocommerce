@@ -66,15 +66,19 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
     		'orderby' 		 => 'meta_value',
     		'no_found_rows'  => 1,
     	);
-
+    	
+    	$query_args['meta_query'] = array();
+    	
     	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
-    		$query_args['meta_query'] = array( array(
+    		$query_args['meta_query'][] = array(
 			    'key'     => '_price',
 			    'value'   => 0,
 			    'compare' => '>',
 			    'type'    => 'DECIMAL',
-			) );
+			);
     	}
+
+	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
 
 		$r = new WP_Query($query_args);
 		

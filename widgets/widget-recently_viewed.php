@@ -63,6 +63,10 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 
 	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $_SESSION['viewed_products'], 'orderby' => 'rand');
 
+		$query_args['meta_query'] = array();
+	    
+	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    
 		$r = new WP_Query($query_args);
 		
 		if ($r->have_posts()) :

@@ -59,20 +59,22 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 		else if ( $number > 15 )
 			$number = 15;
 
-    $show_variations = $instance['show_variations'] ? '1' : '0';
-
-    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product');
-
-    if($show_variations=='0'){
-      $query_args['meta_query'] = array(
-			  array(
-				  'key' => '_visibility',
-				  'value' => array('catalog', 'visible'),
-				  'compare' => 'IN'
-			  )
-		  );
-		  $query_args['parent'] = '0';
-    }
+	    $show_variations = $instance['show_variations'] ? '1' : '0';
+	
+	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product');
+	    
+	    $query_args['meta_query'] = array();
+	     
+	    if ( $show_variations == '0' ) {
+		    $query_args['meta_query'][] = array(
+				'key' => '_visibility',
+				'value' => array('catalog', 'visible'),
+				'compare' => 'IN'
+			);
+			$query_args['parent'] = '0';
+	    }
+	    
+	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
 
 		$r = new WP_Query($query_args);
 		

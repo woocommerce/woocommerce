@@ -37,17 +37,19 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 			'orderby'        => 'rand',
 			'no_found_rows'  => 1
 		);
-
+		
+		$query_args['meta_query'] = array();
+		
 		if ( $instance['show_variations'] ) {
-			$query_args['meta_query'] = array(
-				array(
-					'key'     => '_visibility',
-					'value'   => array('catalog', 'visible'),
-					'compare' => 'IN',
-				),
+			$query_args['meta_query'][] = array(
+				'key'     => '_visibility',
+				'value'   => array('catalog', 'visible'),
+				'compare' => 'IN',
 			);
 			$query_args['post_parent'] = 0;
 		}
+	    
+	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
 
 		$query = new WP_Query( $query_args );
 
