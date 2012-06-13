@@ -28,22 +28,42 @@ class WC_Query {
 	 */
 	function pre_get_posts( $q ) {
 		global $woocommerce;
-
-		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
-	    if 	( 
-	    		( ! $q->is_main_query() ) // Abort if this isn't the main query
-	    		|| 
-	    		( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
-	    	) 
-	    return;
+		
+		// We only want to affect the main query
+		if ( ! $q->is_main_query() )
+			return;
+		
+		// Special check for shops with the product archive on front
+		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == woocommerce_get_page_id('shop') ) {
+		
+			// This is a front-page shop 
+			$q->set( 'post_type', 'product' );
+			$q->set( 'page_id', '' );
+			if ( isset( $q->query['paged'] ) )
+				$q->set( 'paged', $q->query['paged'] );
+			
+			// Fix conditional Fucntions like is_front_page
+	        $q->is_page = false;
+	        $q->is_singular = false;
+	        $q->is_post_type_archive = true;
+	        $q->is_archive = true;
+	        define( 'SHOP_IS_ON_FRONT', true );
+		
+		} else {
+			
+			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
+		    if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) 
+		   		return;
+		   		
+		}
 	    
 	    $this->product_query( $q );
 	    
 	    // We're on a shop page so queue the woocommerce_get_products_in_view function
-	    add_action('wp', array( &$this, 'get_products_in_view' ), 2);
+	    add_action( 'wp', array( &$this, 'get_products_in_view' ), 2);
 	    
 	    // And remove the pre_get_posts hook
-	    remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
+	    $this->remove_product_query();
 	}
 
 	/**
@@ -52,14 +72,25 @@ class WC_Query {
 	function the_posts( $posts, $query = false ) {
 		global $woocommerce;
 		
-	    if 	( 
-	    		( ! $query ) // Abort if theres no query
-	    		|| ( empty( $this->post__in ) ) // Abort if we're not filtering posts
-	    		|| ( ! empty( $query->wc_query ) ) // Abort if this query is already done
-	    		|| ( empty( $query->query_vars["s"] ) ) // Abort if this isn't a search query
-	    		|| ( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) // Abort if we're not on a post type archive/prduct taxonomy
-	    	) 
-	    return $posts;
+		// Abort if theres no query
+		if ( ! $query )
+			return $posts;
+		
+		// Abort if we're not filtering posts
+		if ( empty( $this->post__in ) )
+			return $posts;
+		
+		// Abort if this query has already been done
+		if ( ! empty( $query->wc_query ) )
+			return $posts;
+			
+		// Abort if this isn't a search query	
+		if ( empty( $query->query_vars["s"] ) )
+			return $posts;
+		
+		// Abort if we're not on a post type archive/product taxonomy
+		if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) 
+	   		return $posts;
 	    
 	    $filtered_posts = array();
 	    $queried_post_ids = array();
@@ -101,7 +132,7 @@ class WC_Query {
 		$ordering = $this->get_catalog_ordering_args();
 		
 		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
-		$post__in = array_unique(apply_filters('loop_shop_post_in', array()));
+		$post__in = array_unique( apply_filters( 'loop_shop_post_in', array() ) );
 		
 		// Ordering query vars
 		$q->set( 'orderby', $ordering['orderby'] );
@@ -114,7 +145,7 @@ class WC_Query {
 			$q->set( 'post_type', 'product' );
 		$q->set( 'meta_query', $meta_query );
 	    $q->set( 'post__in', $post__in );
-	    $q->set( 'posts_per_page', $q->get('posts_per_page') ? $q->get('posts_per_page') : apply_filters('loop_shop_per_page', get_option('posts_per_page') ) );
+	    $q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 	    
 	    // Set a special variable
 	    $q->set( 'wc_query', true );
@@ -135,16 +166,18 @@ class WC_Query {
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
 	 */
 	function get_products_in_view() {
-		global $wp_query;
+		global $wp_the_query;
 		
 		$unfiltered_product_ids = array();
+
+		// Get main query
+		$current_wp_query = $wp_the_query->query;
 		
 		// Get WP Query for current page (without 'paged')
-		$current_wp_query = $wp_query->query;
 		unset( $current_wp_query['paged'] );
 		
 		// Generate a transient name based on current query
-		$transient_name = 'wc_uf_pid_' . md5( http_build_query($current_wp_query) );
+		$transient_name = 'wc_uf_pid_' . md5( http_build_query( $current_wp_query ) );
 		$transient_name = ( is_search() ) ? $transient_name . '_s' : $transient_name;
 		
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
@@ -159,40 +192,39 @@ class WC_Query {
 						'post_status' 	=> 'publish',
 						'meta_query' 	=> $this->meta_query,
 						'fields' 		=> 'ids',
-						'no_found_rows' => true
+						'no_found_rows' => true,
+						'update_post_meta_cache' => false,
+						'update_post_term_cache' => false
 					)
 				)
 			);
 		
 			set_transient( $transient_name, $unfiltered_product_ids );
-
 		}
 		
 		// Store the variable
 		$this->unfiltered_product_ids = $unfiltered_product_ids;
 		
 		// Also store filtered posts ids...
-		if (sizeof($this->post__in)>0) :
+		if ( sizeof( $this->post__in ) > 0 )
 			$this->filtered_product_ids = array_intersect( $this->unfiltered_product_ids, $this->post__in );
-		else :
+		else
 			$this->filtered_product_ids = $this->unfiltered_product_ids;
-		endif;
 		
 		// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
-		if ( sizeof( $this->layered_nav_post__in ) > 0 ) :
+		if ( sizeof( $this->layered_nav_post__in ) > 0 )
 			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
-		else :
+		else
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
-		endif;
 	}
 	
 	/**
 	 * Returns an array of arguments for ordering products based on the selected values
 	 */
 	function get_catalog_ordering_args() {
-		$current_order = (isset($_SESSION['orderby'])) ? $_SESSION['orderby'] : apply_filters('woocommerce_default_catalog_orderby', get_option('woocommerce_default_catalog_orderby'));
+		$current_order = ( isset( $_SESSION['orderby'] ) ) ? $_SESSION['orderby'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 		
-		switch ($current_order) :
+		switch ( $current_order ) {
 			case 'date' :
 				$orderby = 'date';
 				$order = 'desc';
@@ -213,13 +245,14 @@ class WC_Query {
 				$order = 'asc';
 				$meta_key = '';			
 			break;
-		endswitch;
+		}
 		
 		$args = array();
 		
 		$args['orderby'] = $orderby;
 		$args['order'] = $order;
-		if ($meta_key) $args['meta_key'] = $meta_key;
+		if ($meta_key) 
+			$args['meta_key'] = $meta_key;
 		
 		return apply_filters('woocommerce_get_catalog_ordering_args', $args);
 	}
@@ -244,13 +277,13 @@ class WC_Query {
 	 */
 	function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();
-		if (get_option('woocommerce_hide_out_of_stock_items')=='yes') :
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
 			 $meta_query = array(
 		        'key' 		=> '_stock_status',
 				'value' 	=> $status,
 				'compare' 	=> '='
 		    );
-		endif;
+		}
 		return $meta_query;
 	}
 	 

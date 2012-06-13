@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Exempt from VAT shows price ex VAT
 * Tweak - Newlines for order meta (flat)
 * Tweak - Show method title when free
+* Tweak - Improved queries when shop is on the front-page
 * Fix - check_cart_coupons on checkout to prevent invalid coupons being used
 * Fix - Hide out of stock now works with widgets.
 * Fix - Strange error where detecting the page (is_page etc) would break the canonical redirect in some instances when hooked into 'wp'. Used the later get_header hook instead.

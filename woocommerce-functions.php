@@ -88,60 +88,6 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 }
 
 /**
- * Detect frontpage shop and fix pagination on static front page
- **/
-function woocommerce_front_page_archive_paging_fix() {
-	
-	if ( is_front_page() && is_page( woocommerce_get_page_id('shop') )) :
-		
-		if (get_query_var('paged')) :
-			$paged = get_query_var('paged'); 
-		else :
-			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
-		endif;
-		
-		global $wp_query;
-		
-		$wp_query->query( array( 'page_id' => woocommerce_get_page_id('shop'), 'is_paged' => true, 'paged' => $paged ) );
-		
-		define('SHOP_IS_ON_FRONT', true);
-		
-	endif;
-}
-
-/**
- * Front page archive/shop template applied to main loop
- */
-function woocommerce_front_page_archive( $query ) {
-		
-	global $paged, $woocommerce, $wp_query;
-		
-	// Only apply to front_page
-	if ( defined('SHOP_IS_ON_FRONT') && is_main_query() ) :
-		
-		if (get_query_var('paged')) :
-			$paged = get_query_var('paged'); 
-		else :
-			$paged = (get_query_var('page')) ? get_query_var('page') : 1;
-		endif;
-		
-		// Filter the query
-		add_filter( 'pre_get_posts', array( &$woocommerce->query, 'pre_get_posts') );
-		
-		// Query the products
-		$wp_query->query( array( 'page_id' => '', 'p' => '', 'post_type' => 'product', 'paged' => $paged ) );
-		
-		// get products in view (for use by widgets)
-		$woocommerce->query->get_products_in_view();
-		
-		// Remove the query manipulation
-		remove_filter( 'pre_get_posts', array( &$woocommerce->query, 'pre_get_posts') ); 
-		remove_action( 'loop_start', 'woocommerce_front_page_archive', 1);
-	
-	endif;
-}
-
-/**
  * Fix active class in wp_list_pages for shop page
  *
  * Suggested by jessor - https://github.com/woothemes/woocommerce/issues/177
