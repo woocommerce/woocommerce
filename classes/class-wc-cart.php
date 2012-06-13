@@ -51,6 +51,7 @@ class WC_Cart {
 		$this->get_cart_from_session();
 		
 		add_action('woocommerce_check_cart_items', array(&$this, 'check_cart_items'), 1);
+		add_action('woocommerce_check_cart_items', array(&$this, 'check_cart_coupons'), 1);
 		add_action('woocommerce_after_checkout_validation', array(&$this, 'check_customer_coupons'), 1);
     }
 
@@ -229,6 +230,29 @@ class WC_Cart {
 			
 			if (is_wp_error($result)) 
 				$woocommerce->add_error( $result->get_error_message() );
+		}
+		
+		/**
+		 * Check cart coupons for errors
+		 */
+		function check_cart_coupons() {
+			global $woocommerce;
+			
+			if ( ! empty( $this->applied_coupons ) ) {
+				foreach ( $this->applied_coupons as $key => $code ) {
+					$coupon = new WC_Coupon( $code );
+					
+					if ( is_wp_error( $coupon->is_valid() ) ) {
+						
+						$woocommerce->add_error( sprintf( __('Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce'), $code ) );
+						
+						// Remove the coupon
+						unset( $this->applied_coupons[$key] );
+						$_SESSION['coupons'] = $this->applied_coupons;
+						$_SESSION['refresh_totals'] = true;
+					}
+				}
+			}
 		}
 		
 		/**

@@ -944,7 +944,7 @@ class WC_Product {
 	/** Depreciated - naming was confusing */
 	function get_available_attribute_variations() {
 		_deprecated_function( 'get_available_attribute_variations', '1.5.7', 'get_variation_attributes' );
-		$this->get_variation_attributes();
+		return $this->get_variation_attributes();
 	}
 
     /**

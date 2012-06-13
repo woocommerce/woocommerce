@@ -70,10 +70,11 @@ function woocommerce_cart( $atts ) {
 
 	}
 	
+	// Check cart items are valid
+	do_action('woocommerce_check_cart_items');
+	
 	// Calc totals
 	$woocommerce->cart->calculate_totals();
-	
-	do_action('woocommerce_check_cart_items');
 	
 	if (sizeof($woocommerce->cart->get_cart())==0) :
 		

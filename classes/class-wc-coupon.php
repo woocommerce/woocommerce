@@ -215,7 +215,8 @@ class WC_Coupon {
 			
 			$valid = apply_filters( 'woocommerce_coupon_is_valid', $valid, $this );
 			
-			if ( $valid ) return true;
+			if ( $valid ) 
+				return true;
 		
 		endif;
 		
