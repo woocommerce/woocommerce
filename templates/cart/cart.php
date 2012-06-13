@@ -41,7 +41,8 @@ global $woocommerce;
 						<!-- The thumbnail -->
 						<td class="product-thumbnail">
 							<?php 
-								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $_product->get_image() ); 
+								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
+								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $thumbnail ); 
 							?>
 						</td>
 						
