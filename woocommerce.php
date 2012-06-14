@@ -306,8 +306,8 @@ class Woocommerce {
 	 */
 	function template_loader( $template ) {
 		
-		$find 	= array( 'woocommerce.php' );
-		$file 	= '';
+		$find = array( 'woocommerce.php' );
+		$file = '';
 		
 		if ( is_single() && get_post_type() == 'product' ) {
 			
@@ -315,7 +315,7 @@ class Woocommerce {
 			$find[] = $file;
 			$find[] = $this->template_url . $file;
 
-		} elseif ( is_tax('product_cat') || is_tax('product_tag') ) {
+		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 			
 			$term = get_queried_object();
 			
@@ -325,7 +325,7 @@ class Woocommerce {
 			$find[] 	= $file;
 			$find[] 	= $this->template_url . $file;
 						
-		} elseif ( is_post_type_archive('product') || is_page( woocommerce_get_page_id('shop') ) ) {
+		} elseif ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) {
 			
 			$file 	= 'archive-product.php';
 			$find[] = $file;
