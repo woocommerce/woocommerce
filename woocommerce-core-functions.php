@@ -492,16 +492,22 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 /**
  * Hex darker/lighter/contrast functions for colours
  **/
+function woocommerce_rgb_from_hex( $color ) {
+	$color = str_replace( '#', '', $color );
+	// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
+	$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
+
+	$rgb['R'] = hexdec( $color{0}.$color{1} );
+	$rgb['G'] = hexdec( $color{2}.$color{3} );
+	$rgb['B'] = hexdec( $color{4}.$color{5} );
+	return $rgb;
+}
+
 if (!function_exists('woocommerce_hex_darker')) {
 	function woocommerce_hex_darker( $color, $factor = 30 ) {
-		$color = str_replace('#', '', $color);
-		
-		$base['R'] = hexdec($color{0}.$color{1});
-		$base['G'] = hexdec($color{2}.$color{3});
-		$base['B'] = hexdec($color{4}.$color{5});
-		
+		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
-		
+
 		foreach ($base as $k => $v) :
 	        $amount = $v / 100;
 	        $amount = round($amount * $factor);
@@ -519,14 +525,9 @@ if (!function_exists('woocommerce_hex_darker')) {
 }
 if (!function_exists('woocommerce_hex_lighter')) {
 	function woocommerce_hex_lighter( $color, $factor = 30 ) {
-		$color = str_replace('#', '', $color);
-		
-		$base['R'] = hexdec($color{0}.$color{1});
-		$base['G'] = hexdec($color{2}.$color{3});
-		$base['B'] = hexdec($color{4}.$color{5});
-		
+		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
-	     
+
 	    foreach ($base as $k => $v) :
 	        $amount = 255 - $v; 
 	        $amount = $amount / 100; 
