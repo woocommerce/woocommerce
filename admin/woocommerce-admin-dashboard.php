@@ -175,7 +175,7 @@ function woocommerce_init_dashboard_widgets() {
 						
 	$current_month_offset = 0;
 	
-	if (isset($_GET['month'])) $current_month_offset = (int) $_GET['month'];
+	if (isset($_GET['wc_sales_month'])) $current_month_offset = (int) $_GET['wc_sales_month'];
 	
 	$the_month_num 	= date('n', strtotime('NOW '.($current_month_offset).' MONTH'));
 	$the_year 		= date('Y', strtotime('NOW '.($current_month_offset).' MONTH'));
@@ -183,10 +183,10 @@ function woocommerce_init_dashboard_widgets() {
 	$sales_heading = '';
 	
 	if ($the_month_num!=date('m')) : 
-		$sales_heading .= '<a href="index.php?month='.($current_month_offset+1).'" class="next">'.date_i18n('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
+		$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset+1).'" class="next">'.date_i18n('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
 	endif;
 	
-	$sales_heading .= '<a href="index.php?month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
+	$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
 	if(current_user_can('manage_woocommerce_orders')){
             wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
