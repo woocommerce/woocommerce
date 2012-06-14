@@ -134,7 +134,7 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
  *
  * returns -1 if no page is found
  **/
-if (!function_exists('woocommerce_get_page_id')) {
+if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
 	function woocommerce_get_page_id( $page ) {
 		$page = apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
 		return ($page) ? $page : -1;
@@ -146,7 +146,7 @@ if (!function_exists('woocommerce_get_page_id')) {
  *
  * Clears the cart session when called
  **/
-if (!function_exists('woocommerce_empty_cart')) {
+if ( ! function_exists( 'woocommerce_empty_cart' ) ) {
 	function woocommerce_empty_cart() {
 		global $woocommerce;
 		
@@ -160,7 +160,7 @@ if (!function_exists('woocommerce_empty_cart')) {
  * WooCommerce disable admin bar
  *
  **/
-if (!function_exists('woocommerce_disable_admin_bar')) {
+if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
 	function woocommerce_disable_admin_bar() {
 		if ( get_option('woocommerce_lock_down_admin')=='yes' && !current_user_can('edit_posts') ) {
 			add_filter( 'show_admin_bar', '__return_false' );
@@ -195,42 +195,42 @@ function woocommerce_load_persistent_cart( $user_login, $user ) {
 function is_woocommerce() {
 	if (is_shop() || is_product_category() || is_product_tag() || is_product()) return true; else return false;
 }
-if (!function_exists('is_shop')) {
+if ( ! function_exists( 'is_shop' ) ) {
 	function is_shop() {
 		if (is_post_type_archive( 'product' ) || is_page(woocommerce_get_page_id('shop'))) return true; else return false;
 	}
 }
-if (!function_exists('is_product_category')) {
+if ( ! function_exists( 'is_product_category' ) ) {
 	function is_product_category( $term = '' ) {
 		return is_tax( 'product_cat', $term );
 	}
 }
-if (!function_exists('is_product_tag')) {
+if ( ! function_exists( 'is_product_tag' ) ) {
 	function is_product_tag( $term = '' ) {
 		return is_tax( 'product_tag', $term );
 	}
 }
-if (!function_exists('is_product')) {
+if ( ! function_exists( 'is_product' ) ) {
 	function is_product() {
 		return is_singular( array('product') );
 	}
 }
-if (!function_exists('is_cart')) {
+if ( ! function_exists( 'is_cart' ) ) {
 	function is_cart() {
 		return is_page(woocommerce_get_page_id('cart'));
 	}
 }
-if (!function_exists('is_checkout')) {
+if ( ! function_exists( 'is_checkout' ) ) {
 	function is_checkout() {
 		if (is_page(woocommerce_get_page_id('checkout')) || is_page(woocommerce_get_page_id('pay'))) return true; else return false;
 	}
 }
-if (!function_exists('is_account_page')) {
+if ( ! function_exists( 'is_account_page' ) ) {
 	function is_account_page() {
 		if ( is_page(woocommerce_get_page_id('myaccount')) || is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) ) return true; else return false;
 	}
 }
-if (!function_exists('is_ajax')) {
+if ( ! function_exists( 'is_ajax' ) ) {
 	function is_ajax() {
 		if ( defined('DOING_AJAX') ) return true;
 		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
@@ -492,18 +492,20 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 /**
  * Hex darker/lighter/contrast functions for colours
  **/
-function woocommerce_rgb_from_hex( $color ) {
-	$color = str_replace( '#', '', $color );
-	// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
-	$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
-
-	$rgb['R'] = hexdec( $color{0}.$color{1} );
-	$rgb['G'] = hexdec( $color{2}.$color{3} );
-	$rgb['B'] = hexdec( $color{4}.$color{5} );
-	return $rgb;
+if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
+	function woocommerce_rgb_from_hex( $color ) {
+		$color = str_replace( '#', '', $color );
+		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
+		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
+	
+		$rgb['R'] = hexdec( $color{0}.$color{1} );
+		$rgb['G'] = hexdec( $color{2}.$color{3} );
+		$rgb['B'] = hexdec( $color{4}.$color{5} );
+		return $rgb;
+	}
 }
 
-if (!function_exists('woocommerce_hex_darker')) {
+if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
 	function woocommerce_hex_darker( $color, $factor = 30 ) {
 		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
@@ -523,7 +525,7 @@ if (!function_exists('woocommerce_hex_darker')) {
 		return $color;        
 	}
 }
-if (!function_exists('woocommerce_hex_lighter')) {
+if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
 	function woocommerce_hex_lighter( $color, $factor = 30 ) {
 		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
@@ -548,7 +550,7 @@ if (!function_exists('woocommerce_hex_lighter')) {
 /**
  * Detect if we should use a light or dark colour on a background colour
  **/
-if (!function_exists('woocommerce_light_or_dark')) {
+if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
 	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
 	    //return ( hexdec( $color ) > 0xffffff / 2 ) ? $dark : $light;
 	    $hex = str_replace( '#', '', $color );
@@ -565,7 +567,7 @@ if (!function_exists('woocommerce_light_or_dark')) {
 /**
  * Format string as hex
  **/
-if (!function_exists('woocommerce_format_hex')) {
+if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 	function woocommerce_format_hex( $hex ) {
 	    
 	    $hex = trim( str_replace( '#', '', $hex ) );
