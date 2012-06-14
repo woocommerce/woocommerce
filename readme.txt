@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.5.7 - 14/05/2012 =
+= 1.5.7 - 14/06/2012 =
 * Feature - Mijireh Checkout Integration
 * Feature - Menu count for orders requiring admin action
 * Feature - 'supports' function for gateways.
