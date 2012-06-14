@@ -580,12 +580,12 @@ jQuery( function($){
 	// META BOXES
 	
 		jQuery('.expand_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox table').show();
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
 			return false;
 		});
 		
 		jQuery('.close_all').click(function(){
-			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox table').hide();
+			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
 			return false;
 		});
 		
