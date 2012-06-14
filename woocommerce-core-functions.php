@@ -495,7 +495,9 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 if (!function_exists('woocommerce_hex_darker')) {
 	function woocommerce_hex_darker( $color, $factor = 30 ) {
 		$color = str_replace('#', '', $color);
-		
+		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
+		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
+
 		$base['R'] = hexdec($color{0}.$color{1});
 		$base['G'] = hexdec($color{2}.$color{3});
 		$base['B'] = hexdec($color{4}.$color{5});
@@ -520,7 +522,9 @@ if (!function_exists('woocommerce_hex_darker')) {
 if (!function_exists('woocommerce_hex_lighter')) {
 	function woocommerce_hex_lighter( $color, $factor = 30 ) {
 		$color = str_replace('#', '', $color);
-		
+		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
+		$color = preg_replace( '~^(.)(.)(.)$~', '$1$1$2$2$3$3', $color );
+
 		$base['R'] = hexdec($color{0}.$color{1});
 		$base['G'] = hexdec($color{2}.$color{3});
 		$base['B'] = hexdec($color{4}.$color{5});
