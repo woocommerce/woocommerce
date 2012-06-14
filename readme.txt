@@ -214,6 +214,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Updated localisations
 * Localization - Updated currency symbols
 * Localization - translations for admin menu names
+* Localization - Updated french translaction by Arnaud Cheminand
 
 = 1.5.6 - 17/05/2012 =
 * Feature - Default display for shipping methods is radio buttons. Before, when methods were enabled/disabled based on coupons or customer, changed methods could go unnoticed. Radio options are always visible.
