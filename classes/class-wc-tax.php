@@ -96,6 +96,9 @@ class WC_Tax {
 			
 			$this->rates = $flat_rates;
 			$this->parsed_rates = $parsed_rates;
+			
+			do_action('woocommerce_after_get_tax_rates',$this);
+			
 		endif;
 	}
 	
