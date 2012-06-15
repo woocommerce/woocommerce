@@ -137,7 +137,7 @@ class ShareYourCartWooCommerce extends ShareYourCartBase {
 	private function _saveCouponPost($coupon_code) {
 		$new_post = array(
 			'post_title'    => $coupon_code,
-			'post_name'     => ereg_replace("[^A-Za-z0-9]", "", $coupon_code),
+			'post_name'     => sanitize_title( $coupon_code ),
 			'post_content'  => '',
 			'post_status'   => 'publish',
 			'comment_status'=> 'closed',

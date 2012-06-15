@@ -161,6 +161,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= =
+* Fix - Remove depreciated ereg_replace in validation class
+
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug
 

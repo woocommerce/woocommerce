@@ -90,7 +90,7 @@ class WC_Validation {
 				$toCheck = strtoupper ($matches[1] . ' ' . $matches [2]);
 				
 				// Take account of the special BFPO c/o format
-				$toCheck = ereg_replace ('C\/O', 'c/o ', $toCheck);
+				$toCheck = str_replace( 'C/O', 'c/o ', $toCheck );
 				
 				// Remember that we have found that the code is valid and break from loop
 				$valid = true;
