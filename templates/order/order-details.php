@@ -78,6 +78,8 @@ $order = new WC_Order( $order_id );
 	</p>
 <?php endif; ?>
 
+<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
+
 <header>
 	<h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 </header>
