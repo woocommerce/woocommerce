@@ -332,15 +332,15 @@ function variable_product_type_options() {
 				
 				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation wc-metabox">\
 					<h3 class="handle">\
-						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php _e('Remove', 'woocommerce'); ?></button>\
-						<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
+						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php echo esc_js( __('Remove', 'woocommerce') ); ?></button>\
+						<div class="handlediv" title="<?php echo esc_js( __('Click to toggle', 'woocommerce') ); ?>"></div>\
 						<strong>#' + variation_id + ' &mdash; </strong>\
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
 								
 								if ( !isset($attribute['is_variation']) || !$attribute['is_variation'] ) continue;
 								
-								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">'.__('Any', 'woocommerce') . ' ' .$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
+								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">' . esc_js( __('Any', 'woocommerce') ) . ' ' .$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
 								
 								// Get terms for attribute taxonomy or value if its a custom attribute
 								if ($attribute['is_taxonomy']) :
@@ -364,7 +364,7 @@ function variable_product_type_options() {
 							<tr>\
 								<td class="sku" colspan="2">\
 									<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>\
-										<label><?php _e('SKU', 'woocommerce'); ?>: <a class="tips" data-tip="<?php _e('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woocommerce'); ?>" href="#">[?]</a></label>\
+										<label><?php echo esc_js( __('SKU', 'woocommerce') ); ?>: <a class="tips" data-tip="<?php echo esc_js( __('Enter a SKU for this variation or leave blank to use the parent product SKU.', 'woocommerce') ); ?>" href="#">[?]</a></label>\
 										<input type="text" size="5" name="variable_sku[' + loop + ']" placeholder="<?php if ($sku = get_post_meta($post->ID, '_sku', true)) echo $sku; ?>" />\
 									<?php else : ?>\
 										<input type="hidden" name="variable_sku[' + loop + ']" />\
@@ -373,23 +373,23 @@ function variable_product_type_options() {
 								<td class="data" rowspan="2">\
 									<table cellspacing="0">\
 										<tr>\
-											<td><label><?php _e('Stock Qty:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
+											<td><label><?php echo esc_js( __('Stock Qty:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
 											<td>&nbsp;</td>\
 										</tr>\
 										<tr>\
-											<td><label><?php _e('Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_price[' + loop + ']" /></td>\
-											<td><label><?php _e('Sale Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" /></td>\
+											<td><label><?php echo esc_js( __('Price:', 'woocommerce') ); ?></label><input type="text" size="5" name="variable_price[' + loop + ']" /></td>\
+											<td><label><?php echo esc_js( __('Sale Price:', 'woocommerce') ); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" /></td>\
 										</tr>\
 										<?php if( get_option('woocommerce_enable_weight', true) !== 'no' || get_option('woocommerce_enable_dimensions', true) !== 'no' ) : ?>\
 										<tr>\
 											<?php if( get_option('woocommerce_enable_weight', true) !== 'no' ) : ?>\
-												<td class="hide_if_variation_virtual"><label><?php _e('Weight', 'woocommerce').' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" data-tip="<?php _e('Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_weight', true)) echo $value; else echo '0.00'; ?>" /></td>\
+												<td class="hide_if_variation_virtual"><label><?php echo esc_js( __('Weight', 'woocommerce') ).' ('.get_option('woocommerce_weight_unit').'):'; ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a weight for this variation or leave blank to use the parent product weight.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_weight[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_weight', true)) echo $value; else echo '0.00'; ?>" /></td>\
 											<?php else : ?>\
 												<td>&nbsp;</td>\
 											<?php endif; ?>\
 											<?php if( get_option('woocommerce_enable_dimensions', true) !== 'no' ) : ?>\
 												<td class="dimensions_field hide_if_variation_virtual">\
-													<label for"product_length"><?php echo __('Dimensions (L&times;W&times;H)', 'woocommerce'); ?></label>\
+													<label for"product_length"><?php echo esc_js( __('Dimensions (L&times;W&times;H)', 'woocommerce') ); ?></label>\
 													<input id="product_length" class="input-text" size="6" type="text" name="variable_length[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_length', true)) echo $value; else echo '0'; ?>" />\
 													<input class="input-text" size="6" type="text" name="variable_width[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_width', true)) echo $value; else echo '0'; ?>" />\
 													<input class="input-text last" size="6" type="text" name="variable_height[' + loop + ']" placeholder="<?php if ($value = get_post_meta($post->ID, '_height', true)) echo $value; else echo '0'; ?>" />\
@@ -400,7 +400,7 @@ function variable_product_type_options() {
 										</tr>\
 										<?php endif; ?>\
 										<tr>\
-											<td><label><?php _e('Shipping class:', 'woocommerce'); ?></label> <?php
+											<td><label><?php echo esc_js( __('Shipping class:', 'woocommerce') ); ?></label> <?php
 												$args = array(
 													'taxonomy' 			=> 'product_shipping_class',
 													'hide_empty'		=> 0,
@@ -411,7 +411,7 @@ function variable_product_type_options() {
 												);
 												echo addslashes(str_replace('[]', "[' + loop + ']", str_replace("\n", '', wp_dropdown_categories( $args ))));
 											?></td>\
-											<td><label><?php _e('Tax class:', 'woocommerce'); ?></label> <select name="variable_tax_class[' + loop + ']"><?php
+											<td><label><?php echo esc_js( __('Tax class:', 'woocommerce') ); ?></label> <select name="variable_tax_class[' + loop + ']"><?php
 												foreach ( $tax_class_options as $key => $tax_class ) {
 													echo '<option value="' . $key . '" ';
 													if ( isset( $variation_data['_tax_class'][0] ) ) echo addslashes(selected($key, $variation_data['_tax_class'][0], false));
@@ -421,10 +421,10 @@ function variable_product_type_options() {
 										</tr>\
 										<tr>\
 											<td>\
-												<div class="show_if_variation_downloadable file_path_field"><label><?php _e('File path:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[' + loop + ']" placeholder="<?php _e('File path/URL', 'woocommerce'); ?>" /> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" /></div>\
+												<div class="show_if_variation_downloadable file_path_field"><label><?php echo esc_js( __('File path:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[' + loop + ']" placeholder="<?php echo esc_js( __('File path/URL', 'woocommerce') ); ?>" /> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
 											</td>\
 											<td>\
-												<div class="show_if_variation_downloadable"><label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" /></div>\
+												<div class="show_if_variation_downloadable"><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
 											</td>\
 										</tr>\
 										<?php do_action( 'woocommerce_product_after_variable_attributes_js' ); ?>\
@@ -435,11 +435,11 @@ function variable_product_type_options() {
 								<td class="upload_image"><a href="#" class="upload_image_button" rel="' + variation_id + '"><img src="<?php echo woocommerce_placeholder_img_src() ?>" /><input type="hidden" name="upload_image_id[' + loop + ']" class="upload_image_id" /><span class="overlay"></span></a></td>\
 								<td class="options">\
 									\
-									<label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /> <?php _e('Enabled', 'woocommerce'); ?></label>\
+									<label><input type="checkbox" class="checkbox" name="variable_enabled[' + loop + ']" checked="checked" /> <?php echo esc_js( __('Enabled', 'woocommerce') ); ?></label>\
 									\
-									<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[' + loop + ']" /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce'); ?>" href="#">[?]</a></label>\
+									<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[' + loop + ']" /> <?php echo esc_js( __('Downloadable', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce') ); ?>" href="#">[?]</a></label>\
 									\
-									<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[' + loop + ']" /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce'); ?>" href="#">[?]</a></label>\
+									<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[' + loop + ']" /> <?php echo esc_js( __('Virtual', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce') ); ?>" href="#">[?]</a></label>\
 									\
 								</td>\
 							</tr>\
