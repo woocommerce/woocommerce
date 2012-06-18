@@ -327,7 +327,7 @@ function woocommerce_dashboard_sales_js() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
+				'terms' => apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)

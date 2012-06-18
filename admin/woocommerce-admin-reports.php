@@ -277,7 +277,7 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	");
 	
 	$total_sales 	= $order_totals->total_sales;
@@ -295,7 +295,7 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	");	
 	
 	$shipping_total = $wpdb->get_var("
@@ -310,7 +310,7 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	");	
 	
 	$order_items_serialized = $wpdb->get_col("
@@ -325,7 +325,7 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	");
 	
 	if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
@@ -400,7 +400,7 @@ function woocommerce_sales_overview() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
+				'terms' => apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -543,7 +543,7 @@ function woocommerce_daily_sales() {
 	    'tax_query' => array(
 	    	array(
 		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
+				'terms' => apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ),
 				'field' => 'slug',
 				'operator' => 'IN'
 			)
@@ -748,7 +748,7 @@ function woocommerce_monthly_sales() {
 			AND 	posts.post_type 	= 'shop_order'
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
 		");	
 		
@@ -771,7 +771,7 @@ function woocommerce_monthly_sales() {
 			AND 	posts.post_type 	= 'shop_order'
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
 		");
 		
@@ -1118,7 +1118,7 @@ function woocommerce_product_sales() {
 			AND 	posts.post_type 	= 'shop_order'
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('completed', 'processing', 'on-hold')
+			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		posts.post_date		> date_sub( NOW(), INTERVAL 1 YEAR )
 			ORDER BY posts.post_date ASC
 		");
@@ -1245,7 +1245,7 @@ function woocommerce_customer_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND		posts.ID			IN (
 			SELECT post_id FROM {$wpdb->postmeta}
 			WHERE 	meta_key 		= '_customer_user'
@@ -1268,7 +1268,7 @@ function woocommerce_customer_overview() {
 		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('completed', 'processing', 'on-hold')
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND		posts.ID			IN (
 			SELECT post_id FROM {$wpdb->postmeta}
 			WHERE 	meta_key 		= '_customer_user'
