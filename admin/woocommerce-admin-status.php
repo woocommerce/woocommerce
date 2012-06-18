@@ -345,15 +345,18 @@ function woocommerce_status() {
 				$posting['wp_remote_post']['name'] = __('WP Remote Post Check','woocommerce');
 				$params = array( 
 					'sslverify' 	=> false,
-		        	'timeout' 		=> 30,
-		        	'user-agent'	=> 'WooCommerce/'.$woocommerce->version
+		        	'timeout' 		=> 60,
+		        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
 				);	
 				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
-				if ( ! is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
+				if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
             		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce'); 
             		$posting['wp_remote_post']['success'] = true;
-            	} else {
+            	} elseif ( is_wp_error( $response ) ) {
             		$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce') . ' ' . $response->get_error_message();
+            		$posting['wp_remote_post']['success'] = false;
+            	} else {
+	            	$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce');
             		$posting['wp_remote_post']['success'] = false;
             	}
             	
