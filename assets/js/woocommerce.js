@@ -708,50 +708,63 @@ jQuery(document).ready(function($) {
 		/* AJAX Form Submission */
 		$('form.checkout').submit( function() {
 			var $form = $(this);
-			
-			if ($form.is('.processing')) return false;
-			
-			$form.addClass('processing').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
-			
-			$.ajax({
-				type: 		'POST',
-				url: 		woocommerce_params.checkout_url,
-				data: 		$form.serialize(),
-				success: 	function( code ) {
-					$('.woocommerce_error, .woocommerce_message').remove();
-						try {
-							result = $.parseJSON( code );	
-							
-							if (result.result=='success') {
+
+			if ( $form.is('.processing') ) 
+				return false;
+
+			// Trigger a handler to let gateways manipulate the checkout if needed
+			if ( $form.triggerHandler('checkout_place_order') !== false && $form.triggerHandler('checkout_place_order_' + $('#order_review input[name=payment_method]:checked').val() ) !== false ) {
+				
+				$form.addClass('processing');
+
+				var form_data = $form.data();
+				
+				if ( form_data["blockUI.isBlocked"] != 1 )
+					$form.block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+				
+				$.ajax({
+					type: 		'POST',
+					url: 		woocommerce_params.checkout_url,
+					data: 		$form.serialize(),
+					success: 	function( code ) {
+							try {
+								result = $.parseJSON( code );	
 								
-								window.location = decodeURI(result.redirect);
+								if (result.result=='success') {
+									
+									window.location = decodeURI(result.redirect);
+									
+								} else if (result.result=='failure') {
+									
+									$('.woocommerce_error, .woocommerce_message').remove();
+									$form.prepend( result.messages );
+									$form.removeClass('processing').unblock(); 
 								
-							} else if (result.result=='failure') {
-								
-								$form.prepend( result.messages );
+									if (result.refresh=='true') $('body').trigger('update_checkout');
+									
+									$('html, body').animate({
+									    scrollTop: ($('form.checkout').offset().top - 100)
+									}, 1000);
+									
+								} else {
+									throw "Invalid response";
+								}
+							}
+							catch(err) {
+								$('.woocommerce_error, .woocommerce_message').remove();
+							  	$form.prepend( code );
 								$form.removeClass('processing').unblock(); 
-							
-								if (result.refresh=='true') $('body').trigger('update_checkout');
 								
 								$('html, body').animate({
 								    scrollTop: ($('form.checkout').offset().top - 100)
 								}, 1000);
-								
-							} else {
-								throw "Invalid response";
 							}
-						}
-						catch(err) {
-						  	$form.prepend( code );
-							$form.removeClass('processing').unblock(); 
-							
-							$('html, body').animate({
-							    scrollTop: ($('form.checkout').offset().top - 100)
-							}, 1000);
-						}
-					},
-				dataType: 	"html"
-			});
+						},
+					dataType: 	"html"
+				});
+			
+			} 
+			
 			return false;
 		});
 		

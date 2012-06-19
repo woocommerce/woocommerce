@@ -76,8 +76,8 @@ global $woocommerce;
 
 		<div class="form-row">
 			<?php $woocommerce->nonce_field('pay')?>
-			<input type="submit" class="button alt" name="woocommerce_pay" id="place_order" value="<?php _e('Pay for order', 'woocommerce'); ?>" />
-
+			<input type="submit" class="button alt" id="place_order" value="<?php _e('Pay for order', 'woocommerce'); ?>" />
+			<input type="hidden" name="woocommerce_pay" value="1" />
 		</div>
 
 	</div>

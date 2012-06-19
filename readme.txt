@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 1.5.7.1
+Stable tag: 1.5.8
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,7 +161,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= =
+= 1.5.8 - 21/06/2012 =
+* Tweak - Added checkout processing triggers for gateways (in particular stripe) to use
+* Tweak - Pay page woocommerce_pay hidden input so we can use javascript to submit the form
 * Tweak - Hooks for order statuses in reports
 * Fix - Remove depreciated ereg_replace in validation class
 * Fix - strpos warning in shipping class
