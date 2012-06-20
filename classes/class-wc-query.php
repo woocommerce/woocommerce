@@ -89,7 +89,7 @@ class WC_Query {
 			return $posts;
 		
 		// Abort if we're not on a post type archive/product taxonomy
-		if 	( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) 
+		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( array_merge( array('product_cat', 'product_tag'), $woocommerce->get_attribute_taxonomy_names() ) ) ) 
 	   		return $posts;
 	    
 	    $filtered_posts = array();

@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Hooks for order statuses in reports
 * Fix - Remove depreciated ereg_replace in validation class
 * Fix - strpos warning in shipping class
+* Fix - $query instead of $q in query class
 
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug
