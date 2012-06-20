@@ -154,7 +154,7 @@ class WC_Order {
 	 * @return string
 	 */
 	function get_order_number() {
-		return apply_filters( 'woocommerce_order_number', $this->id, $this );
+		return apply_filters( 'woocommerce_order_number', '#' . $this->id, $this );
 	}
 	
 	function get_formatted_billing_address() {

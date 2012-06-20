@@ -170,7 +170,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - strpos warning in shipping class
 * Fix - $query instead of $q in query class
 * Fix - Visibility setting for products in widgets
-* Fix - Moved # character in translatable order strings
 
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug

@@ -10,7 +10,7 @@
 
 <?php do_action('woocommerce_email_before_order_table', $order, false); ?>
 
-<h2><?php echo __( 'Order: #', 'woocommerce' ) . $order->get_order_number(); ?></h2>
+<h2><?php echo __('Order:', 'woocommerce') . ' ' . $order->get_order_number(); ?></h2>
 
 <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;" border="1" bordercolor="#eee">
 	<thead>

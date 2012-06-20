@@ -77,7 +77,7 @@ function woocommerce_custom_order_columns($column) {
            		$user = __('Guest', 'woocommerce');
            	endif;
            	
-           	echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'"><strong>'.sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) . '</strong></a> ' . __('made by', 'woocommerce') . ' ' . $user;
+           	echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'"><strong>'.sprintf( __('Order %s', 'woocommerce'), $order->get_order_number() ).'</strong></a> ' . __('made by', 'woocommerce') . ' ' . $user;
            	
            	if ($order->billing_email) :
         		echo '<small class="meta">'.__('Email:', 'woocommerce') . ' ' . '<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
