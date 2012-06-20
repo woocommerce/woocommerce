@@ -314,7 +314,7 @@ class WC_Checkout {
 				
 				$order_data = array(
 					'post_type' 	=> 'shop_order',
-					'post_title' 	=> 'Order &ndash; '.date('F j, Y @ h:i A'),
+					'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%B %e, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
 					'post_status' 	=> 'publish',
 					'ping_status'	=> 'closed',
 					'post_excerpt' 	=> $this->posted['order_comments'],
