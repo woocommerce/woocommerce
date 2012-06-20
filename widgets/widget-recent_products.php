@@ -66,11 +66,7 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 	    $query_args['meta_query'] = array();
 	     
 	    if ( $show_variations == '0' ) {
-		    $query_args['meta_query'][] = array(
-				'key' => '_visibility',
-				'value' => array('catalog', 'visible'),
-				'compare' => 'IN'
-			);
+		    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 			$query_args['parent'] = '0';
 	    }
 	    

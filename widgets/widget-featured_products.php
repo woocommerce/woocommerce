@@ -70,6 +70,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 			'value' => 'yes'
 		);
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 	    
 		$r = new WP_Query($query_args);
 		

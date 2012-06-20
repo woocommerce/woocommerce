@@ -79,6 +79,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
     	}
 
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
+	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 
 		$r = new WP_Query($query_args);
 		

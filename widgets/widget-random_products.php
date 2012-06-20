@@ -40,12 +40,8 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 		
 		$query_args['meta_query'] = array();
 		
-		if ( $instance['show_variations'] ) {
-			$query_args['meta_query'][] = array(
-				'key'     => '_visibility',
-				'value'   => array('catalog', 'visible'),
-				'compare' => 'IN',
-			);
+		if ( ! $instance['show_variations'] ) {
+			$query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 			$query_args['post_parent'] = 0;
 		}
 	    

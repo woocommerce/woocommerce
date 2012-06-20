@@ -122,26 +122,24 @@ class WC_Tax {
 		$found_rates = array();
 
 		// Look for a state specific rule
-		if (isset($this->parsed_rates[ $country ][ $state ])) :
+		if ( isset( $this->parsed_rates[ $country ][ $state ][ $tax_class ] ) || isset( $this->parsed_rates[ $country ][ $state ][ '*' ] ) ) {
 			
 			// Look for tax class specific rule
-			if (isset($this->parsed_rates[ $country ][ $state ][ $tax_class ])) :
+			if ( isset( $this->parsed_rates[ $country ][ $state ][ $tax_class ] ) )
 				$found_rates = $this->parsed_rates[ $country ][ $state ][ $tax_class ];
-			else :
+			else
 				$found_rates = $this->parsed_rates[ $country ][ $state ][ '*' ];
-			endif;
 		
 		// Default to * if not state specific rules are found
-		elseif (isset($this->parsed_rates[ $country ][ '*' ])) :
+		} elseif ( isset( $this->parsed_rates[ $country ][ '*' ] ) ) {
 		
 			// Look for tax class specific rule
-			if (isset($this->parsed_rates[ $country ][ '*' ][ $tax_class ])) :
+			if (isset($this->parsed_rates[ $country ][ '*' ][ $tax_class ]))
 				$found_rates = $this->parsed_rates[ $country ][ '*' ][ $tax_class ];
-			else :
+			else
 				$found_rates = $this->parsed_rates[ $country ][ '*' ][ '*' ];
-			endif;
 			
-		endif;
+		}
 		
 		// Now we have an array of matching rates, lets filter this based on postcode
 		$matched_tax_rates = array();
