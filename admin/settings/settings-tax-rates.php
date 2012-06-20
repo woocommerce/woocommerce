@@ -185,7 +185,7 @@ function woocommerce_tax_rates_setting() {
 		});
 	
 		jQuery('tr.tax_rate .select_us_states').live('click', function(){
-			jQuery(this).closest('td').find('select optgroup[label="United States"] option').attr("selected","selected");
+			jQuery(this).closest('td').find('select optgroup[label="<?php echo __( 'United States', 'woocommerce' ); ?>"] option').attr("selected","selected");
 			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 			return false;
 		});

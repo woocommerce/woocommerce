@@ -171,6 +171,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - strpos warning in shipping class
 * Fix - $query instead of $q in query class
 * Fix - Visibility setting for products in widgets
+* Fix - Allow translating of # in order numbers
+* Fix - Make United States label in JS translatable, as it might change
 
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug
