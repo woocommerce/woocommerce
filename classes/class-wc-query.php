@@ -47,6 +47,7 @@ class WC_Query {
 	        $q->is_singular = false;
 	        $q->is_post_type_archive = true;
 	        $q->is_archive = true;
+	        $q->is_front_page = true;
 	        define( 'SHOP_IS_ON_FRONT', true );
 		
 		} else {
