@@ -174,7 +174,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Allow translating of # in order numbers
 * Fix - Make United States label in JS translatable, as it might change
 * Fix - Zero tax check in totals.php
-* Fix - When SHOP_IS_ON_FRONT set is_front_page to true
 
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug
