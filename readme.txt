@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added checkout processing triggers for gateways (in particular stripe) to use
 * Tweak - Pay page woocommerce_pay hidden input so we can use javascript to submit the form
 * Tweak - Hooks for order statuses in reports
+* Tweak - Extra hooks in some templates
 * Fix - Remove depreciated ereg_replace in validation class
 * Fix - strpos warning in shipping class
 * Fix - $query instead of $q in query class

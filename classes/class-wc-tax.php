@@ -16,7 +16,8 @@ class WC_Tax {
 	 * Get the tax rates as an array
 	 */
 	function get_tax_rates() {
-		if (!is_array($this->parsed_rates)) :
+		if ( ! is_array( $this->parsed_rates ) ) {
+		
 			global $woocommerce;
 			
 			$tax_rates 			= array_filter( (array) get_option('woocommerce_tax_rates') );
@@ -94,9 +95,11 @@ class WC_Tax {
 				
 			endforeach;			
 			
-			$this->rates = $flat_rates;
+			$this->rates 		= $flat_rates;
 			$this->parsed_rates = $parsed_rates;
-		endif;
+			
+			do_action( 'woocommerce_get_tax_rates', $this );
+		}
 	}
 	
 	/**
