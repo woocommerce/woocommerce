@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.5.8 - 21/06/2012 =
+* Tweak - Textarea for notes and enabled HTML
 * Tweak - Added checkout processing triggers for gateways (in particular stripe) to use
 * Tweak - Pay page woocommerce_pay hidden input so we can use javascript to submit the form
 * Tweak - Hooks for order statuses in reports

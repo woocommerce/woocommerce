@@ -33,7 +33,7 @@ function woocommerce_order_notes_meta_box() {
 			echo '<li rel="'.$note->comment_ID.'" class="note ';
 			if ($customer_note) echo 'customer-note';
 			echo '"><div class="note_content">';
-			echo wpautop(wptexturize($note->comment_content));
+			echo wpautop( wptexturize( $note->comment_content ) );
 			echo '</div><p class="meta">'. sprintf(__('added %s ago', 'woocommerce'), human_time_diff(strtotime($note->comment_date_gmt), current_time('timestamp', 1))) .' - <a href="#" class="delete_note">'.__('Delete note', 'woocommerce').'</a></p>';
 			echo '</li>';
 		endforeach;
@@ -44,27 +44,30 @@ function woocommerce_order_notes_meta_box() {
 	echo '</ul>';
 	?>
 	<div class="add_note">
-		<h4><?php _e('Add note', 'woocommerce'); ?></h4>
-		<p><?php _e('Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce'); ?></p>
-		<p><input type="text" name="order_note" id="add_order_note" class="input-text" />
-		<select name="order_note_type" id="order_note_type">
-			<option value="customer"><?php _e('Customer note', 'woocommerce'); ?></option>
-			<option value=""><?php _e('Private note', 'woocommerce'); ?></option>
-		</select></p>
-		<a href="#" class="add_note button"><?php _e('Add', 'woocommerce'); ?></a>
+		<h4><?php _e('Add note', 'woocommerce'); ?> <img class="help_tip" data-tip='<?php esc_attr_e('Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce'); ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></h4>
+		<p>
+			<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
+		</p>
+		<p>
+			<select name="order_note_type" id="order_note_type">
+				<option value="customer"><?php _e('Customer note', 'woocommerce'); ?></option>
+				<option value=""><?php _e('Private note', 'woocommerce'); ?></option>
+			</select> 
+			<a href="#" class="add_note button"><?php _e('Add', 'woocommerce'); ?></a>
+		</p>
 	</div>
 	<script type="text/javascript">
 		
 		jQuery('a.add_note').click(function(){
 			
-			if (!jQuery('input#add_order_note').val()) return;
+			if (!jQuery('textarea#add_order_note').val()) return;
 			
 			jQuery('#woocommerce-order-notes').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 			
 			var data = {
 				action: 		'woocommerce_add_order_note',
 				post_id:		'<?php echo $post->ID; ?>',
-				note: 			jQuery('input#add_order_note').val(),
+				note: 			jQuery('textarea#add_order_note').val(),
 				note_type:		jQuery('select#order_note_type').val(),
 				security: 		'<?php echo wp_create_nonce("add-order-note"); ?>'
 			};

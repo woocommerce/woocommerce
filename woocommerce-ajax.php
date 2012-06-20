@@ -837,23 +837,23 @@ function woocommerce_add_order_note() {
 	check_ajax_referer( 'add-order-note', 'security' );
 	
 	$post_id 	= (int) $_POST['post_id'];
-	$note		= strip_tags(woocommerce_clean($_POST['note']));
+	$note		= wp_kses( trim( stripslashes( $_POST['note'] ) ), array( 'a' => array( 'href' => array(), 'title' => array() ), 'br' => array(), 'em' => array(), 'strong' => array() ) );
 	$note_type	= $_POST['note_type'];
 	
-	$is_customer_note = ($note_type=='customer') ? 1 : 0;
+	$is_customer_note = $note_type == 'customer' ? 1 : 0;
 	
-	if ($post_id>0) :
+	if ( $post_id > 0 ) {
 		$order = new WC_Order( $post_id );
 		$comment_id = $order->add_order_note( $note, $is_customer_note );
 		
 		echo '<li rel="'.$comment_id.'" class="note ';
 		if ($is_customer_note) echo 'customer-note';
 		echo '"><div class="note_content">';
-		echo wpautop(wptexturize($note));
+		echo wpautop( wptexturize( $note ) );
 		echo '</div><p class="meta"><a href="#" class="delete_note">'.__('Delete note', 'woocommerce').'</a></p>';
 		echo '</li>';
 		
-	endif;
+	}
 	
 	// Quit out
 	die();
