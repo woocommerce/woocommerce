@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Visibility setting for products in widgets
 * Fix - Allow translating of # in order numbers
 * Fix - Make United States label in JS translatable, as it might change
+* Fix - Zero tax check in totals.php
 
 = 1.5.7.1 - 14/06/2012 =
 * Fix - Saving Mijireh settings bug

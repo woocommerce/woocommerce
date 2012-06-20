@@ -120,7 +120,6 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							
 							foreach ($taxes as $key => $tax) : 
 								if ($woocommerce->cart->tax->is_compound( $key )) : $has_compound_tax = true; continue; endif;
-								if ($tax==0) continue;
 								?>
 								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
 									<th>
@@ -148,7 +147,6 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 							
 							foreach ($taxes as $key => $tax) : 
 								if (!$woocommerce->cart->tax->is_compound( $key )) continue;
-								if ($tax==0) continue;
 								?>
 								<tr class="tax-rate tax-rate-<?php echo $key; ?>">
 									<th>

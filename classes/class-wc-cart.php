@@ -566,7 +566,8 @@ class WC_Cart {
 			$taxes = $this->get_taxes();
 
 			foreach ( $taxes as $key => $tax )
-				$taxes[$key] = woocommerce_price( $tax );
+				if ( $tax > 0 )
+					$taxes[$key] = woocommerce_price( $tax );
 
 			return apply_filters( 'woocommerce_cart_formatted_taxes', $taxes, $this );
 		}
