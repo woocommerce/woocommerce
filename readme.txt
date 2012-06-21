@@ -21,80 +21,34 @@ WooCommerce is built by the experienced folk at WooThemes who also offer premium
 = STRENGTH & FLEXIBILITY =
 Built upon core WordPress functionality for stability, with enough hooks and filters to satisfy the most avid theme developer, eCommerce is now truly accessible to anyone.
 
+= SMART DASHBOARD WIDGETS & REPORTS =
+Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard or go to the reports section to view stats in more detail.
+
 = CUSTOMIZABLE =
 Your business is unique, as should your online store. Choose one of our [eCommerce themes](http://www.woothemes.com/themes/woocommerce-themes/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
 
-= SMART DASHBOARD WIDGETS =
-Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard.
-
-= FEATURES =
-Seriously, WooCommerce has got more features than you can shake a stick at. But don’t just take our word for it, try it for yourself.
-
-= BUNDLED GATEWAYS, SHIPPING AND INTEGRATIONS =
-WooCommerce is a powerful plugin straight out of the box and comes bundled with the following gateways:
-
-* __PayPal Standard Gateway__ - Accept credit cards and PayPal payments
-* __Mijireh Checkout__ - Accept credit cards via Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.
-* __BACS__ -  A simple bank transfer gateway
-* __Cheque__ - A simple Cheque gateway (great for testing!)
-* __Cash on Delivery__ - A simple cash only gateway
-
-For shipping we include the following:
-
-* __Flat rate shipping__ - Ship your items using a flat cost
-* __Free shipping__ - Ship for free, or require a coupon to enable
-* __International delivery__ - Flat rates for international deliveries
-* __Local delivery and local Pickup__
-
-Finally, for extra power we integrate with these services:
-
-* __Google Analytics__ - Powerful analytics, including eCommerce tracking
-* __Sharedaddy__ - Let your customers share your products with their friends
-* __ShareThis__ - Like sharedaddy, helps you utilise social media
-* __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
-
-= THEMES =
-WooCommerce works with any theme, including the default WordPress themes Twenty Ten and Eleven.
+WooCommerce works with any theme, including the default WordPress themes Twenty Ten and Eleven. If you need help getting your theme working nicely with WooCommerce read our [theming docs](http://wcdocs.woothemes.com/category/codex/theming/).
 
 Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/themes/woocommerce-themes/) and check out our free themes, such as [WooTique](http://www.woothemes.com/2011/09/wootique/).
 
-If you need help getting your theme working nicely with WooCommerce read our [theming docs](http://wcdocs.woothemes.com/category/codex/theming/).
+= FEATURES =
+Seriously, WooCommerce has got more features than you can shake a stick at. But don't just take our word for it, try it for yourself! You can read more about features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
 
-= EXTENSIONS =
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that: [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). Some of our more popular plugins are listed below.
+Payment Gateways, Shipping Methods and Integrations are important to any store - WC comes bundled with the following:
 
-* __Functionality__
-	* [Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/) - Bulk discounts, role based pricing and more.
-	* [Product Addons](http://www.woothemes.com/extension/product-addons/) - Create personalised products.
-	* [Gravity Forms Addons](http://www.woothemes.com/extension/gravityforms-product-addons/) - Create personalised products using gravity forms.
-	* [Currency Converter Widget](http://www.woothemes.com/extension/currency-converter-widget/) - Dynamically switch the currency of displayed prices.
-	* [Product Enquiry Form](http://www.woothemes.com/extension/product-enquiry-form/) - Allow visitors to email you enquiries about a product.
-	* [Facebook Tab](http://www.woothemes.com/extension/facebook-tab/) - Sell your products via your Facebook page.
-	* [Google Product Feed](http://www.woothemes.com/extension/google-product-feed/) - Add your products to Google Product Search.
-	* [Newsletter Subscription](http://www.woothemes.com/extension/newsletter-subscription/) - Allow customers to subscribe to your MailChimp or CampaignMonitor mailing list.
-* __Shipping__
-	* [Shipment Tracking](http://www.woothemes.com/extension/shipment-tracking/) - Add tracking info to orders
-	* [FedEx](http://www.woothemes.com/extension/fedex/) - Get rates from the FedEx API
-	* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules based on country/postcode, weight, cart items, and price.
-	* [UPS Shipping Method](http://www.woothemes.com/extension/ups/) - Get rates from the UPS API
-* __Payment__
-	* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
-	* [PayPal Express](http://www.woothemes.com/extension/paypal-express/) - Skip the WooCommerce checkout in favour of PayPal
-	* [Authorize.net DPM](http://www.woothemes.com/extension/authorize-net-dpm/) - Form based gateway
-* __Import/Export__
-	* [Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/) - Import and Export variations and products via a CSV
-	* [Order/Customer CSV Export](http://www.woothemes.com/extension/order-customer-csv-export/) - Export your orders and customer records to a CSV
+* __PayPal Standard Gateway__ - Accept credit cards and PayPal payments
+* __Mijireh Checkout__ - Accept credit cards via Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.
+* __BACS__, __Cheque__ and __Cash on Delivery__ -  Simple offline gateways
+* __Flat rate shipping__ - Ship your items using a flat cost
+* __Free shipping__ - Ship for free, or require a coupon to enable
+* __International delivery__, __Local delivery and local Pickup__
+* __Google Analytics__ - Powerful analytics, including eCommerce tracking
+* __Sharedaddy__ and __ShareThis__ - Let your customers share your products with their friends
+* __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
 
-WordPress.org is home to some cool free extensions too:
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). 
 
-* [WooCommerce Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/) - Adds useful admin links and resources for the WooCommerce eCommerce Plugin to the WordPress Toolbar / Admin Bar.
-* [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
-* [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
-* [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
-
-= MORE INFORMATION AND GETTING INVOLVED =
-
-Read more about the features and benefits of the WooCommerce eCommerce platform on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress"),
+= GET INVOLVED =
 
 Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/) or submit extensions to be listed on the WooThemes site [here](http://www.woothemes.com/become-a-woocommerce-developer/).
 
@@ -126,6 +80,41 @@ The manual installation method involves downloading our eCommerce plugin and upl
 Automatic updates should work a charm; as always though, ensure you backup your site just in case. 
 
 If on the off chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
+
+== Premium Extensions ==
+
+[Click here to view our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). Some of our more popular plugins are listed below.
+
+* __Functionality__
+	* [Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/) - Bulk discounts, role based pricing and more.
+	* [Product Addons](http://www.woothemes.com/extension/product-addons/) - Create personalised products.
+	* [Gravity Forms Addons](http://www.woothemes.com/extension/gravityforms-product-addons/) - Create personalised products using gravity forms.
+	* [Currency Converter Widget](http://www.woothemes.com/extension/currency-converter-widget/) - Dynamically switch the currency of displayed prices.
+	* [Product Enquiry Form](http://www.woothemes.com/extension/product-enquiry-form/) - Allow visitors to email you enquiries about a product.
+	* [Facebook Tab](http://www.woothemes.com/extension/facebook-tab/) - Sell your products via your Facebook page.
+	* [Google Product Feed](http://www.woothemes.com/extension/google-product-feed/) - Add your products to Google Product Search.
+	* [Newsletter Subscription](http://www.woothemes.com/extension/newsletter-subscription/) - Allow customers to subscribe to your MailChimp or CampaignMonitor mailing list.
+* __Shipping__
+	* [Shipment Tracking](http://www.woothemes.com/extension/shipment-tracking/) - Add tracking info to orders
+	* [FedEx](http://www.woothemes.com/extension/fedex/) - Get rates from the FedEx API
+	* [Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/) - Create rules based on country/postcode, weight, cart items, and price.
+	* [UPS Shipping Method](http://www.woothemes.com/extension/ups/) - Get rates from the UPS API
+* __Payment__
+	* [PayPal Pro](http://www.woothemes.com/extension/paypal-pro/) - Direct gateway
+	* [PayPal Express](http://www.woothemes.com/extension/paypal-express/) - Skip the WooCommerce checkout in favour of PayPal
+	* [Authorize.net DPM](http://www.woothemes.com/extension/authorize-net-dpm/) - Form based gateway
+* __Import/Export__
+	* [Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/) - Import and Export variations and products via a CSV
+	* [Order/Customer CSV Export](http://www.woothemes.com/extension/order-customer-csv-export/) - Export your orders and customer records to a CSV
+
+== Free Extensions ==
+
+WordPress.org is home to some cool free extensions too:
+
+* [WooCommerce Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/) - Adds useful admin links and resources for the WooCommerce eCommerce Plugin to the WordPress Toolbar / Admin Bar.
+* [WooCommerce Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/) - Print delivery Notes for orders.
+* [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
+* [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
 
 == Frequently Asked Questions == 
 
