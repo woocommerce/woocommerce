@@ -115,12 +115,12 @@ class WC_Tax {
 	function find_rates( $country = '', $state = '', $postcode = '', $tax_class = '' ) {
 		$this->get_tax_rates();
 		
-		if (!$country) return array();
+		if ( ! $country ) return array();
 		
-		if (!$state) $state = '*';
+		if ( ! $state ) $state = '*';
 		
 		$tax_class = sanitize_title($tax_class);
-		if (!$tax_class) $tax_class = '*';
+		if ( ! $tax_class ) $tax_class = '*';
 
 		$found_rates = array();
 
@@ -137,9 +137,9 @@ class WC_Tax {
 		} elseif ( isset( $this->parsed_rates[ $country ][ '*' ] ) ) {
 		
 			// Look for tax class specific rule
-			if (isset($this->parsed_rates[ $country ][ '*' ][ $tax_class ]))
+			if ( isset( $this->parsed_rates[ $country ][ '*' ][ $tax_class ] ) )
 				$found_rates = $this->parsed_rates[ $country ][ '*' ][ $tax_class ];
-			else
+			elseif ( isset( $this->parsed_rates[ $country ][ '*' ][ '*' ] ) )
 				$found_rates = $this->parsed_rates[ $country ][ '*' ][ '*' ];
 			
 		}

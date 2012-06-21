@@ -208,7 +208,7 @@ function woocommerce_order_data_meta_box($post) {
 								'label' => __('Country', 'woocommerce'), 
 								'show'	=> false,
 								'type'	=> 'select',
-								'options' => $woocommerce->countries->get_allowed_countries()
+								'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + $woocommerce->countries->get_allowed_countries()
 								),
 							'state' => array( 
 								'label' => __('State/County', 'woocommerce'), 
