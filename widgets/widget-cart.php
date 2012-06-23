@@ -53,7 +53,9 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 		
 			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-				
+
+				if ( apply_filters('woocommerce_widget_cart_hide_item', 'show', $cart_item, $cart_item_key) == 'hide' ) continue;
+
 				$_product = $cart_item['data'];
 				
 				if ( $_product->exists() && $cart_item['quantity'] > 0 ) {
