@@ -150,6 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 
 = 1.5.8 - 21/06/2012 =
