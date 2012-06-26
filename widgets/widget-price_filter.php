@@ -9,26 +9,26 @@
  * @author		WooThemes
  */
 
-if (is_active_widget( false, false, 'price_filter', 'true' ) && !is_admin()) :
-	add_action('init', 'woocommerce_price_filter_init');
-	add_filter('loop_shop_post_in', 'woocommerce_price_filter');
-endif;
-
 /**
  * Price filter Init
  */
+add_action( 'init', 'woocommerce_price_filter_init' );
+
 function woocommerce_price_filter_init() {
 	
-	unset($_SESSION['min_price']);
-	unset($_SESSION['max_price']);
+	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
 	
-	if (isset($_GET['min_price'])) :
-		$_SESSION['min_price'] = $_GET['min_price'];
-	endif;
-	if (isset($_GET['max_price'])) :
-		$_SESSION['max_price'] = $_GET['max_price'];
-	endif;
-	
+		unset( $_SESSION['min_price'] );
+		unset( $_SESSION['max_price'] );
+		
+		if ( isset( $_GET['min_price'] ) ) 
+			$_SESSION['min_price'] = $_GET['min_price'];
+
+		if ( isset( $_GET['max_price'] ) )
+			$_SESSION['max_price'] = $_GET['max_price'];
+		
+		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
+	}
 }
 
 /**

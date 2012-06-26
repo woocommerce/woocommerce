@@ -6,44 +6,49 @@
  * @category	Widgets
  * @author		WooThemes
  */
-if (is_active_widget( false, false, 'woocommerce_layered_nav', 'true' ) && !is_admin()) :
-	add_action('init', 'woocommerce_layered_nav_init', 1);
-	add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');
-endif;
-
 
 /**
  * Layered Nav Init
  */
+add_action( 'init', 'woocommerce_layered_nav_init', 1 );
+
 function woocommerce_layered_nav_init( ) {
-	global $_chosen_attributes, $woocommerce, $_attributes_array;   
 	
-	$_chosen_attributes = array();
-	$_attributes_array = array();
+	if ( is_active_widget( false, false, 'woocommerce_layered_nav', true ) && ! is_admin() ) {
 	
-	$attribute_taxonomies = $woocommerce->attribute_taxonomies;   
-	if ( $attribute_taxonomies ) : 
-		foreach ($attribute_taxonomies as $tax) :
-	    	
-	    	$attribute = strtolower(sanitize_title($tax->attribute_name));
-	    	$taxonomy = $woocommerce->attribute_taxonomy_name($attribute);  
-			
-			// create an array of product attribute taxonomies
-			$_attributes_array[] = $taxonomy;
-			
-	    	$name = 'filter_' . $attribute;
-	    	$query_type_name = 'query_type_' . $attribute;
-	    	
-	    	if (isset($_GET[$name]) && $_GET[$name] && taxonomy_exists($taxonomy)) : 
-	    		$_chosen_attributes[$taxonomy]['terms'] = explode(',', $_GET[$name] );
-	    		if (isset($_GET[$query_type_name]) && $_GET[$query_type_name]=='or') :
-	    			$_chosen_attributes[$taxonomy]['query_type'] = 'or';
-	    		else :
-	    			$_chosen_attributes[$taxonomy]['query_type'] = 'and';
-	    		endif;
-			endif;
-	    endforeach;    	
-    endif;  	
+		global $_chosen_attributes, $woocommerce, $_attributes_array;   
+		
+		$_chosen_attributes = array();
+		$_attributes_array = array();
+		
+		$attribute_taxonomies = $woocommerce->attribute_taxonomies;   
+		if ( $attribute_taxonomies ) {
+			foreach ( $attribute_taxonomies as $tax ) {
+		    	
+		    	$attribute = strtolower(sanitize_title($tax->attribute_name));
+		    	$taxonomy = $woocommerce->attribute_taxonomy_name($attribute);  
+				
+				// create an array of product attribute taxonomies
+				$_attributes_array[] = $taxonomy;
+				
+		    	$name = 'filter_' . $attribute;
+		    	$query_type_name = 'query_type_' . $attribute;
+		    	
+		    	if ( ! empty( $_GET[$name] ) && taxonomy_exists( $taxonomy ) ) {
+		    		
+		    		$_chosen_attributes[$taxonomy]['terms'] = explode( ',', $_GET[ $name ] );
+		    		
+		    		if ( ! empty( $_GET[$query_type_name] ) && $_GET[ $query_type_name ] == 'or' ) 
+		    			$_chosen_attributes[$taxonomy]['query_type'] = 'or';
+		    		else 
+		    			$_chosen_attributes[$taxonomy]['query_type'] = 'and';
+
+				}
+			}	
+	    }
+	    
+	    add_filter('loop_shop_post_in', 'woocommerce_layered_nav_query');	
+    }
 }
 
 /**

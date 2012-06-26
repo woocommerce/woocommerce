@@ -22,6 +22,7 @@ class WC_Product_Variation extends WC_Product {
 	var $variation_has_stock;
 	var $variation_has_sku;
 	var $variation_shipping_class;
+	var $variation_shipping_class_id;
 	var $variation_has_tax_class;
 	
 	/**
@@ -279,6 +280,21 @@ class WC_Product_Variation extends WC_Product {
 			if ($classes && !is_wp_error($classes)) $this->variation_shipping_class = current($classes)->slug; else $this->variation_shipping_class = parent::get_shipping_class();
 		endif;
 		return $this->variation_shipping_class;
+	}
+	
+	/** Returns the product shipping class ID */
+	function get_shipping_class_id() {
+		if ( ! $this->variation_shipping_class_id ) {
+			
+			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
+			
+			if ( $classes && ! is_wp_error( $classes ) ) 
+				$this->variation_shipping_class_id = current( $classes )->term_id; 
+			else 
+				$this->variation_shipping_class_id = parent::get_shipping_class_id();
+								
+		}
+		return (int) $this->variation_shipping_class_id;
 	}
 
 }
