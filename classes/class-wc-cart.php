@@ -1464,7 +1464,7 @@ class WC_Cart {
 			
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
 				if ( ! $woocommerce->customer->has_calculated_shipping() ) {
-					if ( ! $woocommerce->customer->get_shipping_country() || ! $woocommerce->customer->get_shipping_state() ) return false;
+					if ( ! $woocommerce->customer->get_shipping_country() || ( ! $woocommerce->customer->get_shipping_state() && ! $woocommerce->customer->get_shipping_postcode() ) ) return false;
 				}
 			}
 		
