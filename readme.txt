@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
+* Fix - Scheduled on sale ignored from sale widget
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML
