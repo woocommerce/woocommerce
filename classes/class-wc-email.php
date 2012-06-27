@@ -136,10 +136,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'new_order');
+		$headers = apply_filters('woocommerce_email_headers', '', 'new_order', $order);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'new_order');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'new_order', $order);
 
 		// Send the mail	
 		$this->send( get_option('woocommerce_new_order_email_recipient'), $subject, $message, $headers, $attachments);
@@ -171,10 +171,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'customer_processing_order');
+		$headers = apply_filters('woocommerce_email_headers', '', 'customer_processing_order', $order);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_processing_order');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_processing_order', $order);
 	
 		// Send the mail	
 		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
@@ -214,10 +214,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'customer_completed_order');
+		$headers = apply_filters('woocommerce_email_headers', '', 'customer_completed_order', $order);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_completed_order');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_completed_order', $order);
 	
 		// Send the mail	
 		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
@@ -253,10 +253,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'customer_invoice');
+		$headers = apply_filters('woocommerce_email_headers', '', 'customer_invoice', $order);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_invoice');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_invoice', $order);
 		
 		// Send the mail	
 		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
@@ -300,10 +300,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'customer_note');
+		$headers = apply_filters('woocommerce_email_headers', '', 'customer_note', $order);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_note');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_note', $order);
 	
 		// Send the mail	
 		$this->send( $order->billing_email, $subject, $message, $headers, $attachments );
@@ -328,10 +328,10 @@ class WC_Email {
 		$message = $title . __('is low in stock.', 'woocommerce');
 	
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock');
+		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock', $product);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'low_stock');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'low_stock', $product);
 		
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -356,10 +356,10 @@ class WC_Email {
 		$message = $title . __('is out of stock.', 'woocommerce');
 	
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock');
+		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock', $product);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'no_stock');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'no_stock', $product);
 
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -397,10 +397,10 @@ class WC_Email {
 		$message = sprintf(__('%s units of %s have been backordered in order #%s.', 'woocommerce'), $quantity, $title, $order_id );
 	
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'backorder');
+		$headers = apply_filters('woocommerce_email_headers', '', 'backorder', $args);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'backorder');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'backorder', $args);
 		
 		// Send the mail
 		wp_mail( get_option('woocommerce_stock_email_recipient'), $subject, $message, $headers, $attachments );
@@ -466,10 +466,10 @@ class WC_Email {
 		$message = ob_get_clean();
 		
 		//	CC, BCC, additional headers
-		$headers = apply_filters('woocommerce_email_headers', '', 'customer_new_account');
+		$headers = apply_filters('woocommerce_email_headers', '', 'customer_new_account', $user);
 		
 		// Attachments
-		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_new_account');
+		$attachments = apply_filters('woocommerce_email_attachments', '', 'customer_new_account', $user);
 		
 		// Send the mail	
 		$this->send( $user_email, $subject, $message, $headers, $attachments );
