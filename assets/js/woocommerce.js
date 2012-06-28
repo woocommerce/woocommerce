@@ -660,11 +660,11 @@ jQuery(document).ready(function($) {
 		$('select#shipping_method, input[name=shipping_method]').live('change', function(){
 			$('body').trigger('update_checkout');
 		});
-		$('input#billing_country, input#billing_state, #billing_postcode, input#shipping_country, input#shipping_state, #shipping_postcode').live('keydown', function(){
-			clearTimeout(updateTimer);
+		$('.update_totals_on_change input').live('keydown', function(){
+			clearTimeout( updateTimer );
 			updateTimer = setTimeout(update_checkout, '1000');
 		});
-		$('select#billing_country, select#billing_state, select#shipping_country, select#shipping_state, #shiptobilling input, .update_totals_on_change').live('change', function(){
+		$('#shiptobilling input, .update_totals_on_change select, .update_totals_on_change input').live('change', function(){
 			$('body').trigger('update_checkout');
 		});
 		
@@ -860,8 +860,5 @@ jQuery(document).ready(function($) {
 
 
 	}
-	
-	// Get this show on the road - update locale when loaded
-	$('select.country_to_state').change();
 
 });
