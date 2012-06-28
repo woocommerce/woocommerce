@@ -60,9 +60,10 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 			$number = 15;
 
 		// Get products on sale
-		if ( false === ( $product_ids_on_sale = get_transient( 'wc_products_onsale' ) ) ) :
+		if ( false === ( $product_ids_on_sale = get_transient( 'wc_products_onsale' ) ) ) {
 		
 			$meta_query = array();
+			
 		    $meta_query[] = array(
 		    	'key' => '_sale_price',
 		        'value' 	=> 0,
@@ -78,11 +79,19 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 				'fields' 			=> 'id=>parent'
 			));
 			
-			$product_ids_on_sale = array_unique(array_merge(array_values($on_sale), array_keys($on_sale)));
+			$product_ids 	= array_keys( $on_sale );
+			$parent_ids		= array_values( $on_sale );
+			
+			// Check for scheduled sales which have not started
+			foreach ( $product_ids as $key => $id )
+				if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time('timestamp') )
+					unset( $product_ids[ $key ] );
+			
+			$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
 			
 			set_transient( 'wc_products_onsale', $product_ids_on_sale );
 					
-		endif;
+		}
 		
 		$product_ids_on_sale[] = 0;
 		
@@ -95,14 +104,15 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
     		'no_found_rows' => 1,
     		'post_status' 	=> 'publish', 
     		'post_type' 	=> 'product',
-    		'orderby' 		=> 'rand',
+    		'orderby' 		=> 'date',
+    		'order' 		=> 'ASC',
     		'meta_query' 	=> $meta_query,
     		'post__in'		=> $product_ids_on_sale
     	);
 
 		$r = new WP_Query($query_args);
 		
-		if ($r->have_posts()) :
+		if ( $r->have_posts() ) :
 ?>
 		<?php echo $before_widget; ?>
 		<?php if ( $title ) echo $before_title . $title . $after_title; ?>

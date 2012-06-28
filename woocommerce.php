@@ -221,7 +221,7 @@ class Woocommerce {
 			add_filter( 'template_include', array(&$this, 'template_loader') );
 			add_filter( 'comments_template', array(&$this, 'comments_template_loader') );
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
-			add_action( 'get_header', array(&$this, 'buffer_checkout') );
+			add_action( 'template_redirect', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
 			add_action( 'wp_head', array(&$this, 'generator') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
