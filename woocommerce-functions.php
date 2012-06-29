@@ -639,6 +639,9 @@ function woocommerce_order_again() {
 	// Nonce security check
 	if ( ! $woocommerce->verify_nonce( 'order_again', '_GET' ) ) return;
 
+	// Clear current cart
+	$woocommerce->cart->empty_cart();
+	
 	// Load the previous order - Stop if the order does not exist
 	$order = new WC_Order( (int) $_GET['order_again'] );
 	

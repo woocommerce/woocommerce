@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Use template_redirect instead of get_header to avoid white space errors with the checkout page
 * Fix - Windows CRT fix
 * Fix - Order count clear transient on delete
+* Fix - When placing an order again, clear current cart.
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML
