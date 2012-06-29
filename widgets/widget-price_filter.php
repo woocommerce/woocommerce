@@ -103,7 +103,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	function widget( $args, $instance ) {
 		extract($args);
 		
-		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query;
+		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query, $wp;
 		
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return; // Not on product page - return
 		
@@ -158,8 +158,13 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		if (isset($_SESSION['max_price'])) $post_max = $_SESSION['max_price'];
 
 		echo $before_widget . $before_title . $title . $after_title;
-
-		echo '<form method="get">
+		
+		if ( get_option( 'permalink_structure' ) == '' ) 
+			$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
+		else
+			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( $wp->request ) );
+		
+		echo '<form method="get" action="' . $form_action . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">

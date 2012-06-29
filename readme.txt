@@ -157,6 +157,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
 * Tweak - Cart widget filters added and renamed for consistency.
 * Tweak - Payment gateway API tweaks - get_title, get_icon, get_description
+* Tweak - Price filter widgets takes you back to page 1.
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
