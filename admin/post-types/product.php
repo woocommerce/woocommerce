@@ -95,7 +95,7 @@ function woocommerce_custom_product_columns( $column ) {
 
 	switch ($column) {
 		case "thumb" :
-			$product->get_image();
+			echo $product->get_image();
 		break;
 		case "name" : 
 			$edit_link = get_edit_post_link( $post->ID );

@@ -151,10 +151,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.xxxx - xx/xx/2012 =
-* Feature - Better WC_Product::get_image() function
+* Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
-* Tweak - Cart widget filters.
+* Tweak - Cart widget filters added and renamed for consistency.
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID

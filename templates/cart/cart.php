@@ -41,7 +41,7 @@ global $woocommerce;
 						<!-- The thumbnail -->
 						<td class="product-thumbnail">
 							<?php 
-								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image( null, false ) /* default size, no output */, $values, $cart_item_key );
+								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
 								printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), $thumbnail ); 
 							?>
 						</td>
@@ -49,16 +49,8 @@ global $woocommerce;
 						<!-- Product Name -->
 						<td class="product-name">
 							<?php 
-								if ( !$_product->is_visible() )
-									echo apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
-
-								else if ( $_product instanceof WC_Product_Variation ) {
-									$_parent = new WC_Product( $_product->id );
-									if ( !$_parent->is_visible() )
-										echo apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
-									else
-										printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ) );
-								}
+								if ( ! $_product->is_visible() || ( $_product instanceof WC_Product_Variation && ! $_product->parent_is_visible() ) )
+									echo apply_filters( 'woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key );
 								else
 									printf('<a href="%s">%s</a>', esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) ), apply_filters('woocommerce_in_cart_product_title', $_product->get_title(), $values, $cart_item_key ) );
 														

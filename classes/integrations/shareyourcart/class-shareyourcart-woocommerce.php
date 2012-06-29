@@ -201,7 +201,7 @@ class ShareYourCartWooCommerce extends ShareYourCartBase {
 
 		ob_start();
 
-		$product->get_image();
+		echo $product->get_image();
 
 		$image = ob_get_clean();
 

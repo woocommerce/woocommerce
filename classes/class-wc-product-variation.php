@@ -76,7 +76,6 @@ class WC_Product_Variation extends WC_Product {
 			$this->$key = ( isset( $parent_custom_fields['_' . $key][0] ) && $parent_custom_fields['_' . $key][0] !== '' ) ? $parent_custom_fields['_' . $key][0] : $default;
 
 		$this->product_type = 'variable';
-		$this->visibility 	= 'visible';
 		
 		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_sale_price = false;
 				
@@ -142,6 +141,23 @@ class WC_Product_Variation extends WC_Product {
 		}
 		
 		$this->total_stock = $this->stock;
+	}
+
+	/** Returns whether or not the variation is visible */
+	function is_visible() {
+	
+		$visible = true;
+			
+		// Out of stock visibility
+		if ( get_option('woocommerce_hide_out_of_stock_items') == 'yes' && ! $this->is_in_stock() ) 
+			$visible = false;
+		
+		return apply_filters('woocommerce_product_is_visible', $visible, $this->id);
+	}
+	
+	/** Returns whether or not the variations parent is visible */
+	function parent_is_visible() {
+		return parent::is_visible();	
 	}
 	
 	/**
