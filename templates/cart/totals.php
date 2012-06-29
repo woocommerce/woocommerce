@@ -125,7 +125,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 									<th>
 										<?php
 										if ( get_option( 'woocommerce_display_totals_excluding_tax' ) == 'no' && get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
-											_e( 'incl.', 'woocommerce' );
+											_e( 'incl.&nbsp;', 'woocommerce' );
 										}
 										echo $woocommerce->cart->tax->get_rate_label( $key );
 										?>
@@ -152,7 +152,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 									<th>
 										<?php
 										if ( get_option( 'woocommerce_display_totals_excluding_tax' ) == 'no' && get_option( 'woocommerce_prices_include_tax' ) == 'yes' ) {
-											_e( 'incl.', 'woocommerce' );
+											_e( 'incl.&nbsp;', 'woocommerce' );
 										}
 										echo $woocommerce->cart->tax->get_rate_label( $key );
 										?>

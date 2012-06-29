@@ -129,7 +129,11 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th colspan="2"><?php 
+									if ( get_option('woocommerce_prices_include_tax') == 'yes' ) 
+										_e('incl.&nbsp;', 'woocommerce'); 
+									echo $woocommerce->cart->tax->get_rate_label( $key ); 
+								?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
@@ -149,7 +153,11 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 							?>
 							<tr class="tax-rate tax-rate-<?php echo $key; ?>">
-								<th colspan="2"><?php if (get_option('woocommerce_prices_include_tax')=='yes') : _e('incl.', 'woocommerce'); endif; ?> <?php echo $woocommerce->cart->tax->get_rate_label( $key ); ?></th>
+								<th colspan="2"><?php 
+									if ( get_option('woocommerce_prices_include_tax') == 'yes' ) 
+										_e('incl.&nbsp;', 'woocommerce'); 
+									echo $woocommerce->cart->tax->get_rate_label( $key ); 
+								?></th>
 								<td><?php echo $tax; ?></td>
 							</tr>
 							<?php
