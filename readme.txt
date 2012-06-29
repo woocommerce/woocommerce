@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Variation get shipping class ID
 * Fix - Scheduled on sale ignored from sale widget
 * Fix - Use template_redirect instead of get_header to avoid white space errors with the checkout page
+* Fix - Windows CRT fix
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML
