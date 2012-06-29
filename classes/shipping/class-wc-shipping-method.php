@@ -151,7 +151,26 @@ class WC_Shipping_Method extends WC_Settings_API {
 		
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true );
     } 
-    
+
+	/**
+	 * Return the gateways title
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_title() {
+		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
+	}
+	
+	
+    /**
+     * get_fee function.
+     * 
+     * @access public
+     * @param mixed $fee
+     * @param mixed $total
+     * @return void
+     */
     function get_fee( $fee, $total ) {
 		if ( strstr( $fee, '%' ) ) :
 			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
@@ -171,7 +190,7 @@ class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	function supports( $feature ) {
 		
-		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
 		
 	}
 }
