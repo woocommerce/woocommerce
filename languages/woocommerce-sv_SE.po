@@ -2574,7 +2574,7 @@ msgstr "Tillåt betalning via BACS (Bank Account Clearing System), mer känt som
 #: classes/gateways/class-wc-bacs.php:171
 #@ woocommerce
 msgid "Our Details"
-msgstr "Dina uppgifter"
+msgstr "Våra uppgifter"
 
 #: classes/gateways/class-wc-bacs.php:146
 #: classes/gateways/class-wc-bacs.php:179
@@ -8967,13 +8967,13 @@ msgstr ""
 #: admin/post-types/product.php:674
 #@ woocommerce
 msgid "Sale"
-msgstr ""
+msgstr "Rea"
 
 #: admin/post-types/product.php:478
 #: admin/post-types/product.php:690
 #@ woocommerce
 msgid "Sale price"
-msgstr ""
+msgstr "Rea-pris"
 
 #: admin/post-types/product.php:494
 #: admin/post-types/product.php:716
@@ -8985,7 +8985,7 @@ msgstr ""
 #: admin/post-types/product.php:775
 #@ woocommerce
 msgid "In stock?"
-msgstr ""
+msgstr "I lager?"
 
 #: admin/post-types/product.php:657
 #: admin/post-types/product.php:679
@@ -9014,14 +9014,14 @@ msgstr ""
 #: admin/post-types/shop_order.php:149
 #@ woocommerce
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: admin/post-types/product.php:764
 #: admin/post-types/product.php:800
 #: admin/post-types/shop_order.php:151
 #@ woocommerce
 msgid "No"
-msgstr ""
+msgstr "Nej"
 
 #: admin/post-types/shop_order.php:40
 #@ woocommerce
@@ -9230,8 +9230,8 @@ msgstr ""
 #@ woocommerce
 msgid "Product"
 msgid_plural "Products"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Produkt"
+msgstr[1] "Produkter"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:55
@@ -9239,8 +9239,8 @@ msgstr[1] ""
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Produktkategori"
+msgstr[1] "Produktkategorier"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:69
@@ -9322,7 +9322,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:441
 #@ woocommerce
 msgid "Product updated."
-msgstr ""
+msgstr "Produkt uppdaterad."
 
 #: admin/woocommerce-admin-init.php:442
 #, php-format
@@ -9382,7 +9382,7 @@ msgstr ""
 #: admin/woocommerce-admin-init.php:459
 #@ default
 msgid "Order saved."
-msgstr ""
+msgstr "Order sparad."
 
 #: admin/woocommerce-admin-init.php:460
 #@ woocommerce
@@ -9640,7 +9640,7 @@ msgstr ""
 #: templates/myaccount/my-account.php:83
 #@ woocommerce
 msgid "My Address"
-msgstr ""
+msgstr "Min adress"
 
 #: templates/single-product/add-to-cart/variable.php:43
 #@ woocommerce
