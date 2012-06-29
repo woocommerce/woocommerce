@@ -240,7 +240,7 @@ class Woocommerce {
 
 		// Actions for SSL
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
-			add_action( 'get_header', array( &$this, 'ssl_redirect' ) );
+			add_action( 'template_redirect', array( &$this, 'ssl_redirect' ) );
 	
 			$filters = array( 'post_thumbnail_html', 'widget_text', 'wp_get_attachment_url', 'wp_get_attachment_image_attributes', 'wp_get_attachment_url', 'option_siteurl', 'option_homeurl', 'option_home', 'option_url', 'option_wpurl', 'option_stylesheet_url', 'option_template_url', 'script_loader_src', 'style_loader_src', 'template_directory_uri', 'stylesheet_directory_uri', 'site_url' );
 			
