@@ -231,28 +231,22 @@ class WC_Product_Variation extends WC_Product {
 		if ( $this->variation_has_stock ) {
 			if ( $this->managing_stock() ) {
 				
-				$this->stock = $this->stock - $by;
-				$this->total_stock = $this->get_total_stock() - $by;
+				$this->stock 		= $this->stock - $by;
+				$this->total_stock 	= $this->total_stock - $by;
 				update_post_meta( $this->variation_id, '_stock', $this->stock );
+				$woocommerce->clear_product_transients( $this->id ); // Clear transient
 				
-				// Parents out of stock attribute
+				// Check parents out of stock attribute
 				if ( ! $this->is_in_stock() ) {
 				
 					// Check parent
 					$parent_product = new WC_Product( $this->id );
 					
-					if ( $parent_product->managing_stock() ) {
-						if ( ! $parent_product->backorders_allowed() ) {
-							if ( $parent_product->get_total_stock() == 0 || $parent_product->get_total_stock() < 0 ) {
-								update_post_meta( $this->id, '_stock_status', 'outofstock' );
-								$woocommerce->clear_product_transients( $this->id ); // Clear transient
-							}
-						}
-					} else {
-						if ( $parent_product->get_total_stock() == 0 || $parent_product->get_total_stock() < 0 ) {
-							update_post_meta( $this->id, '_stock_status', 'outofstock' );
-							$woocommerce->clear_product_transients( $this->id ); // Clear transient
-						}
+					// Only continue if the parent has backorders off
+					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 ) {
+					
+						update_post_meta( $this->id, '_stock_status', 'outofstock' );
+					
 					}
 
 				}
@@ -270,15 +264,19 @@ class WC_Product_Variation extends WC_Product {
 	 * @param   int		$by		Amount to increase by
 	 */
 	function increase_stock( $by = 1 ) {
+		global $woocommerce;
+		
 		if ($this->variation_has_stock) :
 			if ($this->managing_stock()) :
 
-				$this->stock = $this->stock + $by;
-				$this->total_stock = $this->get_total_stock() + $by;
-				update_post_meta($this->variation_id, '_stock', $this->stock);
+				$this->stock 		= $this->stock + $by;
+				$this->total_stock 	= $this->total_stock + $by;
+				update_post_meta( $this->variation_id, '_stock', $this->stock );
+				$woocommerce->clear_product_transients( $this->id ); // Clear transient
 				
 				// Parents out of stock attribute
-				if ( $this->is_in_stock() ) update_post_meta($this->id, '_stock_status', 'instock');
+				if ( $this->is_in_stock() ) 
+					update_post_meta( $this->id, '_stock_status', 'instock' );
 				
 				return $this->stock;
 			endif;
