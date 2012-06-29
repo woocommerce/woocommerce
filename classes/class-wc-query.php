@@ -41,13 +41,25 @@ class WC_Query {
 			$q->set( 'page_id', '' );
 			if ( isset( $q->query['paged'] ) )
 				$q->set( 'paged', $q->query['paged'] );
+				
+			// Define a variable so we know this is the front page shop later on
+			define( 'SHOP_IS_ON_FRONT', true );
 			
-			// Fix conditional Fucntions like is_front_page
-	        $q->is_page = false;
+			// Get the actual WP page to avoid errors and let us use is_front_page()
+			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
+			global $wp_post_types;
+			
+			$q->is_page = true;
+			$shop_page 	= get_post( woocommerce_get_page_id('shop') );
+			
+			$wp_post_types['product']->ID 			= $shop_page->ID;
+			$wp_post_types['product']->post_title 	= $shop_page->post_title;
+			$wp_post_types['product']->post_name 	= $shop_page->post_name;
+			
+			// Fix conditional Functions like is_front_page
 	        $q->is_singular = false;
 	        $q->is_post_type_archive = true;
 	        $q->is_archive = true;
-	        define( 'SHOP_IS_ON_FRONT', true );
 		
 		} else {
 			
