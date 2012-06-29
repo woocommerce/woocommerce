@@ -1093,18 +1093,19 @@ class WC_Product {
     	global $woocommerce;
     	
     	$output = '';
-		if (has_post_thumbnail($this->id)) :
-			$output = get_the_post_thumbnail($this->id, $size); 
-		elseif (($parent_id = wp_get_post_parent_id( $this->id )) && has_post_thumbnail($parent_id)) :
-			$output = get_the_post_thumbnail($parent_id, $size); 
-		else :
-			$output = '<img src="'. woocommerce_placeholder_img_src() . '" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />'; 
-		endif;
-		
-		if ( $echo ) {
-			echo $output;
+    	
+		if ( has_post_thumbnail( $this->id ) ) {
+			$output = get_the_post_thumbnail( $this->id, $size ); 
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
+			$output = get_the_post_thumbnail( $parent_id, $size ); 
+		} else {
+			$output = '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $woocommerce->get_image_size( 'shop_thumbnail_image_width' ) . '" height="' . $woocommerce->get_image_size( 'shop_thumbnail_image_height' ) . '" />'; 
 		}
-		return $output;
+		
+		if ( $echo ) 
+			echo $output;
+		else
+			return $output;
     }
     
     /**
