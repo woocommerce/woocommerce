@@ -64,13 +64,13 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
 }
  
 /**
- * Deleting products sync
+ * Deleting posts
  * 
- * Removes variations etc belonging to a deleted post
+ * Removes variations etc belonging to a deleted post, and clears transients
  */
-function woocommerce_delete_product_sync( $id ) {
+function woocommerce_delete_post( $id ) {
 	
-	if (!current_user_can('delete_posts')) return;
+	if ( ! current_user_can( 'delete_posts' ) ) return;
 	
 	if ( $id > 0 ) :
 	
@@ -89,6 +89,8 @@ function woocommerce_delete_product_sync( $id ) {
 		endif;
 	
 	endif;
+	
+	delete_transient( 'woocommerce_processing_order_count' );
 }
 
 /**

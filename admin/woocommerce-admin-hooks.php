@@ -12,7 +12,7 @@ global $woocommerce;
 
 /** Events ****************************************************************/
 
-add_action('delete_post', 'woocommerce_delete_product_sync', 10);
+add_action('delete_post', 'woocommerce_delete_post');
 add_action('admin_init', 'woocommerce_preview_emails');
 add_action('admin_init', 'woocommerce_prevent_admin_access');
 add_action('woocommerce_settings_saved', 'woocomerce_check_download_folder_protection');
