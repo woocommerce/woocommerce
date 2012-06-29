@@ -89,7 +89,10 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 				$weight *= 0.001;
 			break;
 			case 'lbs':
-				$weight *= 0.4535;
+				$weight *= 0.4536;
+			break;
+			case 'oz':
+				$weight *= 0.0283;
 			break;
 		}
 
@@ -99,7 +102,10 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 				$weight *= 1000;
 			break;
 			case 'lbs':
-				$weight *= 2.204;
+				$weight *= 2.2046;
+			break;
+			case 'oz':
+				$weight *= 35.274;
 			break;
 		}
 	}
