@@ -167,13 +167,6 @@ class WC_Paypal extends WC_Payment_Gateway {
     } // End init_form_fields()
     
     /**
-	 * There are no payment fields for paypal, but we want to show the description if set.
-	 **/
-    function payment_fields() {
-    	if ($this->description) echo wpautop(wptexturize($this->description));
-    }
-    
-    /**
 	 * Get PayPal Args for passing to PP
 	 **/
 	function get_paypal_args( $order ) {

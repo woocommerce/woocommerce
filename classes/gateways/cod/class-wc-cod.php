@@ -70,10 +70,6 @@ class WC_COD extends WC_Payment_Gateway {
  	   );
     }
     
-	function payment_fields() {	 // Fields for the payment form	
-		if ($this->description) { echo wpautop($this->description); }
-    }
-    
     // Process the payment
 	function process_payment ($order_id) {
 		global $woocommerce;

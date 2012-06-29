@@ -34,7 +34,7 @@ function woocommerce_shipping_methods_setting() {
 				    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
 				    			<input type="hidden" name="method_order[]" value="' . $method->id . '" />
 				    			<td>
-				    				<p><strong>' . $method->title . '</strong><br/>
+				    				<p><strong>' . $method->get_title() . '</strong><br/>
 				    				<small>' . __('Method ID', 'woocommerce') . ': ' . $method->id . '</small></p>
 				    			</td>
 				    			<td>';

@@ -33,7 +33,7 @@ function woocommerce_payment_gateways_setting() {
 		        				<input type="hidden" name="gateway_order[]" value="' . $gateway->id . '" />
 		        			</td>
 		        			<td>
-		        				<p><strong>' . $gateway->title . '</strong><br/>
+		        				<p><strong>' . $gateway->get_title() . '</strong><br/>
 		        				<small>' . __('Gateway ID', 'woocommerce') . ': ' . $gateway->id . '</small></p>
 		        			</td>
 		        			<td>';

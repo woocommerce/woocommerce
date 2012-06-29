@@ -198,19 +198,6 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 		</table><!--/.form-table-->
 		<?php
   	}
-  	
-    /**
-     * payment_fields function.
-     *
-     * There are no payment fields for Mijireh Checkout, but show the description if available.
-     * 
-     * @access public
-     * @return void
-     */
-    public function payment_fields() {
-    	if ( $this->description ) 
-    		echo wpautop(wptexturize($this->description));
-    }
     
     /**
      * process_payment function.

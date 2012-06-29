@@ -57,6 +57,50 @@ class WC_Payment_Gateway extends WC_Settings_API {
 	}
 	
 	/**
+	 * has_fields function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function has_fields() {
+		return $this->has_fields ? true : false;
+	}
+	
+	/**
+	 * Return the gateways title
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_title() {
+		return apply_filters( 'woocommerce_gateway_title', $this->title, $this->id );
+	}
+
+	/**
+	 * Return the gateways description
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_description() {
+		return apply_filters( 'woocommerce_gateway_description', $this->description, $this->id );
+	}
+	
+	/**
+	 * get_icon function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_icon() {
+		global $woocommerce;
+		
+		$icon = $this->icon ? '<img src="' . $woocommerce->force_ssl( $this->icon ) . '" alt="' . $this->title . '" />' : '';
+			
+		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}
+	
+	/**
 	 * Set As Current Gateway.
 	 *
 	 * Set this as the current gateway.
@@ -75,9 +119,8 @@ class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.0.0
 	 */
 	function icon() {
-		global $woocommerce;
-		if ( $this->icon )
-			return '<img src="' . $woocommerce->force_ssl( $this->icon ) . '" alt="' . $this->title . '" />';
+		_deprecated_function( __FUNCTION__, '1.5.9', 'get_icon()' );
+		return $this->get_icon();
 	}
 	
 	/**
@@ -103,8 +146,8 @@ class WC_Payment_Gateway extends WC_Settings_API {
     * Override this in your gateway if you have some.
     */
     function payment_fields() {
-        if ( $this->description ) 
-        	echo wpautop( wptexturize( $this->description ) );
+        if ( $description = $this->get_description() ) 
+        	echo wpautop( wptexturize( $description ) );
     }
     
 	/**

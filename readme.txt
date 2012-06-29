@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
 * Tweak - Cart widget filters added and renamed for consistency.
+* Tweak - Payment gateway API tweaks - get_title, get_icon, get_description
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID

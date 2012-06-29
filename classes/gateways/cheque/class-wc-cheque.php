@@ -82,16 +82,10 @@ class WC_Cheque extends WC_Payment_Gateway {
 		</table><!--/.form-table-->
     	<?php
     } // End admin_options()
-
-	/**
-	* There are no payment fields for cheques, but we want to show the description if set.
-	**/
-	function payment_fields() {
-		if ($this->description) echo wpautop(wptexturize($this->description));
-	}
 	
 	function thankyou_page() {
-		if ($this->description) echo wpautop(wptexturize($this->description));
+		if ( $description = $this->get_description() ) 
+        	echo wpautop( wptexturize( $description ) );
 	}
 	
 	function email_instructions( $order, $sent_to_admin ) {
@@ -101,7 +95,8 @@ class WC_Cheque extends WC_Payment_Gateway {
     	
     	if ( $order->payment_method !== 'cheque') return;
     	
-		if ($this->description) echo wpautop(wptexturize($this->description));
+		if ( $description = $this->get_description() ) 
+        	echo wpautop( wptexturize( $description ) );
 	}
 	
 	/**

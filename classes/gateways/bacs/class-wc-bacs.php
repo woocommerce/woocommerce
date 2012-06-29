@@ -124,16 +124,9 @@ class WC_BACS extends WC_Payment_Gateway {
     	<?php
     } // End admin_options()
 
-
-    /**
-    * There are no payment fields for bacs, but we want to show the description if set.
-    **/
-    function payment_fields() {
-      if ($this->description) echo wpautop(wptexturize($this->description));
-    }
-
     function thankyou_page() {
-		if ($this->description) echo wpautop(wptexturize($this->description));
+		if ( $description = $this->get_description() ) 
+        	echo wpautop( wptexturize( $description ) );
 		
 		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
 		
@@ -166,7 +159,8 @@ class WC_BACS extends WC_Payment_Gateway {
     	
     	if ( $order->payment_method !== 'bacs') return;
     	
-		if ($this->description) echo wpautop(wptexturize($this->description));
+		if ( $description = $this->get_description() ) 
+        	echo wpautop( wptexturize( $description ) );
 		
 		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
 		
