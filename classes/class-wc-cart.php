@@ -658,63 +658,10 @@ class WC_Cart {
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() )
 				$quantity = 1;
-			
-			// Type/Exists check
-			if ( $product_data->is_type('external') || ! $product_data->exists() ) {
-				$woocommerce->add_error( __('This product cannot be purchased.', 'woocommerce') );
-				return false; 
-			}
-			
-			// Price set check
-			if( $product_data->get_price() === '' ) {
-				$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set.', 'woocommerce') );
-				return false; 
-			}
-	
-			// Stock check - only check if we're managing stock and backorders are not allowed
-			if ( ! $product_data->has_enough_stock( $quantity ) ) {
-				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woocommerce'), $product_data->get_stock_quantity() ));
-				return false; 
-			} elseif ( ! $product_data->is_in_stock() ) {
-				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
-				return false;
-			}
 
-			// Downloadable/virtual qty check
-			if ( $product_data->is_sold_individually() ) {
-				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
-				
-				// If its greater than 1, its already in the cart
-				if ( $in_cart_quantity > 1 ) {
-					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
-					return false;
-				}
-			}
-			
-			// Stock check - this time accounting for whats already in-cart
-			$product_qty_in_cart = $this->get_cart_item_quantities();
-			
-			if ( $product_data->managing_stock() ) {
-				
-				// Variations
-				if ( $variation_id && $product_data->variation_has_stock ) {
-						
-					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
-						return false;
-					}
-				
-				// Products
-				} else {
-					
-					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
-						return false;
-					}
-					
-				}
-				
-			}			
+			// Check if this product can be added to the cart
+			if ( !add_to_cart_check( $product_data, $product_id, $quantity, $variation_id, $cart_item_key, $cart_item_data ) ) 
+				return false;
 			
 			// If cart_item_key is set, the item is already in the cart
 			if ( $cart_item_key ) {
@@ -745,6 +692,80 @@ class WC_Cart {
 			$this->set_session();
 			
 			return true;
+		}
+
+
+		/**
+		 * Check if a product can be added to the cart
+		 *
+		 * @param string $product_id contains the id of the product to check
+		 * @param string $quantity contains the quantity of the item to add
+		 * @param int $variation_id
+		 * @param array $variation attribute values
+		 * @param array $cart_item_data extra cart item data passed into the item
+		 * @return bool
+		 */
+		function add_to_cart_check( $product_data, $product_id, $quantity, $variation_id, $cart_item_key, $cart_item_data ) {
+			global $woocommerce;
+
+			// Type/Exists check
+			if ( $product_data->is_type('external') || ! $product_data->exists() ) {
+				$woocommerce->add_error( apply_filters( 'woocommerce_add_to_cart_error_message', __('This product cannot be purchased.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ) );
+				return false; 
+			}
+			
+			// Price set check
+			if( $product_data->get_price() === '' && apply_filters( 'woocommerce_add_to_cart_empty_price_halt', true, $product_data, $cart_item_key, $cart_item_data ) ) {
+				$woocommerce->add_error( apply_filters( 'woocommerce_add_to_cart_error_message', __('This product cannot be purchased - the price is not yet set.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ) );
+				return false; 
+			}
+
+			// Downloadable/virtual qty check
+			if ( $product_data->is_sold_individually() ) {
+				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
+				
+				// If its greater than 1, its already in the cart
+				if ( $in_cart_quantity > 1 && apply_filters( 'woocommerce_add_to_cart_individual_halt', true, $product_data, $cart_item_key, $cart_item_data ) ) {
+					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), apply_filters( 'woocommerce_add_to_cart_error_message', __('You already have this item in your cart.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ) ) );
+					return false;
+				}
+			}
+
+			// Stock check - only check if we're managing stock and backorders are not allowed
+			if ( ! $product_data->has_enough_stock( $quantity ) ) {
+				$woocommerce->add_error( sprintf( apply_filters( 'woocommerce_add_to_cart_error_message', __('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ), $product_data->get_stock_quantity() ) );
+				return false; 
+			} elseif ( ! $product_data->is_in_stock() ) {
+				$woocommerce->add_error( apply_filters( 'woocommerce_add_to_cart_error_message', __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ) );
+				return false;
+			}
+			
+			// Stock check - this time accounting for whats already in-cart
+			$product_qty_in_cart = $this->get_cart_item_quantities();
+			
+			if ( $product_data->managing_stock() ) {
+				
+				// Variations
+				if ( $variation_id && $product_data->variation_has_stock ) {
+						
+					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
+						$woocommerce->add_error( sprintf( '<a href="%s" class="button">%s</a> ' . apply_filters( 'woocommerce_add_to_cart_error_message', __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
+						return false;
+					}
+				
+				// Products
+				} else {
+					
+					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
+						$woocommerce->add_error( sprintf( '<a href="%s" class="button">%s</a> ' . apply_filters( 'woocommerce_add_to_cart_error_message', __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), $product_data, $cart_item_key, $cart_item_data ), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
+						return false;
+					}
+					
+				}
+				
+			}		
+
+			return true;		
 		}
 
 		/**
