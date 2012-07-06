@@ -12,13 +12,13 @@ $home_link = home_url();
 $prepend = '';
 
 if ( get_option('woocommerce_prepend_shop_page_to_urls')=="yes" && woocommerce_get_page_id('shop') && get_option('page_on_front') !== woocommerce_get_page_id('shop') )
-	$prepend =  $before . '<a href="' . get_permalink( woocommerce_get_page_id('shop') ) . '">' . get_the_title( woocommerce_get_page_id('shop') ) . '</a> ' . $after . $delimiter;
+	$prepend =  $before . '<a href="' . get_permalink( woocommerce_get_page_id('shop') ) . '" rel="v:url" property="v:title">' . get_the_title( woocommerce_get_page_id('shop') ) . '</a> ' . $after . $delimiter;
 
 if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('page_on_front')==woocommerce_get_page_id('shop'))) || is_paged() ) :
 
 	echo $wrap_before;
 	
-	echo $before  . '<a class="home" href="' . $home_link . '">' . $home . '</a> '  . $after . $delimiter ;
+	echo $before  . '<a class="home" href="' . $home_link . '" rel="v:url" property="v:title">' . $home . '</a> '  . $after . $delimiter ;
 	
 	if ( is_category() ) :
 	
@@ -48,7 +48,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 			$parents = array_reverse($parents);
 			foreach ($parents as $parent):
 				$item = get_term_by( 'id', $parent, get_query_var( 'taxonomy' ));
-				echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
+				echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '" rel="v:url" property="v:title">' . $item->name . '</a>' . $after . $delimiter;
 			endforeach;
 		endif;
 	
@@ -62,13 +62,13 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 	elseif ( is_day() ) :
 	
-		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '">' . get_the_time('Y') . '</a>' . $after . $delimiter;
-		echo $before . '<a href="' . get_month_link(get_the_time('Y'),get_the_time('m')) . '">' . get_the_time('F') . '</a>' . $after . $delimiter;
+		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '" rel="v:url" property="v:title">' . get_the_time('Y') . '</a>' . $after . $delimiter;
+		echo $before . '<a href="' . get_month_link(get_the_time('Y'),get_the_time('m')) . '" rel="v:url" property="v:title">' . get_the_time('F') . '</a>' . $after . $delimiter;
 		echo $before . get_the_time('d') . $after;
 	
 	elseif ( is_month() ) :
 	
-		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '">' . get_the_time('Y') . '</a>' . $after . $delimiter;
+		echo $before . '<a href="' . get_year_link(get_the_time('Y')) . '" rel="v:url" property="v:title">' . get_the_time('Y') . '</a>' . $after . $delimiter;
 		echo $before . get_the_time('F') . $after;
 	
 	elseif ( is_year() ) :
@@ -81,11 +81,11 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	
 		if (is_search()) :
 	
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __('Search results for &ldquo;', 'woocommerce') . get_search_query() . '&rdquo;' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '" rel="v:url" property="v:title">' . $_name . '</a>' . $delimiter . __('Search results for &ldquo;', 'woocommerce') . get_search_query() . '&rdquo;' . $after;
 	
 		else :
 	
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '" rel="v:url" property="v:title">' . $_name . '</a>' . $after;
 	
 		endif;
 	
@@ -108,10 +108,10 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 				$parents = array_reverse($parents);
 				foreach ($parents as $parent):
 					$item = get_term_by( 'id', $parent, 'product_cat');
-					echo $before . '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
+					echo $before . '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '" rel="v:url" property="v:title">' . $item->name . '</a>' . $after . $delimiter;
 				endforeach;
 			endif;
-			echo $before . '<a href="' . get_term_link( $term->slug, 'product_cat' ) . '">' . $term->name . '</a>' . $after . $delimiter;
+			echo $before . '<a href="' . get_term_link( $term->slug, 'product_cat' ) . '" rel="v:url" property="v:title">' . $term->name . '</a>' . $after . $delimiter;
 		endif;
 	
 		echo $before . get_the_title() . $after;
@@ -119,7 +119,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 	elseif ( get_post_type() != 'post' ) :
 		$post_type = get_post_type_object(get_post_type());
 		$slug = $post_type->rewrite;
-			echo $before . '<a href="' . get_post_type_archive_link(get_post_type()) . '">' . $post_type->labels->singular_name . '</a>' . $after . $delimiter;
+			echo $before . '<a href="' . get_post_type_archive_link(get_post_type()) . '" rel="v:url" property="v:title">' . $post_type->labels->singular_name . '</a>' . $after . $delimiter;
 		echo $before . get_the_title() . $after;
 	else :
 		$cat = current(get_the_category());
@@ -154,7 +154,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 		$breadcrumbs = array();
 		while ($parent_id) {
 			$page = get_page($parent_id);
-			$breadcrumbs[] = '<a href="' . get_permalink($page->ID) . '">' . get_the_title($page->ID) . '</a>';
+			$breadcrumbs[] = '<a href="' . get_permalink($page->ID) . '" rel="v:url" property="v:title">' . get_the_title($page->ID) . '</a>';
 			$parent_id  = $page->post_parent;
 		}
 		$breadcrumbs = array_reverse($breadcrumbs);
