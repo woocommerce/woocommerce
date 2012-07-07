@@ -10555,7 +10555,7 @@ msgstr ""
 #@ woocommerce
 #: templates/single-product/add-to-cart/variable.php:43
 msgid "Clear selection"
-msgstr ""
+msgstr "Annulla selezione"
 
 #@ woocommerce
 #: templates/single-product/review.php:25
