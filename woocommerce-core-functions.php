@@ -604,7 +604,7 @@ function woocommerce_exclude_order_comments( $clauses ) {
 	
 	if (is_admin() && $typenow=='shop_order') return $clauses; // Don't hide when viewing orders in admin
 	
-	$clauses['join'] = "LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID";
+	if ($clauses['join']) $clauses['join'] .= "LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID";
 	
 	if ($clauses['where']) $clauses['where'] .= ' AND ';
 	
