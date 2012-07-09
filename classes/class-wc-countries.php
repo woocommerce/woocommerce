@@ -679,6 +679,11 @@ class WC_Countries {
 						'placeholder'	=> __('Province', 'woocommerce')
 					)
 				),
+				'CO' => array(
+					'postcode' => array(
+						'required' 	=> false
+					)
+				),
 				'CZ' => array(
 					'state'		=> array(
 						'required' => false
