@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Order count clear transient on delete
 * Fix - When placing an order again, clear current cart.
 * Fix - Colombia zipcodes are not required
+* Fix - Conflict with WPML joins
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML

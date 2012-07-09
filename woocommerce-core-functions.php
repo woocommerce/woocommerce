@@ -602,11 +602,18 @@ add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_
 function woocommerce_exclude_order_comments( $clauses ) {
 	global $wpdb, $typenow;
 	
-	if (is_admin() && $typenow=='shop_order') return $clauses; // Don't hide when viewing orders in admin
+	if ( is_admin() && $typenow == 'shop_order' ) 
+		return $clauses; // Don't hide when viewing orders in admin
 	
-	$clauses['join'] = "LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID";
+	if ( ! $clauses['join'] )
+		$clauses['join'] = '';
 	
-	if ($clauses['where']) $clauses['where'] .= ' AND ';
+	$clauses['join'] .= " 
+		LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID 
+	";
+	
+	if ( $clauses['where'] ) 
+		$clauses['where'] .= ' AND ';
 	
 	$clauses['where'] .= "
 		$wpdb->posts.post_type NOT IN ('shop_order')
