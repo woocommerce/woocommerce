@@ -343,12 +343,15 @@ function woocommerce_status() {
             	
             	// WP Remote Post Check
 				$posting['wp_remote_post']['name'] = __('WP Remote Post Check','woocommerce');
+				$request['cmd'] = '_notify-validate';
 				$params = array( 
 					'sslverify' 	=> false,
 		        	'timeout' 		=> 60,
-		        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version
+		        	'user-agent'	=> 'WooCommerce/' . $woocommerce->version,
+		        	'body'			=> $request
 				);	
 				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
+				
 				if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
             		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce'); 
             		$posting['wp_remote_post']['success'] = true;
