@@ -1165,7 +1165,7 @@ function woocommerce_product_sales() {
 						$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
 						$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
 		
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode(get_the_title($chosen_product_id)) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
+						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( implode( ' ', $chosen_product_titles ) ) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
 		
 						echo '<tr><th><a href="'.$orders_link.'">'.date_i18n('F', strtotime($date.'01')).'</a></th>
 						<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
