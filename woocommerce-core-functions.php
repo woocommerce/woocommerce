@@ -828,6 +828,9 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
  */
 function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' ) {
 	
+	if ( ! taxonomy_exists( $taxonomy ) ) 
+		return array();
+	
 	$terms 			= array();
 	$object_terms 	= wp_get_object_terms( $object_id, $taxonomy );
 	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );

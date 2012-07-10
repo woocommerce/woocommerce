@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Colombia zipcodes are not required
 * Fix - Conflict with WPML joins
 * Fix - IPN check with PayPal redesign
+* Fix - When showing attributes, check taxonomies exist
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
 
