@@ -116,7 +116,13 @@ class WC_Coupon {
 	/** Increase usage count */
 	function inc_usage_count() {
 		$this->usage_count++;
-		update_post_meta($this->id, 'usage_count', $this->usage_count);
+		update_post_meta( $this->id, 'usage_count', $this->usage_count );
+	}
+	
+	/** Decrease usage count */
+	function dcr_usage_count() {
+		$this->usage_count--;
+		update_post_meta( $this->id, 'usage_count', $this->usage_count );
 	}
 		
 	/**

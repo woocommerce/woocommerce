@@ -128,17 +128,6 @@ function woocommerce_update_catalog_ordering() {
 }
 
 /**
- * Increase coupon usage count
- */
-function woocommerce_increase_coupon_counts() {
-	global $woocommerce;
-	if ($applied_coupons = $woocommerce->cart->get_applied_coupons()) foreach ($applied_coupons as $code) :
-		$coupon = new WC_Coupon( $code );
-		$coupon->inc_usage_count();
-	endforeach;
-}
-
-/**
  * Remove from cart/update
  **/
 function woocommerce_update_cart_action() {

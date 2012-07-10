@@ -152,12 +152,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.xxxx - xx/xx/2012 =
 * Feature - Support for ounces
+* Feature - Restore coupon usage count after order cancellation
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
 * Tweak - Cart widget filters added and renamed for consistency.
 * Tweak - Payment gateway API tweaks - get_title, get_icon, get_description
 * Tweak - Price filter widgets takes you back to page 1.
+* Tweak - Changed microdata for offers/product so its picked up by google
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
@@ -170,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Conflict with WPML joins
 * Fix - IPN check with PayPal redesign
 * Fix - When showing attributes, check taxonomies exist
+* Fix - When adding multiple items to an order, saving lost all by the first
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
 

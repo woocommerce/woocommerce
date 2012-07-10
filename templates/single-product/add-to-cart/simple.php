@@ -17,11 +17,7 @@ if( $product->get_price() === '') return;
     endif;
 ?>
 
-<?php if (!$product->is_in_stock()) : ?>
-	<link itemprop="availability" href="http://schema.org/OutOfStock">
-<?php else : ?>
-
-	<link itemprop="availability" href="http://schema.org/InStock">
+<?php if ( $product->is_in_stock() ) : ?>
 
 	<?php do_action('woocommerce_before_add_to_cart_form'); ?>
 	
