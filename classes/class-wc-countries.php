@@ -554,6 +554,7 @@ class WC_Countries {
 				'AU' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 				'AT' => $postcode_before_city,
 				'BE' => $postcode_before_city,
+				'CH' => $postcode_before_city,
 				'CN' => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
 				'CZ' => $postcode_before_city,
 				'DE' => $postcode_before_city,
@@ -564,6 +565,7 @@ class WC_Countries {
 				'HU' => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 				'IS' => $postcode_before_city,
 				'IS' => $postcode_before_city,
+				'LI' => $postcode_before_city,
 				'NL' => $postcode_before_city,
 				'NZ' => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 				'NO' => $postcode_before_city,
@@ -664,6 +666,14 @@ class WC_Countries {
 						'placeholder'	=> __('Province', 'woocommerce')
 					)
 				),
+				'CH' => array(
+                    'postcode_before_city' => true,
+                    'state' => array(
+                        'label'         => __('Canton', 'woocommerce'),
+                        'placeholder'   => __('Canton', 'woocommerce'),
+                        'required'      => false
+                    )
+                ),
 				'CL' => array(
 					'city'		=> array(
 						'required' 	=> false,
@@ -795,6 +805,14 @@ class WC_Countries {
 						'placeholder'	=> __('Province', 'woocommerce')
 					)
 				),
+				'LI' => array(
+                    'postcode_before_city' => true,
+                    'state' => array(
+                        'label'         => __('Municipality', 'woocommerce'),
+                        'placeholder'   => __('Municipality', 'woocommerce'),
+                        'required'      => false
+                    )
+                ),
 				'LK' => array(
 					'state'	=> array(
 						'required' => false
@@ -949,27 +967,38 @@ class WC_Countries {
 				'clear'			=> true
 				)
 		);
-
-		if (isset($locale[$country])) :
+		
+		if ( isset( $locale[$country] ) ) {
 			
 			$fields = woocommerce_array_overlay( $fields, $locale[$country] );
 			
-			if (isset($locale[$country]['postcode_before_city'])) :
-				$fields['city']['class'] = array('form-row-last');
-				$fields['postcode']['class'] = array('form-row-first', 'update_totals_on_change');
-			endif;
-			
-		endif;
+			if ( isset( $locale[$country]['postcode_before_city'] ) ) {
+				$fields['city']['class'] 		= array('form-row-last');
+				$fields['postcode']['class'] 	= array('form-row-first', 'update_totals_on_change');
+				
+				$switch_fields = array();
+				
+				foreach ( $fields as $key => $value ) {
+					if ( $key == 'city' ) {
+						// Place postcode before city
+						$switch_fields['postcode'] = '';
+					}
+					$switch_fields[$key] = $value;
+				}
+				
+				$fields = $switch_fields;
+			}
+		}
 		
 		// Prepend field keys
 		$address_fields = array();
 		
-		foreach ($fields as $key => $value) :
+		foreach ( $fields as $key => $value ) {
 			$address_fields[$type . $key] = $value;
-		endforeach;
+		}
 		
 		// Billing/Shipping Specific
-		if ($type=='billing_') :
+		if ( $type == 'billing_' ) {
 
 			$address_fields['billing_email'] = array(
 				'label' 		=> __('Email Address', 'woocommerce'), 
@@ -986,9 +1015,9 @@ class WC_Countries {
 			);
 			
 			$address_fields = apply_filters('woocommerce_billing_fields', $address_fields);
-		else :
+		} else {
 			$address_fields = apply_filters('woocommerce_shipping_fields', $address_fields);
-		endif;
+		}
 		
 		// Return
 		return $address_fields;

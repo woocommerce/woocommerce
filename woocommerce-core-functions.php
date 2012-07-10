@@ -608,32 +608,31 @@ function woocommerce_exclude_order_comments( $clauses ) {
 	if ( ! $clauses['join'] )
 		$clauses['join'] = '';
 	
-	$clauses['join'] .= " 
-		LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID 
-	";
+	if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
+		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
 	
 	if ( $clauses['where'] ) 
 		$clauses['where'] .= ' AND ';
 	
-	$clauses['where'] .= "
-		$wpdb->posts.post_type NOT IN ('shop_order')
-	";
+	$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('shop_order') ";
 	
 	return $clauses;	
 }
 function woocommerce_exclude_order_comments_from_feed_join( $join ) {
 	global $wpdb;
 	
-    if (!$join) $join = "JOIN $wpdb->posts ON ( $wpdb->comments.comment_post_ID = $wpdb->posts.ID )";
+    if ( ! $join ) 
+    	$join = " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
 
     return $join;
 }
 function woocommerce_exclude_order_comments_from_feed_where( $where ) {
 	global $wpdb;
 
-    if ($where) $where .= ' AND ';
+    if ( $where ) 
+    	$where .= ' AND ';
 	
-	$where .= "$wpdb->posts.post_type NOT IN ('shop_order')";
+	$where .= " $wpdb->posts.post_type NOT IN ('shop_order') ";
     
     return $where;
 }
@@ -828,6 +827,9 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
  * @return array
  */
 function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' ) {
+	
+	if ( ! taxonomy_exists( $taxonomy ) ) 
+		return array();
 	
 	$terms 			= array();
 	$object_terms 	= wp_get_object_terms( $object_id, $taxonomy );

@@ -36,7 +36,13 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		
 	<?php endif; ?>
 			
-	<?php foreach ($attributes as $attribute) : if ( ! isset( $attribute['is_visible'] ) || ! $attribute['is_visible'] ) continue; $alt = $alt * -1; ?>
+	<?php foreach ($attributes as $attribute) : 
+		
+		if ( ! isset( $attribute['is_visible'] ) || ! $attribute['is_visible'] ) continue;
+		if ( $attribute['is_taxonomy'] && ! taxonomy_exists( $attribute['name'] ) ) continue;
+		
+		$alt = $alt * -1; 
+		?>
 			
 		<tr class="<?php if ( $alt == 1 ) echo 'alt'; ?>">
 			<th><?php echo $woocommerce->attribute_label( $attribute['name'] ); ?></th>
