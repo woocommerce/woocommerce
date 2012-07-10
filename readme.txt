@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Conflict with WPML joins
 * Fix - IPN check with PayPal redesign
 * Fix - When showing attributes, check taxonomies exist
+* Fix - When adding multiple items to an order, saving lost all by the first
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
 

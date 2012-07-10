@@ -240,10 +240,10 @@ jQuery( function($){
 			
 			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
 		
+			var size = $('table.woocommerce_order_items tbody tr.item').size();
+			
 			$.each( add_item_ids, function( index, value ) {
 			
-				var size = $('table.woocommerce_order_items tbody tr.item').size();
-				
 				var data = {
 					action: 		'woocommerce_add_order_item',
 					item_to_add: 	value,
@@ -266,6 +266,8 @@ jQuery( function($){
 					    $('table.woocommerce_order_items').unblock();
 					}		
 				});
+				
+				size++;
 			
 			});
 
