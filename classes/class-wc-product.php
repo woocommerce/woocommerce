@@ -358,7 +358,7 @@ class WC_Product {
 			$url = add_query_arg('add-to-cart', $this->id);
 		endif;
 
-		return $url;
+		return apply_filters( 'woocommerce_add_to_cart_url', $url );
 	}
 	
 	/** Returns whether or not the product is stock managed */
