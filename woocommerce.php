@@ -1057,15 +1057,26 @@ class Woocommerce {
 		if ( ! class_exists('WC_Validation') ) include( 'classes/class-wc-validation.php' );
 		return new WC_Validation();
 	}
+
+	/**
+	 * Init a coupon
+	 */
+	function coupon( $code ) {
+		if ( ! class_exists('WC_Coupon') ) include( 'classes/class-wc-coupon.php' );
+		return new WC_Coupon( $code );
+	}
 	
 	/**
-	 * Email Class
+	 * Init the mailer and call the notifications for the current filter
 	 */
 	function send_transactional_email( $args = array() ) {
 		$this->mailer();
 		do_action( current_filter() . '_notification' , $args );
 	}
 	
+	/**
+	 * Email Class
+	 */
 	function mailer() { 
 		// Init mail class
 		if ( ! class_exists('WC_Email') ) {

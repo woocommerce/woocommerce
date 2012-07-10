@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.xxxx - xx/xx/2012 =
 * Feature - Support for ounces
+* Feature - Restore coupon usage count after order cancellation
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 

@@ -688,21 +688,35 @@ class WC_Order {
 		
 		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status');
 		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status');
+		
 		if ($new_status) {
 			
 			wp_set_object_terms($this->id, array( $new_status->slug ), 'shop_order_status', false);
 			
 			if ( $this->status != $new_status->slug ) {
+				
 				// Status was changed
 				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __($old_status->name, 'woocommerce'), __($new_status->name, 'woocommerce') ) );
-
-				// Date
-				if ($new_status->slug=='completed') update_post_meta( $this->id, '_completed_date', current_time('mysql') );
 				
-				// Sales
-				if ($new_status->slug=='processing' || $new_status->slug=='completed' || $new_status->slug=='on-hold') $this->record_product_sales();
+				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
+
+				// Record the completed date of the order
+				if ( $new_status->slug == 'completed' ) 
+					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+				
+				if ( $new_status->slug == 'processing' || $new_status->slug == 'completed' || $new_status->slug == 'on-hold' ) {
+					
+					// Record the sales
+					$this->record_product_sales();
+					
+					// Increase coupon usage counts
+					$this->increase_coupon_usage_counts();
+				}
+				
+				// If the order is cancelled, restore used coupons
+				if ( $new_status->slug == 'cancelled' ) 
+					$this->decrease_coupon_usage_counts();
 				
 			}
 
@@ -785,20 +799,77 @@ class WC_Order {
 	 */
 	function record_product_sales() {
 		
-		if ( get_post_meta( $this->id, '_recorded_sales', true )=='yes' ) return;
+		if ( get_post_meta( $this->id, '_recorded_sales', true ) == 'yes' ) 
+			return;
 		
-		if (sizeof($this->get_items())>0) foreach ($this->get_items() as $item) :
-			if ($item['id']>0) :
-				$sales 	= (int) get_post_meta( $item['id'], 'total_sales', true );
-				$sales += (int) $item['qty'];
-				if ($sales) update_post_meta( $item['id'], 'total_sales', $sales );
-			endif;
-		endforeach;
+		if ( sizeof( $this->get_items() ) > 0 ) {
+			foreach ( $this->get_items() as $item ) {
+				if ( $item['id'] > 0 ) {
+					$sales = (int) get_post_meta( $item['id'], 'total_sales', true );
+					$sales += (int) $item['qty'];
+					if ( $sales ) 
+						update_post_meta( $item['id'], 'total_sales', $sales );
+				}
+			}
+		}
 		
 		update_post_meta( $this->id, '_recorded_sales', 'yes' );
+	}
+
+	/**
+	 * Increase applied coupon counts
+	 */
+	function get_used_coupons() {
 		
+		$coupons = get_post_meta( $this->id, 'coupons', true );
+		
+		return array_map( 'trim', explode( ',', $coupons ) );
 	}
 	
+	/**
+	 * Increase applied coupon counts
+	 */
+	function increase_coupon_usage_counts() {
+		global $woocommerce;
+		
+		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) == 'yes' ) 
+			return;
+			
+		if ( sizeof( $this->get_used_coupons() ) > 0 ) {
+			foreach ( $this->get_used_coupons() as $code ) {
+				if ( ! $code )
+					continue;
+					
+				$coupon = $woocommerce->coupon( $code );
+				$coupon->inc_usage_count();
+			}
+		}
+		
+		update_post_meta( $this->id, '_recorded_coupon_usage_counts', 'yes' );
+	}
+	
+	/**
+	 * Decrease applied coupon counts
+	 */
+	function decrease_coupon_usage_counts() {
+		global $woocommerce;
+		
+		if ( get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) != 'yes' ) 
+			return;
+			
+		if ( sizeof( $this->get_used_coupons() ) > 0 ) {
+			foreach ( $this->get_used_coupons() as $code ) {
+				if ( ! $code )
+					continue;
+					
+				$coupon = $woocommerce->coupon( $code );
+				$coupon->dcr_usage_count();
+			}
+		}
+		
+		delete_post_meta( $this->id, '_recorded_coupon_usage_counts' );
+	}
+		
 	/**
 	 * Reduce stock levels
 	 */
