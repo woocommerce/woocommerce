@@ -1345,13 +1345,20 @@ class WC_Cart {
 			
 			// Allow plugins to hook and alter totals before final total is calculated
 			do_action( 'woocommerce_calculate_totals', $this );			
+			
+//////////////////////////////////////////////
+	$additional_fees_no_tax = 0.0;
+	
+			//	handler must update tax values in $this->taxes and total values used in 'Grand Total'
+	$additional_fees_no_tax = apply_filters('woocommerce_wc_cart_add_additional_fees', $additional_fees_no_tax, $this);
+//////   --------->  change next line also
 
 			/** 
 			 * Grand Total
 			 *
 			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 			 */
-			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, 2, '.', '' ), $this );
+			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $additional_fees_no_tax + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, 2, '.', '' ), $this );
 			
 			if ($this->total < 0) $this->total = 0;
 		}

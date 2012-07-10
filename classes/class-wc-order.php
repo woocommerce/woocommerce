@@ -532,6 +532,12 @@ class WC_Order {
 		if ( $this->get_shipping_method() )
 			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
 		
+/**
+ * Hook added
+///////////////////////////////////////////////
+ */
+$total_rows = apply_filters('woocommerce_wc_order_before_tax', $total_rows, $this); 
+
 		if ( $this->get_total_tax() > 0 ) {
 			
 			if ( sizeof( $this->get_taxes() ) > 0 ) {
