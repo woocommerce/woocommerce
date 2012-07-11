@@ -494,7 +494,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 		
-		extract( $args, EXTR_SKIP );
+		extract( $args );
 		
 		// Don't show when filtering
 		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; 

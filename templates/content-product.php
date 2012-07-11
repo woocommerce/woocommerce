@@ -19,7 +19,8 @@ if ( empty( $woocommerce_loop['columns'] ) )
 	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
 
 // Ensure visibilty
-if ( ! $product->is_visible() ) return; 
+if ( ! $product->is_visible() ) 
+	return; 
 
 // Increase loop count
 $woocommerce_loop['loop']++;

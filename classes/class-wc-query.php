@@ -27,7 +27,10 @@ class WC_Query {
 	 * Hook into pre_get_posts to do the main product query
 	 */
 	function pre_get_posts( $q ) {
-		global $woocommerce;
+		global $woocommerce, $woocommerce_loop;
+		
+		// Reset loop/columns globals when starting a new loop
+		$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
 		
 		// We only want to affect the main query
 		if ( ! $q->is_main_query() )
