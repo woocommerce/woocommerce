@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.6 - xx/xx/2012 =
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
+* Feature - Added bulk actions to bulk change order status to processing or completed
 * Templating - Abolished the use of query_posts.
 * Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
 * Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
