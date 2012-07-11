@@ -635,6 +635,30 @@ function woocommerce_admin_fields($options) {
                		</td>
                	</tr><?php		            	
             break;
+			case 'multi_select_sortable_taxonomies' :
+				$taxonomy_options = get_taxonomies( array( 'public' => true, 'hierarchical' => true ), 'objects' );
+				foreach ( $taxonomy_options as $name => &$tax_object ) {
+					if ( 'product_cat' == $name || 'product_shipping_class' == $name || 'pa_' == substr( $name, 0, 3 ) )
+						unset( $taxonomy_options[$name] );
+					else
+						$tax_object = $tax_object->label;
+				}
+				$selections = (array) get_option($value['id']);
+            	 ?><tr valign="top">
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+					</th>
+                    <td class="forminp">
+	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:300px;" data-placeholder="<?php _e('Choose taxonomies&hellip;', 'woocommerce'); ?>" title="Taxonomy" class="chosen_select">	
+				        	<?php
+				        		if ($taxonomy_options) foreach ($taxonomy_options as $key=>$val) :
+	                    			echo '<option value="'.$key.'" '.selected( in_array($key, $selections), true, false ).'>'.$val.'</option>';   			
+	                    		endforeach;   
+	                    	?>     
+				        </select><?php echo $description; ?>
+               		</td>
+               	</tr><?php
+			break;
             default:
             	do_action( 'woocommerce_admin_field_' . $value['type'], $value );
             break;

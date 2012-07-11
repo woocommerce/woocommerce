@@ -264,6 +264,16 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	    'type'     => 'checkbox',
 	    'checkboxgroup'		=> 'end'
 	),
+	
+	array(  
+		'name' 		=> __( 'Sortable taxonomies', 'woocommerce' ),
+		'desc' 		=> __( 'Enable custom, drag-and-drop sorting on non-woocommerce taxonomies', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_tax_sorting',
+		'css'		=> '',
+		'std' 		=> '',
+		'type' 		=> 'multi_select_sortable_taxonomies',
+		'desc_tip'	=>  true
+	),	
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
 	
