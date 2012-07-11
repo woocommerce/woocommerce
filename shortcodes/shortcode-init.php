@@ -392,7 +392,7 @@ function woocommerce_featured_products( $atts ) {
 /**
  * Show a single product page
  **/
-function woocommerce_product_page_shortcode($atts){
+function woocommerce_product_page_shortcode( $atts ) {
   	if (empty($atts)) return;
 	
 	if (!$atts['id'] && !$atts['sku']) return;
@@ -416,13 +416,23 @@ function woocommerce_product_page_shortcode($atts){
   	if(isset($atts['id'])){
     	$args['p'] = $atts['id'];
   	}
+  	
+  	$single_product = new WP_Query( $args );
 
-  	$product_query = new WP_Query($args);
   	ob_start();
-  	echo '<div class="single-product">';
-	woocommerce_single_product_content( $product_query );
-	echo '</div>';
+	
+	while ( $single_product->have_posts() ) : $single_product->the_post(); ?>
+
+		<div class="single-product">
+			
+			<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+			
+		</div>
+
+	<?php endwhile; // end of the loop.
+
 	wp_reset_query();
+	
 	return ob_get_clean();
 }	
 

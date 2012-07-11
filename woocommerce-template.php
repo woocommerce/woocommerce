@@ -13,93 +13,49 @@
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
 	// This function is only used in the optional 'woocommerce.php' template
-	// people can add to their themes to add basic woocommerce support.
+	// people can add to their themes to add basic woocommerce support without 
+	// using hooks or modifying core templates.
 	function woocommerce_content() {
-		if ( is_singular( 'product' ) )
-			woocommerce_single_product_content();
-		elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) )
-			woocommerce_product_taxonomy_content();
-		else
-			woocommerce_archive_product_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
-	function woocommerce_archive_product_content() {
-
-		if ( ! is_search() ) {
-			$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
-			$shop_page_title = apply_filters( 'the_title', ( get_option( 'woocommerce_shop_page_title' ) ) ? get_option( 'woocommerce_shop_page_title' ) : $shop_page->post_title );
-			if ( is_object( $shop_page  ) )
-				$shop_page_content = $shop_page->post_content;
-		} else {
-			$shop_page_title = __( 'Search Results:', 'woocommerce' ) . ' &ldquo;' . get_search_query() . '&rdquo;';
-			if ( get_query_var( 'paged' ) ) $shop_page_title .= ' &mdash; ' . __( 'Page', 'woocommerce' ) . ' ' . get_query_var( 'paged' );
-			$shop_page_content = '';
-		}
-
-		?><h1 class="page-title"><?php echo $shop_page_title ?></h1>
-
-		<?php if ( ! empty( $shop_page_content  ) ) echo apply_filters( 'the_content', $shop_page_content ); ?>
-
-		<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
-
-		<?php do_action( 'woocommerce_pagination' );
-
-	}
-}
-if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
-	function woocommerce_product_taxonomy_content() {
-
-		global $wp_query;
-
-		$term = get_term_by( 'slug', get_query_var( $wp_query->query_vars['taxonomy'] ) , $wp_query->query_vars['taxonomy'] );
-
-		?><h1 class="page-title"><?php echo wptexturize( $term->name ); ?></h1>
-
-		<?php if ( $term->description ) : ?>
-
-			<div class="term_description"><?php echo wpautop( wptexturize( $term->description ) ); ?></div>
-
-		<?php endif; ?>
-
-		<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
-
-		<?php do_action( 'woocommerce_pagination' );
-
-	}
-}
-if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
-	function woocommerce_single_product_content( $wc_query = false  ) {
-
-		// Let developers override the query used, in case they want to use this function for their own loop/wp_query
-		if ( ! $wc_query ) {
-			global $wp_query;
-
-			$wc_query = $wp_query;
-		}
-
-		if ( $wc_query->have_posts() ) while ( $wc_query->have_posts() ) : $wc_query->the_post(); ?>
-
-			<?php do_action( 'woocommerce_before_single_product' ); ?>
-
-			<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
-
-				<?php do_action( 'woocommerce_before_single_product_summary' ); ?>
-
-				<div class="summary">
-
-					<?php do_action( 'woocommerce_single_product_summary' ); ?>
-
-				</div>
 	
-				<?php do_action( 'woocommerce_after_single_product_summary' ); ?>
+		if ( is_singular( 'product' ) ) {
+			
+			while ( have_posts() ) : the_post();
 				
-			</div>
+				woocommerce_get_template_part( 'content', 'product' );
 
-			<?php do_action( 'woocommerce_after_single_product' ); ?>
+			endwhile;
 
-		<?php endwhile;
-
+		} else {
+		
+			?><h1 class="page-title">
+				<?php if ( is_search() ) : ?>
+					<?php printf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() ); ?>
+				<?php elseif ( is_tax() ) : ?>
+					<?php echo single_term_title( "", false ); ?>
+				<?php else : ?>
+					<?php 
+						$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
+						
+						echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title );
+					?>
+				<?php endif; ?>
+				
+				<?php if ( get_query_var( 'paged' ) ) : ?>
+					<?php printf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) ); ?>
+				<?php endif; ?>
+			</h1>
+					
+			<?php if ( is_tax() ) : ?>
+				<?php echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>'; ?>
+			<?php elseif ( ! is_search() && ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
+				<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
+			<?php endif; ?>
+			
+			<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
+				
+			<?php do_action( 'woocommerce_pagination' ); 
+			
+		}
 	}
 }
 
