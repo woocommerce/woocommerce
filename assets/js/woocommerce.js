@@ -438,9 +438,10 @@ jQuery(document).ready(function($) {
     }
 	
 	//when one of attributes is changed - check everything to show only valid options
-    function check_variations( exclude ) {
+    function check_variations( exclude, focus ) {
 		var all_set = true;
 		var any_set = false;
+		var showing_variation = false;
 		var current_settings = {};
 		        
 		$('.variations select').each(function(){
@@ -473,7 +474,7 @@ jQuery(document).ready(function($) {
         
         var matching_variations = find_matching_variations(current_settings);
         
-        if(all_set) {
+        if (all_set) {
         	var variation = matching_variations.pop();
         	if (variation) {
             	$('form input[name=variation_id]').val(variation.variation_id).change();
@@ -481,21 +482,22 @@ jQuery(document).ready(function($) {
             } else {
             	// Nothing found - reset fields
             	$('.variations select').val('');
+            	if ( ! focus ) reset_variation_image();
             }
         } else {
             update_variation_values(matching_variations);
+            if ( ! focus ) reset_variation_image();
         }
         
-        if(any_set) {
+        if (any_set) {
         	if ($('.reset_variations').css('visibility') == 'hidden') $('.reset_variations').css('visibility','visible').hide().fadeIn();
         } else {
 			$('.reset_variations').css('visibility','hidden');
 		}
     }
-
-	$('.variations select').change(function(){
-		
-		// Reset image
+    
+    function reset_variation_image() {
+	    // Reset image
 		var img = $('div.images img:eq(0)');
         var link = $('div.images a.zoom:eq(0)');
 		var o_src = $(img).attr('data-o_src');
@@ -505,11 +507,14 @@ jQuery(document).ready(function($) {
 	        $(img).attr('src', o_src);
             $(link).attr('href', o_href);
         }
+    }
 
+	$('.variations select').change(function(){
+		
 		$('form input[name=variation_id]').val('').change();
         $('.single_variation_wrap').hide();
         $('.single_variation').text('');
-		check_variations();
+		check_variations( '', false );
 		$(this).blur();
 		if( $().uniform && $.isFunction($.uniform.update) ) {
 			$.uniform.update();
@@ -517,7 +522,7 @@ jQuery(document).ready(function($) {
 		
 	}).bind( 'focusin', function() {
 		
-		check_variations( $(this).attr('name') );
+		check_variations( $(this).attr('name'), true );
 
 	}).change();
 	
