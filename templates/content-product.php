@@ -1,64 +1,63 @@
 <?php
 /**
- * The template for displaying content in the single-product.php template
+ * The template for displaying product content within loops.
  *
  * Override this template by copying it to yourtheme/woocommerce/content-product.php
  *
  * @package WooCommerce
  * @since WooCommerce 1.6
- * @todo prepend class names with wc-
  */
+ 
+global $product, $woocommerce_loop;
+
+// Store loop count we're currently on
+if ( empty( $woocommerce_loop['loop'] ) ) 
+	$woocommerce_loop['loop'] = 0;
+
+// Store column count for displaying the grid
+if ( empty( $woocommerce_loop['columns'] ) ) 
+	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
+
+// Ensure visibilty
+if ( ! $product->is_visible() ) return; 
+
+// Increase loop count
+$woocommerce_loop['loop']++;
 ?>
+<li class="product <?php 
+	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 ) 
+		echo 'last'; 
+	elseif ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 ) 
+		echo 'first'; 
+	?>">
 
-<?php 
-	/** 
-	 * woocommerce_before_single_product hook
-	 *
-	 * @hooked woocommerce_show_messages - 10
-	 */
-	 do_action( 'woocommerce_before_single_product' ); 
-?>
-
-<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
-
-	<?php 
-		/** 
-		 * woocommerce_show_product_images hook
-		 *
-		 * @hooked woocommerce_show_product_sale_flash - 10
-		 * @hooked woocommerce_show_product_images - 20
-		 */
-		do_action( 'woocommerce_before_single_product_summary' ); 
-	?>
-
-	<div class="summary">
-
-		<?php 
-			/**
-			 * woocommerce_single_product_summary hook
-			 *
-			 * @hooked woocommerce_template_single_title - 5
-			 * @hooked woocommerce_template_single_price - 10
-			 * @hooked woocommerce_template_single_excerpt - 20
-			 * @hooked woocommerce_template_single_add_to_cart - 30
-			 * @hooked woocommerce_template_single_meta - 40
-			 * @hooked woocommerce_template_single_sharing - 50
-			 */
-			do_action( 'woocommerce_single_product_summary' ); 	
-		?>
-
-	</div><!-- .summary -->
-
-	<?php 
-		/**
-		 * woocommerce_after_single_product_summary hook
-		 *
-		 * @hooked woocommerce_output_product_data_tabs - 10
-		 * @hooked woocommerce_output_related_products - 20
-		 */
-		do_action( 'woocommerce_after_single_product_summary' );
-	?>
+	<?php do_action( 'woocommerce_before_shop_loop_item' ); ?>
+		
+	<a href="<?php the_permalink(); ?>">
 				
-</div><!-- #product-<?php the_ID(); ?> -->
+		<?php
+			/** 
+			 * woocommerce_before_shop_loop_item_title hook
+			 *
+			 * @hooked woocommerce_show_product_loop_sale_flash - 10
+			 * @hooked woocommerce_template_loop_product_thumbnail - 10
+			 */	  
+			do_action( 'woocommerce_before_shop_loop_item_title' ); 
+		?>
+		
+		<h3><?php the_title(); ?></h3>
 
-<?php do_action( 'woocommerce_after_single_product' ); ?>
+		<?php
+			/** 
+			 * woocommerce_after_shop_loop_item_title hook
+			 *
+			 * @hooked woocommerce_template_loop_price - 10
+			 */	  
+			do_action( 'woocommerce_after_shop_loop_item_title' ); 
+		?>
+	
+	</a>
+	
+	<?php do_action( 'woocommerce_after_shop_loop_item' ); ?>
+			
+</li>

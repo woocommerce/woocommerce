@@ -44,9 +44,37 @@ get_header('shop'); ?>
 		<?php elseif ( ! is_search() && get_query_var( 'paged' ) == 0 && ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
 			<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
 		<?php endif; ?>
+				
+		<?php if ( have_posts() ) : ?>
 		
-		<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
+			<?php do_action('woocommerce_before_shop_loop'); ?>
+		
+			<ul class="products">
 			
+				<?php woocommerce_product_subcategories(); ?>
+		
+				<?php while ( have_posts() ) : the_post(); ?>
+		
+					<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+		
+				<?php endwhile; // end of the loop. ?>
+				
+			</ul>
+
+			<?php do_action('woocommerce_after_shop_loop'); ?>
+		
+		<?php else : ?>
+		
+			<?php if ( ! woocommerce_product_subcategories( array( 'before' => '<ul class="products">', 'after' => '</ul>' ) ) ) : ?>
+					
+				<p><?php _e( 'No products found which match your selection.', 'woocommerce' ); ?></p>
+					
+			<?php endif; ?>
+		
+		<?php endif; ?>
+		
+		<div class="clear"></div>
+
 		<?php 
 			/** 
 			 * woocommerce_pagination hook

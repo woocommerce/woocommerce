@@ -150,10 +150,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.xxxx - xx/xx/2012 =
+= 1.6 - xx/xx/2012 =
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
-* Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() and introduced a content-product.php template for ease of customisation.
+* Templating - Abolished the use of query_posts.
+* Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
+* Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
 * Templating - Documented templates listing hooked in functions.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
@@ -934,6 +936,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.6 =
+1.6 introduces some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
 = 1.5.4 =
 Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 

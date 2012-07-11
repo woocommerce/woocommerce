@@ -21,7 +21,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 			
 			while ( have_posts() ) : the_post();
 				
-				woocommerce_get_template_part( 'content', 'product' );
+				woocommerce_get_template_part( 'content', 'single-product' );
 
 			endwhile;
 
@@ -484,49 +484,81 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
  * display product sub categories as thumbnails
  **/
 if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
-	function woocommerce_product_subcategories() {
-		global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_category_found;
+	function woocommerce_product_subcategories( $args = array() ) {
+		global $woocommerce, $wp_query, $_chosen_attributes;
+		
+		$defaults = array(
+			'before'  => '',
+			'after'  => ''
+		);
 
-		if ( $wp_query !== $wp_the_query ) return; // Detect main query
-		if ( sizeof( $_chosen_attributes ) >0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; // Don't show when filtering
-		if ( is_search() ) return;
-		if ( ! is_product_category() && ! is_shop() ) return;
+		$args = wp_parse_args( $args, $defaults );
+		
+		extract( $args, EXTR_SKIP );
+		
+		// Don't show when filtering
+		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; 
+		
+		// Don't show when searching or when on page > 1 and ensure we're on a product archive
+		if ( is_search() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
+		
+		// Check cateogries are enabled
 		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) return;
 		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) return;
-		if ( is_paged() ) return;
 
-		if ( $product_cat_slug = get_query_var( 'product_cat' ) ) :
-			$product_cat     = get_term_by( 'slug', $product_cat_slug, 'product_cat' );
-		$product_category_parent  = $product_cat->term_id;
-		else :
-			$product_category_parent  = 0;
-		endif;
+		// Find the category + category parent, if applicable
+		if ( $product_cat_slug = get_query_var( 'product_cat' ) ) {
+			$product_cat = get_term_by( 'slug', $product_cat_slug, 'product_cat' );
+			$product_category_parent = $product_cat->term_id;
+		} else {
+			$product_category_parent = 0;
+		}
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = array(
-			'child_of'                  => $product_category_parent,
-			'menu_order'                => 'ASC',
-			'hide_empty'                => 1,
-			'hierarchical'              => 1,
-			'taxonomy'                  => 'product_cat',
-			'pad_counts'    => 1
+			'child_of'		=> $product_category_parent,
+			'menu_order'	=> 'ASC',
+			'hide_empty'	=> 1,
+			'hierarchical'	=> 1,
+			'taxonomy'		=> 'product_cat',
+			'pad_counts'	=> 1
 		);
 		$product_categories = get_categories( $args  );
+		
+		$product_category_found = false;
 
 		if ( $product_categories ) {
-
-			woocommerce_get_template( 'loop-product-cats.php', array(
-					'product_categories'  => $product_categories,
-					'product_category_parent'  => $product_category_parent
+		
+			foreach ( $product_categories as $category ) {
+				
+				if ( $category->parent != $product_category_parent ) 
+					continue;
+				
+				if ( ! $product_category_found ) {
+					// We found a category
+					$product_category_found = true;
+					echo $before;
+				}
+				
+				woocommerce_get_template( 'content-product_cat.php', array(
+					'category' => $category
 				) );
-
-			// If we are hiding products disable the loop and pagination
-			if ( $product_category_found == true && get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
-				$woocommerce_loop['show_products'] = false;
-				$wp_query->max_num_pages = 0;
+				
 			}
 
 		}
+		
+		// If we are hiding products disable the loop and pagination
+		if ( $product_category_found == true && get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+			$wp_query->post_count = 0;
+			$wp_query->max_num_pages = 0;
+		}
+			
+		if ( $product_category_found ) {
+			echo $after;
+			return true;
+		}
+		
 	}
 }
 

@@ -425,7 +425,7 @@ function woocommerce_product_page_shortcode( $atts ) {
 
 		<div class="single-product">
 			
-			<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+			<?php woocommerce_get_template_part( 'content', 'single-product' ); ?>
 			
 		</div>
 
