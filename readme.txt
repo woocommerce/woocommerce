@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Changed microdata for offers/product so its picked up by google
 * Tweak - woocommerce_attribute filter if needed
 * Tweak - Orders page is now the first item in the WooCommerce menu
+* Tweak - If all variations are the same price, don't show the variation price.
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
