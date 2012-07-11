@@ -622,7 +622,7 @@ class WC_Product {
 
 				else :
 
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
 						$price .= $this->get_price_html_from_text();
 						
 					$price .= woocommerce_price( $this->get_price() );
@@ -647,7 +647,7 @@ class WC_Product {
 
 				else :
 
-					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
+					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price ) 
 						$price .= $this->get_price_html_from_text();
 						
 					$price .= __('Free!', 'woocommerce');
@@ -1071,7 +1071,7 @@ class WC_Product {
 					'attributes' 			=> $variation_attributes,
 					'image_src' 			=> $image,
 					'image_link' 			=> $image_link,
-					'price_html' 			=> '<span class="price">' . $variation->get_price_html() . '</span>',
+					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 					'availability_html' 	=> $availability_html,
 					'sku' 					=> __( 'SKU:', 'woocommerce' ) . ' ' . $variation->get_sku(),
 					'min_qty' 				=> 1,
