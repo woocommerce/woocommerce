@@ -332,7 +332,7 @@ jQuery( function($){
 						$('input#_billing_address_2').val( info.billing_address_2 );
 						$('input#_billing_city').val( info.billing_city );
 						$('input#_billing_postcode').val( info.billing_postcode );
-						$('input#_billing_country').val( info.billing_country );
+						$('#_billing_country').val( info.billing_country );
 						$('input#_billing_state').val( info.billing_state );
 						$('input#_billing_email').val( info.billing_email );
 						$('input#_billing_phone').val( info.billing_phone );
@@ -382,7 +382,7 @@ jQuery( function($){
 						$('input#_shipping_address_2').val( info.shipping_address_2 );
 						$('input#_shipping_city').val( info.shipping_city );
 						$('input#_shipping_postcode').val( info.shipping_postcode );
-						$('input#_shipping_country').val( info.shipping_country );
+						$('#_shipping_country').val( info.shipping_country );
 						$('input#_shipping_state').val( info.shipping_state );
 					}
 					
