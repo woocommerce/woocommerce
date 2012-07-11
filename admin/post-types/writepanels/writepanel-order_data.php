@@ -815,6 +815,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			
 			// Mail link to customer
 			global $woocommerce;
+
+			do_action( 'woocommerce_before_customer_invoice', $order->id );
+
 			$mailer = $woocommerce->mailer();
 			$mailer->customer_invoice( $order );
 			
