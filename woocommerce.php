@@ -483,6 +483,7 @@ class Woocommerce {
 			    'read' 						=> true,
 			    'read_private_pages'		=> true,
 			    'read_private_posts'		=> true,
+			    'edit_users'				=> true,
 			    'edit_posts' 				=> true,
 			    'edit_pages' 				=> true,
 			    'edit_published_posts'		=> true,
