@@ -665,9 +665,18 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'id' 		=> 'woocommerce_review_rating_required',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end',
+		'checkboxgroup'		=> '',
 		'show_if_checked' => 'yes',
 	),	
+	
+	array(  
+		'desc' 		=> __( 'Show "verified owner" label for customer reviews', 'woocommerce' ),
+		'id' 		=> 'woocommerce_review_rating_verification_label',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'		=> 'end',
+		'show_if_checked' => 'yes',
+	),
 	
 	array( 'type' => 'sectionend', 'id' => 'product_review_options' ),
 
