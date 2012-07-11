@@ -600,9 +600,9 @@ add_action( 'comment_feed_join', 'woocommerce_exclude_order_comments_from_feed_j
 add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_where' );
 
 function woocommerce_exclude_order_comments( $clauses ) {
-	global $wpdb, $typenow;
+	global $wpdb, $typenow, $pagenow;
 	
-	if ( is_admin() && $typenow == 'shop_order' ) 
+	if ( is_admin() && ( $typenow == 'shop_order' || $pagenow == 'edit-comments.php' ) && current_user_can( 'manage_woocommerce' ) ) 
 		return $clauses; // Don't hide when viewing orders in admin
 	
 	if ( ! $clauses['join'] )

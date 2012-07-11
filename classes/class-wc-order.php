@@ -661,14 +661,14 @@ class WC_Order {
 		$comment_author_url 	= '';
 		$comment_content 		= $note;
 		$comment_agent			= 'WooCommerce';
-		$comment_type			= '';
+		$comment_type			= 'order_note';
 		$comment_parent			= 0;
 		$comment_approved 		= 1;
 		$commentdata 			= compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' );
 		
 		$comment_id = wp_insert_comment( $commentdata );
 		
-		add_comment_meta($comment_id, 'is_customer_note', $is_customer_note);
+		add_comment_meta( $comment_id, 'is_customer_note', $is_customer_note );
 		
 		if ($is_customer_note) do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $note ) );
 		

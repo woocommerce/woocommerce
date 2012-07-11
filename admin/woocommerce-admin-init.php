@@ -542,3 +542,13 @@ function woocommerce_product_updated_messages( $messages ) {
 	
 	return $messages;
 }
+
+/**
+ * Post updated messages
+ */
+add_filter('admin_comment_types_dropdown', 'woocommerce_admin_comment_types_dropdown');
+
+function woocommerce_admin_comment_types_dropdown( $types ) {
+	$types['order_note'] = __( 'Order notes', 'woocommerce' );
+	return $types;
+}
