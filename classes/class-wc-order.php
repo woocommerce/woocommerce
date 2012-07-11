@@ -524,13 +524,22 @@ class WC_Order {
 		$total_rows = array();
 		
 		if ( $subtotal = $this->get_subtotal_to_display() )
-			$total_rows[ __( 'Cart Subtotal:', 'woocommerce' ) ] = $subtotal;
+			$total_rows['cart_subtotal'] = array(
+				'label' => __( 'Cart Subtotal:', 'woocommerce' ),
+				'value'	=> $subtotal
+			);
 		
 		if ( $this->get_cart_discount() > 0 ) 
-			$total_rows[ __( 'Cart Discount:', 'woocommerce' ) ] = '-' . $this->get_cart_discount_to_display();
+			$total_rows['cart_discount'] = array(
+				'label' => __( 'Cart Discount:', 'woocommerce' ),
+				'value'	=> '-' . $this->get_cart_discount_to_display()
+			);
 		
 		if ( $this->get_shipping_method() )
-			$total_rows[ __('Shipping:', 'woocommerce') ] = $this->get_shipping_to_display();
+			$total_rows['shipping'] = array(
+				'label' => __( 'Shipping:', 'woocommerce' ),
+				'value'	=> $this->get_shipping_to_display()
+			);
 		
 		if ( $this->get_total_tax() > 0 ) {
 			
@@ -547,12 +556,18 @@ class WC_Order {
 					if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
 						continue;
 					
-					$total_rows[ $tax[ 'label' ] ] = woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) );
+					$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
+						'label' => $tax[ 'label' ],
+						'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
+					);
 				}
 				
 				if ( $has_compound_tax ) {
 					if ( $subtotal = $this->get_subtotal_to_display( true ) ) {
-						$total_rows[ __( 'Subtotal:', 'woocommerce' ) ] = $subtotal;
+						$total_rows['subtotal'] = array(
+							'label' => __( 'Subtotal:', 'woocommerce' ),
+							'value'	=> $subtotal
+						);
 					}
 				}
 				
@@ -562,21 +577,36 @@ class WC_Order {
 
 					if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
 						continue;
-
-					$total_rows[ $tax[ 'label' ] ] = woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) );
+					
+					$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
+						'label' => $tax[ 'label' ],
+						'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
+					);
 				}
 			} else {
-				$total_rows[ $woocommerce->countries->tax_or_vat() ] = woocommerce_price($this->get_total_tax());
+				$total_rows['tax'] = array(
+					'label' => $woocommerce->countries->tax_or_vat(),
+					'value'	=> woocommerce_price( $this->get_total_tax() )
+				);
 			}
 
 		} elseif ( get_option( 'woocommerce_display_cart_taxes_if_zero' ) == 'yes' ) {
-			$total_rows[ $woocommerce->countries->tax_or_vat() ] = _x( 'N/A', 'Relating to tax', 'woocommerce' );
+			$total_rows['tax'] = array(
+				'label' => $woocommerce->countries->tax_or_vat(),
+				'value'	=> _x( 'N/A', 'Relating to tax', 'woocommerce' )
+			);
 		}
 		
 		if ( $this->get_order_discount() > 0 )
-			$total_rows[ __( 'Order Discount:', 'woocommerce' ) ] = '-' . $this->get_order_discount_to_display();
+			$total_rows['order_discount'] = array(
+				'label' => __( 'Order Discount:', 'woocommerce' ),
+				'value'	=> '-' . $this->get_order_discount_to_display()
+			);
 		
-		$total_rows[ __( 'Order Total:', 'woocommerce' ) ] = $this->get_formatted_order_total();
+		$total_rows['order_total'] = array(
+			'label' => __( 'Order Total:', 'woocommerce' ),
+			'value'	=> $this->get_formatted_order_total()
+		);
 		
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
 	}

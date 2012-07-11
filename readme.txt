@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
 * Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
 * Templating - Documented templates listing hooked in functions.
+* Tweak - get_order_item_totals() total_rows have fixed indexes for easier manipulation
 * Tweak - order_note comment type for future order notes, allowing you to filter in the comments section.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
