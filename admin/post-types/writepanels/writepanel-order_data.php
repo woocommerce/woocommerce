@@ -779,8 +779,10 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			
 			$order->add_order_note( __('Manual stock reduction complete.', 'woocommerce') );
 			
+			do_action( 'woocommerce_reduce_order_stock', $order );
+			
 		elseif (isset($_POST['restore_stock']) && $_POST['restore_stock'] && sizeof($order_items)>0) :
-		
+			
 			$order->add_order_note( __('Manually restoring stock.', 'woocommerce') );
 			
 			foreach ($order_items as $order_item) :
@@ -807,16 +809,18 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			 	
 			endforeach;
 			
-			do_action( 'woocommerce_restore_order_stock', $order );
-			
 			$order->add_order_note( __('Manual stock restore complete.', 'woocommerce') );
+			
+			do_action( 'woocommerce_restore_order_stock', $order );
 		
 		elseif (isset($_POST['invoice']) && $_POST['invoice']) :
 			
-			// Mail link to customer
-			global $woocommerce;
+			do_action( 'woocommerce_before_send_customer_invoice', $order );
+			
 			$mailer = $woocommerce->mailer();
 			$mailer->customer_invoice( $order );
+			
+			do_action( 'woocommerce_after__customer_invoice', $order );
 			
 		endif;
 	

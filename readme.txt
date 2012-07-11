@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When adding multiple items to an order, saving lost all by the first
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
+* Localization - German (formal) update (thanks jjoeris)
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML
