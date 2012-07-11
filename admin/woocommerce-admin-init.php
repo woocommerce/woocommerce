@@ -25,8 +25,6 @@ function woocommerce_admin_menu() {
 		
     $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
     
-    add_submenu_page('woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
-    
     $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
     
     add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
@@ -41,9 +39,8 @@ function woocommerce_admin_menu() {
 }
 
 function woocommerce_admin_menu_after() {
-
-	$status_page = add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
-	
+	add_submenu_page( 'woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
+	add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 }
 
 /**
@@ -52,7 +49,7 @@ function woocommerce_admin_menu_after() {
 add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
 function woocommerce_admin_menu_highlight() {
-	global $parent_file, $submenu_file, $self, $post_type, $taxonomy;
+	global $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
 	$to_highlight_types = array( 'shop_order', 'shop_coupon' );
 
@@ -71,6 +68,9 @@ function woocommerce_admin_menu_highlight() {
 			}
 		}
 	}
+
+	$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
+	unset( $submenu['woocommerce'][2] );
 }
 
 /**
