@@ -68,7 +68,7 @@ jQuery(document).ready(function($) {
 							}
 							
 							// Unblock
-							$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
+							$('.widget_shopping_cart, .updating').stop( true ).css('opacity', '1').unblock();
 							
 							$('body').trigger('cart_widget_refreshed');
 						} );
@@ -81,7 +81,7 @@ jQuery(document).ready(function($) {
 						}
 						
 						// Unblock
-						$('.widget_shopping_cart, .updating').css('opacity', '1').unblock();
+						$('.widget_shopping_cart, .updating').stop( true ).css('opacity', '1').unblock();
 					}
 					
 					// Cart page elements
@@ -89,13 +89,13 @@ jQuery(document).ready(function($) {
 						
 						$("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").addClass('buttons_added').append('<input type="button" value="+" id="add1" class="plus" />').prepend('<input type="button" value="-" id="minus1" class="minus" />');
 						
-						$('.shop_table.cart').css('opacity', '1').unblock();
+						$('.shop_table.cart').stop( true ).css('opacity', '1').unblock();
 						
 						$('body').trigger('cart_page_refreshed');
 					});
 					
 					$('.cart_totals').load( this_page + ' .cart_totals:eq(0) > *', function() {
-						$('.cart_totals').css('opacity', '1').unblock();
+						$('.cart_totals').stop( true ).css('opacity', '1').unblock();
 					});
 					
 					// Trigger event so themes can refresh other areas
