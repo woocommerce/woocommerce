@@ -36,3 +36,7 @@ add_filter( 'tiny_mce_version', 'woocommerce_refresh_mce' );
 
 add_action("create_term", 'woocommerce_create_term', 5, 3);
 add_action("delete_term", 'woocommerce_delete_term', 5, 3);
+
+add_action( 'admin_footer', 'woocommerce_bulk_admin_footer', 10 );
+add_action( 'load-edit.php', 'woocommerce_order_bulk_action' );
+add_action( 'admin_notices', 'woocommerce_order_bulk_admin_notices' );

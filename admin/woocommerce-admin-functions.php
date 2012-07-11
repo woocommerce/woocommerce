@@ -284,3 +284,74 @@ function woocommerce_compile_less_styles() {
 		}
 	}
 }
+
+/**
+ * Add extra bulk action options to mark orders as complete or processing
+ * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
+ **/
+function woocommerce_bulk_admin_footer() {
+	global $post_type;
+
+	if ( 'shop_order' == $post_type ) {
+		?>
+		<script type="text/javascript">
+		jQuery(document).ready(function() {
+			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
+			jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
+
+			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action']");
+			jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark completed', 'woocommerce' )?>').appendTo("select[name='action2']");
+		});
+		</script>
+		<?php
+	}
+}
+
+/**
+ * Process the new bulk actions for changing order status
+ **/
+function woocommerce_order_bulk_action() {
+	$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
+	$action = $wp_list_table->current_action();
+
+	switch ( $action ) {
+		case 'mark_completed':
+			$new_status = 'completed';
+			$report_action = 'marked_completed';
+			break;
+		case 'mark_processing':
+			$new_status = 'processing';
+			$report_action = 'marked_processing';
+			break;
+		default:
+			return;
+	}
+
+	$changed = 0;
+
+	foreach( $_REQUEST['post'] as $post_id ) {
+		$order = new WC_Order( $post_id );
+		$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
+		$changed++;
+	}
+
+	$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => $changed, 'ids' => join( ',', $post_ids ) ), '' );
+	wp_redirect( $sendback );
+	exit();
+}
+
+/**
+ * Show confirmation message that order status changed for number of orders 
+ **/
+function woocommerce_order_bulk_admin_notices() {
+	global $post_type, $pagenow;
+	
+	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) ) {
+		$number = isset( $_REQUEST['marked_processing'] ) ? $_REQUEST['marked_processing'] : $_REQUEST['marked_completed'];
+
+		if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
+			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );
+			echo '<div class="updated"><p>' . $message . '</p></div>';
+		}
+	}
+}
