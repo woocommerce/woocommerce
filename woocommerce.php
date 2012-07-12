@@ -228,6 +228,9 @@ class Woocommerce {
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
 			add_action( 'wp_footer', array(&$this, 'output_inline_js'), 25 );
 		}
+		
+		add_filter('map_meta_cap', array(&$this, 'm3_product_meta_cap'), 10, 4);
+		add_action( 'admin_head-edit.php', array(&$this, 'my_admin_css') );
 
 		// Actions
 		add_action( 'the_post', array( &$this, 'setup_product_data' ) );
@@ -510,9 +513,26 @@ class Woocommerce {
 			   	'export'					=> true,
 				'import'					=> true,
 				'manage_woocommerce'		=> true,
-				'manage_woocommerce_orders'		=> true,
+				'manage_woocommerce_orders'	=> true,
 				'manage_woocommerce_coupons'	=> true,
+				/*
 				'manage_woocommerce_products'	=> true,
+				*/
+				'publish_products' 		=> true,
+				'edit_products' 			=> true,
+				'edit_others_products' 		=> true,
+				'delete_products' 		=> true,
+				'delete_others_products'	=> true,
+				'read_private_products'		=> true,
+				'edit_product' 			=> true,
+				'delete_product' 			=> true,
+				'read_product' 			=> true,
+				
+				'manage_product_cat'		=> true,
+				'edit_product_cat'		=> true,
+				'delete_product_cat'		=> true,
+				'assign_product_cat'		=> true,
+				
 				'view_woocommerce_reports'		=> true
 			) );
 			
@@ -520,7 +540,25 @@ class Woocommerce {
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_orders' );
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_coupons' );
+			
+			/*
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_products' );
+			*/
+			$wp_roles->add_cap( 'administrator', 'publish_products' );
+			$wp_roles->add_cap( 'administrator', 'edit_products' );
+			$wp_roles->add_cap( 'administrator', 'edit_others_products' );
+			$wp_roles->add_cap( 'administrator', 'delete_products' );
+			$wp_roles->add_cap( 'administrator', 'delete_others_products' );
+			$wp_roles->add_cap( 'administrator', 'read_private_products' );
+			$wp_roles->add_cap( 'administrator', 'edit_product' );
+			$wp_roles->add_cap( 'administrator', 'delete_product' );
+			$wp_roles->add_cap( 'administrator', 'read_product' );
+			
+			$wp_roles->add_cap( 'administrator', 'manage_product_cat' );
+			$wp_roles->add_cap( 'administrator', 'edit_product_cat' );
+			$wp_roles->add_cap( 'administrator', 'delete_product_cat' );
+			$wp_roles->add_cap( 'administrator', 'assign_product_cat' );
+			
 			$wp_roles->add_cap( 'administrator', 'view_woocommerce_reports' );
 		}
 	}
@@ -590,11 +628,19 @@ class Woocommerce {
 	            	),
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
+		    /*
 	            'capabilities'			=> array(
 	            	'manage_terms' 		=> 'manage_woocommerce_products',
 	            	'edit_terms' 		=> 'manage_woocommerce_products',
 	            	'delete_terms' 		=> 'manage_woocommerce_products',
 	            	'assign_terms' 		=> 'manage_woocommerce_products',
+	            ),
+		    */
+		    'capabilities'			=> array(
+	            	'manage_terms' 		=> 'manage_product_cat',
+	            	'edit_terms' 		=> 'edit_product_cat',
+	            	'delete_terms' 		=> 'delete_product_cat',
+	            	'assign_terms' 		=> 'assign_product_cat',
 	            ),
 	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false, 'hierarchical' => true ),
 	        )
@@ -621,12 +667,20 @@ class Woocommerce {
 	            	),
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
+				/*
 				'capabilities'			=> array(
 					'manage_terms' 		=> 'manage_woocommerce_products',
 					'edit_terms' 		=> 'manage_woocommerce_products',
 					'delete_terms' 		=> 'manage_woocommerce_products',
 					'assign_terms' 		=> 'manage_woocommerce_products',
 				),
+				*/
+				 'capabilities'			=> array(
+					'manage_terms' 		=> 'manage_product_cat',
+					'edit_terms' 		=> 'edit_product_cat',
+					'delete_terms' 		=> 'delete_product_cat',
+					'assign_terms' 		=> 'assign_product_cat',
+				 ),
 	            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
 	        )
 	    );
@@ -653,12 +707,20 @@ class Woocommerce {
 	            'show_ui' 				=> true,
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
+				/*
 				'capabilities'			=> array(
 					'manage_terms' 		=> 'manage_woocommerce_products',
 					'edit_terms' 		=> 'manage_woocommerce_products',
 					'delete_terms' 		=> 'manage_woocommerce_products',
 					'assign_terms' 		=> 'manage_woocommerce_products',
 				),
+				*/
+				 'capabilities'			=> array(
+					'manage_terms' 		=> 'manage_product_cat',
+					'edit_terms' 		=> 'edit_product_cat',
+					'delete_terms' 		=> 'delete_product_cat',
+					'assign_terms' 		=> 'assign_product_cat',
+				    ),
 	            'rewrite' 				=> false,
 	        )
 	    );
@@ -751,6 +813,8 @@ class Woocommerce {
 				'description' 			=> __( 'This is where you can add new products to your store.', 'woocommerce' ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
+				
+				/*
 				'capability_type' 		=> 'post',
 				'capabilities' => array(
 					'publish_posts' 		=> 'manage_woocommerce_products',
@@ -763,12 +827,29 @@ class Woocommerce {
 					'delete_post' 			=> 'manage_woocommerce_products',
 					'read_post' 			=> 'manage_woocommerce_products'
 				),
+				*/
+				'capability_type' 		=> 'product',
+				'capabilities' => array(
+					'publish_posts' 		=> 'publish_products',
+					'edit_posts' 		=> 'edit_products',
+					'edit_others_posts' 	=> 'edit_others_products',
+					'delete_posts' 		=> 'delete_products',
+					'delete_others_posts'	=> 'delete_others_products',
+					'read_private_posts'	=> 'read_private_products',
+					'edit_post' 			=> 'edit_product',
+					'delete_post' 		=> 'delete_product',
+					'read_post' 			=> 'read_product'
+				),
+
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
 				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
 				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
 				'query_var' 			=> true,			
+				/*
 				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
+				*/
+				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes', 'author' ),
 				'has_archive' 			=> $base_slug,
 				'show_in_nav_menus' 	=> true
 			)
@@ -793,6 +874,7 @@ class Woocommerce {
 					),
 				'public' 				=> true,
 				'show_ui' 				=> false,
+				/*
 				'capability_type' 		=> 'post',
 				'capabilities' => array(
 					'publish_posts' 		=> 'manage_woocommerce_products',
@@ -804,6 +886,19 @@ class Woocommerce {
 					'edit_post' 			=> 'manage_woocommerce_products',
 					'delete_post' 			=> 'manage_woocommerce_products',
 					'read_post' 			=> 'manage_woocommerce_products'
+				),
+				*/
+				'capability_type' 		=> 'product',
+				'capabilities' => array(
+					'publish_posts' 		=> 'publish_products',
+					'edit_posts' 		=> 'edit_products',
+					'edit_others_posts' 	=> 'edit_others_products',
+					'delete_posts' 		=> 'delete_products',
+					'delete_others_posts'	=> 'delete_others_products',
+					'read_private_posts'	=> 'read_private_products',
+					'edit_post' 			=> 'edit_product',
+					'delete_post' 		=> 'delete_product',
+					'read_post' 			=> 'read_product'
 				),
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> true,
@@ -923,6 +1018,103 @@ class Woocommerce {
 				'show_in_nav_menus'		=> false
 			)
 		);
+	}
+	
+	
+	
+	function m3_product_meta_cap( $primitive_caps, $meta_cap, $user_id, $args ) {
+
+		/* If meta-capability is not product based do nothing. */
+		if ( !in_array($meta_cap,array('edit_product', 'delete_product', 'read_product') ) ) {
+			return $primitive_caps;
+		}
+
+		/* Check post is of post type. */
+		$post = get_post( $args[0] );
+		$post_type = get_post_type_object( $post->post_type );
+		if ( 'product' != $post_type->name ) {
+			return $primitive_caps;
+		}
+
+		$primitive_caps = array();
+		switch( $meta_cap ){
+			case 'edit_product':
+				if ( $post->post_author == $user_id ) {
+					/* User is post author */
+					if ( 'publish' == $post->post_status ) {
+						/* product is published: require 'edit_published_products' capability */
+						$primitive_caps[] = $post_type->cap->edit_published_posts;
+
+					}
+					elseif ( 'trash' == $post->post_status ) {
+						if ('publish' == get_post_meta($post->ID, '_wp_trash_meta_status', true) ) {
+							/* product is a trashed published post require 'edit_published_products' capability */
+							$primitive_caps[] = $post_type->cap->edit_published_posts;
+						}
+
+					}
+					else {
+						$primitive_caps[] = $post_type->cap->edit_posts;
+					}
+
+				}
+				else {
+					/* The user is trying to edit a post belonging to someone else. */
+					$primitive_caps[] = $post_type->cap->edit_others_posts;
+
+					/* If the post is published or private, extra caps are required. */
+					if ( 'publish' == $post->post_status ) {
+						$primitive_caps[] = $post_type->cap->edit_published_posts;
+
+					}
+					elseif ( 'private' == $post->post_status ) {
+						$primitive_caps[] = $post_type->cap->edit_private_posts;
+					}
+				}
+				break;
+
+			case 'read_product':
+				if ( 'private' != $post->post_status ) {
+					/* If the post is not private, just require read capability */
+					$primitive_caps[] = $post_type->cap->read;
+
+				}
+				elseif ( $post->post_author == $user_id ) {
+					/* Post is private, but current user is author */
+					$primitive_caps[] = $post_type->cap->read;
+
+				}
+				else {
+					/* Post is private, and current user is not the author */
+					$primitive_caps[] = $post_type->cap->read_private_post;
+				}
+				break;
+
+			case 'delete_product':
+				if ( $post->post_author == $user_id  ) {
+					/* Current user is author, require delete_products capability */
+					$primitive_caps[] = $post_type->cap->delete_posts;
+
+				}
+				else {
+					/* Current user is no the author, require delete_others_products capability */
+					$primitive_caps[] = $post_type->cap->delete_others_posts;
+				}
+
+				/* If post is published, require delete_published_posts capability too */
+				if ( 'publish' == $post->post_status ) {
+					$primitive_caps[] = $post_type->cap->delete_published_posts;
+				}
+				break;
+		}
+		return $primitive_caps;
+	}
+
+	
+	function my_admin_css() {
+		if ( current_user_can( 'edit_others_posts' ) )
+			return;
+		?><style type="text/css">ul.subsubsub li.all{ display: none !important; }</style><?php
 	}
 	
 	/**
