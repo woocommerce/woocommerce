@@ -518,6 +518,7 @@ class Woocommerce {
 				/*
 				'manage_woocommerce_products'	=> true,
 				*/
+				'edit_published_products' 		=> true,
 				'publish_products' 		=> true,
 				'edit_products' 			=> true,
 				'edit_others_products' 		=> true,
@@ -544,6 +545,7 @@ class Woocommerce {
 			/*
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_products' );
 			*/
+			$wp_roles->add_cap( 'administrator', 'edit_published_products' );
 			$wp_roles->add_cap( 'administrator', 'publish_products' );
 			$wp_roles->add_cap( 'administrator', 'edit_products' );
 			$wp_roles->add_cap( 'administrator', 'edit_others_products' );
@@ -830,6 +832,7 @@ class Woocommerce {
 				*/
 				'capability_type' 		=> 'product',
 				'capabilities' => array(
+					'edit_published_posts' 		=> 'edit_published_products',
 					'publish_posts' 		=> 'publish_products',
 					'edit_posts' 		=> 'edit_products',
 					'edit_others_posts' 	=> 'edit_others_products',
@@ -1037,6 +1040,7 @@ class Woocommerce {
 		}
 
 		$primitive_caps = array();
+		
 		switch( $meta_cap ){
 			case 'edit_product':
 				if ( $post->post_author == $user_id ) {
@@ -1044,7 +1048,6 @@ class Woocommerce {
 					if ( 'publish' == $post->post_status ) {
 						/* product is published: require 'edit_published_products' capability */
 						$primitive_caps[] = $post_type->cap->edit_published_posts;
-
 					}
 					elseif ( 'trash' == $post->post_status ) {
 						if ('publish' == get_post_meta($post->ID, '_wp_trash_meta_status', true) ) {
@@ -1056,7 +1059,6 @@ class Woocommerce {
 					else {
 						$primitive_caps[] = $post_type->cap->edit_posts;
 					}
-
 				}
 				else {
 					/* The user is trying to edit a post belonging to someone else. */
