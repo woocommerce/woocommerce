@@ -131,12 +131,6 @@ function woocommerce_update_options($options) {
 			if (isset($_POST[$value['id']])) $selected_countries = $_POST[$value['id']]; else $selected_countries = array();
 			update_option($value['id'], $selected_countries);
 		
-		} elseif ( isset( $value['type'] ) && $value['type'] == 'multi_select_sortable_taxonomies' ) {
-		
-			// Get sortable taxonomies array
-			if (isset($_POST[$value['id']])) $selected_taxonomies = $_POST[$value['id']]; else $selected_taxonomies = array();
-			update_option($value['id'], $selected_taxonomies);
-		
 		} elseif ( isset( $value['id'] ) && ( $value['id'] == 'woocommerce_price_thousand_sep' || $value['id'] == 'woocommerce_price_decimal_sep' ) ) {
 			
 			// price separators get a special treatment as they should allow a spaces (don't trim)

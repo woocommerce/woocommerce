@@ -298,7 +298,7 @@ function woocommerce_admin_scripts() {
 	endif;
 	
 	// Term ordering - only when sorting by term_order
-	if ( ( $screen->id == 'edit-product_cat' || strstr( $screen->id, 'edit-pa_' ) || in_array( $_GET['taxonomy'], get_option( 'woocommerce_enable_tax_sorting', array() ) ) ) && ! isset( $_GET['orderby'] ) ) :
+	if ( ( $screen->id == 'edit-product_cat' || strstr( $screen->id, 'edit-pa_' ) ) && ! isset( $_GET['orderby'] ) ) :
 
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable') );
 		wp_enqueue_script( 'woocommerce_term_ordering' );

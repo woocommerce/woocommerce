@@ -781,7 +781,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
 	foreach ((array) $taxonomies as $taxonomy) :
-		if ($taxonomy=='product_cat' || strstr($taxonomy, 'pa_') || in_array( $taxonomy, get_option('woocommerce_enable_tax_sorting',array()))) :
+		if ($taxonomy=='product_cat' || strstr($taxonomy, 'pa_')) :
 			$found = true;
 			break;
 		endif;
