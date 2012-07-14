@@ -48,15 +48,15 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 			<th><?php echo $woocommerce->attribute_label( $attribute['name'] ); ?></th>
 			<td><?php
 				if ( $attribute['is_taxonomy'] ) {
-
-					echo implode( ', ', woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' ) );
+					
+					$values = woocommerce_get_product_terms( $product->id, $attribute['name'], 'names' );
+					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 					
 				} else {
 				
-					// Convert pipes to commas
-					$value = explode( '|', $attribute['value'] );
-					$value = implode( ', ', $value );
-					echo wpautop( wptexturize( $value ) );
+					// Convert pipes to commas and display values
+					$values = explode( '|', $attribute['value'] );
+					echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
 					
 				}
 			?></td>

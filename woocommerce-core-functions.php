@@ -600,9 +600,9 @@ add_action( 'comment_feed_join', 'woocommerce_exclude_order_comments_from_feed_j
 add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_where' );
 
 function woocommerce_exclude_order_comments( $clauses ) {
-	global $wpdb, $typenow;
+	global $wpdb, $typenow, $pagenow;
 	
-	if ( is_admin() && $typenow == 'shop_order' ) 
+	if ( is_admin() && ( $typenow == 'shop_order' || $pagenow == 'edit-comments.php' ) && current_user_can( 'manage_woocommerce' ) ) 
 		return $clauses; // Don't hide when viewing orders in admin
 	
 	if ( ! $clauses['join'] )
@@ -1046,4 +1046,39 @@ function woocommerce_let_to_num( $size ) {
 	        $ret *= 1024;
     }
     return $ret;
+}
+
+/**
+ * woocommerce_customer_bought_product
+ *
+ * Checks if a user (by email) has bought an item
+ **/
+function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
+	global $wpdb;
+	
+	$emails = array();
+	
+	if ( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		$emails[] = $user->user_email;
+	}
+	
+	if ( is_email( $customer_email ) ) 
+		$emails[] = $customer_email;
+	
+	if ( sizeof( $emails ) == 0 )
+		return false;
+	
+	$orders = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE ( meta_key = '_billing_email' AND meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) ) OR ( meta_key = '_customer_user' AND meta_value = %s AND meta_value > 0 )", $user_id ) );
+	
+	foreach ( $orders as $order_id ) {
+		
+		$items = maybe_unserialize( get_post_meta( $order_id, '_order_items', true ) );
+		
+		if ( $items )
+			foreach ( $items as $item )
+				if ( $item['id'] == $product_id || $item['variation_id'] == $product_id )
+					return true;
+			
+	}
 }

@@ -13,93 +13,49 @@
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
 	// This function is only used in the optional 'woocommerce.php' template
-	// people can add to their themes to add basic woocommerce support.
+	// people can add to their themes to add basic woocommerce support without 
+	// using hooks or modifying core templates.
 	function woocommerce_content() {
-		if ( is_singular( 'product' ) )
-			woocommerce_single_product_content();
-		elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) )
-			woocommerce_product_taxonomy_content();
-		else
-			woocommerce_archive_product_content();
-	}
-}
-if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
-	function woocommerce_archive_product_content() {
-
-		if ( ! is_search() ) {
-			$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
-			$shop_page_title = apply_filters( 'the_title', ( get_option( 'woocommerce_shop_page_title' ) ) ? get_option( 'woocommerce_shop_page_title' ) : $shop_page->post_title );
-			if ( is_object( $shop_page  ) )
-				$shop_page_content = $shop_page->post_content;
-		} else {
-			$shop_page_title = __( 'Search Results:', 'woocommerce' ) . ' &ldquo;' . get_search_query() . '&rdquo;';
-			if ( get_query_var( 'paged' ) ) $shop_page_title .= ' &mdash; ' . __( 'Page', 'woocommerce' ) . ' ' . get_query_var( 'paged' );
-			$shop_page_content = '';
-		}
-
-		?><h1 class="page-title"><?php echo $shop_page_title ?></h1>
-
-		<?php if ( ! empty( $shop_page_content  ) ) echo apply_filters( 'the_content', $shop_page_content ); ?>
-
-		<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
-
-		<?php do_action( 'woocommerce_pagination' );
-
-	}
-}
-if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
-	function woocommerce_product_taxonomy_content() {
-
-		global $wp_query;
-
-		$term = get_term_by( 'slug', get_query_var( $wp_query->query_vars['taxonomy'] ) , $wp_query->query_vars['taxonomy'] );
-
-		?><h1 class="page-title"><?php echo wptexturize( $term->name ); ?></h1>
-
-		<?php if ( $term->description ) : ?>
-
-			<div class="term_description"><?php echo wpautop( wptexturize( $term->description ) ); ?></div>
-
-		<?php endif; ?>
-
-		<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
-
-		<?php do_action( 'woocommerce_pagination' );
-
-	}
-}
-if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
-	function woocommerce_single_product_content( $wc_query = false  ) {
-
-		// Let developers override the query used, in case they want to use this function for their own loop/wp_query
-		if ( ! $wc_query ) {
-			global $wp_query;
-
-			$wc_query = $wp_query;
-		}
-
-		if ( $wc_query->have_posts() ) while ( $wc_query->have_posts() ) : $wc_query->the_post(); ?>
-
-			<?php do_action( 'woocommerce_before_single_product' ); ?>
-
-			<div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
-
-				<?php do_action( 'woocommerce_before_single_product_summary' ); ?>
-
-				<div class="summary">
-
-					<?php do_action( 'woocommerce_single_product_summary' ); ?>
-
-				</div>
 	
-				<?php do_action( 'woocommerce_after_single_product_summary' ); ?>
+		if ( is_singular( 'product' ) ) {
+			
+			while ( have_posts() ) : the_post();
 				
-			</div>
+				woocommerce_get_template_part( 'content', 'single-product' );
 
-			<?php do_action( 'woocommerce_after_single_product' ); ?>
+			endwhile;
 
-		<?php endwhile;
-
+		} else {
+		
+			?><h1 class="page-title">
+				<?php if ( is_search() ) : ?>
+					<?php printf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() ); ?>
+				<?php elseif ( is_tax() ) : ?>
+					<?php echo single_term_title( "", false ); ?>
+				<?php else : ?>
+					<?php 
+						$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
+						
+						echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title );
+					?>
+				<?php endif; ?>
+				
+				<?php if ( get_query_var( 'paged' ) ) : ?>
+					<?php printf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) ); ?>
+				<?php endif; ?>
+			</h1>
+					
+			<?php if ( is_tax() ) : ?>
+				<?php echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>'; ?>
+			<?php elseif ( ! is_search() && ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
+				<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
+			<?php endif; ?>
+			
+			<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
+				
+			<?php do_action( 'woocommerce_pagination' ); 
+			
+		}
 	}
 }
 
@@ -528,49 +484,81 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
  * display product sub categories as thumbnails
  **/
 if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
-	function woocommerce_product_subcategories() {
-		global $woocommerce, $woocommerce_loop, $wp_query, $wp_the_query, $_chosen_attributes, $product_category_found;
+	function woocommerce_product_subcategories( $args = array() ) {
+		global $woocommerce, $wp_query, $_chosen_attributes;
+		
+		$defaults = array(
+			'before'  => '',
+			'after'  => ''
+		);
 
-		if ( $wp_query !== $wp_the_query ) return; // Detect main query
-		if ( sizeof( $_chosen_attributes ) >0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; // Don't show when filtering
-		if ( is_search() ) return;
-		if ( ! is_product_category() && ! is_shop() ) return;
+		$args = wp_parse_args( $args, $defaults );
+		
+		extract( $args );
+		
+		// Don't show when filtering
+		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; 
+		
+		// Don't show when searching or when on page > 1 and ensure we're on a product archive
+		if ( is_search() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
+		
+		// Check cateogries are enabled
 		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) return;
 		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) return;
-		if ( is_paged() ) return;
 
-		if ( $product_cat_slug = get_query_var( 'product_cat' ) ) :
-			$product_cat     = get_term_by( 'slug', $product_cat_slug, 'product_cat' );
-		$product_category_parent  = $product_cat->term_id;
-		else :
-			$product_category_parent  = 0;
-		endif;
+		// Find the category + category parent, if applicable
+		if ( $product_cat_slug = get_query_var( 'product_cat' ) ) {
+			$product_cat = get_term_by( 'slug', $product_cat_slug, 'product_cat' );
+			$product_category_parent = $product_cat->term_id;
+		} else {
+			$product_category_parent = 0;
+		}
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = array(
-			'child_of'                  => $product_category_parent,
-			'menu_order'                => 'ASC',
-			'hide_empty'                => 1,
-			'hierarchical'              => 1,
-			'taxonomy'                  => 'product_cat',
-			'pad_counts'    => 1
+			'child_of'		=> $product_category_parent,
+			'menu_order'	=> 'ASC',
+			'hide_empty'	=> 1,
+			'hierarchical'	=> 1,
+			'taxonomy'		=> 'product_cat',
+			'pad_counts'	=> 1
 		);
 		$product_categories = get_categories( $args  );
+		
+		$product_category_found = false;
 
 		if ( $product_categories ) {
-
-			woocommerce_get_template( 'loop-product-cats.php', array(
-					'product_categories'  => $product_categories,
-					'product_category_parent'  => $product_category_parent
+		
+			foreach ( $product_categories as $category ) {
+				
+				if ( $category->parent != $product_category_parent ) 
+					continue;
+				
+				if ( ! $product_category_found ) {
+					// We found a category
+					$product_category_found = true;
+					echo $before;
+				}
+				
+				woocommerce_get_template( 'content-product_cat.php', array(
+					'category' => $category
 				) );
-
-			// If we are hiding products disable the loop and pagination
-			if ( $product_category_found == true && get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
-				$woocommerce_loop['show_products'] = false;
-				$wp_query->max_num_pages = 0;
+				
 			}
 
 		}
+		
+		// If we are hiding products disable the loop and pagination
+		if ( $product_category_found == true && get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+			$wp_query->post_count = 0;
+			$wp_query->max_num_pages = 0;
+		}
+			
+		if ( $product_category_found ) {
+			echo $after;
+			return true;
+		}
+		
 	}
 }
 

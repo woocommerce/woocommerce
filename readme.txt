@@ -150,9 +150,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.xxxx - xx/xx/2012 =
+= 1.6 - xx/xx/2012 =
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
+* Feature - Added bulk actions to bulk change order status to processing or completed
+* Feature - Optional "verified owner" label for customer reviews 
+* Templating - Abolished the use of query_posts.
+* Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
+* Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
+* Templating - Documented templates listing hooked in functions.
+* Tweak - get_order_item_totals() total_rows have fixed indexes for easier manipulation
+* Tweak - order_note comment type for future order notes, allowing you to filter in the comments section.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
 * Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
@@ -160,6 +168,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Payment gateway API tweaks - get_title, get_icon, get_description
 * Tweak - Price filter widgets takes you back to page 1.
 * Tweak - Changed microdata for offers/product so its picked up by google
+* Tweak - woocommerce_attribute filter if needed
+* Tweak - Orders page is now the first item in the WooCommerce menu
+* Tweak - If all variations are the same price, don't show the variation price.
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
@@ -175,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - When adding multiple items to an order, saving lost all by the first
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
+* Localization - German (formal) update (thanks jjoeris)
 
 = 1.5.8 - 21/06/2012 =
 * Tweak - Textarea for notes and enabled HTML
@@ -932,6 +944,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.6 =
+1.6 introduces some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
 = 1.5.4 =
 Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 

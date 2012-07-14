@@ -16,11 +16,11 @@ global $woocommerce;
 		</thead>
 		<tfoot>
 		<?php 
-			if ($totals = $order->get_order_item_totals()) foreach ($totals as $label => $value) :
+			if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
 				?>
 				<tr>
-					<th scope="row" colspan="2"><?php echo $label; ?></th>
-					<td><?php echo $value; ?></td>
+					<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
+					<td><?php echo $total['value']; ?></td>
 				</tr>
 				<?php 
 			endforeach; 

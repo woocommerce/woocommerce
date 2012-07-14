@@ -116,7 +116,7 @@ div.product, #content div.product {
 	}
 	
 	/* Price */
-	p.price {
+	span.price, p.price {
 		color: @highlight;
 		font-size: 1.25em;
 		ins {
@@ -311,7 +311,6 @@ div.product, #content div.product {
 			div.quantity {
 				float:none;
 				margin: 0;
-				width: 72px;
 			}
 			small.stock {
 				display:block;
@@ -319,17 +318,34 @@ div.product, #content div.product {
 			}
 		}
 		.variations {
+			margin-bottom: 1em;
 			label {
-				font-weight:bold;
+				font-weight: bold;
 			}
 			select {
 				width: 100%;
 				float:left;
 			}
+			td.label {
+				padding-right: 1em;	
+			}
+			td {
+				vertical-align: top;
+			}
 		}
 		.button {
 			vertical-align: middle;
 			float:left;
+		}
+		
+		.group_table {
+			td.label {
+				padding-right: 1em;	
+				padding-left: 1em;
+			}
+			td {
+				vertical-align: top;
+			}
 		}
 	}
 }

@@ -31,10 +31,8 @@ function woocommerce_product_category($atts){
 	  	'category'		=> ''
 		), $atts));
 		
-	if (!$category) return;
+	if ( ! $category ) return;
 		
-	$woocommerce_loop['columns'] = $columns;
-	
   	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
@@ -59,11 +57,28 @@ function woocommerce_product_category($atts){
 	    )
 	);
 	
-  	query_posts($args);
-	
   	ob_start();
-	woocommerce_get_template_part( 'loop', 'shop' );
+	
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+		
+		<ul class="products">
+			
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+		
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+	
+			<?php endwhile; // end of the loop. ?>
+				
+		</ul>
+		
+	<?php endif; 
+
 	wp_reset_query();
+	
 	return ob_get_clean();
 }
 
@@ -101,13 +116,27 @@ function woocommerce_product_categories( $atts ) {
   	$terms = get_terms( 'product_cat', $args );
 
   	$woocommerce_loop['columns'] = $columns;
-  	$woocommerce_loop['loop'] = 0;
 	
   	ob_start();
-  	echo '<ul class="products">';
-	woocommerce_get_template( 'loop-product-cats.php', array( 'product_categories' => $terms, 'product_category_parent' => false ) );
-	echo '</ul>';
+  	  	
+  	if ( $product_categories ) {
+  	
+  		echo '<ul class="products">';
+		
+		foreach ( $product_categories as $category ) {
+			
+			woocommerce_get_template( 'content-product_cat.php', array(
+				'category' => $category
+			) );
+			
+		}
+		
+		echo '</ul>';
+
+	}
+
 	wp_reset_query();
+	
 	return ob_get_clean();
 }
 
@@ -125,8 +154,6 @@ function woocommerce_recent_products( $atts ) {
 		'order' => 'desc'
 	), $atts));
 	
-	$woocommerce_loop['columns'] = $columns;
-	
 	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
@@ -143,9 +170,26 @@ function woocommerce_recent_products( $atts ) {
 		)
 	);
 	
-	query_posts($args);
 	ob_start();
-	woocommerce_get_template_part( 'loop', 'shop' );
+
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+		
+		<ul class="products">
+			
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+		
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+	
+			<?php endwhile; // end of the loop. ?>
+				
+		</ul>
+		
+	<?php endif; 
+
 	wp_reset_query();
 	
 	return ob_get_clean();
@@ -164,8 +208,6 @@ function woocommerce_products($atts){
 	  	'orderby'   => 'title',
 	  	'order'     => 'asc'
 		), $atts));
-		
-	$woocommerce_loop['columns'] = $columns;
 	
   	$args = array(
 		'post_type'	=> 'product',
@@ -199,11 +241,28 @@ function woocommerce_products($atts){
     	$args['post__in'] = $ids;
 	}
 	
-  	query_posts($args);
-	
   	ob_start();
-	woocommerce_get_template_part( 'loop', 'shop' );
+
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+		
+		<ul class="products">
+			
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+		
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+	
+			<?php endwhile; // end of the loop. ?>
+				
+		</ul>
+		
+	<?php endif; 
+
 	wp_reset_query();
+
 	return ob_get_clean();
 }
 
@@ -239,11 +298,26 @@ function woocommerce_product($atts){
     	$args['p'] = $atts['id'];
   	}
   
-  	query_posts($args);
-	
   	ob_start();
-	woocommerce_get_template_part( 'loop', 'shop' );
+
+	$products = new WP_Query( $args );
+
+	if ( $products->have_posts() ) : ?>
+		
+		<ul class="products">
+			
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+		
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+	
+			<?php endwhile; // end of the loop. ?>
+				
+		</ul>
+		
+	<?php endif; 
+
 	wp_reset_query();
+
 	return ob_get_clean();  
 }
 
@@ -360,8 +434,6 @@ function woocommerce_featured_products( $atts ) {
 		'order' => 'desc'
 	), $atts));
 	
-	$woocommerce_loop['columns'] = $columns;
-	
 	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
@@ -381,9 +453,27 @@ function woocommerce_featured_products( $atts ) {
 			)
 		)
 	);
-	query_posts($args);
+
 	ob_start();
-	woocommerce_get_template_part( 'loop', 'shop' );
+
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+		
+		<ul class="products">
+			
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+		
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+	
+			<?php endwhile; // end of the loop. ?>
+				
+		</ul>
+		
+	<?php endif; 
+
 	wp_reset_query();
 	
 	return ob_get_clean();
@@ -392,7 +482,7 @@ function woocommerce_featured_products( $atts ) {
 /**
  * Show a single product page
  **/
-function woocommerce_product_page_shortcode($atts){
+function woocommerce_product_page_shortcode( $atts ) {
   	if (empty($atts)) return;
 	
 	if (!$atts['id'] && !$atts['sku']) return;
@@ -416,13 +506,23 @@ function woocommerce_product_page_shortcode($atts){
   	if(isset($atts['id'])){
     	$args['p'] = $atts['id'];
   	}
+  	
+  	$single_product = new WP_Query( $args );
 
-  	$product_query = new WP_Query($args);
   	ob_start();
-  	echo '<div class="single-product">';
-	woocommerce_single_product_content( $product_query );
-	echo '</div>';
+	
+	while ( $single_product->have_posts() ) : $single_product->the_post(); ?>
+
+		<div class="single-product">
+			
+			<?php woocommerce_get_template_part( 'content', 'single-product' ); ?>
+			
+		</div>
+
+	<?php endwhile; // end of the loop.
+
 	wp_reset_query();
+	
 	return ob_get_clean();
 }	
 

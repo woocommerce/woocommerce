@@ -49,7 +49,7 @@ foreach ( $product->get_children() as $child_id ) {
 						<?php endif; ?>
 					</td>
 					
-					<td><label for="product-<?php echo $child_product['product']->id; ?>"><?php
+					<td class="label"><label for="product-<?php echo $child_product['product']->id; ?>"><?php
 						
 						if ($child_product['product']->is_visible()) 
 							echo '<a href="'.get_permalink($child_product['product']->id).'">' . $child_product['product']->get_title() . '</a>';

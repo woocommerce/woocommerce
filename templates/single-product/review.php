@@ -10,7 +10,7 @@ global $post;
 <li itemprop="reviews" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
-			<?php echo get_avatar( $GLOBALS['comment'], $size='60' ); ?>
+		<?php echo get_avatar( $GLOBALS['comment'], $size='60' ); ?>
 		
 		<div class="comment-text">
 		
@@ -22,7 +22,13 @@ global $post;
 				<p class="meta"><em><?php _e('Your comment is awaiting approval', 'woocommerce'); ?></em></p>
 			<?php else : ?>
 				<p class="meta">
-					<?php _e('Rating by', 'woocommerce'); ?> <strong itemprop="author"><?php comment_author(); ?></strong> <?php _e('on', 'woocommerce'); ?> <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__('M jS Y', 'woocommerce')); ?></time>:
+					<strong itemprop="author"><?php comment_author(); ?></strong> <?php 
+						
+						if ( get_option('woocommerce_review_rating_verification_label') == 'yes' )
+							if ( woocommerce_customer_bought_product( $GLOBALS['comment']->comment_author_email, $GLOBALS['comment']->user_id, $post->ID ) )
+								echo '(' . __('verified owner', 'woocommerce') . ') ';
+						
+					?>&ndash; <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__('M jS Y', 'woocommerce')); ?></time>:
 				</p>
 			<?php endif; ?>
 			
