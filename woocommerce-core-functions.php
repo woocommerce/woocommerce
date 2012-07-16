@@ -865,7 +865,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
  * We use a custom walker, just like WordPress does
  */
-function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
+function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1, $show_uncategorized = 1 ) {
 	global $wp_query, $woocommerce;
 	
 	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
@@ -884,7 +884,10 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
 	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__('Select a category', 'woocommerce').'</option>';
 	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
-	$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
+	
+	if ( $show_uncategorized )
+		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
+	
 	$output .="</select>";
 	
 	echo $output;
