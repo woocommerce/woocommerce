@@ -230,6 +230,7 @@ class Woocommerce {
 		}
 		
 		add_filter('map_meta_cap', array(&$this, 'm3_product_meta_cap'), 10, 4);
+		add_filter('map_meta_cap', array(&$this, 'm3_shop_order_meta_cap'), 10, 4);
 		add_action( 'admin_head-edit.php', array(&$this, 'my_admin_css') );
 
 		// Actions
@@ -513,7 +514,20 @@ class Woocommerce {
 			   	'export'					=> true,
 				'import'					=> true,
 				'manage_woocommerce'		=> true,
+				/*
 				'manage_woocommerce_orders'	=> true,
+				*/
+				'edit_published_shop_orders' 	=> true,
+				'publish_shop_orders' 		=> true,
+				'edit_shop_orders' 		=> true,
+				'edit_others_shop_orders' 	=> true,
+				'delete_shop_orders' 		=> true,
+				'delete_others_shop_orders'	=> true,
+				'read_private_shop_orders'	=> true,
+				'edit_shop_order'			=> true,
+				'delete_shop_order'		=> true,
+				'read_shop_order'			=> true,
+				
 				'manage_woocommerce_coupons'	=> true,
 				/*
 				'manage_woocommerce_products'	=> true,
@@ -539,7 +553,21 @@ class Woocommerce {
 			
 			// Main Shop capabilities for admin
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
+			/*
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_orders' );
+			*/
+			$wp_roles->add_cap( 'administrator', 'edit_published_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'publish_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'edit_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'edit_others_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'delete_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'delete_others_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'read_private_shop_orders' );
+			$wp_roles->add_cap( 'administrator', 'edit_shop_order' );
+			$wp_roles->add_cap( 'administrator', 'delete_shop_order' );
+			$wp_roles->add_cap( 'administrator', 'read_shop_order' );
+			
+			
 			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_coupons' );
 			
 			/*
@@ -954,6 +982,7 @@ class Woocommerce {
 				'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
+				/*
 				'capability_type' 		=> 'post',
 				'capabilities' => array(
 					'publish_posts' 		=> 'manage_woocommerce_orders',
@@ -966,6 +995,21 @@ class Woocommerce {
 					'delete_post' 			=> 'manage_woocommerce_orders',
 					'read_post' 			=> 'manage_woocommerce_orders'
 				),
+				*/
+				'capability_type' 		=> 'shop_order',
+				'capabilities' => array(
+					'edit_published_posts' 		=> 'edit_published_shop_orders',
+					'publish_posts' 		=> 'publish_shop_orders',
+					'edit_posts' 			=> 'edit_shop_orders',
+					'edit_others_posts' 	=> 'edit_others_shop_orders',
+					'delete_posts' 			=> 'delete_shop_orders',
+					'delete_others_posts'	=> 'delete_others_shop_orders',
+					'read_private_posts'	=> 'read_private_shop_orders',
+					'edit_post' 			=> 'edit_shop_order',
+					'delete_post' 			=> 'delete_shop_order',
+					'read_post' 			=> 'read_shop_order'
+				),
+				
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
 				'show_in_menu' 			=> $show_in_menu,
@@ -1023,7 +1067,96 @@ class Woocommerce {
 		);
 	}
 	
-	
+	function m3_shop_order_meta_cap( $primitive_caps, $meta_cap, $user_id, $args ) {
+
+		/* If meta-capability is not order based do nothing. */
+		if ( !in_array($meta_cap,array('edit_shop_order', 'delete_shop_order', 'read_shop_order') ) ) {
+			return $primitive_caps;
+		}
+
+		/* Check post is of post type. */
+		$post = get_post( $args[0] );
+		$post_type = get_post_type_object( $post->post_type );
+		if ( 'shop_order' != $post_type->name ) {
+			return $primitive_caps;
+		}
+		
+		/* get author id */
+		$order_items = (array) maybe_unserialize( get_post_meta($post->ID, '_order_items', true) );
+		$post_tmp = get_post($order_items[0][id]);
+		$author_id = $post_tmp->post_author;
+
+		$primitive_caps = array();
+		switch( $meta_cap ){
+			case 'edit_shop_order':				
+				if ( $author_id == $user_id ) {
+					/* User is post author */
+					if ( 'publish' == $post->post_status ) {
+						/* order is published: require 'edit_published_shop_orders' capability */
+						$primitive_caps[] = $post_type->cap->edit_published_posts;
+					}
+					elseif ( 'trash' == $post->post_status ) {
+						if ('publish' == get_post_meta($post->ID, '_wp_trash_meta_status', true) ) {
+							/* order is a trashed published post require 'edit_published_shop_orders' capability */
+							$primitive_caps[] = $post_type->cap->edit_published_posts;
+						}
+
+					}
+					else {
+						$primitive_caps[] = $post_type->cap->edit_posts;
+					}
+				}
+				else {
+					/* The user is trying to edit a post belonging to someone else. */
+					$primitive_caps[] = $post_type->cap->edit_others_posts;
+
+					/* If the post is published or private, extra caps are required. */
+					if ( 'publish' == $post->post_status ) {
+						$primitive_caps[] = $post_type->cap->edit_published_posts;
+
+					}
+					elseif ( 'private' == $post->post_status ) {
+						$primitive_caps[] = $post_type->cap->edit_private_posts;
+					}
+				}
+				break;
+
+			case 'read_shop_order':
+				if ( 'private' != $post->post_status ) {
+					/* If the post is not private, just require read capability */
+					$primitive_caps[] = $post_type->cap->read;
+
+				}
+				elseif ( $author_id == $user_id ) {
+					/* Post is private, but current user is author */
+					$primitive_caps[] = $post_type->cap->read;
+
+				}
+				else {
+					/* Post is private, and current user is not the author */
+					$primitive_caps[] = $post_type->cap->read_private_post;
+				}
+				break;
+
+			case 'delete_shop_order':
+				if ( $author_id == $user_id  ) {
+					/* Current user is author, require delete_shop_orders capability */
+					$primitive_caps[] = $post_type->cap->delete_posts;
+
+				}
+				else {
+					/* Current user is no the author, require delete_others_shop_orders capability */
+					$primitive_caps[] = $post_type->cap->delete_others_posts;
+				}
+
+				/* If post is published, require delete_published_posts capability too */
+				if ( 'publish' == $post->post_status ) {
+					$primitive_caps[] = $post_type->cap->delete_published_posts;
+				}
+				break;
+		}
+		return $primitive_caps;
+	}
 	
 	function m3_product_meta_cap( $primitive_caps, $meta_cap, $user_id, $args ) {
 
