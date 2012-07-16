@@ -637,7 +637,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 			}
 
-			$field .= '</select></p>' . $after;
+			$field .= '</select>';
+			
+			$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __('Update country', 'woocommerce') . '" /></noscript>';
+			
+			$field .= '</p>' . $after;
 
 			break;
 		case "state" :
@@ -646,22 +650,24 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 					<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
 
 			/* Get Country */
-			$country_key = ( $key=='billing_state' ) ? 'billing_country' : 'shipping_country';
+			$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
 
-			if ( isset( $_POST[$country_key] ) ) {
-				$current_cc = woocommerce_clean( $_POST[$country_key] );
+			if ( isset( $_POST[ $country_key ] ) ) {
+				$current_cc = woocommerce_clean( $_POST[ $country_key ] );
 			} elseif ( is_user_logged_in() ) {
-				$current_cc = get_user_meta( get_current_user_id() , $country_key, true  );
+				$current_cc = get_user_meta( get_current_user_id() , $country_key, true );
+			} elseif ( $country_key == 'billing_country' ) {
+				$current_cc = apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
 			} else {
-				$current_cc = apply_filters( 'default_checkout_country', ( $woocommerce->customer->get_country() ) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country() );
+				$current_cc 	= apply_filters('default_checkout_country', ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country());
 			}
+			
+			$states = $woocommerce->countries->get_states( $current_cc );
 
-			$states = $woocommerce->countries->states;
-
-			if ( isset( $states[$current_cc][$value]  ) ) {
+			if ( ! empty( $states ) ) {
 				// Dropdown
 				$field .= '<select name="' . $key . '" id="' . $key . '" class="state_select"><option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
-				foreach ( $states[$current_cc] as $ckey => $cvalue ) {
+				foreach ( $states as $ckey => $cvalue ) {
 					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 				}
 				$field .= '</select>';

@@ -105,11 +105,8 @@ class WC_Checkout {
 		if ( $woocommerce->cart->ship_to_billing_address_only() ) $this->posted['shiptobilling'] = 1;
 		
 		// Update customer shipping and payment method to posted method
-		$_SESSION['_chosen_shipping_method'] = $this->posted['shipping_method'];
-		$_SESSION['_chosen_payment_method'] = $this->posted['payment_method'];
-		
-		// Update cart totals
-		$woocommerce->cart->calculate_totals();
+		$_SESSION['_chosen_shipping_method'] 	= $this->posted['shipping_method'];
+		$_SESSION['_chosen_payment_method'] 	= $this->posted['payment_method'];
 		
 		// Note if we skip shipping
 		$skipped_shipping = false;
@@ -118,7 +115,7 @@ class WC_Checkout {
 		$validation = $woocommerce->validation();
 		
 		// Get posted checkout_fields and do validation
-		foreach ($this->checkout_fields as $fieldset_key => $fieldset) :		
+		foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {	
 			
 			// Skip shipping if its not needed
 			if ( $fieldset_key == 'shipping' && ( $woocommerce->cart->ship_to_billing_address_only() || $this->posted['shiptobilling'] || ( ! $woocommerce->cart->needs_shipping() && get_option('woocommerce_require_shipping_address') == 'no' ) ) ) {
@@ -126,54 +123,79 @@ class WC_Checkout {
 				continue;
 			}
 			
-			foreach ($fieldset as $key => $field) :
+			foreach ( $fieldset as $key => $field ) {
 				
-				if (!isset($field['type'])) $field['type'] = 'text';
+				if ( ! isset( $field['type'] ) ) $field['type'] = 'text';
 				
 				// Get Value
-				switch ($field['type']) :
+				switch ( $field['type'] ) {
 					case "checkbox" :
-						$this->posted[$key] = isset($_POST[$key]) ? 1 : 0;
+						$this->posted[ $key ] = isset( $_POST[$key] ) ? 1 : 0;
 					break;
 					default :
-						$this->posted[$key] = isset($_POST[$key]) ? woocommerce_clean($_POST[$key]) : '';
+						$this->posted[ $key ] = isset( $_POST[$key] ) ? woocommerce_clean( $_POST[ $key ] ) : '';
 					break;
-				endswitch;
+				}
 				
 				// Hook to allow modification of value
-				$this->posted[$key] = apply_filters('woocommerce_process_checkout_field_' . $key, $this->posted[$key]);
+				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[$key] );
 				
 				// Validation: Required fields
-				if ( isset($field['required']) && $field['required'] && empty($this->posted[$key]) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
+				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[$key] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
 				
-				if ( ! empty( $this->posted[ $key ] ) ) :
+				if ( ! empty( $this->posted[ $key ] ) ) {
+				
 					// Special handling for validation and formatting
-					switch ( $key ) :
+					switch ( $key ) {
 						case "billing_postcode" :
 						case "shipping_postcode" :
-							$validate_against = ( $key == 'billing_postcode' ) ? 'billing_country' : 'shipping_country'; 
+							
+							$validate_against = $key == 'billing_postcode' ? 'billing_country' : 'shipping_country'; 
 							$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 							
-							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) ) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __('(%s) is not a valid postcode/ZIP.', 'woocommerce'), $this->posted[ $key ] ) ); 
-							else :
+							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
+								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __('(%s) is not a valid postcode/ZIP.', 'woocommerce'), $this->posted[ $key ] ) ); 
+							else
 								$this->posted[ $key ] = $validation->format_postcode( $this->posted[$key], $_POST[ $validate_against ] );
-							endif;
+							
+						break;
+						case "billing_state" :
+						case "shipping_state" :
+						
+							// Get valid states
+							$validate_against = $key == 'billing_state' ? 'billing_country' : 'shipping_country';
+							$valid_states = $woocommerce->countries->get_states( $_POST[ $validate_against ] );
+							if ( $valid_states )
+								$valid_state_values = array_flip( array_map( 'strtolower', $valid_states ) );
+							
+							// Convert value to key if set
+							if ( isset( $valid_state_values[ strtolower( $this->posted[ $key ] ) ] ) )
+								 $this->posted[ $key ] = $valid_state_values[ strtolower( $this->posted[ $key ] ) ];
+							
+							// Only validate if the country has specific state options
+							if ( $valid_states && sizeof( $valid_states ) > 0 )
+								if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) )
+									$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not valid. Please enter one of the following:', 'woocommerce') . ' ' . implode( ', ', $valid_states ) );
+						
 						break;
 						case "billing_phone" :
+						
 							$this->posted[ $key ] = $validation->format_phone( $this->posted[ $key ] );
+							
 							if ( ! $validation->is_phone( $this->posted[ $key ] ) )
 								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid number.', 'woocommerce') );
 						break;
 						case "billing_email" :
-							$this->posted[$key] = strtolower( $this->posted[$key] );
-							if (!$validation->is_email( $this->posted[$key] )) : $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') ); endif;
+						
+							$this->posted[ $key ] = strtolower( $this->posted[$key] );
+							
+							if ( ! $validation->is_email( $this->posted[$key] ) ) 
+								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') );
 						break;
-					endswitch;
-				endif;
-				
-			endforeach;
-			
-		endforeach;
+					}
+				}
+			}
+		}
 		
 		// Update customer location to posted location so we can correctly check available shipping methods
 		if ( isset( $this->posted['billing_country'] ) ) 
@@ -206,6 +228,10 @@ class WC_Checkout {
 			
 		}
 		
+		// Update cart totals now we have customer address
+		$woocommerce->cart->calculate_totals();
+		
+		// Handle accounts
 		if ( is_user_logged_in() )
 			$this->creating_account = false;
 		elseif ( ! empty( $this->posted['createaccount'] ) )
@@ -217,52 +243,54 @@ class WC_Checkout {
 		
 		if ( $this->creating_account ) {
 		
-			if ( empty($this->posted['account_username']) ) $woocommerce->add_error( __('Please enter an account username.', 'woocommerce') );
-			if ( empty($this->posted['account_password']) ) $woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
-			if ( $this->posted['account_password-2'] !== $this->posted['account_password'] ) $woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
+			if ( empty($this->posted['account_username']) ) 
+				$woocommerce->add_error( __('Please enter an account username.', 'woocommerce') );
+			if ( empty($this->posted['account_password']) ) 
+				$woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
+			if ( $this->posted['account_password-2'] !== $this->posted['account_password'] ) 
+				$woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
 		
 			// Check the username
-			if ( !validate_username( $this->posted['account_username'] ) ) :
+			if ( !validate_username( $this->posted['account_username'] ) )
 				$woocommerce->add_error( __('Invalid email/username.', 'woocommerce') );
-			elseif ( username_exists( $this->posted['account_username'] ) ) :
+			elseif ( username_exists( $this->posted['account_username'] ) )
 				$woocommerce->add_error( __('An account is already registered with that username. Please choose another.', 'woocommerce') );
-			endif;
 			
 			// Check the e-mail address
-			if ( email_exists( $this->posted['billing_email'] ) ) :
+			if ( email_exists( $this->posted['billing_email'] ) )
 				$woocommerce->add_error( __('An account is already registered with your email address. Please login.', 'woocommerce') );
-			endif;
 			
 		}
 		
 		// Terms
-		if (!isset($_POST['woocommerce_checkout_update_totals']) && empty($this->posted['terms']) && woocommerce_get_page_id('terms')>0 ) $woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && woocommerce_get_page_id( 'terms' ) > 0 ) 
+			$woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
 		
-		if ($woocommerce->cart->needs_shipping()) :
+		if ( $woocommerce->cart->needs_shipping() ) {
 			
 			// Shipping Method
 			$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			
-			if (!isset($available_methods[$this->posted['shipping_method']])) :
+			if ( ! isset( $available_methods[ $this->posted['shipping_method'] ] ) )
 				$woocommerce->add_error( __('Invalid shipping method.', 'woocommerce') );
-			endif;	
 		
-		endif;	
+		}	
 		
-		if ($woocommerce->cart->needs_payment()) :
+		if ($woocommerce->cart->needs_payment()) {
+			
 			// Payment Method
 			$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
-			if (!isset($available_gateways[$this->posted['payment_method']])) :
+			
+			if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) )
 				$woocommerce->add_error( __('Invalid payment method.', 'woocommerce') );
-			else :
-				// Payment Method Field Validation
-				$available_gateways[$this->posted['payment_method']]->validate_fields();
-			endif;
-		endif;
+			else
+				$available_gateways[$this->posted['payment_method']]->validate_fields(); // Payment Method Field Validation
+		}
 		
+		// Action after validation
 		do_action( 'woocommerce_after_checkout_validation', $this->posted );
 				
-		if (!isset($_POST['woocommerce_checkout_update_totals']) && $woocommerce->error_count()==0) :
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->error_count() == 0 ) :
 			
 			$user_id = get_current_user_id();
 			
