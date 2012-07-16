@@ -16,79 +16,156 @@
  * The added attributes are stored in the database and can be used for layered navigation.
  */
 function woocommerce_attributes() {
-	
 	global $wpdb, $woocommerce;
 	
-	if (isset($_POST['add_new_attribute']) && $_POST['add_new_attribute']) :
+	if ( ! empty( $_POST['add_new_attribute'] ) ) {
+	
 		check_admin_referer( 'woocommerce-add-new_attribute' );
-		$attribute_name = (string) sanitize_title($_POST['attribute_name']);
-		$attribute_type = (string) $_POST['attribute_type'];
-		$attribute_label = (string) $_POST['attribute_label'];
 		
-		if (!$attribute_label) $attribute_label = ucwords($attribute_name);
+		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_type 	= esc_attr( $_POST['attribute_type'] );
+		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
 		
-		if (!$attribute_name) $attribute_name = sanitize_title($attribute_label);
+		if ( ! $attribute_label ) 
+			$attribute_label = ucwords( $attribute_name );
 		
-		if ($attribute_name && strlen($attribute_name)<30 && $attribute_type && !taxonomy_exists( $woocommerce->attribute_taxonomy_name($attribute_name) )) :
+		if ( ! $attribute_name ) 
+			$attribute_name = sanitize_title( $attribute_label );
 		
-			$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $attribute_name, 'attribute_label' => $attribute_label, 'attribute_type' => $attribute_type ), array( '%s', '%s' ) );
+		if ( $attribute_name && strlen( $attribute_name ) < 30 && $attribute_type && ! taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
+		
+			$wpdb->insert( 
+				$wpdb->prefix . "woocommerce_attribute_taxonomies", 
+				array( 
+					'attribute_name' 	=> $attribute_name, 
+					'attribute_label' 	=> $attribute_label, 
+					'attribute_type' 	=> $attribute_type 
+				)
+			);
 						
 			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
 			exit;
-			
-		endif;
+		}
 		
-	elseif (isset($_POST['save_attribute']) && $_POST['save_attribute'] && isset($_GET['edit'])) :
+	} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) {
 		
-		$edit = absint($_GET['edit']);
+		$edit = absint( $_GET['edit'] );
 		check_admin_referer( 'woocommerce-save-attribute_' . $edit );
-		if ($edit>0) :
 		
-			$attribute_type = $_POST['attribute_type'];
-			$attribute_label = (string) $_POST['attribute_label'];
+		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
+		$attribute_type	 	= esc_attr( $_POST['attribute_type'] );
+		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
+
+		if ( ! $attribute_label ) 
+			$attribute_label = ucwords( $attribute_name );
 		
-			$wpdb->update( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_type' => $attribute_type, 'attribute_label' => $attribute_label ), array( 'attribute_id' => $_GET['edit'] ), array( '%s', '%s' ) );
-		
-		endif;
-		
-		wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
-		exit;
+		if ( ! $attribute_name ) 
+			$attribute_name = sanitize_title( $attribute_label );
 			
-	elseif (isset($_GET['delete'])) :
-		check_admin_referer( 'woocommerce-delete-attribute_' . absint( $_GET['delete'] ) );
-		$delete = absint($_GET['delete']);
+		$old_attribute_name = sanitize_title( $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $edit" ) );
 		
-		if ($delete>0) :
-		
-			$att_name = $wpdb->get_var("SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$delete'");
+		if ( $old_attribute_name != $attribute_name && taxonomy_exists( $woocommerce->attribute_taxonomy_name( $attribute_name ) ) ) {
 			
-			if ($att_name && $wpdb->query("DELETE FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$delete'")) :
-				
-				$taxonomy = $woocommerce->attribute_taxonomy_name($att_name); 
-				
-				if (taxonomy_exists($taxonomy)) :
-				
-					$terms = get_terms($taxonomy, 'orderby=name&hide_empty=0'); 
-					foreach ($terms as $term) {
-						wp_delete_term( $term->term_id, $taxonomy );
-					}
-				
-				endif;
-				
-				wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
-				exit;
-										
-			endif;
+			echo '<div id="woocommerce_errors" class="error fade"><p>' . __( 'Taxonomy exists - please change the slug', 'woocommerce' ) . '</p></div>';
 			
-		endif;
-		
-	endif;
+		} elseif ( $attribute_name && strlen( $attribute_name ) < 30 && $attribute_type ) {
 	
-	if (isset($_GET['edit']) && $_GET['edit'] > 0) :
+			$wpdb->update( 
+				$wpdb->prefix . "woocommerce_attribute_taxonomies", 
+				array( 
+					'attribute_name' 	=> $attribute_name, 
+					'attribute_label' 	=> $attribute_label, 
+					'attribute_type' 	=> $attribute_type 
+				), 
+				array( 
+					'attribute_id' 		=> $edit
+				)
+			);
+			
+			if ( $old_attribute_name != $attribute_name && ! empty( $old_attribute_name ) ) {
+				
+				// Update taxonomies in the wp term taxonomy table
+				$wpdb->update( 
+					$wpdb->term_taxonomy,
+					array( 
+						'taxonomy' 	=> $woocommerce->attribute_taxonomy_name( $attribute_name )
+					), 
+					array( 
+						'taxonomy' 	=> $woocommerce->attribute_taxonomy_name( $old_attribute_name )
+					)
+				);
+				
+				// Update taxonomy ordering term meta
+				$wpdb->update( 
+					$wpdb->prefix . "woocommerce_termmeta",
+					array( 
+						'meta_key' 	=> 'order_pa_' . sanitize_title( $attribute_name )
+					), 
+					array( 
+						'meta_key' 	=> 'order_pa_' . sanitize_title( $old_attribute_name )
+					)
+				);
+				
+				// Update product attributes which use this taxonomy
+				$old_attribute_name_length = strlen($old_attribute_name) + 3;
+				$attribute_name_length = strlen($attribute_name) + 3;
+				
+				$wpdb->query( "
+					UPDATE {$wpdb->postmeta} 
+					SET meta_value = replace( meta_value, 's:{$old_attribute_name_length}:\"pa_{$old_attribute_name}\"', 's:{$attribute_name_length}:\"pa_{$attribute_name}\"' ) 
+					WHERE meta_key = '_product_attributes'" 
+					);
+				
+				// Update variations which use this taxonomy
+				$wpdb->update( 
+					$wpdb->postmeta,
+					array( 
+						'meta_key' 	=> 'attribute_' . sanitize_title( $attribute_name )
+					), 
+					array( 
+						'meta_key' 	=> 'attribute_' . sanitize_title( $old_attribute_name )
+					)
+				);
+				
+				// Clear post cache
+				wp_cache_flush();
+			}
+			
+			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
+			exit;
+		
+		}
+			
+	} elseif ( ! empty( $_GET['delete'] ) ) {
+		
+		$delete = absint( $_GET['delete'] );
+		check_admin_referer( 'woocommerce-delete-attribute_' . $delete );
+		
+		$att_name = $wpdb->get_var( "SELECT attribute_name FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $delete" );
+		
+		if ( $att_name && $wpdb->query( "DELETE FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = $delete" ) ) {
+			
+			$taxonomy = $woocommerce->attribute_taxonomy_name( $att_name ); 
+			
+			if ( taxonomy_exists( $taxonomy ) ) {
+			
+				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0'); 
+				foreach ( $terms as $term )
+					wp_delete_term( $term->term_id, $taxonomy );
+			
+			}
+			
+			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );
+			exit;
+									
+		}
+		
+	}
+	
+	if ( ! empty( $_GET['edit'] ) && $_GET['edit'] > 0 )
 		woocommerce_edit_attribute();
-	else :	
+	else	
 		woocommerce_add_attribute();
-	endif;
 	
 }
 
@@ -98,13 +175,15 @@ function woocommerce_attributes() {
  * Shows the interface for changing an attributes type between select and text
  */
 function woocommerce_edit_attribute() {
-	
 	global $wpdb;
 	
-	$edit = absint($_GET['edit']);
+	$edit = absint( $_GET['edit'] );
 		
-	$att_type = $wpdb->get_var("SELECT attribute_type FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");	
-	$att_label = $wpdb->get_var("SELECT attribute_label FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");		
+	$attribute_to_edit = $wpdb->get_row("SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'");	
+	
+	$att_type 	= $attribute_to_edit->attribute_type;
+	$att_label 	= $attribute_to_edit->attribute_label;
+	$att_name 	= $attribute_to_edit->attribute_name;
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -123,12 +202,21 @@ function woocommerce_edit_attribute() {
 					</tr>
 					<tr class="form-field form-required">
 						<th scope="row" valign="top">
+							<label for="attribute_name"><?php _e('Slug', 'woocommerce'); ?></label>
+						</th>
+						<td>
+							<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
+							<p class="description"><?php _e('Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce'); ?></p>
+						</td>
+					</tr>					
+					<tr class="form-field form-required">
+						<th scope="row" valign="top">
 							<label for="attribute_type"><?php _e('Type', 'woocommerce'); ?></label>
 						</th>
 						<td>
 							<select name="attribute_type" id="attribute_type">
-								<option value="select" <?php selected($att_type, 'select'); ?>><?php _e('Select', 'woocommerce') ?></option>
-								<option value="text" <?php selected($att_type, 'text'); ?>><?php _e('Text', 'woocommerce') ?></option>										
+								<option value="select" <?php selected( $att_type, 'select' ); ?>><?php _e('Select', 'woocommerce') ?></option>
+								<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e('Text', 'woocommerce') ?></option>										
 							</select>
 							<p class="description"><?php _e('Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce'); ?></p>
 						</td>
@@ -221,7 +309,7 @@ function woocommerce_add_attribute() {
 							
 							<div class="form-field">
 								<label for="attribute_name"><?php _e('Slug', 'woocommerce'); ?></label>
-								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+								<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
 								<p class="description"><?php _e('Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce'); ?></p>
 							</div>
 							

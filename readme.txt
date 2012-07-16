@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
 * Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
 * Templating - Documented templates listing hooked in functions.
+* Tweak - Allowed the editing of attribute slugs after creation
 * Tweak - get_order_item_totals() total_rows have fixed indexes for easier manipulation
 * Tweak - order_note comment type for future order notes, allowing you to filter in the comments section.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
@@ -171,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_attribute filter if needed
 * Tweak - Orders page is now the first item in the WooCommerce menu
 * Tweak - If all variations are the same price, don't show the variation price.
+* Tweak - woocommerce_completed_order_customer_notification_subject hook renamed to for more sense: woocommerce_email_heading_customer_completed_order
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
