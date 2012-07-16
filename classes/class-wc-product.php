@@ -539,10 +539,15 @@ class WC_Product {
 	function get_weight() {
 		if ($this->weight) return $this->weight;
 	}
-	
+
+	/** Set a products price dynamically */
+	function set_price( $price ) {
+		$this->price = $price;
+	}
+		
 	/** Adjust a products price dynamically */
 	function adjust_price( $price ) {
-		if ($price>0) :
+		if ( $price > 0 ) :
 			$this->price += $price;
 		endif;
 	}
