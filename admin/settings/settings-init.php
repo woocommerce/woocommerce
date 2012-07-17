@@ -250,20 +250,20 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Enable jQuery UI (used by the price slider widget)', 'woocommerce' ),
+		'desc' 		=> __( 'Enable jQuery UI (used by the price filter widget)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_jquery_ui',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'end'
 	),
 	
-	array(  
+	/*array(  
 	    'desc'     => __( 'Output WooCommerce JavaScript in the footer', 'woocommerce' ),
 	    'id'     => 'woocommerce_scripts_position',
 	    'std'     => 'yes',
 	    'type'     => 'checkbox',
 	    'checkboxgroup'		=> 'end'
-	),
+	),*/
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
 	

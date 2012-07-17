@@ -943,90 +943,80 @@ class Woocommerce {
 	 * Init frontend CSS
 	 */
 	function init_styles() {
-		$chosen_en = ( get_option('woocommerce_enable_chosen') == 'yes' ) ? true : false;
-		$lightbox_en = ( get_option('woocommerce_enable_lightbox') == 'yes' ) ? true : false;
-		
+
     	// Optional front end css	
 		if ( ( defined('WOOCOMMERCE_USE_CSS') && WOOCOMMERCE_USE_CSS ) || ( ! defined('WOOCOMMERCE_USE_CSS') && get_option('woocommerce_frontend_css') == 'yes') ) {
 			$css = file_exists( get_stylesheet_directory() . '/woocommerce/style.css' ) ? get_stylesheet_directory_uri() . '/woocommerce/style.css' : $this->plugin_url() . '/assets/css/woocommerce.css';
-			wp_register_style( 'woocommerce_frontend_styles', $css );
-			wp_enqueue_style( 'woocommerce_frontend_styles' );
+			
+			wp_enqueue_style( 'woocommerce_frontend_styles', $css );
 		}
-    
-    	if ($lightbox_en) wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox.css' );
-    	if ($chosen_en) wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen.css' );
 	}
 	
 	/**
 	 * Register/queue frontend scripts
 	 */
 	function frontend_scripts() {
-		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-		$lightbox_en = ( get_option('woocommerce_enable_lightbox') == 'yes' ) ? true : false;
-		$chosen_en = ( get_option('woocommerce_enable_chosen') == 'yes' ) ? true : false;
-		$jquery_ui_en = ( get_option('woocommerce_enable_jquery_ui') == 'yes' ) ? true : false;
-		$scripts_position = ( get_option('woocommerce_scripts_position') == 'yes' ) ? true : false;
+		$suffix 				= defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$lightbox_en 			= get_option('woocommerce_enable_lightbox') == 'yes' ? true : false;
+		$chosen_en 				= get_option( 'woocommerce_enable_chosen' ) == 'yes' ? true : false;
+		$frontend_script_path 	= $this->plugin_url() . '/assets/js/frontend/';
 		
-		// Woocommerce.min.js is minified and contains woocommerce_plugins
-		wp_enqueue_script( 'woocommerce', $this->plugin_url() . '/assets/js/woocommerce'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+		// Register any scipts for later use, or used as dependencies
+		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+		wp_register_script( 'jquery-plugins', $this->plugin_url() . '/assets/js/jquery-plugins' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 		
-		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) 
-			wp_enqueue_script( 'woocommerce_plugins', $this->plugin_url() . '/assets/js/woocommerce_plugins.js', array('jquery'), '1.0', $scripts_position );
+		if ( is_product() )
+			wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 		
-		if ($lightbox_en) 
-			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
+		// Queue frontend scripts conditionally
+		if ( get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' )	
+			wp_enqueue_script( 'wc-add-to-cart', $frontend_script_path . 'add-to-cart' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 		
-		// Chosen.jquery.min.js is minified and contains the frontend code for chosen selects
+		if ( is_cart() )
+			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+		
+		if ( is_checkout() )
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+
+		if ( is_product() )
+			wp_enqueue_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+			
+		if ( $lightbox_en && is_product() ) {
+			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox/fancybox' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+			wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox.css' );
+		}
+		
 		if ( $chosen_en && is_checkout() ) {
-			wp_enqueue_script( 'chosen', $this->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
-			
-			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-				wp_enqueue_script( 'chosen_frontend', $this->plugin_url() . '/assets/js/chosen.frontend.js', array('chosen'), '1.0', $scripts_position );
-			}
+			wp_enqueue_script( 'wc-chosen', $frontend_script_path . 'chosen-frontend' . $suffix . '.js', array( 'chosen' ), '1.6', true );
+			wp_enqueue_style( 'woocommerce_chosen_styles', $this->plugin_url() . '/assets/css/chosen.css' );
 		}
 		
-		if ($jquery_ui_en) {
-			wp_enqueue_script( 'jqueryui', $this->plugin_url() . '/assets/js/jquery-ui'.$suffix.'.js', array('jquery'), '1.0', $scripts_position );
-			wp_enqueue_script( 'wc_price_slider', $this->plugin_url() . '/assets/js/price_slider'.$suffix.'.js', array('jqueryui'), '1.0', $scripts_position );
-			
-			$woocommerce_price_slider_params = array(
-				'currency_symbol' 			=> get_woocommerce_currency_symbol(),
-				'currency_pos'           	=> get_option('woocommerce_currency_pos'), 
-				'min_price'					=> isset($_SESSION['min_price']) ? $_SESSION['min_price'] : '',
-				'max_price'					=> isset($_SESSION['max_price']) ? $_SESSION['max_price'] : ''
-			);
-			
-			wp_localize_script( 'wc_price_slider', 'woocommerce_price_slider_params', $woocommerce_price_slider_params );
-		}
-	    	
-		/* Script variables */
-		$states = json_encode( $this->countries->states );
+		// Global frontend scripts
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-plugins' ), '1.6', true );
 		
+		// Variables for JS scripts
 		$woocommerce_params = array(
-			'countries' 					=> $states,
-			'select_state_text' 			=> __('Select an option&hellip;', 'woocommerce'),
-			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
-			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
-			'review_rating_required'		=> get_option('woocommerce_review_rating_required'),
+			'countries' 					=> json_encode( $this->countries->states ),
+			'select_state_text' 			=> __( 'Select an option&hellip;', 'woocommerce' ),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> $this->ajax_url(),
-			'get_variation_nonce' 			=> wp_create_nonce("get-variation"),
-			'add_to_cart_nonce' 			=> wp_create_nonce("add-to-cart"),
-			'update_order_review_nonce' 	=> wp_create_nonce("update-order-review"),
-			'update_shipping_method_nonce' 	=> wp_create_nonce("update-shipping-method"),
-			'apply_coupon_nonce' 			=> wp_create_nonce("apply-coupon"),
-			'option_guest_checkout'			=> get_option('woocommerce_enable_guest_checkout'),
+			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'review_rating_required'		=> get_option( 'woocommerce_review_rating_required' ),
+			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
+			'update_order_review_nonce' 	=> wp_create_nonce( "update-order-review" ),
+			'apply_coupon_nonce' 			=> wp_create_nonce( "apply-coupon" ),
+			'option_guest_checkout'			=> get_option( 'woocommerce_enable_guest_checkout' ),
 			'checkout_url'					=> add_query_arg( 'action', 'woocommerce-checkout', $this->ajax_url() ),
-			'option_ajax_add_to_cart'		=> get_option('woocommerce_enable_ajax_add_to_cart'),
-			'is_checkout'					=> ( is_page(woocommerce_get_page_id('checkout')) ) ? 1 : 0,
-			'is_pay_page'					=> ( is_page(woocommerce_get_page_id('pay')) ) ? 1 : 0,
-			'is_cart'						=> ( is_cart() ) ? 1 : 0
+			'is_checkout'					=> is_page( woocommerce_get_page_id( 'checkout' ) ) ? 1 : 0,
+			'update_shipping_method_nonce' 	=> wp_create_nonce( "update-shipping-method" ),
+			'add_to_cart_nonce' 			=> wp_create_nonce( "add-to-cart" )
 		);
 		
 		if ( is_checkout() || is_cart() ) 
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 		
-		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters('woocommerce_params', $woocommerce_params) );
+		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
 	}
 	
 	/** Load Instances on demand **********************************************/	

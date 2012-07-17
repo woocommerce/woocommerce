@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - If all variations are the same price, don't show the variation price.
 * Tweak - woocommerce_completed_order_customer_notification_subject hook renamed to for more sense: woocommerce_email_heading_customer_completed_order
 * Tweak - woocommerce_sortable_taxonomies filter
+* Tweak - Split up frontend scripts so they can be loaded when needed.
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID

@@ -266,7 +266,11 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	function woocommerce_variable_add_to_cart() {
 		global $product;
-
+		
+		// Enqueue variation scripts
+		wp_enqueue_script( 'wc-add-to-cart-variation' );
+		
+		// Load the template
 		woocommerce_get_template( 'single-product/add-to-cart/variable.php', array(
 				'available_variations'  => $product->get_available_variations(),
 				'attributes'   			=> $product->get_variation_attributes(),
