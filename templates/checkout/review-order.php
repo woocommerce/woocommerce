@@ -115,6 +115,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php do_action('woocommerce_review_order_after_shipping'); ?>
 
 			<?php endif; ?>
+<?php
+/**
+ * Hook added
+///////////////////////////////////////////////
+ */
+do_action('woocommerce_review_order_before_tax'); 
+?>		
 			
 			<?php 
 				if ($woocommerce->cart->get_cart_tax()) :

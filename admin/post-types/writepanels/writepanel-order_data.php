@@ -494,6 +494,14 @@ function woocommerce_order_totals_meta_box($post) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $post->ID ) ?>
 		<div class="clear"></div>
 	</div>
+<?php	
+/**
+ * Hook added - writepanel-order_data
+///////////////////////////////////////////////
+ */	
+do_action( 'woocommerce_admin_order_before_taxes', $post->ID );
+?>	
+	
 	<div class="totals_group">
 		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>" href="#">[?]</a></h4>
 		<div id="tax_rows">
