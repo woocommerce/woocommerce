@@ -433,7 +433,7 @@ class WC_Checkout {
 				// Get better formatted shipping method (title/label)
 				$payment_method = $this->posted['payment_method'];
 				if (isset($available_gateways) && isset($available_gateways[$this->posted['payment_method']])) :
-					$payment_method = $available_gateways[$this->posted['payment_method']]->title;
+					$payment_method = $available_gateways[$this->posted['payment_method']]->get_title();
 				endif;
 				
 				// UPDATE ORDER META
