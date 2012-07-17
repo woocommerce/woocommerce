@@ -58,7 +58,7 @@ global $woocommerce;
 								echo $woocommerce->cart->get_item_data( $values );
                    				
                    				// Backorder notification
-                   				if ( $_product->backorders_require_notification() && $_product->get_total_stock() < 1 ) 
+                   				if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
                    					echo '<p class="backorder_notification">' . __('Available on backorder', 'woocommerce') . '</p>';
 							?>
 						</td>

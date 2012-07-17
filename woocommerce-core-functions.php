@@ -403,10 +403,17 @@ function woocommerce_price( $price, $args = array() ) {
 }	
 	
 /**
- * Trim trailing zeros
+ * Trim trailing zeros off prices
  **/
 function woocommerce_trim_zeros( $price ) {
 	return preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
+}
+
+/**
+ * Formal decimal numbers - format to 4 dp and remove trailing zeros
+ **/
+function woocommerce_format_decimal( $number ) {
+	return rtrim( rtrim( number_format( $number, 4, '.', '' ), '0' ), '.' );
 }
 
 /**

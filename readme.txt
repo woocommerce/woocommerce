@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
-Tested up to: 3.4
-Stable tag: 1.5.8
+Tested up to: 3.4.1
+Stable tag: 1.6.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -150,7 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.6 - xx/xx/2012 =
+= 1.6.0 - 17/07/2012 =
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
 * Feature - Added bulk actions to bulk change order status to processing or completed
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_sortable_taxonomies filter
 * Tweak - Split up frontend scripts so they can be loaded when needed.
 * Tweak - Set session_name to avoid conflicting sessions across installs.
+* Tweak - Tweaked backorder handling to allow out of stock to be bought, and show 'backorder' notification is cart qty > stock
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID

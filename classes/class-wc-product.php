@@ -370,20 +370,19 @@ class WC_Product {
 	
 	/** Returns whether or not the product is in stock */
 	function is_in_stock() {
-		if ($this->managing_stock()) :
-			if (!$this->backorders_allowed()) :
-				if ($this->get_total_stock()==0 || $this->get_total_stock()<0) :
+		if ( $this->managing_stock() ) :
+			if ( ! $this->backorders_allowed() ) :
+				if ( $this->get_total_stock() <  1 ) :
 					return false;
 				else :
-					if ($this->stock_status=='instock') return true;
+					if ( $this->stock_status == 'instock' ) return true;
 					return false;
 				endif;
 			else :
-				if ($this->stock_status=='instock') return true;
-				return false;
+				return true;
 			endif;
 		endif;
-		if ($this->stock_status=='instock') return true;
+		if ( $this->stock_status == 'instock' ) return true;
 		return false;
 	}
 	
@@ -396,6 +395,14 @@ class WC_Product {
 	/** Returns whether or not the product needs to notify the customer on backorder */
 	function backorders_require_notification() {
 		if ($this->managing_stock() && $this->backorders=='notify') return true;
+		return false;
+	}
+	
+	/**
+	 * is_on_backorder function.
+	 */
+	function is_on_backorder( $qty_in_cart = 0 ) {
+		if ( $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ) return true;
 		return false;
 	}
 	

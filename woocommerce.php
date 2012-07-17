@@ -3,11 +3,11 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.6.0 beta1
+ * Version: 1.6.0
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
- * Tested up to: 3.4
+ * Tested up to: 3.4.1
  * 
  * Text Domain: woocommerce
  * Domain Path: /languages/
@@ -32,7 +32,7 @@ class Woocommerce {
 	
 	/** Version ***************************************************************/
 	
-	var $version = '1.5.8';
+	var $version = '1.6.0';
 	
 	/** URLS ******************************************************************/
 	

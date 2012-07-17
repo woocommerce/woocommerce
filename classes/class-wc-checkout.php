@@ -353,7 +353,7 @@ class WC_Checkout {
 				// Cart items
 				$order_items = array();
 				
-				foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
+				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 					
 					$_product = $values['data'];
 
@@ -363,25 +363,30 @@ class WC_Checkout {
 					$item_meta->new_order_item( $values );
 					
 					// Store variation data in meta so admin can view it
-					if ($values['variation'] && is_array($values['variation'])) :
-						foreach ($values['variation'] as $key => $value) :
-							$item_meta->add( esc_attr(str_replace('attribute_', '', $key)), $value );
-						endforeach;
-					endif;
+					if ( $values['variation'] && is_array( $values['variation'] ) ) {
+						foreach ( $values['variation'] as $key => $value ) {
+							$item_meta->add( esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+						}
+					}
 					
-					$order_items[] = apply_filters('new_order_item', array(
+					// Store backorder status
+					if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
+                   		$item_meta->add( __( 'Backordered', 'woocommerce' ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
+					
+					$order_items[] = apply_filters( 'new_order_item', array(
 				 		'id' 				=> $values['product_id'],
 				 		'variation_id' 		=> $values['variation_id'],
 				 		'name' 				=> $_product->get_title(),
 				 		'qty' 				=> (int) $values['quantity'],
 				 		'item_meta'			=> $item_meta->meta,
-				 		'line_subtotal' 	=> rtrim(rtrim(number_format($values['line_subtotal'], 4, '.', ''), '0'), '.'),	// Line subtotal (before discounts)
-				 		'line_subtotal_tax' => rtrim(rtrim(number_format($values['line_subtotal_tax'], 4, '.', ''), '0'), '.'), // Line tax (before discounts)
-				 		'line_total'		=> rtrim(rtrim(number_format($values['line_total'], 4, '.', ''), '0'), '.'), 		// Line total (after discounts)
-				 		'line_tax' 			=> rtrim(rtrim(number_format($values['line_tax'], 4, '.', ''), '0'), '.'), 		// Line Tax (after discounts)
-				 		'tax_class'			=> $_product->get_tax_class()								// Tax class (adjusted by filters)
-				 	), $values);
-				endforeach;
+				 		'line_subtotal' 	=> woocommerce_format_decimal( $values['line_subtotal'] ),		// Line subtotal (before discounts)
+				 		'line_subtotal_tax' => woocommerce_format_decimal( $values['line_subtotal_tax'] ), 	// Line tax (before discounts)
+				 		'line_total'		=> woocommerce_format_decimal( $values['line_total'] ), 		// Line total (after discounts)
+				 		'line_tax' 			=> woocommerce_format_decimal( $values['line_tax'] ), 			// Line Tax (after discounts)
+				 		'tax_class'			=> $_product->get_tax_class()									// Tax class (adjusted by filters)
+				 	), $values );
+				 	
+				}
 				
 				// Check order items for errors
 				do_action('woocommerce_check_new_order_items', $order_items);
