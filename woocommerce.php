@@ -76,8 +76,11 @@ class Woocommerce {
 	 */
 	function __construct() {
 
-		// Start a PHP session
-		if ( ! session_id() ) session_start();
+		// Start a PHP session - uses a unqiue session name for this install
+		if ( ! session_id() ) {
+			session_name( 'PHPSESSID_' . substr( md5( get_bloginfo('name') ), 0, 6 ) );
+			session_start();
+		}
 		
 		// Define version constant
 		define( 'WOOCOMMERCE_VERSION', $this->version );
