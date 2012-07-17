@@ -1064,9 +1064,12 @@ class WC_Product {
 
 				if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
 					$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-					$large_thumbnail_size = apply_filters( 'single_product_large_thumbnail_size', 'shop_single' );
-					$image = current( wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size  ) );
-					$image_link = current( wp_get_attachment_image_src( $attachment_id, 'full'  ) );
+					
+					$attachment = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
+					$image = $attachment ? current( $attachment ) : '';
+					
+					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
+					$image_link = $attachment ? current( $attachment ) : '';
 				} else {
 					$image = $image_link = '';
 				}
