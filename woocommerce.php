@@ -318,6 +318,18 @@ class Woocommerce {
 			$find[] = $file;
 			$find[] = $this->template_url . $file;
 
+			global $product;
+
+		    foreach ( get_the_terms( $product->id, 'product_cat' ) as $key => $value) {
+		       
+		       if( locate_template( 'single-product-' . $value->slug . '.php' ,false, $require_once = true) ){    
+		            unset($find);
+		            $file 	= 'single-product-'.$value->slug.'.php';
+					$find[] = $file;
+					$find[] = get_stylesheet_directory() . $file;
+		       }
+		    }
+
 		} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 			
 			$term = get_queried_object();
