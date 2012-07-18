@@ -972,6 +972,7 @@ class WC_Countries {
 			
 			$fields = woocommerce_array_overlay( $fields, $locale[$country] );
 			
+			// If default country has postcode_before_city switch the fields round
 			if ( isset( $locale[$country]['postcode_before_city'] ) ) {
 				$fields['city']['class'] 		= array('form-row-last');
 				$fields['city']['clear'] 		= true;
@@ -990,6 +991,7 @@ class WC_Countries {
 				
 				$fields = $switch_fields;
 			}
+			
 		}
 		
 		// Prepend field keys

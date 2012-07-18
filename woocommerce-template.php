@@ -650,9 +650,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			break;
 		case "state" :
 
-			$field = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">
-					<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
-
 			/* Get Country */
 			$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
 
@@ -668,19 +665,34 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			
 			$states = $woocommerce->countries->get_states( $current_cc );
 
-			if ( ! empty( $states ) ) {
-				// Dropdown
-				$field .= '<select name="' . $key . '" id="' . $key . '" class="state_select"><option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
-				foreach ( $states as $ckey => $cvalue ) {
+			if ( is_array( $states ) && empty( $states ) ) {
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field" style="display: none">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
+				$field .= '<input type="hidden" class="hidden" name="' . $key  . '" id="' . $key . '" value="" />';
+				$field .= '</p>' . $after;
+				
+			} elseif ( is_array( $states ) ) {
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
+				$field .= '<select name="' . $key . '" id="' . $key . '" class="state_select">
+					<option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
+				
+				foreach ( $states as $ckey => $cvalue )
 					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
-				}
+				
 				$field .= '</select>';
+				$field .= '</p>' . $after;
+				
 			} else {
-				// Input
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
 				$field .= '<input type="text" class="input-text" value="' . $value . '"  placeholder="' . $args['placeholder'] . '" name="' . $key . '" id="' . $key . '" />';
+				$field .= '</p>' . $after;
+				
 			}
-
-			$field .= '</p>' . $after;
 
 			break;
 		case "textarea" :
