@@ -401,8 +401,13 @@ class Woocommerce {
 		// NGINX Proxy
 		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_SERVER['HTTP_REMOTE_ADDR'] ) )
 			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
+			
 		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_HTTPS'] ) )
 			$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
+			
+		// Support for hosts which don't use HTTPS, and use HTTP_X_FORWARDED_PROTO
+		if ( ! isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) 
+			$_SERVER['HTTPS'] = '1';
 	}
 
 	/**

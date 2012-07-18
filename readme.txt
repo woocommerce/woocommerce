@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Split up frontend scripts so they can be loaded when needed.
 * Tweak - Set session_name to avoid conflicting sessions across installs.
 * Tweak - Tweaked backorder handling to allow out of stock to be bought, and show 'backorder' notification is cart qty > stock
+* Tweak - Support for HTTP_X_FORWARDED_PROTO with is_ssl
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
