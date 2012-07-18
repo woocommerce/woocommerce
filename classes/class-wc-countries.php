@@ -974,7 +974,9 @@ class WC_Countries {
 			
 			if ( isset( $locale[$country]['postcode_before_city'] ) ) {
 				$fields['city']['class'] 		= array('form-row-last');
+				$fields['city']['clear'] 		= true;
 				$fields['postcode']['class'] 	= array('form-row-first', 'update_totals_on_change');
+				$fields['postcode']['clear'] 	= false;
 				
 				$switch_fields = array();
 				
