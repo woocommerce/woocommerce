@@ -51,7 +51,35 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 				<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
 			<?php endif; ?>
 			
-			<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
+			<?php if ( have_posts() ) : ?>
+			
+				<?php do_action('woocommerce_before_shop_loop'); ?>
+			
+				<ul class="products">
+				
+					<?php woocommerce_product_subcategories(); ?>
+			
+					<?php while ( have_posts() ) : the_post(); ?>
+			
+						<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+			
+					<?php endwhile; // end of the loop. ?>
+					
+				</ul>
+	
+				<?php do_action('woocommerce_after_shop_loop'); ?>
+			
+			<?php else : ?>
+			
+				<?php if ( ! woocommerce_product_subcategories( array( 'before' => '<ul class="products">', 'after' => '</ul>' ) ) ) : ?>
+						
+					<p><?php _e( 'No products found which match your selection.', 'woocommerce' ); ?></p>
+						
+				<?php endif; ?>
+			
+			<?php endif; ?>
+			
+			<div class="clear"></div>
 				
 			<?php do_action( 'woocommerce_pagination' ); 
 			
@@ -62,17 +90,23 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 /**
  * deprecated template functions from < 1.6
  **/
-function woocommerce_single_product_content() {
-	_deprecated_function( __FUNCTION__, '1.6' );
-	woocommerce_content();
+if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
+	function woocommerce_single_product_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
+	}
 }
-function woocommerce_archive_product_content() {
-	_deprecated_function( __FUNCTION__, '1.6' );
-	woocommerce_content();
+if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
+	function woocommerce_archive_product_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
+	}
 }
-function woocommerce_product_taxonomy_content() {
-	_deprecated_function( __FUNCTION__, '1.6' );
-	woocommerce_content();
+if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
+	function woocommerce_product_taxonomy_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
+	}
 }
 
 /** Global ****************************************************************/
