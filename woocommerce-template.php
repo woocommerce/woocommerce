@@ -59,6 +59,22 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	}
 }
 
+/**
+ * deprecated template functions from < 1.6
+ **/
+function woocommerce_single_product_content() {
+	_deprecated_function( __FUNCTION__, '1.6' );
+	woocommerce_content();
+}
+function woocommerce_archive_product_content() {
+	_deprecated_function( __FUNCTION__, '1.6' );
+	woocommerce_content();
+}
+function woocommerce_product_taxonomy_content() {
+	_deprecated_function( __FUNCTION__, '1.6' );
+	woocommerce_content();
+}
+
 /** Global ****************************************************************/
 
 if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
