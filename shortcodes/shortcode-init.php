@@ -113,7 +113,7 @@ function woocommerce_product_categories( $atts ) {
 		'include'    => $ids
 	);
 	
-  	$terms = get_terms( 'product_cat', $args );
+  	$product_categories = get_terms( 'product_cat', $args );
 
   	$woocommerce_loop['columns'] = $columns;
 	
