@@ -153,6 +153,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.6.1 - 19/07/2012 =
 * Fix - Minor issue with woocommerce_content() - updated to new template system
 * Fix - Wrapped the deprecated content functions in function_exists
+* Fix - Put back deprecated loop-shop for older themes until they are updated
 
 = 1.6.0 - 17/07/2012 =
 * Feature - Support for ounces

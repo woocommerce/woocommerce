@@ -543,12 +543,16 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		
 		$defaults = array(
 			'before'  => '',
-			'after'  => ''
+			'after'  => '',
+			'force_display' => false
 		);
 
 		$args = wp_parse_args( $args, $defaults );
 		
 		extract( $args );
+		
+		// Main query only
+		if ( ! is_main_query() && ! $force_display ) return;
 		
 		// Don't show when filtering
 		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; 
