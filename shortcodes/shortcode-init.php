@@ -118,6 +118,9 @@ function woocommerce_product_categories( $atts ) {
   	$woocommerce_loop['columns'] = $columns;
 	
   	ob_start();
+  	
+  	// Reset loop/columns globals when starting a new loop
+	$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
   	  	
   	if ( $product_categories ) {
   	
