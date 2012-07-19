@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.2 - 19/07/2012 =
+* Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
 * Fix - Product categories shortcode loop
 
 = 1.6.1 - 19/07/2012 =
