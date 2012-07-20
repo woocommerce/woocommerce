@@ -150,8 +150,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.6.2 - 19/07/2012 =
+= 1.6.2 - 20/07/2012 =
 * Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
+* Tweak - Added US Zip Code validation
 * Fix - Product categories shortcode loop
 
 = 1.6.1 - 19/07/2012 =
@@ -962,8 +963,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 1.6 =
-1.6 introduces some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
+= 1.6.2 =
+1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
 = 1.5.4 =
 Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 

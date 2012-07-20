@@ -27,7 +27,9 @@ class WC_Validation {
 	 * @return  boolean
 	 */
 	function is_phone( $phone ) {
-		if (strlen(trim(preg_replace('/[\s\#0-9_\-\+\(\)]/', '', $phone)))>0) return false;
+		if ( strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) > 0 ) 
+			return false;
+			
 		return true;
 	}
 	
@@ -39,10 +41,19 @@ class WC_Validation {
 	 * @return  boolean
 	 */
 	function is_postcode( $postcode, $country ) {
-		if (strlen(trim(preg_replace('/[\s\-A-Za-z0-9]/', '', $postcode)))>0) return false;
-		if ($country=='GB') :
-			return $this->is_GB_postcode( $postcode );
-		endif;
+		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 ) 
+			return false;
+		
+		switch ( $country ) {
+			case "GB" :
+				return $this->is_GB_postcode( $postcode );
+			case "US" :
+				 if ( preg_match( "/^([0-9]{5})(-[0-9]{4})?$/i", $postcode ) )
+				 	return true;
+				 else
+				 	return false;
+		}
+
 		return true;
 	}
 	
