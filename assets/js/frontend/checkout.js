@@ -1,6 +1,7 @@
 jQuery(document).ready(function($) {
 
 	var updateTimer;
+	var dirtyInput = false;
 	var xhr;
 	
 	function update_checkout() {
@@ -109,19 +110,35 @@ jQuery(document).ready(function($) {
 	$('#order_review input[name=payment_method]:checked').click();
 	
 	/* Update totals */
-	$('select#shipping_method, input[name=shipping_method]').live('change', function(){
-		$('body').trigger('update_checkout');
-	});
-	$('.update_totals_on_change input').live('keydown', function(){
+	// Inputs/selects which update totals instantly
+	$('select#shipping_method, input[name=shipping_method], #shiptobilling input, .update_totals_on_change select').live('change', function(){
 		clearTimeout( updateTimer );
-		updateTimer = setTimeout(update_checkout, '1000');
-	});
-	$('#shiptobilling input, .update_totals_on_change select, .update_totals_on_change input').live('change', function(){
 		$('body').trigger('update_checkout');
 	});
 	
+	// Inputs which update totals on change
+	function input_changed() {
+		dirtyInput = false;
+		$('body').trigger('update_checkout');
+	}
+	$('.update_totals_on_change input').live('change', function(){
+		if ( dirtyInput ) {
+			clearTimeout( updateTimer );
+			$('body').trigger('update_checkout');
+		}
+	});
+	$('.update_totals_on_change input').live('keydown', function( e ){
+		var code = e.keyCode || e.which;
+		if ( code == '9' )
+			return;
+		dirtyInput = true;
+		clearTimeout( updateTimer );
+		updateTimer = setTimeout( input_changed, '1000' );
+	});
+	
 	// Update on page load
-	if (woocommerce_params.is_checkout==1) $('body').trigger('update_checkout');
+	if ( woocommerce_params.is_checkout == 1 ) 
+		$('body').trigger('update_checkout');
 	
 	/* AJAX Coupon Form Submission */
 	$('form.checkout_coupon').submit( function() {
@@ -159,6 +176,8 @@ jQuery(document).ready(function($) {
 	
 	/* AJAX Form Submission */
 	$('form.checkout').submit( function() {
+		clearTimeout( updateTimer );
+		
 		var $form = $(this);
 
 		if ( $form.is('.processing') ) 
