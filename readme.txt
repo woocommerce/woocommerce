@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
 * Tweak - Added US Zip Code validation
 * Tweak - Event handling for checkout fields
+* Tweak - wp_reset_postdata instead of wp_reset_query in product page loops
 * Fix - Product categories shortcode loop
 
 = 1.6.1 - 19/07/2012 =
