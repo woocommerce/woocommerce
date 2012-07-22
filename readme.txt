@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.2 - 20/07/2012 =
+* Tweak - Simplified the product data write panels
 * Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
 * Tweak - Added US Zip Code validation
 * Tweak - Event handling for checkout fields

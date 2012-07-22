@@ -5,6 +5,69 @@ jQuery( function($){
 		if (e.keyCode == 13) return false;
 	});
 	
+	// Type box
+	$('.type_box').appendTo( '#woocommerce-product-data h3.hndle span' );
+	
+	$(function(){
+		// Prevent inputs in meta box headings opening/closing contents	
+		$('#woocommerce-product-data h3.hndle').unbind('click.postboxes');	
+		
+		jQuery('#woocommerce-product-data').on('click', 'h3.hndle', function(event){
+			
+			// If the user clicks on some form input inside the h3 the box should not be toggled
+			if ( $(event.target).filter('input, option, label, select').length ) 
+				return;
+			
+			$('#woocommerce-product-data').toggleClass('closed');
+		});
+	});
+	
+	// Catalog Visibility
+	$('#catalog-visibility .edit-catalog-visibility').click(function () {
+		if ($('#catalog-visibility-select').is(":hidden")) {
+			$('#catalog-visibility-select').slideDown('fast');
+			$(this).hide();
+		}
+		return false;
+	});
+	$('#catalog-visibility .save-post-visibility').click(function () {
+		$('#catalog-visibility-select').slideUp('fast');
+		$('#catalog-visibility .edit-catalog-visibility').show();
+		
+		var value = $('input[name=_visibility]:checked').val();
+		var label = $('input[name=_visibility]:checked').attr('data-label');
+		
+		if ( $('input[name=_featured]').is(':checked') ) {
+			label = label + ', ' + woocommerce_writepanel_params.featured_label
+			$('input[name=_featured]').attr('checked', 'checked');
+		}
+		
+		$('#catalog-visibility-display').text( label );
+		return false;
+	});
+	$('#catalog-visibility .cancel-post-visibility').click(function () {
+		$('#catalog-visibility-select').slideUp('fast');
+		$('#catalog-visibility .edit-catalog-visibility').show();
+		
+		var current_visibility = $('#current_visibilty').val();
+		var current_featured = $('#current_featured').val();
+		
+		$('input[name=_visibility]').removeAttr('checked');
+		$('input[name=_visibility][value=' + current_visibility + ']').attr('checked', 'checked');
+		
+		var label = $('input[name=_visibility]:checked').attr('data-label');
+
+		if ( current_featured == 'yes' ) {
+			label = label + ', ' + woocommerce_writepanel_params.featured_label
+			$('input[name=_featured]').attr('checked', 'checked');
+		} else {
+			$('input[name=_featured]').removeAttr('checked');
+		}
+		
+		$('#catalog-visibility-display').text( label );
+		return false;
+	});
+	
 	// TABS
 	$('ul.tabs').show();
 	$('div.panel-wrap').each(function(){
@@ -260,7 +323,8 @@ jQuery( function($){
 					    jQuery(".tips").tipTip({
 					    	'attribute' : 'data-tip',
 					    	'fadeIn' : 50,
-					    	'fadeOut' : 50
+					    	'fadeOut' : 50,
+					    	'delay' : 200
 					    });
 					    $('select#add_item_id').trigger("liszt:updated");
 					    $('table.woocommerce_order_items').unblock();
