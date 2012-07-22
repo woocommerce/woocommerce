@@ -157,6 +157,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Event handling for checkout fields
 * Tweak - wp_reset_postdata instead of wp_reset_query in product page loops
 * Fix - Product categories shortcode loop
+* Localization - Added Romanian translation (by silviu-bucsa)
 
 = 1.6.1 - 19/07/2012 =
 * Fix - Minor issue with woocommerce_content() - updated to new template system
