@@ -156,6 +156,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added US Zip Code validation
 * Tweak - Event handling for checkout fields
 * Tweak - wp_reset_postdata instead of wp_reset_query in product page loops
+* Tweak - Option to enable coupon form on cart
+* Tweak - Coupon codes added to order notes when used (thanks Max Rice)
 * Fix - Product categories shortcode loop
 * Localization - Added Romanian translation (by silviu-bucsa)
 
