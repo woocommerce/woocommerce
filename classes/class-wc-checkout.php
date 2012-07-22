@@ -679,7 +679,7 @@ class WC_Checkout {
 	}
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_checkout extends WC_Checkout {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_checkout', '1.4', 'WC_Checkout()' );
