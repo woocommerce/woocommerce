@@ -158,6 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - wp_reset_postdata instead of wp_reset_query in product page loops
 * Tweak - Option to enable coupon form on cart
 * Tweak - Coupon codes added to order notes when used (thanks Max Rice)
+* Tweak - Shipping calculator state box improvements
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
 * Localization - Added Romanian translation (by silviu-bucsa)
