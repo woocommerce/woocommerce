@@ -167,12 +167,12 @@ if ( ! function_exists( 'woocommerce_empty_cart' ) ) {
  *
  **/
 if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
-	function woocommerce_disable_admin_bar() {
-		if ( get_option('woocommerce_lock_down_admin')=='yes' && !current_user_can('edit_posts') ) {
-			add_filter( 'show_admin_bar', '__return_false' );
-			wp_deregister_style( 'admin-bar' );
-			remove_action('wp_head', '_admin_bar_bump_cb');
+	function woocommerce_disable_admin_bar( $show_admin_bar ) {
+		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! current_user_can('edit_posts') ) {
+			$show_admin_bar = false;
 		}
+		
+		return $show_admin_bar;
 	}
 }
 
