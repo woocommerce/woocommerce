@@ -582,7 +582,7 @@ function woocommerce_order_totals_meta_box($post) {
  * 
  * Function for processing and storing all order data.
  */
-add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 1, 2);
+add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 10, 2 );
 
 function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce, $woocommerce_errors;
