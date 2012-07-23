@@ -822,25 +822,10 @@ class Woocommerce {
 				'show_in_nav_menus' 	=> false
 			)
 		);
-	    
-
-	        
-		if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
-			$order_statuses = get_terms( 'shop_order_status' );
-		    $order_count = false;
-		    foreach ( $order_statuses as $status ) {
-		        if( $status->slug === 'processing' ) {
-		            $order_count += $status->count;
-		            break;
-		        }
-		    }
-		    $order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
-			set_transient( 'woocommerce_processing_order_count', $order_count );
-		}
-	        
+	            
 		$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
-		if ( $order_count ) {
-			$menu_name .= " <span class='awaiting-mod count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+		if ( $order_count = woocommerce_processing_order_count() ) {
+			$menu_name .= " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
 		}
 
 	    register_post_type( "shop_order",

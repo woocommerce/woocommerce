@@ -49,7 +49,7 @@ function woocommerce_admin_menu_after() {
 add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
 function woocommerce_admin_menu_highlight() {
-	global $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
+	global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
 	$to_highlight_types = array( 'shop_order', 'shop_coupon' );
 
@@ -71,6 +71,24 @@ function woocommerce_admin_menu_highlight() {
 
 	$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
 	unset( $submenu['woocommerce'][2] );
+	
+	// Sort out Orders menu when on the top level
+	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'manage_woocommerce_orders' ) ) {
+		foreach ( $menu as $key => $menu_item ) {
+			if ( strpos( $menu_item[0], _x('Orders', 'Admin menu name', 'woocommerce') ) === 0 ) {
+				
+				$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
+				$menu_name_count = '';
+				if ( $order_count = woocommerce_processing_order_count() ) {
+					$menu_name_count = " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+				}
+				
+				$menu[$key][0] = $menu_name . $menu_name_count;
+				$submenu['edit.php?post_type=shop_order'][5][0] = $menu_name;
+				break;
+			}
+		}
+	}
 }
 
 /**
