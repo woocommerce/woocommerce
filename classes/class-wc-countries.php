@@ -1028,7 +1028,7 @@ class WC_Countries {
 	}
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_countries extends WC_Countries {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_countries', '1.4', 'WC_Countries()' );

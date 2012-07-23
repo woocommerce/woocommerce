@@ -138,7 +138,7 @@ jQuery(document).ready(function($) {
         	$('.single_variation_wrap').find('.quantity').hide();
         }
 
-        $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // depreciated variationWrapShown
+        $('.single_variation_wrap').slideDown('200').trigger('variationWrapShown').trigger('show_variation'); // deprecated variationWrapShown
     }
 	
 	//when one of attributes is changed - check everything to show only valid options

@@ -166,7 +166,7 @@ class WC_Payment_Gateway extends WC_Settings_API {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_payment_gateway extends WC_Payment_Gateway {
 	public function __construct() { 
 		parent::__construct(); 

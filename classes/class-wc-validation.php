@@ -144,7 +144,7 @@ class WC_Validation {
 	
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_validation extends WC_Validation {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_validation', '1.4', 'WC_Validation()' );

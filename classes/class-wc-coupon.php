@@ -230,7 +230,7 @@ class WC_Coupon {
 	}
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_coupon extends WC_Coupon {
 	public function __construct( $code ) { 
 		_deprecated_function( 'woocommerce_coupon', '1.4', 'WC_Coupon()' );
