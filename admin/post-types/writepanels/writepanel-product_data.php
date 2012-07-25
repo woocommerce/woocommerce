@@ -54,7 +54,8 @@ function woocommerce_product_data_box() {
 	) );
 	
 	foreach ( $product_type_options as $key => $option ) {
-		$type_box .= '<label for="' . $option['id'] . '" class="'. $option['wrapper_class'] . ' tips" data-tip="' . $option['description'] . '">'. $option['label'] . ': <input type="checkbox" name="' . $option['id'] . '" id="' . $option['id'] . '" /></label>';
+		$selected_value = get_post_meta( $post->ID, '_' . $key, true );
+		$type_box .= '<label for="' . $option['id'] . '" class="'. $option['wrapper_class'] . ' tips" data-tip="' . $option['description'] . '">'. $option['label'] . ': <input type="checkbox" name="' . $option['id'] . '" id="' . $option['id'] . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
 	}
 	
 	?>
