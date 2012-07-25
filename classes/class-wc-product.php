@@ -1231,7 +1231,10 @@ class WC_Product {
 		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
 		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
 		
-		if ( $this->min_variation_price !== '' ) $woocommerce->clear_product_transients( $this->id );
+		$this->price = $this->min_variation_price;
+		
+		if ( $this->min_variation_price !== '' ) 
+			$woocommerce->clear_product_transients( $this->id );
 	}
 	
 }
