@@ -159,6 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Option to enable coupon form on cart
 * Tweak - Coupon codes added to order notes when used (thanks Max Rice)
 * Tweak - Shipping calculator state box improvements
+* Tweak - Added date to admin order notification
+* Tweak - Formatted addresses in emails in a table to maintain appearance when printing
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
 * Localization - Added Romanian translation (by silviu-bucsa)
