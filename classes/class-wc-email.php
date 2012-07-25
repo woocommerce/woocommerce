@@ -477,7 +477,7 @@ class WC_Email {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_email extends WC_Email {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_email', '1.4', 'WC_Email()' );

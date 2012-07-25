@@ -462,7 +462,7 @@ class WC_Settings_API {
     
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_settings_api extends WC_Settings_Api {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_settings_api', '1.4', 'WC_Settings_Api()' );
