@@ -314,6 +314,10 @@ function woocommerce_status() {
 						}
                     ?></td>
                 </tr>
+                <tr>
+                	<td><?php _e('Session name','woocommerce')?></td>
+                	<td><?php echo session_name(); ?></td>
+                </tr>
             </tbody>
             
             <thead>
