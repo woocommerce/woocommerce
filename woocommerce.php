@@ -1359,6 +1359,28 @@ class Woocommerce {
 				setcookie( "woocommerce_items_in_cart", "0", time() - 3600, COOKIEPATH, COOKIE_DOMAIN, false );
 		}
 	}
+
+	/**
+	 * mfunc_wrapper function.
+	 *
+	 * Wraps a function in mfunc to keep it dynamic. 
+	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
+	 * 
+	 * @access public
+	 * @param mixed $function
+	 * @return void
+	 */
+	function mfunc_wrapper( $mfunction, $function, $args ) {
+		global $wp_super_cache_late_init;
+		
+		if ( is_null( $wp_super_cache_late_init ) || $wp_super_cache_late_init == 1 ) {
+			echo '<!--mfunc ' . $mfunction . ' -->';
+			$function( $args );
+			echo '<!--/mfunc-->';
+		} else {
+			$function( $args );
+		}
+	}
 		
 	/** Transients ************************************************************/
 		

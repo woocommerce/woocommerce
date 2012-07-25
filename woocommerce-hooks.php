@@ -26,7 +26,6 @@ if ( !is_admin() || defined('DOING_AJAX') ) {
 	add_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 );
 	
 	/* Sidebar */
-	add_action( 'get_sidebar', 'woocommerce_prevent_sidebar_cache' );
 	add_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 	
 	/* Products Loop */

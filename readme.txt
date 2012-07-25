@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.2 - 20/07/2012 =
+* Tweak - Added mini-cart.php template for the cart widget output
 * Tweak - Simplified the product data write panels
 * Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
 * Tweak - Added US Zip Code validation
@@ -161,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Shipping calculator state box improvements
 * Tweak - Added date to admin order notification
 * Tweak - Formatted addresses in emails in a table to maintain appearance when printing
+* Tweak - Better support for supercache - detect late_init or don't cache
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
 * Localization - Added Romanian translation (by silviu-bucsa)

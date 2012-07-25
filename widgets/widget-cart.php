@@ -47,53 +47,9 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		
 		if ( $title ) 
 			echo $before_title . $title . $after_title;
-
-		echo '<ul class="cart_list product_list_widget ' . ( $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) . '">';
 		
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-		
-			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $cart_item ) {
-				
-				$_product = $cart_item['data'];
+		$woocommerce->mfunc_wrapper( 'woocommerce_mini_cart()', 'woocommerce_mini_cart', array( $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) );
 
-				if ( ! apply_filters('woocommerce_widget_cart_item_visible', true, $cart_item, $cart_item_key ) ) 
-					continue;
-				
-				if ( $_product->exists() && $cart_item['quantity'] > 0 ) {
-				
-					echo '<li><a href="' . get_permalink( $cart_item['product_id'] ) . '">';
-
-					echo $_product->get_image();
-
-					echo apply_filters('woocommerce_widget_cart_product_title', $_product->get_title(), $_product ) . '</a>';
-
-	   				echo $woocommerce->cart->get_item_data( $cart_item );
-
-	   				$product_price = get_option( 'woocommerce_display_cart_prices_excluding_tax' ) == 'yes' || $woocommerce->customer->is_vat_exempt() ? $_product->get_price_excluding_tax() : $_product->get_price();
-							
-					$product_price = apply_filters( 'woocommerce_cart_item_price_html', woocommerce_price( $product_price ), $cart_item, $cart_item_key ); 	
-								
-					echo '<span class="quantity">' . $cart_item['quantity'] . ' &times; ' . $product_price . '</span></li>';
-				}
-				
-			}
-			
-		} else {
-			echo '<li class="empty">' . __('No products in the cart.', 'woocommerce') . '</li>';
-		}
-		
-		echo '</ul>';
-
-		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
-		
-			echo '<p class="total"><strong>' . __('Subtotal', 'woocommerce') . ':</strong> ' . $woocommerce->cart->get_cart_subtotal() . '</p>';
-
-			do_action( 'woocommerce_widget_shopping_cart_before_buttons' );
-
-			echo '<p class="buttons"><a href="' . $woocommerce->cart->get_cart_url() . '" class="button">' . __('View Cart &rarr;', 'woocommerce') . '</a> <a href="' . $woocommerce->cart->get_checkout_url() . '" class="button checkout">' . __('Checkout &rarr;', 'woocommerce') . '</a></p>';
-			
-		}
-		
 		echo $after_widget;
 
 		if ( $hide_if_empty && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
