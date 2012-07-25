@@ -112,7 +112,7 @@ if (get_option('woocommerce_clear_cart_on_logout')=='yes') add_action( 'wp_logou
 add_action( 'get_header', 'woocommerce_clear_cart_after_payment' );
 
 /* Disable admin bar */
-add_action( 'init', 'woocommerce_disable_admin_bar' );
+add_filter( 'show_admin_bar', 'woocommerce_disable_admin_bar', 10, 1 );
 
 /* Catalog sorting/ordering */
 add_action( 'init', 'woocommerce_update_catalog_ordering' );
