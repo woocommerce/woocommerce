@@ -223,7 +223,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Pay page woocommerce_pay hidden input so we can use javascript to submit the form
 * Tweak - Hooks for order statuses in reports
 * Tweak - Extra hooks in some templates
-* Fix - Remove depreciated ereg_replace in validation class
+* Fix - Remove deprecated ereg_replace in validation class
 * Fix - strpos warning in shipping class
 * Fix - $query instead of $q in query class
 * Fix - Visibility setting for products in widgets
@@ -624,7 +624,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
-* Depreciated tax class fix
+* Deprecated tax class fix
 * Logout error fix
 * get_shipping_tax_rate deprecated to stop errors
 * get_attribute returns non-linked terms

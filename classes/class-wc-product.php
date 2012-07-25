@@ -953,7 +953,7 @@ class WC_Product {
 		));
 	}
 	
-	/** Depreciated - naming was confusing */
+	/** Deprecated - naming was confusing */
 	function get_available_attribute_variations() {
 		_deprecated_function( 'get_available_attribute_variations', '1.5.7', 'get_variation_attributes' );
 		return $this->get_variation_attributes();
@@ -1236,7 +1236,7 @@ class WC_Product {
 	
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_product extends WC_Product {
 	public function __construct( $id ) { 
 		_deprecated_function( 'woocommerce_product', '1.4', 'WC_Product()' );

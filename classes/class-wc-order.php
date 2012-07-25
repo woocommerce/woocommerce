@@ -356,7 +356,7 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', '') );
 	}
 	
-	/** Depreciated functions */
+	/** Deprecated functions */
 	
 	function get_order_total() {
 		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
@@ -1082,7 +1082,7 @@ class order_item_meta {
 	
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_order extends WC_Order {
 	public function __construct( $id = '' ) { 
 		parent::__construct( $id ); 

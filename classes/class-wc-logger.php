@@ -67,7 +67,7 @@ class WC_Logger {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_logger extends WC_Logger {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_logger', '1.4', 'WC_Logger()' );
