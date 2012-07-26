@@ -280,8 +280,10 @@ class WC_Countries {
 				'VIC' => __('Victoria', 'woocommerce') ,
 				'WA' => __('Western Australia', 'woocommerce') 
 			),
+			'AF' => array(),
 			'AT' => array(),
 			'BE' => array(),
+			'BI' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woocommerce'),
 			    'AC' => __('Acre', 'woocommerce'),
@@ -648,6 +650,11 @@ class WC_Countries {
 		
 			// Locale information used by the checkout
 			$this->locale = apply_filters('woocommerce_get_country_locale', array(
+				'AF' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'AT' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
@@ -656,6 +663,11 @@ class WC_Countries {
 				),
 				'BE' => array(
 					'postcode_before_city' => true,
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'BI' => array(
 					'state' => array(
 						'required' => false,
 					),
