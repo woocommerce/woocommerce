@@ -27,7 +27,7 @@ function woocommerce_order_tracking( $atts ) {
 		
 		$woocommerce->verify_nonce( 'order_tracking' );
 		
-		$order_id 		= empty( $_POST['orderid'] ) ? 0 : absint( $_POST['orderid'] );
+		$order_id 		= empty( $_POST['orderid'] ) ? 0 : esc_attr( $_POST['orderid'] );
 		$order_email	= empty( $_POST['order_email'] ) ? '' : esc_attr( $_POST['order_email']) ;
 		
 		if ( ! $order_id ) {
