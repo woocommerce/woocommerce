@@ -584,7 +584,7 @@ class Woocommerce {
 	            'labels' => array(
 	                    'name' 				=> __( 'Product Categories', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Product Category', 'woocommerce'),
-						'menu_name'			=> _x( 'Product Categories', 'Admin menu name', 'woocommerce' ),
+						'menu_name'			=> _x( 'Categories', 'Admin menu name', 'woocommerce' ),
 	                    'search_items' 		=> __( 'Search Product Categories', 'woocommerce'),
 	                    'all_items' 		=> __( 'All Product Categories', 'woocommerce'),
 	                    'parent_item' 		=> __( 'Parent Product Category', 'woocommerce'),
@@ -613,7 +613,7 @@ class Woocommerce {
 	            'update_count_callback' => '_update_post_term_count',
 	            'label' 				=> __( 'Product Tags', 'woocommerce'),
 	            'labels' => array(
-	                    'name' 				=> __( 'Tags', 'woocommerce'),
+	                    'name' 				=> __( 'Product Tags', 'woocommerce'),
 	                    'singular_name' 	=> __( 'Product Tag', 'woocommerce'),
 						'menu_name'			=> _x( 'Tags', 'Admin menu name', 'woocommerce' ),
 	                    'search_items' 		=> __( 'Search Product Tags', 'woocommerce'),
