@@ -324,6 +324,23 @@ class WC_Settings_API {
     	
     	return $html;
     } // End generate_select_html()
+	
+	/**
+     * Generate Title HTML.
+     *
+     * @since 1.0.0
+     * @return $html string
+     */
+	function generate_title_html ( $key, $data ) {
+    	$html = '';
+    	   	
+		$html .= '</table>' . "\n";
+			$html .= '<h3 class=" . '.$data['class'].'">' . $data['name'] . '</h3>' . "\n";
+			if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<p>' . $data['description'] . '</p>' . "\n"; }
+		$html .= '<table class="form-table">' . "\n";
+    	
+    	return $html;
+    } // End generate_title_html()
     
     /**
      * Validate Settings Field Data.
