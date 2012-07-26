@@ -328,14 +328,18 @@ class WC_Settings_API {
 	/**
      * Generate Title HTML.
      *
-     * @since 1.0.0
+     * @since 1.6.2
      * @return $html string
      */
-	function generate_title_html ( $key, $data ) {
+	function generate_title_html( $key, $data ) {
     	$html = '';
-    	   	
+
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+ 	
 		$html .= '</table>' . "\n";
-			$html .= '<h3 class=" . '.$data['class'].'">' . $data['name'] . '</h3>' . "\n";
+			$html .= '<h4 class="' . $data['class'] . '">' . $data['title'] . '</h4>' . "\n";
 			if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<p>' . $data['description'] . '</p>' . "\n"; }
 		$html .= '<table class="form-table">' . "\n";
     	

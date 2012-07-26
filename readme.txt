@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added date to admin order notification
 * Tweak - Formatted addresses in emails in a table to maintain appearance when printing
 * Tweak - Better support for supercache - detect late_init or don't cache
+* Tweak - Added generate_title_html() to settings API
 * Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case) - http://wcdocs.woothemes.com/codex/extending/multiple-installs-on-one-domain-sessions-conflictsession-sharing-workaround/
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
