@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case) - http://wcdocs.woothemes.com/codex/extending/multiple-installs-on-one-domain-sessions-conflictsession-sharing-workaround/
 * Fix - Product categories shortcode loop
 * Fix - selected state for variation options
+* Localization - Rescan all language strings and updated .po and .mo files for next release
 * Localization - Added Romanian translation (by silviu-bucsa)
 * Localization - Updated Swedish translation by Patric Liljestrand
 
