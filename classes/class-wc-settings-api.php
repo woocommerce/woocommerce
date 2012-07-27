@@ -95,7 +95,7 @@ class WC_Settings_API {
 		    	
 		    	// Prevent "undefined index" errors.
 		    	foreach ( $this->form_fields as $k => $v )
-    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : $v['default'];
+    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : ( isset( $v['default'] ) ? $v['default'] : '' );
     		
 	    	}
 	    	

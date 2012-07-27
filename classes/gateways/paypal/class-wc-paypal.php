@@ -120,6 +120,24 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ), 
 							'default' => ''
 						),
+			'form_submission_method' => array(
+							'title' => __( 'Submission method', 'woocommerce' ), 
+							'type' => 'checkbox', 
+							'label' => __( 'Use form submission method.', 'woocommerce' ), 
+							'description' => __( 'Enable this to post order data to PayPal via a form instead of using a redirect/querystring.', 'woocommerce' ),
+							'default' => 'no'
+						), 
+			'page_style' => array(
+							'title' => __( 'Page Style', 'woocommerce' ), 
+							'type' => 'text', 
+							'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ), 
+							'default' => ''
+						),		
+			'shipping' => array(
+							'title' => __( 'Shipping options', 'woocommerce' ), 
+							'type' => 'title', 
+							'description' => '',
+						),
 			'send_shipping' => array(
 							'title' => __( 'Shipping details', 'woocommerce' ), 
 							'type' => 'checkbox', 
@@ -135,18 +153,10 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 							'default' => 'no'
 						), 
-			'form_submission_method' => array(
-							'title' => __( 'Submission method', 'woocommerce' ), 
-							'type' => 'checkbox', 
-							'label' => __( 'Use form submission method.', 'woocommerce' ), 
-							'description' => __( 'Enable this to post order data to PayPal via a form instead of using a redirect/querystring.', 'woocommerce' ),
-							'default' => 'no'
-						), 
-			'page_style' => array(
-							'title' => __( 'Page Style', 'woocommerce' ), 
-							'type' => 'text', 
-							'description' => __( 'Optionally enter the name of the page style you wish to use. These are defined within your PayPal account.', 'woocommerce' ), 
-							'default' => ''
+			'testing' => array(
+							'title' => __( 'Gateway Testing', 'woocommerce' ), 
+							'type' => 'title', 
+							'description' => '',
 						),
 			'testmode' => array(
 							'title' => __( 'PayPal sandbox', 'woocommerce' ), 
@@ -270,13 +280,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args['amount_1'] 		= number_format($order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
 			
 			// Shipping Cost
-			$paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
+			// No longer using shipping_1 because 
+			//		a) paypal ignore it if *any* shipping rules are within paypal
+			//		b) paypal ignore anyhing over 5 digits, so 999.99 is the max
+			// $paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
 			
-			/*if ( $order->get_shipping() > 0 ) :
-				$paypal_args['item_name_2'] = __('Shipping via', 'woocommerce') . ' ' . ucwords($order->shipping_method_title);
+			if ( ( $order->get_shipping() + $order->get_shipping_tax() ) > 0 ) :
+				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );
 				$paypal_args['quantity_2'] 	= '1';
-				$paypal_args['amount_2'] 	= number_format($order->get_shipping(), 2, '.', '');
-			endif;*/
+				$paypal_args['amount_2'] 	= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
+			endif;
 					
 		else :
 			
