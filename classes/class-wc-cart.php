@@ -932,9 +932,10 @@ class WC_Cart {
 							
 							case "percent" :
 							
-								$percent_discount = ( $values['data']->get_price(  ) / 100 ) * $coupon->amount;
+								$percent_discount = round( ( $values['data']->get_price() / 100 ) * $coupon->amount, 2 );
 										
-								if ( $add_totals ) $this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
+								if ( $add_totals ) 
+									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
 								
 								$price = $price - $percent_discount;
 								
