@@ -82,9 +82,11 @@ function woocommerce_order_data_meta_box($post) {
 					?>
 				</select></p>
 				
+				<?php if( get_option( 'woocommerce_enable_order_comments' ) != 'no' ) : ?>
 				<p class="form-field form-field-wide"><label for="excerpt"><?php _e('Customer Note:', 'woocommerce') ?></label>
 				<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php _e('Customer\'s notes about the order', 'woocommerce'); ?>"><?php echo $post->post_excerpt; ?></textarea></p>
-
+				<?php endif; ?>
+				
 				<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 
 			</div>
