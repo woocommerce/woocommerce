@@ -26,6 +26,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_id 							= $this->settings['ga_id'];
 		$this->ga_standard_tracking_enabled 	= $this->settings['ga_standard_tracking_enabled'];
 		$this->ga_ecommerce_tracking_enabled 	= $this->settings['ga_ecommerce_tracking_enabled'];
+		$this->ga_event_tracking_enabled		= $this->settings['ga_event_tracking_enabled'];
 		
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( &$this, 'process_admin_options') );
@@ -33,6 +34,10 @@ class WC_Google_Analytics extends WC_Integration {
 		// Tracking code
 		add_action( 'wp_footer', array( &$this, 'google_tracking_code' ) );
 		add_action( 'woocommerce_thankyou', array( &$this, 'ecommerce_tracking_code' ) );
+		
+		// Event tracking code
+		add_action( 'woocommerce_after_add_to_cart_button', array( &$this, 'add_to_cart' ) );
+		add_action( 'woocommerce_pagination', array( &$this, 'loop_add_to_cart' ) );
     } 
     
 	/**
@@ -57,8 +62,14 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
 				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'end',
+				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
+			),
+			'ga_event_tracking_enabled' => array(
+				'label' 			=> __('Add event tracking code for add to cart actions', 'woocommerce'),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> 'end',
+				'default' 			=> 'no'
 			)
 		);
 		
@@ -195,6 +206,72 @@ class WC_Google_Analytics extends WC_Integration {
 		</script>
 		<?php
 	}
+	/**
+	 * Google Analytics event tracking for single product add to cart
+	 *
+	 **/
+	function add_to_cart() {
+		
+		if( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		
+		global $product;
+		
+		$parameters = array();
+		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
+		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
+		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
+		$parameters['label'] = "'" . esc_js( $product->get_title() ) . "'";
+		
+		$this->event_tracking_code( $parameters, '.button.alt' );
+		
+	}
+	
+	/**
+	 * Google Analytics event tracking for loop add to cart
+	 *
+	 **/
+	function loop_add_to_cart() {
+		
+		if( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		
+		$parameters = array();
+		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
+		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
+		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
+		$parameters['label'] = "$(this).parent().find('h3').text()";
+		
+		$this->event_tracking_code( $parameters, '.button.add_to_cart_button' );
+		
+	}
+
+	
+	/**
+	 * Google Analytics event tracking for loop add to cart
+	 * 
+	 * @param array $parameters - associative array of _trackEvent parameters
+	 * @param string $selector - jQuery selector for binding click event
+	 **/
+	private function event_tracking_code( $parameters, $selector ) {
+	
+		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
+		
+	?>
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$('<?php echo $selector; ?>').click(function() {
+					<?php printf( "_gaq.push(['_trackEvent', %s, %s, %s]);", $parameters['category'], $parameters['action'], $parameters['label'] ); ?>
+				});
+			});
+		</script>
+	<?php
+	}
+	
+	private function disable_tracking( $type ) {
+		
+		if( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) return true;
+		
+	}
+	
 }
 
 /**
