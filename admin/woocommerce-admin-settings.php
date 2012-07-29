@@ -194,7 +194,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						$tabs = apply_filters('woocommerce_settings_tabs_array', $tabs);
 						
 						foreach ( $tabs as $name => $label ) {
-							echo '<a href="' . admin_url( 'admin.php?page=woocommerce&tab=' . $name ) . '" class="nav-tab ';
+							echo '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=' . $name ) . '" class="nav-tab ';
 							if( $current_tab == $name ) echo 'nav-tab-active';
 							echo '">' . $label . '</a>';
 						}
@@ -230,7 +230,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 							
 							$current = $current_section ? '' : 'class="current"';
 	
-							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
+							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce_settings&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
 							
 							// Load shipping methods so we can show any global options they may have
 							$shipping_methods = $woocommerce->shipping->load_shipping_methods();
@@ -243,7 +243,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 								
 								$current = ( get_class( $method ) == $current_section ) ? 'class="current"' : '';
 								
-								$links[] = '<a href="' . add_query_arg( 'section', get_class( $method ), admin_url('admin.php?page=woocommerce&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $method ), admin_url('admin.php?page=woocommerce_settings&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
 								
 							}
 							
@@ -302,7 +302,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 								
 								$current = ( $integration->id == $current_section ) ? 'class="current"' : '';
 								
-								$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce&tab=integration') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce_settings&tab=integration') ) . '"' . $current . '>' . $title . '</a>';
 							}
 							
 							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
