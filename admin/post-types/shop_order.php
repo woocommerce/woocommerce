@@ -137,9 +137,11 @@ function woocommerce_custom_order_columns($column) {
 		case "order_actions" :
 			
 			?><p>
+				<?php do_action( 'woocommerce_admin_order_actions_before', $order ); ?>
 				<?php if (in_array($order->status, array('pending', 'on-hold'))) : ?><a class="button" href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID), 'woocommerce-mark-order-processing' ); ?>"><?php _e('Processing', 'woocommerce'); ?></a><?php endif; ?>
 				<?php if (in_array($order->status, array('pending', 'on-hold', 'processing'))) : ?><a class="button" href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID), 'woocommerce-mark-order-complete' ); ?>"><?php _e('Complete', 'woocommerce'); ?></a><?php endif; ?>
 				<a class="button" href="<?php echo admin_url('post.php?post='.$post->ID.'&action=edit'); ?>"><?php _e('View', 'woocommerce'); ?></a>
+				<?php do_action( 'woocommerce_admin_order_actions_after', $order ); ?>
 			</p><?php
 			
 		break;
