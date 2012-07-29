@@ -26,6 +26,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_id 							= $this->settings['ga_id'];
 		$this->ga_standard_tracking_enabled 	= $this->settings['ga_standard_tracking_enabled'];
 		$this->ga_ecommerce_tracking_enabled 	= $this->settings['ga_ecommerce_tracking_enabled'];
+		$this->ga_event_tracking_enabled		= $this->settings['ga_event_tracking_enabled'];
 		
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( &$this, 'process_admin_options') );
@@ -33,6 +34,9 @@ class WC_Google_Analytics extends WC_Integration {
 		// Tracking code
 		add_action( 'wp_footer', array( &$this, 'google_tracking_code' ) );
 		add_action( 'woocommerce_thankyou', array( &$this, 'ecommerce_tracking_code' ) );
+		
+		// Event tracking code
+		add_filter( 'woocommerce_onclick_javascript', array( &$this, 'event_tracking_code' ), 10, 3 );
     } 
     
 	/**
@@ -57,8 +61,14 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
 				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'end',
+				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
+			),
+			'ga_event_tracking_enabled' => array(
+				'label' 			=> __('Add event tracking code for add to cart actions', 'woocommerce'),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> 'end',
+				'default' 			=> 'no'
 			)
 		);
 		
@@ -195,6 +205,40 @@ class WC_Google_Analytics extends WC_Integration {
 		</script>
 		<?php
 	}
+	/**
+	 * Google Analytics event tracking
+	 *
+	 * @param string $event_source - indicates the source of onClick: add to cart, applied coupon, etc.
+	 * @param mixed $event_data - data about the event to be passed to GA: product->id for add to cart event, etc.
+	 * @return string - javascript code within onClick attribute
+	 **/
+	function event_tracking_code( $default, $event_source, $event_data ) {
+	
+		if ( is_admin() || current_user_can('manage_options') || $this->ga_event_tracking_enabled == "no" ) return;
+		
+		if ( ! $this->ga_id ) return;
+		
+		$parameters = array();
+		
+		switch( $event_source ) {
+		
+			case 'add_to_cart':
+				//event_data is product->id
+				$product = new WC_Product( $event_data );
+				$parameters['category'] = __( 'Products', 'woocommerce' );
+				$parameters['action'] = __( 'Add to Cart', 'woocommerce' );
+				$parameters['label'] = esc_js( $product->get_title() );
+				break;
+				
+			default:
+				return '';
+		}
+		
+		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
+		
+		return sprintf( "_gaq.push(['_trackEvent', '%s', '%s', '%s']);", $parameters['category'], $parameters['action'], $parameters['label'] );
+	}
+	
 }
 
 /**

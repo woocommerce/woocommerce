@@ -35,7 +35,7 @@ if( $product->get_price() === '' && $product->product_type != 'external' ) retur
 			break;
 		}
 	
-		printf('<a href="%s" rel="nofollow" data-product_id="%s" class="button add_to_cart_button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label);
+		printf('<a href="%s" rel="nofollow" data-product_id="%s" class="button add_to_cart_button product_type_%s" onClick="%s">%s</a>', $link, $product->id, $product->product_type, apply_filters( 'woocommerce_onclick_javascript', '', 'add_to_cart', $product->id ), $label );
 
 	?>
 
