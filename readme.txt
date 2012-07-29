@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.2 - 20/07/2012 =
+* Tweak - Hide admin order comments box if they are disabled
 * Tweak - Added mini-cart.php template for the cart widget output
 * Tweak - Simplified the product data write panels
 * Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
