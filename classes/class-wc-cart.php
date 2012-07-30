@@ -448,14 +448,15 @@ class WC_Cart {
 				$data_list = array();
 				
 				foreach ($other_data as $data ) {
-					
-					$display_value = !empty($data['display']) ? $data['display'] : $data['value'];
-					
-					if ($flat)
-						$data_list[] = $data['name'].': '.$display_value;
-					else
-						$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$display_value.'</dd>';
-					
+					// Set hidden to true to not display meta on cart.
+					if ( ! $data['hidden'] ) {
+						$display_value = !empty($data['display']) ? $data['display'] : $data['value'];
+						
+						if ($flat)
+							$data_list[] = $data['name'].': '.$display_value;
+						else
+							$data_list[] = '<dt>'.$data['name'].':</dt><dd>'.$display_value.'</dd>';
+					}
 				}
 				
 				if ($flat)
@@ -931,9 +932,10 @@ class WC_Cart {
 							
 							case "percent" :
 							
-								$percent_discount = ( $values['data']->get_price(  ) / 100 ) * $coupon->amount;
+								$percent_discount = round( ( $values['data']->get_price() / 100 ) * $coupon->amount, 2 );
 										
-								if ( $add_totals ) $this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
+								if ( $add_totals ) 
+									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
 								
 								$price = $price - $percent_discount;
 								

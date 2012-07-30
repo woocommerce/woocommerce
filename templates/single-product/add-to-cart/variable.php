@@ -34,11 +34,11 @@ global $woocommerce, $product, $post;
 	
 									foreach ( $terms as $term ) {
 										if ( ! in_array( $term->slug, $options ) ) continue;
-										echo '<option value="' . $term->slug . '" ' . selected( $selected_value, $term->slug ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+										echo '<option value="' . $term->slug . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
 									}
 								} else {
 									foreach ( $options as $option )
-										echo '<option value="' . $option . '" ' . selected( $selected_value, $option ) . '>' . apply_filters( 'woocommerce_variation_option_name', $option ) . '</option>';
+										echo '<option value="' . $option . '" ' . selected( $selected_value, $option, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $option ) . '</option>';
 								}
 							}
 						?>

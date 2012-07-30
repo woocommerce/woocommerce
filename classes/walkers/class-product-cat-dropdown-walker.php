@@ -29,7 +29,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 			
 		$output .= '>';
 		
-		$output .= $pad . $cat_name;
+		$output .= $pad . __( $cat_name, 'woocommerce' );
 		
 		if ( $args['show_count'] )
 			$output .= '&nbsp;(' . $cat->count . ')';

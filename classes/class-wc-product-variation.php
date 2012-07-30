@@ -313,7 +313,7 @@ class WC_Product_Variation extends WC_Product {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_product_variation extends WC_Product_Variation {
 	public function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) { 
 		_deprecated_function( 'woocommerce_product_variation', '1.4', 'WC_Product_Variation()' );

@@ -51,11 +51,61 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 				<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
 			<?php endif; ?>
 			
-			<?php woocommerce_get_template_part( 'loop', 'shop'  ); ?>
+			<?php if ( have_posts() ) : ?>
+			
+				<?php do_action('woocommerce_before_shop_loop'); ?>
+			
+				<ul class="products">
+				
+					<?php woocommerce_product_subcategories(); ?>
+			
+					<?php while ( have_posts() ) : the_post(); ?>
+			
+						<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+			
+					<?php endwhile; // end of the loop. ?>
+					
+				</ul>
+	
+				<?php do_action('woocommerce_after_shop_loop'); ?>
+			
+			<?php else : ?>
+			
+				<?php if ( ! woocommerce_product_subcategories( array( 'before' => '<ul class="products">', 'after' => '</ul>' ) ) ) : ?>
+						
+					<p><?php _e( 'No products found which match your selection.', 'woocommerce' ); ?></p>
+						
+				<?php endif; ?>
+			
+			<?php endif; ?>
+			
+			<div class="clear"></div>
 				
 			<?php do_action( 'woocommerce_pagination' ); 
 			
 		}
+	}
+}
+
+/**
+ * deprecated template functions from < 1.6
+ **/
+if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
+	function woocommerce_single_product_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
+	}
+}
+if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
+	function woocommerce_archive_product_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
+	}
+}
+if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
+	function woocommerce_product_taxonomy_content() {
+		_deprecated_function( __FUNCTION__, '1.6' );
+		woocommerce_content();
 	}
 }
 
@@ -109,15 +159,6 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 }
 
 /**
- * Prevent Cache
- **/
-if ( ! function_exists( 'woocommerce_prevent_sidebar_cache' ) ) {
-	function woocommerce_prevent_sidebar_cache( $sidebar  ) {
-		echo '<!--mfunc get_sidebar( "' . $sidebar . '" ) --><!--/mfunc-->';
-	}
-}
-
-/**
  * Demo Banner
  *
  * Adds a demo store banner to the site if enabled
@@ -153,6 +194,13 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 	function woocommerce_show_product_loop_sale_flash() {
 		woocommerce_get_template( 'loop/sale-flash.php' );
+	}
+}
+if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
+	function woocommerce_reset_loop() {
+		global $woocommerce_loop;
+		// Reset loop/columns globals when starting a new loop
+		$woocommerce_loop['loop'] = $woocommerce_loop['column'] = '';
 	}
 }
 
@@ -266,7 +314,11 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	function woocommerce_variable_add_to_cart() {
 		global $product;
-
+		
+		// Enqueue variation scripts
+		wp_enqueue_script( 'wc-add-to-cart-variation' );
+		
+		// Load the template
 		woocommerce_get_template( 'single-product/add-to-cart/variable.php', array(
 				'available_variations'  => $product->get_available_variations(),
 				'attributes'   			=> $product->get_variation_attributes(),
@@ -413,6 +465,24 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	}
 }
 
+/** Mini-Cart *************************************************************/
+
+/**
+ * Mini-cart template - used by cart widget
+ **/
+if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
+	function woocommerce_mini_cart( $args = array() ) {
+		
+		$defaults = array(
+			'list_class' => ''
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+		
+		woocommerce_get_template( 'cart/mini-cart.php', $args );
+	}
+}
+
 /** Login *****************************************************************/
 
 /**
@@ -489,12 +559,16 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		
 		$defaults = array(
 			'before'  => '',
-			'after'  => ''
+			'after'  => '',
+			'force_display' => false
 		);
 
 		$args = wp_parse_args( $args, $defaults );
 		
 		extract( $args );
+		
+		// Main query only
+		if ( ! is_main_query() && ! $force_display ) return;
 		
 		// Don't show when filtering
 		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return; 
@@ -637,40 +711,58 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
 			}
 
-			$field .= '</select></p>' . $after;
+			$field .= '</select>';
+			
+			$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __('Update country', 'woocommerce') . '" /></noscript>';
+			
+			$field .= '</p>' . $after;
 
 			break;
 		case "state" :
 
-			$field = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">
-					<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
-
 			/* Get Country */
-			$country_key = ( $key=='billing_state' ) ? 'billing_country' : 'shipping_country';
+			$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
 
-			if ( isset( $_POST[$country_key] ) ) {
-				$current_cc = woocommerce_clean( $_POST[$country_key] );
+			if ( isset( $_POST[ $country_key ] ) ) {
+				$current_cc = woocommerce_clean( $_POST[ $country_key ] );
 			} elseif ( is_user_logged_in() ) {
-				$current_cc = get_user_meta( get_current_user_id() , $country_key, true  );
+				$current_cc = get_user_meta( get_current_user_id() , $country_key, true );
+			} elseif ( $country_key == 'billing_country' ) {
+				$current_cc = apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
 			} else {
-				$current_cc = apply_filters( 'default_checkout_country', ( $woocommerce->customer->get_country() ) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country() );
+				$current_cc 	= apply_filters('default_checkout_country', ($woocommerce->customer->get_shipping_country()) ? $woocommerce->customer->get_shipping_country() : $woocommerce->countries->get_base_country());
 			}
+			
+			$states = $woocommerce->countries->get_states( $current_cc );
 
-			$states = $woocommerce->countries->states;
-
-			if ( isset( $states[$current_cc][$value]  ) ) {
-				// Dropdown
-				$field .= '<select name="' . $key . '" id="' . $key . '" class="state_select"><option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
-				foreach ( $states[$current_cc] as $ckey => $cvalue ) {
+			if ( is_array( $states ) && empty( $states ) ) {
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field" style="display: none">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
+				$field .= '<input type="hidden" class="hidden" name="' . $key  . '" id="' . $key . '" value="" />';
+				$field .= '</p>' . $after;
+				
+			} elseif ( is_array( $states ) ) {
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
+				$field .= '<select name="' . $key . '" id="' . $key . '" class="state_select">
+					<option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
+				
+				foreach ( $states as $ckey => $cvalue )
 					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
-				}
+				
 				$field .= '</select>';
+				$field .= '</p>' . $after;
+				
 			} else {
-				// Input
+				
+				$field  = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">';
+				$field .= '<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required . '</label>';
 				$field .= '<input type="text" class="input-text" value="' . $value . '"  placeholder="' . $args['placeholder'] . '" name="' . $key . '" id="' . $key . '" />';
+				$field .= '</p>' . $after;
+				
 			}
-
-			$field .= '</p>' . $after;
 
 			break;
 		case "textarea" :

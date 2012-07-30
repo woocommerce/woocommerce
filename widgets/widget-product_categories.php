@@ -62,7 +62,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		if ( $d ) {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
-			woocommerce_product_dropdown_categories( $c, $h );
+			woocommerce_product_dropdown_categories( $c, $h, 0 );
 			
 			?>
 			<script type='text/javascript'>

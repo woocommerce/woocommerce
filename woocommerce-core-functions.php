@@ -167,12 +167,12 @@ if ( ! function_exists( 'woocommerce_empty_cart' ) ) {
  *
  **/
 if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
-	function woocommerce_disable_admin_bar() {
-		if ( get_option('woocommerce_lock_down_admin')=='yes' && !current_user_can('edit_posts') ) {
-			add_filter( 'show_admin_bar', '__return_false' );
-			wp_deregister_style( 'admin-bar' );
-			remove_action('wp_head', '_admin_bar_bump_cb');
+	function woocommerce_disable_admin_bar( $show_admin_bar ) {
+		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! current_user_can('edit_posts') ) {
+			$show_admin_bar = false;
 		}
+		
+		return $show_admin_bar;
 	}
 }
 
@@ -403,10 +403,17 @@ function woocommerce_price( $price, $args = array() ) {
 }	
 	
 /**
- * Trim trailing zeros
+ * Trim trailing zeros off prices
  **/
 function woocommerce_trim_zeros( $price ) {
 	return preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
+}
+
+/**
+ * Formal decimal numbers - format to 4 dp and remove trailing zeros
+ **/
+function woocommerce_format_decimal( $number ) {
+	return rtrim( rtrim( number_format( $number, 4, '.', '' ), '0' ), '.' );
 }
 
 /**
@@ -781,7 +788,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
 	foreach ((array) $taxonomies as $taxonomy) :
-		if ($taxonomy=='product_cat' || strstr($taxonomy, 'pa_')) :
+		if ( strstr($taxonomy, 'pa_') || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) :
 			$found = true;
 			break;
 		endif;
@@ -865,7 +872,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
  * We use a custom walker, just like WordPress does
  */
-function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1 ) {
+function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1, $show_uncategorized = 1 ) {
 	global $wp_query, $woocommerce;
 	
 	include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-dropdown-walker.php' );
@@ -884,7 +891,10 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
 	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__('Select a category', 'woocommerce').'</option>';
 	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
-	$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
+	
+	if ( $show_uncategorized )
+		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
+	
 	$output .="</select>";
 	
 	echo $output;
@@ -1081,4 +1091,21 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 					return true;
 			
 	}
+}
+
+function woocommerce_processing_order_count() {
+	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
+		$order_statuses = get_terms( 'shop_order_status' );
+	    $order_count = false;
+	    foreach ( $order_statuses as $status ) {
+	        if( $status->slug === 'processing' ) {
+	            $order_count += $status->count;
+	            break;
+	        }
+	    }
+	    $order_count = apply_filters( 'woocommerce_admin_menu_count', intval( $order_count ) );
+		set_transient( 'woocommerce_processing_order_count', $order_count );
+	}
+	
+	return $order_count;
 }

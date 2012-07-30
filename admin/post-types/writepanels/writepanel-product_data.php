@@ -21,23 +21,64 @@ function woocommerce_product_data_box() {
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 	
 	$thepostid = $post->ID;
+	
+	if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) ) 
+		$product_type = current( $terms )->slug; 
+	else 
+		$product_type = 'simple';
+	
+	$product_type_selector = apply_filters('product_type_selector', array(
+		'simple' => __('Simple product', 'woocommerce'),
+		'grouped' => __('Grouped product', 'woocommerce'),
+		'external' => __('External/Affiliate product', 'woocommerce')
+	), $product_type);
+	
+	$type_box  = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . __('Product Type', 'woocommerce') . '">';
+	foreach ( $product_type_selector as $value => $label )
+		$type_box .= '<option value="' . $value . '" ' . selected( $product_type, $value, false ) .'>' . $label . '</option>';
+	$type_box .= '</optgroup></select></label>';	
+	
+	$product_type_options = apply_filters('product_type_options', array(
+		'virtual' => array( 
+			'id' => '_virtual', 
+			'wrapper_class' => 'show_if_simple', 
+			'label' => __('Virtual', 'woocommerce'), 
+			'description' => __('Virtual products are intangible and aren\'t shipped.', 'woocommerce') 
+		),
+		'downloadable' => array( 
+			'id' => '_downloadable', 
+			'wrapper_class' => 'show_if_simple', 
+			'label' => __('Downloadable', 'woocommerce'), 
+			'description' => __('Downloadable products give access to a file upon purchase.', 'woocommerce') 
+		)
+	) );
+	
+	foreach ( $product_type_options as $key => $option ) {
+		$selected_value = get_post_meta( $post->ID, '_' . $key, true );
+		$type_box .= '<label for="' . $option['id'] . '" class="'. $option['wrapper_class'] . ' tips" data-tip="' . $option['description'] . '">'. $option['label'] . ': <input type="checkbox" name="' . $option['id'] . '" id="' . $option['id'] . '" ' . checked( $selected_value, 'yes', false ) .' /></label>';
+	}
+	
 	?>
 	<div class="panel-wrap product_data">
 	
+		<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
+	
 		<ul class="product_data_tabs tabs" style="display:none;">
 			
-			<li class="active general_options"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
+			<li class="active general_options hide_if_grouped"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
 			
-			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e('Tax', 'woocommerce'); ?></a></li>
+			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e('Taxes', 'woocommerce'); ?></a></li>
 			
 			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e('Inventory', 'woocommerce'); ?></a></li>
+			
+			<li class="shipping_tab hide_if_virtual shipping_options hide_if_grouped hide_if_external"><a href="#shipping_product_data"><?php _e('Shipping', 'woocommerce'); ?></a></li>
 			
 			<li class="related_product_tab related_product_options"><a href="#related_product_data"><?php _e('Related Products', 'woocommerce'); ?></a></li>
 			
 			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e('Attributes', 'woocommerce'); ?></a></li>
 			
-			<li class="grouping_tab show_if_simple show_if_external grouping_options"><a href="#grouping_product_data"><?php _e('Grouping', 'woocommerce'); ?></a></li>
-			
+			<li class="advanced_tab advanced_options"><a href="#advanced_product_data"><?php _e('Advanced', 'woocommerce'); ?></a></li>
+						
 			<?php do_action('woocommerce_product_write_panel_tabs'); ?>
 
 		</ul>
@@ -47,7 +88,7 @@ function woocommerce_product_data_box() {
 			
 				// SKU
 				if( get_option('woocommerce_enable_sku', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __('Stock Keeping Unit', 'woocommerce') .'">' . __('SKU', 'woocommerce') . '</abbr>' ) );
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __('Stock Keeping Unit', 'woocommerce') .'">' . __('SKU', 'woocommerce') . '</abbr>', 'desc_tip' => 'true', 'description' => __('SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce') ) );
 				else:
 					echo '<input type="hidden" name="_sku" value="'.get_post_meta($thepostid, '_sku', true).'" />';
 				endif;
@@ -99,7 +140,7 @@ function woocommerce_product_data_box() {
 								
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __('Weight', 'woocommerce') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00' ) );
+					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __('Weight', 'woocommerce') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __('Weight in decimal form', 'woocommerce') ) );
 				else:
 					echo '<input type="hidden" name="_weight" value="'.get_post_meta($thepostid, '_weight', true).'" />';
 				endif;
@@ -108,9 +149,12 @@ function woocommerce_product_data_box() {
 				if( get_option('woocommerce_enable_dimensions', true) !== 'no' ) :
 					?><p class="form-field dimensions_field">
 						<label for"product_length"><?php echo __('Dimensions', 'woocommerce') . ' ('.get_option('woocommerce_dimension_unit').')'; ?></label>
-						<input id="product_length" placeholder="<?php _e('Length', 'woocommerce'); ?>" class="input-text sized" size="6" type="text" name="_length" value="<?php echo get_post_meta( $thepostid, '_length', true ); ?>" />
-						<input placeholder="<?php _e('Width', 'woocommerce'); ?>" class="input-text sized" size="6" type="text" name="_width" value="<?php echo get_post_meta( $thepostid, '_width', true ); ?>" />
-						<input placeholder="<?php _e('Height', 'woocommerce'); ?>" class="input-text sized" size="6" type="text" name="_height" value="<?php echo get_post_meta( $thepostid, '_height', true ); ?>" />
+						<span class="wrap">
+							<input id="product_length" placeholder="<?php _e('Length', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_length" value="<?php echo get_post_meta( $thepostid, '_length', true ); ?>" />
+							<input placeholder="<?php _e('Width', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_width" value="<?php echo get_post_meta( $thepostid, '_width', true ); ?>" />
+							<input placeholder="<?php _e('Height', 'woocommerce'); ?>" class="input-text last" size="6" type="text" name="_height" value="<?php echo get_post_meta( $thepostid, '_height', true ); ?>" />
+						</span>
+						<span class="description"><?php _e('LxWxH in decimal form', 'woocommerce'); ?></span>
 					</p><?php
 				else:
 					echo '<input type="hidden" name="_length" value="'.get_post_meta($thepostid, '_length', true).'" />';
@@ -118,44 +162,7 @@ function woocommerce_product_data_box() {
 					echo '<input type="hidden" name="_height" value="'.get_post_meta($thepostid, '_height', true).'" />';
 				endif;
 				
-				// Shipping Class
-				$classes = get_the_terms( $thepostid, 'product_shipping_class' );
-				if ( $classes && ! is_wp_error( $classes ) ) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
-
-				$args = array(
-					'taxonomy' 			=> 'product_shipping_class',
-					'hide_empty'		=> 0,
-					'show_option_none' 	=> __('No shipping class', 'woocommerce'),
-					'name' 				=> 'product_shipping_class',
-					'id'				=> 'product_shipping_class',
-					'selected'			=> $current_shipping_class,
-					'class'				=> 'select short'
-				);
-				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e('Shipping class', 'woocommerce'); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e('Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce'); ?></span></p><?php
-				
 				do_action('woocommerce_product_options_dimensions');
-			
-			echo '</div>';
-			
-			echo '<div class="options_group">';
-			
-				// Visibility
-				woocommerce_wp_select( array( 'id' => '_visibility', 'label' => __('Visibility', 'woocommerce'), 'options' => apply_filters('woocommerce_product_visibility_options', array(
-					'visible' => __('Catalog &amp; search', 'woocommerce'),
-					'catalog' => __('Catalog', 'woocommerce'),
-					'search' => __('Search', 'woocommerce'),
-					'hidden' => __('Hidden', 'woocommerce')
-				)), 'description' => __('Define the loops this product should be visible in. It will still be accessible directly.', 'woocommerce') ) );
-				
-				// Featured
-				woocommerce_wp_checkbox( array( 'id' => '_featured', 'label' => __('Featured', 'woocommerce'), 'description' => __('Enable this option to feature this product', 'woocommerce') ) );
-			
-			echo '</div>';
-			
-			echo '<div class="options_group hide_if_external">';
-			
-				// Purchase note
-				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __('Purchase Note', 'woocommerce'), 'description' => __('Enter an optional note to send the customer after purchase.', 'woocommerce') ) );
 			
 			echo '</div>';
 			
@@ -252,6 +259,30 @@ function woocommerce_product_data_box() {
 			
 			?>
 			
+		</div>
+		
+		<div id="shipping_product_data" class="panel woocommerce_options_panel">
+		
+			<?php
+			
+				// Shipping Class
+				$classes = get_the_terms( $thepostid, 'product_shipping_class' );
+				if ( $classes && ! is_wp_error( $classes ) ) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
+
+				$args = array(
+					'taxonomy' 			=> 'product_shipping_class',
+					'hide_empty'		=> 0,
+					'show_option_none' 	=> __('No shipping class', 'woocommerce'),
+					'name' 				=> 'product_shipping_class',
+					'id'				=> 'product_shipping_class',
+					'selected'			=> $current_shipping_class,
+					'class'				=> 'select short'
+				);
+				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e('Shipping class', 'woocommerce'); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e('Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce'); ?></span></p><?php
+				
+				do_action('woocommerce_product_options_shipping');
+			?>
+		
 		</div>
 
 		<div id="woocommerce_attributes" class="panel wc-metaboxes-wrapper">
@@ -471,9 +502,26 @@ function woocommerce_product_data_box() {
 			<?php do_action('woocommerce_product_options_related'); ?>
 					
 		</div>
-		<div id="grouping_product_data" class="panel woocommerce_options_panel">
+		
+		<div id="advanced_product_data" class="panel woocommerce_options_panel">
+			
 			<?php
-			echo '<div class="options_group grouping">';
+			
+			echo '<div class="options_group hide_if_external">';
+			
+				// Purchase note
+				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __('Purchase Note', 'woocommerce'), 'description' => __('Enter an optional note to send the customer after purchase.', 'woocommerce') ) );
+			
+			echo '</div>';
+			
+			echo '<div class="options_group">';
+			
+				// menu_order
+				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __('Menu order', 'woocommerce'), 'description' => __('Custom ordering position.', 'woocommerce'), 'value' => $post->menu_order ) );
+			
+			echo '</div>';
+			
+			echo '<div class="options_group grouping show_if_simple show_if_external">';
 			
 				// List Grouped products
 				$post_parents = array();
@@ -506,7 +554,16 @@ function woocommerce_product_data_box() {
 				do_action('woocommerce_product_options_grouping');
 			
 			echo '</div>';
+			
+			echo '<div class="options_group reviews">';
+			
+				woocommerce_wp_checkbox( array( 'id' => 'comment_status', 'label' => __('Enable reviews', 'woocommerce'), 'cbvalue' => 'open', 'value' => $post->comment_status ) );
+				
+				do_action('woocommerce_product_options_reviews');
+				
+			echo '</div>';
 			?>
+			
 		</div>
 		
 		<?php do_action('woocommerce_product_write_panels'); ?>
@@ -860,36 +917,6 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 }
 
 /**
-* Procuct type panel
-**/
-function woocommerce_product_type_box() {
-	
-	global $post, $thepostid;
-	
-	$thepostid = $post->ID;
-
-	echo '<div class="woocommerce_options_panel">';
-	
-	// Product Type
-	if ($terms = wp_get_object_terms( $thepostid, 'product_type' )) $product_type = current($terms)->slug; else $product_type = 'simple';
-	
-	woocommerce_wp_select( array( 'id' => 'product-type', 'label' => __('Product Type', 'woocommerce'), 'value' => $product_type, 'options' => apply_filters('product_type_selector', array(
-		'simple' => __('Simple product', 'woocommerce'),
-		'grouped' => __('Grouped product', 'woocommerce'),
-		'external' => __('External/Affiliate product', 'woocommerce')
-	), $product_type) ) );
-	
-	woocommerce_wp_checkbox( array( 'id' => '_virtual', 'wrapper_class' => 'show_if_simple', 'label' => __('Virtual', 'woocommerce'), 'description' => __('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce') ) );
-	
-	woocommerce_wp_checkbox( array( 'id' => '_downloadable', 'wrapper_class' => 'show_if_simple', 'label' => __('Downloadable', 'woocommerce'), 'description' => __('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce') ) );
-	
-	do_action('woocommerce_product_options_product_type');
-	
-	echo '</div>';
-			
-}
-
-/**
  * Change label for insert buttons
  */
 add_filter( 'gettext', 'woocommerce_change_insert_into_post', null, 2 );
@@ -902,4 +929,68 @@ function woocommerce_change_insert_into_post( $translation, $original ) {
     if( $_REQUEST['from'] == 'wc01' && ($original == 'insert into post' || $original == 'use this image') ) return __('Use this file', 'woocommerce' );
 
     return $translation;
+}
+
+add_action( 'post_submitbox_misc_actions', 'woocommerce_product_data_visibility' );
+
+function woocommerce_product_data_visibility() {
+	global $post;
+	
+	if ( $post->post_type != 'product' )
+		return;
+	
+	$current_visibility = get_post_meta( $post->ID, '_visibility', true );
+	$current_featured = get_post_meta( $post->ID, '_featured', true );
+	
+	$visibility_options = apply_filters('woocommerce_product_visibility_options', array(
+		'visible' => __('Catalog/search', 'woocommerce'),
+		'catalog' => __('Catalog', 'woocommerce'),
+		'search' => __('Search', 'woocommerce'),
+		'hidden' => __('Hidden', 'woocommerce')
+	) );
+	
+	if ( ! $current_visibility )
+		$current_visibility = 'visible';
+		
+	if ( ! $current_featured )
+		$current_featured = 'no';
+	?>
+	<div class="misc-pub-section" id="catalog-visibility">
+		<?php _e('Catalog visibility:', 'woocommerce'); ?> <strong id="catalog-visibility-display"><?php 
+			
+			echo isset( $visibility_options[ $current_visibility ]  ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility ); 
+			
+			if ( $current_featured == 'yes' )
+				echo ', ' . __('Featured', 'woocommerce');
+			
+		?></strong>
+
+		<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php _e('Edit'); ?></a>
+
+		<div id="catalog-visibility-select" class="hide-if-js">
+			
+			<input type="hidden" name="current_visibilty" id="current_visibilty" value="<?php echo $current_visibility; ?>" />
+			<input type="hidden" name="current_featured" id="current_featured" value="<?php echo $current_featured; ?>" />
+			
+			<?php
+				echo '<p>' . __('Define the loops this product should be visible in. The product will still be accessible directly.', 'woocommerce') . '</p>';
+
+				foreach ( $visibility_options as $name => $label ) {
+					echo '<input type="radio" name="_visibility" id="_visibility_' . $name . '" value="' . $name . '" ' . checked( $current_visibility, $name, false ). ' data-label="' . $label . '" /> <label for="_visibility_' . $name . '" class="selectit">' . $label . '</label><br />';
+				}
+				
+				echo '<p>' . __('Enable this option to feature this product.', 'woocommerce') . '</p>';
+				
+				echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ). ' /> <label for="_featured">' . __('Featured Product', 'woocommerce') . '</label><br />';
+			?>
+			
+			<p>
+			 <a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php _e('OK'); ?></a>
+			 <a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php _e('Cancel'); ?></a>
+			</p>
+			
+		</div>
+	</div>
+	<?php
+	
 }

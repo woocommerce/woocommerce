@@ -64,6 +64,12 @@ class WC_BACS extends WC_Payment_Gateway {
 							'description' => __( 'Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.', 'woocommerce' ), 
 							'default' => __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woocommerce')
 						),
+			'account_details' => array(
+							'title' => __( 'Account Details', 'woocommerce' ), 
+							'type' => 'title', 
+							'description' => __( 'Optionally enter your bank details below for customers to pay into.', 'woocommerce' ), 
+							'default' => ''
+						),
 			'account_name' => array(
 							'title' => __( 'Account Name', 'woocommerce' ), 
 							'type' => 'text', 

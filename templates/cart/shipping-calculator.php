@@ -17,11 +17,8 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 			<select name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" rel="calc_shipping_state">
 				<option value=""><?php _e('Select a country&hellip;', 'woocommerce'); ?></option>
 				<?php
-					foreach($woocommerce->countries->get_allowed_countries() as $key=>$value) :
-						echo '<option value="'.$key.'"';
-						if ($woocommerce->customer->get_shipping_country()==$key) echo 'selected="selected"';
-						echo '>'.$value.'</option>';
-					endforeach;
+					foreach( $woocommerce->countries->get_allowed_countries() as $key => $value )
+						echo '<option value="' . $key . '"' . selected( $woocommerce->customer->get_shipping_country(), $key, false ) . '>' . $value . '</option>';
 				?>
 			</select>
 		</p>
@@ -29,27 +26,36 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 			<?php
 				$current_cc = $woocommerce->customer->get_shipping_country();
 				$current_r = $woocommerce->customer->get_shipping_state();
-				$states = $woocommerce->countries->states;
-	
-				if (isset( $states[$current_cc][$current_r] )) :
+				
+				$states = $woocommerce->countries->get_states( $current_cc );
+				
+				if ( is_array( $states ) && empty( $states ) ) {
+				
+					// Hidden
+					?>
+					<input type="hidden" name="calc_shipping_state" id="calc_shipping_state" />
+					<?php
+				
+				} elseif ( is_array( $states ) ) {
+					
 					// Dropdown
 					?>
 					<span>
 						<select name="calc_shipping_state" id="calc_shipping_state"><option value=""><?php _e('Select a state&hellip;', 'woocommerce'); ?></option><?php
-							foreach($states[$current_cc] as $key=>$value) :
-								echo '<option value="'.$key.'"';
-								if ($current_r==$key) echo 'selected="selected"';
-								echo '>'.$value.'</option>';
-							endforeach;
+							foreach ( $states as $ckey => $cvalue )
+								echo '<option value="' . $ckey . '" '.selected( $current_r, $ckey, false ) .'>' . __( $cvalue, 'woocommerce' ) .'</option>';
 						?></select>
 					</span>
 					<?php
-				else :
+				
+				} else {
+				
 					// Input
 					?>
 					<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('State', 'woocommerce'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
 					<?php
-				endif;
+				
+				}
 			?>
 		</p>
 		<div class="clear"></div>

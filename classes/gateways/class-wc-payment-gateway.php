@@ -119,7 +119,7 @@ class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.0.0
 	 */
 	function icon() {
-		_deprecated_function( __FUNCTION__, '1.5.9', 'get_icon()' );
+		_deprecated_function( __FUNCTION__, '1.6.0', 'get_icon()' );
 		return $this->get_icon();
 	}
 	
@@ -166,7 +166,7 @@ class WC_Payment_Gateway extends WC_Settings_API {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_payment_gateway extends WC_Payment_Gateway {
 	public function __construct() { 
 		parent::__construct(); 

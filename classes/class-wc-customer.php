@@ -256,7 +256,7 @@ class WC_Customer {
 	}	
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_customer extends WC_Customer {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_customer', '1.4', 'WC_Customer()' );

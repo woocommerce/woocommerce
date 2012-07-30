@@ -370,20 +370,19 @@ class WC_Product {
 	
 	/** Returns whether or not the product is in stock */
 	function is_in_stock() {
-		if ($this->managing_stock()) :
-			if (!$this->backorders_allowed()) :
-				if ($this->get_total_stock()==0 || $this->get_total_stock()<0) :
+		if ( $this->managing_stock() ) :
+			if ( ! $this->backorders_allowed() ) :
+				if ( $this->get_total_stock() <  1 ) :
 					return false;
 				else :
-					if ($this->stock_status=='instock') return true;
+					if ( $this->stock_status == 'instock' ) return true;
 					return false;
 				endif;
 			else :
-				if ($this->stock_status=='instock') return true;
-				return false;
+				return true;
 			endif;
 		endif;
-		if ($this->stock_status=='instock') return true;
+		if ( $this->stock_status == 'instock' ) return true;
 		return false;
 	}
 	
@@ -396,6 +395,14 @@ class WC_Product {
 	/** Returns whether or not the product needs to notify the customer on backorder */
 	function backorders_require_notification() {
 		if ($this->managing_stock() && $this->backorders=='notify') return true;
+		return false;
+	}
+	
+	/**
+	 * is_on_backorder function.
+	 */
+	function is_on_backorder( $qty_in_cart = 0 ) {
+		if ( $this->managing_stock() && $this->backorders_allowed() && ( $this->get_total_stock() - $qty_in_cart ) < 0 ) return true;
 		return false;
 	}
 	
@@ -539,10 +546,15 @@ class WC_Product {
 	function get_weight() {
 		if ($this->weight) return $this->weight;
 	}
-	
+
+	/** Set a products price dynamically */
+	function set_price( $price ) {
+		$this->price = $price;
+	}
+		
 	/** Adjust a products price dynamically */
 	function adjust_price( $price ) {
-		if ($price>0) :
+		if ( $price > 0 ) :
 			$this->price += $price;
 		endif;
 	}
@@ -941,7 +953,7 @@ class WC_Product {
 		));
 	}
 	
-	/** Depreciated - naming was confusing */
+	/** Deprecated - naming was confusing */
 	function get_available_attribute_variations() {
 		_deprecated_function( 'get_available_attribute_variations', '1.5.7', 'get_variation_attributes' );
 		return $this->get_variation_attributes();
@@ -1059,9 +1071,12 @@ class WC_Product {
 
 				if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
 					$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-					$large_thumbnail_size = apply_filters( 'single_product_large_thumbnail_size', 'shop_single' );
-					$image = current( wp_get_attachment_image_src( $attachment_id, $large_thumbnail_size  ) );
-					$image_link = current( wp_get_attachment_image_src( $attachment_id, 'full'  ) );
+					
+					$attachment = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
+					$image = $attachment ? current( $attachment ) : '';
+					
+					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
+					$image_link = $attachment ? current( $attachment ) : '';
 				} else {
 					$image = $image_link = '';
 				}
@@ -1216,12 +1231,15 @@ class WC_Product {
 		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
 		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
 		
-		if ( $this->min_variation_price !== '' ) $woocommerce->clear_product_transients( $this->id );
+		$this->price = $this->min_variation_price;
+		
+		if ( $this->min_variation_price !== '' ) 
+			$woocommerce->clear_product_transients( $this->id );
 	}
 	
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_product extends WC_Product {
 	public function __construct( $id ) { 
 		_deprecated_function( 'woocommerce_product', '1.4', 'WC_Product()' );

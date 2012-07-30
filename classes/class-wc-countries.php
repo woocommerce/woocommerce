@@ -280,8 +280,10 @@ class WC_Countries {
 				'VIC' => __('Victoria', 'woocommerce') ,
 				'WA' => __('Western Australia', 'woocommerce') 
 			),
+			'AF' => array(),
 			'AT' => array(),
 			'BE' => array(),
+			'BI' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woocommerce'),
 			    'AC' => __('Acre', 'woocommerce'),
@@ -648,6 +650,11 @@ class WC_Countries {
 		
 			// Locale information used by the checkout
 			$this->locale = apply_filters('woocommerce_get_country_locale', array(
+				'AF' => array(
+					'state' => array(
+						'required' => false,
+					),
+				),
 				'AT' => array(
 					'postcode_before_city' => true,
 					'state'		=> array(
@@ -656,6 +663,11 @@ class WC_Countries {
 				),
 				'BE' => array(
 					'postcode_before_city' => true,
+					'state' => array(
+						'required' => false,
+					),
+				),
+				'BI' => array(
 					'state' => array(
 						'required' => false,
 					),
@@ -972,9 +984,12 @@ class WC_Countries {
 			
 			$fields = woocommerce_array_overlay( $fields, $locale[$country] );
 			
+			// If default country has postcode_before_city switch the fields round
 			if ( isset( $locale[$country]['postcode_before_city'] ) ) {
 				$fields['city']['class'] 		= array('form-row-last');
+				$fields['city']['clear'] 		= true;
 				$fields['postcode']['class'] 	= array('form-row-first', 'update_totals_on_change');
+				$fields['postcode']['clear'] 	= false;
 				
 				$switch_fields = array();
 				
@@ -988,6 +1003,7 @@ class WC_Countries {
 				
 				$fields = $switch_fields;
 			}
+			
 		}
 		
 		// Prepend field keys
@@ -1024,7 +1040,7 @@ class WC_Countries {
 	}
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_countries extends WC_Countries {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_countries', '1.4', 'WC_Countries()' );

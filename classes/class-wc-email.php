@@ -195,7 +195,7 @@ class WC_Email {
 			$email_heading 	= __('Order Complete', 'woocommerce');
 		endif;
 		
-		$email_heading = apply_filters( 'woocommerce_completed_order_customer_notification_subject', $email_heading );
+		$email_heading = apply_filters( 'woocommerce_email_heading_customer_completed_order', $email_heading );
 		
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 		
@@ -477,7 +477,7 @@ class WC_Email {
 
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_email extends WC_Email {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_email', '1.4', 'WC_Email()' );

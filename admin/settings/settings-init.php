@@ -147,7 +147,16 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'checkboxgroup' => 'start',
 		'show_if_checked' => 'option'
 	),
-
+	
+	array(  
+		'desc' 		=> __( 'Enable coupon form on cart', 'woocommerce' ),
+		'id' 		=> 'woocommerce_enable_coupon_form_on_cart',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'checkboxgroup'	=> '',
+		'show_if_checked' => 'yes'
+	),
+	
 	array(  
 		'desc' 		=> __( 'Enable coupon form on checkout', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_coupon_form_on_checkout',
@@ -250,20 +259,20 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 	
 	array(  
-		'desc' 		=> __( 'Enable jQuery UI (used by the price slider widget)', 'woocommerce' ),
+		'desc' 		=> __( 'Enable jQuery UI (used by the price filter widget)', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_jquery_ui',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'end'
 	),
 	
-	array(  
+	/*array(  
 	    'desc'     => __( 'Output WooCommerce JavaScript in the footer', 'woocommerce' ),
 	    'id'     => 'woocommerce_scripts_position',
 	    'std'     => 'yes',
 	    'type'     => 'checkbox',
 	    'checkboxgroup'		=> 'end'
-	),
+	),*/
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
 	

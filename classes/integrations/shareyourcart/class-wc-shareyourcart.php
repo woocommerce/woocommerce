@@ -233,7 +233,7 @@ class WC_ShareYourCart extends WC_Integration {
 				<div id="wc_get_started">
 					<span class="main"><?php _e('Setup your ShareYourCart account', 'woocommerce'); ?></span>
 					<span><?php echo $this->method_description; ?></span>
-					<p><a href="<?php echo add_query_arg( 'syc-account', 'create', admin_url( 'admin.php?page=woocommerce&tab=integration&section=shareyourcart' ) ); ?>" class="button button-primary api-link"><?php _e('Create an account', 'woocommerce'); ?></a> <a href="<?php echo add_query_arg( 'syc-account', 'recover', admin_url( 'admin.php?page=woocommerce&tab=integration&section=shareyourcart' ) ); ?>" class="button api-link"><?php _e('Can\'t access your account?', 'woocommerce'); ?></a></p>
+					<p><a href="<?php echo add_query_arg( 'syc-account', 'create', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button button-primary api-link"><?php _e('Create an account', 'woocommerce'); ?></a> <a href="<?php echo add_query_arg( 'syc-account', 'recover', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button api-link"><?php _e('Can\'t access your account?', 'woocommerce'); ?></a></p>
 				</div>
 				<?php
 			

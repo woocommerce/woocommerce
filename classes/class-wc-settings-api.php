@@ -95,7 +95,7 @@ class WC_Settings_API {
 		    	
 		    	// Prevent "undefined index" errors.
 		    	foreach ( $this->form_fields as $k => $v )
-    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : $v['default'];
+    				$form_field_settings[ $k ] = isset( $form_field_settings[ $k ] ) ? $form_field_settings[ $k ] : ( isset( $v['default'] ) ? $v['default'] : '' );
     		
 	    	}
 	    	
@@ -324,6 +324,27 @@ class WC_Settings_API {
     	
     	return $html;
     } // End generate_select_html()
+	
+	/**
+     * Generate Title HTML.
+     *
+     * @since 1.6.2
+     * @return $html string
+     */
+	function generate_title_html( $key, $data ) {
+    	$html = '';
+
+    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
+    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+ 	
+		$html .= '</table>' . "\n";
+			$html .= '<h4 class="' . $data['class'] . '">' . $data['title'] . '</h4>' . "\n";
+			if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<p>' . $data['description'] . '</p>' . "\n"; }
+		$html .= '<table class="form-table">' . "\n";
+    	
+    	return $html;
+    } // End generate_title_html()
     
     /**
      * Validate Settings Field Data.
@@ -462,7 +483,7 @@ class WC_Settings_API {
     
 }
 
-/** Depreciated */
+/** Deprecated */
 class woocommerce_settings_api extends WC_Settings_Api {
 	public function __construct() { 
 		_deprecated_function( 'woocommerce_settings_api', '1.4', 'WC_Settings_Api()' );

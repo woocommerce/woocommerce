@@ -26,9 +26,9 @@ function woocommerce_meta_boxes() {
 	global $post;
 	
 	// Products
-	add_meta_box( 'woocommerce-product-type', __('Product Type', 'woocommerce'), 'woocommerce_product_type_box', 'product', 'normal', 'high' );
 	add_meta_box( 'woocommerce-product-data', __('Product Data', 'woocommerce'), 'woocommerce_product_data_box', 'product', 'normal', 'high' );
 	remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
+	remove_meta_box( 'pageparentdiv', 'product', 'side' );
 	
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
@@ -38,7 +38,7 @@ function woocommerce_meta_boxes() {
 	
 	// Comments/Reviews
 	remove_meta_box( 'commentstatusdiv', 'product', 'normal' );
-	add_meta_box( 'commentstatusdiv', __('Product Reviews', 'woocommerce'), 'woocommerce_product_review_status_meta_box', 'product', 'normal' );
+	remove_meta_box( 'commentstatusdiv', 'product', 'side' );
 	
 	if ( ('publish' == $post->post_status || 'private' == $post->post_status) ) {
 		remove_meta_box( 'commentsdiv', 'product', 'normal' );
@@ -272,10 +272,11 @@ function woocommerce_wp_checkbox( $field ) {
 	if (!isset($field['class'])) $field['class'] = 'checkbox';
 	if (!isset($field['wrapper_class'])) $field['wrapper_class'] = '';
 	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	if (!isset($field['cbvalue'])) $field['cbvalue'] = 'yes';
 	
-	echo '<p class="form-field '.$field['id'].'_field '.$field['wrapper_class'].'"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" ';
+	echo '<p class="form-field '.$field['id'].'_field '.$field['wrapper_class'].'"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="' . $field['cbvalue'] . '" ';
 	
-	checked($field['value'], 'yes');
+	checked($field['value'], $field['cbvalue']);
 	
 	echo ' /> ';
 	

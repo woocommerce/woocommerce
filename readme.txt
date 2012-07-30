@@ -3,8 +3,8 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
-Tested up to: 3.4
-Stable tag: 1.5.8
+Tested up to: 3.4.1
+Stable tag: 1.6.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -150,7 +150,35 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.6 - xx/xx/2012 =
+= 1.6.2 - 20/07/2012 =
+* Tweak - Hide admin order comments box if they are disabled
+* Tweak - Added mini-cart.php template for the cart widget output
+* Tweak - Simplified the product data write panels
+* Tweak - woocommerce_reset_loop() on loop_end to reset columns and index
+* Tweak - Added US Zip Code validation
+* Tweak - Event handling for checkout fields
+* Tweak - wp_reset_postdata instead of wp_reset_query in product page loops
+* Tweak - Option to enable coupon form on cart
+* Tweak - Coupon codes added to order notes when used (thanks Max Rice)
+* Tweak - Shipping calculator state box improvements
+* Tweak - Added date to admin order notification
+* Tweak - Formatted addresses in emails in a table to maintain appearance when printing
+* Tweak - Better support for supercache - detect late_init or don't cache
+* Tweak - Added generate_title_html() to settings API
+* Tweak - PayPal standard: No longer using shipping_1 because a) paypal ignore it if *any* shipping rules are within paypal, b) paypal ignore anyhing over 5 digits, so 999.99 is the max
+* Fix - Removed session_name from 1.6 to prevent issues when other plugins start a session first. Instead, added a KB article on how to do it manually (if needed, this is an edge case) - http://wcdocs.woothemes.com/codex/extending/multiple-installs-on-one-domain-sessions-conflictsession-sharing-workaround/
+* Fix - Product categories shortcode loop
+* Fix - selected state for variation options
+* Localization - Rescan all language strings and updated .po and .mo files for next release
+* Localization - Added Romanian translation (by silviu-bucsa)
+* Localization - Updated Swedish translation by Patric Liljestrand
+
+= 1.6.1 - 19/07/2012 =
+* Fix - Minor issue with woocommerce_content() - updated to new template system
+* Fix - Wrapped the deprecated content functions in function_exists
+* Fix - Put back deprecated loop-shop for older themes until they are updated
+
+= 1.6.0 - 17/07/2012 =
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
 * Feature - Added bulk actions to bulk change order status to processing or completed
@@ -159,6 +187,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
 * Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
 * Templating - Documented templates listing hooked in functions.
+* Tweak - Allowed the editing of attribute slugs after creation
 * Tweak - get_order_item_totals() total_rows have fixed indexes for easier manipulation
 * Tweak - order_note comment type for future order notes, allowing you to filter in the comments section.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
@@ -171,6 +200,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - woocommerce_attribute filter if needed
 * Tweak - Orders page is now the first item in the WooCommerce menu
 * Tweak - If all variations are the same price, don't show the variation price.
+* Tweak - woocommerce_completed_order_customer_notification_subject hook renamed to for more sense: woocommerce_email_heading_customer_completed_order
+* Tweak - woocommerce_sortable_taxonomies filter
+* Tweak - Split up frontend scripts so they can be loaded when needed.
+* Tweak - Set session_name to avoid conflicting sessions across installs.
+* Tweak - Tweaked backorder handling to allow out of stock to be bought, and show 'backorder' notification is cart qty > stock
+* Tweak - Support for HTTP_X_FORWARDED_PROTO with is_ssl
 * Fix - Widget init function conflict with widget logic
 * Fix - PLN currency code
 * Fix - Variation get shipping class ID
@@ -184,6 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - IPN check with PayPal redesign
 * Fix - When showing attributes, check taxonomies exist
 * Fix - When adding multiple items to an order, saving lost all by the first
+* Fix - Tax calc when javascript disabled
 * Localization - LI and CH address locales
 * Localization - Switch fields in array if postcode_before_city is set
 * Localization - German (formal) update (thanks jjoeris)
@@ -194,7 +230,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Pay page woocommerce_pay hidden input so we can use javascript to submit the form
 * Tweak - Hooks for order statuses in reports
 * Tweak - Extra hooks in some templates
-* Fix - Remove depreciated ereg_replace in validation class
+* Fix - Remove deprecated ereg_replace in validation class
 * Fix - strpos warning in shipping class
 * Fix - $query instead of $q in query class
 * Fix - Visibility setting for products in widgets
@@ -595,7 +631,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Other minor fixes
 
 = 1.4.1 - 01/02/2012 = 
-* Depreciated tax class fix
+* Deprecated tax class fix
 * Logout error fix
 * get_shipping_tax_rate deprecated to stop errors
 * get_attribute returns non-linked terms
@@ -945,8 +981,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Upgrade Notice ==
 
-= 1.6 =
-1.6 introduces some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
+= 1.6.2 =
+1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
 = 1.5.4 =
 Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 

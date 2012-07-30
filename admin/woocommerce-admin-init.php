@@ -32,14 +32,14 @@ function woocommerce_admin_menu() {
     add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
     add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
     
-    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
+    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
     
     foreach ( $print_css_on as $page ) 
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' ); 
 }
 
 function woocommerce_admin_menu_after() {
-	add_submenu_page( 'woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce', 'woocommerce_settings_page');
+	add_submenu_page( 'woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
 	add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 }
 
@@ -49,7 +49,7 @@ function woocommerce_admin_menu_after() {
 add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
 function woocommerce_admin_menu_highlight() {
-	global $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
+	global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
 	$to_highlight_types = array( 'shop_order', 'shop_coupon' );
 
@@ -71,6 +71,24 @@ function woocommerce_admin_menu_highlight() {
 
 	$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
 	unset( $submenu['woocommerce'][2] );
+	
+	// Sort out Orders menu when on the top level
+	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'manage_woocommerce_orders' ) ) {
+		foreach ( $menu as $key => $menu_item ) {
+			if ( strpos( $menu_item[0], _x('Orders', 'Admin menu name', 'woocommerce') ) === 0 ) {
+				
+				$menu_name = _x('Orders', 'Admin menu name', 'woocommerce');
+				$menu_name_count = '';
+				if ( $order_count = woocommerce_processing_order_count() ) {
+					$menu_name_count = " <span class='awaiting-mod update-plugins count-$order_count'><span class='processing-count'>" . number_format_i18n( $order_count ) . "</span></span>" ;
+				}
+				
+				$menu[$key][0] = $menu_name . $menu_name_count;
+				$submenu['edit.php?post_type=shop_order'][5][0] = $menu_name;
+				break;
+			}
+		}
+	}
 }
 
 /**
@@ -83,7 +101,7 @@ function woocommerce_admin_install_notice() {
 	<div id="message" class="updated woocommerce-message wc-connect">
 		<div class="squeezer">
 			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; You\'re almost ready to start selling :)', 'woocommerce' ); ?></h4>
-			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
+			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
 		</div>
 	</div>
 	<?php
@@ -94,7 +112,7 @@ function woocommerce_admin_installed_notice() {
 		<div class="squeezer">
 			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; You\'re ready to start selling :)', 'woocommerce' ); ?></h4>
 			
-			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e('Documentation', 'woocommerce'); ?></a></p>
+			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e('Documentation', 'woocommerce'); ?></a></p>
 			
 			<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
@@ -221,14 +239,14 @@ function woocommerce_admin_scripts() {
 	wp_register_script( 'woocommerce_admin', $woocommerce->plugin_url() . '/assets/js/admin/woocommerce_admin'.$suffix.'.js', array('jquery', 'jquery-ui-widget', 'jquery-ui-core'), '1.0' );
 	wp_register_script( 'jquery-ui-datepicker',  $woocommerce->plugin_url() . '/assets/js/admin/ui-datepicker.js', array('jquery','jquery-ui-core'), '1.0' );
 	wp_register_script( 'woocommerce_writepanel', $woocommerce->plugin_url() . '/assets/js/admin/write-panels'.$suffix.'.js', array('jquery', 'jquery-ui-datepicker') );
-	wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/ajax-chosen.jquery'.$suffix.'.js', array('jquery', 'chosen'), '1.0' );
-	wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
+	wp_register_script( 'ajax-chosen', $woocommerce->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery'.$suffix.'.js', array('jquery', 'chosen'), '1.0' );
+	wp_register_script( 'chosen', $woocommerce->plugin_url() . '/assets/js/chosen/chosen.jquery'.$suffix.'.js', array('jquery'), '1.0' );
 	
 	// Get admin screen id
     $screen = get_current_screen();
 
     // WooCommerce admin pages
-    if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
+    if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
     
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
@@ -272,6 +290,7 @@ function woocommerce_admin_scripts() {
 			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
 			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce'),
 			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
+			'featured_label'				=> __('Featured', 'woocommerce'),
 			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
 			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
@@ -298,7 +317,7 @@ function woocommerce_admin_scripts() {
 	endif;
 	
 	// Term ordering - only when sorting by term_order
-	if ( ( $screen->id == 'edit-product_cat' || strstr( $screen->id, 'edit-pa_' ) ) && ! isset( $_GET['orderby'] ) ) :
+	if ( ( strstr( $screen->id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) :
 
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable') );
 		wp_enqueue_script( 'woocommerce_term_ordering' );

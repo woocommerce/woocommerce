@@ -1,25 +1,27 @@
-<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
+<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 
-	<div style="float:left; width: 49%;">
+	<tr>
 
-<?php endif; ?>
+		<td valign="top" width="50%">
+
+			<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
 	
-		<h3><?php _e('Billing address', 'woocommerce'); ?></h3>
+			<p><?php echo $order->get_formatted_billing_address(); ?></p>
+			
+		</td>
+
+		<?php if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' ) : ?>
+
+		<td valign="top" width="50%">
+
+			<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
+	
+			<p><?php echo $order->get_formatted_shipping_address(); ?></p>
 		
-		<p><?php echo $order->get_formatted_billing_address(); ?></p>
+		</td>	
+			
+		<?php endif; ?>
 
-<?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
-
-	</div>
+	</tr>
 	
-	<div style="float:right; width: 49%;">
-	
-		<h3><?php _e('Shipping address', 'woocommerce'); ?></h3>
-		
-		<p><?php echo $order->get_formatted_shipping_address(); ?></p>
-	
-	</div>
-	
-	<div style="clear:both;"></div>
-
-<?php endif; ?>
+</table>

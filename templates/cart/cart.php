@@ -15,10 +15,10 @@ global $woocommerce;
 		<tr>
 			<th class="product-remove">&nbsp;</th>
 			<th class="product-thumbnail">&nbsp;</th>
-			<th class="product-name"><span class="nobr"><?php _e('Product Name', 'woocommerce'); ?></span></th>
-			<th class="product-price"><span class="nobr"><?php _e('Unit', 'woocommerce'); ?></span></th>
+			<th class="product-name"><?php _e('Product', 'woocommerce'); ?></th>
+			<th class="product-price"><?php _e('Price', 'woocommerce'); ?></th>
 			<th class="product-quantity"><?php _e('Quantity', 'woocommerce'); ?></th>
-			<th class="product-subtotal"><?php _e('Price', 'woocommerce'); ?></th>
+			<th class="product-subtotal"><?php _e('Total', 'woocommerce'); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -58,7 +58,7 @@ global $woocommerce;
 								echo $woocommerce->cart->get_item_data( $values );
                    				
                    				// Backorder notification
-                   				if ( $_product->backorders_require_notification() && $_product->get_total_stock() < 1 ) 
+                   				if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
                    					echo '<p class="backorder_notification">' . __('Available on backorder', 'woocommerce') . '</p>';
 							?>
 						</td>
@@ -106,7 +106,7 @@ global $woocommerce;
 		<tr>
 			<td colspan="6" class="actions">
 
-				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' ) { ?>
+				<?php if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' && get_option( 'woocommerce_enable_coupon_form_on_cart' ) == 'yes') { ?>
 					<div class="coupon">
 					
 						<label for="coupon_code"><?php _e('Coupon', 'woocommerce'); ?>:</label> <input name="coupon_code" class="input-text" id="coupon_code" value="" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />

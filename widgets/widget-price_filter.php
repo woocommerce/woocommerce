@@ -15,8 +15,13 @@
 add_action( 'init', 'woocommerce_price_filter_init' );
 
 function woocommerce_price_filter_init() {
+	global $woocommerce;
 	
 	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
+		
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		
+		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui' ), '1.6', true );
 	
 		unset( $_SESSION['min_price'] );
 		unset( $_SESSION['max_price'] );
@@ -108,6 +113,18 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		if (!is_tax( 'product_cat' ) && !is_post_type_archive('product') && !is_tax( 'product_tag' )) return; // Not on product page - return
 		
 		if ( sizeof( $woocommerce->query->unfiltered_product_ids ) == 0 ) return; // None shown - return
+		
+		if ( get_option( 'woocommerce_enable_jquery_ui' ) == 'yes' ) {
+			
+			wp_enqueue_script( 'wc-price-slider' );
+			
+			wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
+				'currency_symbol' 	=> get_woocommerce_currency_symbol(),
+				'currency_pos'      => get_option( 'woocommerce_currency_pos' ), 
+				'min_price'			=> isset( $_SESSION['min_price'] ) ? $_SESSION['min_price'] : '',
+				'max_price'			=> isset( $_SESSION['max_price'] ) ? $_SESSION['max_price'] : ''
+			) );
+		}
 
 		$title = $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
