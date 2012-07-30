@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.2 - 20/07/2012 =
+* Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
 * Tweak - Hide admin order comments box if they are disabled
 * Tweak - Added mini-cart.php template for the cart widget output
 * Tweak - Simplified the product data write panels

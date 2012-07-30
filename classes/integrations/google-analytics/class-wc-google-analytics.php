@@ -37,7 +37,7 @@ class WC_Google_Analytics extends WC_Integration {
 		
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( &$this, 'add_to_cart' ) );
-		add_action( 'woocommerce_pagination', array( &$this, 'loop_add_to_cart' ) );
+		add_action( 'woocommerce_after_shop_loop', array( &$this, 'loop_add_to_cart' ) );
     } 
     
 	/**
@@ -96,15 +96,15 @@ class WC_Google_Analytics extends WC_Integration {
 			$user_id 		= '';
 			$username 		= __('Guest', 'woocommerce');
 		}
-		?>
-		<script type="text/javascript">
+		
+		$woocommerce->add_inline_js("
 		
 			var _gaq = _gaq || [];
 			_gaq.push(
-				['_setAccount', '<?php echo $tracking_id; ?>'],
-				['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
-				['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
-				['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
+				['_setAccount', '" . $tracking_id . "'],
+				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
+				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
+				['_setCustomVar', 3, 'username', '" . $username . "', 1],
 				['_trackPageview']
 			);
 			
@@ -114,8 +114,7 @@ class WC_Google_Analytics extends WC_Integration {
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
 	
-		</script>
-		<?php
+		");
 	}
 	
 	/**
@@ -145,57 +144,62 @@ class WC_Google_Analytics extends WC_Integration {
 			$user_id 		= '';
 			$username 		= __('Guest', 'woocommerce');
 		}
-		?>
-		<script type="text/javascript">
+		
+		$code = "
 			var _gaq = _gaq || [];
 			
 			_gaq.push(
-				['_setAccount', '<?php echo $tracking_id; ?>'],
-				['_setCustomVar', 1, 'logged-in', '<?php echo $loggedin; ?>', 1],
-				['_setCustomVar', 2, 'user-id', '<?php echo $user_id; ?>', 1],
-				['_setCustomVar', 3, 'username', '<?php echo $username; ?>', 1],
+				['_setAccount', '" . $tracking_id . "'],
+				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
+				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
+				['_setCustomVar', 3, 'username', '" . $username . "', 1],
 				['_trackPageview']
 			);
 			
 			_gaq.push(['_addTrans',
-				'<?php echo $order_id; ?>',           		// order ID - required
-				'<?php bloginfo('name'); ?>',  				// affiliation or store name
-				'<?php echo $order->order_total; ?>',   	// total - required
-				'<?php echo $order->get_total_tax(); ?>',   // tax
-				'<?php echo $order->get_shipping(); ?>',	// shipping
-				'<?php echo $order->billing_city; ?>',      // city
-				'<?php echo $order->billing_state; ?>',     // state or province
-				'<?php echo $order->billing_country; ?>'    // country
+				'" . $order_id . "',           		// order ID - required
+				'" . get_bloginfo( 'name' ) . "',  	// affiliation or store name
+				'" . $order->order_total . "',   	// total - required
+				'" . $order->get_total_tax() . "',  // tax
+				'" . $order->get_shipping() . "',	// shipping
+				'" . $order->billing_city . "',     // city
+				'" . $order->billing_state . "',    // state or province
+				'" . $order->billing_country . "'   // country
 			]);
+		";
 			
-			// Order items
-			<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
-				_gaq.push(['_addItem',
-					'<?php echo $order_id; ?>',           	// order ID - required
-					'<?php if (!empty($_product->sku)) 
-								echo __('SKU:', 'woocommerce') . ' ' . $_product->sku; 
-						   else 
-								echo $_product->id;
-					?>', // SKU/code - required
-					'<?php echo $item['name']; ?>',        	// product name
-					'<?php if (isset($_product->variation_data)){
-								echo woocommerce_get_formatted_variation( $_product->variation_data, true ); 
-						   } else {
-								$out = array();
-								$categories = get_the_terms($_product->id, 'product_cat');
-								if ( $categories ) {
-									foreach ( $categories as $category ){
-										$out[] = $category->name;
-									}
-								}
-								echo join( "/", $out);
-						   }
-					 ?>',   // category or variation
-					'<?php echo ($item['line_total']/$item['qty']); ?>',         // unit price - required
-					'<?php echo $item['qty']; ?>'           // quantity - required
-				]);
-			<?php endforeach; ?>
-			
+		// Order items
+		if ( $order->get_items() ) {
+			foreach ( $order->get_items() as $item ) {
+				$_product = $order->get_product_from_item( $item );
+				
+				$code .= "_gaq.push(['_addItem',";
+				$code .= "'" . $order_id . "',";
+				$code .= "'" . ( ( ! empty( $_product->sku ) ) ? __('SKU:', 'woocommerce') . ' ' . $_product->sku : $_product->id ) . "',";
+				$code .= "'" . $item['name'] . "',";
+				
+				if ( isset( $_product->variation_data ) ) {
+				
+					$code .= "'" . woocommerce_get_formatted_variation( $_product->variation_data, true ) . "',";
+				
+				} else {
+					$out = array();
+					$categories = get_the_terms($_product->id, 'product_cat');
+					if ( $categories ) {
+						foreach ( $categories as $category ){
+							$out[] = $category->name;
+						}
+					}
+					$code .= "'" . join( "/", $out) . "',";
+				}
+
+				$code .= "'" . ( $item['line_total'] / $item['qty'] ) . "',";
+				$code .= "'" . $item['qty'] . "'";
+				$code .= "]);";
+			}
+		}
+		
+		$code .= "
 			_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
 			
 			(function() {
@@ -203,16 +207,19 @@ class WC_Google_Analytics extends WC_Integration {
 				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
-		</script>
-		<?php
+		";
+		
+		$woocommerce->add_inline_js( $code );
 	}
+	
 	/**
 	 * Google Analytics event tracking for single product add to cart
 	 *
 	 **/
 	function add_to_cart() {
 		
-		if( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		if ( ! is_single() ) return;
 		
 		global $product;
 		
@@ -220,10 +227,9 @@ class WC_Google_Analytics extends WC_Integration {
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
 		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
-		$parameters['label'] = "'" . esc_js( $product->get_title() ) . "'";
+		$parameters['label'] = "'#" . esc_js( $product->id ) . "'";
 		
-		$this->event_tracking_code( $parameters, '.button.alt' );
-		
+		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 	
 	/**
@@ -232,18 +238,16 @@ class WC_Google_Analytics extends WC_Integration {
 	 **/
 	function loop_add_to_cart() {
 		
-		if( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
 		
 		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
-		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
-		$parameters['label'] = "$(this).parent().find('h3').text()";
+		$parameters['action'] 	= "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
+		$parameters['label'] 	= "'#' + $(this).attr('data-product_id')"; // Product ID
 		
-		$this->event_tracking_code( $parameters, '.button.add_to_cart_button' );
-		
+		$this->event_tracking_code( $parameters, '.add_to_cart_button' );
 	}
-
 	
 	/**
 	 * Google Analytics event tracking for loop add to cart
@@ -252,18 +256,15 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @param string $selector - jQuery selector for binding click event
 	 **/
 	private function event_tracking_code( $parameters, $selector ) {
-	
+		global $woocommerce;
+		
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 		
-	?>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$('<?php echo $selector; ?>').click(function() {
-					<?php printf( "_gaq.push(['_trackEvent', %s, %s, %s]);", $parameters['category'], $parameters['action'], $parameters['label'] ); ?>
-				});
+		$woocommerce->add_inline_js("
+			$('" . $selector . "').click(function() {
+				" . sprintf( "_gaq.push(['_trackEvent', %s, %s, %s]);", $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
-		</script>
-	<?php
+		");
 	}
 	
 	private function disable_tracking( $type ) {
