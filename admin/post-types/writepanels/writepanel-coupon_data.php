@@ -164,6 +164,18 @@ add_action('woocommerce_process_shop_coupon_meta', 'woocommerce_process_shop_cou
 function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce_errors;
 	
+	// Check for dupe coupons
+	$coupon_found = $wpdb->get_var( $wpdb->prepare( "
+		SELECT $wpdb->posts.ID
+	    FROM $wpdb->posts
+	    WHERE $wpdb->posts.post_type = 'shop_coupon'
+	    AND $wpdb->posts.post_status = 'publish' 
+	    AND $wpdb->posts.post_title = '%s'
+	    AND $wpdb->posts.ID != %s
+	 ", esc_attr( $_POST['post_title'] ), $post_id ) );
+	if ( $coupon_found )
+		$woocommerce_errors[] = __( 'Coupon code already exists.', 'woocommerce' );
+	
 	// Add/Replace data to array
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
 		$amount 		= strip_tags(stripslashes( $_POST['coupon_amount'] ));
