@@ -309,7 +309,8 @@ function woocommerce_admin_scripts() {
 			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
-			'search_products_nonce' => wp_create_nonce("search-products"),
+			'search_products_nonce' 		=> wp_create_nonce("search-products"),
+			'search_customers_nonce' 		=> wp_create_nonce("search-customers"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
 			'post_id'						=> $post->ID
 		 );

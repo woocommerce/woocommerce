@@ -94,7 +94,7 @@ jQuery( function($){
 	    method: 	'GET',
 	    url: 		woocommerce_writepanel_params.ajax_url,
 	    dataType: 	'json',
-	     afterTypeDelay: 100,
+	    afterTypeDelay: 100,
 	    data:		{
 	    	action: 		'woocommerce_json_search_products',
 			security: 		woocommerce_writepanel_params.search_products_nonce
@@ -118,6 +118,28 @@ jQuery( function($){
 	    data:		{
 	    	action: 		'woocommerce_json_search_products_and_variations',
 			security: 		woocommerce_writepanel_params.search_products_nonce
+	    }
+	}, function (data) {
+	
+		var terms = {};
+		
+	    $.each(data, function (i, val) {
+	        terms[i] = val;
+	    });
+	
+	    return terms;
+	});
+	
+	// Ajax Chosen Customer Selectors
+	jQuery("select.ajax_chosen_select_customer").ajaxChosen({
+	    method: 	'GET',
+	    url: 		woocommerce_writepanel_params.ajax_url,
+	    dataType: 	'json',
+	    afterTypeDelay: 100,
+	    minTermLength: 1,
+	    data:		{
+	    	action: 		'woocommerce_json_search_customers',
+			security: 		woocommerce_writepanel_params.search_customers_nonce
 	    }
 	}, function (data) {
 	

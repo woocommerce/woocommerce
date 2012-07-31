@@ -69,18 +69,21 @@ function woocommerce_order_data_meta_box($post) {
 				<p class="form-field last"><label for="order_date"><?php _e('Order Date:', 'woocommerce') ?></label>
 					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date('Y-m-d', strtotime( $post->post_date ) ); ?>" /> @ <input type="text" class="hour" placeholder="<?php _e('h', 'woocommerce') ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date('H', strtotime( $post->post_date ) ); ?>" />:<input type="text" class="minute" placeholder="<?php _e('m', 'woocommerce') ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date('i', strtotime( $post->post_date ) ); ?>" />
 				</p>
-	
-				<p class="form-field form-field-wide"><label for="customer_user"><?php _e('Customer:', 'woocommerce') ?></label>
-				<select id="customer_user" name="customer_user" class="chosen_select">
-					<option value=""><?php _e('Guest', 'woocommerce') ?></option>
-					<?php
-						$users = new WP_User_Query( array( 'orderby' => 'display_name' ) );
-						$users = $users->get_results();
-						if ($users) foreach ( $users as $user ) :
-							echo '<option value="'.$user->ID.'" '; selected($customer_user, $user->ID); echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
-						endforeach;
-					?>
-				</select></p>
+				
+				<p class="form-field form-field-wide">
+					<label for="customer_user"><?php _e('Customer:', 'woocommerce') ?></label>
+					<select id="customer_user" name="customer_user" class="ajax_chosen_select_customer">
+						<option value=""><?php _e('Guest', 'woocommerce') ?></option>
+						<?php
+							if ( $customer_user ) {
+								$user = get_user_by( 'id', $customer_user );
+								echo '<option value="' . $user->ID . '" '; 
+								selected( 1, 1 ); 
+								echo '>' . $user->display_name . ' (#' . $user->ID . ' &ndash; ' . $user->user_email . ')</option>';
+							}
+						?>
+					</select>
+				</p>
 				
 				<?php if( get_option( 'woocommerce_enable_order_comments' ) != 'no' ) : ?>
 				<p class="form-field form-field-wide"><label for="excerpt"><?php _e('Customer Note:', 'woocommerce') ?></label>

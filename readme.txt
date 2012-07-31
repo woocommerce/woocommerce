@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
 * Feature - WC_Product::has_file() for detecting if a downloadable product has a file set
 * Feature - Store customer IP and UA on purchase
+* Tweak - Ajaxified the customer selector on the order screen for stores with large amounts of users
 * Tweak - Hide admin order comments box if they are disabled
 * Tweak - Added mini-cart.php template for the cart widget output
 * Tweak - Simplified the product data write panels

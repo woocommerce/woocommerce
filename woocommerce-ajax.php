@@ -966,6 +966,42 @@ function woocommerce_json_search_products_and_variations() {
 }
 
 /**
+ * Search for customers and return json
+ */
+add_action('wp_ajax_woocommerce_json_search_customers', 'woocommerce_json_search_customers');
+
+function woocommerce_json_search_customers() {
+
+	check_ajax_referer( 'search-customers', 'security' );
+	
+	$term = urldecode( stripslashes( strip_tags( $_GET['term'] ) ) );
+	
+	if ( empty( $term ) ) 
+		die();
+	
+	$found_customers = array( '' => __('Guest', 'woocommerce') );
+	
+	$customers_query = new WP_User_Query( array( 
+		'fields'			=> 'all',
+		'orderby'			=> 'display_name', 
+		'search'			=> '*' . $term . '*',
+		'search_columns'	=> array( 'ID', 'user_login', 'user_email', 'user_nicename' )
+	) );
+	
+	$customers = $customers_query->get_results();
+	
+	if ( $customers ) {
+		foreach ( $customers as $customer ) {
+			$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . $customer->user_email . ')';
+		}
+	}
+
+	echo json_encode( $found_customers );
+	die();
+}
+
+
+/**
  * Search for products for upsells/crosssells
  */
 add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
