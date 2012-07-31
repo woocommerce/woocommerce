@@ -134,10 +134,9 @@ class WC_Coupon {
 	 * @return void
 	 */
 	function is_valid() {
-		
 		global $woocommerce;
 				
-		if ($this->id) :
+		if ( $this->id ) {
 		
 			$valid = true;
 			$error = false;
@@ -224,7 +223,9 @@ class WC_Coupon {
 			if ( $valid ) 
 				return true;
 		
-		endif;
+		} else {
+			$error = __( 'Invalid coupon', 'woocommerce' );
+		}
 		
 		return new WP_Error( 'coupon_error', apply_filters( 'woocommerce_coupon_error', $error, $this ) );
 	}
