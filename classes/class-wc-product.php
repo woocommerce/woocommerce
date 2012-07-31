@@ -270,6 +270,17 @@ class WC_Product {
 	}
 	
 	/**
+	 * Checks if a downloadable product has a file attached to it
+	 */
+	function has_file() {
+		if ( ! $this->is_downloadable() )
+			return false;
+			
+		if ( apply_filters( 'woocommerce_file_download_path', get_post_meta( $this->id, '_file_path', true ), $this->id ) )
+			return true;
+	}
+	
+	/**
 	 * Checks if a product is virtual (has no shipping)
 	 */
 	function is_virtual() {

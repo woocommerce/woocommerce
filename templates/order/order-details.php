@@ -49,7 +49,7 @@ $order = new WC_Order( $order_id );
 				$item_meta = new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
 				
-				if ($_product->exists() && $_product->is_downloadable() && ($order->status=='completed' || (get_option('woocommerce_downloads_grant_access_after_payment')=='yes' && $order->status=='processing'))) :
+				if ( $_product->exists() && $_product->is_downloadable() && $_product->has_file() && ( $order->status=='completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $order->status == 'processing' ) ) ) :
 					
 					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woocommerce') . '</a></small>';
 		

@@ -670,11 +670,11 @@ class WC_Order {
 	/** Gets a downloadable products file url */
 	function get_downloadable_file_url( $item_id, $variation_id ) {
 	 	
-	 	$download_id = ($variation_id>0) ? $variation_id : $item_id;
+	 	$download_id = $variation_id > 0 ? $variation_id : $item_id;
 	 	
 	 	$user_email = $this->billing_email;
 				
-	 	return add_query_arg('download_file', $download_id, add_query_arg('order', $this->order_key, add_query_arg('email', $user_email, trailingslashit( home_url() ))));
+	 	return add_query_arg( 'download_file', $download_id, add_query_arg( 'order', $this->order_key, add_query_arg( 'email', $user_email, trailingslashit( home_url() ) ) ) );
 	 }
 	 
 	/**
