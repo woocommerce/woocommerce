@@ -33,7 +33,7 @@ function woocommerce_order_data_meta_box($post) {
 		$order_status = current($order_status);
 		$order_status = $order_status->slug;
 	else :
-		$order_status = 'pending';
+		$order_status = apply_filters( 'woocommerce_default_order_status', 'pending' );
 	endif;
 	
 	if (!isset($post->post_title) || empty($post->post_title)) :
