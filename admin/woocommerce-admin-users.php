@@ -199,7 +199,8 @@ add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
 add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
 
 function woocommerce_customer_meta_fields( $user ) { 
-	if (!current_user_can('manage_woocommerce')) return $columns;
+	if ( ! current_user_can( 'manage_woocommerce' ) ) 
+		return;
 
 	$show_fields = woocommerce_get_customer_meta_fields();
 	

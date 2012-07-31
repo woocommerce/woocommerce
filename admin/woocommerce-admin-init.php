@@ -68,9 +68,11 @@ function woocommerce_admin_menu_highlight() {
 			}
 		}
 	}
-
-	$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
-	unset( $submenu['woocommerce'][2] );
+	
+	if ( isset( $submenu['woocommerce'] ) ) {
+		$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
+		unset( $submenu['woocommerce'][2] );
+	}
 	
 	// Sort out Orders menu when on the top level
 	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'manage_woocommerce_orders' ) ) {
