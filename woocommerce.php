@@ -780,6 +780,11 @@ class Woocommerce {
 			)
 		);
 		
+		// Sort out attachment urls
+		$attachment_base = get_option('woocommerce_prepend_shop_page_to_products') == 'yes' ? trailingslashit( $base_slug ) : trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
+		
+		add_rewrite_rule( '^' . $attachment_base . '([^/]*)/([^/]*)/([^/]*)/?', 'index.php?attachment=$matches[3]', 'top' );
+		
 		register_post_type( "product_variation",
 			array(
 				'labels' => array(
