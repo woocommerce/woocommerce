@@ -4503,7 +4503,7 @@ msgstr "El total del pedido ha sido actualizado. Por favor confirme su pedido pu
 #, php-format
 #@ woocommerce
 msgid "Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href=\"%s\">change your password</a>."
-msgstr "Hola, <strong>%s</strong>. Desde la página de cuenta, usted puede ver sus pedidos recientes, gestionar su envío y facturación y <a href=\\\"%s\\\">cambiar su contraseña</a> ."
+msgstr "Hola, <strong>%s</strong>. Desde la página de cuenta, usted puede ver sus pedidos recientes, gestionar su envío y facturación y <a href=\"%s\">cambiar su contraseña</a> ."
 
 #: templates/myaccount/my-account.php:16
 #@ woocommerce
