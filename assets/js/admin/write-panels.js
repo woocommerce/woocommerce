@@ -1,27 +1,27 @@
 jQuery( function($){
-	
+
 	// Prevent enter submitting post form
 	$("#upsell_product_data").bind("keypress", function(e) {
 		if (e.keyCode == 13) return false;
 	});
-	
+
 	// Type box
 	$('.type_box').appendTo( '#woocommerce-product-data h3.hndle span' );
-	
+
 	$(function(){
-		// Prevent inputs in meta box headings opening/closing contents	
-		$('#woocommerce-product-data h3.hndle').unbind('click.postboxes');	
-		
+		// Prevent inputs in meta box headings opening/closing contents
+		$('#woocommerce-product-data h3.hndle').unbind('click.postboxes');
+
 		jQuery('#woocommerce-product-data').on('click', 'h3.hndle', function(event){
-			
+
 			// If the user clicks on some form input inside the h3 the box should not be toggled
-			if ( $(event.target).filter('input, option, label, select').length ) 
+			if ( $(event.target).filter('input, option, label, select').length )
 				return;
-			
+
 			$('#woocommerce-product-data').toggleClass('closed');
 		});
 	});
-	
+
 	// Catalog Visibility
 	$('#catalog-visibility .edit-catalog-visibility').click(function () {
 		if ($('#catalog-visibility-select').is(":hidden")) {
@@ -33,28 +33,28 @@ jQuery( function($){
 	$('#catalog-visibility .save-post-visibility').click(function () {
 		$('#catalog-visibility-select').slideUp('fast');
 		$('#catalog-visibility .edit-catalog-visibility').show();
-		
+
 		var value = $('input[name=_visibility]:checked').val();
 		var label = $('input[name=_visibility]:checked').attr('data-label');
-		
+
 		if ( $('input[name=_featured]').is(':checked') ) {
 			label = label + ', ' + woocommerce_writepanel_params.featured_label
 			$('input[name=_featured]').attr('checked', 'checked');
 		}
-		
+
 		$('#catalog-visibility-display').text( label );
 		return false;
 	});
 	$('#catalog-visibility .cancel-post-visibility').click(function () {
 		$('#catalog-visibility-select').slideUp('fast');
 		$('#catalog-visibility .edit-catalog-visibility').show();
-		
+
 		var current_visibility = $('#current_visibilty').val();
 		var current_featured = $('#current_featured').val();
-		
+
 		$('input[name=_visibility]').removeAttr('checked');
 		$('input[name=_visibility][value=' + current_visibility + ']').attr('checked', 'checked');
-		
+
 		var label = $('input[name=_visibility]:checked').attr('data-label');
 
 		if ( current_featured == 'yes' ) {
@@ -63,11 +63,11 @@ jQuery( function($){
 		} else {
 			$('input[name=_featured]').removeAttr('checked');
 		}
-		
+
 		$('#catalog-visibility-display').text( label );
 		return false;
 	});
-	
+
 	// TABS
 	$('ul.tabs').show();
 	$('div.panel-wrap').each(function(){
@@ -81,14 +81,14 @@ jQuery( function($){
 		$( $(this).attr('href') ).show();
 		return false;
 	});
-	
+
 	// Chosen selects
 	jQuery("select.chosen_select").chosen();
-			
+
 	jQuery("select.chosen_select_nostd").chosen({
 		allow_single_deselect: 'true'
 	});
-	
+
 	// Ajax Chosen Product Selectors
 	jQuery("select.ajax_chosen_select_products").ajaxChosen({
 	    method: 	'GET',
@@ -100,16 +100,16 @@ jQuery( function($){
 			security: 		woocommerce_writepanel_params.search_products_nonce
 	    }
 	}, function (data) {
-	
+
 		var terms = {};
-	
+
 	    $.each(data, function (i, val) {
 	        terms[i] = val;
 	    });
-	
+
 	    return terms;
-	});	
-	
+	});
+
 	jQuery("select.ajax_chosen_select_products_and_variations").ajaxChosen({
 	    method: 	'GET',
 	    url: 		woocommerce_writepanel_params.ajax_url,
@@ -120,35 +120,13 @@ jQuery( function($){
 			security: 		woocommerce_writepanel_params.search_products_nonce
 	    }
 	}, function (data) {
-	
+
 		var terms = {};
-		
+
 	    $.each(data, function (i, val) {
 	        terms[i] = val;
 	    });
-	
-	    return terms;
-	});
-	
-	// Ajax Chosen Customer Selectors
-	jQuery("select.ajax_chosen_select_customer").ajaxChosen({
-	    method: 	'GET',
-	    url: 		woocommerce_writepanel_params.ajax_url,
-	    dataType: 	'json',
-	    afterTypeDelay: 100,
-	    minTermLength: 1,
-	    data:		{
-	    	action: 		'woocommerce_json_search_customers',
-			security: 		woocommerce_writepanel_params.search_customers_nonce
-	    }
-	}, function (data) {
-	
-		var terms = {};
-		
-	    $.each(data, function (i, val) {
-	        terms[i] = val;
-	    });
-	
+
 	    return terms;
 	});
 
@@ -156,15 +134,15 @@ jQuery( function($){
 	jQuery('#woocommerce-order-actions input, #woocommerce-order-actions a').click(function(){
 		window.onbeforeunload = '';
 	});
-	
+
 	$('a.edit_address').click(function(event){
-		
+
 		$(this).hide();
 		$(this).closest('.order_data').find('div.address').hide();
 		$(this).closest('.order_data').find('div.edit_address').show();
 		event.preventDefault();
 	});
-	
+
 	$('#order_items_list .remove_row').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.remove_item_notice);
 		if (answer){
@@ -173,17 +151,17 @@ jQuery( function($){
 		}
 		return false;
 	});
-	
+
 	$('button.calc_line_taxes').live('click', function(){
 		// Block write panel
 		$('.woocommerce_order_items_wrapper').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
+
 		var answer = confirm(woocommerce_writepanel_params.calc_line_taxes);
-		
+
 		if (answer) {
-			
+
 			var $items = $('#order_items_list tr.item');
-						
+
 			var country = $('#_shipping_country').val();
 			if (country) {
 				var state = $('#_shipping_state').val();
@@ -193,11 +171,11 @@ jQuery( function($){
 				var state = $('#_billing_state').val();
 				var postcode = $('#_billing_postcode').val();
 			}
-			
+
 			$items.each(function( idx ){
-				
+
 				var $row = $(this);
-				
+
 				var data = {
 					action: 		'woocommerce_calc_line_taxes',
 					item_id:		$row.find('input.item_id').val(),
@@ -209,19 +187,19 @@ jQuery( function($){
 					postcode:		postcode,
 					security: 		woocommerce_writepanel_params.calc_totals_nonce
 				};
-				
+
 				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
-					
+
 					result = jQuery.parseJSON( response );
 					$row.find('input.line_subtotal_tax').val( result.line_subtotal_tax );
 					$row.find('input.line_tax').val( result.line_tax );
-					
+
 					if (idx == ($items.size() - 1)) {
 						$('.woocommerce_order_items_wrapper').unblock();
 					}
-					
+
 				});
-				
+
 			});
 
 		} else {
@@ -233,16 +211,16 @@ jQuery( function($){
 	}, function() {
 		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax').css('background-color', '');
 	});
-	
-		
+
+
 	$('button.calc_totals').live('click', function(){
 		// Block write panel
 		$('#woocommerce-order-totals').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
+
 		var answer = confirm(woocommerce_writepanel_params.calc_totals);
-		
+
 		if (answer) {
-			
+
 			// Get row totals
 			var line_subtotals 		= 0;
 			var line_subtotal_taxes = 0;
@@ -252,54 +230,54 @@ jQuery( function($){
 			var order_shipping 		= parseFloat( $('#_order_shipping').val() );
 			var order_shipping_tax 	= parseFloat( $('#_order_shipping_tax').val() );
 			var order_discount		= parseFloat( $('#_order_discount').val() );
-			
+
 			if ( ! order_shipping ) order_shipping = 0;
 			if ( ! order_shipping_tax ) order_shipping_tax = 0;
 			if ( ! order_discount ) order_discount = 0;
-			
+
 			$('#order_items_list tr.item').each(function(){
-				
+
 				var line_subtotal 		= parseFloat( $(this).find('input.line_subtotal').val() );
 				var line_subtotal_tax 	= parseFloat( $(this).find('input.line_subtotal_tax').val() );
 				var line_total 			= parseFloat( $(this).find('input.line_total').val() );
 				var line_tax 			= parseFloat( $(this).find('input.line_tax').val() );
-				
+
 				if ( ! line_subtotal ) line_subtotal = 0;
 				if ( ! line_subtotal_tax ) line_subtotal_tax = 0;
 				if ( ! line_total ) line_total = 0;
 				if ( ! line_tax ) line_tax = 0;
-				
+
 				line_subtotals = parseFloat( line_subtotals + line_subtotal );
 				line_subtotal_taxes = parseFloat( line_subtotal_taxes + line_subtotal_tax );
 				line_totals = parseFloat( line_totals + line_total );
-				
+
 				if (woocommerce_writepanel_params.round_at_subtotal=='no') {
 					line_tax = parseFloat( line_tax.toFixed( 2 ) );
 				}
-				
+
 				cart_tax = parseFloat( cart_tax + line_tax );
-				
+
 			});
-			
+
 			// Tax
 			if (woocommerce_writepanel_params.round_at_subtotal=='yes') {
 				cart_tax = parseFloat( cart_tax.toFixed( 2 ) );
 			}
-			
+
 			// Cart discount
 			var cart_discount = ( (line_subtotals + line_subtotal_taxes) - (line_totals + cart_tax) );
 			if (cart_discount<0) cart_discount = 0;
 			cart_discount = cart_discount.toFixed( 2 );
-			
+
 			// Total
 			var order_total = line_totals + cart_tax + order_shipping + order_shipping_tax - order_discount;
 			order_total = order_total.toFixed( 2 );
-			
+
 			// Set fields
 			$('#_cart_discount').val( cart_discount );
 			$('#_order_tax').val( cart_tax );
 			$('#_order_total').val( order_total );
-			
+
 			// Since we currently cannot calc shipping from the backend, ditch the rows. They must be manually calculated.
 			$('#tax_rows').empty();
 
@@ -314,32 +292,32 @@ jQuery( function($){
 	}, function() {
 		$('#woocommerce-order-totals .calculated').css('background-color', '');
 	});
-		
+
 	$('button.add_shop_order_item').click(function(){
-		
+
 		var add_item_ids = $('select#add_item_id').val();
-		
+
 		if ( add_item_ids ) {
-		
+
 			count = add_item_ids.length;
-			
+
 			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-		
+
 			var size = $('table.woocommerce_order_items tbody tr.item').size();
-			
+
 			$.each( add_item_ids, function( index, value ) {
-			
+
 				var data = {
 					action: 		'woocommerce_add_order_item',
 					item_to_add: 	value,
 					index:			size,
 					security: 		woocommerce_writepanel_params.add_order_item_nonce
 				};
-	
+
 				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
-					
-					$('table.woocommerce_order_items tbody#order_items_list').append( response );		
-					    
+
+					$('table.woocommerce_order_items tbody#order_items_list').append( response );
+
 					if (!--count) {
 						$('select#add_item_id, #add_item_id_chzn .chzn-choices').css('border-color', '').val('');
 					    jQuery(".tips").tipTip({
@@ -350,11 +328,11 @@ jQuery( function($){
 					    });
 					    $('select#add_item_id').trigger("liszt:updated");
 					    $('table.woocommerce_order_items').unblock();
-					}		
+					}
 				});
-				
+
 				size++;
-			
+
 			});
 
 		} else {
@@ -362,17 +340,17 @@ jQuery( function($){
 		}
 
 	});
-	
+
 	$('button.add_meta').live('click', function(){
-		
+
 		var index = $(this).closest('tr.item').attr('rel');
-		
+
 		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>');
-		
+
 		return false;
-		
+
 	});
-	
+
 	$('button.remove_meta').live('click', function(){
 		var answer = confirm("Remove this meta key?")
 		if (answer){
@@ -380,36 +358,36 @@ jQuery( function($){
 		}
 		return false;
 	});
-	
+
 	$('button.load_customer_billing').live('click', function(){
-		
+
 		var answer = confirm(woocommerce_writepanel_params.load_billing);
 		if (answer){
-		
+
 			// Get user ID to load data for
 			var user_id = $('#customer_user').val();
-			
+
 			if (!user_id) {
 				alert(woocommerce_writepanel_params.no_customer_selected);
 				return false;
 			}
-			
+
 			var data = {
 				user_id: 			user_id,
 				type_to_load: 		'billing',
 				action: 			'woocommerce_get_customer_details',
 				security: 			woocommerce_writepanel_params.get_customer_details_nonce
 			};
-			
+
 			$(this).closest('.edit_address').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
+
 			$.ajax({
 				url: woocommerce_writepanel_params.ajax_url,
 				data: data,
 				type: 'POST',
 				success: function( response ) {
 					var info = jQuery.parseJSON(response);
-					
+
 					if (info) {
 						$('input#_billing_first_name').val( info.billing_first_name );
 						$('input#_billing_last_name').val( info.billing_last_name );
@@ -423,43 +401,43 @@ jQuery( function($){
 						$('input#_billing_email').val( info.billing_email );
 						$('input#_billing_phone').val( info.billing_phone );
 					}
-					
+
 					$('.edit_address').unblock();
 				}
 			});
 		}
 		return false;
 	});
-	
+
 	$('button.load_customer_shipping').live('click', function(){
-		
+
 		var answer = confirm(woocommerce_writepanel_params.load_shipping);
 		if (answer){
-		
+
 			// Get user ID to load data for
 			var user_id = $('#customer_user').val();
-			
+
 			if (!user_id) {
 				alert(woocommerce_writepanel_params.no_customer_selected);
 				return false;
 			}
-			
+
 			var data = {
 				user_id: 			user_id,
 				type_to_load: 		'shipping',
 				action: 			'woocommerce_get_customer_details',
 				security: 			woocommerce_writepanel_params.get_customer_details_nonce
 			};
-			
+
 			$(this).closest('.edit_address').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
+
 			$.ajax({
 				url: woocommerce_writepanel_params.ajax_url,
 				data: data,
 				type: 'POST',
 				success: function( response ) {
 					var info = jQuery.parseJSON(response);
-					
+
 					if (info) {
 						$('input#_shipping_first_name').val( info.shipping_first_name );
 						$('input#_shipping_last_name').val( info.shipping_last_name );
@@ -471,14 +449,14 @@ jQuery( function($){
 						$('#_shipping_country').val( info.shipping_country );
 						$('input#_shipping_state').val( info.shipping_state );
 					}
-					
+
 					$('.edit_address').unblock();
 				}
 			});
 		}
 		return false;
 	});
-	
+
 	$('button.billing-same-as-shipping').live('click', function(){
 		var answer = confirm(woocommerce_writepanel_params.copy_billing);
 		if (answer){
@@ -490,15 +468,15 @@ jQuery( function($){
 			$('input#_shipping_city').val( $('input#_billing_city').val() );
 			$('input#_shipping_postcode').val( $('input#_billing_postcode').val() );
 			$('input#_shipping_country').val( $('input#_billing_country').val() );
-			$('input#_shipping_state').val( $('input#_billing_state').val() );			
+			$('input#_shipping_state').val( $('input#_billing_state').val() );
 		}
 		return false;
 	});
-	
+
 	$('a.add_tax_row').live('click', function(){
-		
+
 		var size = $('#tax_rows .tax_row').size();
-		
+
 		$('#tax_rows').append('<div class="tax_row">\
 			<p class="first">\
 				<label>' + woocommerce_writepanel_params.tax_label + '</label>\
@@ -519,83 +497,83 @@ jQuery( function($){
 			<a href="#" class="delete_tax_row">&times;</a>\
 			<div class="clear"></div>\
 		</div>');
-		
+
 		return false;
 	});
-	
+
 	$('a.delete_tax_row').live('click', function(){
 		$tax_row = $(this).closest('.tax_row');
 		$tax_row.find('input').val('');
 		$tax_row.hide();
 		return false;
 	});
-	
+
 	// PRODUCT TYPE SPECIFIC OPTIONS
 	$('select#product-type').change(function(){
-		
+
 		// Get value
 		var select_val = $(this).val();
-		
+
 		$('.hide_if_grouped, .hide_if_external').show();
 		$('.show_if_simple, .show_if_variable, .show_if_grouped, .show_if_external').hide();
-		
+
 		if (select_val=='simple') {
 			$('.show_if_simple').show();
 			$('input#_manage_stock').change();
 		}
-		
+
 		else if (select_val=='variable') {
 			$('.show_if_variable').show();
 			$('input#_manage_stock').change();
 			$('input#_downloadable').prop('checked', false).change();
 			$('input#_virtual').removeAttr('checked').change();
 		}
-		
+
 		else if (select_val=='grouped') {
 			$('.show_if_grouped').show();
 			$('input#_downloadable').prop('checked', false).change();
 			$('input#_virtual').removeAttr('checked').change();
 			$('.hide_if_grouped').hide();
 		}
-		
+
 		else if (select_val=='external') {
 			$('.show_if_external').show();
 			$('input#_downloadable').prop('checked', false).change();
 			$('input#_virtual').removeAttr('checked').change();
 			$('.hide_if_external').hide();
 		}
-		
+
 		$('ul.tabs li:visible').eq(0).find('a').click();
-		
+
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
-		
+
 	}).change();
-	
+
 	$('input#_downloadable').change(function(){
-	
+
 		$('.show_if_downloadable').hide();
-		
+
 		if ($('input#_downloadable').is(':checked')) {
 			$('.show_if_downloadable').show();
 		}
-		
+
 		if ($('.downloads_tab').is('.active')) $('ul.tabs li:visible').eq(0).find('a').click();
-		
+
 	}).change();
-	
+
 	$('input#_virtual').change(function(){
-	
+
 		$('.show_if_virtual').hide();
 		$('.hide_if_virtual').show();
-		
+
 		if ($('input#_virtual').is(':checked')) {
 			$('.show_if_virtual').show();
 			$('.hide_if_virtual').hide();
 		}
-		
+
 	}).change();
-	
-	
+
+
 	// Sale price schedule
 	var sale_schedule_set = false;
 	$('.sale_price_dates_fields input').each(function(){
@@ -608,28 +586,28 @@ jQuery( function($){
 		$('.sale_schedule').show();
 		$('.sale_price_dates_fields').hide();
 	}
-	
+
 	$('.sale_schedule').click(function(){
 		$(this).hide();
 		$('.sale_price_dates_fields').show();
 		return false;
 	});
-	
+
 	$('.cancel_sale_schedule').click(function(){
 		$(this).closest('p').find('input').val('');
 		$('.sale_schedule').show();
 		$('.sale_price_dates_fields').hide();
 		return false;
 	});
-	
+
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
 		if ($(this).is(':checked')) $('div.stock_fields').show();
 		else $('div.stock_fields').hide();
 	}).change();
-	
-	
+
+
 	// DATE PICKER FIELDS
 	var dates = $( "#_sale_price_dates_from, #_sale_price_dates_to" ).datepicker({
 		defaultDate: "",
@@ -649,7 +627,7 @@ jQuery( function($){
 			dates.not( this ).datepicker( "option", option, date );
 		}
 	});
-	
+
 	$( ".date-picker" ).datepicker({
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,
@@ -658,25 +636,25 @@ jQuery( function($){
 		buttonImage: woocommerce_writepanel_params.calendar_image,
 		buttonImageOnly: true
 	});
-	
+
 	$( ".date-picker-field" ).datepicker({
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,
 		showButtonPanel: true,
 	});
-	
+
 	// META BOXES
-	
+
 		jQuery('.expand_all').click(function(){
 			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').show();
 			return false;
 		});
-		
+
 		jQuery('.close_all').click(function(){
 			jQuery(this).closest('.wc-metaboxes-wrapper').find('.wc-metabox > table').hide();
 			return false;
 		});
-		
+
 		// Open/close
 		jQuery('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){
 			// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
@@ -684,44 +662,44 @@ jQuery( function($){
 
 			jQuery(this).next('.wc-metabox-content').toggle();
 		});
-		
+
 		jQuery('.wc-metabox.closed').each(function(){
 			jQuery(this).find('.wc-metabox-content').hide();
 		});
-	
+
 	// ATTRIBUTE TABLES
 
 		// Multiselect attributes
-		$(".woocommerce_attributes select.multiselect").chosen();	
-		
+		$(".woocommerce_attributes select.multiselect").chosen();
+
 		// Initial order
 		var woocommerce_attribute_items = $('.woocommerce_attributes').find('.woocommerce_attribute').get();
-		
+
 		woocommerce_attribute_items.sort(function(a, b) {
 		   var compA = parseInt($(a).attr('rel'));
 		   var compB = parseInt($(b).attr('rel'));
 		   return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
 		})
 		$(woocommerce_attribute_items).each( function(idx, itm) { $('.woocommerce_attributes').append(itm); } );
-		
+
 		function attribute_row_indexes() {
-			$('.woocommerce_attributes .woocommerce_attribute').each(function(index, el){ 
-				$('.attribute_position', el).val( parseInt( $(el).index('.woocommerce_attributes .woocommerce_attribute') ) ); 
+			$('.woocommerce_attributes .woocommerce_attribute').each(function(index, el){
+				$('.attribute_position', el).val( parseInt( $(el).index('.woocommerce_attributes .woocommerce_attribute') ) );
 			});
 		};
-		
+
 		// Add rows
 		$('button.add_attribute').on('click', function(){
-			
+
 			var size = $('.woocommerce_attributes .woocommerce_attribute').size();
-			
+
 			var attribute_type = $('select.attribute_taxonomy').val();
-			
+
 			if (!attribute_type) {
-			
+
 				var product_type = $('select#product-type').val();
 				if (product_type!='variable') enable_variation = 'style="display:none;"'; else enable_variation = '';
-				
+
 				// Add custom attribute row
 				$('.woocommerce_attributes').append('<div class="woocommerce_attribute wc-metabox">\
 						<h3>\
@@ -758,41 +736,41 @@ jQuery( function($){
 							</tbody>\
 						</table>\
 					</div>');
-				
+
 			} else {
-				
+
 				// Reveal taxonomy row
 				var thisrow = $('.woocommerce_attributes .woocommerce_attribute.' + attribute_type);
 				$('.woocommerce_attributes').append( $(thisrow) );
 				$(thisrow).show().find('.woocommerce_attribute_data').show();
 				attribute_row_indexes();
-				
+
 			}
-			
+
 			$('select.attribute_taxonomy').val('');
 		});
-		
+
 		$('.woocommerce_attributes').on('blur', 'input.attribute_name', function(){
 			$(this).closest('.woocommerce_attribute').find('strong.attribute_name').text( $(this).val() );
 		});
-		
+
 		$('.woocommerce_attributes').on('click', 'button.select_all_attributes', function(){
 			$(this).closest('td').find('select option').attr("selected","selected");
 			$(this).closest('td').find('select').trigger("liszt:updated");
 			return false;
 		});
-		
+
 		$('.woocommerce_attributes').on('click', 'button.select_no_attributes', function(){
 			$(this).closest('td').find('select option').removeAttr("selected");
 			$(this).closest('td').find('select').trigger("liszt:updated");
 			return false;
 		});
-		
+
 		$('.woocommerce_attributes').on('click', 'button.remove_row', function() {
 			var answer = confirm(woocommerce_writepanel_params.remove_attribute);
 			if (answer){
 				var $parent = $(this).parent().parent();
-				
+
 				if ($parent.is('.taxonomy')) {
 					$parent.find('select, input[type=text]').val('');
 					$parent.hide();
@@ -804,7 +782,7 @@ jQuery( function($){
 			}
 			return false;
 		});
-		
+
 		// Attribute ordering
 		$('.woocommerce_attributes').sortable({
 			items:'.woocommerce_attribute',
@@ -824,29 +802,29 @@ jQuery( function($){
 				attribute_row_indexes();
 			}
 		});
-		
+
 		// Add a new attribute (via ajax)
 		$('.woocommerce_attributes').on('click', 'button.add_new_attribute', function() {
-			
+
 			$('.woocommerce_attributes').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
+
 			var attribute = $(this).attr('data-attribute');
 			var $wrapper = $(this).closest('.woocommerce_attribute_data');
 			var new_attribute_name = prompt( woocommerce_writepanel_params.new_attribute_prompt );
-			
+
 			if ( new_attribute_name ) {
-				
+
 				var data = {
 					action: 		'woocommerce_add_new_attribute',
 					taxonomy:		attribute,
 					term:			new_attribute_name,
 					security: 		woocommerce_writepanel_params.add_attribute_nonce
 				};
-				
+
 				$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
-					
+
 					result = jQuery.parseJSON( response );
-					
+
 					if ( result.error ) {
 						// Error
 						alert( result.error );
@@ -855,45 +833,45 @@ jQuery( function($){
 						$wrapper.find('select.attribute_values').append('<option value="' + result.slug + '" selected="selected">' + result.name + '</option>');
 						$wrapper.find('select.attribute_values').trigger("liszt:updated");
 					}
-					
+
 					$('.woocommerce_attributes').unblock();
-					
+
 				});
-				
+
 			} else {
 				$('.woocommerce_attributes').unblock();
 			}
-			
+
 			return false;
-			
+
 		});
-	
+
 	// Uploading files
 	var file_path_field;
-	
+
 	window.send_to_editor_default = window.send_to_editor;
 
 	jQuery('.upload_file_button').live('click', function(){
-		
+
 		file_path_field = jQuery(this).parent().find('.file_path');
-		
+
 		formfield = jQuery(file_path_field).attr('name');
-		
+
 		window.send_to_editor = window.send_to_download_url;
-		
+
 		tb_show('', 'media-upload.php?post_id=' + woocommerce_writepanel_params.post_id + '&amp;type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
 		return false;
 	});
 
 	window.send_to_download_url = function(html) {
-		
+
 		file_url = jQuery(html).attr('href');
 		if (file_url) {
 			jQuery(file_path_field).val(file_url);
 		}
 		tb_remove();
 		window.send_to_editor = window.send_to_editor_default;
-		
+
 	}
 
 });
