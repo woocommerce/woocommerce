@@ -707,7 +707,7 @@ class WC_Order {
 	}
 
 	/**
-	 * Adds a note (comment) to the order
+	 * Updates status of order
 	 *
 	 * @param   string	$new_status		Status to change the order to
 	 * @param   string	$note			Optional note to add
