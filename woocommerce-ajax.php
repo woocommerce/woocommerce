@@ -912,7 +912,21 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 			'fields'			=> 'ids'
 		);
 
-		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ) ));
+		$args3 = array(
+			'post_type'			=> $post_types,
+			'post_status' 		=> 'publish',
+			'posts_per_page' 	=> -1,
+			'meta_query' 		=> array(
+				array(
+				'key' 	=> '_sku',
+				'value' => $term,
+				'compare' => 'LIKE'
+				)
+			),
+			'fields'			=> 'ids'
+		);
+
+		$posts = array_unique(array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ) ));
 
 	} else {
 
