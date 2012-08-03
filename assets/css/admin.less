@@ -1,3 +1,24 @@
+/* FontAwesome icon font - http://fortawesome.github.com/Font-Awesome/ */
+@font-face {
+	font-family: 'FontAwesome';
+	src: url('../fonts/fontawesome-webfont.eot');
+	src: url('../fonts/fontawesome-webfont.eot?#iefix') format('eot'), url('../fonts/fontawesome-webfont.woff') format('woff'), url('../fonts/fontawesome-webfont.ttf') format('truetype'), url('../fonts/fontawesome-webfont.svg#FontAwesome') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+.iconafter() {
+	font-family: 'FontAwesome';
+	display: inline-block;
+	margin-left:.618em;
+	font-weight: normal;
+}
+
+.iconbefore() {
+	font-family: 'FontAwesome';
+	display: inline-block;
+	margin-right:.618em;
+	font-weight: normal;
+}
 .woocommerce-message {
 	position: relative;
 	z-index: 100;
@@ -1420,69 +1441,60 @@ img.help_tip {
 	background: #f8f8f8;
 	color: #555;
 
-	background-image: linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
-
-	background-image: -webkit-gradient(
-		linear,
-		left bottom,
-		left top,
-		color-stop(0, rgb(255,255,255)),
-		color-stop(1, rgb(248,248,248))
-	);
+	
 }
 #woocommerce-product-data ul.product_data_tabs li {
 	&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.related_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 		a {
-			padding: 9px 9px 9px 31px;
+			padding: 9px;
 			line-height: 16px;
 			border-bottom: 1px solid #d5d5d5;
 			text-shadow: 0 1px 1px #fff;
 			color: #555;
-			background: #f1f1f1 url(../images/icons/wc-tab-icons.png) no-repeat 9px 9px;
+			
+			&:before {
+				.iconbefore;
+			}
 		}
 	}
 	&.general_options {
-		a {
-			background-position: 9px 9px;
+		a:before {
+			content: "\f0ce";
 		}
 	}
 	&.tax_options {
-		a {
-			background-position: 9px -55px;
+		a:before {
+			content: "\f0d6";
 		}
 	}
 	&.inventory_options {
-		a {
-			background-position: 9px -119px;
+		a:before {
+			content: "\f0ae";
 		}
 	}
 	&.shipping_options {
-		a {
-			background-position: 9px -631px;
+		a:before {
+			content: "\f0d1";
 		}
 	}
 	&.related_product_options {
-		a {
-			background-position: 9px -567px;
+		a:before {
+			content: "\f0c1";
 		}
 	}
 	&.attribute_options {
-		a {
-			background-position: 9px -247px;
+		a:before {
+			content: "\f0ca";
 		}
 	}
 	&.advanced_options {
-		a {
-			background-position: 9px -695px;
+		a:before {
+			content: "\f0ad";
 		}
 	}
 	&.variation_options {
-		a {
-			background-position: 9px -439px;
+		a:before {
+			content: "\f0db";
 		}
 	}
 	&.active {
@@ -1623,6 +1635,9 @@ img.help_tip {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DFDFDF;
 		padding: 9px 12px !important;
+		&:first-child {
+			border-top:0;
+		}
 	}
 	p.toolbar {
 		overflow: hidden;
