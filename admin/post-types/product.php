@@ -76,8 +76,8 @@ function woocommerce_edit_product_columns($columns){
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
 	$columns["product_tag"] = __("Tags", 'woocommerce');
-	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" />';
-	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" />';
+	$columns["featured"] = '<span class="icon"></span><span class="hide">' . __("Featured", 'woocommerce') . '</span>';
+	$columns["product_type"] = '<span class="icon"></span><span class="hide">' . __("Product Type", 'woocommerce') . '</span>';	
 	$columns["date"] = __("Date", 'woocommerce');
 	
 	return $columns;
@@ -220,8 +220,8 @@ function woocommerce_custom_product_columns( $column ) {
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
 			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" />';
+			if ($product->is_featured()) echo '<a href="'.$url.'"><span class="icon featured"></span><span class="hide">Featured</span>';
+			else echo '<span class="icon not-featured"></span><span class="hide">Not featured</span>';
 			echo '</a>';
 		break;
 		case "is_in_stock" :
