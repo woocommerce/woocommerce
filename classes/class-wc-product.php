@@ -270,7 +270,11 @@ class WC_Product {
 	}
 	
 	/**
-	 * Checks if a downloadable product has a file attached to it
+	 * Check if downloadable product has a file attached.
+	 *
+	 * @since 1.6.2
+	 *
+	 * @return bool Whether downloadable product has a file attached.
 	 */
 	function has_file() {
 		if ( ! $this->is_downloadable() )
@@ -278,6 +282,8 @@ class WC_Product {
 			
 		if ( apply_filters( 'woocommerce_file_download_path', get_post_meta( $this->id, '_file_path', true ), $this->id ) )
 			return true;
+
+		return false;
 	}
 	
 	/**
