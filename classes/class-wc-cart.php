@@ -220,6 +220,13 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/ 
 
 		/**
+		 * Get number of items in cart
+		 */
+		function get_cart_contents_count() {
+			return apply_filters( 'woocommerce_cart_contents_count', $this->cart_contents_count );
+		}
+
+		/**
 		 * Check cart items for errors
 		 */
 		function check_cart_items() {
