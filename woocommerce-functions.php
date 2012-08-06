@@ -658,6 +658,8 @@ function woocommerce_order_again() {
 
 		$woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations );
 	}
+	
+	do_action( 'woocommerce_ordered_again', $order->id );
 
 	// Redirect to cart
 	$woocommerce->add_message( __('The cart has been filled with the items from your previous order.', 'woocommerce' ) );
@@ -686,6 +688,8 @@ function woocommerce_cancel_order() {
 			
 			// Message
 			$woocommerce->add_message( __('Your order was cancelled.', 'woocommerce') );
+			
+			do_action( 'woocommerce_cancelled_order', $order->id );
 		
 		elseif ($order->status!='pending') :
 			

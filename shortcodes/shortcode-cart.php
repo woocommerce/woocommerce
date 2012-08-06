@@ -67,6 +67,8 @@ function woocommerce_cart( $atts ) {
 			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
 			
 		endif;
+		
+		do_action( 'woocommerce_calculated_shipping' );
 
 	}
 	
