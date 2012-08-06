@@ -36,8 +36,8 @@ function woocommerce_edit_order_columns($columns){
 	$columns["billing_address"] = __("Billing", 'woocommerce');
 	$columns["shipping_address"] = __("Shipping", 'woocommerce');
 	$columns["total_cost"] = __("Order Total", 'woocommerce');
-	$columns["order_comments"] = '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . esc_url( admin_url( 'images/comment-grey-bubble.png' ) ) . '" class="tips" data-tip="' . __("Order Notes", 'woocommerce') . '" />';
-	$columns["note"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/note_head.png" alt="' . __("Customer Notes", 'woocommerce') . '" class="tips" data-tip="' . __("Customer Notes", 'woocommerce') . '" />';
+	$columns["order_comments"] = '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/icons/comment.svg' . '" class="tips" data-tip="' . __("Order Notes", 'woocommerce') . '" height="12" width="12" />';
+	$columns["note"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/icons/note-fill.svg" alt="' . __("Customer Notes", 'woocommerce') . '" class="tips" data-tip="' . __("Customer Notes", 'woocommerce') . '" height="12" width="12" />';
 	$columns["order_date"] = __("Date", 'woocommerce');
 	$columns["order_actions"] = __("Actions", 'woocommerce');
 
@@ -172,9 +172,9 @@ function woocommerce_custom_order_columns($column) {
 		case "note" :
 
 			if ($order->customer_note)
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="'. __('Yes', 'woocommerce') .'" />';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/icons/note-fill.svg" alt="yes" class="tips" data-tip="'. __('Yes', 'woocommerce') .'" height="16" width="16" />';
 			else
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="'. __('No', 'woocommerce') .'" />';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/icons/note.svg" alt="no" class="tips" data-tip="'. __('No', 'woocommerce') .'" height="16" width="16" />';
 
 		break;
 		case "order_comments" :
