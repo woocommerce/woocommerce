@@ -1,24 +1,3 @@
-/* FontAwesome icon font - http://fortawesome.github.com/Font-Awesome/ */
-@font-face {
-	font-family: 'FontAwesome';
-	src: url('../fonts/fontawesome-webfont.eot');
-	src: url('../fonts/fontawesome-webfont.eot?#iefix') format('eot'), url('../fonts/fontawesome-webfont.woff') format('woff'), url('../fonts/fontawesome-webfont.ttf') format('truetype'), url('../fonts/fontawesome-webfont.svg#FontAwesome') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-.iconafter() {
-	font-family: 'FontAwesome';
-	display: inline-block;
-	margin-left:.618em;
-	font-weight: normal;
-}
-
-.iconbefore() {
-	font-family: 'FontAwesome';
-	display: inline-block;
-	margin-right:.618em;
-	font-weight: normal;
-}
 .woocommerce-message {
 	position: relative;
 	z-index: 100;
@@ -1441,60 +1420,69 @@ img.help_tip {
 	background: #f8f8f8;
 	color: #555;
 
-	
+	background-image: linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(255,255,255) 0%, rgb(248,248,248) 100%);
+
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgb(255,255,255)),
+		color-stop(1, rgb(248,248,248))
+	);
 }
 #woocommerce-product-data ul.product_data_tabs li {
 	&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.related_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 		a {
-			padding: 9px;
+			padding: 9px 9px 9px 31px;
 			line-height: 16px;
 			border-bottom: 1px solid #d5d5d5;
 			text-shadow: 0 1px 1px #fff;
 			color: #555;
-			
-			&:before {
-				.iconbefore;
-			}
+			background: #f1f1f1 url(../images/icons/wc-tab-icons.png) no-repeat 9px 9px;
 		}
 	}
 	&.general_options {
-		a:before {
-			content: "\f0ce";
+		a {
+			background-position: 9px 9px;
 		}
 	}
 	&.tax_options {
-		a:before {
-			content: "\f0d6";
+		a {
+			background-position: 9px -55px;
 		}
 	}
 	&.inventory_options {
-		a:before {
-			content: "\f0ae";
+		a {
+			background-position: 9px -119px;
 		}
 	}
 	&.shipping_options {
-		a:before {
-			content: "\f0d1";
+		a {
+			background-position: 9px -631px;
 		}
 	}
 	&.related_product_options {
-		a:before {
-			content: "\f0c1";
+		a {
+			background-position: 9px -567px;
 		}
 	}
 	&.attribute_options {
-		a:before {
-			content: "\f0ca";
+		a {
+			background-position: 9px -247px;
 		}
 	}
 	&.advanced_options {
-		a:before {
-			content: "\f0ad";
+		a {
+			background-position: 9px -695px;
 		}
 	}
 	&.variation_options {
-		a:before {
-			content: "\f0db";
+		a {
+			background-position: 9px -439px;
 		}
 	}
 	&.active {
@@ -1635,9 +1623,6 @@ img.help_tip {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DFDFDF;
 		padding: 9px 12px !important;
-		&:first-child {
-			border-top:0;
-		}
 	}
 	p.toolbar {
 		overflow: hidden;
