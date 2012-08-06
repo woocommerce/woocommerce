@@ -364,7 +364,7 @@ class WC_Countries {
 				'BP' => __('Bay of Plenty', 'woocommerce') ,
 				'MW' => __('Manawatu-Wanganui', 'woocommerce') ,
 				'OT' => __('Otago', 'woocommerce') ,
-				'HB' => __('Hawke\'s Bay', 'woocommerce') ,
+				'HB' => __('Hawke&rsquo;s Bay', 'woocommerce') ,
 				'NL' => __('Northland', 'woocommerce') ,
 				'TK' => __('Taranaki', 'woocommerce') ,
 				'SL' => __('Southland', 'woocommerce') ,
