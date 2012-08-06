@@ -524,7 +524,7 @@ class WC_Countries {
 	}
 
 	/** Outputs the list of countries and states for use in dropdown boxes */
-	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape=false ) {
+	function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 
 		asort($this->countries);
 
@@ -548,27 +548,23 @@ class WC_Countries {
 	}
 
 	/** Outputs the list of countries and states for use in multiselect boxes */
-	function country_multiselect_options( $selected_countries = '', $escape=false ) {
+	function country_multiselect_options( $selected_countries = '', $escape = false ) {
 
-		foreach ( $this->get_allowed_countries() as $key => $value ) :
-			if ( $states =  $this->get_states($key) ) :
-				echo '<optgroup label="'.$value.'">';
-    				foreach ($states as $state_key=>$state_value) :
-    					echo '<option value="'.$key.':'.$state_key.'"';
+		$countries = $this->get_allowed_countries();
 
-    					if (isset($selected_countries[$key]) && in_array($state_key, $selected_countries[$key])) echo ' selected="selected"';
+		foreach ( $countries as $key => $val ) {
 
-    					echo '>' . ($escape ? esc_js($state_value) : $state_value) .'</option>';
-    				endforeach;
-    			echo '</optgroup>';
-			else :
-    			echo '<option';
+			echo '<option value="' . $key . '" ' . selected( isset( $selected_countries[ $key ] ) && in_array( '*', $selected_countries[ $key ] ), true, false ) . '>' . ( $escape ? esc_js( $val ) : $val ) . '</option>';
 
-    			if (isset($selected_countries[$key]) && in_array('*', $selected_countries[$key])) echo ' selected="selected"';
+			if ( $states = $this->get_states( $key ) ) {
+				foreach ($states as $state_key => $state_value ) {
 
-    			echo ' value="'.$key.'">'. ($escape ? esc_js( __($value, 'woocommerce') ) : __($value, 'woocommerce') ) .'</option>';
-			endif;
-		endforeach;
+	    			echo '<option value="' . $key . ':' . $state_key . '" ' . selected(  isset( $selected_countries[ $key ] ) && in_array( $state_key, $selected_countries[ $key ] ), true, false ) . '>' . ( $escape ? esc_js( $val . ' &gt; ' . $state_value ) : $val . ' &gt; ' . $state_value ) . '</option>';
+
+	    		}
+			}
+
+		}
 	}
 
 	/** Get country address formats */

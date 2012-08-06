@@ -1,7 +1,7 @@
 <?php
 /**
  * Additional tax settings
- * 
+ *
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce
@@ -10,11 +10,11 @@ add_action( 'woocommerce_admin_field_tax_rates', 'woocommerce_tax_rates_setting'
 
 function woocommerce_tax_rates_setting() {
 	global $woocommerce;
-	
+
 	$tax_classes 		= array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 	$tax_rates 			= get_option('woocommerce_tax_rates');
 	$local_tax_rates 	= get_option('woocommerce_local_tax_rates');
-	
+
 	?><tr valign="top">
 		<th scope="row" class="titledesc"><?php _e('Tax Rates', 'woocommerce') ?></th>
 	    <td class="forminp">
@@ -43,7 +43,7 @@ function woocommerce_tax_rates_setting() {
 	    			</tr>
 	    		</tfoot>
 	    		<tbody id="tax_rates">
-	    			
+
 	    			<?php $i = -1; if ($tax_rates && is_array($tax_rates)) foreach( $tax_rates as $rate ) : $i++; ?>
 	    			<tr class="tax_rate">
 						<td class="check-column"><input type="checkbox" name="select" /></td>
@@ -82,7 +82,7 @@ function woocommerce_tax_rates_setting() {
 	    				</td>
 	    			</tr>
 	    			<?php endforeach; ?>
-	    			
+
 	    		</tbody>
 	    	</table>
 	    </td>
@@ -112,7 +112,7 @@ function woocommerce_tax_rates_setting() {
 	    			</tr>
 	    		</tfoot>
 	    		<tbody id="local_tax_rates">
-	    			
+
 	    			<?php $i = -1; if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) : $i++; ?>
 	    			<tr class="tax_rate">
 						<td class="check-column"><input type="checkbox" name="select" /></td>
@@ -149,61 +149,61 @@ function woocommerce_tax_rates_setting() {
 	    				</td>
 	    			</tr>
 	    			<?php endforeach; ?>
-	    			
+
 	    		</tbody>
 	    	</table>
 	    </td>
 	</tr>
-	        
+
 	<script type="text/javascript">
 	jQuery(function() {
-	
+
 		jQuery('tr.tax_rate .edit_options').live('click', function(){
 			jQuery(this).closest('td').find('.options').slideToggle();
 			if (jQuery(this).text()=='<?php _e('Edit', 'woocommerce'); ?>') {
-				
+
 				jQuery(this).closest('tr').find("select.tax_chosen_select").chosen();
-				
+
 				jQuery(this).text('<?php _e('Done', 'woocommerce'); ?>');
-			
+
 			} else {
 				jQuery(this).text('<?php _e('Edit', 'woocommerce'); ?>');
 			}
 			return false;
 		});
-		
+
 		jQuery('tr.tax_rate .select_all').live('click', function(){
 			jQuery(this).closest('td').find('select option').attr("selected","selected");
 			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 			return false;
 		});
-		
+
 		jQuery('tr.tax_rate .select_none').live('click', function(){
 			jQuery(this).closest('td').find('select option').removeAttr("selected");
 			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 			return false;
 		});
-	
+
 		jQuery('tr.tax_rate .select_us_states').live('click', function(){
-			jQuery(this).closest('td').find('select optgroup[label="<?php echo __( 'United States', 'woocommerce' ); ?>"] option').attr("selected","selected");
-			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
+			jQuery(this).closest('td').find('option[value=\"US:AK\"], option[value=\"US:AL\"], option[value=\"US:AZ\"], option[value=\"US:AR\"], option[value=\"US:CA\"], option[value=\"US:CO\"], option[value=\"US:CT\"], option[value=\"US:DE\"], option[value=\"US:DC\"], option[value=\"US:FL\"], option[value=\"US:GA\"], option[value=\"US:HI\"], option[value=\"US:ID\"], option[value=\"US:IL\"], option[value=\"US:IN\"], option[value=\"US:IA\"], option[value=\"US:KS\"], option[value=\"US:KY\"], option[value=\"US:LA\"], option[value=\"US:ME\"], option[value=\"US:MD\"], option[value=\"US:MA\"], option[value=\"US:MI\"], option[value=\"US:MN\"], option[value=\"US:MS\"], option[value=\"US:MO\"], option[value=\"US:MT\"], option[value=\"US:NE\"], option[value=\"US:NV\"], option[value=\"US:NH\"], option[value=\"US:NJ\"], option[value=\"US:NM\"], option[value=\"US:NY\"], option[value=\"US:NC\"], option[value=\"US:ND\"], option[value=\"US:OH\"], option[value=\"US:OK\"], option[value=\"US:OR\"], option[value=\"US:PA\"], option[value=\"US:RI\"], option[value=\"US:SC\"], option[value=\"US:SD\"], option[value=\"US:TN\"], option[value=\"US:TX\"], option[value=\"US:UT\"], option[value=\"US:VT\"], option[value=\"US:VA\"], option[value=\"US:WA\"], option[value=\"US:WV\"], option[value=\"US:WI\"], option[value=\"US:WY\"]').attr( "selected", "selected");
+			jQuery(this).closest('td').find('select.tax_chosen_select').trigger('liszt:updated');
 			return false;
 		});
-		
+
 		jQuery('tr.tax_rate .options select').live('change', function(){
 			jQuery(this).trigger("liszt:updated");
 			jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + ' ' + '<?php _e('countries/states selected', 'woocommerce') ?>' );
 		});
-		
+
 		jQuery('tr.tax_rate .select_europe').live('click', function(){
 			jQuery(this).closest('td').find('option[value="BE"],option[value="FR"],option[value="DE"],option[value="IT"],option[value="LU"],option[value="NL"],option[value="DK"],option[value="IE"],option[value="GR"],option[value="PT"],option[value="ES"],option[value="AT"],option[value="FI"],option[value="SE"],option[value="CY"],option[value="CZ"],option[value="EE"],option[value="HU"],option[value="LV"],option[value="LT"],option[value="MT"],option[value="PL"],option[value="SK"],option[value="SI"],option[value="RO"],option[value="BG"],option[value="IM"],option[value="GB"]').attr("selected","selected");
 			jQuery(this).closest('td').find('select.tax_chosen_select').trigger("change");
 			return false;
-		});		
-	
+		});
+
 		jQuery('.taxrows a.add_tax_rate').live('click', function(){
 			var size = jQuery('#tax_rates tr').size();
-			
+
 			// Add the row
 			jQuery('<tr class="tax_rate new_rate">\
 				<td class="check-column"><input type="checkbox" name="select" /></td>\
@@ -239,16 +239,16 @@ function woocommerce_tax_rates_setting() {
 					<input type="checkbox" class="checkbox" name="tax_shipping[' + size + ']" />\
 				</td>\
 			</tr>').appendTo('#tax_rates');
-				
+
 			jQuery(".new_rate select.tax_chosen_select").chosen();
 			jQuery(".new_rate").removeClass('new_rate');
-				
+
 			return false;
 		});
-		
+
 		jQuery('.taxrows a.add_local_tax_rate').live('click', function(){
 			var size = jQuery('#local_tax_rates tr').size();
-			
+
 			// Add the row
 			jQuery('<tr class="tax_rate new_rate">\
 				<td class="check-column"><input type="checkbox" name="select" /></td>\
@@ -282,18 +282,18 @@ function woocommerce_tax_rates_setting() {
 					<input type="checkbox" class="checkbox" name="local_tax_shipping[' + size + ']" />\
 				</td>\
 			</tr>').appendTo('#local_tax_rates');
-				
+
 			jQuery(".new_rate").removeClass('new_rate');
-				
+
 			return false;
 		});
-		
+
 		// Remove row
 		jQuery('.taxrows a.remove').live('click', function(){
 			var answer = confirm("<?php _e('Delete the selected rates?', 'woocommerce'); ?>")
 			if (answer) {
 				var $rates = jQuery(this).closest('.taxrows').find('tbody');
-				
+
 				$rates.find('tr td.check-column input:checked').each(function(i, el){
 					jQuery(el).closest('tr').find('input.text, input.checkbox, select.select').val('');
 					jQuery(el).closest('tr').hide();
@@ -301,92 +301,92 @@ function woocommerce_tax_rates_setting() {
 			}
 			return false;
 		});
-		
+
 		// Dupe row
 		jQuery('.taxrows a.dupe').live('click', function(){
 			var answer = confirm("<?php _e('Duplicate the selected rates?', 'woocommerce'); ?>")
 			if (answer) {
-			
+
 				var $rates = jQuery(this).closest('.taxrows').find('tbody');
-				
+
 				$rates.find('tr td.check-column input:checked').each(function(i, el){
 					var dupe = jQuery(el).closest('tr').clone()
-					
+
 					// Remove chosen selector
 					dupe.find('.chzn-done').removeClass('chzn-done').removeAttr('id').removeAttr('style');
 					dupe.find('.chzn-container').remove();
-					
+
 					// Append
 					$rates.append( dupe );
 				});
-				
+
 				// Re-index keys
 				var loop = 0;
 				$rates.find('tr.tax_rate').each(function( index, row ){
 					jQuery('input.text, input.checkbox, select.select', row).each(function( i, el ){
-						
+
 						var t = jQuery(el);
 						t.attr('name', t.attr('name').replace(/\[([^[]*)\]/, "[" + loop + "]"));
-						
+
 					});
 					loop++;
 				});
 			}
 			return false;
 		});
-		
+
 	});
-	</script>   
+	</script>
 	<?php
 }
 
 /**
  * Tax Row Label
- * 
+ *
  * Show a label based on user selections
  */
 function woocommerce_tax_row_label( $selected ) {
 	global $woocommerce;
-	
+
 	$return = '';
-	
+
 	// Get counts/countries
 	$counties_array = array();
 	$states_count = 0;
-	
+
 	if ($selected) foreach ($selected as $country => $value) :
-		
+
 		$country = woocommerce_clean($country);
-	
+
 		if (sizeof($value)>0 && $value[0]!=='*') :
 			$states_count+=sizeof($value);
 		endif;
-		
+
 		if (!in_array($country, $counties_array)) $counties_array[] = $woocommerce->countries->countries[$country];
-		
+
 	endforeach;
-	
+
 	$states_text = '';
 	$countries_text = implode(', ', $counties_array);
 
 	// Show label
 	if (sizeof($counties_array)==0) :
-	
+
 		$return .= __('No countries selected', 'woocommerce');
-		
+
 	elseif ( sizeof($counties_array) < 6 ) :
-	
+
 		if ($states_count>0) $states_text = sprintf(_n('(1 state)', '(%s states)', $states_count, 'woocommerce'), $states_count);
 
 		$return .= $countries_text . ' ' . $states_text;
-		
+
 	else :
-		
+
 		if ($states_count>0) $states_text = sprintf(_n('and 1 state', 'and %s states', $states_count, 'woocommerce'), $states_count);
-		
+
 		$return .= sprintf(_n('1 country', '%1$s countries', sizeof($counties_array), 'woocommerce'), sizeof($counties_array)) . ' ' . $states_text;
-	
+
 	endif;
-	
+
 	return $return;
 }

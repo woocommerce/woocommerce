@@ -46,7 +46,7 @@ Payment Gateways, Shipping Methods and Integrations are important to any store -
 * __Sharedaddy__ and __ShareThis__ - Let your customers share your products with their friends
 * __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes"). 
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
 
 = GET INVOLVED =
 
@@ -63,9 +63,9 @@ Developers can checkout and contribute to the source code on the [WooCommerce Gi
 
 = Automatic installation =
 
-Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress admin panel, navigate to the Plugins menu and click Add New. 
+Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t even need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress admin panel, navigate to the Plugins menu and click Add New.
 
-In the search field type “WooCommerce” and click Search Plugins. Once you’ve found our eCommerce plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation. 
+In the search field type “WooCommerce” and click Search Plugins. Once you’ve found our eCommerce plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking Install Now. After clicking that link you will be asked if you’re sure you want to install the plugin. Click yes and WordPress will automatically complete the installation.
 
 = Manual installation =
 
@@ -77,7 +77,7 @@ The manual installation method involves downloading our eCommerce plugin and upl
 
 = Upgrading =
 
-Automatic updates should work a charm; as always though, ensure you backup your site just in case. 
+Automatic updates should work a charm; as always though, ensure you backup your site just in case.
 
 If on the off chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
 
@@ -116,11 +116,11 @@ WordPress.org is home to some cool free extensions too:
 * [Affiliates WooCommerce Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/) - Integrates Affiliates with WooCommerce.
 * [WooCommerce Multilingual](http://wordpress.org/extend/plugins/woocommerce-multilingual/) - Allows running multilingual e-commerce sites using WooCommerce and WPML.
 
-== Frequently Asked Questions == 
+== Frequently Asked Questions ==
 
 = Where can I find WooCommerce documentation and user guides =
 
-To view our extensive WooCommerce Codex, documentation and tips go to the [WooCommerce Docs site](http://wcdocs.woothemes.com/). 
+To view our extensive WooCommerce Codex, documentation and tips go to the [WooCommerce Docs site](http://wcdocs.woothemes.com/).
 
 Clients and beginners will appreciate the usage instructions here: [User Guide](http://wcdocs.woothemes.com/category/user-guide/)
 
@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
 * Feature - WC_Product::has_file() for detecting if a downloadable product has a file set
 * Feature - Store customer IP and UA on purchase
+* Tweak - Revised tax select box to allow top level country to be chosen (when the country has states)
 * Tweak - Ajaxified the customer selector on the order screen for stores with large amounts of users
 * Tweak - Hide admin order comments box if they are disabled
 * Tweak - Added mini-cart.php template for the cart widget output
@@ -177,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Rescan all language strings and updated .po and .mo files for next release
 * Localization - Added Romanian translation (by silviu-bucsa)
 * Localization - Updated Swedish translation by Patric Liljestrand
+* Localization - NL and NZ states
 
 = 1.6.1 - 19/07/2012 =
 * Fix - Minor issue with woocommerce_content() - updated to new template system
@@ -187,7 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Support for ounces
 * Feature - Restore coupon usage count after order cancellation
 * Feature - Added bulk actions to bulk change order status to processing or completed
-* Feature - Optional "verified owner" label for customer reviews 
+* Feature - Optional "verified owner" label for customer reviews
 * Templating - Abolished the use of query_posts.
 * Templating - Introduced content-product.php and content-product_cat.php for use in loops. Loop-shop is gone.
 * Templating - Dumped woocommerce_single_product_content(), woocommerce_archive_product_content(), woocommerce_product_taxonomy_content() in favour of the new content templates.
@@ -197,7 +199,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - order_note comment type for future order notes, allowing you to filter in the comments section.
 * Tweak - Better WC_Product::get_image() function. Fixed instances where we were not echo'ing.
 * Tweak - Pass valuable object data to woocommerce_email_headers and woocommerce_email_attachments filters.
-* Tweak - Cart.php tweak: Disable hyperlinks for hidden products. 
+* Tweak - Cart.php tweak: Disable hyperlinks for hidden products.
 * Tweak - Cart widget filters added and renamed for consistency.
 * Tweak - Payment gateway API tweaks - get_title, get_icon, get_description
 * Tweak - Price filter widgets takes you back to page 1.
@@ -465,7 +467,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Made the monthly sales dashboard widget translatable (by GeertDD)
 * Localization - Updated Danish Translation (by FrederikRS)
 
-= 1.5.2 - 15/03/2012 = 
+= 1.5.2 - 15/03/2012 =
 * Feature - My account ssl (added by justinstern)
 * Feature - Product id rules for coupons apply to a products parent (useful for grouped products)
 * Feature - Billing email sets user email address, other profile fields filled in based on billing info
@@ -578,7 +580,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Option to limit products which are downloadable and virtual to 1 per cart
 * woocommerce_items_in_cart cookie when cart has contents (can be used for caching plugins)
 
-= 1.4.4 - 18/02/2012 = 
+= 1.4.4 - 18/02/2012 =
 * Fix for remove coupon links after ajax update of shipping
 * Fix for reducing/increasing stock + notifications
 * Don't reset shipping method on cart during every update
@@ -592,7 +594,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Load non-minified woocommerce.js file if SCRIPT_DEBUG is on
 * Category widget hierarchy on single product page
 
-= 1.4.3 - 16/02/2012 = 
+= 1.4.3 - 16/02/2012 =
 * Fix for variation shipping class detection
 * Classes added to my-account
 * Fix for price filtering when the shop is the homepage
@@ -618,7 +620,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Moved localisation to init
 * Price slider triggers
 
-= 1.4.2 - 09/02/2012 = 
+= 1.4.2 - 09/02/2012 =
 * Uninstall fix
 * Improved template loader - passes args instead of using globals
 * Get dimensions fix
@@ -635,7 +637,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Option to redirect to the product page after searching if one result found (kudos to pixeltrix)
 * Other minor fixes
 
-= 1.4.1 - 01/02/2012 = 
+= 1.4.1 - 01/02/2012 =
 * Deprecated tax class fix
 * Logout error fix
 * get_shipping_tax_rate deprecated to stop errors
@@ -643,7 +645,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * First time install fix
 * Added back version constant to stop 3rd party themes breaking
 
-= 1.4 - 01/02/2012 = 
+= 1.4 - 01/02/2012 =
 * Improved default theme
 * Support for multiple and stacked (compound) taxes
 * Locale options for country address formatting and checkout fields
@@ -697,11 +699,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Code to allow add-on validation
 * International shipping (based on flat rate)
 
-= 1.3.2.1 - 15/12/2011 = 
+= 1.3.2.1 - 15/12/2011 =
 * Category/Ordering fix
 * HTTPS download URL fix
 
-= 1.3.2 - 09/12/2011 = 
+= 1.3.2 - 09/12/2011 =
 * Fixed error when adding an order manually
 * Dumped the orders class (hardly used)
 * Shipping classes can be set up without assigning products first
@@ -735,7 +737,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Rewritten cart tax calculations to support coupons before tax and after tax
 * 2 lines of discounts on total tables - 1 for product discounts, 1 for after tax discounts (e.g. store credit)
 * Tweaked paypal to work with tax inclusive prices without screwing up rounding
-* Stored ex. prices with higher precision to prevent rounding errors 
+* Stored ex. prices with higher precision to prevent rounding errors
 * Rewritten options for tax display - cart items can be shown without tax now
 * Fixed ordering of custom attributes in variation select boxes
 * Support for ordering attributes with the same ID (but different taxonomies)
@@ -836,7 +838,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Support for informal/formal localisations
 * Directory changed for uploading file downloads - uploads/woocommerce_files
 * Download directory created on install as well as htaccess for denying access
-* Formal and informal German translations - thanks to stefahn, jessor, Ramoonus , owcv and deckerweb 
+* Formal and informal German translations - thanks to stefahn, jessor, Ramoonus , owcv and deckerweb
 * Hook for checking cart contents during cart/checkout - used for plugins too
 
 = 1.2 - 03/11/2011 =
@@ -861,7 +863,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Download urls use site_url instead of home_url so installs in subdirectories are handled correctly
 * Fixed variations - Incorrectly used instead $product_custom_fields of $parent_custom_fields
 * Adding cart item resets shipping - so free shipping etc is selected when going over a threshold
-* Changes to shipping calc - if no rates are found, but the user did not enter a state/postcode, it asks them to do so. 
+* Changes to shipping calc - if no rates are found, but the user did not enter a state/postcode, it asks them to do so.
 * Fix for adding sites in multisite
 * Dashboard chart now ignores 'pending' orders
 * Fixed dashboard report range
@@ -869,7 +871,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Added Dutch translation by [Ramoonus](http://www.ramoonus.nl/)
 
 = 1.1.3 - 27/10/2011 =
-* Improved Force SSL Setting - now forces https urls for enqueued scripts and styles 
+* Improved Force SSL Setting - now forces https urls for enqueued scripts and styles
 * Updated some localisation strings in email subject lines
 * Fixed variation coupons
 * Fixed edit address via my account
@@ -958,7 +960,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix in woocommerce_templates for when a shop is the front-page
 * Added esc_html/esc_attribute in review-order.php
 * Tweaked localised strings in shortcode-thankyou.php
-* Filter added to get_downloadable_products so more advanced rules can be applied. 
+* Filter added to get_downloadable_products so more advanced rules can be applied.
 * Fixed required fields in edit shipping address
 * Fixed login link 'jump' on checkout
 * Added Turkish lira currency
@@ -973,7 +975,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Removed the 'resave permalinks message' due to it being done automatically
 * Added support to exclude images from product page
 
-= 1.0.1 - 29/09/2011 = 
+= 1.0.1 - 29/09/2011 =
 * Fixed notices on product page
 * Variation formatting uses item_meta when showing order items
 * Javascript fixes in admin + correct enqueuing of scripts
@@ -981,7 +983,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Used dbDelta for installation of tables for better table upgrades/installs
 * Fix for reviews form when fancybox is turned off
 
-= 1.0 - 27/09/2011 = 
+= 1.0 - 27/09/2011 =
 * Initial Release. Woo!
 
 == Upgrade Notice ==
@@ -990,7 +992,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.
 
 = 1.5.4 =
-Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably. 
+Please update your shipping methods after upgrading - the save hooks have been modified to ensure settings are saved more reliably.
 
 Also note, there was a mistake in the code for Quebec -> PQ to QC. If you have rates for Quebec ensure you re-save them.
 
@@ -1000,11 +1002,11 @@ Minor update. Note, titles are now hooked in to single-product.php - if you have
 = 1.4.4 =
 Minor update fixing a few bugs. If you encounter any problems with the store/category pages after upgrade simply go to Settings > Permalinks and hit 'save'.
 
-= 1.4 = 
+= 1.4 =
 Major update with plenty of optimisations and new features. Changes to note:
 
 * Requires WP 3.3
-* Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically. 
+* Product data meta has been renamed in this version so that custom-fields can be enabled. Product data is now prepended with an underscore so they are hidden from the custom-field panel. Existing data will be upgraded automatically.
 * The shipping method classes have been updated to make rate definition easier. Third party plugins will need updating.
 * Textdomain has changed - re-scan your po/mo's
 * Tax additions (tax rows, compounds etc) required a change to the way order items are stored. Old orders won't show items when viewed. Order totals should be unaffected.
