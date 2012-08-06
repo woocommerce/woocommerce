@@ -667,15 +667,9 @@ class WC_Cart {
 			if ( $product_data->is_sold_individually() )
 				$quantity = 1;
 
-			// Type/Exists check
-			if ( $product_data->is_type('external') || ! $product_data->exists() ) {
-				$woocommerce->add_error( __('This product cannot be purchased.', 'woocommerce') );
-				return false;
-			}
-
-			// Price set check
-			if( $product_data->get_price() === '' ) {
-				$woocommerce->add_error( __('This product cannot be purchased - the price is not yet set.', 'woocommerce') );
+			// Check product is_purchasable
+			if ( ! $product_data->is_purchasable() ) {
+				$woocommerce->add_error( __('Sorry, this product cannot be purchased.', 'woocommerce') );
 				return false;
 			}
 
