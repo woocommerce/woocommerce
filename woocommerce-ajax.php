@@ -174,6 +174,7 @@ function woocommerce_ajax_add_to_cart() {
 	if ($passed_validation && $woocommerce->cart->add_to_cart($product_id, 1)) :
 		// Return html fragments
 		$data = apply_filters('add_to_cart_fragments', array());
+		do_action( 'woocommerce_ajax_added_to_cart', $product_id);
 	else :
 		// If there was an error adding to the cart, redirect to the product page to show any errors
 		$data = array(
