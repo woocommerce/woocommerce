@@ -888,20 +888,6 @@ table.wp-list-table {
 		text-align: center;
 		white-space: nowrap
 	}
-	span.hide {
-		display: none;
-	}
-	span.icon {
-		position: relative;
-		&:before {
-			font-family: FontAwesome;
-			font-weight: normal;
-			font-style: normal;
-			display: inline-block;
-			text-decoration: inherit;
-			font-size: 1.3em;
-		}
-	}
 	.column-product_cat, .column-product_tag {
 		width: 11% !important;
 	}
@@ -911,19 +897,6 @@ table.wp-list-table {
 	.column-featured, .column-product_type {
 		width: 46px;
 		text-align: left !important;
-	}
-	.column-featured {
-		span.icon:before {
-			content: "\f005";
-		}
-		span.icon.not-featured:before {
-			content: "\f006";
-		}
-	}
-	.column-product_type {
-		span.icon:before {
-			content: "\f07a";
-		}
 	}
 	.column-note {
 		width: 46px;
@@ -935,28 +908,8 @@ table.wp-list-table {
 	}
 	.column-order_comments {
 		width: 3em !important;
-		span.icon {
-			&:before {
-				content: "\f075";
-			}
-		}
 		.post-com-count {
 			float: left;
-		}
-	}
-	.column-note {
-		span.icon {
-			&:before {
-				content: "\f016";
-			}
-		}
-		span.icon.no:before {
-			zoom:1;
-			-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-			filter: alpha(opacity=50);
-			-moz-opacity:0.5;			
-			-khtml-opacity: 0.5;
-			opacity: 0.5;
 		}
 	}
 	th.column-note, th.column-order_comments {
@@ -989,39 +942,21 @@ table.wp-list-table {
 		height: 16px;
 		margin: 1px 2px;
 		display: block;
-		&:before {
-			font-family: FontAwesome;
-			font-weight: normal;
-			font-style: normal;
-			display: inline-block;
-			text-decoration: inherit;
-			content: "\f016";
-			font-size:1.3em;
-		}
+		background:url(../images/product_types.png) no-repeat -16px 0;
 		&.grouped {
-			&:before {
-				content: "\f0e8";
-			}
+			background:url(../images/product_types.png) no-repeat 0 0;
 		}
 		&.external {
-			&:before {
-				content: "\f08e";
-			}
+			background:url(../images/product_types.png) no-repeat -32px 0;
 		}
 		&.variable {
-			&:before {
-				content: "\f0c5";
-			}
+			background:url(../images/product_types.png) no-repeat -48px 0;
 		}
 		&.downloadable {
-			&:before {
-				content: "\f019";
-			}
+			background:url(../images/product_types.png) no-repeat -64px 0;
 		}
 		&.virtual {
-			&:before {
-				content: "\f0c2";
-			}
+			background:url(../images/product_types.png) no-repeat -80px 0;
 		}
 	}
 	mark.instock {

@@ -36,8 +36,8 @@ function woocommerce_edit_order_columns($columns){
 	$columns["billing_address"] = __("Billing", 'woocommerce');
 	$columns["shipping_address"] = __("Shipping", 'woocommerce');
 	$columns["total_cost"] = __("Order Total", 'woocommerce');
-	$columns["order_comments"] = '<span class="icon tips" data-tip="' . __("Order Notes", 'woocommerce') . '"></span><span class="hide">' . __("Order Notes", 'woocommerce') . '</span>';
-	$columns["note"] = '<span class="icon tips" data-tip="' . __("Customer Notes", 'woocommerce') . '"></span><span class="hide">' . __("Customer Notes", 'woocommerce') . '</span>';
+	$columns["order_comments"] = '<img alt="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '" src="' . esc_url( admin_url( 'images/comment-grey-bubble.png' ) ) . '" class="tips" data-tip="' . __("Order Notes", 'woocommerce') . '" />';
+	$columns["note"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/note_head.png" alt="' . __("Customer Notes", 'woocommerce') . '" class="tips" data-tip="' . __("Customer Notes", 'woocommerce') . '" />';
 	$columns["order_date"] = __("Date", 'woocommerce');
 	$columns["order_actions"] = __("Actions", 'woocommerce');
 
@@ -172,9 +172,9 @@ function woocommerce_custom_order_columns($column) {
 		case "note" :
 
 			if ($order->customer_note)
-				echo '<span class="icon yes tips" data-tip="'. __('Yes', 'woocommerce') .'"></span><span class="hide">'. __('Yes', 'woocommerce') .'</span>';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="'. __('Yes', 'woocommerce') .'" />';
 			else
-				echo '<span class="icon no tips" data-tip="'. __('No', 'woocommerce') .'"></span><span class="hide">'. __('No', 'woocommerce') .'</span>';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="'. __('No', 'woocommerce') .'" />';
 
 		break;
 		case "order_comments" :
