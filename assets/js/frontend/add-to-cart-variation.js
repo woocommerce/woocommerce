@@ -93,6 +93,7 @@ jQuery(document).ready(function($) {
 
         var variation_image = variation.image_src;
         var variation_link = variation.image_link;
+		var variation_title = variation.image_title;
 		
 		$('.variations_button').show();
         $('.single_variation').html( variation.price_html + variation.availability_html );
@@ -108,6 +109,8 @@ jQuery(document).ready(function($) {
         if (variation_image && variation_image.length > 1) {	
             $(img).attr('src', variation_image);
             $(link).attr('href', variation_link);
+			$(img).attr('alt', variation_title);
+			$(img).attr('title', variation_title);
         } else {
             $(img).attr('src', o_src);
             $(link).attr('href', o_href);
