@@ -384,9 +384,9 @@ class WC_Tax {
 				$the_rate = $rate['rate'] / 100;
 				
 				if ($rate['compound']=='yes')
-					$tax_amount = ( $the_rate / $compound_tax_rate ) * $price;
+					$tax_amount = ( $the_rate / $compound_tax_rate ) * apply_filters( 'wc_taxable_price', $price, $key, true, true );
 				else
-					$tax_amount = ( $the_rate / $regular_tax_rate ) * $non_compound_price;
+					$tax_amount = ( $the_rate / $regular_tax_rate ) * apply_filters( 'wc_taxable_price', $non_compound_price, $key, true, false );
 				
 				// Back to pounds
 				$tax_amount = ($tax_amount / 100);
@@ -408,7 +408,7 @@ class WC_Tax {
 			foreach ($rates as $key => $rate) :
 				if ($rate['compound']=='yes') continue;
 				
-				$tax_amount = $price * ($rate['rate']/100);
+				$tax_amount = apply_filters( 'wc_taxable_price', $price, $key, false, false ) * ($rate['rate']/100);
 				
 				// Back to pounds
 				$tax_amount = ($tax_amount / 100);
@@ -429,7 +429,7 @@ class WC_Tax {
 			foreach ($rates as $key => $rate) :
 				if ($rate['compound']=='no') continue;
 				
-				$the_price_inc_tax = $price + ($pre_compound_total * 100);
+				$the_price_inc_tax = apply_filters( 'wc_taxable_price', $price, $key, false, true ) + ($pre_compound_total * 100);
 				
 				$tax_amount = $the_price_inc_tax * ($rate['rate']/100);
 	
