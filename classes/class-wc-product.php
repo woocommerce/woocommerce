@@ -605,7 +605,7 @@ class WC_Product {
 		elseif ( $this->get_price() === '' )
 			$purchasable = false;
 
-		return apply_filters( 'woocommerce_is_purchasable', $purchasable );
+		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
 	}
 
 	/** Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting */
