@@ -5,7 +5,7 @@
 
 global $woocommerce, $product;
 
-if ( $product->get_price() === '' ) return;
+if ( ! $product->is_purchasable() ) return;
 ?>
 
 <?php
