@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4.1
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -150,7 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.6.2 - 20/07/2012 =
+= 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
 * Feature - WC_Product::has_file() for detecting if a downloadable product has a file set
 * Feature - Store customer IP and UA on purchase
