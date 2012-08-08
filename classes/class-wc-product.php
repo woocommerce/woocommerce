@@ -1121,8 +1121,10 @@ class WC_Product {
 
 					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
 					$image_link = $attachment ? current( $attachment ) : '';
+					
+					$image_title = get_the_title( $attachment_id );
 				} else {
-					$image = $image_link = '';
+					$image = $image_link = $image_title = '';
 				}
 
 				$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
@@ -1130,6 +1132,7 @@ class WC_Product {
 					'attributes' 			=> $variation_attributes,
 					'image_src' 			=> $image,
 					'image_link' 			=> $image_link,
+					'image_title'			=> $image_title,
 					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 					'availability_html' 	=> $availability_html,
 					'sku' 					=> __( 'SKU:', 'woocommerce' ) . ' ' . $variation->get_sku(),
