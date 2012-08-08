@@ -212,14 +212,14 @@ function variable_product_type_options() {
 													}
 												?></select></td>
 											</tr>
-											<tr>
+											<tr class="show_if_variation_downloadable">
 												<td>
-													<div class="show_if_variation_downloadable file_path_field">
+													<div class="file_path_field">
 													<label><?php _e('File path:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_file_path'][0])) echo $variation_data['_file_path'][0]; ?>" placeholder="<?php _e('File path/URL', 'woocommerce'); ?>" /> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" />
 													</div>
 												</td>
 												<td>
-													<div class="show_if_variation_downloadable">
+													<div>
 													<label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 													</div>
 												</td>
@@ -419,12 +419,12 @@ function variable_product_type_options() {
 												}
 											?></select></td>\
 										</tr>\
-										<tr>\
+										<tr class="show_if_variation_downloadable">\
 											<td>\
-												<div class="show_if_variation_downloadable file_path_field"><label><?php echo esc_js( __('File path:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[' + loop + ']" placeholder="<?php echo esc_js( __('File path/URL', 'woocommerce') ); ?>" /> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
+												<div class="file_path_field"><label><?php echo esc_js( __('File path:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[' + loop + ']" placeholder="<?php echo esc_js( __('File path/URL', 'woocommerce') ); ?>" /> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
 											</td>\
 											<td>\
-												<div class="show_if_variation_downloadable"><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
+												<div><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
 											</td>\
 										</tr>\
 										<?php do_action( 'woocommerce_product_after_variable_attributes_js' ); ?>\
