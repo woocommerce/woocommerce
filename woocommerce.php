@@ -562,6 +562,8 @@ class Woocommerce {
 		/**
 		 * Taxonomies
 		 **/
+		do_action( 'woocommerce_register_taxonomy' );
+
 		$admin_only_query_var = ( is_admin() ) ? true : false;
 
 		register_taxonomy( 'product_type',
@@ -736,6 +738,8 @@ class Woocommerce {
 	    /**
 		 * Post Types
 		 **/
+		do_action( 'woocommerce_register_post_type' );
+
 		register_post_type( "product",
 			array(
 				'labels' => array(
