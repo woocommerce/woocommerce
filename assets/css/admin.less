@@ -1438,6 +1438,17 @@ img.help_tip {
 		color-stop(1, rgb(248,248,248))
 	);
 }
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	#woocommerce-product-data ul.product_data_tabs li {
+		&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.related_product_options, &.attribute_options, &.variation_options, &.advanced_options {
+			a {
+				background-image: url(../images/icons/wc-tab-icons-x2.png) !important;
+				background-size: 17px 720px !important;
+			}
+		}
+	}
+
+}
 #woocommerce-product-data ul.product_data_tabs li {
 	&.general_options, &.tax_options, &.inventory_options, &.shipping_options, &.related_product_options, &.attribute_options, &.variation_options, &.advanced_options {
 		a {
