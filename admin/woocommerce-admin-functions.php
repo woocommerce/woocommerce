@@ -1,35 +1,35 @@
 <?php
 /**
  * WooCommerce Admin Functions
- * 
+ *
  * Hooked-in functions for WooCommerce related events in admin.
  *
  * @package		WooCommerce
  * @category	Actions
  * @author		WooThemes
  */
- 
+
 /**
  * Checks which method we're using to serve downloads
- * 
+ *
  * If using force or x-sendfile, this ensures the .htaccess is in place
  */
 function woocomerce_check_download_folder_protection() {
 	$upload_dir 		= wp_upload_dir();
 	$downloads_url 		= $upload_dir['basedir'] . '/woocommerce_uploads';
 	$download_method	= get_option('woocommerce_file_download_method');
-	
+
 	if ($download_method=='redirect') :
-		
+
 		// Redirect method - don't protect
 		if (file_exists($downloads_url.'/.htaccess')) :
 			unlink( $downloads_url . '/.htaccess' );
 		endif;
-		
+
 		flush_rewrite_rules( true );
-		
+
 	else :
-		
+
 		// Force method - protect, add rules to the htaccess file
 		if (!file_exists($downloads_url.'/.htaccess')) :
 			if ($file_handle = @fopen( $downloads_url . '/.htaccess', 'w' )) :
@@ -37,22 +37,22 @@ function woocomerce_check_download_folder_protection() {
 				fclose($file_handle);
 			endif;
 		endif;
-		
+
 		flush_rewrite_rules( true );
-		
+
 	endif;
-} 
+}
 
 /**
  * Protect downlodas from ms-files.php in multisite
  */
 function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
     global $wp_rewrite;
-    
+
     $download_method	= get_option('woocommerce_file_download_method');
-    
+
     if (!is_multisite() || $download_method=='redirect') return $rewrite;
-	
+
 	$rule  = "\n# WooCommerce Rules - Protect Files from ms-files.php\n\n";
 	$rule .= "<IfModule mod_rewrite.c>\n";
 	$rule .= "RewriteEngine On\n";
@@ -62,34 +62,34 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
 
 	return $rule . $rewrite;
 }
- 
+
 /**
  * Deleting posts
- * 
+ *
  * Removes variations etc belonging to a deleted post, and clears transients
  */
 function woocommerce_delete_post( $id ) {
-	
+
 	if ( ! current_user_can( 'delete_posts' ) ) return;
-	
+
 	if ( $id > 0 ) :
-	
+
 		if ( $children_products =& get_children( 'post_parent='.$id.'&post_type=product_variation' ) ) :
-	
+
 			if ($children_products) :
-			
+
 				foreach ($children_products as $child) :
-					
+
 					wp_delete_post( $child->ID, true );
-					
+
 				endforeach;
-			
+
 			endif;
-	
+
 		endif;
-	
+
 	endif;
-	
+
 	delete_transient( 'woocommerce_processing_order_count' );
 }
 
@@ -97,27 +97,72 @@ function woocommerce_delete_post( $id ) {
  * Preview Emails
  **/
 function woocommerce_preview_emails() {
-	if (isset($_GET['preview_woocommerce_mail'])) :
+	if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
 		$nonce = $_REQUEST['_wpnonce'];
-		if (!wp_verify_nonce($nonce, 'preview-mail') ) die('Security check'); 
-		
-		global $woocommerce, $email_heading;
-		
-		$mailer = $woocommerce->mailer();
-	
-		$email_heading = __('Email preview', 'woocommerce');
-		
-		$message = '<h2>WooCommerce sit amet</h2>';
-		
-		$message.= wpautop('Ut ut est qui euismod parum. Dolor veniam tation nihil assum mazim. Possim fiant habent decima et claritatem. Erat me usus gothica laoreet consequat. Clari facer litterarum aliquam insitam dolor. 
+		if ( ! wp_verify_nonce( $nonce, 'preview-mail') )
+			die( 'Security check' );
 
-Gothica minim lectores demonstraverunt ut soluta. Sequitur quam exerci veniam aliquip litterarum. Lius videntur nisl facilisis claritatem nunc. Praesent in iusto me tincidunt iusto. Dolore lectores sed putamus exerci est. ');
-		
+		global $woocommerce, $email_heading;
+
+		$mailer = $woocommerce->mailer();
+
+		$email_heading = __('Order Received', 'woocommerce');
+
+		$message  = wpautop( __("Thank you, we are now processing your order. Your order's details are below.", 'woocommerce') );
+
+		$message .= '<h2>' . __('Order:', 'woocommerce') . ' ' . '#1000</h2>';
+
+		$message .= '
+		<table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee; margin: 0 0 20px" border="1" bordercolor="#eee">
+			<thead>
+				<tr>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Product', 'woocommerce') . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Quantity', 'woocommerce') . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Price', 'woocommerce') . '</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>An awesome product</td>
+					<td>1</td>
+					<td>$9.99</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="2">' . __( 'Order total:', 'woocommerce' ) . '</td>
+					<td>$9.99</td>
+				</tr>
+			</tfoot>
+		</table>';
+
+		$message .= '<h2>' . __('Customer details', 'woocommerce') . '</h2>';
+
+		$message .= '
+		<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+			<tr>
+				<td valign="top" width="50%">
+					<h3>' . __('Billing address', 'woocommerce') . '</h3>
+					<p>Some Guy
+					1 infinite loop
+					Cupertino
+					CA 95014</p>
+				</td>
+				<td valign="top" width="50%">
+					<h3>' . __('Shipping address', 'woocommerce') . '</h3>
+					<p>Some Guy
+					1 infinite loop
+					Cupertino
+					CA 95014</p>
+				</td>
+			</tr>
+		</table>';
+
 		echo $mailer->wrap_message( $email_heading, $message );
-		
+
 		exit;
-		
-	endif;
+
+	}
 }
 
 /**
@@ -144,16 +189,16 @@ function woocommerce_allow_img_insertion($vars) {
 function woocommerce_downloads_upload_dir( $pathdata ) {
 
 	if (isset($_POST['type']) && $_POST['type'] == 'downloadable_product') :
-		
+
 		// Uploading a downloadable file
 		$subdir = '/woocommerce_uploads'.$pathdata['subdir'];
 	 	$pathdata['path'] = str_replace($pathdata['subdir'], $subdir, $pathdata['path']);
 	 	$pathdata['url'] = str_replace($pathdata['subdir'], $subdir, $pathdata['url']);
 		$pathdata['subdir'] = str_replace($pathdata['subdir'], $subdir, $pathdata['subdir']);
 		return $pathdata;
-		
+
 	endif;
-	
+
 	return $pathdata;
 }
 function woocommerce_media_upload_downloadable_product() {
@@ -191,16 +236,16 @@ function woocommerce_refresh_mce($ver) {
  * Reorder categories on term insertion
  */
 function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
-	
+
 	if (!$taxonomy=='product_cat' && !strstr($taxonomy, 'pa_')) return;
-	
+
 	$next_id = null;
-	
+
 	$term = get_term($term_id, $taxonomy);
-	
+
 	// gets the sibling terms
 	$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
-	
+
 	foreach ($siblings as $sibling) {
 		if( $sibling->term_id == $term_id ) continue;
 		$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
@@ -215,14 +260,14 @@ function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
  * Delete terms metas on deletion
  */
 function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
-	
+
 	$term_id = (int) $term_id;
-	
+
 	if(!$term_id) return;
-	
+
 	global $wpdb;
 	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
-	
+
 }
 
 /**
@@ -230,17 +275,17 @@ function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
  */
 function woocommerce_compile_less_styles() {
 	global $woocommerce;
-	
+
 	$colors 		= get_option( 'woocommerce_frontend_css_colors' );
 	$base_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
 	$less_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.less';
 	$css_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
 
-	// Write less file				
+	// Write less file
 	if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
-		
+
 		// Colours changed - recompile less
-		if ( ! class_exists( 'lessc' ) ) 
+		if ( ! class_exists( 'lessc' ) )
 			include_once('includes/lessc.inc.php');
 		if ( ! class_exists( 'cssmin' ) )
 			include_once('includes/cssmin.inc.php');
@@ -252,7 +297,7 @@ function woocommerce_compile_less_styles() {
 			if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
 			if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
 			if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
-		
+
 			// Write new color to base file
 			$color_rules = "
 @primary: 		" . $colors['primary'] . ";
@@ -268,17 +313,17 @@ function woocommerce_compile_less_styles() {
 
 @subtext:		" . $colors['subtext'] . ";
 			";
-			
+
 			file_put_contents( $base_file, $color_rules );
-		
+
 		    $less 			= new lessc( $less_file );
 			$compiled_css 	= $less->parse();
-		    
+
 		    $compiled_css = CssMin::minify( $compiled_css );
-		    
+
 		    if ( $compiled_css )
 		    	file_put_contents( $css_file, $compiled_css );
-		    
+
 		} catch ( exception $ex ) {
 			wp_die( __('Could not compile woocommerce.less:', 'woocommerce') . ' ' . $ex->getMessage() );
 		}
@@ -341,11 +386,11 @@ function woocommerce_order_bulk_action() {
 }
 
 /**
- * Show confirmation message that order status changed for number of orders 
+ * Show confirmation message that order status changed for number of orders
  **/
 function woocommerce_order_bulk_admin_notices() {
 	global $post_type, $pagenow;
-	
+
 	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) ) {
 		$number = isset( $_REQUEST['marked_processing'] ) ? $_REQUEST['marked_processing'] : $_REQUEST['marked_completed'];
 
