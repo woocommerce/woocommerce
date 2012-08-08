@@ -3,21 +3,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-<g>
-	<g>
-		<polygon fill="#555555" points="24.469,66.375 43.5,66.375 38.062,55.5 24.469,55.5 		"/>
-		<rect y="71.812" fill="#555555" width="43.5" height="27.188"/>
-		<polygon fill="#555555" points="19.031,55.5 5.438,55.5 0,66.375 19.031,66.375 		"/>
-	</g>
-	<g>
-		<polygon fill="#555555" points="80.969,66.375 100,66.375 94.562,55.5 80.969,55.5 		"/>
-		<rect x="56.5" y="71.812" fill="#555555" width="43.5" height="27.188"/>
-		<polygon fill="#555555" points="75.531,55.5 61.938,55.5 56.5,66.375 75.531,66.375 		"/>
-	</g>
-</g>
-<g>
-	<polygon fill="#555555" points="52.719,9.875 71.75,9.875 66.312,-1 52.719,-1 	"/>
-	<rect x="28.25" y="15.312" fill="#555555" width="43.5" height="27.188"/>
-	<polygon fill="#555555" points="47.281,-1 33.688,-1 28.25,9.875 47.281,9.875 	"/>
-</g>
+<rect x="37.5" y="25" fill="#555555" width="25" height="75"/>
+<rect x="75" fill="#555555" width="25" height="100"/>
+<rect y="50" fill="#555555" width="25" height="50"/>
 </svg>
