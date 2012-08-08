@@ -76,8 +76,8 @@ function woocommerce_edit_product_columns($columns){
 	
 	$columns["product_cat"] = __("Categories", 'woocommerce');
 	$columns["product_tag"] = __("Tags", 'woocommerce');
-	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured_head.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" />';
-	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" />';
+	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" width="12" height="12" />';
+	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" width="14" height="12" />';
 	$columns["date"] = __("Date", 'woocommerce');
 	
 	return $columns;
@@ -220,8 +220,8 @@ function woocommerce_custom_product_columns( $column ) {
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
 			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
-			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" />';
-			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" />';
+			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
+			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" height="14" width="14" />';
 			echo '</a>';
 		break;
 		case "is_in_stock" :

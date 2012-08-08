@@ -920,6 +920,12 @@ table.wp-list-table {
 	.column-is_in_stock {
 		text-align: left !important;
 	}
+	@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+		span.product-type {
+			background-image: url(../images/product_types-x2.png) !important;
+			background-size:96px 16px !important;
+		}
+	}
 	span.product-type {
 		width: 16px;
 		height: 16px;
@@ -927,19 +933,19 @@ table.wp-list-table {
 		display: block;
 		background:url(../images/product_types.png) no-repeat -16px 0;
 		&.grouped {
-			background:url(../images/product_types.png) no-repeat 0 0;
+			background-position: 0 0;
 		}
 		&.external {
-			background:url(../images/product_types.png) no-repeat -32px 0;
+			background-position: -32px 0;
 		}
 		&.variable {
-			background:url(../images/product_types.png) no-repeat -48px 0;
+			background-position: -48px 0;
 		}
 		&.downloadable {
-			background:url(../images/product_types.png) no-repeat -64px 0;
+			background-position: -64px 0;
 		}
 		&.virtual {
-			background:url(../images/product_types.png) no-repeat -80px 0;
+			background-position: -80px 0;
 		}
 	}
 	mark.instock {
