@@ -45,12 +45,12 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 				<?php endif; ?>
 			</h1>
 
+			<?php do_action( 'woocommerce_archive_description' ); ?>
+
 			<?php if ( is_tax() ) : ?>
 				<?php do_action( 'woocommerce_taxonomy_archive_description' ); ?>
 			<?php elseif ( ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
 				<?php do_action( 'woocommerce_product_archive_description', $shop_page ); ?>
-			<?php else : ?>
-				<?php do_action( 'woocommerce_archive_description' ); ?>
 			<?php endif; ?>
 
 			<?php if ( have_posts() ) : ?>
