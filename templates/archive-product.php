@@ -39,12 +39,12 @@ get_header('shop'); ?>
 			<?php endif; ?>
 		</h1>
 
-		<?php if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) : ?>
-			<?php echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>'; ?>
-		<?php elseif ( is_tax() && get_query_var( 'paged' ) == 0 ) : ?>
-			<?php do_action( 'woocommerce_term_description' ); ?>
-		<?php elseif ( ! is_search() && get_query_var( 'paged' ) == 0 && ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
-			<?php echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>'; ?>
+		<?php if ( is_tax() ) : ?>
+			<?php do_action( 'woocommerce_taxonomy_archive_description' ); ?>
+		<?php elseif ( ! empty( $shop_page ) && is_object( $shop_page ) ) : ?>
+			<?php do_action( 'woocommerce_product_archive_description', $shop_page ); ?>
+		<?php else : ?>
+			<?php do_action( 'woocommerce_archive_description' ); ?>
 		<?php endif; ?>
 
 		<?php if ( have_posts() ) : ?>
