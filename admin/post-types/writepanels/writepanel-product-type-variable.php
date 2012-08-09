@@ -97,6 +97,7 @@ function variable_product_type_options() {
 				if ($variations) foreach ($variations as $variation) : 
 				
 					$variation_data = get_post_custom( $variation->ID );
+					$variation_data['variation_post_id'] = $variation->ID;
 					$image = '';
 					if (isset($variation_data['_thumbnail_id'][0])) :
 						$image_id = $variation_data['_thumbnail_id'][0];
