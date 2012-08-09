@@ -339,6 +339,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'USD' : $currency_symbol = '&#36;'; break;
 		case 'EUR' : $currency_symbol = '&euro;'; break;
 		case 'CNY' : $currency_symbol = '&yen;'; break;
+		case 'RMB' : $currency_symbol = '&yen;'; break;
 		case 'JPY' : $currency_symbol = '&yen;'; break;
 		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
 		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
@@ -355,7 +356,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'TWD' : $currency_symbol = '&#78;&#84;&#36;'; break;
 		case 'THB' : $currency_symbol = '&#3647;'; break;
 		case 'GBP' : $currency_symbol = '&pound;'; break;
-		default    : $currency_symbol = '&pound;'; break;
+		default    : $currency_symbol = ''; break;
 	endswitch;
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
