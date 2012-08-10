@@ -310,6 +310,21 @@ class WC_Product_Variation extends WC_Product {
 		}
 		return (int) $this->variation_shipping_class_id;
 	}
+	
+	/**
+	 * Check if downloadable product has a file attached.
+	 *
+	 * @return bool Whether downloadable product has a file attached.
+	 */
+	function has_file() {
+		if ( ! $this->is_downloadable() )
+			return false;
+		
+		if ( apply_filters( 'woocommerce_file_download_path', get_post_meta( $this->variation_id, '_file_path', true ), $this->variation_id ) )
+			return true;
+
+		return false;
+	}
 
 }
 
