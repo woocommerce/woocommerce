@@ -517,9 +517,27 @@ function woocommerce_order_totals_meta_box($post) {
 
 			<li class="right">
 				<label><?php _e('Method:', 'woocommerce'); ?></label>
-				<input type="text" name="_shipping_method" id="_shipping_method" value="<?php
-				if (isset($data['_shipping_method'][0])) echo $data['_shipping_method'][0];
-				?>" placeholder="<?php _e('Shipping method&hellip;', 'woocommerce'); ?>" />
+				<select name="_shipping_method" id="_shipping_method" class="first">
+					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+					<?php
+						$chosen_method 	= $data['_shipping_method'][0];
+						$found_method 	= false;
+
+						if ( $woocommerce->shipping ) {
+							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+								echo '<option value="' . $method->id . '" ' . selected( $chosen_method, $method->id, false ) . '>' . $method->get_title() . '</option>';
+								if ( $chosen_method == $method->id )
+									$found_method = true;
+							}
+						}
+
+						if ( ! $found_method && ! empty( $chosen_method ) ) {
+							echo '<option value="' . $chosen_method . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+						} else {
+							echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+						}
+					?>
+				</select>
 			</li>
 
 		</ul>
@@ -598,9 +616,27 @@ function woocommerce_order_totals_meta_box($post) {
 
 			<li class="right">
 				<label><?php _e('Payment Method:', 'woocommerce'); ?></label>
-				<input type="text" name="_payment_method" id="_payment_method" value="<?php
-					if (isset($data['_payment_method'][0])) echo $data['_payment_method'][0];
-				?>" class="first" placeholder="<?php _e('Payment method&hellip;', 'woocommerce'); ?>" />
+				<select name="_payment_method" id="_payment_method" class="first">
+					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+					<?php
+						$chosen_method 	= $data['_payment_method'][0];
+						$found_method 	= false;
+
+						if ( $woocommerce->payment_gateways ) {
+							foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
+								echo '<option value="' . $gateway->id . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . $gateway->get_title() . '</option>';
+								if ( $chosen_method == $gateway->id )
+									$found_method = true;
+							}
+						}
+
+						if ( ! $found_method && ! empty( $chosen_method ) ) {
+							echo '<option value="' . $chosen_method . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+						} else {
+							echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+						}
+					?>
+				</select>
 			</li>
 
 		</ul>
@@ -653,14 +689,30 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 		// Shipping method handling
 		if ( get_post_meta( $post_id, '_shipping_method', true ) !== stripslashes( $_POST['_shipping_method'] ) ) {
-			update_post_meta( $post_id, '_shipping_method', stripslashes( $_POST['_shipping_method'] ));
-			update_post_meta( $post_id, '_shipping_method_title', stripslashes( $_POST['_shipping_method'] ));
+
+			$methods 				= $woocommerce->shipping->load_shipping_methods();
+			$shipping_method 		= esc_attr( $_POST['_shipping_method'] );
+			$shipping_method_title 	= $shipping_method;
+
+			if ( isset( $methods) && isset( $methods[ $shipping_method ] ) )
+				$shipping_method_title = $methods[ $shipping_method ]->get_title();
+
+			update_post_meta( $post_id, '_shipping_method', $shipping_method );
+			update_post_meta( $post_id, '_shipping_method_title', $shipping_method_title );
 		}
 
 		// Payment method handling
 		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
-			update_post_meta( $post_id, '_payment_method', stripslashes( $_POST['_payment_method'] ));
-			update_post_meta( $post_id, '_payment_method_title', stripslashes( $_POST['_payment_method'] ));
+
+			$methods 				= $woocommerce->payment_gateways->payment_gateways();
+			$payment_method 		= esc_attr( $_POST['_payment_method'] );
+			$payment_method_title 	= $payment_method;
+
+			if ( isset( $methods) && isset( $methods[ $payment_method ] ) )
+				$payment_method_title = $methods[ $payment_method ]->get_title();
+
+			update_post_meta( $post_id, '_payment_method', $payment_method );
+			update_post_meta( $post_id, '_payment_method_title', $payment_method_title );
 		}
 
 	// Update date

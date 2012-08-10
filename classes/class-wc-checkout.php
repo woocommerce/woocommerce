@@ -447,13 +447,13 @@ class WC_Checkout {
 					endif;
 				endif;
 
-				// Get better formatted billing method (title)
+				// Get better formatted shipping method (title)
 				$shipping_method = $this->posted['shipping_method'];
 				if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
 					$shipping_method = $available_methods[$this->posted['shipping_method']]->label;
 				endif;
 
-				// Get better formatted shipping method (title/label)
+				// Get better formatted payment method (title/label)
 				$payment_method = $this->posted['payment_method'];
 				if (isset($available_gateways) && isset($available_gateways[$this->posted['payment_method']])) :
 					$payment_method = $available_gateways[$this->posted['payment_method']]->get_title();
