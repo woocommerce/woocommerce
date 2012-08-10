@@ -12,7 +12,7 @@ global $woocommerce;
 
 /** Template Hooks ********************************************************/
 
-if ( !is_admin() || defined('DOING_AJAX') ) {
+if ( ! is_admin() || defined('DOING_AJAX') ) {
 
 	/* Content Wrappers */
 	add_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
