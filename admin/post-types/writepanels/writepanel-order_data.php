@@ -184,7 +184,7 @@ function woocommerce_order_data_meta_box($post) {
 						echo '</div>';
 
 						// Display form
-						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__('Load customer billing address', 'woocommerce').'</button></p>';
+						echo '<div class="edit_address"><p><button class="button load_customer_billing">'.__('Load billing address', 'woocommerce').'</button></p>';
 
 						foreach ( $billing_data as $key => $field ) :
 							if (!isset($field['type'])) $field['type'] = 'text';
@@ -261,7 +261,7 @@ function woocommerce_order_data_meta_box($post) {
 						echo '</div>';
 
 						// Display form
-						echo '<div class="edit_address"><p><button class="button load_customer_shipping">'.__('Load customer shipping address', 'woocommerce').'</button></p>';
+						echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __('Load shipping address', 'woocommerce') . '</button> <button class="button billing-same-as-shipping">'. __('Copy from billing', 'woocommerce') . '</button></p>';
 
 						if ( $shipping_data ) foreach ( $shipping_data as $key => $field ) :
 							if (!isset($field['type'])) $field['type'] = 'text';

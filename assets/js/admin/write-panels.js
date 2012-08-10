@@ -467,7 +467,7 @@ jQuery( function($){
 			$('input#_shipping_address_2').val( $('input#_billing_address_2').val() );
 			$('input#_shipping_city').val( $('input#_billing_city').val() );
 			$('input#_shipping_postcode').val( $('input#_billing_postcode').val() );
-			$('input#_shipping_country').val( $('input#_billing_country').val() );
+			$('#_shipping_country').val( $('#_billing_country').val() );
 			$('input#_shipping_state').val( $('input#_billing_state').val() );
 		}
 		return false;

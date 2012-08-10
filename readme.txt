@@ -153,7 +153,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.6.3 =
 * Feature - Option to register using the email address as the username instead of entering a username
 * Feature - Ability to change the demo notice text via settings
+* Feature - Copy billing to shipping address on order screen
 * Tweak - Removed rarely used settings
+* Tweak - has_file() handling for variations
 
 = 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
