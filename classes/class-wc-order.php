@@ -260,21 +260,21 @@ class WC_Order {
 
 	/** Gets shipping and product tax */
 	function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', $this->order_tax + $this->order_shipping_tax );
+		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( $this->order_tax + $this->order_shipping_tax, 2, '.', '' ) );
 	}
 
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_cart_discount() {
-		return apply_filters( 'woocommerce_order_amount_cart_discount', $this->cart_discount );
+		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( $this->cart_discount, 2, '.', '' ) );
 	}
 
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_order_discount() {
-		return apply_filters( 'woocommerce_order_amount_order_discount', $this->order_discount );
+		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( $this->order_discount, 2, '.', '' ) );
 	}
 
 	/**
@@ -282,18 +282,18 @@ class WC_Order {
 	 */
 	function get_total_discount() {
 		if ($this->order_discount || $this->cart_discount) :
-			return apply_filters( 'woocommerce_order_amount_total_discount', $this->order_discount + $this->cart_discount );
+			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( $this->order_discount + $this->cart_discount, 2, '.', '' ) );
 		endif;
 	}
 
 	/** Gets shipping */
 	function get_shipping() {
-		return apply_filters( 'woocommerce_order_amount_shipping', $this->order_shipping );
+		return apply_filters( 'woocommerce_order_amount_shipping', number_format( $this->order_shipping, 2, '.', '' ) );
 	}
 
 	/** Gets shipping tax amount */
 	function get_shipping_tax() {
-		return apply_filters( 'woocommerce_order_amount_shipping_tax', $this->order_shipping_tax );
+		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( $this->order_shipping_tax, 2, '.', '' ) );
 	}
 
 	/** Gets shipping method title */
@@ -303,7 +303,7 @@ class WC_Order {
 
 	/** Gets order total */
 	function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
+		return apply_filters( 'woocommerce_order_amount_total', number_format( $this->order_total, 2, '.', '' ) );
 	}
 
 	/** Get item subtotal - this is the cost before discount */
@@ -359,7 +359,7 @@ class WC_Order {
 	/** Deprecated functions */
 
 	function get_order_total() {
-		return apply_filters( 'woocommerce_order_amount_total', $this->order_total );
+		return $this->get_total();
 	}
 
 	function get_item_cost( $item, $inc_tax = false ) {

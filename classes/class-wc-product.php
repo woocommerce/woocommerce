@@ -1121,7 +1121,7 @@ class WC_Product {
 
 					$attachment = wp_get_attachment_image_src( $attachment_id, 'full'  );
 					$image_link = $attachment ? current( $attachment ) : '';
-					
+
 					$image_title = get_the_title( $attachment_id );
 				} else {
 					$image = $image_link = $image_title = '';
@@ -1239,8 +1239,6 @@ class WC_Product {
 	function variable_product_sync() {
 		global $woocommerce;
 
-		if (!$this->is_type('variable')) return;
-
 		$children = get_posts( array(
 			'post_parent' 	=> $this->id,
 			'posts_per_page'=> -1,
@@ -1280,8 +1278,7 @@ class WC_Product {
 
 		$this->price = $this->min_variation_price;
 
-		if ( $this->min_variation_price !== '' )
-			$woocommerce->clear_product_transients( $this->id );
+		$woocommerce->clear_product_transients( $this->id );
 	}
 
 }
