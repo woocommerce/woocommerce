@@ -97,23 +97,6 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	$localisation_setting,
 
-	array(
-		'name' => __( 'Store Notice', 'woocommerce' ),
-		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woocommerce' ),
-		'id' 		=> 'woocommerce_demo_store',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox'
-	),
-
-	array(
-		'name' => __( 'Store Notice Text', 'woocommerce' ),
-		'desc' 		=> '',
-		'id' 		=> 'woocommerce_demo_store_notice',
-		'std' 		=> __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-	),
-
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 
 	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
@@ -247,6 +230,23 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'type' 		=> 'frontend_styles'
+	),
+
+	array(
+		'name' => __( 'Store Notice', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the "Demo Store" notice on your site', 'woocommerce' ),
+		'id' 		=> 'woocommerce_demo_store',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox'
+	),
+
+	array(
+		'name' => __( 'Store Notice Text', 'woocommerce' ),
+		'desc' 		=> '',
+		'id' 		=> 'woocommerce_demo_store_notice',
+		'std' 		=> __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
+		'type' 		=> 'text',
+		'css' 		=> 'min-width:300px;',
 	),
 
 	array(
