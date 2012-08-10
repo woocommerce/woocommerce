@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Swapped invoice and custom in paypal and added prefix (https://github.com/woothemes/woocommerce/issues/1149)
 * Tweak - Order page styling
 * Fix - has_file() handling for variations
+* Fix - Hide if cart is empty option
 
 = 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)

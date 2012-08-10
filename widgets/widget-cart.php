@@ -35,7 +35,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	/** @see WP_Widget */
 	function widget( $args, $instance ) {
 		global $woocommerce;
-		
+
 		extract( $args );
 
 		if ( is_cart() || is_checkout() ) return;
@@ -44,11 +44,11 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		$hide_if_empty = empty( $instance['hide_if_empty'] )  ? 0 : 1;
 
 		echo $before_widget;
-		
-		if ( $title ) 
+
+		if ( $title )
 			echo $before_title . $title . $after_title;
-		
-		$woocommerce->mfunc_wrapper( 'woocommerce_mini_cart()', 'woocommerce_mini_cart', array( $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) );
+
+		$woocommerce->mfunc_wrapper( 'woocommerce_mini_cart()', 'woocommerce_mini_cart', array( 'list_class' => $hide_if_empty ? 'hide_cart_widget_if_empty' : '' ) );
 
 		echo $after_widget;
 
