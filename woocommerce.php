@@ -817,7 +817,7 @@ class Woocommerce {
 					'delete_post' 			=> 'manage_woocommerce_products',
 					'read_post' 			=> 'manage_woocommerce_products'
 				),
-				'publicly_queryable' 	=> true,
+				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
 				'hierarchical' 			=> false,
 				'rewrite' 				=> false,

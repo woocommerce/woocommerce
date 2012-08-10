@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Order page styling
 * Fix - has_file() handling for variations
 * Fix - Hide if cart is empty option
+* FIx - Hide individual variations from frontend
 
 = 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
