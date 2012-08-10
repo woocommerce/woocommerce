@@ -492,7 +492,28 @@ table.wc_status_table {
 		color: #999;
 	}
 }
-#woocommerce-order-totals {
+#poststuff #woocommerce-order-actions {
+	.inside {
+		margin:0;
+		padding:0;
+		ul.order_actions {
+			li {
+				padding:6px 10px;
+				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+				box-sizing: border-box;         /* Opera/IE 8+ */
+				&:last-child {
+					border-bottom:0;
+				}
+			}
+		}
+	}
+}
+#poststuff #woocommerce-order-totals {
+	.inside {
+		margin:0;
+		padding:0;
+	}
 	h4 {
 		margin:0 !important;
 		a.add_tax_row {
@@ -503,10 +524,13 @@ table.wc_status_table {
 	.totals_group {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #DDD;
-		padding: 10px 0 0;
-	}
-	.totals_group:first-child {
-		border-top: 0;
+		padding: 10px 10px 0 10px;
+		&:first-child {
+			border-top:0;
+		}
+		&:last-child {
+			border-bottom:0;
+		}
 	}
 	ul.totals {
 		margin: 6px 0 0;
@@ -628,6 +652,17 @@ table.wc_status_table {
 		&:hover, &:focus {
 			a.delete_tax_row {
 				display: block;
+			}
+		}
+	}
+}
+#poststuff #woocommerce-order-notes {
+	.inside {
+		margin:0;
+		padding:0;
+		ul.order_notes {
+			li {
+				padding:0 10px;
 			}
 		}
 	}
