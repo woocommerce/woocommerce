@@ -151,7 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.3 =
-* Feature - Option to register using the email address as the username
+* Feature - Option to register using the email address as the username instead of entering a username
 * Feature - Ability to change the demo notice text via settings
 * Tweak - Removed rarely used settings
 

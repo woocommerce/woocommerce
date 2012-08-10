@@ -2,16 +2,16 @@
 /**
  * Login Form
  */
- 
-global $woocommerce; 
+
+global $woocommerce;
 
 if (is_user_logged_in()) return;
 ?>
 <form method="post" class="login">
 	<?php if ($message) echo wpautop(wptexturize($message)); ?>
-	
+
 	<p class="form-row form-row-first">
-		<label for="username"><?php _e('Username', 'woocommerce'); ?> <span class="required">*</span></label>
+		<label for="username"><?php _e('Username or email', 'woocommerce'); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text" name="username" id="username" />
 	</p>
 	<p class="form-row form-row-last">
@@ -26,6 +26,6 @@ if (is_user_logged_in()) return;
 		<input type="hidden" name="redirect" value="<?php echo $redirect ?>" />
 		<a class="lost_password" href="<?php echo esc_url( wp_lostpassword_url( home_url() ) ); ?>"><?php _e('Lost Password?', 'woocommerce'); ?></a>
 	</p>
-	
+
 	<div class="clear"></div>
 </form>

@@ -202,7 +202,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array(
 		'desc' 		=> __( 'Register using the email address for the username', 'woocommerce' ),
-		'id' 		=> 'woocommerce_egistration_email_for_username',
+		'id' 		=> 'woocommerce_registration_email_for_username',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end'
