@@ -157,6 +157,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Payment methods and shipping method selection dropdowns on order page
 * Tweak - Removed rarely used settings
 * Tweak - has_file() handling for variations
+* Tweak - Swapped invoice and custom in paypal and added prefix (https://github.com/woothemes/woocommerce/issues/1149)
 
 = 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
