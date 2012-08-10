@@ -521,11 +521,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 		// Custom holds post ID
 	    if ( !empty($posted['invoice']) && !empty($posted['custom']) ) {
 
-	    	$order_id = (int) str_replace( $this->invoice_prefix, '', $posted['invoice'] );
+	    	// Backwards comp for IPN requests
+	    	if ( is_numeric( $posted['custom'] ) ) {
+		    	$order_id = $posted['custom'];
+		    	$order_key = $posted['invoice'];
+	    	} else {
+		    	$order_id = (int) str_replace( $this->invoice_prefix, '', $posted['invoice'] );
+		    	$order_key = $posted['custom'];
+	    	}
 
 			$order = new WC_Order( $order_id );
 
-	        if ($order->order_key!==$posted['custom']) :
+	        if ( $order->order_key !== $order_key ) :
 	        	if ($this->debug=='yes') $this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
 	        	exit;
 	        endif;
