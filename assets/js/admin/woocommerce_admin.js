@@ -2,13 +2,13 @@
   jQuery blockUI plugin
   Version 2.37 (29-JAN-2011)
   @requires jQuery v1.2.3 or later
- 
+
   Examples at: http://malsup.com/jquery/block/
   Copyright (c) 2007-2010 M. Alsup
   Dual licensed under the MIT and GPL licenses:
   http://www.opensource.org/licenses/mit-license.php
   http://www.gnu.org/licenses/gpl.html
- 
+
   Thanks to Amir-Hossein Sobhi for some excellent contributions!
  */
 ;(function($){if(/1\.(0|1|2)\.(0|1|2)/.test($.fn.jquery)||/^1.1/.test($.fn.jquery)){alert('blockUI requires jQuery v1.2.3 or later!  You are using v'+$.fn.jquery);return;}
@@ -78,7 +78,7 @@ e.focus();};function center(el,x,y){var p=el.parentNode,s=el.style;var l=((p.off
  * browser tooltip. It is extremely lightweight and very smart in
  * that it detects the edges of the browser window and will make sure
  * the tooltip stays within the current window size. As a result the
- * tooltip will adjust itself to be displayed above, below, to the left 
+ * tooltip will adjust itself to be displayed above, below, to the left
  * or to the right depending on what is necessary to stay within the
  * browser window. It is completely customizable as well via CSS.
  *
@@ -90,7 +90,7 @@ e.focus();};function center(el,x,y){var p=el.parentNode,s=el.style;var l=((p.off
 
 /**
  * Spoofs placeholders in browsers that don't support them (eg Firefox 3)
- * 
+ *
  * Copyright 2011 Dan Bentley
  * Licensed under the Apache License 2.0
  *
@@ -106,7 +106,7 @@ jQuery(function(){
 
 	// Live validation
 	jQuery('body').on(
-		'keyup', 
+		'keyup',
 		'.wc_input_price',
 		function() {
 			var $this = jQuery(this);
@@ -118,7 +118,7 @@ jQuery(function(){
 			}
 		}
 	).keyup();
-	
+
 	// Tooltips
 	jQuery(".tips, .help_tip").tipTip({
     	'attribute' : 'data-tip',
@@ -126,7 +126,7 @@ jQuery(function(){
     	'fadeOut' : 50,
     	'delay' : 200
     });
-    
+
     jQuery('select.availability').change(function(){
 		if (jQuery(this).val()=="specific") {
 			jQuery(this).closest('tr').next('tr').show();
@@ -134,34 +134,42 @@ jQuery(function(){
 			jQuery(this).closest('tr').next('tr').hide();
 		}
 	}).change();
-	
+
 	// Hidden options
 	jQuery('.hide_options_if_checked').each(function(){
-	
+
 		jQuery(this).find('input:eq(0)').change(function() {
-			
+
 			if (jQuery(this).is(':checked')) {
 				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
 			} else {
 				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
 			}
-			
+
 		}).change();
-		
+
 	});
-	
+
 	jQuery('.show_options_if_checked').each(function(){
-	
+
 		jQuery(this).find('input:eq(0)').change(function() {
-			
+
 			if (jQuery(this).is(':checked')) {
 				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').show();
 			} else {
 				jQuery(this).closest('fieldset, tr').nextUntil( '.hide_options_if_checked, .show_options_if_checked', '.hidden_option').hide();
 			}
-			
+
 		}).change();
-		
+
 	});
+
+	jQuery('input#woocommerce_demo_store').change(function() {
+		if (jQuery(this).is(':checked')) {
+			jQuery('#woocommerce_demo_store_notice').closest('tr').show();
+		} else {
+			jQuery('#woocommerce_demo_store_notice').closest('tr').hide();
+		}
+	}).change();
 
 });

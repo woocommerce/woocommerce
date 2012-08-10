@@ -167,9 +167,14 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
  **/
 if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 	function woocommerce_demo_store() {
-		if ( get_option( 'woocommerce_demo_store' ) == 'no' ) return;
+		if ( get_option( 'woocommerce_demo_store' ) == 'no' )
+			return;
 
-		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ) . '</p>'  );
+		$notice = get_option( 'woocommerce_demo_store_notice' );
+		if ( empty( $notice ) )
+			$notice = __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' );
+
+		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . $notice . '</p>'  );
 	}
 }
 

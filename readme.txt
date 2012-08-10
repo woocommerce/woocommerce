@@ -150,6 +150,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.6.3 =
+* Feature - Option to register using the email address as the username
+* Feature - Ability to change the demo notice text via settings
+* Tweak - Removed rarely used settings
+
 = 1.6.2 - 09/08/2012 =
 * Feature - Added google analytics event tracking for add to cart buttons (thanks to Max Rice)
 * Feature - WC_Product::has_file() for detecting if a downloadable product has a file set
