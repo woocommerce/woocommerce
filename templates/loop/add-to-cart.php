@@ -5,7 +5,7 @@
 
 global $product;
 
-if ( ! $product->is_purchasable() && $product->product_type != 'external' ) return;
+if ( ! $product->is_purchasable() && ! in_array( $product->product_type, array( 'external', 'grouped' ) ) ) return;
 ?>
 
 <?php if ( ! $product->is_in_stock() ) : ?>
