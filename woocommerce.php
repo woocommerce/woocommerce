@@ -953,6 +953,8 @@ class Woocommerce {
 	 * Register/queue frontend scripts
 	 */
 	function frontend_scripts() {
+		global $post;
+
 		$suffix 				= defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en 			= get_option('woocommerce_enable_lightbox') == 'yes' ? true : false;
 		$chosen_en 				= get_option( 'woocommerce_enable_chosen' ) == 'yes' ? true : false;
@@ -962,9 +964,8 @@ class Woocommerce {
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 		wp_register_script( 'jquery-plugins', $this->plugin_url() . '/assets/js/jquery-plugins' . $suffix . '.js', array( 'jquery' ), '1.6', true );
-
-		if ( is_product() )
-			wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 
 		// Queue frontend scripts conditionally
 		if ( get_option( 'woocommerce_enable_ajax_add_to_cart' ) == 'yes' )
@@ -977,9 +978,9 @@ class Woocommerce {
 			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 
 		if ( is_product() )
-			wp_enqueue_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), '1.6', true );
+			wp_enqueue_script( 'wc-single-product' );
 
-		if ( $lightbox_en && is_product() ) {
+		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			wp_enqueue_script( 'fancybox', $this->plugin_url() . '/assets/js/fancybox/fancybox' . $suffix . '.js', array( 'jquery' ), '1.6', true );
 			wp_enqueue_style( 'woocommerce_fancybox_styles', $this->plugin_url() . '/assets/css/fancybox.css' );
 		}
