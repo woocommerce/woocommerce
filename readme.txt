@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.6.4 =
 * Fix - Missing grouped product cart buttons
+* Fix - Notice in invoice template with number_format
 
 = 1.6.3 - 10/08/2012 =
 * Feature - Option to register using the email address as the username instead of entering a username

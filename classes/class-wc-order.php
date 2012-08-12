@@ -260,21 +260,21 @@ class WC_Order {
 
 	/** Gets shipping and product tax */
 	function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( $this->order_tax + $this->order_shipping_tax, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_total_tax', number_format( (double) $this->order_tax + (double) $this->order_shipping_tax, 2, '.', '' ) );
 	}
 
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_cart_discount() {
-		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( $this->cart_discount, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_cart_discount', number_format( (double) $this->cart_discount, 2, '.', '' ) );
 	}
 
 	/**
 	 * gets the total (product) discount amount - these are applied before tax
 	 */
 	function get_order_discount() {
-		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( $this->order_discount, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_order_discount', number_format( (double) $this->order_discount, 2, '.', '' ) );
 	}
 
 	/**
@@ -282,28 +282,28 @@ class WC_Order {
 	 */
 	function get_total_discount() {
 		if ($this->order_discount || $this->cart_discount) :
-			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( $this->order_discount + $this->cart_discount, 2, '.', '' ) );
+			return apply_filters( 'woocommerce_order_amount_total_discount', number_format( (double) $this->order_discount + (double) $this->cart_discount, 2, '.', '' ) );
 		endif;
 	}
 
 	/** Gets shipping */
 	function get_shipping() {
-		return apply_filters( 'woocommerce_order_amount_shipping', number_format( $this->order_shipping, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_shipping', number_format( (double) $this->order_shipping, 2, '.', '' ) );
 	}
 
 	/** Gets shipping tax amount */
 	function get_shipping_tax() {
-		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( $this->order_shipping_tax, 2, '.', '' ) );
+		return apply_filters( 'woocommerce_order_amount_shipping_tax', number_format( (double) $this->order_shipping_tax, 2, '.', '' ) );
+	}
+
+	/** Gets order total */
+	function get_total() {
+		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ) );
 	}
 
 	/** Gets shipping method title */
 	function get_shipping_method() {
 		return apply_filters( 'woocommerce_order_shipping_method', ucwords( $this->shipping_method_title ) );
-	}
-
-	/** Gets order total */
-	function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', number_format( $this->order_total, 2, '.', '' ) );
 	}
 
 	/** Get item subtotal - this is the cost before discount */
