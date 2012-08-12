@@ -516,7 +516,7 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 
 			<li class="right">
-				<label><?php _e('Method:', 'woocommerce'); ?></label>
+				<label><?php _e('Shipping Method:', 'woocommerce'); ?></label>
 				<select name="_shipping_method" id="_shipping_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
@@ -525,8 +525,8 @@ function woocommerce_order_totals_meta_box($post) {
 
 						if ( $woocommerce->shipping ) {
 							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-								echo '<option value="' . $method->id . '" ' . selected( $chosen_method, $method->id, false ) . '>' . $method->get_title() . '</option>';
-								if ( $chosen_method == $method->id )
+								echo '<option value="' . $method->id . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . $method->get_title() . '</option>';
+								if ( strpos( $chosen_method, $method->id ) === 0 )
 									$found_method = true;
 							}
 						}
@@ -538,6 +538,12 @@ function woocommerce_order_totals_meta_box($post) {
 						}
 					?>
 				</select>
+			</li>
+
+			<li class="wide">
+				<label><?php _e('Shipping Title:', 'woocommerce'); ?></label>
+				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e('The shipping title the customer sees', 'woocommerce'); ?>" value="<?php if (isset($data['_shipping_method_title'][0])) echo $data['_shipping_method_title'][0];
+				?>" class="first" />
 			</li>
 
 		</ul>
@@ -690,14 +696,24 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 		// Shipping method handling
 		if ( get_post_meta( $post_id, '_shipping_method', true ) !== stripslashes( $_POST['_shipping_method'] ) ) {
 
-			$methods 				= $woocommerce->shipping->load_shipping_methods();
-			$shipping_method 		= esc_attr( $_POST['_shipping_method'] );
-			$shipping_method_title 	= $shipping_method;
-
-			if ( isset( $methods) && isset( $methods[ $shipping_method ] ) )
-				$shipping_method_title = $methods[ $shipping_method ]->get_title();
+			$shipping_method 		= esc_attr( trim( stripslashes( $_POST['_shipping_method'] ) ) );
 
 			update_post_meta( $post_id, '_shipping_method', $shipping_method );
+		}
+
+		if ( get_post_meta( $post_id, '_shipping_method_title', true ) !== stripslashes( $_POST['_shipping_method_title'] ) ) {
+
+			$shipping_method_title = esc_attr( trim( stripslashes( $_POST['_shipping_method_title'] ) ) );
+
+			if ( ! $shipping_method_title ) {
+
+				$shipping_method = esc_attr( $_POST['_shipping_method'] );
+				$methods = $woocommerce->shipping->load_shipping_methods();
+
+				if ( isset( $methods ) && isset( $methods[ $shipping_method ] ) )
+					$shipping_method_title = $methods[ $shipping_method ]->get_title();
+			}
+
 			update_post_meta( $post_id, '_shipping_method_title', $shipping_method_title );
 		}
 

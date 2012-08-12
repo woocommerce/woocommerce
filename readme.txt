@@ -151,7 +151,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.4 =
+* Feature - New input for shipping method title (as the customer sees it)
 * Tweak - Classes for order info in my-account
+* Fix - Shipping method dropdown for id's which vary
 * Fix - Missing grouped product cart buttons
 * Fix - Notice in invoice template with number_format
 * Fix - Made variation get_image() return instead of echo

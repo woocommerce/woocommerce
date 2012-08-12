@@ -449,15 +449,13 @@ class WC_Checkout {
 
 				// Get better formatted shipping method (title)
 				$shipping_method = $this->posted['shipping_method'];
-				if (isset($available_methods) && isset($available_methods[$this->posted['shipping_method']])) :
-					$shipping_method = $available_methods[$this->posted['shipping_method']]->label;
-				endif;
+				if ( isset( $available_methods[ $this->posted['shipping_method'] ] ) )
+					$shipping_method = $available_methods[ $this->posted['shipping_method'] ]->label;
 
 				// Get better formatted payment method (title/label)
 				$payment_method = $this->posted['payment_method'];
-				if (isset($available_gateways) && isset($available_gateways[$this->posted['payment_method']])) :
-					$payment_method = $available_gateways[$this->posted['payment_method']]->get_title();
-				endif;
+				if ( isset( $available_gateways[ $this->posted['payment_method'] ] ) )
+					$payment_method = $available_gateways[ $this->posted['payment_method'] ]->get_title();
 
 				// UPDATE ORDER META
 
@@ -565,7 +563,9 @@ class WC_Checkout {
 
 					update_post_meta( $order_id, 'coupons', implode(', ', $applied_coupons) );
 
-					$order = new WC_Order( $order_id );
+					if ( empty( $order ) )
+						$order = new WC_Order( $order_id );
+
 					$order->add_order_note( sprintf( __( 'Coupon Code Used: %s', 'woocommerce' ), implode(', ', $applied_coupons ) ) );
 				}
 
@@ -601,7 +601,8 @@ class WC_Checkout {
 
 				else :
 
-					$order = new WC_Order($order_id);
+					if ( empty( $order ) )
+						$order = new WC_Order( $order_id );
 
 					// No payment was required for order
 					$order->payment_complete();
