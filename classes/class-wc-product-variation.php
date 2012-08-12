@@ -209,15 +209,19 @@ class WC_Product_Variation extends WC_Product {
     function get_image( $size = 'shop_thumbnail' ) {
     	global $woocommerce;
 
-    	if ($this->variation_id && has_post_thumbnail($this->variation_id)) :
-			echo get_the_post_thumbnail($this->variation_id, $size);
-		elseif (has_post_thumbnail($this->id)) :
-			echo get_the_post_thumbnail($this->id, $size);
-		elseif ($parent_id = wp_get_post_parent_id( $this->id ) && has_post_thumbnail($parent_id)) :
-			echo get_the_post_thumbnail($parent_id, $size);
-		else :
-			echo '<img src="'. woocommerce_placeholder_img_src() . '" alt="Placeholder" width="'.$woocommerce->get_image_size('shop_thumbnail_image_width').'" height="'.$woocommerce->get_image_size('shop_thumbnail_image_height').'" />';
-		endif;
+    	$image = '';
+
+    	if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
+			$image = get_the_post_thumbnail( $this->variation_id, $size );
+		} elseif ( has_post_thumbnail( $this->id ) ) {
+			$image = get_the_post_thumbnail( $this->id, $size );
+		} elseif ( $parent_id = wp_get_post_parent_id( $this->id ) && has_post_thumbnail( $parent_id ) ) {
+			$image = get_the_post_thumbnail( $parent_id, $size );
+		} else {
+			$image = '<img src="' . woocommerce_placeholder_img_src() . '" alt="Placeholder" width="' . $woocommerce->get_image_size( 'shop_thumbnail_image_width' ) . '" height="' . $woocommerce->get_image_size( 'shop_thumbnail_image_height' ) . '" />';
+		}
+
+		return $image;
     }
 
 	/**
