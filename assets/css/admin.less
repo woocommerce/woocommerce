@@ -804,54 +804,45 @@ table.wc_status_table {
 		width:9%;
 	}
 	.column-order_status {
-		width:90px;
+		width:75px;
 		text-align: center;
 		mark {
 			display:block;
 			text-align: center;
 			white-space: nowrap;
 			padding: 0 2px;
+			
 			background: #999;
-			border: 1px solid #999;
-			-webkit-box-shadow:inset 0 0 2px 1px rgba(255,255,255,0.5);
-			-webkit-border-radius:4px;
-			-moz-border-radius:4px;
-			-o-border-radius:4px;
-			border-radius:4px;
+			font-size:11px;
+			line-height: 1.75;
+			-webkit-border-radius:3px;
+			-moz-border-radius:3px;
+			-o-border-radius:3px;
+			border-radius:3px;
 			margin: 0;
-			font-size:9px;
-			text-transform: uppercase;
 			color:#fff;
 			font-weight: bold;
-			text-shadow:0 1px 0 rgba(0,0,0,0.3);
 		}
 		mark.pending {
 			background-color: #999;
-			border-color: #999;
 		}
 		mark.completed {
 			background-color: #a0658b;
-			border-color: #a0658b;
 		}
 		mark.on-hold {
 			background-color: #E66F00;
-			border-color: #E66F00;
 		}
 		mark.failed {
 			background-color: red;
-			border-color: red;
 		}
 		mark.cancelled {
 			background-color: #ccc;
-			border-color: #ccc;
 		}
 		mark.processing {
 			background-color: #2184c2;
-			border-color: #2184c2;
 		}
 		mark.refunded {
 			background-color: #ccc;
-			border-color: #ccc;
 		}
 	}
 }
