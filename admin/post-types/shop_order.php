@@ -162,7 +162,7 @@ function woocommerce_custom_order_columns($column) {
 					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
 
 					foreach ( $actions as $action )
-						printf( '<a class="button" href="%s">%s</a>', $action['url'], $action['name'] );
+						printf( '<a class="button tips" href="%s" data-tip="%s"><img src="'.$woocommerce->plugin_url() . '/assets/images/icons/'.strtolower($action['name']).'.png" alt="%s" width="14" /></a>', $action['url'], $action['name'], $action['name'] );
 
 					do_action( 'woocommerce_admin_order_actions_end', $order );
 				?>
