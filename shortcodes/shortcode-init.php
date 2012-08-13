@@ -140,6 +140,8 @@ function woocommerce_product_categories( $atts ) {
 
 	wp_reset_query();
 
+	woocommerce_reset_loop();
+	
 	return ob_get_clean();
 }
 
