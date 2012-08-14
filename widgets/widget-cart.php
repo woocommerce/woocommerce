@@ -4,19 +4,25 @@
  *
  * Displays shopping cart widget
  *
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
 class WooCommerce_Widget_Cart extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
 
-	/** constructor */
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Cart() {
 
 		/* Widget variable settings. */
@@ -32,7 +38,16 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		$this->WP_Widget( 'shopping_cart', $this->woo_widget_name, $widget_ops );
 	}
 
-	/** @see WP_Widget */
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget( $args, $instance ) {
 		global $woocommerce;
 
@@ -62,14 +77,31 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		}
 	}
 
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance['title'] = strip_tags( stripslashes( $new_instance['title'] ) );
 		$instance['hide_if_empty'] = empty( $new_instance['hide_if_empty'] ) ? 0 : 1;
 		return $instance;
 	}
 
-	/** @see WP_Widget->form */
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
 		?>
@@ -81,4 +113,4 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 		<?php
 	}
 
-} // class WooCommerce_Widget_Cart
+}

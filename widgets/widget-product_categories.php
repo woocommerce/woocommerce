@@ -1,39 +1,53 @@
 <?php
 /**
  * Product Search Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
- 
 class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
 	var $cat_ancestors;
 	var $current_cat;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Product_Categories() {
-	
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_product_categories';
 		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_categories';
 		$this->woo_widget_name = __('WooCommerce Product Categories', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('product_categories', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget */
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget( $args, $instance ) {
 		extract( $args );
 
@@ -48,22 +62,22 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		if ( $title ) echo $before_title . $title . $after_title;
 
 		$cat_args = array('show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat');
-		
+
 		if ( $o == 'order' ) {
-			
+
 			$cat_args['menu_order'] = 'asc';
-			
+
 		} else {
-			
+
 			$cat_args['orderby'] = 'title';
-			
+
 		}
-		
+
 		if ( $d ) {
 
 			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
 			woocommerce_product_dropdown_categories( $c, $h, 0 );
-			
+
 			?>
 			<script type='text/javascript'>
 			/* <![CDATA[ */
@@ -77,32 +91,32 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			/* ]]> */
 			</script>
 			<?php
-			
+
 		} else {
-			
+
 			global $wp_query, $post, $woocommerce;
-			
+
 			$this->current_cat = false;
 			$this->cat_ancestors = array();
-				
+
 			if ( is_tax('product_cat') ) :
-			
+
 				$this->current_cat = $wp_query->queried_object;
 				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
-			
+
 			elseif ( is_singular('product') ) :
-				
-				$product_category = wp_get_post_terms( $post->ID, 'product_cat' ); 
-				
+
+				$product_category = wp_get_post_terms( $post->ID, 'product_cat' );
+
 				if ($product_category) :
 					$this->current_cat = end($product_category);
 					$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 				endif;
-				
+
 			endif;
-			
+
 			include_once( $woocommerce->plugin_path() . '/classes/walkers/class-product-cat-list-walker.php' );
-			
+
 			$cat_args['walker'] 			= new WC_Product_Cat_List_Walker;
 			$cat_args['title_li'] 			= '';
 			$cat_args['show_children_only']	= ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? 1 : 0;
@@ -110,11 +124,11 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce');
 			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$cat_args['current_category_ancestors']	= $this->cat_ancestors;
-			
+
 			echo '<ul class="product-categories">';
-			
+
 			wp_list_categories( apply_filters( 'woocommerce_product_categories_widget_args', $cat_args ) );
-			
+
 			echo '</ul>';
 
 		}
@@ -122,7 +136,16 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		echo $after_widget;
 	}
 
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -134,8 +157,16 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
 		return $instance;
 	}
-	
-	/** @see WP_Widget->form */
+
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		//Defaults
 		$instance = wp_parse_args( (array) $instance, array( 'title' => '') );
@@ -148,7 +179,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 ?>
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
-		
+
 		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order by:', 'woocommerce') ?></label>
 		<select id="<?php echo esc_attr( $this->get_field_id('orderby') ); ?>" name="<?php echo esc_attr( $this->get_field_name('orderby') ); ?>">
 			<option value="order" <?php selected($orderby, 'order'); ?>><?php _e('Category Order', 'woocommerce'); ?></option>
@@ -163,10 +194,10 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('hierarchical') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hierarchical') ); ?>"<?php checked( $hierarchical ); ?> />
 		<label for="<?php echo $this->get_field_id('hierarchical'); ?>"><?php _e( 'Show hierarchy', 'woocommerce' ); ?></label><br/>
-		
+
 		<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('show_children_only') ); ?>" name="<?php echo esc_attr( $this->get_field_name('show_children_only') ); ?>"<?php checked( $show_children_only ); ?> />
 		<label for="<?php echo $this->get_field_id('show_children_only'); ?>"><?php _e( 'Show children of current category only', 'woocommerce' ); ?></label></p>
 <?php
 	}
 
-} // class WooCommerce_Widget_Product_Categories
+}

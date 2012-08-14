@@ -1,32 +1,37 @@
 <?php
 /**
  * Recent Products Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
-
 class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Recently_Viewed() {
-		
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_recently_viewed_products';
 		$this->woo_widget_description = __( 'Display a list of recently viewed products.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recently_viewed_products';
 		$this->woo_widget_name = __('WooCommerce Recently Viewed Products', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('recently_viewed_products', $this->woo_widget_name, $widget_ops);
 
@@ -35,7 +40,15 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget */
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget($args, $instance) {
 		global $woocommerce;
 
@@ -47,12 +60,12 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 			echo $cache[$args['widget_id']];
 			return;
 		}
-		
+
 		if (!isset($_SESSION['viewed_products']) || sizeof($_SESSION['viewed_products'])==0) return;
-		
+
 		ob_start();
 		extract($args);
-		
+
 		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recently viewed', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
@@ -64,11 +77,11 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $_SESSION['viewed_products'], 'orderby' => 'rand');
 
 		$query_args['meta_query'] = array();
-	    
+
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
-	    
+
 		$r = new WP_Query($query_args);
-		
+
 		if ($r->have_posts()) :
 ?>
 		<?php echo $before_widget; ?>
@@ -91,17 +104,25 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-		
+
 		echo $content;
-		
+
 		wp_cache_set('recently_viewed_products', $cache, 'widget');
 	}
 
-	/** @see WP_Widget->update */
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['number'] = (int) $new_instance['number'];		
+		$instance['number'] = (int) $new_instance['number'];
 
 		$this->flush_widget_cache();
 
@@ -115,7 +136,14 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		wp_cache_delete('recently_viewed_products', 'widget');
 	}
 
-	/** @see WP_Widget->form */
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
@@ -130,21 +158,24 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 
 <?php
 	}
-} // class WooCommerce_Widget_Recently_Viewed
+}
 
 
 /**
  * Track product views
+ *
+ * @access public
+ * @return void
  */
-add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);
-
 function woocommerce_track_product_view() {
 	global $post, $product;
-	
+
 	if (!isset($_SESSION['viewed_products']) || !is_array($_SESSION['viewed_products'])) $_SESSION['viewed_products'] = array();
-	
+
 	if (!in_array($post->ID, $_SESSION['viewed_products'])) $_SESSION['viewed_products'][] = $post->ID;
-	
+
 	if (sizeof($_SESSION['viewed_products'])>15) array_shift($_SESSION['viewed_products']);
-	
+
 }
+
+add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);

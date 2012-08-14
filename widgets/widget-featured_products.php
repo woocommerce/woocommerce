@@ -3,31 +3,39 @@
  * Featured Products Widget
  *
  * Gets and displays featured products in an unordered list
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
 class WooCommerce_Widget_Featured_Products extends WP_Widget {
-	
+
 	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Featured_Products() {
-	
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_featured_products';
 		$this->woo_widget_description = __( 'Display a list of featured products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_featured_products';
 		$this->woo_widget_name = __('WooCommerce Featured Products', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('featured-products', $this->woo_widget_name, $widget_ops);
 
@@ -36,10 +44,19 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget */
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget($args, $instance) {
 		global $woocommerce;
-		
+
 		$cache = wp_cache_get('widget_featured_products', 'widget');
 
 		if ( !is_array($cache) ) $cache = array();
@@ -64,45 +81,54 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
    		<?php $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
 
 		$query_args['meta_query'] = array();
-		
+
 		$query_args['meta_query'][] = array(
 			'key' => '_featured',
 			'value' => 'yes'
 		);
 	    $query_args['meta_query'][] = $woocommerce->query->stock_status_meta_query();
 	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
-	    
+
 		$r = new WP_Query($query_args);
-		
+
 		if ($r->have_posts()) : ?>
-		
+
 		<?php echo $before_widget; ?>
 		<?php if ( $title ) echo $before_title . $title . $after_title; ?>
 		<ul class="product_list_widget">
 		<?php while ($r->have_posts()) : $r->the_post(); global $product; ?>
-		
+
 		<li><a href="<?php echo esc_url( get_permalink( $r->post->ID ) ); ?>" title="<?php echo esc_attr($r->post->post_title ? $r->post->post_title : $r->post->ID); ?>">
 			<?php echo $product->get_image(); ?>
-			<?php if ( $r->post->post_title ) echo get_the_title( $r->post->ID ); else echo $r->post->ID; ?>			
+			<?php if ( $r->post->post_title ) echo get_the_title( $r->post->ID ); else echo $r->post->ID; ?>
 		</a> <?php echo $product->get_price_html(); ?></li>
-		
+
 		<?php endwhile; ?>
 		</ul>
 		<?php echo $after_widget; ?>
-		
+
 		<?php endif;
 
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-		
+
 		echo $content;
 
 		wp_cache_set('widget_featured_products', $cache, 'widget');
         wp_reset_postdata();
 	}
 
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -115,11 +141,26 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		return $instance;
 	}
 
+
+	/**
+	 * flush_widget_cache function.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function flush_widget_cache() {
 		wp_cache_delete('widget_featured_products', 'widget');
 	}
 
-	/** @see WP_Widget->form */
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] )
@@ -132,4 +173,4 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 <?php
 	}
-} // class WooCommerce_Widget_Featured_Products
+}

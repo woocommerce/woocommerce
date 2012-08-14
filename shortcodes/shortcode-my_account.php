@@ -4,36 +4,67 @@
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *
- * @package		WooCommerce
- * @category	Shortcode
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Shortcodes
+ * @package 	WooCommerce/Shortcodes/Accounts
+ * @version     1.6.4
  */
 
 /**
- * Shortcode wrappers
+ * Get the My Account shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
  */
 function get_woocommerce_my_account( $atts ) {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_my_account', $atts);
 }
+
+/**
+ * Get the Edit Address shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function get_woocommerce_edit_address() {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_edit_address');
 }
+
+/**
+ * Get the Change Password shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function get_woocommerce_change_password() {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_change_password');
 }
+
+/**
+ * Get the View Order shortcode content.
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function get_woocommerce_view_order() {
 	global $woocommerce;
 	return $woocommerce->shortcode_wrapper('woocommerce_view_order');
 }
 
+
 /**
  * My Account Shortcode.
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
+ * @param mixed $atts
+ * @return void
  */
 function woocommerce_my_account( $atts ) {
 	global $woocommerce, $current_user;
@@ -71,8 +102,7 @@ function woocommerce_my_account( $atts ) {
  *
  * Adapted from spencerfinnell's pull request
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_edit_address() {
 	global $woocommerce;
@@ -95,8 +125,7 @@ function woocommerce_edit_address() {
  * Save and and update a billing or shipping address if the
  * form was submitted through the user account page.
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_save_address() {
 	global $woocommerce;
@@ -162,13 +191,13 @@ function woocommerce_save_address() {
 		exit;
 	}
 }
+
 add_action( 'template_redirect', 'woocommerce_save_address' );
 
 /**
  * Figure out which address is being viewed/edited.
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_get_address_to_edit() {
 
@@ -182,8 +211,7 @@ function woocommerce_get_address_to_edit() {
 /**
  * Change Password Shortcode
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_change_password() {
 	global $woocommerce;
@@ -196,8 +224,7 @@ function woocommerce_change_password() {
 /**
  * Save the password and redirect back to the my account page.
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_save_password() {
 	global $woocommerce;
@@ -233,13 +260,13 @@ function woocommerce_save_password() {
 		exit;
 	}
 }
+
 add_action( 'template_redirect', 'woocommerce_save_password' );
 
 /**
  * View Order Shortcode
  *
- * @package WooCommerce
- * @since 1.4
+ * @access public
  */
 function woocommerce_view_order() {
 	global $woocommerce;

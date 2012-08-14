@@ -1,32 +1,37 @@
 <?php
 /**
  * Recent Reviews Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
- 
 class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Recent_Reviews() {
-		
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_recent_reviews';
 		$this->woo_widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recent_reviews';
 		$this->woo_widget_name = __('WooCommerce Recent Reviews', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('recent_reviews', $this->woo_widget_name, $widget_ops);
 
@@ -34,11 +39,19 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		add_action( 'deleted_post', array(&$this, 'flush_widget_cache') );
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
-	
-	/** @see WP_Widget */
-	function widget( $args, $instance ) {
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
+	 function widget( $args, $instance ) {
 		global $comments, $comment, $woocommerce;
-		
+
 		$cache = wp_cache_get('widget_recent_reviews', 'widget');
 
 		if ( ! is_array( $cache ) )
@@ -54,36 +67,36 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 
  		$title = apply_filters('widget_title', empty($instance['title']) ? __('Recent Reviews', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( ! $number = absint( $instance['number'] ) ) $number = 5;
-		
+
 		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
-		
+
 		if ( $comments ) :
 			echo $before_widget;
 			if ( $title ) echo $before_title . $title . $after_title;
 			echo '<ul class="product_list_widget">';
-		
+
 			foreach ( (array) $comments as $comment) :
-				
+
 				$_product = new WC_Product( $comment->comment_post_ID );
-				
+
 				$star_size = apply_filters('woocommerce_star_rating_size_recent_reviews', 16);
-				
+
 				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
-				
+
 				$rating_html = '<div class="star-rating" title="'.$rating.'">
 					<span style="width:'.($rating*$star_size).'px">'.$rating.' '.__('out of 5', 'woocommerce').'</span>
 				</div>';
-				
+
 				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
-				
+
 				echo $_product->get_image();
-				
+
 				echo $_product->get_title().'</a>';
-				
+
 				echo $rating_html;
-				
+
 				printf(_x('by %1$s', 'by comment author', 'woocommerce'), get_comment_author()) . '</li>';
-				
+
 			endforeach;
 
 			echo '</ul>';
@@ -93,17 +106,25 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-		
+
 		echo $content;
 
 		wp_cache_set('widget_recent_reviews', $cache, 'widget');
 	}
 
-	/** @see WP_Widget->update */
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['number'] = (int) $new_instance['number'];		
+		$instance['number'] = (int) $new_instance['number'];
 
 		$this->flush_widget_cache();
 
@@ -113,11 +134,24 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 		return $instance;
 	}
 
+	/**
+	 * flush_widget_cache function.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function flush_widget_cache() {
 		wp_cache_delete('widget_recent_reviews', 'widget');
 	}
-	
-	/** @see WP_Widget->form */
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;

@@ -4,9 +4,10 @@
  *
  * Init main shortcodes, and add a few others such as recent products.
  *
- * @package		WooCommerce
- * @category	Shortcode
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Shortcodes
+ * @package 	WooCommerce/Shortcodes
+ * @version     1.6.4
  */
 include_once('shortcode-cart.php');
 include_once('shortcode-checkout.php');
@@ -15,21 +16,26 @@ include_once('shortcode-order_tracking.php');
 include_once('shortcode-pay.php');
 include_once('shortcode-thankyou.php');
 
+
 /**
  * List products in a category shortcode
- **/
-function woocommerce_product_category($atts){
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_product_category( $atts ){
 	global $woocommerce_loop;
 
-  	if (empty($atts)) return;
+  	if ( empty( $atts ) ) return;
 
-	extract(shortcode_atts(array(
+	extract( shortcode_atts( array(
 		'per_page' 		=> '12',
 		'columns' 		=> '4',
 	  	'orderby'   	=> 'title',
 	  	'order'     	=> 'asc',
 	  	'category'		=> ''
-		), $atts));
+		), $atts ) );
 
 	if ( ! $category ) return;
 
@@ -82,9 +88,14 @@ function woocommerce_product_category($atts){
 	return ob_get_clean();
 }
 
+
 /**
  * List all (or limited) product categories
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_product_categories( $atts ) {
 	global $woocommerce_loop;
 
@@ -145,9 +156,14 @@ function woocommerce_product_categories( $atts ) {
 	return ob_get_clean();
 }
 
+
 /**
  * Recent Products shortcode
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_recent_products( $atts ) {
 
 	global $woocommerce_loop;
@@ -200,10 +216,15 @@ function woocommerce_recent_products( $atts ) {
 	return ob_get_clean();
 }
 
+
 /**
  * List multiple products shortcode
- **/
-function woocommerce_products($atts){
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_products( $atts ) {
 	global $woocommerce_loop;
 
   	if (empty($atts)) return;
@@ -271,10 +292,15 @@ function woocommerce_products($atts){
 	return ob_get_clean();
 }
 
+
 /**
  * Display a single prodcut
- **/
-function woocommerce_product($atts){
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_product( $atts ) {
   	if (empty($atts)) return;
 
   	$args = array(
@@ -329,8 +355,12 @@ function woocommerce_product($atts){
 
 /**
  * Display a single prodcut price + cart button
- **/
-function woocommerce_product_add_to_cart($atts){
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_product_add_to_cart( $atts ) {
   	if (empty($atts)) return;
 
   	global $wpdb, $woocommerce;
@@ -402,7 +432,11 @@ function woocommerce_product_add_to_cart($atts){
 
 /**
  * Get the add to cart URL for a product
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_product_add_to_cart_url( $atts ){
   	if (empty($atts)) return;
 
@@ -427,7 +461,11 @@ function woocommerce_product_add_to_cart_url( $atts ){
 
 /**
  * Output featured products
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_featured_products( $atts ) {
 
 	global $woocommerce_loop;
@@ -484,9 +522,14 @@ function woocommerce_featured_products( $atts ) {
 	return ob_get_clean();
 }
 
+
 /**
  * Show a single product page
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_product_page_shortcode( $atts ) {
   	if (empty($atts)) return;
 
@@ -531,9 +574,14 @@ function woocommerce_product_page_shortcode( $atts ) {
 	return ob_get_clean();
 }
 
+
 /**
  * Show messages
- **/
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
 function woocommerce_messages_shortcode() {
 	ob_start();
 

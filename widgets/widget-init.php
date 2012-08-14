@@ -1,12 +1,13 @@
 <?php
 /**
  * Widgets init
- * 
+ *
  * Init the widgets.
  *
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
  */
 include_once('widget-cart.php');
 include_once('widget-featured_products.php');
@@ -24,6 +25,12 @@ include_once('widget-onsale.php');
 include_once('widget-login.php');
 include_once('widget-random_products.php');
 
+/**
+ * woocommerce_register_widgets function.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Recent_Products');
 	register_widget('WooCommerce_Widget_Featured_Products');

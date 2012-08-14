@@ -1,31 +1,37 @@
 <?php
 /**
  * Best Sellers Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
 class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Best_Sellers() {
-		
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_best_sellers';
 		$this->woo_widget_description = __( 'Display a list of your best selling products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_best_sellers';
 		$this->woo_widget_name = __('WooCommerce Best Sellers', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('best_sellers', $this->woo_widget_name, $widget_ops);
 
@@ -34,10 +40,19 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget */
-	function widget($args, $instance) {
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
+	function widget( $args, $instance ) {
 		global $woocommerce;
-		
+
 		$cache = wp_cache_get('widget_best_sellers', 'widget');
 
 		if ( !is_array($cache) ) $cache = array();
@@ -49,7 +64,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
 		ob_start();
 		extract($args);
-		
+
 		$title = apply_filters('widget_title', empty($instance['title']) ? __('Best Sellers', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
@@ -59,16 +74,16 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 			$number = 15;
 
     	$query_args = array(
-    		'posts_per_page' => $number, 
-    		'post_status' 	 => 'publish', 
+    		'posts_per_page' => $number,
+    		'post_status' 	 => 'publish',
     		'post_type' 	 => 'product',
     		'meta_key' 		 => 'total_sales',
     		'orderby' 		 => 'meta_value',
     		'no_found_rows'  => 1,
     	);
-    	
+
     	$query_args['meta_query'] = array();
-    	
+
     	if ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) {
     		$query_args['meta_query'][] = array(
 			    'key'     => '_price',
@@ -82,7 +97,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	    $query_args['meta_query'][] = $woocommerce->query->visibility_meta_query();
 
 		$r = new WP_Query($query_args);
-		
+
 		if ($r->have_posts()) :
 ?>
 		<?php echo $before_widget; ?>
@@ -102,13 +117,22 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-		
+
 		echo $content;
 
 		wp_cache_set('widget_best_sellers', $cache, 'widget');
 	}
 
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -127,11 +151,26 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		return $instance;
 	}
 
+
+	/**
+	 * flush_widget_cache function.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function flush_widget_cache() {
-		wp_cache_delete('widget_best_sellers', 'widget');
+		wp_cache_delete( 'widget_best_sellers', 'widget' );
 	}
 
-	/** @see WP_Widget->form */
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
@@ -149,4 +188,4 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 
 		<?php
 	}
-} 
+}

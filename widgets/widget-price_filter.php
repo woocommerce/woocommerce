@@ -2,93 +2,27 @@
 /**
  * Price Filter Widget and related functions
  *
- * Generates a range slider to filter products by price
+ * Generates a range slider to filter products by price.
  *
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
- */
-
-/**
- * Price filter Init
- */
-add_action( 'init', 'woocommerce_price_filter_init' );
-
-function woocommerce_price_filter_init() {
-	global $woocommerce;
-
-	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
-
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui' ), '1.6', true );
-
-		unset( $_SESSION['min_price'] );
-		unset( $_SESSION['max_price'] );
-
-		if ( isset( $_GET['min_price'] ) )
-			$_SESSION['min_price'] = $_GET['min_price'];
-
-		if ( isset( $_GET['max_price'] ) )
-			$_SESSION['max_price'] = $_GET['max_price'];
-
-		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
-	}
-}
-
-/**
- * Price Filter post filter
- */
-function woocommerce_price_filter($filtered_posts) {
-    global $wpdb;
-
-    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
-
-        $matched_products = array();
-        $min 	= floatval( $_GET['min_price'] );
-        $max 	= floatval( $_GET['max_price'] );
-
-        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
-        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
-			INNER JOIN $wpdb->postmeta ON ID = post_id
-			WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
-		", '_price', $min, $max ), OBJECT_K );
-
-        if ( $matched_products_query ) {
-            foreach ( $matched_products_query as $product ) {
-                if ( $product->post_type == 'product' )
-                    $matched_products[] = $product->ID;
-                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
-                    $matched_products[] = $product->post_parent;
-            }
-        }
-
-        // Filter the id's
-        if ( sizeof( $filtered_posts ) == 0) {
-            $filtered_posts = $matched_products;
-            $filtered_posts[] = 0;
-        } else {
-            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
-            $filtered_posts[] = 0;
-        }
-
-    }
-
-    return (array) $filtered_posts;
-}
-
-/**
- * Price Filter post Widget
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
 class WooCommerce_Widget_Price_Filter extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
 
-	/** constructor */
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Price_Filter() {
 
 		/* Widget variable settings. */
@@ -104,7 +38,16 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$this->WP_Widget('price_filter', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget */
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget( $args, $instance ) {
 		extract($args);
 
@@ -197,14 +140,31 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		echo $after_widget;
 	}
 
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = __('Filter by price', 'woocommerce');
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		return $instance;
 	}
 
-	/** @see WP_Widget->form */
+
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		global $wpdb;
 		?>
@@ -212,4 +172,81 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 		<?php
 	}
-} // class WooCommerce_Widget_Price_Filter
+}
+
+
+/**
+ * Price filter Init
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_price_filter_init() {
+	global $woocommerce;
+
+	if ( is_active_widget( false, false, 'price_filter', true ) && ! is_admin() ) {
+
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui' ), '1.6', true );
+
+		unset( $_SESSION['min_price'] );
+		unset( $_SESSION['max_price'] );
+
+		if ( isset( $_GET['min_price'] ) )
+			$_SESSION['min_price'] = $_GET['min_price'];
+
+		if ( isset( $_GET['max_price'] ) )
+			$_SESSION['max_price'] = $_GET['max_price'];
+
+		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
+	}
+}
+
+add_action( 'init', 'woocommerce_price_filter_init' );
+
+
+/**
+ * Price Filter post filter
+ *
+ * @access public
+ * @param array $filtered_posts
+ * @return array
+ */
+function woocommerce_price_filter($filtered_posts) {
+    global $wpdb;
+
+    if ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) {
+
+        $matched_products = array();
+        $min 	= floatval( $_GET['min_price'] );
+        $max 	= floatval( $_GET['max_price'] );
+
+        $matched_products_query = $wpdb->get_results( $wpdb->prepare("
+        	SELECT DISTINCT ID, post_parent, post_type FROM $wpdb->posts
+			INNER JOIN $wpdb->postmeta ON ID = post_id
+			WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = 'publish' AND meta_key = %s AND meta_value BETWEEN %d AND %d
+		", '_price', $min, $max ), OBJECT_K );
+
+        if ( $matched_products_query ) {
+            foreach ( $matched_products_query as $product ) {
+                if ( $product->post_type == 'product' )
+                    $matched_products[] = $product->ID;
+                if ( $product->post_parent > 0 && ! in_array( $product->post_parent, $matched_products ) )
+                    $matched_products[] = $product->post_parent;
+            }
+        }
+
+        // Filter the id's
+        if ( sizeof( $filtered_posts ) == 0) {
+            $filtered_posts = $matched_products;
+            $filtered_posts[] = 0;
+        } else {
+            $filtered_posts = array_intersect( $filtered_posts, $matched_products );
+            $filtered_posts[] = 0;
+        }
+
+    }
+
+    return (array) $filtered_posts;
+}

@@ -2,19 +2,25 @@
 /**
  * Login Widget
  *
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
 class WooCommerce_Widget_Login extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
 
-	/** constructor */
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Login() {
 
 		/* Widget variable settings. */
@@ -30,7 +36,15 @@ class WooCommerce_Widget_Login extends WP_Widget {
 		$this->WP_Widget('woocommerce_login', $this->woo_widget_name, $widget_ops);
 	}
 
-	/** @see WP_Widget */
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget( $args, $instance ) {
 		global $woocommerce;
 
@@ -170,14 +184,29 @@ class WooCommerce_Widget_Login extends WP_Widget {
 		echo $after_widget;
 	}
 
-	/** @see WP_Widget->update */
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance['logged_out_title'] = strip_tags(stripslashes($new_instance['logged_out_title']));
 		$instance['logged_in_title'] = strip_tags(stripslashes($new_instance['logged_in_title']));
 		return $instance;
 	}
 
-	/** @see WP_Widget->form */
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		?>
 
@@ -190,10 +219,15 @@ class WooCommerce_Widget_Login extends WP_Widget {
 		<?php
 	}
 
-} // class WooCommerce_Widget_Login
+}
 
-add_action('init', 'woocommerce_sidebar_login_process', 0);
 
+/**
+ * Process the login.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_sidebar_login_process() {
 
 	if (isset($_POST['woocommerce_login'])) {
@@ -245,3 +279,5 @@ function woocommerce_sidebar_login_process() {
 
 	}
 }
+
+add_action( 'init', 'woocommerce_sidebar_login_process', 0 );

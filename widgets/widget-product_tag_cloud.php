@@ -1,37 +1,50 @@
 <?php
 /**
  * Tag Cloud Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
- 
 class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_Product_Tag_Cloud() {
-	
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_product_tag_cloud';
 		$this->woo_widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_tag_cloud';
 		$this->woo_widget_name = __('WooCommerce Product Tags', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('product_tag_cloud', $this->woo_widget_name, $widget_ops);
 	}
-	
-	/** @see WP_Widget */
+
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
 	function widget( $args, $instance ) {
 		extract($args);
 		$current_taxonomy = $this->_get_current_taxonomy($instance);
@@ -55,15 +68,30 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 		echo "</div>\n";
 		echo $after_widget;
 	}
-	
-	/** @see WP_Widget->update */
+
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance['title'] = isset( $new_instance['title'] ) ? strip_tags( stripslashes( $new_instance['title'] ) ) : '';
 		$instance['taxonomy'] = isset( $new_instance['taxonomy'] ) ? stripslashes( $new_instance['taxonomy'] ) : '';
 		return $instance;
 	}
 
-	/** @see WP_Widget->form */
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$current_taxonomy = $this->_get_current_taxonomy($instance);
 ?>
@@ -75,4 +103,4 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 	function _get_current_taxonomy($instance) {
 		return 'product_tag';
 	}
-} // class WooCommerce_Widget_Product_Tag_Cloud
+}

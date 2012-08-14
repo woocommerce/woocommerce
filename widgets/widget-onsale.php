@@ -1,32 +1,37 @@
 <?php
 /**
  * On Sale Widget
- * 
- * @package		WooCommerce
- * @category	Widgets
- * @author		WooThemes
+ *
+ * @author 		WooThemes
+ * @category 	Widgets
+ * @package 	WooCommerce/Widgets
+ * @version 	1.6.4
+ * @extends 	WP_Widget
  */
-
 class WooCommerce_Widget_On_Sale extends WP_Widget {
 
-	/** Variables to setup the widget. */
 	var $woo_widget_cssclass;
 	var $woo_widget_description;
 	var $woo_widget_idbase;
 	var $woo_widget_name;
-	
-	/** constructor */
+
+	/**
+	 * constructor
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function WooCommerce_Widget_On_Sale() {
-		
+
 		/* Widget variable settings. */
 		$this->woo_widget_cssclass = 'widget_onsale';
 		$this->woo_widget_description = __( 'Display a list of your on-sale products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_onsale';
 		$this->woo_widget_name = __('WooCommerce On-sale', 'woocommerce' );
-		
+
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
-		
+
 		/* Create the widget. */
 		$this->WP_Widget('onsale', $this->woo_widget_name, $widget_ops);
 
@@ -35,10 +40,18 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		add_action( 'switch_theme', array(&$this, 'flush_widget_cache') );
 	}
 
-	/** @see WP_Widget */
-	function widget($args, $instance) {
+	/**
+	 * widget function.
+	 *
+	 * @see WP_Widget
+	 * @access public
+	 * @param array $args
+	 * @param array $instance
+	 * @return void
+	 */
+	function widget( $args, $instance ) {
 		global $wp_query, $woocommerce;
-		
+
 		$cache = wp_cache_get('widget_onsale', 'widget');
 
 		if ( !is_array($cache) ) $cache = array();
@@ -50,7 +63,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 
 		ob_start();
 		extract($args);
-		
+
 		$title = apply_filters('widget_title', empty($instance['title']) ? __('On Sale', 'woocommerce') : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
@@ -61,16 +74,16 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 
 		// Get products on sale
 		if ( false === ( $product_ids_on_sale = get_transient( 'wc_products_onsale' ) ) ) {
-		
+
 			$meta_query = array();
-			
+
 		    $meta_query[] = array(
 		    	'key' => '_sale_price',
 		        'value' 	=> 0,
 				'compare' 	=> '>',
 				'type'		=> 'NUMERIC'
 		    );
-	
+
 			$on_sale = get_posts(array(
 				'post_type' 		=> array('product', 'product_variation'),
 				'posts_per_page' 	=> -1,
@@ -78,31 +91,31 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 				'meta_query' 		=> $meta_query,
 				'fields' 			=> 'id=>parent'
 			));
-			
+
 			$product_ids 	= array_keys( $on_sale );
 			$parent_ids		= array_values( $on_sale );
-			
+
 			// Check for scheduled sales which have not started
 			foreach ( $product_ids as $key => $id )
 				if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time('timestamp') )
 					unset( $product_ids[ $key ] );
-			
+
 			$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
-			
+
 			set_transient( 'wc_products_onsale', $product_ids_on_sale );
-					
+
 		}
-		
+
 		$product_ids_on_sale[] = 0;
-		
+
 		$meta_query = array();
 		$meta_query[] = $woocommerce->query->visibility_meta_query();
 	    $meta_query[] = $woocommerce->query->stock_status_meta_query();
-		    
+
     	$query_args = array(
-    		'posts_per_page' 	=> $number, 
+    		'posts_per_page' 	=> $number,
     		'no_found_rows' => 1,
-    		'post_status' 	=> 'publish', 
+    		'post_status' 	=> 'publish',
     		'post_type' 	=> 'product',
     		'orderby' 		=> 'date',
     		'order' 		=> 'ASC',
@@ -111,7 +124,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
     	);
 
 		$r = new WP_Query($query_args);
-		
+
 		if ( $r->have_posts() ) :
 ?>
 		<?php echo $before_widget; ?>
@@ -131,17 +144,25 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		$content = ob_get_clean();
 
 		if ( isset( $args['widget_id'] ) ) $cache[$args['widget_id']] = $content;
-		
+
 		echo $content;
 
 		wp_cache_set('widget_onsale', $cache, 'widget');
 	}
 
-	/** @see WP_Widget->update */
+	/**
+	 * update function.
+	 *
+	 * @see WP_Widget->update
+	 * @access public
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array
+	 */
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['number'] = (int) $new_instance['number'];		
+		$instance['number'] = (int) $new_instance['number'];
 
 		$this->flush_widget_cache();
 
@@ -151,11 +172,24 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		return $instance;
 	}
 
+	/**
+	 * flush_widget_cache function.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function flush_widget_cache() {
 		wp_cache_delete('widget_onsale', 'widget');
 	}
 
-	/** @see WP_Widget->form */
+	/**
+	 * form function.
+	 *
+	 * @see WP_Widget->form
+	 * @access public
+	 * @param array $instance
+	 * @return void
+	 */
 	function form( $instance ) {
 		$title = isset($instance['title']) ? esc_attr($instance['title']) : '';
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
@@ -169,4 +203,4 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 
 		<?php
 	}
-} 
+}
