@@ -5,20 +5,59 @@
  * Handles shipping and loads shipping methods via hooks.
  *
  * @class 		WC_Shipping
- * @package		WooCommerce
- * @category	Shipping
- * @author		WooThemes
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Shipping
+ * @author 		WooThemes
  */
 class WC_Shipping {
 
+	/**
+	 * @var bool
+	 */
 	var $enabled					= false;
-	var $shipping_methods 			= array();	// Stores methods loaded into woocommerce
-	var $available_shipping_methods = array(); 	// Stores available shipping method instances
+
+	/**
+	 * Stores methods loaded into woocommerce.
+	 *
+	 * @var array
+	 */
+	var $shipping_methods 			= array();
+
+	/**
+	 * Stores available shipping method instances.
+	 *
+	 * @var array
+	 */
+	var $available_shipping_methods = array();
+
+	/**
+	 * @var string
+	 */
 	var $chosen_method				= null;
+
+	/**
+	 * @var float
+	 */
 	var $shipping_total 			= 0;
+
+	/**
+	 * @var array
+	 */
 	var $shipping_taxes				= array();
+
+	/**
+	 * @var string
+	 */
 	var $shipping_label				= null;
+
+	/**
+	 * @var array
+	 */
 	var $shipping_classes			= array();
+
+	/**
+	 * @var array
+	 */
 	var $packages					= array();
 
     /**

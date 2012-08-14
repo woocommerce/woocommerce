@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce/Admin/Write Panels
+ * @package 	WooCommerce/Admin/WritePanels
  * @version     1.6.4
  */
 

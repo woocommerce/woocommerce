@@ -6,7 +6,7 @@
  *
  * @class 		WC_Product_Variation
  * @version		1.6.4
- * @package		WooCommerce/classes
+ * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
 class WC_Product_Variation extends WC_Product {

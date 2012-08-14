@@ -5,39 +5,116 @@
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class 		WC_Shipping_Method
- * @package		WooCommerce
- * @category	Shipping
- * @author		WooThemes
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Shipping
+ * @author 		WooThemes
  */
 class WC_Shipping_Method extends WC_Settings_API {
 
-	var $id;								// Unique ID for the shipping method - must be set.
-	var $number;							// Optional instance ID.
-	var $method_title; 						// Method title
-	var $title;								// User set title
+	/**
+	 * Unique ID for the shipping method - must be set.
+	 *
+	 * @var string
+	 */
+	var $id;
 
+	/**
+	 * Optional instance ID.
+	 *
+	 * @var int
+	 */
+	var $number;
+
+	/**
+	 * Method title
+	 *
+	 * @var string
+	 */
+	var $method_title;
+
+	/**
+	 * User set title
+	 *
+	 * @var string
+	 */
+	var $title;
+
+	/**
+	 * @var bool
+	 */
 	var $availability;
+
+	/**
+	 * Array of countries this method is enabled for.
+	 *
+	 * @var array
+	 */
 	var $countries;
 
-	var $tax_status			= 'taxable';	// If 'taxable' tax will be charged for this method (if applicable)
-	var $fee				= 0;			// Fees for the method
-	var $minimum_fee		= null;			// Minimum fee for the method
-	var $min_amount			= null;			// Min amount (if set) for the cart to use this method
-	var $enabled			= false;		// Enabled for disabled
-	var $has_settings		= true;			// Whether the method has settings or not (In WooCommerce > Settings > Shipping)
+	/**
+	 * If 'taxable' tax will be charged for this method (if applicable)
+	 *
+	 * @var string
+	 */
+	var $tax_status			= 'taxable';
+
+	/**
+	 * Fees for the method
+	 *
+	 * @var mixed
+	 */
+	var $fee				= 0;
+
+	/**
+	 * Minimum fee for the method
+	 *
+	 * @var float
+	 */
+	var $minimum_fee		= null;
+
+	/**
+	 * Min amount (if set) for the cart to use this method
+	 *
+	 * @var float
+	 */
+	var $min_amount			= null;
+
+	/**
+	 * Enabled for disabled
+	 *
+	 * @var bool
+	 */
+	var $enabled			= false;
+
+	/**
+	 * Whether the method has settings or not (In WooCommerce > Settings > Shipping)
+	 *
+	 * @var bool
+	 */
+	var $has_settings		= true;
+
+	/**
+	 * Features this method supports.
+	 *
+	 * @var array
+	 */
 	var $supports			= array();		// Features this method supports.
 
 	/**
-	 * Rates
-	 *
 	 * This is an array of rates - methods must populate this array to register shipping costs
+	 *
+	 * @var array
 	 */
-	var $rates 				= array(); // This is an array of rates - methods must populate this array to register shipping costs
+	var $rates 				= array();
 
 	/**
 	 * Add a rate
 	 *
-	 * A a shipping rate. If taxes are not set they will be calculated based on cost.
+	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
+	 *
+	 * @access public
+	 * @param array $args (default: array())
+	 * @return void
 	 */
 	function add_rate( $args = array() ) {
 		global $woocommerce;
@@ -121,11 +198,24 @@ class WC_Shipping_Method extends WC_Settings_API {
 		$this->rates[] = new WC_Shipping_Rate( $id, $label, $total_cost, $taxes );
 	}
 
+	/**
+	 * has_settings function.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function has_settings() {
 		if ( $this->has_settings )
 			return true;
 	}
 
+    /**
+     * is_available function.
+     *
+     * @access public
+     * @param array $package
+     * @return bool
+     */
     function is_available( $package ) {
     	global $woocommerce;
 
@@ -189,9 +279,7 @@ class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	function supports( $feature ) {
-
 		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
-
 	}
 }
 
@@ -199,6 +287,11 @@ class WC_Shipping_Method extends WC_Settings_API {
  * WooCommerce Shipping Rate Class
  *
  * Simple Class for storing rates.
+ *
+ * @class 		WC_Shipping_Rate
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Shipping
+ * @author 		WooThemes
  */
 class WC_Shipping_Rate {
 
@@ -207,6 +300,16 @@ class WC_Shipping_Rate {
 	var $cost 	= 0;
 	var $taxes 	= array();
 
+	/**
+	 * __construct function.
+	 *
+	 * @access public
+	 * @param mixed $id
+	 * @param mixed $label
+	 * @param mixed $cost
+	 * @param mixed $taxes
+	 * @return void
+	 */
 	public function __construct( $id, $label, $cost, $taxes ) {
 		$this->id 		= $id;
 		$this->label 	= $label;
@@ -214,6 +317,12 @@ class WC_Shipping_Rate {
 		$this->taxes 	= $taxes ? $taxes : array();
 	}
 
+	/**
+	 * get_shipping_tax function.
+	 *
+	 * @access public
+	 * @return array
+	 */
 	function get_shipping_tax() {
 		$taxes = 0;
 		if ( $this->taxes && sizeof( $this->taxes ) > 0 )
@@ -222,7 +331,12 @@ class WC_Shipping_Rate {
 	}
 }
 
-/** Deprecated */
+/**
+ * woocommerce_shipping_method class.
+ *
+ * @extends WC_Shipping_Method
+ * @deprecated 1.4
+ */
 class woocommerce_shipping_method extends WC_Shipping_Method {
 	public function __construct() {
 		_deprecated_function( 'woocommerce_shipping_method', '1.4', 'WC_Shipping_Method()' );

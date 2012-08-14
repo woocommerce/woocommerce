@@ -1,8 +1,12 @@
 <?php
 /**
  * WC_Product_Cat_List_Walker class.
- * 
- * @extends Walker
+ *
+ * @extends 	Walker
+ * @class 		WC_Product_Cat_Dropdown_Walker
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Walkers
+ * @author 		WooThemes
  */
 class WC_Product_Cat_List_Walker extends Walker {
 
@@ -51,20 +55,20 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param array $args
 	 */
 	function start_el( &$output, $cat, $depth, $args ) {
-		
+
 		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
-		
+
 		if ( $args['current_category'] == $cat->term_id )
 			$output .= ' current-cat';
-		
+
 		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) )
 			$output .= ' current-cat-parent';
-		
+
 		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, 'product_cat' ) . '">' . __( $cat->name, 'woocommerce' ) . '</a>';
-		
-		if ( $args['show_count'] ) 
+
+		if ( $args['show_count'] )
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
-		
+
 	}
 
 	/**
@@ -77,11 +81,11 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @param array $args Only uses 'list' for whether should append to output.
 	 */
 	function end_el( &$output, $cat, $depth, $args ) {
-		
+
 		$output .= "</li>\n";
 
 	}
-	
+
 	/**
 	 * Traverse elements to create list from elements.
 	 *
@@ -106,24 +110,24 @@ class WC_Product_Cat_List_Walker extends Walker {
 
 		if ( !$element )
 			return;
-			
+
 		if ( ! $args[0]['show_children_only'] || ( $args[0]['show_children_only'] && ( $element->parent == 0 || $args[0]['current_category'] == $element->parent || in_array( $element->parent, $args[0]['current_category_ancestors'] ) ) ) ) {
 
 			$id_field = $this->db_fields['id'];
-	
+
 			//display this element
 			if ( is_array( $args[0] ) )
 				$args[0]['has_children'] = ! empty( $children_elements[$element->$id_field] );
 			$cb_args = array_merge( array(&$output, $element, $depth), $args);
 			call_user_func_array(array(&$this, 'start_el'), $cb_args);
-	
+
 			$id = $element->$id_field;
-	
+
 			// descend only when the depth is right and there are childrens for this element
 			if ( ($max_depth == 0 || $max_depth > $depth+1 ) && isset( $children_elements[$id]) ) {
-	
+
 				foreach( $children_elements[ $id ] as $child ){
-	
+
 					if ( !isset($newlevel) ) {
 						$newlevel = true;
 						//start the child delimiter
@@ -134,17 +138,17 @@ class WC_Product_Cat_List_Walker extends Walker {
 				}
 				unset( $children_elements[ $id ] );
 			}
-	
+
 			if ( isset($newlevel) && $newlevel ){
 				//end the child delimiter
 				$cb_args = array_merge( array(&$output, $depth), $args);
 				call_user_func_array(array(&$this, 'end_lvl'), $cb_args);
 			}
-			
+
 			//end this element
 			$cb_args = array_merge( array(&$output, $element, $depth), $args);
 			call_user_func_array(array(&$this, 'end_el'), $cb_args);
-			
+
 		}
 	}
 
