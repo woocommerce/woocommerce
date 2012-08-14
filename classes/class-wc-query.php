@@ -9,12 +9,47 @@
  */
 class WC_Query {
 
-	var $unfiltered_product_ids 	= array(); 	// Unfiltered product ids (before layered nav etc)
-	var $filtered_product_ids 		= array(); 	// Filtered product ids (after layered nav)
-	var $post__in 					= array(); 	// Product id's that match the layered nav + price filter
-	var $meta_query 				= ''; 		// The meta query for the page
-	var $layered_nav_post__in 		= array(); 	// posts matching layered nav only
-	var $layered_nav_product_ids 	= array();	// Stores posts matching layered nav, so price filter can find max price in view
+	/**
+	 * Unfiltered product ids (before layered nav etc)
+	 *
+	 * @var array
+	 */
+	var $unfiltered_product_ids 	= array();
+
+	/**
+	 * Filtered product ids (after layered nav)
+	 *
+	 * @var array
+	 */
+	var $filtered_product_ids 		= array();
+
+	/**
+	 * Product IDs that match the layered nav + price filter
+	 *
+	 * @var array
+	 */
+	var $post__in 					= array();
+
+	/**
+	 * The meta query for the page
+	 *
+	 * @var array
+	 */
+	var $meta_query 				= '';
+
+	/**
+	 * Post IDs matching layered nav only
+	 *
+	 * @var array
+	 */
+	var $layered_nav_post__in 		= array();
+
+	/**
+	 * Stores post IDs matching layered nav, so price filter can find max price in view
+	 *
+	 * @var array
+	 */
+	var $layered_nav_product_ids 	= array();
 
 	/**
 	 * Constructor.
@@ -28,8 +63,13 @@ class WC_Query {
 		add_filter( 'wp', array( &$this, 'remove_product_query') );
 	}
 
+
 	/**
 	 * Hook into pre_get_posts to do the main product query
+	 *
+	 * @access public
+	 * @param mixed $q query object
+	 * @return void
 	 */
 	function pre_get_posts( $q ) {
 		global $woocommerce;
@@ -83,8 +123,14 @@ class WC_Query {
 	    $this->remove_product_query();
 	}
 
+
 	/**
 	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
+	 *
+	 * @access public
+	 * @param mixed $posts
+	 * @param bool $query (default: false)
+	 * @return void
 	 */
 	function the_posts( $posts, $query = false ) {
 		global $woocommerce;
@@ -135,8 +181,13 @@ class WC_Query {
 	    return $filtered_posts;
 	}
 
+
 	/**
 	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
+	 *
+	 * @access public
+	 * @param mixed $q
+	 * @return void
 	 */
 	function product_query( $q ) {
 
@@ -174,15 +225,23 @@ class WC_Query {
 	    do_action( 'woocommerce_product_query', $q, $this );
 	}
 
+
 	/**
 	 * Remove the query
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function remove_product_query() {
 		remove_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
 	}
 
+
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function get_products_in_view() {
 		global $wp_the_query;
@@ -237,8 +296,12 @@ class WC_Query {
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
 	}
 
+
 	/**
 	 * Returns an array of arguments for ordering products based on the selected values
+	 *
+	 * @access public
+	 * @return array
 	 */
 	function get_catalog_ordering_args() {
 		$current_order = ( isset( $_SESSION['orderby'] ) ) ? $_SESSION['orderby'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -273,11 +336,16 @@ class WC_Query {
 		if ($meta_key)
 			$args['meta_key'] = $meta_key;
 
-		return apply_filters('woocommerce_get_catalog_ordering_args', $args);
+		return apply_filters('woocommerce_get_catalog_ordering_args', $args );
 	}
+
 
 	/**
 	 * Returns a meta query to handle product visibility
+	 *
+	 * @access public
+	 * @param string $compare (default: 'IN')
+	 * @return array
 	 */
 	function visibility_meta_query( $compare = 'IN' ) {
 		if ( is_search() ) $in = array( 'visible', 'search' ); else $in = array( 'visible', 'catalog' );
@@ -291,8 +359,13 @@ class WC_Query {
 	    return $meta_query;
 	}
 
+
 	/**
 	 * Returns a meta query to handle product stock status
+	 *
+	 * @access public
+	 * @param string $status (default: 'instock')
+	 * @return array
 	 */
 	function stock_status_meta_query( $status = 'instock' ) {
 		$meta_query = array();

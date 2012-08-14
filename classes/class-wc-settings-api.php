@@ -2,18 +2,48 @@
 /**
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
- * @class 		WC_Settings_Api
- * @package		WooCommerce
- * @category	Class
- * @author		WooThemes
+ * @class 		WC_Settings_API
+ * @version		1.6.4
+ * @package		WooCommerce/classes
+ * @author 		WooThemes
  */
 class WC_Settings_API {
 
+	/**
+	 * The plugin ID. Used for option names.
+	 *
+	 * @var string
+	 */
 	var $plugin_id = 'woocommerce_';
+
+	/**
+	 * Array of setting values.
+	 *
+	 * @var array
+	 */
 	var $settings = array();
+
+	/**
+	 * Array of form option fields.
+	 *
+	 * @var array
+	 */
 	var $form_fields = array();
+
+	/**
+	 * Array of validation errors.
+	 *
+	 * @var array
+	 */
 	var $errors = array();
+
+	/**
+	 * Sanitized fields after validation.
+	 *
+	 * @var array
+	 */
 	var $sanitized_fields = array();
+
 
 	/**
 	 * Admin Options
@@ -22,6 +52,8 @@ class WC_Settings_API {
 	 * Override this in your gateway.
 	 *
 	 * @since 1.0.0
+	 * @access public
+	 * @return void
 	 */
 	function admin_options() { ?>
 		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings','woocommerce' ) ; ?></h3>
@@ -40,14 +72,20 @@ class WC_Settings_API {
 	 * on the gateway's settings screen.
 	 *
 	 * @since 1.0.0
+	 * @access public
+	 * @return string
 	 */
-	function init_form_fields() { return __( 'This function needs to be overridden by your payment gateway class.', 'woocommerce' ); }
+	function init_form_fields() {
+		return __( 'This function needs to be overridden by your payment gateway class.', 'woocommerce' );
+	}
 
 	/**
 	 * Admin Panel Options Processing
 	 * - Saves the options to the DB
 	 *
 	 * @since 1.0.0
+	 * @access public
+	 * @return bool
 	 */
     public function process_admin_options() {
     	$this->validate_settings_fields();
@@ -65,8 +103,10 @@ class WC_Settings_API {
      * Display admin error messages.
      *
      * @since 1.0.0
-     */
-    function display_errors() {} // End display_errors()
+	 * @access public
+	 * @return void
+	 */
+    function display_errors() {}
 
 	/**
      * Initialise Gateway Settings
@@ -77,7 +117,9 @@ class WC_Settings_API {
      *
      * @since 1.0.0
      * @uses get_option(), add_option()
-     */
+	 * @access public
+	 * @return void
+	 */
     function init_settings() {
 
     	// Load form_field settings
@@ -106,19 +148,32 @@ class WC_Settings_API {
     	if ( isset( $this->settings['enabled'] ) && ( $this->settings['enabled'] == 'yes' ) )
     		$this->enabled = 'yes';
 
-    } // End init_settings()
+    }
 
+
+    /**
+     * Decode values for settings.
+     *
+     * @access public
+     * @param mixed $value
+     * @return array
+     */
     function format_settings( $value ) {
     	return ( is_array( $value ) ) ? $value : html_entity_decode( $value );
     }
+
 
     /**
      * Generate Settings HTML.
      *
      * Generate the HTML for the fields on the "settings" screen.
      *
+     * @access public
+     * @param bool $form_fields (default: false)
      * @since 1.0.0
      * @uses method_exists()
+	 * @access public
+	 * @return string the html for the settings
      */
     function generate_settings_html ( $form_fields = false ) {
 
@@ -135,13 +190,17 @@ class WC_Settings_API {
     	}
 
     	echo $html;
-    } // End generate_settings_html()
+    }
+
 
     /**
      * Generate Text Input HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_text_html ( $key, $data ) {
     	$html = '';
@@ -164,13 +223,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_text_html()
+    }
 
     /**
      * Generate Password Input HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_password_html ( $key, $data ) {
     	$html = '';
@@ -193,13 +255,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_password_html()
+    }
 
     /**
      * Generate Textarea HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_textarea_html( $key, $data ) {
     	$html = '';
@@ -223,13 +288,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_textarea_html()
+    }
 
     /**
      * Generate Checkbox HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_checkbox_html ( $key, $data ) {
     	$html = '';
@@ -251,13 +319,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_checkbox_html()
+    }
 
     /**
      * Generate Select HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_select_html ( $key, $data ) {
     	$html = '';
@@ -286,13 +357,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_select_html()
+    }
 
     /**
      * Generate Multiselect HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.0.0
-     * @return $html string
+     * @return string
      */
     function generate_multiselect_html ( $key, $data ) {
     	$html = '';
@@ -323,13 +397,16 @@ class WC_Settings_API {
 		$html .= '</tr>' . "\n";
 
     	return $html;
-    } // End generate_select_html()
+    }
 
 	/**
      * Generate Title HTML.
      *
+     * @access public
+     * @param mixed $key
+     * @param mixed $data
      * @since 1.6.2
-     * @return $html string
+     * @return string
      */
 	function generate_title_html( $key, $data ) {
     	$html = '';
@@ -344,7 +421,8 @@ class WC_Settings_API {
 		$html .= '<table class="form-table">' . "\n";
 
     	return $html;
-    } // End generate_title_html()
+    }
+
 
     /**
      * Validate Settings Field Data.
@@ -353,6 +431,8 @@ class WC_Settings_API {
      *
      * @since 1.0.0
      * @uses method_exists()
+     * @param bool $form_fields (default: false)
+     * @return void
      */
     function validate_settings_fields( $form_fields = false ) {
 
@@ -371,15 +451,18 @@ class WC_Settings_API {
     			$this->sanitized_fields[$k] = $this->settings[$k];
     		}
     	}
-    } // End validate_settings_fields()
+    }
+
 
     /**
      * Validate Checkbox Field.
      *
      * If not set, return "no", otherwise return "yes".
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $status string
+     * @return string
      */
     function validate_checkbox_field ( $key ) {
     	$status = 'no';
@@ -388,15 +471,17 @@ class WC_Settings_API {
     	}
 
     	return $status;
-    } // End validate_checkbox_field()
+    }
 
     /**
      * Validate Text Field.
      *
      * Make sure the data is escaped correctly, etc.
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $text string
+     * @return string
      */
     function validate_text_field ( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
@@ -406,15 +491,18 @@ class WC_Settings_API {
     	}
 
     	return $text;
-    } // End validate_text_field()
+    }
+
 
     /**
      * Validate Password Field.
      *
      * Make sure the data is escaped correctly, etc.
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $text string
+     * @return string
      */
     function validate_password_field ( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
@@ -424,7 +512,7 @@ class WC_Settings_API {
     	}
 
     	return $text;
-    } // End validate_password_field()
+    }
 
 
     /**
@@ -432,8 +520,10 @@ class WC_Settings_API {
      *
      * Make sure the data is escaped correctly, etc.
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $text string
+     * @return string
      */
     function validate_textarea_field ( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
@@ -443,15 +533,18 @@ class WC_Settings_API {
     	}
 
     	return $text;
-    } // End validate_textarea_field()
+    }
+
 
     /**
      * Validate Select Field.
      *
      * Make sure the data is escaped correctly, etc.
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $text string
+     * @return string
      */
     function validate_select_field ( $key ) {
     	$value = (isset($this->settings[$key])) ? $this->settings[$key] : '';
@@ -461,15 +554,17 @@ class WC_Settings_API {
     	}
 
     	return $value;
-    } // End validate_select_field()
+    }
 
     /**
      * Validate Multiselect Field.
      *
      * Make sure the data is escaped correctly, etc.
      *
+     * @access public
+     * @param mixed $key
      * @since 1.0.0
-     * @return $text string
+     * @return string
      */
     function validate_multiselect_field ( $key ) {
     	$value = (isset($this->settings[$key])) ? $this->settings[$key] : '';
@@ -481,11 +576,16 @@ class WC_Settings_API {
     	}
 
     	return $value;
-    } // End validate_select_field()
+    }
 
 }
 
-/** Deprecated */
+/**
+ * woocommerce_settings_api class.
+ *
+ * @extends WC_Settings_Api
+ * @deprecated 1.4
+ */
 class woocommerce_settings_api extends WC_Settings_Api {
 	public function __construct() {
 		_deprecated_function( 'woocommerce_settings_api', '1.4', 'WC_Settings_Api()' );
