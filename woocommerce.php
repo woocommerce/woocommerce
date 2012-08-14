@@ -1589,7 +1589,7 @@ class Woocommerce {
 	 * @param bool $echo (default: true)
 	 * @return void
 	 */
-	function nonce_fiel ( $action, $referer = true , $echo = true ) {
+	function nonce_field( $action, $referer = true , $echo = true ) {
 		return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo );
 	}
 

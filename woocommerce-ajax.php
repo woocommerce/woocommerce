@@ -5,17 +5,19 @@
  * Handles AJAX requests via wp_ajax hook (both admin and front-end events)
  *
  * @author 		WooThemes
- * @category 	AJAX
- * @package 	WooCommerce
+ * @category 	Core
+ * @package 	WooCommerce/Functions/AJAX
+ * @version     1.6.4
  */
 
 /** Frontend AJAX events **************************************************/
 
 /**
  * Process ajax login
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_nopriv_woocommerce_sidebar_login_process', 'woocommerce_sidebar_login_ajax_process');
-
 function woocommerce_sidebar_login_ajax_process() {
 
 	check_ajax_referer( 'woocommerce-sidebar-login-action', 'security' );
@@ -75,12 +77,15 @@ function woocommerce_sidebar_login_ajax_process() {
 	die();
 }
 
+add_action('wp_ajax_nopriv_woocommerce_sidebar_login_process', 'woocommerce_sidebar_login_ajax_process');
+
+
 /**
  * AJAX apply coupon on checkout page
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
-add_action('wp_ajax_nopriv_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
-
 function woocommerce_ajax_apply_coupon() {
 	global $woocommerce;
 
@@ -97,12 +102,16 @@ function woocommerce_ajax_apply_coupon() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
+add_action('wp_ajax_nopriv_woocommerce_apply_coupon', 'woocommerce_ajax_apply_coupon');
+
+
 /**
  * AJAX update shipping method on cart page
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
-add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
-
 function woocommerce_ajax_update_shipping_method() {
 	global $woocommerce;
 
@@ -119,12 +128,16 @@ function woocommerce_ajax_update_shipping_method() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
+add_action('wp_ajax_nopriv_woocommerce_update_shipping_method', 'woocommerce_ajax_update_shipping_method');
+
+
 /**
  * AJAX update order review on checkout
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
-
 function woocommerce_ajax_update_order_review() {
 	global $woocommerce;
 
@@ -155,12 +168,16 @@ function woocommerce_ajax_update_order_review() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
+add_action('wp_ajax_nopriv_woocommerce_update_order_review', 'woocommerce_ajax_update_order_review');
+
+
 /**
  * AJAX add to cart
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-
 function woocommerce_ajax_add_to_cart() {
 
 	global $woocommerce;
@@ -189,12 +206,16 @@ function woocommerce_ajax_add_to_cart() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+
+
 /**
  * Process ajax checkout form
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
-add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
-
 function woocommerce_process_checkout() {
 	global $woocommerce;
 
@@ -206,27 +227,34 @@ function woocommerce_process_checkout() {
 	die(0);
 }
 
+add_action('wp_ajax_woocommerce-checkout', 'woocommerce_process_checkout');
+add_action('wp_ajax_nopriv_woocommerce-checkout', 'woocommerce_process_checkout');
+
+
 
 /** Admin AJAX events *****************************************************/
 
 /**
  * Feature a product from admin
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_feature_product() {
 
-	if( ! is_admin() ) die;
+	if ( ! is_admin() ) die;
 
-	if( ! current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if ( ! current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
 
-	if( ! check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( ! check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 
 	$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
 
-	if(!$post_id) die;
+	if (!$post_id) die;
 
 	$post = get_post($post_id);
 
-	if( ! $post || $post->post_type !== 'product' ) die;
+	if ( ! $post || $post->post_type !== 'product' ) die;
 
 	$featured = get_post_meta( $post->ID, '_featured', true );
 
@@ -240,16 +268,20 @@ function woocommerce_feature_product() {
 
 add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product');
 
+
 /**
  * Mark an order as complete
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_mark_order_complete() {
 
-	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( !is_admin() ) die;
+	if ( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if ( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-	if(!$order_id) die;
+	if (!$order_id) die;
 
 	$order = new WC_Order( $order_id );
 	$order->update_status( 'completed' );
@@ -259,16 +291,20 @@ function woocommerce_mark_order_complete() {
 }
 add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_complete');
 
+
 /**
  * Mark an order as processing
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_mark_order_processing() {
 
-	if( !is_admin() ) die;
-	if( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( !is_admin() ) die;
+	if ( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if ( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
-	if(!$order_id) die;
+	if (!$order_id) die;
 
 	$order = new WC_Order( $order_id );
 	$order->update_status( 'processing' );
@@ -278,11 +314,13 @@ function woocommerce_mark_order_processing() {
 }
 add_action('wp_ajax_woocommerce-mark-order-processing', 'woocommerce_mark_order_processing');
 
+
 /**
  * Add a new attribute via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_add_new_attribute', 'woocommerce_add_new_attribute');
-
 function woocommerce_add_new_attribute() {
 
 	check_ajax_referer( 'add-attribute', 'security' );
@@ -308,46 +346,57 @@ function woocommerce_add_new_attribute() {
 	}
 
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_add_new_attribute', 'woocommerce_add_new_attribute');
+
 
 /**
  * Delete variation via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_remove_variation', 'woocommerce_remove_variation');
-
 function woocommerce_remove_variation() {
 
 	check_ajax_referer( 'delete-variation', 'security' );
 	$variation_id = intval( $_POST['variation_id'] );
 	$variation = get_post($variation_id);
-	if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
+	if ( $variation && $variation->post_type == "product_variation" )
+		wp_delete_post( $variation_id );
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_remove_variation', 'woocommerce_remove_variation');
+
 
 /**
  * Delete variations via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variations');
-
 function woocommerce_remove_variations() {
 
 	check_ajax_referer( 'delete-variations', 'security' );
 	$variation_ids = (array) $_POST['variation_ids'];
-	foreach ($variation_ids as $variation_id) :
+	foreach ( $variation_ids as $variation_id ) {
 		$variation = get_post($variation_id);
-		if ($variation && $variation->post_type=="product_variation") wp_delete_post( $variation_id );
-	endforeach;
+		if ( $variation && $variation->post_type == "product_variation" )
+			wp_delete_post( $variation_id );
+	}
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variations');
+
 
 /**
  * Add variation via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_add_variation', 'woocommerce_add_variation');
-
 function woocommerce_add_variation() {
 
 	check_ajax_referer( 'add-variation', 'security' );
@@ -367,14 +416,17 @@ function woocommerce_add_variation() {
 	echo $variation_id;
 
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_add_variation', 'woocommerce_add_variation');
+
 
 /**
  * Link all variations via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_link_all_variations', 'woocommerce_link_all_variations');
-
 function woocommerce_link_all_variations() {
 
 	check_ajax_referer( 'link-variations', 'security' );
@@ -420,7 +472,7 @@ function woocommerce_link_all_variations() {
 
     foreach($_product->get_children() as $child_id) {
     	$child = $_product->get_child( $child_id );
-        if($child instanceof WC_Product_Variation) {
+        if ($child instanceof WC_Product_Variation) {
             $available_variations[] = $child->get_variation_attributes();
         }
     }
@@ -521,14 +573,17 @@ function woocommerce_link_all_variations() {
 	echo $added;
 
 	die();
-
 }
+
+add_action( 'wp_ajax_woocommerce_link_all_variations', 'woocommerce_link_all_variations' );
+
 
 /**
  * Delete download permissions via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_revoke_access_to_download', 'woocommerce_revoke_access_to_download');
-
 function woocommerce_revoke_access_to_download() {
 
 	check_ajax_referer( 'revoke-access', 'security' );
@@ -547,11 +602,15 @@ function woocommerce_revoke_access_to_download() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_revoke_access_to_download', 'woocommerce_revoke_access_to_download');
+
+
 /**
  * Grant download permissions via ajax function
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_grant_access_to_download', 'woocommerce_grant_access_to_download');
-
 function woocommerce_grant_access_to_download() {
 
 	check_ajax_referer( 'grant-access', 'security' );
@@ -623,11 +682,15 @@ function woocommerce_grant_access_to_download() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_grant_access_to_download', 'woocommerce_grant_access_to_download');
+
+
 /**
  * Get customer details via ajax
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');
-
 function woocommerce_get_customer_details() {
 
 	global $woocommerce;
@@ -655,14 +718,17 @@ function woocommerce_get_customer_details() {
 
 	// Quit out
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer_details');
+
 
 /**
  * Add order item via ajax
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
-
 function woocommerce_add_order_item() {
 	global $woocommerce, $wpdb;
 
@@ -774,11 +840,15 @@ function woocommerce_add_order_item() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
+
+
 /**
  * Calc line tax
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
-
 function woocommerce_calc_line_taxes() {
 	global $woocommerce;
 
@@ -826,11 +896,15 @@ function woocommerce_calc_line_taxes() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
+
+
 /**
  * Add order note via ajax
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_add_order_note', 'woocommerce_add_order_note');
-
 function woocommerce_add_order_note() {
 
 	global $woocommerce;
@@ -860,11 +934,15 @@ function woocommerce_add_order_note() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_add_order_note', 'woocommerce_add_order_note');
+
+
 /**
  * Delete order note via ajax
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_delete_order_note', 'woocommerce_delete_order_note');
-
 function woocommerce_delete_order_note() {
 
 	global $woocommerce;
@@ -881,12 +959,17 @@ function woocommerce_delete_order_note() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_delete_order_note', 'woocommerce_delete_order_note');
+
+
 /**
  * Search for products and return json
+ *
+ * @access public
+ * @param string $x (default: '')
+ * @param string $post_types (default: array('product'))
+ * @return void
  */
-add_action('wp_ajax_woocommerce_json_search_products', 'woocommerce_json_search_products');
-add_action('wp_ajax_woocommerce_json_search_products_and_variations', 'woocommerce_json_search_products_and_variations');
-
 function woocommerce_json_search_products( $x = '', $post_types = array('product') ) {
 
 	check_ajax_referer( 'search-products', 'security' );
@@ -974,17 +1057,28 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 	die();
 }
 
+add_action('wp_ajax_woocommerce_json_search_products', 'woocommerce_json_search_products');
+
+/**
+ * Search for product variations and return json
+ *
+ * @access public
+ * @return void
+ * @see woocommerce_json_search_products()
+ */
 function woocommerce_json_search_products_and_variations() {
-
 	woocommerce_json_search_products( '', array('product', 'product_variation') );
-
 }
+
+add_action('wp_ajax_woocommerce_json_search_products_and_variations', 'woocommerce_json_search_products_and_variations');
+
 
 /**
  * Search for customers and return json
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_json_search_customers', 'woocommerce_json_search_customers');
-
 function woocommerce_json_search_customers() {
 
 	check_ajax_referer( 'search-customers', 'security' );
@@ -1017,12 +1111,15 @@ function woocommerce_json_search_customers() {
 	die();
 }
 
+add_action('wp_ajax_woocommerce_json_search_customers', 'woocommerce_json_search_customers');
+
 
 /**
  * Search for products for upsells/crosssells
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
-
 function woocommerce_upsell_crosssell_search_products() {
 
 	check_ajax_referer( 'search-products', 'security' );
@@ -1069,14 +1166,17 @@ function woocommerce_upsell_crosssell_search_products() {
 	endif;
 
 	die();
-
 }
+
+add_action('wp_ajax_woocommerce_upsell_crosssell_search_products', 'woocommerce_upsell_crosssell_search_products');
+
 
 /**
  * Ajax request handling for categories ordering
+ *
+ * @access public
+ * @return void
  */
-add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
-
 function woocommerce_term_ordering() {
 	global $wpdb;
 
@@ -1085,25 +1185,29 @@ function woocommerce_term_ordering() {
 	$taxonomy = isset($_POST['thetaxonomy']) ? esc_attr( $_POST['thetaxonomy'] ) : null;
 	$term = get_term_by('id', $id, $taxonomy);
 
-	if( !$id || !$term || !$taxonomy ) die(0);
+	if ( !$id || !$term || !$taxonomy ) die(0);
 
 	woocommerce_order_terms( $term, $next_id, $taxonomy );
 
 	$children = get_terms($taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0");
 
-	if( $term && sizeof($children) ) {
+	if ( $term && sizeof($children) ) {
 		echo 'children';
 		die;
 	}
 }
 
+add_action('wp_ajax_woocommerce-term-ordering', 'woocommerce_term_ordering');
+
+
 /**
  * Ajax request handling for product ordering
  *
  * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+ *
+ * @access public
+ * @return void
  */
-add_action( 'wp_ajax_woocommerce_product_ordering', 'woocommerce_product_ordering' );
-
 function woocommerce_product_ordering() {
 	global $wpdb;
 
@@ -1181,3 +1285,5 @@ function woocommerce_product_ordering() {
 
 	die( json_encode( $new_pos ) );
 }
+
+add_action( 'wp_ajax_woocommerce_product_ordering', 'woocommerce_product_ordering' );
