@@ -4,20 +4,43 @@
  *
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *
- * @class 		WC_Checkout
- * @package		WooCommerce
- * @category	Class
- * @author		WooThemes
+ * @class 		WC_Cart
+ * @version		1.6.4
+ * @package		WooCommerce/classes
+ * @author 		WooThemes
  */
 class WC_Checkout {
 
+	/**
+	 * Array of posted form data.
+	 *
+	 * @var array
+	 */
 	var $posted;
-	var $checkout_fields;
-	var $must_create_account;
-	var $creating_account;
-	var $localisation;
 
-	/** constructor */
+	/**
+	 * Array of fields to display on the checkout.
+	 *
+	 * @var array
+	 */
+	var $checkout_fields;
+
+	/**
+	 * @var bool
+	 */
+	var $must_create_account;
+
+	/**
+	 * @var bool
+	 */
+	var $creating_account;
+
+	/**
+	 * Constructor.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function __construct () {
 		global $woocommerce;
 
@@ -67,24 +90,46 @@ class WC_Checkout {
 		$this->checkout_fields = apply_filters('woocommerce_checkout_fields', $this->checkout_fields);
 	}
 
-	/** Checkout process */
+
+	/**
+	 * Checkout process
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function checkout_process() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
 		do_action('woocommerce_check_cart_items');
 	}
 
-	/** Output the billing information form */
+
+	/**
+	 * Output the billing information form
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function checkout_form_billing() {
 		woocommerce_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
-	/** Output the shipping information form */
+
+	/**
+	 * Output the shipping information form
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function checkout_form_shipping() {
 		woocommerce_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
 	}
 
+
 	/**
 	 * Process the checkout after the confirm order button is pressed
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function process_checkout() {
 		global $wpdb, $woocommerce;
@@ -659,7 +704,14 @@ class WC_Checkout {
 		endif;
 	}
 
-	/** Gets the value either from the posted data, or from the users meta data */
+
+	/**
+	 * Gets the value either from the posted data, or from the users meta data
+	 *
+	 * @access public
+	 * @param string $input
+	 * @return string
+	 */
 	function get_value( $input ) {
 		global $woocommerce;
 
@@ -706,7 +758,12 @@ class WC_Checkout {
 	}
 }
 
-/** Deprecated */
+/**
+ * woocommerce_checkout class.
+ *
+ * @extends WC_Checkout
+ * @deprecated 1.4
+ */
 class woocommerce_checkout extends WC_Checkout {
 	public function __construct() {
 		_deprecated_function( 'woocommerce_checkout', '1.4', 'WC_Checkout()' );

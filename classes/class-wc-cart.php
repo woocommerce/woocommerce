@@ -5,35 +5,142 @@
  * The WooCommerce cart class stores cart data and active coupons as well as handling customer sessions and some cart related urls.
  * The cart class also has a price calculation function which calls upon other classes to calculate totals.
  *
- * @class WC_Cart
- * @package WooCommerce
- * @category Class
- * @author WooThemes
+ * @class 		WC_Cart
+ * @version		1.6.4
+ * @package		WooCommerce/classes
+ * @author 		WooThemes
  */
 class WC_Cart {
+
+	/**
+	 * Contains an array of cart items.
+	 *
+	 * @var array
+	 */
 	var $cart_contents;
+
+	/**
+	 * Contains an array of coupons applied to the cart.
+	 *
+	 * @var array
+	 */
 	var $applied_coupons;
+
+	/**
+	 * The total cost of the cart items.
+	 *
+	 * @var float
+	 */
 	var $cart_contents_total;
+
+	/**
+	 * The total weight of the cart items.
+	 *
+	 * @var float
+	 */
 	var $cart_contents_weight;
+
+	/**
+	 * The total count of the cart items.
+	 *
+	 * @var float
+	 */
 	var $cart_contents_count;
+
+	/**
+	 * The total tax for the cart items.
+	 *
+	 * @var float
+	 */
 	var $cart_contents_tax;
+
+	/**
+	 * Cart grand total.
+	 *
+	 * @var float
+	 */
 	var $total;
+
+	/**
+	 * Cart subtotal.
+	 *
+	 * @var float
+	 */
 	var $subtotal;
+
+	/**
+	 * Cart subtotal without tax.
+	 *
+	 * @var float
+	 */
 	var $subtotal_ex_tax;
+
+	/**
+	 * Total cart tax.
+	 *
+	 * @var float
+	 */
 	var $tax_total;
+
+	/**
+	 * An array of taxes/tax rates for the cart.
+	 *
+	 * @var array
+	 */
 	var $taxes;
+
+	/**
+	 * An array of taxes/tax rates for the shipping.
+	 *
+	 * @var array
+	 */
 	var $shipping_taxes;
+
+	/**
+	 * Discounts before tax.
+	 *
+	 * @var float
+	 */
 	var $discount_cart;
+
+	/**
+	 * Discounts after tax.
+	 *
+	 * @var float
+	 */
 	var $discount_total;
+
+	/**
+	 * Shipping cost.
+	 *
+	 * @var float
+	 */
 	var $shipping_total;
+
+	/**
+	 * Shipping tax.
+	 *
+	 * @var float
+	 */
 	var $shipping_tax_total;
+
+	/**
+	 * Shipping title/label.
+	 *
+	 * @var float
+	 */
 	var $shipping_label;
+
+	/**
+	 * @var WC_Tax
+	 */
 	var $tax;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
-	 * Gets options from DB, loads the tax class, and queues the cart init
+	 * @access public
+	 * @return void
 	 */
 	function __construct() {
 		$this->tax = new WC_Tax();
@@ -44,9 +151,13 @@ class WC_Cart {
 		add_action( 'init', array( &$this, 'init' ), 5 ); // Get cart on init
 	}
 
+
     /**
 	 * Loads the cart data from the session during WordPress init
-	 */
+     *
+     * @access public
+     * @return void
+     */
     function init() {
 		$this->get_cart_from_session();
 
@@ -61,6 +172,9 @@ class WC_Cart {
 
 		/**
 		 * Get the cart data from the PHP session
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function get_cart_from_session() {
 			global $woocommerce;
@@ -129,8 +243,12 @@ class WC_Cart {
 				$this->set_session();
 		}
 
+
 		/**
 		 * Sets the php session data for the cart and coupons and re-calculates totals
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function set_session() {
 
@@ -176,11 +294,13 @@ class WC_Cart {
 			do_action('woocommerce_cart_updated');
 		}
 
+
 		/**
 		 * Empties the cart and optionally the persistent cart too
 		 *
 		 * @access public
 		 * @param bool $clear_persistent_cart (default: true)
+		 * @return void
 		 */
 		function empty_cart( $clear_persistent_cart = true ) {
 
@@ -201,6 +321,9 @@ class WC_Cart {
 
 		/**
 		 * Save the persistent cart when updated
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function persistent_cart_update() {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
@@ -208,8 +331,12 @@ class WC_Cart {
 			));
 		}
 
+
 		/**
 		 * Delete the persistent cart
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function persistent_cart_destroy() {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' );
@@ -221,13 +348,20 @@ class WC_Cart {
 
 		/**
 		 * Get number of items in cart
+		 *
+		 * @access public
+		 * @return int
 		 */
 		function get_cart_contents_count() {
 			return apply_filters( 'woocommerce_cart_contents_count', $this->cart_contents_count );
 		}
 
+
 		/**
 		 * Check cart items for errors
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function check_cart_items() {
 			global $woocommerce;
@@ -239,8 +373,12 @@ class WC_Cart {
 				$woocommerce->add_error( $result->get_error_message() );
 		}
 
+
 		/**
 		 * Check cart coupons for errors
+		 *
+		 * @access public
+		 * @return void
 		 */
 		function check_cart_coupons() {
 			global $woocommerce;
@@ -774,6 +912,9 @@ class WC_Cart {
 
 		/**
 		 * Reset totals
+		 *
+		 * @access private
+		 * @return void
 		 */
 		private function reset() {
 			$this->total = 0;

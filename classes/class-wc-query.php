@@ -3,9 +3,9 @@
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
  *
  * @class 		WC_Query
- * @package		WooCommerce
- * @category	Class
- * @author		WooThemes
+ * @version		1.6.4
+ * @package		WooCommerce/classes
+ * @author 		WooThemes
  */
 class WC_Query {
 
@@ -16,7 +16,12 @@ class WC_Query {
 	var $layered_nav_post__in 		= array(); 	// posts matching layered nav only
 	var $layered_nav_product_ids 	= array();	// Stores posts matching layered nav, so price filter can find max price in view
 
-	/** constructor */
+	/**
+	 * Constructor.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function __construct() {
 		add_filter( 'pre_get_posts', array( &$this, 'pre_get_posts') );
 		add_filter( 'the_posts', array( &$this, 'the_posts'), 11, 2 );

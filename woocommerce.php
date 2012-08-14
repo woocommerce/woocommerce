@@ -26,6 +26,7 @@ if ( ! class_exists( 'Woocommerce' ) ) {
  *
  * Contains the main functions for WooCommerce, stores variables, and handles error messages
  *
+ * @class Woocommerce
  * @version	1.6.4
  * @since 1.4
  * @package	WooCommerce
