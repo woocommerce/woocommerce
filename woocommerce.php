@@ -26,53 +26,109 @@ if ( ! class_exists( 'Woocommerce' ) ) {
  *
  * Contains the main functions for WooCommerce, stores variables, and handles error messages
  *
- * @since WooCommerce 1.4
+ * @version	1.6.4
+ * @since 1.4
+ * @package	WooCommerce
+ * @author WooThemes
  */
 class Woocommerce {
 
-	/** Version ***************************************************************/
-
+	/**
+	 * @var string
+	 */
 	var $version = '1.6.3';
 
-	/** URLS ******************************************************************/
-
+	/**
+	 * @var string
+	 */
 	var $plugin_url;
-	var $plugin_path;
-	var $template_url;
-
-	/** Errors / Messages *****************************************************/
-
-	var $errors = array(); // Stores store errors
-	var $messages = array(); // Stores store messages
-
-	/** Class Instances *******************************************************/
-
-	var $query;
-	var $customer;
-	var $shipping;
-	var $cart;
-	var $payment_gateways;
-	var $countries;
-	var $woocommerce_email;
-	var $checkout;
-	var $integrations;
-
-	/** Taxonomies ************************************************************/
-
-	var $attribute_taxonomies; // Stores the attribute taxonomies used in the store
-
-	/** Body Classes **********************************************************/
-
-	private $_body_classes = array();
-
-	/** Inline JavaScript *****************************************************/
-
-	private $_inline_js = '';
 
 	/**
-	 * WooCommerce Constructor
+	 * @var string
+	 */
+	var $plugin_path;
+
+	/**
+	 * @var string
+	 */
+	var $template_url;
+
+	/**
+	 * @var array
+	 */
+	var $errors = array();
+
+	/**
+	 * @var array
+	 */
+	var $messages = array();
+
+	/**
+	 * @var WC_Query
+	 */
+	var $query;
+
+	/**
+	 * @var WC_Customer
+	 */
+	var $customer;
+
+	/**
+	 * @var WC_Shipping
+	 */
+	var $shipping;
+
+	/**
+	 * @var WC_Cart
+	 */
+	var $cart;
+
+	/**
+	 * @var WC_Payment_Gateways
+	 */
+	var $payment_gateways;
+
+	/**
+	 * @var WC_Countries
+	 */
+	var $countries;
+
+	/**
+	 * @var WC_Email
+	 */
+	var $woocommerce_email;
+
+	/**
+	 * @var WC_Checkout
+	 */
+	var $checkout;
+
+	/**
+	 * @var WC_Integrations
+	 */
+	var $integrations;
+
+	/**
+	 * @var array
+	 */
+	var $attribute_taxonomies;
+
+	/**
+	 * @var array
+	 */
+	private $_body_classes = array();
+
+	/**
+	 * @var string
+	 */
+	private $_inline_js = '';
+
+
+	/**
+	 * WooCommerce Constructor.
 	 *
-	 * Gets things started
+	 * @access public
+	 * @return void
 	 */
 	function __construct() {
 
@@ -98,9 +154,13 @@ class Woocommerce {
 		do_action( 'woocommerce_loaded' );
 	}
 
+
 	/**
-	 * Include required core files
-	 **/
+	 * Include required core files.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function includes() {
 		if ( is_admin() ) $this->admin_includes();
 		if ( defined('DOING_AJAX') ) $this->ajax_includes();
@@ -142,23 +202,35 @@ class Woocommerce {
 		include( 'classes/integrations/shareyourcart/class-wc-shareyourcart.php' );
 	}
 
+
 	/**
-	 * Include required admin files
-	 **/
+	 * Include required admin files.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function admin_includes() {
 		include( 'admin/woocommerce-admin-init.php' );			// Admin section
 	}
 
+
 	/**
-	 * Include required ajax files
-	 **/
+	 * Include required ajax files.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function ajax_includes() {
 		include( 'woocommerce-ajax.php' );						// Ajax functions for admin and the front-end
 	}
 
+
 	/**
-	 * Include required frontend files
-	 **/
+	 * Include required frontend files.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function frontend_includes() {
 		include( 'woocommerce-hooks.php' );						// Template hooks used on the front-end
 		include( 'woocommerce-functions.php' );					// Contains functions for various front-end events
@@ -169,16 +241,24 @@ class Woocommerce {
 		include( 'classes/class-wc-customer.php' ); 			// Customer class
 	}
 
+
 	/**
-	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes
-	 **/
+	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function include_template_functions() {
 		include( 'woocommerce-template.php' );
 	}
 
+
 	/**
-	 * Install upon activation
-	 **/
+	 * Install upon activation.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function install() {
 		register_activation_hook( __FILE__, 'activate_woocommerce' );
 		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -186,9 +266,13 @@ class Woocommerce {
 			add_action( 'init', 'install_woocommerce', 1 );
 	}
 
+
 	/**
-	 * Init WooCommerce when WordPress Initialises
-	 **/
+	 * Init WooCommerce when WordPress Initialises.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function init() {
 		// Set up localisation
 		$this->load_plugin_textdomain();
@@ -271,9 +355,13 @@ class Woocommerce {
 		do_action( 'woocommerce_init' );
 	}
 
+
 	/**
-	 * API request - Trigger any API requests (handy for third party plugins/gateways)
-	 **/
+	 * API request - Trigger any API requests (handy for third party plugins/gateways).
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function api_requests() {
 		if ( isset( $_GET['wc-api'] ) ) {
 			$api = strtolower( esc_attr( $_GET['wc-api'] ) );
@@ -281,9 +369,13 @@ class Woocommerce {
 		}
 	}
 
+
 	/**
-	 * Localisation
-	 **/
+	 * Localisation.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function load_plugin_textdomain() {
 		// Note: the first-loaded translation file overrides any following ones if the same translation is present
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
@@ -293,8 +385,9 @@ class Woocommerce {
 		load_plugin_textdomain( 'woocommerce', false, dirname( plugin_basename( __FILE__ ) ).'/languages' );
 	}
 
+
 	/**
-	 * template_loader
+	 * Load a template.
 	 *
 	 * Handles template usage so that we can use our own templates instead of the themes.
 	 *
@@ -304,6 +397,10 @@ class Woocommerce {
 	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
 	 * this to the theme (containing a woocommerce() inside) this will be used for all
 	 * woocommerce templates.
+	 *
+	 * @access public
+	 * @param mixed $template
+	 * @return string
 	 */
 	function template_loader( $template ) {
 
@@ -342,6 +439,14 @@ class Woocommerce {
 		return $template;
 	}
 
+
+	/**
+	 * comments_template_loader function.
+	 *
+	 * @access public
+	 * @param mixed $template
+	 * @return string
+	 */
 	function comments_template_loader( $template ) {
 		if( get_post_type() !== 'product' ) return $template;
 
@@ -351,23 +456,36 @@ class Woocommerce {
 			return $this->plugin_path() . '/templates/single-product-reviews.php';
 	}
 
+
 	/**
-	 * Output buffering on the checkout allows gateways to do header redirects
-	 **/
+	 * Output buffering on the checkout allows gateways to do header redirects.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function buffer_checkout() {
 		if ( is_checkout() ) ob_start();
 	}
 
+
 	/**
-	 * Register WC environment globals
-	 **/
+	 * Register WC environment globals.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function register_globals() {
 		$GLOBALS['product'] = null;
 	}
 
+
 	/**
-	 * When the_post is called, get product data too
-	 **/
+	 * When the_post is called, get product data too.
+	 *
+	 * @access public
+	 * @param mixed $post
+	 * @return WC_Product
+	 */
 	function setup_product_data( $post ) {
 		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
@@ -376,9 +494,13 @@ class Woocommerce {
 		return $GLOBALS['product'];
 	}
 
+
 	/**
-	 * Add Compatibility for various bits
-	 **/
+	 * Add Compatibility for various bits.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function compatibility() {
 		// Post thumbnail support
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
@@ -408,9 +530,13 @@ class Woocommerce {
 			$_SERVER['HTTPS'] = '1';
 	}
 
+
 	/**
-	 * Redirect to https if Force SSL is enabled
-	 **/
+	 * Redirect to https if Force SSL is enabled.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function ssl_redirect() {
 		if ( get_option('woocommerce_force_ssl_checkout') == 'no' ) return;
 
@@ -442,16 +568,24 @@ class Woocommerce {
 		}
 	}
 
+
 	/**
-	 * Output generator to aid debugging
-	 **/
+	 * Output generator to aid debugging.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function generator() {
 		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
 	}
 
+
 	/**
-	 * Add body classes
-	 **/
+	 * Add body classes.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function wp_head() {
 		$theme_name = ( function_exists( 'wp_get_theme' ) ) ? wp_get_theme() : get_current_theme();
 		$this->add_body_class( "theme-{$theme_name}" );
@@ -467,9 +601,13 @@ class Woocommerce {
 		if ( is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page( woocommerce_get_page_id('order_tracking') ) || is_page( woocommerce_get_page_id('thanks') ) ) $this->add_body_class('woocommerce-page');
 	}
 
+
 	/**
-	 * Init WooCommerce user roles
-	 **/
+	 * Init WooCommerce user roles.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function init_user_roles() {
 		global $wp_roles;
 
@@ -531,9 +669,13 @@ class Woocommerce {
 		}
 	}
 
+
 	/**
-	 * Init WooCommerce taxonomies
-	 **/
+	 * Init WooCommerce taxonomies.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function init_taxonomy() {
 
 		if ( post_type_exists('product') ) return;
@@ -922,8 +1064,12 @@ class Woocommerce {
 		);
 	}
 
+
 	/**
-	 * Init images
+	 * Init images.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function init_image_sizes() {
 		// Image sizes
@@ -936,8 +1082,12 @@ class Woocommerce {
 		add_image_size( 'shop_single', $this->get_image_size('shop_single_image_width'), $this->get_image_size('shop_single_image_height'), $shop_single_crop );
 	}
 
+
 	/**
-	 * Init frontend CSS
+	 * Init frontend CSS.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function init_styles() {
 
@@ -949,8 +1099,12 @@ class Woocommerce {
 		}
 	}
 
+
 	/**
-	 * Register/queue frontend scripts
+	 * Register/queue frontend scripts.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function frontend_scripts() {
 		global $post;
@@ -1020,7 +1174,10 @@ class Woocommerce {
 	/** Load Instances on demand **********************************************/
 
 	/**
-	 * Get Checkout Class
+	 * Get Checkout Class.
+	 *
+	 * @access public
+	 * @return WC_Checkout
 	 */
 	function checkout() {
 		if ( ! class_exists('WC_Checkout') ) {
@@ -1031,40 +1188,62 @@ class Woocommerce {
 		return $this->checkout;
 	}
 
+
 	/**
-	 * Get Logging Class
+	 * Get Logging Class.
+	 *
+	 * @access public
+	 * @return WC_Logger
 	 */
 	function logger() {
 		if ( ! class_exists('WC_Logger') ) include( 'classes/class-wc-logger.php' );
 		return new WC_Logger();
 	}
 
+
 	/**
-	 * Get Validation Class
+	 * Get Validation Class.
+	 *
+	 * @access public
+	 * @return WC_Validation
 	 */
 	function validation() {
 		if ( ! class_exists('WC_Validation') ) include( 'classes/class-wc-validation.php' );
 		return new WC_Validation();
 	}
 
+
 	/**
-	 * Init a coupon
+	 * Init a coupon.
+	 *
+	 * @access public
+	 * @param mixed $code
+	 * @return WC_Coupon
 	 */
 	function coupon( $code ) {
 		if ( ! class_exists('WC_Coupon') ) include( 'classes/class-wc-coupon.php' );
 		return new WC_Coupon( $code );
 	}
 
+
 	/**
-	 * Init the mailer and call the notifications for the current filter
+	 * Init the mailer and call the notifications for the current filter.
+	 *
+	 * @access public
+	 * @param array $args (default: array())
+	 * @return void
 	 */
 	function send_transactional_email( $args = array() ) {
 		$this->mailer();
 		do_action( current_filter() . '_notification' , $args );
 	}
 
+
 	/**
-	 * Email Class
+	 * Email Class.
+	 *
+	 * @access public
+	 * @return WC_Email
 	 */
 	function mailer() {
 		// Init mail class
@@ -1078,15 +1257,22 @@ class Woocommerce {
 	/** Helper functions ******************************************************/
 
 	/**
-	 * Get the plugin url
+	 * Get the plugin url.
+	 *
+	 * @access public
+	 * @return string
 	 */
 	function plugin_url() {
 		if ( $this->plugin_url ) return $this->plugin_url;
 		return $this->plugin_url = plugins_url( basename( plugin_dir_path(__FILE__) ), basename( __FILE__ ) );
 	}
 
+
 	/**
-	 * Get the plugin path
+	 * Get the plugin path.
+	 *
+	 * @access public
+	 * @return string
 	 */
 	function plugin_path() {
 		if ( $this->plugin_path ) return $this->plugin_path;
@@ -1094,15 +1280,24 @@ class Woocommerce {
 		return $this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 	}
 
+
 	/**
-	 * Ajax URL
+	 * Get Ajax URL.
+	 *
+	 * @access public
+	 * @return string
 	 */
 	function ajax_url() {
 		return str_replace( array('https:', 'http:'), '', admin_url( 'admin-ajax.php' ) );
 	}
 
+
 	/**
-	 * Return the URL with https if SSL is on
+	 * Return the URL with https if SSL is on.
+	 *
+	 * @access public
+	 * @param string/array $content
+	 * @return string/array
 	 */
 	function force_ssl( $content ) {
 		if ( is_ssl() ) {
@@ -1114,10 +1309,15 @@ class Woocommerce {
 		return $content;
 	}
 
+
 	/**
-	 * Get an image size
+	 * Get an image size.
 	 *
 	 * Variable is filtered by woocommerce_get_image_size_{image_size}
+	 *
+	 * @access public
+	 * @param mixed $image_size
+	 * @return string
 	 */
 	function get_image_size( $image_size ) {
 		$return = '';
@@ -1129,13 +1329,16 @@ class Woocommerce {
 			case "shop_single_image_width" : $return = get_option('woocommerce_single_image_width'); break;
 			case "shop_single_image_height" : $return = get_option('woocommerce_single_image_height'); break;
 		}
-		return apply_filters( 'woocommerce_get_image_size_'.$image_size, $return );
+		return apply_filters( 'woocommerce_get_image_size_' . $image_size, $return );
 	}
 
 	/** Messages ****************************************************************/
 
-    /**
-	 * Load Messages
+	/**
+	 * Load Messages.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function load_messages() {
 		if ( isset( $_SESSION['errors'] ) ) $this->errors = $_SESSION['errors'];
@@ -1150,57 +1353,117 @@ class Woocommerce {
 		}
 	}
 
-	/**
-	 * Add an error
-	 */
-	function add_error( $error ) { $this->errors[] = apply_filters( 'woocommerce_add_error', $error ); }
 
 	/**
-	 * Add a message
+	 * Add an error.
+	 *
+	 * @access public
+	 * @param string $error
+	 * @return void
 	 */
-	function add_message( $message ) { $this->messages[] = apply_filters( 'woocommerce_add_message', $message ); }
+	function add_error( $error ) {
+		$this->errors[] = apply_filters( 'woocommerce_add_error', $error );
+	}
 
-	/** Clear messages and errors from the session data */
+
+	/**
+	 * Add a message.
+	 *
+	 * @access public
+	 * @param string $message
+	 * @return void
+	 */
+	function add_message( $message ) {
+		$this->messages[] = apply_filters( 'woocommerce_add_message', $message );
+	}
+
+
+	/**
+	 * Clear messages and errors from the session data.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function clear_messages() {
 		$this->errors = $this->messages = array();
 		unset( $_SESSION['messages'], $_SESSION['errors'] );
 	}
 
-	/**
-	 * Get error count
-	 */
-	function error_count() { return sizeof($this->errors); }
 
 	/**
-	 * Get message count
+	 * error_count function.
+	 *
+	 * @access public
+	 * @return int
 	 */
-	function message_count() { return sizeof($this->messages); }
+	function error_count() {
+		return sizeof( $this->errors );
+	}
+
 
 	/**
-	 * Get errors
+	 * Get message count.
+	 *
+	 * @access public
+	 * @return int
 	 */
-	function get_errors() { return (array) $this->errors; }
+	function message_count() {
+		return sizeof( $this->messages );
+	}
+
 
 	/**
-	 * Get messages
+	 * Get errors.
+	 *
+	 * @access public
+	 * @return array
 	 */
-	function get_messages() { return (array) $this->messages; }
+	function get_errors() {
+		return (array) $this->errors;
+	}
+
 
 	/**
-	 * Output the errors and messages
+	 * Get messages.
+	 *
+	 * @access public
+	 * @return array
 	 */
-	function show_messages() { woocommerce_show_messages(); }
+	function get_messages() {
+		return (array) $this->messages;
+	}
+
 
 	/**
-	 * Set session data for messages
+	 * Output the errors and messages.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function show_messages() {
+		woocommerce_show_messages();
+	}
+
+
+	/**
+	 * Set session data for messages.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function set_messages() {
 		$_SESSION['errors'] = $this->errors;
 		$_SESSION['messages'] = $this->messages;
 	}
 
+
 	/**
-	 * Redirection hook which stores messages into session data
+	 * Redirection hook which stores messages into session data.
+	 *
+	 * @access public
+	 * @param mixed $location
+	 * @param mixed $status
+	 * @return string
 	 */
 	function redirect( $location, $status ) {
 		global $is_IIS;
@@ -1215,25 +1478,38 @@ class Woocommerce {
 
 	/** Attribute Helpers ****************************************************************/
 
-    /**
-	 * Get attribute taxonomies
+	/**
+	 * Get attribute taxonomies.
+	 *
+	 * @access public
+	 * @return object
 	 */
 	function get_attribute_taxonomies() {
 		global $wpdb;
 		if ( ! $this->attribute_taxonomies )
-			$this->attribute_taxonomies = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."woocommerce_attribute_taxonomies;");
+			$this->attribute_taxonomies = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies;" );
 		return $this->attribute_taxonomies;
 	}
 
-    /**
-	 * Get a product attributes name
-	 */
-	function attribute_taxonomy_name( $name ) {
-		return 'pa_'.sanitize_title($name);
-	}
 
 	/**
-	 * Get a product attributes label
+	 * Get a product attributes name.
+	 *
+	 * @access public
+	 * @param mixed $name
+	 * @return string
+	 */
+	function attribute_taxonomy_name( $name ) {
+		return 'pa_' . sanitize_title( $name );
+	}
+
+
+	/**
+	 * Get a product attributes label.
+	 *
+	 * @access public
+	 * @param mixed $name
+	 * @return string
 	 */
 	function attribute_label( $name ) {
 		global $wpdb;
@@ -1251,8 +1527,12 @@ class Woocommerce {
 		return apply_filters( 'woocommerce_attribute_label', $label, $name );
 	}
 
+
 	/**
-	 * Get an array of product attribute taxonomies
+	 * Get an array of product attribute taxonomies.
+	 *
+	 * @access public
+	 * @return array
 	 */
 	function get_attribute_taxonomy_names() {
 		$taxonomy_names = array();
@@ -1268,7 +1548,10 @@ class Woocommerce {
 	/** Coupon Helpers ********************************************************/
 
 	/**
-	 * Get coupon types
+	 * Get coupon types.
+	 *
+	 * @access public
+	 * @return array
 	 */
 	function get_coupon_discount_types() {
 		if ( ! isset($this->coupon_discount_types ) ) {
@@ -1282,8 +1565,13 @@ class Woocommerce {
 		return $this->coupon_discount_types;
 	}
 
+
 	/**
-	 * Get a coupon type's name
+	 * Get a coupon type's name.
+	 *
+	 * @access public
+	 * @param string $type (default: '')
+	 * @return string
 	 */
 	function get_coupon_discount_type( $type = '' ) {
 		$types = (array) $this->get_coupon_discount_types();
@@ -1293,25 +1581,43 @@ class Woocommerce {
 	/** Nonces ****************************************************************/
 
 	/**
-	 * Return a nonce field
+	 * Return a nonce field.
+	 *
+	 * @access public
+	 * @param mixed $action
+	 * @param bool $referer (default: true)
+	 * @param bool $echo (default: true)
+	 * @return void
 	 */
-	function nonce_field ( $action, $referer = true , $echo = true ) { return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo ); }
+	function nonce_fiel ( $action, $referer = true , $echo = true ) {
+		return wp_nonce_field('woocommerce-' . $action, '_n', $referer, $echo );
+	}
+
 
 	/**
-	 * Return a url with a nonce appended
+	 * Return a url with a nonce appended.
+	 *
+	 * @access public
+	 * @param mixed $action
+	 * @param string $url (default: '')
+	 * @return string
 	 */
-	function nonce_url ( $action, $url = '' ) { return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url ); }
+	function nonce_url( $action, $url = '' ) {
+		return add_query_arg( '_n', wp_create_nonce( 'woocommerce-' . $action ), $url );
+	}
+
 
 	/**
-	 * Check a nonce and sets woocommerce error in case it is invalid
+	 * Check a nonce and sets woocommerce error in case it is invalid.
+	 *
 	 * To fail silently, set the error_message to an empty string
 	 *
-	 * @param 	string $name the nonce name
-	 * @param	string $action then nonce action
-	 * @param   string $method the http request method _POST, _GET or _REQUEST
-	 * @param   string $error_message custom error message, or false for default message, or an empty string to fail silently
-	 *
-	 * @return   bool
+	 * @access public
+	 * @param string $name the nonce name
+	 * @param string $action then nonce action
+	 * @param string $method the http request method _POST, _GET or _REQUEST
+	 * @param string $error_message custom error message, or false for default message, or an empty string to fail silently
+	 * @return bool
 	 */
 	function verify_nonce( $action, $method='_POST', $error_message = false ) {
 
@@ -1333,6 +1639,11 @@ class Woocommerce {
 
 	/**
 	 * Shortcode Wrapper
+	 *
+	 * @access public
+	 * @param mixed $function
+	 * @param array $atts (default: array())
+	 * @return string
 	 */
 	function shortcode_wrapper( $function, $atts = array() ) {
 		ob_start();
@@ -1343,18 +1654,22 @@ class Woocommerce {
 	/** Cache Helpers *********************************************************/
 
 	/**
-	 * nocache
-	 *
 	 * Sets a constant preventing some caching plugins from caching a page. Used on dynamic pages
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function nocache() {
 		if ( ! defined('DONOTCACHEPAGE') ) define("DONOTCACHEPAGE", "true"); // WP Super Cache constant
 	}
 
+
 	/**
-	 * cookie_cart_has_contents
-	 *
 	 * Sets a cookie when the cart has something in it. Can be used by hosts to prevent caching if set.
+	 *
+	 * @access public
+	 * @param mixed $set
+	 * @return void
 	 */
 	function cart_has_contents_cookie( $set ) {
 		if ( ! headers_sent() ) {
@@ -1369,6 +1684,7 @@ class Woocommerce {
 	 * mfunc_wrapper function.
 	 *
 	 * Wraps a function in mfunc to keep it dynamic.
+	 *
 	 * If running WP Super Cache this checks for late_init (because functions calling this require WP to be loaded)
 	 *
 	 * @access public
@@ -1390,7 +1706,11 @@ class Woocommerce {
 	/** Transients ************************************************************/
 
 	/**
-	 * Clear Product Transients
+	 * Clear all transients cache for product data.
+	 *
+	 * @access public
+	 * @param int $post_id (default: 0)
+	 * @return void
 	 */
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
@@ -1428,10 +1748,24 @@ class Woocommerce {
 
 	/** Body Classes **********************************************************/
 
+	/**
+	 * Add a class to the webpage body.
+	 *
+	 * @access public
+	 * @param string $class
+	 * @return void
+	 */
 	function add_body_class( $class ) {
 		$this->_body_classes[] = sanitize_html_class( strtolower($class) );
 	}
 
+	/**
+	 * Output classes on the body tag.
+	 *
+	 * @access public
+	 * @param mixed $classes
+	 * @return array
+	 */
 	function output_body_class( $classes ) {
 		if ( sizeof( $this->_body_classes ) > 0 ) $classes = array_merge( $classes, $this->_body_classes );
 
@@ -1445,12 +1779,25 @@ class Woocommerce {
 
 	/** Inline JavaScript Helper **********************************************/
 
+	/**
+	 * Add some JavaScript inline to be output in the footer.
+	 *
+	 * @access public
+	 * @param string $code
+	 * @return void
+	 */
 	function add_inline_js( $code ) {
 		$this->_inline_js .= "\n" . $code . "\n";
 	}
 
+	/**
+	 * Output any queued inline JS.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function output_inline_js() {
-		if ($this->_inline_js) {
+		if ( $this->_inline_js ) {
 
 			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
 
@@ -1459,7 +1806,6 @@ class Woocommerce {
 			echo "});\n</script>\n";
 
 			$this->_inline_js = '';
-
 		}
 	}
 }

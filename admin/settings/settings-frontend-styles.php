@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend styles/color picker settings
+ * Frontend styles/color picker settings.
  *
  * @author 		WooThemes
  * @category 	Admin

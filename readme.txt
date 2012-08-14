@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Made variation get_image() return instead of echo
 * Fix - Remove is_product check so variation JS can register itself for use. Same for the single product JS
 * Fix - Above fix also fixes single product shortcodes
+* Misc - Updated all inline documentation for use in our API docs.
 
 = 1.6.3 - 10/08/2012 =
 * Feature - Option to register using the email address as the username instead of entering a username
