@@ -1,19 +1,25 @@
 <?php
 /**
- * Functions used for modifying the users panel
+ * Admin user functions
+ *
+ * Functions used for modifying the users panel in admin.
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Users
+ * @version     1.6.4
  */
 
 /**
- * Define columns to show on the users page
+ * Define columns to show on the users page.
+ *
+ * @access public
+ * @param array $columns Columns on the manage users page
+ * @return array The modified columns
  */
-add_filter('manage_users_columns', 'woocommerce_user_columns', 10, 1);
-
 function woocommerce_user_columns( $columns ) {
-	if (!current_user_can('manage_woocommerce')) return $columns;
+	if ( ! current_user_can( 'manage_woocommerce' ) )
+		return $columns;
 
 	$columns['woocommerce_billing_address'] = __('Billing Address', 'woocommerce');
 	$columns['woocommerce_shipping_address'] = __('Shipping Address', 'woocommerce');
@@ -21,27 +27,34 @@ function woocommerce_user_columns( $columns ) {
 	$columns['woocommerce_order_count'] = __('Orders', 'woocommerce');
 	return $columns;
 }
- 
-/**
- * Define values for custom columns
- */
-add_action('manage_users_custom_column', 'woocommerce_user_column_values', 10, 3);
 
-function woocommerce_user_column_values($value, $column_name, $user_id) {
+add_filter( 'manage_users_columns', 'woocommerce_user_columns', 10, 1 );
+
+
+/**
+ * Define values for custom columns.
+ *
+ * @access public
+ * @param mixed $value The value of the column being displayed
+ * @param mixed $column_name The name of the column being displayed
+ * @param mixed $user_id The ID of the user being displayed
+ * @return string Value for the column
+ */
+function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 	global $woocommerce, $wpdb;
 	switch ($column_name) :
 		case "woocommerce_order_count" :
-			
-			$count = $wpdb->get_var( "SELECT COUNT(*) 
-			FROM $wpdb->posts 
+
+			$count = $wpdb->get_var( "SELECT COUNT(*)
+			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_value = $user_id 
+			WHERE meta_value = $user_id
 			AND meta_key = '_customer_user'
-			AND post_type IN ('shop_order') 
+			AND post_type IN ('shop_order')
 			AND post_status = 'publish'" );
-			
+
 			$value = '<a href="'.admin_url('edit.php?post_status=all&post_type=shop_order&_customer_user='.$user_id.'').'">'.$count.'</a>';
-			
+
 		break;
 		case "woocommerce_billing_address" :
 			$address = array(
@@ -50,16 +63,16 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 				'company'		=> get_user_meta( $user_id, 'billing_company', true ),
 				'address_1'		=> get_user_meta( $user_id, 'billing_address_1', true ),
 				'address_2'		=> get_user_meta( $user_id, 'billing_address_2', true ),
-				'city'			=> get_user_meta( $user_id, 'billing_city', true ),			
+				'city'			=> get_user_meta( $user_id, 'billing_city', true ),
 				'state'			=> get_user_meta( $user_id, 'billing_state', true ),
 				'postcode'		=> get_user_meta( $user_id, 'billing_postcode', true ),
 				'country'		=> get_user_meta( $user_id, 'billing_country', true )
 			);
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
-			
+
 			if (!$formatted_address) $value = __('N/A', 'woocommerce'); else $value = $formatted_address;
-			
+
 			$value = wpautop($value);
 		break;
 		case "woocommerce_shipping_address" :
@@ -69,32 +82,38 @@ function woocommerce_user_column_values($value, $column_name, $user_id) {
 				'company'		=> get_user_meta( $user_id, 'shipping_company', true ),
 				'address_1'		=> get_user_meta( $user_id, 'shipping_address_1', true ),
 				'address_2'		=> get_user_meta( $user_id, 'shipping_address_2', true ),
-				'city'			=> get_user_meta( $user_id, 'shipping_city', true ),			
+				'city'			=> get_user_meta( $user_id, 'shipping_city', true ),
 				'state'			=> get_user_meta( $user_id, 'shipping_state', true ),
 				'postcode'		=> get_user_meta( $user_id, 'shipping_postcode', true ),
 				'country'		=> get_user_meta( $user_id, 'shipping_country', true )
 			);
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
-			
+
 			if (!$formatted_address) $value = __('N/A', 'woocommerce'); else $value = $formatted_address;
-			
+
 			$value = wpautop($value);
 		break;
 		case "woocommerce_paying_customer" :
-			
+
 			$paying_customer = get_user_meta( $user_id, 'paying_customer', true );
-			
+
 			if ($paying_customer) $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
 			else $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';
-			
+
 		break;
 	endswitch;
 	return $value;
 }
- 
+
+add_action( 'manage_users_custom_column', 'woocommerce_user_column_values', 10, 3 );
+
+
 /**
- * Get Address Fields for edit user pages
+ * Get Address Fields for the edit user pages.
+ *
+ * @access public
+ * @return array Fields to display which are filtered through woocommerce_customer_meta_fields before being returned
  */
 function woocommerce_get_customer_meta_fields() {
 	$show_fields = apply_filters('woocommerce_customer_meta_fields', array(
@@ -191,19 +210,21 @@ function woocommerce_get_customer_meta_fields() {
 	));
 	return $show_fields;
 }
- 
-/**
- * Show Address Fields on edit user pages
- */
-add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
-add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
 
-function woocommerce_customer_meta_fields( $user ) { 
-	if ( ! current_user_can( 'manage_woocommerce' ) ) 
+
+/**
+ * Show Address Fields on edit user pages.
+ *
+ * @access public
+ * @param mixed $user User (object) being displayed
+ * @return void
+ */
+function woocommerce_customer_meta_fields( $user ) {
+	if ( ! current_user_can( 'manage_woocommerce' ) )
 		return;
 
 	$show_fields = woocommerce_get_customer_meta_fields();
-	
+
 	foreach( $show_fields as $fieldset ) :
 		?>
 		<h3><?php echo $fieldset['title']; ?></h3>
@@ -226,22 +247,28 @@ function woocommerce_customer_meta_fields( $user ) {
 	endforeach;
 }
 
+add_action( 'show_user_profile', 'woocommerce_customer_meta_fields' );
+add_action( 'edit_user_profile', 'woocommerce_customer_meta_fields' );
+
+
 /**
  * Save Address Fields on edit user pages
+ *
+ * @access public
+ * @param mixed $user_id User ID of the user being saved
+ * @return void
  */
+function woocommerce_save_customer_meta_fields( $user_id ) {
+	if ( ! current_user_can( 'manage_woocommerce' ) )
+		return $columns;
+
+ 	$save_fields = woocommerce_get_customer_meta_fields();
+
+ 	foreach( $save_fields as $fieldset )
+ 		foreach( $fieldset['fields'] as $key => $field )
+ 			if ( isset( $_POST[ $key ] ) )
+ 				update_user_meta( $user_id, $key, trim( esc_attr( $_POST[ $key ] ) ) );
+}
+
 add_action( 'personal_options_update', 'woocommerce_save_customer_meta_fields' );
 add_action( 'edit_user_profile_update', 'woocommerce_save_customer_meta_fields' );
- 
-function woocommerce_save_customer_meta_fields( $user_id ) {
-	if (!current_user_can('manage_woocommerce')) return $columns;
- 	
- 	$save_fields = woocommerce_get_customer_meta_fields();
- 	
- 	foreach( $save_fields as $fieldset ) :
- 		foreach( $fieldset['fields'] as $key => $field ) :
- 		
- 			if (isset($_POST[$key])) update_user_meta( $user_id, $key, trim(esc_attr( $_POST[$key] )) );
- 		
- 		endforeach;
- 	endforeach;
-}

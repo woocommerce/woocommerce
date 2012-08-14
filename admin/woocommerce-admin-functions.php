@@ -4,15 +4,19 @@
  *
  * Hooked-in functions for WooCommerce related events in admin.
  *
- * @package		WooCommerce
- * @category	Actions
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Admin
+ * @package 	WooCommerce/Admin
+ * @version     1.6.4
  */
 
 /**
  * Checks which method we're using to serve downloads
  *
  * If using force or x-sendfile, this ensures the .htaccess is in place
+ *
+ * @access public
+ * @return void
  */
 function woocomerce_check_download_folder_protection() {
 	$upload_dir 		= wp_upload_dir();
@@ -43,8 +47,13 @@ function woocomerce_check_download_folder_protection() {
 	endif;
 }
 
+
 /**
  * Protect downlodas from ms-files.php in multisite
+ *
+ * @access public
+ * @param mixed $rewrite
+ * @return string
  */
 function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
     global $wp_rewrite;
@@ -63,10 +72,13 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
 	return $rule . $rewrite;
 }
 
+
 /**
- * Deleting posts
- *
  * Removes variations etc belonging to a deleted post, and clears transients
+ *
+ * @access public
+ * @param mixed $id ID of post being deleted
+ * @return void
  */
 function woocommerce_delete_post( $id ) {
 
@@ -93,9 +105,13 @@ function woocommerce_delete_post( $id ) {
 	delete_transient( 'woocommerce_processing_order_count' );
 }
 
+
 /**
- * Preview Emails
- **/
+ * Preview Emails in WP admin
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_preview_emails() {
 	if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
 		$nonce = $_REQUEST['_wpnonce'];
@@ -165,26 +181,40 @@ function woocommerce_preview_emails() {
 	}
 }
 
+
 /**
  * Prevent non-admin access to backend
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_prevent_admin_access() {
-	if ( get_option('woocommerce_lock_down_admin')=='yes' && !is_ajax() && !current_user_can('edit_posts') ) {
+	if ( get_option('woocommerce_lock_down_admin') == 'yes' && ! is_ajax() && ! current_user_can('edit_posts') ) {
 		wp_safe_redirect(get_permalink(woocommerce_get_page_id('myaccount')));
 		exit;
 	}
 }
 
+
 /**
  * Fix 'insert into post' buttons for images
- **/
-function woocommerce_allow_img_insertion($vars) {
+ *
+ * @access public
+ * @param mixed $vars
+ * @return array
+ */
+function woocommerce_allow_img_insertion( $vars ) {
     $vars['send'] = true; // 'send' as in "Send to Editor"
     return($vars);
 }
 
+
 /**
- * Directory for uploads
+ * Filter the directory for uploads.
+ *
+ * @access public
+ * @param mixed $pathdata
+ * @return void
  */
 function woocommerce_downloads_upload_dir( $pathdata ) {
 
@@ -201,13 +231,25 @@ function woocommerce_downloads_upload_dir( $pathdata ) {
 
 	return $pathdata;
 }
+
+
+/**
+ * Run a filter when uploading a downloadable product.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_media_upload_downloadable_product() {
 	do_action('media_upload_file');
 }
 
+
 /**
- * Shortcode button in post editor
- **/
+ * Add a button for shortcodes to the WP editor.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_add_shortcode_button() {
 	if ( ! current_user_can('edit_posts') && ! current_user_can('edit_pages') ) return;
 	if ( get_user_option('rich_editing') == 'true') :
@@ -216,24 +258,55 @@ function woocommerce_add_shortcode_button() {
 	endif;
 }
 
+
+/**
+ * Register the shortcode button.
+ *
+ * @access public
+ * @param mixed $buttons
+ * @return array
+ */
 function woocommerce_register_shortcode_button($buttons) {
 	array_push($buttons, "|", "woocommerce_shortcodes_button");
 	return $buttons;
 }
 
+
+/**
+ * Add the shortcode button to TinyMCE
+ *
+ * @access public
+ * @param mixed $plugin_array
+ * @return array
+ */
 function woocommerce_add_shortcode_tinymce_plugin($plugin_array) {
 	global $woocommerce;
 	$plugin_array['WooCommerceShortcodes'] = $woocommerce->plugin_url() . '/assets/js/admin/editor_plugin.js';
 	return $plugin_array;
 }
 
-function woocommerce_refresh_mce($ver) {
+
+/**
+ * Force TinyMCE to refresh.
+ *
+ * @access public
+ * @param mixed $ver
+ * @return int
+ */
+function woocommerce_refresh_mce( $ver ) {
 	$ver += 3;
 	return $ver;
 }
 
+
 /**
- * Reorder categories on term insertion
+ * Order terms when a new term is created.
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $tt_id
+ * @param mixed $taxonomy
+ * @return void
  */
 function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 
@@ -256,8 +329,15 @@ function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 	woocommerce_order_terms( $term, $next_id, $taxonomy );
 }
 
+
 /**
- * Delete terms metas on deletion
+ * When a term is deleted, delete its meta.
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $tt_id
+ * @param mixed $taxonomy
+ * @return void
  */
 function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 
@@ -267,11 +347,14 @@ function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 
 	global $wpdb;
 	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
-
 }
 
+
 /**
- * Compile styles
+ * Generate CSS from the less file when changing colours.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_compile_less_styles() {
 	global $woocommerce;
@@ -330,10 +413,15 @@ function woocommerce_compile_less_styles() {
 	}
 }
 
+
 /**
  * Add extra bulk action options to mark orders as complete or processing
+ *
  * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
- **/
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_bulk_admin_footer() {
 	global $post_type;
 
@@ -352,9 +440,13 @@ function woocommerce_bulk_admin_footer() {
 	}
 }
 
+
 /**
  * Process the new bulk actions for changing order status
- **/
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_order_bulk_action() {
 	$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
 	$action = $wp_list_table->current_action();
@@ -385,9 +477,13 @@ function woocommerce_order_bulk_action() {
 	exit();
 }
 
+
 /**
  * Show confirmation message that order status changed for number of orders
- **/
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_order_bulk_admin_notices() {
 	global $post_type, $pagenow;
 

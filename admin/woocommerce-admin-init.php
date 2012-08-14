@@ -6,17 +6,23 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin
+ * @version     1.6.4
  */
+
+include_once( 'post-types/product.php' );
+include_once( 'post-types/shop_coupon.php' );
+include_once( 'post-types/shop_order.php' );
+include_once( 'woocommerce-admin-hooks.php' );
+include_once( 'woocommerce-admin-functions.php' );
+include_once( 'woocommerce-admin-taxonomies.php' );
 
 /**
- * Admin Menus
+ * Setup the Admin menu in WordPress
  *
- * Sets up the admin menus in wordpress.
+ * @access public
+ * @return void
  */
-add_action('admin_menu', 'woocommerce_admin_menu', 9);
-add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
-
 function woocommerce_admin_menu() {
     global $menu, $woocommerce;
 
@@ -38,16 +44,28 @@ function woocommerce_admin_menu() {
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' );
 }
 
+add_action('admin_menu', 'woocommerce_admin_menu', 9);
+
+/**
+ * Setup the Admin menu in WordPress - later priority so they appear last
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_admin_menu_after() {
 	add_submenu_page( 'woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
 	add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 }
 
+add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
+
+
 /**
  * Highlights the correct top level admin menu item for post type add screens.
+ *
+ * @access public
+ * @return void
  */
-add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
-
 function woocommerce_admin_menu_highlight() {
 	global $menu, $submenu, $parent_file, $submenu_file, $self, $post_type, $taxonomy;
 
@@ -93,11 +111,15 @@ function woocommerce_admin_menu_highlight() {
 	}
 }
 
-/**
- * Admin Notices
- */
-add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
+add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
+
+/**
+ * Show notices in admin.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_admin_install_notice() {
 	?>
 	<div id="message" class="updated woocommerce-message wc-connect">
@@ -141,73 +163,102 @@ function woocommerce_admin_notices_styles() {
 	}
 }
 
-/**
- * Admin Includes - loaded conditionally
- */
-add_action('admin_init', 'woocommerce_admin_init');
+add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
 
+
+/**
+ * Include some admin files conditonally.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_admin_init() {
 	global $pagenow, $typenow;
 
 	ob_start();
 
-	if ($typenow=='post' && isset($_GET['post']) && !empty($_GET['post'])) :
+	if ( $typenow=='post' && isset( $_GET['post'] ) && ! empty( $_GET['post'] ) ) {
 		$typenow = $post->post_type;
-	elseif (empty($typenow) && !empty($_GET['post'])) :
-	    $post = get_post($_GET['post']);
+	} elseif ( empty( $typenow ) && ! empty( $_GET['post'] ) ) {
+	    $post = get_post( $_GET['post'] );
 	    $typenow = $post->post_type;
-	endif;
+	}
 
-	if ( $pagenow=='index.php' ) {
+	if ( $pagenow == 'index.php' ) {
 
 		include_once( 'woocommerce-admin-dashboard.php' );
 
-	} elseif ( $pagenow=='admin.php' && isset($_GET['import']) ) {
+	} elseif ( $pagenow == 'admin.php' && isset( $_GET['import'] ) ) {
 
 		include_once( 'woocommerce-admin-import.php' );
 
-	} elseif ( $pagenow=='post-new.php' || $pagenow=='post.php' || $pagenow=='edit.php' ) {
+	} elseif ( $pagenow == 'post-new.php' || $pagenow == 'post.php' || $pagenow == 'edit.php' ) {
 
 		include_once( 'post-types/writepanels/writepanels-init.php' );
 
-		if (in_array($typenow, array('product', 'shop_coupon', 'shop_order'))) add_action('admin_print_styles', 'woocommerce_admin_help_tab');
+		if ( in_array( $typenow, array( 'product', 'shop_coupon', 'shop_order' ) ) )
+			add_action('admin_print_styles', 'woocommerce_admin_help_tab');
 
-	} elseif ( $pagenow=='users.php' || $pagenow=='user-edit.php' || $pagenow=='profile.php' ) {
+	} elseif ( $pagenow == 'users.php' || $pagenow == 'user-edit.php' || $pagenow == 'profile.php' ) {
 
 		include_once( 'woocommerce-admin-users.php' );
 
 	}
 }
 
-include_once( 'post-types/product.php' );
-include_once( 'post-types/shop_coupon.php' );
-include_once( 'post-types/shop_order.php' );
-include_once( 'woocommerce-admin-hooks.php' );
-include_once( 'woocommerce-admin-functions.php' );
-include_once( 'woocommerce-admin-taxonomies.php' );
+add_action('admin_init', 'woocommerce_admin_init');
+
 
 /**
- * Includes for admin pages - only load functions when needed
+ * Include and display the settings page.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_settings_page() {
 	include_once( 'woocommerce-admin-settings.php' );
 	woocommerce_settings();
 }
+
+/**
+ * Include and display the reports page.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_reports_page() {
 	include_once( 'woocommerce-admin-reports.php' );
 	woocommerce_reports();
 }
+
+/**
+ * Include and display the attibutes page.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_attributes_page() {
 	include_once( 'woocommerce-admin-attributes.php' );
 	woocommerce_attributes();
 }
+
+/**
+ * Include and display the status page.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_status_page() {
 	include_once( 'woocommerce-admin-status.php' );
 	woocommerce_status();
 }
 
+
 /**
- * Installation functions
+ * On activation, include the installer and run it.
+ *
+ * @access public
+ * @return void
  */
 function activate_woocommerce() {
 	include_once( 'woocommerce-admin-install.php' );
@@ -215,6 +266,13 @@ function activate_woocommerce() {
 	update_option( 'woocommerce_installed', 1 );
 	do_install_woocommerce();
 }
+
+/**
+ * Include the installer and run it.
+ *
+ * @access public
+ * @return void
+ */
 function install_woocommerce() {
 	include_once( 'woocommerce-admin-install.php' );
 	do_install_woocommerce();
@@ -222,15 +280,22 @@ function install_woocommerce() {
 
 
 /**
- * Admin Help Tabs
+ * Include and add help tabs to WordPress admin.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_admin_help_tab() {
 	include_once( 'woocommerce-admin-content.php' );
 	woocommerce_admin_help_tab_content();
 }
 
+
 /**
- * Admin Scripts
+ * Include admin scripts and styles.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_admin_scripts() {
 	global $woocommerce, $pagenow, $post, $wp_query;
@@ -342,18 +407,23 @@ function woocommerce_admin_scripts() {
 	}
 
 	// Reports pages
-    if ($screen->id=='woocommerce_page_woocommerce_reports') :
+    if ( $screen->id == 'woocommerce_page_woocommerce_reports' ) {
 
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
 		wp_enqueue_script( 'flot-resize', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot.resize'.$suffix.'.js', array('jquery', 'flot'), '1.0' );
 
-	endif;
+	}
 }
-add_action('admin_enqueue_scripts', 'woocommerce_admin_scripts');
+
+add_action( 'admin_enqueue_scripts', 'woocommerce_admin_scripts' );
+
 
 /**
- * Queue admin CSS
+ * Queue WooCommerce CSS.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_admin_css() {
 	global $woocommerce, $typenow, $post;
@@ -376,19 +446,27 @@ function woocommerce_admin_css() {
 	do_action('woocommerce_admin_css');
 }
 
+
 /**
- * Queue admin menu icons CSS
+ * Queue admin menu icons CSS.
  *
+ * @access public
+ * @return void
  */
 function woocommerce_admin_menu_styles() {
 	global $woocommerce;
 	wp_enqueue_style( 'woocommerce_admin_menu_styles', $woocommerce->plugin_url() . '/assets/css/menu.css' );
 }
+
 add_action( 'admin_print_styles', 'woocommerce_admin_menu_styles' );
 
 
 /**
- * Order admin menus
+ * Reorder the WC menu items in admin.
+ *
+ * @access public
+ * @param mixed $menu_order
+ * @return void
  */
 function woocommerce_admin_menu_order( $menu_order ) {
 
@@ -419,23 +497,37 @@ function woocommerce_admin_menu_order( $menu_order ) {
 	// Return order
 	return $woocommerce_menu_order;
 }
+
 add_action('menu_order', 'woocommerce_admin_menu_order');
 
+
+/**
+ * woocommerce_admin_custom_menu_order function.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_admin_custom_menu_order() {
-	if ( !current_user_can( 'manage_woocommerce' ) ) return false;
+	if ( ! current_user_can( 'manage_woocommerce' ) )
+		return false;
 	return true;
 }
-add_action('custom_menu_order', 'woocommerce_admin_custom_menu_order');
+
+add_action( 'custom_menu_order', 'woocommerce_admin_custom_menu_order' );
+
 
 /**
  * Admin Head
  *
  * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_admin_head() {
 	global $woocommerce;
 
-	if ( !current_user_can( 'manage_woocommerce' ) ) return false;
+	if ( ! current_user_can( 'manage_woocommerce' ) ) return false;
 	?>
 	<style type="text/css">
 		<?php if ( isset($_GET['taxonomy']) && $_GET['taxonomy']=='product_cat' ) : ?>
@@ -446,15 +538,18 @@ function woocommerce_admin_head() {
 	</style>
 	<?php
 }
+
 add_action('admin_head', 'woocommerce_admin_head');
+
 
 /**
  * Add functionality to the image uploader on product pages to exclude an image
- **/
-add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
-add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
-add_action('add_attachment', 'woocommerce_exclude_image_from_product_page_field_add');
-
+ *
+ * @access public
+ * @param mixed $fields
+ * @param mixed $object
+ * @return void
+ */
 function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 
 	if (!$object->post_parent) return $fields;
@@ -480,6 +575,19 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 	return $fields;
 }
 
+add_filter('attachment_fields_to_edit', 'woocommerce_exclude_image_from_product_page_field', 1, 2);
+add_filter('attachment_fields_to_save', 'woocommerce_exclude_image_from_product_page_field_save', 1, 2);
+add_action('add_attachment', 'woocommerce_exclude_image_from_product_page_field_add');
+
+
+/**
+ * Save the meta for exlcuding images from galleries.
+ *
+ * @access public
+ * @param mixed $post
+ * @param mixed $attachment
+ * @return void
+ */
 function woocommerce_exclude_image_from_product_page_field_save( $post, $attachment ) {
 
 	if (isset($_REQUEST['attachments'][$post['ID']]['woocommerce_exclude_image'])) :
@@ -494,25 +602,39 @@ function woocommerce_exclude_image_from_product_page_field_save( $post, $attachm
 
 }
 
+/**
+ * Add the meta for exlcuding images from galleries.
+ *
+ * @access public
+ * @param mixed $post_id
+ * @return void
+ */
 function woocommerce_exclude_image_from_product_page_field_add( $post_id ) {
 	add_post_meta( $post_id, '_woocommerce_exclude_image', 0, true );
 }
 
+
 /**
  * Duplicate a product action
+ *
+ * @access public
+ * @return void
  */
-add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_action');
-
 function woocommerce_duplicate_product_action() {
 	include_once('includes/duplicate_product.php');
 	woocommerce_duplicate_product();
 }
 
+add_action('admin_action_duplicate_product', 'woocommerce_duplicate_product_action');
+
+
 /**
  * Post updated messages
+ *
+ * @access public
+ * @param mixed $messages
+ * @return void
  */
-add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
-
 function woocommerce_product_updated_messages( $messages ) {
 	global $post, $post_ID;
 
@@ -564,12 +686,19 @@ function woocommerce_product_updated_messages( $messages ) {
 	return $messages;
 }
 
+add_filter('post_updated_messages', 'woocommerce_product_updated_messages');
+
+
 /**
  * Post updated messages
+ *
+ * @access public
+ * @param mixed $types
+ * @return void
  */
-add_filter('admin_comment_types_dropdown', 'woocommerce_admin_comment_types_dropdown');
-
 function woocommerce_admin_comment_types_dropdown( $types ) {
 	$types['order_note'] = __( 'Order notes', 'woocommerce' );
 	return $types;
 }
+
+add_filter( 'admin_comment_types_dropdown', 'woocommerce_admin_comment_types_dropdown' );

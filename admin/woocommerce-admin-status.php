@@ -4,9 +4,16 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/System Status
+ * @version     1.6.4
  */
 
+/**
+ * Output the content of the debugging page.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_status() {
 	global $woocommerce;
 

@@ -7,19 +7,24 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Settings
+ * @version     1.6.4
  */
 
 global $woocommerce_settings;
 
-include('settings/settings-init.php');
+include( 'settings/settings-init.php' );
 
-/**
- * Settings page
- *
- * Handles the display of the main woocommerce settings page in admin.
- */
 if ( ! function_exists( 'woocommerce_settings' ) ) {
+
+	/**
+	 * Settings page.
+	 *
+	 * Handles the display of the main woocommerce settings page in admin.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_settings() {
 	    global $woocommerce, $woocommerce_settings;
 
@@ -430,12 +435,17 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	}
 }
 
+
 /**
- * Admin fields
+ * Output admin fields.
  *
  * Loops though the woocommerce options array and outputs each field.
+ *
+ * @access public
+ * @param array $options Opens array to output
+ * @return void
  */
-function woocommerce_admin_fields($options) {
+function woocommerce_admin_fields( $options ) {
 	global $woocommerce;
 
     foreach ( $options as $value ) {
