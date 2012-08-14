@@ -4,7 +4,8 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Products
+ * @version     1.6.4
  */
 
 

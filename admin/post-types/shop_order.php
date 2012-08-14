@@ -4,14 +4,17 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Orders
+ * @version     1.6.4
  */
 
-/**
- * Disable auto-save
- **/
-add_action('admin_print_scripts', 'woocommerce_disable_autosave_for_orders');
 
+/**
+ * Disable the auto-save functionality for Orders
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_disable_autosave_for_orders(){
     global $post;
 
@@ -20,11 +23,16 @@ function woocommerce_disable_autosave_for_orders(){
     }
 }
 
-/**
- * Columns for order page
- **/
-add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
+add_action('admin_print_scripts', 'woocommerce_disable_autosave_for_orders');
 
+
+/**
+ * Define columns for the orders page.
+ *
+ * @access public
+ * @param mixed $columns
+ * @return array
+ */
 function woocommerce_edit_order_columns($columns){
 	global $woocommerce;
 
@@ -44,12 +52,17 @@ function woocommerce_edit_order_columns($columns){
 	return $columns;
 }
 
-/**
- * Custom Columns for order page
- **/
-add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_columns', 2);
+add_filter('manage_edit-shop_order_columns', 'woocommerce_edit_order_columns');
 
-function woocommerce_custom_order_columns($column) {
+
+/**
+ * Values for the custom columns on the orders page.
+ *
+ * @access public
+ * @param mixed $column
+ * @return void
+ */
+function woocommerce_custom_order_columns( $column ) {
 
 	global $post, $woocommerce;
 	$order = new WC_Order( $post->ID );
@@ -186,12 +199,16 @@ function woocommerce_custom_order_columns($column) {
 	}
 }
 
+add_action('manage_shop_order_posts_custom_column', 'woocommerce_custom_order_columns', 2);
+
 
 /**
- * Order page filters
- **/
-add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
-
+ * Filters for the order page.
+ *
+ * @access public
+ * @param mixed $views
+ * @return array
+ */
 function woocommerce_custom_order_views( $views ) {
 
 	unset($views['publish']);
@@ -206,12 +223,16 @@ function woocommerce_custom_order_views( $views ) {
 	return $views;
 }
 
+add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
+
 
 /**
- * Order page actions
- **/
-add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
-
+ * Actions for the orders page
+ *
+ * @access public
+ * @param mixed $actions
+ * @return array
+ */
 function woocommerce_remove_row_actions( $actions ) {
     if( get_post_type() === 'shop_order' ) :
         unset( $actions['view'] );
@@ -220,24 +241,33 @@ function woocommerce_remove_row_actions( $actions ) {
     return $actions;
 }
 
+add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
+
 
 /**
- * Order page bulk actions
- **/
-add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
-
+ * Remove edit from the bulk actions
+ *
+ * @access public
+ * @param mixed $actions
+ * @return array
+ */
 function woocommerce_bulk_actions( $actions ) {
 
-	if (isset($actions['edit'])) unset($actions['edit']);
+	if ( isset( $actions['edit'] ) )
+		unset( $actions['edit'] );
 
 	return $actions;
 }
 
-/**
- * Custom restrict posts for orders
- */
-add_action('restrict_manage_posts', 'woocommerce_restrict_manage_orders' );
+add_filter( 'bulk_actions-edit-shop_order', 'woocommerce_bulk_actions' );
 
+
+/**
+ * Show custom filters to filter orders by status/customer.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_restrict_manage_orders() {
 	global $woocommerce, $typenow, $wp_query;
 
@@ -306,11 +336,16 @@ function woocommerce_restrict_manage_orders() {
 	" );
 }
 
-/**
- * Filter orders by customer query
- **/
-add_filter( 'request', 'woocommerce_orders_by_customer_query' );
+add_action('restrict_manage_posts', 'woocommerce_restrict_manage_orders' );
 
+
+/**
+ * Filter the orders by the posted customer
+ *
+ * @access public
+ * @param mixed $vars
+ * @return array
+ */
 function woocommerce_orders_by_customer_query( $vars ) {
 	global $typenow, $wp_query;
     if ($typenow=='shop_order' && isset( $_GET['_customer_user'] ) && $_GET['_customer_user']>0) :
@@ -323,12 +358,19 @@ function woocommerce_orders_by_customer_query( $vars ) {
 	return $vars;
 }
 
+add_filter( 'request', 'woocommerce_orders_by_customer_query' );
+
+
 /**
  * Make order columns sortable
+ *
+ *
  * https://gist.github.com/906872
- **/
-add_filter("manage_edit-shop_order_sortable_columns", 'woocommerce_custom_shop_order_sort');
-
+ *
+ * @access public
+ * @param mixed $columns
+ * @return array
+ */
 function woocommerce_custom_shop_order_sort($columns) {
 	$custom = array(
 		'order_title'	=> 'ID',
@@ -339,12 +381,16 @@ function woocommerce_custom_shop_order_sort($columns) {
 	return wp_parse_args($custom, $columns);
 }
 
+add_filter("manage_edit-shop_order_sortable_columns", 'woocommerce_custom_shop_order_sort');
+
 
 /**
  * Order column orderby/request
- **/
-add_filter( 'request', 'woocommerce_custom_shop_order_orderby' );
-
+ *
+ * @access public
+ * @param mixed $vars
+ * @return array
+ */
 function woocommerce_custom_shop_order_orderby( $vars ) {
 	global $typenow, $wp_query;
     if ($typenow!='shop_order') return $vars;
@@ -362,14 +408,16 @@ function woocommerce_custom_shop_order_orderby( $vars ) {
 	return $vars;
 }
 
-/**
- * Order custom field search
- **/
-if (is_admin()) :
-	add_filter( 'parse_query', 'woocommerce_shop_order_search_custom_fields' );
-	add_filter( 'get_search_query', 'woocommerce_shop_order_search_label' );
-endif;
+add_filter( 'request', 'woocommerce_custom_shop_order_orderby' );
 
+
+/**
+ * Search custom fields as well as content
+ *
+ * @access public
+ * @param mixed $wp
+ * @return void
+ */
 function woocommerce_shop_order_search_custom_fields( $wp ) {
 	global $pagenow, $wpdb;
 
@@ -435,6 +483,14 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 	$wp->query_vars['post__in'] = $post_ids;
 }
 
+
+/**
+ * Change the label when searching orders
+ *
+ * @access public
+ * @param mixed $query
+ * @return string
+ */
 function woocommerce_shop_order_search_label($query) {
 	global $pagenow, $typenow;
 
@@ -445,13 +501,23 @@ function woocommerce_shop_order_search_label($query) {
 	return $_GET['s'];
 }
 
+if ( is_admin() ) {
+	add_filter( 'parse_query', 'woocommerce_shop_order_search_custom_fields' );
+	add_filter( 'get_search_query', 'woocommerce_shop_order_search_label' );
+}
+
+
 /**
  * Query vars for custom searches
- **/
-add_filter('query_vars', 'woocommerce_add_custom_query_var');
-
+ *
+ * @access public
+ * @param mixed $public_query_vars
+ * @return array
+ */
 function woocommerce_add_custom_query_var($public_query_vars) {
 	$public_query_vars[] = 'sku';
 	$public_query_vars[] = 'shop_order_search';
 	return $public_query_vars;
 }
+
+add_filter('query_vars', 'woocommerce_add_custom_query_var');

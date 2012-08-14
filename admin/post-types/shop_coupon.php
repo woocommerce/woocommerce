@@ -4,18 +4,21 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Coupons
+ * @version     1.6.4
  */
- 
-/**
- * Columns for Coupons page
- **/
-add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
 
+/**
+ * Define Columns for the Coupons admin page
+ *
+ * @access public
+ * @param mixed $columns
+ * @return array
+ */
 function woocommerce_edit_coupon_columns($columns){
-	
+
 	$columns = array();
-	
+
 	$columns["cb"] 			= "<input type=\"checkbox\" />";
 	$columns["title"] 		= __("Code", 'woocommerce');
 	$columns["type"] 		= __("Coupon type", 'woocommerce');
@@ -28,15 +31,19 @@ function woocommerce_edit_coupon_columns($columns){
 	return $columns;
 }
 
+add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns');
+
 
 /**
- * Custom Columns for Coupons page
- **/
-add_action('manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2);
-
+ * Values for Columns on the Coupons admin page
+ *
+ * @access public
+ * @param mixed $column
+ * @return void
+ */
 function woocommerce_custom_coupon_columns($column) {
 	global $post, $woocommerce;
-	
+
 	$type 			= get_post_meta($post->ID, 'discount_type', true);
 	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
 	$individual_use = get_post_meta($post->ID, 'individual_use', true);
@@ -47,7 +54,7 @@ function woocommerce_custom_coupon_columns($column) {
 
 	switch ($column) {
 		case "type" :
-			echo $woocommerce->get_coupon_discount_type($type);			
+			echo $woocommerce->get_coupon_discount_type($type);
 		break;
 		case "amount" :
 			echo $amount;
@@ -66,3 +73,5 @@ function woocommerce_custom_coupon_columns($column) {
 		break;
 	}
 }
+
+add_action( 'manage_shop_coupon_posts_custom_column', 'woocommerce_custom_coupon_columns', 2 );
