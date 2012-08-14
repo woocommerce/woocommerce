@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin functions for the shop_order post type
+ * Admin functions for the shop_order post type.
  *
  * @author 		WooThemes
  * @category 	Admin
@@ -10,7 +10,7 @@
 
 
 /**
- * Disable the auto-save functionality for Orders
+ * Disable the auto-save functionality for Orders.
  *
  * @access public
  * @return void
@@ -227,7 +227,7 @@ add_filter('views_edit-shop_order', 'woocommerce_custom_order_views');
 
 
 /**
- * Actions for the orders page
+ * Actions for the orders page.
  *
  * @access public
  * @param mixed $actions
@@ -245,7 +245,7 @@ add_filter( 'post_row_actions', 'woocommerce_remove_row_actions', 10, 1 );
 
 
 /**
- * Remove edit from the bulk actions
+ * Remove edit from the bulk actions.
  *
  * @access public
  * @param mixed $actions
@@ -340,7 +340,7 @@ add_action('restrict_manage_posts', 'woocommerce_restrict_manage_orders' );
 
 
 /**
- * Filter the orders by the posted customer
+ * Filter the orders by the posted customer.
  *
  * @access public
  * @param mixed $vars
@@ -362,7 +362,7 @@ add_filter( 'request', 'woocommerce_orders_by_customer_query' );
 
 
 /**
- * Make order columns sortable
+ * Make order columns sortable.
  *
  *
  * https://gist.github.com/906872
@@ -385,7 +385,7 @@ add_filter("manage_edit-shop_order_sortable_columns", 'woocommerce_custom_shop_o
 
 
 /**
- * Order column orderby/request
+ * Order column orderby/request.
  *
  * @access public
  * @param mixed $vars
@@ -412,7 +412,7 @@ add_filter( 'request', 'woocommerce_custom_shop_order_orderby' );
 
 
 /**
- * Search custom fields as well as content
+ * Search custom fields as well as content.
  *
  * @access public
  * @param mixed $wp
@@ -485,7 +485,7 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 
 
 /**
- * Change the label when searching orders
+ * Change the label when searching orders.
  *
  * @access public
  * @param mixed $query
@@ -508,7 +508,7 @@ if ( is_admin() ) {
 
 
 /**
- * Query vars for custom searches
+ * Query vars for custom searches.
  *
  * @access public
  * @param mixed $public_query_vars

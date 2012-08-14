@@ -1,12 +1,13 @@
 <?php
 /**
- * Defines the array of settings which are displayed in admin
+ * Defines the array of settings which are displayed in admin.
  *
  * Settings are defined here and displayed via functions.
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Settings
+ * @version     1.6.4
  */
 
 $localisation_setting = ( defined('WPLANG') ) ? array(

@@ -2,17 +2,21 @@
 /**
  * Order Data
  *
- * Functions for displaying the order data meta box
+ * Functions for displaying the order data meta box.
  *
  * @author 		WooThemes
- * @category 	Admin Write Panels
- * @package 	WooCommerce
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Write Panels
+ * @version     1.6.4
  */
 
+
 /**
- * Order data meta box
+ * Displays the order data meta box.
  *
- * Displays the meta box
+ * @access public
+ * @param mixed $post
+ * @return void
  */
 function woocommerce_order_data_meta_box($post) {
 
@@ -289,9 +293,9 @@ function woocommerce_order_data_meta_box($post) {
 }
 
 /**
- * Order items meta box
+ * Order items meta box.
  *
- * Displays the order items meta box - for showing individual items in the order
+ * Displays the order items meta box - for showing individual items in the order.
  */
 function woocommerce_order_items_meta_box($post) {
 	global $woocommerce;
@@ -441,10 +445,15 @@ function woocommerce_order_items_meta_box($post) {
 
 }
 
+
 /**
- * Order actions meta box
+ * Display the order actions meta box.
  *
  * Displays the order actions meta box - buttons for managing order stock and sending the customer an invoice.
+ *
+ * @access public
+ * @param mixed $post
+ * @return void
  */
 function woocommerce_order_actions_meta_box($post) {
 	?>
@@ -474,10 +483,13 @@ function woocommerce_order_actions_meta_box($post) {
 	<?php
 }
 
+
 /**
- * Order totals meta box
+ * Displays the order totals meta box.
  *
- * Displays the order totals meta box
+ * @access public
+ * @param mixed $post
+ * @return void
  */
 function woocommerce_order_totals_meta_box($post) {
 	global $woocommerce;
@@ -651,13 +663,15 @@ function woocommerce_order_totals_meta_box($post) {
 	<?php
 }
 
-/**
- * Order Data Save
- *
- * Function for processing and storing all order data.
- */
-add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 10, 2 );
 
+/**
+ * Save the order data meta box.
+ *
+ * @access public
+ * @param mixed $post_id
+ * @param mixed $post
+ * @return void
+ */
 function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce, $woocommerce_errors;
 
@@ -926,3 +940,5 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	delete_transient( 'woocommerce_processing_order_count' );
 }
+
+add_action('woocommerce_process_shop_order_meta', 'woocommerce_process_shop_order_meta', 10, 2 );

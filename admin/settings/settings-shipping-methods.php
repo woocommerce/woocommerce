@@ -1,13 +1,19 @@
 <?php
 /**
  * Additional shipping settings
- * 
+ *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Settings
+ * @version     1.6.4
  */
-add_action( 'woocommerce_admin_field_shipping_methods', 'woocommerce_shipping_methods_setting' );
 
+/**
+ * Output shipping method settings.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_shipping_methods_setting() {
 	global $woocommerce;
 	?>
@@ -26,9 +32,9 @@ function woocommerce_shipping_methods_setting() {
 				<tbody>
 			    	<?php
 			    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-			    	
+
 				    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
-				    	
+
 				    	echo '<tr>
 				    		<td width="1%" class="radio">
 				    			<input type="radio" name="default_shipping_method" value="' . $method->id . '" ' . checked( $default_shipping_method, $method->id, false ) . ' />
@@ -38,15 +44,15 @@ function woocommerce_shipping_methods_setting() {
 				    				<small>' . __('Method ID', 'woocommerce') . ': ' . $method->id . '</small></p>
 				    			</td>
 				    			<td>';
-				    		
-			    		if ($method->enabled == 'yes') 
+
+			    		if ($method->enabled == 'yes')
 			    			echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
-						else 
-							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';	
-			    			
+						else
+							echo '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';
+
 			    		echo '</td>
 			    		</tr>';
-			    		
+
 			    	}
 			    	?>
 				</tbody>
@@ -55,3 +61,5 @@ function woocommerce_shipping_methods_setting() {
 	</tr>
 	<?php
 }
+
+add_action( 'woocommerce_admin_field_shipping_methods', 'woocommerce_shipping_methods_setting' );

@@ -1,18 +1,21 @@
 <?php
 /**
  * Variable Product Type
- * 
- * Functions specific to variable products (for the write panels)
+ *
+ * Functions specific to variable products (for the write panels).
  *
  * @author 		WooThemes
- * @category 	Admin Write Panels
- * @package 	WooCommerce
+ * @category 	Admin
+ * @package 	WooCommerce/Admin/Write Panels
+ * @version     1.6.4
  */
 
+
 /**
- * Product Options Tab
- * 
- * Product Options tab for the variable product type
+ * Display the variation tab in product data.
+ *
+ * @access public
+ * @return void
  */
 function variable_product_type_options_tab() {
 	?>
@@ -20,18 +23,20 @@ function variable_product_type_options_tab() {
 	<?php
 }
 
-add_action('woocommerce_product_write_panel_tabs', 'variable_product_type_options_tab'); 
- 
+add_action('woocommerce_product_write_panel_tabs', 'variable_product_type_options_tab');
+
+
 /**
- * Product Options
- * 
- * Product Options for the variable product type
+ * Show the variable product options.
+ *
+ * @access public
+ * @return void
  */
 function variable_product_type_options() {
 	global $post, $woocommerce;
-	
+
 	$attributes = (array) maybe_unserialize( get_post_meta($post->ID, '_product_attributes', true) );
-	
+
 	// See if any are set
 	$variation_attribute_found = false;
 	if ($attributes) foreach($attributes as $attribute){
@@ -40,7 +45,7 @@ function variable_product_type_options() {
 			break;
 		endif;
 	}
-	
+
 	// Get tax classes
 	$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 	$tax_class_options = array();
@@ -51,22 +56,22 @@ function variable_product_type_options() {
 
 	?>
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper">
-	
+
 		<?php if (!$variation_attribute_found) : ?>
-		
+
 			<div id="message" class="inline woocommerce-message">
 				<div class="squeezer">
 					<h4><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></h4>
-					
+
 					<p class="submit"><a class="button-primary" href="http://www.woothemes.com/woocommerce-docs/user-guide/product-variations/" target="_blank"><?php _e('Learn more', 'woocommerce'); ?></a></p>
 				</div>
 			</div>
 
 		<?php else : ?>
-	
+
 			<p class="toolbar">
 				<a href="#" class="close_all"><?php _e('Close all', 'woocommerce'); ?></a><a href="#" class="expand_all"><?php _e('Expand all', 'woocommerce'); ?></a>
-				<strong><?php _e('Bulk edit:', 'woocommerce'); ?></strong> 
+				<strong><?php _e('Bulk edit:', 'woocommerce'); ?></strong>
 				<select id="field_to_edit">
 					<option value="variable_price"><?php _e('Prices', 'woocommerce'); ?></option>
 					<option value="variable_sale_price"><?php _e('Sale prices', 'woocommerce'); ?></option>
@@ -81,7 +86,7 @@ function variable_product_type_options() {
 				<a class="button bulk_edit plus"><?php _e('Edit', 'woocommerce'); ?></a>
 				<a class="button toggle toggle_downloadable" href="#"><?php _e('Downloadable', 'woocommerce'); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e('Virtual', 'woocommerce'); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e('Enabled', 'woocommerce'); ?></a> <a href="#" class="button delete_variations"><?php _e('Delete all', 'woocommerce'); ?></a>
 			</p>
-	
+
 			<div class="woocommerce_variations wc-metaboxes">
 				<?php
 				$args = array(
@@ -94,8 +99,8 @@ function variable_product_type_options() {
 				);
 				$variations = get_posts($args);
 				$loop = 0;
-				if ($variations) foreach ($variations as $variation) : 
-				
+				if ($variations) foreach ($variations as $variation) :
+
 					$variation_data = get_post_custom( $variation->ID );
 					$variation_data['variation_post_id'] = $variation->ID;
 					$image = '';
@@ -105,12 +110,12 @@ function variable_product_type_options() {
 					else :
 						$image_id = 0;
 					endif;
-					
+
 					if (!$image) $image = woocommerce_placeholder_img_src();
-					
+
 					$classes = get_the_terms( $variation->ID, 'product_shipping_class' );
 					if ( $classes && ! is_wp_error( $classes ) ) $current_shipping_class = current($classes)->term_id; else $current_shipping_class = '';
-							    			
+
 		    		$parent_tax_class = get_post_meta( $post->ID, '_tax_class', true );
 					?>
 					<div class="woocommerce_variation wc-metabox closed">
@@ -120,16 +125,16 @@ function variable_product_type_options() {
 							<strong>#<?php echo $variation->ID; ?> &mdash; </strong>
 							<?php
 								foreach ($attributes as $attribute) :
-									
+
 									// Only deal with attributes that are variations
 									if ( !$attribute['is_variation'] ) continue;
-	
+
 									// Get current value for variation (if set)
 									$variation_selected_value = get_post_meta( $variation->ID, 'attribute_' . sanitize_title($attribute['name']), true );
-									
+
 									// Name will be something like attribute_pa_color
 									echo '<select name="attribute_' . sanitize_title($attribute['name']).'['.$loop.']"><option value="">'.__('Any', 'woocommerce') . ' ' . $woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
-									
+
 									// Get terms for attribute taxonomy or value if its a custom attribute
 									if ($attribute['is_taxonomy']) :
 										$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
@@ -142,16 +147,16 @@ function variable_product_type_options() {
 											echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst($option).'</option>';
 										endforeach;
 									endif;
-										
+
 									echo '</select>';
-		
+
 								endforeach;
 							?>
 							<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation->ID ); ?>" />
 							<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">
-							<tbody>	
+							<tbody>
 								<tr>
 									<td class="sku" colspan="2">
 										<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>
@@ -161,7 +166,7 @@ function variable_product_type_options() {
 											<input type="hidden" name="variable_sku[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_sku'][0])) echo $variation_data['_sku'][0]; ?>" />
 										<?php endif; ?>
 									</td>
-									
+
 									<td class="data" rowspan="2">
 										<table cellspacing="0" cellpadding="0">
 											<tr>
@@ -170,7 +175,7 @@ function variable_product_type_options() {
 											</tr>
 											<tr>
 												<td><label><?php _e('Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_price'][0])) echo $variation_data['_price'][0]; ?>" /></td>
-											
+
 												<td><label><?php _e('Sale Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_sale_price'][0])) echo $variation_data['_sale_price'][0]; ?>" /></td>
 											</tr>
 											<?php if( get_option('woocommerce_enable_weight', true) !== 'no' || get_option('woocommerce_enable_dimensions', true) !== 'no' ) : ?>
@@ -192,7 +197,7 @@ function variable_product_type_options() {
 												<?php endif; ?>
 											</tr>
 											<?php endif; ?>
-											
+
 											<tr>
 												<td><label><?php _e('Shipping class:', 'woocommerce'); ?></label> <?php
 													$args = array(
@@ -226,25 +231,25 @@ function variable_product_type_options() {
 												</td>
 											</tr>
 											<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data ); ?>
-										</table>									
+										</table>
 									</td>
 								</tr>
 								<tr>
 									<td class="upload_image">
-									
+
 										<a href="#" class="upload_image_button <?php if ($image_id>0) echo 'remove'; ?>" rel="<?php echo $variation->ID; ?>"><img src="<?php echo $image ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a>
-										
+
 									</td>
 									<td class="options">
-										
+
 										<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked($variation->post_status, 'publish'); ?> /> <?php _e('Enabled', 'woocommerce'); ?></label>
-										
+
 										<label><input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo $loop; ?>]" <?php if (isset($variation_data['_downloadable'][0])) checked($variation_data['_downloadable'][0], 'yes'); ?> /> <?php _e('Downloadable', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce'); ?>" href="#">[?]</a></label>
-										
+
 										<label><input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo $loop; ?>]" <?php if (isset($variation_data['_virtual'][0])) checked($variation_data['_virtual'][0], 'yes'); ?> /> <?php _e('Virtual', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce'); ?>" href="#">[?]</a></label>
 
 										<?php do_action( 'woocommerce_variation_options', $loop, $variation_data ); ?>
-										
+
 									</td>
 								</tr>
 							</tbody>
@@ -252,27 +257,27 @@ function variable_product_type_options() {
 					</div>
 				<?php $loop++; endforeach; ?>
 			</div>
-			
+
 			<p class="toolbar">
-			
+
 				<button type="button" class="button button-primary add_variation" <?php disabled($variation_attribute_found, false); ?>><?php _e('Add Variation', 'woocommerce'); ?></button>
-				
+
 				<button type="button" class="button link_all_variations" <?php disabled($variation_attribute_found, false); ?>><?php _e('Link all variations', 'woocommerce'); ?></button>
-				
+
 				<strong><?php _e('Default selections:', 'woocommerce'); ?></strong>
 				<?php
 					$default_attributes = (array) maybe_unserialize(get_post_meta( $post->ID, '_default_attributes', true ));
 					foreach ($attributes as $attribute) :
-						
+
 						// Only deal with attributes that are variations
 						if ( !$attribute['is_variation'] ) continue;
 
 						// Get current value for variation (if set)
 						$variation_selected_value = (isset($default_attributes[sanitize_title($attribute['name'])])) ? $default_attributes[sanitize_title($attribute['name'])] : '';
-						
+
 						// Name will be something like attribute_pa_color
 						echo '<select name="default_attribute_' . sanitize_title($attribute['name']).'"><option value="">'.__('No default', 'woocommerce') . ' ' . $woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
-						
+
 						// Get terms for attribute taxonomy or value if its a custom attribute
 						if ($attribute['is_taxonomy']) :
 							$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
@@ -285,7 +290,7 @@ function variable_product_type_options() {
 								echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst($option).'</option>';
 							endforeach;
 						endif;
-							
+
 						echo '</select>';
 
 					endforeach;
@@ -293,7 +298,7 @@ function variable_product_type_options() {
 			</p>
 
 		<?php endif; ?>
-		
+
 		<div class="clear"></div>
 	</div>
 	<?php
@@ -303,24 +308,24 @@ function variable_product_type_options() {
 	ob_start();
 	?>
 	jQuery(function(){
-	
+
 		<?php if (!$attributes || (is_array($attributes) && sizeof($attributes)==0)) : ?>
-			
+
 			jQuery('#variable_product_options').on('click', 'button.link_all_variations, button.add_variation', function(){
-				
+
 				alert('<?php _e('You must add some attributes via the "Product Data" panel and save before adding a new variation.', 'woocommerce'); ?>');
-				
+
 				return false;
-				
+
 			});
-			
+
 		<?php else : ?>
-		
+
 		// Add a variation
 		jQuery('#variable_product_options').on('click', 'button.add_variation', function(){
-		
+
 			jQuery('.woocommerce_variations').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-					
+
 			var data = {
 				action: 'woocommerce_add_variation',
 				post_id: <?php echo $post->ID; ?>,
@@ -328,11 +333,11 @@ function variable_product_type_options() {
 			};
 
 			jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-				
+
 				var variation_id = parseInt(response);
-				
+
 				var loop = jQuery('.woocommerce_variation').size();
-				
+
 				jQuery('.woocommerce_variations').append('<div class="woocommerce_variation wc-metabox">\
 					<h3 class="handle">\
 						<button type="button" class="remove_variation button" rel="' + variation_id + '"><?php echo esc_js( __('Remove', 'woocommerce') ); ?></button>\
@@ -340,11 +345,11 @@ function variable_product_type_options() {
 						<strong>#' + variation_id + ' &mdash; </strong>\
 						<?php
 							if ($attributes) foreach ($attributes as $attribute) :
-								
+
 								if ( !isset($attribute['is_variation']) || !$attribute['is_variation'] ) continue;
-								
+
 								echo '<select name="attribute_' . sanitize_title($attribute['name']).'[\' + loop + \']"><option value="">' . esc_js( __('Any', 'woocommerce') ) . ' ' .$woocommerce->attribute_label($attribute['name']).'&hellip;</option>';
-								
+
 								// Get terms for attribute taxonomy or value if its a custom attribute
 								if ($attribute['is_taxonomy']) :
 									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
@@ -357,9 +362,9 @@ function variable_product_type_options() {
 										echo '<option value="'.$option.'">'.ucfirst($option).'</option>';
 									endforeach;
 								endif;
-									
+
 								echo '</select>';
-	
+
 							endforeach;
 					?><input type="hidden" name="variable_post_id[' + loop + ']" value="' + variation_id + '" /><input type="hidden" class="variation_menu_order" name="variation_menu_order[' + loop + ']" value="' + loop + '" /></h3>\
 					<table cellpadding="0" cellspacing="0" class="woocommerce_variable_attributes wc-metabox-content">\
@@ -449,13 +454,13 @@ function variable_product_type_options() {
 						</tbody>\
 					</table>\
 				</div>');
-				
+
 				jQuery(".tips").tipTip({
 			    	'attribute' : 'data-tip',
 			    	'fadeIn' : 50,
 			    	'fadeOut' : 50
 			    });
-			    
+
 			    jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
 
 				jQuery('.woocommerce_variations').unblock();
@@ -463,31 +468,31 @@ function variable_product_type_options() {
 			});
 
 			return false;
-		
+
 		});
 
 		jQuery('#variable_product_options').on('click', 'button.link_all_variations', function(){
-			
+
 			var answer = confirm('<?php _e('Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce'); ?>');
-			
+
 			if (answer) {
-				
+
 				jQuery('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-				
+
 				var data = {
 					action: 'woocommerce_link_all_variations',
 					post_id: <?php echo $post->ID; ?>,
 					security: '<?php echo wp_create_nonce("link-variations"); ?>'
 				};
-	
+
 				jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
-					
-					var count = parseInt( response );	
-					
+
+					var count = parseInt( response );
+
 					if (count>0) {
 						jQuery('.woocommerce_variations').load( window.location + ' .woocommerce_variations > *' );
 					}
-					
+
 					if (count==1) {
 						alert( count + ' <?php _e("variation added", 'woocommerce'); ?>');
 					} else if (count==0 || count>1) {
@@ -495,137 +500,137 @@ function variable_product_type_options() {
 					} else {
 						alert('<?php _e("No variations added", 'woocommerce'); ?>');
 					}
-					
+
 					jQuery('#variable_product_options').unblock();
-	
+
 				});
 			}
 			return false;
 		});
-		
+
 		jQuery('#variable_product_options').on('click', 'button.remove_variation', function(e){
 			e.preventDefault();
 			var answer = confirm('<?php _e('Are you sure you want to remove this variation?', 'woocommerce'); ?>');
 			if (answer){
-				
+
 				var el = jQuery(this).parent().parent();
-				
+
 				var variation = jQuery(this).attr('rel');
-				
+
 				if (variation>0) {
-				
+
 					jQuery(el).block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-					
+
 					var data = {
 						action: 'woocommerce_remove_variation',
 						variation_id: variation,
 						security: '<?php echo wp_create_nonce("delete-variation"); ?>'
 					};
-	
+
 					jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
 						// Success
 						jQuery(el).fadeOut('300', function(){
 							jQuery(el).remove();
 						});
 					});
-					
+
 				} else {
 					jQuery(el).fadeOut('300', function(){
 						jQuery(el).remove();
 					});
 				}
-				
+
 			}
 			return false;
 		});
-		
+
 		jQuery('#variable_product_options').on('click', 'a.delete_variations', function(){
 			var answer = confirm('<?php _e('Are you sure you want to delete all variations? This cannot be undone.', 'woocommerce'); ?>');
 			if (answer){
-			
+
 				var answer = confirm('<?php _e('Last warning, are you sure?', 'woocommerce'); ?>');
-				
+
 				if (answer) {
-					
+
 					var variation_ids = [];
-					
+
 					jQuery('.woocommerce_variations .woocommerce_variation').block({ message: null, overlayCSS: { background: '#fff url(<?php echo $woocommerce->plugin_url(); ?>/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-					
+
 					jQuery('.woocommerce_variations .woocommerce_variation .remove_variation').each(function(){
-						
+
 						var variation = jQuery(this).attr('rel');
 						if (variation>0) {
 							variation_ids.push(variation);
 						}
 					});
-					
+
 					var data = {
 						action: 'woocommerce_remove_variations',
 						variation_ids: variation_ids,
 						security: '<?php echo wp_create_nonce("delete-variations"); ?>'
 					};
-					
+
 					jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
 						jQuery('.woocommerce_variations .woocommerce_variation').fadeOut('300', function(){
 							jQuery('.woocommerce_variations .woocommerce_variation').remove();
 						});
 					});
-					
+
 				}
-				
+
 			}
 			return false;
 		});
-		
+
 		jQuery('a.bulk_edit').click(function() {
 			var field_to_edit = jQuery('select#field_to_edit').val();
 			var value = prompt("<?php _e('Enter a value', 'woocommerce'); ?>");
 			jQuery('input[name^="' + field_to_edit + '"]').val( value );
 			return false;
 		});
-		
+
 		jQuery('a.toggle_virtual').click(function(){
 			var checkbox = jQuery('input[name^="variable_is_virtual"]');
        		checkbox.attr('checked', !checkbox.attr('checked'));
        		jQuery('input.variable_is_virtual').change();
 			return false;
 		});
-		
+
 		jQuery('a.toggle_downloadable').click(function(){
 			var checkbox = jQuery('input[name^="variable_is_downloadable"]');
        		checkbox.attr('checked', !checkbox.attr('checked'));
        		jQuery('input.variable_is_downloadable').change();
 			return false;
 		});
-		
+
 		jQuery('a.toggle_enabled').click(function(){
 			var checkbox = jQuery('input[name^="variable_enabled"]');
        		checkbox.attr('checked', !checkbox.attr('checked'));
 			return false;
 		});
-				
+
 		jQuery('#variable_product_options').on('change', 'input.variable_is_downloadable', function(){
-			
+
 			jQuery(this).closest('.woocommerce_variation').find('.show_if_variation_downloadable').hide();
-			
+
 			if (jQuery(this).is(':checked')) {
 				jQuery(this).closest('.woocommerce_variation').find('.show_if_variation_downloadable').show();
 			}
-			
+
 		});
-		
+
 		jQuery('#variable_product_options').on('change', 'input.variable_is_virtual', function(){
-			
+
 			jQuery(this).closest('.woocommerce_variation').find('.hide_if_variation_virtual').show();
-			
+
 			if (jQuery(this).is(':checked')) {
 				jQuery(this).closest('.woocommerce_variation').find('.hide_if_variation_virtual').hide();
 			}
-			
-		});	
-		
+
+		});
+
 		jQuery('input.variable_is_downloadable, input.variable_is_virtual').change();
-		
+
 		// Ordering
 		$('.woocommerce_variations').sortable({
 			items:'.woocommerce_variation',
@@ -645,48 +650,48 @@ function variable_product_type_options() {
 				variation_row_indexes();
 			}
 		});
-		
+
 		function variation_row_indexes() {
-			$('.woocommerce_variations .woocommerce_variation').each(function(index, el){ 
-				$('.variation_menu_order', el).val( parseInt( $(el).index('.woocommerce_variations .woocommerce_variation') ) ); 
+			$('.woocommerce_variations .woocommerce_variation').each(function(index, el){
+				$('.variation_menu_order', el).val( parseInt( $(el).index('.woocommerce_variations .woocommerce_variation') ) );
 			});
 		};
-		
+
 		<?php endif; ?>
-		
+
 		var current_field_wrapper;
-		
+
 		window.send_to_editor_default = window.send_to_editor;
 
 		jQuery('#variable_product_options').on('click', '.upload_image_button', function(){
-			
+
 			var post_id = jQuery(this).attr('rel');
 			var parent = jQuery(this).parent();
 			current_field_wrapper = parent;
-			
+
 			if (jQuery(this).is('.remove')) {
-				
+
 				jQuery('.upload_image_id', current_field_wrapper).val('');
 				jQuery('img', current_field_wrapper).attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 				jQuery(this).removeClass('remove');
-				
+
 			} else {
-				
+
 				window.send_to_editor = window.send_to_cproduct;
 				formfield = jQuery('.upload_image_id', parent).attr('name');
 				tb_show('', 'media-upload.php?post_id=' + post_id + '&amp;type=image&amp;TB_iframe=true');
-			
+
 			}
-			
+
 			return false;
 		});
 
 		window.send_to_cproduct = function(html) {
-			
+
 			jQuery('body').append('<div id="temp_image">' + html + '</div>');
-				
+
 			var img = jQuery('#temp_image').find('img');
-			
+
 			imgurl 		= img.attr('src');
 			imgclass 	= img.attr('class');
 			imgid		= parseInt(imgclass.replace(/\D/g, ''), 10);
@@ -697,9 +702,9 @@ function variable_product_type_options() {
 			jQuery('img', current_field_wrapper).attr('src', imgurl);
 			tb_remove();
 			jQuery('#temp_image').remove();
-			
+
 			window.send_to_editor = window.send_to_editor_default;
-			
+
 		}
 
 	});
@@ -707,29 +712,38 @@ function variable_product_type_options() {
 	$javascript = ob_get_clean();
 	$woocommerce->add_inline_js( $javascript );
 }
+
 add_action('woocommerce_product_write_panels', 'variable_product_type_options');
 
+
 /**
- * Product Type selector
- * 
- * Adds this product type to the product type selector in the product options meta box
+ * Show the variable product selector in the dropdown in admin.
+ *
+ * @access public
+ * @param mixed $types
+ * @param mixed $product_type
+ * @return array
  */
 function variable_product_type_selector( $types, $product_type ) {
 	$types['variable'] = __('Variable product', 'woocommerce');
 	return $types;
 }
+
 add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
 
+
 /**
- * Process meta
- * 
- * Processes this product types options when a post is saved
+ * Save the variable product options.
+ *
+ * @access public
+ * @param mixed $post_id
+ * @return void
  */
 function process_product_meta_variable( $post_id ) {
-	global $woocommerce, $wpdb; 
-	
+	global $woocommerce, $wpdb;
+
 	if (isset($_POST['variable_sku'])) :
-		
+
 		$variable_post_id 			= $_POST['variable_post_id'];
 		$variable_sku 				= $_POST['variable_sku'];
 		$variable_weight			= $_POST['variable_weight'];
@@ -746,38 +760,38 @@ function process_product_meta_variable( $post_id ) {
 		$variable_tax_class			= $_POST['variable_tax_class'];
 		$variable_menu_order 		= $_POST['variation_menu_order'];
 
-		if (isset($_POST['variable_enabled'])) 
+		if (isset($_POST['variable_enabled']))
 			$variable_enabled 			= $_POST['variable_enabled'];
-			
-		if (isset($_POST['variable_is_virtual'])) 
+
+		if (isset($_POST['variable_is_virtual']))
 			$variable_is_virtual		= $_POST['variable_is_virtual'];
-			
-		if (isset($_POST['variable_is_downloadable'])) 
+
+		if (isset($_POST['variable_is_downloadable']))
 			$variable_is_downloadable 	= $_POST['variable_is_downloadable'];
-			
+
 		$attributes = (array) maybe_unserialize( get_post_meta($post_id, '_product_attributes', true) );
-		
+
 		$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
-		
+
 		for ( $i=0; $i <= $max_loop; $i++ ) :
-			
+
 			if ( ! isset( $variable_post_id[$i] ) ) continue;
-			
+
 			$variation_id = (int) $variable_post_id[$i];
-			
+
 			// Virtal/Downloadable
 			if (isset($variable_is_virtual[$i])) $is_virtual = 'yes'; else $is_virtual = 'no';
 			if (isset($variable_is_downloadable[$i])) $is_downloadable = 'yes'; else $is_downloadable = 'no';
 
 			// Enabled or disabled
 			if (isset($variable_enabled[$i])) $post_status = 'publish'; else $post_status = 'private';
-			
+
 			// Generate a useful post title
 			$variation_post_title = sprintf(__('Variation #%s of %s', 'woocommerce'), $variation_id, get_the_title($post_id));
-			
+
 			// Update or Add post
 			if (!$variation_id) :
-				
+
 				$variation = array(
 					'post_title' => $variation_post_title,
 					'post_content' => '',
@@ -790,9 +804,9 @@ function process_product_meta_variable( $post_id ) {
 				$variation_id = wp_insert_post( $variation );
 
 			else :
-				
+
 				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[$i] ), array( 'ID' => $variation_id ) );
-			
+
 			endif;
 
 			// Update post meta
@@ -800,7 +814,7 @@ function process_product_meta_variable( $post_id ) {
 			update_post_meta( $variation_id, '_price', $variable_price[$i] );
 			update_post_meta( $variation_id, '_sale_price', $variable_sale_price[$i] );
 			update_post_meta( $variation_id, '_weight', $variable_weight[$i] );
-			
+
 			update_post_meta( $variation_id, '_length', $variable_length[$i] );
 			update_post_meta( $variation_id, '_width', $variable_width[$i] );
 			update_post_meta( $variation_id, '_height', $variable_height[$i] );
@@ -810,12 +824,12 @@ function process_product_meta_variable( $post_id ) {
 
 			update_post_meta( $variation_id, '_virtual', $is_virtual );
 			update_post_meta( $variation_id, '_downloadable', $is_downloadable );
-			
-			if ( $variable_tax_class[$i] !== 'parent' ) 
+
+			if ( $variable_tax_class[$i] !== 'parent' )
 				update_post_meta( $variation_id, '_tax_class', $variable_tax_class[$i] );
 			else
 				delete_post_meta( $variation_id, '_tax_class' );
-			
+
 			if ($is_downloadable=='yes') :
 				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
 				update_post_meta( $variation_id, '_file_path', $variable_file_path[$i] );
@@ -823,34 +837,34 @@ function process_product_meta_variable( $post_id ) {
 				update_post_meta( $variation_id, '_download_limit', '' );
 				update_post_meta( $variation_id, '_file_path', '' );
 			endif;
-			
+
 			// Save shipping class
 			$variable_shipping_class[$i] = ( $variable_shipping_class[$i] ) ? (int) $variable_shipping_class[$i] : '';
 			wp_set_object_terms( $variation_id, $variable_shipping_class[$i], 'product_shipping_class');
-			
+
 			// Remove old taxnomies attributes so data is kept up to date
 			if ($variation_id) $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE 'attribute_%' AND post_id = $variation_id;");
-		
+
 			// Update taxonomies
 			foreach ($attributes as $attribute) :
-							
+
 				if ( $attribute['is_variation'] ) :
-				
+
 					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
-					
+
 					update_post_meta( $variation_id, 'attribute_' . sanitize_title($attribute['name']), $value );
-				
+
 				endif;
 
 			endforeach;
-		 	
-		 endfor; 
-		 
+
+		 endfor;
+
 	endif;
-	
+
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
 	$post_parent = $post_id;
-	
+
 	$children = get_posts( array(
 		'post_parent' 	=> $post_parent,
 		'posts_per_page'=> -1,
@@ -858,19 +872,19 @@ function process_product_meta_variable( $post_id ) {
 		'fields' 		=> 'ids',
 		'post_status'	=> 'publish'
 	));
-	
+
 	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';
-	
+
 	if ($children) {
 		foreach ($children as $child) {
-                	
+
 			$child_price 		= get_post_meta($child, '_price', true);
 			$child_sale_price 	= get_post_meta($child, '_sale_price', true);
-			
+
 			// Low price
 			if (!is_numeric($lowest_regular_price) || $child_price < $lowest_regular_price) $lowest_regular_price = $child_price;
 			if ($child_sale_price!=='' && (!is_numeric($lowest_sale_price) || $child_sale_price < $lowest_sale_price)) $lowest_sale_price = $child_sale_price;
-			
+
 			// High price
 			if (!is_numeric($highest_regular_price) || $child_price > $highest_regular_price) $highest_regular_price = $child_price;
 			if ($child_sale_price!=='' && (!is_numeric($highest_sale_price) || $child_sale_price > $highest_sale_price)) $highest_sale_price = $child_sale_price;
@@ -879,7 +893,7 @@ function process_product_meta_variable( $post_id ) {
     	$lowest_price = ($lowest_sale_price==='' || $lowest_regular_price < $lowest_sale_price) ? $lowest_regular_price : $lowest_sale_price;
 		$highest_price = ($highest_sale_price==='' || $highest_regular_price > $highest_sale_price) ? $highest_regular_price : $highest_sale_price;
 	}
-	
+
 	update_post_meta( $post_parent, '_price', $lowest_price );
 	update_post_meta( $post_parent, '_min_variation_price', $lowest_price );
 	update_post_meta( $post_parent, '_max_variation_price', $highest_price );
@@ -887,10 +901,10 @@ function process_product_meta_variable( $post_id ) {
 	update_post_meta( $post_parent, '_max_variation_regular_price', $highest_regular_price );
 	update_post_meta( $post_parent, '_min_variation_sale_price', $lowest_sale_price );
 	update_post_meta( $post_parent, '_max_variation_sale_price', $highest_sale_price );
-	
+
 	// Update default attribute options setting
 	$default_attributes = array();
-	
+
 	foreach ($attributes as $attribute) :
 		if ( $attribute['is_variation'] ) :
 			$value = esc_attr(trim($_POST[ 'default_attribute_' . sanitize_title($attribute['name']) ]));
@@ -899,8 +913,9 @@ function process_product_meta_variable( $post_id ) {
 			endif;
 		endif;
 	endforeach;
-	
+
 	update_post_meta( $post_parent, '_default_attributes', $default_attributes );
 
 }
+
 add_action('woocommerce_process_product_meta_variable', 'process_product_meta_variable');

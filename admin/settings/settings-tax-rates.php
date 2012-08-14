@@ -4,10 +4,16 @@
  *
  * @author 		WooThemes
  * @category 	Admin
- * @package 	WooCommerce
+ * @package 	WooCommerce/Admin/Settings
+ * @version     1.6.4
  */
-add_action( 'woocommerce_admin_field_tax_rates', 'woocommerce_tax_rates_setting' );
 
+/**
+ * Output tax rate settings.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_tax_rates_setting() {
 	global $woocommerce;
 
@@ -340,10 +346,15 @@ function woocommerce_tax_rates_setting() {
 	<?php
 }
 
+add_action( 'woocommerce_admin_field_tax_rates', 'woocommerce_tax_rates_setting' );
+
+
 /**
- * Tax Row Label
+ * Show a tax label based on user selections.
  *
- * Show a label based on user selections
+ * @access public
+ * @param mixed $selected
+ * @return void
  */
 function woocommerce_tax_row_label( $selected ) {
 	global $woocommerce;

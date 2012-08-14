@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin functions for the shop_coupon post type
+ * Admin functions for the shop_coupon post type.
  *
  * @author 		WooThemes
  * @category 	Admin
@@ -9,7 +9,7 @@
  */
 
 /**
- * Define Columns for the Coupons admin page
+ * Define Columns for the Coupons admin page.
  *
  * @access public
  * @param mixed $columns
@@ -35,7 +35,7 @@ add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns')
 
 
 /**
- * Values for Columns on the Coupons admin page
+ * Values for Columns on the Coupons admin page.
  *
  * @access public
  * @param mixed $column
