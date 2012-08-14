@@ -227,57 +227,124 @@ function woocommerce_load_persistent_cart( $user_login, $user ) {
 }
 
 /**
- * WooCommerce conditionals
- *
  * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
- **/
+ *
+ * @access public
+ * @return bool
+ */
 function is_woocommerce() {
-	if (is_shop() || is_product_category() || is_product_tag() || is_product()) return true; else return false;
+	return ( is_shop() || is_product_category() || is_product_tag() || is_product() ) ? true : false;
 }
 if ( ! function_exists( 'is_shop' ) ) {
+
+	/**
+	 * is_shop - Returns true when viewing the product type archive (shop).
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_shop() {
-		if (is_post_type_archive( 'product' ) || is_page(woocommerce_get_page_id('shop'))) return true; else return false;
+		return ( is_post_type_archive( 'product' ) || is_page( woocommerce_get_page_id( 'shop' ) ) ) ? true : false;
 	}
 }
 if ( ! function_exists( 'is_product_category' ) ) {
+
+	/**
+	 * is_product_category - Returns true when viewing a product category.
+	 *
+	 * @access public
+	 * @param string $term (default: '') The term slug your checking for. Leave blank to return true on any.
+	 * @return bool
+	 */
 	function is_product_category( $term = '' ) {
 		return is_tax( 'product_cat', $term );
 	}
 }
 if ( ! function_exists( 'is_product_tag' ) ) {
+
+	/**
+	 * is_product_tag - Returns true when viewing a product tag.
+	 *
+	 * @access public
+	 * @param string $term (default: '') The term slug your checking for. Leave blank to return true on any.
+	 * @return bool
+	 */
 	function is_product_tag( $term = '' ) {
 		return is_tax( 'product_tag', $term );
 	}
 }
 if ( ! function_exists( 'is_product' ) ) {
+
+	/**
+	 * is_product - Returns true when viewing a single product.
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_product() {
-		return is_singular( array('product') );
+		return is_singular( array( 'product' ) );
 	}
 }
 if ( ! function_exists( 'is_cart' ) ) {
+
+	/**
+	 * is_cart - Returns true when viewing the cart page.
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_cart() {
-		return is_page(woocommerce_get_page_id('cart'));
+		return is_page( woocommerce_get_page_id( 'cart' ) );
 	}
 }
 if ( ! function_exists( 'is_checkout' ) ) {
+
+	/**
+	 * is_checkout - Returns true when viewing the checkout page.
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_checkout() {
-		if (is_page(woocommerce_get_page_id('checkout')) || is_page(woocommerce_get_page_id('pay'))) return true; else return false;
+		return ( is_page( woocommerce_get_page_id( 'checkout' ) ) || is_page( woocommerce_get_page_id( 'pay' ) ) ) ? true : false;
 	}
 }
 if ( ! function_exists( 'is_account_page' ) ) {
+
+	/**
+	 * is_account_page - Returns true when viewing an account page.
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_account_page() {
-		if ( is_page(woocommerce_get_page_id('myaccount')) || is_page(woocommerce_get_page_id('edit_address')) || is_page(woocommerce_get_page_id('view_order')) || is_page(woocommerce_get_page_id('change_password')) ) return true; else return false;
+		return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ? true : false;
 	}
 }
 if ( ! function_exists( 'is_ajax' ) ) {
+
+	/**
+	 * is_ajax - Returns true when the page is loaded via ajax.
+	 *
+	 * @access public
+	 * @return bool
+	 */
 	function is_ajax() {
-		if ( defined('DOING_AJAX') ) return true;
-		if ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) return true; else return false;
+		if ( defined('DOING_AJAX') )
+			return true;
+
+		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
 	}
 }
 
+
 /**
- * Get template part (for templates like the shop-loop)
+ * Get template part (for templates like the shop-loop).
+ *
+ * @access public
+ * @param mixed $slug
+ * @param string $name (default: '')
+ * @return void
  */
 function woocommerce_get_template_part( $slug, $name = '' ) {
 	global $woocommerce;
@@ -299,8 +366,16 @@ function woocommerce_get_template_part( $slug, $name = '' ) {
 		load_template( $template, false );
 }
 
+
 /**
- * Get other templates (e.g. product attributes) passing attributes and including the file
+ * Get other templates (e.g. product attributes) passing attributes and including the file.
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param array $args (default: array())
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return void
  */
 function woocommerce_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	global $woocommerce;
@@ -317,6 +392,7 @@ function woocommerce_get_template( $template_name, $args = array(), $template_pa
 	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located );
 }
 
+
 /**
  * Locate a template and return the path for inclusion.
  *
@@ -325,6 +401,12 @@ function woocommerce_get_template( $template_name, $args = array(), $template_pa
  *		yourtheme		/	$template_path	/	$template_name
  *		yourtheme		/	$template_name
  *		$default_path	/	$template_name
+ *
+ * @access public
+ * @param mixed $template_name
+ * @param string $template_path (default: '')
+ * @param string $default_path (default: '')
+ * @return string
  */
 function woocommerce_locate_template( $template_name, $template_path = '', $default_path = '' ) {
 	global $woocommerce;
@@ -348,16 +430,25 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 	return apply_filters('woocommerce_locate_template', $template, $template_name, $template_path);
 }
 
+
 /**
- * Get Currency
- **/
+ * Get Currency.
+ *
+ * @access public
+ * @return string
+ */
 function get_woocommerce_currency() {
 	return apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
 }
 
+
 /**
- * Currency
- **/
+ * Get Currency symbol.
+ *
+ * @access public
+ * @param string $currency (default: '')
+ * @return string
+ */
 function get_woocommerce_currency_symbol( $currency = '' ) {
 	if ( ! $currency ) $currency = get_woocommerce_currency();
 	$currency_symbol = '';
@@ -394,152 +485,199 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
 
+
 /**
- * Price Formatting Helper
- **/
+ * Format the price with a currency symbol.
+ *
+ * @access public
+ * @param float $price
+ * @param array $args (default: array())
+ * @return string
+ */
 function woocommerce_price( $price, $args = array() ) {
 	global $woocommerce;
 
-	extract(shortcode_atts(array(
+	extract( shortcode_atts( array(
 		'ex_tax_label' 	=> '0'
-	), $args));
+	), $args ) );
 
 	$return = '';
-	$num_decimals = (int) get_option('woocommerce_price_num_decimals');
-	$currency_pos = get_option('woocommerce_currency_pos');
+	$num_decimals = (int) get_option( 'woocommerce_price_num_decimals' );
+	$currency_pos = get_option( 'woocommerce_currency_pos' );
 	$currency_symbol = get_woocommerce_currency_symbol();
 
 	$price = apply_filters( 'raw_woocommerce_price', (double) $price );
 
-	$price = number_format( $price, $num_decimals, stripslashes(get_option('woocommerce_price_decimal_sep')), stripslashes(get_option('woocommerce_price_thousand_sep')) );
+	$price = number_format( $price, $num_decimals, stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) );
 
-	if (get_option('woocommerce_price_trim_zeros')=='yes' && $num_decimals>0)
-		$price = woocommerce_trim_zeros($price);
+	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
+		$price = woocommerce_trim_zeros( $price );
 
-	switch ($currency_pos) :
+	switch ( $currency_pos ) {
 		case 'left' :
-			$return = '<span class="amount">'. $currency_symbol . $price . '</span>';
+			$return = '<span class="amount">' . $currency_symbol . $price . '</span>';
 		break;
 		case 'right' :
-			$return = '<span class="amount">'. $price . $currency_symbol . '</span>';
+			$return = '<span class="amount">' . $price . $currency_symbol . '</span>';
 		break;
 		case 'left_space' :
-			$return = '<span class="amount">'. $currency_symbol . '&nbsp;' . $price . '</span>';
+			$return = '<span class="amount">' . $currency_symbol . '&nbsp;' . $price . '</span>';
 		break;
 		case 'right_space' :
-			$return = '<span class="amount">'. $price . '&nbsp;' . $currency_symbol . '</span>';
+			$return = '<span class="amount">' . $price . '&nbsp;' . $currency_symbol . '</span>';
 		break;
-	endswitch;
+	}
 
-	if ($ex_tax_label && get_option('woocommerce_calc_taxes')=='yes') $return .= ' <small>'.$woocommerce->countries->ex_tax_or_vat().'</small>';
+	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' )
+		$return .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 
 	return $return;
 }
 
-/**
- * Trim trailing zeros off prices
- **/
-function woocommerce_trim_zeros( $price ) {
-	return preg_replace('/'.preg_quote(get_option('woocommerce_price_decimal_sep'), '/').'0++$/', '', $price);
-}
 
 /**
- * Formal decimal numbers - format to 4 dp and remove trailing zeros
- **/
+ * Trim trailing zeros off prices.
+ *
+ * @access public
+ * @param mixed $price
+ * @return string
+ */
+function woocommerce_trim_zeros( $price ) {
+	return preg_replace( '/' . preg_quote( get_option( 'woocommerce_price_decimal_sep' ), '/' ) . '0++$/', '', $price );
+}
+
+
+/**
+ * Formal decimal numbers - format to 4 dp and remove trailing zeros.
+ *
+ * @access public
+ * @param mixed $number
+ * @return string
+ */
 function woocommerce_format_decimal( $number ) {
 	return rtrim( rtrim( number_format( $number, 4, '.', '' ), '0' ), '.' );
 }
 
+
 /**
  * Clean variables
- **/
+ *
+ * @access public
+ * @param string $var
+ * @return string
+ */
 function woocommerce_clean( $var ) {
-	return trim(strip_tags(stripslashes($var)));
+	return trim( strip_tags( stripslashes( $var ) ) );
 }
+
 
 /**
  * Merge two arrays
- **/
-function woocommerce_array_overlay($a1,$a2) {
-    foreach($a1 as $k => $v) {
-        if(!array_key_exists($k,$a2)) continue;
-        if(is_array($v) && is_array($a2[$k])){
-            $a1[$k] = woocommerce_array_overlay($v,$a2[$k]);
-        }else{
-            $a1[$k] = $a2[$k];
+ *
+ * @access public
+ * @param array $a1
+ * @param array $a2
+ * @return array
+ */
+function woocommerce_array_overlay( $a1, $a2 ) {
+    foreach( $a1 as $k => $v ) {
+        if ( ! array_key_exists( $k, $a2 ) )
+        	continue;
+        if ( is_array( $v ) && is_array( $a2[ $k ] ) ) {
+            $a1[ $k ] = woocommerce_array_overlay( $v, $a2[ $k ] );
+        } else {
+            $a1[ $k ] = $a2[ $k ];
         }
     }
     return $a1;
 }
 
+
 /**
  * Get top term
  * http://wordpress.stackexchange.com/questions/24794/get-the-the-top-level-parent-of-a-custom-taxonomy-term
- **/
-function woocommerce_get_term_top_most_parent($term_id, $taxonomy) {
+ *
+ * @access public
+ * @param int $term_id
+ * @param string $taxonomy
+ * @return int
+ */
+function woocommerce_get_term_top_most_parent( $term_id, $taxonomy ) {
     // start from the current term
-    $parent  = get_term_by( 'id', $term_id, $taxonomy);
+    $parent  = get_term_by( 'id', $term_id, $taxonomy );
     // climb up the hierarchy until we reach a term with parent = '0'
-    while ($parent->parent != '0'){
+    while ( $parent->parent != '0' ) {
         $term_id = $parent->parent;
         $parent  = get_term_by( 'id', $term_id, $taxonomy);
     }
     return $parent;
 }
 
+
 /**
  * Variation Formatting
  *
  * Gets a formatted version of variation data or item meta
- **/
+ *
+ * @access public
+ * @param string $variation (default: '')
+ * @param bool $flat (default: false)
+ * @return string
+ */
 function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
 	global $woocommerce;
 
-	if (is_array($variation)) :
+	if ( is_array( $variation ) ) {
 
-		if (!$flat) $return = '<dl class="variation">'; else $return = '';
+		if ( ! $flat )
+			$return = '<dl class="variation">';
+		else
+			$return = '';
 
 		$variation_list = array();
 
-		foreach ($variation as $name => $value) :
+		foreach ( $variation as $name => $value ) {
 
-			if (!$value) continue;
+			if ( ! $value )
+				continue;
 
 			// If this is a term slug, get the term's nice name
-            if (taxonomy_exists(esc_attr(str_replace('attribute_', '', $name)))) :
-            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
-            	if (!is_wp_error($term) && $term->name) :
+            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
+            	$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+            	if ( ! is_wp_error( $term ) && $term->name )
             		$value = $term->name;
-            	endif;
-            else :
+            } else {
             	$value = ucfirst($value);
-            endif;
+            }
 
-			if ($flat) :
+			if ( $flat )
 				$variation_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-			else :
+			else
 				$variation_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
-			endif;
+		}
 
-		endforeach;
+		if ( $flat )
+			$return .= implode( ', ', $variation_list );
+		else
+			$return .= implode( '', $variation_list );
 
-		if ($flat) :
-			$return .= implode(', ', $variation_list);
-		else :
-			$return .= implode('', $variation_list);
-		endif;
-
-		if (!$flat) $return .= '</dl>';
+		if ( ! $flat )
+			$return .= '</dl>';
 
 		return $return;
 
-	endif;
+	}
 }
 
-/**
- * Hex darker/lighter/contrast functions for colours
- **/
 if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
+
+	/**
+	 * Hex darker/lighter/contrast functions for colours
+	 *
+	 * @access public
+	 * @param mixed $color
+	 * @return string
+	 */
 	function woocommerce_rgb_from_hex( $color ) {
 		$color = str_replace( '#', '', $color );
 		// Convert shorthand colors to full format, e.g. "FFF" -> "FFFFFF"
@@ -553,6 +691,15 @@ if ( ! function_exists( 'woocommerce_rgb_from_hex' ) ) {
 }
 
 if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
+
+	/**
+	 * Hex darker/lighter/contrast functions for colours
+	 *
+	 * @access public
+	 * @param mixed $color
+	 * @param int $factor (default: 30)
+	 * @return string
+	 */
 	function woocommerce_hex_darker( $color, $factor = 30 ) {
 		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
@@ -572,7 +719,17 @@ if ( ! function_exists( 'woocommerce_hex_darker' ) ) {
 		return $color;
 	}
 }
+
 if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
+
+	/**
+	 * Hex darker/lighter/contrast functions for colours
+	 *
+	 * @access public
+	 * @param mixed $color
+	 * @param int $factor (default: 30)
+	 * @return string
+	 */
 	function woocommerce_hex_lighter( $color, $factor = 30 ) {
 		$base = woocommerce_rgb_from_hex( $color );
 		$color = '#';
@@ -594,10 +751,17 @@ if ( ! function_exists( 'woocommerce_hex_lighter' ) ) {
 	}
 }
 
-/**
- * Detect if we should use a light or dark colour on a background colour
- **/
 if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
+
+	/**
+	 * Detect if we should use a light or dark colour on a background colour
+	 *
+	 * @access public
+	 * @param mixed $color
+	 * @param string $dark (default: '#000000')
+	 * @param string $light (default: '#FFFFFF')
+	 * @return string
+	 */
 	function woocommerce_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
 	    //return ( hexdec( $color ) > 0xffffff / 2 ) ? $dark : $light;
 	    $hex = str_replace( '#', '', $color );
@@ -611,10 +775,15 @@ if ( ! function_exists( 'woocommerce_light_or_dark' ) ) {
 	}
 }
 
-/**
- * Format string as hex
- **/
 if ( ! function_exists( 'woocommerce_format_hex' ) ) {
+
+	/**
+	 * Format string as hex
+	 *
+	 * @access public
+	 * @param string $hex
+	 * @return string
+	 */
 	function woocommerce_format_hex( $hex ) {
 
 	    $hex = trim( str_replace( '#', '', $hex ) );
@@ -627,6 +796,7 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 	}
 }
 
+
 /**
  * Exclude order comments from queries and RSS
  *
@@ -635,11 +805,11 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
  * shop managers can view orders anyway.
  *
  * The frontend view order pages get around this filter by using remove_filter('comments_clauses', 'woocommerce_exclude_order_comments');
- **/
-add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
-add_action( 'comment_feed_join', 'woocommerce_exclude_order_comments_from_feed_join' );
-add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_where' );
-
+ *
+ * @access public
+ * @param array $clauses
+ * @return array
+ */
 function woocommerce_exclude_order_comments( $clauses ) {
 	global $wpdb, $typenow, $pagenow;
 
@@ -659,6 +829,17 @@ function woocommerce_exclude_order_comments( $clauses ) {
 
 	return $clauses;
 }
+
+add_filter( 'comments_clauses', 'woocommerce_exclude_order_comments', 10, 1);
+
+
+/**
+ * Exclude order comments from queries and RSS
+ *
+ * @access public
+ * @param string $join
+ * @return string
+ */
 function woocommerce_exclude_order_comments_from_feed_join( $join ) {
 	global $wpdb;
 
@@ -667,6 +848,17 @@ function woocommerce_exclude_order_comments_from_feed_join( $join ) {
 
     return $join;
 }
+
+add_action( 'comment_feed_join', 'woocommerce_exclude_order_comments_from_feed_join' );
+
+
+/**
+ * Exclude order comments from queries and RSS
+ *
+ * @access public
+ * @param string $where
+ * @return string
+ */
 function woocommerce_exclude_order_comments_from_feed_where( $where ) {
 	global $wpdb;
 
@@ -678,13 +870,16 @@ function woocommerce_exclude_order_comments_from_feed_where( $where ) {
     return $where;
 }
 
+add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_where' );
+
+
 /**
  * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
- **/
-add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
-
-if (get_option('woocommerce_downloads_grant_access_after_payment')=='yes') add_action('woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions');
-
+ *
+ * @access public
+ * @param int $order_id
+ * @return void
+ */
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 
@@ -755,11 +950,19 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 	update_post_meta( $order_id,  __('Download Permissions Granted', 'woocommerce'), 1);
 }
 
+add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
+
+if ( get_option('woocommerce_downloads_grant_access_after_payment') == 'yes' )
+	add_action( 'woocommerce_order_status_processing', 'woocommerce_downloadable_product_permissions' );
+
+
 /**
  * Order Status completed - This is a paying customer
- **/
-add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
-
+ *
+ * @access public
+ * @param int $order_id
+ * @return void
+ */
 function woocommerce_paying_customer( $order_id ) {
 
 	$order = new WC_Order( $order_id );
@@ -767,34 +970,44 @@ function woocommerce_paying_customer( $order_id ) {
 	if ( $order->user_id > 0 ) update_user_meta( $order->user_id, 'paying_customer', 1 );
 }
 
+add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
+
+
 /**
  * Filter to allow product_cat in the permalinks for products.
  *
+ * @access public
  * @param string $permalink The existing permalink URL.
+ * @param object $post
+ * @return string
  */
-add_filter( 'post_type_link', 'woocommerce_product_cat_filter_post_link', 10, 4 );
-
-function woocommerce_product_cat_filter_post_link( $permalink, $post, $leavename, $sample ) {
+function woocommerce_product_cat_filter_post_link( $permalink, $post ) {
     // Abort if post is not a product
-    if ($post->post_type!=='product') return $permalink;
+    if ( $post->post_type !== 'product' )
+    	return $permalink;
 
     // Abort early if the placeholder rewrite tag isn't in the generated URL
-    if ( false === strpos( $permalink, '%product_cat%' ) ) return $permalink;
+    if ( false === strpos( $permalink, '%product_cat%' ) )
+    	return $permalink;
 
     // Get the custom taxonomy terms in use by this post
     $terms = get_the_terms( $post->ID, 'product_cat' );
 
-    if ( empty( $terms ) ) :
+    if ( empty( $terms ) ) {
     	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
         $permalink = str_replace( '%product_cat%', _x('product', 'slug', 'woocommerce'), $permalink );
-    else :
+    } else {
     	// Replace the placeholder rewrite tag with the first term's slug
         $first_term = array_shift( $terms );
         $permalink = str_replace( '%product_cat%', $first_term->slug, $permalink );
-    endif;
+    }
 
     return $permalink;
 }
+
+add_filter( 'post_type_link', 'woocommerce_product_cat_filter_post_link', 10, 2 );
+
+
 
 /**
  * Add term ordering to get_terms
@@ -804,10 +1017,13 @@ function woocommerce_product_cat_filter_post_link( $permalink, $post, $leavename
  *
  * To disable it, set it ot false (or 0)
  *
+ * @access public
+ * @param array $clauses
+ * @param array $taxonomies
+ * @param array $args
+ * @return array
  */
-add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3);
-
-function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
+function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb, $woocommerce;
 
 	// No sorting when menu_order is false
@@ -821,7 +1037,7 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
-	foreach ((array) $taxonomies as $taxonomy) :
+	foreach ( (array) $taxonomies as $taxonomy ) :
 		if ( strstr($taxonomy, 'pa_') || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) :
 			$found = true;
 			break;
@@ -837,13 +1053,13 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 	}
 
 	// query fields
-	if( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
+	if ( strpos('COUNT(*)', $clauses['fields']) === false ) $clauses['fields']  .= ', tm.* ';
 
 	//query join
 	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '". $meta_name ."') ";
 
 	// default to ASC
-	if( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
+	if ( ! isset($args['menu_order']) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) $args['menu_order'] = 'ASC';
 
 	$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
 
@@ -855,6 +1071,9 @@ function woocommerce_terms_clauses($clauses, $taxonomies, $args ) {
 
 	return $clauses;
 }
+
+add_filter( 'terms_clauses', 'woocommerce_terms_clauses', 10, 3);
+
 
 /**
  * woocommerce_get_product_terms function.
@@ -900,11 +1119,18 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 	return $terms;
 }
 
+
 /**
  * WooCommerce Dropdown categories
  *
  * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
  * We use a custom walker, just like WordPress does
+ *
+ * @access public
+ * @param int $show_counts (default: 1)
+ * @param int $hierarchal (default: 1)
+ * @param int $show_uncategorized (default: 1)
+ * @return string
  */
 function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal = 1, $show_uncategorized = 1 ) {
 	global $wp_query, $woocommerce;
@@ -934,8 +1160,12 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	echo $output;
 }
 
+
 /**
  * Walk the Product Categories.
+ *
+ * @access public
+ * @return void
  */
 function woocommerce_walk_category_dropdown_tree() {
 	$args = func_get_args();
@@ -949,15 +1179,13 @@ function woocommerce_walk_category_dropdown_tree() {
 	return call_user_func_array(array( &$walker, 'walk' ), $args );
 }
 
-/**
- * WooCommerce Term Meta API
- *
- * API for working with term meta data. Adapted from 'Term meta API' by Nikolay Karev
- *
- */
-add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
-add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
 
+/**
+ * WooCommerce Term Meta API - set table name
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_taxonomy_metadata_wpdbfix() {
 	global $wpdb;
 	$variable_name = 'woocommerce_termmeta';
@@ -965,31 +1193,81 @@ function woocommerce_taxonomy_metadata_wpdbfix() {
 	$wpdb->tables[] = $variable_name;
 }
 
-function update_woocommerce_term_meta($term_id, $meta_key, $meta_value, $prev_value = ''){
-	return update_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value);
+add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+add_action( 'switch_blog', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
+
+
+/**
+ * WooCommerce Term Meta API - Update term meta
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param string $prev_value (default: '')
+ * @return bool
+ */
+function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
+	return update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
 }
 
-function add_woocommerce_term_meta($term_id, $meta_key, $meta_value, $unique = false){
-	return add_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $unique);
+
+/**
+ * WooCommerce Term Meta API - Add term meta
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param bool $unique (default: false)
+ * @return bool
+ */
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
+	return add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
 }
 
-function delete_woocommerce_term_meta($term_id, $meta_key, $meta_value = '', $delete_all = false){
-	return delete_metadata('woocommerce_term', $term_id, $meta_key, $meta_value, $delete_all);
+
+/**
+ * WooCommerce Term Meta API - Delete term meta
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $meta_key
+ * @param string $meta_value (default: '')
+ * @param bool $delete_all (default: false)
+ * @return bool
+ */
+function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	return delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $delete_all );
 }
 
-function get_woocommerce_term_meta($term_id, $key, $single = true){
-	return get_metadata('woocommerce_term', $term_id, $key, $single);
+
+/**
+ * WooCommerce Term Meta API - Get term meta
+ *
+ * @access public
+ * @param mixed $term_id
+ * @param mixed $key
+ * @param bool $single (default: true)
+ * @return mixed
+ */
+function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
+	return get_metadata( 'woocommerce_term', $term_id, $key, $single );
 }
+
 
 /**
  * Move a term before the a	given element of its hierarchy level
  *
- * @param object $the_term
+ * @access public
+ * @param int $the_term
  * @param int $next_id the id of the next slibling element in save hierachy level
- * @param int $index
- * @param int $terms
+ * @param string $taxonomy
+ * @param int $index (default: 0)
+ * @param mixed $terms (default: null)
+ * @return int
  */
-function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index=0, $terms=null ) {
+function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
 
 	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0');
 	if( empty( $terms ) ) return $index;
@@ -1030,14 +1308,18 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index=0, $ter
 	return $index;
 }
 
+
 /**
  * Set the sort order of a term
  *
+ * @access public
  * @param int $term_id
  * @param int $index
- * @param bool $recursive
+ * @param string $taxonomy
+ * @param bool $recursive (default: false)
+ * @return int
  */
-function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=false) {
+function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	global $wpdb;
 
 	$term_id 	= (int) $term_id;
@@ -1068,7 +1350,7 @@ function woocommerce_set_term_order($term_id, $index, $taxonomy, $recursive=fals
 /**
  * let_to_num function.
  *
- * This function transforms the php.ini notation for numbers (like '2M') to an integer
+ * This function transforms the php.ini notation for numbers (like '2M') to an integer.
  *
  * @access public
  * @param $size
@@ -1092,11 +1374,18 @@ function woocommerce_let_to_num( $size ) {
     return $ret;
 }
 
+
 /**
  * woocommerce_customer_bought_product
  *
  * Checks if a user (by email) has bought an item
- **/
+ *
+ * @access public
+ * @param string $customer_email
+ * @param int $user_id
+ * @param int $product_id
+ * @return bool
+ */
 function woocommerce_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
@@ -1127,6 +1416,12 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	}
 }
 
+/**
+ * Return the count of processing orders.
+ *
+ * @access public
+ * @return int
+ */
 function woocommerce_processing_order_count() {
 	if ( false === ( $order_count = get_transient( 'woocommerce_processing_order_count' ) ) ) {
 		$order_statuses = get_terms( 'shop_order_status' );
