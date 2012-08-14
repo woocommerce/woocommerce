@@ -4,17 +4,26 @@
  *
  * Functions used in the template files to output content - in most cases hooked in via the template actions. All functions are pluggable.
  *
- * @package WooCommerce
- * @category Core
- * @author WooThemes
+ * @author 		WooThemes
+ * @category 	Core
+ * @package 	WooCommerce/Template
+ * @version     1.6.4
  */
 
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
-	// This function is only used in the optional 'woocommerce.php' template
-	// people can add to their themes to add basic woocommerce support without
-	// using hooks or modifying core templates.
+
+	/**
+	 * Output WooCommerce content.
+	 *
+	 * This function is only used in the optional 'woocommerce.php' template
+	 * which people can add to their themes to add basic woocommerce support
+	 * without using hooks or modifying core templates.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_content() {
 
 		if ( is_singular( 'product' ) ) {
@@ -89,22 +98,43 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	}
 }
 
-/**
- * deprecated template functions from < 1.6
- **/
 if ( ! function_exists( 'woocommerce_single_product_content' ) ) {
+
+	/**
+	 * woocommerce_single_product_content function.
+	 *
+	 * @access public
+	 * @return void
+	 * @deprecated 1.6
+	 */
 	function woocommerce_single_product_content() {
 		_deprecated_function( __FUNCTION__, '1.6' );
 		woocommerce_content();
 	}
 }
 if ( ! function_exists( 'woocommerce_archive_product_content' ) ) {
+
+	/**
+	 * woocommerce_archive_product_content function.
+	 *
+	 * @access public
+	 * @return void
+	 * @deprecated 1.6
+	 */
 	function woocommerce_archive_product_content() {
 		_deprecated_function( __FUNCTION__, '1.6' );
 		woocommerce_content();
 	}
 }
 if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
+
+	/**
+	 * woocommerce_product_taxonomy_content function.
+	 *
+	 * @access public
+	 * @return void
+	 * @deprecated 1.6
+	 */
 	function woocommerce_product_taxonomy_content() {
 		_deprecated_function( __FUNCTION__, '1.6' );
 		woocommerce_content();
@@ -114,58 +144,77 @@ if ( ! function_exists( 'woocommerce_product_taxonomy_content' ) ) {
 /** Global ****************************************************************/
 
 if ( ! function_exists( 'woocommerce_output_content_wrapper' ) ) {
+
+	/**
+	 * Output the start of the page wrapper.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_output_content_wrapper() {
 		woocommerce_get_template( 'shop/wrapper-start.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_output_content_wrapper_end' ) ) {
+
+	/**
+	 * Output the end of the page wrapper.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_output_content_wrapper_end() {
 		woocommerce_get_template( 'shop/wrapper-end.php' );
 	}
 }
 
-/**
- * Messages
- **/
 if ( ! function_exists( 'woocommerce_show_messages' ) ) {
+
+	/**
+	 * Show messages on the frontend.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_show_messages() {
 		global $woocommerce;
 
-		if ( $woocommerce->error_count() > 0  ) {
-
+		if ( $woocommerce->error_count() > 0  )
 			woocommerce_get_template( 'shop/errors.php', array(
 					'errors' => $woocommerce->get_errors()
 				) );
 
-		}
 
-		if ( $woocommerce->message_count() > 0  ) {
-
+		if ( $woocommerce->message_count() > 0  )
 			woocommerce_get_template( 'shop/messages.php', array(
 					'messages' => $woocommerce->get_messages()
 				) );
-
-		}
 
 		$woocommerce->clear_messages();
 	}
 }
 
-/**
- * Sidebar
- **/
 if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
+
+	/**
+	 * Get the shop sidebar template.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_get_sidebar() {
 		woocommerce_get_template( 'shop/sidebar.php' );
 	}
 }
 
-/**
- * Demo Banner
- *
- * Adds a demo store banner to the site if enabled
- **/
 if ( ! function_exists( 'woocommerce_demo_store' ) ) {
+
+	/**
+	 * Adds a demo store banner to the site if enabled
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_demo_store() {
 		if ( get_option( 'woocommerce_demo_store' ) == 'no' )
 			return;
@@ -180,46 +229,89 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 
 /** Loop ******************************************************************/
 
-/**
- * Archive descriptions
- **/
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
+
+	/**
+	 * Show an archive description on taxonomy archives
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_taxonomy_archive_description() {
 		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 )
 			echo '<div class="term-description">' . wpautop( wptexturize( term_description() ) ) . '</div>';
 	}
 }
 if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
+
+	/**
+	 * Show a shop page description on product archives
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_archive_description( $shop_page ) {
 		if ( get_query_var( 'paged' ) == 0 )
 			echo '<div class="page-description">' . apply_filters( 'the_content', $shop_page->post_content ) . '</div>';
 	}
 }
 
-/**
- * Products Loop
- **/
 if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
+
+	/**
+	 * Get the add to cart template for the loop.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_loop_add_to_cart() {
 		woocommerce_get_template( 'loop/add-to-cart.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
+
+	/**
+	 * Get the product thumbnail for the loop.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_loop_product_thumbnail() {
 		echo woocommerce_get_product_thumbnail();
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
+
+	/**
+	 * Get the product price for the loop.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_loop_price() {
 		woocommerce_get_template( 'loop/price.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
+
+	/**
+	 * Get the sale flash for the loop.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_show_product_loop_sale_flash() {
 		woocommerce_get_template( 'loop/sale-flash.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
+
+	/**
+	 * Reset the loop's index and columns when we're done outputting a product loop.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_reset_loop() {
 		global $woocommerce_loop;
 		// Reset loop/columns globals when starting a new loop
@@ -227,10 +319,17 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	}
 }
 
-/**
- * WooCommerce Product Thumbnail
- **/
 if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
+
+	/**
+	 * Get the product thumbnail, or the placeholder if not set.
+	 *
+	 * @access public
+	 * @param string $size (default: 'shop_catalog')
+	 * @param int $placeholder_width (default: 0)
+	 * @param int $placeholder_height (default: 0)
+	 * @return string
+	 */
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0  ) {
 		global $post, $woocommerce;
 
@@ -246,19 +345,27 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	}
 }
 
-/**
- * Pagination
- **/
 if ( ! function_exists( 'woocommerce_pagination' ) ) {
+
+	/**
+	 * Output the pagination.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_pagination() {
 		woocommerce_get_template( 'loop/pagination.php' );
 	}
 }
 
-/**
- * Sorting
- **/
 if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
+
+	/**
+	 * Output the product sorting options.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_catalog_ordering() {
 		if ( ! isset( $_SESSION['orderby'] ) )
 			$_SESSION['orderby'] = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -268,75 +375,160 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 /** Single Product ********************************************************/
 
-/**
- * Before Single Products Summary Div
- **/
 if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
+
+	/**
+	 * Output the product image before the single product summary.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_show_product_images() {
 		woocommerce_get_template( 'single-product/product-image.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
+
+	/**
+	 * Output the product thumbnails.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_show_product_thumbnails() {
 		woocommerce_get_template( 'single-product/product-thumbnails.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
+
+	/**
+	 * Output the product tabs.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_output_product_data_tabs() {
 		woocommerce_get_template( 'single-product/tabs.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
+
+	/**
+	 * Output the product title.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_title() {
 		woocommerce_get_template( 'single-product/title.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
+
+	/**
+	 * Output the product price.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_price() {
 		woocommerce_get_template( 'single-product/price.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_excerpt' ) ) {
+
+	/**
+	 * Output the product short description (excerpt).
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_excerpt() {
 		woocommerce_get_template( 'single-product/short-description.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
+
+	/**
+	 * Output the product meta.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_meta() {
 		woocommerce_get_template( 'single-product/meta.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_single_sharing' ) ) {
+
+	/**
+	 * Output the product sharing.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_sharing() {
 		woocommerce_get_template( 'single-product/share.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
+
+	/**
+	 * Output the product sale flash.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_show_product_sale_flash() {
 		woocommerce_get_template( 'single-product/sale-flash.php' );
 	}
 }
 
-/**
- * Product Add to cart buttons
- **/
 if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
+
+	/**
+	 * Trigger the single product add to cart action.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
 		do_action( 'woocommerce_' . $product->product_type . '_add_to_cart'  );
 	}
 }
 if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
+
+	/**
+	 * Output the simple product add to cart area.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_simple_add_to_cart() {
 		woocommerce_get_template( 'single-product/add-to-cart/simple.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
+
+	/**
+	 * Output the grouped product add to cart area.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_grouped_add_to_cart() {
 		woocommerce_get_template( 'single-product/add-to-cart/grouped.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
+
+	/**
+	 * Output the variable product add to cart area.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_variable_add_to_cart() {
 		global $product;
 
@@ -352,6 +544,13 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	}
 }
 if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
+
+	/**
+	 * Output the external product add to cart area.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_external_add_to_cart() {
 		global $product;
 
@@ -367,10 +566,14 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	}
 }
 
-/**
- * Quantity inputs
- **/
 if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
+
+	/**
+	 * Output the quantity input for add to cart forms.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_quantity_input( $args = array() ) {
 		$defaults = array(
 			'input_name'  => 'quantity',
@@ -385,64 +588,115 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	}
 }
 
-/**
- * Product page tabs
- **/
 if ( ! function_exists( 'woocommerce_product_description_tab' ) ) {
+
+	/**
+	 * Output the description tab.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_description_tab() {
 		woocommerce_get_template( 'single-product/tabs/tab-description.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_product_attributes_tab' ) ) {
+
+	/**
+	 * Output the attributes tab.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_attributes_tab() {
 		woocommerce_get_template( 'single-product/tabs/tab-attributes.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
+
+	/**
+	 * Output the reviews tab.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_reviews_tab() {
 		woocommerce_get_template( 'single-product/tabs/tab-reviews.php' );
 	}
 }
 
-/**
- * Product page tab panels
- **/
 if ( ! function_exists( 'woocommerce_product_description_panel' ) ) {
+
+	/**
+	 * Output the description tab content.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_description_panel() {
 		woocommerce_get_template( 'single-product/tabs/description.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_product_attributes_panel' ) ) {
+
+	/**
+	 * Output the attributes tab content.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_attributes_panel() {
 		woocommerce_get_template( 'single-product/tabs/attributes.php' );
 	}
 }
 if ( ! function_exists( 'woocommerce_product_reviews_panel' ) ) {
+
+	/**
+	 * Output the reviews tab content.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_reviews_panel() {
 		woocommerce_get_template( 'single-product/tabs/reviews.php' );
 	}
 }
 
-/**
- * Review comments template
- **/
 if ( ! function_exists( 'woocommerce_comments' ) ) {
+
+	/**
+	 * Output the Review comments template.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
 		woocommerce_get_template( 'single-product/review.php' );
 	}
 }
 
-/**
- * WooCommerce Related Products
- **/
 if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
+
+	/**
+	 * Output the related products.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_output_related_products() {
 		woocommerce_related_products( 2, 2  );
 	}
 }
 
 if ( ! function_exists( 'woocommerce_related_products' ) ) {
+
+	/**
+	 * Output the related products.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_related_products( $posts_per_page = 4, $columns = 4, $orderby = 'rand'  ) {
 		woocommerce_get_template( 'single-product/related.php', array(
 				'posts_per_page'  => $posts_per_page,
@@ -452,10 +706,14 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	}
 }
 
-/**
- * Display Up Sells
- **/
 if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
+
+	/**
+	 * Output product up sells.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_upsell_display() {
 		woocommerce_get_template( 'single-product/up-sells.php' );
 	}
@@ -463,28 +721,40 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 
 /** Cart ******************************************************************/
 
-/**
- * WooCommerce Shipping Calculator
- **/
 if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
+
+	/**
+	 * Output the cart shipping calculator.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_shipping_calculator() {
 		woocommerce_get_template( 'cart/shipping-calculator.php' );
 	}
 }
 
-/**
- * WooCommerce Cart totals
- **/
 if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
+
+	/**
+	 * Output the cart totals.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_cart_totals() {
 		woocommerce_get_template( 'cart/totals.php' );
 	}
 }
 
-/**
- * Display Cross Sells
- **/
 if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
+
+	/**
+	 * Output the cart cross-sells.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_cross_sell_display() {
 		woocommerce_get_template( 'cart/cross-sells.php' );
 	}
@@ -492,10 +762,14 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 
 /** Mini-Cart *************************************************************/
 
-/**
- * Mini-cart template - used by cart widget
- **/
 if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
+
+	/**
+	 * Output the Mini-cart - used by cart widget
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_mini_cart( $args = array() ) {
 
 		$defaults = array(
@@ -510,10 +784,14 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 
 /** Login *****************************************************************/
 
-/**
- * WooCommerce Login Form
- **/
 if ( ! function_exists( 'woocommerce_login_form' ) ) {
+
+	/**
+	 * Output the WooCommerce Login Form
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_login_form( $args = array() ) {
 
 		$defaults = array(
@@ -527,19 +805,27 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	}
 }
 
-/**
- * WooCommerce Checkout Login Form
- **/
 if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
+
+	/**
+	 * Output the WooCommerce Checkout Login Form
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_checkout_login_form() {
 		woocommerce_get_template( 'checkout/form-login.php' );
 	}
 }
 
-/**
- * WooCommerce Breadcrumb
- **/
 if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
+
+	/**
+	 * Output the WooCommerce Breadcrumb
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 
 		$defaults = array(
@@ -557,28 +843,40 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 	}
 }
 
-/**
- * Order review table for checkout
- **/
 if ( ! function_exists( 'woocommerce_order_review' ) ) {
+
+	/**
+	 * Output the Order review table for the checkout.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_order_review() {
 		woocommerce_get_template( 'checkout/review-order.php' );
 	}
 }
 
-/**
- * Coupon form for checkout
- **/
 if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
+
+	/**
+	 * Output the Coupon form for the checkout.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_checkout_coupon_form() {
 		woocommerce_get_template( 'checkout/form-coupon.php' );
 	}
 }
 
-/**
- * display product sub categories as thumbnails
- **/
 if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
+
+	/**
+	 * Display product sub categories as thumbnails.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_product_subcategories( $args = array() ) {
 		global $woocommerce, $wp_query, $_chosen_attributes;
 
@@ -661,10 +959,15 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	}
 }
 
-/**
- * Show subcategory thumbnail
- **/
 if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
+
+	/**
+	 * Show subcategory thumbnails.
+	 *
+	 * @access public
+	 * @param mixed $category
+	 * @return void
+	 */
 	function woocommerce_subcategory_thumbnail( $category  ) {
 		global $woocommerce;
 
@@ -686,10 +989,15 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	}
 }
 
-/**
- * Displays order details in a table
- **/
 if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
+
+	/**
+	 * Displays order details in a table.
+	 *
+	 * @access public
+	 * @param mixed $order_id
+	 * @return void
+	 */
 	function woocommerce_order_details_table( $order_id  ) {
 		if ( ! $order_id ) return;
 
@@ -701,10 +1009,17 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 
 /** Forms ****************************************************************/
 
-/**
- * Outputs a checkout/address form field
- */
 if ( ! function_exists( 'woocommerce_form_field' ) ) {
+
+	/**
+	 * Outputs a checkout/address form field.
+	 *
+	 * @access public
+	 * @param mixed $key
+	 * @param mixed $args
+	 * @param string $value (default: '')
+	 * @return void
+	 */
 	function woocommerce_form_field( $key, $args, $value = ''  ) {
 		global $woocommerce;
 
@@ -850,30 +1165,36 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	}
 }
 
-/**
- * Product search forms
- */
-function get_product_search_form( $echo = true  ) {
-	do_action( 'get_product_search_form'  );
+if ( ! function_exists( 'get_product_search_form' ) ) {
 
-	$search_form_template = locate_template( 'product-searchform.php' );
-	if ( '' != $search_form_template  ) {
-		require $search_form_template;
-		return;
+	/**
+	 * Output Product search forms.
+	 *
+	 * @access public
+	 * @param bool $echo (default: true)
+	 * @return void
+	 */
+	function get_product_search_form( $echo = true  ) {
+		do_action( 'get_product_search_form'  );
+
+		$search_form_template = locate_template( 'product-searchform.php' );
+		if ( '' != $search_form_template  ) {
+			require $search_form_template;
+			return;
+		}
+
+		$form = '<form role="search" method="get" id="searchform" action="' . esc_url( home_url( '/'  ) ) . '">
+			<div>
+				<label class="screen-reader-text" for="s">' . __( 'Search for:', 'woocommerce' ) . '</label>
+				<input type="text" value="' . get_search_query() . '" name="s" id="s" placeholder="' . __( 'Search for products', 'woocommerce' ) . '" />
+				<input type="submit" id="searchsubmit" value="'. esc_attr__( 'Search' ) .'" />
+				<input type="hidden" name="post_type" value="product" />
+			</div>
+		</form>';
+
+		if ( $echo  )
+			echo apply_filters( 'get_product_search_form', $form );
+		else
+			return apply_filters( 'get_product_search_form', $form );
 	}
-
-	$form = '<form role="search" method="get" id="searchform" action="' . esc_url( home_url( '/'  ) ) . '">
-		<div>
-			<label class="screen-reader-text" for="s">' . __( 'Search for:', 'woocommerce' ) . '</label>
-			<input type="text" value="' . get_search_query() . '" name="s" id="s" placeholder="' . __( 'Search for products', 'woocommerce' ) . '" />
-			<input type="submit" id="searchsubmit" value="'. esc_attr__( 'Search' ) .'" />
-			<input type="hidden" name="post_type" value="product" />
-		</div>
-	</form>';
-
-	if ( $echo  )
-		echo apply_filters( 'get_product_search_form', $form );
-	else
-		return apply_filters( 'get_product_search_form', $form );
-
 }

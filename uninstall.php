@@ -1,20 +1,20 @@
 <?php
 /**
  * WooCommerce Uninstall
- * 
+ *
  * Uninstalling WooCommerce deletes user roles, options, tables, and pages.
  *
- * @package		WooCommerce
- * @category	Core
- * @author		WooThemes
- * @since		1.4
+ * @author 		WooThemes
+ * @category 	Core
+ * @package 	WooCommerce/Uninstaller
+ * @version     1.6.4
  */
 if( !defined('WP_UNINSTALL_PLUGIN') ) exit();
 
 global $wpdb, $wp_roles;
-	
+
 // Roles
-remove_role( 'customer' );	
+remove_role( 'customer' );
 remove_role( 'shop_manager' );
 
 // Capabilities
@@ -37,7 +37,7 @@ wp_delete_post( get_option('woocommerce_pay_page_id'), true );
 wp_delete_post( get_option('woocommerce_thanks_page_id'), true );
 
 // mijireh checkout page
-if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) ) 
+if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) )
 	wp_delete_post( $mijireh_page->ID, true );
 
 // Tables

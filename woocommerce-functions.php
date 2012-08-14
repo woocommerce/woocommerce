@@ -4,14 +4,18 @@
  *
  * Hooked-in functions for WooCommerce related events on the front-end.
  *
- * @package		WooCommerce
- * @category	Actions
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Core
+ * @package 	WooCommerce/Functions
+ * @version     1.6.4
  */
 
 /**
- * Handle redirects before content is output - hooked into template_redirect so is_page works
- **/
+ * Handle redirects before content is output - hooked into template_redirect so is_page works.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_redirects() {
 	global $woocommerce, $wp_query;
 
@@ -49,9 +53,15 @@ function woocommerce_redirects() {
 	}
 }
 
+
 /**
- * Fix active class in nav for shop page
- **/
+ * Fix active class in nav for shop page.
+ *
+ * @access public
+ * @param array $menu_items
+ * @param array $args
+ * @return array
+ */
 function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 
 	if ( ! is_woocommerce() ) return $menu_items;
@@ -87,13 +97,18 @@ function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
 	return $menu_items;
 }
 
+
 /**
- * Fix active class in wp_list_pages for shop page
+ * Fix active class in wp_list_pages for shop page.
  *
- * Suggested by jessor - https://github.com/woothemes/woocommerce/issues/177
- * Amended Dec '11, by Peter Sterling - http://www.sterling-adventures.co.uk/
- **/
-function woocommerce_list_pages($pages){
+ * https://github.com/woothemes/woocommerce/issues/177
+ *
+ * @author Jessor, Peter Sterling
+ * @access public
+ * @param string $pages
+ * @return string
+ */
+function woocommerce_list_pages( $pages ){
     global $post;
 
     if (is_woocommerce()) {
@@ -109,27 +124,41 @@ function woocommerce_list_pages($pages){
     return $pages;
 }
 
+
 /**
- * Add logout link to my account menu
- **/
+ * Add logout link to my account menu.
+ *
+ * @access public
+ * @param string $items
+ * @param array $args
+ * @return string
+ */
 function woocommerce_nav_menu_items( $items, $args ) {
-	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() ) :
+	if ( get_option('woocommerce_menu_logout_link')=='yes' && strstr($items, get_permalink(woocommerce_get_page_id('myaccount'))) && is_user_logged_in() )
 		$items .= '<li class="logout"><a href="'. wp_logout_url(home_url()) .'">'.__('Logout', 'woocommerce').'</a></li>';
-	endif;
 
     return $items;
 }
 
-/**
- * Update catalog ordering if posted
- */
-function woocommerce_update_catalog_ordering() {
-	if (isset($_REQUEST['sort']) && $_REQUEST['sort'] != '') $_SESSION['orderby'] = esc_attr($_REQUEST['sort']);
-}
 
 /**
- * Remove from cart/update
- **/
+ * Update catalog ordering if posted.
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_update_catalog_ordering() {
+	if ( isset( $_REQUEST['sort'] ) && $_REQUEST['sort'] != '' )
+		$_SESSION['orderby'] = esc_attr($_REQUEST['sort']);
+}
+
+
+/**
+ * Remove from cart/update.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_update_cart_action() {
 	global $woocommerce;
 
@@ -189,11 +218,16 @@ function woocommerce_update_cart_action() {
 	endif;
 }
 
+
 /**
  * Add to cart action
  *
- * Checks for a valid request, does validation (via hooks) and then redirects if valid
- **/
+ * Checks for a valid request, does validation (via hooks) and then redirects if valid.
+ *
+ * @access public
+ * @param bool $url (default: false)
+ * @return void
+ */
 function woocommerce_add_to_cart_action( $url = false ) {
 	global $woocommerce;
 
@@ -341,9 +375,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 
 }
 
+
 /**
- * Add to cart messages
- **/
+ * Add to cart messages.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_add_to_cart_message() {
 	global $woocommerce;
 
@@ -363,68 +401,82 @@ function woocommerce_add_to_cart_message() {
 	$woocommerce->add_message( apply_filters('woocommerce_add_to_cart_message', $message) );
 }
 
+
 /**
- * Clear cart after payment
- **/
+ * Clear cart after payment.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_clear_cart_after_payment() {
 	global $woocommerce;
 
-	if (is_page(woocommerce_get_page_id('thanks'))) :
+	if ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) {
 
-		if (isset($_GET['order'])) $order_id = $_GET['order']; else $order_id = 0;
-		if (isset($_GET['key'])) $order_key = $_GET['key']; else $order_key = '';
-		if ($order_id > 0) :
+		if ( isset( $_GET['order'] ) )
+			$order_id = $_GET['order'];
+		else
+			$order_id = 0;
+
+		if ( isset( $_GET['key'] ) )
+			$order_key = $_GET['key'];
+		else
+			$order_key = '';
+
+		if ( $order_id > 0 ) {
 			$order = new WC_Order( $order_id );
-			if ($order->order_key == $order_key) :
 
+			if ( $order->order_key == $order_key ) {
 				$woocommerce->cart->empty_cart();
+				unset( $_SESSION['order_awaiting_payment'] );
+			}
+		}
 
-				unset($_SESSION['order_awaiting_payment']);
+	}
 
-			endif;
-		endif;
+	if ( isset( $_SESSION['order_awaiting_payment'] ) && $_SESSION['order_awaiting_payment'] > 0 ) {
 
-	endif;
+		$order = new WC_Order( $_SESSION['order_awaiting_payment'] );
 
-	if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
-
-		$order = new WC_Order($_SESSION['order_awaiting_payment']);
-
-		if ($order->id > 0 && $order->status!=='pending') :
-
+		if ( $order->id > 0 && $order->status !== 'pending' ) {
 			$woocommerce->cart->empty_cart();
-
 			unset($_SESSION['order_awaiting_payment']);
-
-		endif;
-
-	endif;
+		}
+	}
 }
 
+
 /**
- * Process the checkout form
- **/
+ * Process the checkout form.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_checkout_action() {
 	global $woocommerce;
 
-	if (isset($_POST['woocommerce_checkout_place_order']) || isset($_POST['woocommerce_checkout_update_totals'])) :
+	if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) {
 
-		if (sizeof($woocommerce->cart->get_cart())==0) :
-			wp_redirect(get_permalink(woocommerce_get_page_id('cart')));
+		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
+			wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
 			exit;
-		endif;
+		}
 
-		if (!defined('WOOCOMMERCE_CHECKOUT')) define('WOOCOMMERCE_CHECKOUT', true);
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) )
+			define( 'WOOCOMMERCE_CHECKOUT', true );
 
 		$woocommerce_checkout = $woocommerce->checkout();
 		$woocommerce_checkout->process_checkout();
-
-	endif;
+	}
 }
 
+
 /**
- * Process the pay form
- **/
+ * Process the pay form.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_pay_action() {
 	global $woocommerce;
 
@@ -478,9 +530,13 @@ function woocommerce_pay_action() {
 	endif;
 }
 
+
 /**
- * Process the login form
- **/
+ * Process the login form.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_process_login() {
 
 	global $woocommerce;
@@ -523,9 +579,13 @@ function woocommerce_process_login() {
 	endif;
 }
 
+
 /**
- * Process the registration form
- **/
+ * Process the registration form.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_process_registration() {
 
 	global $woocommerce;
@@ -625,9 +685,13 @@ function woocommerce_process_registration() {
 	endif;
 }
 
+
 /**
- * Place a previous order again
- **/
+ * Place a previous order again.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_order_again() {
 	global $woocommerce;
 
@@ -676,9 +740,13 @@ function woocommerce_order_again() {
 	exit;
 }
 
+
 /**
- * Cancel a pending order
- **/
+ * Cancel a pending order.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_cancel_order() {
 
 	global $woocommerce;
@@ -716,9 +784,13 @@ function woocommerce_cancel_order() {
 	endif;
 }
 
+
 /**
- * Download a file - hook into init function
- **/
+ * Download a file - hook into init function.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_download_product() {
 
 	if ( isset($_GET['download_file']) && isset($_GET['order']) && isset($_GET['email']) ) :
@@ -891,17 +963,18 @@ function woocommerce_download_product() {
 
         endif;
 
-		/**
-		 * readfile_chunked
-		 *
-		 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
-		 *
-		 * @access   public
-		 * @param    string    file
-		 * @param    boolean    return bytes of file
-		 * @return   void
-		 */
-		if ( ! function_exists('readfile_chunked')) {
+        if ( ! function_exists('readfile_chunked')) {
+
+			/**
+			 * readfile_chunked
+			 *
+			 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
+			 *
+			 * @access   public
+			 * @param    string    file
+			 * @param    boolean    return bytes of file
+			 * @return   void
+			 */
 		    function readfile_chunked($file, $retbytes=TRUE) {
 
 				$chunksize = 1 * (1024 * 1024);
@@ -963,8 +1036,13 @@ function woocommerce_download_product() {
 	endif;
 }
 
+
 /**
- * ecommerce tracking with piwik
+ * ecommerce tracking with piwik.
+ *
+ * @access public
+ * @param int $order_id
+ * @return void
  */
 function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	global $woocommerce;
@@ -1012,7 +1090,13 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 	<?php
 }
 
-/* Products RSS Feed */
+
+/**
+ * Products RSS Feed.
+ *
+ * @access public
+ * @return void
+ */
 function woocommerce_products_rss_feed() {
 	// Product RSS
 	if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) :
@@ -1040,9 +1124,14 @@ function woocommerce_products_rss_feed() {
 	endif;
 }
 
+
 /**
- * Rating field for comments
- **/
+ * Rating field for comments.
+ *
+ * @access public
+ * @param mixed $comment_id
+ * @return void
+ */
 function woocommerce_add_comment_rating($comment_id) {
 	if ( isset($_POST['rating']) ) :
 		global $post;
@@ -1052,6 +1141,14 @@ function woocommerce_add_comment_rating($comment_id) {
 	endif;
 }
 
+
+/**
+ * Validate the comment ratings.
+ *
+ * @access public
+ * @param array $comment_data
+ * @return array
+ */
 function woocommerce_check_comment_rating($comment_data) {
 	global $woocommerce;
 

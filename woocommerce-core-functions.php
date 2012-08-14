@@ -4,9 +4,10 @@
  *
  * Functions available on both the front-end and admin.
  *
- * @package		WooCommerce
- * @category	Core
- * @author		WooThemes
+ * @author 		WooThemes
+ * @category 	Core
+ * @package 	WooCommerce/Functions
+ * @version     1.6.4
  */
 
 /**
@@ -18,9 +19,8 @@
  *
  * @access public
  * @param mixed $dim
- * @param mixed $unit 'in', 'm', 'cm', 'm'
- * @return void
- *
+ * @param mixed $to_unit 'in', 'm', 'cm', 'm'
+ * @return float
  */
 function woocommerce_get_dimension( $dim, $to_unit ) {
 
@@ -64,6 +64,7 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
 	return ( $dim < 0 ) ? 0 : $dim;
 }
 
+
 /**
  * woocommerce_get_weight function.
  *
@@ -73,8 +74,8 @@ function woocommerce_get_dimension( $dim, $to_unit ) {
  *
  * @access public
  * @param mixed $weight
- * @param mixed $unit 'g', 'kg', 'lbs'
- * @return void
+ * @param mixed $to_unit 'g', 'kg', 'lbs'
+ * @return float
  */
 function woocommerce_get_weight( $weight, $to_unit ) {
 
@@ -115,16 +116,28 @@ function woocommerce_get_weight( $weight, $to_unit ) {
 
 /**
  * Get the placeholder for products etc
- **/
+ *
+ * @access public
+ * @return string
+ */
 function woocommerce_placeholder_img_src() {
 	global $woocommerce;
 
 	return apply_filters('woocommerce_placeholder_img_src', $woocommerce->plugin_url() . '/assets/images/placeholder.png' );
 }
 
+
 /**
- * HTML emails from WooCommerce
- **/
+ * Send HTML emails from WooCommerce
+ *
+ * @access public
+ * @param mixed $to
+ * @param mixed $subject
+ * @param mixed $message
+ * @param string $headers (default: "Content-Type: text/html\r\n")
+ * @param string $attachments (default: "")
+ * @return void
+ */
 function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 	global $woocommerce;
 
@@ -133,40 +146,54 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 	$mailer->send( $to, $subject, $message, $headers, $attachments );
 }
 
-/**
- * WooCommerce page IDs
- *
- * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
- *
- * returns -1 if no page is found
- **/
 if ( ! function_exists( 'woocommerce_get_page_id' ) ) {
+
+	/**
+	 * WooCommerce page IDs
+	 *
+	 * retrieve page ids - used for myaccount, edit_address, change_password, shop, cart, checkout, pay, view_order, thanks, terms, order_tracking
+	 *
+	 * returns -1 if no page is found
+	 *
+	 * @access public
+	 * @param string $page
+	 * @return int
+	 */
 	function woocommerce_get_page_id( $page ) {
 		$page = apply_filters('woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id'));
-		return ($page) ? $page : -1;
+		return ( $page ) ? $page : -1;
 	}
 }
 
-/**
- * WooCommerce clear cart
- *
- * Clears the cart session when called
- **/
 if ( ! function_exists( 'woocommerce_empty_cart' ) ) {
+
+	/**
+	 * WooCommerce clear cart
+	 *
+	 * Clears the cart session when called
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function woocommerce_empty_cart() {
 		global $woocommerce;
 
-		if (!isset($woocommerce->cart) || $woocommerce->cart == '' ) $woocommerce->cart = new WC_Cart();
+		if ( ! isset( $woocommerce->cart ) || $woocommerce->cart == '' )
+			$woocommerce->cart = new WC_Cart();
 
 		$woocommerce->cart->empty_cart( false );
 	}
 }
 
-/**
- * WooCommerce disable admin bar
- *
- **/
 if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
+
+	/**
+	 * WooCommerce disable admin bar
+	 *
+	 * @access public
+	 * @param bool $show_admin_bar
+	 * @return bool
+	 */
 	function woocommerce_disable_admin_bar( $show_admin_bar ) {
 		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! current_user_can('edit_posts') ) {
 			$show_admin_bar = false;
@@ -176,9 +203,15 @@ if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
 	}
 }
 
+
 /**
  * Load the cart upon login
- **/
+ *
+ * @access public
+ * @param mixed $user_login
+ * @param mixed $user
+ * @return void
+ */
 function woocommerce_load_persistent_cart( $user_login, $user ) {
 	global $woocommerce;
 
