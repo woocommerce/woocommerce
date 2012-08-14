@@ -1,8 +1,12 @@
 <?php
 /**
- * Variable Product Add to Cart
+ * Variable product add to cart
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce, $product, $post;
 ?>
 <script type="text/javascript">
@@ -19,9 +23,9 @@ global $woocommerce, $product, $post;
 					<td class="label"><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
 					<td class="value"><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
 						<option value=""><?php echo __('Choose an option', 'woocommerce') ?>&hellip;</option>
-						<?php 
+						<?php
 							if ( is_array( $options ) ) {
-							
+
 								if ( empty( $_POST ) )
 									$selected_value = ( isset( $selected_attributes[ sanitize_title( $name ) ] ) ) ? $selected_attributes[ sanitize_title( $name ) ] : '';
 								else
@@ -31,7 +35,7 @@ global $woocommerce, $product, $post;
 								if ( taxonomy_exists( sanitize_title( $name ) ) ) {
 
 									$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC') );
-	
+
 									foreach ( $terms as $term ) {
 										if ( ! in_array( $term->slug, $options ) ) continue;
 										echo '<option value="' . $term->slug . '" ' . selected( $selected_value, $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';

@@ -1,8 +1,12 @@
 <?php
 /**
- * My Account
+ * My Account page
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 ?>
 
@@ -19,12 +23,12 @@ global $woocommerce;
 		<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n('&nbsp;download remaining', '&nbsp;downloads remaining', $download['downloads_remaining'], 'woocommerce'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
 	<?php endforeach; ?>
 </ul>
-<?php endif; ?>	
+<?php endif; ?>
 
 <h2><?php _e('Recent Orders', 'woocommerce'); ?></h2>
 <?php woocommerce_get_template('myaccount/my-orders.php', array( 'recent_orders' => $recent_orders )); ?>
 
-<h2><?php _e('My Address', 'woocommerce'); ?></h2>	
+<h2><?php _e('My Address', 'woocommerce'); ?></h2>
 <p class="myaccount_address"><?php _e('The following addresses will be used on the checkout page by default.', 'woocommerce'); ?></p>
 <?php woocommerce_get_template('myaccount/my-address.php'); ?>
 

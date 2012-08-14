@@ -1,6 +1,10 @@
 <?php
 /**
- * Error messages
+ * Show error messages
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 if ( ! $errors ) return;
 ?>

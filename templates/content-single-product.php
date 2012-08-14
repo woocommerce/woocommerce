@@ -4,36 +4,36 @@
  *
  * Override this template by copying it to yourtheme/woocommerce/content-single-product.php
  *
- * @package WooCommerce
- * @since WooCommerce 1.6
- * @todo prepend class names with wc-
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 ?>
 
-<?php 
-	/** 
+<?php
+	/**
 	 * woocommerce_before_single_product hook
 	 *
 	 * @hooked woocommerce_show_messages - 10
 	 */
-	 do_action( 'woocommerce_before_single_product' ); 
+	 do_action( 'woocommerce_before_single_product' );
 ?>
 
 <div itemscope itemtype="http://schema.org/Product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 
-	<?php 
-		/** 
+	<?php
+		/**
 		 * woocommerce_show_product_images hook
 		 *
 		 * @hooked woocommerce_show_product_sale_flash - 10
 		 * @hooked woocommerce_show_product_images - 20
 		 */
-		do_action( 'woocommerce_before_single_product_summary' ); 
+		do_action( 'woocommerce_before_single_product_summary' );
 	?>
 
 	<div class="summary">
 
-		<?php 
+		<?php
 			/**
 			 * woocommerce_single_product_summary hook
 			 *
@@ -44,12 +44,12 @@
 			 * @hooked woocommerce_template_single_meta - 40
 			 * @hooked woocommerce_template_single_sharing - 50
 			 */
-			do_action( 'woocommerce_single_product_summary' ); 	
+			do_action( 'woocommerce_single_product_summary' );
 		?>
 
 	</div><!-- .summary -->
 
-	<?php 
+	<?php
 		/**
 		 * woocommerce_after_single_product_summary hook
 		 *
@@ -58,7 +58,7 @@
 		 */
 		do_action( 'woocommerce_after_single_product_summary' );
 	?>
-				
+
 </div><!-- #product-<?php the_ID(); ?> -->
 
 <?php do_action( 'woocommerce_after_single_product' ); ?>

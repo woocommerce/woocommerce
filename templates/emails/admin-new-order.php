@@ -1,4 +1,13 @@
-<?php if (!defined('ABSPATH')) exit; ?>
+<?php
+/**
+ * Admin new order email
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates/Emails
+ * @version     1.6.4
+ */
+
+if (!defined('ABSPATH')) exit; ?>
 
 <?php do_action('woocommerce_email_header', $email_heading); ?>
 
@@ -20,7 +29,7 @@
 		<?php echo $order->email_order_items_table( false, true ); ?>
 	</tbody>
 	<tfoot>
-		<?php 
+		<?php
 			if ( $totals = $order->get_order_item_totals() ) {
 				$i = 0;
 				foreach ( $totals as $total ) {
@@ -28,7 +37,7 @@
 					?><tr>
 						<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['label']; ?></th>
 						<td style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['value']; ?></td>
-					</tr><?php 
+					</tr><?php
 				}
 			}
 		?>

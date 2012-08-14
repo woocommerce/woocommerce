@@ -1,11 +1,20 @@
-<?php if (!defined('ABSPATH')) exit; ?>
+<?php
+/**
+ * Customer invoice email
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates/Emails
+ * @version     1.6.4
+ */
+
+if (!defined('ABSPATH')) exit; ?>
 
 <?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <?php if ($order->status=='pending') : ?>
 
 	<p><?php printf( __( 'An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: <a href="%s">Pay</a>', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ); ?></p>
-	
+
 <?php endif; ?>
 
 <?php do_action('woocommerce_email_before_order_table', $order, false); ?>
@@ -21,22 +30,22 @@
 		</tr>
 	</thead>
 	<tbody>
-		<?php 
+		<?php
 			switch ( $order->status ) {
 				case "completed" :
 					echo $order->email_order_items_table( true, false, true );
 				break;
 				case "processing" :
-					echo $order->email_order_items_table( get_option('woocommerce_downloads_grant_access_after_payment')=='yes' ? true : false, true, true ); 
+					echo $order->email_order_items_table( get_option('woocommerce_downloads_grant_access_after_payment')=='yes' ? true : false, true, true );
 				break;
 				default :
-					echo $order->email_order_items_table( false, true, false ); 
+					echo $order->email_order_items_table( false, true, false );
 				break;
 			}
 		?>
 	</tbody>
 	<tfoot>
-		<?php 
+		<?php
 			if ( $totals = $order->get_order_item_totals() ) {
 				$i = 0;
 				foreach ( $totals as $total ) {
@@ -44,7 +53,7 @@
 					?><tr>
 						<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['label']; ?></th>
 						<td style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['value']; ?></td>
-					</tr><?php 
+					</tr><?php
 				}
 			}
 		?>

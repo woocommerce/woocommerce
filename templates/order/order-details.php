@@ -1,8 +1,12 @@
 <?php
 /**
- * Order Details
+ * Order details
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 
 $order = new WC_Order( $order_id );
@@ -17,15 +21,15 @@ $order = new WC_Order( $order_id );
 		</tr>
 	</thead>
 	<tfoot>
-	<?php 
+	<?php
 		if ( $totals = $order->get_order_item_totals() ) foreach ( $totals as $total ) :
 			?>
 			<tr>
 				<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
 				<td><?php echo $total['value']; ?></td>
 			</tr>
-			<?php 
-		endforeach; 
+			<?php
+		endforeach;
 	?>
 	</tfoot>
 	<tbody>
@@ -43,27 +47,27 @@ $order = new WC_Order( $order_id );
 				echo '
 					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
 						<td class="product-name">';
-						
+
 				echo '<a href="'.get_permalink( $item['id'] ).'">' . $item['name'] . '</a>';
 
 				$item_meta = new order_item_meta( $item['item_meta'] );
 				$item_meta->display();
-				
+
 				if ( $_product->exists() && $_product->is_downloadable() && $_product->has_file() && ( $order->status=='completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $order->status == 'processing' ) ) ) :
-					
+
 					echo '<br/><small><a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '">' . __('Download file &rarr;', 'woocommerce') . '</a></small>';
-		
-				endif;	
+
+				endif;
 
 				echo '</td><td class="product-quantity">'.$item['qty'].'</td><td class="product-total">' . $order->get_formatted_line_subtotal($item) . '</td></tr>';
-				
+
 				// Show any purchase notes
 				if ($order->status=='completed' || $order->status=='processing') :
 					if ($purchase_note = get_post_meta( $_product->id, '_purchase_note', true)) :
 						echo '<tr class="product-purchase-note"><td colspan="3">' . apply_filters('the_content', $purchase_note) . '</td></tr>';
 					endif;
 				endif;
-				
+
 			endforeach;
 		endif;
 
@@ -97,7 +101,7 @@ $order = new WC_Order( $order_id );
 	<div class="col-1">
 
 <?php endif; ?>
-	
+
 		<header class="title">
 			<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
 		</header>
@@ -110,9 +114,9 @@ $order = new WC_Order( $order_id );
 <?php if (get_option('woocommerce_ship_to_billing_address_only')=='no') : ?>
 
 	</div><!-- /.col-1 -->
-	
+
 	<div class="col-2">
-	
+
 		<header class="title">
 			<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
 		</header>

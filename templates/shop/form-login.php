@@ -1,6 +1,10 @@
 <?php
 /**
- * Login Form
+ * Login form
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
 global $woocommerce;

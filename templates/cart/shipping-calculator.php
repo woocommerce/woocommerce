@@ -1,8 +1,12 @@
 <?php
 /**
  * Shipping Calculator
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 
 if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->cart->needs_shipping() ) return;
@@ -26,18 +30,18 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 			<?php
 				$current_cc = $woocommerce->customer->get_shipping_country();
 				$current_r = $woocommerce->customer->get_shipping_state();
-				
+
 				$states = $woocommerce->countries->get_states( $current_cc );
-				
+
 				if ( is_array( $states ) && empty( $states ) ) {
-				
+
 					// Hidden
 					?>
 					<input type="hidden" name="calc_shipping_state" id="calc_shipping_state" />
 					<?php
-				
+
 				} elseif ( is_array( $states ) ) {
-					
+
 					// Dropdown
 					?>
 					<span>
@@ -47,14 +51,14 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 						?></select>
 					</span>
 					<?php
-				
+
 				} else {
-				
+
 					// Input
 					?>
 					<input type="text" class="input-text" value="<?php echo esc_attr( $current_r ); ?>" placeholder="<?php _e('State', 'woocommerce'); ?>" name="calc_shipping_state" id="calc_shipping_state" />
 					<?php
-				
+
 				}
 			?>
 		</p>

@@ -1,6 +1,10 @@
 <?php
 /**
- * Empty Cart Page
+ * Empty cart page
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 ?>
 

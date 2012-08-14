@@ -1,6 +1,10 @@
 <?php
 /**
- * Up-sells
+ * Single Product Up-Sells
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
 global $product, $woocommerce_loop;
@@ -21,23 +25,23 @@ $args = array(
 $products = new WP_Query( $args );
 
 if ( $products->have_posts() ) : ?>
-	
+
 	<div class="upsells products">
-		
+
 		<h2><?php _e('You may also like&hellip;', 'woocommerce') ?></h2>
 
 		<ul class="products">
-			
+
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-		
+
 				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-	
+
 			<?php endwhile; // end of the loop. ?>
-				
+
 		</ul>
-		
+
 	</div>
-	
-<?php endif; 
+
+<?php endif;
 
 wp_reset_postdata();

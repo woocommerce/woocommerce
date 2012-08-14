@@ -1,7 +1,12 @@
 <?php
 /**
- * Checkout Billing Information Form
+ * Checkout billing information form
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
+
 global $woocommerce;
 ?>
 

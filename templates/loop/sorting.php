@@ -1,7 +1,12 @@
 <?php
 /**
  * Sorting
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
+
 ?>
 <form class="woocommerce_ordering" method="POST">
 	<select name="sort" class="orderby">
@@ -13,7 +18,7 @@
 				'price' 		=> __('Sort by price', 'woocommerce')
 			));
 
-			foreach ( $catalog_orderby as $id => $name ) 
+			foreach ( $catalog_orderby as $id => $name )
 				echo '<option value="' . $id . '" ' . selected( $_SESSION['orderby'], $id, false ) . '>' . $name . '</option>';
 		?>
 	</select>

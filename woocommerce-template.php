@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @category 	Core
- * @package 	WooCommerce/Template
+ * @package 	WooCommerce/Templates
  * @version     1.6.4
  */
 

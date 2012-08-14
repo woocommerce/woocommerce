@@ -3,8 +3,12 @@
  * My Orders
  *
  * Shows recent orders on the account page
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 
 $customer_id = get_current_user_id();
@@ -14,14 +18,14 @@ $args = array(
     'meta_key'        => '_customer_user',
     'meta_value'	  => $customer_id,
     'post_type'       => 'shop_order',
-    'post_status'     => 'publish' 
+    'post_status'     => 'publish'
 );
 $customer_orders = get_posts($args);
 
 if ($customer_orders) :
 ?>
 	<table class="shop_table my_account_orders">
-	
+
 		<thead>
 			<tr>
 				<th class="order-number"><span class="nobr"><?php _e('Order', 'woocommerce'); ?></span></th>
@@ -30,15 +34,15 @@ if ($customer_orders) :
 				<th class="order-status" colspan="2"><span class="nobr"><?php _e('Status', 'woocommerce'); ?></span></th>
 			</tr>
 		</thead>
-		
+
 		<tbody><?php
 			foreach ($customer_orders as $customer_order) :
 				$order = new WC_Order();
-				
+
 				$order->populate( $customer_order );
-				
+
 				$status = get_term_by('slug', $order->status, 'shop_order_status');
-				
+
 				?><tr class="order">
 					<td class="order-number" width="1%">
 						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>"><?php echo $order->get_order_number(); ?></a> &ndash; <time title="<?php echo esc_attr( strtotime($order->order_date) ); ?>"><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></time>
@@ -52,11 +56,11 @@ if ($customer_orders) :
 						<?php endif; ?>
 					</td>
 					<td class="order-actions" style="text-align:right; white-space:nowrap;">
-												
+
 						<?php if (in_array($order->status, array('pending', 'failed'))) : ?>
 							<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e('Pay', 'woocommerce'); ?></a>
 						<?php endif; ?>
-						
+
 						<a href="<?php echo esc_url( add_query_arg('order', $order->id, get_permalink(woocommerce_get_page_id('view_order'))) ); ?>" class="button"><?php _e('View', 'woocommerce'); ?></a>
 
 
@@ -64,7 +68,7 @@ if ($customer_orders) :
 				</tr><?php
 			endforeach;
 		?></tbody>
-	
+
 	</table>
 <?php
 else :

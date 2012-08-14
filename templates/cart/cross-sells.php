@@ -1,6 +1,10 @@
 <?php
 /**
  * Cross-sells
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
 global $woocommerce_loop, $woocommerce, $product;
@@ -25,21 +29,21 @@ $woocommerce_loop['columns'] 	= 2;
 if ( $products->have_posts() ) : ?>
 
 	<div class="cross-sells">
-		
+
 		<h2><?php _e('You may be interested in&hellip;', 'woocommerce') ?></h2>
-	
+
 		<ul class="products">
-			
+
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-		
+
 				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-	
+
 			<?php endwhile; // end of the loop. ?>
-				
+
 		</ul>
-		
+
 	</div>
-	
-<?php endif; 
+
+<?php endif;
 
 wp_reset_query();

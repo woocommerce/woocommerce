@@ -1,6 +1,10 @@
 <?php
 /**
- * External Add to Cart
+ * External product add to cart
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 ?>
 <?php do_action('woocommerce_before_add_to_cart_button'); ?>

@@ -1,6 +1,10 @@
 <?php
 /**
- * Simple Product Add to Cart
+ * Simple product add to cart
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
 global $woocommerce, $product;

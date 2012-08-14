@@ -1,3 +1,13 @@
+<?php
+/**
+ * Email Footer
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates/Emails
+ * @version     1.6.4
+ */
+
+?>
 															</div>
 														</td>
                                                     </tr>
@@ -21,7 +31,7 @@
                                                         	<?php echo wpautop(wptexturize(apply_filters('woocommerce_email_footer_text', get_option('woocommerce_email_footer_text')))); ?>
                                                         </td>
                                                     </tr>
-                                                   
+
                                                 </table>
                                             </td>
                                         </tr>

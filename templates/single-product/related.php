@@ -1,11 +1,15 @@
 <?php
 /**
  * Related Products
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
 
 global $product, $woocommerce_loop;
 
-$related = $product->get_related(); 
+$related = $product->get_related();
 
 if ( sizeof($related) == 0 ) return;
 
@@ -25,21 +29,21 @@ $woocommerce_loop['columns'] 	= $columns;
 if ( $products->have_posts() ) : ?>
 
 	<div class="related products">
-	
+
 		<h2><?php _e('Related Products', 'woocommerce'); ?></h2>
-		
+
 		<ul class="products">
-			
+
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-		
+
 				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-	
+
 			<?php endwhile; // end of the loop. ?>
-				
+
 		</ul>
-		
+
 	</div>
-	
-<?php endif; 
+
+<?php endif;
 
 wp_reset_postdata();

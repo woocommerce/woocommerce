@@ -1,7 +1,12 @@
 <?php
 /**
- * Checkout Coupon Form
+ * Checkout coupon form
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
+
 if ( get_option( 'woocommerce_enable_coupons' ) == 'no' || get_option( 'woocommerce_enable_coupon_form_on_checkout' ) == 'no' ) return;
 
 $info_message = apply_filters('woocommerce_checkout_coupon_message', __('Have a coupon?', 'woocommerce'));
@@ -18,6 +23,6 @@ $info_message = apply_filters('woocommerce_checkout_coupon_message', __('Have a 
 	<p class="form-row form-row-last">
 		<input type="submit" class="button" name="apply_coupon" value="<?php _e('Apply Coupon', 'woocommerce'); ?>" />
 	</p>
-	
+
 	<div class="clear"></div>
 </form>

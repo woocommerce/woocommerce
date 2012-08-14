@@ -1,4 +1,13 @@
-<?php global $product;
+<?php
+/**
+ * Attributes tab
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
+ */
+
+global $product;
 
 $show_attr = ( get_option( 'woocommerce_enable_dimension_product_attributes' ) == 'yes' ? true : false );
 

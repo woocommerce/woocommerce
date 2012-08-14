@@ -1,4 +1,13 @@
-<?php global $woocommerce; ?>
+<?php
+/**
+ * Login Form
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
+ */
+
+global $woocommerce; ?>
 
 <?php $woocommerce->show_messages(); ?>
 

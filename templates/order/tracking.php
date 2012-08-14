@@ -1,8 +1,12 @@
 <?php
 /**
- * Order Tracking
+ * Order tracking
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 ?>
 
@@ -10,11 +14,11 @@ global $woocommerce;
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 
 	$order_status_text = sprintf( __('Order %s which was made %s has the status &ldquo;%s&rdquo;', 'woocommerce'), $order->get_order_number(), human_time_diff(strtotime($order->order_date), current_time('timestamp')) . ' ' . __('ago', 'woocommerce'), __($status->name, 'woocommerce') );
-	
+
 	if ($order->status == 'completed') $order_status_text .= ' ' . __('and was completed', 'woocommerce') . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woocommerce');
-	
+
 	$order_status_text .= '.';
-	
+
 	echo wpautop(apply_filters('woocommerce_order_tracking_status', $order_status_text, $order));
 ?>
 
@@ -23,10 +27,10 @@ global $woocommerce;
 	if ($notes) :
 		?>
 		<h2><?php _e('Order Updates', 'woocommerce'); ?></h2>
-		<ol class="commentlist notes">	
+		<ol class="commentlist notes">
 			<?php foreach ($notes as $note) : ?>
 			<li class="comment note">
-				<div class="comment_container">			
+				<div class="comment_container">
 					<div class="comment-text">
 						<p class="meta"><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></p>
 						<div class="description">
@@ -34,7 +38,7 @@ global $woocommerce;
 						</div>
 		  				<div class="clear"></div>
 		  			</div>
-					<div class="clear"></div>			
+					<div class="clear"></div>
 				</div>
 			</li>
 			<?php endforeach; ?>

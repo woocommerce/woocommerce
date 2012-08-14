@@ -1,8 +1,12 @@
 <?php
 /**
- * Change Password Form
+ * Change password form
+ *
+ * @author 		WooThemes
+ * @package 	WooCommerce/Templates
+ * @version     1.6.4
  */
- 
+
 global $woocommerce;
 ?>
 
@@ -19,10 +23,10 @@ global $woocommerce;
 		<input type="password" class="input-text" name="password_2" id="password_2" />
 	</p>
 	<div class="clear"></div>
-	
+
 	<p><input type="submit" class="button" name="change_password" value="<?php _e('Save', 'woocommerce'); ?>" /></p>
-	
+
 	<?php $woocommerce->nonce_field('change_password')?>
 	<input type="hidden" name="action" value="change_password" />
-	
+
 </form>
