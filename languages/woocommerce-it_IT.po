@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-07-27 15:32:35+0000\n"
-"Last-Translator: Bfred.it <me@bfred.it>\n"
+"PO-Revision-Date: 2012-08-11 16:17+0100\n"
+"Last-Translator: Alessandro Pagnin <alepane@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3304,57 +3304,57 @@ msgstr "Opzioni Spedizione"
 #: admin/settings/settings-init.php:873
 #@ woocommerce
 msgid "Shipping calculations"
-msgstr ""
+msgstr "Spese di spedizione"
 
 #: admin/settings/settings-init.php:874
 #@ woocommerce
 msgid "Enable shipping"
-msgstr ""
+msgstr "Abilita spedizione"
 
 #: admin/settings/settings-init.php:882
 #@ woocommerce
 msgid "Enable the shipping calculator on the cart page"
-msgstr ""
+msgstr "Abilita il calcolatore di spese di spedizione nella pagina carrello"
 
 #: admin/settings/settings-init.php:913
 #@ woocommerce
 msgid "Only ship to the users billing address"
-msgstr ""
+msgstr "Spedisci solo all'indirizzo di fatturazione degli utenti"
 
 #: admin/settings/settings-init.php:921
 #@ woocommerce
 msgid "Ship to billing address by default"
-msgstr ""
+msgstr "Spedisci all'indirizzo di fatturazione di default"
 
 #: admin/settings/settings-init.php:960
 #@ woocommerce
 msgid "Tax Options"
-msgstr ""
+msgstr "Opzioni tasse"
 
 #: admin/settings/settings-init.php:963
 #@ woocommerce
 msgid "Tax calculations"
-msgstr ""
+msgstr "Calcolo tasse"
 
 #: admin/settings/settings-init.php:964
 #@ woocommerce
 msgid "Enable taxes and tax calculations"
-msgstr ""
+msgstr "Abilita tasse e calcolo tasse"
 
 #: admin/settings/settings-init.php:972
 #@ woocommerce
 msgid "Display taxes on cart page"
-msgstr ""
+msgstr "Visualizza tasse sulla pagina carrello"
 
 #: admin/settings/settings-init.php:988
 #@ woocommerce
 msgid "Round tax at subtotal level, instead of per line"
-msgstr ""
+msgstr "Arrotonda tasse nel totale invece che per ogni prodotto"
 
 #: admin/settings/settings-init.php:996
 #@ woocommerce
 msgid "Catalog Prices"
-msgstr ""
+msgstr "Prezzi catalogo"
 
 #: admin/settings/settings-init.php:997
 #@ woocommerce
@@ -3394,7 +3394,7 @@ msgstr ""
 #: admin/settings/settings-init.php:1035
 #@ woocommerce
 msgid "All fields are required."
-msgstr ""
+msgstr "Tutti i campi sono richiesti"
 
 #: admin/settings/settings-init.php:1036
 #@ woocommerce
@@ -3804,7 +3804,7 @@ msgstr "Buono sconto non esistente!"
 #: classes/class-wc-checkout.php:36
 #@ woocommerce
 msgid "Account username"
-msgstr ""
+msgstr "nome utente dell'account"
 
 #: templates/myaccount/form-login.php:18
 #: templates/myaccount/form-login.php:44
@@ -3812,13 +3812,13 @@ msgstr ""
 #: widgets/widget-login.php:93
 #@ woocommerce
 msgid "Username"
-msgstr ""
+msgstr "nome utente"
 
 #: classes/class-wc-checkout.php:41
 #: classes/class-wc-checkout.php:47
 #@ woocommerce
 msgid "Account password"
-msgstr ""
+msgstr "password dell'account"
 
 #: templates/myaccount/form-login.php:22
 #: templates/myaccount/form-login.php:54
@@ -3826,7 +3826,7 @@ msgstr ""
 #: widgets/widget-login.php:95
 #@ woocommerce
 msgid "Password"
-msgstr ""
+msgstr "password"
 
 #: templates/checkout/form-billing.php:33
 #@ woocommerce
@@ -3926,7 +3926,7 @@ msgstr "Metodo di pagamento non valido."
 #: woocommerce-functions.php:586
 #@ woocommerce
 msgid "ERROR"
-msgstr ""
+msgstr "ERRORE"
 
 #: classes/class-wc-countries.php:25
 #@ woocommerce
@@ -5800,22 +5800,22 @@ msgstr "[%s] E' stata aggiunta una nota al tuo ordine"
 #: classes/class-wc-email.php:319
 #@ woocommerce
 msgid "Product low in stock"
-msgstr ""
+msgstr "Pochi pezzi a magazzino"
 
 #: classes/class-wc-email.php:328
 #@ woocommerce
 msgid "is low in stock."
-msgstr ""
+msgstr "ha pochi pezzi a magazzino."
 
 #: classes/class-wc-email.php:347
 #@ woocommerce
 msgid "Product out of stock"
-msgstr ""
+msgstr "Il prodotto non è disponibile a magazzino"
 
 #: classes/class-wc-email.php:356
 #@ woocommerce
 msgid "is out of stock."
-msgstr ""
+msgstr "non è disponibile a magazzino."
 
 #: classes/class-wc-email.php:388
 #@ woocommerce
@@ -5899,7 +5899,7 @@ msgstr ""
 #: classes/shipping/class-wc-international-delivery.php:39
 #@ woocommerce
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Abilita/Disabilita"
 
 #: classes/gateways/bacs/class-wc-bacs.php:52
 #@ woocommerce
@@ -5915,7 +5915,7 @@ msgstr ""
 #: classes/shipping/class-wc-local-pickup.php:55
 #@ woocommerce
 msgid "Title"
-msgstr ""
+msgstr "Titolo"
 
 #: classes/gateways/bacs/class-wc-bacs.php:58
 #: classes/gateways/cheque/class-wc-cheque.php:53
@@ -5939,7 +5939,7 @@ msgstr ""
 #: classes/gateways/cheque/class-wc-cheque.php:57
 #@ woocommerce
 msgid "Customer Message"
-msgstr ""
+msgstr "Messaggio utente"
 
 #: classes/gateways/bacs/class-wc-bacs.php:64
 #@ woocommerce
@@ -5956,14 +5956,14 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-bacs.php:174
 #@ woocommerce
 msgid "Account Name"
-msgstr ""
+msgstr "Nome account"
 
 #: classes/gateways/bacs/class-wc-bacs.php:80
 #: classes/gateways/bacs/class-wc-bacs.php:141
 #: classes/gateways/bacs/class-wc-bacs.php:175
 #@ woocommerce
 msgid "Account Number"
-msgstr ""
+msgstr "Numero account"
 
 #: classes/gateways/bacs/class-wc-bacs.php:86
 #: classes/gateways/bacs/class-wc-bacs.php:142
@@ -5977,7 +5977,7 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-bacs.php:177
 #@ woocommerce
 msgid "Bank Name"
-msgstr ""
+msgstr "Nome banca"
 
 #: classes/gateways/bacs/class-wc-bacs.php:98
 #: classes/gateways/bacs/class-wc-bacs.php:144
@@ -5990,12 +5990,12 @@ msgstr ""
 #: classes/gateways/bacs/class-wc-bacs.php:106
 #@ woocommerce
 msgid "Your bank may require this for international payments"
-msgstr ""
+msgstr "La tua banca potrebbe richiederlo per i pagamenti internazionali"
 
 #: classes/gateways/bacs/class-wc-bacs.php:104
 #@ woocommerce
 msgid "BIC (formerly Swift)"
-msgstr ""
+msgstr "BIC (ex Swift)"
 
 #: classes/gateways/bacs/class-wc-bacs.php:122
 #@ woocommerce
@@ -6005,7 +6005,7 @@ msgstr "Pagamento con bonifico"
 #: classes/gateways/bacs/class-wc-bacs.php:123
 #@ woocommerce
 msgid "Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer."
-msgstr ""
+msgstr "Permetti pagamenti via sistema bancario (bonifico)"
 
 #: classes/gateways/bacs/class-wc-bacs.php:137
 #: classes/gateways/bacs/class-wc-bacs.php:171
@@ -8775,8 +8775,8 @@ msgstr ""
 #@ woocommerce
 msgid "Product"
 msgid_plural "Products"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prodotto"
+msgstr[1] "Prodotti"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:54
@@ -8784,8 +8784,8 @@ msgstr[1] ""
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Categoria Prodotto"
+msgstr[1] "Categorie Prodotto"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:68
@@ -9462,25 +9462,25 @@ msgstr ""
 #: templates/loop/sorting.php:10
 #@ woocommerce
 msgid "Default sorting"
-msgstr ""
+msgstr "Ordinamento predefinito"
 
 #: admin/settings/settings-init.php:543
 #: templates/loop/sorting.php:11
 #@ woocommerce
 msgid "Sort alphabetically"
-msgstr ""
+msgstr "Ordine alfabetico"
 
 #: admin/settings/settings-init.php:544
 #: templates/loop/sorting.php:12
 #@ woocommerce
 msgid "Sort by most recent"
-msgstr ""
+msgstr "Ordine dal più recente"
 
 #: admin/settings/settings-init.php:545
 #: templates/loop/sorting.php:13
 #@ woocommerce
 msgid "Sort by price"
-msgstr ""
+msgstr "Ordine per prezzo"
 
 #: admin/settings/settings-init.php:551
 #@ woocommerce
@@ -9659,73 +9659,73 @@ msgstr ""
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
-msgstr ""
+msgstr "Note sull'ordine, ad esempio richieste particolari per la consegna."
 
 #: classes/class-wc-countries.php:924
 #@ woocommerce
 msgctxt "placeholder"
 msgid "First Name"
-msgstr ""
+msgstr "Nome"
 
 #: classes/class-wc-countries.php:930
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Last Name"
-msgstr ""
+msgstr "Cognome"
 
 #: classes/class-wc-countries.php:937
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Company (optional)"
-msgstr ""
+msgstr "Ragione sociale (opzionale)"
 
 #: classes/class-wc-countries.php:942
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Address"
-msgstr ""
+msgstr "Indirizzo"
 
 #: classes/class-wc-countries.php:948
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Address 2 (optional)"
-msgstr ""
+msgstr "Indirizzo (2.a riga, opzionale)"
 
 #: classes/class-wc-countries.php:955
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Town/City"
-msgstr ""
+msgstr "Città"
 
 #: classes/class-wc-countries.php:961
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Postcode/Zip"
-msgstr ""
+msgstr "C.A.P."
 
 #: classes/class-wc-countries.php:969
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Country"
-msgstr ""
+msgstr "Stato"
 
 #: classes/class-wc-countries.php:976
 #@ woocommerce
 msgctxt "placeholder"
 msgid "State/County"
-msgstr ""
+msgstr "Provincia"
 
 #: classes/class-wc-countries.php:1021
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Email Address"
-msgstr ""
+msgstr "Indirizzo e-mail"
 
 #: classes/class-wc-countries.php:1027
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Phone"
-msgstr ""
+msgstr "Telefono"
 
 #: classes/class-wc-email.php:124
 #, php-format
@@ -10255,12 +10255,12 @@ msgstr ""
 #: templates/checkout/form-billing.php:10
 #@ woocommerce
 msgid "Billing &amp; Shipping"
-msgstr ""
+msgstr "Fatturazione e Spedizione"
 
 #: templates/checkout/form-shipping.php:25
 #@ woocommerce
 msgid "Ship to billing address?"
-msgstr ""
+msgstr "Spedisci all'indirizzo di fatturazione"
 
 #: templates/emails/customer-new-account.php:5
 #, php-format
