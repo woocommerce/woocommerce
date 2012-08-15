@@ -10,10 +10,19 @@
  * @version     1.6.4
  */
 
+/** Product data writepanel */
 include_once('writepanel-product_data.php');
+
+/** Coupon data writepanel */
 include_once('writepanel-coupon_data.php');
+
+/** Order data writepanel */
 include_once('writepanel-order_data.php');
+
+/** Order notes writepanel */
 include_once('writepanel-order_notes.php');
+
+/** Order downloads writepanel */
 include_once('writepanel-order_downloads.php');
 
 

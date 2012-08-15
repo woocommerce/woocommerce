@@ -11,8 +11,10 @@
  * @version     1.6.4
  */
 
+/** Store settings in this array */
 global $woocommerce_settings;
 
+/** Settings init */
 include( 'settings/settings-init.php' );
 
 if ( ! function_exists( 'woocommerce_settings' ) ) {

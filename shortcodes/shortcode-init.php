@@ -9,11 +9,23 @@
  * @package 	WooCommerce/Shortcodes
  * @version     1.6.4
  */
+
+/** Cart shortcode */
 include_once('shortcode-cart.php');
+
+/** Checkout shortcode */
 include_once('shortcode-checkout.php');
+
+/** My Account shortcode */
 include_once('shortcode-my_account.php');
+
+/** Order tracking shortcode */
 include_once('shortcode-order_tracking.php');
+
+/** Pay shortcode */
 include_once('shortcode-pay.php');
+
+/** Thanks shortcode */
 include_once('shortcode-thankyou.php');
 
 
@@ -152,7 +164,7 @@ function woocommerce_product_categories( $atts ) {
 	wp_reset_query();
 
 	woocommerce_reset_loop();
-	
+
 	return ob_get_clean();
 }
 

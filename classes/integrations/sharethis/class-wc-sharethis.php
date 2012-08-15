@@ -109,6 +109,7 @@ class WC_ShareThis extends WC_Integration {
 /**
  * Add the integration to WooCommerce.
  *
+ * @package		WooCommerce/Classes/Integrations
  * @access public
  * @param array $integrations
  * @return array

@@ -386,9 +386,15 @@ class WC_ShareYourCart extends WC_Integration {
 
 }
 
+
 /**
  * Add the integration to WooCommerce
- **/
+ *
+ * @package		WooCommerce/Classes/Integrations
+ * @access public
+ * @param mixed $integrations
+ * @return void
+ */
 function add_shareyourcart_integration( $integrations ) {
 	if ( ! class_exists('ShareYourCartAPI') ) // Only allow this integration if we're not already using shareyourcart via another plugin
 		$integrations[] = 'WC_ShareYourCart';
