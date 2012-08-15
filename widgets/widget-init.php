@@ -9,21 +9,6 @@
  * @package 	WooCommerce/Widgets
  * @version 	1.6.4
  */
-include_once('widget-cart.php');
-include_once('widget-featured_products.php');
-include_once('widget-layered_nav.php');
-include_once('widget-price_filter.php');
-include_once('widget-product_categories.php');
-include_once('widget-product_search.php');
-include_once('widget-product_tag_cloud.php');
-include_once('widget-recent_products.php');
-include_once('widget-top_rated_products.php');
-include_once('widget-recent_reviews.php');
-include_once('widget-recently_viewed.php');
-include_once('widget-best_sellers.php');
-include_once('widget-onsale.php');
-include_once('widget-login.php');
-include_once('widget-random_products.php');
 
 /**
  * woocommerce_register_widgets function.
@@ -48,4 +33,21 @@ function woocommerce_register_widgets() {
 	register_widget('WooCommerce_Widget_Login');
 	register_widget('WooCommerce_Widget_Random_Products');
 }
+
 add_action('widgets_init', 'woocommerce_register_widgets');
+
+include_once('widget-cart.php');
+include_once('widget-featured_products.php');
+include_once('widget-layered_nav.php');
+include_once('widget-price_filter.php');
+include_once('widget-product_categories.php');
+include_once('widget-product_search.php');
+include_once('widget-product_tag_cloud.php');
+include_once('widget-recent_products.php');
+include_once('widget-top_rated_products.php');
+include_once('widget-recent_reviews.php');
+include_once('widget-recently_viewed.php');
+include_once('widget-best_sellers.php');
+include_once('widget-onsale.php');
+include_once('widget-login.php');
+include_once('widget-random_products.php');

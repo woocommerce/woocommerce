@@ -165,6 +165,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
  * Track product views
  *
  * @access public
+ * @package 	WooCommerce/Widgets
  * @return void
  */
 function woocommerce_track_product_view() {

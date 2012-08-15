@@ -226,6 +226,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
  * Process the login.
  *
  * @access public
+ * @package 	WooCommerce/Widgets
  * @return void
  */
 function woocommerce_sidebar_login_process() {

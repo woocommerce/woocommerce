@@ -10,6 +10,7 @@
  * @version     1.6.4
  */
 
+/** Variable products */
 require_once('writepanel-product-type-variable.php');
 
 /**
