@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce v1.6.1\n"
+"Project-Id-Version: WooCommerce v1.6.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-06-14 12:02+0100\n"
-"PO-Revision-Date: 2012-07-27 15:26:48+0000\n"
+"PO-Revision-Date: 2012-08-10 09:22:15+0000\n"
 "Last-Translator: Arnaud CHEMINAND <nodar44@gmail.com>\n"
 "Language-Team: AVTALIA <contact@avtalia.com>\n"
 "MIME-Version: 1.0\n"
@@ -40,126 +40,126 @@ msgstr "D&eacute;sol&eacute;, votre session a expir&eacute;."
 msgid "Return to homepage &rarr;"
 msgstr "Retour &agrave; l&rsquo;accueil &rarr;"
 
-#: woocommerce-ajax.php:218
-#: woocommerce-ajax.php:248
-#: woocommerce-ajax.php:267
+#: woocommerce-ajax.php:219
+#: woocommerce-ajax.php:249
+#: woocommerce-ajax.php:268
 #@ woocommerce
 msgid "You do not have sufficient permissions to access this page."
 msgstr "Vous n&rsquo;avez pas les droits suffisants pour acc&eacute;der &agrave; cette page."
 
-#: woocommerce-ajax.php:220
-#: woocommerce-ajax.php:249
-#: woocommerce-ajax.php:268
+#: woocommerce-ajax.php:221
+#: woocommerce-ajax.php:250
+#: woocommerce-ajax.php:269
 #@ woocommerce
 msgid "You have taken too long. Please go back and retry."
 msgstr "Vous avez mis trop longtemps. Veuillez revenir en arri&egrave;re et essayer &agrave; nouveau."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:309
-#: woocommerce-ajax.php:707
+#: admin/post-types/writepanels/writepanel-order_data.php:341
+#: woocommerce-ajax.php:708
 #@ woocommerce
 msgid "Product ID:"
 msgstr "ID Produit&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:310
-#: woocommerce-ajax.php:708
+#: admin/post-types/writepanels/writepanel-order_data.php:342
+#: woocommerce-ajax.php:709
 #@ woocommerce
 msgid "Variation ID:"
 msgstr "ID Variation&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:311
-#: woocommerce-ajax.php:709
+#: admin/post-types/writepanels/writepanel-order_data.php:343
+#: woocommerce-ajax.php:710
 #@ woocommerce
 msgid "Product SKU:"
 msgstr "UGS Produit&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:323
-#: woocommerce-ajax.php:721
+#: admin/post-types/writepanels/writepanel-order_data.php:355
+#: woocommerce-ajax.php:722
 #@ woocommerce
 msgid "Delete item"
 msgstr "Supprimer l&rsquo;article"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:324
-#: woocommerce-ajax.php:722
+#: admin/post-types/writepanels/writepanel-order_data.php:356
+#: woocommerce-ajax.php:723
 #@ woocommerce
 msgid "View product"
 msgstr "Voir le produit"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:334
-#: woocommerce-ajax.php:730
+#: admin/post-types/writepanels/writepanel-order_data.php:366
+#: woocommerce-ajax.php:731
 #@ woocommerce
 msgid "Add&nbsp;meta"
 msgstr "Ajouter&nbsp;m&eacute;ta"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:367
+#: admin/post-types/writepanels/writepanel-order_data.php:399
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:48
 #: admin/post-types/writepanels/writepanel-product_data.php:206
-#: woocommerce-ajax.php:744
+#: woocommerce-ajax.php:745
 #@ woocommerce
 msgid "Standard"
 msgstr "Standard"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:381
-#: admin/post-types/writepanels/writepanel-order_data.php:387
+#: admin/post-types/writepanels/writepanel-order_data.php:413
+#: admin/post-types/writepanels/writepanel-order_data.php:419
 #: classes/shipping/class-wc-flat-rate.php:360
-#: woocommerce-ajax.php:758
-#: woocommerce-ajax.php:764
+#: woocommerce-ajax.php:759
+#: woocommerce-ajax.php:765
 #@ woocommerce
 msgid "Cost"
 msgstr "Tarif"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:383
-#: admin/post-types/writepanels/writepanel-order_data.php:389
+#: admin/post-types/writepanels/writepanel-order_data.php:415
+#: admin/post-types/writepanels/writepanel-order_data.php:421
 #: admin/woocommerce-admin-content.php:42
 #: admin/woocommerce-admin-settings.php:187
-#: classes/class-wc-countries.php:475
+#: classes/class-wc-countries.php:504
 #: templates/cart/totals.php:170
 #: templates/cart/totals.php:180
-#: woocommerce-ajax.php:760
-#: woocommerce-ajax.php:766
+#: woocommerce-ajax.php:761
+#: woocommerce-ajax.php:767
 #@ woocommerce
 msgid "Tax"
 msgstr "Taxe"
 
 #: admin/post-types/writepanels/writepanel-order_notes.php:37
-#: woocommerce-ajax.php:853
+#: woocommerce-ajax.php:854
 #@ woocommerce
 msgid "Delete note"
 msgstr "Supprimer le commentaire"
 
-#: woocommerce-ajax.php:1009
+#: woocommerce-ajax.php:1062
 #@ woocommerce
 msgid "Cross-sell"
 msgstr "Ventes crois&eacute;es"
 
-#: woocommerce-ajax.php:1009
+#: woocommerce-ajax.php:1062
 #@ woocommerce
 msgid "Up-sell"
 msgstr "Mont&eacute;e en gamme"
 
-#: woocommerce-ajax.php:1014
+#: woocommerce-ajax.php:1067
 #@ woocommerce
 msgid "No products found"
 msgstr "Aucun produit trouv&eacute;"
 
-#: woocommerce-core-functions.php:657
-#: woocommerce-core-functions.php:721
+#: woocommerce-core-functions.php:658
+#: woocommerce-core-functions.php:722
 #@ woocommerce
 msgid "Download Permissions Granted"
 msgstr "Permission de t&eacute;l&eacute;charger accord&eacute;e"
 
-#: woocommerce-core-functions.php:755
+#: woocommerce-core-functions.php:756
 #: woocommerce.php:554
 #@ woocommerce
 msgctxt "slug"
 msgid "product"
 msgstr "produit"
 
-#: woocommerce-core-functions.php:892
+#: woocommerce-core-functions.php:893
 #@ woocommerce
 msgid "Select a category"
 msgstr "Choisissez une cat&eacute;gorie"
 
-#: woocommerce-core-functions.php:896
+#: woocommerce-core-functions.php:897
 #@ woocommerce
 msgid "Uncategorized"
 msgstr "Non cat&eacute;goris&eacute;"
@@ -209,9 +209,9 @@ msgstr "Continuer mes achats &rarr;"
 msgid "Product successfully added to your cart."
 msgstr "Produit ajout&eacute; &agrave; votre panier avec succ&egrave;s."
 
-#: classes/class-wc-cart.php:690
-#: classes/class-wc-cart.php:704
-#: classes/class-wc-cart.php:712
+#: classes/class-wc-cart.php:691
+#: classes/class-wc-cart.php:705
+#: classes/class-wc-cart.php:713
 #: templates/cart/mini-cart.php:59
 #: woocommerce-functions.php:359
 #@ woocommerce
@@ -297,22 +297,22 @@ msgstr "Le champ anti-spam a &eacute;t&eacute; rempli."
 msgid "Couldn&#8217;t register you&hellip; please contact us if you continue to have problems."
 msgstr "Impossible de vous inscrire&hellip; Veuillez nous contacter si vous continuez d&rsquo;avoir des probl&egrave;mes."
 
-#: woocommerce-functions.php:663
+#: woocommerce-functions.php:665
 #@ woocommerce
 msgid "The cart has been filled with the items from your previous order."
 msgstr "Le panier a &eacute;t&eacute; rempli avec les articles de votre pr&eacute;c&eacute;dente commande."
 
-#: woocommerce-functions.php:685
+#: woocommerce-functions.php:687
 #@ woocommerce
 msgid "Order cancelled by customer."
 msgstr "Commande annul&eacute;e par le client."
 
-#: woocommerce-functions.php:688
+#: woocommerce-functions.php:690
 #@ woocommerce
 msgid "Your order was cancelled."
 msgstr "Votre commande a &eacute;t&eacute; annul&eacute;e."
 
-#: woocommerce-functions.php:692
+#: woocommerce-functions.php:696
 #@ woocommerce
 msgid "Your order is no longer pending and could not be cancelled. Please contact us if you need assistance."
 msgstr "Votre commande n&rsquo;est plus en attente et ne peut &ecirc;tre annul&eacute;e. Veuillez nous contacter si vous avez besoin d&rsquo;assistance."
@@ -320,86 +320,86 @@ msgstr "Votre commande n&rsquo;est plus en attente et ne peut &ecirc;tre annul&e
 #: shortcodes/shortcode-my_account.php:261
 #: shortcodes/shortcode-pay.php:53
 #: shortcodes/shortcode-pay.php:108
-#: woocommerce-functions.php:696
-#: woocommerce-functions.php:758
+#: woocommerce-functions.php:700
+#: woocommerce-functions.php:762
 #@ woocommerce
 msgid "Invalid order."
 msgstr "Commande invalide."
 
-#: woocommerce-functions.php:720
+#: woocommerce-functions.php:724
 #@ woocommerce
 msgid "Invalid email address."
 msgstr "Adresse e-mail invalide."
 
-#: woocommerce-functions.php:720
-#: woocommerce-functions.php:732
-#: woocommerce-functions.php:758
-#: woocommerce-functions.php:765
-#: woocommerce-functions.php:772
-#: woocommerce-functions.php:944
+#: woocommerce-functions.php:724
+#: woocommerce-functions.php:736
+#: woocommerce-functions.php:762
+#: woocommerce-functions.php:769
+#: woocommerce-functions.php:776
+#: woocommerce-functions.php:948
 #@ woocommerce
 msgid "Go to homepage &rarr;"
 msgstr "Retourner &agrave; l&rsquo;accueil &rarr;"
 
-#: woocommerce-functions.php:732
+#: woocommerce-functions.php:736
 #@ woocommerce
 msgid "Invalid download."
 msgstr "T&eacute;l&eacute;chargement invalide."
 
-#: woocommerce-functions.php:744
+#: woocommerce-functions.php:748
 #@ woocommerce
 msgid "You must be logged in to download files."
 msgstr "Vous devez &ecirc;tre connect&eacute;(e) pour t&eacute;l&eacute;charger des fichiers."
 
 #: widgets/widget-login.php:97
-#: woocommerce-functions.php:744
+#: woocommerce-functions.php:748
 #@ woocommerce
 msgid "Login &rarr;"
 msgstr "Connexion &rarr;"
 
-#: woocommerce-functions.php:749
+#: woocommerce-functions.php:753
 #@ woocommerce
 msgid "This is not your download link."
 msgstr "Ce n&rsquo;est pas votre lien de t&eacute;l&eacute;chargement."
 
-#: woocommerce-functions.php:765
+#: woocommerce-functions.php:769
 #@ woocommerce
 msgid "Sorry, you have reached your download limit for this file"
 msgstr "D&eacute;sol&eacute;, vous avez atteint la limite de t&eacute;l&eacute;chargements pour ce fichier"
 
-#: woocommerce-functions.php:772
+#: woocommerce-functions.php:776
 #@ woocommerce
 msgid "Sorry, this download has expired"
 msgstr "D&eacute;sol&eacute;, ce t&eacute;l&eacute;chargement a expir&eacute;"
 
-#: woocommerce-functions.php:944
+#: woocommerce-functions.php:948
 #@ woocommerce
 msgid "File not found"
 msgstr "Fichier non trouv&eacute;"
 
-#: woocommerce-functions.php:1009
+#: woocommerce-functions.php:1013
 #@ woocommerce
 msgid "New products"
 msgstr "Nouveaux produits"
 
-#: woocommerce-functions.php:1017
+#: woocommerce-functions.php:1021
 #, php-format
 #@ woocommerce
 msgid "New products added to %s"
 msgstr "Nouveaux produits ajout&eacute;s a %s"
 
-#: woocommerce-functions.php:1025
+#: woocommerce-functions.php:1029
 #, php-format
 #@ woocommerce
 msgid "New products tagged %s"
 msgstr "Nouveaux produits avec le mot-clef %s"
 
-#: woocommerce-functions.php:1047
+#: woocommerce-functions.php:1051
 #@ woocommerce
 msgid "You have taken too long. Please go back and refresh the page."
 msgstr "Vous avez mis trop longtemps. Veuillez revenir en arri&egrave;re et rafra&icirc;chir la page."
 
-#: woocommerce-functions.php:1050
+#: woocommerce-functions.php:1054
 #@ woocommerce
 msgid "Please rate the product."
 msgstr "Veuillez noter le produit."
@@ -409,36 +409,36 @@ msgstr "Veuillez noter le produit."
 msgid "Page"
 msgstr "Page"
 
-#: woocommerce-template.php:170
+#: woocommerce-template.php:172
 #@ woocommerce
 msgid "This is a demo store for testing purposes &mdash; no orders shall be fulfilled."
 msgstr "Boutique de d&eacute;monstration &agrave; usage de test uniquement &mdash; Aucune commande ne sera trait&eacute;e."
 
-#: woocommerce-template.php:340
+#: woocommerce-template.php:360
 #@ woocommerce
 msgid "Buy product"
 msgstr "Acheter le produit"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:128
-#: admin/post-types/writepanels/writepanel-order_data.php:211
+#: admin/post-types/writepanels/writepanel-order_data.php:160
+#: admin/post-types/writepanels/writepanel-order_data.php:243
 #: templates/cart/shipping-calculator.php:18
-#: woocommerce-template.php:708
+#: woocommerce-template.php:729
 #@ woocommerce
 msgid "Select a country&hellip;"
 msgstr "Choisissez un pays..."
 
 #: templates/cart/shipping-calculator.php:44
-#: woocommerce-template.php:750
+#: woocommerce-template.php:771
 #@ woocommerce
 msgid "Select a state&hellip;"
 msgstr "Choisissez un &eacute;tat..."
 
-#: woocommerce-template.php:841
+#: woocommerce-template.php:862
 #@ woocommerce
 msgid "Search for:"
 msgstr "Rechercher&nbsp;:"
 
-#: woocommerce-template.php:842
+#: woocommerce-template.php:863
 #@ woocommerce
 msgid "Search for products"
 msgstr "Rechercher des produits"
@@ -467,64 +467,64 @@ msgstr "mot-clef-produit"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:103
 #: widgets/widget-product_categories.php:40
-#: woocommerce.php:583
 #: woocommerce.php:585
+#: woocommerce.php:587
 #@ woocommerce
 msgid "Product Categories"
 msgstr "Cat&eacute;gories de produits"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:54
-#: woocommerce.php:586
+#: woocommerce.php:588
 #@ woocommerce
 msgid "Product Category"
 msgid_plural "Product Categories"
 msgstr[0] "Cat&eacute;gorie de produits"
 msgstr[1] "Cat&eacute;gories de produits"
 
-#: woocommerce.php:588
+#: woocommerce.php:590
 #@ woocommerce
 msgid "Search Product Categories"
 msgstr "Rechercher des cat&eacute;gories de produits"
 
-#: woocommerce.php:589
+#: woocommerce.php:591
 #@ woocommerce
 msgid "All Product Categories"
 msgstr "Toutes les cat&eacute;gories de produits"
 
-#: woocommerce.php:590
+#: woocommerce.php:592
 #@ woocommerce
 msgid "Parent Product Category"
 msgstr "Cat&eacute;gorie de produits parente"
 
-#: woocommerce.php:591
+#: woocommerce.php:593
 #@ woocommerce
 msgid "Parent Product Category:"
 msgstr "Cat&eacute;gorie de produits parente&nbsp;:"
 
-#: woocommerce.php:592
+#: woocommerce.php:594
 #@ woocommerce
 msgid "Edit Product Category"
 msgstr "Modifier la cat&eacute;gorie de produits parente"
 
-#: woocommerce.php:593
+#: woocommerce.php:595
 #@ woocommerce
 msgid "Update Product Category"
 msgstr "Mettre &agrave; jour la cat&eacute;gorie de produits"
 
-#: woocommerce.php:594
+#: woocommerce.php:596
 #@ woocommerce
 msgid "Add New Product Category"
 msgstr "Ajouter une nouvelle cat&eacute;gorie de produits"
 
-#: woocommerce.php:595
+#: woocommerce.php:597
 #@ woocommerce
 msgid "New Product Category Name"
 msgstr "Nom de la nouvelle cat&eacute;gorie de produits"
 
 #: widgets/widget-product_tag_cloud.php:42
-#: woocommerce.php:614
 #: woocommerce.php:616
+#: woocommerce.php:618
 #@ woocommerce
 msgid "Product Tags"
 msgstr "mots-clefs de produit"
@@ -536,163 +536,163 @@ msgstr "mots-clefs"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:68
-#: woocommerce.php:617
+#: woocommerce.php:619
 #@ woocommerce
 msgid "Product Tag"
 msgid_plural "Product Tags"
 msgstr[0] "mot-clef de produit"
 msgstr[1] "mots-clefs de produit"
 
-#: woocommerce.php:618
+#: woocommerce.php:620
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Tags"
 msgstr "mots-clefs"
 
-#: woocommerce.php:619
+#: woocommerce.php:621
 #@ woocommerce
 msgid "Search Product Tags"
 msgstr "Rechercher des mots-clefs de produit"
 
-#: woocommerce.php:620
+#: woocommerce.php:622
 #@ woocommerce
 msgid "All Product Tags"
 msgstr "Tous les mots-clefs de produit"
 
-#: woocommerce.php:621
+#: woocommerce.php:623
 #@ woocommerce
 msgid "Parent Product Tag"
 msgstr "Mot-clef de produit parent"
 
-#: woocommerce.php:622
+#: woocommerce.php:624
 #@ woocommerce
 msgid "Parent Product Tag:"
 msgstr "Mot-clef de produit parent&nbsp;:"
 
-#: woocommerce.php:623
+#: woocommerce.php:625
 #@ woocommerce
 msgid "Edit Product Tag"
 msgstr "Modifier le mot-clef de produit"
 
-#: woocommerce.php:624
+#: woocommerce.php:626
 #@ woocommerce
 msgid "Update Product Tag"
 msgstr "Mettre &agrave; jour le mot-clef de produit"
 
-#: woocommerce.php:625
+#: woocommerce.php:627
 #@ woocommerce
 msgid "Add New Product Tag"
 msgstr "Ajouter un nouveau mot-clef de produit"
 
-#: woocommerce.php:626
+#: woocommerce.php:628
 #@ woocommerce
 msgid "New Product Tag Name"
 msgstr "Nom du nouveau mot-clef de produit"
 
-#: woocommerce.php:645
 #: woocommerce.php:647
+#: woocommerce.php:649
 #@ woocommerce
 msgid "Shipping Classes"
 msgstr "Classes de livraison"
 
 #: classes/shipping/class-wc-flat-rate.php:359
-#: woocommerce.php:648
+#: woocommerce.php:650
 #@ woocommerce
 msgid "Shipping Class"
 msgstr "Classe de livraison"
 
-#: woocommerce.php:649
+#: woocommerce.php:651
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Shipping Classes"
 msgstr "Classes de livraison"
 
-#: woocommerce.php:650
+#: woocommerce.php:652
 #@ woocommerce
 msgid "Search Shipping Classes"
 msgstr "Rechercher des classes de livraison"
 
-#: woocommerce.php:651
+#: woocommerce.php:653
 #@ woocommerce
 msgid "All Shipping Classes"
 msgstr "Toutes les classes de livraison"
 
-#: woocommerce.php:652
+#: woocommerce.php:654
 #@ woocommerce
 msgid "Parent Shipping Class"
 msgstr "Classe de livraison parente"
 
-#: woocommerce.php:653
+#: woocommerce.php:655
 #@ woocommerce
 msgid "Parent Shipping Class:"
 msgstr "Classe de livraison parente&nbsp;:"
 
-#: woocommerce.php:654
+#: woocommerce.php:656
 #@ woocommerce
 msgid "Edit Shipping Class"
 msgstr "Modifier la classe de livraison"
 
-#: woocommerce.php:655
+#: woocommerce.php:657
 #@ woocommerce
 msgid "Update Shipping Class"
 msgstr "Mettre &agrave; jour la classe de livraison"
 
-#: woocommerce.php:656
+#: woocommerce.php:658
 #@ woocommerce
 msgid "Add New Shipping Class"
 msgstr "Ajouter une nouvelle classe de livraison"
 
-#: woocommerce.php:657
+#: woocommerce.php:659
 #@ woocommerce
 msgid "New Shipping Class Name"
 msgstr "Nom de la nouvelle classe de livraison"
 
-#: woocommerce.php:678
+#: woocommerce.php:680
 #@ woocommerce
 msgid "Order statuses"
 msgstr "&Eacute;tats de commande"
 
-#: woocommerce.php:679
+#: woocommerce.php:681
 #@ woocommerce
 msgid "Order status"
 msgstr "&Eacute;tat de la commande"
 
-#: woocommerce.php:680
+#: woocommerce.php:682
 #@ woocommerce
 msgid "Search Order statuses"
 msgstr "Rechercher des &eacute;tats de commande"
 
-#: woocommerce.php:681
+#: woocommerce.php:683
 #@ woocommerce
 msgid "All Order statuses"
 msgstr "Tous les &eacute;tats de commande"
 
-#: woocommerce.php:682
+#: woocommerce.php:684
 #@ woocommerce
 msgid "Parent Order status"
 msgstr "&Eacute;tat de la commande parente"
 
-#: woocommerce.php:683
+#: woocommerce.php:685
 #@ woocommerce
 msgid "Parent Order status:"
 msgstr "&Eacute;tat de la commande parente&nbsp;:"
 
-#: woocommerce.php:684
+#: woocommerce.php:686
 #@ woocommerce
 msgid "Edit Order status"
 msgstr "Modifier l&rsquo;&eacute;tat de la commande"
 
-#: woocommerce.php:685
+#: woocommerce.php:687
 #@ woocommerce
 msgid "Update Order status"
 msgstr "Mettre &agrave; jour l&rsquo;&eacute;tat de la commande"
 
-#: woocommerce.php:686
+#: woocommerce.php:688
 #@ woocommerce
 msgid "Add New Order status"
 msgstr "Ajouter un nouvel &eacute;tat de commande"
 
-#: woocommerce.php:687
+#: woocommerce.php:689
 #@ woocommerce
 msgid "New Order status Name"
 msgstr "Nom du nouvel &eacute;tat de commande"
@@ -700,8 +700,8 @@ msgstr "Nom du nouvel &eacute;tat de commande"
 #: admin/post-types/product.php:546
 #: admin/post-types/product.php:788
 #: admin/post-types/writepanels/writepanel-product_data.php:948
-#: woocommerce-template.php:843
-#: woocommerce.php:716
+#: woocommerce-template.php:864
+#: woocommerce.php:718
 #@ woocommerce
 #@ default
 msgid "Search"
@@ -709,19 +709,19 @@ msgstr "Recherche"
 
 #: admin/settings/settings-tax-rates.php:56
 #: admin/settings/settings-tax-rates.php:216
-#: woocommerce.php:717
+#: woocommerce.php:719
 #@ woocommerce
 msgid "All"
 msgstr "Tous"
 
-#: woocommerce.php:718
-#: woocommerce.php:719
+#: woocommerce.php:720
+#: woocommerce.php:721
 #@ woocommerce
 msgid "Parent"
 msgstr "Parent"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:93
-#: admin/post-types/writepanels/writepanel-order_data.php:176
+#: admin/post-types/writepanels/writepanel-order_data.php:125
+#: admin/post-types/writepanels/writepanel-order_data.php:208
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:81
 #: admin/post-types/writepanels/writepanel-product_data.php:968
 #: admin/settings/settings-tax-rates.php:51
@@ -731,40 +731,43 @@ msgstr "Parent"
 #: admin/woocommerce-admin-attributes.php:267
 #: templates/myaccount/my-address.php:21
 #: templates/myaccount/my-address.php:52
-#: woocommerce.php:720
-#: woocommerce.php:747
-#: woocommerce.php:790
-#: woocommerce.php:836
-#: woocommerce.php:882
+#: woocommerce.php:722
+#: woocommerce.php:751
+#: woocommerce.php:796
+#: woocommerce.php:842
+#: woocommerce.php:888
 #@ woocommerce
 #@ default
 msgid "Edit"
 msgstr "Modifier"
 
 #: admin/woocommerce-admin-attributes.php:226
-#: woocommerce.php:721
+#: woocommerce.php:723
 #@ woocommerce
 msgid "Update"
 msgstr "Mettre &agrave; jour"
 
-#: woocommerce.php:722
+#: woocommerce.php:724
 #@ woocommerce
 msgid "Add New"
 msgstr "Ajouter nouveau"
 
-#: woocommerce.php:723
+#: woocommerce.php:725
 #@ woocommerce
 msgid "New"
 msgstr "Nouveau"
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:55
-#: woocommerce.php:742
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:228
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:245
+#: woocommerce.php:746
 #@ woocommerce
 msgid "Products"
 msgstr "Produits"
 
 #. gettext fix: identical singular and plural forms found, that may be ambiguous! Please check the code!
 #: admin/woocommerce-admin-dashboard.php:40
+#: admin/woocommerce-admin-functions.php:119
 #: admin/woocommerce-admin-reports.php:946
 #: admin/woocommerce-admin-reports.php:1043
 #: templates/cart/cart.php:18
@@ -776,131 +779,131 @@ msgstr "Produits"
 #: templates/emails/customer-note.php:18
 #: templates/emails/customer-processing-order.php:14
 #: templates/order/order-details.php:14
-#: woocommerce.php:743
+#: woocommerce.php:747
 #@ woocommerce
 msgid "Product"
 msgid_plural "Products"
 msgstr[0] "Produit"
 msgstr[1] "Produits"
 
-#: woocommerce.php:744
+#: woocommerce.php:748
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Products"
 msgstr "Produits"
 
-#: woocommerce.php:745
+#: woocommerce.php:749
 #@ woocommerce
 msgid "Add Product"
 msgstr "Ajouter un produit"
 
-#: woocommerce.php:746
+#: woocommerce.php:750
 #@ woocommerce
 msgid "Add New Product"
 msgstr "Ajouter un nouveau produit"
 
-#: woocommerce.php:748
+#: woocommerce.php:752
 #@ woocommerce
 msgid "Edit Product"
 msgstr "Modifier un produit"
 
-#: woocommerce.php:749
+#: woocommerce.php:753
 #@ woocommerce
 msgid "New Product"
 msgstr "Nouveau produit"
 
-#: woocommerce.php:750
-#: woocommerce.php:751
+#: woocommerce.php:754
+#: woocommerce.php:755
 #@ woocommerce
 msgid "View Product"
 msgstr "Voir le produit"
 
-#: woocommerce.php:752
+#: woocommerce.php:756
 #@ woocommerce
 msgid "Search Products"
 msgstr "Rechercher un produit"
 
-#: woocommerce.php:753
+#: woocommerce.php:757
 #@ woocommerce
 msgid "No Products found"
 msgstr "Aucun produit trouv&eacute;"
 
-#: woocommerce.php:754
+#: woocommerce.php:758
 #@ woocommerce
 msgid "No Products found in trash"
 msgstr "Aucun produit trouv&eacute; dans la Corbeille"
 
-#: woocommerce.php:755
+#: woocommerce.php:759
 #@ woocommerce
 msgid "Parent Product"
 msgstr "Produit parent"
 
-#: woocommerce.php:757
+#: woocommerce.php:761
 #@ woocommerce
 msgid "This is where you can add new products to your store."
 msgstr "C&rsquo;est ici que vous pouvez ajouter des nouveaux produits dans votre boutique."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:19
-#: woocommerce.php:786
+#: woocommerce.php:792
 #@ woocommerce
 msgid "Variations"
 msgstr "Variations"
 
-#: woocommerce.php:787
+#: woocommerce.php:793
 #@ woocommerce
 msgid "Variation"
 msgstr "Variation"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:255
-#: woocommerce.php:788
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:258
+#: woocommerce.php:794
 #@ woocommerce
 msgid "Add Variation"
 msgstr "Ajouter une variation"
 
-#: woocommerce.php:789
+#: woocommerce.php:795
 #@ woocommerce
 msgid "Add New Variation"
 msgstr "Ajouter une nouvelle variation"
 
-#: woocommerce.php:791
+#: woocommerce.php:797
 #@ woocommerce
 msgid "Edit Variation"
 msgstr "Modifier la variation"
 
-#: woocommerce.php:792
+#: woocommerce.php:798
 #@ woocommerce
 msgid "New Variation"
 msgstr "Nouvelle variation"
 
-#: woocommerce.php:793
-#: woocommerce.php:794
+#: woocommerce.php:799
+#: woocommerce.php:800
 #@ woocommerce
 msgid "View Variation"
 msgstr "Voir la variation"
 
-#: woocommerce.php:795
+#: woocommerce.php:801
 #@ woocommerce
 msgid "Search Variations"
 msgstr "Rechercher des variations"
 
-#: woocommerce.php:796
+#: woocommerce.php:802
 #@ woocommerce
 msgid "No Variations found"
 msgstr "Aucune variation trouv&eacute;e"
 
-#: woocommerce.php:797
+#: woocommerce.php:803
 #@ woocommerce
 msgid "No Variations found in trash"
 msgstr "Aucune variation trouv&eacute;e dans la Corbeille"
 
-#: woocommerce.php:798
+#: woocommerce.php:804
 #@ woocommerce
 msgid "Parent Variation"
 msgstr "Variation parente"
 
-#: admin/woocommerce-admin-init.php:78
 #: admin/woocommerce-admin-init.php:80
-#: woocommerce.php:824
+#: admin/woocommerce-admin-init.php:82
+#: woocommerce.php:830
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Orders"
@@ -909,174 +912,174 @@ msgstr "Commandes"
 #: admin/woocommerce-admin-content.php:61
 #: admin/woocommerce-admin-dashboard.php:98
 #: admin/woocommerce-admin-users.php:21
-#: woocommerce.php:832
+#: woocommerce.php:838
 #@ woocommerce
 msgid "Orders"
 msgstr "Commandes"
 
 #: admin/post-types/shop_order.php:35
 #: templates/myaccount/my-orders.php:27
-#: woocommerce.php:833
+#: woocommerce.php:839
 #@ woocommerce
 msgid "Order"
 msgstr "Commande"
 
-#: woocommerce.php:834
+#: woocommerce.php:840
 #@ woocommerce
 msgid "Add Order"
 msgstr "Ajouter une commande"
 
-#: woocommerce.php:835
+#: woocommerce.php:841
 #@ woocommerce
 msgid "Add New Order"
 msgstr "Ajouter une nouvelle commande"
 
-#: woocommerce.php:837
+#: woocommerce.php:843
 #@ woocommerce
 msgid "Edit Order"
 msgstr "Modifier la commande"
 
-#: woocommerce.php:838
+#: woocommerce.php:844
 #@ woocommerce
 msgid "New Order"
 msgstr "Nouvelle commande"
 
 #: admin/woocommerce-admin-install.php:179
-#: woocommerce.php:839
-#: woocommerce.php:840
+#: woocommerce.php:845
+#: woocommerce.php:846
 #@ woocommerce
 msgid "View Order"
 msgstr "Voir la commande"
 
-#: woocommerce.php:841
+#: woocommerce.php:847
 #@ woocommerce
 msgid "Search Orders"
 msgstr "Rechercher des commandes"
 
-#: woocommerce.php:842
+#: woocommerce.php:848
 #@ woocommerce
 msgid "No Orders found"
 msgstr "Aucune commande trouv&eacute;e"
 
-#: woocommerce.php:843
+#: woocommerce.php:849
 #@ woocommerce
 msgid "No Orders found in trash"
 msgstr "Aucune commande trouv&eacute;e dans la Corbeille"
 
-#: woocommerce.php:844
+#: woocommerce.php:850
 #@ woocommerce
 msgid "Parent Orders"
 msgstr "Commandes parentes"
 
-#: woocommerce.php:847
+#: woocommerce.php:853
 #@ woocommerce
 msgid "This is where store orders are stored."
 msgstr "C&rsquo;est ici que sont stock&eacute;es les commandes de la boutique."
 
 #: admin/settings/settings-init.php:142
 #: admin/woocommerce-admin-content.php:69
-#: woocommerce.php:877
+#: woocommerce.php:883
 #@ woocommerce
 msgid "Coupons"
 msgstr "Codes promo"
 
 #: classes/shipping/class-wc-free-shipping.php:65
 #: templates/cart/cart.php:112
-#: woocommerce.php:878
+#: woocommerce.php:884
 #@ woocommerce
 msgid "Coupon"
 msgstr "Code promo"
 
-#: woocommerce.php:879
+#: woocommerce.php:885
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Coupons"
 msgstr "Codes promo"
 
-#: woocommerce.php:880
+#: woocommerce.php:886
 #@ woocommerce
 msgid "Add Coupon"
 msgstr "Ajouter un code promo"
 
-#: woocommerce.php:881
+#: woocommerce.php:887
 #@ woocommerce
 msgid "Add New Coupon"
 msgstr "Ajouter un nouveau code promo"
 
-#: woocommerce.php:883
+#: woocommerce.php:889
 #@ woocommerce
 msgid "Edit Coupon"
 msgstr "Modifier le code promo"
 
-#: woocommerce.php:884
+#: woocommerce.php:890
 #@ woocommerce
 msgid "New Coupon"
 msgstr "Nouveau code promo"
 
-#: woocommerce.php:885
+#: woocommerce.php:891
 #@ woocommerce
 msgid "View Coupons"
 msgstr "Voir les codes promo"
 
-#: woocommerce.php:886
+#: woocommerce.php:892
 #@ woocommerce
 msgid "View Coupon"
 msgstr "Voir le code promo"
 
-#: woocommerce.php:887
+#: woocommerce.php:893
 #@ woocommerce
 msgid "Search Coupons"
 msgstr "Rechercher des codes promo"
 
-#: woocommerce.php:888
+#: woocommerce.php:894
 #@ woocommerce
 msgid "No Coupons found"
 msgstr "Aucun code promo trouv&eacute;"
 
-#: woocommerce.php:889
+#: woocommerce.php:895
 #@ woocommerce
 msgid "No Coupons found in trash"
 msgstr "Aucun code promo trouv&eacute; dans la Corbeille"
 
-#: woocommerce.php:890
+#: woocommerce.php:896
 #@ woocommerce
 msgid "Parent Coupon"
 msgstr "Code promo parent"
 
-#: woocommerce.php:892
+#: woocommerce.php:898
 #@ woocommerce
 msgid "This is where you can add new coupons that customers can use in your store."
 msgstr "C&rsquo;est ici que vous pouvez ajouter les nouveaux codes promo que les clients peuvent utiliser dans votre boutique."
 
-#: woocommerce.php:992
+#: woocommerce.php:998
 #@ woocommerce
 msgid "Select an option&hellip;"
 msgstr "Choisissez une option..."
 
 #: templates/cart/totals.php:28
 #: templates/checkout/review-order.php:30
-#: woocommerce.php:1269
+#: woocommerce.php:1275
 #@ woocommerce
 msgid "Cart Discount"
 msgstr "Remise sur panier"
 
-#: woocommerce.php:1270
+#: woocommerce.php:1276
 #@ woocommerce
 msgid "Cart % Discount"
 msgstr "Remise sur panier en %"
 
-#: woocommerce.php:1271
+#: woocommerce.php:1277
 #@ woocommerce
 msgid "Product Discount"
 msgstr "Remise sur produit(s)"
 
-#: woocommerce.php:1272
+#: woocommerce.php:1278
 #@ woocommerce
 msgid "Product % Discount"
 msgstr "Remise sur produit(s) en %"
 
 #: admin/woocommerce-admin-settings.php:34
-#: woocommerce.php:1314
+#: woocommerce.php:1320
 #@ woocommerce
 msgid "Action failed. Please refresh the page and retry."
 msgstr "L&rsquo;action a &eacute;chou&eacute;e. Veuillez rafraichir la page et essayer &agrave; nouveau."
@@ -1087,13 +1090,13 @@ msgid "Edit Attribute"
 msgstr "Modifier l&rsquo;attribut"
 
 #: admin/post-types/product.php:67
-#: admin/post-types/writepanels/writepanel-order_data.php:275
+#: admin/post-types/writepanels/writepanel-order_data.php:307
 #: admin/post-types/writepanels/writepanel-product_data.php:334
 #: admin/post-types/writepanels/writepanel-product_data.php:414
 #: admin/woocommerce-admin-attributes.php:196
 #: admin/woocommerce-admin-attributes.php:252
 #: admin/woocommerce-admin-attributes.php:305
-#: admin/woocommerce-admin-init.php:280
+#: admin/woocommerce-admin-init.php:282
 #: templates/single-product-reviews.php:79
 #: widgets/widget-product_categories.php:155
 #@ woocommerce
@@ -1226,7 +1229,7 @@ msgstr "Si vous rencontrez un bug, ou si vous souhaitez contribuer au projet, vo
 
 #: admin/woocommerce-admin-content.php:35
 #: admin/woocommerce-admin-init.php:42
-#: admin/woocommerce-admin-init.php:115
+#: admin/woocommerce-admin-init.php:117
 #: admin/woocommerce-admin-status.php:123
 #: classes/class-wc-settings-api.php:27
 #: classes/integrations/class-wc-integration.php:24
@@ -1294,7 +1297,7 @@ msgid "Options concerning tax, including international and local tax rates."
 msgstr "Options concernant les taxes, y compris les taux de taxes internationnales et locales."
 
 #: admin/post-types/shop_order.php:37
-#: admin/post-types/writepanels/writepanel-order_data.php:477
+#: admin/post-types/writepanels/writepanel-order_data.php:509
 #: admin/post-types/writepanels/writepanel-product_data.php:74
 #: admin/settings/settings-tax-rates.php:33
 #: admin/settings/settings-tax-rates.php:102
@@ -1464,7 +1467,7 @@ msgstr "En suspens"
 msgid "On-Hold"
 msgstr "En attente"
 
-#: admin/post-types/shop_order.php:140
+#: admin/post-types/shop_order.php:148
 #: admin/woocommerce-admin-dashboard.php:132
 #@ woocommerce
 msgid "Processing"
@@ -1527,7 +1530,7 @@ msgid "There are no product orders yet."
 msgstr "Il n&rsquo;y a pas encore de commandes."
 
 #: admin/woocommerce-admin-dashboard.php:260
-#: classes/class-wc-product.php:760
+#: classes/class-wc-product.php:804
 #: templates/single-product/review.php:18
 #: templates/single-product-reviews.php:29
 #: widgets/widget-recent_reviews.php:74
@@ -1558,18 +1561,15 @@ msgstr "Nombre de ventes"
 msgid "Sales amount"
 msgstr "Montant des ventes"
 
-#: admin/woocommerce-admin-functions.php:108
-#@ woocommerce
-msgid "Email preview"
-msgstr "Pr&eacute;visualisation de l&rsquo;e-mail"
-
-#: admin/woocommerce-admin-functions.php:283
+#: admin/woocommerce-admin-functions.php:328
 #@ woocommerce
 msgid "Could not compile woocommerce.less:"
 msgstr "Impossible de compiler woocommerce.less&nbsp;:"
 
 #. translators: plugin header field 'Name'
 #: admin/woocommerce-admin-init.php:26
+#: classes/class-wc-order.php:689
+#: classes/class-wc-order.php:690
 #: woocommerce.php:0
 #@ woocommerce
 msgid "WooCommerce"
@@ -1585,300 +1585,300 @@ msgstr "WooCommerce - Param&egrave;tres"
 msgid "WooCommerce Status"
 msgstr "WooCommerce &Eacute;tats"
 
-#: admin/woocommerce-admin-init.php:103
+#: admin/woocommerce-admin-init.php:105
 #@ woocommerce
 msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
 msgstr "<strong>Bienvenue sur WooCommerce</strong> &#8211; Vous &ecirc;tes presque pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
 
-#: admin/woocommerce-admin-init.php:104
+#: admin/woocommerce-admin-init.php:106
 #@ woocommerce
 msgid "Install WooCommerce Pages"
 msgstr "Installer les pages WooCommerce"
 
-#: admin/woocommerce-admin-init.php:104
+#: admin/woocommerce-admin-init.php:106
 #@ woocommerce
 msgid "Skip setup"
 msgstr "Ignorer la configuration"
 
-#: admin/woocommerce-admin-init.php:113
+#: admin/woocommerce-admin-init.php:115
 #@ woocommerce
 msgid "<strong>WooCommerce has been installed</strong> &#8211; You're ready to start selling :)"
 msgstr "<strong>WooCommerce a &eacute;t&eacute; install&eacute;</strong> &#8211; Vous &ecirc;tes pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
 
-#: admin/woocommerce-admin-init.php:115
+#: admin/woocommerce-admin-init.php:117
 #@ woocommerce
 msgid "Documentation"
 msgstr "Documentation"
 
-#: admin/woocommerce-admin-init.php:278
+#: admin/woocommerce-admin-init.php:280
 #@ woocommerce
 msgid "Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock."
 msgstr "Supprimer cet article&nbsp;? Si vous avez r&eacute;duit le stock de cet article auparavant, ou bien si cette commande a &eacute;t&eacute; envoy&eacute;e par un client, vous devrez restaurer le stock de cet article manuellement."
 
-#: admin/woocommerce-admin-init.php:279
+#: admin/woocommerce-admin-init.php:281
 #@ woocommerce
 msgid "Remove this attribute?"
 msgstr "Supprimer cet attribut&nbsp;?"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:117
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:335
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:118
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:338
 #: admin/post-types/writepanels/writepanel-product_data.php:326
 #: admin/post-types/writepanels/writepanel-product_data.php:406
-#: admin/woocommerce-admin-init.php:281
+#: admin/woocommerce-admin-init.php:283
 #@ woocommerce
 msgid "Remove"
 msgstr "Supprimer"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:39
 #: admin/post-types/writepanels/writepanel-order_downloads.php:155
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:118
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:336
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:119
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:339
 #: admin/post-types/writepanels/writepanel-product_data.php:327
 #: admin/post-types/writepanels/writepanel-product_data.php:407
-#: admin/woocommerce-admin-init.php:282
+#: admin/woocommerce-admin-init.php:284
 #@ woocommerce
 msgid "Click to toggle"
 msgstr "Cliquez ici pour basculer"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:342
 #: admin/post-types/writepanels/writepanel-product_data.php:420
-#: admin/woocommerce-admin-init.php:283
+#: admin/woocommerce-admin-init.php:285
 #@ woocommerce
 msgid "Value(s)"
 msgstr "Valeur(s)"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:421
-#: admin/woocommerce-admin-init.php:284
+#: admin/woocommerce-admin-init.php:286
 #@ woocommerce
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr "Entrez du texte, ou des attributs en les s&eacute;parant par un pipe (|)."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:378
 #: admin/post-types/writepanels/writepanel-product_data.php:426
-#: admin/woocommerce-admin-init.php:285
+#: admin/woocommerce-admin-init.php:287
 #@ woocommerce
 msgid "Visible on the product page"
 msgstr "Visible sur la page produit"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:384
 #: admin/post-types/writepanels/writepanel-product_data.php:432
-#: admin/woocommerce-admin-init.php:286
+#: admin/woocommerce-admin-init.php:288
 #@ woocommerce
 msgid "Used for variations"
 msgstr "Utilis&eacute; pour les variations"
 
-#: admin/woocommerce-admin-init.php:287
+#: admin/woocommerce-admin-init.php:289
 #@ woocommerce
 msgid "Enter a name for the new attribute term:"
 msgstr "Donnez un nom au nouvel attribut&nbsp;:"
 
-#: admin/woocommerce-admin-init.php:288
+#: admin/woocommerce-admin-init.php:290
 #@ woocommerce
 msgid "Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually."
 msgstr "Calculez le total en fonction des articles de la commande, du montant de la remise et de la livraison&nbsp;? Veuillez noter que vous devrez (optionnellement) calculer les lignes de taxe et les remises sur panier manuellement."
 
-#: admin/woocommerce-admin-init.php:289
+#: admin/woocommerce-admin-init.php:291
 #@ woocommerce
 msgid "Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country."
 msgstr "Calculer les lignes de taxe&nbsp;? Ceci calculera les taxes en fonction du pays des clients. Si aucune adresse de facturation/livraison n&rsquo;est renseign&eacute;e, le pays de base de la boutique sera utilis&eacute; par d&eacute;faut."
 
-#: admin/woocommerce-admin-init.php:290
+#: admin/woocommerce-admin-init.php:292
 #@ woocommerce
 msgid "Copy billing information to shipping information? This will remove any currently entered shipping information."
 msgstr "Copier les coordonn&eacute;es de facturation vers les coordonn&eacute;es de livraison&nbsp;? Cela supprimera les coordonn&eacute;es de livraison actuellement saisies."
 
-#: admin/woocommerce-admin-init.php:291
+#: admin/woocommerce-admin-init.php:293
 #@ woocommerce
 msgid "Load the customer's billing information? This will remove any currently entered billing information."
 msgstr "Charger les coordonn&eacute;es de facturation du client&nbsp;? Cela supprimera les coordonn&eacute;es de facturation actuellement saisies."
 
-#: admin/woocommerce-admin-init.php:292
+#: admin/woocommerce-admin-init.php:294
 #@ woocommerce
 msgid "Load the customer's shipping information? This will remove any currently entered shipping information."
 msgstr "Charger les coordonn&eacute;es de livraison du client&nbsp;? Cela supprimera les coordonn&eacute;es de livraison actuellement saisies."
 
-#: admin/woocommerce-admin-init.php:297
+#: admin/woocommerce-admin-init.php:299
 #@ woocommerce
 msgid "Meta Name"
 msgstr "M&eacute;ta-nom"
 
-#: admin/woocommerce-admin-init.php:298
+#: admin/woocommerce-admin-init.php:300
 #@ woocommerce
 msgid "Meta Value"
 msgstr "M&eacute;ta-valeur"
 
-#: admin/woocommerce-admin-init.php:299
+#: admin/woocommerce-admin-init.php:301
 #@ woocommerce
 msgid "No customer selected"
 msgstr "Aucun client s&eacute;lectionn&eacute;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:508
-#: admin/woocommerce-admin-init.php:300
+#: admin/post-types/writepanels/writepanel-order_data.php:540
+#: admin/woocommerce-admin-init.php:302
 #@ woocommerce
 msgid "Tax Label:"
 msgstr "Titre de la taxe&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:512
-#: admin/woocommerce-admin-init.php:301
+#: admin/post-types/writepanels/writepanel-order_data.php:544
+#: admin/woocommerce-admin-init.php:303
 #@ woocommerce
 msgid "Compound:"
 msgstr "Cumulable&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:516
-#: admin/post-types/writepanels/writepanel-order_data.php:540
-#: admin/woocommerce-admin-init.php:302
+#: admin/post-types/writepanels/writepanel-order_data.php:548
+#: admin/post-types/writepanels/writepanel-order_data.php:572
+#: admin/woocommerce-admin-init.php:304
 #@ woocommerce
 msgid "Cart Tax:"
 msgstr "Taxe du panier&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:520
-#: admin/post-types/writepanels/writepanel-order_data.php:547
-#: admin/woocommerce-admin-init.php:303
+#: admin/post-types/writepanels/writepanel-order_data.php:552
+#: admin/post-types/writepanels/writepanel-order_data.php:579
+#: admin/woocommerce-admin-init.php:305
 #@ woocommerce
 msgid "Shipping Tax:"
 msgstr "Taxe de livraison&nbsp;:"
 
-#: admin/woocommerce-admin-init.php:466
+#: admin/woocommerce-admin-init.php:468
 #@ woocommerce
 msgid "Exclude image"
 msgstr "Exclure l&rsquo;image"
 
-#: admin/woocommerce-admin-init.php:475
+#: admin/woocommerce-admin-init.php:477
 #@ woocommerce
 msgid "Enabling this option will hide it from the product page image gallery."
 msgstr "Cette option cachera l&rsquo;image de la galerie sur la page produit."
 
-#: admin/woocommerce-admin-init.php:519
+#: admin/woocommerce-admin-init.php:521
 #, php-format
 #@ woocommerce
 msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr "Produit mis &agrave; jour. <a href=\"%s\">Voir le produit</a>"
 
-#: admin/woocommerce-admin-init.php:520
-#: admin/woocommerce-admin-init.php:535
-#: admin/woocommerce-admin-init.php:550
+#: admin/woocommerce-admin-init.php:522
+#: admin/woocommerce-admin-init.php:537
+#: admin/woocommerce-admin-init.php:552
 #@ woocommerce
 msgid "Custom field updated."
 msgstr "Champ personnalis&eacute; mis &agrave; jour."
 
-#: admin/woocommerce-admin-init.php:521
-#: admin/woocommerce-admin-init.php:536
-#: admin/woocommerce-admin-init.php:551
+#: admin/woocommerce-admin-init.php:523
+#: admin/woocommerce-admin-init.php:538
+#: admin/woocommerce-admin-init.php:553
 #@ woocommerce
 msgid "Custom field deleted."
 msgstr "Champ personnalis&eacute; supprim&eacute;."
 
-#: admin/woocommerce-admin-init.php:522
+#: admin/woocommerce-admin-init.php:524
 #@ woocommerce
 msgid "Product updated."
 msgstr "Produit mis &agrave; jour."
 
-#: admin/woocommerce-admin-init.php:523
+#: admin/woocommerce-admin-init.php:525
 #, php-format
 #@ woocommerce
 msgid "Product restored to revision from %s"
 msgstr "Produit restaur&eacute; &agrave; la version du %s"
 
-#: admin/woocommerce-admin-init.php:524
+#: admin/woocommerce-admin-init.php:526
 #, php-format
 #@ woocommerce
 msgid "Product published. <a href=\"%s\">View Product</a>"
 msgstr "Produit publi&eacute;. <a href=\"%s\">Voir le produit</a>"
 
-#: admin/woocommerce-admin-init.php:525
+#: admin/woocommerce-admin-init.php:527
 #@ woocommerce
 msgid "Product saved."
 msgstr "Produit enregistr&eacute;."
 
-#: admin/woocommerce-admin-init.php:526
+#: admin/woocommerce-admin-init.php:528
 #, php-format
 #@ woocommerce
 msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Produit envoy&eacute;. <a target=\"_blank\" href=\"%s\">Pr&eacute;visualiser le produit</a>"
 
-#: admin/woocommerce-admin-init.php:527
+#: admin/woocommerce-admin-init.php:529
 #, php-format
 #@ woocommerce
 msgid "Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Preview Product</a>"
 msgstr "Produit planifi&eacute; pour&nbsp;: <strong>%1$s</strong>. <a target=\"_blank\" href=\"%2$s\">Pr&eacute;visualiser le produit</a>"
 
-#: admin/woocommerce-admin-init.php:528
-#: admin/woocommerce-admin-init.php:543
-#: admin/woocommerce-admin-init.php:558
+#: admin/woocommerce-admin-init.php:530
+#: admin/woocommerce-admin-init.php:545
+#: admin/woocommerce-admin-init.php:560
 #@ woocommerce
 msgid "M j, Y @ G:i"
 msgstr "j M Y @ G:i"
 
-#: admin/woocommerce-admin-init.php:529
+#: admin/woocommerce-admin-init.php:531
 #, php-format
 #@ woocommerce
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr "Brouillon de produit mis &agrave; jour. <a target=\"_blank\" href=\"%s\">Pr&eacute;visualiser le produit</a>"
 
-#: admin/woocommerce-admin-init.php:534
-#: admin/woocommerce-admin-init.php:537
+#: admin/woocommerce-admin-init.php:536
 #: admin/woocommerce-admin-init.php:539
+#: admin/woocommerce-admin-init.php:541
 #@ woocommerce
 msgid "Order updated."
 msgstr "Commande mise &agrave; jour."
 
-#: admin/woocommerce-admin-init.php:538
+#: admin/woocommerce-admin-init.php:540
 #, php-format
 #@ woocommerce
 msgid "Order restored to revision from %s"
 msgstr "Commande restaur&eacute;e &agrave; la version du %s"
 
-#: admin/woocommerce-admin-init.php:540
+#: admin/woocommerce-admin-init.php:542
 #@ woocommerce
 msgid "Order saved."
 msgstr "Commande enregistr&eacute;e."
 
-#: admin/woocommerce-admin-init.php:541
+#: admin/woocommerce-admin-init.php:543
 #@ woocommerce
 msgid "Order submitted."
 msgstr "Commande envoy&eacute;e."
 
-#: admin/woocommerce-admin-init.php:542
+#: admin/woocommerce-admin-init.php:544
 #, php-format
 #@ woocommerce
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr "Commande planifi&eacute;e pour&nbsp;: <strong>%1$s</strong>."
 
-#: admin/woocommerce-admin-init.php:544
+#: admin/woocommerce-admin-init.php:546
 #@ woocommerce
 msgid "Order draft updated."
 msgstr "Brouillon de commande mis &agrave; jour."
 
-#: admin/woocommerce-admin-init.php:549
-#: admin/woocommerce-admin-init.php:552
+#: admin/woocommerce-admin-init.php:551
 #: admin/woocommerce-admin-init.php:554
+#: admin/woocommerce-admin-init.php:556
 #@ woocommerce
 msgid "Coupon updated."
 msgstr "Code promo mis &agrave; jour."
 
-#: admin/woocommerce-admin-init.php:553
+#: admin/woocommerce-admin-init.php:555
 #, php-format
 #@ woocommerce
 msgid "Coupon restored to revision from %s"
 msgstr "Code promo restaur&eacute; &agrave; la version du %s"
 
-#: admin/woocommerce-admin-init.php:555
+#: admin/woocommerce-admin-init.php:557
 #@ woocommerce
 msgid "Coupon saved."
 msgstr "Code promo enregistr&eacute;."
 
-#: admin/woocommerce-admin-init.php:556
+#: admin/woocommerce-admin-init.php:558
 #@ woocommerce
 msgid "Coupon submitted."
 msgstr "Code promo envoy&eacute;."
 
-#: admin/woocommerce-admin-init.php:557
+#: admin/woocommerce-admin-init.php:559
 #, php-format
 #@ woocommerce
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr "Code promo planifi&eacute; pour&nbsp;: <strong>%1$s</strong>."
 
-#: admin/woocommerce-admin-init.php:559
+#: admin/woocommerce-admin-init.php:561
 #@ woocommerce
 msgid "Coupon draft updated."
 msgstr "Brouillon de code promo mis &agrave; jour."
@@ -1986,6 +1986,7 @@ msgctxt "page_slug"
 msgid "order-received"
 msgstr "commande-recue"
 
+#: admin/woocommerce-admin-functions.php:109
 #: admin/woocommerce-admin-install.php:188
 #: classes/class-wc-email.php:155
 #@ woocommerce
@@ -2091,7 +2092,7 @@ msgstr "Ventes du mois"
 #: admin/woocommerce-admin-reports.php:1038
 #@ woocommerce
 msgid "From:"
-msgstr "Du&nbsp;:"
+msgstr "De&nbsp;:"
 
 #: admin/woocommerce-admin-reports.php:606
 #: admin/woocommerce-admin-reports.php:941
@@ -2194,7 +2195,7 @@ msgid "No sales :("
 msgstr "Aucune vente&nbsp;:("
 
 #: admin/post-types/writepanels/writepanel-coupon_data.php:56
-#: admin/post-types/writepanels/writepanel-order_data.php:399
+#: admin/post-types/writepanels/writepanel-order_data.php:431
 #: admin/post-types/writepanels/writepanel-product_data.php:465
 #: admin/post-types/writepanels/writepanel-product_data.php:484
 #: admin/woocommerce-admin-reports.php:1180
@@ -2244,9 +2245,9 @@ msgstr "Stock faible"
 
 #: admin/post-types/product.php:70
 #: admin/post-types/product.php:483
-#: admin/post-types/writepanels/writepanel-order_data.php:274
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:157
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:367
+#: admin/post-types/writepanels/writepanel-order_data.php:306
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:158
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:370
 #: admin/post-types/writepanels/writepanel-product_data.php:91
 #: admin/woocommerce-admin-reports.php:1527
 #: admin/woocommerce-admin-reports.php:1562
@@ -2273,9 +2274,9 @@ msgstr "Aucun produit en stock faible."
 #: admin/post-types/product.php:824
 #: admin/post-types/writepanels/writepanel-product_data.php:242
 #: admin/woocommerce-admin-reports.php:1547
-#: classes/class-wc-product.php:444
-#: classes/class-wc-product.php:483
-#: classes/class-wc-product.php:493
+#: classes/class-wc-product.php:461
+#: classes/class-wc-product.php:500
+#: classes/class-wc-product.php:510
 #@ woocommerce
 msgid "Out of stock"
 msgstr "Rupture de stock"
@@ -2467,18 +2468,18 @@ msgstr "Forcer le SSL"
 
 #: admin/post-types/product.php:805
 #: admin/post-types/product.php:841
-#: admin/post-types/shop_order.php:149
+#: admin/post-types/shop_order.php:175
 #: admin/woocommerce-admin-status.php:138
-#: admin/woocommerce-admin-status.php:283
+#: admin/woocommerce-admin-status.php:299
 #@ woocommerce
 msgid "Yes"
 msgstr "Oui"
 
 #: admin/post-types/product.php:806
 #: admin/post-types/product.php:842
-#: admin/post-types/shop_order.php:151
+#: admin/post-types/shop_order.php:177
 #: admin/woocommerce-admin-status.php:138
-#: admin/woocommerce-admin-status.php:283
+#: admin/woocommerce-admin-status.php:299
 #@ woocommerce
 msgid "No"
 msgstr "Non"
@@ -2553,141 +2554,141 @@ msgstr "Page non d&eacute;finie"
 msgid "Page does not contain the shortcode: %s"
 msgstr "La page ne contient pas le shortcode&nbsp;: %s"
 
-#: admin/woocommerce-admin-status.php:232
+#: admin/woocommerce-admin-status.php:248
 #@ woocommerce
 msgid "Server Environment"
 msgstr "Environnement du serveur "
 
-#: admin/woocommerce-admin-status.php:238
+#: admin/woocommerce-admin-status.php:254
 #@ woocommerce
 msgid "PHP Version"
 msgstr "Version de PHP"
 
-#: admin/woocommerce-admin-status.php:244
+#: admin/woocommerce-admin-status.php:260
 #@ woocommerce
 msgid "Server Software"
 msgstr "Logiciel du serveur"
 
-#: admin/woocommerce-admin-status.php:250
+#: admin/woocommerce-admin-status.php:266
 #@ woocommerce
 msgid "WP Max Upload Size"
 msgstr "WP taille max. d&rsquo;upload"
 
-#: admin/woocommerce-admin-status.php:256
+#: admin/woocommerce-admin-status.php:272
 #@ woocommerce
 msgid "Server upload_max_filesize"
 msgstr "Serveur upload_max_filesize"
 
-#: admin/woocommerce-admin-status.php:263
+#: admin/woocommerce-admin-status.php:279
 #@ woocommerce
 msgid "Server post_max_size"
 msgstr "Serveur post_max_size"
 
-#: admin/woocommerce-admin-status.php:270
+#: admin/woocommerce-admin-status.php:286
 #@ woocommerce
 msgid "WP Memory Limit"
 msgstr "Limite m&eacute;moire de WP"
 
-#: admin/woocommerce-admin-status.php:275
+#: admin/woocommerce-admin-status.php:291
 #, php-format
 #@ woocommerce
 msgid "%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\">Increasing memory allocated to PHP</a>"
 msgstr "%s - Nous recommandons un r&eacute;glage m&eacute;moire d&rsquo;au moins 64MB. Voir&nbsp;: <a href=\"%s\">Augmenter la m&eacute;moire allou&eacute;e &agrave; PHP</a>"
 
-#: admin/woocommerce-admin-status.php:282
+#: admin/woocommerce-admin-status.php:298
 #@ woocommerce
 msgid "WP Debug Mode"
 msgstr "Mode de d&eacute;bogage de WP"
 
-#: admin/woocommerce-admin-status.php:286
+#: admin/woocommerce-admin-status.php:302
 #@ woocommerce
 msgid "WC Logging"
 msgstr "Connexion &agrave; WC"
 
-#: admin/woocommerce-admin-status.php:289
+#: admin/woocommerce-admin-status.php:305
 #@ woocommerce
 msgid "Log directory is writable."
 msgstr "Le r&eacute;pertoire de connexion est autoris&eacute; en &eacute;criture."
 
-#: admin/woocommerce-admin-status.php:291
+#: admin/woocommerce-admin-status.php:307
 #@ woocommerce
 msgid "Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible."
 msgstr "Le r&eacute;pertoire de connexion (<code>woocommerce/logs/</code>) n&rsquo;est pas autoris&eacute; en &eacute;criture. La connexion ne sera pas possible."
 
-#: admin/woocommerce-admin-status.php:298
+#: admin/woocommerce-admin-status.php:314
 #@ woocommerce
 msgid "PHP Sessions"
 msgstr "Sessions de PHP"
 
-#: admin/woocommerce-admin-status.php:304
+#: admin/woocommerce-admin-status.php:320
 #@ woocommerce
 msgid "Session save path"
 msgstr "Chemin de sauvegarde de session"
 
-#: admin/woocommerce-admin-status.php:309
+#: admin/woocommerce-admin-status.php:325
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> does not exist - contact your host to resolve the problem."
 msgstr "<code>%s</code> n&rsquo;existe pas - Contactez votre h&eacute;bergeur pour r&eacute;soudre le probl&egrave;me."
 
-#: admin/woocommerce-admin-status.php:311
+#: admin/woocommerce-admin-status.php:327
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> is not writable - contact your host to resolve the problem."
 msgstr "<code>%s</code> n&rsquo;est pas autoris&eacute; en &eacute;criture - Contactez votre h&eacute;bergeur pour r&eacute;soudre le probl&egrave;me."
 
-#: admin/woocommerce-admin-status.php:313
+#: admin/woocommerce-admin-status.php:329
 #, php-format
 #@ woocommerce
 msgid "<code>%s</code> is writable."
 msgstr "<code>%s</code> est autoris&eacute; en &eacute;criture."
 
-#: admin/woocommerce-admin-status.php:325
+#: admin/woocommerce-admin-status.php:341
 #@ woocommerce
 msgid "Remote Posting/IPN"
 msgstr "Remote Posting/IPN"
 
-#: admin/woocommerce-admin-status.php:333
+#: admin/woocommerce-admin-status.php:349
 #@ woocommerce
 msgid "fsockopen/cURL"
 msgstr "fsockopen/cURL"
 
-#: admin/woocommerce-admin-status.php:336
+#: admin/woocommerce-admin-status.php:352
 #@ woocommerce
 msgid "Your server has fsockopen and cURL enabled."
 msgstr "fsockopen et Curl sont activ&eacute;s sur votre serveur."
 
-#: admin/woocommerce-admin-status.php:338
+#: admin/woocommerce-admin-status.php:354
 #@ woocommerce
 msgid "Your server has fsockopen enabled, cURL is disabled."
 msgstr "fsockopen est activ&eacute; sur votre serveur, cURL est d&eacute;sactiv&eacute;."
 
-#: admin/woocommerce-admin-status.php:340
+#: admin/woocommerce-admin-status.php:356
 #@ woocommerce
 msgid "Your server has cURL enabled, fsockopen is disabled."
 msgstr "cURL est activ&eacute; sur votre serveur, fsockopen est d&eacute;sactiv&eacute;."
 
-#: admin/woocommerce-admin-status.php:344
+#: admin/woocommerce-admin-status.php:360
 #@ woocommerce
 msgid "Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider."
 msgstr "fsockopen ou cURL n&rsquo;est pas activ&eacute; sur votre serveur - PayPal IPN et les autres scripts communiquant avec d&rsquo;autres serveurs ne fonctionneront pas. Contactez votre h&eacute;bergeur pour r&eacute;soudre le probl&egrave;me."
 
-#: admin/woocommerce-admin-status.php:349
+#: admin/woocommerce-admin-status.php:365
 #@ woocommerce
 msgid "WP Remote Post Check"
 msgstr "V&eacute;rifier WP Remote Post"
 
-#: admin/woocommerce-admin-status.php:360
+#: admin/woocommerce-admin-status.php:376
 #@ woocommerce
 msgid "wp_remote_post() was successful - PayPal IPN is working."
 msgstr "wp_remote_post() a r&eacute;ussi - PayPal IPN fonctionne."
 
-#: admin/woocommerce-admin-status.php:363
+#: admin/woocommerce-admin-status.php:379
 #@ woocommerce
 msgid "wp_remote_post() failed. PayPal IPN won't work with your server. Contact your hosting provider. Error:"
 msgstr "wp_remote_post() a &eacute;chou&eacute;. PayPal IPN ne fonctionne pas sur votre serveur. Contactez votre h&eacute;bergeur pour r&eacute;soudre le probl&egrave;me. Erreur&nbsp;:"
 
-#: admin/woocommerce-admin-status.php:388
+#: admin/woocommerce-admin-status.php:404
 #@ woocommerce
 msgid "Tools"
 msgstr "Outils"
@@ -2779,66 +2780,66 @@ msgstr "Pr&eacute;nom"
 msgid "Last name"
 msgstr "Nom"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:105
-#: admin/post-types/writepanels/writepanel-order_data.php:188
+#: admin/post-types/writepanels/writepanel-order_data.php:137
+#: admin/post-types/writepanels/writepanel-order_data.php:220
 #: admin/woocommerce-admin-users.php:113
 #: admin/woocommerce-admin-users.php:162
 #@ woocommerce
 msgid "Company"
 msgstr "Entreprise"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:109
-#: admin/post-types/writepanels/writepanel-order_data.php:192
+#: admin/post-types/writepanels/writepanel-order_data.php:141
+#: admin/post-types/writepanels/writepanel-order_data.php:224
 #: admin/woocommerce-admin-users.php:117
 #: admin/woocommerce-admin-users.php:166
 #@ woocommerce
 msgid "Address 1"
 msgstr "Adresse"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:113
-#: admin/post-types/writepanels/writepanel-order_data.php:196
+#: admin/post-types/writepanels/writepanel-order_data.php:145
+#: admin/post-types/writepanels/writepanel-order_data.php:228
 #: admin/woocommerce-admin-users.php:121
 #: admin/woocommerce-admin-users.php:170
-#: classes/class-wc-countries.php:947
+#: classes/class-wc-countries.php:972
 #@ woocommerce
 msgid "Address 2"
 msgstr "Adresse 2"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:117
-#: admin/post-types/writepanels/writepanel-order_data.php:200
+#: admin/post-types/writepanels/writepanel-order_data.php:149
+#: admin/post-types/writepanels/writepanel-order_data.php:232
 #: admin/woocommerce-admin-users.php:125
 #: admin/woocommerce-admin-users.php:174
 #@ woocommerce
 msgid "City"
 msgstr "Ville"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:121
-#: admin/post-types/writepanels/writepanel-order_data.php:204
+#: admin/post-types/writepanels/writepanel-order_data.php:153
+#: admin/post-types/writepanels/writepanel-order_data.php:236
 #: admin/woocommerce-admin-users.php:129
 #: admin/woocommerce-admin-users.php:178
-#: classes/class-wc-countries.php:858
-#: classes/class-wc-countries.php:859
+#: classes/class-wc-countries.php:883
+#: classes/class-wc-countries.php:884
 #: templates/cart/shipping-calculator.php:63
 #@ woocommerce
 msgid "Postcode"
 msgstr "Code postal/ZIP"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:131
-#: admin/post-types/writepanels/writepanel-order_data.php:214
+#: admin/post-types/writepanels/writepanel-order_data.php:163
+#: admin/post-types/writepanels/writepanel-order_data.php:246
 #: admin/woocommerce-admin-users.php:133
 #: admin/woocommerce-admin-users.php:182
-#: classes/class-wc-countries.php:899
-#: classes/class-wc-countries.php:900
-#: classes/class-wc-countries.php:975
+#: classes/class-wc-countries.php:924
+#: classes/class-wc-countries.php:925
+#: classes/class-wc-countries.php:1000
 #@ woocommerce
 msgid "State/County"
 msgstr "&Eacute;tat/R&eacute;gion"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:125
-#: admin/post-types/writepanels/writepanel-order_data.php:208
+#: admin/post-types/writepanels/writepanel-order_data.php:157
+#: admin/post-types/writepanels/writepanel-order_data.php:240
 #: admin/woocommerce-admin-users.php:137
 #: admin/woocommerce-admin-users.php:186
-#: classes/class-wc-countries.php:968
+#: classes/class-wc-countries.php:993
 #@ woocommerce
 msgid "Country"
 msgstr "Pays"
@@ -2848,7 +2849,7 @@ msgstr "Pays"
 msgid "Telephone"
 msgstr "T&eacute;l&eacute;phone"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:135
+#: admin/post-types/writepanels/writepanel-order_data.php:167
 #: admin/woocommerce-admin-users.php:145
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:199
 #: classes/integrations/shareyourcart/class-wc-shareyourcart.php:222
@@ -2906,6 +2907,7 @@ msgstr "Copier vers un nouveau brouillon"
 #: admin/post-types/product.php:75
 #: admin/post-types/product.php:494
 #: admin/post-types/product.php:687
+#: admin/woocommerce-admin-functions.php:121
 #: templates/cart/cart.php:19
 #: templates/emails/admin-new-order.php:16
 #: templates/emails/customer-completed-order.php:16
@@ -2925,7 +2927,7 @@ msgstr "Cat&eacute;gories"
 #: admin/post-types/product.php:558
 #: admin/post-types/product.php:799
 #: admin/post-types/writepanels/writepanel-product_data.php:964
-#: admin/woocommerce-admin-init.php:293
+#: admin/woocommerce-admin-init.php:295
 #@ woocommerce
 msgid "Featured"
 msgstr "&Agrave; la une"
@@ -2972,7 +2974,7 @@ msgid "Delete this item permanently"
 msgstr "Supprimer cet article d&eacute;finitivement"
 
 #: admin/post-types/product.php:132
-#: admin/post-types/writepanels/writepanel-order_data.php:434
+#: admin/post-types/writepanels/writepanel-order_data.php:466
 #@ woocommerce
 msgid "Delete Permanently"
 msgstr "Supprimer d&eacute;finitivement"
@@ -2995,7 +2997,7 @@ msgid "View &#8220;%s&#8221;"
 msgstr "Voir &#8220;%s&#8221;"
 
 #: admin/post-types/product.php:139
-#: admin/post-types/shop_order.php:142
+#: admin/post-types/shop_order.php:159
 #: templates/myaccount/my-orders.php:60
 #@ woocommerce
 msgid "View"
@@ -3014,8 +3016,8 @@ msgstr "Externe/Affili&eacute;"
 #: admin/post-types/product.php:191
 #: admin/post-types/product.php:358
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:82
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:243
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:442
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:244
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:445
 #: admin/post-types/writepanels/writepanel-product_data.php:45
 #@ woocommerce
 msgid "Virtual"
@@ -3024,8 +3026,8 @@ msgstr "Virtuel"
 #: admin/post-types/product.php:193
 #: admin/post-types/product.php:354
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:82
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:241
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:440
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:242
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:443
 #: admin/post-types/writepanels/writepanel-product_data.php:51
 #@ woocommerce
 msgid "Downloadable"
@@ -3051,9 +3053,9 @@ msgstr "Changer"
 #: admin/post-types/product.php:567
 #: admin/post-types/product.php:823
 #: admin/post-types/writepanels/writepanel-product_data.php:241
-#: classes/class-wc-product.php:455
-#: classes/class-wc-product.php:460
-#: classes/class-wc-product.php:480
+#: classes/class-wc-product.php:472
+#: classes/class-wc-product.php:477
+#: classes/class-wc-product.php:497
 #@ woocommerce
 msgid "In stock"
 msgstr "En stock"
@@ -3127,8 +3129,8 @@ msgstr "Prix sold&eacute;"
 #: admin/post-types/product.php:514
 #: admin/post-types/product.php:732
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:74
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:386
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:179
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:389
 #: admin/post-types/writepanels/writepanel-product_data.php:143
 #: templates/single-product/product-attributes.php:22
 #@ woocommerce
@@ -3285,9 +3287,10 @@ msgid "Actions"
 msgstr "Actions"
 
 #: admin/post-types/shop_order.php:77
-#: admin/post-types/writepanels/writepanel-order_data.php:75
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:86
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:135
+#: admin/post-types/writepanels/writepanel-order_data.php:76
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:97
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:145
+#: woocommerce-ajax.php:997
 #@ woocommerce
 msgid "Guest"
 msgstr "Invit&eacute;"
@@ -3350,17 +3353,18 @@ msgstr "%s"
 msgid "Y/m/d"
 msgstr "d/m/Y"
 
-#: admin/post-types/shop_order.php:141
+#: admin/post-types/shop_order.php:154
 #@ woocommerce
 msgid "Complete"
 msgstr "Termin&eacute;e"
 
-#: admin/post-types/shop_order.php:220
+#: admin/post-types/shop_order.php:250
 #@ woocommerce
 msgid "Show all statuses"
 msgstr "Afficher tous les &eacute;tats"
 
-#: admin/post-types/shop_order.php:249
+#: admin/post-types/shop_order.php:269
+#: admin/post-types/shop_order.php:294
 #@ woocommerce
 msgid "Show all customers"
 msgstr "Afficher tous les clients"
@@ -3530,84 +3534,84 @@ msgstr "h"
 msgid "m"
 msgstr "m"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:73
+#: admin/post-types/writepanels/writepanel-order_data.php:74
 #@ woocommerce
 msgid "Customer:"
 msgstr "Client&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:85
+#: admin/post-types/writepanels/writepanel-order_data.php:116
 #@ woocommerce
 msgid "Customer Note:"
 msgstr "Commentaire client&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:86
+#: admin/post-types/writepanels/writepanel-order_data.php:117
 #@ woocommerce
 msgid "Customer's notes about the order"
 msgstr "Commentaires du client &agrave; propos de la commande"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:93
+#: admin/post-types/writepanels/writepanel-order_data.php:125
 #@ woocommerce
 msgid "Billing Details"
 msgstr "Coordonn&eacute;es de facturation"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:97
-#: admin/post-types/writepanels/writepanel-order_data.php:180
-#: classes/class-wc-countries.php:923
+#: admin/post-types/writepanels/writepanel-order_data.php:129
+#: admin/post-types/writepanels/writepanel-order_data.php:212
+#: classes/class-wc-countries.php:948
 #@ woocommerce
 msgid "First Name"
 msgstr "Pr&eacute;nom"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:101
-#: admin/post-types/writepanels/writepanel-order_data.php:184
-#: classes/class-wc-countries.php:929
+#: admin/post-types/writepanels/writepanel-order_data.php:133
+#: admin/post-types/writepanels/writepanel-order_data.php:216
+#: classes/class-wc-countries.php:954
 #@ woocommerce
 msgid "Last Name"
 msgstr "Nom"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:138
-#: classes/class-wc-countries.php:1026
+#: admin/post-types/writepanels/writepanel-order_data.php:170
+#: classes/class-wc-countries.php:1051
 #@ woocommerce
 msgid "Phone"
 msgstr "T&eacute;l&eacute;phone"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:145
-#: admin/post-types/writepanels/writepanel-order_data.php:222
-#: classes/class-wc-countries.php:941
+#: admin/post-types/writepanels/writepanel-order_data.php:177
+#: admin/post-types/writepanels/writepanel-order_data.php:254
+#: classes/class-wc-countries.php:966
 #@ woocommerce
 msgid "Address"
 msgstr "Adresse"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:145
+#: admin/post-types/writepanels/writepanel-order_data.php:177
 #@ woocommerce
 msgid "No billing address set."
 msgstr "Aucune adresse de facturation."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:155
+#: admin/post-types/writepanels/writepanel-order_data.php:187
 #@ woocommerce
 msgid "Load customer billing address"
 msgstr "Charger l&rsquo;adresse de facturation du client"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:176
+#: admin/post-types/writepanels/writepanel-order_data.php:208
 #@ woocommerce
 msgid "Shipping Details"
 msgstr "Coordon&eacute;es de livraison"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:222
+#: admin/post-types/writepanels/writepanel-order_data.php:254
 #@ woocommerce
 msgid "No shipping address set."
 msgstr "Aucune adresse de livraison."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:232
+#: admin/post-types/writepanels/writepanel-order_data.php:264
 #@ woocommerce
 msgid "Load customer shipping address"
 msgstr "Charger l&rsquo;adresse de livraison du client"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:273
+#: admin/post-types/writepanels/writepanel-order_data.php:305
 #@ woocommerce
 msgid "Item"
 msgstr "Article"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:278
+#: admin/post-types/writepanels/writepanel-order_data.php:310
 #: admin/post-types/writepanels/writepanel-product_data.php:211
 #: admin/settings/settings-tax-rates.php:29
 #: admin/settings/settings-tax-rates.php:98
@@ -3615,12 +3619,12 @@ msgstr "Article"
 msgid "Tax Class"
 msgstr "Classe de taxe"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:278
+#: admin/post-types/writepanels/writepanel-order_data.php:310
 #@ woocommerce
 msgid "Tax class for the line item"
 msgstr "Classe de taxe pour la ligne d&rsquo;article"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:280
+#: admin/post-types/writepanels/writepanel-order_data.php:312
 #: templates/checkout/form-pay.php:13
 #: templates/checkout/review-order.php:16
 #: templates/order/order-details.php:15
@@ -3628,150 +3632,150 @@ msgstr "Classe de taxe pour la ligne d&rsquo;article"
 msgid "Qty"
 msgstr "Qt&eacute;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:282
+#: admin/post-types/writepanels/writepanel-order_data.php:314
 #@ woocommerce
 msgid "Line&nbsp;Subtotal"
 msgstr "Ligne du sous-total"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:282
+#: admin/post-types/writepanels/writepanel-order_data.php:314
 #@ woocommerce
 msgid "Line cost and line tax before pre-tax discounts"
 msgstr "Ligne du tarif et ligne de taxe avant les remises pr&eacute;-taxes"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:284
+#: admin/post-types/writepanels/writepanel-order_data.php:316
 #@ woocommerce
 msgid "Line&nbsp;Total"
 msgstr "Ligne du total"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:284
+#: admin/post-types/writepanels/writepanel-order_data.php:316
 #@ woocommerce
 msgid "Line cost and line tax after pre-tax discounts"
 msgstr "Ligne du tarif et ligne de taxe apr&egrave;s les remises pr&eacute;-taxes"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:362
+#: admin/post-types/writepanels/writepanel-order_data.php:394
 #@ woocommerce
 msgid "Tax class"
 msgstr "Classe de taxe"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:401
+#: admin/post-types/writepanels/writepanel-order_data.php:433
 #@ woocommerce
 msgid "Add item(s)"
 msgstr "Ajouter article(s)"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:404
+#: admin/post-types/writepanels/writepanel-order_data.php:436
 #@ woocommerce
 msgid "Calc line tax &uarr;"
 msgstr "Calculer la ligne de taxe &uarr;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:405
+#: admin/post-types/writepanels/writepanel-order_data.php:437
 #@ woocommerce
 msgid "Calc totals &rarr;"
 msgstr "Calcul du total &rarr;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:420
+#: admin/post-types/writepanels/writepanel-order_data.php:452
 #@ woocommerce
 msgid "Save Order"
 msgstr "Enregistrer la commande"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:420
+#: admin/post-types/writepanels/writepanel-order_data.php:452
 #@ woocommerce
 msgid "Save/update the order"
 msgstr "Enregistrer/Actualiser la commande"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:422
+#: admin/post-types/writepanels/writepanel-order_data.php:454
 #@ woocommerce
 msgid "Reduce stock"
 msgstr "R&eacute;duire le stock"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:422
+#: admin/post-types/writepanels/writepanel-order_data.php:454
 #@ woocommerce
 msgid "Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid."
 msgstr "R&eacute;duire le stock de chaque article de la commande&nbsp;; utile en cas de cr&eacute;ation manuelle d&rsquo;une commande ou de passage manuel d&rsquo;une commande comme pay&eacute;e."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:424
+#: admin/post-types/writepanels/writepanel-order_data.php:456
 #@ woocommerce
 msgid "Restore stock"
 msgstr "Restaurer le stock"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:424
+#: admin/post-types/writepanels/writepanel-order_data.php:456
 #@ woocommerce
 msgid "Restores stock for each item in the order; useful after refunding or canceling the entire order."
 msgstr "Restaurer le stock de chaque article de la commande&nbsp;; utile en cas de remboursement ou d&rsquo;annulation d&rsquo;une commande compl&egrave;te."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:426
+#: admin/post-types/writepanels/writepanel-order_data.php:458
 #@ woocommerce
 msgid "Email invoice"
 msgstr "Facture e-mail"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:426
+#: admin/post-types/writepanels/writepanel-order_data.php:458
 #@ woocommerce
 msgid "Email the order to the customer. Unpaid orders will include a payment link."
 msgstr "Envoyer la commande au client par e-mail. Les commandes impay&eacute;es incluront un lien de paiement."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:436
+#: admin/post-types/writepanels/writepanel-order_data.php:468
 #@ woocommerce
 msgid "Move to Trash"
 msgstr "Mettre &agrave; la Corbeille"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:456
+#: admin/post-types/writepanels/writepanel-order_data.php:488
 #@ woocommerce
 msgid "Discounts"
 msgstr "Remises"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:460
+#: admin/post-types/writepanels/writepanel-order_data.php:492
 #: classes/class-wc-order.php:534
 #@ woocommerce
 msgid "Cart Discount:"
 msgstr "Remise sur panier&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:467
+#: admin/post-types/writepanels/writepanel-order_data.php:499
 #: classes/class-wc-order.php:602
 #@ woocommerce
 msgid "Order Discount:"
 msgstr "Remise sur commande&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:481
+#: admin/post-types/writepanels/writepanel-order_data.php:513
 #@ woocommerce
 msgid "Cost ex. tax:"
 msgstr "Tarif H.T.&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:482
-#: classes/class-wc-countries.php:487
+#: admin/post-types/writepanels/writepanel-order_data.php:514
+#: classes/class-wc-countries.php:516
 #@ woocommerce
 msgid "(ex. tax)"
 msgstr "(ex. taxe)"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:487
+#: admin/post-types/writepanels/writepanel-order_data.php:519
 #@ woocommerce
 msgid "Method:"
 msgstr "Mode&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:490
+#: admin/post-types/writepanels/writepanel-order_data.php:522
 #@ woocommerce
 msgid "Shipping method&hellip;"
 msgstr "Modes de livraison&hellip;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:498
+#: admin/post-types/writepanels/writepanel-order_data.php:530
 #@ woocommerce
 msgid "Tax Rows"
 msgstr "Lignes de taxes"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:498
+#: admin/post-types/writepanels/writepanel-order_data.php:530
 #@ woocommerce
 msgid "These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total."
 msgstr "Ces lignes contiennent les taxes de cette commande. Cela vous permet d&rsquo;afficher des taxes multiples ou cumulables plut&ocirc;t qu&rsquo;un total simple."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:532
+#: admin/post-types/writepanels/writepanel-order_data.php:564
 #@ woocommerce
 msgid "+ Add tax row"
 msgstr "&plus; Ajouter une ligne taxe"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:536
+#: admin/post-types/writepanels/writepanel-order_data.php:568
 #@ woocommerce
 msgid "Tax Totals"
 msgstr "Total des taxes"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:557
+#: admin/post-types/writepanels/writepanel-order_data.php:589
 #: admin/woocommerce-admin-reports.php:1803
 #: templates/cart/cart.php:21
 #: templates/myaccount/my-orders.php:29
@@ -3779,58 +3783,58 @@ msgstr "Total des taxes"
 msgid "Total"
 msgstr "Total"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:561
+#: admin/post-types/writepanels/writepanel-order_data.php:593
 #: classes/class-wc-order.php:607
 #@ woocommerce
 msgid "Order Total:"
 msgstr "Montant&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:568
+#: admin/post-types/writepanels/writepanel-order_data.php:600
 #@ woocommerce
 msgid "Payment Method:"
 msgstr "Mode de paiement&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:571
+#: admin/post-types/writepanels/writepanel-order_data.php:603
 #@ woocommerce
 msgid "Payment method&hellip;"
 msgstr "Mode de paiement&nbsp;&hellip;"
 
-#: admin/post-types/writepanels/writepanel-order_data.php:752
+#: admin/post-types/writepanels/writepanel-order_data.php:784
 #@ woocommerce
 msgid "Manually reducing stock."
 msgstr "R&eacute;duire manuellement le stock."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:766
+#: admin/post-types/writepanels/writepanel-order_data.php:798
 #: classes/class-wc-order.php:922
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock reduced from %s to %s."
 msgstr "Stock de l&rsquo;article n&deg;%s r&eacute;duit de %s &agrave; %s."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:774
 #: admin/post-types/writepanels/writepanel-order_data.php:806
+#: admin/post-types/writepanels/writepanel-order_data.php:838
 #, php-format
 #@ woocommerce
 msgid "Item %s %s not found, skipping."
 msgstr "Article %s %s introuvable, passage au suivant."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:780
+#: admin/post-types/writepanels/writepanel-order_data.php:812
 #@ woocommerce
 msgid "Manual stock reduction complete."
 msgstr "R&eacute;duction manuelle du stock termin&eacute;e."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:786
+#: admin/post-types/writepanels/writepanel-order_data.php:818
 #@ woocommerce
 msgid "Manually restoring stock."
 msgstr "Restaurer manuellement le stock."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:800
+#: admin/post-types/writepanels/writepanel-order_data.php:832
 #, php-format
 #@ woocommerce
 msgid "Item #%s stock increased from %s to %s."
 msgstr "Stock de l&rsquo;article n&deg;%s augment&eacute; de %s &agrave; %s."
 
-#: admin/post-types/writepanels/writepanel-order_data.php:812
+#: admin/post-types/writepanels/writepanel-order_data.php:844
 #@ woocommerce
 msgid "Manual stock restore complete."
 msgstr "Restauration manuelle du stock termin&eacute;e."
@@ -3857,8 +3861,8 @@ msgstr "T&eacute;l&eacute;chargements restant"
 
 #: admin/post-types/writepanels/writepanel-order_downloads.php:48
 #: admin/post-types/writepanels/writepanel-order_downloads.php:164
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:224
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:430
 #: admin/post-types/writepanels/writepanel-product_data.php:180
 #@ woocommerce
 msgid "Unlimited"
@@ -3940,8 +3944,8 @@ msgid "Variations for variable products are defined here."
 msgstr "Les variations pour les produits variables sont d&eacute;finies ici."
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:47
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:200
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:407
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:201
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:410
 #@ woocommerce
 msgid "Same as parent"
 msgstr "Identique au parent"
@@ -3994,8 +3998,8 @@ msgid "Download limit"
 msgstr "Limite de t&eacute;l&eacute;chargement"
 
 #: admin/post-types/writepanels/writepanel-product-type-variable.php:82
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:239
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:438
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:240
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:441
 #@ woocommerce
 msgid "Enabled"
 msgstr "Activ&eacute;"
@@ -4005,189 +4009,189 @@ msgstr "Activ&eacute;"
 msgid "Delete all"
 msgstr "Tout supprimer"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:130
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:343
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:131
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:346
 #@ woocommerce
 msgid "Any"
 msgstr "Toute"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:157
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:367
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:158
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:370
 #@ woocommerce
 msgid "Enter a SKU for this variation or leave blank to use the parent product SKU."
 msgstr "Entrez un UGS pour cette variation ou laissez vide pour utiliser l&rsquo;UGS du produit parent."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:168
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:379
 #@ woocommerce
 msgid "Stock Qty:"
 msgstr "Qt&eacute; en stock&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:167
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:376
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:168
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:379
 #@ woocommerce
 msgid "Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options."
 msgstr "Entrez une quantit&eacute; pour activer la gestion de stock sur cette variation, ou laissez vide pour utiliser les options de stock des produits variables."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:171
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:380
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:172
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:383
 #: widgets/widget-price_filter.php:192
 #@ woocommerce
 msgid "Price:"
 msgstr "Prix&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:173
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:381
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:174
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:384
 #@ woocommerce
 msgid "Sale Price:"
 msgstr "Prix sold&eacute;&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:178
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:386
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:179
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:389
 #@ woocommerce
 msgid "Enter a weight for this variation or leave blank to use the parent product weight."
 msgstr "Entrez un poids pour cette variation ou laissez vide pour utiliser le poids du produit parent."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:184
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:392
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:185
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:395
 #@ woocommerce
 msgid "Dimensions (L&times;W&times;H)"
 msgstr "Dimensions (L&times;l&times;H)"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:196
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:403
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:197
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:406
 #@ woocommerce
 msgid "Shipping class:"
 msgstr "Classe de livraison&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:207
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:414
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:208
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:417
 #@ woocommerce
 msgid "Tax class:"
 msgstr "Classe de taxe&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:219
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #@ woocommerce
 msgid "File path:"
 msgstr "Chemin de fichier&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:219
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #@ woocommerce
 msgid "Enter a File Path to make this variation a downloadable product, or leave blank."
 msgstr "Entrez un chemin de fichier pour faire de cette variation un produit t&eacute;l&eacute;chargeable, ou laissez vide."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:219
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #: admin/post-types/writepanels/writepanel-product_data.php:175
 #@ woocommerce
 msgid "File path/URL"
 msgstr "URL du fichier"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:219
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #@ woocommerce
 msgid "&uarr;"
 msgstr "&uarr;"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:218
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:424
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:219
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
 #@ woocommerce
 msgid "Upload"
 msgstr "Envoyer"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:224
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:430
 #@ woocommerce
 msgid "Download Limit:"
 msgstr "Limite t&eacute;l&eacute;chargement&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:223
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:427
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:224
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:430
 #: admin/post-types/writepanels/writepanel-product_data.php:180
 #@ woocommerce
 msgid "Leave blank for unlimited re-downloads."
 msgstr "Laissez vide pour les t&eacute;l&eacute;chargements illimit&eacute;s."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:241
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:440
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:242
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:443
 #@ woocommerce
 msgid "Enable this option if access is given to a downloadable file upon purchase of a product"
 msgstr "Activer cette option si l&rsquo;acc&egrave;s est donn&eacute; &agrave; un fichier t&eacute;l&eacute;chargeable lors de l&rsquo;achat du produit."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:243
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:442
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:244
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:445
 #@ woocommerce
 msgid "Enable this option if a product is not shipped or there is no shipping cost"
 msgstr "Activez cette option si le produit n&rsquo;est pas exp&eacute;di&eacute; ou ne g&eacute;n&egrave;re aucun frais de livraison."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:257
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:260
 #@ woocommerce
 msgid "Link all variations"
 msgstr "Lier toutes les variations"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:259
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:262
 #@ woocommerce
 msgid "Default selections:"
 msgstr "S&eacute;lections par d&eacute;faut&nbsp;:"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:271
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:274
 #@ woocommerce
 msgid "No default"
 msgstr "Aucune valeur par d&eacute;faut"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:308
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:311
 #@ woocommerce
 msgid "You must add some attributes via the \"Product Data\" panel and save before adding a new variation."
 msgstr "Vous devez ajouter quelques attributs par le panneau \"Informations de produit\" et les enregistrer avant d&rsquo;ajouter une nouvelle variation."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:468
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:471
 #@ woocommerce
 msgid "Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run)."
 msgstr "&Ecirc;tes-vous s&ucirc;r(e) de vouloir lier toutes les variations&nbsp;? Cela cr&eacute;era une nouvelle variation pour chaque combinaison possible d&rsquo;attributs de variation (50 max. par lancement)."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:489
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:492
 #@ woocommerce
 msgid "variation added"
 msgstr "variation ajout&eacute;e"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:491
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:494
 #@ woocommerce
 msgid "variations added"
 msgstr "variations ajout&eacute;es"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:493
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:496
 #@ woocommerce
 msgid "No variations added"
 msgstr "Aucune variation ajout&eacute;e"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:505
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:508
 #@ woocommerce
 msgid "Are you sure you want to remove this variation?"
 msgstr "&Ecirc;tes-vous s&ucirc;r(e) de vouloir supprimer cette variation&nbsp;?"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:540
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:543
 #@ woocommerce
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr "&Ecirc;tes-vous s&ucirc;r(e) de vouloir supprimer tous les attributs&nbsp;? Cela ne peut pas &ecirc;tre annul&eacute;."
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:543
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:546
 #@ woocommerce
 msgid "Last warning, are you sure?"
 msgstr "Dernier avertissement, vous &ecirc;tes s&ucirc;r(e)&nbsp;?"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:579
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:582
 #@ woocommerce
 msgid "Enter a value"
 msgstr "Entrez une valeur"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:715
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:718
 #@ woocommerce
 msgid "Variable product"
 msgstr "Produit variable"
 
-#: admin/post-types/writepanels/writepanel-product-type-variable.php:773
+#: admin/post-types/writepanels/writepanel-product-type-variable.php:776
 #: classes/class-wc-email.php:324
 #: classes/class-wc-email.php:352
 #: classes/class-wc-email.php:393
@@ -6033,96 +6037,86 @@ msgid_plural "%1$s countries"
 msgstr[0] "1 pays"
 msgstr[1] "%1$s pays"
 
-#: classes/class-wc-cart.php:247
+#: classes/class-wc-cart.php:254
 #, php-format
 #@ woocommerce
 msgid "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from your order."
 msgstr "D&eacute;sol&eacute;, il semble que le code promo \"%s\" est invalide - Il vient d&rsquo;&ecirc;tre supprim&eacute; de votre commande."
 
-#: classes/class-wc-cart.php:321
+#: classes/class-wc-cart.php:328
 #, php-format
 #@ woocommerce
 msgid "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed from your order."
 msgstr "D&eacute;sol&eacute;, il semble que le code promo \"%s\" n&rsquo;est pas le v&ocirc;tre - Il vient d&rsquo;&ecirc;tre supprim&eacute; de votre commande."
 
-#: classes/class-wc-cart.php:357
-#: classes/class-wc-cart.php:367
+#: classes/class-wc-cart.php:364
 #: classes/class-wc-cart.php:374
+#: classes/class-wc-cart.php:381
 #, php-format
 #@ woocommerce
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr "D&eacute;sol&eacute;, nous n&rsquo;avons pas assez de \"%s\" en stock pour traiter votre commande (%s en stock). Veuillez modifier votre panier et essayer &agrave; nouveau. Nous nous excusons pour le d&eacute;sagr&eacute;ment occasionn&eacute;."
 
-#: classes/class-wc-cart.php:385
+#: classes/class-wc-cart.php:392
 #, php-format
 #@ woocommerce
 msgid "Sorry, we do not have enough \"%s\" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused."
 msgstr "D&eacute;sol&eacute;, nous n&rsquo;avons pas assez de \"%s\" en stock pour traiter votre commande. Veuillez modifier votre panier et essayer &agrave; nouveau. Nous nous excusons pour le d&eacute;sagr&eacute;ment occasionn&eacute;."
 
-#: classes/class-wc-cart.php:665
-#@ woocommerce
-msgid "This product cannot be purchased."
-msgstr "Ce produit ne peut pas &ecirc;tre achet&eacute;."
-
-#: classes/class-wc-cart.php:671
-#@ woocommerce
-msgid "This product cannot be purchased - the price is not yet set."
-msgstr "Ce produit ne peut pas &ecirc;tre achet&eacute; - Le prix n&rsquo;est pas encore renseign&eacute;."
-
-#: classes/class-wc-cart.php:677
+#: classes/class-wc-cart.php:678
 #, php-format
 #@ woocommerce
 msgid "You cannot add that amount to the cart since there is not enough stock. We have %s in stock."
 msgstr "Vous ne pouvez pas ajouter cette quantit&eacute; au panier car le stock est trop faible. Nous en avons %s en stock."
 
-#: classes/class-wc-cart.php:680
+#: classes/class-wc-cart.php:681
 #@ woocommerce
 msgid "You cannot add that product to the cart since the product is out of stock."
 msgstr "Vous ne pouvez ajouter ce produit au panier car il est en rupture de stock."
 
-#: classes/class-wc-cart.php:690
+#: classes/class-wc-cart.php:691
 #@ woocommerce
 msgid "You already have this item in your cart."
 msgstr "Vous avez d&eacute;j&agrave; cet article dans votre panier."
 
-#: classes/class-wc-cart.php:704
-#: classes/class-wc-cart.php:712
+#: classes/class-wc-cart.php:705
+#: classes/class-wc-cart.php:713
 #, php-format
 #@ woocommerce
 msgid "<a href=\"%s\" class=\"button\">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart."
 msgstr "<a href=\"%s\" class=\"button\">%s</a> Vous ne pouvez pas ajouter cette quantit&eacute; au panier &mdash; Nous en avons %s en stock et vous en avez d&eacute;j&agrave; %s dans votre panier."
 
-#: classes/class-wc-cart.php:1519
+#: classes/class-wc-cart.php:1520
 #: classes/class-wc-order.php:491
-#: classes/class-wc-product.php:656
-#: classes/class-wc-product.php:665
-#: classes/class-wc-product.php:696
-#: classes/class-wc-product.php:702
+#: classes/class-wc-product.php:700
+#: classes/class-wc-product.php:709
+#: classes/class-wc-product.php:740
+#: classes/class-wc-product.php:746
 #@ woocommerce
 msgid "Free!"
 msgstr "Gratuit&nbsp;!"
 
-#: classes/class-wc-cart.php:1531
+#: classes/class-wc-cart.php:1532
 #@ woocommerce
 msgid "via"
 msgstr "par"
 
-#: classes/class-wc-cart.php:1569
+#: classes/class-wc-cart.php:1570
 #@ woocommerce
 msgid "Invalid coupon."
 msgstr "Code promo invalide."
 
-#: classes/class-wc-cart.php:1575
+#: classes/class-wc-cart.php:1576
 #@ woocommerce
 msgid "Discount code already applied!"
 msgstr "Code promo d&eacute;j&agrave; utilis&eacute;&nbsp;!"
 
-#: classes/class-wc-cart.php:1595
+#: classes/class-wc-cart.php:1596
 #@ woocommerce
 msgid "Discount code applied successfully."
 msgstr "Code promo appliqu&eacute; avec succ&egrave;s."
 
-#: classes/class-wc-cart.php:1599
+#: classes/class-wc-cart.php:1603
 #@ woocommerce
 msgid "Coupon does not exist!"
 msgstr "Ce code promo n&rsquo;existe pas&nbsp;!"
@@ -6616,7 +6610,7 @@ msgid "Gambia"
 msgstr "Gambie"
 
 #: classes/class-wc-countries.php:103
-#: classes/class-wc-countries.php:365
+#: classes/class-wc-countries.php:394
 #@ woocommerce
 msgid "Georgia"
 msgstr "G&eacute;orgie"
@@ -7391,11 +7385,10 @@ msgstr "&Eacute;mirats arabes unis"
 msgid "United Kingdom"
 msgstr "Royaume-Uni"
 
-#: admin/settings/settings-tax-rates.php:188
 #: classes/class-wc-countries.php:258
 #@ woocommerce
 msgid "United States"
-msgstr ""
+msgstr "Etats-Unis"
 
 #: classes/class-wc-countries.php:259
 #@ woocommerce
@@ -7517,11 +7510,6 @@ msgstr "Amap&aacute;"
 msgid "Cear&aacute;"
 msgstr "Cear&aacute;"
 
-#: classes/class-wc-countries.php:293
-#@ woocommerce
-msgid "Distrito federal"
-msgstr "District f&eacute;d&eacute;ral"
-
 #: classes/class-wc-countries.php:294
 #@ woocommerce
 msgid "Esp&iacute;rito Santo"
@@ -7547,17 +7535,6 @@ msgstr "Pernambouc"
 msgid "Piau&iacute;"
 msgstr "Piau&iacute;"
 
-#: classes/class-wc-countries.php:299
-#@ woocommerce
-msgid "Rio grande do norte"
-msgstr "Rio Grande do Norte"
-
-#: classes/class-wc-countries.php:300
-#: classes/class-wc-countries.php:313
-#@ woocommerce
-msgid "Rio grande do sul"
-msgstr "Rio Grande do Sul"
-
 #: classes/class-wc-countries.php:301
 #@ woocommerce
 msgid "Rond&ocirc;nia"
@@ -7567,11 +7544,6 @@ msgstr "Rond&ocirc;nia"
 #@ woocommerce
 msgid "Roraima"
 msgstr "Roraima"
-
-#: classes/class-wc-countries.php:303
-#@ woocommerce
-msgid "Santa catarina"
-msgstr "Santa Catarina"
 
 #: classes/class-wc-countries.php:304
 #@ woocommerce
@@ -7597,31 +7569,6 @@ msgstr "Bahia"
 #@ woocommerce
 msgid "Goi&aacute;s"
 msgstr "Goi&aacute;s"
-
-#: classes/class-wc-countries.php:309
-#@ woocommerce
-msgid "Mato grosso"
-msgstr "Mato Grosso"
-
-#: classes/class-wc-countries.php:310
-#@ woocommerce
-msgid "Mato grosso do sul"
-msgstr "Mato Grosso do Sul"
-
-#: classes/class-wc-countries.php:311
-#@ woocommerce
-msgid "Rio de janeiro"
-msgstr "Rio de Janeiro"
-
-#: classes/class-wc-countries.php:312
-#@ woocommerce
-msgid "S&atilde;o paulo"
-msgstr "S&atilde;o Paulo"
-
-#: classes/class-wc-countries.php:314
-#@ woocommerce
-msgid "Minas gerais"
-msgstr "Minas Gerais"
 
 #: classes/class-wc-countries.php:315
 #@ woocommerce
@@ -7708,459 +7655,447 @@ msgstr "Kowloon"
 msgid "New Territories"
 msgstr "Nouveaux Territoires"
 
-#: classes/class-wc-countries.php:355
+#: classes/class-wc-countries.php:384
 #@ woocommerce
 msgid "Alabama"
 msgstr "Alabama"
 
-#: classes/class-wc-countries.php:356
+#: classes/class-wc-countries.php:385
 #@ woocommerce
 msgid "Alaska"
 msgstr "Alaska"
 
-#: classes/class-wc-countries.php:357
+#: classes/class-wc-countries.php:386
 #@ woocommerce
 msgid "Arizona"
 msgstr "Arizona"
 
-#: classes/class-wc-countries.php:358
+#: classes/class-wc-countries.php:387
 #@ woocommerce
 msgid "Arkansas"
 msgstr "Arkansas"
 
-#: classes/class-wc-countries.php:359
+#: classes/class-wc-countries.php:388
 #@ woocommerce
 msgid "California"
 msgstr "Californie"
 
-#: classes/class-wc-countries.php:360
+#: classes/class-wc-countries.php:389
 #@ woocommerce
 msgid "Colorado"
 msgstr "Colorado"
 
-#: classes/class-wc-countries.php:361
+#: classes/class-wc-countries.php:390
 #@ woocommerce
 msgid "Connecticut"
 msgstr "Connecticut"
 
-#: classes/class-wc-countries.php:362
+#: classes/class-wc-countries.php:391
 #@ woocommerce
 msgid "Delaware"
 msgstr "Delaware"
 
-#: classes/class-wc-countries.php:363
+#: classes/class-wc-countries.php:392
 #@ woocommerce
 msgid "District Of Columbia"
 msgstr "Washington (district de Columbia)"
 
-#: classes/class-wc-countries.php:364
+#: classes/class-wc-countries.php:393
 #@ woocommerce
 msgid "Florida"
 msgstr "Floride"
 
-#: classes/class-wc-countries.php:366
+#: classes/class-wc-countries.php:395
 #@ woocommerce
 msgid "Hawaii"
 msgstr "Hawa&iuml;"
 
-#: classes/class-wc-countries.php:367
+#: classes/class-wc-countries.php:396
 #@ woocommerce
 msgid "Idaho"
 msgstr "Idaho"
 
-#: classes/class-wc-countries.php:368
+#: classes/class-wc-countries.php:397
 #@ woocommerce
 msgid "Illinois"
 msgstr "Illinois"
 
-#: classes/class-wc-countries.php:369
+#: classes/class-wc-countries.php:398
 #@ woocommerce
 msgid "Indiana"
 msgstr "Indiana"
 
-#: classes/class-wc-countries.php:370
+#: classes/class-wc-countries.php:399
 #@ woocommerce
 msgid "Iowa"
 msgstr "Iowa"
 
-#: classes/class-wc-countries.php:371
+#: classes/class-wc-countries.php:400
 #@ woocommerce
 msgid "Kansas"
 msgstr "Kansas"
 
-#: classes/class-wc-countries.php:372
+#: classes/class-wc-countries.php:401
 #@ woocommerce
 msgid "Kentucky"
 msgstr "Kentucky"
 
-#: classes/class-wc-countries.php:373
+#: classes/class-wc-countries.php:402
 #@ woocommerce
 msgid "Louisiana"
 msgstr "Louisiane"
 
-#: classes/class-wc-countries.php:374
+#: classes/class-wc-countries.php:403
 #@ woocommerce
 msgid "Maine"
 msgstr "Maine"
 
-#: classes/class-wc-countries.php:375
+#: classes/class-wc-countries.php:404
 #@ woocommerce
 msgid "Maryland"
 msgstr "Maryland"
 
-#: classes/class-wc-countries.php:376
+#: classes/class-wc-countries.php:405
 #@ woocommerce
 msgid "Massachusetts"
 msgstr "Massachusetts"
 
-#: classes/class-wc-countries.php:377
+#: classes/class-wc-countries.php:406
 #@ woocommerce
 msgid "Michigan"
 msgstr "Michigan"
 
-#: classes/class-wc-countries.php:378
+#: classes/class-wc-countries.php:407
 #@ woocommerce
 msgid "Minnesota"
 msgstr "Minnesota"
 
-#: classes/class-wc-countries.php:379
+#: classes/class-wc-countries.php:408
 #@ woocommerce
 msgid "Mississippi"
 msgstr "Mississippi"
 
-#: classes/class-wc-countries.php:380
+#: classes/class-wc-countries.php:409
 #@ woocommerce
 msgid "Missouri"
 msgstr "Missouri"
 
-#: classes/class-wc-countries.php:381
+#: classes/class-wc-countries.php:410
 #@ woocommerce
 msgid "Montana"
 msgstr "Montana"
 
-#: classes/class-wc-countries.php:382
+#: classes/class-wc-countries.php:411
 #@ woocommerce
 msgid "Nebraska"
 msgstr "Nebraska"
 
-#: classes/class-wc-countries.php:383
+#: classes/class-wc-countries.php:412
 #@ woocommerce
 msgid "Nevada"
 msgstr "Nevada"
 
-#: classes/class-wc-countries.php:384
+#: classes/class-wc-countries.php:413
 #@ woocommerce
 msgid "New Hampshire"
 msgstr "New Hampshire"
 
-#: classes/class-wc-countries.php:385
+#: classes/class-wc-countries.php:414
 #@ woocommerce
 msgid "New Jersey"
 msgstr "New Jersey"
 
-#: classes/class-wc-countries.php:386
+#: classes/class-wc-countries.php:415
 #@ woocommerce
 msgid "New Mexico"
 msgstr "Nouveau-Mexique"
 
-#: classes/class-wc-countries.php:387
+#: classes/class-wc-countries.php:416
 #@ woocommerce
 msgid "New York"
 msgstr "New York"
 
-#: classes/class-wc-countries.php:388
+#: classes/class-wc-countries.php:417
 #@ woocommerce
 msgid "North Carolina"
 msgstr "Caroline du Nord"
 
-#: classes/class-wc-countries.php:389
+#: classes/class-wc-countries.php:418
 #@ woocommerce
 msgid "North Dakota"
 msgstr "Dakota du Nord"
 
-#: classes/class-wc-countries.php:390
+#: classes/class-wc-countries.php:419
 #@ woocommerce
 msgid "Ohio"
 msgstr "Ohio"
 
-#: classes/class-wc-countries.php:391
+#: classes/class-wc-countries.php:420
 #@ woocommerce
 msgid "Oklahoma"
 msgstr "Oklahoma"
 
-#: classes/class-wc-countries.php:392
+#: classes/class-wc-countries.php:421
 #@ woocommerce
 msgid "Oregon"
 msgstr "Oregon"
 
-#: classes/class-wc-countries.php:393
+#: classes/class-wc-countries.php:422
 #@ woocommerce
 msgid "Pennsylvania"
 msgstr "Pennsylvanie"
 
-#: classes/class-wc-countries.php:394
+#: classes/class-wc-countries.php:423
 #@ woocommerce
 msgid "Rhode Island"
 msgstr "Rhode Island"
 
-#: classes/class-wc-countries.php:395
+#: classes/class-wc-countries.php:424
 #@ woocommerce
 msgid "South Carolina"
 msgstr "Caroline du Sud"
 
-#: classes/class-wc-countries.php:396
+#: classes/class-wc-countries.php:425
 #@ woocommerce
 msgid "South Dakota"
 msgstr "Dakota du Sud"
 
-#: classes/class-wc-countries.php:397
+#: classes/class-wc-countries.php:426
 #@ woocommerce
 msgid "Tennessee"
 msgstr "Tennessee"
 
-#: classes/class-wc-countries.php:398
+#: classes/class-wc-countries.php:427
 #@ woocommerce
 msgid "Texas"
 msgstr "Texas"
 
-#: classes/class-wc-countries.php:399
+#: classes/class-wc-countries.php:428
 #@ woocommerce
 msgid "Utah"
 msgstr "Utah"
 
-#: classes/class-wc-countries.php:400
+#: classes/class-wc-countries.php:429
 #@ woocommerce
 msgid "Vermont"
 msgstr "Vermont"
 
-#: classes/class-wc-countries.php:401
+#: classes/class-wc-countries.php:430
 #@ woocommerce
 msgid "Virginia"
 msgstr "Virginie"
 
-#: classes/class-wc-countries.php:402
+#: classes/class-wc-countries.php:431
 #@ woocommerce
 msgid "Washington"
 msgstr "Washington"
 
-#: classes/class-wc-countries.php:403
+#: classes/class-wc-countries.php:432
 #@ woocommerce
 msgid "West Virginia"
 msgstr "Virginie-Occidentale"
 
-#: classes/class-wc-countries.php:404
+#: classes/class-wc-countries.php:433
 #@ woocommerce
 msgid "Wisconsin"
 msgstr "Wisconsin"
 
-#: classes/class-wc-countries.php:405
+#: classes/class-wc-countries.php:434
 #@ woocommerce
 msgid "Wyoming"
 msgstr "Wyoming"
 
-#: classes/class-wc-countries.php:408
+#: classes/class-wc-countries.php:437
 #@ woocommerce
 msgid "Americas"
 msgstr "Am&eacute;rique"
 
-#: classes/class-wc-countries.php:409
+#: classes/class-wc-countries.php:438
 #@ woocommerce
 msgid "Europe"
 msgstr "Europe"
 
-#: classes/class-wc-countries.php:410
+#: classes/class-wc-countries.php:439
 #@ woocommerce
 msgid "Pacific"
 msgstr "Pacifique"
 
-#: classes/class-wc-countries.php:461
+#: classes/class-wc-countries.php:490
 #@ woocommerce
 msgid "to the"
 msgstr "pour le"
 
-#: classes/class-wc-countries.php:462
+#: classes/class-wc-countries.php:491
 #@ woocommerce
 msgid "to"
 msgstr "pour"
 
-#: classes/class-wc-countries.php:469
+#: classes/class-wc-countries.php:498
 #@ woocommerce
 msgid "the"
 msgstr "le"
 
-#: classes/class-wc-countries.php:475
+#: classes/class-wc-countries.php:504
 #@ woocommerce
 msgid "VAT"
 msgstr "TVA"
 
-#: classes/class-wc-countries.php:481
+#: classes/class-wc-countries.php:510
 #@ woocommerce
 msgid "(incl. VAT)"
 msgstr "(avec TVA)"
 
-#: classes/class-wc-countries.php:481
+#: classes/class-wc-countries.php:510
 #@ woocommerce
 msgid "(incl. tax)"
 msgstr "(avec taxe)"
 
-#: classes/class-wc-countries.php:487
+#: classes/class-wc-countries.php:516
 #@ woocommerce
 msgid "(ex. VAT)"
 msgstr "(sans TVA)"
 
-#: classes/class-wc-countries.php:677
-#: classes/class-wc-countries.php:678
-#: classes/class-wc-countries.php:700
-#: classes/class-wc-countries.php:701
-#: classes/class-wc-countries.php:816
-#: classes/class-wc-countries.php:817
+#: classes/class-wc-countries.php:702
+#: classes/class-wc-countries.php:703
+#: classes/class-wc-countries.php:725
+#: classes/class-wc-countries.php:726
+#: classes/class-wc-countries.php:841
 #: classes/class-wc-countries.php:842
-#: classes/class-wc-countries.php:843
+#: classes/class-wc-countries.php:867
+#: classes/class-wc-countries.php:868
 #@ woocommerce
 msgid "Province"
 msgstr "Province"
 
-#: classes/class-wc-countries.php:694
-#: classes/class-wc-countries.php:695
-#: classes/class-wc-countries.php:823
-#: classes/class-wc-countries.php:824
+#: classes/class-wc-countries.php:719
+#: classes/class-wc-countries.php:720
+#: classes/class-wc-countries.php:848
+#: classes/class-wc-countries.php:849
 #@ woocommerce
 msgid "Municipality"
 msgstr "Municipalit&eacute;"
 
-#: classes/class-wc-countries.php:743
-#: classes/class-wc-countries.php:744
+#: classes/class-wc-countries.php:768
+#: classes/class-wc-countries.php:769
 #@ woocommerce
 msgid "Town/District"
 msgstr "Ville/Quartier"
 
-#: classes/class-wc-countries.php:747
-#: classes/class-wc-countries.php:748
+#: classes/class-wc-countries.php:772
+#: classes/class-wc-countries.php:773
 #@ woocommerce
 msgid "Region"
 msgstr "R&eacute;gion"
 
-#: classes/class-wc-countries.php:848
-#: classes/class-wc-countries.php:849
+#: classes/class-wc-countries.php:873
+#: classes/class-wc-countries.php:874
 #@ woocommerce
 msgid "Zip"
 msgstr "ZIP"
 
-#: classes/class-wc-countries.php:852
-#: classes/class-wc-countries.php:853
+#: classes/class-wc-countries.php:877
+#: classes/class-wc-countries.php:878
 #: templates/cart/shipping-calculator.php:55
 #@ woocommerce
 msgid "State"
 msgstr "&Eacute;tat"
 
-#: classes/class-wc-countries.php:862
-#: classes/class-wc-countries.php:863
+#: classes/class-wc-countries.php:887
+#: classes/class-wc-countries.php:888
 #@ woocommerce
 msgid "County"
 msgstr "R&eacute;gion"
 
-#: classes/class-wc-countries.php:889
-#: classes/class-wc-countries.php:890
-#: classes/class-wc-countries.php:960
+#: classes/class-wc-countries.php:914
+#: classes/class-wc-countries.php:915
+#: classes/class-wc-countries.php:985
 #: templates/cart/shipping-calculator.php:63
 #@ woocommerce
 msgid "Postcode/Zip"
 msgstr "Code postal/ZIP"
 
-#: classes/class-wc-countries.php:894
-#: classes/class-wc-countries.php:895
-#: classes/class-wc-countries.php:954
+#: classes/class-wc-countries.php:919
+#: classes/class-wc-countries.php:920
+#: classes/class-wc-countries.php:979
 #@ woocommerce
 msgid "Town/City"
 msgstr "Ville"
 
-#: classes/class-wc-countries.php:924
+#: classes/class-wc-countries.php:949
 #@ woocommerce
 msgctxt "placeholder"
 msgid "First Name"
 msgstr "Pr&eacute;nom"
 
-#: classes/class-wc-countries.php:930
+#: classes/class-wc-countries.php:955
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Last Name"
 msgstr "Nom"
 
-#: classes/class-wc-countries.php:936
+#: classes/class-wc-countries.php:961
 #@ woocommerce
 msgid "Company Name"
 msgstr "Nom de l&rsquo;entreprise"
 
-#: classes/class-wc-countries.php:937
+#: classes/class-wc-countries.php:962
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Company (optional)"
 msgstr "Soci&eacute;t&eacute; (optionnel)"
 
-#: classes/class-wc-countries.php:942
+#: classes/class-wc-countries.php:967
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Address"
 msgstr "Adresse"
 
-#: classes/class-wc-countries.php:948
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Address 2 (optional)"
-msgstr "Adresse 2 (optionnel)"
-
-#: classes/class-wc-countries.php:955
+#: classes/class-wc-countries.php:980
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Town/City"
 msgstr "Ville"
 
-#: classes/class-wc-countries.php:961
+#: classes/class-wc-countries.php:986
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Postcode/Zip"
 msgstr "Code postal/ZIP"
 
-#: classes/class-wc-countries.php:969
+#: classes/class-wc-countries.php:994
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Country"
 msgstr "Pays"
 
-#: classes/class-wc-countries.php:976
+#: classes/class-wc-countries.php:1001
 #@ woocommerce
 msgctxt "placeholder"
 msgid "State/County"
 msgstr "&Eacute;tat/R&eacute;gion"
 
-#: classes/class-wc-countries.php:1020
+#: classes/class-wc-countries.php:1045
 #@ woocommerce
 msgid "Email Address"
 msgstr "Adresse E-mail"
 
-#: classes/class-wc-countries.php:1021
+#: classes/class-wc-countries.php:1046
 #@ woocommerce
 msgctxt "placeholder"
 msgid "Email Address"
 msgstr "Adresse E-mail"
 
-#: classes/class-wc-countries.php:1027
-#@ woocommerce
-msgctxt "placeholder"
-msgid "Phone"
-msgstr "T&eacute;l&eacute;phone"
-
-#: classes/class-wc-coupon.php:149
+#: classes/class-wc-coupon.php:148
 #@ woocommerce
 msgid "Coupon usage limit has been reached."
 msgstr "La limite d&rsquo;utilisation du coupon a &eacute;t&eacute; atteinte."
 
-#: classes/class-wc-coupon.php:157
+#: classes/class-wc-coupon.php:156
 #@ woocommerce
 msgid "This coupon has expired."
 msgstr "Ce code promo est expir&eacute;"
 
-#: classes/class-wc-coupon.php:165
+#: classes/class-wc-coupon.php:164
 #, php-format
 #@ woocommerce
 msgid "The minimum spend for this coupon is %s."
@@ -8341,45 +8276,45 @@ msgstr "L&rsquo;&eacute;tat de la commande est pass&eacute; de %s &agrave; %s."
 msgid "Order item stock reduced successfully."
 msgstr "Stock d&rsquo;article de la commande diminu&eacute; avec succ&egrave;s."
 
-#: classes/class-wc-product.php:460
+#: classes/class-wc-product.php:477
 #, php-format
 #@ woocommerce
 msgid "Only %s left in stock"
 msgstr "Plus que %s en stock"
 
-#: classes/class-wc-product.php:463
+#: classes/class-wc-product.php:480
 #, php-format
 #@ woocommerce
 msgid "%s in stock"
 msgstr "%s en stock"
 
-#: classes/class-wc-product.php:470
+#: classes/class-wc-product.php:487
 #@ woocommerce
 msgid "(backorders allowed)"
 msgstr "(reliquats autoris&eacute;s)"
 
-#: classes/class-wc-product.php:477
-#: classes/class-wc-product.php:490
+#: classes/class-wc-product.php:494
+#: classes/class-wc-product.php:507
 #: templates/cart/cart.php:62
 #@ woocommerce
 msgid "Available on backorder"
 msgstr "Disponible sur commande"
 
-#: classes/class-wc-product.php:716
+#: classes/class-wc-product.php:760
 #@ woocommerce
 msgctxt "min_price"
 msgid "From:"
-msgstr "Du&nbsp;:"
+msgstr "A partir de&nbsp;:"
 
-#: classes/class-wc-product.php:760
+#: classes/class-wc-product.php:804
 #: templates/single-product-reviews.php:29
 #, php-format
 #@ woocommerce
 msgid "Rated %s out of 5"
 msgstr "Not&eacute; %s sur 5"
 
-#: classes/class-wc-product.php:1091
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:165
+#: classes/class-wc-product.php:1138
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:178
 #: templates/single-product/meta.php:11
 #@ woocommerce
 msgid "SKU:"
@@ -8890,27 +8825,27 @@ msgstr "Google Analytics"
 msgid "Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website."
 msgstr "Google Analytics est un service gratuit offert par Google qui g&eacute;n&egrave;re des statistiques d&eacute;taill&eacute;es sur les visiteurs d&rsquo;un site."
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:45
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:50
 #@ woocommerce
 msgid "Google Analytics ID"
 msgstr "ID Google Analytics"
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:46
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:51
 #@ woocommerce
 msgid "Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>"
 msgstr "Connectez-vous &agrave; votre compte Google Analytics pour trouver votre ID <code>UA-XXXXX-X</code>"
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:51
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:56
 #@ woocommerce
 msgid "Tracking code"
 msgstr "Code de suivi"
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:52
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:57
 #@ woocommerce
 msgid "Add tracking code to your site's footer. You don't need to enable this if using a 3rd party analytics plugin."
 msgstr "Ajouter le code de suivi dans le pied de page de votre site. Vous n&rsquo;avez pas besoin de l&rsquo;activer si vous utilisez une extention de statistiques tierce."
 
-#: classes/integrations/google-analytics/class-wc-google-analytics.php:58
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:63
 #@ woocommerce
 msgid "Add eCommerce tracking code to the thankyou page"
 msgstr "Ajouter le code de suivi eCommerce &agrave; votre page de remerciements."
@@ -9604,6 +9539,7 @@ msgstr "D&eacute;sol&eacute;, nous ne trouvons pas ce n&deg; de commande dans no
 msgid "Your order has already been paid for. Please contact us if you need assistance."
 msgstr "Votre commande a d&eacute;j&agrave; &eacute;t&eacute; pay&eacute;e. Veuillez nous contacter si vous avez besoin d&rsquo;assistance."
 
+#: admin/woocommerce-admin-functions.php:113
 #: shortcodes/shortcode-pay.php:73
 #: templates/checkout/thankyou.php:36
 #: templates/emails/admin-new-order.php:9
@@ -9627,9 +9563,9 @@ msgstr "Date&nbsp;:"
 msgid "Payment method:"
 msgstr "Mode de paiement&nbsp;:"
 
-#: templates/archive-product.php:70
+#: templates/archive-product.php:72
 #: templates/loop-shop.php:36
-#: woocommerce-template.php:76
+#: woocommerce-template.php:78
 #@ woocommerce
 msgid "No products found which match your selection."
 msgstr "Aucun produit correspondant &agrave; votre s&eacute;lection n&rsquo;a &eacute;t&eacute; trouv&eacute;."
@@ -9719,6 +9655,7 @@ msgstr "Mauvais"
 msgid "Your Review"
 msgstr "Votre avis"
 
+#: admin/woocommerce-admin-functions.php:120
 #: templates/cart/cart.php:20
 #: templates/emails/admin-new-order.php:15
 #: templates/emails/customer-completed-order.php:15
@@ -10014,6 +9951,7 @@ msgstr "Vous avez re&ccedil;u une commande de"
 msgid ". Their order is as follows:"
 msgstr ". La commande est la suivante&nbsp;:"
 
+#: admin/woocommerce-admin-functions.php:139
 #: templates/emails/admin-new-order.php:40
 #: templates/emails/customer-completed-order.php:40
 #: templates/emails/customer-note.php:44
@@ -10056,16 +9994,19 @@ msgstr "Bonjour, un commentaire vient juste d&rsquo;&ecirc;tre ajout&eacute; &ag
 msgid "For your reference, your order details are shown below."
 msgstr "Pour votre information, les d&eacute;tails de votre commande sont affich&eacute;s ci-dessous."
 
+#: admin/woocommerce-admin-functions.php:111
 #: templates/emails/customer-processing-order.php:5
 #@ woocommerce
 msgid "Thank you, we are now processing your order. Your order's details are below."
 msgstr "Merci, nous traitons votre commande. Les d&eacute;tails de la commande sont ci-dessous."
 
+#: admin/woocommerce-admin-functions.php:145
 #: templates/emails/email-addresses.php:7
 #@ woocommerce
 msgid "Billing address"
 msgstr "Adresse de facturation"
 
+#: admin/woocommerce-admin-functions.php:152
 #: templates/emails/email-addresses.php:17
 #@ woocommerce
 msgid "Shipping address"
@@ -10162,7 +10103,7 @@ msgstr "Entrez &agrave; nouveau le mot de passe"
 #, php-format
 #@ woocommerce
 msgid "Hello, <strong>%s</strong>. From your account dashboard you can view your recent orders, manage your shipping and billing addresses and <a href=\"%s\">change your password</a>."
-msgstr "Bonjour, <strong>%s</strong>. Vous pouvez voir vos commandes r&eacute;centes, g&eacute;rer vos adresses de livraison et de facturation et <a href=\"%s\">changer votre mot de passe</a> &agrave; partir du tableau de bord de votre compte."
+msgstr "Bonjour, <strong>%s</strong>. Vous pouvez voir vos commandes r&eacute;centes, g&eacute;rer votre adresse de facturation et <a href=\"%s\">changer votre mot de passe</a> &agrave; partir du tableau de bord de votre compte."
 
 #: templates/myaccount/my-account.php:16
 #@ woocommerce
@@ -10189,7 +10130,7 @@ msgstr "Mon adresse"
 #: templates/myaccount/my-account.php:28
 #@ woocommerce
 msgid "The following addresses will be used on the checkout page by default."
-msgstr "Les adresse suivantes seront utilis&eacute;es par d&eacute;faut sur les pages commande."
+msgstr "L'adresse suivante sera utilis&eacute;e par d&eacute;faut sur les pages commande."
 
 #: templates/myaccount/my-address.php:39
 #@ woocommerce
@@ -10726,91 +10667,6 @@ msgstr "WooCommerce - Produits les mieux not&eacute;s"
 msgid "Top Rated Products"
 msgstr "Produits les mieux not&eacute;s"
 
-#: admin/post-types/writepanels/writepanel-product_data.php:46
-#@ woocommerce
-msgid "Virtual products are intangible and aren't shipped."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:52
-#@ woocommerce
-msgid "Downloadable products give access to a file upon purchase."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:70
-#@ woocommerce
-msgid "Taxes"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:80
-#@ woocommerce
-msgid "Advanced"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:91
-#@ woocommerce
-msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:143
-#@ woocommerce
-msgid "Weight in decimal form"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:157
-#@ woocommerce
-msgid "LxWxH in decimal form"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:520
-#@ woocommerce
-msgid "Menu order"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:520
-#@ woocommerce
-msgid "Custom ordering position."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:560
-#@ woocommerce
-msgid "Enable reviews"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:946
-#@ woocommerce
-msgid "Catalog/search"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:959
-#@ woocommerce
-msgid "Catalog visibility:"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:976
-#@ woocommerce
-msgid "Define the loops this product should be visible in. The product will still be accessible directly."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:982
-#@ woocommerce
-msgid "Enable this option to feature this product."
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:984
-#@ woocommerce
-msgid "Featured Product"
-msgstr ""
-
-#: admin/post-types/writepanels/writepanel-product_data.php:988
-#@ default
-msgid "OK"
-msgstr ""
-
-#: admin/settings/settings-init.php:152
-#@ woocommerce
-msgid "Enable coupon form on cart"
-msgstr ""
-
 #: admin/settings/settings-init.php:262
 #@ woocommerce
 msgid "Enable jQuery UI (used by the price filter widget)"
@@ -10831,24 +10687,24 @@ msgstr ""
 msgid "Taxonomy exists - please change the slug"
 msgstr ""
 
-#: admin/woocommerce-admin-functions.php:299
-#: admin/woocommerce-admin-functions.php:300
+#: admin/woocommerce-admin-functions.php:344
+#: admin/woocommerce-admin-functions.php:345
 #@ woocommerce
 msgid "Mark processing"
 msgstr ""
 
-#: admin/woocommerce-admin-functions.php:302
-#: admin/woocommerce-admin-functions.php:303
+#: admin/woocommerce-admin-functions.php:347
+#: admin/woocommerce-admin-functions.php:348
 #@ woocommerce
 msgid "Mark completed"
 msgstr ""
 
-#: admin/woocommerce-admin-functions.php:334
+#: admin/woocommerce-admin-functions.php:379
 #@ woocommerce
 msgid "Order status changed by bulk edit:"
 msgstr ""
 
-#: admin/woocommerce-admin-functions.php:353
+#: admin/woocommerce-admin-functions.php:398
 #, php-format
 #@ default
 msgid "Order status changed."
@@ -10856,15 +10712,227 @@ msgid_plural "%s order statuses changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/woocommerce-admin-init.php:571
+#: admin/woocommerce-admin-init.php:573
 #@ woocommerce
 msgid "Order notes"
+msgstr "Notes de Commande"
+
+#: admin/woocommerce-admin-status.php:382
+#@ woocommerce
+msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgstr ""
+
+#: classes/class-wc-checkout.php:178
+#@ woocommerce
+msgid "is not valid. Please enter one of the following:"
+msgstr ""
+
+#: classes/class-wc-checkout.php:345
+#, php-format
+#@ woocommerce
+msgid "Order &ndash; %s"
+msgstr ""
+
+#: classes/class-wc-checkout.php:345
+#, php-format
+#@ woocommerce
+msgctxt "Order date parsed by strftime"
+msgid "%b %d, %Y @ %I:%M %p"
+msgstr ""
+
+#: classes/class-wc-checkout.php:374
+#@ woocommerce
+msgid "Backordered"
+msgstr ""
+
+#: classes/class-wc-countries.php:709
+#: classes/class-wc-countries.php:710
+#@ woocommerce
+msgid "Canton"
+msgstr ""
+
+#: classes/class-wc-order.php:157
+#@ woocommerce
+msgctxt "hash before order number"
+msgid "#"
+msgstr ""
+
+#: templates/archive-product.php:27
+#: woocommerce-template.php:32
+#, php-format
+#@ woocommerce
+msgid "Search Results: &ldquo;%s&rdquo;"
+msgstr ""
+
+#: templates/archive-product.php:29
+#: woocommerce-template.php:44
+#, php-format
+#@ woocommerce
+msgid "&nbsp;&ndash; Page %s"
+msgstr ""
+
+#: templates/cart/totals.php:128
+#: templates/cart/totals.php:155
+#: templates/checkout/review-order.php:134
+#: templates/checkout/review-order.php:158
+#@ woocommerce
+msgid "incl.&nbsp;"
+msgstr ""
+
+#: templates/single-product/review.php:29
+#@ woocommerce
+msgid "verified owner"
+msgstr ""
+
+#: widgets/widget-cart.php:24
+#@ woocommerce
+msgid "Display the user's Cart in the sidebar."
+msgstr ""
+
+#: widgets/widget-cart.php:26
+#@ woocommerce
+msgid "WooCommerce Cart"
+msgstr ""
+
+#: woocommerce-template.php:721
+#: woocommerce.php:1003
+#@ woocommerce
+msgid "required"
+msgstr "requis"
+
+#: woocommerce-template.php:737
+#@ woocommerce
+msgid "Update country"
+msgstr ""
+
+#. translators: plugin header field 'PluginURI'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "http://www.woothemes.com/woocommerce/"
+msgstr ""
+
+#. translators: plugin header field 'Description'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgstr ""
+
+#. translators: plugin header field 'Author'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "WooThemes"
+msgstr ""
+
+#. translators: plugin header field 'AuthorURI'
+#: woocommerce.php:0
+#@ woocommerce
+msgid "http://woothemes.com"
+msgstr ""
+
+#: woocommerce.php:1001
+#@ woocommerce
+msgid "Please select a rating"
+msgstr "S'il vous plaît, attribuez une note"
+
+#: admin/post-types/writepanels/writepanel-coupon_data.php:177
+#@ woocommerce
+msgid "Coupon code already exists."
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:46
+#@ woocommerce
+msgid "Virtual products are intangible and aren't shipped."
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:52
+#@ woocommerce
+msgid "Downloadable products give access to a file upon purchase."
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:70
+#@ woocommerce
+msgid "Taxes"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:80
+#@ woocommerce
+msgid "Advanced"
+msgstr "Avancé"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:91
+#@ woocommerce
+msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:143
+#@ woocommerce
+msgid "Weight in decimal form"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:157
+#@ woocommerce
+msgid "LxWxH in decimal form"
+msgstr ""
+
+#: admin/post-types/writepanels/writepanel-product_data.php:520
+#@ woocommerce
+msgid "Menu order"
+msgstr "Ordre du Menu"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:520
+#@ woocommerce
+msgid "Custom ordering position."
+msgstr "Classement Personnalis&eacute;"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:560
+#@ woocommerce
+msgid "Enable reviews"
+msgstr "Activer les commentaires"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:946
+#@ woocommerce
+msgid "Catalog/search"
+msgstr "Catalogue, Recherche"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:959
+#@ woocommerce
+msgid "Catalog visibility:"
+msgstr "Visiblit&eacute;"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:976
+#@ woocommerce
+msgid "Define the loops this product should be visible in. The product will still be accessible directly."
+msgstr "D&eacute;fini o&ugrave; le produit doit toujours &ecirc;tre visible"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:982
+#@ woocommerce
+msgid "Enable this option to feature this product."
+msgstr "Activez cette option pour mettre le produit &agrave; la une."
+
+#: admin/post-types/writepanels/writepanel-product_data.php:984
+#@ woocommerce
+msgid "Featured Product"
+msgstr "Produits &agrave; la une"
+
+#: admin/post-types/writepanels/writepanel-product_data.php:988
+#@ default
+msgid "OK"
+msgstr ""
+
+#: admin/settings/settings-init.php:152
+#@ woocommerce
+msgid "Enable coupon form on cart"
+msgstr ""
+
+#: admin/woocommerce-admin-functions.php:133
+#@ woocommerce
+msgid "Order total:"
 msgstr ""
 
 #: admin/woocommerce-admin-reports.php:36
 #@ woocommerce
 msgid "Taxes by month"
-msgstr ""
+msgstr "Taxes par Mois"
 
 #: admin/woocommerce-admin-reports.php:1733
 #@ woocommerce
@@ -10946,55 +11014,238 @@ msgstr ""
 msgid "Toggle tax rows"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:318
+#: admin/woocommerce-admin-status.php:232
+#@ woocommerce
+msgid "Core Taxonomies"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:238
+#@ woocommerce
+msgid "Order Statuses"
+msgstr ""
+
+#: admin/woocommerce-admin-status.php:334
 #@ woocommerce
 msgid "Session name"
 msgstr ""
 
-#: admin/woocommerce-admin-status.php:366
+#: classes/class-wc-cart.php:672
 #@ woocommerce
-msgid "wp_remote_post() failed. PayPal IPN may not work with your server."
+msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: classes/class-wc-checkout.php:178
+#: classes/class-wc-checkout.php:536
 #@ woocommerce
-msgid "is not valid. Please enter one of the following:"
+msgid "Customer IP Address"
 msgstr ""
 
-#: classes/class-wc-checkout.php:345
-#, php-format
+#: classes/class-wc-checkout.php:537
 #@ woocommerce
-msgid "Order &ndash; %s"
+msgid "Customer UA"
 msgstr ""
 
-#: classes/class-wc-checkout.php:345
-#, php-format
-#@ woocommerce
-msgctxt "Order date parsed by strftime"
-msgid "%b %d, %Y @ %I:%M %p"
-msgstr ""
-
-#: classes/class-wc-checkout.php:374
-#@ woocommerce
-msgid "Backordered"
-msgstr ""
-
-#: classes/class-wc-checkout.php:543
+#: classes/class-wc-checkout.php:551
 #, php-format
 #@ woocommerce
 msgid "Coupon Code Used: %s"
 msgstr ""
 
-#: classes/class-wc-countries.php:684
-#: classes/class-wc-countries.php:685
+#: classes/class-wc-countries.php:293
 #@ woocommerce
-msgid "Canton"
+msgid "Distrito Federal"
 msgstr ""
 
-#: classes/class-wc-order.php:157
+#: classes/class-wc-countries.php:299
 #@ woocommerce
-msgctxt "hash before order number"
-msgid "#"
+msgid "Rio Grande do Norte"
+msgstr ""
+
+#: classes/class-wc-countries.php:300
+#: classes/class-wc-countries.php:313
+#@ woocommerce
+msgid "Rio Grande do Sul"
+msgstr ""
+
+#: classes/class-wc-countries.php:303
+#@ woocommerce
+msgid "Santa Catarina"
+msgstr ""
+
+#: classes/class-wc-countries.php:309
+#@ woocommerce
+msgid "Mato Grosso"
+msgstr ""
+
+#: classes/class-wc-countries.php:310
+#@ woocommerce
+msgid "Mato Grosso do Sul"
+msgstr ""
+
+#: classes/class-wc-countries.php:311
+#@ woocommerce
+msgid "Rio de Janeiro"
+msgstr ""
+
+#: classes/class-wc-countries.php:312
+#@ woocommerce
+msgid "S&atilde;o Paulo"
+msgstr ""
+
+#: classes/class-wc-countries.php:314
+#@ woocommerce
+msgid "Minas Gerais"
+msgstr ""
+
+#: classes/class-wc-countries.php:346
+#@ woocommerce
+msgid "Drenthe"
+msgstr ""
+
+#: classes/class-wc-countries.php:347
+#@ woocommerce
+msgid "Flevoland"
+msgstr ""
+
+#: classes/class-wc-countries.php:348
+#@ woocommerce
+msgid "Friesland"
+msgstr ""
+
+#: classes/class-wc-countries.php:349
+#@ woocommerce
+msgid "Gelderland"
+msgstr ""
+
+#: classes/class-wc-countries.php:350
+#@ woocommerce
+msgid "Groningen"
+msgstr ""
+
+#: classes/class-wc-countries.php:351
+#@ woocommerce
+msgid "Limburg"
+msgstr ""
+
+#: classes/class-wc-countries.php:352
+#@ woocommerce
+msgid "Noord-Brabant"
+msgstr ""
+
+#: classes/class-wc-countries.php:353
+#@ woocommerce
+msgid "Noord-Holland"
+msgstr ""
+
+#: classes/class-wc-countries.php:354
+#@ woocommerce
+msgid "Overijssel"
+msgstr ""
+
+#: classes/class-wc-countries.php:355
+#@ woocommerce
+msgid "Utrecht"
+msgstr ""
+
+#: classes/class-wc-countries.php:356
+#@ woocommerce
+msgid "Zeeland"
+msgstr ""
+
+#: classes/class-wc-countries.php:357
+#@ woocommerce
+msgid "Zuid-Holland"
+msgstr ""
+
+#: classes/class-wc-countries.php:360
+#@ woocommerce
+msgid "Auckland"
+msgstr ""
+
+#: classes/class-wc-countries.php:361
+#@ woocommerce
+msgid "Canterbury"
+msgstr ""
+
+#: classes/class-wc-countries.php:362
+#@ woocommerce
+msgid "Wellington"
+msgstr ""
+
+#: classes/class-wc-countries.php:363
+#@ woocommerce
+msgid "Waikato"
+msgstr ""
+
+#: classes/class-wc-countries.php:364
+#@ woocommerce
+msgid "Bay of Plenty"
+msgstr ""
+
+#: classes/class-wc-countries.php:365
+#@ woocommerce
+msgid "Manawatu-Wanganui"
+msgstr ""
+
+#: classes/class-wc-countries.php:366
+#@ woocommerce
+msgid "Otago"
+msgstr ""
+
+#: classes/class-wc-countries.php:367
+#@ woocommerce
+msgid "Hawke&rsquo;s Bay"
+msgstr ""
+
+#: classes/class-wc-countries.php:368
+#@ woocommerce
+msgid "Northland"
+msgstr ""
+
+#: classes/class-wc-countries.php:369
+#@ woocommerce
+msgid "Taranaki"
+msgstr ""
+
+#: classes/class-wc-countries.php:370
+#@ woocommerce
+msgid "Southland"
+msgstr ""
+
+#: classes/class-wc-countries.php:371
+#@ woocommerce
+msgid "Nelson"
+msgstr ""
+
+#: classes/class-wc-countries.php:372
+#@ woocommerce
+msgid "Marlborough"
+msgstr ""
+
+#: classes/class-wc-countries.php:373
+#@ woocommerce
+msgid "Tasman"
+msgstr ""
+
+#: classes/class-wc-countries.php:374
+#@ woocommerce
+msgid "West Coast"
+msgstr ""
+
+#: classes/class-wc-countries.php:973
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Address 2 (optional)"
+msgstr ""
+
+#: classes/class-wc-countries.php:1052
+#@ woocommerce
+msgctxt "placeholder"
+msgid "Phone"
+msgstr ""
+
+#: classes/class-wc-coupon.php:227
+#@ woocommerce
+msgid "Invalid coupon"
 msgstr ""
 
 #: classes/gateways/bacs/class-wc-bacs.php:68
@@ -11017,26 +11268,15 @@ msgstr ""
 msgid "Gateway Testing"
 msgstr ""
 
-#: templates/archive-product.php:27
-#: woocommerce-template.php:32
-#, php-format
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:69
 #@ woocommerce
-msgid "Search Results: &ldquo;%s&rdquo;"
-msgstr ""
+msgid "Add event tracking code for add to cart actions"
+msgstr "Ajouter les &eacute;v&eacute;nements du code de suivi lors de l'ajout au Panier"
 
-#: templates/archive-product.php:29
-#: woocommerce-template.php:44
-#, php-format
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:229
+#: classes/integrations/google-analytics/class-wc-google-analytics.php:246
 #@ woocommerce
-msgid "&nbsp;&ndash; Page %s"
-msgstr ""
-
-#: templates/cart/totals.php:128
-#: templates/cart/totals.php:155
-#: templates/checkout/review-order.php:134
-#: templates/checkout/review-order.php:158
-#@ woocommerce
-msgid "incl.&nbsp;"
+msgid "Add to Cart"
 msgstr ""
 
 #: templates/emails/admin-new-order.php:9
@@ -11045,70 +11285,15 @@ msgstr ""
 msgid "jS F Y"
 msgstr ""
 
-#: templates/single-product/review.php:29
-#@ woocommerce
-msgid "verified owner"
-msgstr ""
-
-#: widgets/widget-cart.php:24
-#@ woocommerce
-msgid "Display the user's Cart in the sidebar."
-msgstr ""
-
-#: widgets/widget-cart.php:26
-#@ woocommerce
-msgid "WooCommerce Cart"
-msgstr ""
-
-#: woocommerce-template.php:700
-#: woocommerce.php:997
-#@ woocommerce
-msgid "required"
-msgstr ""
-
-#: woocommerce-template.php:716
-#@ woocommerce
-msgid "Update country"
-msgstr ""
-
-#. translators: plugin header field 'PluginURI'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "http://www.woothemes.com/woocommerce/"
-msgstr ""
-
-#. translators: plugin header field 'Description'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
-msgstr ""
-
-#. translators: plugin header field 'Author'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "WooThemes"
-msgstr ""
-
-#. translators: plugin header field 'AuthorURI'
-#: woocommerce.php:0
-#@ woocommerce
-msgid "http://woothemes.com"
-msgstr ""
-
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
 #@ woocommerce
-msgid "1.6.1"
+msgid "1.6.2"
 msgstr ""
 
-#: woocommerce.php:587
+#: woocommerce.php:589
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Categories"
-msgstr ""
-
-#: woocommerce.php:995
-#@ woocommerce
-msgid "Please select a rating"
 msgstr ""
 
