@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-07-27 15:30:32+0000\n"
+"PO-Revision-Date: 2012-08-15 11:39:22+0000\n"
 "Last-Translator: Roy Dittmann <info@owc.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -10817,72 +10817,72 @@ msgstr "Kanton"
 #: admin/post-types/writepanels/writepanel-product_data.php:46
 #@ woocommerce
 msgid "Virtual products are intangible and aren't shipped."
-msgstr ""
+msgstr "Virtuelle Produkte sind immateriell und werden nicht versendet."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:52
 #@ woocommerce
 msgid "Downloadable products give access to a file upon purchase."
-msgstr ""
+msgstr "Für Herunterladbare Produkte erhalten Sie nach dem Kauf Zugriff auf eine Datei."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:70
 #@ woocommerce
 msgid "Taxes"
-msgstr ""
+msgstr "Steuern"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:80
 #@ woocommerce
 msgid "Advanced"
-msgstr ""
+msgstr "Fortgeschritten"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:91
 #@ woocommerce
 msgid "SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased."
-msgstr ""
+msgstr "SKU bezieht sich auf eine \\\"Stock-keeping unit\\\", ein einzigartiger Bezeichner für jedes einzelne Produkt und jede Dienstleistung die gekauft werden kann."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:143
 #@ woocommerce
 msgid "Weight in decimal form"
-msgstr ""
+msgstr "Gewicht in dezimaler Form"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:157
 #@ woocommerce
 msgid "LxWxH in decimal form"
-msgstr ""
+msgstr "LxBxH in dezimaler Form"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:520
 #@ woocommerce
 msgid "Menu order"
-msgstr ""
+msgstr "Menü Gliederung "
 
 #: admin/post-types/writepanels/writepanel-product_data.php:520
 #@ woocommerce
 msgid "Custom ordering position."
-msgstr ""
+msgstr "Benutzerdefinierte bestell position"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:560
 #@ woocommerce
 msgid "Enable reviews"
-msgstr ""
+msgstr "Rezensionen zulassen"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:946
 #@ woocommerce
 msgid "Catalog/search"
-msgstr ""
+msgstr "Katalog/Suche"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:959
 #@ woocommerce
 msgid "Catalog visibility:"
-msgstr ""
+msgstr "Katalog sichtbarkeit:"
 
 #: admin/post-types/writepanels/writepanel-product_data.php:976
 #@ woocommerce
 msgid "Define the loops this product should be visible in. The product will still be accessible directly."
-msgstr ""
+msgstr "Definieren Sie die Schleifen in denen das Produkt sichtbar seien soll. Das Produkt bleib direkt zugreifbar."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:982
 #@ woocommerce
 msgid "Enable this option to feature this product."
-msgstr ""
+msgstr "Aktivieren Sie diese Option damit das Produkt angepriesen wird."
 
 #: admin/post-types/writepanels/writepanel-product_data.php:984
 #@ woocommerce
@@ -10897,39 +10897,39 @@ msgstr ""
 #: admin/settings/settings-init.php:152
 #@ woocommerce
 msgid "Enable coupon form on cart"
-msgstr ""
+msgstr "Gutscheinform im Warenkorb anzeigen"
 
 #: admin/settings/settings-init.php:262
 #@ woocommerce
 msgid "Enable jQuery UI (used by the price filter widget)"
-msgstr ""
+msgstr "jQuery UI (vom Filter widget benötigt) aktivieren"
 
 #: admin/settings/settings-init.php:682
 #@ woocommerce
 msgid "Show \"verified owner\" label for customer reviews"
-msgstr ""
+msgstr "Zeige \"Verifizierter Besitzer\" Kennzeichnung für Kundenkritiken"
 
 #: admin/woocommerce-admin-attributes.php:69
 #@ woocommerce
 msgid "Taxonomy exists - please change the slug"
-msgstr ""
+msgstr "Taxonomie existiert bereits - bitte ändern Sie den Slug"
 
 #: admin/woocommerce-admin-functions.php:299
 #: admin/woocommerce-admin-functions.php:300
 #@ woocommerce
 msgid "Mark processing"
-msgstr ""
+msgstr "Ziel wird bearbeitet"
 
 #: admin/woocommerce-admin-functions.php:302
 #: admin/woocommerce-admin-functions.php:303
 #@ woocommerce
 msgid "Mark completed"
-msgstr ""
+msgstr "Ziel fertig gestellt "
 
 #: admin/woocommerce-admin-functions.php:334
 #@ woocommerce
 msgid "Order status changed by bulk edit:"
-msgstr ""
+msgstr "Bestellstatus wurde von der Massenverarbeitung verändert:"
 
 #: admin/woocommerce-admin-functions.php:353
 #, php-format
@@ -10942,128 +10942,128 @@ msgstr[1] ""
 #: admin/woocommerce-admin-init.php:571
 #@ woocommerce
 msgid "Order notes"
-msgstr ""
+msgstr "Bestellnotizen:"
 
 #: admin/woocommerce-admin-reports.php:36
 #@ woocommerce
 msgid "Taxes by month"
-msgstr ""
+msgstr "Steuern pro Monat"
 
 #: admin/woocommerce-admin-reports.php:1733
 #@ woocommerce
 msgid "Total taxes for year"
-msgstr ""
+msgstr "Gesamte Steuern für das Jahr"
 
 #: admin/woocommerce-admin-reports.php:1744
 #@ woocommerce
 msgid "Total product taxes for year"
-msgstr ""
+msgstr "Gesamte Produktsteuern für das Jahr"
 
 #: admin/woocommerce-admin-reports.php:1755
 #@ woocommerce
 msgid "Total shipping tax for year"
-msgstr ""
+msgstr "Gesamte Versandsteuern für das Jahr"
 
 #: admin/woocommerce-admin-reports.php:1771
 #@ woocommerce
 msgid "Total Sales"
-msgstr ""
+msgstr "Gesamtverkäufe"
 
 #: admin/woocommerce-admin-reports.php:1771
 #@ woocommerce
 msgid "This is the sum of the 'Order Total' field within your orders."
-msgstr ""
+msgstr "Das ist die Summe aus dem 'Bestellung gesamt' Feld Ihrer Bestellung."
 
 #: admin/woocommerce-admin-reports.php:1772
 #@ woocommerce
 msgid "Total Shipping"
-msgstr ""
+msgstr "Komplette Versandkosten"
 
 #: admin/woocommerce-admin-reports.php:1772
 #@ woocommerce
 msgid "This is the sum of the 'Shipping Total' field within your orders."
-msgstr ""
+msgstr "Das ist die Summe der 'Versandkosten gesamt' Feldes Ihrer Bestellung."
 
 #: admin/woocommerce-admin-reports.php:1773
 #@ woocommerce
 msgid "Total Product Taxes"
-msgstr ""
+msgstr "Gesamte Produktsteuern"
 
 #: admin/woocommerce-admin-reports.php:1773
 #@ woocommerce
 msgid "This is the sum of the 'Cart Tax' field within your orders."
-msgstr ""
+msgstr "Das ist die Summe des 'Warenkorbsteuern' Feldes Ihrer Bestellung."
 
 #: admin/woocommerce-admin-reports.php:1774
 #@ woocommerce
 msgid "Total Shipping Taxes"
-msgstr ""
+msgstr "Gesamte Versandsteuern"
 
 #: admin/woocommerce-admin-reports.php:1774
 #@ woocommerce
 msgid "This is the sum of the 'Shipping Tax' field within your orders."
-msgstr ""
+msgstr "Das ist die Summe des 'Versandsteuern' Feldes Ihrer Bestellung."
 
 #: admin/woocommerce-admin-reports.php:1775
 #@ woocommerce
 msgid "Total Taxes"
-msgstr ""
+msgstr "Gesamte Steuern"
 
 #: admin/woocommerce-admin-reports.php:1775
 #@ woocommerce
 msgid "This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders."
-msgstr ""
+msgstr "Das ist die Summe der 'Warenkorbsteuer' und 'Versandsteuer' Feldern aus Ihrer Bestellung."
 
 #: admin/woocommerce-admin-reports.php:1776
 #@ woocommerce
 msgid "Net profit"
-msgstr ""
+msgstr "Nettogewinn"
 
 #: admin/woocommerce-admin-reports.php:1776
 #@ woocommerce
 msgid "Total sales minus shipping and tax."
-msgstr ""
+msgstr "Gesamtverkäufe minus Versand und Steuern"
 
 #: admin/woocommerce-admin-reports.php:1819
 #@ woocommerce
 msgid "Toggle tax rows"
-msgstr ""
+msgstr "Steuerreihen umschalten"
 
 #: admin/woocommerce-admin-status.php:318
 #@ woocommerce
 msgid "Session name"
-msgstr ""
+msgstr "Sitzungsname"
 
 #: classes/class-wc-checkout.php:178
 #@ woocommerce
 msgid "is not valid. Please enter one of the following:"
-msgstr ""
+msgstr "ist nicht gültig. Bitte geben sie eins der Folgenden ein:"
 
 #: classes/class-wc-checkout.php:374
 #@ woocommerce
 msgid "Backordered"
-msgstr ""
+msgstr "Rückständig"
 
 #: classes/class-wc-checkout.php:543
 #, php-format
 #@ woocommerce
 msgid "Coupon Code Used: %s"
-msgstr ""
+msgstr "Coupon Code benutzt: %s"
 
 #: classes/gateways/bacs/class-wc-bacs.php:68
 #@ woocommerce
 msgid "Account Details"
-msgstr ""
+msgstr "Benutzerkonto details"
 
 #: classes/gateways/bacs/class-wc-bacs.php:70
 #@ woocommerce
 msgid "Optionally enter your bank details below for customers to pay into."
-msgstr ""
+msgstr "Geben Sie optional Ihre Bankdaten unten an die, die Kunden zum bezahlen nutzen können. "
 
 #: classes/gateways/paypal/class-wc-paypal.php:137
 #@ woocommerce
 msgid "Shipping options"
-msgstr ""
+msgstr "Versandoptionen"
 
 #: classes/gateways/paypal/class-wc-paypal.php:157
 #@ woocommerce
@@ -11075,14 +11075,14 @@ msgstr ""
 #, php-format
 #@ woocommerce
 msgid "Search Results: &ldquo;%s&rdquo;"
-msgstr ""
+msgstr "Such Ergebnisse: &ldquo;%s&rdquo;"
 
 #: templates/archive-product.php:29
 #: woocommerce-template.php:44
 #, php-format
 #@ woocommerce
 msgid "&nbsp;&ndash; Page %s"
-msgstr ""
+msgstr "&nbsp;&ndash; Seite %s"
 
 #: templates/emails/admin-new-order.php:9
 #: templates/emails/customer-invoice.php:13
@@ -11093,12 +11093,12 @@ msgstr ""
 #: templates/single-product/review.php:29
 #@ woocommerce
 msgid "verified owner"
-msgstr ""
+msgstr "Verifizierter Besitzer"
 
 #: woocommerce-template.php:716
 #@ woocommerce
 msgid "Update country"
-msgstr ""
+msgstr "Land aktualisieren"
 
 #. translators: plugin header field 'Version'
 #: woocommerce.php:0
@@ -11110,5 +11110,5 @@ msgstr ""
 #@ woocommerce
 msgctxt "Admin menu name"
 msgid "Categories"
-msgstr ""
+msgstr "Kategorien"
 
