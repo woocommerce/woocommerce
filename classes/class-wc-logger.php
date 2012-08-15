@@ -9,10 +9,14 @@
  */
 class WC_Logger {
 
+	/**
+	 * @var array Stores open file handles.
+	 * @access private
+	 */
 	private $handles;
 
 	/**
-	 * Constructor.
+	 * Constructor for the logger.
 	 *
 	 * @access public
 	 * @return void
@@ -88,8 +92,9 @@ class WC_Logger {
 /**
  * woocommerce_logger class.
  *
- * @extends WC_Logger
- * @deprecated 1.4
+ * @extends 	WC_Logger
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_logger extends WC_Logger {
 	public function __construct() {

@@ -11,18 +11,43 @@
  */
 class WC_Product_Variation extends WC_Product {
 
+	/** @var array Stores variation data (attributes) for the current variation. */
 	var $variation_data;
+
+	/** @var int ID of the variable product. */
 	var $variation_id;
+
+	/** @var bool True if the variation has a length. */
 	var $variation_has_length;
+
+	/** @var bool True if the variation has a width. */
 	var $variation_has_width;
+
+	/** @var bool True if the variation has a height. */
 	var $variation_has_height;
+
+	/** @var bool True if the variation has a weight. */
 	var $variation_has_weight;
+
+	/** @var bool True if the variation has a price. */
 	var $variation_has_price;
+
+	/** @var bool True if the variation has a sale price. */
 	var $variation_has_sale_price;
+
+	/** @var bool True if the variation has stock and is managing stock. */
 	var $variation_has_stock;
+
+	/** @var bool True if the variation has a sku. */
 	var $variation_has_sku;
+
+	/** @var string Stores the shipping class of the variation. */
 	var $variation_shipping_class;
+
+	/** @var int Stores the shipping class ID of the variation. */
 	var $variation_shipping_class_id;
+
+	/** @var bool True if the variation has a tax class. */
 	var $variation_has_tax_class;
 
 	/**
@@ -371,8 +396,9 @@ class WC_Product_Variation extends WC_Product {
 /**
  * woocommerce_product_variation class.
  *
- * @extends WC_Product_Variation
- * @deprecated 1.4
+ * @extends 	WC_Product_Variation
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_product_variation extends WC_Product_Variation {
 	public function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {

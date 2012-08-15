@@ -311,7 +311,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 					$item_name 	= $item['name'];
 
-					$item_meta = new order_item_meta( $item['item_meta'] );
+					$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 					if ($meta = $item_meta->display( true, true )) :
 						$item_name .= ' ('.$meta.')';
 					endif;

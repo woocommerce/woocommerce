@@ -11,51 +11,142 @@
  */
 class WC_Order {
 
+	/** @var int Order (post) ID */
 	var $id;
+
+	/** @var string Coupon code. */
 	var $status;
+
+	/** @var string Order date (placed). */
 	var $order_date;
+
+	/** @var string Order date (placed). */
 	var $modified_date;
+
+	/** @var string Note added by the customer. */
 	var $customer_note;
+
+	/** @var array Order (post) meta/custom fields. */
 	var $order_custom_fields;
+
+	/** @var string Order unique key. */
 	var $order_key;
+
+	/** @var string */
 	var $billing_first_name;
+
+	/** @var string */
 	var $billing_last_name;
+
+	/** @var string */
 	var $billing_company;
+
+	/** @var string */
 	var $billing_address_1;
+
+	/** @var string */
 	var $billing_address_2;
+
+	/** @var string */
 	var $billing_city;
+
+	/** @var string */
 	var $billing_postcode;
+
+	/** @var string */
 	var $billing_country;
+
+	/** @var string */
 	var $billing_state;
+
+	/** @var string */
 	var $billing_email;
+
+	/** @var string */
 	var $billing_phone;
+
+	/** @var string */
 	var $shipping_first_name;
+
+	/** @var string */
 	var $shipping_last_name;
+
+	/** @var string */
 	var $shipping_company;
+
+	/** @var string */
 	var $shipping_address_1;
+
+	/** @var string */
 	var $shipping_address_2;
+
+	/** @var string */
 	var $shipping_city;
+
+	/** @var string */
 	var $shipping_postcode;
+
+	/** @var string */
 	var $shipping_country;
+
+	/** @var string */
 	var $shipping_state;
+
+	/** @var string Method id of the shipping used */
 	var $shipping_method;
+
+	/** @var string Shipping method title */
 	var $shipping_method_title;
+
+	/** @var string Method id of the payment used */
 	var $payment_method;
+
+	/** @var string Payment method title */
 	var $payment_method_title;
+
+	/** @var string After tax discount total */
 	var $order_discount;
+
+	/** @var string Before tax discount total */
 	var $cart_discount;
+
+	/** @var string Tax for the items total */
 	var $order_tax;
+
+	/** @var string Shipping cost */
 	var $order_shipping;
+
+	/** @var string Shipping tax */
 	var $order_shipping_tax;
+
+	/** @var string Grand total */
 	var $order_total;
+
+	/** @var array Order line items array */
 	var $items;
+
+	/** @var array Taxes array (tax rows) */
 	var $taxes;
+
+	/** @var int User ID */
 	var $customer_user;
+
+	/** @var int User ID */
 	var $user_id;
+
+	/** @var string */
 	var $completed_date;
+
+	/** @var string */
 	var $billing_address;
+
+	/** @var string */
 	var $formatted_billing_address;
+
+	/** @var string */
 	var $shipping_address;
+
+	/** @var string */
 	var $formatted_shipping_address;
 
 	/**
@@ -1308,7 +1399,7 @@ class WC_Order {
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class order_item_meta {
+class WC_Order_Item_Meta {
 
 	var $meta;
 
@@ -1414,11 +1505,26 @@ class order_item_meta {
 /**
  * woocommerce_order class.
  *
- * @extends WC_Order
- * @deprecated 1.4
+ * @extends 	WC_Order
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_order extends WC_Order {
 	public function __construct( $id = '' ) {
 		parent::__construct( $id );
+	}
+}
+
+/**
+ * order_item_meta class.
+ *
+ * @extends 	WC_Order_Item_Meta
+ * @deprecated 	1.6.4
+ * @package		WooCommerce/Classes
+ */
+class order_item_meta extends WC_Order_Item_Meta {
+	public function __construct() {
+		//_deprecated_function( 'order_item_meta', '1.6.4', 'WC_Order_Item_Meta()' );
+		parent::__construct();
 	}
 }

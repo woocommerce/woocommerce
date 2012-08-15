@@ -9,18 +9,10 @@
  */
 class WC_Tax {
 
-	/**
-	 * Contains an array of tax rates.
-	 *
-	 * @var array
-	 */
+	/** @var array Contains an array of tax rates. */
 	var $rates;
 
-	/**
-	 * Contains an array of parsed tax rates with counties/states as keys.
-	 *
-	 * @var array
-	 */
+	/** @var array Contains an array of parsed tax rates with counties/states as keys. */
 	var $parsed_rates;
 
 	/**
@@ -572,8 +564,9 @@ class WC_Tax {
 /**
  * woocommerce_tax class.
  *
- * @extends WC_Tax
- * @deprecated 1.4
+ * @extends 	WC_Tax
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_tax extends WC_Tax {
 	public function __construct() {

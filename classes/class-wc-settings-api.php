@@ -9,39 +9,19 @@
  */
 class WC_Settings_API {
 
-	/**
-	 * The plugin ID. Used for option names.
-	 *
-	 * @var string
-	 */
+	/** @var string The plugin ID. Used for option names. */
 	var $plugin_id = 'woocommerce_';
 
-	/**
-	 * Array of setting values.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of setting values. */
 	var $settings = array();
 
-	/**
-	 * Array of form option fields.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of form option fields. */
 	var $form_fields = array();
 
-	/**
-	 * Array of validation errors.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of validation errors. */
 	var $errors = array();
 
-	/**
-	 * Sanitized fields after validation.
-	 *
-	 * @var array
-	 */
+	/** @var array Sanitized fields after validation. */
 	var $sanitized_fields = array();
 
 
@@ -583,8 +563,9 @@ class WC_Settings_API {
 /**
  * woocommerce_settings_api class.
  *
- * @extends WC_Settings_Api
- * @deprecated 1.4
+ * @extends 	WC_Settings_Api
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_settings_api extends WC_Settings_Api {
 	public function __construct() {

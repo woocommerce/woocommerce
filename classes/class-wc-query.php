@@ -9,50 +9,26 @@
  */
 class WC_Query {
 
-	/**
-	 * Unfiltered product ids (before layered nav etc)
-	 *
-	 * @var array
-	 */
+	/** @var array Unfiltered product ids (before layered nav etc) */
 	var $unfiltered_product_ids 	= array();
 
-	/**
-	 * Filtered product ids (after layered nav)
-	 *
-	 * @var array
-	 */
+	/** @var array Filtered product ids (after layered nav) */
 	var $filtered_product_ids 		= array();
 
-	/**
-	 * Product IDs that match the layered nav + price filter
-	 *
-	 * @var array
-	 */
+	/** @var array Product IDs that match the layered nav + price filter */
 	var $post__in 					= array();
 
-	/**
-	 * The meta query for the page
-	 *
-	 * @var array
-	 */
+	/** @var array The meta query for the page */
 	var $meta_query 				= '';
 
-	/**
-	 * Post IDs matching layered nav only
-	 *
-	 * @var array
-	 */
+	/** @var array Post IDs matching layered nav only */
 	var $layered_nav_post__in 		= array();
 
-	/**
-	 * Stores post IDs matching layered nav, so price filter can find max price in view
-	 *
-	 * @var array
-	 */
+	/** @var array Stores post IDs matching layered nav, so price filter can find max price in view */
 	var $layered_nav_product_ids 	= array();
 
 	/**
-	 * Constructor.
+	 * Constructor for the query class. Hooks in methods.
 	 *
 	 * @access public
 	 * @return void

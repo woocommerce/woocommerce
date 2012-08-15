@@ -11,36 +11,20 @@
  */
 class WC_Countries {
 
-	/**
-	 * Array of countries
-	 *
-	 * @var array
-	 */
+	/** @var array Array of countries */
 	var $countries;
 
-	/**
-	 * Array of states
-	 *
-	 * @var array
-	 */
+	/** @var array Array of states */
 	var $states;
 
-	/**
-	 * Array of locales
-	 *
-	 * @var array
-	 */
+	/** @var array Array of locales */
 	var $locale;
 
-	/**
-	 * Array of address formats for locales
-	 *
-	 * @var array
-	 */
+	/** @var array Array of address formats for locales */
 	var $address_formats;
 
 	/**
-	 * Constructor.
+	 * Constructor for the counties class - defines all countries and states.
 	 *
 	 * @access public
 	 * @return void
@@ -1193,8 +1177,9 @@ class WC_Countries {
 /**
  * woocommerce_countries class.
  *
- * @extends WC_Countries
- * @deprecated 1.4
+ * @extends 	WC_Countries
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_countries extends WC_Countries {
 	public function __construct() {

@@ -50,7 +50,7 @@ $order = new WC_Order( $order_id );
 
 				echo '<a href="'.get_permalink( $item['id'] ).'">' . $item['name'] . '</a>';
 
-				$item_meta = new order_item_meta( $item['item_meta'] );
+				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();
 
 				if ( $_product->exists() && $_product->is_downloadable() && $_product->has_file() && ( $order->status=='completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $order->status == 'processing' ) ) ) :

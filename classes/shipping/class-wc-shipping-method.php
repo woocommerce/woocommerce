@@ -11,100 +11,46 @@
  */
 class WC_Shipping_Method extends WC_Settings_API {
 
-	/**
-	 * Unique ID for the shipping method - must be set.
-	 *
-	 * @var string
-	 */
+	/** @var string Unique ID for the shipping method - must be set. */
 	var $id;
 
-	/**
-	 * Optional instance ID.
-	 *
-	 * @var int
-	 */
+	/** @var int Optional instance ID. */
 	var $number;
 
-	/**
-	 * Method title
-	 *
-	 * @var string
-	 */
+	/** @var string Method title */
 	var $method_title;
 
-	/**
-	 * User set title
-	 *
-	 * @var string
-	 */
+	/** @var string User set title */
 	var $title;
 
-	/**
-	 * @var bool
-	 */
+	/**  @var bool True if the method is available. */
 	var $availability;
 
-	/**
-	 * Array of countries this method is enabled for.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of countries this method is enabled for. */
 	var $countries;
 
-	/**
-	 * If 'taxable' tax will be charged for this method (if applicable)
-	 *
-	 * @var string
-	 */
+	/** @var string If 'taxable' tax will be charged for this method (if applicable) */
 	var $tax_status			= 'taxable';
 
-	/**
-	 * Fees for the method
-	 *
-	 * @var mixed
-	 */
+	/** @var mixed Fees for the method */
 	var $fee				= 0;
 
-	/**
-	 * Minimum fee for the method
-	 *
-	 * @var float
-	 */
+	/** @var float Minimum fee for the method */
 	var $minimum_fee		= null;
 
-	/**
-	 * Min amount (if set) for the cart to use this method
-	 *
-	 * @var float
-	 */
+	/** @var float Min amount (if set) for the cart to use this method */
 	var $min_amount			= null;
 
-	/**
-	 * Enabled for disabled
-	 *
-	 * @var bool
-	 */
+	/** @var bool Enabled for disabled */
 	var $enabled			= false;
 
-	/**
-	 * Whether the method has settings or not (In WooCommerce > Settings > Shipping)
-	 *
-	 * @var bool
-	 */
+	/** @var bool Whether the method has settings or not (In WooCommerce > Settings > Shipping) */
 	var $has_settings		= true;
 
-	/**
-	 * Features this method supports.
-	 *
-	 * @var array
-	 */
+	/** @var array Features this method supports. */
 	var $supports			= array();		// Features this method supports.
 
-	/**
-	 * This is an array of rates - methods must populate this array to register shipping costs
-	 *
-	 * @var array
-	 */
+	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
 	var $rates 				= array();
 
 	/**

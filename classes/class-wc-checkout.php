@@ -11,32 +11,20 @@
  */
 class WC_Checkout {
 
-	/**
-	 * Array of posted form data.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of posted form data. */
 	var $posted;
 
-	/**
-	 * Array of fields to display on the checkout.
-	 *
-	 * @var array
-	 */
+	/** @var array Array of fields to display on the checkout. */
 	var $checkout_fields;
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool Whether or not the user must create an account to checkout. */
 	var $must_create_account;
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool True when the user is creating an account. */
 	var $creating_account;
 
 	/**
-	 * Constructor.
+	 * Constructor for the checkout class. Hooks in methods and defines eheckout fields.
 	 *
 	 * @access public
 	 * @return void
@@ -421,7 +409,7 @@ class WC_Checkout {
 					$_product = $values['data'];
 
 					// Store any item meta data - item meta class lets plugins add item meta in a standardized way
-					$item_meta = new order_item_meta();
+					$item_meta = new WC_Order_Item_Meta();
 
 					$item_meta->new_order_item( $values );
 
@@ -761,8 +749,9 @@ class WC_Checkout {
 /**
  * woocommerce_checkout class.
  *
- * @extends WC_Checkout
- * @deprecated 1.4
+ * @extends		WC_Checkout
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_checkout extends WC_Checkout {
 	public function __construct() {

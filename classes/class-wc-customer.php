@@ -12,7 +12,7 @@
 class WC_Customer {
 
 	/**
-	 * Constructor.
+	 * Constructor for the customer class loads the customer from the PHP session.
 	 *
 	 * @access public
 	 * @return void
@@ -394,8 +394,9 @@ class WC_Customer {
 /**
  * woocommerce_customer class.
  *
- * @extends WC_Customer
- * @deprecated 1.4
+ * @extends 	WC_Customer
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_customer extends WC_Customer {
 	public function __construct() {

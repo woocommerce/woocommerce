@@ -11,27 +11,62 @@
  */
 class WC_Coupon {
 
+	/** @var string Coupon code. */
 	var $code;
+
+	/** @var int Coupon ID. */
 	var $id;
+
+	/** @var string Type of discount. */
 	var $type;
-	var $amount;
-	var $individual_use;
-	var $product_ids;
-	var $usage_limit;
-	var $usage_count;
-	var $expiry_date;
-	var $apply_before_tax;
-	var $free_shipping;
-	var $product_categories;
-	var $exclude_product_categories;
-	var $minimum_amount;
-	var $customer_email;
-	var $coupon_custom_fields;
+
+	/** @var string Type of discount (alias). */
 	var $discount_type;
+
+	/** @var string Coupon amount. */
+	var $amount;
+
+	/** @var string "Yes" if for individual use. */
+	var $individual_use;
+
+	/** @var array Array of product IDs. */
+	var $product_ids;
+
+	/** @var int Coupon usage limit. */
+	var $usage_limit;
+
+	/** @var int Coupon usage count. */
+	var $usage_count;
+
+	/** @var string Expirey date. */
+	var $expiry_date;
+
+	/** @var string "yes" if applied before tax. */
+	var $apply_before_tax;
+
+	/** @var string "yes" if coupon grants free shipping. */
+	var $free_shipping;
+
+	/** @var array Array of category ids. */
+	var $product_categories;
+
+	/** @var array Array of category ids. */
+	var $exclude_product_categories;
+
+	/** @var string Minimum cart amount. */
+	var $minimum_amount;
+
+	/** @var string Coupon owner's email. */
+	var $customer_email;
+
+	/** @var array Post meta. */
+	var $coupon_custom_fields;
+
+	/** @var string How much the coupon is worth. */
 	var $coupon_amount;
 
 	/**
-	 * __construct function.
+	 * Coupon constructor. Loads coupon data.
 	 *
 	 * @access public
 	 * @param mixed $code code of the coupon to load
@@ -265,8 +300,9 @@ class WC_Coupon {
 /**
  * woocommerce_coupon class.
  *
- * @extends WC_Coupon
- * @deprecated 1.4
+ * @extends 	WC_Coupon
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_coupon extends WC_Coupon {
 	public function __construct( $code ) {

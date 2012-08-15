@@ -818,7 +818,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 				if (!isset($line_tax[$i])) continue;
 
 				// Meta
-				$item_meta 		= new order_item_meta();
+				$item_meta 		= new WC_Order_Item_Meta();
 
 				if (isset($item_meta_names[$i]) && isset($item_meta_values[$i])) :
 			 	$meta_names 	= $item_meta_names[$i];

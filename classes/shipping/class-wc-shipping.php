@@ -11,53 +11,31 @@
  */
 class WC_Shipping {
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool True if shipping is enabled. */
 	var $enabled					= false;
 
-	/**
-	 * Stores methods loaded into woocommerce.
-	 *
-	 * @var array
-	 */
+	/** @var array Stores methods loaded into woocommerce. */
 	var $shipping_methods 			= array();
 
-	/**
-	 * Stores available shipping method instances.
-	 *
-	 * @var array
-	 */
+	/** @var array Stores available shipping method instances. */
 	var $available_shipping_methods = array();
 
-	/**
-	 * @var string
-	 */
+	/** @var string Stores the customers chosen shipping method. */
 	var $chosen_method				= null;
 
-	/**
-	 * @var float
-	 */
+	/** @var float Stores the cost of shipping */
 	var $shipping_total 			= 0;
 
-	/**
-	 * @var array
-	 */
+	/**  @var array Stores an array of shipping taxes. */
 	var $shipping_taxes				= array();
 
-	/**
-	 * @var string
-	 */
+	/**  @var string Stores the label for the chosen method. */
 	var $shipping_label				= null;
 
-	/**
-	 * @var array
-	 */
+	/** @var array Stores the shipping classes. */
 	var $shipping_classes			= array();
 
-	/**
-	 * @var array
-	 */
+	/** @var array Stores packages to ship and to get quotes for. */
 	var $packages					= array();
 
     /**

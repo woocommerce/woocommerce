@@ -11,11 +11,20 @@
  */
 class WC_Email {
 
+	/**
+	 * @var string Stores the emailer's address.
+	 * @access private
+	 */
 	private $_from_address;
+
+	/**
+	 * @var string Stores the emailer's name.
+	 * @access private
+	 */
 	private $_from_name;
 
 	/**
-	 * Constructor.
+	 * Constructor for the email class hooks in all emails that can be sent.
 	 *
 	 * @access public
 	 * @return void
@@ -590,8 +599,9 @@ class WC_Email {
 /**
  * woocommerce_email class.
  *
- * @extends WC_Email
- * @deprecated 1.4
+ * @extends 	WC_Email
+ * @deprecated 	1.4
+ * @package		WooCommerce/Classes
  */
 class woocommerce_email extends WC_Email {
 	public function __construct() {

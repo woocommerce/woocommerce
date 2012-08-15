@@ -15,7 +15,7 @@ foreach ($items as $item) :
 
 	// Get/prep product data
 	$_product = $order->get_product_from_item( $item );
-	$item_meta = new order_item_meta( $item['item_meta'] );
+	$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 	$image = ($show_image) ? '<img src="'. current(wp_get_attachment_image_src( get_post_thumbnail_id( $_product->id ), 'thumbnail')) .'" alt="Product Image" height="'.$image_size[1].'" width="'.$image_size[0].'" style="vertical-align:middle; margin-right: 10px;" />' : '';
 
 	?>

@@ -312,8 +312,6 @@ add_action( 'init', 'woocommerce_order_again' );
 add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
 add_filter( 'preprocess_comment', 'woocommerce_check_comment_rating', 0 );
 
-/* Text filters */
-
 /**
  * Text filters
  */
