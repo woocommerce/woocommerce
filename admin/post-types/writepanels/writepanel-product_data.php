@@ -67,7 +67,7 @@ function woocommerce_product_data_box() {
 
 		<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
 
-		<ul class="product_data_tabs tabs" style="display:none;">
+		<ul class="product_data_tabs wc-tabs" style="display:none;">
 
 			<li class="active general_options hide_if_grouped"><a href="#general_product_data"><?php _e('General', 'woocommerce'); ?></a></li>
 

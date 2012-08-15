@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Classes for order info in my-account
 * Tweak - Iconised order action buttons
 * Tweak - Simplified order status markers
+* Tweak - Product data tabs class change
 * Fix - Shipping method dropdown for id's which vary
 * Fix - Missing grouped product cart buttons
 * Fix - Notice in invoice template with number_format

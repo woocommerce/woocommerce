@@ -69,13 +69,13 @@ jQuery( function($){
 	});
 
 	// TABS
-	$('ul.tabs').show();
+	$('ul.wc-tabs').show();
 	$('div.panel-wrap').each(function(){
 		$('div.panel:not(div.panel:first)', this).hide();
 	});
-	$('ul.tabs a').click(function(){
+	$('ul.wc-tabs a').click(function(){
 		var panel_wrap =  $(this).closest('div.panel-wrap');
-		$('ul.tabs li', panel_wrap).removeClass('active');
+		$('ul.wc-tabs li', panel_wrap).removeClass('active');
 		$(this).parent().addClass('active');
 		$('div.panel', panel_wrap).hide();
 		$( $(this).attr('href') ).show();
@@ -543,7 +543,7 @@ jQuery( function($){
 			$('.hide_if_external').hide();
 		}
 
-		$('ul.tabs li:visible').eq(0).find('a').click();
+		$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
 		$('body').trigger('woocommerce-product-type-change', select_val, $(this) );
 
@@ -557,7 +557,7 @@ jQuery( function($){
 			$('.show_if_downloadable').show();
 		}
 
-		if ($('.downloads_tab').is('.active')) $('ul.tabs li:visible').eq(0).find('a').click();
+		if ($('.downloads_tab').is('.active')) $('ul.wc-tabs li:visible').eq(0).find('a').click();
 
 	}).change();
 
