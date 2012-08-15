@@ -280,8 +280,9 @@ class WC_Shipping_Rate {
 /**
  * woocommerce_shipping_method class.
  *
- * @extends WC_Shipping_Method
- * @deprecated 1.4
+ * @package		WooCommerce/Classes/Shipping
+ * @extends 	WC_Shipping_Method
+ * @deprecated 	1.4
  */
 class woocommerce_shipping_method extends WC_Shipping_Method {
 	public function __construct() {

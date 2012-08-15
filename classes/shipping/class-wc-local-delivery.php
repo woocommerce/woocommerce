@@ -224,6 +224,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 /**
  * add_local_delivery_method function.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @access public
  * @param array $methods
  * @return array

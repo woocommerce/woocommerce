@@ -213,6 +213,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 /**
  * add_free_shipping_method function.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @access public
  * @param array $methods
  * @return array

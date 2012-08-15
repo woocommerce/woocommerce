@@ -371,6 +371,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 /**
  * Layered Nav Init
  *
+ * @package 	WooCommerce/Widgets
  * @access public
  * @return void
  */
@@ -419,6 +420,7 @@ add_action( 'init', 'woocommerce_layered_nav_init', 1 );
 /**
  * Layered Nav post filter
  *
+ * @package 	WooCommerce/Widgets
  * @access public
  * @param array $filtered_posts
  * @return array

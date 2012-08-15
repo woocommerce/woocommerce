@@ -1,22 +1,22 @@
 #mijireh_notice {
-	background: #5bc0de url(../../../assets/images/mijireh-logo.png) no-repeat 15px 18px; 
-	border: 1px solid #339bb9; 
+	background: #5bc0de url(../images/mijireh-logo.png) no-repeat 15px 18px;
+	border: 1px solid #339bb9;
 	padding: 15px 15px 15px 152px !important;
-	box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 ); 
-	-moz-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 ); 
+	box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 );
+	-moz-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 );
 	-webkit-box-shadow: inset 1px 1px 0 rgba( 255, 255, 255, 0.5 ), inset -1px -1px 0 rgba( 255, 255, 255, 0.5 );
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-	color: #fff; 
+	color: #fff;
 	text-shadow: 0 1px 0 #4a94ac;
 }
 #mijireh_notice.alert-danger, #mijireh_notice.alert-error {
 	background-color: #e0534e;
-	border: 1px solid #e0534e; 
+	border: 1px solid #e0534e;
 	text-shadow: 0 1px 0 #e0534e;
 }
 #mijireh_notice.success {
 	background-color: #62c462;
-	border: 1px solid #62c462; 
+	border: 1px solid #62c462;
 	text-shadow: 0 1px 0 #4fbd4f;
 }
 #slurp_meta_box .inside {
@@ -31,7 +31,7 @@
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 	margin: 0;
 }
-#slurp_meta_box a { 
+#slurp_meta_box a {
 	color: #fff;
 }
 #slurp_meta_box a.button-primary {

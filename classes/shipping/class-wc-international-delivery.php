@@ -147,6 +147,7 @@ class WC_International_Delivery extends WC_Flat_Rate {
 /**
  * add_international_delivery_method function.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @access public
  * @param array $methods
  * @return array

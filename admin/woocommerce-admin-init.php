@@ -10,11 +10,34 @@
  * @version     1.6.4
  */
 
+/**
+ * Functions for the product post type
+ */
 include_once( 'post-types/product.php' );
+
+/**
+ * Functions for the shop_coupon post type
+ */
 include_once( 'post-types/shop_coupon.php' );
+
+/**
+ * Functions for the shop_order post type
+ */
 include_once( 'post-types/shop_order.php' );
+
+/**
+ * Hooks in admin
+ */
 include_once( 'woocommerce-admin-hooks.php' );
+
+/**
+ * Functions in admin
+ */
 include_once( 'woocommerce-admin-functions.php' );
+
+/**
+ * Functions for handling taxonomies
+ */
 include_once( 'woocommerce-admin-taxonomies.php' );
 
 /**

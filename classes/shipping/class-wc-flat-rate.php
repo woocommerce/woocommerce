@@ -557,6 +557,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 /**
  * add_flat_rate_method function.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @access public
  * @param array $methods
  * @return array

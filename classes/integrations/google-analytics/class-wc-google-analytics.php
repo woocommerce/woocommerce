@@ -5,12 +5,19 @@
  * Allows tracking code to be inserted into store pages.
  *
  * @class 		WC_Google_Analytics
- * @package		WooCommerce
- * @category	Integrations
- * @author		WooThemes
+ * @extends		WC_Integration
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Integrations
+ * @author 		WooThemes
  */
 class WC_Google_Analytics extends WC_Integration {
 
+	/**
+	 * Init and hook in the integration.
+	 *
+	 * @access public
+	 * @return void
+	 */
 	public function __construct() {
         $this->id					= 'google_analytics';
         $this->method_title     	= __( 'Google Analytics', 'woocommerce' );
@@ -40,8 +47,12 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_after_shop_loop', array( &$this, 'loop_add_to_cart' ) );
     }
 
-	/**
+
+    /**
      * Initialise Settings Form Fields
+     *
+     * @access public
+     * @return void
      */
     function init_form_fields() {
 
@@ -75,9 +86,13 @@ class WC_Google_Analytics extends WC_Integration {
 
     } // End init_form_fields()
 
+
 	/**
 	 * Google Analytics standard tracking
-	 **/
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function google_tracking_code() {
 		global $woocommerce;
 
@@ -117,9 +132,14 @@ class WC_Google_Analytics extends WC_Integration {
 		</script>";
 	}
 
+
 	/**
 	 * Google Analytics eCommerce tracking
-	 **/
+	 *
+	 * @access public
+	 * @param mixed $order_id
+	 * @return void
+	 */
 	function ecommerce_tracking_code( $order_id ) {
 		global $woocommerce;
 
@@ -214,10 +234,13 @@ class WC_Google_Analytics extends WC_Integration {
 		echo '<script type="text/javascript">' . $code . '</script>';
 	}
 
+
 	/**
 	 * Google Analytics event tracking for single product add to cart
 	 *
-	 **/
+	 * @access public
+	 * @return void
+	 */
 	function add_to_cart() {
 
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
@@ -234,10 +257,13 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
+
 	/**
 	 * Google Analytics event tracking for loop add to cart
 	 *
-	 **/
+	 * @access public
+	 * @return void
+	 */
 	function loop_add_to_cart() {
 
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
@@ -251,12 +277,15 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->event_tracking_code( $parameters, '.add_to_cart_button' );
 	}
 
+
 	/**
 	 * Google Analytics event tracking for loop add to cart
 	 *
-	 * @param array $parameters - associative array of _trackEvent parameters
-	 * @param string $selector - jQuery selector for binding click event
-	 **/
+	 * @access private
+	 * @param mixed $parameters associative array of _trackEvent parameters
+	 * @param mixed $selector jQuery selector for binding click event
+	 * @return void
+	 */
 	private function event_tracking_code( $parameters, $selector ) {
 		global $woocommerce;
 
@@ -269,6 +298,14 @@ class WC_Google_Analytics extends WC_Integration {
 		");
 	}
 
+
+	/**
+	 * Check if tracking is disabled
+	 *
+	 * @access private
+	 * @param mixed $type
+	 * @return bool
+	 */
 	private function disable_tracking( $type ) {
 
 		if( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) return true;
@@ -277,10 +314,17 @@ class WC_Google_Analytics extends WC_Integration {
 
 }
 
+
 /**
- * Add the integration to WooCommerce
- **/
+ * Add the integration to WooCommerce.
+ *
+ * @access public
+ * @param array $integrations
+ * @return array
+ */
 function add_google_analytics_integration( $integrations ) {
-	$integrations[] = 'WC_Google_Analytics'; return $integrations;
+	$integrations[] = 'WC_Google_Analytics';
+	return $integrations;
 }
+
 add_filter('woocommerce_integrations', 'add_google_analytics_integration' );

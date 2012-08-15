@@ -178,6 +178,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 /**
  * Price filter Init
  *
+ * @package 	WooCommerce/Widgets
  * @access public
  * @return void
  */
@@ -209,6 +210,7 @@ add_action( 'init', 'woocommerce_price_filter_init' );
 /**
  * Price Filter post filter
  *
+ * @package 	WooCommerce/Widgets
  * @access public
  * @param array $filtered_posts
  * @return array

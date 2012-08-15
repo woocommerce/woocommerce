@@ -235,6 +235,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * Show an archive description on taxonomy archives
 	 *
 	 * @access public
+	 * @subpackage	Archives
 	 * @return void
 	 */
 	function woocommerce_taxonomy_archive_description() {
@@ -248,6 +249,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	 * Show a shop page description on product archives
 	 *
 	 * @access public
+	 * @subpackage	Archives
 	 * @return void
 	 */
 	function woocommerce_product_archive_description( $shop_page ) {
@@ -262,6 +264,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	 * Get the add to cart template for the loop.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_template_loop_add_to_cart() {
@@ -274,6 +277,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
 	 * Get the product thumbnail for the loop.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_template_loop_product_thumbnail() {
@@ -286,6 +290,7 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 	 * Get the product price for the loop.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_template_loop_price() {
@@ -298,6 +303,7 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 	 * Get the sale flash for the loop.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_show_product_loop_sale_flash() {
@@ -310,6 +316,7 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	 * Reset the loop's index and columns when we're done outputting a product loop.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_reset_loop() {
@@ -325,6 +332,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @param string $size (default: 'shop_catalog')
 	 * @param int $placeholder_width (default: 0)
 	 * @param int $placeholder_height (default: 0)
@@ -351,6 +359,7 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	 * Output the pagination.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_pagination() {
@@ -364,6 +373,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * Output the product sorting options.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
@@ -381,6 +391,7 @@ if ( ! function_exists( 'woocommerce_show_product_images' ) ) {
 	 * Output the product image before the single product summary.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_show_product_images() {
@@ -393,6 +404,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	 * Output the product thumbnails.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_show_product_thumbnails() {
@@ -405,6 +417,7 @@ if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 	 * Output the product tabs.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_output_product_data_tabs() {
@@ -417,6 +430,7 @@ if ( ! function_exists( 'woocommerce_template_single_title' ) ) {
 	 * Output the product title.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_title() {
@@ -429,6 +443,7 @@ if ( ! function_exists( 'woocommerce_template_single_price' ) ) {
 	 * Output the product price.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_price() {
@@ -441,6 +456,7 @@ if ( ! function_exists( 'woocommerce_template_single_excerpt' ) ) {
 	 * Output the product short description (excerpt).
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_excerpt() {
@@ -453,6 +469,7 @@ if ( ! function_exists( 'woocommerce_template_single_meta' ) ) {
 	 * Output the product meta.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_meta() {
@@ -465,6 +482,7 @@ if ( ! function_exists( 'woocommerce_template_single_sharing' ) ) {
 	 * Output the product sharing.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_sharing() {
@@ -477,6 +495,7 @@ if ( ! function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 	 * Output the product sale flash.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_show_product_sale_flash() {
@@ -490,6 +509,7 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 	 * Trigger the single product add to cart action.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_template_single_add_to_cart() {
@@ -503,6 +523,7 @@ if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
 	 * Output the simple product add to cart area.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_simple_add_to_cart() {
@@ -515,6 +536,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 	 * Output the grouped product add to cart area.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_grouped_add_to_cart() {
@@ -527,6 +549,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	 * Output the variable product add to cart area.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_variable_add_to_cart() {
@@ -549,6 +572,7 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	 * Output the external product add to cart area.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_external_add_to_cart() {
@@ -572,6 +596,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * Output the quantity input for add to cart forms.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_quantity_input( $args = array() ) {
@@ -594,6 +619,7 @@ if ( ! function_exists( 'woocommerce_product_description_tab' ) ) {
 	 * Output the description tab.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_description_tab() {
@@ -606,6 +632,7 @@ if ( ! function_exists( 'woocommerce_product_attributes_tab' ) ) {
 	 * Output the attributes tab.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_attributes_tab() {
@@ -618,6 +645,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	 * Output the reviews tab.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_reviews_tab() {
@@ -631,6 +659,7 @@ if ( ! function_exists( 'woocommerce_product_description_panel' ) ) {
 	 * Output the description tab content.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_description_panel() {
@@ -643,6 +672,7 @@ if ( ! function_exists( 'woocommerce_product_attributes_panel' ) ) {
 	 * Output the attributes tab content.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_attributes_panel() {
@@ -655,6 +685,7 @@ if ( ! function_exists( 'woocommerce_product_reviews_panel' ) ) {
 	 * Output the reviews tab content.
 	 *
 	 * @access public
+	 * @subpackage	Product/Tabs
 	 * @return void
 	 */
 	function woocommerce_product_reviews_panel() {
@@ -668,6 +699,7 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 * Output the Review comments template.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
@@ -682,6 +714,7 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	 * Output the related products.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_output_related_products() {
@@ -695,6 +728,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 	 * Output the related products.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_related_products( $posts_per_page = 4, $columns = 4, $orderby = 'rand'  ) {
@@ -712,6 +746,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * Output product up sells.
 	 *
 	 * @access public
+	 * @subpackage	Product
 	 * @return void
 	 */
 	function woocommerce_upsell_display() {
@@ -727,6 +762,7 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 	 * Output the cart shipping calculator.
 	 *
 	 * @access public
+	 * @subpackage	Cart
 	 * @return void
 	 */
 	function woocommerce_shipping_calculator() {
@@ -740,6 +776,7 @@ if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
 	 * Output the cart totals.
 	 *
 	 * @access public
+	 * @subpackage	Cart
 	 * @return void
 	 */
 	function woocommerce_cart_totals() {
@@ -753,6 +790,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	 * Output the cart cross-sells.
 	 *
 	 * @access public
+	 * @subpackage	Cart
 	 * @return void
 	 */
 	function woocommerce_cross_sell_display() {
@@ -790,6 +828,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	 * Output the WooCommerce Login Form
 	 *
 	 * @access public
+	 * @subpackage	Forms
 	 * @return void
 	 */
 	function woocommerce_login_form( $args = array() ) {
@@ -811,6 +850,7 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 	 * Output the WooCommerce Checkout Login Form
 	 *
 	 * @access public
+	 * @subpackage	Checkout
 	 * @return void
 	 */
 	function woocommerce_checkout_login_form() {
@@ -849,6 +889,7 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 	 * Output the Order review table for the checkout.
 	 *
 	 * @access public
+	 * @subpackage	Checkout
 	 * @return void
 	 */
 	function woocommerce_order_review() {
@@ -862,6 +903,7 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * Output the Coupon form for the checkout.
 	 *
 	 * @access public
+	 * @subpackage	Checkout
 	 * @return void
 	 */
 	function woocommerce_checkout_coupon_form() {
@@ -875,6 +917,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * Display product sub categories as thumbnails.
 	 *
 	 * @access public
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
@@ -966,6 +1009,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 *
 	 * @access public
 	 * @param mixed $category
+	 * @subpackage	Loop
 	 * @return void
 	 */
 	function woocommerce_subcategory_thumbnail( $category  ) {
@@ -996,6 +1040,7 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 	 *
 	 * @access public
 	 * @param mixed $order_id
+	 * @subpackage	Orders
 	 * @return void
 	 */
 	function woocommerce_order_details_table( $order_id  ) {
@@ -1015,6 +1060,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * Outputs a checkout/address form field.
 	 *
 	 * @access public
+	 * @subpackage	Forms
 	 * @param mixed $key
 	 * @param mixed $args
 	 * @param string $value (default: '')
@@ -1171,6 +1217,7 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	 * Output Product search forms.
 	 *
 	 * @access public
+	 * @subpackage	Forms
 	 * @param bool $echo (default: true)
 	 * @return void
 	 */

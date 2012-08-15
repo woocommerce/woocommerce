@@ -5,12 +5,19 @@
  * Provides a PayPal Standard Payment Gateway.
  *
  * @class 		WC_Paypal
- * @package		WooCommerce
- * @category	Payment Gateways
- * @author		WooThemes
+ * @extends		WC_Payment_Gateway
+ * @version		1.6.4
+ * @package		WooCommerce/Classes/Payment
+ * @author 		WooThemes
  */
 class WC_Paypal extends WC_Payment_Gateway {
 
+    /**
+     * Constructor for the gateway.
+     *
+     * @access public
+     * @return void
+     */
 	public function __construct() {
 		global $woocommerce;
 
@@ -52,8 +59,12 @@ class WC_Paypal extends WC_Payment_Gateway {
 		if ( !$this->is_valid_for_use() ) $this->enabled = false;
     }
 
-     /**
+
+    /**
      * Check if this gateway is enabled and available in the user's country
+     *
+     * @access public
+     * @return bool
      */
     function is_valid_for_use() {
         if (!in_array(get_woocommerce_currency(), array('AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB'))) return false;
@@ -89,10 +100,14 @@ class WC_Paypal extends WC_Payment_Gateway {
     	?>
 		</table><!--/.form-table-->
     	<?php
-    } // End admin_options()
+    }
 
-	/**
+
+    /**
      * Initialise Gateway Settings Form Fields
+     *
+     * @access public
+     * @return void
      */
     function init_form_fields() {
 
@@ -181,11 +196,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 						)
 			);
 
-    } // End init_form_fields()
+    }
 
-    /**
+
+	/**
 	 * Get PayPal Args for passing to PP
-	 **/
+	 *
+	 * @access public
+	 * @param mixed $order
+	 * @return array
+	 */
 	function get_paypal_args( $order ) {
 		global $woocommerce;
 
@@ -339,9 +359,14 @@ class WC_Paypal extends WC_Payment_Gateway {
 		return $paypal_args;
 	}
 
-	/**
+
+    /**
 	 * Generate the paypal button link
-	 **/
+     *
+     * @access public
+     * @param mixed $order_id
+     * @return string
+     */
     function generate_paypal_form( $order_id ) {
 		global $woocommerce;
 
@@ -389,9 +414,14 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	}
 
-	/**
-	 * Process the payment and return the result
-	 **/
+
+    /**
+     * Process the payment and return the result
+     *
+     * @access public
+     * @param int $order_id
+     * @return array
+     */
 	function process_payment( $order_id ) {
 
 		$order = new WC_Order( $order_id );
@@ -424,9 +454,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	}
 
-	/**
-	 * receipt_page
-	 **/
+
+    /**
+     * Output for the order received page.
+     *
+     * @access public
+     * @return void
+     */
 	function receipt_page( $order ) {
 
 		echo '<p>'.__('Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce').'</p>';
@@ -485,9 +519,13 @@ class WC_Paypal extends WC_Payment_Gateway {
         return false;
     }
 
+
 	/**
 	 * Check for PayPal IPN Response
-	 **/
+	 *
+	 * @access public
+	 * @return void
+	 */
 	function check_ipn_response() {
 
 		if (isset($_GET['paypalListener']) && $_GET['paypalListener'] == 'paypal_standard_IPN'):
@@ -512,9 +550,14 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	}
 
+
 	/**
 	 * Successful Payment!
-	 **/
+	 *
+	 * @access public
+	 * @param array $posted
+	 * @return void
+	 */
 	function successful_request( $posted ) {
 		global $woocommerce;
 
@@ -638,11 +681,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 }
 
+
 /**
  * Add the gateway to WooCommerce
- **/
+ *
+ * @access public
+ * @param array $methods
+ * @package		WooCommerce/Classes/Payment
+ * @return array
+ */
 function add_paypal_gateway( $methods ) {
-	$methods[] = 'WC_Paypal'; return $methods;
+	$methods[] = 'WC_Paypal';
+	return $methods;
 }
 
 add_filter('woocommerce_payment_gateways', 'add_paypal_gateway' );

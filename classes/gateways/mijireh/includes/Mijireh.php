@@ -1,16 +1,16 @@
-<?php 
+<?php
 
 $root_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 
 // Require the mijireh library classes
-require_once $root_dir . 'Mijireh/Rest.php';
-require_once $root_dir . 'Mijireh/RestJSON.php';
-require_once $root_dir . 'Mijireh/Model.php';
-require_once $root_dir . 'Mijireh/Address.php';
-require_once $root_dir . 'Mijireh/Item.php';
-require_once $root_dir . 'Mijireh/Order.php';
+require_once $root_dir . 'Rest.php';
+require_once $root_dir . 'RestJSON.php';
+require_once $root_dir . 'Model.php';
+require_once $root_dir . 'Address.php';
+require_once $root_dir . 'Item.php';
+require_once $root_dir . 'Order.php';
 
-class Mijireh_Exception extends Exception {}               
+class Mijireh_Exception extends Exception {}
 class Mijireh_ClientError extends Mijireh_Exception {}         /* Status: 400-499 */
 class Mijireh_BadRequest extends Mijireh_ClientError {}        /* Status: 400 */
 class Mijireh_Unauthorized extends Mijireh_ClientError {}      /* Status: 401 */
@@ -19,13 +19,13 @@ class Mijireh_ServerError extends Mijireh_Exception {}         /* Status: 500-59
 class Mijireh_InternalError extends Mijireh_ServerError {}     /* Status: 500 */
 
 class Mijireh {
-  
+
   /* Live server urls */
   public static $base_url = 'https://secure.mijireh.com/';
   public static $url      = 'https://secure.mijireh.com/api/1/';
-  
+
   public static $access_key;
-  
+
   /**
    * Return the job id of the slurp
    */
@@ -44,11 +44,11 @@ class Mijireh {
     '?)?)?'.                                                   // path and query string optional
     '(#([a-z0-9$_\.\+!\*\'\(\),;:@&=-]|%[0-9a-f]{2})*)?'.      // fragment
     '$/i';
-    
+
     if(!preg_match($url_format, $url)) {
       throw new Mijireh_NotFound('Unable to slurp invalid URL: $url');
     }
-    
+
     try {
       $rest = new Mijireh_Rest($url);
       $html = $rest->get('');
@@ -77,7 +77,7 @@ class Mijireh {
       throw new Mijireh_Exception('Unable to slurp the URL: $url');
     }
   }
-  
+
   /**
    * Return an array of store information
    */
@@ -104,13 +104,13 @@ class Mijireh {
       throw new Mijireh_ServerError($e->getMessage());
     }
   }
-  
+
   public static function preview_checkout_link() {
     if(empty(Mijireh::$access_key)) {
       throw new Mijireh_Exception('Access key required to view checkout preview');
     }
-    
+
     return self::$base_url . 'checkout/' . self::$access_key;
   }
-  
+
 }

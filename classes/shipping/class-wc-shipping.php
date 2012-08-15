@@ -391,6 +391,7 @@ class WC_Shipping {
  *
  * Registers a shipping method ready to be loaded. Accepts a class name (string) or a class object.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @since 1.5.7
  */
 function woocommerce_register_shipping_method( $shipping_method ) {

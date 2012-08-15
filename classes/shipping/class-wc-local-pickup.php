@@ -151,6 +151,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 /**
  * add_local_pickup_method function.
  *
+ * @package		WooCommerce/Classes/Shipping
  * @access public
  * @param array $methods
  * @return array
