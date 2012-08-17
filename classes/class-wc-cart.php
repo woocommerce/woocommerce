@@ -524,7 +524,7 @@ class WC_Cart {
 
 				foreach ($other_data as $data ) {
 					// Set hidden to true to not display meta on cart.
-					if ( ! $data['hidden'] ) {
+					if ( empty( $data['hidden'] ) ) {
 						$display_value = !empty($data['display']) ? $data['display'] : $data['value'];
 
 						if ($flat)
