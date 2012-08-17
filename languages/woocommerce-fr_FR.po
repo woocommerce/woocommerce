@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce v1.6.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-17 15:42+0100\n"
-"PO-Revision-Date: 2012-08-17 15:43+0100\n"
+"POT-Creation-Date: 2012-08-17 18:02+0100\n"
+"PO-Revision-Date: 2012-08-17 18:04+0100\n"
 "Last-Translator: Arnaud CHEMINAND <nodar44@gmail.com>\n"
 "Language-Team: AVTALIA <contact@avtalia.com>\n"
 "MIME-Version: 1.0\n"
@@ -169,17 +169,17 @@ msgstr "Vous pouvez seulement avoir 1 %s dans votre panier."
 #: ../woocommerce-functions.php:245
 #: ../woocommerce-functions.php:285
 msgid "Please choose product options&hellip;"
-msgstr "Veuillez choisir les options du produit..."
+msgstr "Veuillez choisir les options du produit&hellip;"
 
 # @ woocommerce
 #: ../woocommerce-functions.php:316
 msgid "Please choose a quantity&hellip;"
-msgstr "Veuillez choisir une quantit&eacute;..."
+msgstr "Veuillez choisir une quantit&eacute;&hellip;"
 
 # @ woocommerce
 #: ../woocommerce-functions.php:324
 msgid "Please choose a product&hellip;"
-msgstr "Veuillez choisir un produit..."
+msgstr "Veuillez choisir un produit&hellip;"
 
 # @ woocommerce
 #: ../woocommerce-functions.php:393
@@ -241,7 +241,7 @@ msgstr "Veuillez saisir votre adresse e-mail."
 
 # @ woocommerce
 #: ../woocommerce-functions.php:629
-msgid "The email address isn&#8217;t correct."
+msgid "The email address isn't correct."
 msgstr "L&rsquo;adresse e-mail n&rsquo;est pas correcte."
 
 # @ woocommerce
@@ -402,7 +402,7 @@ msgstr "Acheter le produit"
 # @ woocommerce
 #: ../woocommerce-template.php:1095
 msgid "Select a country&hellip;"
-msgstr "Choisissez un pays..."
+msgstr "Choisissez un pays&hellip;"
 
 # @ woocommerce
 #: ../woocommerce-template.php:1103
@@ -412,7 +412,7 @@ msgstr "Mettre &agrave; jour le pays"
 # @ woocommerce
 #: ../woocommerce-template.php:1137
 msgid "Select a state&hellip;"
-msgstr "Choisissez un &eacute;tat..."
+msgstr "Choisissez un &eacute;tat&hellip;"
 
 # @ woocommerce
 #: ../woocommerce-template.php:1235
@@ -991,7 +991,7 @@ msgstr "C&rsquo;est ici que vous pouvez ajouter les nouveaux codes promo que les
 # @ woocommerce
 #: ../woocommerce.php:1154
 msgid "Select an option&hellip;"
-msgstr "Choisissez une option..."
+msgstr "Choisissez une option&hellip;"
 
 # @ woocommerce
 #: ../woocommerce.php:1560
@@ -1535,8 +1535,8 @@ msgstr "WooCommerce &Eacute;tats"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-init.php:150
-msgid "<strong>Welcome to WooCommerce</strong> &#8211; You're almost ready to start selling :)"
-msgstr "<strong>Bienvenue sur WooCommerce</strong> &#8211; Vous &ecirc;tes presque pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
+msgid "<strong>Welcome to WooCommerce</strong> &ndash; You're almost ready to start selling :)"
+msgstr "<strong>Bienvenue sur WooCommerce</strong> &ndash; Vous &ecirc;tes presque pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-init.php:151
@@ -1550,8 +1550,8 @@ msgstr "Ignorer la configuration"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-init.php:160
-msgid "<strong>WooCommerce has been installed</strong> &#8211; You're ready to start selling :)"
-msgstr "<strong>WooCommerce a &eacute;t&eacute; install&eacute;</strong> &#8211; Vous &ecirc;tes pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
+msgid "<strong>WooCommerce has been installed</strong> &ndash; You're ready to start selling :)"
+msgstr "<strong>WooCommerce a &eacute;t&eacute; install&eacute;</strong> &ndash; Vous &ecirc;tes pr&ecirc;t &agrave; commencer &agrave; vendre&nbsp;:)"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-init.php:162
@@ -2129,7 +2129,7 @@ msgstr "Aucune vente&nbsp;:("
 #: ../admin/post-types/writepanels/writepanel-coupon_data.php:60
 #: ../admin/post-types/writepanels/writepanel-order_data.php:435
 msgid "Search for a product&hellip;"
-msgstr "Rechercher un produit..."
+msgstr "Rechercher un produit&hellip;"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-reports.php:1331
@@ -2302,8 +2302,8 @@ msgstr "Vos param&egrave;tres ont &eacute;t&eacute; enregistr&eacute;s."
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-settings.php:171
-msgid "<strong>Congratulations!</strong> &#8211; WooCommerce has been installed and setup. Enjoy :)"
-msgstr "<strong>F&eacute;licitations&nbsp;!</strong> &#8211; WooCommerce a &eacute;t&eacute; install&eacute; et param&eacute;tr&eacute;. Amusez-vous bien&nbsp;:)"
+msgid "<strong>Congratulations!</strong> &ndash; WooCommerce has been installed and setup. Enjoy :)"
+msgstr "<strong>F&eacute;licitations&nbsp;!</strong> &ndash; WooCommerce a &eacute;t&eacute; install&eacute; et param&eacute;tr&eacute;. Amusez-vous bien&nbsp;:)"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-settings.php:196
@@ -2361,12 +2361,12 @@ msgstr "Choisissez une page&hellip;"
 # @ woocommerce
 #: ../admin/woocommerce-admin-settings.php:625
 msgid "Choose a country&hellip;"
-msgstr "Choisissez un pays..."
+msgstr "Choisissez un pays&hellip;"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-settings.php:640
 msgid "Choose countries&hellip;"
-msgstr "Choisissez des pays..."
+msgstr "Choisissez des pays&hellip;"
 
 # @ woocommerce
 #: ../admin/woocommerce-admin-status.php:22
@@ -2959,8 +2959,8 @@ msgstr "Supprimer d&eacute;finitivement"
 # @ woocommerce
 #: ../admin/post-types/product.php:157
 #, php-format
-msgid "Preview &#8220;%s&#8221;"
-msgstr "Pr&eacute;visualiser &#8220;%s&#8221;"
+msgid "Preview &ldquo;%s&bdquo;"
+msgstr "Pr&eacute;visualiser &ldquo;%s&bdquo;"
 
 # @ woocommerce
 #: ../admin/post-types/product.php:157
@@ -2970,8 +2970,8 @@ msgstr "Aper&ccedil;u"
 # @ woocommerce
 #: ../admin/post-types/product.php:159
 #, php-format
-msgid "View &#8220;%s&#8221;"
-msgstr "Voir &#8220;%s&#8221;"
+msgid "View &ldquo;%s&bdquo;"
+msgstr "Voir &ldquo;%s&bdquo;"
 
 # @ woocommerce
 #: ../admin/post-types/product.php:159
@@ -3814,7 +3814,7 @@ msgstr "Jamais"
 # @ woocommerce
 #: ../admin/post-types/writepanels/writepanel-order_downloads.php:69
 msgid "Choose a downloadable product&hellip;"
-msgstr "Choisissez un produit t&eacute;l&eacute;chargeable..."
+msgstr "Choisissez un produit t&eacute;l&eacute;chargeable&hellip;"
 
 # @ woocommerce
 #: ../admin/post-types/writepanels/writepanel-order_downloads.php:119
@@ -4206,13 +4206,13 @@ msgstr "Dates des soldes"
 #: ../admin/post-types/writepanels/writepanel-product_data.php:133
 msgctxt "placeholder"
 msgid "From&hellip;"
-msgstr "Du..."
+msgstr "Du&hellip;"
 
 # @ woocommerce
 #: ../admin/post-types/writepanels/writepanel-product_data.php:136
 msgctxt "placeholder"
 msgid "To&hellip;"
-msgstr "Au..."
+msgstr "Au&hellip;"
 
 # @ woocommerce
 # @ default
@@ -4411,7 +4411,7 @@ msgstr "Position personalis&eacute;e."
 # @ woocommerce
 #: ../admin/post-types/writepanels/writepanel-product_data.php:533
 msgid "Choose a grouped product&hellip;"
-msgstr "Choisissez un produit group&eacute;..."
+msgstr "Choisissez un produit group&eacute;&hellip;"
 
 # @ woocommerce
 #: ../admin/post-types/writepanels/writepanel-product_data.php:557
@@ -5936,7 +5936,7 @@ msgstr "Supprimer les lignes s&eacute;lectionn&eacute;es"
 #: ../admin/settings/settings-tax-rates.php:59
 #: ../admin/settings/settings-tax-rates.php:219
 msgid "Select countries/states&hellip;"
-msgstr "Choisissez des pays/&eacute;tats..."
+msgstr "Choisissez des pays/&eacute;tats&hellip;"
 
 # @ woocommerce
 #: ../admin/settings/settings-tax-rates.php:62
@@ -5979,7 +5979,7 @@ msgstr "Liste des codes postaux/ZIP auxquels s&rsquo;appliquent ce taux, s&eacut
 #: ../admin/settings/settings-tax-rates.php:127
 #: ../admin/settings/settings-tax-rates.php:263
 msgid "Select a country/state&hellip;"
-msgstr "Choisissez un pays/&eacute;tat..."
+msgstr "Choisissez un pays/&eacute;tat&hellip;"
 
 # @ woocommerce
 #: ../admin/settings/settings-tax-rates.php:173
@@ -9523,7 +9523,7 @@ msgstr "Supprimer les taux s&eacute;lectionn&eacute;s"
 #: ../classes/shipping/class-wc-flat-rate.php:440
 #: ../classes/shipping/class-wc-flat-rate.php:473
 msgid "Select a class&hellip;"
-msgstr "Choisissez une classe..."
+msgstr "Choisissez une classe&hellip;"
 
 # @ woocommerce
 #: ../classes/shipping/class-wc-flat-rate.php:445
@@ -9904,7 +9904,7 @@ msgstr "Valider la commande &rarr;"
 # @ woocommerce
 #: ../templates/cart/cross-sells.php:33
 msgid "You may be interested in&hellip;"
-msgstr "Vous pourriez &ecirc;tre int&eacute;ress&eacute; par..."
+msgstr "Vous pourriez &ecirc;tre int&eacute;ress&eacute; par&hellip;"
 
 # @ woocommerce
 #: ../templates/cart/empty.php:11
@@ -10490,7 +10490,7 @@ msgstr "j F Y"
 # @ woocommerce
 #: ../templates/single-product/up-sells.php:31
 msgid "You may also like&hellip;"
-msgstr "Vous pourriez aussi aimer..."
+msgstr "Vous pourriez aussi aimer&hellip;"
 
 # @ woocommerce
 #: ../templates/single-product/add-to-cart/variable.php:25

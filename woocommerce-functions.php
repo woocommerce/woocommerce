@@ -626,7 +626,7 @@ function woocommerce_process_registration() {
 		if ( $user_email == '' ) {
 			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'Please type your e-mail address.', 'woocommerce' ) );
 		} elseif ( ! is_email( $user_email ) ) {
-			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'The email address isn&#8217;t correct.', 'woocommerce' ) );
+			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'The email address isn\'t correct.', 'woocommerce' ) );
 			$user_email = '';
 		} elseif ( email_exists( $user_email ) ) {
 			$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __( 'This email is already registered, please choose another one.', 'woocommerce' ) );
