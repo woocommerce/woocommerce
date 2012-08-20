@@ -17,7 +17,7 @@ $info_message = apply_filters('woocommerce_checkout_coupon_message', __('Have a 
 <form class="checkout_coupon" method="post">
 
 	<p class="form-row form-row-first">
-		<input name="coupon_code" class="input-text" placeholder="<?php _e('Coupon code', 'woocommerce'); ?>" id="coupon_code" value="" />
+		<input type="text" name="coupon_code" class="input-text" placeholder="<?php _e('Coupon code', 'woocommerce'); ?>" id="coupon_code" value="" />
 	</p>
 
 	<p class="form-row form-row-last">
