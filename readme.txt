@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.6.4 =
 * Feature - New input for shipping method title (as the customer sees it)
+* Tweak - Made the currency DP rule apply to order totals for currencies which don't have cent values https://github.com/woothemes/woocommerce/issues/1383
 * Tweak - Made proceed to checkout button update totals too
 * Tweak - Rewritten variation javascript to add scope. Please ensure that if you have a custom variable.php add to cart template, that you update them.
 * Tweak - Classes for order info in my-account

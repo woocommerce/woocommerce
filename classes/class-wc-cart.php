@@ -77,7 +77,7 @@ class WC_Cart {
 		$this->prices_include_tax = ( get_option('woocommerce_prices_include_tax') == 'yes' ) ? true : false;
 		$this->display_totals_ex_tax = ( get_option('woocommerce_display_totals_excluding_tax') == 'yes' ) ? true : false;
 		$this->display_cart_ex_tax = ( get_option('woocommerce_display_cart_prices_excluding_tax') == 'yes' ) ? true : false;
-
+		$this->dp = get_option( 'woocommerce_price_num_decimals' );
 		add_action( 'init', array( &$this, 'init' ), 5 ); // Get cart on init
 	}
 
@@ -1004,7 +1004,7 @@ class WC_Cart {
 
 							case "percent" :
 
-								$percent_discount = round( ( $values['data']->get_price() / 100 ) * $coupon->amount, 2 );
+								$percent_discount = round( ( $values['data']->get_price() / 100 ) * $coupon->amount, $this->dp );
 
 								if ( $add_totals )
 									$this->discount_cart = $this->discount_cart + ( $percent_discount * $values['quantity'] );
@@ -1088,7 +1088,7 @@ class WC_Cart {
 								$this->discount_total = $this->discount_total + ( $discount_amount * $values['quantity'] );
 
 							} elseif ( $coupon->type == 'percent_product' ) {
-								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, 2 );
+								$this->discount_total = $this->discount_total + round( ( $price / 100 ) * $coupon->amount, $this->dp );
 							}
 						}
 					}
@@ -1122,9 +1122,9 @@ class WC_Cart {
 
 							case "percent" :
 
-								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total , 2 ) / 100 ) * $coupon->amount;
+								$percent_discount = ( round( $this->cart_contents_total + $this->tax_total, $this->dp ) / 100 ) * $coupon->amount;
 
-								$this->discount_total = $this->discount_total + round( $percent_discount, 2 );
+								$this->discount_total = $this->discount_total + round( $percent_discount, $this->dp );
 
 							break;
 
@@ -1259,7 +1259,7 @@ class WC_Cart {
 								$tax_amount				= array_sum( $taxes );
 
 								// Line subtotal + tax
-								$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round( $tax_amount, 2 ) : $tax_amount;
+								$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round( $tax_amount, $this->dp ) : $tax_amount;
 								$line_subtotal			= $row_base_price - $this->tax->get_tax_total($base_taxes);
 
 								// Adjusted price
@@ -1280,8 +1280,8 @@ class WC_Cart {
 								$tax_amount				= array_sum( $this->tax->calc_tax( $base_price * $values['quantity'], $tax_rates, true ) );
 
 								// Line subtotal + tax
-								$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round($tax_amount, 2) : $tax_amount;
-								$line_subtotal			= ( $base_price * $values['quantity'] ) - round( $line_subtotal_tax, 2 );
+								$line_subtotal_tax 		= ( get_option('woocommerce_tax_round_at_subtotal')=='no' ) ? round( $tax_amount, $this->dp ) : $tax_amount;
+								$line_subtotal			= ( $base_price * $values['quantity'] ) - round( $line_subtotal_tax, $this->dp );
 
 								// Calc prices and tax (discounted)
 								$discounted_price 		= $this->get_discounted_price( $values, $base_price, true );
@@ -1307,8 +1307,8 @@ class WC_Cart {
 						}
 
 						// Line prices
-						$line_tax = ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) ? round( $discounted_tax_amount, 2 ) : $discounted_tax_amount;
-						$line_total 		= round( ( $discounted_price * $values['quantity'] ) - round( $line_tax, 2 ), 2 );
+						$line_tax = ( get_option('woocommerce_tax_round_at_subtotal') == 'no' ) ? round( $discounted_tax_amount, $this->dp ) : $discounted_tax_amount;
+						$line_total 		= round( ( $discounted_price * $values['quantity'] ) - round( $line_tax, $this->dp ), $this->dp );
 
 						// Add any product discounts (after tax)
 						$this->apply_product_discounts_after_tax( $values, $line_total + $discounted_tax_amount );
@@ -1425,7 +1425,7 @@ class WC_Cart {
 			 *
 			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 			 */
-			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, 2, '.', '' ), $this );
+			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, $this->dp, '.', '' ), $this );
 
 			if ($this->total < 0) $this->total = 0;
 		}

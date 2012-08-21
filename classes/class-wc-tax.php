@@ -405,7 +405,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, 2 );
+					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
 
 				// Add rate
 				if ( ! isset( $taxes[$key] ) )
@@ -434,7 +434,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, 2 );
+					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
 
 				// Add rate
 				if ( ! isset( $taxes[ $key ] ) )
@@ -464,7 +464,7 @@ class WC_Tax {
 
 				// Rounding
 				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, 2 );
+					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
 
 				// Add rate
 				if ( ! isset( $taxes[ $key ] ) )
@@ -527,8 +527,7 @@ class WC_Tax {
 	 * @return  bool
 	 */
 	function is_compound( $key ) {
-		if (isset($this->rates[$key]) && $this->rates[$key]['compound']=='yes') return true;
-		return false;
+		return ( isset( $this->rates[$key] ) && $this->rates[$key]['compound'] == 'yes' ) ? true : false;
 	}
 
 	/**
@@ -538,7 +537,7 @@ class WC_Tax {
 	 * @return  string
 	 */
 	function get_rate_label( $key ) {
-		if (isset($this->rates[$key]) && $this->rates[$key]['label']) return $this->rates[$key]['label'];
+		if ( isset( $this->rates[ $key ] ) && $this->rates[ $key ]['label'] ) return $this->rates[ $key ]['label'];
 		return '';
 	}
 
@@ -549,14 +548,14 @@ class WC_Tax {
 	 * @return  float
 	 */
 	function get_tax_total( $taxes ) {
-		return array_sum(array_map(array(&$this, 'round'), $taxes));
+		return array_sum( array_map( array(&$this, 'round'), $taxes ) );
 	}
 
 	/**
-	 * Round to 2 DP.
+	 * Round to currency DP.
 	 */
 	function round( $in ) {
-		return round($in, 2);
+		return round( $in, get_option( 'woocommerce_price_num_decimals' ) );
 	}
 
 }

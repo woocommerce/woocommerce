@@ -555,7 +555,19 @@ function woocommerce_trim_zeros( $price ) {
  * @return string
  */
 function woocommerce_format_decimal( $number ) {
-	return rtrim( rtrim( number_format( $number, 4, '.', '' ), '0' ), '.' );
+	return rtrim( rtrim( number_format( (float) $number, 4, '.', '' ), '0' ), '.' );
+}
+
+
+/**
+ * Formal total costs - format to the number of decimal places for the base currency.
+ *
+ * @access public
+ * @param mixed $number
+ * @return float
+ */
+function woocommerce_format_total( $number ) {
+	return number_format( (float) $number, get_option( 'woocommerce_price_num_decimals' ), '.', '' );
 }
 
 
