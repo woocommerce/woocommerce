@@ -163,7 +163,7 @@ function woocommerce_update_cart_action() {
 	global $woocommerce;
 
 	// Remove from cart
-	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->verify_nonce('cart', '_GET')) :
+	if ( isset($_GET['remove_item']) && $_GET['remove_item'] && $woocommerce->verify_nonce('cart', '_GET')) {
 
 		$woocommerce->cart->set_quantity( $_GET['remove_item'], 0 );
 
@@ -174,12 +174,12 @@ function woocommerce_update_cart_action() {
 		exit;
 
 	// Update Cart
-	elseif (isset($_POST['update_cart']) && $_POST['update_cart']  && $woocommerce->verify_nonce('cart')) :
+	} elseif ( ( ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && $woocommerce->verify_nonce('cart')) {
 
 		$cart_totals = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
 
-		if (sizeof($woocommerce->cart->get_cart())>0) :
-			foreach ($woocommerce->cart->get_cart() as $cart_item_key => $values) :
+		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
+			foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -194,28 +194,32 @@ function woocommerce_update_cart_action() {
 	    		$passed_validation 	= apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity);
 
 	    		// Check downloadable items
-				if ( get_option('woocommerce_limit_downloadable_product_qty')=='yes' ) :
-					if ( $_product->is_downloadable() && $_product->is_virtual() && $quantity > 1 ) :
+				if ( get_option('woocommerce_limit_downloadable_product_qty') == 'yes' ) {
+					if ( $_product->is_downloadable() && $_product->is_virtual() && $quantity > 1 ) {
 						$woocommerce->add_error( sprintf(__('You can only have 1 %s in your cart.', 'woocommerce'), $_product->get_title()) );
 						$passed_validation = false;
-					endif;
-				endif;
+					}
+				}
 
-	    		if ($passed_validation) {
+	    		if ( $passed_validation )
 		    		$woocommerce->cart->set_quantity( $cart_item_key, $quantity );
-	    		}
 
-			endforeach;
-		endif;
+			}
+		}
 
-		$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
+		if ( ! empty( $_POST['proceed'] ) ) {
+			wp_safe_redirect( $woocommerce->cart->get_checkout_url() );
+			exit;
+		} else {
+			$woocommerce->add_message( __('Cart updated.', 'woocommerce') );
 
-		$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
-		$referer = remove_query_arg( 'remove_discounts', $referer );
-		wp_safe_redirect( $referer );
-		exit;
+			$referer = ( wp_get_referer() ) ? wp_get_referer() : $woocommerce->cart->get_cart_url();
+			$referer = remove_query_arg( 'remove_discounts', $referer );
+			wp_safe_redirect( $referer );
+			exit;
+		}
 
-	endif;
+	}
 }
 
 
