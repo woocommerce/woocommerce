@@ -555,7 +555,7 @@ function woocommerce_trim_zeros( $price ) {
  * @return string
  */
 function woocommerce_format_decimal( $number ) {
-	return rtrim( rtrim( number_format( (float) $number, 4, '.', '' ), '0' ), '.' );
+	return rtrim( rtrim( number_format( (float) $number, get_option( 'woocommerce_price_num_decimals' ), '.', '' ), '0' ), '.' );
 }
 
 
