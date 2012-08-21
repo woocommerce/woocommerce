@@ -144,7 +144,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 
 					// Ajax action
 					jQuery.ajax({
-						url: '".admin_url('admin-ajax.php')."',
+						url: '" . ( ( is_ssl() || force_ssl_admin() || force_ssl_login() ) ? str_replace( 'http:', 'https:', admin_url( 'admin-ajax.php' ) ) : str_replace( 'https:', 'http:', admin_url( 'admin-ajax.php' ) ) ) . "',
 						data: data,
 						type: 'GET',
 						dataType: 'jsonp',

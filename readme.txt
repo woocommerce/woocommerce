@@ -156,12 +156,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Iconised order action buttons
 * Tweak - Simplified order status markers
 * Tweak - Product data tabs class change
+* Tweak - Moved upsells above related products as they should have higher priority
 * Fix - Shipping method dropdown for id's which vary
 * Fix - Missing grouped product cart buttons
 * Fix - Notice in invoice template with number_format
 * Fix - Made variation get_image() return instead of echo
 * Fix - Remove is_product check so variation JS can register itself for use. Same for the single product JS
 * Fix - Above fix also fixes single product shortcodes
+* Fix - ajax url for login widget to support SSL
 * Misc - Updated all inline documentation for use in our API docs.
 * Localization - Added Norwegian translation by Espen André Corneliussen
 
