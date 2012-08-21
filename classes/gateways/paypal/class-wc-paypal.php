@@ -240,7 +240,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'charset' 				=> 'UTF-8',
 				'rm' 					=> is_ssl() ? 2 : 1,
 				'upload' 				=> 1,
-				'return' 				=> $this->get_return_url( $order ),
+				'return' 				=> add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ),
 				'cancel_return'			=> $order->get_cancel_order_url(),
 				'page_style'			=> $this->page_style,
 
