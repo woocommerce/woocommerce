@@ -38,6 +38,7 @@ include_once('shortcode-thankyou.php');
  */
 function woocommerce_product_category( $atts ){
 	global $woocommerce_loop;
+	global $products;
 
   	if ( empty( $atts ) ) return;
 
@@ -81,19 +82,8 @@ function woocommerce_product_category( $atts ){
 
 	$woocommerce_loop['columns'] = $columns;
 
-	if ( $products->have_posts() ) : ?>
-
-		<ul class="products">
-
-			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-
-			<?php endwhile; // end of the loop. ?>
-
-		</ul>
-
-	<?php endif;
+	if ( $products->have_posts() )
+		woocommerce_get_template_part( 'loop', 'products' );
 
 	wp_reset_query();
 
@@ -179,6 +169,7 @@ function woocommerce_product_categories( $atts ) {
 function woocommerce_recent_products( $atts ) {
 
 	global $woocommerce_loop;
+	global $products;
 
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',
@@ -209,19 +200,8 @@ function woocommerce_recent_products( $atts ) {
 
 	$woocommerce_loop['columns'] = $columns;
 
-	if ( $products->have_posts() ) : ?>
-
-		<ul class="products">
-
-			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-
-			<?php endwhile; // end of the loop. ?>
-
-		</ul>
-
-	<?php endif;
+	if ( $products->have_posts() )
+		woocommerce_get_template_part( 'loop', 'products' );
 
 	wp_reset_query();
 
@@ -238,6 +218,7 @@ function woocommerce_recent_products( $atts ) {
  */
 function woocommerce_products( $atts ) {
 	global $woocommerce_loop;
+	global $products;
 
   	if (empty($atts)) return;
 
@@ -285,19 +266,8 @@ function woocommerce_products( $atts ) {
 
 	$woocommerce_loop['columns'] = $columns;
 
-	if ( $products->have_posts() ) : ?>
-
-		<ul class="products">
-
-			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-
-			<?php endwhile; // end of the loop. ?>
-
-		</ul>
-
-	<?php endif;
+	if ( $products->have_posts() )
+		woocommerce_get_template_part( 'loop', 'products' );
 
 	wp_reset_query();
 
@@ -345,19 +315,8 @@ function woocommerce_product( $atts ) {
 
 	$products = new WP_Query( $args );
 
-	if ( $products->have_posts() ) : ?>
-
-		<ul class="products">
-
-			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-
-			<?php endwhile; // end of the loop. ?>
-
-		</ul>
-
-	<?php endif;
+	if ( $products->have_posts() )
+		woocommerce_get_template_part( 'loop', 'products' );
 
 	wp_reset_query();
 
@@ -376,7 +335,8 @@ function woocommerce_product_add_to_cart( $atts ) {
   	if (empty($atts)) return;
 
   	global $wpdb, $woocommerce;
-
+	global $products;
+	
   	if (!isset($atts['style'])) $atts['style'] = 'border:4px solid #ccc; padding: 12px;';
 
   	if ($atts['id']) :
@@ -481,7 +441,8 @@ function woocommerce_product_add_to_cart_url( $atts ){
 function woocommerce_featured_products( $atts ) {
 
 	global $woocommerce_loop;
-
+	global $products;
+	
 	extract(shortcode_atts(array(
 		'per_page' 	=> '12',
 		'columns' 	=> '4',
@@ -512,22 +473,11 @@ function woocommerce_featured_products( $atts ) {
 	ob_start();
 
 	$products = new WP_Query( $args );
-
+	
 	$woocommerce_loop['columns'] = $columns;
 
-	if ( $products->have_posts() ) : ?>
-
-		<ul class="products">
-
-			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
-
-				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
-
-			<?php endwhile; // end of the loop. ?>
-
-		</ul>
-
-	<?php endif;
+	if ( $products->have_posts() )
+		woocommerce_get_template_part( 'loop', 'products' );
 
 	wp_reset_query();
 
