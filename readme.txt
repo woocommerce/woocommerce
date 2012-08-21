@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.6.4 =
 * Feature - New input for shipping method title (as the customer sees it)
+* Tweak - Rewritten variation javascript to add scope. Please ensure that if you have a custom variable.php add to cart template, that you update them.
 * Tweak - Classes for order info in my-account
 * Tweak - Iconised order action buttons
 * Tweak - Simplified order status markers

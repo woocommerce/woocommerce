@@ -10,12 +10,12 @@
 global $woocommerce, $product, $post;
 ?>
 <script type="text/javascript">
-    var product_variations = <?php echo json_encode($available_variations) ?>;
+    var product_variations_<?php echo $post->ID; ?> = <?php echo json_encode( $available_variations ) ?>;
 </script>
 
 <?php do_action('woocommerce_before_add_to_cart_form'); ?>
 
-<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data'>
+<form action="<?php echo esc_url( $product->add_to_cart_url() ); ?>" class="variations_form cart" method="post" enctype='multipart/form-data' data-product_id="<?php echo $post->ID; ?>">
 	<table class="variations" cellspacing="0">
 		<tbody>
 			<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
