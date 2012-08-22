@@ -283,9 +283,7 @@ jQuery(document).ready(function($) {
 	/**
 	 * Initial states and loading
 	 */
-
-	$('form.variations_form .variations select')
-		.change();
+	$('form.variations_form .variations select').change();
 
 
 	/**
