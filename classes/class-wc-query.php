@@ -69,9 +69,9 @@ class WC_Query {
 			// Get the actual WP page to avoid errors and let us use is_front_page()
 			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
-
-			$q->is_page = true;
+			
 			$shop_page 	= get_post( woocommerce_get_page_id('shop') );
+			$q->is_page = true;
 
 			$wp_post_types['product']->ID 			= $shop_page->ID;
 			$wp_post_types['product']->post_title 	= $shop_page->post_title;
@@ -81,6 +81,12 @@ class WC_Query {
 	        $q->is_singular = false;
 	        $q->is_post_type_archive = true;
 	        $q->is_archive = true;
+	        
+	        // Fix WP SEO
+	        if ( function_exists( 'wpseo_get_value' ) ) {
+	       		add_filter( 'wpseo_metadesc', array( &$this, 'wpseo_metadesc' ) );
+	       		add_filter( 'wpseo_metakey', array( &$this, 'wpseo_metakey' ) );
+	       	}
 
 		} else {
 
@@ -97,6 +103,29 @@ class WC_Query {
 
 	    // And remove the pre_get_posts hook
 	    $this->remove_product_query();
+	}
+	
+
+	/**
+	 * wpseo_metadesc function.
+	 * 
+	 * @access public
+	 * @param mixed $meta
+	 * @return void
+	 */
+	function wpseo_metadesc() {
+		return wpseo_get_value( 'metadesc', woocommerce_get_page_id('shop') );
+	}
+	
+	
+	/**
+	 * wpseo_metakey function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function wpseo_metakey() {
+		return wpseo_get_value( 'metakey', woocommerce_get_page_id('shop') );
 	}
 
 
