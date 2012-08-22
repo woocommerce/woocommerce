@@ -489,21 +489,42 @@ class WC_Countries {
 	 */
 	function get_allowed_countries() {
 
-		asort($this->countries);
+		asort( $this->countries );
 
-		if (get_option('woocommerce_allowed_countries')!=='specific') return $this->countries;
+		if ( get_option('woocommerce_allowed_countries') !== 'specific' ) 
+			return $this->countries;
 
 		$allowed_countries = array();
 
-		$allowed_countries_raw = get_option('woocommerce_specific_allowed_countries');
+		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
 
-		foreach ($allowed_countries_raw as $country) :
-
+		foreach ($allowed_countries_raw as $country)
 			$allowed_countries[$country] = $this->countries[$country];
 
-		endforeach;
-
 		return $allowed_countries;
+	}
+	
+	
+	/**
+	 * get_allowed_country_states function.
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function get_allowed_country_states() {
+
+		if ( get_option('woocommerce_allowed_countries') !== 'specific' ) 
+			return $this->states;
+
+		$allowed_states = array();
+
+		$allowed_countries_raw = get_option( 'woocommerce_specific_allowed_countries' );
+
+		foreach ( $allowed_countries_raw as $country )
+			if ( ! empty( $this->states[ $country ] ) ) 
+				$allowed_states[ $country ] = $this->states[ $country ];
+
+		return $allowed_states;
 	}
 
 

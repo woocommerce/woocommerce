@@ -1150,7 +1150,7 @@ class Woocommerce {
 
 		// Variables for JS scripts
 		$woocommerce_params = array(
-			'countries' 					=> json_encode( $this->countries->states ),
+			'countries' 					=> json_encode( $this->countries->get_allowed_country_states() ),
 			'select_state_text' 			=> __( 'Select an option&hellip;', 'woocommerce' ),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> $this->ajax_url(),
