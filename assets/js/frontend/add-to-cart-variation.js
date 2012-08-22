@@ -18,8 +18,6 @@ jQuery(document).ready(function($) {
 
 			$variation_form = $(this).closest('form.variations_form');
 			$variation_form.find('input[name=variation_id]').val('').change();
-			$variation_form.find('.single_variation_wrap').hide();
-			$variation_form.find('.single_variation').text('');
 
 			$variation_form
 				.trigger( 'woocommerce_variation_select_change' )
@@ -55,18 +53,18 @@ jQuery(document).ready(function($) {
 
 			$variation_form.find('.variations select').each( function() {
 
+				if ( $(this).val().length == 0 ) {
+					all_set = false;
+				} else {
+					any_set = true;
+				}
+
 				if ( exclude && $(this).attr('name') == exclude ) {
 
 					all_set = false;
 					current_settings[$(this).attr('name')] = '';
 
 				} else {
-
-					if ( $(this).val().length == 0 ) {
-						all_set = false;
-					} else {
-						any_set = true;
-					}
 
 	            	// Encode entities
 	            	value = $(this).val()
@@ -115,6 +113,10 @@ jQuery(document).ready(function($) {
 
 	            if ( ! focus )
 	            	$variation_form.trigger( 'reset_image' );
+
+				if ( ! exclude ) {
+					$variation_form.find('.single_variation_wrap').slideUp('200');
+				}
 
 	        }
 
@@ -281,9 +283,6 @@ jQuery(document).ready(function($) {
 	/**
 	 * Initial states and loading
 	 */
-	$('form.variations_form')
-		.find('.reset_variations')
-		.css('visibility','hidden');
 
 	$('form.variations_form .variations select')
 		.change();
