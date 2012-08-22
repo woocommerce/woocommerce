@@ -61,7 +61,7 @@ function woocommerce_admin_menu() {
     add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
     add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
 
-    $print_css_on = array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' );
+    $print_css_on = apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'woocommerce_page_woocommerce_status', 'product_page_woocommerce_attributes', 'edit-tags.php', 'edit.php', 'index.php', 'post-new.php', 'post.php' ) );
 
     foreach ( $print_css_on as $page )
     	add_action( 'admin_print_styles-'. $page, 'woocommerce_admin_css' );
@@ -336,7 +336,7 @@ function woocommerce_admin_scripts() {
     $screen = get_current_screen();
 
     // WooCommerce admin pages
-    if (in_array( $screen->id, array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ))) :
+    if (in_array( $screen->id, apply_filters( 'woocommerce_screen_ids', array( 'toplevel_page_woocommerce', 'woocommerce_page_woocommerce_settings', 'woocommerce_page_woocommerce_reports', 'edit-shop_order', 'edit-shop_coupon', 'shop_coupon', 'shop_order', 'edit-product', 'product' ) ) ) ) :
 
     	wp_enqueue_script( 'woocommerce_admin' );
     	wp_enqueue_script('farbtastic');
@@ -430,7 +430,7 @@ function woocommerce_admin_scripts() {
 	}
 
 	// Reports pages
-    if ( $screen->id == 'woocommerce_page_woocommerce_reports' ) {
+    if ( $screen->id == apply_filters( 'woocommerce_reports_screen_id', 'woocommerce_page_woocommerce_reports' ) ) {
 
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'flot', $woocommerce->plugin_url() . '/assets/js/admin/jquery.flot'.$suffix.'.js', 'jquery', '1.0' );
