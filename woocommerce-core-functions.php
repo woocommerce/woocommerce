@@ -480,6 +480,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		case 'TWD' : $currency_symbol = '&#78;&#84;&#36;'; break;
 		case 'THB' : $currency_symbol = '&#3647;'; break;
 		case 'GBP' : $currency_symbol = '&pound;'; break;
+		case 'RON' : $currency_symbol = 'lei'; break;
 		default    : $currency_symbol = ''; break;
 	endswitch;
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
