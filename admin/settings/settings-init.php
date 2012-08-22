@@ -68,6 +68,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 			'THB' => __( 'Thai Baht', 'woocommerce' ),
 			'TRY' => __( 'Turkish Lira (TL)', 'woocommerce' ),
 			'ZAR' => __( 'South African rand (R)', 'woocommerce' ),
+			'RON' => __( 'Romanian Leu (RON)', 'woocommerce' ),
 			))
 		)
 	),
