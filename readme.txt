@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Misc - Updated all inline documentation for use in our API docs.
 * Localization - Added Norwegian translation by Espen André Corneliussen
 * Localization - Added Romanian Leu
+* Localization - Updated Spanish translation
 
 = 1.6.3 - 10/08/2012 =
 * Feature - Option to register using the email address as the username instead of entering a username
