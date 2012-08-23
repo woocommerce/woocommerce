@@ -308,9 +308,9 @@ jQuery(document).ready(function($) {
 	// Check if two arrays of attributes match
     function variations_match( attrs1, attrs2 ) {
         var match = true;
-        for ( name in attrs1 ) {
-            var val1 = attrs1[ name ];
-            var val2 = attrs2[ name ];
+        for ( attr_name in attrs1 ) {
+            var val1 = attrs1[ attr_name ];
+            var val2 = attrs2[ attr_name ];
             if ( val1 !== undefined && val2 !== undefined && val1.length != 0 && val2.length != 0 && val1 != val2 ) {
                 match = false;
             }
