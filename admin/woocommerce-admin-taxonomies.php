@@ -91,7 +91,12 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 				<button type="submit" class="remove_image_button button"><?php _e('Remove image', 'woocommerce'); ?></button>
 			</div>
 			<script type="text/javascript">
-				
+
+				// Only show the "remove image" button when needed
+				if ( ! jQuery('#product_cat_thumbnail_id').val()) {
+					jQuery('.remove_image_button').hide();
+				}
+
 				window.send_to_termmeta = function(html) {
 					
 					jQuery('body').append('<div id="temp_image">' + html + '</div>');
@@ -104,6 +109,7 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 					
 					jQuery('#product_cat_thumbnail_id').val(imgid);
 					jQuery('#product_cat_thumbnail img').attr('src', imgurl);
+					jQuery('.remove_image_button').show();
 					jQuery('#temp_image').remove();
 					
 					tb_remove();
@@ -121,6 +127,7 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 				jQuery('.remove_image_button').live('click', function(){
 					jQuery('#product_cat_thumbnail img').attr('src', '<?php echo woocommerce_placeholder_img_src(); ?>');
 					jQuery('#product_cat_thumbnail_id').val('');
+					jQuery('.remove_image_button').hide();
 					return false;
 				});
 				
