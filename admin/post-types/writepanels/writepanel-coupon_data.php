@@ -45,7 +45,7 @@ function woocommerce_coupon_data_meta_box($post) {
 			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __('Apply before tax', 'woocommerce'), 'description' => __('Check this box if the coupon should be applied before calculating cart tax', 'woocommerce') ) );
 
 			// Free Shipping
-			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woocommerce'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woocommerce'), admin_url('admin.php?page=woocommerce_settings&tab=shipping_methods&subtab=shipping-free_shipping')) ) );
+			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __('Enable free shipping', 'woocommerce'), 'description' => sprintf(__('Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woocommerce'), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
 
 			echo '</div><div class="options_group">';
 
