@@ -32,6 +32,7 @@ if ($customer_orders) :
 				<th class="order-shipto"><span class="nobr"><?php _e('Ship to', 'woocommerce'); ?></span></th>
 				<th class="order-total"><span class="nobr"><?php _e('Total', 'woocommerce'); ?></span></th>
 				<th class="order-status" colspan="2"><span class="nobr"><?php _e('Status', 'woocommerce'); ?></span></th>
+				<th>&nbsp;</th>
 			</tr>
 		</thead>
 
