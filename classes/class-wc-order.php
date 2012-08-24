@@ -1452,60 +1452,58 @@ class WC_Order_Item_Meta {
 	 * @access public
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
-	 * @param string $hideprefix (default: blank)
+	 * @param string $hideprefix (default: _)
 	 * @return void
 	 */
-	function display( $flat = false, $return = false, $hideprefix = '' ) {
+	function display( $flat = false, $return = false, $hideprefix = '_' ) {
 		global $woocommerce;
 
-		if ( $this->meta && is_array( $this->meta ) ) :
-
-			if ( ! $flat ) $output = '<dl class="variation">'; else $output = '';
+		if ( $this->meta && is_array( $this->meta ) ) {
+			
+			$output = $flat ? '' : '<dl class="variation">';
 
 			$meta_list = array();
 
-			foreach ( $this->meta as $meta ) :
-				if ( !empty( $hideprefix) ) {
-					if ( substr( $meta['meta_name'], 0, 1 ) <> $hideprefix ) {
-						$name 	= $meta['meta_name'];
-						$value	= $meta['meta_value'];
-					} else continue;
+			foreach ( $this->meta as $meta ) {
+			
+				if ( ! empty( $hideprefix ) && substr( $meta['meta_name'], 0, 1 ) == $hideprefix ) {
+					// Skip
+					continue;
 				} else {
 					$name 	= $meta['meta_name'];
 					$value	= $meta['meta_value'];
 				}
 
-				if ( ! $value ) continue;
+				if ( ! $value ) 
+					continue;
 
 				// If this is a term slug, get the term's nice name
-	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) :
-	            	$term = get_term_by('slug', $value, esc_attr(str_replace('attribute_', '', $name)));
-	            	if (!is_wp_error($term) && $term->name) :
+	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
+	            	$term = get_term_by('slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+	            	if ( ! is_wp_error( $term ) && $term->name )
 	            		$value = $term->name;
-	            	endif;
-	            else :
+	            } else {
 	            	$value = ucfirst($value);
-	            endif;
+	            }
 
-				if ($flat) :
-					$meta_list[] = $woocommerce->attribute_label(str_replace('attribute_', '', $name)).': '.$value;
-				else :
-					$meta_list[] = '<dt>'.$woocommerce->attribute_label(str_replace('attribute_', '', $name)).':</dt><dd>'.$value.'</dd>';
-				endif;
+				if ( $flat )
+					$meta_list[] = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
+				else
+					$meta_list[] = '<dt>' . $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
 
-			endforeach;
+			}
 
-			if ($flat) :
-				$output .= implode(", \n", $meta_list);
-			else :
-				$output .= implode('', $meta_list);
-			endif;
+			if ( $flat )
+				$output .= implode( ", \n", $meta_list );
+			else
+				$output .= implode( '', $meta_list );
 
-			if (!$flat) $output .= '</dl>';
+			if ( ! $flat ) 
+				$output .= '</dl>';
 
-			if ($return) return $output; else echo $output;
+			if ( $return ) return $output; else echo $output;
 
-		endif;
+		}
 	}
 }
 
