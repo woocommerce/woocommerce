@@ -1396,6 +1396,8 @@ class WC_Cart {
 			if ( $woocommerce->customer->is_vat_exempt() || ( is_cart() && get_option('woocommerce_display_cart_taxes') == 'no' ) ) {
 				$this->shipping_tax_total = $this->tax_total = 0;
 				$this->taxes = $this->shipping_taxes = array();
+				foreach ( $this->cart_contents as $cart_item_key => $item )
+					$this->cart_contents[$cart_item_key]['line_subtotal_tax'] = $this->cart_contents[$cart_item_key]['line_tax'] = 0;
 			}
 
 			// Cart Discounts (after tax)
