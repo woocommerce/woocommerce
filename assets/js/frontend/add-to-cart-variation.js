@@ -213,9 +213,11 @@ jQuery(document).ready(function($) {
 		// Show single variation details (price, stock, image)
 		.on( 'found_variation', function( event, variation ) {
 	      	var $variation_form = $(this);
+	       
 	        var $product 		= $(this).closest( '.product' );
 			var $product_img 	= $product.find( 'div.images img:eq(0)' );
 			var $product_link 	= $product.find( 'div.images a.zoom:eq(0)' );
+			
 			var o_src 			= $product_img.attr('data-o_src');
 			var o_title 		= $product_img.attr('data-o_title');
 	        var o_href 			= $product_link.attr('data-o_href');
@@ -227,29 +229,35 @@ jQuery(document).ready(function($) {
 			$variation_form.find('.variations_button').show();
 	        $variation_form.find('.single_variation').html( variation.price_html + variation.availability_html );
 
-	        if ( ! o_src )
-	            $product_img.attr('data-o_src', $product_img.attr('src') );
+	        if ( ! o_src ) {
+	        	o_src = ( ! $product_img.attr('src') ) ? '' : $product_img.attr('src');
+	            $product_img.attr('data-o_src', o_src );
+	        }
 
-	        if ( ! o_href )
-	            $product_link.attr('data-o_href', $product_link.attr('href') );
+	        if ( ! o_href ) {
+	        	o_href = ( ! $product_link.attr('href') ) ? '' : $product_link.attr('href');
+	            $product_link.attr('data-o_href', o_href );
+	        }
 
-	         if ( ! o_title )
-	            $product_img.attr('data-o_title', $product_img.attr('title') );
+	        if ( ! o_title ) {
+	        	o_title = ( ! $product_img.attr('title') ) ? '' : $product_img.attr('title');
+	            $product_img.attr('data-o_title', o_title );
+	        }
 
 	        if ( variation_image && variation_image.length > 1 ) {
 	            $product_img
-	            	.attr('src', variation_image)
-	            	.attr('alt', variation_title)
-	            	.attr('title', variation_title);
+	            	.attr( 'src', variation_image )
+	            	.attr( 'alt', variation_title )
+	            	.attr( 'title', variation_title );
 	            $product_link
-	            	.attr('href', variation_link);
+	            	.attr( 'href', variation_link );
 	        } else {
 	            $product_img
-	            	.attr('src', o_src)
-	            	.attr('alt', o_title)
-	            	.attr('title', o_title);
+	            	.attr( 'src', o_src )
+	            	.attr( 'alt', o_title )
+	            	.attr( 'title', o_title );
 	            $product_link
-	            	.attr('href', o_href);
+	            	.attr( 'href', o_href );
 	        }
 
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
