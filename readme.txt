@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allowed order actions to be translated without breaking icons
 * Tweak - Wipe line tax when an order is tax exempt
 * Tweak - Status page improvements
+* Tweak - Appended version to scripts to prevent cache issues upon upgrade
 
 = 1.6.4 - 23/08/2012 =
 * Feature - New input for shipping method title (as the customer sees it)
