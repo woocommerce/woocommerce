@@ -158,24 +158,27 @@ function woocommerce_custom_order_columns( $column ) {
 					if ( in_array( $order->status, array( 'pending', 'on-hold' ) ) )
 						$actions[] = array(
 							'url' 	=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-processing&order_id=' . $post->ID ), 'woocommerce-mark-order-processing' ),
-							'name' 	=> __( 'Processing', 'woocommerce' )
+							'name' 	=> __( 'Processing', 'woocommerce' ),
+							'img' 	=> "processing"
 						);
 
 					if ( in_array( $order->status, array( 'pending', 'on-hold', 'processing' ) ) )
 						$actions[] = array(
 							'url' 	=> wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce-mark-order-complete&order_id=' . $post->ID ), 'woocommerce-mark-order-complete' ),
-							'name' 	=> __( 'Complete', 'woocommerce' )
+							'name' 	=> __( 'Complete', 'woocommerce' ),
+							'img' 	=> "complete"
 						);
 
 					$actions[] = array(
 							'url' 	=> admin_url( 'post.php?post=' . $post->ID . '&action=edit' ),
-							'name' 	=> __( 'View', 'woocommerce' )
+							'name' 	=> __( 'View', 'woocommerce' ),
+							'img' 	=> "view"
 						);
 
 					$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
 
 					foreach ( $actions as $action )
-						printf( '<a class="button tips" href="%s" data-tip="%s"><img src="'.$woocommerce->plugin_url() . '/assets/images/icons/'.strtolower($action['name']).'.png" alt="%s" width="14" /></a>', $action['url'], $action['name'], $action['name'] );
+						printf( '<a class="button tips" href="%s" data-tip="%s"><img src="'.$woocommerce->plugin_url() . '/assets/images/icons/'.$action['img'].'.png" alt="%s" width="14" /></a>', $action['url'], $action['name'], $action['name'] );
 
 					do_action( 'woocommerce_admin_order_actions_end', $order );
 				?>
