@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
 				
 				var this_page = window.location.toString();
 				
-				this_page = this_page.split("?")[0];
+				this_page = this_page.replace( 'add-to-cart', 'added-to-cart' );
 				
 				$thisbutton.removeClass('loading');
 
