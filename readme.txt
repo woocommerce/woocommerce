@@ -151,6 +151,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.5 =
+* Tweak - Allowed order actions to be translated without breaking icons
 * Tweak - Wipe line tax when an order is tax exempt
 * Tweak - Status page improvements
 
