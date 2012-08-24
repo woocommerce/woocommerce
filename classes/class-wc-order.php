@@ -1452,9 +1452,10 @@ class WC_Order_Item_Meta {
 	 * @access public
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
+	 * @param string $hideprefix (default: blank)
 	 * @return void
 	 */
-	function display( $flat = false, $return = false ) {
+	function display( $flat = false, $return = false, $hideprefix = '' ) {
 		global $woocommerce;
 
 		if ( $this->meta && is_array( $this->meta ) ) :
@@ -1464,9 +1465,15 @@ class WC_Order_Item_Meta {
 			$meta_list = array();
 
 			foreach ( $this->meta as $meta ) :
-
-				$name 	= $meta['meta_name'];
-				$value	= $meta['meta_value'];
+				if ( !empty( $hideprefix) ) {
+					if ( substr( $meta['meta_name'], 0, 1 ) <> $hideprefix ) {
+						$name 	= $meta['meta_name'];
+						$value	= $meta['meta_value'];
+					} else continue;
+				} else {
+					$name 	= $meta['meta_name'];
+					$value	= $meta['meta_value'];
+				}
 
 				if ( ! $value ) continue;
 
