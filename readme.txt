@@ -150,6 +150,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.6.5 =
+* Tweak - Wipe line tax when an order is tax exempt
+* Tweak - Status page improvements
+
 = 1.6.4 - 23/08/2012 =
 * Feature - New input for shipping method title (as the customer sees it)
 * Tweak - Made the currency DP rule apply to order totals for currencies which don't have cent values https://github.com/woothemes/woocommerce/issues/1383
