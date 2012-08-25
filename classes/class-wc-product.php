@@ -1526,6 +1526,8 @@ class WC_Product {
 					'sku' 					=> __( 'SKU:', 'woocommerce' ) . ' ' . $variation->get_sku(),
 					'min_qty' 				=> 1,
 					'max_qty' 				=> $this->backorders_allowed() ? '' : $variation->stock,
+					'backorders_allowed' 	=> $this->backorders_allowed(),
+					'is_in_stock'			=> $variation->is_in_stock(),
 					'is_downloadable' 		=> $variation->is_downloadable() ,
 					'is_virtual' 			=> $variation->is_virtual(),
 					'is_sold_individually' 	=> $variation->is_sold_individually() ? 'yes' : 'no',

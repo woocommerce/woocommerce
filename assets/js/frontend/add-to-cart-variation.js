@@ -274,7 +274,11 @@ jQuery(document).ready(function($) {
 	        	 $variation_form.find('.product_meta').find('.sku').text('');
 
 	        $single_variation_wrap.find('.quantity').show();
-
+	        
+	        if ( ! variation.is_in_stock && ! variation.backorders_allowed ) {
+		        $variation_form.find('.variations_button').hide();
+	        }
+	        
 	        if ( variation.min_qty )
 	        	$single_variation_wrap.find('input[name=quantity]').attr( 'data-min', variation.min_qty ).val( variation.min_qty );
 	        else
