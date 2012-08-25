@@ -89,7 +89,7 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 
 		else :
 
-			echo $before  . $_name . $after;
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $after;
 
 		endif;
 
