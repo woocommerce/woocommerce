@@ -81,7 +81,13 @@ jQuery(document).ready(function($) {
 			});
 
 			var variation_id		= parseInt( $variation_form.attr( 'data-product_id' ) );
-	        var matching_variations = find_matching_variations( window[ "product_variations_" + variation_id ], current_settings );
+			var all_variations		= window[ "product_variations_" + variation_id ];
+			
+			// Fallback
+			if ( ! all_variations ) 
+				all_variations = window[ "product_variations" ];
+			
+	        var matching_variations = find_matching_variations( all_variations, current_settings );
 
 	        if ( all_set ) {
 
