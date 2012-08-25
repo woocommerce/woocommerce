@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4.1
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -150,7 +150,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.6.5 =
+= 1.6.5 - 25/08/2012 =
 * Tweak - Check for, and enforce, a minimum version of jQuery
 * Tweak - Hide cart button when a variation is out of stock with disabled backorders
 * Tweak - Allowed order actions to be translated without breaking icons
