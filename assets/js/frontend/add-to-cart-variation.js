@@ -284,7 +284,7 @@ jQuery(document).ready(function($) {
 	        	$single_variation_wrap.find('.quantity').hide();
 	        }
 
-	        $single_variation_wrap.slideDown('200').trigger('show_variation');
+	        $single_variation_wrap.slideDown('200').trigger( 'show_variation', [ variation ] );
 
 		} );
 

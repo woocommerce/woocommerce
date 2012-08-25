@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allowed order actions to be translated without breaking icons
 * Tweak - Wipe line tax when an order is tax exempt
 * Tweak - Status page improvements
+* Tweak - Pass variation to show_variation trigger (JS)
 * Tweak - Appended version to scripts to prevent cache issues upon upgrade
 * Fix - notice in woocommerce_create_term (kudos nathanielks)
 * Localization - Few strings (kudos maxistore)
