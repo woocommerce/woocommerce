@@ -129,10 +129,10 @@ function woocommerce_product_data_box() {
 				echo '	<p class="form-field sale_price_dates_fields">
 							<label for="'.$field['id'].'_from">'.$field['label'].'</label>
 							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
-				if ($sale_price_dates_from) echo date('Y-m-d', $sale_price_dates_from);
+				if ($sale_price_dates_from) echo date_i18n( 'Y-m-d', $sale_price_dates_from );
 				echo '" placeholder="' . _x('From&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
-				if ($sale_price_dates_to) echo date('Y-m-d', $sale_price_dates_to);
+				if ($sale_price_dates_to) echo date_i18n( 'Y-m-d', $sale_price_dates_to );
 				echo '" placeholder="' . _x('To&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
 							<a href="#" class="cancel_sale_schedule">'. __('Cancel', 'woocommerce') .'</a>
 						</p>';

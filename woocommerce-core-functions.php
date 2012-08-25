@@ -919,7 +919,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
                 // Default value is NULL in the table schema
 				$expiry = (empty($expiry)) ? null : (int) $expiry;
 
-				if ($expiry) $expiry = date("Y-m-d", strtotime('NOW + ' . $expiry . ' DAY'));
+				if ($expiry) $expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
                 $data = array(
 					'product_id' 			=> $download_id,

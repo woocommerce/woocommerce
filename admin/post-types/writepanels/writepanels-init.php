@@ -203,7 +203,7 @@ function woocommerce_order_data( $data ) {
 	if ($data['post_type']=='shop_order' && isset($data['post_date'])) {
 
 		$order_title = 'Order';
-		if ($data['post_date']) $order_title.= ' &ndash; '.date('F j, Y @ h:i A', strtotime($data['post_date']));
+		if ($data['post_date']) $order_title.= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 
 		$data['post_title'] = $order_title;
 	}

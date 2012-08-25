@@ -53,7 +53,7 @@ function woocommerce_order_downloads_meta_box() {
 									</td>
 									<td>
 										<label><?php _e('Access Expires', 'woocommerce'); ?>:</label>
-										<input type="text" class="short date-picker" name="access_expires[<?php echo $i; ?>]" value="<?php echo ($download->access_expires>0) ? date('Y-m-d', strtotime($download->access_expires)) : ''; ?>" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />
+										<input type="text" class="short date-picker" name="access_expires[<?php echo $i; ?>]" value="<?php echo ($download->access_expires>0) ? date_i18n( 'Y-m-d', strtotime( $download->access_expires ) ) : ''; ?>" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />
 									</td>
 								</tr>
 							</tbody>
@@ -274,7 +274,7 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 
             $format = array( '%d', '%s', '%s');
 
-            $expiry  = ( array_key_exists( $i, $access_expires ) && $access_expires[ $i ] != '' ) ? date( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
+            $expiry  = ( array_key_exists( $i, $access_expires ) && $access_expires[ $i ] != '' ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 
             if ( ! is_null($expiry)) {
                 $data['access_expires'] = $expiry;

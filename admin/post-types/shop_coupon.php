@@ -69,7 +69,7 @@ function woocommerce_custom_coupon_columns($column) {
 			echo $usage_count;
 		break;
 		case "expiry_date" :
-			if ($expiry_date) echo date('F j, Y', strtotime($expiry_date)); else echo '&ndash;';
+			if ($expiry_date) echo date_i18n( 'F j, Y', strtotime( $expiry_date ) ); else echo '&ndash;';
 		break;
 	}
 }

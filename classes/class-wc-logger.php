@@ -68,7 +68,7 @@ class WC_Logger {
 	 */
 	public function add( $handle, $message ) {
 		if ( $this->open( $handle ) ) {
-			$time = date('m-d-Y @ H:i:s -'); //Grab Time
+			$time = date_i18n( 'm-d-Y @ H:i:s -' ); //Grab Time
 			fwrite( $this->handles[$handle], $time . " " . $message . "\n" );
 		}
 	}
