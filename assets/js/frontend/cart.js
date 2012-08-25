@@ -13,7 +13,7 @@ jQuery(document).ready(function($) {
 		
 		var method = $(this).val();
 		
-		$('div.cart_totals').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6}});
+		$('div.cart_totals').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', opacity: 0.6}});
 		
 		var data = {
 			action: 			'woocommerce_update_shipping_method',

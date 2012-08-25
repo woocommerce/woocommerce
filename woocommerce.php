@@ -1155,6 +1155,7 @@ class Woocommerce {
 			'select_state_text' 			=> __( 'Select an option&hellip;', 'woocommerce' ),
 			'plugin_url' 					=> $this->plugin_url(),
 			'ajax_url' 						=> $this->ajax_url(),
+			'ajax_loader_url'				=> apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader.gif' ),
 			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
 			'review_rating_required'		=> get_option( 'woocommerce_review_rating_required' ),
 			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
