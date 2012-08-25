@@ -80,8 +80,8 @@ jQuery(document).ready(function($) {
 
 			});
 
-			var variation_id		= parseInt( $variation_form.attr( 'data-product_id' ) );
-			var all_variations		= window[ "product_variations_" + variation_id ];
+			var product_id			= parseInt( $variation_form.attr( 'data-product_id' ) );
+			var all_variations		= window[ "product_variations_" + product_id ];
 			
 			// Fallback
 			if ( ! all_variations ) 
@@ -212,7 +212,7 @@ jQuery(document).ready(function($) {
 	        });
 
 			// Custom event for when variations have been updated
-			$(document).trigger('woocommerce_update_variation_values');
+			$variation_form.trigger('woocommerce_update_variation_values');
 
 		} )
 
