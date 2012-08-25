@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added fallback for variations variable (JS)
 * Tweak - Filter for the ajax_loader_url
 * Tweak - Clear transients during link_all_variations
+* Tweak - Breadcrumbs tweaks (thanks kingbt)
 * Fix - notice in woocommerce_create_term (kudos nathanielks)
 * Localization - Few strings (kudos maxistore)
 
