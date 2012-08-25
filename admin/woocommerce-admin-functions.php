@@ -316,17 +316,22 @@ function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 
 	$term = get_term($term_id, $taxonomy);
 
-	// gets the sibling terms
-	$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
-
-	foreach ($siblings as $sibling) {
-		if( $sibling->term_id == $term_id ) continue;
-		$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
-		break;
+	if ( $term != null ){
+	
+		// gets the sibling terms
+		$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
+	
+		foreach ($siblings as $sibling) {
+			if( $sibling->term_id == $term_id ) continue;
+			$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
+			break;
+		}
+	
+		// reorder
+		woocommerce_order_terms( $term, $next_id, $taxonomy );		
+	
 	}
 
-	// reorder
-	woocommerce_order_terms( $term, $next_id, $taxonomy );
 }
 
 
