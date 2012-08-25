@@ -150,11 +150,11 @@ function woocommerce_get_customer_meta_fields() {
 					),
 				'billing_state' => array(
 						'label' => __('State/County', 'woocommerce'),
-						'description' => 'Country or state code'
+						'description' => '__('Country or state code', 'woocommerce'),
 					),
 				'billing_country' => array(
 						'label' => __('Country', 'woocommerce'),
-						'description' => '2 letter Country code'
+						'description' => '__('2 letter Country code', 'woocommerce')'
 					),
 				'billing_phone' => array(
 						'label' => __('Telephone', 'woocommerce'),
