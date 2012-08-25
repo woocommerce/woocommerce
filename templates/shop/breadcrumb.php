@@ -89,7 +89,12 @@ if ( (!is_home() && !is_front_page() && !(is_post_type_archive() && get_option('
 
 		else :
 
+		        if (is_paged()) {
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $after;
+			}
+			if (!is_paged()) {
 			echo $before . $_name . $after;
+			}
 
 		endif;
 
