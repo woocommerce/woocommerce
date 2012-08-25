@@ -151,10 +151,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.6.5 =
+* Tweak - Check for, and enforce, a minimum version of jQuery
 * Tweak - Allowed order actions to be translated without breaking icons
 * Tweak - Wipe line tax when an order is tax exempt
 * Tweak - Status page improvements
 * Tweak - Appended version to scripts to prevent cache issues upon upgrade
+* Fix - notice in woocommerce_create_term (kudos nathanielks)
+* Localization - Few strings (kudos maxistore)
 
 = 1.6.4 - 23/08/2012 =
 * Feature - New input for shipping method title (as the customer sees it)

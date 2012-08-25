@@ -309,6 +309,7 @@ class Woocommerce {
 			add_filter( 'wp_redirect', array(&$this, 'redirect'), 1, 2 );
 			add_action( 'template_redirect', array(&$this, 'buffer_checkout') );
 			add_action( 'wp_enqueue_scripts', array(&$this, 'frontend_scripts') );
+			add_action( 'wp_print_scripts', array(&$this, 'check_jquery'), 25 );
 			add_action( 'wp_head', array(&$this, 'generator') );
 			add_action( 'wp_head', array(&$this, 'wp_head') );
 			add_filter( 'body_class', array(&$this, 'output_body_class') );
@@ -1170,6 +1171,28 @@ class Woocommerce {
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
+		
+		
+	}
+	
+	/**
+	 * WC requires jQuery 1.7 since it uses functions like .on() for events.
+	 * If, by the time wp_print_scrips is called, jQuery is outdated (i.e not
+	 * using the version in core) we need to deregister it and register the 
+	 * core version of the file.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function check_jquery() {
+		global $wp_scripts;
+		
+		// Enforce minimum version of jQuery
+		if ( isset( $wp_scripts->registered['jquery']->ver ) && $wp_scripts->registered['jquery']->ver < '1.7' ) {
+			wp_deregister_script( 'jquery' );
+			wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.7' );
+			wp_enqueue_script( 'jquery' );
+		}
 	}
 
 	/** Load Instances on demand **********************************************/
