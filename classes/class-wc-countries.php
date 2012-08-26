@@ -292,7 +292,18 @@ class WC_Countries {
 			),
 			'AF' => array(),
 			'AT' => array(),
-			'BE' => array(),
+			'BE' => array(
+				'ANT' => __('Antwerp', 'woocommerce'),				
+				'EF' => __('East Flanders', 'woocommerce'),				
+				'FB' => __('Flemish Brabant', 'woocommerce'),				
+				'HN' => __('Hainaut', 'woocommerce'),				
+				'LI' => __('Liege', 'woocommerce'),				
+				'LB' => __('Limburg', 'woocommerce'),				
+				'LUX' => __('Luxembourg', 'woocommerce'),				
+				'NA' => __('Namur', 'woocommerce'),				
+				'WB' => __('Walloon Brabant', 'woocommerce'),				
+				'WF' => __('West Flanders', 'woocommerce')
+			),
 			'BI' => array(),
 			'BR' => array(
 			    'AM' => __('Amazonas', 'woocommerce'),
