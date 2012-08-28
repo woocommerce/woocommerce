@@ -866,7 +866,7 @@ class WC_Order {
 
 				$has_compound_tax = false;
 
-				foreach ( $this->get_taxes() as $tax ) {
+				foreach ( $this->get_taxes() as $index => $tax ) {
 					if ( $tax[ 'compound' ] ) {
 						$has_compound_tax = true;
 						continue;
@@ -875,7 +875,12 @@ class WC_Order {
 					if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
 						continue;
 
-					$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
+					$row_index = sanitize_title( $tax['label'] );
+
+					if ( isset( $total_rows[sanitize_title( $tax['label'] )] ) )
+						$row_index .= '_' . $index;
+
+					$total_rows[$row_index] = array(
 						'label' => $tax[ 'label' ],
 						'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
 					);
