@@ -1513,7 +1513,7 @@ class Woocommerce {
 		global $wpdb;
 		if ( ! $this->attribute_taxonomies )
 			$this->attribute_taxonomies = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies;" );
-		return $this->attribute_taxonomies;
+		return apply_filters( 'woocommerce_attribute_taxonomies', $this->attribute_taxonomies );
 	}
 
 
