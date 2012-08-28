@@ -404,8 +404,10 @@ class WC_Tax {
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$tax_amount = round( $tax_amount, $decimals );
+				}
 
 				// Add rate
 				if ( ! isset( $taxes[$key] ) )
@@ -433,8 +435,10 @@ class WC_Tax {
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$tax_amount = round( $tax_amount, $decimals );
+				}
 
 				// Add rate
 				if ( ! isset( $taxes[ $key ] ) )
@@ -463,8 +467,10 @@ class WC_Tax {
 				$tax_amount = ( $tax_amount / 100 );
 
 				// Rounding
-				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding )
-					$tax_amount = round( $tax_amount, get_option( 'woocommerce_price_num_decimals' ) );
+				if ( get_option( 'woocommerce_tax_round_at_subtotal' ) == 'no' && ! $supress_rounding ) {
+					$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+					$tax_amount = round( $tax_amount, $decimals );
+				}
 
 				// Add rate
 				if ( ! isset( $taxes[ $key ] ) )
@@ -555,7 +561,8 @@ class WC_Tax {
 	 * Round to currency DP.
 	 */
 	function round( $in ) {
-		return round( $in, get_option( 'woocommerce_price_num_decimals' ) );
+		$decimals = ( '' != get_option( 'woocommerce_price_num_decimals' ) ) ? get_option( 'woocommerce_price_num_decimals' ) : 0;
+		return round( $in, $decimals );
 	}
 
 }
