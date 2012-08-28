@@ -801,27 +801,41 @@ function woocommerce_download_product() {
 
 		global $wpdb;
 
-		$download_file = (int) urldecode($_GET['download_file']);
+		$product_id = (int) urldecode($_GET['download_file']);
 		$order_key = urldecode( $_GET['order'] );
 		$email = str_replace( ' ', '+', urldecode( $_GET['email'] ) );
+		$download_id = isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
+		$_product = new WC_Product( $product_id );
 
 		if (!is_email($email)) :
 			wp_die( __('Invalid email address.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 		endif;
 
-		$download_result = $wpdb->get_row( $wpdb->prepare("
-			SELECT order_id, downloads_remaining,user_id,download_count,access_expires
-			FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions
+		$query = "
+			SELECT order_id,downloads_remaining,user_id,download_count,access_expires,download_id
+			FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
-			AND product_id = %s
-		;", $email, $order_key, $download_file ) );
+			AND product_id = %s";
+		$args = array(
+			$email,
+			$order_key,
+			$product_id
+		);
+		if ( $download_id ) {
+			// backwards compatibility for existing download URLs
+			$query .= " AND download_id = %s";
+			$args[] = $download_id;
+		}
+
+		$download_result = $wpdb->get_row( $wpdb->prepare( $query, $args ) );
 
 		if (!$download_result) :
 			wp_die( __('Invalid download.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 			exit;
 		endif;
 
+		$download_id = $download_result->download_id;
 		$order_id = $download_result->order_id;
 		$downloads_remaining = $download_result->downloads_remaining;
 		$download_count = $download_result->download_count;
@@ -841,9 +855,14 @@ function woocommerce_download_product() {
 			endif;
 		endif;
 
+		if ( ! get_post( $product_id ) ) {
+			wp_die( __('Product no longer exists.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
+			exit;
+		}
+
 		if ($order_id) :
 			$order = new WC_Order( $order_id );
-			if ($order->status!='completed' && $order->status!='processing' && $order->status!='publish') :
+			if ( ! $order->is_download_permitted() && $order->status != 'publish' ) :
 				wp_die( __('Invalid order.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
 				exit;
 			endif;
@@ -870,8 +889,9 @@ function woocommerce_download_product() {
 			), array(
 				'user_email' => $email,
 				'order_key' => $order_key,
-				'product_id' => $download_file
-			), array( '%d' ), array( '%s', '%s', '%d' ) );
+				'product_id' => $product_id,
+				'download_id' => $download_id 
+			), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 
 		endif;
 
@@ -881,15 +901,16 @@ function woocommerce_download_product() {
 		), array(
 			'user_email' => $email,
 			'order_key' => $order_key,
-			'product_id' => $download_file
-		), array( '%d' ), array( '%s', '%s', '%d' ) );
+			'product_id' => $product_id,
+			'download_id' => $download_id
+		), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 
-		// Get the downloads URL and try to replace the url with a path
-		$file_path = apply_filters('woocommerce_file_download_path', get_post_meta($download_file, '_file_path', true), $download_file);
+		// Get the download URL and try to replace the url with a path
+		$file_path = $_product->get_file_download_path( $download_id );
 
-		if (!$file_path) exit;
+		if ( ! $file_path ) exit;
 
-		$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $download_file);
+		$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $product_id);
 
 		if ($file_download_method=='redirect') :
 

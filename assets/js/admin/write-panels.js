@@ -853,7 +853,7 @@ jQuery( function($){
 
 	jQuery('.upload_file_button').live('click', function(){
 
-		file_path_field = jQuery(this).parent().find('.file_path');
+		file_path_field = jQuery(this).parent().find('.file_paths');
 
 		formfield = jQuery(file_path_field).attr('name');
 
@@ -867,7 +867,7 @@ jQuery( function($){
 
 		file_url = jQuery(html).attr('href');
 		if (file_url) {
-			jQuery(file_path_field).val(file_url);
+			jQuery(file_path_field).val(jQuery(file_path_field).val() ? jQuery(file_path_field).val() + "\n" + file_url : file_url);
 		}
 		tb_remove();
 		window.send_to_editor = window.send_to_editor_default;

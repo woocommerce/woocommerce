@@ -29,26 +29,42 @@ function woocommerce_order_downloads_meta_box() {
 
 				$download_permissions = $wpdb->get_results("
 					SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-					WHERE order_id = $post->ID
+					WHERE order_id = $post->ID ORDER BY product_id
 				");
 
+				$product = null;
 				if ($download_permissions && sizeof($download_permissions)>0) foreach ($download_permissions as $download) :
-					$i++;
 
-					$product = new WC_Product( $download->product_id );
+					if ( ! $product || $product->id != $download->product_id ) :
+						$product = new WC_Product( $download->product_id );
+						$file_count = 0;
+					endif;
+
+					// don't show permissions to files that have since been removed
+					if ( ! $product->exists() || ! $product->has_file( $download->download_id ) ) continue;
+
+					$i++;
+					$file_count++;
+
 					?>
 		    		<div class="wc-metabox closed">
 						<h3 class="fixed">
-							<button type="button" rel="<?php echo $download->product_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
+							<button type="button" rel="<?php echo $download->product_id . ',' . $download->download_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
-							<strong><?php echo '#' . $product->id . ' &mdash; ' . $product->get_title() . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count, 'woocommerce'), $download->download_count); ?></strong>
+							<strong><?php echo '#' . $product->id . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_title(), $download->product_id, $download->order_id, $download->order_key, $download->download_id ) . ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_count ) . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count, 'woocommerce'), $download->download_count); ?></strong>
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 							<tbody>
 								<tr>
+									<td colspan="2">
+										<?php echo __('File path:', 'woocommerce') . ' ' . $product->get_file_download_path( $download->download_id ); ?>
+									</td>
+								</tr>
+								<tr>
 									<td>
 										<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>
-										<input type="hidden" name="download_id[<?php echo $i; ?>]" value="<?php echo $download->product_id; ?>" />
+										<input type="hidden" name="product_id[<?php echo $i; ?>]" value="<?php echo $download->product_id; ?>" />
+										<input type="hidden" name="download_id[<?php echo $i; ?>]" value="<?php echo $download->download_id; ?>" />
 										<input type="text" class="short" name="downloads_remaining[<?php echo $i; ?>]" value="<?php echo $download->downloads_remaining ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 									</td>
 									<td>
@@ -149,32 +165,39 @@ function woocommerce_order_downloads_meta_box() {
 
 				var loop = jQuery('.order_download_permissions .wc-metabox').size();
 
-				new_download = jQuery.parseJSON( response );
+				new_downloads = jQuery.parseJSON( response );
 
-				if ( new_download && new_download.success == 1 ) {
+				if ( new_downloads && new_downloads.success == 1 ) {
 
-					jQuery('.order_download_permissions .wc-metaboxes').append('<div class="wc-metabox closed">\
-						<h3 class="fixed">\
-							<button type="button" rel="' + new_download.download_id + '" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>\
-							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
-							<strong>#' + new_download.download_id + ' &mdash; ' + new_download.title + '</strong>\
-						</h3>\
-						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">\
-							<tbody>\
-								<tr>\
-									<td>\
-										<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>\
-										<input type="hidden" name="download_id[' + loop + ']" value="' + new_download.download_id + '" />\
-										<input type="text" class="short" name="downloads_remaining[' + loop + ']" value="' + new_download.remaining + '" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />\
-									</td>\
-									<td>\
-										<label><?php _e('Access Expires', 'woocommerce'); ?>:</label>\
-										<input type="text" class="short date-picker" name="access_expires[' + loop + ']" value="' + new_download.expires + '" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />\
-									</td>\
-								</tr>\
-							</tbody>\
-						</table>\
-					</div>');
+				    $.each(new_downloads.files, function(i, new_download) {
+						jQuery('.order_download_permissions .wc-metaboxes').append('<div class="wc-metabox closed">\
+							<h3 class="fixed">\
+								<button type="button" rel="' + new_download.product_id + ',' + new_download.download_id + '" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>\
+								<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
+								<strong>#' + new_download.download_id + ' &mdash; ' + new_download.title + '</strong>\
+							</h3>\
+							<table cellpadding="0" cellspacing="0" class="wc-metabox-content">\
+								<tbody>\
+									<tr>\
+										<td colspan="2"><?php _e('File path:', 'woocommerce') ?>' + new_download.file_path + '</td>\
+									</tr>\
+									<tr>\
+										<td>\
+											<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>\
+											<input type="hidden" name="product_id[' + loop + ']" value="' + new_download.product_id + '" />\
+											<input type="hidden" name="download_id[' + loop + ']" value="' + new_download.download_id + '" />\
+											<input type="text" class="short" name="downloads_remaining[' + loop + ']" value="' + new_download.remaining + '" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />\
+										</td>\
+										<td>\
+											<label><?php _e('Access Expires', 'woocommerce'); ?>:</label>\
+											<input type="text" class="short date-picker" name="access_expires[' + loop + ']" value="' + new_download.expires + '" maxlength="10" placeholder="<?php _e('Never', 'woocommerce'); ?>" />\
+										</td>\
+									</tr>\
+								</tbody>\
+							</table>\
+						</div>');
+						loop++;
+				    });
 
 				} else {
 					alert('<?php _e('Could not grant access - the user may already have permission for this file.', 'woocommerce'); ?>');
@@ -204,7 +227,8 @@ function woocommerce_order_downloads_meta_box() {
 
 				var el = jQuery(this).parent().parent();
 
-				var product = jQuery(this).attr('rel');
+				var product = jQuery(this).attr('rel').split(",")[0];
+				var file = jQuery(this).attr('rel').split(",")[1];
 
 				if (product>0) {
 
@@ -213,6 +237,7 @@ function woocommerce_order_downloads_meta_box() {
 					var data = {
 						action: 		'woocommerce_revoke_access_to_download',
 						product_id: 	product,
+						download_id:	file,
 						order_id: 		'<?php echo $post->ID; ?>',
 						security: 		'<?php echo wp_create_nonce("revoke-access"); ?>'
 					};
@@ -256,6 +281,7 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 
 		// Download data
 		$download_ids			= $_POST['download_id'];
+		$product_ids			= $_POST['product_id'];
 		$downloads_remaining 	= $_POST['downloads_remaining'];
 		$access_expires 		= $_POST['access_expires'];
 
@@ -263,8 +289,8 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 		$order_key = get_post_meta($post->ID, '_order_key', true);
 		$customer_email = get_post_meta($post->ID, '_billing_email', true);
 		$customer_user = (int) get_post_meta($post->ID, '_customer_user', true);
-		$download_ids_count = sizeof( $download_ids );
-		for ($i=0; $i<$download_ids_count; $i++) :
+		$product_ids_count = sizeof( $product_ids );
+		for ($i=0; $i<$product_ids_count; $i++) :
 
             $data = array(
 				'user_id'				=> $customer_user,
@@ -285,8 +311,9 @@ function woocommerce_order_downloads_save( $post_id, $post ) {
 			    $data,
                 array(
 				'order_id' 		=> $post_id,
-				'product_id' 	=> $download_ids[$i]
-			), $format, array( '%d', '%d' ) );
+				'product_id' 	=> $product_ids[$i],
+				'download_id'	=> $download_ids[$i]
+			), $format, array( '%d', '%d', '%s' ) );
 
 		endfor;
 

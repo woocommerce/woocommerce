@@ -346,40 +346,49 @@ class WC_Customer {
 
 			$user_info = get_userdata(get_current_user_id());
 
-			$results = $wpdb->get_results( $wpdb->prepare("SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE user_id = '%s';", get_current_user_id()) );
-
+			$results = $wpdb->get_results( $wpdb->prepare("SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE user_id = '%s' ORDER BY order_id, product_id, download_id", get_current_user_id()) );
+			
+			$_product = null;
+			$order = null;
+			$file_number = 0;
 			if ($results) foreach ($results as $result) :
 
 				if ($result->order_id>0) :
 
-					$order = new WC_Order( $result->order_id );
+					if ( ! $order || $order->id != $result->order_id ) {
+						// new order
+						$order = new WC_Order( $result->order_id );
+						$_product = null;
+					}
 
-					if ( $order->status!='completed' && $order->status!='processing' ) continue;
+					// order exists and downloads permitted?
+					if ( ! $order->id || ! $order->is_download_permitted() ) continue;
 
-					$product_post = get_post( $result->product_id );
-
-					if ( ! $product_post ) continue;
-
-					if ( $product_post->post_type == 'product_variation' ) :
-						$_product = new WC_Product_Variation( $result->product_id );
-					else :
+					if ( ! $_product || $_product->id != $result->product_id ) :
+						// new product
+						$file_number = 0;
 						$_product = new WC_Product( $result->product_id );
 					endif;
 
-					if ( $_product->exists() ) :
-						$download_name = $_product->get_title();
-					else :
-						$download_name = '#' . $result->product_id;
-					endif;
+					if ( ! $_product->exists() ) continue;
+					
+					if ( ! $_product->has_file( $result->download_id ) ) continue;
+
+					// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
+					$download_name = $_product->get_title() . ( $file_number > 0 ? ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number + 1 ) : '' );
+					if ( $file_number == 1 ) $downloads[ count( $downloads ) - 1 ]['download_name'] .= ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_number );
 
 					$downloads[] = array(
-						'download_url' => add_query_arg('download_file', $result->product_id, add_query_arg('order', $result->order_key, add_query_arg('email', $result->user_email, home_url()))),
+						'download_url' => add_query_arg( array( 'download_file' => $result->product_id, 'order' => $result->order_key, 'email' => $result->user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) ),
+						'download_id' => $result->download_id,
 						'product_id' => $result->product_id,
 						'download_name' => $download_name,
 						'order_id' => $order->id,
 						'order_key' => $order->order_key,
 						'downloads_remaining' => $result->downloads_remaining
 					);
+
+					$file_number++;
 
 				endif;
 

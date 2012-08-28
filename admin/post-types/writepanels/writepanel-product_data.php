@@ -174,10 +174,12 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group show_if_downloadable">';
 
 				// File URL
-				$file_path = get_post_meta($post->ID, '_file_path', true);
-				$field = array( 'id' => '_file_path', 'label' => __('File path', 'woocommerce') );
+				$file_paths = get_post_meta( $post->ID, '_file_paths', true );
+				if ( is_array( $file_paths ) ) $file_paths = implode( "\n", $file_paths );
+
+				$field = array( 'id' => '_file_paths', 'label' => __('File paths (one per line)', 'woocommerce' ) );
 				echo '<p class="form-field"><label for="'.$field['id'].'">'.$field['label'].':</label>
-					<input type="text" class="short file_path" name="'.$field['id'].'" id="'.$field['id'].'" value="'.$file_path.'" placeholder="'.__('File path/URL', 'woocommerce').'" />
+					<textarea style="float:left;height:5em;" id="'.$field['id'].'" class="short file_paths" cols="20" rows="3" placeholder="'.__('File paths/URLs, one per line', 'woocommerce').'" name="'.$field['id'].'" wrap="off">'.$file_paths.'</textarea>
 					<input type="button"  class="upload_file_button button" value="'.__('Upload a file', 'woocommerce').'" />
 				</p>';
 
@@ -901,7 +903,25 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		$_download_expiry = (int) $_POST['_download_expiry'];
 		if ( ! $_download_expiry ) $_download_expiry = ''; // 0 or blank = unlimited
 
-		if (isset($_POST['_file_path'])) update_post_meta( $post_id, '_file_path', esc_attr($_POST['_file_path']) );
+		// file paths will be stored in an array keyed off md5(file path)
+		if ( isset( $_POST['_file_paths'] ) ) {
+			$_file_paths = array();
+			$file_paths = str_replace( "\r\n", "\n", esc_attr( $_POST['_file_paths'] ) );
+			$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
+			if ( $file_paths ) {
+				$file_paths = explode( "\n", $file_paths );
+
+				foreach ( $file_paths as $file_path ) {
+					$file_path = trim( $file_path );
+					$_file_paths[ md5( $file_path ) ] = $file_path;
+				}
+			}
+
+			// grant permission to any newly added files on any existing orders for this product
+			do_action( 'woocommerce_process_product_file_download_paths', $post_id, 0, $_file_paths );
+
+			update_post_meta( $post_id, '_file_paths', $_file_paths );
+		}
 		if (isset($_POST['_download_limit'])) update_post_meta( $post_id, '_download_limit', esc_attr( $_download_limit ) );
 		if (isset($_POST['_download_expiry'])) update_post_meta( $post_id, '_download_expiry', esc_attr( $_download_expiry ) );
 
