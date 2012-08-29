@@ -62,7 +62,12 @@ function woocommerce_reports() {
 					'title' => __('Top earners', 'woocommerce'),
 					'description' => '',
 					'function' => 'woocommerce_top_earners'
-				)
+				),
+				array(
+					'title' => __('Sales by category', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_category_sales'
+				),
 			)
 		),
 		'customers' => array(
@@ -1907,5 +1912,285 @@ function woocommerce_monthly_taxes() {
 			</script>
 		</div>
 	</div>
+	<?php
+}
+
+
+/**
+ * woocommerce_category_sales function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_category_sales() {
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
+
+	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
+
+	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
+	$start_date 	= strtotime( $current_year . '0101' );
+	?>
+	<form method="post" action="">
+		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label>
+		<select name="show_year" id="show_year">
+			<?php
+				for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
+					printf( '<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
+			?>
+		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+	</form>
+	<?php
+
+	$item_sales = array();
+
+	for ( $count = 0; $count < 12; $count++ ) {
+		$time = strtotime( date( 'Ym', strtotime( '+ ' . $count . ' MONTH', $start_date ) ) . '01' ) . '000';
+
+		if ( $time > current_time( 'timestamp' ) . '000' )
+			continue;
+
+		$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ '. $count . ' MONTH', $start_date ) ) . '01' ) );
+
+		// Get order items
+		$order_items_serialized = $wpdb->get_col("
+			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
+
+			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+			WHERE 	meta.meta_key 		= '_order_items'
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		");
+
+		if ( $order_items_serialized ) {
+			foreach ( $order_items_serialized as $order_items_array ) {
+				$order_items_array = maybe_unserialize( $order_items_array );
+				if ( is_array( $order_items_array ) ) 
+					foreach ( $order_items_array as $item ) {
+						
+						if ( ! isset( $item_sales[ $count ][ $item['id'] ] ) )
+							$item_sales[ $count ][ $item['id'] ] = 0;
+						
+						if ( ! empty( $item['line_total'] ) )
+							$item_sales[ $count ][ $item['id'] ] += $item['line_total'];
+						
+					}
+			}
+		}
+	}
+	
+	$categories = get_terms( 'product_cat', array( 'parent' => 0 ) );
+	?>
+	<table class="widefat">
+		<thead>
+			<tr>
+				<th><?php _e( 'Category', 'woocommerce' ); ?></th>
+				<?php for ( $count = 0; $count < 12; $count++ ) : 
+					if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
+						continue;
+					?>
+					<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
+				<?php endfor; ?>
+				<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
+			</tr>
+		</thead>
+		<tbody><?php
+			// While outputting, lets store them for the chart
+			$chart_data = $month_totals = $category_totals = array();
+			$top_cat = $bottom_cat = $top_cat_name = $bottom_cat_name = '';
+			
+			for ( $count = 0; $count < 12; $count++ )
+				if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+					break;
+				else
+					$month_totals[ $count ] = 0;
+			
+			foreach ( $categories as $category ) {
+				
+				$cat_total = 0;
+				$category_chart_data = $term_ids = array();
+				
+				$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
+				$term_ids[] 	= $category->term_id;
+				$product_ids 	= get_objects_in_term( $term_ids, 'product_cat' );
+				
+				$category_sales_html = '<tr><th>' . $category->name . '</th>';
+
+				for ( $count = 0; $count < 12; $count++ ) {
+					
+					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )	
+						continue;
+				
+					if ( ! empty( $item_sales[ $count ] ) ) {
+						$matches = array_intersect_key( $item_sales[ $count ], array_flip( $product_ids ) );
+						$total = array_sum( $matches );
+						$cat_total += $total;
+					} else {
+						$total = 0;
+					}
+						
+					$month_totals[ $count ] += $total;
+					
+					$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
+					
+					$category_chart_data[] = array( strtotime( date( 'Ymd', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ) ) . '000', $total );
+				}
+				
+				if ( $cat_total == 0 )
+					continue;
+				
+				$category_totals[] = $cat_total;
+				
+				$category_sales_html .= '<td><strong>' . woocommerce_price( $cat_total ) . '</strong></td>';
+				
+				$category_sales_html .= '</tr>';
+				
+				echo $category_sales_html;
+				
+				$chart_data[ $category->name ] = $category_chart_data;
+				
+				if ( $cat_total > $top_cat ) {
+					$top_cat = $cat_total;
+					$top_cat_name = $category->name;
+				}
+				
+				if ( $cat_total < $bottom_cat || $bottom_cat === '' ) {
+					$bottom_cat = $cat_total;
+					$bottom_cat_name = $category->name;
+				}
+
+			}
+			
+			sort( $category_totals );
+			
+			echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
+			for ( $count = 0; $count < 12; $count++ )
+				if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+					break;
+				else
+					echo '<td><strong>' . woocommerce_price( $month_totals[ $count ] ) . '</strong></td>';
+			echo '<td><strong>' .  woocommerce_price( array_sum( $month_totals ) ) . '</strong></td></tr>';
+			
+		?></tbody>
+	</table>
+	
+	<br/>
+	
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Top category', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						echo $top_cat_name . ' (' . woocommerce_price( $top_cat ) . ')';
+					?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Bottom category', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						echo $bottom_cat_name . ' (' . woocommerce_price( $bottom_cat ) . ')';
+					?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Category sales average', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						if ( sizeof( $category_totals ) > 0 )
+							echo woocommerce_price( array_sum( $category_totals ) / sizeof( $category_totals ) );
+						else
+							echo __( 'N/A', 'woocommerce' );
+					?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Category sales median', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						if ( sizeof( $category_totals ) == 0 )
+							echo __( 'N/A', 'woocommerce' );
+						elseif ( sizeof( $category_totals ) % 2 )
+							echo woocommerce_price( 
+								( 
+									$category_totals[ floor( sizeof( $category_totals ) / 2 ) ] + $category_totals[ ceil( sizeof( $category_totals ) / 2 ) ] 
+								) / 2 
+							);
+						else
+							echo woocommerce_price( $category_totals[ sizeof( $category_totals ) / 2 ] );
+					?></p>
+				</div>
+			</div>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('Monthly sales by category', 'woocommerce'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		jQuery(function(){
+			
+			<?php
+				// Variables
+				foreach ( $chart_data as $name => $data ) {
+					$varname = str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
+					echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
+				}
+			?>
+
+			var placeholder = jQuery("#placeholder");
+
+			var plot = jQuery.plot(placeholder, [ 
+				<?php 
+				$labels = array();
+				
+				foreach ( $chart_data as $name => $data ) {
+					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
+				}
+				
+				echo implode( ',', $labels );
+				?>
+			], {
+				series: {
+					lines: { show: true },
+					points: { show: true, align: "left" }
+				},
+				grid: {
+					show: true,
+					aboveData: false,
+					color: '#ccc',
+					backgroundColor: '#fff',
+					borderWidth: 2,
+					borderColor: '#ccc',
+					clickable: false,
+					hoverable: true
+				},
+				xaxis: {
+					mode: "time",
+					timeformat: "%b %y",
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+					tickLength: 1,
+					minTickSize: [1, "month"]
+				},
+				yaxes: [ { min: 0, tickDecimals: 2 } ]
+		 	});
+
+		 	placeholder.resize();
+
+			<?php woocommerce_tooltip_js(); ?>
+		});
+	</script>
 	<?php
 }

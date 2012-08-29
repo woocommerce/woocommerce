@@ -150,6 +150,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 1.7 = 
+* Feature - Added sales by category report
+
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen
 
