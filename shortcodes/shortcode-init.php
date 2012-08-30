@@ -95,7 +95,7 @@ function woocommerce_product_category( $atts ){
 
 	<?php endif;
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
@@ -161,8 +161,6 @@ function woocommerce_product_categories( $atts ) {
 
 	}
 
-	wp_reset_query();
-
 	woocommerce_reset_loop();
 
 	return ob_get_clean();
@@ -223,7 +221,7 @@ function woocommerce_recent_products( $atts ) {
 
 	<?php endif;
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
@@ -299,7 +297,7 @@ function woocommerce_products( $atts ) {
 
 	<?php endif;
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
@@ -359,7 +357,7 @@ function woocommerce_product( $atts ) {
 
 	<?php endif;
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
@@ -529,7 +527,7 @@ function woocommerce_featured_products( $atts ) {
 
 	<?php endif;
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
@@ -581,7 +579,7 @@ function woocommerce_product_page_shortcode( $atts ) {
 
 	<?php endwhile; // end of the loop.
 
-	wp_reset_query();
+	wp_reset_postdata();
 
 	return ob_get_clean();
 }
