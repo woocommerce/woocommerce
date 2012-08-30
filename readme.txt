@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.7 = 
 * Feature - Added sales by category report
+* Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen
