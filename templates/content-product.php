@@ -26,11 +26,11 @@ if ( ! $product->is_visible() )
 // Increase loop count
 $woocommerce_loop['loop']++;
 ?>
-<li class="product <?php
+<li class="product<?php
 	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 )
-		echo 'last';
+		echo ' last';
 	elseif ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 )
-		echo 'first';
+		echo ' first';
 	?>">
 
 	<?php do_action( 'woocommerce_before_shop_loop_item' ); ?>
