@@ -330,7 +330,7 @@ function woocommerce_product_data_box() {
 								<h3>
 									<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 									<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
-									<strong class="attribute_name"><?php echo ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name; ?></strong>
+									<strong class="attribute_name"><?php echo apply_filters( 'woocommerce_attribute_label', ($tax->attribute_label) ? $tax->attribute_label : $tax->attribute_name, $tax->attribute_name ); ?></strong>
 								</h3>
 								<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 									<tbody>
@@ -410,7 +410,7 @@ function woocommerce_product_data_box() {
 							<h3>
 								<button type="button" class="remove_row button"><?php _e('Remove', 'woocommerce'); ?></button>
 								<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
-								<strong class="attribute_name"><?php echo esc_attr( $attribute['name'] ); ?></strong>
+								<strong class="attribute_name"><?php echo apply_filters( 'woocommerce_attribute_label', esc_attr( $attribute['name'] ), esc_attr( $attribute['name'] ) ); ?></strong>
 							</h3>
 							<table cellpadding="0" cellspacing="0" class="woocommerce_attribute_data wc-metabox-content">
 								<tbody>

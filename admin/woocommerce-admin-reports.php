@@ -1002,7 +1002,7 @@ function woocommerce_top_sellers() {
 
 					$product = get_post($product_id);
 					if ($product) :
-						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
+						$product_name = '<a href="'.get_permalink($product->ID).'">'. __( $product->post_title ) .'</a>';
 						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					else :
 						$product_name = __('Product does not exist', 'woocommerce');
@@ -1102,7 +1102,7 @@ function woocommerce_top_earners() {
 
 					$product = get_post($product_id);
 					if ($product) :
-						$product_name = '<a href="'.get_permalink($product->ID).'">'.$product->post_title.'</a>';
+						$product_name = '<a href="'.get_permalink($product->ID).'">'. __( $product->post_title ) .'</a>';
 						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
 					else :
 						$product_name = __('Product no longer exists', 'woocommerce');
@@ -1580,7 +1580,7 @@ function woocommerce_stock_overview() {
 
 							if ( $stock <= $nostockamount ) continue;
 
-							$title = $product->post_title;
+							$title = __( $product->post_title );
 
 							if ( $sku )
 								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';
@@ -1615,7 +1615,7 @@ function woocommerce_stock_overview() {
 
 							if ( $stock > $nostockamount ) continue;
 
-							$title = $product->post_title;
+							$title = __( $product->post_title );
 
 							if ( $sku )
 								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';

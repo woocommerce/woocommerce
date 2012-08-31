@@ -278,7 +278,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 					echo '<li ' . $class . '>';
 
-					echo ( $count > 0 || $option_is_set ) ? '<a href="' . $link . '">' : '<span>';
+					echo ( $count > 0 || $option_is_set ) ? '<a href="' . apply_filters( 'woocommerce_layered_nav_link', $link ) . '">' : '<span>';
 
 					echo $term->name;
 
