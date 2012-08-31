@@ -20,8 +20,8 @@
  */
 function woocommerce_reports() {
 
-	$current_tab 	= ( isset( $_GET['tab'] ) ) 	? urldecode( $_GET['tab'] ) : 'sales';
-	$current_chart 	= ( isset( $_GET['chart'] ) )	? urldecode( $_GET['chart'] ) : 0;
+	$current_tab 	= isset( $_GET['tab'] ) ? urldecode( $_GET['tab'] ) : 'sales';
+	$current_chart 	= isset( $_GET['chart'] ) ? urldecode( $_GET['chart'] ) : 0;
 
 	$charts = apply_filters( 'woocommerce_reports_charts', array(
 		'sales' => array(
@@ -92,7 +92,7 @@ function woocommerce_reports() {
 				),
 			)
 		)
-	));
+	) );
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
@@ -200,7 +200,6 @@ function woocommerce_tooltip_js() {
 			background: '#288ab7'
         }).appendTo("body").fadeIn(200);
     }
-
     var previousPoint = null;
     jQuery("#placeholder").bind("plothover", function (event, pos, item) {
         if (item) {
@@ -272,26 +271,6 @@ function woocommerce_datepicker_js() {
 
 
 /**
- * Filter orders within a range.
- *
- * @access public
- * @param string $where (default: '') where clause
- * @return void
- */
-function orders_within_range( $where = '' ) {
-	global $start_date, $end_date;
-
-	$after = date('Y-m-d', $start_date);
-	$before = date('Y-m-d', strtotime('+1 day', $end_date));
-
-	$where .= " AND post_date > '$after'";
-	$where .= " AND post_date < '$before'";
-
-	return $where;
-}
-
-
-/**
  * Output the sales overview chart.
  *
  * @access public
@@ -301,11 +280,7 @@ function woocommerce_sales_overview() {
 
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$total_sales = 0;
-	$total_orders = 0;
-	$order_items = 0;
-	$discount_total = 0;
-	$shipping_total = 0;
+	$total_sales = $total_orders = $order_items = $discount_total = $shipping_total = 0;
 
 	$order_totals = $wpdb->get_row("
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
@@ -370,11 +345,14 @@ function woocommerce_sales_overview() {
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	");
 
-	if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
-		$order_items_array = maybe_unserialize($order_items_array);
-		if (is_array($order_items_array)) foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+	if ( $order_items_serialized ) {
+		foreach ( $order_items_serialized as $order_items_array ) {
+			$order_items_array = maybe_unserialize( $order_items_array );
+			if ( is_array( $order_items_array ) ) 
+				foreach ( $order_items_array as $item ) 
+					$order_items += absint( $item['qty'] );
+		}
 	}
-
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -426,83 +404,73 @@ function woocommerce_sales_overview() {
 	</div>
 	<?php
 
-	$start_date = strtotime(date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' )));
-	$end_date = strtotime(date('Ymd', current_time('timestamp')));
-
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
-
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-
-	$order_counts = array();
-	$order_amounts = array();
-
+	$start_date = strtotime( date('Ymd', strtotime( date('Ym', current_time('timestamp') ) . '01' ) ) );
+	$end_date = strtotime( date('Ymd', current_time( 'timestamp' ) ) );
+	
 	// Blank date ranges to begin
+	$order_counts = $order_amounts = array();
+
 	$count = 0;
-	$days = ($end_date - $start_date) / (60 * 60 * 24);
-	if ($days==0) $days = 1;
+	
+	$days = ( $end_date - $start_date ) / ( 60 * 60 * 24 );
+	
+	if ( $days == 0 ) 
+		$days = 1;
 
-	while ($count < $days) :
-		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
+	while ( $count < $days ) {
+		$time = strtotime( date( 'Ymd', strtotime( '+ ' . $count . ' DAY', $start_date ) ) ) . '000';
 
-		$order_counts[$time] = 0;
-		$order_amounts[$time] = 0;
+		$order_counts[ $time ] = $order_amounts[ $time ] = 0;
 
 		$count++;
-	endwhile;
+	}
+	
+	// Get order ids and dates in range
+	$orders = $wpdb->get_results("
+		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
-	if ($orders) :
-		foreach ($orders as $order) :
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 
-			$order_total = get_post_meta($order->ID, '_order_total', true);
-			$time = strtotime(date('Ymd', strtotime($order->post_date))).'000';
+		WHERE 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
+		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
+		ORDER BY post_date ASC
+	");
 
-			if (isset($order_counts[$time])) :
-				$order_counts[$time]++;
-			else :
-				$order_counts[$time] = 1;
-			endif;
+	if ( $orders ) {
+		foreach ( $orders as $order ) {
 
-			if (isset($order_amounts[$time])) :
-				$order_amounts[$time] = $order_amounts[$time] + $order_total;
-			else :
-				$order_amounts[$time] = (float) $order_total;
-			endif;
+			$order_total = get_post_meta( $order->ID, '_order_total', true );
+			$time = strtotime( date( 'Ymd', strtotime( $order->post_date ) ) ) . '000';
 
-		endforeach;
-	endif;
+			if ( isset( $order_counts[ $time ] ) )
+				$order_counts[ $time ]++;
+			else
+				$order_counts[ $time ] = 1;
 
-	remove_filter( 'posts_where', 'orders_within_range' );
+			if ( isset( $order_amounts[ $time ] ) )
+				$order_amounts[ $time ] = $order_amounts[ $time ] + $order_total;
+			else
+				$order_amounts[ $time ] = floatval( $order_total );
+		}
+	}
 
-	$order_counts_array = array();
-	foreach ($order_counts as $key => $count) :
-		$order_counts_array[] = array($key, $count);
-	endforeach;
-
-	$order_amounts_array = array();
-	foreach ($order_amounts as $key => $amount) :
-		$order_amounts_array[] = array($key, $amount);
-	endforeach;
+	$order_counts_array = $order_amounts_array = array();
+	
+	foreach ( $order_counts as $key => $count )
+		$order_counts_array[] = array( $key, $count );
+	
+	foreach ( $order_amounts as $key => $amount )
+		$order_amounts_array[] = array( $key, $amount );
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
-	$chart_data = json_encode($order_data);
+	$chart_data = json_encode( $order_data );
 	?>
 	<script type="text/javascript">
 		jQuery(function(){
@@ -563,85 +531,77 @@ function woocommerce_daily_sales() {
 
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
-	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
+	$start_date = isset( $_POST['start_date'] ) ? $_POST['start_date'] : '';
+	$end_date	= isset( $_POST['end_date'] ) ? $_POST['end_date'] : '';
 
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
-	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
+	if ( ! $start_date) 
+		$start_date = date( 'Ymd', strtotime( date('Ym', current_time( 'timestamp' ) ) . '01' ) );
+	if ( ! $end_date) 
+		$end_date = date( 'Ymd', current_time( 'timestamp' ) );
 
-	$start_date = strtotime($start_date);
-	$end_date = strtotime($end_date);
-
-	$total_sales = 0;
-	$total_orders = 0;
-	$order_items = 0;
-
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
-
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
-
-	$order_counts = array();
-	$order_amounts = array();
+	$start_date = strtotime( $start_date );
+	$end_date = strtotime( $end_date );
+	
+	$total_sales = $total_orders = $order_items = 0;
 
 	// Blank date ranges to begin
+	$order_counts = $order_amounts = array();
+
 	$count = 0;
-	$days = ($end_date - $start_date) / (60 * 60 * 24);
-	if ($days==0) $days = 1;
+	
+	$days = ( $end_date - $start_date ) / ( 60 * 60 * 24 );
+	
+	if ( $days == 0 ) 
+		$days = 1;
 
-	while ($count < $days) :
-		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
+	while ( $count < $days ) {
+		$time = strtotime( date( 'Ymd', strtotime( '+ ' . $count . ' DAY', $start_date ) ) ) . '000';
 
-		$order_counts[$time] = 0;
-		$order_amounts[$time] = 0;
+		$order_counts[ $time ] = $order_amounts[ $time ] = 0;
 
 		$count++;
-	endwhile;
+	}
+	
+	// Get order ids and dates in range
+	$orders = $wpdb->get_results("
+		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
-	if ($orders) :
-		foreach ($orders as $order) :
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
+		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
+		ORDER BY post_date ASC
+	");
+
+	if ( $orders ) {
+		foreach ( $orders as $order ) {
 
 			$order_total = get_post_meta($order->ID, '_order_total', true);
-			$time = strtotime(date('Ymd', strtotime($order->post_date))).'000';
+			$time = strtotime( date( 'Ymd', strtotime( $order->post_date ) ) ) . '000';
 
-			$order_items_array = (array) get_post_meta($order->ID, '_order_items', true);
-			foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+			$order_items_array = (array) get_post_meta( $order->ID, '_order_items', true );
+			foreach ( $order_items_array as $item ) 
+				$order_items += absint( $item['qty'] );
 			$total_sales += $order_total;
 			$total_orders++;
 
-			if (isset($order_counts[$time])) :
-				$order_counts[$time]++;
-			else :
-				$order_counts[$time] = 1;
-			endif;
+			if ( isset( $order_counts[ $time ] ) )
+				$order_counts[ $time ]++;
+			else
+				$order_counts[ $time ] = 1;
 
-			if (isset($order_amounts[$time])) :
-				$order_amounts[$time] = $order_amounts[$time] + $order_total;
-			else :
-				$order_amounts[$time] = (float) $order_total;
-			endif;
-
-		endforeach;
-	endif;
-
-	remove_filter( 'posts_where', 'orders_within_range' );
-
+			if ( isset( $order_amounts[ $time ] ) )
+				$order_amounts[ $time ] = $order_amounts[ $time ] + $order_total;
+			else
+				$order_amounts[ $time ] = floatval( $order_total );
+		}
+	}
 	?>
 	<form method="post" action="">
 		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
@@ -685,15 +645,13 @@ function woocommerce_daily_sales() {
 	</div>
 	<?php
 
-	$order_counts_array = array();
-	foreach ($order_counts as $key => $count) :
+	$order_counts_array = $order_amounts_array = array();
+	
+	foreach ( $order_counts as $key => $count )
 		$order_counts_array[] = array($key, $count);
-	endforeach;
 
-	$order_amounts_array = array();
-	foreach ($order_amounts as $key => $amount) :
+	foreach ( $order_amounts as $key => $amount )
 		$order_amounts_array[] = array($key, $amount);
-	endforeach;
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
@@ -759,10 +717,11 @@ function woocommerce_monthly_sales() {
 
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$first_year = $wpdb->get_var("SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;");
-	if ($first_year) $first_year = date('Y', strtotime($first_year)); else $first_year = date('Y');
+	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
+	
+	$first_year = $first_year ? date( 'Y', strtotime( $first_year ) ) : date('Y');
 
-	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
+	$current_year 	= isset( $_POST['show_year'] ) ? $_POST['show_year'] : date( 'Y', current_time( 'timestamp' ) );
 	$start_date 	= strtotime( $current_year . '0101' );
 
 	$total_sales = $total_orders = $order_items = 0;
@@ -792,8 +751,8 @@ function woocommerce_monthly_sales() {
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
 		");
 
-		$order_counts[$time] 	= (int) $months_orders->total_orders;
-		$order_amounts[$time] 	= (float) $months_orders->total_sales;
+		$order_counts[ $time ] 	= (int) $months_orders->total_orders;
+		$order_amounts[ $time ] 	= (float) $months_orders->total_sales;
 
 		$total_orders			+= (int) $months_orders->total_orders;
 		$total_sales			+= (float) $months_orders->total_sales;
@@ -815,9 +774,13 @@ function woocommerce_monthly_sales() {
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
 		");
 
-		if ($order_items_serialized) foreach ($order_items_serialized as $order_items_array) {
-			$order_items_array = maybe_unserialize($order_items_array);
-			if (is_array($order_items_array)) foreach ($order_items_array as $item) $order_items += (int) $item['qty'];
+		if ($order_items_serialized) {
+			foreach ( $order_items_serialized as $order_items_array ) {
+				$order_items_array = maybe_unserialize($order_items_array);
+				if ( is_array( $order_items_array ) ) 
+					foreach ( $order_items_array as $item ) 
+						$order_items += (int) $item['qty'];
+			}
 		}
 
 	}
@@ -826,7 +789,8 @@ function woocommerce_monthly_sales() {
 		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label>
 		<select name="show_year" id="show_year">
 			<?php
-				for ($i = $first_year; $i <= date('Y'); $i++) printf('<option value="%s" %s>%s</option>', $i, selected($current_year, $i, false), $i);
+				for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
+					printf('<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
 			?>
 		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
 	</form>
@@ -868,19 +832,17 @@ function woocommerce_monthly_sales() {
 	</div>
 	<?php
 
-	$order_counts_array = array();
-	foreach ($order_counts as $key => $count) :
-		$order_counts_array[] = array($key, $count);
-	endforeach;
-
-	$order_amounts_array = array();
-	foreach ($order_amounts as $key => $amount) :
-		$order_amounts_array[] = array($key, $amount);
-	endforeach;
+	$order_counts_array = $order_amounts_array = array();
+	
+	foreach ( $order_counts as $key => $count )
+		$order_counts_array[] = array( $key, $count );
+	
+	foreach ( $order_amounts as $key => $amount )
+		$order_amounts_array[] = array( $key, $amount );
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
-	$chart_data = json_encode($order_data);
+	$chart_data = json_encode( $order_data );
 	?>
 	<script type="text/javascript">
 		jQuery(function(){
@@ -934,55 +896,50 @@ function woocommerce_monthly_sales() {
  */
 function woocommerce_top_sellers() {
 
-	global $start_date, $end_date, $woocommerce;
+	global $start_date, $end_date, $woocommerce, $wpdb;
 
-	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
-	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
+	$start_date = isset( $_POST['start_date'] ) ? $_POST['start_date'] : '';
+	$end_date	= isset( $_POST['end_date'] ) ? $_POST['end_date'] : '';
 
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
-	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
+	if ( ! $start_date ) 
+		$start_date = date( 'Ymd', strtotime( date( 'Ym', current_time( 'timestamp' ) ) . '01' ) );
+	if ( ! $end_date )
+		 $end_date = date( 'Ymd', current_time( 'timestamp' ) );
 
-	$start_date = strtotime($start_date);
-	$end_date = strtotime($end_date);
+	$start_date = strtotime( $start_date );
+	$end_date = strtotime( $end_date );
 
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
+	// Get order ids and dates in range
+	$orders = $wpdb->get_results("
+		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
+		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
+		ORDER BY post_date ASC
+	");
 
 	$found_products = array();
 
-	if ($orders) :
-		foreach ($orders as $order) :
+	if ( $orders ) {
+		foreach ($orders as $order) {
 			$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
-			foreach ($order_items as $item) :
-				$found_products[$item['id']] = isset($found_products[$item['id']]) ? $found_products[$item['id']] + $item['qty'] : $item['qty'];
-			endforeach;
-		endforeach;
-	endif;
+			foreach ( $order_items as $item )
+				$found_products[ $item['id'] ] = isset( $found_products[ $item['id'] ] ) ? $found_products[ $item['id'] ] + $item['qty'] : $item['qty'];
+		}
+	}
 
-	asort($found_products);
-	$found_products = array_reverse($found_products, true);
-	$found_products = array_slice($found_products, 0, 25, true);
-	reset($found_products);
-
-	remove_filter( 'posts_where', 'orders_within_range' );
+	asort( $found_products );
+	$found_products = array_reverse( $found_products, true );
+	$found_products = array_slice( $found_products, 0, 25, true );
+	reset( $found_products );
 	?>
 	<form method="post" action="">
 		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
@@ -996,21 +953,21 @@ function woocommerce_top_sellers() {
 		</thead>
 		<tbody>
 			<?php
-				$max_sales = current($found_products);
-				foreach ($found_products as $product_id => $sales) :
-					$width = ($sales>0) ? ($sales / $max_sales) * 100 : 0;
+				$max_sales = current( $found_products );
+				foreach ( $found_products as $product_id => $sales ) {
+					$width = $sales > 0 ? ( $sales / $max_sales ) * 100 : 0;
+					$product_title = get_the_title( $product_id );
+					
+					if ( $product_title ) {
+						$product_name = '<a href="' . get_permalink( $product_id ) . '">'. __( $product_title ) .'</a>';
+						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( $product_title ) . '&shop_order_status=completed,processing,on-hold' );
+					} else {
+						$product_name = __( 'Product does not exist', 'woocommerce' );
+						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold' );
+					}
 
-					$product = get_post($product_id);
-					if ($product) :
-						$product_name = '<a href="'.get_permalink($product->ID).'">'. __( $product->post_title ) .'</a>';
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
-					else :
-						$product_name = __('Product does not exist', 'woocommerce');
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold');
-					endif;
-
-					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.$sales.'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
-				endforeach;
+					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . $sales . '</span></td><td class="bars"><a href="' . $orders_link . '" style="width:' . $width . '%">&nbsp;</a></td></tr>';
+				}
 			?>
 		</tbody>
 	</table>
@@ -1031,58 +988,55 @@ function woocommerce_top_sellers() {
  */
 function woocommerce_top_earners() {
 
-	global $start_date, $end_date, $woocommerce;
+	global $start_date, $end_date, $woocommerce, $wpdb;
 
-	$start_date = (isset($_POST['start_date'])) ? $_POST['start_date'] : '';
-	$end_date	= (isset($_POST['end_date'])) ? $_POST['end_date'] : '';
+	$start_date = isset( $_POST['start_date'] ) ? $_POST['start_date'] : '';
+	$end_date	= isset( $_POST['end_date'] ) ? $_POST['end_date'] : '';
 
-	if (!$start_date) $start_date = date('Ymd', strtotime( date('Ym', current_time('timestamp')).'01' ));
-	if (!$end_date) $end_date = date('Ymd', current_time('timestamp'));
+	if ( ! $start_date ) 
+		$start_date = date( 'Ymd', strtotime( date('Ym', current_time( 'timestamp' ) ) . '01' ) );
+	if ( ! $end_date ) 
+		$end_date = date( 'Ymd', current_time( 'timestamp' ) );
 
-	$start_date = strtotime($start_date);
-	$end_date = strtotime($end_date);
+	$start_date = strtotime( $start_date );
+	$end_date = strtotime( $end_date );
 
-	// Get orders to display in widget
-	add_filter( 'posts_where', 'orders_within_range' );
+	// Get order ids and dates in range
+	$orders = $wpdb->get_results("
+		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
-	$args = array(
-	    'numberposts'     => -1,
-	    'orderby'         => 'post_date',
-	    'order'           => 'ASC',
-	    'post_type'       => 'shop_order',
-	    'post_status'     => 'publish' ,
-	    'suppress_filters'=> 0,
-	    'tax_query' => array(
-	    	array(
-		    	'taxonomy' => 'shop_order_status',
-				'terms' => array('completed', 'processing', 'on-hold'),
-				'field' => 'slug',
-				'operator' => 'IN'
-			)
-	    )
-	);
-	$orders = get_posts( $args );
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+
+		WHERE 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
+		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
+		ORDER BY post_date ASC
+	");
 
 	$found_products = array();
 
-	if ($orders) :
-		foreach ($orders as $order) :
+	if ( $orders ) {
+		foreach ($orders as $order) {
 			$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
-			foreach ($order_items as $item) :
-				if (isset($item['line_total'])) $row_cost = $item['line_total'];
-				else $row_cost = $item['cost'] * $item['qty'];
+			foreach ( $order_items as $item ) {
+				if ( isset( $item['line_total'] ) ) 
+					$row_cost = $item['line_total'];
+				else 
+					$row_cost = $item['cost'] * $item['qty'];
+				$found_products[ $item['id'] ] = isset( $found_products[ $item['id'] ] ) ? $found_products[ $item['id'] ] + $row_cost : $row_cost;
+			}
+		}
+	}
 
-				$found_products[$item['id']] = isset($found_products[$item['id']]) ? $found_products[$item['id']] + $row_cost : $row_cost;
-			endforeach;
-		endforeach;
-	endif;
-
-	asort($found_products);
-	$found_products = array_reverse($found_products, true);
-	$found_products = array_slice($found_products, 0, 25, true);
-	reset($found_products);
-
-	remove_filter( 'posts_where', 'orders_within_range' );
+	asort( $found_products );
+	$found_products = array_reverse( $found_products, true );
+	$found_products = array_slice( $found_products, 0, 25, true );
+	reset( $found_products );
 	?>
 	<form method="post" action="">
 		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
@@ -1096,21 +1050,22 @@ function woocommerce_top_earners() {
 		</thead>
 		<tbody>
 			<?php
-				$max_sales = current($found_products);
-				foreach ($found_products as $product_id => $sales) :
-					$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
+				$max_sales = current( $found_products );
+				foreach ( $found_products as $product_id => $sales ) {
+					$width = $sales > 0 ? ( round( $sales ) / round( $max_sales ) ) * 100 : 0;
 
-					$product = get_post($product_id);
-					if ($product) :
-						$product_name = '<a href="'.get_permalink($product->ID).'">'. __( $product->post_title ) .'</a>';
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode($product->post_title) . '&shop_order_status=completed,processing,on-hold');
-					else :
-						$product_name = __('Product no longer exists', 'woocommerce');
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold');
-					endif;
+					$product_title = get_the_title( $product_id );
+					
+					if ( $product_title ) {
+						$product_name = '<a href="'.get_permalink( $product_id ).'">'. __( $product_title ) .'</a>';
+						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( $product_title ) . '&shop_order_status=completed,processing,on-hold' );
+					} else {
+						$product_name = __( 'Product no longer exists', 'woocommerce' );
+						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold' );
+					}
 
-					echo '<tr><th>'.$product_name.'</th><td width="1%"><span>'.woocommerce_price($sales).'</span></td><td class="bars"><a href="'.$orders_link.'" style="width:'.$width.'%">&nbsp;</a></td></tr>';
-				endforeach;
+					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . woocommerce_price( $sales ) . '</span></td><td class="bars"><a href="' . $orders_link . '" style="width:' . $width . '%">&nbsp;</a></td></tr>';
+				}
 			?>
 		</tbody>
 	</table>
@@ -1392,7 +1347,7 @@ function woocommerce_customer_overview() {
 	while ($count < $days) :
 		$time = strtotime(date('Ymd', strtotime('+ '.$count.' DAY', $start_date))).'000';
 
-		$signups[$time] = 0;
+		$signups[ $time ] = 0;
 
 		$count++;
 	endwhile;
@@ -1401,10 +1356,10 @@ function woocommerce_customer_overview() {
 		if (strtotime($customer->user_registered) > $start_date) :
 			$time = strtotime(date('Ymd', strtotime($customer->user_registered))).'000';
 
-			if (isset($signups[$time])) :
-				$signups[$time]++;
+			if (isset($signups[ $time ])) :
+				$signups[ $time ]++;
 			else :
-				$signups[$time] = 1;
+				$signups[ $time ] = 1;
 			endif;
 		endif;
 	endforeach;
