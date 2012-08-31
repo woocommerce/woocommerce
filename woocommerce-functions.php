@@ -370,8 +370,14 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		}
 
 		// Redirect to cart option
-		elseif (get_option('woocommerce_cart_redirect_after_add')=='yes' && $woocommerce->error_count() == 0) {
+		elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' && $woocommerce->error_count() == 0 ) {
 			wp_safe_redirect( $woocommerce->cart->get_cart_url() );
+			exit;
+		}
+		
+		// Redirect to page without querystring args
+		elseif ( wp_get_referer() ) {
+			wp_safe_redirect( remove_query_arg( array( 'add-to-cart', 'quantity', 'product_id' ), wp_get_referer() ) );
 			exit;
 		}
 
