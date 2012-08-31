@@ -1528,8 +1528,8 @@ class woocommerce_order extends WC_Order {
  * @package		WooCommerce/Classes
  */
 class order_item_meta extends WC_Order_Item_Meta {
-	public function __construct() {
+	public function __construct( $item_meta = '' ) {
 		//_deprecated_function( 'order_item_meta', '1.6.4', 'WC_Order_Item_Meta()' );
-		parent::__construct();
+		parent::__construct( $item_meta );
 	}
 }
