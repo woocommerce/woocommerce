@@ -241,7 +241,7 @@ class WC_Coupon {
 				endforeach; endif;
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+					$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 				}
 			endif;
 
@@ -257,7 +257,7 @@ class WC_Coupon {
 				endforeach; endif;
 				if ( ! $valid_for_cart ) {
 					$valid = false;
-					$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+					$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 				}
 			endif;
 
@@ -274,7 +274,7 @@ class WC_Coupon {
 					endforeach; endif;
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 					}
 				endif;
 
@@ -290,7 +290,7 @@ class WC_Coupon {
 					endforeach; endif;
 					if ( ! $valid_for_cart ) {
 						$valid = false;
-						$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+						$error = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 					}
 				endif;
 
