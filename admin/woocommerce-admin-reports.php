@@ -518,16 +518,16 @@ function woocommerce_sales_overview() {
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
 				series: {
-					lines: { show: true },
+					lines: { show: true, fill: true },
 					points: { show: true }
 				},
 				grid: {
 					show: true,
 					aboveData: false,
-					color: '#ccc',
+					color: '#aaa',
 					backgroundColor: '#fff',
 					borderWidth: 2,
-					borderColor: '#ccc',
+					borderColor: '#aaa',
 					clickable: false,
 					hoverable: true,
 					markings: weekendAreas
@@ -713,16 +713,16 @@ function woocommerce_daily_sales() {
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
 				series: {
-					lines: { show: true },
+					lines: { show: true, fill: true },
 					points: { show: true }
 				},
 				grid: {
 					show: true,
 					aboveData: false,
-					color: '#ccc',
+					color: '#aaa',
 					backgroundColor: '#fff',
 					borderWidth: 2,
-					borderColor: '#ccc',
+					borderColor: '#aaa',
 					clickable: false,
 					hoverable: true,
 					markings: weekendAreas
@@ -893,16 +893,16 @@ function woocommerce_monthly_sales() {
 
 			var plot = jQuery.plot(placeholder, [ { label: "<?php echo esc_js( __( 'Number of sales', 'woocommerce' ) ) ?>", data: d }, { label: "<?php echo esc_js( __( 'Sales amount', 'woocommerce' ) ) ?>", data: d2, yaxis: 2 } ], {
 				series: {
-					lines: { show: true },
+					lines: { show: true, fill: true },
 					points: { show: true, align: "left" }
 				},
 				grid: {
 					show: true,
 					aboveData: false,
-					color: '#ccc',
+					color: '#aaa',
 					backgroundColor: '#fff',
 					borderWidth: 2,
-					borderColor: '#ccc',
+					borderColor: '#aaa',
 					clickable: false,
 					hoverable: true
 				},
@@ -1435,10 +1435,10 @@ function woocommerce_customer_overview() {
 				grid: {
 					show: true,
 					aboveData: false,
-					color: '#ccc',
+					color: '#aaa',
 					backgroundColor: '#fff',
 					borderWidth: 2,
-					borderColor: '#ccc',
+					borderColor: '#aaa',
 					clickable: false,
 					hoverable: true,
 					markings: weekendAreas
@@ -1930,15 +1930,34 @@ function woocommerce_category_sales() {
 
 	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
 	$start_date 	= strtotime( $current_year . '0101' );
+	
+	$categories = get_terms( 'product_cat', array( 'parent' => 0 ) );
 	?>
-	<form method="post" action="">
-		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label>
-		<select name="show_year" id="show_year">
-			<?php
-				for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
-					printf( '<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
-			?>
-		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+	<form method="post" action="" class="report_filters">
+		<p>
+			<label for="show_year"><?php _e('Show:', 'woocommerce'); ?></label>
+			<select name="show_year" id="show_year">
+				<?php
+					for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
+						printf( '<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
+				?>
+			</select>
+		
+			<select multiple="multiple" class="chosen_select" id="show_categories" name="show_categories[]" style="width: 300px;">
+				<?php
+					foreach ( $categories as $category ) {
+						if ( $category->parent > 0 )
+							$prepend = '&mdash; ';
+						else
+							$prepend = '';
+						
+						echo '<option value="' . $category->term_id . '" ' . selected( ! empty( $_POST['show_categories'] ) && in_array( $category->term_id, $_POST['show_categories'] ), true ) . '>' . $prepend . $category->name . '</option>';
+					}
+				?>
+			</select>
+
+			<input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" />
+		</p>
 	</form>
 	<?php
 
@@ -1986,102 +2005,124 @@ function woocommerce_category_sales() {
 		}
 	}
 	
-	$categories = get_terms( 'product_cat', array( 'parent' => 0 ) );
-	?>
-	<table class="widefat">
-		<thead>
-			<tr>
-				<th><?php _e( 'Category', 'woocommerce' ); ?></th>
-				<?php for ( $count = 0; $count < 12; $count++ ) : 
-					if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
-						continue;
-					?>
-					<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
-				<?php endfor; ?>
-				<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
-			</tr>
-		</thead>
-		<tbody><?php
-			// While outputting, lets store them for the chart
-			$chart_data = $month_totals = $category_totals = array();
-			$top_cat = $bottom_cat = $top_cat_name = $bottom_cat_name = '';
-			
-			for ( $count = 0; $count < 12; $count++ )
-				if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
-					break;
-				else
-					$month_totals[ $count ] = 0;
-			
-			foreach ( $categories as $category ) {
-				
-				$cat_total = 0;
-				$category_chart_data = $term_ids = array();
-				
-				$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
-				$term_ids[] 	= $category->term_id;
-				$product_ids 	= get_objects_in_term( $term_ids, 'product_cat' );
-				
-				$category_sales_html = '<tr><th>' . $category->name . '</th>';
-
-				for ( $count = 0; $count < 12; $count++ ) {
-					
-					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )	
-						continue;
-				
-					if ( ! empty( $item_sales[ $count ] ) ) {
-						$matches = array_intersect_key( $item_sales[ $count ], array_flip( $product_ids ) );
-						$total = array_sum( $matches );
-						$cat_total += $total;
-					} else {
-						$total = 0;
-					}
-						
-					$month_totals[ $count ] += $total;
-					
-					$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
-					
-					$category_chart_data[] = array( strtotime( date( 'Ymd', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ) ) . '000', $total );
-				}
-				
-				if ( $cat_total == 0 )
-					continue;
-				
-				$category_totals[] = $cat_total;
-				
-				$category_sales_html .= '<td><strong>' . woocommerce_price( $cat_total ) . '</strong></td>';
-				
-				$category_sales_html .= '</tr>';
-				
-				echo $category_sales_html;
-				
-				$chart_data[ $category->name ] = $category_chart_data;
-				
-				if ( $cat_total > $top_cat ) {
-					$top_cat = $cat_total;
-					$top_cat_name = $category->name;
-				}
-				
-				if ( $cat_total < $bottom_cat || $bottom_cat === '' ) {
-					$bottom_cat = $cat_total;
-					$bottom_cat_name = $category->name;
-				}
-
-			}
-			
-			sort( $category_totals );
-			
-			echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
-			for ( $count = 0; $count < 12; $count++ )
-				if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
-					break;
-				else
-					echo '<td><strong>' . woocommerce_price( $month_totals[ $count ] ) . '</strong></td>';
-			echo '<td><strong>' .  woocommerce_price( array_sum( $month_totals ) ) . '</strong></td></tr>';
-			
-		?></tbody>
-	</table>
+	if ( ! empty( $_POST['show_categories'] ) && sizeof( $_POST['show_categories'] ) > 0 ) {
 	
-	<br/>
+	$show_categories = $include_categories = array_map( 'absint', $_POST['show_categories'] );
+	
+	foreach( $show_categories as $cat )
+		$include_categories = array_merge( $include_categories, get_term_children( $cat, 'product_cat' ) );
+	
+	$categories = get_terms( 'product_cat', array( 'include' => array_unique( $include_categories ) ) );
+	?>
+	<div class="woocommerce-wide-reports-wrap">
+		<table class="widefat">
+			<thead>
+				<tr>
+					<th><?php _e( 'Category', 'woocommerce' ); ?></th>
+					<?php 
+						$column_count = 0;
+						for ( $count = 0; $count < 12; $count++ ) : 
+							if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
+								continue;
+							$column_count++;
+							?>
+							<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
+					<?php endfor; ?>
+					<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
+				</tr>
+			</thead>
+			<!--<tfoot>
+				<tr>
+					<th colspan="<?php echo $column_count + 2; ?>">
+						<a class="button export-data" href="<?php echo add_query_arg( 'export', 'true' ); ?>"><?php _e('Export data', 'woocommerce'); ?></a>
+					</th>
+				</tr>
+			</tfoot>-->
+			<tbody><?php
+				// While outputting, lets store them for the chart
+				$chart_data = $month_totals = $category_totals = array();
+				$top_cat = $bottom_cat = $top_cat_name = $bottom_cat_name = '';
+				
+				for ( $count = 0; $count < 12; $count++ )
+					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+						break;
+					else
+						$month_totals[ $count ] = 0;
+				
+				foreach ( $categories as $category ) {
+					
+					$cat_total = 0;
+					$category_chart_data = $term_ids = array();
+					
+					$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
+					$term_ids[] 	= $category->term_id;
+					$product_ids 	= get_objects_in_term( $term_ids, 'product_cat' );
+					
+					if ( $category->parent > 0 )
+						$prepend = '&mdash; ';
+					else
+						$prepend = '';
+					
+					$category_sales_html = '<tr><th>' . $prepend . $category->name . '</th>';
+	
+					for ( $count = 0; $count < 12; $count++ ) {
+						
+						if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )	
+							continue;
+					
+						if ( ! empty( $item_sales[ $count ] ) ) {
+							$matches = array_intersect_key( $item_sales[ $count ], array_flip( $product_ids ) );
+							$total = array_sum( $matches );
+							$cat_total += $total;
+						} else {
+							$total = 0;
+						}
+							
+						$month_totals[ $count ] += $total;
+						
+						$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
+						
+						$category_chart_data[] = array( strtotime( date( 'Ymd', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ) ) . '000', $total );
+					}
+					
+					if ( $cat_total == 0 )
+						continue;
+					
+					$category_totals[] = $cat_total;
+					
+					$category_sales_html .= '<td><strong>' . woocommerce_price( $cat_total ) . '</strong></td>';
+					
+					$category_sales_html .= '</tr>';
+					
+					echo $category_sales_html;
+					
+					$chart_data[ $category->name ] = $category_chart_data;
+					
+					if ( $cat_total > $top_cat ) {
+						$top_cat = $cat_total;
+						$top_cat_name = $category->name;
+					}
+					
+					if ( $cat_total < $bottom_cat || $bottom_cat === '' ) {
+						$bottom_cat = $cat_total;
+						$bottom_cat_name = $category->name;
+					}
+	
+				}
+				
+				sort( $category_totals );
+				
+				echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
+				for ( $count = 0; $count < 12; $count++ )
+					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+						break;
+					else
+						echo '<td><strong>' . woocommerce_price( $month_totals[ $count ] ) . '</strong></td>';
+				echo '<td><strong>' .  woocommerce_price( array_sum( $month_totals ) ) . '</strong></td></tr>';
+				
+			?></tbody>
+		</table>
+	</div>
 	
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -2093,8 +2134,9 @@ function woocommerce_category_sales() {
 					?></p>
 				</div>
 			</div>
+			<?php if ( sizeof( $category_totals ) > 1 ) : ?>
 			<div class="postbox">
-				<h3><span><?php _e('Bottom category', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e('Worst category', 'woocommerce'); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						echo $bottom_cat_name . ' (' . woocommerce_price( $bottom_cat ) . ')';
@@ -2129,6 +2171,7 @@ function woocommerce_category_sales() {
 					?></p>
 				</div>
 			</div>
+			<?php endif; ?>
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
@@ -2164,16 +2207,16 @@ function woocommerce_category_sales() {
 				?>
 			], {
 				series: {
-					lines: { show: true },
+					lines: { show: true, fill: true },
 					points: { show: true, align: "left" }
 				},
 				grid: {
 					show: true,
 					aboveData: false,
-					color: '#ccc',
+					color: '#aaa',
 					backgroundColor: '#fff',
 					borderWidth: 2,
-					borderColor: '#ccc',
+					borderColor: '#aaa',
 					clickable: false,
 					hoverable: true
 				},
@@ -2190,6 +2233,14 @@ function woocommerce_category_sales() {
 		 	placeholder.resize();
 
 			<?php woocommerce_tooltip_js(); ?>
+		});
+	</script>
+	<?php
+	}
+	?>
+	<script type="text/javascript">
+		jQuery(function(){
+			jQuery("select.chosen_select").chosen();
 		});
 	</script>
 	<?php
