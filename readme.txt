@@ -155,6 +155,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
 * Fix - Added more error messages for coupons.
+* Localization - French update by Arnaud Cheminand
 
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen
