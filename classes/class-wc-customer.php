@@ -21,7 +21,7 @@ class WC_Customer {
 
 		if ( ! isset( $_SESSION['customer'] ) ) {
 
-			$default = get_option('woocommerce_default_country');
+			$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
 
         	if ( strstr( $default, ':' ) ) {
         		$country = current( explode( ':', $default ) );
@@ -64,7 +64,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_to_base() {
-		$default = get_option('woocommerce_default_country');
+		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
     	if (strstr($default, ':')) :
     		$country = current(explode(':', $default));
     		$state = end(explode(':', $default));
