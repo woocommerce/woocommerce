@@ -239,7 +239,10 @@ class WC_Coupon {
 						$valid_for_cart = true;
 					endif;
 				endforeach; endif;
-				if ( ! $valid_for_cart ) $valid = false;
+				if ( ! $valid_for_cart ) {
+					$valid = false;
+					$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+				}
 			endif;
 
 			// Category ids - If a product included is found in the cart then its valid
@@ -252,7 +255,10 @@ class WC_Coupon {
 					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) $valid_for_cart = true;
 
 				endforeach; endif;
-				if ( ! $valid_for_cart ) $valid = false;
+				if ( ! $valid_for_cart ) {
+					$valid = false;
+					$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+				}
 			endif;
 
 			// Cart discounts cannot be added if non-eligble product is found in cart
@@ -266,7 +272,10 @@ class WC_Coupon {
 							$valid_for_cart = false;
 						endif;
 					endforeach; endif;
-					if ( ! $valid_for_cart ) $valid = false;
+					if ( ! $valid_for_cart ) {
+						$valid = false;
+						$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+					}
 				endif;
 
 				// Exclude Categories
@@ -279,7 +288,10 @@ class WC_Coupon {
 						if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) $valid_for_cart = false;
 
 					endforeach; endif;
-					if ( ! $valid_for_cart ) $valid = false;
+					if ( ! $valid_for_cart ) {
+						$valid = false;
+						$error = __( 'Sorry, your cart contents do not qualify for this coupon.', 'woocommerce' );
+					}
 				endif;
 
 			endif;
