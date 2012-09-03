@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce v1.6.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-09-03 16:29+0200\n"
-"PO-Revision-Date: 2012-09-03 16:29+0200\n"
+"PO-Revision-Date: 2012-09-03 22:16+0200\n"
 "Last-Translator: Silviu Bucsa <tom@madc.at>\n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -5905,17 +5905,17 @@ msgstr "Sortare implicită"
 # @ woocommerce
 #: admin/settings/settings-init.php:545 templates/loop/sorting.php:16
 msgid "Sort alphabetically"
-msgstr "Sortare Alfabetică (A - Z)"
+msgstr "Afișează de la A la Z"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:546 templates/loop/sorting.php:17
 msgid "Sort by most recent"
-msgstr "Cele mai noi produse afișate primele"
+msgstr "Cele mai recente produse"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:547 templates/loop/sorting.php:18
 msgid "Sort by price"
-msgstr "Sortare după preț (Mic - Mare)"
+msgstr "Preț Ascendent"
 
 # @ woocommerce
 #: admin/settings/settings-init.php:553
