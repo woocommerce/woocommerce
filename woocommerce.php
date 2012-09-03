@@ -1131,7 +1131,7 @@ class Woocommerce {
 			wp_enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
 		if ( is_checkout() )
-			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery' ), $this->version, true );
+			wp_enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce' ), $this->version, true );
 
 		if ( is_product() )
 			wp_enqueue_script( 'wc-single-product' );

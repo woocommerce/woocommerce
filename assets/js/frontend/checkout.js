@@ -136,10 +136,6 @@ jQuery(document).ready(function($) {
 		updateTimer = setTimeout( input_changed, '1000' );
 	});
 	
-	// Update on page load
-	if ( woocommerce_params.is_checkout == 1 ) 
-		$('body').trigger('update_checkout');
-	
 	/* AJAX Coupon Form Submission */
 	$('form.checkout_coupon').submit( function() {
 		var $form = $(this);
@@ -328,5 +324,15 @@ jQuery(document).ready(function($) {
 		}
 		
 	});
+	
+	// Init trigger
+	$('body').bind('init_checkout', function() {
+		$('select.country_to_state').change();
+		$('body').trigger('update_checkout');
+	});
+	
+	// Update on page load
+	if ( woocommerce_params.is_checkout == 1 ) 
+		$('body').trigger('init_checkout');
 			
 });
