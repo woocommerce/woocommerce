@@ -145,7 +145,7 @@ function variable_product_type_options() {
 									else :
 										$options = explode('|', $attribute['value']);
 										foreach ($options as $option) :
-											echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst($option).'</option>';
+											echo '<option '.selected($variation_selected_value, $option, false).' value="'.$option.'">'.ucfirst( apply_filters( 'woocommerce_variation_option_name', $option ) ).'</option>';
 										endforeach;
 									endif;
 
