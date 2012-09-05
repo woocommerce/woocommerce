@@ -45,7 +45,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 					<?php
 						$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
 
-						echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title );
+						echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
 					?>
 				<?php endif; ?>
 

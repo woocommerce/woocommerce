@@ -493,7 +493,7 @@ class WC_Product {
 	 */
 	function get_title() {
 		$this->get_post_data();
-		return apply_filters('woocommerce_product_title', apply_filters('the_title', $this->post->post_title), $this);
+		return apply_filters('woocommerce_product_title', apply_filters( 'the_title', $this->post->post_title, $this->id ), $this);
 	}
 
 
