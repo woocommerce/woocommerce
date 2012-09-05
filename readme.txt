@@ -156,6 +156,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - On add to cart success, redirect back.
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
+* Fix - Active plugins display on status page.
 * Localization - French update by Arnaud Cheminand
 
 = 1.6.5.1 - 25/08/2012 =

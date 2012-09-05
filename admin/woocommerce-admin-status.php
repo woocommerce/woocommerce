@@ -102,21 +102,17 @@ function woocommerce_status() {
              			if ( is_multisite() )
 							$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
 
-						$active_plugins = array_map( 'strtolower', $active_plugins );
-
 						$wc_plugins = array();
 
 						foreach ( $active_plugins as $plugin ) {
-							//if ( strstr( $plugin, 'woocommerce' ) ) {
 
-								$plugin_data = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+							$plugin_data = @get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 
-	    						if ( ! empty( $plugin_data['Name'] ) ) {
+    						if ( ! empty( $plugin_data['Name'] ) ) {
 
-	    							$wc_plugins[] = $plugin_data['Name'] . ' ' . __('by', 'woocommerce') . ' ' . $plugin_data['Author'] . ' ' . __('version', 'woocommerce') . ' ' . $plugin_data['Version'];
+    							$wc_plugins[] = $plugin_data['Name'] . ' ' . __('by', 'woocommerce') . ' ' . $plugin_data['Author'] . ' ' . __('version', 'woocommerce') . ' ' . $plugin_data['Version'];
 
-	    						}
-    						//}
+    						}
 						}
 
 						if ( sizeof( $wc_plugins ) == 0 ) echo '-'; else echo '<ul><li>' . implode( ', </li><li>', $wc_plugins ) . '</li></ul>';
