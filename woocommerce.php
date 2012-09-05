@@ -578,7 +578,8 @@ class Woocommerce {
 	 * @return void
 	 */
 	function generator() {
-		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
+		if( 'yes' == get_option( 'woocommerce_enable_generator_meta_tag' ) )
+			echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
 	}
 
 
