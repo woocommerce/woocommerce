@@ -269,9 +269,9 @@ jQuery(document).ready(function($) {
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
 
 	        if ( variation.sku )
-	        	 $variation_form.find('.product_meta').find('.sku').text( variation.sku );
+	        	 $product.find('.product_meta').find('.sku').text( variation.sku );
 	        else
-	        	 $variation_form.find('.product_meta').find('.sku').text('');
+	        	 $product.find('.product_meta').find('.sku').text('');
 
 	        $single_variation_wrap.find('.quantity').show();
 	        
