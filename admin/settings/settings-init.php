@@ -267,6 +267,14 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
+	
+	array(
+		'desc'		=> __( 'Enable generator meta tag output in the HEAD section' ),
+		'id'		=> 'woocommerce_enable_generator_meta_tag',
+		'std'		=> 'yes',
+		'type'		=> 'checkbox',
+		'checkboxgroup'		=> ''
+	),
 
 	array(
 		'desc' 		=> __( 'Enable enhanced country select boxes', 'woocommerce' ),
