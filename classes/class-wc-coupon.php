@@ -227,7 +227,7 @@ class WC_Coupon {
 			if ($this->minimum_amount>0) :
 				if ( $this->minimum_amount > $woocommerce->cart->subtotal ) :
 					$valid = false;
-					$error = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), $this->minimum_amount );
+					$error = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), woocommerce_price( $this->minimum_amount ) );
 				endif;
 			endif;
 

@@ -161,6 +161,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
 * Localization - French update by Arnaud Cheminand
+* Localization - Romanian update by silviu-bucsa
+* Localization - Dutch updates by Ramoonus
 
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen
