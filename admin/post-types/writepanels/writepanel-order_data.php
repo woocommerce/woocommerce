@@ -392,7 +392,7 @@ function woocommerce_order_items_meta_box($post) {
 							</table>
 						</td>
 
-						<?php do_action('woocommerce_admin_order_item_values', $_product, $item); ?>
+						<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, $loop ); ?>
 
 						<td class="tax_class" width="1%">
 							<select class="tax_class" name="item_tax_class[<?php echo $loop; ?>]" title="<?php _e('Tax class', 'woocommerce'); ?>">
@@ -846,7 +846,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 					'line_subtotal_tax' => rtrim(rtrim(number_format(woocommerce_clean($line_subtotal_tax[$i]), 4, '.', ''), '0'), '.'),
 					'item_meta'			=> $item_meta->meta,
 					'tax_class'			=> woocommerce_clean($item_tax_class[$i])
-				));
+				), $i);
 
 			 endfor;
 		endif;

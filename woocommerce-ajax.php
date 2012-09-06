@@ -593,14 +593,16 @@ function woocommerce_revoke_access_to_download() {
 
 	global $wpdb;
 
+	$download_id = $_POST['download_id'];
 	$product_id = intval( $_POST['product_id'] );
 	$order_id 	= intval( $_POST['order_id'] );
 
-	$wpdb->query("
-		DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-		WHERE order_id = $order_id
-		AND product_id = $product_id
-	");
+	$where = array(
+		'order_id' => $order_id,
+		'product_id' => $product_id,
+		'download_id' => $download_id
+	);
+	$wpdb->delete( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', $where );
 
 	die();
 }
@@ -629,6 +631,7 @@ function woocommerce_grant_access_to_download() {
 
 	$limit = trim(get_post_meta($product_id, '_download_limit', true));
 	$expiry = trim(get_post_meta($product_id, '_download_expiry', true));
+	$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, null );
 
     $limit = (empty($limit)) ? '' : (int) $limit;
 
@@ -639,46 +642,60 @@ function woocommerce_grant_access_to_download() {
 
 	$wpdb->hide_errors();
 
-    $data = array(
-        'product_id' 			=> $product_id,
-        'user_id' 				=> (int) $order->user_id,
-        'user_email' 			=> $user_email,
-        'order_id' 				=> $order->id,
-        'order_key' 			=> $order->order_key,
-        'downloads_remaining' 	=> $limit,
-        'access_granted'		=> current_time('mysql'),
-        'download_count'		=> 0
-    );
+	$response = array();
+	foreach ( $file_paths as $download_id => $file_path ) {
 
-    $format = array(
-        '%s',
-        '%s',
-        '%s',
-        '%s',
-        '%s',
-        '%s',
-        '%s',
-        '%d'
-    );
+	    $data = array(
+	    	'download_id'			=> $download_id,
+	        'product_id' 			=> $product_id,
+	        'user_id' 				=> (int) $order->user_id,
+	        'user_email' 			=> $user_email,
+	        'order_id' 				=> $order->id,
+	        'order_key' 			=> $order->order_key,
+	        'downloads_remaining' 	=> $limit,
+	        'access_granted'		=> current_time('mysql'),
+	        'download_count'		=> 0
+	    );
 
-    if ( ! is_null($expiry)) {
-        $data['access_expires'] = $expiry;
-        $format[] = '%s';
-    }
+	    $format = array(
+	    	'%s',
+	        '%s',
+	        '%s',
+	        '%s',
+	        '%s',
+	        '%s',
+	        '%s',
+	        '%s',
+	        '%d'
+	    );
 
-    // Downloadable product - give access to the customer
-    $success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-        $data,
-        $format
-    );
+	    if ( ! is_null($expiry)) {
+	        $data['access_expires'] = $expiry;
+	        $format[] = '%s';
+	    }
 
-	if ($success) {
-		echo json_encode(array(
-			'success'		=> 1,
-			'download_id'  	=> $product_id,
-			'title'			=> get_the_title($product_id),
-			'expires'		=> is_null($expiry) ? '' : $expiry,
-			'remaining'		=> $limit
+	    // Downloadable product - give access to the customer
+	    $success = $wpdb->insert( $wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+	        $data,
+	        $format
+	    );
+
+		if ( $success ) {
+			$response[] = array(
+				'product_id'  	=> $product_id,
+				'download_id'  	=> $download_id,
+				'title'			=> get_the_title( $product_id ),
+				'expires'		=> is_null( $expiry ) ? '' : $expiry,
+				'remaining'		=> $limit,
+				'file_path'		=> $file_path
+			);
+		}
+	}
+
+	if ( $response ) {
+		echo json_encode( array(
+			'success' => 1,
+			'files' => $response
 		));
 	}
 
@@ -804,10 +821,10 @@ function woocommerce_add_order_item() {
 			</table>
 		</td>
 
-		<?php do_action('woocommerce_admin_order_item_values', $_product); ?>
+		<?php do_action('woocommerce_admin_order_item_values', $_product, '', $index); ?>
 
 		<td class="tax_class" width="1%">
-			<select class="tax_class" name="item_tax_class[<?php echo $loop; ?>]">
+			<select class="tax_class" name="item_tax_class[<?php echo $index; ?>]">
 				<?php
 				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 				$classes_options = array();

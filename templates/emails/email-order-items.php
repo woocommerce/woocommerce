@@ -31,8 +31,19 @@ foreach ($items as $item) :
 			// SKU
 			echo 	($show_sku && $_product->get_sku()) ? ' (#' . $_product->get_sku() . ')' : '';
 
-			// File URL
-			echo 	( $show_download_links && $_product->exists() && $_product->is_downloadable() && $_product->has_file() ) ? '<br/><small>' . __( 'Download:', 'woocommerce' ) . ' <a href="' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '" target="_blank">' . $order->get_downloadable_file_url( $item['id'], $item['variation_id'] ) . '</a></small>' : '';
+			// File URLs
+			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) :
+				$download_file_urls = $order->get_downloadable_file_urls( $item['id'], $item['variation_id'], $item );
+				foreach ( $download_file_urls as $i => $download_file_url ) :
+					echo '<br/><small>';
+					if ( $i == 0 ) echo __( 'Download:', 'woocommerce' );
+					if ( count( $download_file_urls ) > 1 ) :
+						if ( $i == 0 ) echo '</small><br/><small>';
+						echo sprintf( __('File %d:', 'woocommerce' ), $i + 1 );
+					endif;
+					echo ' <a href="' . $download_file_url . '" target="_blank">' . $download_file_url . '</a></small>';
+				endforeach;
+			endif;
 
 			// Variation
 			echo 	($item_meta->meta) ? '<br/><small>' . nl2br( $item_meta->display( true, true ) ) . '</small>' : '';

@@ -80,7 +80,7 @@ function variable_product_type_options() {
 					<option value="variable_length"><?php _e('Length', 'woocommerce'); ?></option>
 					<option value="variable_width"><?php _e('Width', 'woocommerce'); ?></option>
 					<option value="variable_height"><?php _e('Height', 'woocommerce'); ?></option>
-					<option value="variable_file_path"><?php _e('File Path', 'woocommerce'); ?></option>
+					<option value="variable_file_paths" rel="textarea"><?php _e('File Path', 'woocommerce'); ?></option>
 					<option value="variable_download_limit"><?php _e('Download limit', 'woocommerce'); ?></option>
 				</select>
 				<a class="button bulk_edit plus"><?php _e('Edit', 'woocommerce'); ?></a>
@@ -220,8 +220,10 @@ function variable_product_type_options() {
 											</tr>
 											<tr class="show_if_variation_downloadable">
 												<td>
-													<div class="file_path_field">
-													<label><?php _e('File path:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_file_path'][0])) echo $variation_data['_file_path'][0]; ?>" placeholder="<?php _e('File path/URL', 'woocommerce'); ?>" /> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" />
+													<div class="file_path_field"><?php
+													$file_paths = isset( $variation_data['_file_paths'][0] ) ? maybe_unserialize( $variation_data['_file_paths'][0] ) : array();
+													if ( is_array( $file_paths ) ) $file_paths = implode( "\n", $file_paths );
+													?><label><?php _e('File paths:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e('File paths/URLs, one per line', 'woocommerce'); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php echo $file_paths; ?></textarea> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" />
 													</div>
 												</td>
 												<td>
@@ -429,7 +431,7 @@ function variable_product_type_options() {
 										</tr>\
 										<tr class="show_if_variation_downloadable">\
 											<td>\
-												<div class="file_path_field"><label><?php echo esc_js( __('File path:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a File Path to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" class="file_path" name="variable_file_path[' + loop + ']" placeholder="<?php echo esc_js( __('File path/URL', 'woocommerce') ); ?>" /> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
+												<div class="file_path_field"><label><?php echo esc_js( __('File paths:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php echo esc_js('File paths/URLs, one per line', 'woocommerce'); ?>" name="variable_file_paths[' + loop + ']" wrap="off"></textarea> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
 											</td>\
 											<td>\
 												<div><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
@@ -584,8 +586,10 @@ function variable_product_type_options() {
 
 		jQuery('a.bulk_edit').click(function() {
 			var field_to_edit = jQuery('select#field_to_edit').val();
+			var input_tag = jQuery('select#field_to_edit :selected').attr('rel') ? jQuery('select#field_to_edit :selected').attr('rel') : 'input';
+			
 			var value = prompt("<?php _e('Enter a value', 'woocommerce'); ?>");
-			jQuery('input[name^="' + field_to_edit + '"]').val( value );
+			jQuery(input_tag + '[name^="' + field_to_edit + '"]').val( value );
 			return false;
 		});
 
@@ -754,7 +758,7 @@ function process_product_meta_variable( $post_id ) {
 		$variable_price 			= $_POST['variable_price'];
 		$variable_sale_price		= $_POST['variable_sale_price'];
 		$upload_image_id			= $_POST['upload_image_id'];
-		$variable_file_path 		= $_POST['variable_file_path'];
+		$variable_file_paths 		= $_POST['variable_file_paths'];
 		$variable_download_limit 	= $_POST['variable_download_limit'];
 		$variable_shipping_class 	= $_POST['variable_shipping_class'];
 		$variable_tax_class			= $_POST['variable_tax_class'];
@@ -832,10 +836,26 @@ function process_product_meta_variable( $post_id ) {
 
 			if ($is_downloadable=='yes') :
 				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
-				update_post_meta( $variation_id, '_file_path', $variable_file_path[$i] );
+				
+				$_file_paths = array();
+				$file_paths = str_replace( "\r\n", "\n", esc_attr( $variable_file_paths[$i] ) );
+				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
+				if ( $file_paths ) {
+					$file_paths = explode( "\n", $file_paths );
+	
+					foreach ( $file_paths as $file_path ) {
+						$file_path = trim( $file_path );
+						$_file_paths[ md5( $file_path ) ] = $file_path;
+					}
+				}
+
+				// grant permission to any newly added files on any existing orders for this product
+				do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $_file_paths );
+
+				update_post_meta( $variation_id, '_file_paths', $_file_paths );
 			else :
 				update_post_meta( $variation_id, '_download_limit', '' );
-				update_post_meta( $variation_id, '_file_path', '' );
+				update_post_meta( $variation_id, '_file_paths', '' );
 			endif;
 
 			// Save shipping class

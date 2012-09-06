@@ -240,9 +240,16 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies (
 ";
     dbDelta($sql);
 
+	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<=' ) ) { // TODO: change to 1.7 or whatever
+		// remove the existing primary key so we can add the new download_id column
+		$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
+	}
+
     // Table for storing user and guest download permissions
+    //  KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
+  download_id varchar(32) NOT NULL,
   product_id bigint(20) NOT NULL,
   order_id bigint(20) NOT NULL DEFAULT 0,
   order_key varchar(200) NOT NULL,
@@ -252,10 +259,24 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
   access_granted datetime NOT NULL default '0000-00-00 00:00:00',
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
-  PRIMARY KEY  (product_id,order_id,order_key)
+  PRIMARY KEY  (product_id,order_id,order_key,download_id),
+  KEY (order_id,product_id,download_id)
 ) $collate;
 ";
     dbDelta($sql);
+
+	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<=' ) ) { // TODO: change to 1.7 or whatever
+
+		// upgrade existing meta data
+		$existing_file_paths = $wpdb->get_results( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key='_file_path'" );
+		if ( $existing_file_paths ) : foreach( $existing_file_paths as $existing_file_path ) :
+			$existing_file_path->meta_value = trim( $existing_file_path->meta_value );
+			if ( $existing_file_path->meta_value ) $file_paths = maybe_serialize( array( md5( $existing_file_path->meta_value ) => $existing_file_path->meta_value ) );
+			else $file_paths = '';
+			$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->postmeta . " SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->prefix . "woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $existing_file_path->meta_value ), $existing_file_path->post_id ) );
+		endforeach; endif;
+	}
 
     // Term meta table - sadly WordPress does not have termmeta so we need our own
     $sql = "
