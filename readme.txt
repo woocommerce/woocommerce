@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.7 = 
 * Feature - Added sales by category report
+* Feature - Download expirey for variations (kudos niravmehta)
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
 * Fix - Added more error messages for coupons.
