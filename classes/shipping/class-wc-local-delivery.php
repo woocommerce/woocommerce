@@ -125,7 +125,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 			'codes' => array(
 				'title' 		=> __( 'Zip/Post Codes', 'woocommerce' ),
 				'type' 			=> 'textarea',
-				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma.', 'woocommerce' ),
+				'description' 	=> __( 'What zip/post codes would you like to offer delivery to? Separate codes with a comma. Accepts wildcards, e.g. P* will match a postcode of PE30.', 'woocommerce' ),
 				'default'		=> ''
 			),
 			'availability' => array(
@@ -179,15 +179,37 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 
 		// If post codes are listed, let's use them.
 		$codes = '';
-		if($this->codes != '') {
-			foreach(explode(',',$this->codes) as $code) {
-				$codes[] = $this->clean($code);
+		if ( $this->codes != '' ) {
+			foreach( explode( ',', $this->codes ) as $code ) {
+				$codes[] = $this->clean( $code );
 			}
 		}
-
-		if (is_array($codes))
-			if ( ! in_array($this->clean( $package['destination']['postcode'] ), $codes))
+		
+		if ( is_array( $codes ) ) {
+			
+			$found_match = false;
+			
+			if ( in_array( $this->clean( $package['destination']['postcode'] ), $codes ) )
+				$found_match = true;
+			
+			// Wildcard search
+			if ( ! $found_match ) {
+				
+				$customer_postcode = $this->clean( $package['destination']['postcode'] );
+				$customer_postcode_length = strlen( $customer_postcode );
+				
+				for ( $i = 0; $i <= $customer_postcode_length; $i++ ) {
+					
+					if ( in_array( $customer_postcode, $codes ) ) 
+						$found_match = true;
+					
+					$customer_postcode = substr( $customer_postcode, 0, -2 ) . '*';
+				}
+			}
+			
+			if ( ! $found_match )
 				return false;
+		}
 
 		// Either post codes not setup, or post codes are in array... so lefts check countries for backwards compatability.
 		$ship_to_countries = '';
@@ -215,8 +237,8 @@ class WC_Local_Delivery extends WC_Shipping_Method {
      * @param mixed $code
      * @return string
      */
-    function clean($code) {
-    	return str_replace('-','',sanitize_title($code));
+    function clean( $code ) {
+    	return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
     }
 
 }
