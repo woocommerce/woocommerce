@@ -1033,7 +1033,7 @@ class WC_Order {
 	 */
 	function get_downloadable_file_url( $item_id, $variation_id ) {
 
-		_deprecated_function( __METHOD__, '1.7', 'WC_Order::get_downloadable_file_urls' );  // TODO: version
+		_deprecated_function( __METHOD__, '1.7', 'WC_Order::get_downloadable_file_urls' );
 
 	 	$download_id = $variation_id > 0 ? $variation_id : $item_id;
 

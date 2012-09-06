@@ -226,7 +226,8 @@ add_filter('wp_insert_post_data', 'woocommerce_order_data');
 function woocommerce_process_product_file_download_paths( $product_id, $variation_id, $file_paths ) {
 	global $wpdb;
 
-	if ( $variation_id ) $product_id = $variation_id;
+	if ( $variation_id ) 
+		$product_id = $variation_id;
 
 	// determine whether any new files have been added
 	$existing_file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, null, null );

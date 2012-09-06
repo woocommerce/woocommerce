@@ -82,6 +82,7 @@ function variable_product_type_options() {
 					<option value="variable_height"><?php _e('Height', 'woocommerce'); ?></option>
 					<option value="variable_file_paths" rel="textarea"><?php _e('File Path', 'woocommerce'); ?></option>
 					<option value="variable_download_limit"><?php _e('Download limit', 'woocommerce'); ?></option>
+					<option value="variable_download_expiry"><?php _e('Download Expiry', 'woocommerce'); ?></option>
 				</select>
 				<a class="button bulk_edit plus"><?php _e('Edit', 'woocommerce'); ?></a>
 				<a class="button toggle toggle_downloadable" href="#"><?php _e('Downloadable', 'woocommerce'); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e('Virtual', 'woocommerce'); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e('Enabled', 'woocommerce'); ?></a> <a href="#" class="button delete_variations"><?php _e('Delete all', 'woocommerce'); ?></a>
@@ -219,16 +220,23 @@ function variable_product_type_options() {
 												?></select></td>
 											</tr>
 											<tr class="show_if_variation_downloadable">
-												<td>
+												<td rowspan="2">
 													<div class="file_path_field"><?php
 													$file_paths = isset( $variation_data['_file_paths'][0] ) ? maybe_unserialize( $variation_data['_file_paths'][0] ) : array();
 													if ( is_array( $file_paths ) ) $file_paths = implode( "\n", $file_paths );
-													?><label><?php _e('File paths:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e('File paths/URLs, one per line', 'woocommerce'); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php echo $file_paths; ?></textarea> <input type="button"  class="upload_file_button button" value="<?php _e('&uarr;', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" />
+													?><label><?php _e('File paths:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php _e('File paths/URLs, one per line', 'woocommerce'); ?>" name="variable_file_paths[<?php echo $loop; ?>]" wrap="off"><?php echo $file_paths; ?></textarea> <input type="button"  class="upload_file_button button" value="<?php _e('Upload a file', 'woocommerce'); ?>" title="<?php _e('Upload', 'woocommerce'); ?>" />
 													</div>
 												</td>
 												<td>
 													<div>
 													<label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
+													</div>
+												</td>
+											</tr>
+											<tr class="show_if_variation_downloadable">
+												<td>
+													<div>
+													<label><?php _e('Download Expiry:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter the number of days before a download link expires, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_expiry[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_expiry'][0])) echo $variation_data['_download_expiry'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 													</div>
 												</td>
 											</tr>
@@ -430,11 +438,16 @@ function variable_product_type_options() {
 											?></select></td>\
 										</tr>\
 										<tr class="show_if_variation_downloadable">\
-											<td>\
+											<td rowspan="2">\
 												<div class="file_path_field"><label><?php echo esc_js( __('File paths:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter one or more File Paths, one per line, to make this variation a downloadable product, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><textarea style="float:left;" class="short file_paths" cols="20" rows="2" placeholder="<?php echo esc_js('File paths/URLs, one per line', 'woocommerce'); ?>" name="variable_file_paths[' + loop + ']" wrap="off"></textarea> <input type="button"  class="upload_file_button button" value="<?php echo esc_js( __('&uarr;', 'woocommerce') ); ?>" title="<?php echo esc_js( __('Upload', 'woocommerce') ); ?>" /></div>\
 											</td>\
 											<td>\
 												<div><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
+											</td>\
+										</tr>\
+										<tr class="show_if_variation_downloadable">\
+											<td>\
+												<div><label><?php echo esc_js( __('Download Expiry:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter the number of days before a download link expires, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_expiry[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
 											</td>\
 										</tr>\
 										<?php do_action( 'woocommerce_product_after_variable_attributes_js' ); ?>\
@@ -760,6 +773,7 @@ function process_product_meta_variable( $post_id ) {
 		$upload_image_id			= $_POST['upload_image_id'];
 		$variable_file_paths 		= $_POST['variable_file_paths'];
 		$variable_download_limit 	= $_POST['variable_download_limit'];
+		$variable_download_expiry   = $_POST['variable_download_expiry'];
 		$variable_shipping_class 	= $_POST['variable_shipping_class'];
 		$variable_tax_class			= $_POST['variable_tax_class'];
 		$variable_menu_order 		= $_POST['variation_menu_order'];
@@ -836,6 +850,7 @@ function process_product_meta_variable( $post_id ) {
 
 			if ($is_downloadable=='yes') :
 				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
+				update_post_meta( $variation_id, '_download_expiry', $variable_download_expiry[$i] );
 				
 				$_file_paths = array();
 				$file_paths = str_replace( "\r\n", "\n", esc_attr( $variable_file_paths[$i] ) );
@@ -855,6 +870,7 @@ function process_product_meta_variable( $post_id ) {
 				update_post_meta( $variation_id, '_file_paths', $_file_paths );
 			else :
 				update_post_meta( $variation_id, '_download_limit', '' );
+				update_post_meta( $variation_id, '_download_expiry', '' );
 				update_post_meta( $variation_id, '_file_paths', '' );
 			endif;
 

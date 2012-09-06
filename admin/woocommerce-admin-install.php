@@ -35,18 +35,18 @@ function do_install_woocommerce() {
 
 	if ( wp_mkdir_p( $downloads_url ) && ! file_exists( $downloads_url.'/.htaccess' ) ) {
 		if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
-			fwrite($file_handle, 'deny from all');
-			fclose($file_handle);
+			fwrite( $file_handle, 'deny from all' );
+			fclose( $file_handle );
 		}
 	}
 
 	// Install folder for logs
-	$logs_url = WP_PLUGIN_DIR . "/" . plugin_basename( dirname(dirname(__FILE__))) . '/logs';
+	$logs_url = WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs';
 
 	if ( wp_mkdir_p( $logs_url ) && ! file_exists( $logs_url . '/.htaccess' ) ) {
 		if ( $file_handle = @fopen( $logs_url . '/.htaccess', 'w' ) ) {
-			fwrite($file_handle, 'deny from all');
-			fclose($file_handle);
+			fwrite( $file_handle, 'deny from all' );
+			fclose( $file_handle );
 		}
 	}
 
@@ -54,7 +54,7 @@ function do_install_woocommerce() {
 	$woocommerce->clear_product_transients();
 
 	// Recompile LESS styles if they are custom
-	if ( get_option('woocommerce_frontend_css') == 'yes' ) {
+	if ( get_option( 'woocommerce_frontend_css' ) == 'yes' ) {
 
 		// Handle Colour Settings
 		$colors = get_option( 'woocommerce_frontend_css_colors' );
@@ -81,7 +81,7 @@ function do_install_woocommerce() {
 	}
 
 	// Update version
-	update_option( "woocommerce_db_version", $woocommerce->version );
+	update_option( 'woocommerce_db_version', $woocommerce->version );
 }
 
 
@@ -99,7 +99,7 @@ function woocommerce_default_options() {
 	// Include settings so that we can run through defaults
 	include_once( 'settings/settings-init.php' );
 
-	foreach ($woocommerce_settings as $section) {
+	foreach ( $woocommerce_settings as $section ) {
 
 		foreach ( $section as $value ) {
 
@@ -107,12 +107,12 @@ function woocommerce_default_options() {
 
 	        	if ( $value['type'] == 'image_width' ) {
 
-	        		add_option($value['id'].'_width', $value['std']);
-	        		add_option($value['id'].'_height', $value['std']);
+	        		add_option( $value['id'] . '_width', $value['std'] );
+	        		add_option( $value['id'] . '_height', $value['std'] );
 
 	        	} else {
 
-	        		add_option($value['id'], $value['std']);
+	        		add_option( $value['id'], $value['std'] );
 
 	        	}
 
@@ -145,12 +145,12 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 	if ( $option_value > 0 && get_post( $option_value ) )
 		return;
 
-	$page_found = $wpdb->get_var("SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1;");
-	if ( $page_found ) :
+	$page_found = $wpdb->get_var( "SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1;" );
+	if ( $page_found ) {
 		if ( ! $option_value )
 			update_option( $option, $page_found );
 		return;
-	endif;
+	}
 
 	$page_data = array(
         'post_status' 		=> 'publish',
@@ -177,34 +177,34 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 function woocommerce_create_pages() {
 
 	// Shop page
-    woocommerce_create_page( esc_sql( _x('shop', 'page_slug', 'woocommerce') ), 'woocommerce_shop_page_id', __('Shop', 'woocommerce'), '' );
+    woocommerce_create_page( esc_sql( _x( 'shop', 'page_slug', 'woocommerce' ) ), 'woocommerce_shop_page_id', __( 'Shop', 'woocommerce' ), '' );
 
     // Cart page
-    woocommerce_create_page( esc_sql( _x('cart', 'page_slug', 'woocommerce') ), 'woocommerce_cart_page_id', __('Cart', 'woocommerce'), '[woocommerce_cart]' );
+    woocommerce_create_page( esc_sql( _x( 'cart', 'page_slug', 'woocommerce' ) ), 'woocommerce_cart_page_id', __( 'Cart', 'woocommerce' ), '[woocommerce_cart]' );
 
 	// Checkout page
-    woocommerce_create_page( esc_sql( _x('checkout', 'page_slug', 'woocommerce') ), 'woocommerce_checkout_page_id', __('Checkout', 'woocommerce'), '[woocommerce_checkout]' );
+    woocommerce_create_page( esc_sql( _x( 'checkout', 'page_slug', 'woocommerce' ) ), 'woocommerce_checkout_page_id', __( 'Checkout', 'woocommerce' ), '[woocommerce_checkout]' );
 
     // Order tracking page
-    woocommerce_create_page( esc_sql( _x('order-tracking', 'page_slug', 'woocommerce') ), 'woocommerce_order_tracking_page_id', __('Track your order', 'woocommerce'), '[woocommerce_order_tracking]' );
+    woocommerce_create_page( esc_sql( _x( 'order-tracking', 'page_slug', 'woocommerce' ) ), 'woocommerce_order_tracking_page_id', __( 'Track your order', 'woocommerce' ), '[woocommerce_order_tracking]' );
 
 	// My Account page
-    woocommerce_create_page( esc_sql( _x('my-account', 'page_slug', 'woocommerce') ), 'woocommerce_myaccount_page_id', __('My Account', 'woocommerce'), '[woocommerce_my_account]' );
+    woocommerce_create_page( esc_sql( _x( 'my-account', 'page_slug', 'woocommerce' ) ), 'woocommerce_myaccount_page_id', __( 'My Account', 'woocommerce' ), '[woocommerce_my_account]' );
 
 	// Edit address page
-    woocommerce_create_page( esc_sql( _x('edit-address', 'page_slug', 'woocommerce') ), 'woocommerce_edit_address_page_id', __('Edit My Address', 'woocommerce'), '[woocommerce_edit_address]', woocommerce_get_page_id('myaccount') );
+    woocommerce_create_page( esc_sql( _x( 'edit-address', 'page_slug', 'woocommerce' ) ), 'woocommerce_edit_address_page_id', __( 'Edit My Address', 'woocommerce' ), '[woocommerce_edit_address]', woocommerce_get_page_id( 'myaccount' ) );
 
     // View order page
-    woocommerce_create_page( esc_sql( _x('view-order', 'page_slug', 'woocommerce') ), 'woocommerce_view_order_page_id', __('View Order', 'woocommerce'), '[woocommerce_view_order]', woocommerce_get_page_id('myaccount') );
+    woocommerce_create_page( esc_sql( _x( 'view-order', 'page_slug', 'woocommerce' ) ), 'woocommerce_view_order_page_id', __( 'View Order', 'woocommerce' ), '[woocommerce_view_order]', woocommerce_get_page_id( 'myaccount' ) );
 
     // Change password page
-    woocommerce_create_page( esc_sql( _x('change-password', 'page_slug', 'woocommerce') ), 'woocommerce_change_password_page_id', __('Change Password', 'woocommerce'), '[woocommerce_change_password]', woocommerce_get_page_id('myaccount') );
+    woocommerce_create_page( esc_sql( _x( 'change-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_change_password_page_id', __( 'Change Password', 'woocommerce' ), '[woocommerce_change_password]', woocommerce_get_page_id( 'myaccount' ) );
 
 	// Pay page
-    woocommerce_create_page( esc_sql( _x('pay', 'page_slug', 'woocommerce') ), 'woocommerce_pay_page_id', __('Checkout &rarr; Pay', 'woocommerce'), '[woocommerce_pay]', woocommerce_get_page_id('checkout') );
+    woocommerce_create_page( esc_sql( _x( 'pay', 'page_slug', 'woocommerce' ) ), 'woocommerce_pay_page_id', __( 'Checkout &rarr; Pay', 'woocommerce' ), '[woocommerce_pay]', woocommerce_get_page_id( 'checkout' ) );
 
     // Thanks page
-    woocommerce_create_page( esc_sql( _x('order-received', 'page_slug', 'woocommerce') ), 'woocommerce_thanks_page_id', __('Order Received', 'woocommerce'), '[woocommerce_thankyou]', woocommerce_get_page_id('checkout') );
+    woocommerce_create_page( esc_sql( _x( 'order-received', 'page_slug', 'woocommerce' ) ), 'woocommerce_thanks_page_id', __( 'Order Received', 'woocommerce' ), '[woocommerce_thankyou]', woocommerce_get_page_id( 'checkout' ) );
 
 }
 
@@ -222,11 +222,21 @@ function woocommerce_tables_install() {
 
 	$collate = '';
     if ( $wpdb->supports_collation() ) {
-		if( ! empty($wpdb->charset ) ) $collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-		if( ! empty($wpdb->collate ) ) $collate .= " COLLATE $wpdb->collate";
+		if( ! empty($wpdb->charset ) ) 
+			$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
+		if( ! empty($wpdb->collate ) ) 
+			$collate .= " COLLATE $wpdb->collate";
     }
 
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    
+    /**
+     * Data Upgrades - Prepare existing tables
+     **/
+    if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<' ) ) { 
+		// remove the existing primary key so we can add the new download_id column
+		$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
+	}
 
     // Table for storing attribute taxonomies - these are user defined
     $sql = "
@@ -240,13 +250,20 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_attribute_taxonomies (
 ";
     dbDelta($sql);
 
-	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<=' ) ) { // TODO: change to 1.7 or whatever
-		// remove the existing primary key so we can add the new download_id column
-		$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
-	}
-
+    // Term meta table - sadly WordPress does not have termmeta so we need our own
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL AUTO_INCREMENT,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id)
+) $collate;
+";
+    dbDelta($sql);
+    
     // Table for storing user and guest download permissions
-    //  KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
+    // KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
   download_id varchar(32) NOT NULL,
@@ -265,38 +282,30 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 ";
     dbDelta($sql);
 
-	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<=' ) ) { // TODO: change to 1.7 or whatever
+    /**
+     * Data Upgrades
+     **/
+	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<' ) ) {
 
 		// upgrade existing meta data
-		$existing_file_paths = $wpdb->get_results( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key='_file_path'" );
-		if ( $existing_file_paths ) : foreach( $existing_file_paths as $existing_file_path ) :
-			$existing_file_path->meta_value = trim( $existing_file_path->meta_value );
-			if ( $existing_file_path->meta_value ) $file_paths = maybe_serialize( array( md5( $existing_file_path->meta_value ) => $existing_file_path->meta_value ) );
-			else $file_paths = '';
-			$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->postmeta . " SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
-			$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->prefix . "woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $existing_file_path->meta_value ), $existing_file_path->post_id ) );
-		endforeach; endif;
+		$existing_file_paths = $wpdb->get_results( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key = '_file_path'" );
+		if ( $existing_file_paths ) {
+			foreach( $existing_file_paths as $existing_file_path ) {
+				$existing_file_path->meta_value = trim( $existing_file_path->meta_value );
+				if ( $existing_file_path->meta_value ) 
+					$file_paths = maybe_serialize( array( md5( $existing_file_path->meta_value ) => $existing_file_path->meta_value ) );
+				else 
+					$file_paths = '';
+				$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->postmeta . " SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
+				$wpdb->query( $wpdb->prepare( "UPDATE " . $wpdb->prefix . "woocommerce_downloadable_product_permissions SET download_id = %s WHERE product_id = %d", md5( $existing_file_path->meta_value ), $existing_file_path->post_id ) );
+			}
+		}
 	}
 
-    // Term meta table - sadly WordPress does not have termmeta so we need our own
-    $sql = "
-CREATE TABLE ". $wpdb->prefix . "woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL AUTO_INCREMENT,
-  woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id)
-) $collate;
-";
-    dbDelta($sql);
-
-    /**
-     * Version updates
-     **/
-    if ( get_option('woocommerce_db_version') > 1.0 && get_option('woocommerce_db_version') < 1.4 ) {
+    if ( version_compare( get_option('woocommerce_db_version'), '1.0', '>' ) && version_compare( get_option('woocommerce_db_version'), '1.4', '<' ) {
 
 	    // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
-	    $results = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
+	    $results = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
 
 		if ( $results ) foreach ( $results as $result ) {
 
@@ -389,5 +398,4 @@ function woocommerce_default_taxonomies() {
 			wp_set_object_terms( $product, 'simple', 'product_type');
 		}
 	}
-
 }

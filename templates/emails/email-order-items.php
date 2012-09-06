@@ -36,11 +36,10 @@ foreach ($items as $item) :
 				$download_file_urls = $order->get_downloadable_file_urls( $item['id'], $item['variation_id'], $item );
 				foreach ( $download_file_urls as $i => $download_file_url ) :
 					echo '<br/><small>';
-					if ( $i == 0 ) echo __( 'Download:', 'woocommerce' );
-					if ( count( $download_file_urls ) > 1 ) :
-						if ( $i == 0 ) echo '</small><br/><small>';
-						echo sprintf( __('File %d:', 'woocommerce' ), $i + 1 );
-					endif;
+					if ( count( $download_file_urls ) > 1 ) {
+						echo sprintf( __('Download %d:', 'woocommerce' ), $i + 1 );
+					} elseif ( $i == 0 ) 
+						echo __( 'Download:', 'woocommerce' );
 					echo ' <a href="' . $download_file_url . '" target="_blank">' . $download_file_url . '</a></small>';
 				endforeach;
 			endif;

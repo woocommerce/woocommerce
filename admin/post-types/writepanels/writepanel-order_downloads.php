@@ -51,15 +51,12 @@ function woocommerce_order_downloads_meta_box() {
 						<h3 class="fixed">
 							<button type="button" rel="<?php echo $download->product_id . ',' . $download->download_id; ?>" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>
 							<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>
-							<strong><?php echo '#' . $product->id . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_title(), $download->product_id, $download->order_id, $download->order_key, $download->download_id ) . ' &mdash; ' . sprintf( __( 'File %d', 'woocommerce' ), $file_count ) . ' &mdash; ' . sprintf(_n('Downloaded %s time', 'Downloaded %s times', $download->download_count, 'woocommerce'), $download->download_count); ?></strong>
+							<strong>
+								<?php echo '#' . $product->id . ' &mdash; ' . apply_filters( 'woocommerce_admin_download_permissions_title', $product->get_title(), $download->product_id, $download->order_id, $download->order_key, $download->download_id ) . ' &mdash; ' . sprintf( __( 'File %d: %s', 'woocommerce' ), $file_count, basename( $product->get_file_download_path( $download->download_id ) ) ) . ' &mdash; ' . sprintf( _n('Downloaded %s time', 'Downloaded %s times', $download->download_count, 'woocommerce'), $download->download_count ); ?>
+							</strong>
 						</h3>
 						<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 							<tbody>
-								<tr>
-									<td colspan="2">
-										<?php echo __('File path:', 'woocommerce') . ' ' . $product->get_file_download_path( $download->download_id ); ?>
-									</td>
-								</tr>
 								<tr>
 									<td>
 										<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>
@@ -164,7 +161,7 @@ function woocommerce_order_downloads_meta_box() {
 			jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', data, function(response) {
 
 				var loop = jQuery('.order_download_permissions .wc-metabox').size();
-
+				
 				new_downloads = jQuery.parseJSON( response );
 
 				if ( new_downloads && new_downloads.success == 1 ) {
@@ -174,13 +171,10 @@ function woocommerce_order_downloads_meta_box() {
 							<h3 class="fixed">\
 								<button type="button" rel="' + new_download.product_id + ',' + new_download.download_id + '" class="revoke_access button"><?php _e('Revoke Access', 'woocommerce'); ?></button>\
 								<div class="handlediv" title="<?php _e('Click to toggle', 'woocommerce'); ?>"></div>\
-								<strong>#' + new_download.download_id + ' &mdash; ' + new_download.title + '</strong>\
+								<strong>#' + new_download.product_id + ' &mdash; ' + new_download.title + ' &mdash; <?php _e( 'File', 'woocommerce' ) ?> ' + (i + 1) + ': ' + new_download.file_name + '</strong>\
 							</h3>\
 							<table cellpadding="0" cellspacing="0" class="wc-metabox-content">\
 								<tbody>\
-									<tr>\
-										<td colspan="2"><?php _e('File path:', 'woocommerce') ?>' + new_download.file_path + '</td>\
-									</tr>\
 									<tr>\
 										<td>\
 											<label><?php _e('Downloads Remaining', 'woocommerce'); ?>:</label>\

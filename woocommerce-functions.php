@@ -803,19 +803,18 @@ function woocommerce_cancel_order() {
  */
 function woocommerce_download_product() {
 
-	if ( isset($_GET['download_file']) && isset($_GET['order']) && isset($_GET['email']) ) :
+	if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
 
 		global $wpdb;
 
-		$product_id = (int) urldecode($_GET['download_file']);
-		$order_key = urldecode( $_GET['order'] );
-		$email = str_replace( ' ', '+', urldecode( $_GET['email'] ) );
-		$download_id = isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
-		$_product = new WC_Product( $product_id );
+		$product_id 	= (int) urldecode($_GET['download_file']);
+		$order_key 		= urldecode( $_GET['order'] );
+		$email 			= str_replace( ' ', '+', urldecode( $_GET['email'] ) );
+		$download_id 	= isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
+		$_product	 	= new WC_Product( $product_id );
 
-		if (!is_email($email)) :
-			wp_die( __('Invalid email address.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-		endif;
+		if ( ! is_email( $email) )
+			wp_die( __( 'Invalid email address.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
 		$query = "
 			SELECT order_id,downloads_remaining,user_id,download_count,access_expires,download_id
@@ -836,79 +835,62 @@ function woocommerce_download_product() {
 
 		$download_result = $wpdb->get_row( $wpdb->prepare( $query, $args ) );
 
-		if (!$download_result) :
+		if ( ! $download_result )
 			wp_die( __('Invalid download.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-			exit;
-		endif;
 
-		$download_id = $download_result->download_id;
-		$order_id = $download_result->order_id;
-		$downloads_remaining = $download_result->downloads_remaining;
-		$download_count = $download_result->download_count;
-		$user_id = $download_result->user_id;
-		$access_expires = $download_result->access_expires;
+		$download_id 			= $download_result->download_id;
+		$order_id 				= $download_result->order_id;
+		$downloads_remaining 	= $download_result->downloads_remaining;
+		$download_count 		= $download_result->download_count;
+		$user_id 				= $download_result->user_id;
+		$access_expires 		= $download_result->access_expires;
 
-		if ($user_id && get_option('woocommerce_downloads_require_login')=='yes'):
-			if (!is_user_logged_in()):
-				wp_die( __('You must be logged in to download files.', 'woocommerce') . ' <a href="'.wp_login_url(get_permalink(woocommerce_get_page_id('myaccount'))).'">' . __('Login &rarr;', 'woocommerce') . '</a>' );
-				exit;
-			else:
-				$current_user = wp_get_current_user();
-				if($user_id != $current_user->ID):
-					wp_die( __('This is not your download link.', 'woocommerce'));
-					exit;
-				endif;
-			endif;
-		endif;
-
-		if ( ! get_post( $product_id ) ) {
-			wp_die( __('Product no longer exists.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-			exit;
+		if ( $user_id && get_option( 'woocommerce_downloads_require_login' ) == 'yes' ) {
+		
+			if ( ! is_user_logged_in() )
+				wp_die( __( 'You must be logged in to download files.', 'woocommerce' ) . ' <a href="' . wp_login_url( get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) . '">' . __( 'Login &rarr;', 'woocommerce' ) . '</a>' );
+			
+			elseif ( $user_id != get_current_user_id() )
+				wp_die( __( 'This is not your download link.', 'woocommerce' ) );
+		
 		}
 
-		if ($order_id) :
+		if ( ! get_post( $product_id ) )
+			wp_die( __( 'Product no longer exists.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
+
+		if ( $order_id ) {
 			$order = new WC_Order( $order_id );
-			if ( ! $order->is_download_permitted() && $order->status != 'publish' ) :
-				wp_die( __('Invalid order.', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-				exit;
-			endif;
-		endif;
+			
+			if ( ! $order->is_download_permitted() && $order->status != 'publish' )
+				wp_die( __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
+		}
 
-		if ($downloads_remaining=='0') :
-
+		if ( $downloads_remaining == '0' )
 			wp_die( __('Sorry, you have reached your download limit for this file', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-			exit;
 
-		endif;
+		if ( $access_expires > 0 && strtotime( $access_expires) < current_time( 'timestamp' ) )
+			wp_die( __( 'Sorry, this download has expired', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
-		if ($access_expires > 0 && strtotime($access_expires) < current_time('timestamp')) :
-
-			wp_die( __('Sorry, this download has expired', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
-			exit;
-
-		endif;
-
-		if ($downloads_remaining>0) :
+		if ( $downloads_remaining > 0 ) {
 
 			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array(
 				'downloads_remaining' => $downloads_remaining - 1,
 			), array(
-				'user_email' => $email,
-				'order_key' => $order_key,
-				'product_id' => $product_id,
-				'download_id' => $download_id 
+				'user_email' 	=> $email,
+				'order_key' 	=> $order_key,
+				'product_id' 	=> $product_id,
+				'download_id' 	=> $download_id 
 			), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
-
-		endif;
+		}
 
 		// Count the download
 		$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions", array(
 			'download_count' => $download_count + 1,
 		), array(
-			'user_email' => $email,
-			'order_key' => $order_key,
-			'product_id' => $product_id,
-			'download_id' => $download_id
+			'user_email' 	=> $email,
+			'order_key' 	=> $order_key,
+			'product_id' 	=> $product_id,
+			'download_id' 	=> $download_id
 		), array( '%d' ), array( '%s', '%s', '%d', '%s' ) );
 
 		// Get the download URL and try to replace the url with a path
@@ -916,83 +898,80 @@ function woocommerce_download_product() {
 
 		if ( ! $file_path ) exit;
 
-		$file_download_method = apply_filters('woocommerce_file_download_method', get_option('woocommerce_file_download_method'), $product_id);
-
-		if ($file_download_method=='redirect') :
-
-			header('Location: '.$file_path);
+		$file_download_method = apply_filters( 'woocommerce_file_download_method', get_option( 'woocommerce_file_download_method' ), $product_id );
+		
+		// Redirect to download location
+		if ( $file_download_method == 'redirect' ) {
+			header( 'Location: ' . $file_path );
 			exit;
-
-		endif;
+		}
 
 		// Get URLS with https
 		$site_url = site_url();
 		$network_url = network_admin_url();
-		if (is_ssl()) :
-			$site_url = str_replace('https:', 'http:', $site_url);
-			$network_url = str_replace('https:', 'http:', $network_url);
-		endif;
+		if ( is_ssl() ) {
+			$site_url = str_replace( 'https:', 'http:', $site_url );
+			$network_url = str_replace( 'https:', 'http:', $network_url );
+		}
 
-		if (!is_multisite()) :
-			$file_path = str_replace(trailingslashit($site_url), ABSPATH, $file_path);
-		else :
+		if ( ! is_multisite() ) {
+			$file_path = str_replace( trailingslashit( $site_url ), ABSPATH, $file_path );
+		} else {
 			$upload_dir = wp_upload_dir();
 
 			// Try to replace network url
-			$file_path = str_replace(trailingslashit($network_url), ABSPATH, $file_path);
+			$file_path = str_replace( trailingslashit( $network_url ), ABSPATH, $file_path );
 
 			// Now try to replace upload URL
-			$file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_path);
-		endif;
+			$file_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $file_path );
+		}
 
 		// See if its local or remote
-		if (strstr($file_path, 'http:') || strstr($file_path, 'https:') || strstr($file_path, 'ftp:')) :
+		if ( strstr( $file_path, 'http:' ) || strstr( $file_path, 'https:' ) || strstr( $file_path, 'ftp:' ) ) {
 			$remote_file = true;
-		else :
+		} else {
 			$remote_file = false;
-			$file_path = realpath($file_path);
-		endif;
+			$file_path = realpath( $file_path );
+		}
 
 		// Download the file
-		$file_extension = strtolower(substr(strrchr($file_path,"."),1));
+		$file_extension = strtolower( substr( strrchr( $file_path, "." ), 1 ) );
 
 		$ctype = "application/force-download";
 
-		foreach (get_allowed_mime_types() as $mime => $type) :
-			$mimes = explode('|', $mime);
-			if (in_array($file_extension, $mimes)) :
+		foreach ( get_allowed_mime_types() as $mime => $type ) {
+			$mimes = explode( '|', $mime );
+			if ( in_array( $file_extension, $mimes ) ) {
 				$ctype = $type;
 				break;
-			endif;
-		endforeach;
+			}
+		}
 
-		if ($file_download_method=='xsendfile') :
+		if ( $file_download_method == 'xsendfile' ) {
+			
+			// Path fix - kudos to Jason Judge
+         	if ( getcwd() )
+         		$file_path = trim( preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/' );
 
-         	if (getcwd()) :
-         		// Path fix - kudos to Jason Judge
-         		$file_path = trim(preg_replace( '`^' . getcwd() . '`' , '', $file_path ), '/');
-         	endif;
+            header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
 
-            header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
-
-            if (function_exists('apache_get_modules') && in_array( 'mod_xsendfile', apache_get_modules()) ) :
+            if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
 
             	header("X-Sendfile: $file_path");
             	exit;
 
-            elseif (stristr(getenv('SERVER_SOFTWARE'), 'lighttpd') ) :
+            } elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
 
-            	header("X-Lighttpd-Sendfile: $file_path");
+            	header( "X-Lighttpd-Sendfile: $file_path" );
             	exit;
 
-            elseif (stristr(getenv('SERVER_SOFTWARE'), 'nginx') || stristr(getenv('SERVER_SOFTWARE'), 'cherokee')) :
+            } elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
 
-            	header("X-Accel-Redirect: $file_path");
+            	header( "X-Accel-Redirect: $file_path" );
             	exit;
 
-            endif;
-
-        endif;
+            }
+        }
 
         if ( ! function_exists('readfile_chunked')) {
 
@@ -1006,65 +985,71 @@ function woocommerce_download_product() {
 			 * @param    boolean    return bytes of file
 			 * @return   void
 			 */
-		    function readfile_chunked($file, $retbytes=TRUE) {
+		    function readfile_chunked( $file, $retbytes = true ) {
 
-				$chunksize = 1 * (1024 * 1024);
+				$chunksize = 1 * ( 1024 * 1024 );
 				$buffer = '';
 				$cnt = 0;
 
-				$handle = fopen($file, 'r');
-				if ($handle === FALSE) return FALSE;
+				$handle = fopen( $file, 'r' );
+				if ( $handle === FALSE ) 
+					return FALSE;
 
-				while (!feof($handle)) :
-				   $buffer = fread($handle, $chunksize);
-				   echo $buffer;
-				   ob_flush();
-				   flush();
+				while ( ! feof( $handle ) ) {
+					$buffer = fread( $handle, $chunksize );
+					echo $buffer;
+					ob_flush();
+					flush();
+					
+					if ( $retbytes ) 
+						$cnt += strlen( $buffer );
+				}
 
-				   if ($retbytes) $cnt += strlen($buffer);
-				endwhile;
+				$status = fclose( $handle );
 
-				$status = fclose($handle);
-
-				if ($retbytes AND $status) return $cnt;
+				if ( $retbytes && $status ) 
+					return $cnt;
 
 				return $status;
 		    }
 		}
 
         @session_write_close();
-        if (function_exists('apache_setenv')) @apache_setenv('no-gzip', 1);
-        @ini_set('zlib.output_compression', 'Off');
+        if ( function_exists( 'apache_setenv' ) ) 
+        	@apache_setenv( 'no-gzip', 1 );
+        @ini_set( 'zlib.output_compression', 'Off' );
 		@set_time_limit(0);
 		@set_magic_quotes_runtime(0);
 		@ob_end_clean();
-		if (ob_get_level()) @ob_end_clean(); // Zip corruption fix
+		if ( ob_get_level() ) 
+			@ob_end_clean(); // Zip corruption fix
 
-		header("Pragma: no-cache");
-		header("Expires: 0");
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-		header("Robots: none");
-		header("Content-Type: ".$ctype."");
-		header("Content-Description: File Transfer");
-		header("Content-Disposition: attachment; filename=\"".basename($file_path)."\";");
-		header("Content-Transfer-Encoding: binary");
+		header( "Pragma: no-cache" );
+		header( "Expires: 0" );
+		header( "Cache-Control: must-revalidate, post-check=0, pre-check=0" );
+		header( "Robots: none" );
+		header( "Content-Type: " . $ctype );
+		header( "Content-Description: File Transfer" );
+		header( "Content-Disposition: attachment; filename=\"" . basename( $file_path ) . "\";" );
+		header( "Content-Transfer-Encoding: binary" );
 
-        if ($size = @filesize($file_path)) header("Content-Length: ".$size);
+        if ( $size = @filesize( $file_path ) ) 
+        	header( "Content-Length: " . $size );
 
         // Serve it
-        if ($remote_file) :
+        if ( $remote_file ) {
 
-        	@readfile_chunked("$file_path") or header('Location: '.$file_path);
+        	@readfile_chunked( "$file_path" ) or header( 'Location: ' . $file_path );
 
-        else :
+        } else {
 
-        	@readfile_chunked("$file_path") or wp_die( __('File not found', 'woocommerce') . ' <a href="'.home_url().'">' . __('Go to homepage &rarr;', 'woocommerce') . '</a>' );
+        	@readfile_chunked( "$file_path" ) or wp_die( __( 'File not found', 'woocommerce' ) . ' <a href="' . home_url() . '">' . __( 'Go to homepage &rarr;', 'woocommerce' ) . '</a>' );
 
-        endif;
+        }
 
         exit;
 
-	endif;
+	}
 }
 
 
