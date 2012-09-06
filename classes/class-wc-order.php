@@ -962,6 +962,15 @@ class WC_Order {
 		return $return;
 	}
 
+	/**
+	 * Checks if product download is permitted
+	 * 
+	 * @access public
+	 * @return bool
+	 */
+	function is_download_permitted() {
+		return apply_filters( 'woocommerce_order_is_download_permitted', $this->status == 'completed' || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->status == 'processing' ), $this );
+	}
 
 	/**
 	 * Returns true if the order contains a downloadable product.
@@ -1024,6 +1033,8 @@ class WC_Order {
 	 */
 	function get_downloadable_file_url( $item_id, $variation_id ) {
 
+		_deprecated_function( __METHOD__, '1.7', 'WC_Order::get_downloadable_file_urls' );  // TODO: version
+
 	 	$download_id = $variation_id > 0 ? $variation_id : $item_id;
 
 	 	$user_email = $this->billing_email;
@@ -1031,6 +1042,41 @@ class WC_Order {
 	 	return add_query_arg( 'download_file', $download_id, add_query_arg( 'order', $this->order_key, add_query_arg( 'email', $user_email, trailingslashit( home_url() ) ) ) );
 	 }
 
+
+	/**
+	 * Gets any downloadable product file urls.
+	 *
+	 * @access public
+	 * @param int $product_id product identifier
+	 * @param int $variation_id variation identifier, or null
+	 * @param array $item the item
+	 * @return array available downloadable file urls
+	 */
+	function get_downloadable_file_urls( $product_id, $variation_id, $item ) {
+		global $wpdb;
+
+	 	$download_file = $variation_id > 0 ? $variation_id : $product_id;
+		$_product = new WC_Product( $download_file );
+
+	 	$user_email = $this->billing_email;
+
+		$results = $wpdb->get_results( $wpdb->prepare("
+			SELECT download_id
+			FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions
+			WHERE user_email = %s
+			AND order_key = %s
+			AND product_id = %s
+		", $user_email, $this->order_key, $download_file ) );
+
+		$file_urls = array();
+		foreach ( $results as $result ) {
+			if ( $_product->has_file( $result->download_id ) ) {
+				$file_urls[] = add_query_arg( array( 'download_file' => $download_file, 'order' => $this->order_key, 'email' => $user_email, 'key' => $result->download_id ), trailingslashit( home_url() ) );
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_downloadable_file_urls', $file_urls, $product_id, $variation_id, $item );
+	}
 
 	/**
 	 * Adds a note (comment) to the order

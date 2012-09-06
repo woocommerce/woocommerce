@@ -33,13 +33,13 @@ if (!defined('ABSPATH')) exit; ?>
 		<?php
 			switch ( $order->status ) {
 				case "completed" :
-					echo $order->email_order_items_table( true, false, true );
+					echo $order->email_order_items_table( $order->is_download_permitted(), false, true );
 				break;
 				case "processing" :
-					echo $order->email_order_items_table( get_option('woocommerce_downloads_grant_access_after_payment')=='yes' ? true : false, true, true );
+					echo $order->email_order_items_table( $order->is_download_permitted(), true, true );
 				break;
 				default :
-					echo $order->email_order_items_table( false, true, false );
+					echo $order->email_order_items_table( $order->is_download_permitted(), true, false );
 				break;
 			}
 		?>

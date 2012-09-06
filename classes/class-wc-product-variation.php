@@ -378,18 +378,26 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Check if downloadable product has a file attached.
-	 *
-	 * @return bool Whether downloadable product has a file attached.
+	 * Get file download path identified by $download_id
+	 * 
+	 * @access public
+	 * @param string $download_id file identifier
+	 * @return array
 	 */
-	function has_file() {
-		if ( ! $this->is_downloadable() )
-			return false;
+	function get_file_download_path( $download_id ) {
+		
+		$file_path = '';
+		$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $this->variation_id, '_file_paths', true ), $this->variation_id, null, null );
 
-		if ( apply_filters( 'woocommerce_file_download_path', get_post_meta( $this->variation_id, '_file_path', true ), $this->variation_id ) )
-			return true;
+		if ( ! $download_id && count( $file_paths ) == 1 ) {
+			// backwards compatibility for old-style download URLs and template files
+			$file_path = array_shift( $file_paths );
+		} elseif ( isset( $file_paths[ $download_id ] ) ) {
+			$file_path = $file_paths[ $download_id ];
+		}
 
-		return false;
+		// allow overriding based on the particular file being requested
+		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
 }
 

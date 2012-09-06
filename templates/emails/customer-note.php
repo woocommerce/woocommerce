@@ -30,7 +30,7 @@ if (!defined('ABSPATH')) exit; ?>
 		</tr>
 	</thead>
 	<tbody>
-		<?php if ($order->status=='completed') echo $order->email_order_items_table( true, true ); else echo $order->email_order_items_table( false, true ); ?>
+		<?php echo $order->email_order_items_table( $order->is_download_permitted(), true ); ?>
 	</tbody>
 	<tfoot>
 		<?php
