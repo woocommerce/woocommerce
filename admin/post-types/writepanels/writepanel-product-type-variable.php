@@ -82,7 +82,6 @@ function variable_product_type_options() {
 					<option value="variable_height"><?php _e('Height', 'woocommerce'); ?></option>
 					<option value="variable_file_path"><?php _e('File Path', 'woocommerce'); ?></option>
 					<option value="variable_download_limit"><?php _e('Download limit', 'woocommerce'); ?></option>
-					<option value="variable_download_expiry"><?php _e('Download Expiry', 'woocommerce'); ?></option>
 				</select>
 				<a class="button bulk_edit plus"><?php _e('Edit', 'woocommerce'); ?></a>
 				<a class="button toggle toggle_downloadable" href="#"><?php _e('Downloadable', 'woocommerce'); ?></a> <a class="button toggle toggle_virtual" href="#"><?php _e('Virtual', 'woocommerce'); ?></a> <a class="button toggle toggle_enabled" href="#"><?php _e('Enabled', 'woocommerce'); ?></a> <a href="#" class="button delete_variations"><?php _e('Delete all', 'woocommerce'); ?></a>
@@ -228,9 +227,6 @@ function variable_product_type_options() {
 												<td>
 													<div>
 													<label><?php _e('Download Limit:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Leave blank for unlimited re-downloads.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_limit'][0])) echo $variation_data['_download_limit'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
-													</div>
-													<div>
-													<label><?php _e('Download Expiry:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter the number of days before a download link expires, or leave blank.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_expiry[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_download_expiry'][0])) echo $variation_data['_download_expiry'][0]; ?>" placeholder="<?php _e('Unlimited', 'woocommerce'); ?>" />
 													</div>
 												</td>
 											</tr>
@@ -437,7 +433,6 @@ function variable_product_type_options() {
 											</td>\
 											<td>\
 												<div><label><?php echo esc_js( __('Download Limit:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Leave blank for unlimited re-downloads.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_limit[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
-												<div><label><?php echo esc_js( __('Download Expiry:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter the number of days before a download link expires, or leave blank.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_download_expiry[' + loop + ']" placeholder="<?php echo esc_js( __('Unlimited', 'woocommerce') ); ?>" /></div>\
 											</td>\
 										</tr>\
 										<?php do_action( 'woocommerce_product_after_variable_attributes_js' ); ?>\
@@ -761,7 +756,6 @@ function process_product_meta_variable( $post_id ) {
 		$upload_image_id			= $_POST['upload_image_id'];
 		$variable_file_path 		= $_POST['variable_file_path'];
 		$variable_download_limit 	= $_POST['variable_download_limit'];
-		$variable_download_expiry 	= $_POST['variable_download_expiry'];
 		$variable_shipping_class 	= $_POST['variable_shipping_class'];
 		$variable_tax_class			= $_POST['variable_tax_class'];
 		$variable_menu_order 		= $_POST['variation_menu_order'];
@@ -838,11 +832,9 @@ function process_product_meta_variable( $post_id ) {
 
 			if ($is_downloadable=='yes') :
 				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
-				update_post_meta( $variation_id, '_download_expiry', $variable_download_expiry[$i] );
 				update_post_meta( $variation_id, '_file_path', $variable_file_path[$i] );
 			else :
 				update_post_meta( $variation_id, '_download_limit', '' );
-				update_post_meta( $variation_id, '_download_expiry', '' );
 				update_post_meta( $variation_id, '_file_path', '' );
 			endif;
 
