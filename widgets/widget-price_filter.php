@@ -62,8 +62,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
 			'currency_symbol' 	=> get_woocommerce_currency_symbol(),
 			'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-			'min_price'			=> isset( $_SESSION['min_price'] ) ? $_SESSION['min_price'] : '',
-			'max_price'			=> isset( $_SESSION['max_price'] ) ? $_SESSION['max_price'] : ''
+			'min_price'			=> isset( $woocommerce->session->min_price ) ? $woocommerce->session->min_price : '',
+			'max_price'			=> isset( $woocommerce->session->max_price ) ? $woocommerce->session->max_price : ''
 		) );
 
 		$title = $instance['title'];
@@ -111,8 +111,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 
 		if ( $min == $max ) return;
 
-		if (isset($_SESSION['min_price'])) $post_min = $_SESSION['min_price'];
-		if (isset($_SESSION['max_price'])) $post_max = $_SESSION['max_price'];
+		if ( isset( $woocommerce->session->min_price ) ) $post_min = $woocommerce->session->min_price;
+		if ( isset( $woocommerce->session->max_price ) ) $post_max = $woocommerce->session->max_price;
 
 		echo $before_widget . $before_title . $title . $after_title;
 
@@ -191,14 +191,14 @@ function woocommerce_price_filter_init() {
 
 		wp_register_script( 'wc-price-slider', $woocommerce->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui' ), '1.6', true );
 
-		unset( $_SESSION['min_price'] );
-		unset( $_SESSION['max_price'] );
+		unset( $woocommerce->session->min_price );
+		unset( $woocommerce->session->max_price );
 
 		if ( isset( $_GET['min_price'] ) )
-			$_SESSION['min_price'] = $_GET['min_price'];
+			$woocommerce->session->min_price = esc_attr( $_GET['min_price'] );
 
 		if ( isset( $_GET['max_price'] ) )
-			$_SESSION['max_price'] = $_GET['max_price'];
+			$woocommerce->session->max_price = esc_attr( $_GET['max_price'] );
 
 		add_filter( 'loop_shop_post_in', 'woocommerce_price_filter' );
 	}

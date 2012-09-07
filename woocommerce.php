@@ -1490,13 +1490,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	function redirect( $location, $status ) {
-		global $is_IIS;
-
 		$this->set_messages();
-
-		// IIS fix
-		if ( $is_IIS ) 
-			session_write_close();
 
 		return apply_filters( 'woocommerce_redirect', $location );
 	}

@@ -61,7 +61,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 			return;
 		}
 
-		if (!isset($_SESSION['viewed_products']) || sizeof($_SESSION['viewed_products'])==0) return;
+		if ( empty( $woocommerce->session->viewed_products ) ) return;
 
 		ob_start();
 		extract($args);
@@ -74,7 +74,7 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
 		else if ( $number > 15 )
 			$number = 15;
 
-	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $_SESSION['viewed_products'], 'orderby' => 'rand');
+	    $query_args = array('posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product', 'post__in' => $woocommerce->session->viewed_products, 'orderby' => 'rand');
 
 		$query_args['meta_query'] = array();
 
@@ -169,14 +169,20 @@ class WooCommerce_Widget_Recently_Viewed extends WP_Widget {
  * @return void
  */
 function woocommerce_track_product_view() {
-	global $post, $product;
+	global $post, $product, $woocommerce;
+	
+	$viewed_products = $woocommerce->session->viewed_products;
 
-	if (!isset($_SESSION['viewed_products']) || !is_array($_SESSION['viewed_products'])) $_SESSION['viewed_products'] = array();
+	if ( empty( $woocommerce->session->viewed_products ) ) 
+		$viewed_products = array();
 
-	if (!in_array($post->ID, $_SESSION['viewed_products'])) $_SESSION['viewed_products'][] = $post->ID;
+	if ( ! in_array( $post->ID, $viewed_products ) ) 
+		$viewed_products[] = $post->ID;
 
-	if (sizeof($_SESSION['viewed_products'])>15) array_shift($_SESSION['viewed_products']);
-
+	if ( sizeof( $viewed_products ) > 15 ) 
+		array_shift( $viewed_products );
+		
+	$woocommerce->session->viewed_products = $viewed_products;
 }
 
 add_action( 'woocommerce_before_single_product', 'woocommerce_track_product_view', 10);

@@ -34,7 +34,7 @@ class WC_Session {
     		$this->_data = array();
     	
     	// When leaving or ending page load, store data
-    	add_action( 'shutdown', array( &$this, 'save_data' ) );
+    	add_action( 'shutdown', array( &$this, 'save_data' ), 20 );
     }
 	
 	/**

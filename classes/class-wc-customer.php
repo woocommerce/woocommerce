@@ -10,41 +10,61 @@
  * @author 		WooThemes
  */
 class WC_Customer {
-
+	
+	/** Stores customer data as an array */
+	var $data;
+	
 	/**
-	 * Constructor for the customer class loads the customer from the PHP session.
+	 * Constructor for the customer class loads the customer data.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	function __construct() {
+		global $woocommerce;
+		
+		if ( empty( $woocommerce->session->customer ) ) {
 
-		if ( ! isset( $_SESSION['customer'] ) ) {
-
-			$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
+			$default = apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) );
 
         	if ( strstr( $default, ':' ) ) {
-        		$country = current( explode( ':', $default ) );
-        		$state = end( explode( ':', $default ) );
+        		list( $country, $state ) = explode( ':', $default );
         	} else {
         		$country = $default;
         		$state = '';
         	}
 
-			$data = array(
-				'country' 			=> $country,
-				'state' 			=> '',
-				'postcode' 			=> '',
-				'shipping_country' 	=> $country,
-				'shipping_state' 	=> '',
-				'shipping_postcode' => '',
-				'is_vat_exempt' 	=> false
+			$this->data = array(
+				'country' 				=> $country,
+				'state' 				=> '',
+				'postcode' 				=> '',
+				'shipping_country' 		=> $country,
+				'shipping_state' 		=> '',
+				'shipping_postcode' 	=> '',
+				'is_vat_exempt' 		=> false,
+				'calculated_shipping'	=> false
 			);
-			$_SESSION['customer'] = $data;
-			$_SESSION['calculated_shipping'] = false;
+				
+		} else {
+			$this->data = $woocommerce->session->customer;
 		}
+		
+		// When leaving or ending page load, store data
+    	add_action( 'shutdown', array( &$this, 'save_data' ), 10 );
 	}
-
+	
+	
+	/**
+	 * save_data function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function save_data() {
+		global $woocommerce;
+		
+		$woocommerce->session->customer = $this->data;
+	}
 
 	/**
 	 * has_calculated_shipping function.
@@ -53,7 +73,7 @@ class WC_Customer {
 	 * @return bool
 	 */
 	function has_calculated_shipping() {
-		return ( ! empty( $_SESSION['calculated_shipping'] ) && $_SESSION['calculated_shipping'] ) ? true : false;
+		return ( ! empty( $this->data['calculated_shipping'] ) && $this->data['calculated_shipping'] ) ? true : false;
 	}
 
 
@@ -64,17 +84,17 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_to_base() {
+		global $woocommerce;
 		$default = apply_filters( 'woocommerce_customer_default_location', get_option('woocommerce_default_country') );
-    	if (strstr($default, ':')) :
-    		$country = current(explode(':', $default));
-    		$state = end(explode(':', $default));
-    	else :
+    	if ( strstr( $default, ':' ) ) {
+    		list( $country, $state ) = explode( ':', $default );
+    	} else {
     		$country = $default;
     		$state = '';
-    	endif;
-    	$_SESSION['customer']['country'] = $country;
-    	$_SESSION['customer']['state'] = $state;
-    	$_SESSION['customer']['postcode'] = '';
+    	}
+    	$this->data['country'] = $country;
+    	$this->data['state'] = $state;
+    	$this->data['postcode'] = '';
 	}
 
 
@@ -85,17 +105,17 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_shipping_to_base() {
+		global $woocommerce;
 		$default = get_option('woocommerce_default_country');
-    	if (strstr($default, ':')) :
-    		$country = current(explode(':', $default));
-    		$state = end(explode(':', $default));
-    	else :
+    	if ( strstr( $default, ':' ) ) {
+    		list( $country, $state ) = explode( ':', $default );
+    	} else {
     		$country = $default;
     		$state = '';
-    	endif;
-    	$_SESSION['customer']['shipping_country'] = $country;
-    	$_SESSION['customer']['shipping_state'] = $state;
-    	$_SESSION['customer']['shipping_postcode'] = '';
+    	}
+    	$this->data['shipping_country'] = $country;
+    	$this->data['shipping_state'] = $state;
+    	$this->data['shipping_postcode'] = '';
 	}
 
 
@@ -106,19 +126,19 @@ class WC_Customer {
 	 * @return bool
 	 */
 	function is_customer_outside_base() {
-		if (isset($_SESSION['customer']['country'])) :
+		global $woocommerce;
+		if (isset($this->data['country'])) :
 
 			$default = get_option('woocommerce_default_country');
-        	if (strstr($default, ':')) :
-        		$country = current(explode(':', $default));
-        		$state = end(explode(':', $default));
-        	else :
-        		$country = $default;
-        		$state = '';
-        	endif;
+        	if ( strstr( $default, ':' ) ) {
+	    		list( $country, $state ) = explode( ':', $default );
+	    	} else {
+	    		$country = $default;
+	    		$state = '';
+	    	}
 
-			if ($country!==$_SESSION['customer']['shipping_country']) return true;
-			if ($state && $state!==$_SESSION['customer']['shipping_state']) return true;
+			if ($country!==$this->data['shipping_country']) return true;
+			if ($state && $state!==$this->data['shipping_state']) return true;
 
 		endif;
 		return false;
@@ -132,7 +152,7 @@ class WC_Customer {
 	 * @return bool
 	 */
 	function is_vat_exempt() {
-		return ( isset( $_SESSION['customer']['is_vat_exempt'] ) && $_SESSION['customer']['is_vat_exempt'] ) ? true : false;
+		return ( isset( $this->data['is_vat_exempt'] ) && $this->data['is_vat_exempt'] ) ? true : false;
 	}
 
 
@@ -143,7 +163,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	function get_state() {
-		if (isset($_SESSION['customer']['state'])) return $_SESSION['customer']['state'];
+		if ( isset( $this->data['state'] ) ) return $this->data['state'];
 	}
 
 
@@ -154,7 +174,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	function get_country() {
-		if (isset($_SESSION['customer']['country'])) return $_SESSION['customer']['country'];
+		if ( isset( $this->data['country'] ) ) return $this->data['country'];
 	}
 
 
@@ -167,7 +187,7 @@ class WC_Customer {
 	function get_postcode() {
 		global $woocommerce;
 		$validation = $woocommerce->validation();
-		if (isset($_SESSION['customer']['postcode']) && $_SESSION['customer']['postcode'] !== false) return $validation->format_postcode( $_SESSION['customer']['postcode'], $this->get_country());
+		if (isset($this->data['postcode']) && $this->data['postcode'] !== false) return $validation->format_postcode( $this->data['postcode'], $this->get_country());
 	}
 
 
@@ -178,7 +198,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	function get_shipping_state() {
-		if (isset($_SESSION['customer']['shipping_state'])) return $_SESSION['customer']['shipping_state'];
+		if ( isset( $this->data['shipping_state'] ) ) return $this->data['shipping_state'];
 	}
 
 
@@ -189,7 +209,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	function get_shipping_country() {
-		if (isset($_SESSION['customer']['shipping_country'])) return $_SESSION['customer']['shipping_country'];
+		if ( isset( $this->data['shipping_country'] ) ) return $this->data['shipping_country'];
 	}
 
 
@@ -202,7 +222,7 @@ class WC_Customer {
 	function get_shipping_postcode() {
 		global $woocommerce;
 		$validation = $woocommerce->validation();
-		if (isset($_SESSION['customer']['shipping_postcode'])) return $validation->format_postcode( $_SESSION['customer']['shipping_postcode'], $this->get_shipping_country());
+		if (isset($this->data['shipping_postcode'])) return $validation->format_postcode( $this->data['shipping_postcode'], $this->get_shipping_country());
 	}
 
 
@@ -216,13 +236,9 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_location( $country, $state, $postcode = '' ) {
-		$data = (array) $_SESSION['customer'];
-
-		$data['country'] = $country;
-		$data['state'] = $state;
-		$data['postcode'] = $postcode;
-
-		$_SESSION['customer'] = $data;
+		$this->data['country'] = $country;
+		$this->data['state'] = $state;
+		$this->data['postcode'] = $postcode;
 	}
 
 
@@ -234,7 +250,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_country( $country ) {
-		$_SESSION['customer']['country'] = $country;
+		$this->data['country'] = $country;
 	}
 
 
@@ -246,7 +262,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_state( $state ) {
-		$_SESSION['customer']['state'] = $state;
+		$this->data['state'] = $state;
 	}
 
 
@@ -258,7 +274,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_postcode( $postcode ) {
-		$_SESSION['customer']['postcode'] = $postcode;
+		$this->data['postcode'] = $postcode;
 	}
 
 
@@ -272,13 +288,9 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_shipping_location( $country, $state = '', $postcode = '' ) {
-		$data = (array) $_SESSION['customer'];
-
-		$data['shipping_country'] = $country;
-		$data['shipping_state'] = $state;
-		$data['shipping_postcode'] = $postcode;
-
-		$_SESSION['customer'] = $data;
+		$this->data['shipping_country'] = $country;
+		$this->data['shipping_state'] = $state;
+		$this->data['shipping_postcode'] = $postcode;
 	}
 
 
@@ -290,7 +302,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_shipping_country( $country ) {
-		$_SESSION['customer']['shipping_country'] = $country;
+		$this->data['shipping_country'] = $country;
 	}
 
 
@@ -302,7 +314,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_shipping_state( $state ) {
-		$_SESSION['customer']['shipping_state'] = $state;
+		$this->data['shipping_state'] = $state;
 	}
 
 
@@ -314,7 +326,7 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_shipping_postcode( $postcode ) {
-		$_SESSION['customer']['shipping_postcode'] = $postcode;
+		$this->data['shipping_postcode'] = $postcode;
 	}
 
 
@@ -326,9 +338,21 @@ class WC_Customer {
 	 * @return void
 	 */
 	function set_is_vat_exempt( $is_vat_exempt ) {
-		$_SESSION['customer']['is_vat_exempt'] = $is_vat_exempt;
+		$this->data['is_vat_exempt'] = $is_vat_exempt;
 	}
 
+
+	/**
+	 * calculated_shipping function.
+	 * 
+	 * @access public
+	 * @param mixed $calculated
+	 * @return void
+	 */
+	function calculated_shipping( $calculated = true ) {
+		$this->data['calculated_shipping'] = $calculated;
+	}
+	
 
 	/**
 	 * Gets a user's downloadable products if they are logged in.
@@ -337,12 +361,11 @@ class WC_Customer {
 	 * @return array Array of downloadable products
 	 */
 	function get_downloadable_products() {
-
-		global $wpdb;
+		global $wpdb, $woocommerce;
 
 		$downloads = array();
 
-		if (is_user_logged_in()) :
+		if ( is_user_logged_in() ) :
 
 			$user_info = get_userdata(get_current_user_id());
 

@@ -183,6 +183,8 @@ class WC_Shipping {
 	 * @param array $packages multi-dimentional array of cart items to calc shipping for
 	 */
 	function calculate_shipping( $packages = array() ) {
+		global $woocommerce;
+		
 		if ( ! $this->enabled ) return;
 		if ( empty( $packages ) ) return;
 
@@ -203,10 +205,10 @@ class WC_Shipping {
 		$_available_methods = $this->get_available_shipping_methods();
 
 		// Get chosen method
-		if ( ! empty( $_SESSION['chosen_shipping_method'] ) && isset( $_SESSION['_available_methods_count'] ) && $_SESSION['_available_methods_count'] == sizeof( $_available_methods ) )
-			$chosen_method = $_SESSION['chosen_shipping_method'];
+		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && isset( $woocommerce->session->available_methods_count ) && $woocommerce->session->available_methods_count == sizeof( $_available_methods ) )
+			$chosen_method = $woocommerce->session->chosen_shipping_method;
 
-		$_SESSION['_available_methods_count'] = sizeof( $_available_methods );
+		$woocommerce->session->available_methods_count = sizeof( $_available_methods );
 
 		if ( sizeof( $_available_methods ) > 0 ) {
 
@@ -240,7 +242,7 @@ class WC_Shipping {
 			}
 
 			if ( $chosen_method ) {
-				$_SESSION['chosen_shipping_method'] = $chosen_method;
+				$woocommerce->session->chosen_shipping_method = $chosen_method;
 				$this->shipping_total 	= $_available_methods[$chosen_method]->cost;
 				$this->shipping_taxes 	= $_available_methods[$chosen_method]->taxes;
 				$this->shipping_label 	= $_available_methods[$chosen_method]->label;
@@ -349,7 +351,8 @@ class WC_Shipping {
 	 * @return void
 	 */
 	function reset_shipping() {
-		unset( $_SESSION['chosen_shipping_method'] );
+		global $woocommerce;
+		unset( $woocommerce->session->chosen_shipping_method );
 		$this->shipping_total = 0;
 		$this->shipping_taxes = array();
 		$this->shipping_label = null;
