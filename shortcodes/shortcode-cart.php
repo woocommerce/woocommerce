@@ -56,8 +56,8 @@ function woocommerce_cart( $atts ) {
 
 		$validation = $woocommerce->validation();
 
-		$_SESSION['calculated_shipping'] = true;
-		unset($_SESSION['_chosen_shipping_method']);
+		$woocommerce->session->calculated_shipping = true;
+		unset( $woocommerce->session->chosen_shipping_method );
 		$country 	= $_POST['calc_shipping_country'];
 		$state 		= $_POST['calc_shipping_state'];
 		$postcode 	= $_POST['calc_shipping_postcode'];

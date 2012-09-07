@@ -105,7 +105,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 			// Flush rules and clear any unwanted data
 			flush_rewrite_rules( false );
-			unset($_SESSION['orderby']);
 			$woocommerce->clear_product_transients();
 
 			// Redirect back to the settings page

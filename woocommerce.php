@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 1.6.5.1
+ * Version: 1.7.0 beta
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 3.3
@@ -37,7 +37,7 @@ class Woocommerce {
 	/**
 	 * @var string
 	 */
-	var $version = '1.6.5.1';
+	var $version = '1.7.0';
 
 	/**
 	 * @var string
@@ -240,6 +240,7 @@ class Woocommerce {
 		include( 'classes/class-wc-cart.php' );					// The main cart class
 		include( 'classes/class-wc-coupon.php' );				// Coupon class
 		include( 'classes/class-wc-customer.php' ); 			// Customer class
+		include( 'classes/class-wc-session.php' ); 				// Session class
 	}
 
 
@@ -297,7 +298,8 @@ class Woocommerce {
 
 			// Class instances
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
-			$this->customer 		= new WC_Customer();			// Customer class, sorts out session data such as location
+			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
+			$this->session 			= new WC_Session();				// Session class, handles session data for customers
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 
 			// Load messages
@@ -1147,7 +1149,7 @@ class Woocommerce {
 		}
 
 		// Global frontend scripts
-		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-plugins' ), $this->version, true );
+		wp_enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'wc-jquery-plugins' ), $this->version, true );
 
 		// Variables for JS scripts
 		$woocommerce_params = array(
@@ -1366,16 +1368,13 @@ class Woocommerce {
 	 * @return void
 	 */
 	function load_messages() {
-		if ( isset( $_SESSION['errors'] ) ) $this->errors = $_SESSION['errors'];
-		if ( isset( $_SESSION['messages'] ) ) $this->messages = $_SESSION['messages'];
-
-		unset( $_SESSION['messages'] );
-		unset( $_SESSION['errors'] );
+		$this->errors = $this->session->errors;
+		$this->messages = $this->session->messages;
+		unset( $this->session->errors, $this->session->messages );
 
 		// Load errors from querystring
-		if ( isset( $_GET['wc_error'] ) ) {
+		if ( isset( $_GET['wc_error'] ) )
 			$this->add_error( esc_attr( $_GET['wc_error'] ) );
-		}
 	}
 
 
@@ -1411,7 +1410,7 @@ class Woocommerce {
 	 */
 	function clear_messages() {
 		$this->errors = $this->messages = array();
-		unset( $_SESSION['messages'], $_SESSION['errors'] );
+		unset( $this->session->errors, $this->session->messages );
 	}
 
 
@@ -1477,8 +1476,8 @@ class Woocommerce {
 	 * @return void
 	 */
 	function set_messages() {
-		$_SESSION['errors'] = $this->errors;
-		$_SESSION['messages'] = $this->messages;
+		$this->session->errors = $this->errors;
+		$this->session->messages = $this->messages;
 	}
 
 
@@ -1496,7 +1495,8 @@ class Woocommerce {
 		$this->set_messages();
 
 		// IIS fix
-		if ( $is_IIS ) session_write_close();
+		if ( $is_IIS ) 
+			session_write_close();
 
 		return apply_filters( 'woocommerce_redirect', $location );
 	}

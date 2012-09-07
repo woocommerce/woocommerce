@@ -377,8 +377,11 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * @return void
 	 */
 	function woocommerce_catalog_ordering() {
-		if ( ! isset( $_SESSION['orderby'] ) )
-			$_SESSION['orderby'] = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		global $woocommerce;
+		
+		if ( ! isset( $woocommerce->session->orderby ) )
+			$woocommerce->session->orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+			
 		woocommerce_get_template( 'loop/sorting.php' );
 	}
 }

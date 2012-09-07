@@ -150,19 +150,24 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 1.7 = 
+= 1.7.0 = 
 * Feature - Added sales by category report
 * Feature - Multiple downloadable files per product/variation (kudos Justin Stern)
 * Feature - Download expirey for variations (kudos niravmehta)
 * Feature - Added wildcard support to local delivery postcodes
 * Feature - Option to enable Cash on Delivery for select shipping methods only
+* Feature - Stopped using PHP sessions for cart data - using cookies and transients instead to allow WC to function better with static caching. Also to reduce support regarding hosts and session configurations.
+
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files
+
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
 * Tweak - Prefix jquery plugins JS
+
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
+
 * Localization - French update by Arnaud Cheminand
 * Localization - Romanian update by silviu-bucsa
 * Localization - Dutch updates by Ramoonus

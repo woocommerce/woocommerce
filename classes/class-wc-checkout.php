@@ -122,30 +122,32 @@ class WC_Checkout {
 	function process_checkout() {
 		global $wpdb, $woocommerce;
 
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) define( 'WOOCOMMERCE_CHECKOUT', true );
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) 
+			define( 'WOOCOMMERCE_CHECKOUT', true );
 
-		$woocommerce->verify_nonce('process_checkout');
+		$woocommerce->verify_nonce( 'process_checkout' );
 
-		do_action('woocommerce_before_checkout_process');
+		do_action( 'woocommerce_before_checkout_process' );
 
 		if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
-			$woocommerce->add_error( sprintf(__('Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce'), home_url()) );
+			$woocommerce->add_error( sprintf( __( 'Sorry, your session has expired. <a href="%s">Return to homepage &rarr;</a>', 'woocommerce' ), home_url() ) );
 
-		do_action('woocommerce_checkout_process');
+		do_action( 'woocommerce_checkout_process' );
 
 		// Checkout fields (not defined in checkout_fields)
-		$this->posted['shiptobilling'] 		= isset($_POST['shiptobilling']) ? 1 : 0;
-		$this->posted['terms'] 				= isset($_POST['terms']) ? 1 : 0;
-		$this->posted['createaccount'] 		= isset($_POST['createaccount']) ? 1 : 0;
-		$this->posted['payment_method'] 	= isset($_POST['payment_method']) ? woocommerce_clean($_POST['payment_method']) : '';
-		$this->posted['shipping_method']	= isset($_POST['shipping_method']) ? woocommerce_clean($_POST['shipping_method']) : '';
+		$this->posted['shiptobilling'] 		= isset( $_POST['shiptobilling'] ) ? 1 : 0;
+		$this->posted['terms'] 				= isset( $_POST['terms'] ) ? 1 : 0;
+		$this->posted['createaccount'] 		= isset( $_POST['createaccount'] ) ? 1 : 0;
+		$this->posted['payment_method'] 	= isset( $_POST['payment_method'] ) ? woocommerce_clean( $_POST['payment_method'] ) : '';
+		$this->posted['shipping_method']	= isset( $_POST['shipping_method'] ) ? woocommerce_clean( $_POST['shipping_method'] ) : '';
 
 		// Ship to billing only option
-		if ( $woocommerce->cart->ship_to_billing_address_only() ) $this->posted['shiptobilling'] = 1;
+		if ( $woocommerce->cart->ship_to_billing_address_only() ) 
+			$this->posted['shiptobilling'] = 1;
 
 		// Update customer shipping and payment method to posted method
-		$_SESSION['_chosen_shipping_method'] 	= $this->posted['shipping_method'];
-		$_SESSION['_chosen_payment_method'] 	= $this->posted['payment_method'];
+		$woocommerce->session->chosen_shipping_method 	= $this->posted['shipping_method'];
+		$woocommerce->session->chosen_shipping_method	= $this->posted['payment_method'];
 
 		// Note if we skip shipping
 		$skipped_shipping = false;
@@ -315,7 +317,7 @@ class WC_Checkout {
 
 		// Terms
 		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && woocommerce_get_page_id( 'terms' ) > 0 )
-			$woocommerce->add_error( __('You must accept our Terms &amp; Conditions.', 'woocommerce') );
+			$woocommerce->add_error( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
 
 		if ( $woocommerce->cart->needs_shipping() ) {
 
@@ -323,32 +325,32 @@ class WC_Checkout {
 			$available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			if ( ! isset( $available_methods[ $this->posted['shipping_method'] ] ) )
-				$woocommerce->add_error( __('Invalid shipping method.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Invalid shipping method.', 'woocommerce' ) );
 
 		}
 
-		if ($woocommerce->cart->needs_payment()) {
+		if ( $woocommerce->cart->needs_payment() ) {
 
 			// Payment Method
 			$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
 			if ( ! isset( $available_gateways[ $this->posted['payment_method'] ] ) )
-				$woocommerce->add_error( __('Invalid payment method.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Invalid payment method.', 'woocommerce' ) );
 			else
-				$available_gateways[$this->posted['payment_method']]->validate_fields(); // Payment Method Field Validation
+				$available_gateways[ $this->posted['payment_method'] ]->validate_fields(); // Payment Method Field Validation
 		}
 
 		// Action after validation
 		do_action( 'woocommerce_after_checkout_validation', $this->posted );
 
-		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->error_count() == 0 ) :
+		if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && $woocommerce->error_count() == 0 ) {
 
 			$user_id = get_current_user_id();
 
-			while (1) :
+			try {
 
 				// Create customer account and log them in
-				if ($this->creating_account && !$user_id) :
+				if ( $this->creating_account && ! $user_id ) {
 
 					$reg_errors = new WP_Error();
 
@@ -357,18 +359,16 @@ class WC_Checkout {
 					$errors = apply_filters( 'woocommerce_registration_errors', $reg_errors, $this->posted['account_username'], $this->posted['billing_email'] );
 
 	                // if there are no errors, let's create the user account
-					if ( !$reg_errors->get_error_code() ) :
+					if ( ! $reg_errors->get_error_code() ) {
 
 		                $user_pass 	= esc_attr( $this->posted['account_password'] );
 		                $user_id 	= wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
 
-		                if ( !$user_id ) :
-		                	$woocommerce->add_error( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce') );
-		                    break;
-		                endif;
+		                if ( ! $user_id )
+		                	throw new MyException( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce') );
 
 	                    // Change role
-	                    wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
+	                    wp_update_user( array('ID' => $user_id, 'role' => 'customer') ) ;
 
 	                    // Action
 	                    do_action( 'woocommerce_created_customer', $user_id );
@@ -381,12 +381,11 @@ class WC_Checkout {
 	                    $secure_cookie = is_ssl() ? true : false;
 	                    wp_set_auth_cookie($user_id, true, $secure_cookie);
 
-					else :
-						$woocommerce->add_error( $reg_errors->get_error_message() );
-	                	break;
-					endif;
+					} else {
+						throw new MyException( $reg_errors->get_error_message() );
+					}
 
-				endif;
+				}
 
 				// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
 				$_tax = new WC_Tax();
@@ -398,7 +397,7 @@ class WC_Checkout {
 					'ping_status'	=> 'closed',
 					'post_excerpt' 	=> $this->posted['order_comments'],
 					'post_author' 	=> 1,
-					'post_password'	=> uniqid('order_')	// Protects the post just in case
+					'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
 				);
 
 				// Cart items
@@ -442,43 +441,40 @@ class WC_Checkout {
 				// Check order items for errors
 				do_action('woocommerce_check_new_order_items', $order_items);
 
-				if ($woocommerce->error_count()>0) break;
+				if ( $woocommerce->error_count() > 0 ) 
+					throw new MyException();
 
 				// Insert or update the post data
 				$create_new_order = true;
 
-				if (isset($_SESSION['order_awaiting_payment']) && $_SESSION['order_awaiting_payment'] > 0) :
+				if ( $woocommerce->session->order_awaiting_payment > 0 ) {
 
-					$order_id = (int) $_SESSION['order_awaiting_payment'];
+					$order_id = (int) $woocommerce->session->order_awaiting_payment;
 
 					/* Check order is unpaid by getting its status */
-					$terms = wp_get_object_terms( $order_id, 'shop_order_status', array('fields' => 'slugs') );
-					$order_status = (isset($terms[0])) ? $terms[0] : 'pending';
+					$terms = wp_get_object_terms( $order_id, 'shop_order_status', array( 'fields' => 'slugs' ) );
+					$order_status = isset( $terms[0] ) ? $terms[0] : 'pending';
 
-					if ( $order_status == 'pending' ) :
+					if ( $order_status == 'pending' ) {
 
 						// Resume the unpaid order
 						$order_data['ID'] = $order_id;
 						wp_update_post( $order_data );
-						do_action('woocommerce_resume_order', $order_id);
+						do_action( 'woocommerce_resume_order', $order_id );
 
 						$create_new_order = false;
 
-					endif;
+					}
+				}
 
-				endif;
-
-				if ($create_new_order) :
+				if ( $create_new_order ) {
 					$order_id = wp_insert_post( $order_data );
 
-					if (is_wp_error($order_id)) :
-						$woocommerce->add_error( 'Error: Unable to create order. Please try again.' );
-		                break;
-					else :
-						// Inserted successfully
-						do_action('woocommerce_new_order', $order_id);
-					endif;
-				endif;
+					if ( is_wp_error( $order_id ) )
+						throw new MyException( 'Error: Unable to create order. Please try again.' );
+					else
+						do_action( 'woocommerce_new_order', $order_id ); // Inserted successfully
+				}
 
 				// Get better formatted shipping method (title)
 				$shipping_method = $this->posted['shipping_method'];
@@ -493,64 +489,65 @@ class WC_Checkout {
 				// UPDATE ORDER META
 
 				// Save billing and shipping first, also save to user meta if logged in
-				if ($this->checkout_fields['billing']) {
-					foreach ($this->checkout_fields['billing'] as $key => $field) {
+				if ( $this->checkout_fields['billing'] ) {
+					foreach ( $this->checkout_fields['billing'] as $key => $field ) {
 
 						// Post
-						update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
+						update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
 
 						// User
-						if ($user_id>0 && !empty($this->posted[$key])) {
-							update_user_meta( $user_id, $key, $this->posted[$key] );
+						if ( $user_id > 0 && ! empty( $this->posted[ $key ] ) ) {
+							update_user_meta( $user_id, $key, $this->posted[ $key ] );
 
 							// Special fields
-							switch ($key) {
+							switch ( $key ) {
 								case "billing_email" :
-									if (!email_exists($this->posted[$key])) wp_update_user( array ( 'ID' => $user_id, 'user_email' => $this->posted[$key] ) ) ;
+									if ( ! email_exists( $this->posted[ $key ] ) ) 
+										wp_update_user( array ( 'ID' => $user_id, 'user_email' => $this->posted[ $key ] ) ) ;
 								break;
 								case "billing_first_name" :
-									wp_update_user( array ( 'ID' => $user_id, 'first_name' => $this->posted[$key] ) ) ;
+									wp_update_user( array ( 'ID' => $user_id, 'first_name' => $this->posted[ $key ] ) ) ;
 								break;
 								case "billing_last_name" :
-									wp_update_user( array ( 'ID' => $user_id, 'last_name' => $this->posted[$key] ) ) ;
+									wp_update_user( array ( 'ID' => $user_id, 'last_name' => $this->posted[ $key ] ) ) ;
 								break;
 							}
-
 						}
 					}
 				}
 
 				if ( $this->checkout_fields['shipping'] && ( $woocommerce->cart->needs_shipping() || get_option('woocommerce_require_shipping_address') == 'yes' ) ) {
-					foreach ($this->checkout_fields['shipping'] as $key => $field) {
+					foreach ( $this->checkout_fields['shipping'] as $key => $field ) {
 						if ( $this->posted['shiptobilling'] ) {
 
 							$field_key = str_replace('shipping_', 'billing_', $key);
 
 							// Post
-							update_post_meta( $order_id, '_' . $key, $this->posted[$field_key] );
+							update_post_meta( $order_id, '_' . $key, $this->posted[ $field_key ] );
 						} else {
 							// Post
-							update_post_meta( $order_id, '_' . $key, $this->posted[$key] );
+							update_post_meta( $order_id, '_' . $key, $this->posted[ $key ] );
 
 							// User
 							if ( $user_id > 0 )
-								update_user_meta( $user_id, $key, $this->posted[$key] );
+								update_user_meta( $user_id, $key, $this->posted[ $key ] );
 						}
 					}
 				}
 
 				// Save any other user meta
-				if ($user_id) do_action('woocommerce_checkout_update_user_meta', $user_id, $this->posted);
+				if ( $user_id ) 
+					do_action( 'woocommerce_checkout_update_user_meta', $user_id, $this->posted );
 
 				// Prepare order taxes for storage
 				$order_taxes = array();
 
-				foreach (array_keys($woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes) as $key) {
+				foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $key ) {
 
-					$is_compound = ($woocommerce->cart->tax->is_compound( $key )) ? 1 : 0;
+					$is_compound = $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0;
 
-					$cart_tax = (isset($woocommerce->cart->taxes[$key])) ? $woocommerce->cart->taxes[$key] : 0;
-					$shipping_tax = (isset($woocommerce->cart->shipping_taxes[$key])) ? $woocommerce->cart->shipping_taxes[$key] : 0;
+					$cart_tax = isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0;
+					$shipping_tax = isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0;
 
 					$order_taxes[] = array(
 						'label' 		=> $woocommerce->cart->tax->get_rate_label( $key ),
@@ -561,8 +558,8 @@ class WC_Checkout {
 				}
 
 				// Save other order meta fields
-				update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method']);
-				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method']);
+				update_post_meta( $order_id, '_shipping_method', 		$this->posted['shipping_method'] );
+				update_post_meta( $order_id, '_payment_method', 		$this->posted['payment_method'] );
 				update_post_meta( $order_id, '_shipping_method_title', 	$shipping_method );
 				update_post_meta( $order_id, '_payment_method_title', 	$payment_method );
 				update_post_meta( $order_id, '_order_shipping', 		woocommerce_format_total( $woocommerce->cart->shipping_total ) );
@@ -576,7 +573,7 @@ class WC_Checkout {
 				update_post_meta( $order_id, '_order_items', 			$order_items );
 				update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
 				update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
-				update_post_meta( $order_id, '_prices_include_tax', 	get_option('woocommerce_prices_include_tax') );
+				update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
 
 				// Store technical customer details in meta
 				$customer_ip = isset( $_SERVER['HTTP_X_FORWARD_FOR'] ) ? $_SERVER['HTTP_X_FORWARD_FOR'] : $_SERVER['REMOTE_ADDR'];
@@ -586,7 +583,7 @@ class WC_Checkout {
 				update_post_meta( $order_id, __( 'Customer UA', 'woocommerce' ), $customer_user_agent );
 
 				// Let plugins add meta
-				do_action('woocommerce_checkout_update_order_meta', $order_id, $this->posted );
+				do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
 
 				// Order status
 				wp_set_object_terms( $order_id, 'pending', 'shop_order_status' );
@@ -603,36 +600,36 @@ class WC_Checkout {
 				}
 
 				// Order is saved
-				do_action('woocommerce_checkout_order_processed', $order_id, $this->posted);
+				do_action( 'woocommerce_checkout_order_processed', $order_id, $this->posted );
 
 				// Prevent timeout
 				@set_time_limit(0);
 
 				// Process payment
-				if ($woocommerce->cart->needs_payment()) :
+				if ( $woocommerce->cart->needs_payment() ) {
 
 					// Store Order ID in session so it can be re-used after payment failure
-					$_SESSION['order_awaiting_payment'] = $order_id;
+					$woocommerce->session->order_awaiting_payment = $order_id;
 
 					// Process Payment
-					$result = $available_gateways[$this->posted['payment_method']]->process_payment( $order_id );
+					$result = $available_gateways[ $this->posted['payment_method'] ]->process_payment( $order_id );
 
 					// Redirect to success/confirmation/payment page
-					if ($result['result']=='success') :
+					if ( $result['result'] == 'success' ) {
 
 						$result = apply_filters('woocommerce_payment_successful_result', $result );
 
-						if (is_ajax()) :
+						if ( is_ajax() ) {
 							echo json_encode( $result );
 							exit;
-						else :
+						} else {
 							wp_redirect( $result['redirect'] );
 							exit;
-						endif;
+						}
 
-					endif;
+					}
 
-				else :
+				} else {
 
 					if ( empty( $order ) )
 						$order = new WC_Order( $order_id );
@@ -644,11 +641,11 @@ class WC_Checkout {
 					$woocommerce->cart->empty_cart();
 
 					// Get redirect
-					$return_url = get_permalink(woocommerce_get_page_id('thanks'));
-					$return_url = add_query_arg('key', $order->order_key, add_query_arg('order', $order->id, $return_url));
+					$return_url = get_permalink( woocommerce_get_page_id( 'thanks' ) );
+					$return_url = add_query_arg( 'key', $order->order_key, add_query_arg( 'order', $order->id, $return_url ) );
 
 					// Redirect to success/confirmation/payment page
-					if (is_ajax()) :
+					if ( is_ajax() ) {
 						echo json_encode(
 							array(
 								'result' 	=> 'success',
@@ -656,24 +653,26 @@ class WC_Checkout {
 							)
 						);
 						exit;
-					else :
+					} else {
 						wp_safe_redirect(
 							apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order)
 						);
 						exit;
-					endif;
+					}
 
-				endif;
+				}
 
-				// Break out of loop
-				break;
+			} catch ( Exception $e ) {
+				
+				if ( ! empty( $e ) )
+					$woocommerce->add_error( $e );
+				
+			}
 
-			endwhile;
-
-		endif;
+		} // endif
 
 		// If we reached this point then there were errors
-		if (is_ajax()) :
+		if ( is_ajax() ) {
 
 			ob_start();
 			$woocommerce->show_messages();
@@ -683,13 +682,13 @@ class WC_Checkout {
 				array(
 					'result'	=> 'failure',
 					'messages' 	=> $messages,
-					'refresh' 	=> (isset($_SESSION['refresh_totals'])) ? 'true' : 'false'
+					'refresh' 	=> isset( $woocommerce->session->refresh_totals ) ? 'true' : 'false'
 				)
 			);
 
-			unset($_SESSION['refresh_totals']);
+			unset( $woocommerce->session->refresh_totals );
 			exit;
-		endif;
+		}
 	}
 
 

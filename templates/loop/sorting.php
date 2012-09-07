@@ -4,9 +4,9 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     1.7
  */
-
+global $woocommerce;
 ?>
 <form class="woocommerce_ordering" method="POST">
 	<select name="sort" class="orderby">
@@ -19,7 +19,7 @@
 			));
 
 			foreach ( $catalog_orderby as $id => $name )
-				echo '<option value="' . $id . '" ' . selected( $_SESSION['orderby'], $id, false ) . '>' . $name . '</option>';
+				echo '<option value="' . $id . '" ' . selected( $woocommerce->session->orderby, $id, false ) . '>' . $name . '</option>';
 		?>
 	</select>
 </form>

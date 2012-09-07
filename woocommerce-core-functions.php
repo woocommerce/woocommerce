@@ -217,13 +217,9 @@ function woocommerce_load_persistent_cart( $user_login, $user ) {
 
 	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true );
 
-	if ($saved_cart) {
-		if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart']) || sizeof($_SESSION['cart'])==0) {
-
-			$_SESSION['cart'] = $saved_cart['cart'];
-
-		}
-	}
+	if ( $saved_cart )
+		if ( empty( $woocommerce->session->cart ) || ! is_array( $woocommerce->session->cart ) || sizeof( $woocommerce->session->cart ) == 0 )
+			$woocommerce->session->cart = $saved_cart['cart'];
 }
 
 /**

@@ -24,7 +24,7 @@ class WC_Session {
 	 * @access public
 	 * @return void
 	 */
-	function __construct() {
+	public function __construct() {
 		
 		$this->_cookie		= 'wc_session_cookie_' . COOKIEHASH;
 		$this->_customer_id = $this->get_customer_id();
@@ -34,9 +34,8 @@ class WC_Session {
     		$this->_data = array();
     	
     	// When leaving or ending page load, store data
-    	add_filter( 'wp_redirect', array( &$this, 'save_data' ), 1, 2 );
-    	add_filter( 'shutdown', array( &$this, 'save_data' ) );
-	}
+    	add_action( 'shutdown', array( &$this, 'save_data' ) );
+    }
 	
 	/**
 	 * get_customer_id function.
@@ -44,7 +43,7 @@ class WC_Session {
 	 * @access public
 	 * @return mixed
 	 */
-	function get_customer_id() {
+	public function get_customer_id() {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} elseif ( $customer_id = $this->get_session_cookie() ) {
@@ -60,7 +59,7 @@ class WC_Session {
 	 * @access public
 	 * @return mixed
 	 */
-	function get_session_cookie() {
+	public function get_session_cookie() {
 		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) 
 			return false;
 		
@@ -82,8 +81,8 @@ class WC_Session {
 	 * @access public
 	 * @return void
 	 */
-	function create_customer_id() {
-		$customer_id 	= uniqid( 'wc_' );
+	public function create_customer_id() {
+		$customer_id 	= wp_generate_password( 32 ); // Ensure this and the transient is < 45 chars. wc_session_ leaves 34.
 		$expires 		= time() + 172800;
 		$data 			= $customer_id . $expires;
 		$hash 			= hash_hmac( 'md5', $data, wp_hash( $data ) );
@@ -115,6 +114,28 @@ class WC_Session {
      */
     public function __set( $property, $value ) {
         $this->_data[ $property ] = $value;
+    }
+    
+     /**
+     * __isset function.
+     * 
+     * @access public
+     * @param mixed $property
+     * @return bool
+     */
+    public function __isset( $property ) {
+    	return isset( $this->_data[ $property ] );
+    }
+    
+    /**
+     * __unset function.
+     * 
+     * @access public
+     * @param mixed $property
+     * @return void
+     */
+    public function __unset( $property ) {
+    	unset( $this->_data[ $property ] );
     }
     
     /**

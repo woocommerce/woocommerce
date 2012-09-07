@@ -1169,8 +1169,9 @@ class WC_Order {
 	 * @return void
 	 */
 	function cancel_order( $note = '' ) {
-
-		unset($_SESSION['order_awaiting_payment']);
+		global $woocommerce;
+		
+		unset( $woocommerce->session->order_awaiting_payment );
 
 		$this->update_status('cancelled', $note);
 
@@ -1190,8 +1191,9 @@ class WC_Order {
 	 * @return void
 	 */
 	function payment_complete() {
-
-		unset( $_SESSION['order_awaiting_payment'] );
+		global $woocommerce;
+		
+		unset( $woocommerce->session->order_awaiting_payment );
 
 		if ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) {
 

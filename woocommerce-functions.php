@@ -148,8 +148,10 @@ function woocommerce_nav_menu_items( $items, $args ) {
  * @return void
  */
 function woocommerce_update_catalog_ordering() {
+	global $woocommerce;
+	
 	if ( isset( $_REQUEST['sort'] ) && $_REQUEST['sort'] != '' )
-		$_SESSION['orderby'] = esc_attr($_REQUEST['sort']);
+		$woocommerce->session->orderby = esc_attr( $_REQUEST['sort'] );
 }
 
 
@@ -438,19 +440,17 @@ function woocommerce_clear_cart_after_payment() {
 
 			if ( $order->order_key == $order_key ) {
 				$woocommerce->cart->empty_cart();
-				unset( $_SESSION['order_awaiting_payment'] );
 			}
 		}
 
 	}
 
-	if ( isset( $_SESSION['order_awaiting_payment'] ) && $_SESSION['order_awaiting_payment'] > 0 ) {
+	if ( $woocommerce->session->order_awaiting_payment > 0 ) {
 
-		$order = new WC_Order( $_SESSION['order_awaiting_payment'] );
+		$order = new WC_Order( $woocommerce->session->order_awaiting_payment );
 
 		if ( $order->id > 0 && $order->status !== 'pending' ) {
 			$woocommerce->cart->empty_cart();
-			unset($_SESSION['order_awaiting_payment']);
 		}
 	}
 }

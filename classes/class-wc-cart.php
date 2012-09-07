@@ -236,8 +236,8 @@ class WC_Cart {
 
 			$this->cart_contents = array();
 			$this->reset();
-
-			unset( $_SESSION['coupons'], $_SESSION['cart'] );
+			
+			unset( $woocommerce->session->order_awaiting_payment, $woocommerce->session->coupons, $woocommerce->session->cart );
 
 			if ( $clear_persistent_cart && get_current_user_id() )
 				$this->persistent_cart_destroy();
@@ -847,20 +847,8 @@ class WC_Cart {
 		 * @return void
 		 */
 		private function reset() {
-			$this->total = 0;
-			$this->cart_contents_total = 0;
-			$this->cart_contents_weight = 0;
-			$this->cart_contents_count = 0;
-			$this->cart_contents_tax = 0;
-			$this->tax_total = 0;
-			$this->shipping_tax_total = 0;
-			$this->shipping_taxes = array();
-			$this->subtotal = 0;
-			$this->subtotal_ex_tax = 0;
-			$this->discount_total = 0;
-			$this->discount_cart = 0;
-			$this->shipping_total = 0;
-			$this->taxes = array();
+			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = 0;
+			$this->shipping_taxes = $this->taxes = array();
 
 			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'] );
 		}

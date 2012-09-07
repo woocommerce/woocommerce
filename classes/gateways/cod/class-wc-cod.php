@@ -132,13 +132,13 @@ class WC_COD extends WC_Payment_Gateway {
 					
 				$chosen_method = $order->shipping_method;
 				
-			} elseif ( empty( $_SESSION['_chosen_shipping_method'] ) ) {
+			} elseif ( empty( $woocommerce->session->chosen_shipping_method ) ) {
 				return false;
 			} else {
-				$chosen_method		= $_SESSION['_chosen_shipping_method'];
+				$chosen_method = $woocommerce->session->chosen_shipping_method;
 			}
 				
-			$found				= false;
+			$found = false;
 			
 			foreach ( $this->enable_for_methods as $method_id ) {
 				if ( strpos( $chosen_method, $method_id ) === 0 ) {
@@ -175,9 +175,6 @@ class WC_COD extends WC_Payment_Gateway {
 
 		// Remove cart
 		$woocommerce->cart->empty_cart();
-
-		// Empty awaiting payment session
-		unset($_SESSION['order_awaiting_payment']);
 
 		// Return thankyou redirect
 		return array(

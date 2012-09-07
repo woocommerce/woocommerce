@@ -309,7 +309,9 @@ class WC_Query {
 	 * @return array
 	 */
 	function get_catalog_ordering_args() {
-		$current_order = ( isset( $_SESSION['orderby'] ) ) ? $_SESSION['orderby'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		global $woocommerce;
+		
+		$current_order = ( isset( $woocommerce->session->orderby ) ) ? $woocommerce->session->orderby : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 
 		switch ( $current_order ) {
 			case 'date' :

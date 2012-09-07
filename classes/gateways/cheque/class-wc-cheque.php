@@ -150,9 +150,6 @@ class WC_Cheque extends WC_Payment_Gateway {
 		// Remove cart
 		$woocommerce->cart->empty_cart();
 
-		// Empty awaiting payment session
-		unset($_SESSION['order_awaiting_payment']);
-
 		// Return thankyou redirect
 		return array(
 			'result' 	=> 'success',
