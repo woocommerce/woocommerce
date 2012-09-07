@@ -164,7 +164,8 @@ class ShareYourCartWooCommerce extends ShareYourCartBase {
 	}
 
 	public function buttonCallback() {
-
+		global $woocommerce;
+		
 		//specify the parameters
 		$params = array(
 			'callback_url' => get_bloginfo('wpurl').'/?action='.$this->_plugin_name.'_coupon'.(isset($_REQUEST['p']) ? '&p='.$_REQUEST['p'] : '' ),
@@ -174,10 +175,10 @@ class ShareYourCartWooCommerce extends ShareYourCartBase {
 
 		//there is no product set, thus send the products from the shopping cart
 		if (!isset($_REQUEST['p'])) {
-			if (empty($_SESSION['cart']))
+			if ( sizeof( $woocommerce->cart->get_cart() ) == 0 )
 				exit("Cart is empty");
 
-			foreach ($_SESSION['cart'] as $cart_details) {
+			foreach ($woocommerce->cart->get_cart() as $cart_details) {
 				$params['cart'][] = $this->_getProductDetails($cart_details['product_id']);
 			}
 		}
