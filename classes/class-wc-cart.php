@@ -110,12 +110,12 @@ class WC_Cart {
 			global $woocommerce;
 
 			// Load the coupons
-			if ( get_option('woocommerce_enable_coupons') == 'yes' )
-				$this->applied_coupons = ( empty( $_SESSION['coupons'] ) ) ? array() : array_unique( array_filter( (array) $_SESSION['coupons'] ) );
+			if ( get_option( 'woocommerce_enable_coupons' ) == 'yes' )
+				$this->applied_coupons = ( empty( $woocommerce->session->coupons ) ) ? array() : array_unique( array_filter( (array) $woocommerce->session->coupons ) );
 
 			// Load the cart
-			if ( isset( $_SESSION['cart'] ) && is_array( $_SESSION['cart'] ) ) {
-				$cart = $_SESSION['cart'];
+			if ( isset( $woocommerce->session->cart ) && is_array( $woocommerce->session->cart ) ) {
+				$cart = $woocommerce->session->cart;
 
 				foreach ( $cart as $key => $values ) {
 
@@ -127,7 +127,7 @@ class WC_Cart {
 					if ( $_product->exists() && $values['quantity'] > 0 ) {
 
 						// Put session data into array. Run through filter so other plugins can load their own session data
-						$this->cart_contents[$key] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
+						$this->cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', array(
 							'product_id'	=> $values['product_id'],
 							'variation_id'	=> $values['variation_id'],
 							'variation' 	=> $values['variation'],
@@ -152,21 +152,21 @@ class WC_Cart {
 				$woocommerce->cart_has_contents_cookie( false );
 
 			// Load totals
-			$this->cart_contents_total 	= isset( $_SESSION['cart_contents_total'] ) ? $_SESSION['cart_contents_total'] : 0;
-			$this->cart_contents_weight = isset( $_SESSION['cart_contents_weight'] ) ? $_SESSION['cart_contents_weight'] : 0;
-			$this->cart_contents_count 	= isset( $_SESSION['cart_contents_count'] ) ? $_SESSION['cart_contents_count'] : 0;
-			$this->cart_contents_tax 	= isset( $_SESSION['cart_contents_tax'] ) ? $_SESSION['cart_contents_tax'] : 0;
-			$this->total 				= isset( $_SESSION['total'] ) ? $_SESSION['total'] : 0;
-			$this->subtotal 			= isset( $_SESSION['subtotal'] ) ? $_SESSION['subtotal'] : 0;
-			$this->subtotal_ex_tax 		= isset( $_SESSION['subtotal_ex_tax'] ) ? $_SESSION['subtotal_ex_tax'] : 0;
-			$this->tax_total 			= isset( $_SESSION['tax_total'] ) ? $_SESSION['tax_total'] : 0;
-			$this->taxes 				= isset( $_SESSION['taxes'] ) ? $_SESSION['taxes'] : array();
-			$this->shipping_taxes		= isset( $_SESSION['shipping_taxes'] ) ? $_SESSION['shipping_taxes'] : array();
-			$this->discount_cart 		= isset( $_SESSION['discount_cart'] ) ? $_SESSION['discount_cart'] : 0;
-			$this->discount_total 		= isset( $_SESSION['discount_total'] ) ? $_SESSION['discount_total'] : 0;
-			$this->shipping_total 		= isset( $_SESSION['shipping_total'] ) ? $_SESSION['shipping_total'] : 0;
-			$this->shipping_tax_total 	= isset( $_SESSION['shipping_tax_total'] ) ? $_SESSION['shipping_tax_total'] : 0;
-			$this->shipping_label		= isset( $_SESSION['shipping_label'] ) ? $_SESSION['shipping_label'] : '';
+			$this->cart_contents_total 	= isset( $woocommerce->session->cart_contents_total ) ? $woocommerce->session->cart_contents_total : 0;
+			$this->cart_contents_weight = isset( $woocommerce->session->cart_contents_weight ) ? $woocommerce->session->cart_contents_weight : 0;
+			$this->cart_contents_count 	= isset( $woocommerce->session->cart_contents_count ) ? $woocommerce->session->cart_contents_count : 0;
+			$this->cart_contents_tax 	= isset( $woocommerce->session->cart_contents_tax ) ? $woocommerce->session->cart_contents_tax : 0;
+			$this->total 				= isset( $woocommerce->session->total ) ? $woocommerce->session->total : 0;
+			$this->subtotal 			= isset( $woocommerce->session->subtotal ) ? $woocommerce->session->subtotal : 0;
+			$this->subtotal_ex_tax 		= isset( $woocommerce->session->subtotal_ex_tax ) ? $woocommerce->session->subtotal_ex_tax : 0;
+			$this->tax_total 			= isset( $woocommerce->session->tax_total ) ? $woocommerce->session->tax_total : 0;
+			$this->taxes 				= isset( $woocommerce->session->taxes ) ? $woocommerce->session->taxes : array();
+			$this->shipping_taxes		= isset( $woocommerce->session->shipping_taxes ) ? $woocommerce->session->shipping_taxes : array();
+			$this->discount_cart 		= isset( $woocommerce->session->discount_cart ) ? $woocommerce->session->discount_cart : 0;
+			$this->discount_total 		= isset( $woocommerce->session->discount_total ) ? $woocommerce->session->discount_total : 0;
+			$this->shipping_total 		= isset( $woocommerce->session->shipping_total ) ? $woocommerce->session->shipping_total : 0;
+			$this->shipping_tax_total 	= isset( $woocommerce->session->shipping_tax_total ) ? $woocommerce->session->shipping_tax_total : 0;
+			$this->shipping_label		= isset( $woocommerce->session->shipping_label ) ? $woocommerce->session->shipping_label : '';
 
 			// Queue re-calc if subtotal is not set
 			if ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 )
@@ -181,6 +181,7 @@ class WC_Cart {
 		 * @return void
 		 */
 		function set_session() {
+			global $woocommerce;
 
 			// Re-calc totals
 			$this->calculate_totals();
@@ -191,39 +192,38 @@ class WC_Cart {
 			if ( $this->cart_contents ) {
 				foreach ( $this->cart_contents as $key => $values ) {
 
-					$cart_session[$key] = $values;
+					$cart_session[ $key ] = $values;
 
 					// Unset product object
-					unset( $cart_session[$key]['data'] );
+					unset( $cart_session[ $key ]['data'] );
 				}
 			}
 
-			$_SESSION['cart'] = $cart_session;
-			$_SESSION['coupons'] = $this->applied_coupons;
+			$woocommerce->session->cart = $cart_session;
+			$woocommerce->session->coupons = $this->applied_coupons;
 
 			// Store totals to avoid re-calc on page load
-			$_SESSION['cart_contents_total'] = $this->cart_contents_total;
-			$_SESSION['cart_contents_weight'] = $this->cart_contents_weight;
-			$_SESSION['cart_contents_count'] = $this->cart_contents_count;
-			$_SESSION['cart_contents_tax'] = $this->cart_contents_tax;
-			$_SESSION['total'] = $this->total;
-			$_SESSION['subtotal'] = $this->subtotal;
-			$_SESSION['subtotal_ex_tax'] = $this->subtotal_ex_tax;
-			$_SESSION['tax_total'] = $this->tax_total;
-			$_SESSION['shipping_taxes'] = $this->shipping_taxes;
-			$_SESSION['taxes'] = $this->taxes;
-			$_SESSION['discount_cart'] = $this->discount_cart;
-			$_SESSION['discount_total'] = $this->discount_total;
-			$_SESSION['shipping_total'] = $this->shipping_total;
-			$_SESSION['shipping_tax_total'] = $this->shipping_tax_total;
-			$_SESSION['shipping_label'] = $this->shipping_label;
+			$woocommerce->session->cart_contents_total = $this->cart_contents_total;
+			$woocommerce->session->cart_contents_weight = $this->cart_contents_weight;
+			$woocommerce->session->cart_contents_count = $this->cart_contents_count;
+			$woocommerce->session->cart_contents_tax = $this->cart_contents_tax;
+			$woocommerce->session->total = $this->total;
+			$woocommerce->session->subtotal = $this->subtotal;
+			$woocommerce->session->subtotal_ex_tax = $this->subtotal_ex_tax;
+			$woocommerce->session->tax_total = $this->tax_total;
+			$woocommerce->session->shipping_taxes = $this->shipping_taxes;
+			$woocommerce->session->taxes = $this->taxes;
+			$woocommerce->session->discount_cart = $this->discount_cart;
+			$woocommerce->session->discount_total = $this->discount_total;
+			$woocommerce->session->shipping_total = $this->shipping_total;
+			$woocommerce->session->shipping_tax_total = $this->shipping_tax_total;
+			$woocommerce->session->shipping_label = $this->shipping_label;
 
-			if (get_current_user_id())
+			if ( get_current_user_id() )
 				$this->persistent_cart_update();
 
-			do_action('woocommerce_cart_updated');
+			do_action( 'woocommerce_cart_updated' );
 		}
-
 
 		/**
 		 * Empties the cart and optionally the persistent cart too.
@@ -233,6 +233,7 @@ class WC_Cart {
 		 * @return void
 		 */
 		function empty_cart( $clear_persistent_cart = true ) {
+			global $woocommerce;
 
 			$this->cart_contents = array();
 			$this->reset();
@@ -242,7 +243,7 @@ class WC_Cart {
 			if ( $clear_persistent_cart && get_current_user_id() )
 				$this->persistent_cart_destroy();
 
-			do_action('woocommerce_cart_emptied');
+			do_action( 'woocommerce_cart_emptied' );
 		}
 
  	/*-----------------------------------------------------------------------------------*/
@@ -256,9 +257,11 @@ class WC_Cart {
 		 * @return void
 		 */
 		function persistent_cart_update() {
+			global $woocommerce;
+
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart', array(
-				'cart' => $_SESSION['cart'],
-			));
+				'cart' => $woocommerce->session->cart,
+			) );
 		}
 
 
@@ -319,12 +322,12 @@ class WC_Cart {
 
 					if ( is_wp_error( $coupon->is_valid() ) ) {
 
-						$woocommerce->add_error( sprintf( __('Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce'), $code ) );
+						$woocommerce->add_error( sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $code ) );
 
 						// Remove the coupon
-						unset( $this->applied_coupons[$key] );
-						$_SESSION['coupons'] = $this->applied_coupons;
-						$_SESSION['refresh_totals'] = true;
+						unset( $this->applied_coupons[ $key ] );
+						$woocommerce->session->coupons = $this->applied_coupons;
+						$woocommerce->session->refresh_totals = true;
 					}
 				}
 			}
@@ -392,12 +395,12 @@ class WC_Cart {
 
 						$check_emails = array_map( 'strtolower', $check_emails );
 
-						if ( sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) == 0 ) {
-							$woocommerce->add_error( sprintf( __('Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce'), $code ) );
+						if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
+							$woocommerce->add_error( sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $code ) );
 							// Remove the coupon
-							unset( $this->applied_coupons[$key] );
-							$_SESSION['coupons'] = $this->applied_coupons;
-							$_SESSION['refresh_totals'] = true;
+							unset( $this->applied_coupons[ $key ] );
+							$woocommerce->session->coupons = $this->applied_coupons;
+							$woocommerce->session->refresh_totals = true;
 						}
 					}
 				}
@@ -847,10 +850,12 @@ class WC_Cart {
 		 * @return void
 		 */
 		private function reset() {
+			global $woocommerce;
+
 			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = 0;
 			$this->shipping_taxes = $this->taxes = array();
 
-			unset( $_SESSION['cart_contents_total'], $_SESSION['cart_contents_weight'], $_SESSION['cart_contents_count'], $_SESSION['cart_contents_tax'], $_SESSION['total'], $_SESSION['subtotal'], $_SESSION['subtotal_ex_tax'], $_SESSION['tax_total'], $_SESSION['taxes'], $_SESSION['shipping_taxes'], $_SESSION['discount_cart'], $_SESSION['discount_total'], $_SESSION['shipping_total'], $_SESSION['shipping_tax_total'], $_SESSION['shipping_label'] );
+			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total, $woocommerce->session->shipping_label );
 		}
 
 		/**
@@ -1677,25 +1682,28 @@ class WC_Cart {
 		 * @params int type - 0 for all, 1 for before tax, 2 for after tax
 		 */
 		function remove_coupons( $type = 0 ) {
+			global $woocommerce;
 
-			if ( $type == 1 ) {
-				if ($this->applied_coupons) {
+			if ( 1 == $type ) {
+				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
 						$coupon = new WC_Coupon( $code );
-						if ( $coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+						if ( $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
 					}
 				}
-				$_SESSION['coupons'] = $this->applied_coupons;
+
+				$woocommerce->session->coupons = $this->applied_coupons;
 			} elseif ( $type == 2 ) {
 				if ( $this->applied_coupons ) {
 					foreach ( $this->applied_coupons as $index => $code ) {
 						$coupon = new WC_Coupon( $code );
-						if ( !$coupon->apply_before_tax() ) unset($this->applied_coupons[$index]);
+						if ( ! $coupon->apply_before_tax() ) unset( $this->applied_coupons[ $index ] );
 					}
 				}
-				$_SESSION['coupons'] = $this->applied_coupons;
+
+				$woocommerce->session->coupons = $this->applied_coupons;
 			} else {
-				unset($_SESSION['coupons']);
+				unset( $woocommerce->session->coupons );
 				$this->applied_coupons = array();
 			}
 		}
