@@ -28,7 +28,7 @@ class WC_Session {
 		
 		$this->_cookie		= 'wc_session_cookie_' . COOKIEHASH;
 		$this->_customer_id = $this->get_customer_id();
-		$this->_data 		= get_transient( 'wc_session_' . $this->_customer_id );
+		$this->_data 		= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
     	
     	if ( false === $this->_data ) 
     		$this->_data = array();
