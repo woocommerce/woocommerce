@@ -302,7 +302,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 		}
 	}
 
-    if ( version_compare( get_option('woocommerce_db_version'), '1.0', '>' ) && version_compare( get_option('woocommerce_db_version'), '1.4', '<' ) {
+    if ( version_compare( get_option('woocommerce_db_version'), '1.0', '>' ) && version_compare( get_option('woocommerce_db_version'), '1.4', '<' ) ) {
 
 	    // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
 	    $results = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
