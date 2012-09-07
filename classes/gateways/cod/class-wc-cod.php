@@ -33,6 +33,7 @@ class WC_COD extends WC_Payment_Gateway {
 		$this->title = $this->settings['title'];
 		$this->description = $this->settings['description'];
 		$this->instructions = $this->settings['instructions'];
+		$this->enable_for_methods = empty( $this->settings['enable_for_methods'] ) ? array() : $this->settings['enable_for_methods'];
 
 		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 		add_action('woocommerce_thankyou_cod', array(&$this, 'thankyou'));
@@ -63,6 +64,14 @@ class WC_COD extends WC_Payment_Gateway {
      * @return void
      */
     function init_form_fields() {
+    	global $woocommerce;
+    	
+    	$shipping_methods = array();
+    	
+    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+	    	$shipping_methods[ $method->id ] = $method->get_title();
+    	}
+    
     	$this->form_fields = array(
 			'enabled' => array(
 				'title' => __( 'Enable COD', 'woocommerce' ),
@@ -89,9 +98,62 @@ class WC_COD extends WC_Payment_Gateway {
 				'description' => __( 'Instructions that will be added to the thank you page.', 'woocommerce' ),
 				'default' => 'Pay with cash upon delivery.'
 			),
+			'enable_for_methods' => array(
+				'title' 		=> __( 'Enable for shipping methods', 'woocommerce' ),
+				'type' 			=> 'multiselect',
+				'class'			=> 'chosen_select',
+				'css'			=> 'width: 450px;',
+				'default' 		=> '',
+				'description' 	=> '<br/>' . __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'options'		=> $shipping_methods
+			)
  	   );
     }
 
+
+	/**
+	 * Check If The Gateway Is Available For Use
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_available() {
+		global $woocommerce;
+		
+		if ( ! empty( $this->enable_for_methods ) ) {
+			
+			if ( is_page( woocommerce_get_page_id( 'pay' ) ) ) {
+				
+				$order_id = (int) $_GET['order_id'];
+				$order = new WC_Order( $order_id );
+		
+				if ( ! $order->shipping_method ) 
+					return false;
+					
+				$chosen_method = $order->shipping_method;
+				
+			} elseif ( empty( $_SESSION['_chosen_shipping_method'] ) ) {
+				return false;
+			} else {
+				$chosen_method		= $_SESSION['_chosen_shipping_method'];
+			}
+				
+			$found				= false;
+			
+			foreach ( $this->enable_for_methods as $method_id ) {
+				if ( strpos( $chosen_method, $method_id ) === 0 ) {
+					$found = true;
+					break;
+				}
+			}
+			
+			if ( ! $found )
+				return false;
+		}
+		
+		return parent::is_available();
+	}
+	
 
     /**
      * Process the payment and return the result
