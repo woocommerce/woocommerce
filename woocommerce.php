@@ -1119,7 +1119,7 @@ class Woocommerce {
 		// Register any scipts for later use, or used as dependencies
 		wp_register_script( 'chosen', $this->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'jquery-ui', $this->plugin_url() . '/assets/js/jquery-ui' . $suffix . '.js', array( 'jquery' ), $this->version, true );
-		wp_register_script( 'jquery-plugins', $this->plugin_url() . '/assets/js/jquery-plugins' . $suffix . '.js', array( 'jquery' ), $this->version, true );
+		wp_register_script( 'wc-jquery-plugins', $this->plugin_url() . '/assets/js/jquery-plugins' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 		wp_register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ), $this->version, true );
 
