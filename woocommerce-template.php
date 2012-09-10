@@ -1073,14 +1073,15 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		global $woocommerce;
 
 		$defaults = array(
-			'type' => 'text',
-			'label' => '',
+			'type'        => 'text',
+			'label'       => '',
 			'placeholder' => '',
-			'required' => false,
-			'class' => array() ,
-			'label_class' => array() ,
-			'return' => false,
-			'options' => array()
+			'maxlength'   => false,
+			'required'    => false,
+			'class'       => array(),
+			'label_class' => array(),
+			'return'      => false,
+			'options'     => array()
 		);
 
 		$args = wp_parse_args( $args, $defaults  );
@@ -1088,6 +1089,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		if ( ( isset( $args['clear'] ) && $args['clear'] ) ) $after = '<div class="clear"></div>'; else $after = '';
 
 		$required = ( $args['required']  ) ? ' <abbr class="required" title="' . esc_attr__( 'required', 'woocommerce'  ) . '">*</abbr>' : '';
+		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
 
 		switch ( $args['type'] ) {
 		case "country" :
@@ -1183,7 +1185,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 			$field = '<p class="form-row ' . implode( ' ', $args['class'] ) .'" id="' . $key . '_field">
 					<label for="' . $key . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label'] . $required . '</label>
-					<input type="text" class="input-text" name="' . $key . '" id="' . $key . '" placeholder="' . $args['placeholder'] . '" value="'. $value.'" />
+					<input type="text" class="input-text" name="' . $key . '" id="' . $key . '" placeholder="' . $args['placeholder'] . '" '.$args['maxlength'].' value="'. $value.'" />
 				</p>' . $after;
 
 			break;
