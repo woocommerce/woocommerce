@@ -7,44 +7,45 @@
 				init: function(d,e) {},
 				createControl:function(d,e)
 				{
+					
+					var ed = tinymce.activeEditor;
 				
 					if(d=="woocommerce_shortcodes_button"){
 					
 						d=e.createMenuButton( "woocommerce_shortcodes_button",{
-							title:"Insert Shortcode",
-							icons:false
+							title: ed.getLang('woocommerce.insert'),
+							icons: false
 							});
-							
+
 							var a=this;d.onRenderMenu.add(function(c,b){
-								
-								
-								a.addImmediate(b,"Product price/cart button", '[add_to_cart id="" sku=""]');
-								a.addImmediate(b,"Product by SKU/ID", '[product id="" sku=""]');
-								a.addImmediate(b,"Products by SKU/ID", '[products ids="" skus=""]');
-								a.addImmediate(b,"Product categories", '[product_categories number=""]');
-								a.addImmediate(b,"Products by category slug", '[product_category category="" per_page="12" columns="4" orderby="date" order="desc"]');
-								
-								b.addSeparator();
-								
-								a.addImmediate(b,"Recent products", '[recent_products per_page="12" columns="4" orderby="date" order="desc"]');
-								a.addImmediate(b,"Featured products", '[featured_products per_page="12" columns="4" orderby="date" order="desc"]');
+							
+								a.addImmediate(b, ed.getLang('woocommerce.price_button'), '[add_to_cart id="" sku=""]');
+								a.addImmediate(b, ed.getLang('woocommerce.product_by_sku'), '[product id="" sku=""]');
+								a.addImmediate(b, ed.getLang('woocommerce.products_by_sku'), '[products ids="" skus=""]');
+								a.addImmediate(b, ed.getLang('woocommerce.product_categories'), '[product_categories number=""]');
+								a.addImmediate(b, ed.getLang('woocommerce.products_by_cat_slug'), '[product_category category="" per_page="12" columns="4" orderby="date" order="desc"]');
 								
 								b.addSeparator();
 								
-								a.addImmediate(b,"Shop Messages", '[woocommerce_messages]');
+								a.addImmediate(b, ed.getLang('woocommerce.recent_products'), '[recent_products per_page="12" columns="4" orderby="date" order="desc"]');
+								a.addImmediate(b, ed.getLang('woocommerce.featured_products'), '[featured_products per_page="12" columns="4" orderby="date" order="desc"]');
+								
+								b.addSeparator();
+								
+								a.addImmediate(b, ed.getLang('woocommerce.shop_messages'), '[woocommerce_messages]');
 								
 								b.addSeparator();
 								
 								c=b.addMenu({title:"Pages"});
-										a.addImmediate(c,"Cart","[woocommerce_cart]" );
-										a.addImmediate(c,"Checkout","[woocommerce_checkout]" );
-										a.addImmediate(c,"Order tracking","[woocommerce_order_tracking]" );
-										a.addImmediate(c,"My Account","[woocommerce_my_account]" );
-										a.addImmediate(c,"Edit Address","[woocommerce_edit_address]" );
-										a.addImmediate(c,"Change Password","[woocommerce_change_password]" );
-										a.addImmediate(c,"View Order","[woocommerce_view_order]" );
-										a.addImmediate(c,"Pay","[woocommerce_pay]" );
-										a.addImmediate(c,"Thankyou","[woocommerce_thankyou]" );
+										a.addImmediate(c, ed.getLang('woocommerce.cart'),"[woocommerce_cart]" );
+										a.addImmediate(c, ed.getLang('woocommerce.checkout'),"[woocommerce_checkout]" );
+										a.addImmediate(c, ed.getLang('woocommerce.order_tracking'),"[woocommerce_order_tracking]" );
+										a.addImmediate(c, ed.getLang('woocommerce.my_account'),"[woocommerce_my_account]" );
+										a.addImmediate(c, ed.getLang('woocommerce.edit_address'),"[woocommerce_edit_address]" );
+										a.addImmediate(c, ed.getLang('woocommerce.change_password'),"[woocommerce_change_password]" );
+										a.addImmediate(c, ed.getLang('woocommerce.view_order'),"[woocommerce_view_order]" );
+										a.addImmediate(c, ed.getLang('woocommerce.pay'),"[woocommerce_pay]" );
+										a.addImmediate(c, ed.getLang('woocommerce.thankyou'),"[woocommerce_thankyou]" );
 
 							});
 						return d

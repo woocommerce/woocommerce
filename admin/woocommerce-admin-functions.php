@@ -260,6 +260,22 @@ function woocommerce_add_shortcode_button() {
 
 
 /**
+ * woocommerce_add_tinymce_lang function.
+ * 
+ * @access public
+ * @param mixed $arr
+ * @return void
+ */
+function woocommerce_add_tinymce_lang( $arr ) {
+	global $woocommerce;
+    $arr[] = $woocommerce->plugin_path() . '/assets/js/admin/editor_plugin_lang.php';
+    return $arr;
+}
+
+add_filter( 'mce_external_languages', 'woocommerce_add_tinymce_lang', 10, 1 );
+
+
+/**
  * Register the shortcode button.
  *
  * @access public
