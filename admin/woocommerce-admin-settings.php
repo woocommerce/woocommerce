@@ -29,6 +29,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	 */
 	function woocommerce_settings() {
 	    global $woocommerce, $woocommerce_settings;
+	    
+	    do_action( 'woocommerce_settings_start' );
 
 	    // Get current tab/section
 	    $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );

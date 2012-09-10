@@ -1,0 +1,4 @@
+"countries","class","label","rate","compound","shipping"
+"GB","","VAT","20.0000","0","1"
+"GB","reduced-rate","VAT","5.0000","0","1"
+"GB","zero-rate","VAT","0.0000","0","1"

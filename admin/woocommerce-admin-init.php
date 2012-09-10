@@ -227,6 +227,11 @@ function woocommerce_admin_init() {
 		include_once( 'woocommerce-admin-users.php' );
 
 	}
+	
+	// Register importers
+	if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
+		include_once( 'importers/importers-init.php' );
+	}
 }
 
 add_action('admin_init', 'woocommerce_admin_init');
