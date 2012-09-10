@@ -38,6 +38,10 @@ if ( ! $product->is_purchasable() && ! in_array( $product->product_type, array( 
 				$label 	= apply_filters( 'add_to_cart_text', __('Add to cart', 'woocommerce') );
 			break;
 		}
+		
+		$link_not = array ( "%2C", "&#038;" );
+		$link_yes = array ( ",", "&" );
+		$link = str_replace( $link_not, $link_yes, $link ); 
 
 		printf('<a href="%s" rel="nofollow" data-product_id="%s" class="add_to_cart_button button product_type_%s">%s</a>', $link, $product->id, $product->product_type, $label);
 
