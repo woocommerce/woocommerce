@@ -275,6 +275,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					// Query type Arg
 					if ( $query_type == 'or' && ! ( sizeof( $current_filter ) == 1 && isset( $_chosen_attributes[ $taxonomy ]['terms'] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) ) )
 						$link = add_query_arg( 'query_type_' . sanitize_title( $instance['attribute'] ), 'or', $link );
+						$link = str_replace( "%2C", ",", $link ); 
 
 					echo '<li ' . $class . '>';
 
