@@ -151,34 +151,35 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 1.7.0 = 
-* Feature - Added sales by category report
-* Feature - Multiple downloadable files per product/variation (kudos Justin Stern)
-* Feature - Download expirey for variations (kudos niravmehta)
-* Feature - Added wildcard support to local delivery postcodes
-* Feature - Option to enable Cash on Delivery for select shipping methods only
+* Feature - Added sales by category report.
+* Feature - Multiple downloadable files per product/variation (kudos Justin Stern).
+* Feature - Download expirey for variations (kudos niravmehta).
+* Feature - Added wildcard support to local delivery postcodes.
+* Feature - Option to enable Cash on Delivery for select shipping methods only.
 * Feature - Stopped using PHP sessions for cart data - using cookies and transients instead to allow WC to function better with static caching. Also to reduce support regarding hosts and session configurations.
 * Feature - Export and Import Tax Rates from a CSV file.
 * Feature - Option to control whether tax is calculated based on customer shipping or billing address.
 
-* Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files
+* Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 
 * Tweak - Cleaned up the tax settings.
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
-* Tweak - Prefix jquery plugins JS
-* Tweak - Made paypal use wc-api for IPN
+* Tweak - Prefix jquery plugins JS.
+* Tweak - Made paypal use wc-api for IPN.
+* Tweak - Due to new session handling, removed session section from the status page.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
 
-* Localization - French update by Arnaud Cheminand
-* Localization - Romanian update by silviu-bucsa
-* Localization - Dutch updates by Ramoonus
-* Localization - Localized shortcode button
+* Localization - French update by Arnaud Cheminand.
+* Localization - Romanian update by silviu-bucsa.
+* Localization - Dutch updates by Ramoonus.
+* Localization - Localized shortcode button.
 
 = 1.6.5.2 - 12/09/2012 =
-* Tweak - Extra validation for PayPal IPN
+* Tweak - Extra validation for PayPal IPN.
 
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen

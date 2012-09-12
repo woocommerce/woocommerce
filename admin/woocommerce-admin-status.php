@@ -314,33 +314,6 @@ function woocommerce_status() {
 
             <thead>
 				<tr>
-					<th colspan="2"><?php _e( 'PHP Sessions', 'woocommerce' ); ?></th>
-				</tr>
-			</thead>
-
-			<tbody>
-            	<tr>
-                    <td><?php _e('Session save path','woocommerce')?></td>
-					<td><?php
-						$save_path = session_save_path();
-
-						if ( ! is_dir( $save_path ) ) {
-							echo '<mark class="error">' . sprintf( __('<code>%s</code> does not exist - contact your host to resolve the problem.', 'woocommerce'), $save_path ). '</mark>';
-						} elseif ( ! is_writeable( $save_path ) ) {
-							echo '<mark class="error">' . sprintf( __('<code>%s</code> is not writable - contact your host to resolve the problem.', 'woocommerce'), $save_path ). '</mark>';
-						} else {
-							echo '<mark class="yes">' . sprintf( __('<code>%s</code> is writable.', 'woocommerce'), $save_path ). '</mark>';
-						}
-                    ?></td>
-                </tr>
-                <tr>
-                	<td><?php _e('Session name','woocommerce')?></td>
-                	<td><?php echo session_name(); ?></td>
-                </tr>
-            </tbody>
-
-            <thead>
-				<tr>
 					<th colspan="2"><?php _e( 'Remote Posting/IPN', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
