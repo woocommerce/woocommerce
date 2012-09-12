@@ -1,13 +1,14 @@
 <?php
 /**
  * Handle data for the current customers session.
+ * Implements the WC_Session abstract class
  *
- * @class 		WC_Session
+ * @class 		WC_Session_Transients
  * @version		1.7
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Session {
+class WC_Session_Transients extends WC_Session {
 	
 	/** _data  */
 	protected $_data;
@@ -33,17 +34,16 @@ class WC_Session {
     	if ( false === $this->_data ) 
     		$this->_data = array();
     	
-    	// When leaving or ending page load, store data
-    	add_action( 'shutdown', array( &$this, 'save_data' ), 20 );
+    	parent::__construct();
     }
 	
 	/**
 	 * get_customer_id function.
 	 * 
-	 * @access public
+	 * @access private
 	 * @return mixed
 	 */
-	public function get_customer_id() {
+	private function get_customer_id() {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} elseif ( $customer_id = $this->get_session_cookie() ) {
@@ -56,10 +56,10 @@ class WC_Session {
 	/**
 	 * get_session_cookie function.
 	 * 
-	 * @access public
+	 * @access private
 	 * @return mixed
 	 */
-	public function get_session_cookie() {
+	private function get_session_cookie() {
 		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) 
 			return false;
 		
@@ -78,10 +78,10 @@ class WC_Session {
 	/**
 	 * Create a unqiue customer ID and store it in a cookie, along with its hashed value and expirey date. Stored for 48hours.
 	 * 
-	 * @access public
+	 * @access private
 	 * @return void
 	 */
-	public function create_customer_id() {
+	private function create_customer_id() {
 		$customer_id 	= wp_generate_password( 32 ); // Ensure this and the transient is < 45 chars. wc_session_ leaves 34.
 		$expires 		= time() + 172800;
 		$data 			= $customer_id . $expires;

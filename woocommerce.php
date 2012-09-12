@@ -240,7 +240,8 @@ class Woocommerce {
 		include( 'classes/class-wc-cart.php' );					// The main cart class
 		include( 'classes/class-wc-coupon.php' );				// Coupon class
 		include( 'classes/class-wc-customer.php' ); 			// Customer class
-		include( 'classes/class-wc-session.php' ); 				// Session class
+		include( 'classes/abstracts/abstract-wc-session.php' );    // Abstract for session implementations
+		include( 'classes/class-wc-session-transients.php' );   // Transients implementation of the session class
 	}
 
 
@@ -299,8 +300,10 @@ class Woocommerce {
 			// Class instances
 			$this->cart 			= new WC_Cart();				// Cart class, stores the cart contents
 			$this->customer 		= new WC_Customer();			// Customer class, handles data such as customer location
-			$this->session 			= new WC_Session();				// Session class, handles session data for customers
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
+
+			// Session class, handles session data for customers - can be overwritten if custom handler is needed
+			$this->session 			= apply_filters( 'woocommerce_session_handler', new WC_Session_Transients() );
 
 			// Load messages
 			$this->load_messages();
