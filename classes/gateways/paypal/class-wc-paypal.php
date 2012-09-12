@@ -606,6 +606,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 				    
 				    	// Put this order on-hold for manual checking
 				    	$order->update_status( 'on-hold', sprintf( __( 'Payment error: Amounts do not match (gross %s)', 'woocommerce' ), $posted['payment_gross'] ) );
+				    	
+				    	exit;
 				    }	
 
 					 // Store PP Details
