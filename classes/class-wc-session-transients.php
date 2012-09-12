@@ -8,10 +8,7 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Session_Transients extends WC_Session {
-	
-	/** _data  */
-	protected $_data;
+class WC_Session_Transients extends WC_Session {	
 	
 	/** customer_id */
 	private $_customer_id;
@@ -20,21 +17,20 @@ class WC_Session_Transients extends WC_Session {
 	private $_cookie;
 	
 	/**
-	 * Constructor for the session class. Hooks in methods.
+	 * Constructor for the session class.
 	 *
 	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
+		parent::__construct();
 		
 		$this->_cookie		= 'wc_session_cookie_' . COOKIEHASH;
 		$this->_customer_id = $this->get_customer_id();
 		$this->_data 		= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
     	
-    	if ( false === $this->_data ) 
+    	if ( false === $this->_data )
     		$this->_data = array();
-    	
-    	parent::__construct();
     }
 	
 	/**
@@ -92,51 +88,6 @@ class WC_Session_Transients extends WC_Session {
 
 		return $customer_id;
 	}
-	
-    /**
-     * __get function.
-     * 
-     * @access public
-     * @param mixed $property
-     * @return mixed
-     */
-    public function __get( $property ) {
-        return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : null;
-    }
- 
-    /**
-     * __set function.
-     * 
-     * @access public
-     * @param mixed $property
-     * @param mixed $value
-     * @return void
-     */
-    public function __set( $property, $value ) {
-        $this->_data[ $property ] = $value;
-    }
-    
-     /**
-     * __isset function.
-     * 
-     * @access public
-     * @param mixed $property
-     * @return bool
-     */
-    public function __isset( $property ) {
-    	return isset( $this->_data[ $property ] );
-    }
-    
-    /**
-     * __unset function.
-     * 
-     * @access public
-     * @param mixed $property
-     * @return void
-     */
-    public function __unset( $property ) {
-    	unset( $this->_data[ $property ] );
-    }
     
     /**
      * save_data function.

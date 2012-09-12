@@ -303,7 +303,8 @@ class Woocommerce {
 			$this->query			= new WC_Query();				// Query class, handles front-end queries and loops
 
 			// Session class, handles session data for customers - can be overwritten if custom handler is needed
-			$this->session 			= apply_filters( 'woocommerce_session_handler', new WC_Session_Transients() );
+			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Transients' );
+			$this->session = new $session_class();
 
 			// Load messages
 			$this->load_messages();
