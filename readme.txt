@@ -3,7 +3,7 @@ Contributors: woothemes, mikejolley, jameskoster, CoenJacobs
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
-Tested up to: 3.4.1
+Tested up to: 3.4.2
 Stable tag: 1.6.5.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -166,7 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
 * Tweak - Prefix jquery plugins JS
-* Tweak - Extra validation for PayPal IPN
+* Tweak - Made paypal use wc-api for IPN
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
@@ -176,6 +176,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Romanian update by silviu-bucsa
 * Localization - Dutch updates by Ramoonus
 * Localization - Localized shortcode button
+
+= 1.6.5.2 - 12/09/2012 =
+* Tweak - Extra validation for PayPal IPN
 
 = 1.6.5.1 - 25/08/2012 =
 * Fix - Parse error in Users overview screen

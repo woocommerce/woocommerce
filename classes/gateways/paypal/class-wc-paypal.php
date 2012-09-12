@@ -11,7 +11,9 @@
  * @author 		WooThemes
  */
 class WC_Paypal extends WC_Payment_Gateway {
-
+	
+	var $notify_url;
+	
     /**
      * Constructor for the gateway.
      *
@@ -27,7 +29,7 @@ class WC_Paypal extends WC_Payment_Gateway {
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
         $this->method_title     = __( 'PayPal', 'woocommerce' );
-
+        $this->notify_url	= str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Paypal', home_url( '/' ) ) );
 
 		// Load the form fields.
 		$this->init_form_fields();
@@ -51,10 +53,12 @@ class WC_Paypal extends WC_Payment_Gateway {
 		if ($this->debug=='yes') $this->log = $woocommerce->logger();
 
 		// Actions
-		add_action( 'init', array(&$this, 'check_ipn_response') );
-		add_action('valid-paypal-standard-ipn-request', array(&$this, 'successful_request') );
-		add_action('woocommerce_receipt_paypal', array(&$this, 'receipt_page'));
-		add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+		add_action( 'valid-paypal-standard-ipn-request', array( &$this, 'successful_request' ) );
+		add_action( 'woocommerce_receipt_paypal', array( &$this, 'receipt_page' ) );
+		add_action( 'woocommerce_update_options_payment_gateways', array( &$this, 'process_admin_options' ) );
+		
+		// Payment listener/API hook
+		add_action( 'woocommerce_api_wc_paypal', array( &$this, 'check_ipn_response' ) );
 
 		if ( !$this->is_valid_for_use() ) $this->enabled = false;
     }
@@ -211,7 +215,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ($this->debug=='yes') $this->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . trailingslashit(home_url()).'?paypalListener=paypal_standard_IPN');
+		if ($this->debug=='yes') 
+			$this->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . $this->notify_url );
 
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
@@ -249,7 +254,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'custom' 				=> $order->order_key,
 
 				// IPN
-				'notify_url'			=> trailingslashit( home_url() ) . '?paypalListener=paypal_standard_IPN',
+				'notify_url'			=> $this->notify_url,
 
 				// Billing Address info
 				'first_name'			=> $order->billing_first_name,
@@ -530,25 +535,21 @@ class WC_Paypal extends WC_Payment_Gateway {
 	 */
 	function check_ipn_response() {
 
-		if ( isset( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
+		@ob_clean();
 
-			@ob_clean();
+    	$_POST = stripslashes_deep( $_POST );
 
-        	$_POST = stripslashes_deep($_POST);
+    	if ( $this->check_ipn_request_is_valid() ) {
 
-        	if ( $this->check_ipn_request_is_valid() ) {
+    		header('HTTP/1.1 200 OK');
 
-        		header('HTTP/1.1 200 OK');
+        	do_action( "valid-paypal-standard-ipn-request", $_POST );
 
-            	do_action( "valid-paypal-standard-ipn-request", $_POST );
+		} else {
 
-			} else {
+			wp_die( "PayPal IPN Request Failure" );
 
-				wp_die( "PayPal IPN Request Failure" );
-
-       		}
-
-       }
+   		}
 
 	}
 
