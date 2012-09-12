@@ -475,7 +475,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 	function check_ipn_request_is_valid() {
 		global $woocommerce;
 
-		if ($this->debug=='yes') $this->log->add( 'paypal', 'Checking IPN response is valid...' );
+		if ( $this->debug == 'yes' ) 
+			$this->log->add( 'paypal', 'Checking IPN response is valid...' );
 
     	// Get recieved values from post data
 		$received_values = (array) stripslashes_deep( $_POST );
@@ -492,29 +493,30 @@ class WC_Paypal extends WC_Payment_Gateway {
         );
 
         // Get url
-       	if ( $this->testmode == 'yes' ):
+       	if ( $this->testmode == 'yes' )
 			$paypal_adr = $this->testurl;
-		else :
+		else
 			$paypal_adr = $this->liveurl;
-		endif;
 
 		// Post back to get a response
         $response = wp_remote_post( $paypal_adr, $params );
 
-        if ($this->debug=='yes') $this->log->add( 'paypal', 'IPN Response: ' . print_r($response, true) );
+        if ( $this->debug == 'yes' ) 
+        	$this->log->add( 'paypal', 'IPN Response: ' . print_r( $response, true ) );
 
         // check to see if the request was valid
-        if ( !is_wp_error($response) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && (strcmp( $response['body'], "VERIFIED") == 0)) {
-            if ($this->debug=='yes') $this->log->add( 'paypal', 'Received valid response from PayPal' );
+        if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && ( strcmp( $response['body'], "VERIFIED" ) == 0 ) ) {
+            if ( $this->debug == 'yes' ) 
+            	$this->log->add( 'paypal', 'Received valid response from PayPal' );
+            	
             return true;
         }
 
-        if ($this->debug=='yes') :
+        if ( $this->debug == 'yes' ) {
         	$this->log->add( 'paypal', 'Received invalid response from PayPal' );
-        	if (is_wp_error($response)) :
+        	if ( is_wp_error( $response ) )
         		$this->log->add( 'paypal', 'Error response: ' . $result->get_error_message() );
-        	endif;
-        endif;
+        }
 
         return false;
     }
@@ -528,25 +530,25 @@ class WC_Paypal extends WC_Payment_Gateway {
 	 */
 	function check_ipn_response() {
 
-		if (isset($_GET['paypalListener']) && $_GET['paypalListener'] == 'paypal_standard_IPN'):
+		if ( isset( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
 
 			@ob_clean();
 
         	$_POST = stripslashes_deep($_POST);
 
-        	if ($this->check_ipn_request_is_valid()) :
+        	if ( $this->check_ipn_request_is_valid() ) {
 
         		header('HTTP/1.1 200 OK');
 
-            	do_action("valid-paypal-standard-ipn-request", $_POST);
+            	do_action( "valid-paypal-standard-ipn-request", $_POST );
 
-			else :
+			} else {
 
-				wp_die("PayPal IPN Request Failure");
+				wp_die( "PayPal IPN Request Failure" );
 
-       		endif;
+       		}
 
-       	endif;
+       }
 
 	}
 
@@ -562,54 +564,49 @@ class WC_Paypal extends WC_Payment_Gateway {
 		global $woocommerce;
 
 		// Custom holds post ID
-	    if ( !empty($posted['invoice']) && !empty($posted['custom']) ) {
+	    if ( ! empty( $posted['invoice'] ) && ! empty( $posted['custom'] ) ) {
+		    
+		    $order = $this->get_paypal_order( $posted );
+		    
+		    // Lowercase returned variables
+	        $posted['payment_status'] 	= strtolower( $posted['payment_status'] );
+	        $posted['txn_type'] 		= strtolower( $posted['txn_type'] );
+		    
+		    // Sandbox fix
+	        if ( $posted['test_ipn'] == 1 && $posted['payment_status'] == 'pending' ) 
+	        	$posted['payment_status'] = 'completed';
 
-	    	// Backwards comp for IPN requests
-	    	if ( is_numeric( $posted['custom'] ) ) {
-		    	$order_id = $posted['custom'];
-		    	$order_key = $posted['invoice'];
-	    	} else {
-		    	$order_id = (int) str_replace( $this->invoice_prefix, '', $posted['invoice'] );
-		    	$order_key = $posted['custom'];
-	    	}
-
-			$order = new WC_Order( $order_id );
-
-			if ( ! isset( $order->id ) ) { // We have an invalid $order_id, probably because invoice_prefix has changed
-				$order_id = woocommerce_get_order_id_by_order_key( $order_key );
-				$order = new WC_Order( $order_id );
-			}
-
-	        if ( $order->order_key !== $order_key ) :
-	        	if ($this->debug=='yes') $this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
-	        	exit;
-	        endif;
-
-	        // Lowercase
-	        $posted['payment_status'] = strtolower($posted['payment_status']);
-	        $posted['txn_type'] = strtolower($posted['txn_type']);
-
-	        // Sandbox fix
-	        if ($posted['test_ipn']==1 && $posted['payment_status']=='pending') $posted['payment_status'] = 'completed';
-
-	        if ($this->debug=='yes') $this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
+	        if ( $this->debug == 'yes' ) 
+	        	$this->log->add( 'paypal', 'Payment status: ' . $posted['payment_status'] );
 
 	        // We are here so lets check status and do actions
-	        switch ($posted['payment_status']) :
+	        switch ( $posted['payment_status'] ) {
 	            case 'completed' :
 
 	            	// Check order not already completed
-	            	if ($order->status == 'completed') :
-	            		 if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Order #' . $order_id . ' is already complete.' );
+	            	if ( $order->status == 'completed' ) {
+	            		 if ( $this->debug == 'yes' ) 
+	            		 	$this->log->add( 'paypal', 'Aborting, Order #' . $order_id . ' is already complete.' );
 	            		 exit;
-	            	endif;
+	            	}
 
 	            	// Check valid txn_type
-	            	$accepted_types = array('cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money');
-					if (!in_array($posted['txn_type'], $accepted_types)) :
-						if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
+	            	$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
+					if ( ! in_array( $posted['txn_type'], $accepted_types ) ) {
+						if ( $this->debug == 'yes' ) 
+							$this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
 						exit;
-					endif;
+					}
+					
+					// Validate Amount
+				    if ( $order->get_total() != $posted['payment_gross'] ) {
+				    	
+				    	if ( $this->debug == 'yes' ) 
+				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['payment_gross'] . ')' );
+				    
+				    	// Put this order on-hold for manual checking
+				    	$order->update_status( 'on-hold', sprintf( __( 'Payment error: Amounts do not match (gross %s)', 'woocommerce' ), $posted['payment_gross'] ) );
+				    }	
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )
@@ -627,7 +624,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
 	                $order->payment_complete();
 
-	                if ($this->debug=='yes') $this->log->add( 'paypal', 'Payment complete.' );
+	                if ( $this->debug == 'yes' ) 
+	                	$this->log->add( 'paypal', 'Payment complete.' );
 
 	            break;
 	            case 'denied' :
@@ -635,21 +633,21 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case 'failed' :
 	            case 'voided' :
 	                // Order failed
-	                $order->update_status('failed', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
+	                $order->update_status( 'failed', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 	            break;
 	            case "refunded" :
 
 	            	// Only handle full refunds, not partial
-	            	if ($order->get_total() == ($posted['mc_gross']*-1)) {
+	            	if ( $order->get_total() == ( $posted['mc_gross'] * -1 ) ) {
 
 		            	// Mark order as refunded
-		            	$order->update_status('refunded', sprintf(__('Payment %s via IPN.', 'woocommerce'), strtolower($posted['payment_status']) ) );
+		            	$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
 		            	$mailer = $woocommerce->mailer();
 
 		            	$mailer->wrap_message(
 		            		__('Order refunded/reversed', 'woocommerce'),
-		            		sprintf(__('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
+		            		sprintf( __('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
 						);
 
 						$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
@@ -661,7 +659,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case "chargeback" :
 
 	            	// Mark order as refunded
-	            	$order->update_status('refunded', sprintf( __('Payment %s via IPN.', 'woocommerce'), strtolower( $posted['payment_status'] ) ) );
+	            	$order->update_status( 'refunded', sprintf( __('Payment %s via IPN.', 'woocommerce'), strtolower( $posted['payment_status'] ) ) );
 
 	            	$mailer = $woocommerce->mailer();
 
@@ -673,15 +671,49 @@ class WC_Paypal extends WC_Payment_Gateway {
 					$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
 
 	            break;
-	            default:
+	            default :
 	            	// No action
 	            break;
-	        endswitch;
+	        }
 
 			exit;
-
 	    }
 
+	}
+	
+	/**
+	 * get_paypal_order function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_paypal_order() {
+	
+		// Backwards comp for IPN requests
+    	if ( is_numeric( $posted['custom'] ) ) {
+	    	$order_id 	= (int) $posted['custom'];
+	    	$order_key 	= $posted['invoice'];
+    	} else {
+	    	$order_id 	= (int) str_replace( $this->invoice_prefix, '', $posted['invoice'] );
+	    	$order_key 	= $posted['custom'];
+    	}
+
+		$order = new WC_Order( $order_id );
+
+		if ( ! isset( $order->id ) ) { 
+			// We have an invalid $order_id, probably because invoice_prefix has changed
+			$order_id 	= woocommerce_get_order_id_by_order_key( $order_key );
+			$order 		= new WC_Order( $order_id );
+		}
+		
+		// Validate key
+		if ( $order->order_key !== $order_key ) {
+        	if ( $this->debug=='yes' ) 
+        		$this->log->add( 'paypal', 'Error: Order Key does not match invoice.' );
+        	exit;
+        }
+        
+        return $order;
 	}
 
 }
