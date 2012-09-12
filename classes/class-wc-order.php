@@ -1119,21 +1119,22 @@ class WC_Order {
 	 */
 	function update_status( $new_status_slug, $note = '' ) {
 
-		if ($note) $note .= ' ';
+		if ( $note ) 
+			$note .= ' ';
 
-		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status');
-		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status');
+		$old_status = get_term_by( 'slug', sanitize_title( $this->status ), 'shop_order_status' );
+		$new_status = get_term_by( 'slug', sanitize_title( $new_status_slug ), 'shop_order_status' );
+		
+		if ( $new_status ) {
 
-		if ($new_status) {
-
-			wp_set_object_terms($this->id, array( $new_status->slug ), 'shop_order_status', false);
+			wp_set_object_terms( $this->id, array( $new_status->slug ), 'shop_order_status', false );
 
 			if ( $this->status != $new_status->slug ) {
 
 				// Status was changed
-				do_action( 'woocommerce_order_status_' . $new_status->slug , $this->id );
+				do_action( 'woocommerce_order_status_' . $new_status->slug, $this->id );
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
-				do_action( 'woocommerce_order_status_changed' , $this->id , $this->status , $new_status->slug );
+				do_action( 'woocommerce_order_status_changed', $this->id, $this->status, $new_status->slug );
 				
 				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
 

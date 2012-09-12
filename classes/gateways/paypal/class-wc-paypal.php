@@ -683,13 +683,15 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	}
 	
+
 	/**
 	 * get_paypal_order function.
 	 * 
 	 * @access public
+	 * @param mixed $posted
 	 * @return void
 	 */
-	function get_paypal_order() {
+	function get_paypal_order( $posted ) {
 	
 		// Backwards comp for IPN requests
     	if ( is_numeric( $posted['custom'] ) ) {
