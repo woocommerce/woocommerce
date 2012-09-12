@@ -365,7 +365,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	array(
 		'name' => __( 'Terms page ID', 'woocommerce' ),
 		'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_terms_page_id',
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
@@ -696,7 +695,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'name' => __( 'Currency Position', 'woocommerce' ),
 		'desc' 		=> __( 'This controls the position of the currency symbol.', 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_currency_pos',
 		'css' 		=> 'min-width:150px;',
 		'std' 		=> 'left',
@@ -713,7 +711,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'name' => __( 'Thousand separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_price_thousand_sep',
 		'css' 		=> 'width:30px;',
 		'std' 		=> ',',
@@ -724,7 +721,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'name' => __( 'Decimal separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_price_decimal_sep',
 		'css' 		=> 'width:30px;',
 		'std' 		=> '.',
@@ -735,7 +731,6 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(
 		'name' => __( 'Number of decimals', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_price_num_decimals',
 		'css' 		=> 'width:30px;',
 		'std' 		=> '2',
@@ -822,7 +817,6 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	array(
 		'name' => __( 'Low stock threshold', 'woocommerce' ),
 		'desc' 		=> '',
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_notify_low_stock_amount',
 		'css' 		=> 'width:30px;',
 		'type' 		=> 'text',
@@ -832,7 +826,6 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	array(
 		'name' => __( 'Out of stock threshold', 'woocommerce' ),
 		'desc' 		=> '',
-		'tip' 		=> '',
 		'id' 		=> 'woocommerce_notify_no_stock_amount',
 		'css' 		=> 'width:30px;',
 		'type' 		=> 'text',
@@ -965,38 +958,51 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'name' => __( 'Tax calculations', 'woocommerce' ),
 		'desc' 		=> __( 'Enable taxes and tax calculations', 'woocommerce' ),
 		'id' 		=> 'woocommerce_calc_taxes',
-		'std' 		=> 'yes',
+		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
+		'checkboxgroup'		=> 'start',
+		'show_if_checked' 	=> 'option',
 	),
-
+	
 	array(
-		'desc' 		=> __( 'Display taxes on cart page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_display_cart_taxes',
+		'desc' 		=> __( 'Calculate tax based on the customer shipping address', 'woocommerce' ),
+		'id' 		=> 'woocommerce_tax_shipping_address',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
+		'show_if_checked' 	=> 'yes',
+		'checkboxgroup'		=> ''
+	),
+	
+	array(
+		'desc' 		=> __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
+		'id' 		=> 'woocommerce_tax_round_at_subtotal',
+		'std' 		=> 'no',
+		'type' 		=> 'checkbox',
+		'show_if_checked' 	=> 'yes',
 		'checkboxgroup'		=> ''
 	),
 
 	array(
-		'desc'          => __( 'Display taxes even when the amount is zero', 'woocommerce' ),
-		'id'            => 'woocommerce_display_cart_taxes_if_zero',
-		'std'           => 'no',
-		'type'          => 'checkbox',
-		'checkboxgroup' => '',
+		'desc' 		=> __( 'Display taxes on the cart page', 'woocommerce' ),
+		'id' 		=> 'woocommerce_display_cart_taxes',
+		'std' 		=> 'yes',
+		'type' 		=> 'checkbox',
+		'show_if_checked' 	=> 'yes',
+		'checkboxgroup'		=> ''
 	),
 
 	array(
-		'desc' 		=> __( 'Round tax at subtotal level, instead of per line', 'woocommerce' ),
-		'id' 		=> 'woocommerce_tax_round_at_subtotal',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'desc'          => sprintf( __( 'Display the tax total when tax is %s', 'woocommerce' ), woocommerce_price( 0 ) ),
+		'id'            => 'woocommerce_display_cart_taxes_if_zero',
+		'std'           => 'no',
+		'type'          => 'checkbox',
+		'show_if_checked' 	=> 'yes',
+		'checkboxgroup' => 'end',
 	),
 
 	array(
 		'name' => __( 'Catalog Prices', 'woocommerce' ),
-		'desc' 		=> __( 'Catalog prices defined including tax', 'woocommerce' ),
+		'desc' 		=> __( 'Prices include tax', 'woocommerce' ),
 		'id' 		=> 'woocommerce_prices_include_tax',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
@@ -1005,7 +1011,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 
 	array(
-		'desc' 		=> __( 'Display cart contents excluding tax', 'woocommerce' ),
+		'desc' 		=> __( 'Display cart items excluding tax', 'woocommerce' ),
 		'id' 		=> 'woocommerce_display_cart_prices_excluding_tax',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
@@ -1024,18 +1030,15 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 	array(
 		'name' => __( 'Additional Tax classes', 'woocommerce' ),
-		'desc' 		=> __( 'List 1 per line. This is in addition to the default <em>Standard Rate</em>.', 'woocommerce' ),
-		'tip' 		=> __( 'List product and shipping tax classes here, e.g. Zero Tax, Reduced Rate.', 'woocommerce' ),
+		'desc' 		=> __( 'List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_classes',
-		'css' 		=> 'width:100%; height: 75px;',
+		'css' 		=> 'width:100%; height: 65px;',
 		'type' 		=> 'textarea',
 		'std' 		=> sprintf( __( 'Reduced Rate%sZero Rate', 'woocommerce' ), PHP_EOL )
 	),
 
 	array(
 		'name' => __( 'Tax rates', 'woocommerce' ),
-		'desc' 		=> __( 'All fields are required.', 'woocommerce' ),
-		'tip' 		=> __( 'To avoid rounding errors, insert tax rates with 4 decimal places.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_rates',
 		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'tax_rates',

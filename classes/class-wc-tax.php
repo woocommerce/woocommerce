@@ -206,10 +206,16 @@ class WC_Tax {
 
 		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
 		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
-
-			$country 	= $woocommerce->customer->get_shipping_country();
-			$state 		= $woocommerce->customer->get_shipping_state();
-			$postcode   = $woocommerce->customer->get_shipping_postcode();
+			
+			if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
+				$country 	= $woocommerce->customer->get_shipping_country();
+				$state 		= $woocommerce->customer->get_shipping_state();
+				$postcode   = $woocommerce->customer->get_shipping_postcode();
+			} else {
+				$country 	= $woocommerce->customer->get_country();
+				$state 		= $woocommerce->customer->get_state();
+				$postcode   = $woocommerce->customer->get_postcode();
+			}
 
 			$matched_tax_rates = $this->find_rates( $country, $state, $postcode, $tax_class );
 
@@ -264,9 +270,17 @@ class WC_Tax {
 		$this->get_tax_rates();
 
 		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
-			$country 	= $woocommerce->customer->get_shipping_country();
-			$state 		= $woocommerce->customer->get_shipping_state();
-			$postcode   = $woocommerce->customer->get_shipping_postcode();
+		
+			if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
+				$country 	= $woocommerce->customer->get_shipping_country();
+				$state 		= $woocommerce->customer->get_shipping_state();
+				$postcode   = $woocommerce->customer->get_shipping_postcode();
+			} else {
+				$country 	= $woocommerce->customer->get_country();
+				$state 		= $woocommerce->customer->get_state();
+				$postcode   = $woocommerce->customer->get_postcode();
+			}
+
 		} else {
 			$country 	= $woocommerce->countries->get_base_country();
 			$state 		= $woocommerce->countries->get_base_state();

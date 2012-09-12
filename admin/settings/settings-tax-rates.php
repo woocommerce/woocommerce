@@ -26,7 +26,12 @@ function woocommerce_tax_rates_setting() {
 	?><tr valign="top">
 		<th scope="row" class="titledesc"><?php _e( 'Tax Rates', 'woocommerce' ) ?></th>
 	    <td class="forminp">
-		    	    	
+	    
+		    <a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 1 ); ?>"><?php _e('Export rates', 'woocommerce'); ?></a>
+	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e('Import rates', 'woocommerce'); ?></a>
+	    					
+	    	<p style="margin-top:0;"><?php _e('Define tax rates for countries and states below. You can also export and import from CSV files.', 'woocommerce'); ?></p>
+	    		    	
 	    	<table class="taxrows widefat" cellspacing="0">
 	    		<thead>
 	    			<tr>
@@ -95,17 +100,16 @@ function woocommerce_tax_rates_setting() {
 
 	    		</tbody>
 	    	</table>
-	    	
-	    	<a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 1 ); ?>"><?php _e('Export rates', 'woocommerce'); ?></a>
-	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e('Import rates', 'woocommerce'); ?></a>
-	    					
-	    	<p style="margin-top:8px;" class="description"><?php _e('Define tax rates for countries and states above. You can also import them from a CSV file.', 'woocommerce'); ?></p>
-
 	    </td>
 	</tr>
 	<tr valign="top">
 		<th scope="row" class="titledesc"><?php _e('Local Tax Rates', 'woocommerce') ?></th>
 	    <td class="forminp">
+	    	<a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 2 ); ?>"><?php _e('Export rates', 'woocommerce'); ?></a>
+	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e('Import rates', 'woocommerce'); ?></a>
+	    					
+	    	<p style="margin-top:0;"><?php _e('Define local tax rates for specific post/zip codes below. You can also export and import from CSV files.', 'woocommerce'); ?></p>
+	    	
 	    	<table class="taxrows widefat" cellspacing="0">
 	    		<thead>
 	    			<tr>
@@ -168,11 +172,6 @@ function woocommerce_tax_rates_setting() {
 
 	    		</tbody>
 	    	</table>
-	    	
-	    	<a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 2 ); ?>"><?php _e('Export rates', 'woocommerce'); ?></a>
-	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e('Import rates', 'woocommerce'); ?></a>
-	    					
-	    	<p style="margin-top:8px;" class="description"><?php _e('Define local tax rates for specific post/zip codes above. You can also import them from a CSV file.', 'woocommerce'); ?></p>
 	    </td>
 	</tr>
 
