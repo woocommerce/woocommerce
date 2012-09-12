@@ -599,13 +599,13 @@ class WC_Paypal extends WC_Payment_Gateway {
 					}
 					
 					// Validate Amount
-				    if ( $order->get_total() != $posted['payment_gross'] ) {
+				    if ( $order->get_total() != $posted['mc_gross'] ) {
 				    	
 				    	if ( $this->debug == 'yes' ) 
-				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['payment_gross'] . ')' );
+				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
 				    
 				    	// Put this order on-hold for manual checking
-				    	$order->update_status( 'on-hold', sprintf( __( 'Payment error: Amounts do not match (gross %s)', 'woocommerce' ), $posted['payment_gross'] ) );
+				    	$order->update_status( 'on-hold', __( 'Validation error: PayPal amounts do not match', 'woocommerce' ) );
 				    	
 				    	exit;
 				    }	

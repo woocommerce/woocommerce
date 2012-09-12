@@ -94,7 +94,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								echo '<ul id="shipping_method">';
 
 								foreach ( $available_methods as $method )
-									echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . $method->full_label . '</label></li>';
+									echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false ) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . $method->full_label . '</label></li>';
 
 								echo '</ul>';
 
@@ -240,8 +240,8 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					if (sizeof($available_gateways)) :
 						$default_gateway = get_option('woocommerce_default_gateway');
 						
-						if ( isset( $woocommerce->session->chosen_shipping_method ) && isset( $available_gateways[ $woocommerce->session->chosen_shipping_method ] ) ) {
-							$available_gateways[ $woocommerce->session->chosen_shipping_method ]->set_current();
+						if ( isset( $woocommerce->session->chosen_payment_method ) && isset( $available_gateways[ $woocommerce->session->chosen_payment_method ] ) ) {
+							$available_gateways[ $woocommerce->session->chosen_payment_method ]->set_current();
 						} elseif ( isset( $available_gateways[ $default_gateway ] ) ) {
 							$available_gateways[ $default_gateway ]->set_current();
 						} else {

@@ -147,7 +147,7 @@ class WC_Checkout {
 
 		// Update customer shipping and payment method to posted method
 		$woocommerce->session->chosen_shipping_method 	= $this->posted['shipping_method'];
-		$woocommerce->session->chosen_shipping_method	= $this->posted['payment_method'];
+		$woocommerce->session->chosen_payment_method	= $this->posted['payment_method'];
 
 		// Note if we skip shipping
 		$skipped_shipping = false;

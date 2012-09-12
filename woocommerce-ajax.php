@@ -157,7 +157,7 @@ function woocommerce_ajax_update_order_review() {
 	if ( isset( $_POST['shipping_method'] ) ) 
 		$woocommerce->session->chosen_shipping_method = $_POST['shipping_method'];
 	if ( isset( $_POST['payment_method'] ) ) 
-		$woocommerce->session->chosen_shipping_method = $_POST['payment_method'];
+		$woocommerce->session->chosen_payment_method = $_POST['payment_method'];
 	if ( isset( $_POST['country'] ) ) 
 		$woocommerce->customer->set_country( $_POST['country'] );
 	if ( isset( $_POST['state'] ) ) 
