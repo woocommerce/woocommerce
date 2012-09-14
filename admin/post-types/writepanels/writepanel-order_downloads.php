@@ -84,12 +84,11 @@ function woocommerce_order_downloads_meta_box() {
 						echo '<option value=""></option>';
 
 						$args = array(
-							'post_type' 		=> 'product',
+							'post_type' 		=> array( 'product', 'product_variation' ),
 							'posts_per_page' 	=> -1,
 							'post_status'		=> 'publish',
-							'post_parent'		=> 0,
 							'order'				=> 'ASC',
-							'orderby'			=> 'title',
+							'orderby'			=> 'parent title',
 							'meta_query'		=> array(
 								array(
 									'key' 	=> '_downloadable',
@@ -106,24 +105,6 @@ function woocommerce_order_downloads_meta_box() {
 							if ($sku) $sku = ' SKU: '.$sku;
 
 							echo '<option value="'.$product->ID.'">'.$product->post_title.$sku.' (#'.$product->ID.''.$sku.')</option>';
-
-							$args_get_children = array(
-								'post_type' => array( 'product_variation', 'product' ),
-								'posts_per_page' 	=> -1,
-								'order'				=> 'ASC',
-								'orderby'			=> 'title',
-								'post_parent'		=> $product->ID
-							);
-
-							if ( $children_products =& get_children( $args_get_children ) ) :
-
-								foreach ($children_products as $child) :
-
-									echo '<option value="'.$child->ID.'">&nbsp;&nbsp;&mdash;&nbsp;'.$child->post_title.'</option>';
-
-								endforeach;
-
-							endif;
 
 						endforeach;
 					?>
