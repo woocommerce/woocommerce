@@ -81,13 +81,13 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			?>
 			<script type='text/javascript'>
 			/* <![CDATA[ */
-				var dropdown = document.getElementById("dropdown_product_cat");
-				function onCatChange() {
-					if ( dropdown.options[dropdown.selectedIndex].value !=='' ) {
-						location.href = "<?php echo home_url(); ?>/?product_cat="+dropdown.options[dropdown.selectedIndex].value;
+				var product_cat_dropdown = document.getElementById("dropdown_product_cat");
+				function onProductCatChange() {
+					if ( product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value !=='' ) {
+						location.href = "<?php echo home_url(); ?>/?product_cat="+product_cat_dropdown.options[product_cat_dropdown.selectedIndex].value;
 					}
 				}
-				dropdown.onchange = onCatChange;
+				product_cat_dropdown.onchange = onProductCatChange;
 			/* ]]> */
 			</script>
 			<?php
