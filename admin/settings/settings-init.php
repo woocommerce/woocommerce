@@ -1106,11 +1106,11 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 	array(
 		'name' => __( 'Background colour', 'woocommerce' ),
-		'desc' 		=> __( 'The background colour for WooCommerce email templates. Default <code>#eeeeee</code>.', 'woocommerce' ),
+		'desc' 		=> __( 'The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_background_color',
 		'type' 		=> 'color',
 		'css' 		=> 'width:6em;',
-		'std' 		=> '#eeeeee'
+		'std' 		=> '#f5f5f5'
 	),
 
 	array(
