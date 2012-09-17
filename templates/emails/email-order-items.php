@@ -1,8 +1,6 @@
 <?php
 /**
- * Email Order Item
- *
- * Shows a line item inside the order emails table
+ * Email Order Items
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails

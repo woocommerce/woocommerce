@@ -20,7 +20,7 @@ class WC_Order {
 	/** @var string Order date (placed). */
 	var $order_date;
 
-	/** @var string Order date (placed). */
+	/** @var string Order date (paid). */
 	var $modified_date;
 
 	/** @var string Note added by the customer. */
@@ -876,7 +876,7 @@ class WC_Order {
 						continue;
 
 					$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
-						'label' => $tax[ 'label' ],
+						'label' => $tax[ 'label' ] . ':',
 						'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
 					);
 				}
@@ -898,7 +898,7 @@ class WC_Order {
 						continue;
 
 					$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
-						'label' => $tax[ 'label' ],
+						'label' => $tax[ 'label' ] . ':',
 						'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
 					);
 				}
@@ -939,15 +939,17 @@ class WC_Order {
 	 * @param bool $show_sku (default: false)
 	 * @param bool $show_purchase_note (default: false)
 	 * @param bool $show_image (default: false)
-	 * @param array $image_size (default: array( 32)
-	 * @param 32 )
+	 * @param array $image_size (default: array( 32, 32 )
+	 * @param bool plain text
 	 * @return string
 	 */
-	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ) ) {
+	function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
 
 		ob_start();
+		
+		$template = $plain_text ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		woocommerce_get_template( 'emails/email-order-items.php', array(
+		woocommerce_get_template( $template, array(
 			'order'					=> $this,
 			'items' 				=> $this->get_items(),
 			'show_download_links'	=> $show_download_links,

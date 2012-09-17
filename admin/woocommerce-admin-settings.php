@@ -75,11 +75,11 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					$subtext 		= ( ! empty( $_POST['woocommerce_frontend_css_subtext'] ) ) ? woocommerce_format_hex( $_POST['woocommerce_frontend_css_subtext'] ) : '';
 
 					$colors = array(
-						'primary' 	=> $primary,
-						'secondary' => $secondary,
-						'highlight' => $highlight,
-						'content_bg' => $content_bg,
-						'subtext' => $subtext
+						'primary' 		=> $primary,
+						'secondary' 	=> $secondary,
+						'highlight' 	=> $highlight,
+						'content_bg' 	=> $content_bg,
+						'subtext' 		=> $subtext
 					);
 
 					$old_colors = get_option( 'woocommerce_frontend_css_colors' );
@@ -87,15 +87,29 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 					if ( $old_colors != $colors )
 						woocommerce_compile_less_styles();
-
 				}
 
 			} else {
 
 				// If saving a shipping methods options, load 'er up
 				if ( $current_tab == 'shipping' && class_exists( $current_section ) ) {
+					
 					$current_section_class = new $current_section();
 					do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
+				
+				// If saving an email's options, load theme
+				} elseif ( $current_tab == 'email' ) {
+					
+					// Load mailer
+					$mailer 	= $woocommerce->mailer();
+					
+					if ( class_exists( $current_section ) ) {
+						$current_section_class = new $current_section();
+						do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section_class->id );
+					} else {
+						do_action( 'woocommerce_update_options_' . $current_tab . '_' . $current_section );
+					}
+					
 				} else {
 
 					// Save section only
@@ -229,8 +243,42 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						case "pages" :
 						case "catalog" :
 						case "inventory" :
-						case "email" :
 							woocommerce_admin_fields( $woocommerce_settings[$current_tab] );
+						break;
+						case "email" :
+						
+							$current = $current_section ? '' : 'class="current"';
+
+							$links = array( '<a href="' . admin_url( 'admin.php?page=woocommerce_settings&tab=email' ) . '" ' . $current . '>' . __( 'Email Options', 'woocommerce' ) . '</a>' );
+
+							// Define emails that can be customised here
+							$mailer 			= $woocommerce->mailer();
+							$email_templates 	= $mailer->get_emails();
+
+							foreach ( $email_templates as $email ) {
+
+								$title = empty( $email->title ) ? ucwords( $email->id ) : ucwords( $email->title );
+
+								$current = ( get_class( $email ) == $current_section ) ? 'class="current"' : '';
+
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $email ), admin_url('admin.php?page=woocommerce_settings&tab=email') ) . '"' . $current . '>' . $title . '</a>';
+
+							}
+
+							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
+							
+							// Specific email options
+							if ( $current_section ) {
+								foreach ( $email_templates as $email ) {
+									if ( get_class( $email ) == $current_section ) {
+										$email->admin_options();
+										break;
+									}
+								}
+			            	} else {
+			            		woocommerce_admin_fields( $woocommerce_settings[ $current_tab ] );
+			            	}
+
 						break;
 						case "shipping" :
 

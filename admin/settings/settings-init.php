@@ -1051,26 +1051,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', array(
 
-	array(	'name' => __( 'Email Recipient Options', 'woocommerce' ), 'type' => 'title', '', 'id' => 'email_recipient_options' ),
-
-	array(
-		'name' => __( 'New order notifications', 'woocommerce' ),
-		'desc' 		=> __( 'The recipient of new order emails. Defaults to the admin email.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_new_order_email_recipient',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'std' 		=> esc_attr(get_option('admin_email'))
-	),
-
-	array(
-		'name' => __( 'Inventory notifications', 'woocommerce' ),
-		'desc' 		=> __( 'The recipient of stock emails. Defaults to the admin email.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_stock_email_recipient',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'std' 		=> esc_attr(get_option('admin_email'))
-	),
-
 	array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 
 	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce'), 'id' => 'email_options' ),

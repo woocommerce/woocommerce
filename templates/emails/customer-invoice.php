@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     1.6.4
+ * @version     1.7.0
  */
 
 if (!defined('ABSPATH')) exit; ?>
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) exit; ?>
 
 <?php if ($order->status=='pending') : ?>
 
-	<p><?php printf( __( 'An order has been created for you on &ldquo;%s&rdquo;. To pay for this order please use the following link: <a href="%s">Pay</a>', 'woocommerce' ), get_bloginfo( 'name' ), $order->get_checkout_payment_url() ); ?></p>
+	<p><?php printf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name' ), '<a href="' . $order->get_checkout_payment_url() . '">' . __( 'pay', 'woocommerce' ) . '</a>' ); ?></p>
 
 <?php endif; ?>
 
@@ -61,5 +61,7 @@ if (!defined('ABSPATH')) exit; ?>
 </table>
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>
+
+<?php do_action( 'woocommerce_email_order_meta', $order, false ); ?>
 
 <?php do_action('woocommerce_email_footer'); ?>

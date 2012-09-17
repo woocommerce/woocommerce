@@ -104,7 +104,7 @@ class WC_COD extends WC_Payment_Gateway {
 				'class'			=> 'chosen_select',
 				'css'			=> 'width: 450px;',
 				'default' 		=> '',
-				'description' 	=> '<br/>' . __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'description' 	=> __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
 				'options'		=> $shipping_methods
 			)
  	   );

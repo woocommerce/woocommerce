@@ -188,6 +188,7 @@ class WC_Settings_API {
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['placeholder'] = (isset( $data['placeholder'] )) ? $data['placeholder'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
@@ -196,8 +197,8 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text wide-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				$html .= '<input class="input-text regular-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" placeholder="' . $data['placeholder'] . '" />';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
@@ -228,8 +229,8 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text wide-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				$html .= '<input class="input-text regular-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
@@ -262,7 +263,7 @@ class WC_Settings_API {
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
 				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'. $value .'</textarea>';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
@@ -293,7 +294,7 @@ class WC_Settings_API {
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
 				$html .= '<input style="'.$data['css'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="'.$data['class'].'" /> ' . $label . '</label><br />' . "\n";
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
@@ -331,7 +332,7 @@ class WC_Settings_API {
 				endforeach;
 
 				$html .= '</select>';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";
@@ -371,7 +372,7 @@ class WC_Settings_API {
 				endforeach;
 
 				$html .= '</select>';
-				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<span class="description">' . $data['description'] . '</span>' . "\n"; }
+				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= '<p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
 		$html .= '</tr>' . "\n";

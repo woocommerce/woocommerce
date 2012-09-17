@@ -329,7 +329,8 @@ class Woocommerce {
 		// Email Actions
 		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
 
-		foreach ( $email_actions as $action ) add_action( $action, array( &$this, 'send_transactional_email') );
+		foreach ( $email_actions as $action ) 
+			add_action( $action, array( &$this, 'send_transactional_email') );
 
 		// Actions for SSL
 		if ( ! is_admin() || defined('DOING_AJAX') ) {
@@ -1266,7 +1267,7 @@ class Woocommerce {
 	 */
 	function send_transactional_email( $args = array() ) {
 		$this->mailer();
-		do_action( current_filter() . '_notification' , $args );
+		do_action( current_filter() . '_notification', $args );
 	}
 
 
@@ -1279,8 +1280,8 @@ class Woocommerce {
 	function mailer() {
 		// Init mail class
 		if ( ! class_exists('WC_Email') ) {
-			include( 'classes/class-wc-email.php' );
-			$this->woocommerce_email = new WC_Email();
+			include( 'classes/emails/class-wc-emails.php' );
+			$this->woocommerce_email = new WC_Emails();
 		}
 		return $this->woocommerce_email;
 	}

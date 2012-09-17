@@ -50,6 +50,8 @@ if (!defined('ABSPATH')) exit; ?>
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>
 
+<?php do_action( 'woocommerce_email_order_meta', $order, false ); ?>
+
 <h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 
 <?php if ($order->billing_email) : ?>

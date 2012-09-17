@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) exit; ?>
 
 <?php do_action('woocommerce_email_header', $email_heading); ?>
 
-<p><?php _e("Your order is complete. Your order's details are below:", 'woocommerce'); ?></p>
+<p><?php printf( __( "Hi there. Your recent order on %s has been completed. Your order details are shown below for your reference:", 'woocommerce' ), get_option( 'blogname' ) ); ?></p>
 
 <?php do_action('woocommerce_email_before_order_table', $order, false); ?>
 
@@ -45,6 +45,8 @@ if (!defined('ABSPATH')) exit; ?>
 </table>
 
 <?php do_action('woocommerce_email_after_order_table', $order, false); ?>
+
+<?php do_action( 'woocommerce_email_order_meta', $order, false ); ?>
 
 <h2><?php _e('Customer details', 'woocommerce'); ?></h2>
 

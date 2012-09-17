@@ -153,15 +153,17 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 1.7.0 = 
 * Feature - Added sales by category report.
 * Feature - Multiple downloadable files per product/variation (kudos Justin Stern).
-* Feature - Download expirey for variations (kudos niravmehta).
+* Feature - Download expiry for variations (kudos niravmehta).
 * Feature - Added wildcard support to local delivery postcodes.
 * Feature - Option to enable Cash on Delivery for select shipping methods only.
 * Feature - Stopped using PHP sessions for cart data - using cookies and transients instead to allow WC to function better with static caching. Also to reduce support regarding hosts and session configurations.
 * Feature - Export and Import Tax Rates from a CSV file.
 * Feature - Option to control whether tax is calculated based on customer shipping or billing address.
+* Feature - New options for individual transaction emails with template editor
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 
+* Tweak - Humanised order email subjects/headings
 * Tweak - Cleaned up the tax settings.
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
 * Tweak - On add to cart success, redirect back.
