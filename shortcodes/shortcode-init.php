@@ -476,7 +476,7 @@ function woocommerce_product_add_to_cart_url( $atts ){
  * @return string
  */
 function woocommerce_sale_products( $atts ){
-    global $woocommerce_loop;
+    global $woocommerce_loop, $woocommerce;
 
     extract( shortcode_atts( array(
         'per_page'      => '12',
@@ -485,27 +485,57 @@ function woocommerce_sale_products( $atts ){
         'order'         => 'asc'
         ), $atts ) );
 
-    $args = array(
-        'post_type' => 'product',
-        'post_status' => 'publish',
-        'ignore_sticky_posts'   => 1,
-        'orderby' => $orderby,
-        'order' => $order,
-        'posts_per_page' => $per_page,
-        'meta_query' => array(
-            array(
-                'key' => '_visibility',
-                'value' => array('catalog', 'visible'),
-                'compare' => 'IN'
-            ),
-            array(
-                'key' => '_sale_price',
-                'value' => 0,
-                'compare' => '>',
-                'type' => 'NUMERIC'
-            )
-        )
-    );
+	// Get products on sale
+	if ( false === ( $product_ids_on_sale = get_transient( 'wc_products_onsale' ) ) ) {
+
+		$meta_query = array();
+
+	    $meta_query[] = array(
+	    	'key' => '_sale_price',
+	        'value' 	=> 0,
+			'compare' 	=> '>',
+			'type'		=> 'NUMERIC'
+	    );
+
+		$on_sale = get_posts(array(
+			'post_type' 		=> array('product', 'product_variation'),
+			'posts_per_page' 	=> -1,
+			'post_status' 		=> 'publish',
+			'meta_query' 		=> $meta_query,
+			'fields' 			=> 'id=>parent'
+		));
+
+		$product_ids 	= array_keys( $on_sale );
+		$parent_ids		= array_values( $on_sale );
+
+		// Check for scheduled sales which have not started
+		foreach ( $product_ids as $key => $id )
+			if ( get_post_meta( $id, '_sale_price_dates_from', true ) > current_time('timestamp') )
+				unset( $product_ids[ $key ] );
+
+		$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
+
+		set_transient( 'wc_products_onsale', $product_ids_on_sale );
+	}
+		
+	$product_ids_on_sale[] = 0;
+
+	$meta_query = array();
+	$meta_query[] = $woocommerce->query->visibility_meta_query();
+    $meta_query[] = $woocommerce->query->stock_status_meta_query();
+
+	$args = array(
+		'posts_per_page'=> $per_page,
+		'orderby' 		=> $orderby,
+        'order' 		=> $order,
+		'no_found_rows' => 1,
+		'post_status' 	=> 'publish',
+		'post_type' 	=> 'product',
+		'orderby' 		=> 'date',
+		'order' 		=> 'ASC',
+		'meta_query' 	=> $meta_query,
+		'post__in'		=> $product_ids_on_sale
+	);
 
   	ob_start();
 
