@@ -160,6 +160,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Export and Import Tax Rates from a CSV file.
 * Feature - Option to control whether tax is calculated based on customer shipping or billing address.
 * Feature - New options for individual transaction emails with template editor
+* Feature - Added "On Sale" shortcode (thanks daltonrooney)
+* Feature - Added "Best Selling" shortcode
+* Feature = Added "Top Rated" shortcode
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 

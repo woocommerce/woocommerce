@@ -507,29 +507,147 @@ function woocommerce_sale_products( $atts ){
         )
     );
 
-    ob_start();
+  	ob_start();
 
-    $products = new WP_Query( $args );
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
 
-    $woocommerce_loop['columns'] = $columns;
+	if ( $products->have_posts() ) : ?>
 
-    if ( $products->have_posts() ) : ?>
+		<ul class="products">
 
-        <ul class="products">
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
-            <?php while ( $products->have_posts() ) : $products->the_post(); ?>
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
 
-                <?php woocommerce_get_template_part( 'content', 'product' ); ?>
+			<?php endwhile; // end of the loop. ?>
 
-            <?php endwhile; // end of the loop. ?>
+		</ul>
 
-        </ul>
+	<?php endif;
 
-    <?php endif;
+	wp_reset_postdata();
 
-    wp_reset_query();
+	return ob_get_clean();
+}
 
-    return ob_get_clean();
+/**
+ * List best selling products on sale
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_best_selling_products( $atts ){
+    global $woocommerce_loop;
+
+    extract( shortcode_atts( array(
+        'per_page'      => '12',
+        'columns'       => '4'
+        ), $atts ) );
+
+    $args = array(
+        'post_type' => 'product',
+        'post_status' => 'publish',
+        'ignore_sticky_posts'   => 1,
+        'posts_per_page' => $per_page,
+        'meta_key' 		 => 'total_sales',
+    	'orderby' 		 => 'meta_value',
+        'meta_query' => array(
+            array(
+                'key' => '_visibility',
+                'value' => array( 'catalog', 'visible' ),
+                'compare' => 'IN'
+            )
+        )
+    );
+
+  	ob_start();
+  	
+	$products = new WP_Query( $args );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+
+		<ul class="products">
+
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+
+			<?php endwhile; // end of the loop. ?>
+
+		</ul>
+
+	<?php endif;
+
+	wp_reset_postdata();
+
+	return ob_get_clean();
+}
+
+/**
+ * List top rated products on sale
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_top_rated_products( $atts ){
+    global $woocommerce_loop;
+
+    extract( shortcode_atts( array(
+        'per_page'      => '12',
+        'columns'       => '4',
+        'orderby'       => 'title',
+        'order'         => 'asc'
+        ), $atts ) );
+
+    $args = array(
+        'post_type' => 'product',
+        'post_status' => 'publish',
+        'ignore_sticky_posts'   => 1,
+        'orderby' => $orderby,
+        'order' => $order,
+        'posts_per_page' => $per_page,
+        'meta_query' => array(
+            array(
+                'key' => '_visibility',
+                'value' => array('catalog', 'visible'),
+                'compare' => 'IN'
+            )
+        )
+    );
+
+  	ob_start();
+  	
+  	add_filter( 'posts_clauses', 'woocommerce_order_by_rating_post_clauses' );
+
+	$products = new WP_Query( $args );
+	
+	remove_filter( 'posts_clauses', 'woocommerce_order_by_rating_post_clauses' );
+	
+	$woocommerce_loop['columns'] = $columns;
+
+	if ( $products->have_posts() ) : ?>
+
+		<ul class="products">
+
+			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
+
+				<?php woocommerce_get_template_part( 'content', 'product' ); ?>
+
+			<?php endwhile; // end of the loop. ?>
+
+		</ul>
+
+	<?php endif;
+
+	wp_reset_postdata();
+
+	return ob_get_clean();
 }
 
 /**
@@ -664,6 +782,31 @@ function woocommerce_messages_shortcode() {
 }
 
 /**
+ * woocommerce_order_by_rating_post_clauses function.
+ * 
+ * @access public
+ * @param mixed $args
+ * @return void
+ */
+function woocommerce_order_by_rating_post_clauses( $args ) {
+
+	global $wpdb;
+
+	$args['where'] .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
+
+	$args['join'] .= "
+		LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
+		LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
+	";
+
+	$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
+
+	$args['groupby'] = "$wpdb->posts.ID";
+
+	return $args;
+}
+
+/**
  * Shortcode creation
  **/
 add_shortcode('product', 'woocommerce_product');
@@ -675,6 +818,8 @@ add_shortcode('add_to_cart_url', 'woocommerce_product_add_to_cart_url');
 add_shortcode('products', 'woocommerce_products');
 add_shortcode('recent_products', 'woocommerce_recent_products');
 add_shortcode('sale_products', 'woocommerce_sale_products');
+add_shortcode('best_selling_products', 'woocommerce_best_selling_products');
+add_shortcode('top_rated_products', 'woocommerce_top_rated_products');
 add_shortcode('featured_products', 'woocommerce_featured_products');
 add_shortcode('woocommerce_cart', 'get_woocommerce_cart');
 add_shortcode('woocommerce_checkout', 'get_woocommerce_checkout');
