@@ -800,7 +800,7 @@ function woocommerce_add_order_item() {
 		$_product = new WC_Product_Variation( $post->ID );
 	endif;
 	?>
-	<tr class="item" rel="<?php echo $index; ?>">
+	<tr class="item new_row" rel="<?php echo $index; ?>">
 		<td class="thumb">
 			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
 				echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $_product->id;
@@ -850,7 +850,7 @@ function woocommerce_add_order_item() {
 		</td>
 
 		<td class="quantity" width="1%">
-			<input type="text" name="item_quantity[<?php echo $index; ?>]" placeholder="0" value="1" size="2" class="quantity" />
+			<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo $index; ?>]" placeholder="0" value="1" size="2" class="quantity" />
 		</td>
 
 		<td class="line_subtotal" width="1%">

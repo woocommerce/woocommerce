@@ -410,7 +410,7 @@ function woocommerce_order_items_meta_box($post) {
 						</td>
 
 						<td class="quantity" width="1%">
-							<input type="text" name="item_quantity[<?php echo $loop; ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="2" class="quantity" />
+							<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo $loop; ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
 						</td>
 
 						<td class="line_subtotal" width="1%">

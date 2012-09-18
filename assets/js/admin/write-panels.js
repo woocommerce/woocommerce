@@ -151,7 +151,102 @@ jQuery( function($){
 		}
 		return false;
 	});
+	
+	$('#order_items_list').on( 'init_row', 'tr.item', function() {
+		var $row = $(this);
+		var $qty = $row.find('input.quantity');
+		var qty = $qty.val();
+		
+		var line_subtotal 	= $row.find('input.line_subtotal').val();
+		var line_total 		= $row.find('input.line_total').val();
+		var line_tax 		= $row.find('input.line_tax').val();
+		var line_subtotal_tax = $row.find('input.line_subtotal_tax').val();
+		
+		if ( qty ) {
+			unit_subtotal 		= accounting.toFixed( ( line_subtotal / qty ), 2 );
+			unit_subtotal_tax 	= accounting.toFixed( ( line_subtotal_tax / qty ), 2 );
+			unit_total			= accounting.toFixed( ( line_total / qty ), 2 );
+			unit_total_tax		= accounting.toFixed( ( line_tax / qty ), 2 );
+		} else {
+			unit_subtotal = unit_subtotal_tax = unit_total = unit_total_tax = 0;
+		}
+		
+		$qty.attr( 'data-o_qty', qty );
+		$row.attr( 'data-unit_subtotal', unit_subtotal );
+		$row.attr( 'data-unit_subtotal_tax', unit_subtotal_tax );
+		$row.attr( 'data-unit_total', unit_total );
+		$row.attr( 'data-unit_total_tax', unit_total_tax );
+	});
+	
+	// When the page is loaded, store the unit costs
+	$('#order_items_list tr.item').each( function() {
+		$(this).trigger('init_row');
+	} );
+	
+	// When the qty is changed, increase or decrease costs
+	$('#order_items_list').on( 'change', 'input.quantity', function() {
+		var $row = $(this).closest('tr.item');
+		var qty = $(this).val();
+		
+		var unit_subtotal 		= $row.attr('data-unit_subtotal');
+		var unit_subtotal_tax 	= $row.attr('data-unit_subtotal_tax');
+		var unit_total 			= $row.attr('data-unit_total');
+		var unit_total_tax = $row.attr('data-unit_total_tax');
+		var o_qty 				= $(this).attr('data-o_qty');
+		
+		var subtotal = accounting.formatNumber( unit_subtotal * qty, 2, '' );
+		var tax = accounting.formatNumber( unit_subtotal_tax * qty, 2, '' );
+		var total = accounting.formatNumber( unit_total * qty, 2, '' );
+		var total_tax = accounting.formatNumber( unit_total_tax * qty, 2, '' );
+		
+		$row.find('input.line_subtotal').val( subtotal );
+		$row.find('input.line_total').val( total );
+		$row.find('input.line_subtotal_tax').val( tax );
+		$row.find('input.line_tax').val( total_tax );
+	});
+	
+	// When subtotal is changed, update the unit costs
+	$('#order_items_list').on( 'change', 'input.line_subtotal', function() {
+		var $row = $(this).closest('tr.item');
+		var $qty = $row.find('input.quantity');
+		var qty = $qty.val();
+		var value = ( qty ) ? accounting.toFixed( ( $(this).val() / qty ), 2 ) : 0;
+				
+		$row.attr( 'data-unit_subtotal', value );
+	});
+	
+	// When total is changed, update the unit costs + discount amount
+	$('#order_items_list').on( 'change', 'input.line_total', function() {
+		var $row = $(this).closest('tr.item');
+		var $qty = $row.find('input.quantity');
+		var qty = $qty.val();
+		var value = ( qty ) ? accounting.toFixed( ( $(this).val() / qty ), 2 ) : 0;
+				
+		$row.attr( 'data-unit_total', value );
+	});
 
+	// When total is changed, update the unit costs + discount amount
+	$('#order_items_list').on( 'change', 'input.line_subtotal_tax', function() {
+		var $row = $(this).closest('tr.item');
+		var $qty = $row.find('input.quantity');
+		var qty = $qty.val();
+		var value = ( qty ) ? accounting.toFixed( ( $(this).val() / qty ), 2 ) : 0;
+				
+		$row.attr( 'data-unit_subtotal_tax', value );
+	});
+	
+	// When total is changed, update the unit costs + discount amount
+	$('#order_items_list').on( 'change', 'input.line_tax', function() {
+		var $row = $(this).closest('tr.item');
+		var $qty = $row.find('input.quantity');
+		var qty = $qty.val();
+		var value = ( qty ) ? accounting.toFixed( ( $(this).val() / qty ), 2 ) : 0;
+				
+		$row.attr( 'data-unit_total_tax', value );
+	});
+	
+	
+	// Calculate totals
 	$('button.calc_line_taxes').live('click', function(){
 		// Block write panel
 		$('.woocommerce_order_items_wrapper').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
@@ -191,8 +286,8 @@ jQuery( function($){
 				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
 
 					result = jQuery.parseJSON( response );
-					$row.find('input.line_subtotal_tax').val( result.line_subtotal_tax );
-					$row.find('input.line_tax').val( result.line_tax );
+					$row.find('input.line_subtotal_tax').val( result.line_subtotal_tax ).change();
+					$row.find('input.line_tax').val( result.line_tax ).change();
 
 					if (idx == ($items.size() - 1)) {
 						$('.woocommerce_order_items_wrapper').unblock();
@@ -227,9 +322,9 @@ jQuery( function($){
 			var line_totals 		= 0;
 			var cart_discount 		= 0;
 			var cart_tax 			= 0;
-			var order_shipping 		= parseFloat( $('#_order_shipping').val() );
-			var order_shipping_tax 	= parseFloat( $('#_order_shipping_tax').val() );
-			var order_discount		= parseFloat( $('#_order_discount').val() );
+			var order_shipping 		= accounting.unformat( $('#_order_shipping').val() );
+			var order_shipping_tax 	= accounting.unformat( $('#_order_shipping_tax').val() );
+			var order_discount		= accounting.unformat( $('#_order_discount').val() );
 
 			if ( ! order_shipping ) order_shipping = 0;
 			if ( ! order_shipping_tax ) order_shipping_tax = 0;
@@ -237,42 +332,43 @@ jQuery( function($){
 
 			$('#order_items_list tr.item').each(function(){
 
-				var line_subtotal 		= parseFloat( $(this).find('input.line_subtotal').val() );
-				var line_subtotal_tax 	= parseFloat( $(this).find('input.line_subtotal_tax').val() );
-				var line_total 			= parseFloat( $(this).find('input.line_total').val() );
-				var line_tax 			= parseFloat( $(this).find('input.line_tax').val() );
+				var line_subtotal 		= accounting.unformat( $(this).find('input.line_subtotal').val() );
+				var line_subtotal_tax 	= accounting.unformat( $(this).find('input.line_subtotal_tax').val() );
+				var line_total 			= accounting.unformat( $(this).find('input.line_total').val() );
+				var line_tax 			= accounting.unformat( $(this).find('input.line_tax').val() );
 
 				if ( ! line_subtotal ) line_subtotal = 0;
 				if ( ! line_subtotal_tax ) line_subtotal_tax = 0;
 				if ( ! line_total ) line_total = 0;
 				if ( ! line_tax ) line_tax = 0;
 
-				line_subtotals = parseFloat( line_subtotals + line_subtotal );
-				line_subtotal_taxes = parseFloat( line_subtotal_taxes + line_subtotal_tax );
-				line_totals = parseFloat( line_totals + line_total );
+				line_subtotals = line_subtotals + line_subtotal;
+				line_subtotal_taxes = line_subtotal_taxes + line_subtotal_tax;
+				line_totals = line_totals + line_total;
 
-				if (woocommerce_writepanel_params.round_at_subtotal=='no') {
-					line_tax = parseFloat( line_tax.toFixed( 2 ) );
+				if ( woocommerce_writepanel_params.round_at_subtotal=='no' ) {
+					line_tax = accounting.toFixed( line_tax, 2 );
 				}
 
-				cart_tax = parseFloat( cart_tax + line_tax );
+				cart_tax = cart_tax + line_tax;
 
 			});
 
 			// Tax
 			if (woocommerce_writepanel_params.round_at_subtotal=='yes') {
-				cart_tax = parseFloat( cart_tax.toFixed( 2 ) );
+				cart_tax = accounting.toFixed( cart_tax, 2 );
 			}
 
 			// Cart discount
 			var cart_discount = ( (line_subtotals + line_subtotal_taxes) - (line_totals + cart_tax) );
-			if (cart_discount<0) cart_discount = 0;
-			cart_discount = cart_discount.toFixed( 2 );
+			if ( cart_discount < 0 ) cart_discount = 0;
+			cart_discount = accounting.toFixed( cart_discount, 2 );
 
 			// Total
 			var order_total = line_totals + cart_tax + order_shipping + order_shipping_tax - order_discount;
-			order_total = order_total.toFixed( 2 );
-
+			order_total = accounting.toFixed( order_total, 2 );
+			cart_tax = accounting.toFixed( cart_tax, 2 );
+			
 			// Set fields
 			$('#_cart_discount').val( cart_discount );
 			$('#_order_tax').val( cart_tax );
@@ -280,7 +376,6 @@ jQuery( function($){
 
 			// Since we currently cannot calc shipping from the backend, ditch the rows. They must be manually calculated.
 			$('#tax_rows').empty();
-
 			$('#woocommerce-order-totals').unblock();
 
 		} else {
@@ -329,6 +424,8 @@ jQuery( function($){
 					    $('select#add_item_id').trigger("liszt:updated");
 					    $('table.woocommerce_order_items').unblock();
 					}
+					
+					$('#order_items_list tr.new_row').trigger('init_row').removeClass('new_row');
 				});
 
 				size++;
@@ -875,3 +972,8 @@ jQuery( function($){
 	}
 
 });
+
+/*!
+ * accounting.js v0.3.2, copyright 2011 Joss Crowcroft, MIT license, http://josscrowcroft.github.com/accounting.js
+ */
+(function(p,z){function q(a){return!!(""===a||a&&a.charCodeAt&&a.substr)}function m(a){return u?u(a):"[object Array]"===v.call(a)}function r(a){return"[object Object]"===v.call(a)}function s(a,b){var d,a=a||{},b=b||{};for(d in b)b.hasOwnProperty(d)&&null==a[d]&&(a[d]=b[d]);return a}function j(a,b,d){var c=[],e,h;if(!a)return c;if(w&&a.map===w)return a.map(b,d);for(e=0,h=a.length;e<h;e++)c[e]=b.call(d,a[e],e,a);return c}function n(a,b){a=Math.round(Math.abs(a));return isNaN(a)?b:a}function x(a){var b=c.settings.currency.format;"function"===typeof a&&(a=a());return q(a)&&a.match("%v")?{pos:a,neg:a.replace("-","").replace("%v","-%v"),zero:a}:!a||!a.pos||!a.pos.match("%v")?!q(b)?b:c.settings.currency.format={pos:b,neg:b.replace("%v","-%v"),zero:b}:a}var c={version:"0.3.2",settings:{currency:{symbol:"$",format:"%s%v",decimal:".",thousand:",",precision:2,grouping:3},number:{precision:0,grouping:3,thousand:",",decimal:"."}}},w=Array.prototype.map,u=Array.isArray,v=Object.prototype.toString,o=c.unformat=c.parse=function(a,b){if(m(a))return j(a,function(a){return o(a,b)});a=a||0;if("number"===typeof a)return a;var b=b||".",c=RegExp("[^0-9-"+b+"]",["g"]),c=parseFloat((""+a).replace(/\((.*)\)/,"-$1").replace(c,"").replace(b,"."));return!isNaN(c)?c:0},y=c.toFixed=function(a,b){var b=n(b,c.settings.number.precision),d=Math.pow(10,b);return(Math.round(c.unformat(a)*d)/d).toFixed(b)},t=c.formatNumber=function(a,b,d,i){if(m(a))return j(a,function(a){return t(a,b,d,i)});var a=o(a),e=s(r(b)?b:{precision:b,thousand:d,decimal:i},c.settings.number),h=n(e.precision),f=0>a?"-":"",g=parseInt(y(Math.abs(a||0),h),10)+"",l=3<g.length?g.length%3:0;return f+(l?g.substr(0,l)+e.thousand:"")+g.substr(l).replace(/(\d{3})(?=\d)/g,"$1"+e.thousand)+(h?e.decimal+y(Math.abs(a),h).split(".")[1]:"")},A=c.formatMoney=function(a,b,d,i,e,h){if(m(a))return j(a,function(a){return A(a,b,d,i,e,h)});var a=o(a),f=s(r(b)?b:{symbol:b,precision:d,thousand:i,decimal:e,format:h},c.settings.currency),g=x(f.format);return(0<a?g.pos:0>a?g.neg:g.zero).replace("%s",f.symbol).replace("%v",t(Math.abs(a),n(f.precision),f.thousand,f.decimal))};c.formatColumn=function(a,b,d,i,e,h){if(!a)return[];var f=s(r(b)?b:{symbol:b,precision:d,thousand:i,decimal:e,format:h},c.settings.currency),g=x(f.format),l=g.pos.indexOf("%s")<g.pos.indexOf("%v")?!0:!1,k=0,a=j(a,function(a){if(m(a))return c.formatColumn(a,f);a=o(a);a=(0<a?g.pos:0>a?g.neg:g.zero).replace("%s",f.symbol).replace("%v",t(Math.abs(a),n(f.precision),f.thousand,f.decimal));if(a.length>k)k=a.length;return a});return j(a,function(a){return q(a)&&a.length<k?l?a.replace(f.symbol,f.symbol+Array(k-a.length+1).join(" ")):Array(k-a.length+1).join(" ")+a:a})};if("undefined"!==typeof exports){if("undefined"!==typeof module&&module.exports)exports=module.exports=c;exports.accounting=c}else"function"===typeof define&&define.amd?define([],function(){return c}):(c.noConflict=function(a){return function(){p.accounting=a;c.noConflict=z;return c}}(p.accounting),p.accounting=c)})(this);
