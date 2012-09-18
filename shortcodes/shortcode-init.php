@@ -468,6 +468,69 @@ function woocommerce_product_add_to_cart_url( $atts ){
 	return esc_url( $_product->add_to_cart_url() );
 }
 
+/**
+ * List all products on sale
+ *
+ * @access public
+ * @param array $atts
+ * @return string
+ */
+function woocommerce_sale_products( $atts ){
+    global $woocommerce_loop;
+
+    extract( shortcode_atts( array(
+        'per_page'      => '12',
+        'columns'       => '4',
+        'orderby'       => 'title',
+        'order'         => 'asc'
+        ), $atts ) );
+
+    $args = array(
+        'post_type' => 'product',
+        'post_status' => 'publish',
+        'ignore_sticky_posts'   => 1,
+        'orderby' => $orderby,
+        'order' => $order,
+        'posts_per_page' => $per_page,
+        'meta_query' => array(
+            array(
+                'key' => '_visibility',
+                'value' => array('catalog', 'visible'),
+                'compare' => 'IN'
+            ),
+            array(
+                'key' => '_sale_price',
+                'value' => 0,
+                'compare' => '>',
+                'type' => 'NUMERIC'
+            )
+        )
+    );
+
+    ob_start();
+
+    $products = new WP_Query( $args );
+
+    $woocommerce_loop['columns'] = $columns;
+
+    if ( $products->have_posts() ) : ?>
+
+        <ul class="products">
+
+            <?php while ( $products->have_posts() ) : $products->the_post(); ?>
+
+                <?php woocommerce_get_template_part( 'content', 'product' ); ?>
+
+            <?php endwhile; // end of the loop. ?>
+
+        </ul>
+
+    <?php endif;
+
+    wp_reset_query();
+
+    return ob_get_clean();
+}
 
 /**
  * Output featured products
@@ -611,6 +674,7 @@ add_shortcode('add_to_cart', 'woocommerce_product_add_to_cart');
 add_shortcode('add_to_cart_url', 'woocommerce_product_add_to_cart_url');
 add_shortcode('products', 'woocommerce_products');
 add_shortcode('recent_products', 'woocommerce_recent_products');
+add_shortcode('sale_products', 'woocommerce_sale_products');
 add_shortcode('featured_products', 'woocommerce_featured_products');
 add_shortcode('woocommerce_cart', 'get_woocommerce_cart');
 add_shortcode('woocommerce_checkout', 'get_woocommerce_checkout');
