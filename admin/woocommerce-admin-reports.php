@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Reports
- * @version     1.6.4
+ * @version     1.7
  */
 
 /**
@@ -68,6 +68,11 @@ function woocommerce_reports() {
 					'description' => '',
 					'function' => 'woocommerce_category_sales'
 				),
+				array(
+					'title' => __('Sales by coupon', 'woocommerce'),
+					'description' => '',
+					'function' => 'woocommerce_coupon_sales'
+				)
 			)
 		),
 		'customers' => array(
@@ -2192,6 +2197,304 @@ function woocommerce_category_sales() {
 	</script>
 	<?php
 	}
+	?>
+	<script type="text/javascript">
+		jQuery(function(){
+			jQuery("select.chosen_select").chosen();
+		});
+	</script>
+	<?php
+}
+
+/**
+ * woocommerce_coupon_sales function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_coupon_sales() {
+	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
+
+	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 AND post_type='shop_order' ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
+
+	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
+	$start_date 	= strtotime( $current_year . '0101' );
+	
+	$order_statuses = implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) );
+	
+	
+	$coupons = $wpdb->get_col( "
+								SELECT DISTINCT meta.meta_value FROM {$wpdb->postmeta} AS meta
+								LEFT JOIN {$wpdb->posts} AS posts ON posts.ID = meta.post_id
+								LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+								LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+								LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+								
+								WHERE	meta.meta_key		= 'coupons'
+								AND		posts.post_type		= 'shop_order'
+								AND		posts.post_status	= 'publish'
+								AND		tax.taxonomy		= 'shop_order_status'
+								AND		term.slug			IN ('{$order_statuses}')
+							");
+	
+	 
+	
+	?>
+	
+	<form method="post" action="" class="report_filters">
+		<p>
+			<label for="show_year"><?php _e('Show:', 'woocommerce'); ?></label>
+			<select name="show_year" id="show_year">
+				<?php
+					for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
+						printf( '<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
+				?>
+			</select>
+		
+			<select multiple="multiple" class="chosen_select" id="show_coupons" name="show_coupons[]" style="width: 300px;">
+				<?php
+					foreach ( $coupons as $coupon ) {
+						
+						echo '<option value="' . $coupon . '" ' . selected( ! empty( $_POST['show_coupons'] ) && in_array( $coupon, $_POST['show_coupons'] ), true ) . '>' . $coupon . '</option>';
+					}
+				?>
+			</select>
+
+			<input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" />
+		</p>
+	</form>
+	
+	<?php
+	
+	if ( ! empty( $_POST['show_coupons'] ) && count( $_POST['show_coupons'] ) > 0 ) :
+	
+	$coupons = $_POST['show_coupons'];
+	
+	$coupon_sales = $monthly_totals = array();
+
+	foreach( $coupons as $coupon ) :
+	
+		$monthly_sales = $wpdb->get_results($wpdb->prepare("
+			SELECT SUM(postmeta.meta_value) AS order_total, date_format(posts.post_date, '%%Y%%m') as month FROM {$wpdb->posts} AS posts
+			
+			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID=postmeta.post_ID
+			INNER JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			INNER JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			INNER JOIN {$wpdb->terms} AS term USING( term_id )
+			
+			WHERE	postmeta.meta_key	= '_order_total'
+			AND 	tax.taxonomy		= 'shop_order_status'
+			AND		term.slug			IN ('{$order_statuses}')
+			AND 	posts.post_type 	= 'shop_order'
+			AND 	posts.post_status 	= 'publish'
+			AND		'{$current_year}'	= date_format(posts.post_date,'%%Y')
+			AND		posts.ID			IN (
+												SELECT post_id FROM {$wpdb->postmeta} AS meta
+												
+												WHERE 	meta.meta_key 		= 'coupons'
+												AND		meta.meta_value		= '%s'
+											)
+			GROUP BY month", $coupon ), OBJECT );
+		
+		foreach( $monthly_sales as $sales ) {
+			$month = $sales->month;
+			$coupon_sales[$coupon][$month] = $sales->order_total;
+		}
+		
+		
+	endforeach;
+		
+	?>
+	
+	<div class="woocommerce-wide-reports-wrap">
+		<table class="widefat">
+			<thead>
+				<tr>
+					<th><?php _e( 'Coupon', 'woocommerce' ); ?></th>
+					<?php 
+						$column_count = 0;
+						for ( $count = 0; $count < 12; $count++ ) : 
+							if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
+								continue;
+							$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ '. $count . ' MONTH', $start_date ) ) . '01' ) );
+							
+							// set elements before += them below
+							$monthly_totals[$month] = 0;
+							
+							$column_count++;
+							?>
+							<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
+					<?php endfor; ?>
+					<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
+				</tr>
+			</thead>
+			
+			<tbody><?php
+				
+				// save data for chart while outputting
+				$chart_data = $coupon_totals = array();
+				
+				foreach( $coupon_sales as $coupon_code => $sales ) :
+					
+					echo '<tr><th>' . $coupon_code . '</th>';
+					
+					for( $count = 0; $count < 12; $count++ ) :
+						
+						if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
+								continue;
+						
+						$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ '. $count . ' MONTH', $start_date ) ) . '01' ) );
+						
+						$amount = isset( $sales[$month] ) ? $sales[$month] : 0;
+						echo '<td>' . woocommerce_price( $amount ) . '</td>';
+						
+						$monthly_totals[$month] += $amount;
+						
+						$chart_data[$coupon_code][] = array( strtotime( date( 'Ymd', strtotime( $month . '01' ) ) ) . '000', $amount );
+				
+					endfor;
+						
+					echo '<td><strong>' . woocommerce_price( array_sum( $sales ) ) . '</strong></td>';
+					
+					// total sales across all months
+					$coupon_totals[$coupon_code] = array_sum( $sales );
+					
+					echo '</tr>';
+					
+				endforeach;
+				
+				$top_coupon_name = current( array_keys( $coupon_totals, max( $coupon_totals ) ) );
+				$top_coupon_sales = $coupon_totals[$top_coupon_name];
+				
+				$worst_coupon_name = current( array_keys( $coupon_totals, min( $coupon_totals ) ) );
+				$worst_coupon_sales = $coupon_totals[$worst_coupon_name];
+				
+				$median_coupon_sales = array_values( $coupon_totals );
+				sort($median_coupon_sales);
+				
+				echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
+				
+				foreach( $monthly_totals as $month => $totals )
+					echo '<td><strong>' . woocommerce_price( $totals ) . '</strong></td>';
+				
+				echo '<td><strong>' .  woocommerce_price( array_sum( $monthly_totals ) ) . '</strong></td></tr>';
+				
+			?></tbody>
+		</table>
+	</div>
+	
+	<div id="poststuff" class="woocommerce-reports-wrap">
+		<div class="woocommerce-reports-sidebar">
+			<div class="postbox">
+				<h3><span><?php _e('Top coupon', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						echo $top_coupon_name . ' (' . woocommerce_price( $top_coupon_sales ) . ')';
+					?></p>
+				</div>
+			</div>
+			<?php if ( sizeof( $coupon_totals ) > 1 ) : ?>
+			<div class="postbox">
+				<h3><span><?php _e('Worst coupon', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						echo $worst_coupon_name . ' (' . woocommerce_price( $worst_coupon_sales ) . ')';
+					?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Coupon sales average', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+							echo woocommerce_price( array_sum( $coupon_totals ) / count( $coupon_totals ) );
+					?></p>
+				</div>
+			</div>
+			<div class="postbox">
+				<h3><span><?php _e('Coupon sales median', 'woocommerce'); ?></span></h3>
+				<div class="inside">
+					<p class="stat"><?php
+						if ( count( $median_coupon_sales ) == 2 )
+							echo __( 'N/A', 'woocommerce' );
+						elseif ( count( $median_coupon_sales ) % 2 )
+							echo woocommerce_price( 
+								( 
+									$median_coupon_sales[ floor( count( $median_coupon_sales ) / 2 ) ] + $median_coupon_sales[ ceil( count( $median_coupon_sales ) / 2 ) ] 
+								) / 2 
+							);
+						else
+							
+							echo woocommerce_price( $median_coupon_sales[ count( $median_coupon_sales ) / 2 ] );
+					?></p>
+				</div>
+			</div>
+			<?php endif; ?>
+		</div>
+		<div class="woocommerce-reports-main">
+			<div class="postbox">
+				<h3><span><?php _e('Monthly sales by coupon', 'woocommerce'); ?></span></h3>
+				<div class="inside chart">
+					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		jQuery(function(){
+			
+			<?php
+				// Variables
+				foreach ( $chart_data as $name => $data ) {
+					$varname = str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
+					echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
+				}
+			?>
+
+			var placeholder = jQuery("#placeholder");
+
+			var plot = jQuery.plot(placeholder, [ 
+				<?php 
+				$labels = array();
+				
+				foreach ( $chart_data as $name => $data ) {
+					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
+				}
+				
+				echo implode( ',', $labels );
+				?>
+			], {
+				series: {
+					lines: { show: true, fill: true },
+					points: { show: true, align: "left" }
+				},
+				grid: {
+					show: true,
+					aboveData: false,
+					color: '#aaa',
+					backgroundColor: '#fff',
+					borderWidth: 2,
+					borderColor: '#aaa',
+					clickable: false,
+					hoverable: true
+				},
+				xaxis: {
+					mode: "time",
+					timeformat: "%b %y",
+					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+					tickLength: 1,
+					minTickSize: [1, "month"]
+				},
+				yaxes: [ { min: 0, tickDecimals: 2 } ]
+		 	});
+
+		 	placeholder.resize();
+
+			<?php woocommerce_tooltip_js(); ?>
+		});
+	</script>
+	<?php
+	endif; // end POST check
 	?>
 	<script type="text/javascript">
 		jQuery(function(){
