@@ -245,6 +245,29 @@ jQuery( function($){
 		$row.attr( 'data-unit_total_tax', value );
 	});
 	
+	// Display a total for taxes 
+	$('#woocommerce-order-totals').on( 'change', '#_order_tax, #_order_shipping_tax, #_cart_discount, #_order_discount', function() {
+		
+		var $this =  $(this);
+		var fields = $this.closest('.totals').find('input');
+		var total = 0;
+		
+		fields.each(function(){
+			total = total + parseFloat( $(this).val() );
+		});
+
+		var formatted_total = accounting.formatMoney( total, {
+			symbol 		: woocommerce_writepanel_params.currency_format_symbol,
+			decimal 	: woocommerce_writepanel_params.currency_format_decimal_sep,
+			thousand	: woocommerce_writepanel_params.currency_format_thousand_sep,
+			precision 	: woocommerce_writepanel_params.currency_format_num_decimals,
+			format		: woocommerce_writepanel_params.currency_format
+		} );
+		
+		$this.closest('.totals_group').find('span.inline_total').text( formatted_total );
+	} );
+	
+	$('span.inline_total').closest('.totals_group').find('input').change();
 	
 	// Calculate totals
 	$('button.calc_line_taxes').live('click', function(){

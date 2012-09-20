@@ -509,26 +509,28 @@ function woocommerce_price( $price, $args = array() ) {
 
 	if ( get_option( 'woocommerce_price_trim_zeros' ) == 'yes' && $num_decimals > 0 )
 		$price = woocommerce_trim_zeros( $price );
-
-	switch ( $currency_pos ) {
-		case 'left' :
-			$return = '<span class="amount">' . $currency_symbol . $price . '</span>';
-		break;
-		case 'right' :
-			$return = '<span class="amount">' . $price . $currency_symbol . '</span>';
-		break;
-		case 'left_space' :
-			$return = '<span class="amount">' . $currency_symbol . '&nbsp;' . $price . '</span>';
-		break;
-		case 'right_space' :
-			$return = '<span class="amount">' . $price . '&nbsp;' . $currency_symbol . '</span>';
-		break;
-	}
+		
+	$return = '<span class="amount">' . sprintf( get_woocommerce_price_format(), $currency_symbol, $price ) . '</span>';
 
 	if ( $ex_tax_label && get_option( 'woocommerce_calc_taxes' ) == 'yes' )
 		$return .= ' <small>' . $woocommerce->countries->ex_tax_or_vat() . '</small>';
 
 	return $return;
+}
+
+function get_woocommerce_price_format() {
+	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	
+	switch ( $currency_pos ) {
+		case 'left' :
+			return '%1$s%2$s';
+		case 'right' :
+			return '%2$s%1$s';
+		case 'left_space' :
+			return '%1$s&nbsp;%2$s';
+		case 'right_space' :
+			return '%2$s&nbsp;%1$s';
+	}
 }
 
 

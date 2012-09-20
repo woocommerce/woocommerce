@@ -523,6 +523,10 @@ table.wc_status_table {
 			display: block;
 			padding-bottom: 10px;
 		}
+		.inline_total {
+			float: right;
+			color: #999;
+		}
 	}
 	.totals_group {
 		border-top: 1px solid white;
@@ -553,10 +557,13 @@ table.wc_status_table {
 				font-size: 0.8em;
 				color: #333;
 			}
+			input {
+				padding: 4px;
+			}
 			input, select {
 				width: 100%;
-				vertical-align: middle;
-				font-size: 1em;
+				vertical-align: top;
+				font-size: 1em !important;
 				margin: 0 !important;
 				font-weight: normal;
 				color: #555;

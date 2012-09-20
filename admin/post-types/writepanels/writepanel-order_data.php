@@ -497,7 +497,7 @@ function woocommerce_order_totals_meta_box($post) {
 	$data = get_post_custom( $post->ID );
 	?>
 	<div class="totals_group">
-		<h4><?php _e('Discounts', 'woocommerce'); ?></h4>
+		<h4><span class="discount_total_display inline_total"></span><?php _e('Discounts', 'woocommerce'); ?></h4>
 		<ul class="totals">
 
 			<li class="left">
@@ -563,7 +563,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e('Tax Rows', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>" href="#">[?]</a></h4>
+		<h4><?php _e('Tax Rows', 'woocommerce'); ?></h4>
 		<div id="tax_rows">
 			<?php
 				$loop = 0;
@@ -597,11 +597,11 @@ function woocommerce_order_totals_meta_box($post) {
 				endif;
 			?>
 		</div>
-		<h4><a href="#" class="add_tax_row"><?php _e('+ Add tax row', 'woocommerce'); ?></a></h4>
+		<h4><a href="#" class="add_tax_row tips" data-tip="<?php _e('These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce'); ?>"><?php _e('+ Add tax row', 'woocommerce'); ?> [?]</a></a></h4>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
-		<h4><?php _e('Tax Totals', 'woocommerce'); ?></h4>
+		<h4><span class="tax_total_display inline_total"></span><?php _e('Tax Totals', 'woocommerce'); ?></h4>
 		<ul class="totals">
 
 			<li class="left">

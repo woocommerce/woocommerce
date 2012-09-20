@@ -404,7 +404,12 @@ function woocommerce_admin_scripts() {
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
 			'search_products_nonce' 		=> wp_create_nonce("search-products"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
-			'post_id'						=> $post->ID
+			'post_id'						=> $post->ID, 
+			'currency_format_num_decimals'	=> (int) get_option( 'woocommerce_price_num_decimals' ),
+			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
+			'currency_format_decimal_sep'	=> stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ),
+			'currency_format_thousand_sep'	=> stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ),
+			'currency_format'				=> str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) // For accounting JS
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
