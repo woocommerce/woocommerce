@@ -9,7 +9,7 @@
  */
 
 // Only hook in admin parts if the user has admin access
-if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce_orders' )|| current_user_can( 'manage_woocommerce' ) )
+if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' ) )
 	add_action( 'wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );
 
 /**
@@ -37,14 +37,15 @@ function woocommerce_init_dashboard_widgets() {
 
 	$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
 
-	if(current_user_can('manage_woocommerce_orders')){
-            wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
-            wp_add_dashboard_widget('woocommerce_dashboard_recent_orders', __('WooCommerce Recent Orders', 'woocommerce'), 'woocommerce_dashboard_recent_orders');
-            wp_add_dashboard_widget('woocommerce_dashboard_recent_reviews', __('WooCommerce Recent Reviews', 'woocommerce'), 'woocommerce_dashboard_recent_reviews');
-        }
-	if(current_user_can('view_woocommerce_reports') || current_user_can('manage_woocommerce_orders')){
-            wp_add_dashboard_widget('woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales');
-        }
+	if ( current_user_can( 'publish_shop_orders' ) ) {
+		wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
+		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_orders', __( 'WooCommerce Recent Orders', 'woocommerce' ), 'woocommerce_dashboard_recent_orders');
+		wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), 'woocommerce_dashboard_recent_reviews' );
+	}
+	
+	if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'publish_shop_orders' ) ) {
+		wp_add_dashboard_widget( 'woocommerce_dashboard_sales', $sales_heading, 'woocommerce_dashboard_sales' );
+	}
 
 }
 

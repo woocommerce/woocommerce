@@ -13,16 +13,12 @@ if( !defined('WP_UNINSTALL_PLUGIN') ) exit();
 
 global $wpdb, $wp_roles;
 
-// Roles
-remove_role( 'customer' );
-remove_role( 'shop_manager' );
+// Roles + caps
+if ( ! function_exists( 'woocommerce_remove_roles' ) )
+	include_once( 'woocommerce-core-functions.php' );
 
-// Capabilities
-$wp_roles->remove_cap( 'administrator', 'manage_woocommerce' );
-$wp_roles->remove_cap( 'administrator', 'manage_woocommerce_orders' );
-$wp_roles->remove_cap( 'administrator', 'manage_woocommerce_coupons' );
-$wp_roles->remove_cap( 'administrator', 'manage_woocommerce_products' );
-$wp_roles->remove_cap( 'administrator', 'view_woocommerce_reports' );
+if ( function_exists( 'woocommerce_remove_roles' ) )
+	woocommerce_remove_roles();	
 
 // Pages
 wp_delete_post( get_option('woocommerce_shop_page_id'), true );

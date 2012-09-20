@@ -45,16 +45,9 @@ function woocommerce_status() {
 						echo '<div class="updated"><p>' . __('Product Transients Cleared', 'woocommerce') . '</p></div>';
 					break;
 					case "reset_roles" :
-						global $wp_roles;
-
-						// Roles
-						remove_role( 'customer' );
-						remove_role( 'shop_manager' );
-
-						// Capabilities
-						$wp_roles->remove_cap( 'administrator', 'manage_woocommerce' );
-
-						$woocommerce->init_user_roles();
+						// Remove then re-add caps and roles
+						woocommerce_remove_roles();						
+						woocommerce_init_roles();
 
 						echo '<div class="updated"><p>' . __('Roles successfully reset', 'woocommerce') . '</p></div>';
 					break;

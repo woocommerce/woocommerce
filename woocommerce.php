@@ -345,9 +345,6 @@ class Woocommerce {
 		// Register globals for WC environment
 		$this->register_globals();
 
-		// Init user roles
-		$this->init_user_roles();
-
 		// Init WooCommerce taxonomies
 		$this->init_taxonomy();
 
@@ -612,74 +609,6 @@ class Woocommerce {
 
 
 	/**
-	 * Init WooCommerce user roles.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function init_user_roles() {
-		global $wp_roles;
-
-		if ( class_exists('WP_Roles') ) if ( ! isset( $wp_roles ) ) $wp_roles = new WP_Roles();
-
-		if ( is_object($wp_roles) ) {
-
-			// Customer role
-			add_role( 'customer', __('Customer', 'woocommerce'), array(
-			    'read' 						=> true,
-			    'edit_posts' 				=> false,
-			    'delete_posts' 				=> false
-			) );
-
-			// Shop manager role
-			add_role( 'shop_manager', __('Shop Manager', 'woocommerce'), array(
-			    'read' 						=> true,
-			    'read_private_pages'		=> true,
-			    'read_private_posts'		=> true,
-			    'edit_users'				=> true,
-			    'edit_posts' 				=> true,
-			    'edit_pages' 				=> true,
-			    'edit_published_posts'		=> true,
-			    'edit_published_pages'		=> true,
-			    'edit_private_pages'		=> true,
-			    'edit_private_posts'		=> true,
-			    'edit_others_posts' 		=> true,
-			    'edit_others_pages' 		=> true,
-			    'publish_posts' 			=> true,
-			    'publish_pages'				=> true,
-			    'delete_posts' 				=> true,
-			    'delete_pages' 				=> true,
-			    'delete_private_pages'		=> true,
-			    'delete_private_posts'		=> true,
-			    'delete_published_pages'	=> true,
-			    'delete_published_posts'	=> true,
-			    'delete_others_posts' 		=> true,
-			    'delete_others_pages' 		=> true,
-			    'manage_categories' 		=> true,
-			    'manage_links'				=> true,
-			    'moderate_comments'			=> true,
-			    'unfiltered_html'			=> true,
-			    'upload_files'				=> true,
-			   	'export'					=> true,
-				'import'					=> true,
-				'manage_woocommerce'		=> true,
-				'manage_woocommerce_orders'		=> true,
-				'manage_woocommerce_coupons'	=> true,
-				'manage_woocommerce_products'	=> true,
-				'view_woocommerce_reports'		=> true
-			) );
-
-			// Main Shop capabilities for admin
-			$wp_roles->add_cap( 'administrator', 'manage_woocommerce' );
-			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_orders' );
-			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_coupons' );
-			$wp_roles->add_cap( 'administrator', 'manage_woocommerce_products' );
-			$wp_roles->add_cap( 'administrator', 'view_woocommerce_reports' );
-		}
-	}
-
-
-	/**
 	 * Init WooCommerce taxonomies.
 	 *
 	 * @access public
@@ -750,10 +679,10 @@ class Woocommerce {
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
 	            'capabilities'			=> array(
-	            	'manage_terms' 		=> 'manage_woocommerce_products',
-	            	'edit_terms' 		=> 'manage_woocommerce_products',
-	            	'delete_terms' 		=> 'manage_woocommerce_products',
-	            	'assign_terms' 		=> 'manage_woocommerce_products',
+	            	'manage_terms' 		=> 'manage_product_terms',
+					'edit_terms' 		=> 'edit_product_terms',
+					'delete_terms' 		=> 'delete_product_terms',
+					'assign_terms' 		=> 'assign_product_terms',
 	            ),
 	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false, 'hierarchical' => true ),
 	        )
@@ -781,10 +710,10 @@ class Woocommerce {
 	            'show_ui' 				=> true,
 	            'query_var' 			=> true,
 				'capabilities'			=> array(
-					'manage_terms' 		=> 'manage_woocommerce_products',
-					'edit_terms' 		=> 'manage_woocommerce_products',
-					'delete_terms' 		=> 'manage_woocommerce_products',
-					'assign_terms' 		=> 'manage_woocommerce_products',
+					'manage_terms' 		=> 'manage_product_terms',
+					'edit_terms' 		=> 'edit_product_terms',
+					'delete_terms' 		=> 'delete_product_terms',
+					'assign_terms' 		=> 'assign_product_terms',
 				),
 	            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
 	        )
@@ -813,10 +742,10 @@ class Woocommerce {
 	            'show_in_nav_menus' 	=> false,
 	            'query_var' 			=> $admin_only_query_var,
 				'capabilities'			=> array(
-					'manage_terms' 		=> 'manage_woocommerce_products',
-					'edit_terms' 		=> 'manage_woocommerce_products',
-					'delete_terms' 		=> 'manage_woocommerce_products',
-					'assign_terms' 		=> 'manage_woocommerce_products',
+					'manage_terms' 		=> 'manage_product_terms',
+					'edit_terms' 		=> 'edit_product_terms',
+					'delete_terms' 		=> 'delete_product_terms',
+					'assign_terms' 		=> 'assign_product_terms',
 				),
 	            'rewrite' 				=> false,
 	        )
@@ -877,6 +806,12 @@ class Woocommerce {
 				            	),
 				            'show_ui' 					=> false,
 				            'query_var' 				=> true,
+				            'capabilities'			=> array(
+				            	'manage_terms' 		=> 'manage_product_terms',
+								'edit_terms' 		=> 'edit_product_terms',
+								'delete_terms' 		=> 'delete_product_terms',
+								'assign_terms' 		=> 'assign_product_terms',
+				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
 				            'rewrite' 					=> array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
 				        )
@@ -912,18 +847,8 @@ class Woocommerce {
 				'description' 			=> __( 'This is where you can add new products to your store.', 'woocommerce' ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
-				'capability_type' 		=> 'post',
-				'capabilities' => array(
-					'publish_posts' 		=> 'manage_woocommerce_products',
-					'edit_posts' 			=> 'manage_woocommerce_products',
-					'edit_others_posts' 	=> 'manage_woocommerce_products',
-					'delete_posts' 			=> 'manage_woocommerce_products',
-					'delete_others_posts'	=> 'manage_woocommerce_products',
-					'read_private_posts'	=> 'manage_woocommerce_products',
-					'edit_post' 			=> 'manage_woocommerce_products',
-					'delete_post' 			=> 'manage_woocommerce_products',
-					'read_post' 			=> 'manage_woocommerce_products'
-				),
+				'capability_type' 		=> 'product',
+				'map_meta_cap'			=> true,
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
 				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
@@ -956,18 +881,8 @@ class Woocommerce {
 					),
 				'public' 				=> true,
 				'show_ui' 				=> false,
-				'capability_type' 		=> 'post',
-				'capabilities' => array(
-					'publish_posts' 		=> 'manage_woocommerce_products',
-					'edit_posts' 			=> 'manage_woocommerce_products',
-					'edit_others_posts' 	=> 'manage_woocommerce_products',
-					'delete_posts' 			=> 'manage_woocommerce_products',
-					'delete_others_posts'	=> 'manage_woocommerce_products',
-					'read_private_posts'	=> 'manage_woocommerce_products',
-					'edit_post' 			=> 'manage_woocommerce_products',
-					'delete_post' 			=> 'manage_woocommerce_products',
-					'read_post' 			=> 'manage_woocommerce_products'
-				),
+				'capability_type' 		=> 'product',
+				'map_meta_cap'			=> true,
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
 				'hierarchical' 			=> false,
@@ -1004,18 +919,8 @@ class Woocommerce {
 				'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
-				'capability_type' 		=> 'post',
-				'capabilities' => array(
-					'publish_posts' 		=> 'manage_woocommerce_orders',
-					'edit_posts' 			=> 'manage_woocommerce_orders',
-					'edit_others_posts' 	=> 'manage_woocommerce_orders',
-					'delete_posts' 			=> 'manage_woocommerce_orders',
-					'delete_others_posts'	=> 'manage_woocommerce_orders',
-					'read_private_posts'	=> 'manage_woocommerce_orders',
-					'edit_post' 			=> 'manage_woocommerce_orders',
-					'delete_post' 			=> 'manage_woocommerce_orders',
-					'read_post' 			=> 'manage_woocommerce_orders'
-				),
+				'capability_type' 		=> 'shop_order',
+				'map_meta_cap'			=> true,
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
 				'show_in_menu' 			=> $show_in_menu,
@@ -1049,18 +954,8 @@ class Woocommerce {
 				'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
-				'capability_type' 		=> 'post',
-				'capabilities' => array(
-					'publish_posts' 		=> 'manage_woocommerce_coupons',
-					'edit_posts' 			=> 'manage_woocommerce_coupons',
-					'edit_others_posts' 	=> 'manage_woocommerce_coupons',
-					'delete_posts' 			=> 'manage_woocommerce_coupons',
-					'delete_others_posts'	=> 'manage_woocommerce_coupons',
-					'read_private_posts'	=> 'manage_woocommerce_coupons',
-					'edit_post' 			=> 'manage_woocommerce_coupons',
-					'delete_post' 			=> 'manage_woocommerce_coupons',
-					'read_post' 			=> 'manage_woocommerce_coupons'
-				),
+				'capability_type' 		=> 'shop_coupon',
+				'map_meta_cap'			=> true,
 				'publicly_queryable' 	=> false,
 				'exclude_from_search' 	=> true,
 				'show_in_menu' 			=> $show_in_menu,
@@ -1082,9 +977,9 @@ class Woocommerce {
 	 */
 	function init_image_sizes() {
 		// Image sizes
-		$shop_thumbnail_crop 	= (get_option('woocommerce_thumbnail_image_crop')==1) ? true : false;
-		$shop_catalog_crop 		= (get_option('woocommerce_catalog_image_crop')==1) ? true : false;
-		$shop_single_crop 		= (get_option('woocommerce_single_image_crop')==1) ? true : false;
+		$shop_thumbnail_crop 	= get_option('woocommerce_thumbnail_image_crop') == 1 ? true : false;
+		$shop_catalog_crop 		= get_option('woocommerce_catalog_image_crop') == 1 ? true : false;
+		$shop_single_crop 		= get_option('woocommerce_single_image_crop') == 1 ? true : false;
 
 		add_image_size( 'shop_thumbnail', $this->get_image_size('shop_thumbnail_image_width'), $this->get_image_size('shop_thumbnail_image_height'), $shop_thumbnail_crop );
 		add_image_size( 'shop_catalog', $this->get_image_size('shop_catalog_image_width'), $this->get_image_size('shop_catalog_image_height'), $shop_catalog_crop );

@@ -56,7 +56,7 @@ function woocommerce_admin_menu() {
 
     $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
 
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_woocommerce_products', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
 
     add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
     add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
@@ -116,7 +116,7 @@ function woocommerce_admin_menu_highlight() {
 	}
 
 	// Sort out Orders menu when on the top level
-	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'manage_woocommerce_orders' ) ) {
+	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'read_shop_order' ) ) {
 		foreach ( $menu as $key => $menu_item ) {
 			if ( strpos( $menu_item[0], _x('Orders', 'Admin menu name', 'woocommerce') ) === 0 ) {
 

@@ -22,6 +22,7 @@ function do_install_woocommerce() {
 	// Do install
 	woocommerce_default_options();
 	woocommerce_tables_install();
+	woocommerce_init_roles();
 
 	// Register post types
 	$woocommerce->init_taxonomy();

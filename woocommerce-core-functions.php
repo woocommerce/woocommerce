@@ -1468,3 +1468,146 @@ function woocommerce_processing_order_count() {
 
 	return $order_count;
 }
+
+
+/**
+ * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_get_core_capabilities() {
+	$capabilities = array();
+			
+	$capabilities['core'] = array(
+		"manage_woocommerce", 
+		"view_woocommerce_reports"
+	);
+	
+	$capability_types = array( 'product', 'shop_order', 'shop_coupon' );
+	
+	foreach( $capability_types as $capability_type ) {
+	
+		$capabilities[ $capability_type ] = array(
+			
+			// Post type
+			"edit_{$capability_type}",
+			"read_{$capability_type}",
+			"delete_{$capability_type}",
+			"edit_{$capability_type}s",
+			"edit_others_{$capability_type}s",
+			"publish_{$capability_type}s",
+			"read_private_{$capability_type}s",
+			"delete_{$capability_type}s",
+			"delete_private_{$capability_type}s",
+			"delete_published_{$capability_type}s",
+			"delete_others_{$capability_type}s",
+			"edit_private_{$capability_type}s",
+			"edit_published_{$capability_type}s",
+			
+			// Terms
+			"manage_{$capability_type}_terms",
+			"edit_{$capability_type}_terms",
+			"delete_{$capability_type}_terms",
+			"assign_{$capability_type}_terms"
+		);
+	}
+	
+	return $capabilities;
+}
+
+
+/**
+ * woocommerce_init_roles function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_init_roles() {
+	global $wp_roles;
+
+	if ( class_exists('WP_Roles') ) 
+		if ( ! isset( $wp_roles ) ) 
+			$wp_roles = new WP_Roles();
+
+	if ( is_object( $wp_roles ) ) {
+
+		// Customer role
+		add_role( 'customer', __('Customer', 'woocommerce'), array(
+		    'read' 						=> true,
+		    'edit_posts' 				=> false,
+		    'delete_posts' 				=> false
+		) );
+
+		// Shop manager role
+		add_role( 'shop_manager', __('Shop Manager', 'woocommerce'), array(
+		    'read' 						=> true,
+		    'read_private_pages'		=> true,
+		    'read_private_posts'		=> true,
+		    'edit_users'				=> true,
+		    'edit_posts' 				=> true,
+		    'edit_pages' 				=> true,
+		    'edit_published_posts'		=> true,
+		    'edit_published_pages'		=> true,
+		    'edit_private_pages'		=> true,
+		    'edit_private_posts'		=> true,
+		    'edit_others_posts' 		=> true,
+		    'edit_others_pages' 		=> true,
+		    'publish_posts' 			=> true,
+		    'publish_pages'				=> true,
+		    'delete_posts' 				=> true,
+		    'delete_pages' 				=> true,
+		    'delete_private_pages'		=> true,
+		    'delete_private_posts'		=> true,
+		    'delete_published_pages'	=> true,
+		    'delete_published_posts'	=> true,
+		    'delete_others_posts' 		=> true,
+		    'delete_others_pages' 		=> true,
+		    'manage_categories' 		=> true,
+		    'manage_links'				=> true,
+		    'moderate_comments'			=> true,
+		    'unfiltered_html'			=> true,
+		    'upload_files'				=> true,
+		   	'export'					=> true,
+			'import'					=> true
+		) );
+		
+		$capabilities = woocommerce_get_core_capabilities();
+		
+		foreach( $capabilities as $cap_group ) {
+			foreach( $cap_group as $cap ) {
+				$wp_roles->add_cap( 'shop_manager', $cap );
+				$wp_roles->add_cap( 'administrator', $cap );
+			}
+		}
+	}
+}
+
+/**
+ * woocommerce_remove_roles function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_remove_roles() {
+	global $wp_roles;
+
+	if ( class_exists('WP_Roles') ) 
+		if ( ! isset( $wp_roles ) ) 
+			$wp_roles = new WP_Roles();
+
+	if ( is_object( $wp_roles ) ) {
+
+		$capabilities = woocommerce_get_core_capabilities();
+		
+		foreach( $capabilities as $cap_group ) {
+			foreach( $cap_group as $cap ) {
+				$wp_roles->remove_cap( 'shop_manager', $cap );
+				$wp_roles->remove_cap( 'administrator', $cap );
+			}
+		}
+		
+		remove_role( 'customer' );
+		remove_role( 'shop_manager' );
+	}
+}

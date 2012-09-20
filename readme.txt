@@ -166,8 +166,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 
+* Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.
-& Tweak - Display tax/discount total for reference on orders
+* Tweak - Display tax/discount total for reference on orders
 * Tweak - Humanised order email subjects/headings
 * Tweak - Cleaned up the tax settings.
 * Tweak - If a PayPal prefix is changed, IPN requests break for all existing orders - fixed. new woocommerce_get_order_id_by_order_key() function added. Thanks Brent.
