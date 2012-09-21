@@ -176,6 +176,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Prefix jquery plugins JS.
 * Tweak - Made paypal use wc-api for IPN.
 * Tweak - Due to new session handling, removed session section from the status page.
+* Tweak - Removed upsell limit - show whats defined.
+* Tweak - Args for upsells to control per-page and cols.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.

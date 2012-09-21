@@ -721,20 +721,22 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	 * @return void
 	 */
 	function woocommerce_output_related_products() {
-		woocommerce_related_products( 2, 2  );
+		woocommerce_related_products( 2, 2 );
 	}
 }
 
 if ( ! function_exists( 'woocommerce_related_products' ) ) {
-
+	 
 	/**
 	 * Output the related products.
-	 *
+	 * 
 	 * @access public
-	 * @subpackage	Product
+	 * @param int $posts_per_page (default: 2)
+	 * @param int $columns (default: 2)
+	 * @param string $orderby (default: 'rand')
 	 * @return void
 	 */
-	function woocommerce_related_products( $posts_per_page = 4, $columns = 4, $orderby = 'rand'  ) {
+	function woocommerce_related_products( $posts_per_page = 2, $columns = 2, $orderby = 'rand'  ) {
 		woocommerce_get_template( 'single-product/related.php', array(
 				'posts_per_page'  => $posts_per_page,
 				'orderby'    => $orderby,
@@ -747,13 +749,19 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 
 	/**
 	 * Output product up sells.
-	 *
+	 * 
 	 * @access public
-	 * @subpackage	Product
+	 * @param int $posts_per_page (default: -1)
+	 * @param int $columns (default: 2)
+	 * @param string $orderby (default: 'rand')
 	 * @return void
 	 */
-	function woocommerce_upsell_display() {
-		woocommerce_get_template( 'single-product/up-sells.php' );
+	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
+		woocommerce_get_template( 'single-product/up-sells.php', array(
+				'posts_per_page'  => $posts_per_page,
+				'orderby'    => $orderby,
+				'columns'    => $columns
+			) );
 	}
 }
 

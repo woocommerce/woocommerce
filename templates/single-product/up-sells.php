@@ -16,13 +16,15 @@ if ( sizeof( $upsells ) == 0 ) return;
 $args = array(
 	'post_type'				=> 'product',
 	'ignore_sticky_posts'	=> 1,
-	'posts_per_page' 		=> 4,
 	'no_found_rows' 		=> 1,
-	'orderby' 				=> 'rand',
+	'posts_per_page' 		=> $posts_per_page,
+	'orderby' 				=> $orderby,
 	'post__in' 				=> $upsells
 );
 
 $products = new WP_Query( $args );
+
+$woocommerce_loop['columns'] 	= $columns;
 
 if ( $products->have_posts() ) : ?>
 
