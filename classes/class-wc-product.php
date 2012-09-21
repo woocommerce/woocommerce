@@ -542,19 +542,7 @@ class WC_Product {
 	 * @return string
 	 */
 	function add_to_cart_url() {
-		global $woocommerce;
-
-		if ($this->is_type('variable')) :
-			$url = add_query_arg('add-to-cart', 'variation');
-			$url = add_query_arg('product_id', $this->id, $url);
-		elseif ( $this->has_child() ) :
-			$url = add_query_arg('add-to-cart', 'group');
-			$url = add_query_arg('product_id', $this->id, $url);
-		else :
-			$url = add_query_arg('add-to-cart', $this->id);
-		endif;
-
-		return apply_filters( 'woocommerce_add_to_cart_url', $url );
+		return apply_filters( 'woocommerce_add_to_cart_url', add_query_arg( 'add-to-cart', $this->id ) );
 	}
 
 

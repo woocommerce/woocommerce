@@ -235,133 +235,125 @@ function woocommerce_update_cart_action() {
  * @return void
  */
 function woocommerce_add_to_cart_action( $url = false ) {
+	
+	if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) ) 
+		return;
+
 	global $woocommerce;
+	
+	$product_id			= apply_filters('woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
+	$was_added_to_cart 	= false;
+	$adding_to_cart 	= new WC_Product( $product_id );
+    
+    // Variable product handling
+    if ( $adding_to_cart->is_type( 'variable' ) ) {
+    
+    	$variation_id 		= empty( $_REQUEST['quantity'] ) ? '' : absint( $_REQUEST['variation_id'] );
+    	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : absint( $_REQUEST['quantity'] );
+    	$all_variations_set = true;
+    	$variations 		= array();
 
-	if ( empty( $_REQUEST['add-to-cart'] ) ) return;
+		// Only allow integer variation ID - if its not set, redirect to the product page
+		if ( empty( $variation_id ) ) {
+			$woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
+			wp_redirect( get_permalink( $product_id ) );
+			exit;
+		}
+		
+		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
 
-    $added_to_cart 		= false;
+		// Verify all attributes for the variable product were set
+		foreach ( $attributes as $attribute ) {
+            if ( ! $attribute['is_variation'] ) 
+            	continue;
 
-    switch ($_REQUEST['add-to-cart']) {
+            $taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+            if ( ! empty( $_REQUEST[$taxonomy] ) ) {
+                // Get value from post data
+                $value = esc_attr( stripslashes( $_REQUEST[ $taxonomy ] ) );
 
-    	// Variable Products
-    	case 'variation' :
-
-    		// Only allow integer variation ID - if its not set, redirect to the product page
-    		if (empty($_REQUEST['variation_id']) || !is_numeric($_REQUEST['variation_id']) || $_REQUEST['variation_id']<1) {
-    			$woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
-    			wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
-    			exit;
-    		}
-
-    		// Get product ID to add and quantity
-    		$product_id 		= (int) apply_filters('woocommerce_add_to_cart_product_id', $_REQUEST['product_id']);
-    		$variation_id 		= (int) $_REQUEST['variation_id'];
-    		$quantity 			= (isset($_REQUEST['quantity'])) ? (int) $_REQUEST['quantity'] : 1;
-    		$attributes 		= (array) maybe_unserialize(get_post_meta($product_id, '_product_attributes', true));
-    		$variations 		= array();
-    		$all_variations_set = true;
-
-    		// Verify all attributes for the variable product were set
-    		foreach ($attributes as $attribute) {
-                if ( !$attribute['is_variation'] ) continue;
-
-                $taxonomy = 'attribute_' . sanitize_title($attribute['name']);
-                if (!empty($_REQUEST[$taxonomy])) {
-                    // Get value from post data
-                    $value = esc_attr(stripslashes($_REQUEST[$taxonomy]));
-
-                    // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
-                    $variations[esc_attr($attribute['name'])] = $value;
-				} else {
-                    $all_variations_set = false;
-                }
+                // Use name so it looks nicer in the cart widget/order page etc - instead of a sanitized string
+                $variations[ esc_attr( $attribute['name'] ) ] = $value;
+			} else {
+                $all_variations_set = false;
             }
+        }
 
-            if ($all_variations_set) {
-            	// Add to cart validation
-            	$passed_validation 	= apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
+        if ( $all_variations_set ) {
+        	// Add to cart validation
+        	$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-            	if ($passed_validation) {
-					if ($woocommerce->cart->add_to_cart($product_id, $quantity, $variation_id, $variations)) {
-						woocommerce_add_to_cart_message();
-						$added_to_cart = true;
-					}
+        	if ( $passed_validation ) {
+				if ( $woocommerce->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
+					woocommerce_add_to_cart_message( $product_id );
+					$was_added_to_cart = true;
 				}
-            } else {
-                $woocommerce->add_error( __('Please choose product options&hellip;', 'woocommerce') );
-                wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
-                exit;
-           }
-
-    	break;
-
-    	// Grouped Products
-    	case 'group' :
-
-			if (isset($_REQUEST['quantity']) && is_array($_REQUEST['quantity'])) {
-
-				$quantity_set = false;
-
-				foreach ($_REQUEST['quantity'] as $item => $quantity) {
-					if ($quantity<1) continue;
-
-					$quantity_set = true;
-
-					// Add to cart validation
-					$passed_validation 	= apply_filters('woocommerce_add_to_cart_validation', true, $item, $quantity);
-
-					if ($passed_validation) {
-						if ($woocommerce->cart->add_to_cart($item, $quantity)) {
-							woocommerce_add_to_cart_message();
-							$added_to_cart = true;
-						}
-					}
-				}
-
-				if (!$added_to_cart && !$quantity_set) {
-					$woocommerce->add_error( __('Please choose a quantity&hellip;', 'woocommerce') );
-					wp_redirect(apply_filters('woocommerce_add_to_cart_product_id', get_permalink($_REQUEST['product_id'])));
-					exit;
-				}
-
-			} elseif ($_REQUEST['product_id']) {
-
-				/* Link on product archives */
-				$woocommerce->add_error( __('Please choose a product&hellip;', 'woocommerce') );
-				wp_redirect( get_permalink( $_REQUEST['product_id'] ) );
-				exit;
-
 			}
+        } else {
+            $woocommerce->add_error( __( 'Please choose product options&hellip;', 'woocommerce' ) );
+            wp_redirect( get_permalink( $product_id ) );
+			exit;
+       }
 
-    	break;
+    // Grouped Products
+    } elseif ( $adding_to_cart->is_type( 'grouped' ) ) {
 
-    	// Simple Products - add-to-cart contains product ID
-    	default :
+		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
+		
+			$quantity_set = false;
+		
+			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
+				if ( $quantity < 1 ) 
+					continue;
+		
+				$quantity_set = true;
+		
+				// Add to cart validation
+				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
+		
+				if ( $passed_validation ) {
+					if ( $woocommerce->cart->add_to_cart( $item, $quantity ) ) {
+						$was_added_to_cart = true;
+						woocommerce_add_to_cart_message( $item );
+					}
+				}
+			}
+			
+			if ( ! $was_added_to_cart && ! $quantity_set ) {
+				$woocommerce->add_error( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ) );
+				wp_redirect( get_permalink( $product_id ) );
+				exit;
+			}
+		
+		} elseif ( $product_id ) {
+		
+			/* Link on product archives */
+			$woocommerce->add_error( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ) );
+			wp_redirect( get_permalink( $product_id ) );
+			exit;
+		
+		}
 
-    		// Only allow integers
-    		if (!is_numeric($_REQUEST['add-to-cart'])) break;
+	// Simple Products
+    } else {
 
-    		// Get product ID to add and quantity
-    		$product_id		= (int) $_REQUEST['add-to-cart'];
-    		$quantity 		= (isset($_REQUEST['quantity'])) ? (int) $_REQUEST['quantity'] : 1;
+		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : absint( $_REQUEST['quantity'] );
 
-    		// Add to cart validation
-    		$passed_validation 	= apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
+		// Add to cart validation
+		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-    		if ($passed_validation) {
-	    		// Add the product to the cart
-	    		if ($woocommerce->cart->add_to_cart($_REQUEST['add-to-cart'], $quantity)) {
-	    			woocommerce_add_to_cart_message();
-	    			$added_to_cart = true;
-	    		}
+		if ( $passed_validation ) {
+    		// Add the product to the cart
+    		if ( $woocommerce->cart->add_to_cart( $product_id, $quantity ) ) {
+    			woocommerce_add_to_cart_message( $product_id );
+    			$was_added_to_cart = true;
     		}
-
-    	break;
+		}
 
     }
 
     // If we added the product to the cart we can now do a redirect, otherwise just continue loading the page to show errors
-    if ($added_to_cart) {
+    if ( $was_added_to_cart ) {
 
 		$url = apply_filters( 'add_to_cart_redirect', $url );
 
@@ -394,19 +386,21 @@ function woocommerce_add_to_cart_action( $url = false ) {
  * @access public
  * @return void
  */
-function woocommerce_add_to_cart_message() {
+function woocommerce_add_to_cart_message( $product_id ) {
 	global $woocommerce;
+	
+	$added_text = sprintf( __('&quot;%s&quot; was successfully added to your cart.', 'woocommerce'), get_the_title( $product_id ) );
 
 	// Output success messages
-	if (get_option('woocommerce_cart_redirect_after_add')=='yes') :
+	if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) :
 
-		$return_to 	= (wp_get_referer()) ? wp_get_referer() : home_url();
+		$return_to 	= wp_get_referer() ? wp_get_referer() : home_url();
 
-		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') );
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', $return_to, __('Continue Shopping &rarr;', 'woocommerce'), $added_text );
 
 	else :
 
-		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('Product successfully added to your cart.', 'woocommerce') );
+		$message 	= sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $added_text );
 
 	endif;
 

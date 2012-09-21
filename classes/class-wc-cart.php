@@ -745,13 +745,18 @@ class WC_Cart {
 			}
 
 			// Stock check - only check if we're managing stock and backorders are not allowed
-			if ( ! $product_data->has_enough_stock( $quantity ) ) {
-				$woocommerce->add_error( sprintf(__('You cannot add that amount to the cart since there is not enough stock. We have %s in stock.', 'woocommerce'), $product_data->get_stock_quantity() ));
+			if ( ! $product_data->is_in_stock() ) {
+			
+				$woocommerce->add_error( sprintf( __('You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce'), $product_data->get_title() ) );
+				
 				return false;
-			} elseif ( ! $product_data->is_in_stock() ) {
-				$woocommerce->add_error( __('You cannot add that product to the cart since the product is out of stock.', 'woocommerce') );
+			} elseif ( ! $product_data->has_enough_stock( $quantity ) ) {
+			
+				$woocommerce->add_error( sprintf(__('You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce'), $product_data->get_title(), $product_data->get_stock_quantity() ));
+				
 				return false;
-			}
+				
+			} 
 
 			// Downloadable/virtual qty check
 			if ( $product_data->is_sold_individually() ) {
