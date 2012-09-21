@@ -40,10 +40,10 @@ class WC_Session_Transients extends WC_Session {
 	 * @return mixed
 	 */
 	private function get_customer_id() {
-		if ( is_user_logged_in() ) {
-			return get_current_user_id();
-		} elseif ( $customer_id = $this->get_session_cookie() ) {
+		if ( $customer_id = $this->get_session_cookie() ) {
 			return $customer_id;
+		} elseif ( is_user_logged_in() ) {
+			return get_current_user_id();
 		} else {
 			return $this->create_customer_id();
 		}
