@@ -5,7 +5,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/Coupons
- * @version     1.6.4
+ * @version     1.7
  */
 
 /**
@@ -22,6 +22,7 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns["cb"] 			= "<input type=\"checkbox\" />";
 	$columns["title"] 		= __("Code", 'woocommerce');
 	$columns["type"] 		= __("Coupon type", 'woocommerce');
+	$columns["description"]	= __("Description", 'woocommerce');
 	$columns["amount"] 		= __("Coupon amount", 'woocommerce');
 	$columns["products"]	= __("Product IDs", 'woocommerce');
 	$columns["usage_limit"] = __("Usage limit", 'woocommerce');
@@ -44,6 +45,7 @@ add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns')
 function woocommerce_custom_coupon_columns($column) {
 	global $post, $woocommerce;
 
+	$description	= get_post_meta($post->ID, 'description', true);
 	$type 			= get_post_meta($post->ID, 'discount_type', true);
 	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
 	$individual_use = get_post_meta($post->ID, 'individual_use', true);
@@ -53,6 +55,9 @@ function woocommerce_custom_coupon_columns($column) {
 	$expiry_date 	= get_post_meta($post->ID, 'expiry_date', true);
 
 	switch ($column) {
+		case "description" :
+			echo $description;
+		break;
 		case "type" :
 			echo $woocommerce->get_coupon_discount_type($type);
 		break;

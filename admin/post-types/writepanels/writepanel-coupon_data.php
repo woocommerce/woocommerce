@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.6.4
+ * @version     1.7
  */
 
 
@@ -31,7 +31,10 @@ function woocommerce_coupon_data_meta_box($post) {
 		<?php
 
 			echo '<div class="options_group">';
-
+			
+			// Description
+			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __('Coupon Description', 'woocommerce'), 'description' => __('Enter a description for this coupon', 'woocommerce') ) );
+			
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woocommerce'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
@@ -183,6 +186,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$woocommerce_errors[] = __( 'Coupon code already exists.', 'woocommerce' );
 
 	// Add/Replace data to array
+		$description	= strip_tags(stripslashes( $_POST['coupon_description'] ));
 		$type 			= strip_tags(stripslashes( $_POST['discount_type'] ));
 		$amount 		= strip_tags(stripslashes( $_POST['coupon_amount'] ));
 		$usage_limit 	= (isset($_POST['usage_limit']) && $_POST['usage_limit']>0) ? (int) $_POST['usage_limit'] : '';
@@ -211,6 +215,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 		$exclude_product_categories = (isset($_POST['exclude_product_categories'])) ? array_map('intval', $_POST['exclude_product_categories']) : array();
 
 	// Save
+		update_post_meta( $post_id, 'description', $description );
 		update_post_meta( $post_id, 'discount_type', $type );
 		update_post_meta( $post_id, 'coupon_amount', $amount );
 		update_post_meta( $post_id, 'individual_use', $individual_use );
