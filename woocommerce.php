@@ -827,69 +827,73 @@ class Woocommerce {
 		do_action( 'woocommerce_register_post_type' );
 
 		register_post_type( "product",
-			array(
-				'labels' => array(
-						'name' 					=> __( 'Products', 'woocommerce' ),
-						'singular_name' 		=> __( 'Product', 'woocommerce' ),
-						'menu_name'				=> _x( 'Products', 'Admin menu name', 'woocommerce' ),
-						'add_new' 				=> __( 'Add Product', 'woocommerce' ),
-						'add_new_item' 			=> __( 'Add New Product', 'woocommerce' ),
-						'edit' 					=> __( 'Edit', 'woocommerce' ),
-						'edit_item' 			=> __( 'Edit Product', 'woocommerce' ),
-						'new_item' 				=> __( 'New Product', 'woocommerce' ),
-						'view' 					=> __( 'View Product', 'woocommerce' ),
-						'view_item' 			=> __( 'View Product', 'woocommerce' ),
-						'search_items' 			=> __( 'Search Products', 'woocommerce' ),
-						'not_found' 			=> __( 'No Products found', 'woocommerce' ),
-						'not_found_in_trash' 	=> __( 'No Products found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Product', 'woocommerce' )
-					),
-				'description' 			=> __( 'This is where you can add new products to your store.', 'woocommerce' ),
-				'public' 				=> true,
-				'show_ui' 				=> true,
-				'capability_type' 		=> 'product',
-				'map_meta_cap'			=> true,
-				'publicly_queryable' 	=> true,
-				'exclude_from_search' 	=> false,
-				'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
-				'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
-				'query_var' 			=> true,
-				'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
-				'has_archive' 			=> $base_slug,
-				'show_in_nav_menus' 	=> true
+			apply_filters( 'woocommerce_register_post_type_product', 
+				array(
+					'labels' => array(
+							'name' 					=> __( 'Products', 'woocommerce' ),
+							'singular_name' 		=> __( 'Product', 'woocommerce' ),
+							'menu_name'				=> _x( 'Products', 'Admin menu name', 'woocommerce' ),
+							'add_new' 				=> __( 'Add Product', 'woocommerce' ),
+							'add_new_item' 			=> __( 'Add New Product', 'woocommerce' ),
+							'edit' 					=> __( 'Edit', 'woocommerce' ),
+							'edit_item' 			=> __( 'Edit Product', 'woocommerce' ),
+							'new_item' 				=> __( 'New Product', 'woocommerce' ),
+							'view' 					=> __( 'View Product', 'woocommerce' ),
+							'view_item' 			=> __( 'View Product', 'woocommerce' ),
+							'search_items' 			=> __( 'Search Products', 'woocommerce' ),
+							'not_found' 			=> __( 'No Products found', 'woocommerce' ),
+							'not_found_in_trash' 	=> __( 'No Products found in trash', 'woocommerce' ),
+							'parent' 				=> __( 'Parent Product', 'woocommerce' )
+						),
+					'description' 			=> __( 'This is where you can add new products to your store.', 'woocommerce' ),
+					'public' 				=> true,
+					'show_ui' 				=> true,
+					'capability_type' 		=> 'product',
+					'map_meta_cap'			=> true,
+					'publicly_queryable' 	=> true,
+					'exclude_from_search' 	=> false,
+					'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
+					'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
+					'query_var' 			=> true,
+					'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
+					'has_archive' 			=> $base_slug,
+					'show_in_nav_menus' 	=> true
+				)
 			)
 		);
 
 		// Sort out attachment urls (removed, breaks pagination) no alternatives add_rewrite_rule( '^' . $attachment_base . '([^/]*)/([^/]*)/([^/]*)/?', 'index.php?attachment=$matches[3]', 'top' );
 
 		register_post_type( "product_variation",
-			array(
-				'labels' => array(
-						'name' 					=> __( 'Variations', 'woocommerce' ),
-						'singular_name' 		=> __( 'Variation', 'woocommerce' ),
-						'add_new' 				=> __( 'Add Variation', 'woocommerce' ),
-						'add_new_item' 			=> __( 'Add New Variation', 'woocommerce' ),
-						'edit' 					=> __( 'Edit', 'woocommerce' ),
-						'edit_item' 			=> __( 'Edit Variation', 'woocommerce' ),
-						'new_item' 				=> __( 'New Variation', 'woocommerce' ),
-						'view' 					=> __( 'View Variation', 'woocommerce' ),
-						'view_item' 			=> __( 'View Variation', 'woocommerce' ),
-						'search_items' 			=> __( 'Search Variations', 'woocommerce' ),
-						'not_found' 			=> __( 'No Variations found', 'woocommerce' ),
-						'not_found_in_trash' 	=> __( 'No Variations found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Variation', 'woocommerce' )
-					),
-				'public' 				=> true,
-				'show_ui' 				=> false,
-				'capability_type' 		=> 'product',
-				'map_meta_cap'			=> true,
-				'publicly_queryable' 	=> false,
-				'exclude_from_search' 	=> true,
-				'hierarchical' 			=> false,
-				'rewrite' 				=> false,
-				'query_var'				=> true,
-				'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
-				'show_in_nav_menus' 	=> false
+			apply_filters( 'woocommerce_register_post_type_product_variation', 
+				array(
+					'labels' => array(
+							'name' 					=> __( 'Variations', 'woocommerce' ),
+							'singular_name' 		=> __( 'Variation', 'woocommerce' ),
+							'add_new' 				=> __( 'Add Variation', 'woocommerce' ),
+							'add_new_item' 			=> __( 'Add New Variation', 'woocommerce' ),
+							'edit' 					=> __( 'Edit', 'woocommerce' ),
+							'edit_item' 			=> __( 'Edit Variation', 'woocommerce' ),
+							'new_item' 				=> __( 'New Variation', 'woocommerce' ),
+							'view' 					=> __( 'View Variation', 'woocommerce' ),
+							'view_item' 			=> __( 'View Variation', 'woocommerce' ),
+							'search_items' 			=> __( 'Search Variations', 'woocommerce' ),
+							'not_found' 			=> __( 'No Variations found', 'woocommerce' ),
+							'not_found_in_trash' 	=> __( 'No Variations found in trash', 'woocommerce' ),
+							'parent' 				=> __( 'Parent Variation', 'woocommerce' )
+						),
+					'public' 				=> true,
+					'show_ui' 				=> false,
+					'capability_type' 		=> 'product',
+					'map_meta_cap'			=> true,
+					'publicly_queryable' 	=> false,
+					'exclude_from_search' 	=> true,
+					'hierarchical' 			=> false,
+					'rewrite' 				=> false,
+					'query_var'				=> true,
+					'supports' 				=> array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
+					'show_in_nav_menus' 	=> false
+				)
 			)
 		);
 
@@ -899,71 +903,75 @@ class Woocommerce {
 		}
 
 	    register_post_type( "shop_order",
-			array(
-				'labels' => array(
-						'name' 					=> __( 'Orders', 'woocommerce' ),
-						'singular_name' 		=> __( 'Order', 'woocommerce' ),
-						'add_new' 				=> __( 'Add Order', 'woocommerce' ),
-						'add_new_item' 			=> __( 'Add New Order', 'woocommerce' ),
-						'edit' 					=> __( 'Edit', 'woocommerce' ),
-						'edit_item' 			=> __( 'Edit Order', 'woocommerce' ),
-						'new_item' 				=> __( 'New Order', 'woocommerce' ),
-						'view' 					=> __( 'View Order', 'woocommerce' ),
-						'view_item' 			=> __( 'View Order', 'woocommerce' ),
-						'search_items' 			=> __( 'Search Orders', 'woocommerce' ),
-						'not_found' 			=> __( 'No Orders found', 'woocommerce' ),
-						'not_found_in_trash' 	=> __( 'No Orders found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Orders', 'woocommerce' ),
-						'menu_name'				=> $menu_name
-					),
-				'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
-				'public' 				=> true,
-				'show_ui' 				=> true,
-				'capability_type' 		=> 'shop_order',
-				'map_meta_cap'			=> true,
-				'publicly_queryable' 	=> false,
-				'exclude_from_search' 	=> true,
-				'show_in_menu' 			=> $show_in_menu,
-				'hierarchical' 			=> false,
-				'show_in_nav_menus' 	=> false,
-				'rewrite' 				=> false,
-				'query_var' 			=> true,
-				'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
-				'has_archive' 			=> false,
+		    apply_filters( 'woocommerce_register_post_type_shop_order', 
+				array(
+					'labels' => array(
+							'name' 					=> __( 'Orders', 'woocommerce' ),
+							'singular_name' 		=> __( 'Order', 'woocommerce' ),
+							'add_new' 				=> __( 'Add Order', 'woocommerce' ),
+							'add_new_item' 			=> __( 'Add New Order', 'woocommerce' ),
+							'edit' 					=> __( 'Edit', 'woocommerce' ),
+							'edit_item' 			=> __( 'Edit Order', 'woocommerce' ),
+							'new_item' 				=> __( 'New Order', 'woocommerce' ),
+							'view' 					=> __( 'View Order', 'woocommerce' ),
+							'view_item' 			=> __( 'View Order', 'woocommerce' ),
+							'search_items' 			=> __( 'Search Orders', 'woocommerce' ),
+							'not_found' 			=> __( 'No Orders found', 'woocommerce' ),
+							'not_found_in_trash' 	=> __( 'No Orders found in trash', 'woocommerce' ),
+							'parent' 				=> __( 'Parent Orders', 'woocommerce' ),
+							'menu_name'				=> $menu_name
+						),
+					'description' 			=> __( 'This is where store orders are stored.', 'woocommerce' ),
+					'public' 				=> true,
+					'show_ui' 				=> true,
+					'capability_type' 		=> 'shop_order',
+					'map_meta_cap'			=> true,
+					'publicly_queryable' 	=> false,
+					'exclude_from_search' 	=> true,
+					'show_in_menu' 			=> $show_in_menu,
+					'hierarchical' 			=> false,
+					'show_in_nav_menus' 	=> false,
+					'rewrite' 				=> false,
+					'query_var' 			=> true,
+					'supports' 				=> array( 'title', 'comments', 'custom-fields' ),
+					'has_archive' 			=> false,
+				)
 			)
 		);
 
 	    register_post_type( "shop_coupon",
-			array(
-				'labels' => array(
-						'name' 					=> __( 'Coupons', 'woocommerce' ),
-						'singular_name' 		=> __( 'Coupon', 'woocommerce' ),
-						'menu_name'				=> _x( 'Coupons', 'Admin menu name', 'woocommerce' ),
-						'add_new' 				=> __( 'Add Coupon', 'woocommerce' ),
-						'add_new_item' 			=> __( 'Add New Coupon', 'woocommerce' ),
-						'edit' 					=> __( 'Edit', 'woocommerce' ),
-						'edit_item' 			=> __( 'Edit Coupon', 'woocommerce' ),
-						'new_item' 				=> __( 'New Coupon', 'woocommerce' ),
-						'view' 					=> __( 'View Coupons', 'woocommerce' ),
-						'view_item' 			=> __( 'View Coupon', 'woocommerce' ),
-						'search_items' 			=> __( 'Search Coupons', 'woocommerce' ),
-						'not_found' 			=> __( 'No Coupons found', 'woocommerce' ),
-						'not_found_in_trash' 	=> __( 'No Coupons found in trash', 'woocommerce' ),
-						'parent' 				=> __( 'Parent Coupon', 'woocommerce' )
-					),
-				'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
-				'public' 				=> true,
-				'show_ui' 				=> true,
-				'capability_type' 		=> 'shop_coupon',
-				'map_meta_cap'			=> true,
-				'publicly_queryable' 	=> false,
-				'exclude_from_search' 	=> true,
-				'show_in_menu' 			=> $show_in_menu,
-				'hierarchical' 			=> false,
-				'rewrite' 				=> false,
-				'query_var' 			=> false,
-				'supports' 				=> array( 'title' ),
-				'show_in_nav_menus'		=> false
+		    apply_filters( 'woocommerce_register_post_type_shop_coupon',
+				array(
+					'labels' => array(
+							'name' 					=> __( 'Coupons', 'woocommerce' ),
+							'singular_name' 		=> __( 'Coupon', 'woocommerce' ),
+							'menu_name'				=> _x( 'Coupons', 'Admin menu name', 'woocommerce' ),
+							'add_new' 				=> __( 'Add Coupon', 'woocommerce' ),
+							'add_new_item' 			=> __( 'Add New Coupon', 'woocommerce' ),
+							'edit' 					=> __( 'Edit', 'woocommerce' ),
+							'edit_item' 			=> __( 'Edit Coupon', 'woocommerce' ),
+							'new_item' 				=> __( 'New Coupon', 'woocommerce' ),
+							'view' 					=> __( 'View Coupons', 'woocommerce' ),
+							'view_item' 			=> __( 'View Coupon', 'woocommerce' ),
+							'search_items' 			=> __( 'Search Coupons', 'woocommerce' ),
+							'not_found' 			=> __( 'No Coupons found', 'woocommerce' ),
+							'not_found_in_trash' 	=> __( 'No Coupons found in trash', 'woocommerce' ),
+							'parent' 				=> __( 'Parent Coupon', 'woocommerce' )
+						),
+					'description' 			=> __( 'This is where you can add new coupons that customers can use in your store.', 'woocommerce' ),
+					'public' 				=> true,
+					'show_ui' 				=> true,
+					'capability_type' 		=> 'shop_coupon',
+					'map_meta_cap'			=> true,
+					'publicly_queryable' 	=> false,
+					'exclude_from_search' 	=> true,
+					'show_in_menu' 			=> $show_in_menu,
+					'hierarchical' 			=> false,
+					'rewrite' 				=> false,
+					'query_var' 			=> false,
+					'supports' 				=> array( 'title' ),
+					'show_in_nav_menus'		=> false
+				)
 			)
 		);
 	}
