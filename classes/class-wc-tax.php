@@ -33,73 +33,84 @@ class WC_Tax {
 			$flat_rates			= array();
 			$index 				= 0;
 
-			if ( ! empty( $tax_rates ) ) foreach( $tax_rates as $rate ) :
+			if ( ! empty( $tax_rates ) ) {
+				foreach( $tax_rates as $rate ) {
+	
+					// Standard Rate?
+					if ( empty( $rate['class'] ) ) 
+						$rate['class'] = '*';
+	
+					// Add entry for each country/state - each will hold all matching rates
+					if ( ! empty( $rate['countries'] ) ) {
+						foreach( $rate['countries'] as $country => $states ) {
+							if ( $states ) {
+								foreach ( $states as $state ) {
+		
+									if ( empty( $rate['label'] ) ) {
+										$rate['label'] = $woocommerce->countries->tax_or_vat();
+					
+										// Add % to label
+										if ( $rate['rate'] > 0 || $rate['rate'] === 0 )
+											$rate['label'] .= ' (' . rtrim( rtrim( $rate['rate'], '0' ), '.' ) . '%)';
+									}
+		
+									$flat_rates[ $index ] = $rate;
+		
+									$parsed_rates[ $country ][ $state ][ $rate['class'] ][ $index ] = array(
+										'label' 	=> $rate['label'],
+										'rate' 		=> $rate['rate'],
+										'shipping' 	=> $rate['shipping'],
+										'compound' 	=> $rate['compound']
+									);
+									
+									$index++;		
+								}
+							}
+						}
+					}
+				}
+			}
 
-				// Standard Rate?
-				if ( isset( $rate['class'] ) && !$rate['class']) $rate['class'] = '*';
-
-				// Add entry for each country/state - each will hold all matching rates
-				if ( isset( $rate['countries'] ) && $rate['countries']) foreach ($rate['countries'] as $country => $states) :
-
-					if ($states) :
-
-						foreach ($states as $state) :
-
-							if (!$rate['label']) :
-								$rate['label'] = $woocommerce->countries->tax_or_vat();
-
-								// Add % to label
-								if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
-									$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
-								endif;
-							endif;
-
-							$flat_rates[$index] = $rate;
-
-							$parsed_rates[$country][$state][$rate['class']][$index] = array(
-								'label' => $rate['label'],
-								'rate' => $rate['rate'],
-								'shipping' => $rate['shipping'],
-								'compound' => $rate['compound']
-								);
-
-							$index++;
-
-						endforeach;
-
-					endif;
-
-				endforeach;
-
-			endforeach;
-
-			if ( ! empty( $local_tax_rates ) ) foreach( $local_tax_rates as $rate ) :
-
-				// Standard Rate?
-				if (!$rate['class']) $rate['class'] = '*';
-
-				if ( isset( $rate['label'] ) && !$rate['label']) :
-					$rate['label'] = $woocommerce->countries->tax_or_vat();
-
-					// Add % to label
-					if ( $rate['rate'] > 0 || $rate['rate'] === 0 ) :
-						$rate['label'] .= ' ('. rtrim(rtrim($rate['rate'], '0'), '.') . '%)';
-					endif;
-				endif;
-
-				$flat_rates[$index] = $rate;
-
-				$parsed_rates[$rate['country']][$rate['state']][$rate['class']][$index] = array(
-					'label' => $rate['label'],
-					'rate' => $rate['rate'],
-					'postcode' => array_map('strtoupper', (array) $rate['postcode']),
-					'shipping' => $rate['shipping'],
-					'compound' => $rate['compound']
+			if ( ! empty( $local_tax_rates ) ) {
+				foreach( $local_tax_rates as $rate ) {
+	
+					// Standard Rate?
+					if ( empty( $rate['class'] ) ) 
+						$rate['class'] = '*';
+	
+					if ( empty( $rate['label'] ) ) {
+						$rate['label'] = $woocommerce->countries->tax_or_vat();
+	
+						// Add % to label
+						if ( $rate['rate'] > 0 || $rate['rate'] === 0 )
+							$rate['label'] .= ' (' . rtrim( rtrim( $rate['rate'], '0' ), '.' ) . '%)';
+					}
+					
+					// Backwards compat
+					if ( empty( $rate['locations'] ) && isset( $rate['postcode'] ) )
+						$rate['locations'] = $rate['postcode'];
+						
+					if ( empty( $rate['location_type'] ) )
+						$rate['location_type'] = 'postcode';
+						
+					// Postcodes -> Uppercase
+					if ( $rate['location_type'] == 'postcode' )
+				    	$rate['locations'] = array_map( 'strtoupper', (array) $rate['locations'] );
+	
+					$flat_rates[ $index ] = $rate;
+	
+					$parsed_rates[ $rate['country'] ][ $rate['state'] ][ $rate['class'] ][ $index ] = array(
+						'label' 		=> $rate['label'],
+						'rate' 			=> $rate['rate'],
+						'locations' 	=> $rate['locations'],
+						'location_type' => $rate['location_type'],
+						'shipping' 		=> $rate['shipping'],
+						'compound' 		=> $rate['compound']
 					);
 
-				$index++;
-
-			endforeach;
+					$index++;
+				}
+			}
 
 			$this->rates 		= $flat_rates;
 			$this->parsed_rates = $parsed_rates;
@@ -107,27 +118,37 @@ class WC_Tax {
 			do_action( 'woocommerce_get_tax_rates', $this );
 		}
 	}
-
+	
 	/**
 	 * Searches for all matching country/state/postcode tax rates.
-	 *
-	 * @since 	1.4
-	 * @param   string	country
-	 * @param	string	state
-	 * @param   string	postcode
-	 * @param	string	Tax Class
-	 * @return  array
+	 * 
+	 * @access public
+	 * @param string $args (default: '')
+	 * @return array
 	 */
-	function find_rates( $country = '', $state = '', $postcode = '', $tax_class = '' ) {
+	function find_rates( $args = '' ) {
 		$this->get_tax_rates();
+		
+		$defaults = array(
+			'country' 	=> '',
+			'state' 	=> '',
+			'city' 		=> '',
+			'postcode' 	=> '',
+			'tax_class'	=> ''
+		);
 
-		if ( ! $country ) return array();
+		$args = wp_parse_args( $args, $defaults );
 
-		if ( ! $state ) $state = '*';
+		extract( $args, EXTR_SKIP );
 
-		$tax_class = sanitize_title($tax_class);
-		if ( ! $tax_class ) $tax_class = '*';
+		if ( ! $country ) 
+			return array();
 
+		$state = $state ? $state : '*';
+		$tax_class = $tax_class ? $tax_class : '*';
+		$city = sanitize_title( $city );
+		$tax_class = sanitize_title( $tax_class );
+		
 		$found_rates = array();
 
 		// Look for a state specific rule
@@ -153,40 +174,48 @@ class WC_Tax {
 		// Now we have an array of matching rates, lets filter this based on postcode
 		$matched_tax_rates = array();
 
-		if ($found_rates) foreach ($found_rates as $key => $rate) :
+		if ( $found_rates ) {
+			foreach ( $found_rates as $key => $rate ) {
 
-			if (isset($rate['postcode'])) :
+				if ( ! empty( $rate['locations'] ) && $rate['location_type'] == 'postcode' ) {
+	
+					// Local rate
+					if ( $postcode ) {
+					
+						// Check if postcode matches up
+						if ( in_array( $postcode, $rate['locations'] ) || sizeof( $rate['locations'] ) == 0 ) 
+							$matched_tax_rates[ $key ] = $rate;
+	
+						// Check postcode ranges
+						if ( is_numeric( $postcode ) ) {
+							foreach ( $rate['locations'] as $rate_postcode ) {
+								if ( strstr( $rate_postcode, '-' ) ) {
+									$parts = array_map( 'trim', explode( '-', $rate_postcode ) );
+									if ( sizeof( $parts ) == 2 && is_numeric( $parts[0] ) && is_numeric( $parts[1] ) )
+										if ( $postcode >= $parts[0] && $postcode <= $parts[1] ) 
+											$matched_tax_rates[ $key ] = $rate;
+								}
+							}
+						}
+					}
+					
+				} elseif ( ! empty( $rate['locations'] ) && $rate['location_type'] == 'city' ) {
+										
+					// Local rate
+					if ( $city ) {
+						// Check if city matches up
+						if ( in_array( $city, $rate['locations'] ) || sizeof( $rate['locations'] ) == 0 ) 
+							$matched_tax_rates[ $key ] = $rate;
+					}
+					
+				} else {
+					// Standard rate
+					$matched_tax_rates[ $key ] = $rate;
+				}
+			}
+		}
 
-				// Local rate
-				if ($postcode) :
-
-					// Check if postcode matches up
-					if (in_array($postcode, $rate['postcode']) || sizeof($rate['postcode'])==0) $matched_tax_rates[$key] = $rate;
-
-					// Check postcode ranges
-					if (is_numeric($postcode)) :
-						foreach ($rate['postcode'] as $rate_postcode) :
-							if (strstr($rate_postcode, '-')) :
-								$parts = array_map('trim', explode('-', $rate_postcode));
-								if (sizeof($parts)==2 && is_numeric($parts[0]) && is_numeric($parts[1])) :
-									if ($postcode>=$parts[0] && $postcode<=$parts[1]) $matched_tax_rates[$key] = $rate;
-								endif;
-							endif;
-						endforeach;
-					endif;
-
-				endif;
-
-			else :
-
-				// Standard rate
-				$matched_tax_rates[$key] = $rate;
-
-			endif;
-
-		endforeach;
-
-		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->parsed_rates, $country, $state, $postcode, $tax_class );
+		$matched_tax_rates = apply_filters('woocommerce_matched_tax_rates', $matched_tax_rates, $this->parsed_rates, $country, $state, $postcode, $city, $tax_class );
 
 		return $matched_tax_rates;
 	}
@@ -211,13 +240,21 @@ class WC_Tax {
 				$country 	= $woocommerce->customer->get_shipping_country();
 				$state 		= $woocommerce->customer->get_shipping_state();
 				$postcode   = $woocommerce->customer->get_shipping_postcode();
+				$city   	= $woocommerce->customer->get_shipping_city();
 			} else {
 				$country 	= $woocommerce->customer->get_country();
 				$state 		= $woocommerce->customer->get_state();
 				$postcode   = $woocommerce->customer->get_postcode();
+				$city   	= $woocommerce->customer->get_city();
 			}
 
-			$matched_tax_rates = $this->find_rates( $country, $state, $postcode, $tax_class );
+			$matched_tax_rates = $this->find_rates( array(
+				'country' 	=> $country, 
+				'state' 	=> $state, 
+				'postcode' 	=> $postcode, 
+				'city' 		=> $city,
+				'tax_class' => $tax_class
+			) );
 
 			return $matched_tax_rates;
 
@@ -243,19 +280,11 @@ class WC_Tax {
 		$country 	= $woocommerce->countries->get_base_country();
 		$state 		= $woocommerce->countries->get_base_state();
 
-		return $this->find_rates( $country, $state, '', $tax_class );
-	}
-
-
-	/**
-	 * Deprecated before new tax system - added to stop errors before people upgrade.
-	 *
-	 * @deprecated 1.4
-	 * @access public
-	 * @return void
-	 */
-	function get_shipping_tax_rate() {
-		_deprecated_function( 'get_shipping_tax_rate', '1.4' );
+		return $this->find_rates( array(
+			'country' 	=> $country, 
+			'state' 	=> $state, 
+			'tax_class' => $tax_class 
+		) );
 	}
 
 	/**
@@ -275,46 +304,58 @@ class WC_Tax {
 				$country 	= $woocommerce->customer->get_shipping_country();
 				$state 		= $woocommerce->customer->get_shipping_state();
 				$postcode   = $woocommerce->customer->get_shipping_postcode();
+				$city   	= $woocommerce->customer->get_shipping_city();
 			} else {
 				$country 	= $woocommerce->customer->get_country();
 				$state 		= $woocommerce->customer->get_state();
 				$postcode   = $woocommerce->customer->get_postcode();
+				$city   	= $woocommerce->customer->get_city();
 			}
 
 		} else {
 			$country 	= $woocommerce->countries->get_base_country();
 			$state 		= $woocommerce->countries->get_base_state();
 			$postcode   = '';
+			$city		= '';
 		}
 
 		// If we are here then shipping is taxable - work it out
-		if ( ! is_null($tax_class) ) :
+		if ( ! is_null( $tax_class ) ) {
 
 			$matched_tax_rates = array();
 
 			// This will be per item shipping
-			$rates = $this->find_rates( $country, $state, $postcode, $tax_class );
+			$rates = $this->find_rates( array(
+				'country' 	=> $country, 
+				'state' 	=> $state, 
+				'postcode' 	=> $postcode, 
+				'city' 		=> $city,
+				'tax_class' => $tax_class 
+			) );
 
-			if ($rates) foreach ($rates as $key => $rate) :
-				if (isset($rate['shipping']) && $rate['shipping']=='yes') :
-					$matched_tax_rates[$key] = $rate;
-				endif;
-			endforeach;
+			if ( $rates ) 
+				foreach ( $rates as $key => $rate )
+					if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
+						$matched_tax_rates[ $key ] = $rate;
 
-			if (sizeof($matched_tax_rates)==0) :
+			if ( sizeof( $matched_tax_rates ) == 0 ) {
 				// Get standard rate
-				$rates = $this->find_rates( $country, $state, $postcode );
+				$rates = $this->find_rates( array(
+					'country' 	=> $country, 
+					'state' 	=> $state, 
+					'city' 		=> $city,
+					'postcode' 	=> $postcode, 
+				) );
 
-				if ($rates) foreach ($rates as $key => $rate) :
-					if (isset($rate['shipping']) && $rate['shipping']=='yes') :
-						$matched_tax_rates[$key] = $rate;
-					endif;
-				endforeach;
-			endif;
+				if ( $rates ) 
+					foreach ( $rates as $key => $rate )
+						if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
+							$matched_tax_rates[ $key ] = $rate;
+			}
 
 			return $matched_tax_rates;
 
-		else :
+		} else {
 
 			// This will be per order shipping - loop through the order and find the highest tax class rate
 			$found_tax_classes = array();
@@ -322,51 +363,68 @@ class WC_Tax {
 			$rates = false;
 
 			// Loop cart and find the highest tax band
-			if (sizeof($woocommerce->cart->get_cart())>0) : foreach ($woocommerce->cart->get_cart() as $item) :
-
-				$found_tax_classes[] = $item['data']->get_tax_class();
-
-			endforeach; endif;
+			if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) 
+				foreach ( $woocommerce->cart->get_cart() as $item )
+					$found_tax_classes[] = $item['data']->get_tax_class();
 
 			$found_tax_classes = array_unique( $found_tax_classes );
 
 			// If multiple classes are found, use highest
-			if (sizeof($found_tax_classes)>1) :
+			if ( sizeof( $found_tax_classes ) > 1 ) {
 
-				if (in_array('', $found_tax_classes)) :
-					$rates = $this->find_rates( $country, $state, $postcode );
-				else :
-					$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+				if ( in_array( '', $found_tax_classes ) ) {
+					$rates = $this->find_rates( array(
+						'country' 	=> $country, 
+						'state' 	=> $state, 
+						'city' 		=> $city,
+						'postcode' 	=> $postcode, 
+					) );
+				} else {
+					$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
 
-					foreach ($tax_classes as $tax_class) :
-						if (in_array( $tax_class, $found_tax_classes )) :
-							$rates = $this->find_rates( $country, $state, $postcode, $tax_class );
+					foreach ( $tax_classes as $tax_class ) {
+						if ( in_array( $tax_class, $found_tax_classes ) ) {
+							$rates = $this->find_rates( array(
+								'country' 	=> $country, 
+								'state' 	=> $state, 
+								'postcode' 	=> $postcode, 
+								'city' 		=> $city,
+								'tax_class' => $tax_class 
+							) );
 							break;
-						endif;
-					endforeach;
-				endif;
+						}
+					}
+				}
 
 			// If a single tax class is found, use it
-			elseif (sizeof($found_tax_classes)==1) :
+			} elseif ( sizeof( $found_tax_classes ) == 1 ) {
 
-				$rates = $this->find_rates( $country, $state, $postcode, $found_tax_classes[0] );
+				$rates = $this->find_rates( array(
+					'country' 	=> $country, 
+					'state' 	=> $state, 
+					'postcode' 	=> $postcode, 
+					'city' 		=> $city,
+					'tax_class' => $found_tax_classes[0] 
+				) );
 
-			endif;
+			}
 
-			// If no classes are found, use standard rates
-			if (!$rates) :
-				$rates = $this->find_rates( $country, $state, $postcode );
-			endif;
+			// If no class rate are found, use standard rates
+			if ( ! $rates )
+				$rates = $this->find_rates( array(
+					'country' 	=> $country, 
+					'state' 	=> $state, 
+					'postcode' 	=> $postcode, 
+					'city' 		=> $city,
+				) );
 
-			if ($rates) foreach ($rates as $key => $rate) :
-				if (isset($rate['shipping']) && $rate['shipping']=='yes') :
-					$matched_tax_rates[$key] = $rate;
-				endif;
-			endforeach;
+			if ( $rates ) 
+				foreach ( $rates as $key => $rate )
+					if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
+						$matched_tax_rates[ $key ] = $rate;
 
 			return $matched_tax_rates;
-
-		endif;
+		}
 
 		return array(); // return false
 	}

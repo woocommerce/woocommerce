@@ -1096,7 +1096,7 @@ class WC_Countries {
 				'label' 		=> __('Town/City', 'woocommerce'),
 				'placeholder' 	=> _x('Town/City', 'placeholder', 'woocommerce'),
 				'required' 		=> true,
-				'class' 		=> array('form-row-first'),
+				'class' 		=> array('form-row-first', 'update_totals_on_change'),
 				),
 			'postcode' 	=> array(
 				'label' 		=> __('Postcode/Zip', 'woocommerce'),

@@ -284,10 +284,12 @@ jQuery( function($){
 			if (country) {
 				var state = $('#_shipping_state').val();
 				var postcode = $('#_shipping_postcode').val();
+				var city = $('#_shipping_city').val();
 			} else {
 				country = $('#_billing_country').val();
 				var state = $('#_billing_state').val();
 				var postcode = $('#_billing_postcode').val();
+				var city = $('#_billing_city').val();
 			}
 
 			$items.each(function( idx ){
@@ -303,6 +305,7 @@ jQuery( function($){
 					country:		country,
 					state:			state,
 					postcode:		postcode,
+					city:			city,
 					security: 		woocommerce_writepanel_params.calc_totals_nonce
 				};
 

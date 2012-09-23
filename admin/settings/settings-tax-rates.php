@@ -114,7 +114,7 @@ function woocommerce_tax_rates_setting() {
 	    		<thead>
 	    			<tr>
 	    				<th class="check-column"><input type="checkbox"></th>
-	    				<th class="country"><?php _e('Post/zip codes', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('List postcodes/zips this rate applies to separated by semi-colons. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woocommerce'); ?>">[?]</a></th>
+	    				<th class="country"><?php _e('Locations', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('List (1 per line) postcodes/zips/cities this rate applies to. You may also enter ranges for numeric zip codes. e.g. 12345-12349;23456;', 'woocommerce'); ?>">[?]</a></th>
 	    				<th><?php _e('Tax Class', 'woocommerce'); ?></th>
 	    				<th><?php _e('Label', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce'); ?>">[?]</a></th>
 	    				<th><?php _e('Rate', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce'); ?>">[?]</a></th>
@@ -133,41 +133,51 @@ function woocommerce_tax_rates_setting() {
 	    		</tfoot>
 	    		<tbody id="local_tax_rates">
 
-	    			<?php $i = -1; if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) : $i++; ?>
-	    			<tr class="tax_rate">
-						<td class="check-column"><input type="checkbox" name="select" /></td>
-	        			<td class="local_country">
-	        				<select name="local_tax_country[<?php echo $i; ?>]" class="select">
-	        					<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>
-			                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['country'], $rate['state'] ); ?>
-			                </select>
-	               			<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woocommerce'); ?>" class="text" name="local_tax_postcode[<?php echo $i; ?>]"><?php if (isset($rate['postcode'])) echo implode(';', $rate['postcode']); ?></textarea>
-	               		</td>
-	               		<td class="tax_class">
-	               			<select name="local_tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
-				                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>
-				                <?php
-		                    		if ($tax_classes) foreach ($tax_classes as $class) :
-				                        echo '<option value="'.sanitize_title($class).'"';
-				                        selected($rate['class'], sanitize_title($class));
-				                        echo '>'.$class.'</option>';
-				                    endforeach;
-			                    ?>
-		                    </select>
-	               		</td>
-	               		<td class="label">
-	               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />
-	               		</td>
-	    				<td class="rate">
-	    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%
-	    				</td>
-	    				<td class="compound">
-	    					<input type="checkbox" class="checkbox" name="local_tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
-	    				</td>
-	    				<td class="apply_to_shipping">
-	    					<input type="checkbox" class="checkbox" name="local_tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> />
-	    				</td>
-	    			</tr>
+	    			<?php 
+	    			$i = -1; 
+	    			if ($local_tax_rates && is_array($local_tax_rates)) foreach( $local_tax_rates as $rate ) : 
+	    				$i++; 
+		    			$rate['locations'] = isset( $rate['locations'] ) ? $rate['locations'] : $rate['postcode']; // Backwards compat
+		    			$rate['location_type'] = isset( $rate['location_type'] ) ? $rate['location_type'] : 'postcode';
+		    			?>
+		    			<tr class="tax_rate">
+							<td class="check-column"><input type="checkbox" name="select" /></td>
+		        			<td class="local_country">
+		        				<select name="local_tax_country[<?php echo $i; ?>]" class="select">
+		        					<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>
+				                   	<?php echo $woocommerce->countries->country_dropdown_options( $rate['country'], $rate['state'] ); ?>
+				                </select>
+				                <select name="local_tax_location_type[<?php echo $i; ?>]" class="select type">
+		        					<option value="postcode" <?php selected( $rate['location_type'], 'postcode' ); ?>><?php _e('Postcodes/zips', 'woocommerce'); ?></option>
+		        					<option value="city" <?php selected( $rate['location_type'], 'city' ); ?>><?php _e('Cities', 'woocommerce'); ?></option>
+				                </select>
+		               			<textarea type="text" placeholder="<?php _e('List 1 per line', 'woocommerce'); ?>" class="text" name="local_tax_location[<?php echo $i; ?>]"><?php if ( isset( $rate['locations'] ) ) echo implode( "\n", $rate['locations'] ); ?></textarea>
+		               		</td>
+		               		<td class="tax_class">
+		               			<select name="local_tax_class[<?php echo $i; ?>]" title="Tax Class" class="select">
+					                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>
+					                <?php
+			                    		if ($tax_classes) foreach ($tax_classes as $class) :
+					                        echo '<option value="'.sanitize_title($class).'"';
+					                        selected($rate['class'], sanitize_title($class));
+					                        echo '>'.$class.'</option>';
+					                    endforeach;
+				                    ?>
+			                    </select>
+		               		</td>
+		               		<td class="label">
+		               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e('Label', 'woocommerce'); ?>" size="16" />
+		               		</td>
+		    				<td class="rate">
+		    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e('Rate', 'woocommerce'); ?>" placeholder="<?php _e('Rate', 'woocommerce'); ?>" maxlength="8" size="4" />%
+		    				</td>
+		    				<td class="compound">
+		    					<input type="checkbox" class="checkbox" name="local_tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
+		    				</td>
+		    				<td class="apply_to_shipping">
+		    					<input type="checkbox" class="checkbox" name="local_tax_shipping[<?php echo $i; ?>]" <?php  if (isset($rate['shipping'])) checked($rate['shipping'], 'yes'); ?> />
+		    				</td>
+		    			</tr>
 	    			<?php endforeach; ?>
 
 	    		</tbody>
@@ -273,12 +283,16 @@ function woocommerce_tax_rates_setting() {
 			jQuery('<tr class="tax_rate new_rate">\
 				<td class="check-column"><input type="checkbox" name="select" /></td>\
 				<td class="local_country">\
-					<select name="local_tax_country[' + size + ']" class="select">\
-						<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>\
-			       		<?php echo $woocommerce->countries->country_dropdown_options( '', '', true ); ?>\
-			    	</select>\
-					<textarea type="text" placeholder="<?php _e('Post/zip codes', 'woocommerce'); ?>" class="text" name="local_tax_postcode[' + size + ']"></textarea>\
-				</td>\
+    				<select name="local_tax_country[' + size + ']" class="select">\
+    					<option value=""><?php _e('Select a country/state&hellip;', 'woocommerce'); ?></option>\
+	                   	<?php echo $woocommerce->countries->country_dropdown_options( '', '', true ); ?>\
+	                </select>\
+	                <select name="local_tax_location_type[' + size + ']" class="select type">\
+    					<option value="postcode"><?php _e('Postcodes/zips', 'woocommerce'); ?></option>\
+    					<option value="city"><?php _e('Cities', 'woocommerce'); ?></option>\
+	                </select>\
+           			<textarea type="text" placeholder="<?php _e('List 1 per line', 'woocommerce'); ?>" class="text" name="local_tax_location[' + size + ']"></textarea>\
+           		</td>\
 		   		<td class="tax_class">\
 		   			<select name="local_tax_class[' + size + ']" title="Tax Class" class="select">\
 		                <option value=""><?php _e('Standard Rate', 'woocommerce'); ?></option>\

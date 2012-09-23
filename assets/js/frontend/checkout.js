@@ -16,17 +16,19 @@ jQuery(document).ready(function($) {
 		var payment_method 	= $('#order_review input[name=payment_method]:checked').val();
 		var country 		= $('#billing_country').val();
 		var state 			= $('#billing_state').val();
-		var postcode 		= $('input#billing_postcode').val();	
+		var postcode 		= $('input#billing_postcode').val();
+		var city	 		= $('input#billing_city').val();	
 			
 		if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
 			var s_country 	= country;
 			var s_state 	= state;
 			var s_postcode 	= postcode;
-			
+			var s_city 		= city;
 		} else {
 			var s_country 	= $('#shipping_country').val();
 			var s_state 	= $('#shipping_state').val();
 			var s_postcode 	= $('input#shipping_postcode').val();
+			var s_city 		= $('input#shipping_city').val();
 		}
 		
 		$('#order_methods, #order_review').block({message: null, overlayCSS: {background: '#fff url(' + woocommerce_params.ajax_loader_url + ') no-repeat center', opacity: 0.6}});
@@ -39,9 +41,11 @@ jQuery(document).ready(function($) {
 			country: 			country, 
 			state: 				state, 
 			postcode: 			postcode, 
+			city:				city,
 			s_country: 			s_country, 
 			s_state: 			s_state, 
 			s_postcode: 		s_postcode,
+			s_city:				s_city,
 			post_data:			$('form.checkout').serialize()
 		};
 		

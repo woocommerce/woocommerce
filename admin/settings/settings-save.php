@@ -84,7 +84,8 @@ function woocommerce_update_options($options) {
     		$local_tax_rates 	= array();
     		$tax_classes 		= (isset($_POST['local_tax_class'])) ? $_POST['local_tax_class'] : array();
     		$tax_countries 		= (isset($_POST['local_tax_country'])) ? $_POST['local_tax_country'] : array();
-    		$tax_postcode		= (isset($_POST['local_tax_postcode'])) ? $_POST['local_tax_postcode'] : array();
+    		$tax_location_type 	= (isset($_POST['local_tax_location_type'])) ? $_POST['local_tax_location_type'] : 'postcode';
+    		$tax_location	 	= (isset($_POST['local_tax_location'])) ? $_POST['local_tax_location'] : array();
     		$tax_rate 			= (isset($_POST['local_tax_rate'])) ? $_POST['local_tax_rate'] : array();
     		$tax_shipping 		= (isset($_POST['local_tax_shipping'])) ? $_POST['local_tax_shipping'] : array();
     		$tax_postcode 		= (isset($_POST['local_tax_postcode'])) ? $_POST['local_tax_postcode'] : array();
@@ -107,20 +108,26 @@ function woocommerce_update_options($options) {
 					$country = woocommerce_clean($tax_countries[$i]);
 					$state = '*';
 
-					if (strstr($country, ':')) :
-						$cr = explode(':', $country);
-						$country = current($cr);
-						$state = end($cr);
-					endif;
+					if ( strstr( $country, ':' ) ) {
+						$cr = explode( ':', $country );
+						$country = current( $cr );
+						$state = end( $cr );
+					}
 
-					// Handle postcodes
-					$postcodes = explode(';', $tax_postcode[$i]);
-					$postcodes = array_filter(array_map('trim', $postcodes));
+					// Handle postcodes/cities
+					$location_type = $tax_location_type[ $i ] == 'city' ? 'city' : 'postcode';
+					$locations = explode( "\n", $tax_location[ $i ] );
+					$locations = array_filter( array_map( 'stripslashes', array_map( 'trim', $locations ) ) );
+					
+					if ( $location_type == 'city' ) {
+						$locations = array_map( 'sanitize_title', $locations );
+					}
 
 					$local_tax_rates[] = array(
 						'country' => $country,
 						'state' => $state,
-						'postcode' => $postcodes,
+						'location_type' => $location_type,
+						'locations' => $locations,
 						'rate' => $rate,
 						'shipping' => $shipping,
 						'compound' => $compound,

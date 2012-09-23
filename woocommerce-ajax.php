@@ -154,22 +154,32 @@ function woocommerce_ajax_update_order_review() {
 
 	do_action('woocommerce_checkout_update_order_review', $_POST['post_data']);
 
-	if ( isset( $_POST['shipping_method'] ) ) 
-		$woocommerce->session->chosen_shipping_method = $_POST['shipping_method'];
-	if ( isset( $_POST['payment_method'] ) ) 
-		$woocommerce->session->chosen_payment_method = $_POST['payment_method'];
+	$woocommerce->session->chosen_shipping_method = empty( $_POST['shipping_method'] ) ? '' : $_POST['shipping_method'];
+	$woocommerce->session->chosen_payment_method = empty( $_POST['payment_method'] ) ? '' : $_POST['payment_method'];
+	
 	if ( isset( $_POST['country'] ) ) 
 		$woocommerce->customer->set_country( $_POST['country'] );
+		
 	if ( isset( $_POST['state'] ) ) 
 		$woocommerce->customer->set_state( $_POST['state'] );
+		
 	if ( isset( $_POST['postcode'] ) ) 
 		$woocommerce->customer->set_postcode( $_POST['postcode'] );
+		
+	if ( isset( $_POST['city'] ) ) 
+		$woocommerce->customer->set_city( $_POST['city'] );
+		
 	if ( isset( $_POST['s_country'] ) ) 
 		$woocommerce->customer->set_shipping_country( $_POST['s_country'] );
+		
 	if ( isset( $_POST['s_state'] ) ) 
 		$woocommerce->customer->set_shipping_state( $_POST['s_state'] );
+		
 	if ( isset( $_POST['s_postcode'] ) ) 
 		$woocommerce->customer->set_shipping_postcode( $_POST['s_postcode'] );
+	
+	if ( isset( $_POST['s_city'] ) ) 
+		$woocommerce->customer->set_shipping_city( $_POST['s_city'] );
 
 	$woocommerce->cart->calculate_totals();
 
@@ -894,6 +904,7 @@ function woocommerce_calc_line_taxes() {
 	$country 		= strtoupper( esc_attr( $_POST['country'] ) );
 	$state 			= strtoupper( esc_attr( $_POST['state'] ) );
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
+	$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
 
 	$line_subtotal 	= esc_attr( $_POST['line_subtotal'] );
 	$line_total 	= esc_attr( $_POST['line_total'] );
@@ -909,7 +920,13 @@ function woocommerce_calc_line_taxes() {
 
 	if ( $item_tax_status == 'taxable' ) {
 
-		$tax_rates			= $tax->find_rates( $country, $state, $postcode, $tax_class );
+		$tax_rates = $tax->find_rates( array(
+			'country' 	=> $country, 
+			'state' 	=> $state, 
+			'postcode' 	=> $postcode, 
+			'city'		=> $city,
+			'tax_class' => $tax_class 
+		) );
 
 		$line_subtotal_tax_amount	= rtrim( rtrim( number_format( array_sum( $tax->calc_tax( $line_subtotal, $tax_rates, false ) ), 4, '.', '' ), '0' ), '.' );
 		$line_tax_amount			= rtrim( rtrim( number_format( array_sum( $tax->calc_tax( $line_total, $tax_rates, false ) ), 4, '.', '' ), '0' ), '.' );
