@@ -216,7 +216,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		$order_id = $order->id;
 
 		if ($this->debug=='yes') 
-			$this->log->add( 'paypal', 'Generating payment form for order #' . $order_id . '. Notify URL: ' . $this->notify_url );
+			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		if (in_array($order->billing_country, array('US','CA'))) :
 			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
@@ -250,8 +250,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 				'page_style'			=> $this->page_style,
 
 				// Order key + ID
-				'invoice'				=> $this->invoice_prefix . $order_id,
-				'custom' 				=> $order->order_key,
+				'invoice'				=> $this->invoice_prefix . ltrim( $order->get_order_number(), '#' ),
+				'custom' 				=> serialize( array( $order_id, $order->order_key ) ),
 
 				// IPN
 				'notify_url'			=> $this->notify_url,
@@ -693,15 +693,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	function get_paypal_order( $posted ) {
-	
-		// Backwards comp for IPN requests
-    	if ( is_numeric( $posted['custom'] ) ) {
-	    	$order_id 	= (int) $posted['custom'];
-	    	$order_key 	= $posted['invoice'];
+		$custom = maybe_unserialize( $posted['custom'] );
+
+    	// Backwards comp for IPN requests
+    	if ( is_numeric( $custom ) ) {
+	    	$order_id = (int) $custom;
+	    	$order_key = $posted['invoice'];
+    	} elseif( is_string( $custom ) ) {
+	    	$order_id = (int) str_replace( $this->invoice_prefix, '', $custom );
+	    	$order_key = $custom;
     	} else {
-	    	$order_id 	= (int) str_replace( $this->invoice_prefix, '', $posted['invoice'] );
-	    	$order_key 	= $posted['custom'];
-    	}
+    		list( $order_id, $order_key ) = $custom;
+		}
 
 		$order = new WC_Order( $order_id );
 
