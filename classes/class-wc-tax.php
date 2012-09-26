@@ -509,8 +509,8 @@ class WC_Tax {
 	 * @return  string		
 	 */
 	function get_rate_label( $key ) {
-		if (isset($this->rates[$key]) && $this->rates[$key]['label']) return $this->rates[$key]['label'];
-		return '';
+        $label = ( isset( $this->rates[ $key ] ) && $this->rates[ $key ]['label'] ) ? $this->rates[ $key ]['label'] : '';
+        return apply_filters( 'woocommerce_rate_label' , $label, $this, $key );
 	}
 	
 	/**
