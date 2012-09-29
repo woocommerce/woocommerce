@@ -170,10 +170,12 @@ function variable_product_type_options() {
 
 									<td class="data" rowspan="2">
 										<table cellspacing="0" cellpadding="0">
+											<?php if ( get_option('woocommerce_manage_stock') == 'yes' ) : ?>
 											<tr>
 												<td><label><?php _e('Stock Qty:', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e('Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce'); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_stock'][0])) echo $variation_data['_stock'][0]; ?>" /></td>
 												<td>&nbsp;</td>
 											</tr>
+											<?php endif; ?>
 											<tr>
 												<td><label><?php _e('Price:', 'woocommerce'); ?></label><input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if (isset($variation_data['_price'][0])) echo $variation_data['_price'][0]; ?>" /></td>
 
@@ -390,10 +392,10 @@ function variable_product_type_options() {
 								</td>\
 								<td class="data" rowspan="2">\
 									<table cellspacing="0">\
-										<tr>\
+										<?php if ( get_option('woocommerce_manage_stock') == 'yes' ) : ?><tr>\
 											<td><label><?php echo esc_js( __('Stock Qty:', 'woocommerce') ); ?> <a class="tips" data-tip="<?php echo esc_js( __('Enter a quantity to enable stock management for this variation, or leave blank to use the variable product stock options.', 'woocommerce') ); ?>" href="#">[?]</a></label><input type="text" size="5" name="variable_stock[' + loop + ']" /></td>\
 											<td>&nbsp;</td>\
-										</tr>\
+										</tr><?php endif; ?>\
 										<tr>\
 											<td><label><?php echo esc_js( __('Price:', 'woocommerce') ); ?></label><input type="text" size="5" name="variable_price[' + loop + ']" /></td>\
 											<td><label><?php echo esc_js( __('Sale Price:', 'woocommerce') ); ?></label><input type="text" size="5" name="variable_sale_price[' + loop + ']" /></td>\
