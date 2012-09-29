@@ -188,6 +188,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Romanian update by silviu-bucsa.
 * Localization - Dutch updates by Ramoonus.
 * Localization - Localized shortcode button.
+* Localization - Norwegian translation by frilyd.
 * Many other minor fixes and tweaks!
 
 = 1.6.5.2 - 12/09/2012 =
