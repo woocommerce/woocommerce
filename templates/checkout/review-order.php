@@ -121,9 +121,9 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 			<?php endif; ?>
 
 			<?php
-				if ($woocommerce->cart->get_cart_tax()) :
+				$taxes = $woocommerce->cart->get_formatted_taxes();
 
-					$taxes = $woocommerce->cart->get_formatted_taxes();
+				if ( $woocommerce->cart->get_cart_tax() || ! empty( $taxes ) ) :
 
 					if (sizeof($taxes)>0) :
 

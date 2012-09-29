@@ -1436,7 +1436,8 @@ class WC_Cart {
 		 * @return bool
 		 */
 		function needs_payment() {
-			if ( $this->total > 0 ) return true; else return false;
+			$needs_payment = ( $this->total > 0 ) ? true : false;
+			return apply_filters( 'woocommerce_cart_needs_payment', $needs_payment, $this );
 		}
 
     /*-----------------------------------------------------------------------------------*/
