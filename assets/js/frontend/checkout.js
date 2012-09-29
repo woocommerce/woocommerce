@@ -131,7 +131,7 @@ jQuery(document).ready(function($) {
 			$('body').trigger('update_checkout');
 		}
 	});
-	$('.update_totals_on_change input').live('keydown', function( e ){
+	$('.update_totals_on_change input.input-text').live('keydown', function( e ){
 		var code = e.keyCode || e.which;
 		if ( code == '9' )
 			return;
