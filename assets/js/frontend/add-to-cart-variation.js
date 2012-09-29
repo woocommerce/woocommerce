@@ -155,7 +155,8 @@ jQuery(document).ready(function($) {
 		        	.attr( 'alt', o_title )
 		        	.attr( 'title', o_title );
 	            $product_link
-	            	.attr( 'href', o_href );
+	            	.attr( 'href', o_href )
+					.attr( 'title', o_title );
 	        }
 
 		} )
@@ -256,14 +257,16 @@ jQuery(document).ready(function($) {
 	            	.attr( 'alt', variation_title )
 	            	.attr( 'title', variation_title );
 	            $product_link
-	            	.attr( 'href', variation_link );
+	            	.attr( 'href', variation_link )
+					.attr( 'title', variation_title );
 	        } else {
 	            $product_img
 	            	.attr( 'src', o_src )
 	            	.attr( 'alt', o_title )
 	            	.attr( 'title', o_title );
 	            $product_link
-	            	.attr( 'href', o_href );
+	            	.attr( 'href', o_href )
+					.attr( 'title', o_title );
 	        }
 
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
