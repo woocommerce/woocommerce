@@ -395,7 +395,7 @@ function woocommerce_sales_overview() {
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('This months sales', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e('This month\'s sales', 'woocommerce'); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
