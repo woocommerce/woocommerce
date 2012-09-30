@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 		var postcode 		= $('input#billing_postcode').val();
 		var city	 		= $('input#billing_city').val();	
 			
-		if ($('#shiptobilling input').is(':checked') || $('#shiptobilling input').size()==0) {
+		if ( $('#shiptobilling input').is(':checked') || $('#shiptobilling input').size() == 0 ) {
 			var s_country 	= country;
 			var s_state 	= state;
 			var s_postcode 	= postcode;
