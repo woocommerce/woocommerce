@@ -2148,7 +2148,7 @@ function woocommerce_category_sales() {
 			<?php
 				// Variables
 				foreach ( $chart_data as $name => $data ) {
-					$varname = str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
+					$varname = 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
 					echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
 				}
 			?>
@@ -2160,7 +2160,7 @@ function woocommerce_category_sales() {
 				$labels = array();
 				
 				foreach ( $chart_data as $name => $data ) {
-					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
+					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
 				}
 				
 				echo implode( ',', $labels );
@@ -2446,7 +2446,7 @@ function woocommerce_coupon_sales() {
 			<?php
 				// Variables
 				foreach ( $chart_data as $name => $data ) {
-					$varname = str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
+					$varname = 'coupon_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
 					echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
 				}
 			?>
@@ -2458,7 +2458,7 @@ function woocommerce_coupon_sales() {
 				$labels = array();
 				
 				foreach ( $chart_data as $name => $data ) {
-					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
+					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . 'coupon_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
 				}
 				
 				echo implode( ',', $labels );

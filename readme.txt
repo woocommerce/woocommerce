@@ -152,6 +152,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 1.7.0 = 
 * Feature - Added sales by category report.
+* Feature - Added sales by coupon report (kudos Max Rice).
 * Feature - Multiple downloadable files per product/variation (kudos Justin Stern).
 * Feature - Download expiry for variations (kudos niravmehta).
 * Feature - Added wildcard support to local delivery postcodes.
