@@ -17,7 +17,7 @@ _deprecated_file( basename(__FILE__), '1.6' );
 
 	<?php do_action('woocommerce_before_shop_loop'); ?>
 
-	<ul class="products">
+	<?php woocommerce_product_loop_start(); ?>
 
 		<?php woocommerce_product_subcategories(); ?>
 
@@ -27,13 +27,13 @@ _deprecated_file( basename(__FILE__), '1.6' );
 
 		<?php endwhile; // end of the loop. ?>
 
-	</ul>
+	<?php woocommerce_product_loop_end(); ?>
 
 	<?php do_action('woocommerce_after_shop_loop'); ?>
 
 <?php else : ?>
 
-	<?php if ( ! woocommerce_product_subcategories( array( 'before' => '<ul class="products">', 'after' => '</ul>' ) ) ) : ?>
+	<?php if ( ! woocommerce_product_subcategories( array( 'before' => woocommerce_product_loop_start( false ), 'after' => woocommerce_product_loop_end( false ) ) ) ) : ?>
 
 		<p><?php _e( 'No products found which match your selection.', 'woocommerce' ); ?></p>
 

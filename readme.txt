@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature = Added "Top Rated" shortcode
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
+* Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.

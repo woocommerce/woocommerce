@@ -66,7 +66,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php do_action('woocommerce_before_shop_loop'); ?>
 
-				<ul class="products">
+				<?php woocommerce_product_loop_start(); ?>
 
 					<?php woocommerce_product_subcategories(); ?>
 
@@ -76,7 +76,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 					<?php endwhile; // end of the loop. ?>
 
-				</ul>
+				<?php woocommerce_product_loop_end(); ?>
 
 				<?php do_action('woocommerce_after_shop_loop'); ?>
 
@@ -229,6 +229,40 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 
 /** Loop ******************************************************************/
 
+if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
+
+	/**
+	 * Output the start of a product loop. By default this is a UL
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function woocommerce_product_loop_start( $echo = true ) {
+		ob_start();
+		woocommerce_get_template( 'loop/loop-start.php' );
+		if ( $echo )
+			echo ob_get_clean();
+		else 
+			return ob_get_clean();
+	}
+}
+if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
+
+	/**
+	 * Output the end of a product loop. By default this is a UL
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function woocommerce_product_loop_end( $echo = true ) {
+		ob_start();
+		woocommerce_get_template( 'loop/loop-end.php' );
+		if ( $echo )
+			echo ob_get_clean();
+		else 
+			return ob_get_clean();
+	}
+}
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**

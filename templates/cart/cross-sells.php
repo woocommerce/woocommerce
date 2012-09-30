@@ -32,7 +32,7 @@ if ( $products->have_posts() ) : ?>
 
 		<h2><?php _e('You may be interested in&hellip;', 'woocommerce') ?></h2>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -40,7 +40,7 @@ if ( $products->have_posts() ) : ?>
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	</div>
 

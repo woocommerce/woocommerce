@@ -83,7 +83,7 @@ function woocommerce_product_category( $atts ){
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -91,7 +91,7 @@ function woocommerce_product_category( $atts ){
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -147,7 +147,7 @@ function woocommerce_product_categories( $atts ) {
 
   	if ( $product_categories ) {
 
-  		echo '<ul class="products">';
+  		woocommerce_product_loop_start();
 
 		foreach ( $product_categories as $category ) {
 
@@ -157,7 +157,7 @@ function woocommerce_product_categories( $atts ) {
 
 		}
 
-		echo '</ul>';
+		woocommerce_product_loop_end();
 
 	}
 
@@ -209,7 +209,7 @@ function woocommerce_recent_products( $atts ) {
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -217,7 +217,7 @@ function woocommerce_recent_products( $atts ) {
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -285,7 +285,7 @@ function woocommerce_products( $atts ) {
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -293,7 +293,7 @@ function woocommerce_products( $atts ) {
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -345,7 +345,7 @@ function woocommerce_product( $atts ) {
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -353,7 +353,7 @@ function woocommerce_product( $atts ) {
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -545,7 +545,7 @@ function woocommerce_sale_products( $atts ){
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -553,7 +553,7 @@ function woocommerce_sale_products( $atts ){
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -601,7 +601,7 @@ function woocommerce_best_selling_products( $atts ){
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -609,7 +609,7 @@ function woocommerce_best_selling_products( $atts ){
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -663,7 +663,7 @@ function woocommerce_top_rated_products( $atts ){
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -671,7 +671,7 @@ function woocommerce_top_rated_products( $atts ){
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
@@ -726,7 +726,7 @@ function woocommerce_featured_products( $atts ) {
 
 	if ( $products->have_posts() ) : ?>
 
-		<ul class="products">
+		<?php woocommerce_product_loop_start(); ?>
 
 			<?php while ( $products->have_posts() ) : $products->the_post(); ?>
 
@@ -734,7 +734,7 @@ function woocommerce_featured_products( $atts ) {
 
 			<?php endwhile; // end of the loop. ?>
 
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 
 	<?php endif;
 
