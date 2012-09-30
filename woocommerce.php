@@ -1181,9 +1181,11 @@ class Woocommerce {
 	 * @return WC_Email
 	 */
 	function mailer() {
-		// Init mail class
-		if ( ! class_exists('WC_Email') ) {
-			include( 'classes/emails/class-wc-emails.php' );
+		if ( empty( $this->woocommerce_email ) ) {
+			// Init mail class
+			if ( ! class_exists('WC_Emails') ) {
+				include_once( 'classes/emails/class-wc-emails.php' );
+			}
 			$this->woocommerce_email = new WC_Emails();
 		}
 		return $this->woocommerce_email;
