@@ -326,6 +326,9 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	}
 }
 
+add_filter( 'loop_end', 'woocommerce_reset_loop' );
+
+
 if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 
 	/**
