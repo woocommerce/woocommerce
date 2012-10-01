@@ -271,6 +271,28 @@ class WC_Customer {
 	function get_shipping_city() {
 		if ( isset( $this->_data['shipping_city'] ) ) return $this->_data['shipping_city'];
 	}
+	
+	
+	/**
+	 * get_taxable_address function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_taxable_address() {
+		if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
+			$country 	= $this->get_shipping_country();
+			$state 		= $this->get_shipping_state();
+			$postcode   = $this->get_shipping_postcode();
+			$city   	= $this->get_shipping_city();
+		} else {
+			$country 	= $this->get_country();
+			$state 		= $this->get_state();
+			$postcode   = $this->get_postcode();
+			$city   	= $this->get_city();
+		}
+		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
+	}
 
 	
 	/**

@@ -185,8 +185,8 @@ class WC_Shipping {
 	function calculate_shipping( $packages = array() ) {
 		global $woocommerce;
 		
-		if ( ! $this->enabled ) return;
-		if ( empty( $packages ) ) return;
+		if ( ! $this->enabled || empty( $packages ) ) 
+			return;
 
 		$this->shipping_total 	= 0;
 		$this->shipping_taxes 	= array();
@@ -198,8 +198,8 @@ class WC_Shipping {
 		$package_keys 		= array_keys( $packages );
 		$package_keys_size 	= sizeof( $package_keys );
 
-		for ( $i=0; $i < $package_keys_size; $i++ )
-			$this->packages[$package_keys[$i]] = $this->calculate_shipping_for_package( $packages[$package_keys[$i]] );
+		for ( $i = 0; $i < $package_keys_size; $i ++ )
+			$this->packages[ $package_keys[ $i ] ] = $this->calculate_shipping_for_package( $packages[ $package_keys[ $i ] ] );
 
 		// Get available methods (in this case methods for all packages)
 		$_available_methods = $this->get_available_shipping_methods();
@@ -238,14 +238,18 @@ class WC_Shipping {
 					}
 					$chosen_method = $_cheapest_method;
 				}
-
+				
+				// Store chosen method
+				$woocommerce->session->chosen_shipping_method = $chosen_method;
+				
+				// Do action for this chosen method
+				do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 			}
 
 			if ( $chosen_method ) {
-				$woocommerce->session->chosen_shipping_method = $chosen_method;
-				$this->shipping_total 	= $_available_methods[$chosen_method]->cost;
-				$this->shipping_taxes 	= $_available_methods[$chosen_method]->taxes;
-				$this->shipping_label 	= $_available_methods[$chosen_method]->label;
+				$this->shipping_total 	= $_available_methods[ $chosen_method ]->cost;
+				$this->shipping_taxes 	= $_available_methods[ $chosen_method ]->taxes;
+				$this->shipping_label 	= $_available_methods[ $chosen_method ]->label;
 			}
 		}
 	}

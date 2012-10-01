@@ -163,7 +163,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - New options for individual transaction emails with template editor
 * Feature - Added "On Sale" shortcode (thanks daltonrooney)
 * Feature - Added "Best Selling" shortcode
-* Feature = Added "Top Rated" shortcode
+* Feature - Added "Top Rated" shortcode
+* Feature - Local pickup has the option to apply base tax rates instead of customer address rates.
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.

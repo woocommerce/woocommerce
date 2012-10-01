@@ -228,7 +228,7 @@ class WC_Tax {
 	 */
 	function get_rates( $tax_class = '' ) {
 		global $woocommerce;
-
+		
 		$this->get_tax_rates();
 
 		$tax_class = sanitize_title( $tax_class );
@@ -236,17 +236,7 @@ class WC_Tax {
 		/* Checkout uses customer location for the tax rates. Also, if shipping has been calculated, use the customers address. */
 		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
 			
-			if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
-				$country 	= $woocommerce->customer->get_shipping_country();
-				$state 		= $woocommerce->customer->get_shipping_state();
-				$postcode   = $woocommerce->customer->get_shipping_postcode();
-				$city   	= $woocommerce->customer->get_shipping_city();
-			} else {
-				$country 	= $woocommerce->customer->get_country();
-				$state 		= $woocommerce->customer->get_state();
-				$postcode   = $woocommerce->customer->get_postcode();
-				$city   	= $woocommerce->customer->get_city();
-			}
+			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
 
 			$matched_tax_rates = $this->find_rates( array(
 				'country' 	=> $country, 
@@ -300,17 +290,7 @@ class WC_Tax {
 
 		if ( ( defined('WOOCOMMERCE_CHECKOUT') && WOOCOMMERCE_CHECKOUT ) || $woocommerce->customer->has_calculated_shipping() ) {
 		
-			if ( get_option( 'woocommerce_tax_shipping_address' ) == 'yes' ) {
-				$country 	= $woocommerce->customer->get_shipping_country();
-				$state 		= $woocommerce->customer->get_shipping_state();
-				$postcode   = $woocommerce->customer->get_shipping_postcode();
-				$city   	= $woocommerce->customer->get_shipping_city();
-			} else {
-				$country 	= $woocommerce->customer->get_country();
-				$state 		= $woocommerce->customer->get_state();
-				$postcode   = $woocommerce->customer->get_postcode();
-				$city   	= $woocommerce->customer->get_city();
-			}
+			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
 
 		} else {
 			$country 	= $woocommerce->countries->get_base_country();
