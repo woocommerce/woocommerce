@@ -110,13 +110,13 @@ function woocommerce_admin_menu_highlight() {
 		}
 	}
 
-	if ( isset( $submenu['woocommerce'] ) ) {
+	if ( isset( $submenu['woocommerce'] ) && isset( $submenu['woocommerce'][2] ) ) {
 		$submenu['woocommerce'][0] = $submenu['woocommerce'][2];
 		unset( $submenu['woocommerce'][2] );
 	}
 
 	// Sort out Orders menu when on the top level
-	if ( ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'read_shop_order' ) ) {
+	if ( ! current_user_can( 'manage_woocommerce' ) ) {
 		foreach ( $menu as $key => $menu_item ) {
 			if ( strpos( $menu_item[0], _x('Orders', 'Admin menu name', 'woocommerce') ) === 0 ) {
 
