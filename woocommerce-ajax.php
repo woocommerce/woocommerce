@@ -617,7 +617,7 @@ function woocommerce_revoke_access_to_download() {
 	$product_id = intval( $_POST['product_id'] );
 	$order_id 	= intval( $_POST['order_id'] );
 
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %d;" $wpdb->prefix . 'woocommerce_downloadable_product_permissions', $order_id, $product_id, $download_id ) );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %d;", $order_id, $product_id, $download_id ) );
 
 	die();
 }
@@ -1454,7 +1454,12 @@ function woocommerce_product_image_ordering() {
 			$menu_order++;
 		}
 	}
-
+	
+	// Set featured image
+	$new_positions = array_flip( $new_positions );
+	if ( isset( $new_positions[0] ) )
+		update_post_meta( $post_id, '_thumbnail_id', $new_positions[0] );
+		
 	die();
 }
 
