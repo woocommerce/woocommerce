@@ -1336,3 +1336,131 @@ function woocommerce_product_ordering() {
 }
 
 add_action( 'wp_ajax_woocommerce_product_ordering', 'woocommerce_product_ordering' );
+
+
+/**
+ * woocommerce_product_images_box_upload function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_product_images_box_upload() {
+	
+	check_ajax_referer( 'product-images-box-upload' );
+	
+	// Get posted data
+	$file 		= $_FILES['async-upload'];
+	$post_id 	= absint( $_POST['post_id'] );
+	
+	// Upload
+	$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
+	
+	if( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+	
+		// Create attachment
+		require_once( ABSPATH . 'wp-admin/includes/image.php' );
+		
+		$attachment_id = wp_insert_attachment( array(
+			'post_mime_type' 	=> $upload['type'],
+			'post_title' 		=> preg_replace( '/\.[^.]+$/', '', basename( $upload['file'] ) ),
+			'post_content' 		=> '',
+			'post_status' 		=> 'inherit'
+		), $upload['file'], $post_id );
+		
+		$attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
+		wp_update_attachment_metadata( $attachment_id, $attachment_data );
+	
+		// Return the result
+		$image = wp_get_attachment_image_src( $attachment_id, 'full' );
+		
+		$result = array(
+			'src'		=> $image[0],
+			'post_id' 	=> $post_id
+		);
+	
+	} else {
+		$result = array(
+			'error'		=> $upload['error']
+		);
+	}
+
+	echo json_encode( $result );
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_product_images_box_upload', 'woocommerce_product_images_box_upload' );
+
+
+/**
+ * woocommerce_product_image_ordering function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_product_image_ordering() {
+	
+	check_ajax_referer( 'product-image-ordering' );
+	
+	$post_id				= isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : false;
+	$attachment_id			= isset( $_POST['attachment_id'] ) ? absint( $_POST['attachment_id'] ) : false;
+	$prev_attachment_id		= isset( $_POST['prev_attachment_id'] ) ? absint( $_POST['prev_attachment_id'] ) : false;
+	$next_attachment_id 	= isset( $_POST['next_attachment_id'] ) ? absint( $_POST['next_attachment_id'] ) : false;
+	
+	if ( ! $post_id || ! $attachment_id )
+		die( -1 );
+		
+	$siblings = get_children( 'post_parent=' . $post_id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image' ); 
+
+	$new_positions = array(); // store new positions for ajax
+	$menu_order = 0;
+
+	foreach( $siblings as $sibling_id => $sibling ) {
+	
+		if ( $sibling_id == $attachment_id )
+			continue;
+
+		// if this is the post that comes after our repositioned post, set our repositioned post position and increment menu order
+		if ( $next_attachment_id && $next_attachment_id == $sibling_id ) {
+		
+			$attachment = array();
+			$attachment['ID'] = $attachment_id;
+			$attachment['menu_order'] = $menu_order;
+		
+			wp_update_post( $attachment );
+			
+			$new_positions[ $attachment_id ] = $menu_order;
+			
+			$menu_order++;
+		}
+
+		// if repositioned post has been set, and new items are already in the right order, we can stop
+		if ( isset( $new_positions[ $attachment_id ] ) && $sibling->menu_order >= $menu_order )
+			break;
+
+		// set the menu order of the current sibling and increment the menu order
+		$attachment = array();
+		$attachment['ID'] = $sibling_id;
+		$attachment['menu_order'] = $menu_order;
+		wp_update_post( $attachment );
+			
+		$new_positions[ $sibling_id ] = $menu_order;
+		$menu_order++;
+
+		if ( ! $next_attachment_id && $prev_attachment_id == $sibling_id ) {
+			
+			$attachment = array();
+			$attachment['ID'] = $attachment_id;
+			$attachment['menu_order'] = $menu_order;
+		
+			wp_update_post( $attachment );
+			
+			$new_positions[ $attachment_id ] = $menu_order;
+			
+			$menu_order++;
+		}
+	}
+
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_product_image_ordering', 'woocommerce_product_image_ordering' );

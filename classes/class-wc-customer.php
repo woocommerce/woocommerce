@@ -145,25 +145,27 @@ class WC_Customer {
 
 
 	/**
-	 * Is customer outside base country?
+	 * Is customer outside base country (for tax purposes)?
 	 *
 	 * @access public
 	 * @return bool
 	 */
 	function is_customer_outside_base() {
-		global $woocommerce;
-		if ( isset( $this->_data['country'] ) ) {
+		list( $country, $state, $postcode, $city ) = $this->get_taxable_address();
+		
+		if ( $country ) {
 
 			$default = get_option('woocommerce_default_country');
+			
         	if ( strstr( $default, ':' ) ) {
-	    		list( $country, $state ) = explode( ':', $default );
+	    		list( $default_country, $default_state ) = explode( ':', $default );
 	    	} else {
-	    		$country = $default;
-	    		$state = '';
+	    		$default_country = $default;
+	    		$default_state = '';
 	    	}
 
-			if ( $country !== $this->_data['shipping_country'] ) return true;
-			if ( $state && $state !== $this->_data['shipping_state'] ) return true;
+			if ( $default_country !== $country ) return true;
+			if ( $default_state && $default_state !== $state ) return true;
 
 		}
 		return false;
