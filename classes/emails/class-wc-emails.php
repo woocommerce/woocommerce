@@ -49,6 +49,7 @@ class WC_Emails {
 		include_once( 'class-wc-email-customer-invoice.php' );
 		include_once( 'class-wc-email-customer-new-account.php' );
 		include_once( 'class-wc-email-customer-note.php' );
+		include_once( 'class-wc-email-customer-reset-password.php' );
 		include_once( 'class-wc-email-customer-processing-order.php' );
 		include_once( 'class-wc-email-new-order.php' );
 		
@@ -57,6 +58,7 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Completed_Order'] = new WC_Email_Customer_Completed_Order();
 		$this->emails['WC_Email_Customer_Invoice'] = new WC_Email_Customer_Invoice();
 		$this->emails['WC_Email_Customer_Note'] = new WC_Email_Customer_Note();
+		$this->emails['WC_Email_Customer_Reset_Password'] = new WC_Email_Customer_Reset_Password();
 		$this->emails['WC_Email_Customer_New_Account'] = new WC_Email_Customer_New_Account();
 		
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
