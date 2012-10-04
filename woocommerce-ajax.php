@@ -617,12 +617,7 @@ function woocommerce_revoke_access_to_download() {
 	$product_id = intval( $_POST['product_id'] );
 	$order_id 	= intval( $_POST['order_id'] );
 
-	$where = array(
-		'order_id' => $order_id,
-		'product_id' => $product_id,
-		'download_id' => $download_id
-	);
-	$wpdb->delete( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', $where );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %d;" $wpdb->prefix . 'woocommerce_downloadable_product_permissions', $order_id, $product_id, $download_id ) );
 
 	die();
 }
