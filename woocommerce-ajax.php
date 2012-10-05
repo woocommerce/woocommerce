@@ -1272,7 +1272,7 @@ function woocommerce_product_ordering() {
 		WHERE 	posts.post_type 	= 'product'
 		AND 	posts.post_status 	IN ( 'publish', 'pending', 'draft', 'future', 'private' )
 		AND 	posts.ID			NOT IN ( {$post->ID} )
-		ORDER BY posts.menu_order ASC, posts.post_title ASC
+		ORDER BY posts.menu_order ASC, posts.ID DESC
 	");
 
 	$menu_order = 0;
@@ -1344,8 +1344,12 @@ function woocommerce_product_images_box_upload() {
 	check_ajax_referer( 'product-images-box-upload' );
 	
 	// Get posted data
-	$file 		= $_FILES['async-upload'];
-	$post_id 	= absint( $_POST['post_id'] );
+	$file 			= $_FILES['async-upload'];
+	$post_id 		= absint( $_POST['post_id'] );
+	
+	// Get size
+	$attachments =& get_children( 'post_parent=' . $post_id . '&numberposts=-1&post_type=attachment&post_mime_type=image' ); 
+	$gallery_size 	= absint( sizeof( $attachments ) );
 	
 	// Upload
 	$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
@@ -1359,7 +1363,8 @@ function woocommerce_product_images_box_upload() {
 			'post_mime_type' 	=> $upload['type'],
 			'post_title' 		=> preg_replace( '/\.[^.]+$/', '', basename( $upload['file'] ) ),
 			'post_content' 		=> '',
-			'post_status' 		=> 'inherit'
+			'post_status' 		=> 'inherit',
+			'menu_order'		=> ( $gallery_size + 1 )
 		), $upload['file'], $post_id );
 		
 		$attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
@@ -1370,7 +1375,8 @@ function woocommerce_product_images_box_upload() {
 		
 		$result = array(
 			'src'		=> $image[0],
-			'post_id' 	=> $post_id
+			'post_id' 	=> $attachment_id,
+			'edit_url'	=> admin_url( 'media-upload.php?post_id=' . $post_id . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' )
 		);
 	
 	} else {
@@ -1407,7 +1413,7 @@ function woocommerce_product_image_ordering() {
 	$siblings = get_children( 'post_parent=' . $post_id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image' ); 
 
 	$new_positions = array(); // store new positions for ajax
-	$menu_order = 0;
+	$menu_order = 1;
 
 	foreach( $siblings as $sibling_id => $sibling ) {
 	
@@ -1457,10 +1463,98 @@ function woocommerce_product_image_ordering() {
 	
 	// Set featured image
 	$new_positions = array_flip( $new_positions );
-	if ( isset( $new_positions[0] ) )
-		update_post_meta( $post_id, '_thumbnail_id', $new_positions[0] );
+	if ( isset( $new_positions[1] ) )
+		update_post_meta( $post_id, '_thumbnail_id', $new_positions[1] );
 		
 	die();
 }
 
 add_action( 'wp_ajax_woocommerce_product_image_ordering', 'woocommerce_product_image_ordering' );
+
+
+/**
+ * woocommerce_product_image_delete function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_product_image_delete() {
+	
+	check_ajax_referer( 'product-image-delete' );
+	
+	$post_id				= isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : false;
+	$attachment_id			= isset( $_POST['attachment_id'] ) ? absint( $_POST['attachment_id'] ) : false;
+	
+	if ( ! $post_id || ! $attachment_id )
+		die( -1 );
+		
+	wp_delete_attachment( $attachment_id );
+	
+	$thumbnail_id = get_post_thumbnail_id( $post_id );
+	
+	if ( $thumbnail_id == $attachment_id ) {
+		$attachments = get_children( 'post_parent=' . $post_id . '&numberposts=1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image' ); 
+		foreach ( $attachments as $attachment_id => $attachment ) {
+			update_post_meta( $post_id, '_thumbnail_id', $attachment_id );
+		}
+	}
+		
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_product_image_delete', 'woocommerce_product_image_delete' );
+
+/**
+ * woocommerce_product_image_refresh function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_product_image_refresh() {
+	
+	check_ajax_referer( 'product-image-refresh' );
+	
+	$post_id			= isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : false;
+	
+	if ( ! $post_id )
+		die();
+	?>
+	<ul class="product_images">
+		<?php 
+			$thumbnail_id 	= get_post_thumbnail_id( $post_id );
+			
+			if ( $thumbnail_id )
+				echo '<li class="image" data-post_id="' . $thumbnail_id . '">
+					' . wp_get_attachment_image( $thumbnail_id, 'full' ) . '
+					<span class="loading"></span> 
+					<ul class="actions">
+						<li><a href="#" class="delete">' . __( 'Delete', 'woocommerce' ) . '</a></li>
+						<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post_id . '&attachment_id=' . $thumbnail_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;">' . __( 'View', 'woocommerce' ) . '</a></li>
+					</ul>
+				</li>';
+	
+			$attachments =& get_children( 'post_parent=' . $post_id . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image' ); 
+			
+			foreach ( $attachments as $attachment_id => $attachment ) {
+				if ( $thumbnail_id == $attachment_id )
+					continue;
+					
+				$exclude_class = get_post_meta( $attachment_id, '_woocommerce_exclude_image', true ) == 1 ? 'excluded' : '';
+				
+				echo '<li class="image ' . $exclude_class . '" data-post_id="' . $attachment_id . '">
+					' . wp_get_attachment_image( $attachment_id, 'full' ) . '
+					<span class="loading"></span> 
+					<ul class="actions">
+						<li><a href="#" class="delete">' . __( 'Delete', 'woocommerce' ) . '</a></li>
+						<li><a href="' . admin_url( 'media-upload.php?post_id=' . $post_id . '&attachment_id=' . $attachment_id . '&tab=library&width=640&height=553&TB_iframe=1' ) . '" class="view thickbox" onclick="return false;">' . __( 'View', 'woocommerce' ) . '</a></li>
+					</ul>
+				</li>';
+			}
+		?>
+	</ul>
+	<?php
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_product_image_refresh', 'woocommerce_product_image_refresh' );
