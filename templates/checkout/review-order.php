@@ -239,11 +239,14 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						?>
 						<li>
 						<input type="radio" id="payment_method_<?php echo $gateway->id; ?>" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php if ($gateway->chosen) echo 'checked="checked"'; ?> />
-						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->title; ?> <?php echo apply_filters('woocommerce_gateway_icon', $gateway->icon(), $gateway->id); ?></label> 
+						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo apply_filters('woocommerce_gateway_title', $gateway->title); ?> <?php echo apply_filters('woocommerce_gateway_icon', $gateway->icon(), $gateway->id); ?></label> 
 							<?php
 								if ($gateway->has_fields || $gateway->description) : 
 									echo '<div class="payment_box payment_method_'.$gateway->id.'" style="display:none;">';
-									$gateway->payment_fields();
+									
+									//$gateway->payment_fields();
+									echo apply_filters('woocommerce_gateway_raw_description', wpautop(wptexturize($gateway->description)), $gateway->description);
+									
 									echo '</div>';
 								endif;
 							?>
