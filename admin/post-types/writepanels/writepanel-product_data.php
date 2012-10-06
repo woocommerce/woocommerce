@@ -141,36 +141,6 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
-			echo '<div class="options_group hide_if_virtual hide_if_grouped">';
-
-				// Weight
-				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __('Weight', 'woocommerce') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __('Weight in decimal form', 'woocommerce') ) );
-				else:
-					echo '<input type="hidden" name="_weight" value="'.get_post_meta($thepostid, '_weight', true).'" />';
-				endif;
-
-				// Size fields
-				if( get_option('woocommerce_enable_dimensions', true) !== 'no' ) :
-					?><p class="form-field dimensions_field">
-						<label for"product_length"><?php echo __('Dimensions', 'woocommerce') . ' ('.get_option('woocommerce_dimension_unit').')'; ?></label>
-						<span class="wrap">
-							<input id="product_length" placeholder="<?php _e('Length', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_length" value="<?php echo get_post_meta( $thepostid, '_length', true ); ?>" />
-							<input placeholder="<?php _e('Width', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_width" value="<?php echo get_post_meta( $thepostid, '_width', true ); ?>" />
-							<input placeholder="<?php _e('Height', 'woocommerce'); ?>" class="input-text last" size="6" type="text" name="_height" value="<?php echo get_post_meta( $thepostid, '_height', true ); ?>" />
-						</span>
-						<span class="description"><?php _e('LxWxH in decimal form', 'woocommerce'); ?></span>
-					</p><?php
-				else:
-					echo '<input type="hidden" name="_length" value="'.get_post_meta($thepostid, '_length', true).'" />';
-					echo '<input type="hidden" name="_width" value="'.get_post_meta($thepostid, '_width', true).'" />';
-					echo '<input type="hidden" name="_height" value="'.get_post_meta($thepostid, '_height', true).'" />';
-				endif;
-
-				do_action('woocommerce_product_options_dimensions');
-
-			echo '</div>';
-
 			echo '<div class="options_group show_if_downloadable">';
 
 				// File URL
@@ -269,8 +239,40 @@ function woocommerce_product_data_box() {
 		</div>
 
 		<div id="shipping_product_data" class="panel woocommerce_options_panel">
-
+			
 			<?php
+			
+			echo '<div class="options_group">';
+				
+				// Weight
+				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
+					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __('Weight', 'woocommerce') . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __('Weight in decimal form', 'woocommerce') ) );
+				else:
+					echo '<input type="hidden" name="_weight" value="'.get_post_meta($thepostid, '_weight', true).'" />';
+				endif;
+
+				// Size fields
+				if( get_option('woocommerce_enable_dimensions', true) !== 'no' ) :
+					?><p class="form-field dimensions_field">
+						<label for"product_length"><?php echo __('Dimensions', 'woocommerce') . ' ('.get_option('woocommerce_dimension_unit').')'; ?></label>
+						<span class="wrap">
+							<input id="product_length" placeholder="<?php _e('Length', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_length" value="<?php echo get_post_meta( $thepostid, '_length', true ); ?>" />
+							<input placeholder="<?php _e('Width', 'woocommerce'); ?>" class="input-text" size="6" type="text" name="_width" value="<?php echo get_post_meta( $thepostid, '_width', true ); ?>" />
+							<input placeholder="<?php _e('Height', 'woocommerce'); ?>" class="input-text last" size="6" type="text" name="_height" value="<?php echo get_post_meta( $thepostid, '_height', true ); ?>" />
+						</span>
+						<span class="description"><?php _e('LxWxH in decimal form', 'woocommerce'); ?></span>
+					</p><?php
+				else:
+					echo '<input type="hidden" name="_length" value="'.get_post_meta($thepostid, '_length', true).'" />';
+					echo '<input type="hidden" name="_width" value="'.get_post_meta($thepostid, '_width', true).'" />';
+					echo '<input type="hidden" name="_height" value="'.get_post_meta($thepostid, '_height', true).'" />';
+				endif;
+
+				do_action('woocommerce_product_options_dimensions');
+
+			echo '</div>';
+			
+			echo '<div class="options_group">';
 
 				// Shipping Class
 				$classes = get_the_terms( $thepostid, 'product_shipping_class' );
@@ -288,6 +290,8 @@ function woocommerce_product_data_box() {
 				?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e('Shipping class', 'woocommerce'); ?></label> <?php wp_dropdown_categories( $args ); ?> <span class="description"><?php _e('Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce'); ?></span></p><?php
 
 				do_action('woocommerce_product_options_shipping');
+				
+			echo '</div>';
 			?>
 
 		</div>
