@@ -316,7 +316,7 @@ function woocommerce_refresh_mce( $ver ) {
 
 
 /**
- * Order terms when a new term is created.
+ * Order term when created (put in position 0).
  *
  * @access public
  * @param mixed $term_id
@@ -326,28 +326,12 @@ function woocommerce_refresh_mce( $ver ) {
  */
 function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
 
-	if (!$taxonomy=='product_cat' && !strstr($taxonomy, 'pa_')) return;
-
-	$next_id = null;
-
-	$term = get_term($term_id, $taxonomy);
-
-	if ( $term != null ){
+	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) ) 
+		return;
 	
-		// gets the sibling terms
-		$siblings = get_terms($taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0");
-	
-		foreach ($siblings as $sibling) {
-			if( $sibling->term_id == $term_id ) continue;
-			$next_id =  $sibling->term_id; // first sibling term of the hierarchy level
-			break;
-		}
-	
-		// reorder
-		woocommerce_order_terms( $term, $next_id, $taxonomy );		
-	
-	}
+	$meta_name = strstr( $taxonomy, 'pa_' ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
+	update_woocommerce_term_meta( $term_id, $meta_name, 0 );
 }
 
 
