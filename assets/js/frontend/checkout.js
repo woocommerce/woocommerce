@@ -104,12 +104,14 @@ jQuery(document).ready(function($) {
 	
 	}
 	
-	$('.payment_methods input.input-radio').live('click', function(){
-		$('div.payment_box').filter(':visible').slideUp(250);
-		if ($(this).is(':checked')) {
-			$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
-		}
-	});
+	if($('.payment_methods input.input-radio').length > 1) {
+		$('.payment_methods input.input-radio').live('click', function(){
+			$('div.payment_box').filter(':visible').slideUp(250);
+			if ($(this).is(':checked')) {
+				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
+			}
+		});
+	}
 	
 	$('#order_review input[name=payment_method]:checked').click();
 	
