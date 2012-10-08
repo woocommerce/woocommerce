@@ -1539,7 +1539,7 @@ class WC_Product {
 					'image_title'			=> $image_title,
 					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 					'availability_html' 	=> $availability_html,
-					'sku' 					=> __( 'SKU:', 'woocommerce' ) . ' ' . $variation->get_sku(),
+					'sku' 					=> $variation->get_sku(),
 					'min_qty' 				=> 1,
 					'max_qty' 				=> $this->backorders_allowed() ? '' : $variation->stock,
 					'backorders_allowed' 	=> $this->backorders_allowed(),

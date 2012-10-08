@@ -9,6 +9,11 @@ jQuery(document).ready(function($) {
 		.on( 'click', '.reset_variations', function( event ) {
 
 			$(this).closest('form.variations_form').find('.variations select').val('').change();
+			
+			var $sku = $(this).closest('.product').find('.sku');
+
+			if ( $sku.attr( 'data-o_sku' ) )
+				$sku.text( $sku.attr( 'data-o_sku' ) );
 
 			return false;
 		} )
@@ -270,11 +275,17 @@ jQuery(document).ready(function($) {
 	        }
 
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
-
-	        if ( variation.sku )
-	        	 $product.find('.product_meta').find('.sku').text( variation.sku );
-	        else
-	        	 $product.find('.product_meta').find('.sku').text('');
+	        
+	        var $sku = $product.find('.product_meta').find('.sku');
+	        
+	        if ( ! $sku.attr( 'data-o_sku' ) )
+	        	$sku.attr( 'data-o_sku', $sku.text() );
+	        		
+	        if ( variation.sku ) {
+		    	$sku.text( variation.sku );
+	        } else {
+	        	$sku.text( $sku.attr( 'data-o_sku' ) );
+	        }
 
 	        $single_variation_wrap.find('.quantity').show();
 	        
