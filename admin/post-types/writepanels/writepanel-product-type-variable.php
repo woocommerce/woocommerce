@@ -141,6 +141,7 @@ function variable_product_type_options() {
 						'_sku',
 						'_stock', 
 						'_price',
+						'_regular_price',
 						'_sale_price',
 						'_weight',
 						'_length',
@@ -152,12 +153,18 @@ function variable_product_type_options() {
 						'_file_paths',
 						'_downloadable',
 						'_virtual',
-						'_thumbnail_id'
+						'_thumbnail_id',
+						'_sale_price_dates_from',
+						'_sale_price_dates_to'
 					);
 					
 					foreach ( $variation_fields as $field )
 						$$field = isset( $variation_data[ $field ][0] ) ? $variation_data[ $field ][0] : '';
 					
+					// Price backwards compat
+					if ( $_regular_price == '' && $_price )
+						$_regular_price = $_price;
+						
 					// Get image
 					$image_id = absint( $_thumbnail_id );
 					$image = '';
@@ -546,7 +553,7 @@ add_filter('product_type_selector', 'variable_product_type_selector', 1, 2);
 function process_product_meta_variable( $post_id ) {
 	global $woocommerce, $wpdb;
 
-	if (isset($_POST['variable_sku'])) :
+	if ( isset( $_POST['variable_sku'] ) ) {
 
 		$variable_post_id 			= $_POST['variable_post_id'];
 		$variable_sku 				= $_POST['variable_sku'];
@@ -555,7 +562,7 @@ function process_product_meta_variable( $post_id ) {
 		$variable_width				= $_POST['variable_width'];
 		$variable_height			= $_POST['variable_height'];
 		$variable_stock 			= $_POST['variable_stock'];
-		$variable_price 			= $_POST['variable_price'];
+		$variable_regular_price 	= $_POST['variable_regular_price'];
 		$variable_sale_price		= $_POST['variable_sale_price'];
 		$upload_image_id			= $_POST['upload_image_id'];
 		$variable_file_paths 		= $_POST['variable_file_paths'];
@@ -564,6 +571,8 @@ function process_product_meta_variable( $post_id ) {
 		$variable_shipping_class 	= $_POST['variable_shipping_class'];
 		$variable_tax_class			= $_POST['variable_tax_class'];
 		$variable_menu_order 		= $_POST['variation_menu_order'];
+		$variable_sale_price_dates_from 	= $_POST['variable_sale_price_dates_from'];
+		$variable_sale_price_dates_to 		= $_POST['variable_sale_price_dates_to'];
 
 		if (isset($_POST['variable_enabled']))
 			$variable_enabled 			= $_POST['variable_enabled'];
@@ -578,24 +587,24 @@ function process_product_meta_variable( $post_id ) {
 
 		$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
-		for ( $i=0; $i <= $max_loop; $i++ ) :
+		for ( $i = 0; $i <= $max_loop; $i ++ ) {
 
-			if ( ! isset( $variable_post_id[$i] ) ) continue;
+			if ( ! isset( $variable_post_id[ $i ] ) ) continue;
 
-			$variation_id = (int) $variable_post_id[$i];
+			$variation_id = (int) $variable_post_id[ $i ];
 
 			// Virtal/Downloadable
-			if (isset($variable_is_virtual[$i])) $is_virtual = 'yes'; else $is_virtual = 'no';
-			if (isset($variable_is_downloadable[$i])) $is_downloadable = 'yes'; else $is_downloadable = 'no';
+			if (isset($variable_is_virtual[ $i ])) $is_virtual = 'yes'; else $is_virtual = 'no';
+			if (isset($variable_is_downloadable[ $i ])) $is_downloadable = 'yes'; else $is_downloadable = 'no';
 
 			// Enabled or disabled
-			if (isset($variable_enabled[$i])) $post_status = 'publish'; else $post_status = 'private';
+			if (isset($variable_enabled[ $i ])) $post_status = 'publish'; else $post_status = 'private';
 
 			// Generate a useful post title
 			$variation_post_title = sprintf(__('Variation #%s of %s', 'woocommerce'), $variation_id, get_the_title($post_id));
 
 			// Update or Add post
-			if (!$variation_id) :
+			if ( ! $variation_id ) {
 
 				$variation = array(
 					'post_title' => $variation_post_title,
@@ -604,43 +613,79 @@ function process_product_meta_variable( $post_id ) {
 					'post_author' => get_current_user_id(),
 					'post_parent' => $post_id,
 					'post_type' => 'product_variation',
-					'menu_order' => $variable_menu_order[$i]
+					'menu_order' => $variable_menu_order[ $i ]
 				);
 				$variation_id = wp_insert_post( $variation );
 
-			else :
+			} else {
 
-				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[$i] ), array( 'ID' => $variation_id ) );
+				$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
 
-			endif;
+			}
 
 			// Update post meta
-			update_post_meta( $variation_id, '_sku', esc_html( $variable_sku[$i] ) );
-			update_post_meta( $variation_id, '_price', $variable_price[$i] );
-			update_post_meta( $variation_id, '_sale_price', $variable_sale_price[$i] );
-			update_post_meta( $variation_id, '_weight', $variable_weight[$i] );
+			update_post_meta( $variation_id, '_sku', esc_html( $variable_sku[ $i ] ) );
+			update_post_meta( $variation_id, '_weight', $variable_weight[ $i ] );
 
-			update_post_meta( $variation_id, '_length', $variable_length[$i] );
-			update_post_meta( $variation_id, '_width', $variable_width[$i] );
-			update_post_meta( $variation_id, '_height', $variable_height[$i] );
+			update_post_meta( $variation_id, '_length', $variable_length[ $i ] );
+			update_post_meta( $variation_id, '_width', $variable_width[ $i ] );
+			update_post_meta( $variation_id, '_height', $variable_height[ $i ] );
 
-			update_post_meta( $variation_id, '_stock', $variable_stock[$i] );
-			update_post_meta( $variation_id, '_thumbnail_id', $upload_image_id[$i] );
+			update_post_meta( $variation_id, '_stock', $variable_stock[ $i ] );
+			update_post_meta( $variation_id, '_thumbnail_id', $upload_image_id[ $i ] );
 
 			update_post_meta( $variation_id, '_virtual', $is_virtual );
 			update_post_meta( $variation_id, '_downloadable', $is_downloadable );
+			
+			// Price handling
+			$regular_price 	= $variable_regular_price[ $i ];
+			$sale_price 	= $variable_sale_price[ $i ];
+			$date_from 		= $variable_sale_price_dates_from[ $i ];
+			$date_to		= $variable_sale_price_dates_to[ $i ];
+			
+			update_post_meta( $variation_id, '_regular_price', $regular_price );
+			update_post_meta( $variation_id, '_sale_price', $sale_price );
+			
+			// Save Dates
+			if ( $date_from )
+				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( $date_from ) );
+			else
+				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+	
+			if ( $date_to )
+				update_post_meta( $variation_id, '_sale_price_dates_to', strtotime( $date_to ) );
+			else
+				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
 
-			if ( $variable_tax_class[$i] !== 'parent' )
-				update_post_meta( $variation_id, '_tax_class', $variable_tax_class[$i] );
+			if ( $date_to && ! $date_from )
+				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+
+			// Update price if on sale
+			if ( $sale_price != '' && $date_to == '' && $date_from == '' )
+				update_post_meta( $variation_id, '_price', $sale_price );
+			else
+				update_post_meta( $variation_id, '_price', $regular_price );
+
+			if ( $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+				update_post_meta( $variation_id, '_price', $sale_price );
+	
+			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				update_post_meta( $variation_id, '_price', $regular_price );
+				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
+			}
+					
+			if ( $variable_tax_class[ $i ] !== 'parent' )
+				update_post_meta( $variation_id, '_tax_class', $variable_tax_class[ $i ] );
 			else
 				delete_post_meta( $variation_id, '_tax_class' );
 
-			if ($is_downloadable=='yes') :
-				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[$i] );
-				update_post_meta( $variation_id, '_download_expiry', $variable_download_expiry[$i] );
+			if ( $is_downloadable == 'yes' ) {
+				update_post_meta( $variation_id, '_download_limit', $variable_download_limit[ $i ] );
+				update_post_meta( $variation_id, '_download_expiry', $variable_download_expiry[ $i ] );
 				
 				$_file_paths = array();
-				$file_paths = str_replace( "\r\n", "\n", esc_attr( $variable_file_paths[$i] ) );
+				$file_paths = str_replace( "\r\n", "\n", esc_attr( $variable_file_paths[ $i ] ) );
 				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
 				if ( $file_paths ) {
 					$file_paths = explode( "\n", $file_paths );
@@ -655,35 +700,35 @@ function process_product_meta_variable( $post_id ) {
 				do_action( 'woocommerce_process_product_file_download_paths', $post_id, $variation_id, $_file_paths );
 
 				update_post_meta( $variation_id, '_file_paths', $_file_paths );
-			else :
+			} else {
 				update_post_meta( $variation_id, '_download_limit', '' );
 				update_post_meta( $variation_id, '_download_expiry', '' );
 				update_post_meta( $variation_id, '_file_paths', '' );
-			endif;
+			}
 
 			// Save shipping class
-			$variable_shipping_class[$i] = ( $variable_shipping_class[$i] ) ? (int) $variable_shipping_class[$i] : '';
-			wp_set_object_terms( $variation_id, $variable_shipping_class[$i], 'product_shipping_class');
+			$variable_shipping_class[ $i ] = ( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
+			wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
 			// Remove old taxnomies attributes so data is kept up to date
 			if ($variation_id) $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE 'attribute_%' AND post_id = $variation_id;");
 
 			// Update taxonomies
-			foreach ($attributes as $attribute) :
+			foreach ( $attributes as $attribute ) {
 
-				if ( $attribute['is_variation'] ) :
+				if ( $attribute['is_variation'] ) {
 
-					$value = esc_attr(trim($_POST[ 'attribute_' . sanitize_title($attribute['name']) ][$i]));
+					$value = esc_attr( trim( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) );
 
-					update_post_meta( $variation_id, 'attribute_' . sanitize_title($attribute['name']), $value );
+					update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 
-				endif;
+				}
 
-			endforeach;
+			}
 
-		 endfor;
+		 }
 
-	endif;
+	}
 
 	// Update parent if variable so price sorting works and stays in sync with the cheapest child
 	$post_parent = $post_id;
@@ -694,27 +739,36 @@ function process_product_meta_variable( $post_id ) {
 		'post_type' 	=> 'product_variation',
 		'fields' 		=> 'ids',
 		'post_status'	=> 'publish'
-	));
+	) );
 
 	$lowest_price = $lowest_regular_price = $lowest_sale_price = $highest_price = $highest_regular_price = $highest_sale_price = '';
 
 	if ($children) {
 		foreach ($children as $child) {
 
-			$child_price 		= get_post_meta($child, '_price', true);
-			$child_sale_price 	= get_post_meta($child, '_sale_price', true);
-
-			// Low price
-			if (!is_numeric($lowest_regular_price) || $child_price < $lowest_regular_price) $lowest_regular_price = $child_price;
-			if ($child_sale_price!=='' && (!is_numeric($lowest_sale_price) || $child_sale_price < $lowest_sale_price)) $lowest_sale_price = $child_sale_price;
-
-			// High price
-			if (!is_numeric($highest_regular_price) || $child_price > $highest_regular_price) $highest_regular_price = $child_price;
-			if ($child_sale_price!=='' && (!is_numeric($highest_sale_price) || $child_sale_price > $highest_sale_price)) $highest_sale_price = $child_sale_price;
+			$child_price 			= get_post_meta( $child, '_price', true );
+			$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
+			$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
+			
+			// Regular prices
+			if ( ! is_numeric( $lowest_regular_price ) || $child_regular_price < $lowest_regular_price ) 
+				$lowest_regular_price = $child_regular_price;
+				
+			if ( ! is_numeric( $highest_regular_price ) || $child_regular_price > $highest_regular_price ) 
+				$highest_regular_price = $child_regular_price;
+			
+			// Sale prices
+			if ( $child_price == $child_sale_price ) {
+				if ( $child_sale_price !== '' && ( ! is_numeric( $lowest_sale_price ) || $child_sale_price < $lowest_sale_price ) ) 
+					$lowest_sale_price = $child_sale_price;
+				
+				if ( $child_sale_price !== '' && ( ! is_numeric( $highest_sale_price ) || $child_sale_price > $highest_sale_price ) ) 
+					$highest_sale_price = $child_sale_price;
+			}
 		}
 
-    	$lowest_price = ($lowest_sale_price==='' || $lowest_regular_price < $lowest_sale_price) ? $lowest_regular_price : $lowest_sale_price;
-		$highest_price = ($highest_sale_price==='' || $highest_regular_price > $highest_sale_price) ? $highest_regular_price : $highest_sale_price;
+    	$lowest_price 	= $lowest_sale_price === '' || $lowest_regular_price < $lowest_sale_price ? $lowest_regular_price : $lowest_sale_price;
+		$highest_price 	= $highest_sale_price === '' || $highest_regular_price > $highest_sale_price ? $highest_regular_price : $highest_sale_price;
 	}
 
 	update_post_meta( $post_parent, '_price', $lowest_price );

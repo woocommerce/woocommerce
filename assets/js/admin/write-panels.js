@@ -698,31 +698,51 @@ jQuery( function($){
 
 
 	// Sale price schedule
-	var sale_schedule_set = false;
-	$('.sale_price_dates_fields input').each(function(){
-		if ($(this).val()!='') sale_schedule_set = true;
+	$('.sale_price_dates_fields').each(function() {
+	
+		var $these_sale_dates = $(this);
+		var sale_schedule_set = false;
+		var $wrap = $these_sale_dates.closest( 'div, table' );
+	
+		$these_sale_dates.find('input').each(function(){
+			if ( $(this).val() != '' ) 
+				sale_schedule_set = true;
+		});
+		
+		if ( sale_schedule_set ) {
+		
+			$wrap.find('.sale_schedule').hide();
+			$wrap.find('.sale_price_dates_fields').show();
+			
+		} else {
+		
+			$wrap.find('.sale_schedule').show();
+			$wrap.find('.sale_price_dates_fields').hide();
+			
+		}
+		
 	});
-	if (sale_schedule_set) {
-		$('.sale_schedule').hide();
-		$('.sale_price_dates_fields').show();
-	} else {
-		$('.sale_schedule').show();
-		$('.sale_price_dates_fields').hide();
-	}
-
-	$('.sale_schedule').click(function(){
+	
+	$('#woocommerce-product-data').on( 'click', '.sale_schedule', function() {
+		var $wrap = $(this).closest( 'div, table' );
+		
 		$(this).hide();
-		$('.sale_price_dates_fields').show();
+		$wrap.find('.cancel_sale_schedule').show();
+		$wrap.find('.sale_price_dates_fields').show();
+		
 		return false;
 	});
-
-	$('.cancel_sale_schedule').click(function(){
-		$(this).closest('p').find('input').val('');
-		$('.sale_schedule').show();
-		$('.sale_price_dates_fields').hide();
+	$('#woocommerce-product-data').on( 'click', '.cancel_sale_schedule', function() {
+		var $wrap = $(this).closest( 'div, table' );
+		
+		$(this).hide();
+		$wrap.find('.sale_schedule').show();
+		$wrap.find('.sale_price_dates_fields').hide();
+		$wrap.find('.sale_price_dates_fields').find('input').val('');
+		
 		return false;
 	});
-
+		
 
 	// STOCK OPTIONS
 	$('input#_manage_stock').change(function(){
@@ -732,7 +752,7 @@ jQuery( function($){
 
 
 	// DATE PICKER FIELDS
-	var dates = $( "#_sale_price_dates_from, #_sale_price_dates_to" ).datepicker({
+	var dates = $( ".sale_price_dates_fields input" ).datepicker({
 		defaultDate: "",
 		dateFormat: "yy-mm-dd",
 		numberOfMonths: 1,

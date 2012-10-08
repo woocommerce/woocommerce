@@ -941,8 +941,10 @@ class WC_Product {
 		elseif ($this->is_type('variable')) :
 
 			// Ensure variation prices are synced with variations
-			if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' )
+			if ( $this->min_variation_price === '' || $this->min_variation_regular_price === '' ) {
 				$this->variable_product_sync();
+				$this->price = $this->min_variation_price;
+			}
 
 			// Get the price
 			if ($this->price > 0) :
@@ -1673,20 +1675,30 @@ class WC_Product {
 		if ($children) {
 			foreach ( $children as $child ) {
 
-				$child_price 		= get_post_meta($child, '_price', true);
-				$child_sale_price 	= get_post_meta($child, '_sale_price', true);
-
-				// Low price
-				if (!is_numeric($this->min_variation_regular_price) || $child_price < $this->min_variation_regular_price) $this->min_variation_regular_price = $child_price;
-				if ($child_sale_price!=='' && (!is_numeric($this->min_variation_sale_price) || $child_sale_price < $this->min_variation_sale_price)) $this->min_variation_sale_price = $child_sale_price;
-
-				// High price
-				if (!is_numeric($this->max_variation_regular_price) || $child_price > $this->max_variation_regular_price) $this->max_variation_regular_price = $child_price;
-				if ($child_sale_price!=='' && (!is_numeric($this->max_variation_sale_price) || $child_sale_price > $this->max_variation_sale_price)) $this->max_variation_sale_price = $child_sale_price;
+				$child_price 			= get_post_meta( $child, '_price', true );
+				$child_regular_price 	= get_post_meta( $child, '_regular_price', true );
+				$child_sale_price 		= get_post_meta( $child, '_sale_price', true );
+				
+				// Regular prices
+				if ( ! is_numeric( $this->min_variation_regular_price ) || $child_regular_price < $this->min_variation_regular_price ) 
+					$this->min_variation_regular_price = $child_regular_price;
+					
+				if ( ! is_numeric( $this->max_variation_regular_price ) || $child_regular_price > $this->max_variation_regular_price ) 
+					$this->max_variation_regular_price = $child_regular_price;
+				
+				// Sale prices
+				if ( $child_price == $child_sale_price ) {
+					if ( $child_sale_price !== '' && ( ! is_numeric( $this->min_variation_sale_price ) || $child_sale_price < $this->min_variation_sale_price ) ) 
+						$this->min_variation_sale_price = $child_sale_price;
+					
+					if ( $child_sale_price !== '' && ( ! is_numeric( $this->max_variation_sale_price ) || $child_sale_price > $this->max_variation_sale_price ) ) 
+						$this->max_variation_sale_price = $child_sale_price;
+				}
 			}
 
-	    	$this->min_variation_price = ($this->min_variation_sale_price==='' || $this->min_variation_regular_price < $this->min_variation_sale_price) ? $this->min_variation_regular_price : $this->min_variation_sale_price;
-			$this->max_variation_price = ($this->max_variation_sale_price==='' || $this->max_variation_regular_price > $this->max_variation_sale_price) ? $this->max_variation_regular_price : $this->max_variation_sale_price;
+	    	$this->min_variation_price = $this->min_variation_sale_price === '' || $this->min_variation_regular_price < $this->min_variation_sale_price ? $this->min_variation_regular_price : $this->min_variation_sale_price;
+	    	
+			$this->max_variation_price = $this->max_variation_sale_price === '' || $this->max_variation_regular_price > $this->max_variation_sale_price ? $this->max_variation_regular_price : $this->max_variation_sale_price;
 		}
 
 		update_post_meta( $this->id, '_price', $this->min_variation_price );
@@ -1696,8 +1708,6 @@ class WC_Product {
 		update_post_meta( $this->id, '_max_variation_regular_price', $this->max_variation_regular_price );
 		update_post_meta( $this->id, '_min_variation_sale_price', $this->min_variation_sale_price );
 		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
-
-		$this->price = $this->min_variation_price;
 
 		$woocommerce->clear_product_transients( $this->id );
 	}

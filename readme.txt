@@ -160,12 +160,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Stopped using PHP sessions for cart data - using cookies and transients instead to allow WC to function better with static caching. Also to reduce support regarding hosts and session configurations.
 * Feature - Export and Import Tax Rates from a CSV file.
 * Feature - Option to control whether tax is calculated based on customer shipping or billing address.
-* Feature - New options for individual transaction emails with template editor
-* Feature - Added "On Sale" shortcode (thanks daltonrooney)
-* Feature - Added "Best Selling" shortcode
-* Feature - Added "Top Rated" shortcode
+* Feature - New options for individual transaction emails with template editor.
+* Feature - Added "On Sale" shortcode (thanks daltonrooney).
+* Feature - Added "Best Selling" shortcode.
+* Feature - Added "Top Rated" shortcode.
 * Feature - Local pickup has the option to apply base tax rates instead of customer address rates.
 * Feature - New product images panel to make working with featured images + galleries easier.
+* Feature - Schedule sales for variations.
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
@@ -182,7 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Due to new session handling, removed session section from the status page.
 * Tweak - Removed upsell limit - show whats defined.
 * Tweak - Args for upsells to control per-page and cols.
-* Tweak - Recoded add_to_cart_action for better handling of variations and groups
+* Tweak - Recoded add_to_cart_action for better handling of variations and groups.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.

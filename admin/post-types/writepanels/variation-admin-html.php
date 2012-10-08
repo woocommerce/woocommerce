@@ -57,16 +57,29 @@
 								<td>&nbsp;</td>
 							</tr>
 						<?php endif; ?>
+						
 						<tr>
 							<td>
 								<label><?php _e( 'Price:', 'woocommerce' ); ?></label>
-								<input type="text" size="5" name="variable_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_price ) ) echo $_price; ?>" />
+								<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo $_regular_price; ?>" />
 							</td>
 							<td>
-								<label><?php _e( 'Sale Price:', 'woocommerce' ); ?></label>
-								<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo $_sale_price; ?>" />
+								<label><?php _e( 'Sale Price:', 'woocommerce' ); ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
+								<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo $_sale_price; ?>" /> 
 							</td>
 						</tr>
+						
+						<tr class="sale_price_dates_fields" style="display:none">
+							<td>
+								<label><?php _e('Sale start date:', 'woocommerce') ?></label>
+								<input type="text" name="variable_sale_price_dates_from[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_from ) ? date_i18n( 'Y-m-d', $_sale_price_dates_from ) : ''; ?>" placeholder="<?php echo _x('From&hellip;', 'placeholder', 'woocommerce') ?>" maxlength="10" />
+							</td>
+							<td>
+								<label><?php _e('Sale end date:', 'woocommerce') ?></label>
+								<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?>" maxlength="10" />
+							</td>
+						</tr>
+						
 						<?php if ( get_option( 'woocommerce_enable_weight', true) !== 'no' || get_option( 'woocommerce_enable_dimensions', true ) !== 'no' ) : ?>
 							<tr>
 								<?php if ( get_option( 'woocommerce_enable_weight', true ) !== 'no' ) : ?>
@@ -140,7 +153,7 @@
 			</tr>
 			<tr>
 				<td class="upload_image">
-					<a href="#" class="upload_image_button <?php if ( $image_id > 0 ) echo 'remove'; ?>" rel="<?php echo $variation_id; ?>"><img src="<?php if ( isset( $image ) ) echo $image; else echo woocommerce_placeholder_img_src(); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a>
+					<a href="#" class="upload_image_button <?php if ( $image_id > 0 ) echo 'remove'; ?>" rel="<?php echo $variation_id; ?>"><img src="<?php if ( ! empty( $image ) ) echo $image; else echo woocommerce_placeholder_img_src(); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo $image_id; ?>" /><span class="overlay"></span></a>
 				</td>
 				<td class="options">
 					<label><input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( $variation_post_status, 'publish' ); ?> /> <?php _e('Enabled', 'woocommerce'); ?></label>

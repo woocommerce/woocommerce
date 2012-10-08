@@ -31,6 +31,9 @@ class WC_Product_Variation extends WC_Product {
 
 	/** @var bool True if the variation has a price. */
 	var $variation_has_price;
+	
+	/** @var bool True if the variation has a regular price. */
+	var $variation_has_regular_price;
 
 	/** @var bool True if the variation has a sale price. */
 	var $variation_has_sale_price;
@@ -106,7 +109,7 @@ class WC_Product_Variation extends WC_Product {
 
 		$this->product_type = 'variable';
 
-		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_sale_price = false;
+		$this->variation_has_sku = $this->variation_has_stock = $this->variation_has_weight = $this->variation_has_length = $this->variation_has_width = $this->variation_has_height = $this->variation_has_price = $this->variation_has_regular_price = $this->variation_has_sale_price = false;
 
 		/* Override parent data with variation */
 		if ( isset( $product_custom_fields['_sku'][0] ) && ! empty( $product_custom_fields['_sku'][0] ) ) {
@@ -139,19 +142,7 @@ class WC_Product_Variation extends WC_Product {
 			$this->variation_has_height = true;
 			$this->height = $product_custom_fields['_height'][0];
 		}
-
-		if ( isset( $product_custom_fields['_price'][0] ) && $product_custom_fields['_price'][0] !== '' ) {
-			$this->variation_has_price = true;
-			$this->price = $product_custom_fields['_price'][0];
-			$this->regular_price = $product_custom_fields['_price'][0];
-		}
-
-		if ( isset( $product_custom_fields['_sale_price'][0] ) && $product_custom_fields['_sale_price'][0] !== '' ) {
-			$this->variation_has_sale_price = true;
-			$this->sale_price = $product_custom_fields['_sale_price'][0];
-			if ($this->sale_price < $this->price) $this->price = $this->sale_price;
-		}
-
+		
 		if ( isset( $product_custom_fields['_downloadable'][0] ) && $product_custom_fields['_downloadable'][0] == 'yes' ) {
 			$this->downloadable = 'yes';
 		} else {
@@ -168,8 +159,44 @@ class WC_Product_Variation extends WC_Product {
 			$this->variation_has_tax_class = true;
 			$this->tax_class = $product_custom_fields['_tax_class'][0];
 		}
-
+		
+		if ( isset( $product_custom_fields['_price'][0] ) && $product_custom_fields['_price'][0] !== '' ) {
+			$this->variation_has_price = true;
+			$this->price = $product_custom_fields['_price'][0];
+		}
+		
+		if ( isset( $product_custom_fields['_regular_price'][0] ) && $product_custom_fields['_regular_price'][0] !== '' ) {
+			$this->variation_has_regular_price = true;
+			$this->regular_price = $product_custom_fields['_regular_price'][0];
+		}
+		
+		if ( isset( $product_custom_fields['_sale_price'][0] ) && $product_custom_fields['_sale_price'][0] !== '' ) {
+			$this->variation_has_sale_price = true;
+			$this->sale_price = $product_custom_fields['_sale_price'][0];
+		}
+		
+		// Backwards compat for prices
+		if ( $this->variation_has_price && ! $this->variation_has_regular_price ) {
+			update_post_meta( $this->variation_id, '_regular_price', $this->price );
+			$this->variation_has_regular_price = true;
+			$this->regular_price = $this->price;
+			
+			if ( $this->variation_has_sale_price && $this->sale_price < $this->regular_price ) {
+				update_post_meta( $this->variation_id, '_price', $this->sale_price );
+				$this->price = $this->sale_price;
+			}
+		}
+		
+		if ( isset( $product_custom_fields['_sale_price_dates_from'][0] ) )
+			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_from'][0];
+			
+		if ( isset( $product_custom_fields['_sale_price_dates_to'][0] ) )
+			$this->sale_price_dates_from = $product_custom_fields['_sale_price_dates_to'][0];
+		
 		$this->total_stock = $this->stock;
+		
+		// Check sale dates
+		$this->check_sale_price();
 	}
 
 
@@ -225,23 +252,23 @@ class WC_Product_Variation extends WC_Product {
      * @return string containing the formatted price
      */
 	function get_price_html() {
-		if ($this->variation_has_price || $this->variation_has_sale_price) :
+		if ( $this->variation_has_price ) {
 			$price = '';
 
-			if ($this->price!=='') :
-				if ($this->variation_has_sale_price) :
-					$price .= '<del>'.woocommerce_price( $this->regular_price ).'</del> <ins>'.woocommerce_price( $this->sale_price ).'</ins>';
-					$price = apply_filters('woocommerce_variation_sale_price_html', $price, $this);
-				else :
+			if ( $this->price !== '' ) {
+				if ( $this->price == $this->sale_price ) {
+					$price .= '<del>' . woocommerce_price( $this->regular_price ) . '</del> <ins>' . woocommerce_price( $this->sale_price ) . '</ins>';
+					$price = apply_filters( 'woocommerce_variation_sale_price_html', $price, $this );
+				} else {
 					$price .= woocommerce_price( $this->price );
-					$price = apply_filters('woocommerce_variation_price_html', $price, $this);
-				endif;
-			endif;
+					$price = apply_filters( 'woocommerce_variation_price_html', $price, $this );
+				}
+			}
 
 			return $price;
-		else :
-			return woocommerce_price(parent::get_price());
-		endif;
+		} else {
+			return woocommerce_price( parent::get_price() );
+		}
 	}
 
 
@@ -399,18 +426,45 @@ class WC_Product_Variation extends WC_Product {
 		// allow overriding based on the particular file being requested
 		return apply_filters( 'woocommerce_file_download_path', $file_path, $this->variation_id, $download_id );
 	}
-}
+	
+    /**
+     * Checks sale data to see if the product is due to go on sale/sale has expired, and updates the main price.
+     *
+     * @access public
+     * @return void
+     */
+    function check_sale_price() {
 
-/**
- * woocommerce_product_variation class.
- *
- * @extends 	WC_Product_Variation
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_product_variation extends WC_Product_Variation {
-	public function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
-		_deprecated_function( 'woocommerce_product_variation', '1.4', 'WC_Product_Variation()' );
-		parent::__construct( $variation_id, $parent_id, $parent_custom_fields );
-	}
+    	if ( $this->sale_price_dates_from && $this->sale_price_dates_from < current_time('timestamp') ) {
+
+    		if ( $this->sale_price && $this->price !== $this->sale_price ) {
+
+    			// Update price
+    			$this->price = $this->sale_price;
+    			update_post_meta( $this->variation_id, '_price', $this->price );
+
+    			// Variable product prices and sale status are affected by children
+    			$this->variable_product_sync();
+    		}
+
+    	}
+
+    	if ( $this->sale_price_dates_to && $this->sale_price_dates_to < current_time('timestamp') ) {
+
+    		if ( $this->regular_price && $this->price !== $this->regular_price ) {
+
+    			$this->price = $this->regular_price;
+    			update_post_meta( $this->variation_id, '_price', $this->price );
+
+				// Sale has expired - clear the schedule boxes
+				update_post_meta( $this->variation_id, '_sale_price', '' );
+				update_post_meta( $this->variation_id, '_sale_price_dates_from', '' );
+				update_post_meta( $this->variation_id, '_sale_price_dates_to', '' );
+
+				// Variable product prices and sale status are affected by children
+    			$this->variable_product_sync();
+			}
+
+    	}
+    }
 }
