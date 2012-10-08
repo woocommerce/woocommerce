@@ -418,22 +418,68 @@ add_action('wp_ajax_woocommerce_remove_variations', 'woocommerce_remove_variatio
  * @return void
  */
 function woocommerce_add_variation() {
-
+	global $woocommerce;
+	
 	check_ajax_referer( 'add-variation', 'security' );
 
 	$post_id = intval( $_POST['post_id'] );
+	$loop = intval( $_POST['loop'] );
 
 	$variation = array(
-		'post_title' => 'Product #' . $post_id . ' Variation',
-		'post_content' => '',
-		'post_status' => 'publish',
-		'post_author' => get_current_user_id(),
-		'post_parent' => $post_id,
-		'post_type' => 'product_variation'
+		'post_title' 	=> 'Product #' . $post_id . ' Variation',
+		'post_content' 	=> '',
+		'post_status' 	=> 'publish',
+		'post_author' 	=> get_current_user_id(),
+		'post_parent' 	=> $post_id,
+		'post_type' 	=> 'product_variation'
 	);
+	
 	$variation_id = wp_insert_post( $variation );
-
-	echo $variation_id;
+	
+	if ( $variation_id ) {
+	
+		$variation_post_status = 'publish';
+		$variation_data = get_post_custom( $variation_id );
+		$variation_data['variation_post_id'] = $variation_id;
+		
+		// Get attributes
+		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
+		
+		// Get tax classes
+		$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
+		$tax_class_options = array();
+		$tax_class_options['parent'] =__('Same as parent', 'woocommerce');
+		$tax_class_options[''] = __('Standard', 'woocommerce');
+		if ($tax_classes) foreach ( $tax_classes as $class )
+			$tax_class_options[sanitize_title($class)] = $class;
+		
+		// Get parent data
+		$parent_data = array(
+			'id'		=> $post_id,
+			'attributes' => $attributes,
+			'tax_class_options' => $tax_class_options,
+			'sku' 		=> get_post_meta( $post_id, '_sku', true ),
+			'weight' 	=> get_post_meta( $post_id, '_weight', true ),
+			'length' 	=> get_post_meta( $post_id, '_length', true ),
+			'width' 	=> get_post_meta( $post_id, '_width', true ),
+			'height' 	=> get_post_meta( $post_id, '_height', true ),
+			'tax_class' => get_post_meta( $post_id, '_tax_class', true )
+		);
+	
+		if ( ! $parent_data['weight'] )
+			$parent_data['weight'] = '0.00';
+			
+		if ( ! $parent_data['length'] )
+			$parent_data['length'] = '0';
+			
+		if ( ! $parent_data['width'] )
+			$parent_data['width'] = '0';
+			
+		if ( ! $parent_data['height'] )
+			$parent_data['height'] = '0';
+			
+		include( 'admin/post-types/writepanels/variation-admin-html.php' );
+	}
 
 	die();
 }

@@ -123,18 +123,14 @@ function woocommerce_product_data_box() {
 				// Special Price date range
 				$field = array( 'id' => '_sale_price_dates', 'label' => __('Sale Price Dates', 'woocommerce') );
 
-				$sale_price_dates_from = get_post_meta($thepostid, '_sale_price_dates_from', true);
-				$sale_price_dates_to = get_post_meta($thepostid, '_sale_price_dates_to', true);
+				$sale_price_dates_from 	= get_post_meta( $thepostid, '_sale_price_dates_from', true );
+				$sale_price_dates_to 	= get_post_meta( $thepostid, '_sale_price_dates_to', true );
 
 				echo '	<p class="form-field sale_price_dates_fields">
-							<label for="'.$field['id'].'_from">'.$field['label'].'</label>
-							<input type="text" class="short" name="'.$field['id'].'_from" id="'.$field['id'].'_from" value="';
-				if ($sale_price_dates_from) echo date_i18n( 'Y-m-d', $sale_price_dates_from );
-				echo '" placeholder="' . _x('From&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
-							<input type="text" class="short" name="'.$field['id'].'_to" id="'.$field['id'].'_to" value="';
-				if ($sale_price_dates_to) echo date_i18n( 'Y-m-d', $sale_price_dates_to );
-				echo '" placeholder="' . _x('To&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
-							<a href="#" class="cancel_sale_schedule">'. __('Cancel', 'woocommerce') .'</a>
+							<label for="' . $field['id'] . '_from">' . $field['label'] . '</label>
+							<input type="text" class="short" name="' . $field['id'] . '_from" id="' . $field['id'] . '_from" value="' . ( $sale_price_dates_from ? date_i18n( 'Y-m-d', $sale_price_dates_from ) : '' ) . '" placeholder="' . _x('From&hellip;', 'placeholder', 'woocommerce') . '" maxlength="10" />
+							<input type="text" class="short" name="' . $field['id'] . '_to" id="' . $field['id'] . '_to" value="' . ( $sale_price_dates_to ? date_i18n( 'Y-m-d', $sale_price_dates_to ) : '' ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '" maxlength="10" />
+							<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) .'</a>
 						</p>';
 
 				do_action('woocommerce_product_options_pricing');
