@@ -631,7 +631,15 @@ class Woocommerce {
 
 		$tag_slug = ( get_option('woocommerce_product_tag_slug') ) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woocommerce');
 
-		$product_base = ( get_option('woocommerce_prepend_shop_page_to_products') == 'yes' ) ? trailingslashit($base_slug) : trailingslashit(_x('product', 'slug', 'woocommerce'));
+		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
+			$product_base = trailingslashit( $base_slug );
+		} else {
+			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
+				$product_base = trailingslashit( $product_slug );
+			} else {
+				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
+			}
+		}
 
 		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' ) $product_base .= trailingslashit('%product_cat%');
 
