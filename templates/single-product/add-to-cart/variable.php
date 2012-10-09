@@ -20,9 +20,9 @@ global $woocommerce, $product, $post;
 		<tbody>
 			<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
 				<tr>
-					<td class="label"><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label($name); ?></label></td>
+					<td class="label"><label for="<?php echo sanitize_title($name); ?>"><?php echo $woocommerce->attribute_label( $name ); ?></label></td>
 					<td class="value"><select id="<?php echo esc_attr( sanitize_title($name) ); ?>" name="attribute_<?php echo sanitize_title($name); ?>">
-						<option value=""><?php echo __('Choose an option', 'woocommerce') ?>&hellip;</option>
+						<option value=""><?php echo __( 'Choose an option', 'woocommerce' ) ?>&hellip;</option>
 						<?php
 							if ( is_array( $options ) ) {
 
@@ -33,8 +33,22 @@ global $woocommerce, $product, $post;
 
 								// Get terms if this is a taxonomy - ordered
 								if ( taxonomy_exists( sanitize_title( $name ) ) ) {
+								
+									$orderby = $woocommerce->attribute_orderby( $name );
+								
+									switch ( $orderby ) {
+										case 'name' :
+											$args = array( 'orderby' => 'name', 'order' => 'ASC', 'menu_order' => false );
+										break;
+										case 'id' :
+											$args = array( 'orderby' => 'id', 'order' => 'ASC', 'menu_order' => false );
+										break;
+										case 'menu_order' :
+											$args = array( 'menu_order' => 'ASC' );
+										break;
+									}
 
-									$terms = get_terms( sanitize_title($name), array('menu_order' => 'ASC') );
+									$terms = get_terms( sanitize_title( $name ), $args );
 
 									foreach ( $terms as $term ) {
 										if ( ! in_array( $term->slug, $options ) ) continue;
@@ -48,7 +62,7 @@ global $woocommerce, $product, $post;
 						?>
 					</select> <?php
 						if ( sizeof($attributes) == $loop )
-							echo '<a class="reset_variations" href="#reset">'.__('Clear selection', 'woocommerce').'</a>';
+							echo '<a class="reset_variations" href="#reset">' . __( 'Clear selection', 'woocommerce' ) . '</a>';
 					?></td>
 				</tr>
 	        <?php endforeach;?>

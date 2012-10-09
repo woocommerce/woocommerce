@@ -30,6 +30,7 @@ function woocommerce_attributes() {
 		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
 		$attribute_type 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
+		$attribute_orderby 	= esc_attr( $_POST['attribute_orderby'] );
 
 		if ( ! $attribute_label )
 			$attribute_label = ucwords( $attribute_name );
@@ -44,7 +45,8 @@ function woocommerce_attributes() {
 				array(
 					'attribute_name' 	=> $attribute_name,
 					'attribute_label' 	=> $attribute_label,
-					'attribute_type' 	=> $attribute_type
+					'attribute_type' 	=> $attribute_type,
+					'attribute_orderby' => $attribute_orderby
 				)
 			);
 
@@ -60,6 +62,7 @@ function woocommerce_attributes() {
 		$attribute_name 	= sanitize_title( esc_attr( $_POST['attribute_name'] ) );
 		$attribute_type	 	= esc_attr( $_POST['attribute_type'] );
 		$attribute_label 	= esc_attr( $_POST['attribute_label'] );
+		$attribute_orderby	= esc_attr( $_POST['attribute_orderby'] );
 
 		if ( ! $attribute_label )
 			$attribute_label = ucwords( $attribute_name );
@@ -80,7 +83,8 @@ function woocommerce_attributes() {
 				array(
 					'attribute_name' 	=> $attribute_name,
 					'attribute_label' 	=> $attribute_label,
-					'attribute_type' 	=> $attribute_type
+					'attribute_type' 	=> $attribute_type,
+					'attribute_orderby' => $attribute_orderby
 				),
 				array(
 					'attribute_id' 		=> $edit
@@ -193,6 +197,7 @@ function woocommerce_edit_attribute() {
 	$att_type 	= $attribute_to_edit->attribute_type;
 	$att_label 	= $attribute_to_edit->attribute_label;
 	$att_name 	= $attribute_to_edit->attribute_name;
+	$att_orderby 	= $attribute_to_edit->attribute_orderby;
 	?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
@@ -230,6 +235,19 @@ function woocommerce_edit_attribute() {
 							<p class="description"><?php _e('Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce'); ?></p>
 						</td>
 					</tr>
+					<tr class="form-field form-required">
+						<th scope="row" valign="top">
+							<label for="attribute_orderby"><?php _e('Default sort order', 'woocommerce'); ?></label>
+						</th>
+						<td>
+							<select name="attribute_orderby" id="attribute_orderby">
+								<option value="menu_order" <?php selected( $att_orderby, 'menu_order' ); ?>><?php _e( 'Custom ordering', 'woocommerce' ) ?></option>
+								<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ) ?></option>
+								<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ) ?></option>
+							</select>
+							<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 			<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php _e('Update', 'woocommerce'); ?>"></p>
@@ -265,6 +283,7 @@ function woocommerce_add_attribute() {
 				                <th scope="col"><?php _e('Name', 'woocommerce') ?></th>
 				                <th scope="col"><?php _e('Slug', 'woocommerce') ?></th>
 				                <th scope="col"><?php _e('Type', 'woocommerce') ?></th>
+				                <th scope="col"><?php _e('Order by', 'woocommerce') ?></th>
 				                <th scope="col" colspan="2"><?php _e('Terms', 'woocommerce') ?></th>
 				            </tr>
 				        </thead>
@@ -281,6 +300,19 @@ function woocommerce_add_attribute() {
 				        					</td>
 				        					<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 				        					<td><?php echo esc_html( ucwords( $tax->attribute_type ) ); ?></td>
+				        					<td><?php 
+					        					switch ( $tax->attribute_orderby ) {
+						        					case 'name' :
+						        						_e( 'Name', 'woocommerce' );
+						        					break;
+						        					case 'id' :
+						        						_e( 'Term ID', 'woocommerce' );
+						        					break;
+						        					default: 
+						        						_e( 'Custom ordering', 'woocommerce' );
+						        					break;
+					        					}
+				        					?></td>
 				        					<td><?php
 				        						if (taxonomy_exists($woocommerce->attribute_taxonomy_name($tax->attribute_name))) :
 					        						$terms_array = array();
@@ -301,7 +333,7 @@ function woocommerce_add_attribute() {
 				        				</tr><?php
 				        			endforeach;
 				        		else :
-				        			?><tr><td colspan="5"><?php _e('No attributes currently exist.', 'woocommerce') ?></td></tr><?php
+				        			?><tr><td colspan="6"><?php _e('No attributes currently exist.', 'woocommerce') ?></td></tr><?php
 				        		endif;
 				        	?>
 				        </tbody>
@@ -333,6 +365,16 @@ function woocommerce_add_attribute() {
 									<option value="text"><?php _e('Text', 'woocommerce') ?></option>
 								</select>
 								<p class="description"><?php _e('Determines how you select attributes for products. <strong>Text</strong> allows manual entry via the product page, whereas <strong>select</strong> attribute terms can be defined from this section. If you plan on using an attribute for variations use <strong>select</strong>.', 'woocommerce'); ?></p>
+							</div>
+							
+							<div class="form-field">
+								<label for="attribute_orderby"><?php _e( 'Default sort order', 'woocommerce' ); ?></label>
+								<select name="attribute_orderby" id="attribute_orderby">
+									<option value="menu_order"><?php _e( 'Custom ordering', 'woocommerce' ) ?></option>
+									<option value="name"><?php _e( 'Name', 'woocommerce' ) ?></option>
+									<option value="id"><?php _e( 'Term ID', 'woocommerce' ) ?></option>
+								</select>
+								<p class="description"><?php _e( 'Determines the sort order on the frontend for this attribute. If using custom ordering, you can drag and drop the terms in this attribute', 'woocommerce' ); ?></p>
 							</div>
 
 							<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button" value="<?php _e('Add Attribute', 'woocommerce'); ?>"></p>

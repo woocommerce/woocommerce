@@ -785,7 +785,7 @@ class Woocommerce {
 
 		    		$label = ( isset( $tax->attribute_label ) && $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 
-					$show_in_nav_menus = apply_filters('woocommerce_attribute_show_in_nav_menus', false, $name);
+					$show_in_nav_menus = apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name );
 
 		    		register_taxonomy( $name,
 				        array('product'),
@@ -1455,6 +1455,25 @@ class Woocommerce {
 
 		return apply_filters( 'woocommerce_attribute_label', $label, $name );
 	}
+	
+	
+	/**
+	 * Get a product attributes orderby setting.
+	 *
+	 * @access public
+	 * @param mixed $name
+	 * @return string
+	 */
+	function attribute_orderby( $name ) {
+		global $wpdb;
+
+		$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+
+		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+
+		return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
+	}
+
 
 
 	/**
