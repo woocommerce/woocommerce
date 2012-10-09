@@ -95,7 +95,7 @@ jQuery(document).ready(function(){
 	
 	 jQuery('#wpbody').on('change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function(){  
     
-    	if (jQuery(this).val()==1) {
+    	if (jQuery(this).val() > 0) {
     		jQuery(this).closest('div').find('.alignright').show();
     	} else {
     		jQuery(this).closest('div').find('.alignright').hide();

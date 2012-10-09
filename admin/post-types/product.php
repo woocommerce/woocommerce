@@ -784,18 +784,20 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 				    	<select class="change_regular_price change_to" name="change_regular_price">
 						<?php
 							$options = array(
-								'' 	=> __('— No Change —', 'woocommerce'),
-								'1' => __('Change to:', 'woocommerce')
+								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'1' => __( 'Change to:', 'woocommerce' ),
+								'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
+								'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
+								echo '<option value="' . $key . '">' . $value . '</option>';
 							}
 						?>
 						</select>
 					</span>
 				</label>
 			    <label class="alignright">
-			    	<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Regular price', 'woocommerce'); ?>" value="">
+			    	<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Enter price', 'woocommerce'); ?>" value="" />
 			    </label>
 			</div>
 
@@ -806,18 +808,21 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 				    	<select class="change_sale_price change_to" name="change_sale_price">
 						<?php
 							$options = array(
-								'' 	=> __('— No Change —', 'woocommerce'),
-								'1' => __('Change to:', 'woocommerce')
+								'' 	=> __( '— No Change —', 'woocommerce' ),
+								'1' => __( 'Change to:', 'woocommerce' ),
+								'2' => __( 'Increase by (fixed amount or %):', 'woocommerce' ),
+								'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce' ),
+								'4' => __( 'Decrease regular price by (fixed amount or %):', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
-								echo '<option value="'.$key.'">'. $value .'</option>';
+								echo '<option value="' . $key . '">' . $value . '</option>';
 							}
 						?>
 						</select>
 					</span>
 				</label>
 				<label class="alignright">
-					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Sale price', 'woocommerce'); ?>" value="">
+					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Enter price', 'woocommerce'); ?>" value="" />
 				</label>
 			</div>
 
@@ -986,10 +991,10 @@ add_action('bulk_edit_custom_box',  'woocommerce_admin_product_bulk_edit', 10, 2
 function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 	if ( is_int( wp_is_post_revision( $post_id ) ) ) return;
-	if( is_int( wp_is_post_autosave( $post_id ) ) ) return;
+	if ( is_int( wp_is_post_autosave( $post_id ) ) ) return;
 	if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-	if ( !isset($_REQUEST['woocommerce_bulk_edit_nonce']) || (isset($_REQUEST['woocommerce_bulk_edit_nonce']) && !wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ))) return $post_id;
-	if ( !current_user_can( 'edit_post', $post_id )) return $post_id;
+	if ( ! isset( $_REQUEST['woocommerce_bulk_edit_nonce'] ) || ! wp_verify_nonce( $_REQUEST['woocommerce_bulk_edit_nonce'], 'woocommerce_bulk_edit_nonce' ) ) return $post_id;
+	if ( ! current_user_can( 'edit_post', $post_id ) ) return $post_id;
 	if ( $post->post_type != 'product' ) return $post_id;
 
 	global $woocommerce, $wpdb;
@@ -997,53 +1002,120 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 	$product = new WC_Product( $post_id );
 
 	// Save fields
-	if (isset($_REQUEST['change_weight']) && $_REQUEST['change_weight']==1)
-		if(isset($_REQUEST['_weight'])) update_post_meta($post_id, '_weight', esc_html(stripslashes($_REQUEST['_weight'])));
+	if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) )
+		update_post_meta( $post_id, '_weight', esc_html( stripslashes( $_REQUEST['_weight'] ) ) );
 
-	if (isset($_REQUEST['change_dimensions']) && $_REQUEST['change_dimensions']==1) {
-		if(isset($_REQUEST['_length'])) update_post_meta($post_id, '_length', esc_html(stripslashes($_REQUEST['_length'])));
-		if(isset($_REQUEST['_width'])) update_post_meta($post_id, '_width', esc_html(stripslashes($_REQUEST['_width'])));
-		if(isset($_REQUEST['_height'])) update_post_meta($post_id, '_height', esc_html(stripslashes($_REQUEST['_height'])));
+	if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
+		if ( isset( $_REQUEST['_length'] ) ) 
+			update_post_meta( $post_id, '_length', esc_html( stripslashes( $_REQUEST['_length'] ) ) );
+		if ( isset( $_REQUEST['_width'] ) ) 
+			update_post_meta( $post_id, '_width', esc_html( stripslashes( $_REQUEST['_width'] ) ) );
+		if ( isset( $_REQUEST['_height'] ) ) 
+			update_post_meta( $post_id, '_height', esc_html( stripslashes( $_REQUEST['_height'] ) ) );
 	}
 
-	if(isset($_REQUEST['_stock_status']) && $_REQUEST['_stock_status']) update_post_meta( $post_id, '_stock_status', stripslashes( $_REQUEST['_stock_status'] ) );
+	if ( ! empty( $_REQUEST['_stock_status'] ) ) 
+		update_post_meta( $post_id, '_stock_status', stripslashes( $_REQUEST['_stock_status'] ) );
 
-	if(isset($_REQUEST['_visibility']) && $_REQUEST['_visibility']) update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
+	if ( ! empty( $_REQUEST['_visibility'] ) ) 
+		update_post_meta( $post_id, '_visibility', stripslashes( $_REQUEST['_visibility'] ) );
 
-	if(isset($_REQUEST['_featured']) && $_REQUEST['_featured']) update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) );
+	if ( ! empty( $_REQUEST['_featured'] ) ) 
+		update_post_meta( $post_id, '_featured', stripslashes( $_REQUEST['_featured'] ) );
 
 	// Handle price - remove dates and set to lowest
-	if ($product->is_type('simple') || $product->is_type('external')) {
+	if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
 		$price_changed = false;
-
-		if (isset($_REQUEST['change_regular_price']) && $_REQUEST['change_regular_price']==1) {
-
-			if(isset($_REQUEST['_regular_price'])) update_post_meta( $post_id, '_regular_price', stripslashes( $_REQUEST['_regular_price'] ) );
-
-			if(isset($_REQUEST['_regular_price']) && stripslashes( $_REQUEST['_regular_price'] )!=$product->regular_price) {
+		
+		if ( ! empty( $_REQUEST['change_regular_price'] ) ) {
+			
+			$old_price = $product->regular_price;
+			$change_regular_price = absint( $_REQUEST['change_regular_price'] );
+			$regular_price = esc_attr( stripslashes( $_REQUEST['_regular_price'] ) );
+		
+			switch ( $change_regular_price ) {
+				case 1 :
+					$new_price = $regular_price;
+				break;
+				case 2 :
+					if ( strstr( $regular_price, '%' ) ) {
+						$percent = str_replace( '%', '', $regular_price ) / 100;
+						$new_price = $old_price + ( $old_price * $percent );
+					} else {
+						$new_price = $old_price + $regular_price;
+					}
+				break;
+				case 3 : 
+					if ( strstr( $regular_price, '%' ) ) {
+						$percent = str_replace( '%', '', $regular_price ) / 100;
+						$new_price = $old_price - ( $old_price * $percent );
+					} else {
+						$new_price = $old_price - $regular_price;
+					}
+				break;
+			}
+			
+			if ( isset( $new_price ) && $new_price != $product->regular_price ) {
 				$price_changed = true;
-				$product->regular_price = stripslashes( $_REQUEST['_regular_price'] );
+				update_post_meta( $post_id, '_regular_price', $new_price );
+				$product->regular_price = $new_price;
+			}
+		}
+		
+		if ( ! empty( $_REQUEST['change_sale_price'] ) ) {
+			
+			$old_price = $product->sale_price;
+			$change_sale_price = absint( $_REQUEST['change_sale_price'] );
+			$sale_price = esc_attr( stripslashes( $_REQUEST['_sale_price'] ) );
+		
+			switch ( $change_sale_price ) {
+				case 1 :
+					$new_price = $sale_price;
+				break;
+				case 2 :
+					if ( strstr( $sale_price, '%' ) ) {
+						$percent = str_replace( '%', '', $sale_price ) / 100;
+						$new_price = $old_price + ( $old_price * $percent );
+					} else {
+						$new_price = $old_price + $sale_price;
+					}
+				break;
+				case 3 : 
+					if ( strstr( $sale_price, '%' ) ) {
+						$percent = str_replace( '%', '', $sale_price ) / 100;
+						$new_price = $old_price - ( $old_price * $percent );
+					} else {
+						$new_price = $old_price - $sale_price;
+					}
+				break;
+				case 4 : 
+					if ( strstr( $sale_price, '%' ) ) {
+						$percent = str_replace( '%', '', $sale_price ) / 100;
+						$new_price = $product->regular_price - ( $product->regular_price * $percent );
+					} else {
+						$new_price = $product->regular_price - $sale_price;
+					}
+				break;
+			}
+			
+			if ( isset( $new_price ) && $new_price != $product->sale_price ) {
+				$price_changed = true;
+				update_post_meta( $post_id, '_sale_price', $new_price );
+				$product->sale_price = $new_price;
+			}
+		}
+		
+		if ( $price_changed ) {
+			update_post_meta( $post_id, '_sale_price_dates_from', '' );
+			update_post_meta( $post_id, '_sale_price_dates_to', '' );
+			
+			if ( $product->regular_price < $product->sale_price ) {
+				$product->sale_price = '';
+				update_post_meta( $post_id, '_sale_price', '' );
 			}
 
-		}
-
-		if (isset($_REQUEST['change_sale_price']) && $_REQUEST['change_sale_price']==1) {
-
-			if(isset($_REQUEST['_sale_price'])) update_post_meta( $post_id, '_sale_price', stripslashes( $_REQUEST['_sale_price'] ) );
-
-			if(isset($_REQUEST['_sale_price']) && stripslashes( $_REQUEST['_sale_price'] )!=$product->sale_price) {
-				$price_changed = true;
-				$product->sale_price = stripslashes( $_REQUEST['_sale_price'] );
-			}
-
-		}
-
-		if ($price_changed) {
-			update_post_meta( $post_id, '_sale_price_dates_from', '');
-			update_post_meta( $post_id, '_sale_price_dates_to', '');
-
-			if ($product->sale_price) {
+			if ( $product->sale_price ) {
 				update_post_meta( $post_id, '_price', $product->sale_price );
 			} else {
 				update_post_meta( $post_id, '_price', $product->regular_price );
@@ -1052,18 +1124,19 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 	}
 
 	// Handle stock
-	if (!$product->is_type('grouped')) {
-		if (isset($_REQUEST['_manage_stock']) && $_REQUEST['_manage_stock']) {
+	if ( ! $product->is_type( 'grouped' ) ) {
+		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 
-			if ($_REQUEST['_manage_stock']=='yes') {
+			if ( $_REQUEST['_manage_stock'] == 'yes' ) {
 				update_post_meta( $post_id, '_manage_stock', 'yes' );
 
-				if (isset($_REQUEST['change_stock']) && $_REQUEST['change_stock']==1) update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
+				if ( ! empty( $_REQUEST['change_stock'] ) ) 
+					update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
+					
 			} else {
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				update_post_meta( $post_id, '_stock', '0' );
 			}
-
 		}
 	}
 
@@ -1071,7 +1144,7 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 	$woocommerce->clear_product_transients( $post_id );
 }
 
-add_action('save_post', 'woocommerce_admin_product_bulk_edit_save', 10, 2);
+add_action( 'save_post', 'woocommerce_admin_product_bulk_edit_save', 10, 2 );
 
 
 /**

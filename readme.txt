@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Local pickup has the option to apply base tax rates instead of customer address rates.
 * Feature - New product images panel to make working with featured images + galleries easier.
 * Feature - Schedule sales for variations.
+* Feature - Expanded bulk edit for prices. Change to, increase by, decrease by.
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
