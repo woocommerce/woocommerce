@@ -662,7 +662,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array(
 		'name' => __( 'Product Ratings', 'woocommerce' ),
-		'desc' 		=> __( 'Enable the star rating field on the review form', 'woocommerce' ),
+		'desc' 		=> __( 'Enable the rating field on the review form', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_review_rating',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
