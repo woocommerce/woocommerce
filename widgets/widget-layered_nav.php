@@ -144,7 +144,7 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 
 						jQuery('#dropdown_layered_nav_$taxonomy_filter').change(function(){
 
-							location.href = '" . add_query_arg('filtering', '1', remove_query_arg('filter_' . $taxonomy_filter ) ) . "&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
+							location.href = '" . preg_replace( '%\/page/[0-9]+%', '', add_query_arg('filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery('#dropdown_layered_nav_$taxonomy_filter').val();
 
 						});
 
