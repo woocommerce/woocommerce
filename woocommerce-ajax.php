@@ -1142,6 +1142,8 @@ function woocommerce_json_search_products( $x = '', $post_types = array('product
 
 	}
 
+	$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products);
+
 	echo json_encode( $found_products );
 
 	die();
