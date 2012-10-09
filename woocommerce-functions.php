@@ -1189,3 +1189,23 @@ function woocommerce_get_order_id_by_order_key( $order_key ) {
 
 	return $order_id;
 }
+
+/**
+ * Change the count properties for all terms based on our manual counters
+ *
+ * @access public
+ * @return array Contains all the terms with updated counts
+ */
+function wc_get_terms_count_filter( $terms, $taxonomies ) {
+    if ( ! is_admin() && in_array( 'product_cat', $taxonomies ) ) {
+    	$counted_ids = get_option( 'wc_prod_cat_counts' );
+
+        foreach ( $terms as $term ) {
+        	if ( isset( $counted_ids[ $term->term_id ] ) ) {
+            	$term->count = count( $counted_ids[ $term->term_id ] );
+            }
+        }
+    }
+
+    return $terms;
+}
