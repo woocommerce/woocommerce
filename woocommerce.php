@@ -277,6 +277,9 @@ class Woocommerce {
 	 * @return void
 	 */
 	function init() {
+		//Before init action
+		do_action( 'before_woocommerce_init' );
+		
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
@@ -616,36 +619,30 @@ class Woocommerce {
 	 */
 	function init_taxonomy() {
 
-		if ( post_type_exists('product') ) return;
+		if ( post_type_exists('product') ) 
+			return;
 
 		/**
 		 * Slugs
 		 **/
-		$shop_page_id = woocommerce_get_page_id('shop');
-
-		$base_slug = ( $shop_page_id > 0 && get_page( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
-
-		$category_base = ( get_option('woocommerce_prepend_shop_page_to_urls') == "yes" ) ? trailingslashit($base_slug) : '';
-
-		$category_slug = ( get_option('woocommerce_product_category_slug') ) ? get_option('woocommerce_product_category_slug') : _x('product-category', 'slug', 'woocommerce');
-
-		$tag_slug = ( get_option('woocommerce_product_tag_slug') ) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woocommerce');
-
-		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
-			$product_base = trailingslashit( $base_slug );
-		} else {
-			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
-				$product_base = trailingslashit( $product_slug );
-			} else {
-				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
-			}
-		}
-
-		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' ) $product_base .= trailingslashit('%product_cat%');
-
-		$product_base = untrailingslashit($product_base);
-
-		if ( current_user_can('manage_woocommerce') ) $show_in_menu = 'woocommerce'; else $show_in_menu = true;
+		$permalinks 	= get_option( 'woocommerce_permalinks' );
+		$shop_page_id 	= woocommerce_get_page_id( 'shop' );
+		
+		// Base slug is also used for the product post type archive
+		$base_slug 		= $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
+		
+		// Get bases
+		$product_category_slug 	= empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'];
+		$product_tag_slug 		= empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'];
+		$product_attribute_base	= empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'];
+		$product_permalink 		= empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+		
+		if ( $product_permalink ) 
+			$rewrite =  array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false );
+		else
+			$rewrite = false;
+			
+		$show_in_menu = current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : true;
 
 		/**
 		 * Taxonomies
@@ -692,7 +689,7 @@ class Woocommerce {
 					'delete_terms' 		=> 'delete_product_terms',
 					'assign_terms' 		=> 'assign_product_terms',
 	            ),
-	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false, 'hierarchical' => true ),
+	            'rewrite' 				=> array( 'slug' => $product_category_slug, 'with_front' => false, 'hierarchical' => true ),
 	        )
 	    );
 
@@ -723,7 +720,7 @@ class Woocommerce {
 					'delete_terms' 		=> 'delete_product_terms',
 					'assign_terms' 		=> 'assign_product_terms',
 				),
-	            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
+	            'rewrite' 				=> array( 'slug' => $product_tag_slug, 'with_front' => false ),
 	        )
 	    );
 
@@ -821,7 +818,7 @@ class Woocommerce {
 								'assign_terms' 		=> 'assign_product_terms',
 				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
-				            'rewrite' 					=> array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
+				            'rewrite' 					=> array( 'slug' => $product_attribute_base . strtolower( sanitize_title( $tax->attribute_name ) ), 'with_front' => false, 'hierarchical' => $hierarchical ),
 				        )
 				    );
 
@@ -833,7 +830,7 @@ class Woocommerce {
 		 * Post Types
 		 **/
 		do_action( 'woocommerce_register_post_type' );
-
+		
 		register_post_type( "product",
 			apply_filters( 'woocommerce_register_post_type_product', 
 				array(
@@ -861,7 +858,7 @@ class Woocommerce {
 					'publicly_queryable' 	=> true,
 					'exclude_from_search' 	=> false,
 					'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
-					'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
+					'rewrite' 				=> $rewrite,
 					'query_var' 			=> true,
 					'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
 					'has_archive' 			=> $base_slug,

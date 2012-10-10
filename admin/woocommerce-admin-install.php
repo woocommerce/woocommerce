@@ -23,6 +23,40 @@ function do_install_woocommerce() {
 	woocommerce_default_options();
 	woocommerce_tables_install();
 	woocommerce_init_roles();
+	
+	// Setup default permalinks
+	$permalinks 	= get_option( 'woocommerce_permalinks' );
+	$shop_page_id 	= woocommerce_get_page_id( 'shop' );
+	if ( empty( $permalinks ) && $shop_page_id > 0 ) {
+	
+		$base_slug 		= $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
+		
+		$category_base 	= get_option('woocommerce_prepend_shop_page_to_urls') == "yes" ? trailingslashit( $base_slug ) : '';
+		$category_slug 	= get_option('woocommerce_product_category_slug') ? get_option('woocommerce_product_category_slug') : _x( 'product-category', 'slug', 'woocommerce' );
+		$tag_slug 		= get_option('woocommerce_product_tag_slug') ? get_option('woocommerce_product_tag_slug') : _x( 'product-tag', 'slug', 'woocommerce' );
+		
+		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
+			$product_base = trailingslashit( $base_slug );
+		} else {
+			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
+				$product_base = trailingslashit( $product_slug );
+			} else {
+				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
+			}
+		}
+		
+		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' ) 
+			$product_base .= trailingslashit('%product_cat%');
+	
+		$permalinks = array(
+			'product_base' 		=> untrailingslashit( $product_base ),
+			'category_base' 	=> untrailingslashit( $category_base . $category_slug ),
+			'attribute_base' 	=> untrailingslashit( $category_base ),
+			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug )
+		);
+		
+		update_option( 'woocommerce_permalinks', $permalinks );	
+	}
 
 	// Register post types
 	$woocommerce->init_taxonomy();
@@ -192,6 +226,9 @@ function woocommerce_create_pages() {
 	// My Account page
     woocommerce_create_page( esc_sql( _x( 'my-account', 'page_slug', 'woocommerce' ) ), 'woocommerce_myaccount_page_id', __( 'My Account', 'woocommerce' ), '[woocommerce_my_account]' );
 
+	// Lost password page
+	woocommerce_create_page( esc_sql( _x( 'lost-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_lost_password_page_id', __( 'Lost Password', 'woocommerce' ), '[woocommerce_lost_password]', woocommerce_get_page_id( 'myaccount' ) );
+
 	// Edit address page
     woocommerce_create_page( esc_sql( _x( 'edit-address', 'page_slug', 'woocommerce' ) ), 'woocommerce_edit_address_page_id', __( 'Edit My Address', 'woocommerce' ), '[woocommerce_edit_address]', woocommerce_get_page_id( 'myaccount' ) );
 
@@ -207,8 +244,6 @@ function woocommerce_create_pages() {
     // Thanks page
     woocommerce_create_page( esc_sql( _x( 'order-received', 'page_slug', 'woocommerce' ) ), 'woocommerce_thanks_page_id', __( 'Order Received', 'woocommerce' ), '[woocommerce_thankyou]', woocommerce_get_page_id( 'checkout' ) );
 
-	// Lost password page
-	woocommerce_create_page( esc_sql( _x( 'lost-password', 'page_slug', 'woocommerce' ) ), 'woocommerce_lost_password_page_id', __( 'Lost Password', 'woocommerce' ), '[woocommerce_lost_password]' );
 }
 
 

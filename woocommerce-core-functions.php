@@ -1016,31 +1016,59 @@ add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
  * @param object $post
  * @return string
  */
-function woocommerce_product_cat_filter_post_link( $permalink, $post ) {
+function woocommerce_product_post_type_link( $permalink, $post ) {
     // Abort if post is not a product
     if ( $post->post_type !== 'product' )
     	return $permalink;
-
+    	
     // Abort early if the placeholder rewrite tag isn't in the generated URL
-    if ( false === strpos( $permalink, '%product_cat%' ) )
+    if ( false === strpos( $permalink, '%' ) )
     	return $permalink;
-
+    	
     // Get the custom taxonomy terms in use by this post
     $terms = get_the_terms( $post->ID, 'product_cat' );
 
     if ( empty( $terms ) ) {
     	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $permalink = str_replace( '%product_cat%', _x('product', 'slug', 'woocommerce'), $permalink );
+        $product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
     } else {
     	// Replace the placeholder rewrite tag with the first term's slug
         $first_term = array_shift( $terms );
-        $permalink = str_replace( '%product_cat%', $first_term->slug, $permalink );
+        $product_cat = $first_term->slug;
     }
+    
+    $find = array(
+    	'%year%',
+    	'%monthnum%',
+    	'%day%',
+    	'%hour%',
+    	'%minute%',
+    	'%second%',
+    	'%post_id%',
+    	'%category%',
+    	'%product_cat%'
+    );
+    
+    $replace = array(
+    	date_i18n( 'Y', strtotime( $post->post_date ) ),
+    	date_i18n( 'm', strtotime( $post->post_date ) ),
+    	date_i18n( 'd', strtotime( $post->post_date ) ),
+    	date_i18n( 'H', strtotime( $post->post_date ) ),
+    	date_i18n( 'i', strtotime( $post->post_date ) ),
+    	date_i18n( 's', strtotime( $post->post_date ) ),
+    	$post->ID,
+    	$product_cat,
+    	$product_cat
+    );	
+    
+    $replace = array_map( 'sanitize_title', $replace );
+    
+    $permalink = str_replace( $find, $replace, $permalink );
 
     return $permalink;
 }
 
-add_filter( 'post_type_link', 'woocommerce_product_cat_filter_post_link', 10, 2 );
+add_filter( 'post_type_link', 'woocommerce_product_post_type_link', 10, 2 );
 
 
 

@@ -339,17 +339,22 @@ if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 )
 
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
-	array( 'name' => __( 'Page Setup', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'page_options' ),
+	array( 
+		'name' => __( 'Page Setup', 'woocommerce' ), 
+		'type' => 'title', 
+		'desc' => sprintf( __( 'Set up core WooCommerce pages here, for example the base page. The base page can also be used in your %sproduct permalinks%s.', 'woocommerce' ), '<a target="_blank" href="' . admin_url( 'options-permalink.php' ) . '">', '</a>' ), 
+		'id' => 'page_options' 
+	),
 
 	array(
 		'name' => __( 'Shop Base Page', 'woocommerce' ),
-		'desc' 		=> sprintf( __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ), '<a target="_blank" href="options-permalink.php">', '</a>' ),
+		'desc' 		=> __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_shop_page_id',
 		'type' 		=> 'single_select_page',
 		'std' 		=> '',
 		'class'		=> 'chosen_select_nostd',
 		'css' 		=> 'min-width:300px;',
-		'desc_tip'	=>  true,
+		'desc_tip'	=>  true
 	),
 
 	array(
@@ -382,66 +387,6 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array( 'type' => 'sectionend', 'id' => 'page_options' ),
-
-	array( 'name' => __( 'Permalinks', 'woocommerce' ), 'type' => 'title', 'desc' => '', 'id' => 'permalink_options' ),
-
-	array(
-		'name' => __( 'Product base category', 'woocommerce' ),
-		'desc' 		=> __( 'Prepend product permalinks with product category', 'woocommerce' ),
-		'id' 		=> 'woocommerce_prepend_category_to_products',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
-	),
-
-	array(
-		'name' => __( 'Product base page', 'woocommerce' ),
-		'desc' 		=> sprintf(__( 'Prepend product permalinks with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug) . $woocommerce_prepend_shop_page_to_products_warning,
-		'id' 		=> 'woocommerce_prepend_shop_page_to_products',
-		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
-	),
-
-	array(
-		'name' => __( 'Product slug', 'woocommerce' ),
-		'desc' 		=> __( 'Shows in the single product URLs. Leave blank to use the default slug. Can only be used if shop base page isn\'t prepended.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_product_slug',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'std' 		=> '',
-		'desc_tip'	=>  true,
-	),
-
-	array(
-		'name' => __( 'Taxonomy base page', 'woocommerce' ),
-		'desc' 		=> sprintf(__( 'Prepend shop categories/tags with shop base page (<code>%s</code>)', 'woocommerce' ), $base_slug),
-		'id' 		=> 'woocommerce_prepend_shop_page_to_urls',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-	),
-
-	array(
-		'name' => __( 'Product category slug', 'woocommerce' ),
-		'desc' 		=> __( 'Shows in the product category URLs. Leave blank to use the default slug.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_product_category_slug',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'std' 		=> '',
-		'desc_tip'	=>  true,
-	),
-
-	array(
-		'name' => __( 'Product tag slug', 'woocommerce' ),
-		'desc' 		=> __( 'Shows in the product tag URLs. Leave blank to use the default slug.', 'woocommerce' ),
-		'id' 		=> 'woocommerce_product_tag_slug',
-		'type' 		=> 'text',
-		'css' 		=> 'min-width:300px;',
-		'std' 		=> '',
-		'desc_tip'	=>  true,
-	),
-
-	array( 'type' => 'sectionend', 'id' => 'permalink_options' ),
 
 	array( 'name' => __( 'Shop Pages', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following pages need selecting so that WooCommerce knows where they are. These pages should have been created upon installation of the plugin, if not you will need to create them.', 'woocommerce' ) ),
 
@@ -535,7 +480,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 
 	array(
 		'name' => __( 'Lost Password Page', 'woocommerce' ),
-		'desc' 		=> __( 'Page contents: [woocommerce_lost_password]', 'woocommerce' ),
+		'desc' 		=> __( 'Page contents: [woocommerce_lost_password] Parent: "My Account"', 'woocommerce' ),
 		'id' 		=> 'woocommerce_lost_password_page_id',
 		'type' 		=> 'single_select_page',
 		'std' 		=> '',
@@ -544,7 +489,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'desc_tip'	=>  true,
 	),
 
-	array( 'type' => 'sectionend', 'id' => 'page_options'),
+	array( 'type' => 'sectionend', 'id' => 'page_options')
 
 )); // End pages settings
 
