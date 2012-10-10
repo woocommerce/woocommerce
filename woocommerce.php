@@ -1087,8 +1087,6 @@ class Woocommerce {
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
-		
-		
 	}
 	
 	/**
