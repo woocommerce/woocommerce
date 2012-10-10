@@ -37,7 +37,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		$this->template_plain 	= 'emails/plain/customer-reset-password.php';
 
 		$this->subject 			= __( 'Password Reset for {blogname}', 'woocommerce');
-		$this->heading      	= __( 'Password Reset Instructions for {blogname}', 'woocommerce');
+		$this->heading      	= __( 'Password Reset Instructions', 'woocommerce');
 
 		// Trigger
 		add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
