@@ -662,6 +662,9 @@ function woocommerce_process_registration() {
 
                 // Change role
                 wp_update_user( array ('ID' => $user_id, 'role' => 'customer') ) ;
+                
+                // Action
+	            do_action( 'woocommerce_created_customer', $user_id );
 
 				// send the user a confirmation and their login details
 				$mailer = $woocommerce->mailer();
