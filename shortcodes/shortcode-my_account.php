@@ -305,7 +305,7 @@ function woocommerce_view_order() {
 			<li class="comment note">
 				<div class="comment_container">
 					<div class="comment-text">
-						<p class="meta"><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></p>
+						<p class="meta"><?php echo date_i18n(__('l jS \of F Y, h:ia', 'woocommerce'), strtotime($note->comment_date)); ?></p>
 						<div class="description">
 							<?php echo wpautop(wptexturize($note->comment_content)); ?>
 						</div>
