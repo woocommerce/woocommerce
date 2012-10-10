@@ -752,7 +752,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	set_transient( 'wc_product_type_' . $post_id, $product_type );
 
 	// Sales and prices
-	if ($product_type=='simple' || $product_type=='external') :
+	if ( in_array( $product_type, apply_filters( 'woocommerce_product_types_with_price', array('simple', 'external') ) ) ):
 
 		$date_from = (isset($_POST['_sale_price_dates_from'])) ? $_POST['_sale_price_dates_from'] : '';
 		$date_to = (isset($_POST['_sale_price_dates_to'])) ? $_POST['_sale_price_dates_to'] : '';
