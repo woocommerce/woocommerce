@@ -468,16 +468,39 @@ function woocommerce_order_actions_meta_box($post) {
 
 		<?php do_action('woocommerce_order_actions', $post->ID); ?>
 
+		<li class="wide" id="order-emails">
+			<a href="#order-emails" class="show-order-emails hide-if-no-js"><?php _e( 'Show order emails', 'woocommerce' ); ?></a>
+
+			<div id="order-emails-select" class="hide-if-js">
+				<?php
+				global $woocommerce;
+				$mailer = $woocommerce->mailer();
+
+				$available_emails = array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' );
+
+				foreach ( $mailer->get_emails() as $mail ) {
+					if ( in_array( $mail->id, $available_emails ) ) {
+						echo '<input name="order_email" type="radio" id="'. $mail->id .'_email"> <label for="'. $mail->id .'_email">' . $mail->title. '</label></br >';
+					}
+				}
+				?>
+				<p>
+					<a href="#order-emails" class="save-post-visibility button"><?php _e('Resend email'); ?></a>
+					<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e('Cancel'); ?></a>
+				</p>
+			</div>
+		</li>
+
 		<li class="wide">
-		<?php
-		if ( current_user_can( "delete_post", $post->ID ) ) {
-			if ( !EMPTY_TRASH_DAYS )
-				$delete_text = __('Delete Permanently', 'woocommerce');
-			else
-				$delete_text = __('Move to Trash', 'woocommerce');
-			?>
-		<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
-		} ?>
+			<?php
+			if ( current_user_can( "delete_post", $post->ID ) ) {
+				if ( !EMPTY_TRASH_DAYS )
+					$delete_text = __('Delete Permanently', 'woocommerce');
+				else
+					$delete_text = __('Move to Trash', 'woocommerce');
+				?>
+			<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
+			} ?>
 		</li>
 	</ul>
 	<?php
