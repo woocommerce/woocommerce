@@ -533,6 +533,17 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 		'desc_tip'	=>  true,
 	),
 
+	array(
+		'name' => __( 'Lost Password Page', 'woocommerce' ),
+		'desc' 		=> __( 'Page contents: [woocommerce_lost_password]', 'woocommerce' ),
+		'id' 		=> 'woocommerce_lost_password_page_id',
+		'type' 		=> 'single_select_page',
+		'std' 		=> '',
+		'class'		=> 'chosen_select_nostd',
+		'css' 		=> 'min-width:300px;',
+		'desc_tip'	=>  true,
+	),
+
 	array( 'type' => 'sectionend', 'id' => 'page_options'),
 
 )); // End pages settings

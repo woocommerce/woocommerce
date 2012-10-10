@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Shortcodes
  * @package 	WooCommerce/Shortcodes
- * @version     1.6.4
+ * @version     1.7.0
  */
 
 /** Cart shortcode */
@@ -21,6 +21,9 @@ include_once('shortcode-my_account.php');
 
 /** Order tracking shortcode */
 include_once('shortcode-order_tracking.php');
+
+/** Lost password shortcode */
+include_once( 'shortcode-lost_password.php' );
 
 /** Pay shortcode */
 include_once('shortcode-pay.php');
@@ -857,6 +860,7 @@ add_shortcode('woocommerce_order_tracking', 'get_woocommerce_order_tracking');
 add_shortcode('woocommerce_my_account', 'get_woocommerce_my_account');
 add_shortcode('woocommerce_edit_address', 'get_woocommerce_edit_address');
 add_shortcode('woocommerce_change_password', 'get_woocommerce_change_password');
+add_shortcode('woocommerce_lost_password', 'get_woocommerce_lost_password');
 add_shortcode('woocommerce_view_order', 'get_woocommerce_view_order');
 add_shortcode('woocommerce_pay', 'get_woocommerce_pay');
 add_shortcode('woocommerce_thankyou', 'get_woocommerce_thankyou');
