@@ -1662,12 +1662,16 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 
 			$term = get_term( $term_id, 'product_cat' );
 			$counted_ids = get_option( 'wc_prod_cat_counts' );
-			$counted_ids = ( ! is_array( $counted_ids ) ) ? array() : $counted_ids;
+			$counted_ids[ $term->term_id ] = ( isset( $counted_ids[ $term->term_id ] ) && ! is_array( $counted_ids[ $term->term_id ] ) ) ? array() : $counted_ids[ $term->term_id ];
 
 			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! empty( $counted_ids[ $term->term_id ] ) && ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
-					$counted_ids[ $term->term_id ] = ( ! is_array( $counted_ids[ $term->term_id ] ) ) ? array() : $counted_ids[ $term->term_id ];
-					array_push( $counted_ids[ $term->term_id ], absint( $_POST['post_ID'] ) );
+				if ( ! empty( $counted_ids[ $term->term_id ] ) ) {
+					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
+						array_push( $counted_ids[ $term->term_id ], absint( $_POST['post_ID'] ) );
+						update_option( 'wc_prod_cat_counts', $counted_ids );
+					}
+				} else {
+					$counted_ids[ $term->term_id ] = array( absint( $_POST['post_ID'] ) );
 					update_option( 'wc_prod_cat_counts', $counted_ids );
 				}
 			} elseif ( in_array( $_POST['_visibility'], $do_not_count ) ) {
