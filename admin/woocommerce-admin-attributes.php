@@ -135,9 +135,6 @@ function woocommerce_attributes() {
 						'meta_key' 	=> 'attribute_' . sanitize_title( $old_attribute_name )
 					)
 				);
-
-				// Clear post cache
-				wp_cache_flush();
 			}
 
 			wp_safe_redirect( get_admin_url() . 'edit.php?post_type=product&page=woocommerce_attributes' );

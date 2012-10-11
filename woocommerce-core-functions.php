@@ -1332,7 +1332,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  */
 function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
 
-	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0');
+	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
 	if( empty( $terms ) ) return $index;
 
 	$id	= $the_term->term_id;
@@ -1365,8 +1365,6 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $t
 	// no nextid meaning our term is in last position
 	if( $term_in_level && null === $next_id )
 		$index = woocommerce_set_term_order($id, $index+1, $taxonomy, true);
-
-	wp_cache_flush();
 
 	return $index;
 }
@@ -1405,6 +1403,8 @@ function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = f
 		$index ++;
 		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy, true);
 	}
+	
+	clean_term_cache( $term_id, $taxonomy );
 
 	return $index;
 }
@@ -1665,7 +1665,7 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 			$counted_ids = ( ! is_array( $counted_ids ) ) ? array() : $counted_ids;
 
 			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
+				if ( ! empty( $counted_ids[ $term->term_id ] ) && ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
 					$counted_ids[ $term->term_id ] = ( ! is_array( $counted_ids[ $term->term_id ] ) ) ? array() : $counted_ids[ $term->term_id ];
 					array_push( $counted_ids[ $term->term_id ], absint( $_POST['post_ID'] ) );
 					update_option( 'wc_prod_cat_counts', $counted_ids );
