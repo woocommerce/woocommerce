@@ -9,8 +9,9 @@
 
 global $product, $woocommerce_loop;
 
-$related = $product->get_related();
-
+$related = $product->get_cross_sells(); 
+if ( sizeof( $related ) == 0 )
+	$related = $product->get_related();
 if ( sizeof( $related ) == 0 ) return;
 
 $args = apply_filters('woocommerce_related_products_args', array(
