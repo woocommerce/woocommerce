@@ -249,9 +249,13 @@ class WC_Tax {
 			return $matched_tax_rates;
 
 		} else {
-
-			return $this->get_shop_base_rate( $tax_class );
-
+			
+			// Prices which include tax should always use the base rate if we don't know where the user is located
+			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
+			if ( $woocommerce->cart->prices_include_tax )
+				return $this->get_shop_base_rate( $tax_class );
+			else
+				return array();
 		}
 
 	}
@@ -293,10 +297,18 @@ class WC_Tax {
 			list( $country, $state, $postcode, $city ) = $woocommerce->customer->get_taxable_address();
 
 		} else {
-			$country 	= $woocommerce->countries->get_base_country();
-			$state 		= $woocommerce->countries->get_base_state();
-			$postcode   = '';
-			$city		= '';
+			
+			// Prices which include tax should always use the base rate if we don't know where the user is located
+			// Prices exlcuding tax however should just not add any taxes, as they will be added during checkout
+			if ( $woocommerce->cart->prices_include_tax ) {
+				$country 	= $woocommerce->countries->get_base_country();
+				$state 		= $woocommerce->countries->get_base_state();
+				$postcode   = '';
+				$city		= '';
+			} else {
+				return array();
+			}
+
 		}
 
 		// If we are here then shipping is taxable - work it out

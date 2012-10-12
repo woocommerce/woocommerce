@@ -944,14 +944,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> ''
 	),
-
-	array(
-		'desc' 		=> __( 'Display taxes on the cart page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_display_cart_taxes',
-		'std' 		=> 'yes',
-		'checkboxgroup'		=> ''
-	),
-
+	
 	array(
 		'desc'          => sprintf( __( 'Display the tax total when tax is %s', 'woocommerce' ), woocommerce_price( 0 ) ),
 		'id'            => 'woocommerce_display_cart_taxes_if_zero',
