@@ -81,12 +81,12 @@ jQuery(function(){
                 if (item.series.label==params.number_of_sales) {
                 	
                 	var y = item.datapoint[1];
-                	showTooltip(item.pageX, item.pageY, item.series.label + ": " + y);
+                	showTooltip(item.pageX, item.pageY, params.sold + ": " + y);
                 	
                 } else {
                 	
                 	var y = item.datapoint[1].toFixed(2);
-                	showTooltip(item.pageX, item.pageY, item.series.label + ": " + params.currency_symbol + y);
+                	showTooltip(item.pageX, item.pageY, params.earned + ": " + params.currency_symbol + y);
                 
                 }
 

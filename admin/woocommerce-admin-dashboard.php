@@ -420,10 +420,12 @@ function woocommerce_dashboard_sales_js() {
 
 	/* Script variables */
 	$params = array(
-		'currency_symbol' => get_woocommerce_currency_symbol(),
-		'number_of_sales' => __( 'Number of sales', 'woocommerce' ),
-		'sales_amount'    => __( 'Sales amount', 'woocommerce' ),
-		'month_names'     => array_values( $wp_locale->month_abbrev ),
+		'currency_symbol' 	=> get_woocommerce_currency_symbol(),
+		'number_of_sales' 	=> __( 'Sold', 'woocommerce' ) . ' ' . absint( array_sum( $order_counts ) ),
+		'sales_amount'    	=> __( 'Earned', 'woocommerce' ) . ' ' . woocommerce_price( array_sum( $order_amounts ) ),
+		'sold' 				=> __( 'Sold', 'woocommerce' ),
+		'earned'    		=> __( 'Earned', 'woocommerce' ),
+		'month_names'     	=> array_values( $wp_locale->month_abbrev ),
 	);
 
 	$order_counts_array = array();
