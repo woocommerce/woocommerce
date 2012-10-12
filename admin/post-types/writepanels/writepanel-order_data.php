@@ -642,9 +642,11 @@ function woocommerce_order_totals_meta_box($post) {
 
 						if ( $woocommerce->payment_gateways ) {
 							foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
-								echo '<option value="' . $gateway->id . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . $gateway->get_title() . '</option>';
-								if ( $chosen_method == $gateway->id )
+								if($gateway->enabled =="yes"){
+									echo '<option value="' . $gateway->id . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . $gateway->get_title() . '</option>';
+									if ( $chosen_method == $gateway->id )
 									$found_method = true;
+								}
 							}
 						}
 
