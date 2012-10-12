@@ -476,18 +476,24 @@ function woocommerce_order_actions_meta_box($post) {
 				global $woocommerce;
 				$mailer = $woocommerce->mailer();
 
-				$available_emails = array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' );
+				$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+				$mails = $mailer->get_emails();
 
-				foreach ( $mailer->get_emails() as $mail ) {
-					if ( in_array( $mail->id, $available_emails ) ) {
-						echo '<input name="order_email" type="radio" id="'. $mail->id .'_email"> <label for="'. $mail->id .'_email">' . $mail->title. '</label></br >';
+				if ( ! empty( $mails ) ) {
+					foreach ( $mails as $mail ) {
+						if ( in_array( $mail->id, $available_emails ) ) {
+							echo '<label><input name="order_email[]" type="checkbox" value="'. $mail->id .'" id="'. $mail->id .'_email"> ' . $mail->title. '</label></br >';
+						}
 					}
+
+					?>
+					<p>
+						<input type="submit" class="save-post-visibility hide-if-no-js button" value="<?php _e( 'Resend email', 'woocommerce' ); ?>">
+						<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
+					</p>
+					<?php
 				}
 				?>
-				<p>
-					<a href="#order-emails" class="save-post-visibility button"><?php _e('Resend email'); ?></a>
-					<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e('Cancel'); ?></a>
-				</p>
 			</div>
 		</li>
 
@@ -958,6 +964,26 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			$mailer->customer_invoice( $order );
 
 			do_action( 'woocommerce_after__customer_invoice', $order );
+
+		elseif (isset($_POST['order_email']) && $_POST['order_email']) :
+
+			do_action( 'woocommerce_before_resend_order_emails', $order );
+
+			$mailer = $woocommerce->mailer();
+
+			$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+			$resend_emails = array_intersect( $available_emails, $_POST['order_email'] );
+			$mails = $mailer->get_emails();
+
+			if ( ! empty( $mails ) ) {
+				foreach ( $mails as $mail ) {
+					if ( in_array( $mail->id, $resend_emails ) ) {
+						$mail->trigger( $order->id );
+					}
+				}
+			}
+
+			do_action( 'woocommerce_after_resend_order_emails', $order );
 
 		endif;
 
