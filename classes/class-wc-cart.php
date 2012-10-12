@@ -480,9 +480,10 @@ class WC_Cart {
 		function get_item_data( $cart_item, $flat = false ) {
 			global $woocommerce;
 
+			$return = '';
 			$has_data = false;
 
-			if ( ! $flat ) $return = '<dl class="variation">';
+			if ( ! $flat ) $return .= '<dl class="variation">';
 
 			// Variation data
 			if ( $cart_item['data'] instanceof WC_Product_Variation && is_array( $cart_item['variation'] ) ) {
