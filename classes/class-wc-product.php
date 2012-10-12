@@ -504,9 +504,8 @@ class WC_Product {
 	 * @return object
 	 */
 	function get_post_data() {
-		if (empty($this->post)) :
+		if ( empty( $this->post ) )
 			$this->post = get_post( $this->id );
-		endif;
 		return $this->post;
 	}
 
@@ -519,7 +518,7 @@ class WC_Product {
 	 */
 	function get_title() {
 		$this->get_post_data();
-		return apply_filters('woocommerce_product_title', apply_filters( 'the_title', $this->post->post_title, $this->id ), $this);
+		return apply_filters( 'woocommerce_product_title', apply_filters( 'the_title', $this->post->post_title, $this->id ), $this );
 	}
 
 
@@ -1143,7 +1142,7 @@ class WC_Product {
 	 * @return array
 	 */
 	function get_categories( $sep = ', ', $before = '', $after = '' ) {
-		return get_the_term_list($this->id, 'product_cat', $before, $sep, $after);
+		return get_the_term_list( $this->id, 'product_cat', $before, $sep, $after );
 	}
 
 
