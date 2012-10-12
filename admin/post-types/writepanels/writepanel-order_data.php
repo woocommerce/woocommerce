@@ -482,7 +482,8 @@ function woocommerce_order_actions_meta_box($post) {
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( in_array( $mail->id, $available_emails ) ) {
-							echo '<label><input name="order_email[]" type="checkbox" value="'. $mail->id .'" id="'. $mail->id .'_email"> ' . $mail->title. '</label></br >';
+							echo '<label><input name="order_email[]" type="checkbox" value="'. esc_attr( $mail->id ) .'" id="'. esc_attr( $mail->id ) .'_email"> ' . $mail->title. '</label>';
+							echo '<img class="help_tip" data-tip="'.esc_attr( $mail->description ).'" src="'.$woocommerce->plugin_url().'/assets/images/help.png" /></br >';
 						}
 					}
 
