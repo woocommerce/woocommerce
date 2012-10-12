@@ -404,8 +404,6 @@ table.wc_status_table {
 	}
 }
 .order_actions {
-	color: #999;
-	font-size: 11px;
 	margin: 0;
 	overflow: hidden;
 	zoom: 1;
@@ -421,6 +419,7 @@ table.wc_status_table {
 		a {
 			float: none;
 			text-align: center;
+			text-decoration: underline;
 		}
 		&.wide {
 			width: auto;
@@ -428,6 +427,16 @@ table.wc_status_table {
 			clear: both;
 			padding: 6px;
 			text-align: left;
+			overflow: hidden;
+		}
+		#delete-action {
+			line-height: 25px;
+			vertical-align: middle;
+			text-align: left;
+			float: left;
+		}
+		.save_order {
+			float: right;
 		}
 	}
 }

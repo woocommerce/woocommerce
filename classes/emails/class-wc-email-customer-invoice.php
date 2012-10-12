@@ -22,7 +22,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		
 		$this->id 				= 'customer_invoice';
 		$this->title 			= __( 'Customer invoice', 'woocommerce' );
-		$this->description		= __( 'Customer invoice emails are sent when you click the "send invoice" button when editing an order.', 'woocommerce' );
+		$this->description		= __( 'Customer invoice emails can be sent to the user containing order info and payment links.', 'woocommerce' );
 
 		$this->template_html 	= 'emails/customer-invoice.php';
 		$this->template_plain 	= 'emails/plain/customer-invoice.php';
