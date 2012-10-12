@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed upsell limit - show whats defined.
 * Tweak - Args for upsells to control per-page and cols.
 * Tweak - Recoded add_to_cart_action for better handling of variations and groups.
+* Tweak - Admin sales stats show totals.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.

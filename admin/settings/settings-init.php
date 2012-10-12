@@ -925,18 +925,16 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'desc' 		=> __( 'Enable taxes and tax calculations', 'woocommerce' ),
 		'id' 		=> 'woocommerce_calc_taxes',
 		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start',
-		'show_if_checked' 	=> 'option',
+		'type' 		=> 'checkbox'
 	),
 	
 	array(
+		'name' => __( 'Calculation settings', 'woocommerce' ),
 		'desc' 		=> __( 'Calculate tax based on the customer shipping address', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_shipping_address',
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
-		'show_if_checked' 	=> 'yes',
-		'checkboxgroup'		=> ''
+		'checkboxgroup'		=> 'start'
 	),
 	
 	array(
@@ -944,7 +942,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'id' 		=> 'woocommerce_tax_round_at_subtotal',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox',
-		'show_if_checked' 	=> 'yes',
 		'checkboxgroup'		=> ''
 	),
 
@@ -952,8 +949,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'desc' 		=> __( 'Display taxes on the cart page', 'woocommerce' ),
 		'id' 		=> 'woocommerce_display_cart_taxes',
 		'std' 		=> 'yes',
-		'type' 		=> 'checkbox',
-		'show_if_checked' 	=> 'yes',
 		'checkboxgroup'		=> ''
 	),
 
@@ -962,7 +957,6 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'id'            => 'woocommerce_display_cart_taxes_if_zero',
 		'std'           => 'no',
 		'type'          => 'checkbox',
-		'show_if_checked' 	=> 'yes',
 		'checkboxgroup' => 'end',
 	),
 
