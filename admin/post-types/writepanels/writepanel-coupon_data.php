@@ -25,18 +25,21 @@ function woocommerce_coupon_data_meta_box($post) {
 
 	?>
 	<style type="text/css">
-		#edit-slug-box { display:none }
+		#edit-slug-box, #minor-publishing-actions { display:none }
 	</style>
 	<div id="coupon_options" class="panel woocommerce_options_panel">
 		<?php
 
 			echo '<div class="options_group">';
-
+						
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __('Discount type', 'woocommerce'), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
 			// Amount
 			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __('Coupon amount', 'woocommerce'), 'placeholder' => '0.00', 'description' => __('Enter an amount e.g. 2.99', 'woocommerce') ) );
+
+			// Description
+			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __('Coupon description', 'woocommerce'), 'description' => __('Optionally enter a description for this coupon', 'woocommerce'), 'value' => $post->post_excerpt, 'name' => 'excerpt' ) );
 
 			// Individual use
 			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __('Individual use', 'woocommerce'), 'description' => __('Check this box if the coupon cannot be used in conjunction with other coupons', 'woocommerce') ) );
@@ -179,6 +182,7 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	    AND $wpdb->posts.post_title = '%s'
 	    AND $wpdb->posts.ID != %s
 	 ", esc_attr( $_POST['post_title'] ), $post_id ) );
+	 
 	if ( $coupon_found )
 		$woocommerce_errors[] = __( 'Coupon code already exists.', 'woocommerce' );
 

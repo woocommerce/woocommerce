@@ -23,9 +23,9 @@ function woocommerce_edit_coupon_columns($columns){
 	$columns["title"] 		= __("Code", 'woocommerce');
 	$columns["type"] 		= __("Coupon type", 'woocommerce');
 	$columns["amount"] 		= __("Coupon amount", 'woocommerce');
+	$columns["description"] = __("Description", 'woocommerce');
 	$columns["products"]	= __("Product IDs", 'woocommerce');
-	$columns["usage_limit"] = __("Usage limit", 'woocommerce');
-	$columns["usage_count"] = __("Usage count", 'woocommerce');
+	$columns["usage"] 		= __("Usage / Limit", 'woocommerce');
 	$columns["expiry_date"] = __("Expiry date", 'woocommerce');
 
 	return $columns;
@@ -44,32 +44,39 @@ add_filter('manage_edit-shop_coupon_columns', 'woocommerce_edit_coupon_columns')
 function woocommerce_custom_coupon_columns($column) {
 	global $post, $woocommerce;
 
-	$type 			= get_post_meta($post->ID, 'discount_type', true);
-	$amount 		= get_post_meta($post->ID, 'coupon_amount', true);
-	$individual_use = get_post_meta($post->ID, 'individual_use', true);
-	$product_ids 	= (get_post_meta($post->ID, 'product_ids', true)) ? explode(',', get_post_meta($post->ID, 'product_ids', true)) : array();
-	$usage_limit 	= get_post_meta($post->ID, 'usage_limit', true);
-	$usage_count 	= (int) get_post_meta($post->ID, 'usage_count', true);
-	$expiry_date 	= get_post_meta($post->ID, 'expiry_date', true);
-
 	switch ($column) {
 		case "type" :
-			echo $woocommerce->get_coupon_discount_type($type);
+			echo $woocommerce->get_coupon_discount_type( get_post_meta( $post->ID, 'discount_type', true ) );
 		break;
 		case "amount" :
-			echo $amount;
+			echo get_post_meta( $post->ID, 'coupon_amount', true );
 		break;
 		case "products" :
-			if (sizeof($product_ids)>0) echo implode(', ', $product_ids); else echo '&ndash;';
+			$product_ids = get_post_meta($post->ID, 'product_ids', true) ? explode(',', get_post_meta($post->ID, 'product_ids', true)) : array();
+
+			if ( sizeof( $product_ids ) > 0 ) echo implode( ', ', $product_ids ); else echo '&ndash;';
 		break;
 		case "usage_limit" :
-			if ($usage_limit) echo $usage_limit; else echo '&ndash;';
+			$usage_limit = get_post_meta($post->ID, 'usage_limit', true);
+			
+			if ( $usage_limit ) echo $usage_limit; else echo '&ndash;';
 		break;
-		case "usage_count" :
-			echo $usage_count;
+		case "usage" :
+			$usage_count = absint( get_post_meta( $post->ID, 'usage_count', true ) );
+			$usage_limit = get_post_meta($post->ID, 'usage_limit', true);
+			
+			if ( $usage_limit ) 
+				printf( __( '%s / %s', 'woocommerce' ), $usage_count, $usage_limit );
+			else
+				printf( __( '%s / &infin;', 'woocommerce' ), $usage_count );
 		break;
 		case "expiry_date" :
-			if ($expiry_date) echo date_i18n( 'F j, Y', strtotime( $expiry_date ) ); else echo '&ndash;';
+			$expiry_date = get_post_meta($post->ID, 'expiry_date', true);
+			
+			if ( $expiry_date ) echo date_i18n( 'F j, Y', strtotime( $expiry_date ) ); else echo '&ndash;';
+		break;
+		case "description" :
+			echo $post->post_excerpt;
 		break;
 	}
 }

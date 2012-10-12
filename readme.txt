@@ -196,6 +196,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Recoded add_to_cart_action for better handling of variations and groups.
 * Tweak - Admin sales stats show totals.
 * Tweak - product_variations_{id} changed to product_variations array
+* Tweak - Coupon description field.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
