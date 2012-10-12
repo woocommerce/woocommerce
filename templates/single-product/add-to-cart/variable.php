@@ -10,7 +10,10 @@
 global $woocommerce, $product, $post;
 ?>
 <script type="text/javascript">
-    var product_variations_<?php echo $post->ID; ?> = <?php echo json_encode( $available_variations ) ?>;
+	if ( ! product_variations )
+		var product_variations = new Array();
+		
+    product_variations[ <?php echo $post->ID; ?> ] = <?php echo json_encode( $available_variations ) ?>;
 </script>
 
 <?php do_action('woocommerce_before_add_to_cart_form'); ?>
