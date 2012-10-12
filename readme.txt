@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added lost password shortcode / email notification (thanks Max Rice).
 * Feature - Simplified permalink/base settings now found in Settings > Permalinks.
 * Feature - Support more permalink structures (from http://codex.wordpress.org/Using_Permalinks)
+* Feature - Added option to resend order emails, checkboxes select which one
 
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.

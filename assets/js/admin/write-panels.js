@@ -22,6 +22,25 @@ jQuery( function($){
 		});
 	});
 
+	// Order emails
+	$('#order-emails a.show-order-emails').click(function () {
+		if ($('#order-emails-select').is(":hidden")) {
+			$('#order-emails-select').slideDown('fast');
+			$(this).hide();
+		}
+		return false;
+	});
+
+	$('#order-emails a.hide-order-emails').click(function () {
+		$('input[name="order_email[]"]').each( function() { $(this).attr('checked', false) } );
+
+		if ($('#order-emails-select').is(":visible")) {
+			$('#order-emails-select').slideUp('fast');
+			$('#order-emails a.show-order-emails').show();
+		}
+		return false;
+	});
+
 	// Catalog Visibility
 	$('#catalog-visibility .edit-catalog-visibility').click(function () {
 		if ($('#catalog-visibility-select').is(":hidden")) {
