@@ -53,7 +53,11 @@ jQuery(function(){
 			minTickSize: [1, "day"]
 		},
 		yaxes: [ { min: 0, tickSize: 10, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
-   		colors: ["#8a4b75", "#47a03e"]
+   		colors: ["#8a4b75", "#47a03e"],
+   		legend: {
+		    show: true,
+		    position: "nw"
+		}
  	});
  	
  	placeholder.resize();
