@@ -1228,7 +1228,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	function ajax_url() {
-		return str_replace( array('https:', 'http:'), '', admin_url( 'admin-ajax.php' ) );
+		return admin_url( 'admin-ajax.php', 'relative' );
 	}
 
 
