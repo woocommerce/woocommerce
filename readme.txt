@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 
+* Tweak - get_order_number support for PayPal (thanks Justin)
 * Tweak - Taxes - removed woocommerce_display_cart_taxes option in favour of never showing tax until we know where the user is (for tax exclusive prices). Tax inclusive continues to use base so prices remain correct.
 * Tweak - Taxes - tweaked display of tax when using inclusive pricing to avoid confusion.
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
