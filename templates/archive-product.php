@@ -6,7 +6,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     1.7.0
  */
 
 get_header('shop'); ?>
@@ -49,7 +49,16 @@ get_header('shop'); ?>
 
 		<?php if ( have_posts() ) : ?>
 
-			<?php do_action('woocommerce_before_shop_loop'); ?>
+			<?php 
+				/**
+				 * woocommerce_pagination hook
+				 *
+				 * @hooked woocommerce_pagination - 10
+				 * @hooked woocommerce_result_count - 20
+				 * @hooked woocommerce_catalog_ordering - 30
+				 */
+				do_action( 'woocommerce_before_shop_loop' ); 
+			?>
 
 			<?php woocommerce_product_loop_start(); ?>
 
@@ -63,7 +72,7 @@ get_header('shop'); ?>
 
 			<?php woocommerce_product_loop_end(); ?>
 
-			<?php do_action('woocommerce_after_shop_loop'); ?>
+			<?php do_action( 'woocommerce_after_shop_loop' ); ?>
 
 		<?php else : ?>
 
@@ -74,8 +83,6 @@ get_header('shop'); ?>
 			<?php endif; ?>
 
 		<?php endif; ?>
-
-		<div class="clear"></div>
 
 		<?php
 			/**

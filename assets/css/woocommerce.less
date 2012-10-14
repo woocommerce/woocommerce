@@ -383,7 +383,7 @@ span.onsale {
 
 /* Product loops */
 .products ul, ul.products {
-	margin: 0 0 14px;
+	margin: 0 0 1em;
 	padding: 0;
 	list-style:none outside;
 	clear:both;
@@ -472,8 +472,50 @@ ul.products {
 	}
 }
 
+.woocommerce_result_count {
+	float: left;
+	margin: 0 0 1em;
+}
 .woocommerce_ordering {
-	margin-bottom: 2em;
+	margin: 0 0 1em;
+	float: right;
+	select {
+		vertical-align: top;
+	}
+}
+nav.woocommerce_pagination, #content nav.woocommerce_pagination {
+	text-align: center;
+	ul {
+		display: inline-block;
+		white-space: nowrap;
+		clear: both;
+		border: 1px solid darken( @secondary, 10 );
+		border-right: 0;
+		margin: 1px;
+		li {
+			border-right: 1px solid darken( @secondary, 10 );
+			padding: 0;
+			margin: 0;
+			float: left;
+			display: inline;
+			overflow: hidden;
+			a, span {
+				margin: 0;
+				text-decoration: none;
+				padding: 0;
+				line-height: 1em;
+				font-size: 1em;
+				font-weight: normal;
+				padding: .5em;
+				min-width: 1em;
+				display: block;
+			}
+			span.current, a:hover, a:focus {
+				background: @secondary;
+				color: darken( @secondary, 40 );
+			}
+		}
+	}
 }
 
 /* =Buttons
@@ -1403,36 +1445,63 @@ ul.digital-downloads {
 /* =Layered Nav Widget
 -------------------------------------------------------------- */
 
-.widget_layered_nav ul {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	list-style:none outside;
-	li {
-		.clearfix();
-		padding: 0 0 1px;
-		list-style:none;
-		a, span {
+.widget_layered_nav {
+	ul {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		list-style:none outside;
+		li {
+			.clearfix();
+			padding: 0 0 1px;
+			list-style:none;
+			a, span {
+				padding: 1px 0;
+				float:left;
+			}
+		}
+		li.chosen {
+			a {
+				padding: 0 6px 0 18px;
+				border: 1px solid @tertiary;
+				background: @tertiary url(../images/cross_white.png) no-repeat 6px center;
+				.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
+				color: @tertiarytext;
+				.border_radius(3px);
+			}
+		}
+		small.count {
+			float: right;
+			margin-left: 6px;
+			font-size: 1em;
 			padding: 1px 0;
-			float:left;
+			color: @subtext;
 		}
 	}
-	li.chosen {
-		a {
-			padding: 0 6px 0 18px;
-			border: 1px solid @tertiary;
-			background: @tertiary url(../images/cross_white.png) no-repeat 6px center;
-			.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
-			color: @tertiarytext;
-			.border_radius(3px);
+}
+
+.widget_layered_nav_filters {
+	ul {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		list-style:none outside;
+		overflow: hidden;
+		zoom: 1;
+		li {
+			float: left;
+			padding: 0 1px 1px 0;
+			list-style:none;
+			a {
+				padding: 0 6px 0 18px;
+				border: 1px solid @tertiary;
+				background: @tertiary url(../images/cross_white.png) no-repeat 6px center;
+				.inset_box_shadow(0, 1px, 1px, rgba(255,255,255,0.5));
+				color: @tertiarytext;
+				.border_radius(3px);
+				float: left;
+			}
 		}
-	}
-	small.count {
-		float: right;
-		margin-left: 6px;
-		font-size: 1em;
-		padding: 1px 0;
-		color: @subtext;
 	}
 }
 

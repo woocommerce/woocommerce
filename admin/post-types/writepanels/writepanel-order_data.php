@@ -457,27 +457,56 @@ function woocommerce_order_items_meta_box($post) {
  */
 function woocommerce_order_actions_meta_box($post) {
 	?>
-	<ul class="order_actions">
-		<li><input type="submit" class="button button-primary tips" name="save" value="<?php _e('Save Order', 'woocommerce'); ?>" data-tip="<?php _e('Save/update the order', 'woocommerce'); ?>" /></li>
+	<ul class="order_actions submitbox">
 
 		<li><input type="submit" class="button tips" name="reduce_stock" value="<?php _e('Reduce stock', 'woocommerce'); ?>" data-tip="<?php _e('Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid.', 'woocommerce'); ?>" /></li>
 
 		<li><input type="submit" class="button tips" name="restore_stock" value="<?php _e('Restore stock', 'woocommerce'); ?>" data-tip="<?php _e('Restores stock for each item in the order; useful after refunding or canceling the entire order.', 'woocommerce'); ?>" /></li>
-
-		<li><input type="submit" class="button tips" name="invoice" value="<?php _e('Email invoice', 'woocommerce'); ?>" data-tip="<?php _e('Email the order to the customer. Unpaid orders will include a payment link.', 'woocommerce'); ?>" /></li>
-
+		
 		<?php do_action('woocommerce_order_actions', $post->ID); ?>
 
+		<li class="wide" id="order-emails">
+			<a href="#order-emails" class="show-order-emails hide-if-no-js tips" data-tip="<?php _e( 'Lets you send or resend order emails to the admin or customer.', 'woocommerce' ); ?>"><?php _e( 'Show order emails', 'woocommerce' ); ?></a>
+
+			<div id="order-emails-select" class="hide-if-js">
+				<?php
+				global $woocommerce;
+				$mailer = $woocommerce->mailer();
+
+				$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+				$mails = $mailer->get_emails();
+
+				if ( ! empty( $mails ) ) {
+					foreach ( $mails as $mail ) {
+						if ( in_array( $mail->id, $available_emails ) ) {
+							echo '<label><input name="order_email[]" type="checkbox" value="'. esc_attr( $mail->id ) .'" id="'. esc_attr( $mail->id ) .'_email"> ' . $mail->title. '</label>';
+							echo '<img class="help_tip" data-tip="' . esc_attr( $mail->description ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" /></br >';
+						}
+					}
+
+					?>
+					<p>
+						<input type="submit" class="save-post-visibility hide-if-no-js button" value="<?php _e( 'Send selected emails', 'woocommerce' ); ?>">
+						<a href="#order-emails" class="hide-order-emails hide-if-no-js"><?php _e( 'Cancel', 'woocommerce' ); ?></a>
+					</p>
+					<?php
+				}
+				?>
+			</div>
+		</li>
+
 		<li class="wide">
-		<?php
-		if ( current_user_can( "delete_post", $post->ID ) ) {
-			if ( !EMPTY_TRASH_DAYS )
-				$delete_text = __('Delete Permanently', 'woocommerce');
-			else
-				$delete_text = __('Move to Trash', 'woocommerce');
-			?>
-		<a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
-		} ?>
+			<div id="delete-action"><?php
+				if ( current_user_can( "delete_post", $post->ID ) ) {
+					if ( !EMPTY_TRASH_DAYS )
+						$delete_text = __('Delete Permanently', 'woocommerce');
+					else
+						$delete_text = __('Move to Trash', 'woocommerce');
+					?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link($post->ID) ); ?>"><?php echo $delete_text; ?></a><?php
+				} 
+			?></div>
+			
+			<input type="submit" class="button save_order button-primary tips" name="save" value="<?php _e('Save Order', 'woocommerce'); ?>" data-tip="<?php _e('Save/update the order', 'woocommerce'); ?>" />
 		</li>
 	</ul>
 	<?php
@@ -642,9 +671,11 @@ function woocommerce_order_totals_meta_box($post) {
 
 						if ( $woocommerce->payment_gateways ) {
 							foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) {
-								echo '<option value="' . $gateway->id . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . $gateway->get_title() . '</option>';
-								if ( $chosen_method == $gateway->id )
+								if($gateway->enabled =="yes"){
+									echo '<option value="' . $gateway->id . '" ' . selected( $chosen_method, $gateway->id, false ) . '>' . $gateway->get_title() . '</option>';
+									if ( $chosen_method == $gateway->id )
 									$found_method = true;
+								}
 							}
 						}
 
@@ -935,6 +966,26 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 			$mailer->customer_invoice( $order );
 
 			do_action( 'woocommerce_after__customer_invoice', $order );
+
+		elseif (isset($_POST['order_email']) && $_POST['order_email']) :
+
+			do_action( 'woocommerce_before_resend_order_emails', $order );
+
+			$mailer = $woocommerce->mailer();
+
+			$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice' ) );
+			$resend_emails = array_intersect( $available_emails, $_POST['order_email'] );
+			$mails = $mailer->get_emails();
+
+			if ( ! empty( $mails ) ) {
+				foreach ( $mails as $mail ) {
+					if ( in_array( $mail->id, $resend_emails ) ) {
+						$mail->trigger( $order->id );
+					}
+				}
+			}
+
+			do_action( 'woocommerce_after_resend_order_emails', $order );
 
 		endif;
 

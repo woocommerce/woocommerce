@@ -312,12 +312,13 @@ add_action( 'admin_notices', 'woocommerce_meta_boxes_show_errors' );
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post, $woocommerce;
 
-	if (!$thepostid) $thepostid = $post->ID;
-	if (!isset($field['placeholder'])) $field['placeholder'] = '';
-	if (!isset($field['class'])) $field['class'] = 'short';
-	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	if ( ! $thepostid ) $thepostid = $post->ID;
+	if ( ! isset( $field['placeholder'] ) ) $field['placeholder'] = '';
+	if ( ! isset( $field['class'] ) ) $field['class'] = 'short';
+	if ( ! isset( $field['value'] ) ) $field['value'] = get_post_meta( $thepostid, $field['id'], true );
+	if ( ! isset( $field['name'] ) ) $field['name'] = $field['id'];
 
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
+	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['name'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
 
 	if ( isset( $field['description'] ) && $field['description'] ) {
 

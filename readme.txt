@@ -170,10 +170,19 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Expanded bulk edit for prices. Change to, increase by, decrease by.
 * Feature - Set attribute order (globally, per attribute).
 * Feature - Allow setting the product post type slug to a static (non-translatable) text, mainly to be used for translating and WPML setups.
+* Feature - Added lost password shortcode / email notification (thanks Max Rice).
+* Feature - Simplified permalink/base settings now found in Settings > Permalinks.
+* Feature - Support more permalink structures (from http://codex.wordpress.org/Using_Permalinks)
+* Feature - Added option to resend order emails, checkboxes select which one.
+* Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 
+* Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 
+* Tweak - get_order_number support for PayPal (thanks Justin)
+* Tweak - Taxes - removed woocommerce_display_cart_taxes option in favour of never showing tax until we know where the user is (for tax exclusive prices). Tax inclusive continues to use base so prices remain correct.
+* Tweak - Taxes - tweaked display of tax when using inclusive pricing to avoid confusion.
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.
 * Tweak - Display tax/discount total for reference on orders
@@ -187,18 +196,23 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed upsell limit - show whats defined.
 * Tweak - Args for upsells to control per-page and cols.
 * Tweak - Recoded add_to_cart_action for better handling of variations and groups.
+* Tweak - Admin sales stats show totals.
+* Tweak - product_variations_{id} changed to product_variations array
+* Tweak - Coupon description field.
+* Tweak - Exclude up-sells from related products.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
 * Fix - Active plugins display on status page.
 * Fix - Manual product category counting to make sure hidden products are not counted.
 
-* Localization - French update by Arnaud Cheminand.
+* Localization - French update by Arnaud Cheminand and absoluteweb.
 * Localization - Romanian update by silviu-bucsa.
 * Localization - Dutch updates by Ramoonus.
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
 * Localization - Italian update by Giuseppe-Mazzapica.
+* Localization - Korean translate by Woo Jin Koh
 * Many other refactors, minor fixes and tweaks!
 
 = 1.6.5.2 - 12/09/2012 =

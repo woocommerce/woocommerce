@@ -332,6 +332,20 @@ if ( ! function_exists( 'is_ajax' ) ) {
 		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
 	}
 }
+if ( ! function_exists( 'is_filtered' ) ) {
+
+	/**
+	 * is_filtered - Returns true when filtering products using layered nav or price sliders.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_filtered() {
+		global $_chosen_attributes;	
+			
+		return ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) ? true : false;
+	}
+}
 
 
 /**
@@ -1016,31 +1030,59 @@ add_action('woocommerce_order_status_completed', 'woocommerce_paying_customer');
  * @param object $post
  * @return string
  */
-function woocommerce_product_cat_filter_post_link( $permalink, $post ) {
+function woocommerce_product_post_type_link( $permalink, $post ) {
     // Abort if post is not a product
     if ( $post->post_type !== 'product' )
     	return $permalink;
-
+    	
     // Abort early if the placeholder rewrite tag isn't in the generated URL
-    if ( false === strpos( $permalink, '%product_cat%' ) )
+    if ( false === strpos( $permalink, '%' ) )
     	return $permalink;
-
+    	
     // Get the custom taxonomy terms in use by this post
     $terms = get_the_terms( $post->ID, 'product_cat' );
 
     if ( empty( $terms ) ) {
     	// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
-        $permalink = str_replace( '%product_cat%', _x('product', 'slug', 'woocommerce'), $permalink );
+        $product_cat = _x( 'uncategorized', 'slug', 'woocommerce' );
     } else {
     	// Replace the placeholder rewrite tag with the first term's slug
         $first_term = array_shift( $terms );
-        $permalink = str_replace( '%product_cat%', $first_term->slug, $permalink );
+        $product_cat = $first_term->slug;
     }
+    
+    $find = array(
+    	'%year%',
+    	'%monthnum%',
+    	'%day%',
+    	'%hour%',
+    	'%minute%',
+    	'%second%',
+    	'%post_id%',
+    	'%category%',
+    	'%product_cat%'
+    );
+    
+    $replace = array(
+    	date_i18n( 'Y', strtotime( $post->post_date ) ),
+    	date_i18n( 'm', strtotime( $post->post_date ) ),
+    	date_i18n( 'd', strtotime( $post->post_date ) ),
+    	date_i18n( 'H', strtotime( $post->post_date ) ),
+    	date_i18n( 'i', strtotime( $post->post_date ) ),
+    	date_i18n( 's', strtotime( $post->post_date ) ),
+    	$post->ID,
+    	$product_cat,
+    	$product_cat
+    );	
+    
+    $replace = array_map( 'sanitize_title', $replace );
+    
+    $permalink = str_replace( $find, $replace, $permalink );
 
     return $permalink;
 }
 
-add_filter( 'post_type_link', 'woocommerce_product_cat_filter_post_link', 10, 2 );
+add_filter( 'post_type_link', 'woocommerce_product_post_type_link', 10, 2 );
 
 
 
@@ -1304,7 +1346,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  */
 function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
 
-	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0');
+	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
 	if( empty( $terms ) ) return $index;
 
 	$id	= $the_term->term_id;
@@ -1337,8 +1379,6 @@ function woocommerce_order_terms( $the_term, $next_id, $taxonomy, $index = 0, $t
 	// no nextid meaning our term is in last position
 	if( $term_in_level && null === $next_id )
 		$index = woocommerce_set_term_order($id, $index+1, $taxonomy, true);
-
-	wp_cache_flush();
 
 	return $index;
 }
@@ -1377,6 +1417,8 @@ function woocommerce_set_term_order( $term_id, $index, $taxonomy, $recursive = f
 		$index ++;
 		$index = woocommerce_set_term_order($term->term_id, $index, $taxonomy, true);
 	}
+	
+	clean_term_cache( $term_id, $taxonomy );
 
 	return $index;
 }
@@ -1632,20 +1674,25 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 			$do_count = array( 'visible', 'catalog' );
 			$do_not_count = array( 'search', 'hidden' );
 
-			$term = get_term( $term_id, 'product_cat' );
 			$counted_ids = get_option( 'wc_prod_cat_counts' );
-			$counted_ids = ( ! is_array( $counted_ids ) ) ? array() : $counted_ids;
+			if ( ! is_array( $counted_ids ) ) 
+				$counted_ids = array();
+			$counted_ids[ $term_id ] = ( empty( $counted_ids[ $term_id ] ) || ! is_array( $counted_ids[ $term_id ] ) ) ? array() : $counted_ids[ $term_id ];
 
 			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
-					$counted_ids[ $term->term_id ] = ( ! is_array( $counted_ids[ $term->term_id ] ) ) ? array() : $counted_ids[ $term->term_id ];
-					array_push( $counted_ids[ $term->term_id ], absint( $_POST['post_ID'] ) );
+				if ( ! empty( $counted_ids[ $term_id ] ) ) {
+					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
+						array_push( $counted_ids[ $term_id ], absint( $_POST['post_ID'] ) );
+						update_option( 'wc_prod_cat_counts', $counted_ids );
+					}
+				} else {
+					$counted_ids[ $term_id ] = array( absint( $_POST['post_ID'] ) );
 					update_option( 'wc_prod_cat_counts', $counted_ids );
 				}
 			} elseif ( in_array( $_POST['_visibility'], $do_not_count ) ) {
-				if ( in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
-					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) !== false ) {
-					    unset( $counted_ids[ $term->term_id ][ $key ] );
+				if ( in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
+					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) !== false ) {
+					    unset( $counted_ids[ $term_id ][ $key ] );
 					    update_option( 'wc_prod_cat_counts', $counted_ids );
 					}
 				}

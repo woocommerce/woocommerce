@@ -119,8 +119,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 			}
 
-			// Flush rules and clear any unwanted data
-			flush_rewrite_rules( false );
+			// Clear any unwanted data
 			$woocommerce->clear_product_transients();
 
 			// Redirect back to the settings page
@@ -152,7 +151,6 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 	    // Were the settings saved?
 	    if ( ! empty( $_GET['saved'] ) ) {
-	        flush_rewrite_rules( false );
 	        do_action('woocommerce_settings_saved');
 	    }
 

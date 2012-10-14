@@ -324,6 +324,11 @@ class WC_Query {
 				$order = 'asc';
 				$meta_key = '_price';
 			break;
+			case 'high_price' :
+				$orderby = 'meta_value_num';
+				$order = 'desc';
+				$meta_key = '_price';
+			break;
 			case 'title' :
 				$orderby = 'title';
 				$order = 'asc';

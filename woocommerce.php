@@ -277,6 +277,9 @@ class Woocommerce {
 	 * @return void
 	 */
 	function init() {
+		//Before init action
+		do_action( 'before_woocommerce_init' );
+		
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
@@ -616,36 +619,30 @@ class Woocommerce {
 	 */
 	function init_taxonomy() {
 
-		if ( post_type_exists('product') ) return;
+		if ( post_type_exists('product') ) 
+			return;
 
 		/**
 		 * Slugs
 		 **/
-		$shop_page_id = woocommerce_get_page_id('shop');
-
-		$base_slug = ( $shop_page_id > 0 && get_page( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
-
-		$category_base = ( get_option('woocommerce_prepend_shop_page_to_urls') == "yes" ) ? trailingslashit($base_slug) : '';
-
-		$category_slug = ( get_option('woocommerce_product_category_slug') ) ? get_option('woocommerce_product_category_slug') : _x('product-category', 'slug', 'woocommerce');
-
-		$tag_slug = ( get_option('woocommerce_product_tag_slug') ) ? get_option('woocommerce_product_tag_slug') : _x('product-tag', 'slug', 'woocommerce');
-
-		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
-			$product_base = trailingslashit( $base_slug );
-		} else {
-			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
-				$product_base = trailingslashit( $product_slug );
-			} else {
-				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
-			}
-		}
-
-		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' ) $product_base .= trailingslashit('%product_cat%');
-
-		$product_base = untrailingslashit($product_base);
-
-		if ( current_user_can('manage_woocommerce') ) $show_in_menu = 'woocommerce'; else $show_in_menu = true;
+		$permalinks 	= get_option( 'woocommerce_permalinks' );
+		$shop_page_id 	= woocommerce_get_page_id( 'shop' );
+		
+		// Base slug is also used for the product post type archive
+		$base_slug 		= $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
+		
+		// Get bases
+		$product_category_slug 	= empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'];
+		$product_tag_slug 		= empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'];
+		$product_attribute_base	= empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'];
+		$product_permalink 		= empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
+		
+		if ( $product_permalink ) 
+			$rewrite =  array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true );
+		else
+			$rewrite = false;
+			
+		$show_in_menu = current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : true;
 
 		/**
 		 * Taxonomies
@@ -692,7 +689,7 @@ class Woocommerce {
 					'delete_terms' 		=> 'delete_product_terms',
 					'assign_terms' 		=> 'assign_product_terms',
 	            ),
-	            'rewrite' 				=> array( 'slug' => $category_base . $category_slug, 'with_front' => false, 'hierarchical' => true ),
+	            'rewrite' 				=> array( 'slug' => $product_category_slug, 'with_front' => false, 'hierarchical' => true ),
 	        )
 	    );
 
@@ -723,7 +720,7 @@ class Woocommerce {
 					'delete_terms' 		=> 'delete_product_terms',
 					'assign_terms' 		=> 'assign_product_terms',
 				),
-	            'rewrite' 				=> array( 'slug' => $category_base . $tag_slug, 'with_front' => false ),
+	            'rewrite' 				=> array( 'slug' => $product_tag_slug, 'with_front' => false ),
 	        )
 	    );
 
@@ -821,7 +818,7 @@ class Woocommerce {
 								'assign_terms' 		=> 'assign_product_terms',
 				            ),
 				            'show_in_nav_menus' 		=> $show_in_nav_menus,
-				            'rewrite' 					=> array( 'slug' => $category_base . strtolower(sanitize_title($tax->attribute_name)), 'with_front' => false, 'hierarchical' => $hierarchical ),
+				            'rewrite' 					=> array( 'slug' => $product_attribute_base . strtolower( sanitize_title( $tax->attribute_name ) ), 'with_front' => false, 'hierarchical' => $hierarchical ),
 				        )
 				    );
 
@@ -833,7 +830,7 @@ class Woocommerce {
 		 * Post Types
 		 **/
 		do_action( 'woocommerce_register_post_type' );
-
+		
 		register_post_type( "product",
 			apply_filters( 'woocommerce_register_post_type_product', 
 				array(
@@ -861,7 +858,7 @@ class Woocommerce {
 					'publicly_queryable' 	=> true,
 					'exclude_from_search' 	=> false,
 					'hierarchical' 			=> false, // Hierarcal causes memory issues - WP loads all records!
-					'rewrite' 				=> array( 'slug' => $product_base, 'with_front' => false, 'feeds' => $base_slug ),
+					'rewrite' 				=> $rewrite,
 					'query_var' 			=> true,
 					'supports' 				=> array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'custom-fields', 'page-attributes' ),
 					'has_archive' 			=> $base_slug,
@@ -1090,8 +1087,6 @@ class Woocommerce {
 			$woocommerce_params['locale'] = json_encode( $this->countries->get_country_locale() );
 
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
-		
-		
 	}
 	
 	/**
@@ -1233,7 +1228,7 @@ class Woocommerce {
 	 * @return string
 	 */
 	function ajax_url() {
-		return str_replace( array('https:', 'http:'), '', admin_url( 'admin-ajax.php' ) );
+		return admin_url( 'admin-ajax.php', 'relative' );
 	}
 
 
@@ -1670,36 +1665,52 @@ class Woocommerce {
 	 */
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
-
-		delete_transient('wc_products_onsale');
-		delete_transient('wc_hidden_product_ids');
-		delete_transient('wc_hidden_product_ids_search');
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` IN ('wc_products_onsale', 'wc_hidden_product_ids', 'wc_hidden_product_ids_search')");
-
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%')");
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%')");
-		$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%')");
-
-		if ($post_id>0) {
-			$post_id = (int) $post_id;
-			delete_transient('wc_product_total_stock_'.$post_id);
-			delete_transient('wc_product_children_ids_'.$post_id);
-			delete_transient('wc_average_rating_'.$post_id);
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` IN
-				(
-					'_transient_wc_product_children_ids_$post_id',
-					'_transient_wc_product_total_stock_$post_id',
-					'_transient_wc_average_rating_$post_id',
-					'_transient_wc_product_type_$post_id'
-				)");
-		} else {
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_children_ids_%')");
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_total_stock_%')");
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_average_rating_%')");
-			$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_product_type_%')");
+		
+		$post_id = absint( $post_id );
+		
+		$wpdb->show_errors();
+		
+		// Clear core transients
+		$transients_to_clear = array( 
+			'wc_products_onsale', 
+			'wc_hidden_product_ids', 
+			'wc_hidden_product_ids_search' 
+		);
+		
+		foreach( $transients_to_clear as $transient ) {
+			delete_transient( 'wc_products_onsale' );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient ) );
 		}
-
-		wp_cache_flush();
+		
+		// Clear transients for which we don't have the name
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%')" );
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%')" );
+		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%')" );
+		
+		// Clear product specific transients
+		$post_transients_to_clear = array( 
+			'wc_product_children_ids_', 
+			'wc_product_total_stock_', 
+			'wc_average_rating_', 
+			'wc_product_type_' 
+		);
+		
+		if ( $post_id > 0 ) {
+		
+			foreach( $post_transients_to_clear as $transient ) {
+				delete_transient( $transient . $post_id );
+				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient . $post_id ) );
+			}
+			
+			clean_post_cache( $post_id );
+			
+		} else {
+		
+			foreach( $post_transients_to_clear as $transient ) {
+				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient . '%' ) );
+			}
+			
+		}
 	}
 
 	/** Body Classes **********************************************************/

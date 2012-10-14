@@ -100,10 +100,14 @@ function woocommerce_tax_rates_setting() {
 
 	    		</tbody>
 	    	</table>
+	    	
+	    	<?php if ( empty( $local_tax_rates ) ) : ?>
+	    	<p style="margin: 1em 0 0;"><a href="#" data-tip="<?php _e( 'Add local tax rates to define rules for specific zip codes and cities.', 'woocommerce' ); ?>" class="tips toggle_local_tax_rates">+ <?php _e( 'Local tax rates', 'woocommerce' ); ?></a></p>
+	    	<?php endif; ?>
 	    </td>
 	</tr>
-	<tr valign="top">
-		<th scope="row" class="titledesc"><?php _e('Local Tax Rates', 'woocommerce') ?></th>
+	<tr valign="top" <?php if ( empty( $local_tax_rates ) ) : ?>style="display:none;"<?php endif; ?> class="local_tax_rates">
+		<th scope="row" class="titledesc"><?php _e( 'Local tax rates', 'woocommerce' ); ?></th>
 	    <td class="forminp">
 	    	<a class="button export_rates" href="<?php echo add_query_arg( 'wc_export_tax_rates', 2 ); ?>"><?php _e('Export rates', 'woocommerce'); ?></a>
 	    	<a class="button import_rates" href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>"><?php _e('Import rates', 'woocommerce'); ?></a>
@@ -366,6 +370,13 @@ function woocommerce_tax_rates_setting() {
 					loop++;
 				});
 			}
+			return false;
+		});
+		
+		// Show local rates
+		jQuery( 'a.toggle_local_tax_rates' ).click(function(){
+			jQuery(this).closest('p').hide();
+			jQuery('tr.local_tax_rates').slideDown();
 			return false;
 		});
 

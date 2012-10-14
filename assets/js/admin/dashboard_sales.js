@@ -53,7 +53,11 @@ jQuery(function(){
 			minTickSize: [1, "day"]
 		},
 		yaxes: [ { min: 0, tickSize: 10, tickDecimals: 0 }, { position: "right", min: 0, tickDecimals: 2 } ],
-   		colors: ["#8a4b75", "#47a03e"]
+   		colors: ["#8a4b75", "#47a03e"],
+   		legend: {
+		    show: true,
+		    position: "nw"
+		}
  	});
  	
  	placeholder.resize();
@@ -81,12 +85,12 @@ jQuery(function(){
                 if (item.series.label==params.number_of_sales) {
                 	
                 	var y = item.datapoint[1];
-                	showTooltip(item.pageX, item.pageY, item.series.label + ": " + y);
+                	showTooltip(item.pageX, item.pageY, params.sold + ": " + y);
                 	
                 } else {
                 	
                 	var y = item.datapoint[1].toFixed(2);
-                	showTooltip(item.pageX, item.pageY, item.series.label + ": " + params.currency_symbol + y);
+                	showTooltip(item.pageX, item.pageY, params.earned + ": " + params.currency_symbol + y);
                 
                 }
 

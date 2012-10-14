@@ -480,9 +480,10 @@ class WC_Cart {
 		function get_item_data( $cart_item, $flat = false ) {
 			global $woocommerce;
 
+			$return = '';
 			$has_data = false;
 
-			if ( ! $flat ) $return = '<dl class="variation">';
+			if ( ! $flat ) $return .= '<dl class="variation">';
 
 			// Variation data
 			if ( $cart_item['data'] instanceof WC_Product_Variation && is_array( $cart_item['variation'] ) ) {
@@ -1382,7 +1383,7 @@ class WC_Cart {
 			$this->tax_total = $this->tax->get_tax_total( $this->taxes );
 
 			// VAT exemption done at this point - so all totals are correct before exemption
-			if ( $woocommerce->customer->is_vat_exempt() || ( is_cart() && get_option('woocommerce_display_cart_taxes') == 'no' ) ) {
+			if ( $woocommerce->customer->is_vat_exempt() ) {
 				$this->shipping_tax_total = $this->tax_total = 0;
 				$this->taxes = $this->shipping_taxes = array();
 				
@@ -1400,7 +1401,7 @@ class WC_Cart {
 			$this->calculate_shipping();
 
 			// VAT exemption for shipping
-			if ( $woocommerce->customer->is_vat_exempt() || ( is_cart() && get_option('woocommerce_display_cart_taxes') == 'no' ) ) {
+			if ( $woocommerce->customer->is_vat_exempt() ) {
 				$this->shipping_tax_total = 0;
 				$this->shipping_taxes = array();
 			}

@@ -86,7 +86,7 @@ jQuery(document).ready(function($) {
 			});
 
 			var product_id			= parseInt( $variation_form.attr( 'data-product_id' ) );
-			var all_variations		= window[ "product_variations_" + product_id ];
+			var all_variations		= window[ "product_variations" ][ product_id ];
 			
 			// Fallback
 			if ( ! all_variations ) 
