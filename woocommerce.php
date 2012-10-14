@@ -638,7 +638,7 @@ class Woocommerce {
 		$product_permalink 		= empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 		
 		if ( $product_permalink ) 
-			$rewrite =  array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false );
+			$rewrite =  array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true );
 		else
 			$rewrite = false;
 			

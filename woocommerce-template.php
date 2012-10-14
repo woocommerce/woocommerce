@@ -390,17 +390,17 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_pagination' ) ) {
+if ( ! function_exists( 'woocommerce_result_count' ) ) {
 
 	/**
-	 * Output the pagination.
+	 * Output the result count text (Showing x - x of x results).
 	 *
 	 * @access public
 	 * @subpackage	Loop
 	 * @return void
 	 */
-	function woocommerce_pagination() {
-		woocommerce_get_template( 'loop/pagination.php' );
+	function woocommerce_result_count() {
+		woocommerce_get_template( 'loop/result-count.php' );
 	}
 }
 
@@ -420,6 +420,20 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			$woocommerce->session->orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 			
 		woocommerce_get_template( 'loop/sorting.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_pagination' ) ) {
+
+	/**
+	 * Output the pagination.
+	 *
+	 * @access public
+	 * @subpackage	Loop
+	 * @return void
+	 */
+	function woocommerce_pagination() {
+		woocommerce_get_template( 'loop/pagination.php' );
 	}
 }
 
@@ -959,6 +973,57 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
+
+	/**
+	 * Check if we will be showing products or not (and not subcats only)
+	 *
+	 * @access public
+	 * @subpackage	Loop
+	 * @return void
+	 */
+	function woocommerce_products_will_display() {
+		global $woocommerce, $wpdb;
+		
+		if ( ! is_product_category() && ! is_shop() )
+			return false;
+			
+		if ( is_search() || is_filtered() || is_paged() )
+			return true;
+			
+		if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'no' )
+			return true;
+		
+		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) 
+			return true;
+			
+		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) 
+			return true;
+			
+		$term 			= get_queried_object();
+		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
+		$has_children 	= $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d", $parent_id ) );
+	
+		if ( $has_children ) {
+			// Check terms have products inside
+			$children = array();
+			foreach ( $has_children as $term ) {
+				$children = array_merge( $children, get_term_children( $term, 'product_cat' ) );
+				$children[] = $term;
+			}
+			$objects = get_objects_in_term( $children, 'product_cat' );
+			
+			if ( sizeof( $objects ) > 0 ) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+	}
+}
+
 if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 	/**
@@ -969,7 +1034,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * @return void
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
-		global $woocommerce, $wp_query, $_chosen_attributes;
+		global $woocommerce, $wp_query;
 
 		$defaults = array(
 			'before'  => '',
@@ -984,27 +1049,20 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		// Main query only
 		if ( ! is_main_query() && ! $force_display ) return;
 
-		// Don't show when filtering
-		if ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) return;
+		// Don't show when filtering, searching or when on page > 1 and ensure we're on a product archive
+		if ( is_search() || is_filtered() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
 
-		// Don't show when searching or when on page > 1 and ensure we're on a product archive
-		if ( is_search() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
-
-		// Check cateogries are enabled
+		// Check categories are enabled
 		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) return;
 		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) return;
 
 		// Find the category + category parent, if applicable
-		if ( $product_cat_slug = get_query_var( 'product_cat' ) ) {
-			$product_cat = get_term_by( 'slug', $product_cat_slug, 'product_cat' );
-			$product_category_parent = $product_cat->term_id;
-		} else {
-			$product_category_parent = 0;
-		}
+		$term 			= get_queried_object();
+		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = array(
-			'child_of'		=> $product_category_parent,
+			'child_of'		=> $parent_id,
 			'menu_order'	=> 'ASC',
 			'hide_empty'	=> 1,
 			'hierarchical'	=> 1,
@@ -1019,7 +1077,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 			foreach ( $product_categories as $category ) {
 
-				if ( $category->parent != $product_category_parent )
+				if ( $category->parent != $parent_id )
 					continue;
 
 				if ( ! $product_category_found ) {

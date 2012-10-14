@@ -332,6 +332,20 @@ if ( ! function_exists( 'is_ajax' ) ) {
 		return ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) ? true : false;
 	}
 }
+if ( ! function_exists( 'is_filtered' ) ) {
+
+	/**
+	 * is_filtered - Returns true when filtering products using layered nav or price sliders.
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	function is_filtered() {
+		global $_chosen_attributes;	
+			
+		return ( sizeof( $_chosen_attributes ) > 0 || ( isset( $_GET['max_price'] ) && isset( $_GET['min_price'] ) ) ) ? true : false;
+	}
+}
 
 
 /**
@@ -1660,24 +1674,25 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 			$do_count = array( 'visible', 'catalog' );
 			$do_not_count = array( 'search', 'hidden' );
 
-			$term = get_term( $term_id, 'product_cat' );
 			$counted_ids = get_option( 'wc_prod_cat_counts' );
-			$counted_ids[ $term->term_id ] = ( isset( $counted_ids[ $term->term_id ] ) && ! is_array( $counted_ids[ $term->term_id ] ) ) ? array() : $counted_ids[ $term->term_id ];
+			if ( ! is_array( $counted_ids ) ) 
+				$counted_ids = array();
+			$counted_ids[ $term_id ] = ( empty( $counted_ids[ $term_id ] ) || ! is_array( $counted_ids[ $term_id ] ) ) ? array() : $counted_ids[ $term_id ];
 
 			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! empty( $counted_ids[ $term->term_id ] ) ) {
-					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
-						array_push( $counted_ids[ $term->term_id ], absint( $_POST['post_ID'] ) );
+				if ( ! empty( $counted_ids[ $term_id ] ) ) {
+					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
+						array_push( $counted_ids[ $term_id ], absint( $_POST['post_ID'] ) );
 						update_option( 'wc_prod_cat_counts', $counted_ids );
 					}
 				} else {
-					$counted_ids[ $term->term_id ] = array( absint( $_POST['post_ID'] ) );
+					$counted_ids[ $term_id ] = array( absint( $_POST['post_ID'] ) );
 					update_option( 'wc_prod_cat_counts', $counted_ids );
 				}
 			} elseif ( in_array( $_POST['_visibility'], $do_not_count ) ) {
-				if ( in_array( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) {
-					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term->term_id ] ) ) !== false ) {
-					    unset( $counted_ids[ $term->term_id ][ $key ] );
+				if ( in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
+					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) !== false ) {
+					    unset( $counted_ids[ $term_id ][ $key ] );
 					    update_option( 'wc_prod_cat_counts', $counted_ids );
 					}
 				}

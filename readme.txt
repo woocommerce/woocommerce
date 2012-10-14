@@ -173,8 +173,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added lost password shortcode / email notification (thanks Max Rice).
 * Feature - Simplified permalink/base settings now found in Settings > Permalinks.
 * Feature - Support more permalink structures (from http://codex.wordpress.org/Using_Permalinks)
-* Feature - Added option to resend order emails, checkboxes select which one
+* Feature - Added option to resend order emails, checkboxes select which one.
+* Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 
+* Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 
@@ -210,6 +212,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
 * Localization - Italian update by Giuseppe-Mazzapica.
+* Localization - Korean translate by Woo Jin Koh
 * Many other refactors, minor fixes and tweaks!
 
 = 1.6.5.2 - 12/09/2012 =

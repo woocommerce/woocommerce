@@ -59,11 +59,21 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	 * Products Loop
 	 *
 	 * @see woocommerce_show_messages()
+	 * @see woocommerce_result_count()
+	 * @see woocommerce_catalog_ordering()
+	 */
+	add_action( 'woocommerce_before_shop_loop', 'woocommerce_show_messages', 10 );
+	add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
+	add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
+
+	/**
+	 * Product Loop Items
+	 *
+	 * @see woocommerce_show_messages()
 	 * @see woocommerce_template_loop_add_to_cart()
 	 * @see woocommerce_template_loop_product_thumbnail()
 	 * @see woocommerce_template_loop_price()
 	 */
-	add_action( 'woocommerce_before_shop_loop', 'woocommerce_show_messages', 10 );
 	add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10 );
 	add_action( 'woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_thumbnail', 10 );
 	add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
@@ -144,10 +154,8 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	 * Pagination in loop-shop
 	 *
 	 * @see woocommerce_pagination()
-	 * @see woocommerce_catalog_ordering()
 	 */
 	add_action( 'woocommerce_pagination', 'woocommerce_pagination', 10 );
-	add_action( 'woocommerce_pagination', 'woocommerce_catalog_ordering', 20 );
 
 	/**
 	 * Product page tabs
