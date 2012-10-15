@@ -599,7 +599,7 @@ function woocommerce_format_total( $number ) {
  * @return string
  */
 function woocommerce_clean( $var ) {
-	return trim( strip_tags( stripslashes( $var ) ) );
+	return sanitize_text_field( $var );
 }
 
 
