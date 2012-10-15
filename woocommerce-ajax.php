@@ -24,10 +24,10 @@ function woocommerce_sidebar_login_ajax_process() {
 
 	// Get post data
 	$creds = array();
-	$creds['user_login'] 	= esc_attr($_REQUEST['user_login']);
-	$creds['user_password'] = esc_attr($_REQUEST['user_password']);
+	$creds['user_login'] 	= esc_attr( $_REQUEST['user_login'] );
+	$creds['user_password'] = esc_attr( $_REQUEST['user_password'] );
 	$creds['remember'] 		= 'forever';
-	$redirect_to 			= esc_attr($_REQUEST['redirect_to']);
+	$redirect_to 			= esc_attr( $_REQUEST['redirect_to'] );
 
 	// Check for Secure Cookie
 	$secure_cookie = '';
@@ -38,46 +38,47 @@ function woocommerce_sidebar_login_ajax_process() {
 		if ( $user = get_user_by('login',  $user_name ) ) {
 			if ( get_user_option( 'use_ssl', $user->ID ) ) {
 				$secure_cookie = true;
-				force_ssl_admin(true);
+				force_ssl_admin( true );
 			}
 		}
 	}
 
 	if ( force_ssl_admin() ) $secure_cookie = true;
-	if ( $secure_cookie=='' && force_ssl_login() ) $secure_cookie = false;
+	if ( $secure_cookie == '' && force_ssl_login() ) $secure_cookie = false;
 
 	// Login
 	$user = wp_signon( $creds, $secure_cookie );
 
 	// Redirect filter
-	if ( $secure_cookie && strstr($redirect_to, 'wp-admin') ) $redirect_to = str_replace('http:', 'https:', $redirect_to);
+	if ( $secure_cookie && strstr( $redirect_to, 'wp-admin' ) ) $redirect_to = str_replace( 'http:', 'https:', $redirect_to );
 
 	// Result
 	$result = array();
 
-	if ( !is_wp_error($user) ) :
+	if ( ! is_wp_error( $user ) ) {
 		$result['success'] = 1;
 		$result['redirect'] = $redirect_to;
-	else :
+	} else {
 		$result['success'] = 0;
+
 		if ( $user->errors ) {
-			foreach ($user->errors as $error) {
+			foreach ( $user->errors as $error ) {
 				$result['error'] = $error[0];
 				break;
 			}
 		} else {
-			$result['error'] = __('Please enter your username and password to login.', 'woocommerce');
+			$result['error'] = __( 'Please enter your username and password to login.', 'woocommerce' );
 		}
-	endif;
+	}
 
-	header('content-type: application/json; charset=utf-8');
+	header( 'content-type: application/json; charset=utf-8' );
 
-	echo $_GET['callback'] . '(' . json_encode( $result ) . ')';
+	echo esc_js( $_GET['callback'] ) . '(' . json_encode( $result ) . ')';
 
 	die();
 }
 
-add_action('wp_ajax_nopriv_woocommerce_sidebar_login_process', 'woocommerce_sidebar_login_ajax_process');
+add_action( 'wp_ajax_nopriv_woocommerce_sidebar_login_process', 'woocommerce_sidebar_login_ajax_process' );
 
 
 /**
