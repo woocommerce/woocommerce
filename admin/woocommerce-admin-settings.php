@@ -403,7 +403,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						return false;
 					});
 
-					<?php if (isset($_GET['subtab']) && $_GET['subtab']) echo 'jQuery("div.subsubsub_section ul.subsubsub li a[href=#'.$_GET['subtab'].']").click();'; ?>
+					<?php if ( ! empty( $_GET['subtab'] ) ) echo 'jQuery("div.subsubsub_section ul.subsubsub li a[href=#' . esc_js( $_GET['subtab'] ) . ']").click();'; ?>
 
 					// Countries
 					jQuery('select#woocommerce_allowed_countries').change(function(){
