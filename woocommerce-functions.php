@@ -555,8 +555,8 @@ function woocommerce_process_login() {
 		if ($woocommerce->error_count()==0) :
 
 			$creds = array();
-			$creds['user_login'] 	= esc_attr($_POST['username']);
-			$creds['user_password'] = esc_attr($_POST['password']);
+			$creds['user_login'] 	= $_POST['username'];
+			$creds['user_password'] = $_POST['password'];
 			$creds['remember'] = true;
 			$secure_cookie = is_ssl() ? true : false;
 			$user = wp_signon( $creds, $secure_cookie );
@@ -599,14 +599,14 @@ function woocommerce_process_registration() {
 		$woocommerce->verify_nonce('register');
 
 		// Get fields
-		$user_email 			= isset( $_POST['email'] ) ? esc_attr( trim( $_POST['email'] ) ) : '';
-		$password				= isset( $_POST['password'] ) ? esc_attr( trim( $_POST['password'] ) ) : '';
-		$password2 				= isset( $_POST['password2'] ) ? esc_attr( trim( $_POST['password2'] ) ) : '';
+		$user_email 			= isset( $_POST['email'] ) ? trim( $_POST['email'] ) : '';
+		$password				= isset( $_POST['password'] ) ? trim( $_POST['password'] ) : '';
+		$password2 				= isset( $_POST['password2'] ) ? trim( $_POST['password2'] ) : '';
 		$user_email 			= apply_filters( 'user_registration_email', $user_email );
 
 		if ( get_option( 'woocommerce_registration_email_for_username' ) == 'no' ) {
 
-			$username 				= isset( $_POST['username'] ) ? esc_attr( trim( $_POST['username'] ) ) : '';
+			$username 				= isset( $_POST['username'] ) ? trim( $_POST['username'] ) : '';
 			$sanitized_user_login 	= sanitize_user( $username );
 
 			// Check the username

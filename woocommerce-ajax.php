@@ -26,10 +26,10 @@ function woocommerce_sidebar_login_ajax_process() {
 
 	// Get post data
 	$creds = array();
-	$creds['user_login'] 	= esc_attr( $_REQUEST['user_login'] );
-	$creds['user_password'] = esc_attr( $_REQUEST['user_password'] );
+	$creds['user_login'] 	= $_REQUEST['user_login'];
+	$creds['user_password'] = $_REQUEST['user_password'];
 	$creds['remember'] 		= 'forever';
-	$redirect_to 			= esc_attr( $_REQUEST['redirect_to'] );
+	$redirect_to 			= esc_url( $_REQUEST['redirect_to'] );
 
 	// Check for Secure Cookie
 	$secure_cookie = '';
