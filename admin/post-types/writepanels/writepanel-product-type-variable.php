@@ -624,24 +624,24 @@ function process_product_meta_variable( $post_id ) {
 			}
 
 			// Update post meta
-			update_post_meta( $variation_id, '_sku', esc_attr( $variable_sku[ $i ] ) );
-			update_post_meta( $variation_id, '_weight', esc_attr( $variable_weight[ $i ] ) );
+			update_post_meta( $variation_id, '_sku', woocommerce_clean( $variable_sku[ $i ] ) );
+			update_post_meta( $variation_id, '_weight', woocommerce_clean( $variable_weight[ $i ] ) );
 
-			update_post_meta( $variation_id, '_length', esc_attr( $variable_length[ $i ] ) );
-			update_post_meta( $variation_id, '_width', esc_attr( $variable_width[ $i ] ) );
-			update_post_meta( $variation_id, '_height', esc_attr( $variable_height[ $i ] ) );
+			update_post_meta( $variation_id, '_length', woocommerce_clean( $variable_length[ $i ] ) );
+			update_post_meta( $variation_id, '_width', woocommerce_clean( $variable_width[ $i ] ) );
+			update_post_meta( $variation_id, '_height', woocommerce_clean( $variable_height[ $i ] ) );
 
-			update_post_meta( $variation_id, '_stock', esc_attr( $variable_stock[ $i ] ) );
+			update_post_meta( $variation_id, '_stock', woocommerce_clean( $variable_stock[ $i ] ) );
 			update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
 
-			update_post_meta( $variation_id, '_virtual', esc_attr( $is_virtual ) );
-			update_post_meta( $variation_id, '_downloadable', esc_attr( $is_downloadable ) );
+			update_post_meta( $variation_id, '_virtual', woocommerce_clean( $is_virtual ) );
+			update_post_meta( $variation_id, '_downloadable', woocommerce_clean( $is_downloadable ) );
 			
 			// Price handling
-			$regular_price 	= esc_attr( $variable_regular_price[ $i ] );
-			$sale_price 	= esc_attr( $variable_sale_price[ $i ] );
-			$date_from 		= esc_attr( $variable_sale_price_dates_from[ $i ] );
-			$date_to		= esc_attr( $variable_sale_price_dates_to[ $i ] );
+			$regular_price 	= woocommerce_clean( $variable_regular_price[ $i ] );
+			$sale_price 	= woocommerce_clean( $variable_sale_price[ $i ] );
+			$date_from 		= woocommerce_clean( $variable_sale_price_dates_from[ $i ] );
+			$date_to		= woocommerce_clean( $variable_sale_price_dates_to[ $i ] );
 			
 			update_post_meta( $variation_id, '_regular_price', $regular_price );
 			update_post_meta( $variation_id, '_sale_price', $sale_price );
@@ -676,22 +676,22 @@ function process_product_meta_variable( $post_id ) {
 			}
 					
 			if ( $variable_tax_class[ $i ] !== 'parent' )
-				update_post_meta( $variation_id, '_tax_class', esc_attr( $variable_tax_class[ $i ] ) );
+				update_post_meta( $variation_id, '_tax_class', woocommerce_clean( $variable_tax_class[ $i ] ) );
 			else
 				delete_post_meta( $variation_id, '_tax_class' );
 
 			if ( $is_downloadable == 'yes' ) {
-				update_post_meta( $variation_id, '_download_limit', esc_attr( $variable_download_limit[ $i ] ) );
-				update_post_meta( $variation_id, '_download_expiry', esc_attr( $variable_download_expiry[ $i ] ) );
+				update_post_meta( $variation_id, '_download_limit', woocommerce_clean( $variable_download_limit[ $i ] ) );
+				update_post_meta( $variation_id, '_download_expiry', woocommerce_clean( $variable_download_expiry[ $i ] ) );
 				
 				$_file_paths = array();
-				$file_paths = str_replace( "\r\n", "\n", esc_attr( $variable_file_paths[ $i ] ) );
+				$file_paths = str_replace( "\r\n", "\n", $variable_file_paths[ $i ] );
 				$file_paths = trim( preg_replace( "/\n+/", "\n", $file_paths ) );
 				if ( $file_paths ) {
 					$file_paths = explode( "\n", $file_paths );
 	
 					foreach ( $file_paths as $file_path ) {
-						$file_path = trim( $file_path );
+						$file_path = woocommerce_clean( $file_path );
 						$_file_paths[ md5( $file_path ) ] = $file_path;
 					}
 				}
@@ -719,7 +719,7 @@ function process_product_meta_variable( $post_id ) {
 
 				if ( $attribute['is_variation'] ) {
 
-					$value = esc_attr( trim( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] ) );
+					$value = woocommerce_clean( $_POST[ 'attribute_' . sanitize_title( $attribute['name'] ) ][ $i ] );
 
 					update_post_meta( $variation_id, 'attribute_' . sanitize_title( $attribute['name'] ), $value );
 				}
@@ -784,7 +784,7 @@ function process_product_meta_variable( $post_id ) {
 
 	foreach ( $attributes as $attribute ) {
 		if ( $attribute['is_variation'] ) {
-			$value = esc_attr( trim( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) );
+			$value = woocommerce_clean( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] );
 			if ( $value )
 				$default_attributes[ sanitize_title( $attribute['name'] ) ] = $value;
 		}

@@ -320,14 +320,14 @@ function woocommerce_wp_text_input( $field ) {
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><input type="text" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" /> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="text" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" /> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
 
 	}
@@ -367,14 +367,14 @@ function woocommerce_wp_textarea_input( $field ) {
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20">' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20">' . esc_textarea( $field['value'] ) . '</textarea> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
 
 	}
@@ -398,9 +398,9 @@ function woocommerce_wp_checkbox( $field ) {
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['cbvalue'] 		= isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . ' /> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . ' /> ';
 
-	if ( ! empty( $field['description'] ) ) echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
+	if ( ! empty( $field['description'] ) ) echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 
 	echo '</p>';
 }
@@ -420,7 +420,7 @@ function woocommerce_wp_select( $field ) {
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '">';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '">';
 
 	foreach ( $field['options'] as $key => $value ) {
 
@@ -435,7 +435,7 @@ function woocommerce_wp_select( $field ) {
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 		}
 
 	}
