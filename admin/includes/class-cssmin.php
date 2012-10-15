@@ -31,6 +31,9 @@
  * @license		http://opensource.org/licenses/mit-license.php MIT License
  * @version		3.0.1
  */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly 
+ 
 /**
  * Abstract definition of a CSS token class.
  * 

@@ -9,8 +9,10 @@
  * @version		1.6.4
  * @package		WooCommerce/Classes
  * @author 		WooThemes
-
  */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_CSV_Exporter {
 	
 	/**

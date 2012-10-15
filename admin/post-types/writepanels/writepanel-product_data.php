@@ -9,6 +9,8 @@
  * @package 	WooCommerce/Admin/WritePanels
  * @version     1.6.4
  */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /** Variable products */
 require_once('writepanel-product-type-variable.php');

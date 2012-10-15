@@ -8,6 +8,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 // Only hook in admin parts if the user has admin access
 if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' ) )
 	add_action( 'wp_dashboard_setup', 'woocommerce_init_dashboard_widgets' );

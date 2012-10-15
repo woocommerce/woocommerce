@@ -11,6 +11,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * When running the WP importer, ensure attributes exist.
  *

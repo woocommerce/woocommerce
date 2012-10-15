@@ -9,6 +9,8 @@
  * @package 	WooCommerce/Admin/WritePanels
  * @version     1.6.4
  */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /** Product data writepanel */
 include_once('writepanel-product_data.php');

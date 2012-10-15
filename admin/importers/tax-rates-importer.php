@@ -7,6 +7,9 @@
  * @package 	WooCommerce/Admin/Importers
  * @version     1.7.0
  */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 if ( class_exists( 'WP_Importer' ) ) {
 	class WC_CSV_Tax_Rates_Import extends WP_Importer {
 		

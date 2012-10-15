@@ -10,6 +10,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 $localisation_setting = ( defined('WPLANG') ) ? array(
 	'name' => __('Localisation', 'woocommerce'),
 	'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * lessphp v0.3.4-2
  * http://leafo.net/lessphp
@@ -12,6 +11,7 @@
  * @package LessPHP
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * The less compiler and parser.

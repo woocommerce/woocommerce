@@ -7,7 +7,9 @@
  * @package 	WooCommerce/Admin/Importers
  * @version     1.7.0
  */
- 
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce Tax Rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce'), 'woocommerce_tax_rates_importer' );
 
 /**

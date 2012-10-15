@@ -10,6 +10,8 @@
  * @version     1.7
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Reports page
  *

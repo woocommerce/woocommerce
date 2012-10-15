@@ -10,6 +10,8 @@
  * @version     1.7.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Display the product images meta box.
  *
