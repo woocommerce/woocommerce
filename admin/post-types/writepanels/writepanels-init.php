@@ -7,7 +7,7 @@
  * @author 		WooThemes
  * @category 	Admin
  * @package 	WooCommerce/Admin/WritePanels
- * @version     1.6.4
+ * @version     1.7.0
  */
  
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -292,7 +292,7 @@ function woocommerce_meta_boxes_show_errors() {
 
     	echo '<div id="woocommerce_errors" class="error fade">';
     	foreach ( $woocommerce_errors as $error )
-    		echo '<p>' . $error . '</p>';
+    		echo '<p>' . esc_html( $error ) . '</p>';
     	echo '</div>';
 
     	// Clear
@@ -313,21 +313,21 @@ add_action( 'admin_notices', 'woocommerce_meta_boxes_show_errors' );
  */
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post, $woocommerce;
+	
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
 
-	if ( ! $thepostid ) $thepostid = $post->ID;
-	if ( ! isset( $field['placeholder'] ) ) $field['placeholder'] = '';
-	if ( ! isset( $field['class'] ) ) $field['class'] = 'short';
-	if ( ! isset( $field['value'] ) ) $field['value'] = get_post_meta( $thepostid, $field['id'], true );
-	if ( ! isset( $field['name'] ) ) $field['name'] = $field['id'];
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><input type="text" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" /> ';
 
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="text" class="'.$field['class'].'" name="'.$field['name'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" placeholder="'.$field['placeholder'].'" /> ';
-
-	if ( isset( $field['description'] ) && $field['description'] ) {
+	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . $field['description'] . '</span>';
+			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 		}
 
 	}
@@ -344,9 +344,11 @@ function woocommerce_wp_text_input( $field ) {
  */
 function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
-	if (!$thepostid) $thepostid = $post->ID;
-	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
-	echo '<input type="hidden" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="'.esc_attr( $field['value'] ).'" /> ';
+	
+	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	
+	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
 }
 
 
@@ -360,19 +362,19 @@ function woocommerce_wp_hidden_input( $field ) {
 function woocommerce_wp_textarea_input( $field ) {
 	global $thepostid, $post, $woocommerce;
 
-	if (!$thepostid) $thepostid = $post->ID;
-	if (!isset($field['placeholder'])) $field['placeholder'] = '';
-	if (!isset($field['class'])) $field['class'] = 'short';
-	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['placeholder'] 	= isset( $field['placeholder'] ) ? $field['placeholder'] : '';
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><textarea class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" placeholder="'.$field['placeholder'].'" rows="2" cols="20">'.esc_textarea( $field['value'] ).'</textarea> ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><textarea class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="2" cols="20">' . esc_textarea( $field['value'] ) . '</textarea> ';
 
-	if ( isset( $field['description'] ) && $field['description'] ) {
+	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . $field['description'] . '</span>';
+			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 		}
 
 	}
@@ -390,19 +392,15 @@ function woocommerce_wp_textarea_input( $field ) {
 function woocommerce_wp_checkbox( $field ) {
 	global $thepostid, $post;
 
-	if (!$thepostid) $thepostid = $post->ID;
-	if (!isset($field['class'])) $field['class'] = 'checkbox';
-	if (!isset($field['wrapper_class'])) $field['wrapper_class'] = '';
-	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
-	if (!isset($field['cbvalue'])) $field['cbvalue'] = 'yes';
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'checkbox';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['cbvalue'] 		= isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
 
-	echo '<p class="form-field '.$field['id'].'_field '.$field['wrapper_class'].'"><label for="'.$field['id'].'">'.$field['label'].'</label><input type="checkbox" class="'.$field['class'].'" name="'.$field['id'].'" id="'.$field['id'].'" value="' . $field['cbvalue'] . '" ';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><input type="checkbox" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . ' /> ';
 
-	checked($field['value'], $field['cbvalue']);
-
-	echo ' /> ';
-
-	if (isset($field['description']) && $field['description']) echo '<span class="description">' .$field['description'] . '</span>';
+	if ( ! empty( $field['description'] ) ) echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 
 	echo '</p>';
 }
@@ -418,31 +416,28 @@ function woocommerce_wp_checkbox( $field ) {
 function woocommerce_wp_select( $field ) {
 	global $thepostid, $post, $woocommerce;
 
-	if (!$thepostid) $thepostid = $post->ID;
-	if (!isset($field['class'])) $field['class'] = 'select short';
-	if (!isset($field['value'])) $field['value'] = get_post_meta($thepostid, $field['id'], true);
+	$thepostid 				= empty( $thepostid ) ? $post->ID : $thepostid;
+	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'select short';
+	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 
-	echo '<p class="form-field '.$field['id'].'_field"><label for="'.$field['id'].'">'.$field['label'].'</label><select id="'.$field['id'].'" name="'.$field['id'].'" class="'.$field['class'].'">';
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . esc_html( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['id'] ) . '" class="' . esc_attr( $field['class'] ) . '">';
 
-	foreach ($field['options'] as $key => $value) :
+	foreach ( $field['options'] as $key => $value ) {
 
-		echo '<option value="'.$key.'" ';
-		selected($field['value'], $key);
-		echo '>'.$value.'</option>';
+		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
 
-	endforeach;
+	}
 
 	echo '</select> ';
 
-	if ( isset( $field['description'] ) && $field['description'] ) {
+	if ( ! empty( $field['description'] ) ) {
 
 		if ( isset( $field['desc_tip'] ) ) {
 			echo '<img class="help_tip" data-tip="' . esc_attr( $field['description'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
 		} else {
-			echo '<span class="description">' . $field['description'] . '</span>';
+			echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 		}
 
 	}
-
 	echo '</p>';
 }
