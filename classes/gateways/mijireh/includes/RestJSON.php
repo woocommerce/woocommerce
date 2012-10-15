@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class Mijireh_RestJSON extends Mijireh_Rest {
   
   public function post($url, $data, $headers=array()) {

@@ -1,4 +1,7 @@
-<?php 
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class Mijireh_Item extends Mijireh_Model {
   
   private function _init() {

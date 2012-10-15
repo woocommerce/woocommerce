@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+?>
+
 <link rel="stylesheet" type="text/css" href="<?php echo $this->createUrl(dirname(__FILE__).'/../css/style.css'); ?>" />
 <!--[if lt IE 9]>
 <link rel="stylesheet" href="<?php echo $this->createUrl(dirname(__FILE__).'/../css/ie.css'); ?>" type="text/css"/>

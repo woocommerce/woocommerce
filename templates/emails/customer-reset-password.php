@@ -7,7 +7,8 @@
  * @version     1.7.0
  */
 
-if (!defined('ABSPATH')) exit; ?>
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
+
 <?php do_action('woocommerce_email_header', $email_heading); ?>
 
 <p><?php _e( 'Someone requested that the password be reset for the following account:', 'woocommerce' ); ?></p>

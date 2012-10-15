@@ -7,6 +7,9 @@
  * @version     1.6.4
  */
 global $woocommerce;
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 ?>
 <?php if ( comments_open() ) : ?><div id="reviews"><?php
 

@@ -8,6 +8,9 @@
  * @package		WooCommerce/Classes/Walkers
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
 	var $tree_type = 'category';

@@ -10,6 +10,9 @@
  * @author 		WooThemes
  * @extends 	WC_Email
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Email_Customer_Invoice extends WC_Email {
 	
 	var $find;

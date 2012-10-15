@@ -10,6 +10,9 @@
  * @version 	1.6.4
  * @extends 	WP_Widget
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WooCommerce_Widget_Top_Rated_Products extends WP_Widget {
 
 	var $woo_widget_cssclass;

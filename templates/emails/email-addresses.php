@@ -7,6 +7,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 ?><table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 
 	<tr>

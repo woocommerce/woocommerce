@@ -7,6 +7,8 @@
  * @version     1.7.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 // Load colours
 $base 		= get_option( 'woocommerce_email_base_color' );
 

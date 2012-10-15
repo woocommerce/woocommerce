@@ -10,6 +10,9 @@
  * @author 		WooThemes
  * @extends 	WC_Settings_API
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Email extends WC_Settings_API {
 
 	/** @var string Payment method ID. */

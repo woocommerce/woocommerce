@@ -10,6 +10,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /** Template Hooks ********************************************************/
 
 if ( ! is_admin() || defined('DOING_AJAX') ) {

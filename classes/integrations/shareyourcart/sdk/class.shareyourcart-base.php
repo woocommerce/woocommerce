@@ -9,6 +9,9 @@
  * 	DESCRIPTION: This class is used as a base class for every PHP plugin we create.
  * *    Copyright (C) 2012 Barandi Solutions
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 require_once(dirname(__FILE__) ."/class.shareyourcart-api.php");
 
 if(!class_exists('ShareYourCartBase',false)){

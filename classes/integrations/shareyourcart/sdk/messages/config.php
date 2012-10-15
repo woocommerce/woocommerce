@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * This is the configuration for generating message translations
  * for the app. It is used by the 'yiic message' command.

@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+?>
+
 <a href="<?php echo $this->SHAREYOURCART_BUTTON_URL ?>" class="shareyourcart-button" <?php echo (isset($callback_url) && !empty($callback_url)) ? "data-syc-callback_url=$callback_url" : ''; ?> data-syc-layout="custom">
 <?php echo $button_html;?>
 </a>

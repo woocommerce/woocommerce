@@ -18,6 +18,9 @@
  *
  * @version $Id: $
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 return array (
   'API Status:' => '',
   'App Key' => '',

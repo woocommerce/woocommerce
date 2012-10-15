@@ -10,6 +10,9 @@
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Payment_Gateway extends WC_Settings_API {
 
 	/** @var string Payment method ID. */

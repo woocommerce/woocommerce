@@ -7,6 +7,8 @@
  * @version     1.7.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 echo "\n" . __( 'Billing address', 'woocommerce' ) . ":\n";
 echo $order->get_formatted_billing_address() . "\n\n";
 

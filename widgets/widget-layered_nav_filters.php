@@ -8,6 +8,9 @@
  * @version 	1.7.0
  * @extends 	WP_Widget
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 
 	var $woo_widget_cssclass;

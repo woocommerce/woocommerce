@@ -10,6 +10,9 @@
  * @version 	1.6.4
  * @extends 	WP_Widget
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WooCommerce_Widget_Featured_Products extends WP_Widget {
 
 	/** Variables to setup the widget. */

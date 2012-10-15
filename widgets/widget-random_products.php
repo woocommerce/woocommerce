@@ -8,6 +8,9 @@
  * @version 	1.6.4
  * @extends 	WP_Widget
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WooCommerce_Widget_Random_Products extends WP_Widget {
 
 	/**

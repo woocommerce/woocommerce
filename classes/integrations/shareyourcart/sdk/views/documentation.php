@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+?>
+
 <?php if(!$this->isActive()) return; //if the plugin is not active, do not show this page ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/documentation']);

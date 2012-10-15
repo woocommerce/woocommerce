@@ -1,4 +1,6 @@
-<?php 
+<?php
+	if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+ 
 	// If only the hover is uploaded
     if((!$button_img or !$button_img_width or !$button_img_height) and ($button_img_hover and $button_img_hover_width and $button_img_hover_height)) {
         $button_img = $button_img_hover;

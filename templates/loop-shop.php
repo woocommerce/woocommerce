@@ -10,6 +10,8 @@
  * @deprecated 	1.6
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 _deprecated_file( basename(__FILE__), '1.6' );
 ?>
 

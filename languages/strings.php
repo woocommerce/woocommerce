@@ -10,6 +10,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 // Order Status Terms
 __('pending', 'woocommerce');
 __('failed', 'woocommerce');

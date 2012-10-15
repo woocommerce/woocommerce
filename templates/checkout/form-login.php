@@ -7,6 +7,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 if ( is_user_logged_in() ) return;
 if ( get_option('woocommerce_enable_signup_and_login_from_checkout') == "no" ) return;
 

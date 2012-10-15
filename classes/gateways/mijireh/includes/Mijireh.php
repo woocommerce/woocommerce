@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 $root_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 
 // Require the mijireh library classes

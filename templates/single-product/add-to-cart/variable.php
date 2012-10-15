@@ -7,6 +7,8 @@
  * @version     1.6.5
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 global $woocommerce, $product, $post;
 ?>
 <script type="text/javascript">

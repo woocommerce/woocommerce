@@ -8,6 +8,9 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Session_Transients extends WC_Session {	
 	
 	/** customer_id */

@@ -7,6 +7,8 @@
  * @version     1.6.4
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 global $woocommerce;
 
 $available_methods = $woocommerce->shipping->get_available_shipping_methods();

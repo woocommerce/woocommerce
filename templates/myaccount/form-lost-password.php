@@ -7,6 +7,8 @@
  * @version     1.7.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 global $woocommerce, $post;
 
 ?>

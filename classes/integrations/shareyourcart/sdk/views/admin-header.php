@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+?>
+
 <link rel="stylesheet" type="text/css" href="<?php echo $this->createUrl(dirname(__FILE__).'/../css/admin-style.css'); ?>" />
 <script type="text/javascript">
 

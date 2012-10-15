@@ -6,6 +6,8 @@
  * This code is licensed for use, modification, and distribution
  * under the terms of the MIT License (see http://en.wikipedia.org/wiki/MIT_License)
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  
 class Mijireh_Rest {
   

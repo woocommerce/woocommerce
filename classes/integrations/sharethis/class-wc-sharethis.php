@@ -10,6 +10,9 @@
  * @package		WooCommerce/Classes/Integrations
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_ShareThis extends WC_Integration {
 
 	/** @var string Default code for share this */

@@ -9,6 +9,9 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Product_Variation extends WC_Product {
 
 	/** @var array Stores variation data (attributes) for the current variation. */

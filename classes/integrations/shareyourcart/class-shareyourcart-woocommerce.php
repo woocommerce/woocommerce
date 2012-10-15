@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 require_once "sdk/class.shareyourcart-base.php";
 
 class ShareYourCartWooCommerce extends ShareYourCartBase {

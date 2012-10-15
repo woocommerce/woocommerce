@@ -9,6 +9,8 @@
  * *    Copyright (C) 2011 Barandi Solutions
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 if(!class_exists('ShareYourCartAPI',false)){
  
 class ShareYourCartAPI {

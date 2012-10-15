@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+?>
+
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin-view']);
 </script>

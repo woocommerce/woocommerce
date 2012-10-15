@@ -9,6 +9,9 @@
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_Local_Delivery extends WC_Shipping_Method {
 
 	/**

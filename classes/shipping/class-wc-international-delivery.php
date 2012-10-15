@@ -9,6 +9,9 @@
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 class WC_International_Delivery extends WC_Flat_Rate {
 
 	var $id = 'international_delivery';
