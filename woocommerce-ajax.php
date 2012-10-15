@@ -498,6 +498,10 @@ add_action('wp_ajax_woocommerce_add_variation', 'woocommerce_add_variation');
  */
 function woocommerce_link_all_variations() {
 	global $woocommerce;
+
+	if ( ! defined( 'WC_MAX_LINKED_VARIATIONS' ) ) {
+		define( 'WC_MAX_LINKED_VARIATIONS', 49 );
+	}
 	
 	check_ajax_referer( 'link-variations', 'security' );
 
@@ -505,44 +509,45 @@ function woocommerce_link_all_variations() {
 
 	$post_id = intval( $_POST['post_id'] );
 
-	if (!$post_id) die();
+	if ( ! $post_id ) die();
 
 	$variations = array();
 
 	$_product = new WC_Product( $post_id );
 
 	// Put variation attributes into an array
-	foreach ($_product->get_attributes() as $attribute) :
+	foreach ( $_product->get_attributes() as $attribute ) {
 
-		if ( !$attribute['is_variation'] ) continue;
+		if ( ! $attribute['is_variation'] ) continue;
 
-		$attribute_field_name = 'attribute_' . sanitize_title($attribute['name']);
+		$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
-		if ($attribute['is_taxonomy']) :
+		if ( $attribute['is_taxonomy'] ) {
 			$post_terms = wp_get_post_terms( $post_id, $attribute['name'] );
 			$options = array();
-			foreach ($post_terms as $term) :
+			foreach ( $post_terms as $term ) {
 				$options[] = $term->slug;
-			endforeach;
-		else :
+			}
+		} else {
 			$options = explode('|', $attribute['value']);
-		endif;
+		}
 
 		$options = array_map('trim', $options);
 
-		$variations[$attribute_field_name] = $options;
+		$variations[ $attribute_field_name ] = $options;
 
-	endforeach;
+	}
 
 	// Quit out if none were found
-	if (sizeof($variations)==0) die();
+	if ( sizeof( $variations ) == 0 ) die();
 
 	// Get existing variations so we don't create duplicated
     $available_variations = array();
 
-    foreach($_product->get_children() as $child_id) {
+    foreach( $_product->get_children() as $child_id ) {
     	$child = $_product->get_child( $child_id );
-        if ($child instanceof WC_Product_Variation) {
+
+        if ( $child instanceof WC_Product_Variation ) {
             $available_variations[] = $child->get_variation_attributes();
         }
     }
@@ -558,20 +563,20 @@ function woocommerce_link_all_variations() {
 	);
 
 	// Now find all combinations and create posts
-	if (!function_exists('array_cartesian')) {
-		function array_cartesian($input) {
+	if ( ! function_exists( 'array_cartesian' ) ) {
+		function array_cartesian( $input ) {
 		    $result = array();
 
-		    while (list($key, $values) = each($input)) {
+		    while ( list( $key, $values ) = each( $input ) ) {
 		        // If a sub-array is empty, it doesn't affect the cartesian product
-		        if (empty($values)) {
+		        if ( empty( $values ) ) {
 		            continue;
 		        }
 
 		        // Special case: seeding the product array with the values from the first sub-array
-		        if (empty($result)) {
-		            foreach($values as $value) {
-		                $result[] = array($key => $value);
+		        if ( empty( $result ) ) {
+		            foreach ( $values as $value ) {
+		                $result[] = array( $key => $value );
 		            }
 		        }
 		        else {
@@ -585,28 +590,28 @@ function woocommerce_link_all_variations() {
 		            // Store all items to be added to $product here; adding them on the spot
 		            // inside the foreach will result in an infinite loop
 		            $append = array();
-		            foreach($result as &$product) {
+		            foreach( $result as &$product ) {
 		                // Do step 1 above. array_shift is not the most efficient, but it
 		                // allows us to iterate over the rest of the items with a simple
 		                // foreach, making the code short and familiar.
-		                $product[$key] = array_shift($values);
+		                $product[ $key ] = array_shift( $values );
 
 		                // $product is by reference (that's why the key we added above
 		                // will appear in the end result), so make a copy of it here
 		                $copy = $product;
 
 		                // Do step 2 above.
-		                foreach($values as $item) {
-		                    $copy[$key] = $item;
+		                foreach( $values as $item ) {
+		                    $copy[ $key ] = $item;
 		                    $append[] = $copy;
 		                }
 
 		                // Undo the side effecst of array_shift
-		                array_unshift($values, $product[$key]);
+		                array_unshift( $values, $product[ $key ] );
 		            }
 
 		            // Out of the foreach, we can add to $results now
-		            $result = array_merge($result, $append);
+		            $result = array_merge( $result, $append );
 		        }
 		    }
 
@@ -618,27 +623,24 @@ function woocommerce_link_all_variations() {
 	$added = 0;
 	$possible_variations = array_cartesian( $variations );
 
-	foreach ($possible_variations as $variation) :
+	foreach ( $possible_variations as $variation ) {
 
 		// Check if variation already exists
-		if (in_array($variation, $available_variations)) continue;
+		if ( in_array( $variation, $available_variations ) ) continue;
 
 		$variation_id = wp_insert_post( $variation_post_data );
 
 		$variation_ids[] = $variation_id;
 
-		foreach ($variation as $key => $value) :
-
+		foreach ( $variation as $key => $value ) {
 			update_post_meta( $variation_id, $key, $value );
-
-		endforeach;
+		}
 
 		$added++;
 
-		// Max 100
-		if ($added>49) break;
+		if ( $added > WC_MAX_LINKED_VARIATIONS ) break;
 
-	endforeach;
+	}
 	
 	$woocommerce->clear_product_transients( $post_id );
 
