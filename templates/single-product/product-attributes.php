@@ -26,7 +26,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 
 			<tr class="<?php if ( $alt == 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
-				<td><?php echo $product->get_weight() . ' ' . get_option('woocommerce_weight_unit'); ?></td>
+				<td><?php echo $product->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit') ); ?></td>
 			</tr>
 
 		<?php endif; ?>

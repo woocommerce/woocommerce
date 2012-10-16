@@ -27,7 +27,7 @@ $wrapper = "
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAANklEQVQYV2NkIAIwEqFGkpAiSaAhzwkpAluESxHYBJhTsClCUYDPJBT/IJuEYQK6dTgVgBQCAG5EBSOuEsbJAAAAAElFTkSuQmCC);
 	background-repeat: repeat-y no-repeat;
 	background-position: top center;
-	background-color: $bg;
+	background-color: ".esc_attr( $bg ) ."
 	width:100% !important; 
 	-webkit-text-size-adjust:none; 
 	margin:0; 
@@ -36,12 +36,12 @@ $wrapper = "
 $template_container = "
 	-webkit-box-shadow:0 0 0 3px rgba(0,0,0,0.025); 
 	-webkit-border-radius:6px;
-	background-color: $body;
+	background-color: ".esc_attr( $body ) ."
 	border: 1px solid $bg_darker_10;
 	-webkit-border-radius:6px;
 ";
 $template_header = "
-	background-color: $base; 
+	background-color: ".esc_attr( $base ) ."
 	color: $base_text; 
 	-webkit-border-top-left-radius:6px; 
 	-webkit-border-top-right-radius:6px; 
@@ -52,7 +52,7 @@ $template_header = "
 	vertical-align:middle;
 ";
 $body_content = "
-	background-color: $body;
+	background-color: ".esc_attr( $body )."
 	-webkit-border-radius:6px;
 ";
 $body_content_inner = "
@@ -63,7 +63,7 @@ $body_content_inner = "
 	text-align:left;
 ";
 $header_content_h1 = "
-	color: $base_text !important; 
+	color: ".esc_attr( $base_text )." !important; 
 	margin:0; 
 	padding: 28px 24px;
 	text-shadow: 0 1px 0 $base_lighter_20;
@@ -125,7 +125,7 @@ $header_content_h1 = "
                 	<td align="center" valign="top">
                 		<?php
                 			if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
-                				echo '<p style="margin-top:0;"><img src="' . $img . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
+                				echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name' ) . '" /></p>';
                 			}
                 		?>
                     	<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container" style="<?php echo $template_container; ?>">

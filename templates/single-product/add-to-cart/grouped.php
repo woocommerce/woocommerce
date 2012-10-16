@@ -42,7 +42,7 @@ foreach ( $product->get_children() as $child_id ) {
 							$button_text = get_post_meta( $child_product['product']->id, '_button_text', true );
 							?>
 
-							<a href="<?php echo $product_url; ?>" rel="nofollow" class="button alt"><?php echo apply_filters('single_add_to_cart_text', $button_text, 'external'); ?></a>
+							<a href="<?php echo esc_url( $product_url ); ?>" rel="nofollow" class="button alt"><?php echo apply_filters('single_add_to_cart_text', esc_html( $button_text ), 'external'); ?></a>
 
 						<?php elseif ( ! $quantites_required ) : ?>
 

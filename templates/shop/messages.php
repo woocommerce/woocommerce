@@ -13,5 +13,5 @@ if ( ! $messages ) return;
 ?>
 
 <?php foreach ( $messages as $message ) : ?>
-	<div class="woocommerce_message"><?php echo $message; ?></div>
+	<div class="woocommerce_message"><?php echo esc_html( $message ); ?></div>
 <?php endforeach; ?>

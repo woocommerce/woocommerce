@@ -26,7 +26,7 @@ if ( ! woocommerce_products_will_display() )
 			) );
 
 			foreach ( $catalog_orderby as $id => $name )
-				echo '<option value="' . $id . '" ' . selected( $woocommerce->session->orderby, $id, false ) . '>' . $name . '</option>';
+				echo '<option value="' . esc_attr( $id ) . '" ' . selected( $woocommerce->session->orderby, $id, false ) . '>' . esc_attr( $name ) . '</option>';
 		?>
 	</select>
 </form>

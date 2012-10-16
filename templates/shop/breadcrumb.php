@@ -54,12 +54,12 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 			$parents = array_reverse( $parents );
 			foreach ( $parents as $parent ) {
 				$item = get_term_by( 'id', $parent, get_query_var( 'taxonomy' ));
-				echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
+				echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . esc_html( $item->name ) . '</a>' . $after . $delimiter;
 			}
 		}
 
 		$queried_object = $wp_query->get_queried_object();
-		echo $before . $queried_object->name . $after;
+		echo $before . esc_html( $queried_object->name ) . $after;
 
 	} elseif ( is_tax('product_tag') ) {
 

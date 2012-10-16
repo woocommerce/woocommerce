@@ -21,7 +21,7 @@ global $woocommerce;
 
 	$order_status_text .= '.';
 
-	echo wpautop(apply_filters('woocommerce_order_tracking_status', $order_status_text, $order));
+	echo wpautop( esc_attr( apply_filters( 'woocommerce_order_tracking_status', $order_status_text, $order ) ) );
 ?>
 
 <?php
@@ -36,7 +36,7 @@ global $woocommerce;
 					<div class="comment-text">
 						<p class="meta"><?php echo date_i18n('l jS \of F Y, h:ia', strtotime($note->comment_date)); ?></p>
 						<div class="description">
-							<?php echo wpautop(wptexturize($note->comment_content)); ?>
+							<?php echo wpautop( wptexturize( wp_kses_post( $note->comment_content ) ) ); ?>
 						</div>
 		  				<div class="clear"></div>
 		  			</div>

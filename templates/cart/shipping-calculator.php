@@ -24,7 +24,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 				<option value=""><?php _e( 'Select a country&hellip;', 'woocommerce' ); ?></option>
 				<?php
 					foreach( $woocommerce->countries->get_allowed_countries() as $key => $value )
-						echo '<option value="' . $key . '"' . selected( $woocommerce->customer->get_shipping_country(), $key, false ) . '>' . $value . '</option>';
+						echo '<option value="' . $key . '"' . selected( $woocommerce->customer->get_shipping_country(), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
 				?>
 			</select>
 		</p>
@@ -49,7 +49,7 @@ if ( get_option('woocommerce_enable_shipping_calc')=='no' || ! $woocommerce->car
 					<span>
 						<select name="calc_shipping_state" id="calc_shipping_state"><option value=""><?php _e( 'Select a state&hellip;', 'woocommerce' ); ?></option><?php
 							foreach ( $states as $ckey => $cvalue )
-								echo '<option value="' . $ckey . '" '.selected( $current_r, $ckey, false ) .'>' . __( $cvalue, 'woocommerce' ) .'</option>';
+								echo '<option value="' . esc_attr( $ckey ) . '" '.selected( $current_r, $ckey, false ) .'>' . __( esc_html( $cvalue ), 'woocommerce' ) .'</option>';
 						?></select>
 					</span>
 					<?php
