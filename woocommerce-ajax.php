@@ -65,7 +65,7 @@ function woocommerce_sidebar_login_ajax_process() {
 
 		if ( $user->errors ) {
 			foreach ( $user->errors as $error ) {
-				$result['error'] = $error[0];
+				$result['error'] = esc_html( $error[0] );
 				break;
 			}
 		} else {
@@ -95,7 +95,7 @@ function woocommerce_ajax_apply_coupon() {
 	check_ajax_referer( 'apply-coupon', 'security' );
 
 	if ( ! empty( $_POST['coupon_code'] ) ) {
-		$woocommerce->cart->add_discount( stripslashes( trim( $_POST['coupon_code'] ) ) );
+		$woocommerce->cart->add_discount( sanitize_text_field( trim( $_POST['coupon_code'] ) ) );
 	} else {
 		$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 	}
@@ -696,7 +696,7 @@ function woocommerce_grant_access_to_download() {
 	$order 		= new WC_Order( $order_id );
 	$product 	= new WC_Product( $product_id );
 
-	$user_email = $order->billing_email;
+	$user_email = sanitize_email( $order->billing_email );
 
 	$limit		= trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry 	= trim( get_post_meta( $product_id, '_download_expiry', true ) );
@@ -825,8 +825,8 @@ function woocommerce_add_order_item() {
 
 	check_ajax_referer( 'add-order-item', 'security' );
 
-	$index = trim(stripslashes($_POST['index']));
-	$item_to_add = trim(stripslashes($_POST['item_to_add']));
+	$index = trim(sanitize_text_field($_POST['index']));
+	$item_to_add = trim(sanitize_text_field($_POST['item_to_add']));
 
 	$post = '';
 
@@ -859,7 +859,7 @@ function woocommerce_add_order_item() {
 		$_product = new WC_Product_Variation( $post->ID );
 	endif;
 	?>
-	<tr class="item new_row" rel="<?php echo $index; ?>">
+	<tr class="item new_row" rel="<?php echo esc_attr( $index ); ?>">
 		<td class="thumb">
 			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
 				echo '<strong>'.__( 'Product ID:', 'woocommerce' ).'</strong> '. $_product->id;
@@ -869,9 +869,9 @@ function woocommerce_add_order_item() {
 		</td>
 		<td class="sku" width="1%">
 			<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
-			<input type="hidden" class="item_id" name="item_id[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
-			<input type="hidden" name="item_name[<?php echo $index; ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
-			<input type="hidden" name="item_variation[<?php echo $index; ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
+			<input type="hidden" class="item_id" name="item_id[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
+			<input type="hidden" name="item_name[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
+			<input type="hidden" name="item_variation[<?php echo esc_attr( $index ); ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
 		</td>
 		<td class="name">
 
@@ -895,7 +895,7 @@ function woocommerce_add_order_item() {
 		<?php do_action('woocommerce_admin_order_item_values', $_product, '', $index); ?>
 
 		<td class="tax_class" width="1%">
-			<select class="tax_class" name="item_tax_class[<?php echo $index; ?>]">
+			<select class="tax_class" name="item_tax_class[<?php echo esc_attr( $index ); ?>]">
 				<?php
 				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 				$classes_options = array();
@@ -903,25 +903,25 @@ function woocommerce_add_order_item() {
 				if ($tax_classes) foreach ($tax_classes as $class) :
 					$classes_options[sanitize_title($class)] = $class;
 				endforeach;
-				foreach ($classes_options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_status(), false ).'>'. $name .'</option>';
+				foreach ($classes_options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_status(), false ).'>'. esc_attr( $name ) .'</option>';
 				?>
 			</select>
 		</td>
 
 		<td class="quantity" width="1%">
-			<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo $index; ?>]" placeholder="0" value="1" size="2" class="quantity" />
+			<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo esc_attr( $index ); ?>]" placeholder="0" value="1" size="2" class="quantity" />
 		</td>
 
 		<td class="line_subtotal" width="1%">
-			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_subtotal" /></label>
+			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_subtotal" /></label>
 
-			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_subtotal_tax" /></label>
+			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" class="line_subtotal_tax" /></label>
 		</td>
 
 		<td class="line_total" width="1%">
-			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_total" /></label>
+			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_total" /></label>
 
-			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_tax" /></label>
+			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" class="line_tax" /></label>
 		</td>
 
 	</tr>
@@ -1203,7 +1203,7 @@ function woocommerce_json_search_customers() {
 
 	if ( $customers ) {
 		foreach ( $customers as $customer ) {
-			$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . $customer->user_email . ')';
+			$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
 		}
 	}
 
@@ -1256,7 +1256,7 @@ function woocommerce_upsell_crosssell_search_products() {
 		$SKU = get_post_meta($post->ID, '_sku', true);
 
 		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e( 'Cross-sell', 'woocommerce' ); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e( 'Up-sell', 'woocommerce' ); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
+		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e( 'Cross-sell', 'woocommerce' ); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e( 'Up-sell', 'woocommerce' ); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.esc_attr( $SKU ); ?><input type="hidden" class="product_id" value="0" /></li>
 		<?php
 
 	endforeach; else :

@@ -585,7 +585,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	function generator() {
-		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . $this->version . '" />' . "\n\n";
+		echo "\n\n" . '<!-- WooCommerce Version -->' . "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $this->version ) . '" />' . "\n\n";
 	}
 
 
@@ -1754,7 +1754,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	function add_inline_js( $code ) {
-		$this->_inline_js .= "\n" . $code . "\n";
+		$this->_inline_js .= esc_js( "\n" . $code . "\n" );
 	}
 
 	/**

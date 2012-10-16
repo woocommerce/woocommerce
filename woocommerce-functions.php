@@ -1082,20 +1082,20 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
 		// Add order items
 		<?php if ($order->get_items()) foreach($order->get_items() as $item) : $_product = $order->get_product_from_item( $item ); ?>
 			piwikTracker.addEcommerceItem(
-				"<?php echo $_product->sku; ?>",	// (required) SKU: Product unique identifier
-				"<?php echo $item['name']; ?>",		// (optional) Product name
-				"<?php if (isset($_product->variation_data)) echo woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
-				<?php echo ($item['line_cost']/$item['qty']); ?>,		// (recommended) Product price
-				<?php echo $item['qty']; ?> 		// (optional, default to 1) Product quantity
+				"<?php echo esc_js( $_product->sku ); ?>",	// (required) SKU: Product unique identifier
+				"<?php echo esc_js( $item['name'] ); ?>",		// (optional) Product name
+				"<?php if (isset($_product->variation_data)) echo esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ); ?>",	// (optional) Product category. You can also specify an array of up to 5 categories eg. ["Books", "New releases", "Biography"]
+				<?php echo esc_js( ( $item['line_cost'] / $item['qty'] ) ); ?>,		// (recommended) Product price
+				<?php echo esc_js( $item['qty'] ); ?> 		// (optional, default to 1) Product quantity
 			);
 		<?php endforeach; ?>
 		// Track order
 		piwikTracker.trackEcommerceOrder(
-			"<?php echo $order_id; ?>",		// (required) Unique Order ID
-			<?php echo $order->order_total; ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
+			"<?php echo esc_js( $order_id ); ?>",		// (required) Unique Order ID
+			<?php echo esc_js( $order->order_total ); ?>,	// (required) Order Revenue grand total (includes tax, shipping, and subtracted discount)
 			false,					// (optional) Order sub total (excludes shipping)
-			<?php echo $order->get_total_tax(); ?>,	// (optional) Tax amount
-			<?php echo $order->get_shipping(); ?>,	// (optional) Shipping amount
+			<?php echo esc_js( $order->get_total_tax() ); ?>,	// (optional) Tax amount
+			<?php echo esc_js( $order->get_shipping() ); ?>,	// (optional) Shipping amount
 			false 					// (optional) Discount offered (set to false for unspecified parameter)
 		);
 	} catch( err ) {}
@@ -1112,29 +1112,29 @@ function woocommerce_ecommerce_tracking_piwik( $order_id ) {
  */
 function woocommerce_products_rss_feed() {
 	// Product RSS
-	if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) :
+	if ( is_post_type_archive( 'product' ) || is_singular( 'product' ) ) {
 
 		$feed = get_post_type_archive_feed_link( 'product' );
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . esc_attr( $feed ) . '" />';
 
-	elseif ( is_tax( 'product_cat' ) ) :
+	} elseif ( is_tax( 'product_cat' ) ) {
 
-		$term = get_term_by('slug', get_query_var('product_cat'), 'product_cat');
+		$term = get_term_by('slug', esc_attr( get_query_var('product_cat') ), 'product_cat');
 
 		$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products added to %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products added to %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
 
-	elseif ( is_tax( 'product_tag' ) ) :
+	} elseif ( is_tax( 'product_tag' ) ) {
 
-		$term = get_term_by('slug', get_query_var('product_tag'), 'product_tag');
+		$term = get_term_by('slug', esc_attr( get_query_var('product_tag') ), 'product_tag');
 
 		$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . $feed . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_attr( $feed ) . '" />';
 
-	endif;
+	}
 }
 
 
