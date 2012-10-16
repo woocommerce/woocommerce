@@ -210,6 +210,8 @@ class WooCommerce_Widget_Layered_Nav extends WP_Widget {
 					if ( ! is_array( $current_filter ) ) 
 						$current_filter = array();
 
+					$current_filter = array_map( 'esc_attr', $current_filter );
+
 					if ( ! in_array( $term->term_id, $current_filter ) ) 
 						$current_filter[] = $term->term_id;
 
