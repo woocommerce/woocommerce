@@ -44,7 +44,7 @@ add_filter( 'manage_users_columns', 'woocommerce_user_columns', 10, 1 );
  */
 function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 	global $woocommerce, $wpdb;
-	switch ($column_name) :
+	switch ( $column_name ) :
 		case "woocommerce_order_count" :
 
 			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*)
@@ -55,7 +55,7 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 			AND post_type IN ('shop_order')
 			AND post_status = 'publish'" ) );
 
-			$value = '<a href="'.admin_url('edit.php?post_status=all&post_type=shop_order&_customer_user='.$user_id.'').'">'.$count.'</a>';
+			$value = '<a href="' . admin_url( 'edit.php?post_status=all&post_type=shop_order&_customer_user=' . absint( $user_id ) . '' ) . '">' . absint( $count ) . '</a>';
 
 		break;
 		case "woocommerce_billing_address" :
@@ -73,9 +73,12 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if (!$formatted_address) $value = __( 'N/A', 'woocommerce' ); else $value = $formatted_address;
+			if ( ! $formatted_address ) 
+				$value = __( 'N/A', 'woocommerce' ); 
+			else 
+				$value = $formatted_address;
 
-			$value = wpautop($value);
+			$value = wpautop( $value );
 		break;
 		case "woocommerce_shipping_address" :
 			$address = array(
@@ -92,16 +95,21 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 
 			$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-			if (!$formatted_address) $value = __( 'N/A', 'woocommerce' ); else $value = $formatted_address;
+			if ( ! $formatted_address ) 
+				$value = __( 'N/A', 'woocommerce' ); 
+			else 
+				$value = $formatted_address;
 
-			$value = wpautop($value);
+			$value = wpautop( $value );
 		break;
 		case "woocommerce_paying_customer" :
 
 			$paying_customer = get_user_meta( $user_id, 'paying_customer', true );
 
-			if ($paying_customer) $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success.png" alt="yes" />';
-			else $value = '<img src="'.$woocommerce->plugin_url().'/assets/images/success-off.png" alt="no" />';
+			if ( $paying_customer ) 
+				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success.png" alt="yes" />';
+			else 
+				$value = '<img src="' . $woocommerce->plugin_url() . '/assets/images/success-off.png" alt="no" />';
 
 		break;
 	endswitch;

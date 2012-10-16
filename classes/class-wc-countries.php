@@ -723,7 +723,7 @@ class WC_Countries {
 	 */
 	function get_formatted_address( $args = array() ) {
 
-		$args = array_map('trim', $args);
+		$args = array_map( 'trim', $args );
 
 		extract( $args );
 
@@ -731,19 +731,20 @@ class WC_Countries {
 		$formats 		= $this->get_address_formats();
 
 		// Get format for the address' country
-		$format			= ($country && isset($formats[$country])) ? $formats[$country] : $formats['default'];
+		$format			= ( $country && isset( $formats[ $country ] ) ) ? $formats[ $country ] : $formats['default'];
 
 		// Handle full country name
-		$full_country 	= (isset($this->countries[$country])) ? $this->countries[$country] : $country;
+		$full_country 	= ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base
-		if ( $country == $this->get_base_country() ) $format = str_replace('{country}', '', $format);
+		if ( $country == $this->get_base_country() ) 
+			$format = str_replace( '{country}', '', $format );
 
 		// Handle full state name
-		$full_state		= ($country && $state && isset($this->states[$country][$state])) ? $this->states[$country][$state] : $state;
+		$full_state		= ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
 
 		// Substitute address parts into the string
-		$replace = apply_filters('woocommerce_formatted_address_replacements', array(
+		$replace = apply_filters( 'woocommerce_formatted_address_replacements', array(
 			'{first_name}'       => $first_name,
 			'{last_name}'        => $last_name,
 			'{name}'             => $first_name . ' ' . $last_name,
@@ -754,26 +755,28 @@ class WC_Countries {
 			'{state}'            => $full_state,
 			'{postcode}'         => $postcode,
 			'{country}'          => $full_country,
-			'{first_name_upper}' => strtoupper($first_name),
-			'{last_name_upper}'  => strtoupper($last_name),
-			'{name_upper}'       => strtoupper($first_name . ' ' . $last_name),
-			'{company_upper}'    => strtoupper($company),
-			'{address_1_upper}'  => strtoupper($address_1),
-			'{address_2_upper}'  => strtoupper($address_2),
-			'{city_upper}'       => strtoupper($city),
-			'{state_upper}'      => strtoupper($full_state),
-			'{postcode_upper}'   => strtoupper($postcode),
-			'{country_upper}'    => strtoupper($full_country),
-		));
+			'{first_name_upper}' => strtoupper( $first_name ),
+			'{last_name_upper}'  => strtoupper( $last_name ),
+			'{name_upper}'       => strtoupper( $first_name . ' ' . $last_name ),
+			'{company_upper}'    => strtoupper( $company ),
+			'{address_1_upper}'  => strtoupper( $address_1 ),
+			'{address_2_upper}'  => strtoupper( $address_2 ),
+			'{city_upper}'       => strtoupper( $city ),
+			'{state_upper}'      => strtoupper( $full_state ),
+			'{postcode_upper}'   => strtoupper( $postcode ),
+			'{country_upper}'    => strtoupper( $full_country ),
+		) ) ;
+		
+		$replace = array_map( 'esc_html', $replace );
 
-		$formatted_address = str_replace( array_keys($replace), $replace, $format );
+		$formatted_address = str_replace( array_keys( $replace ), $replace, $format );
 
 		// Clean up white space
-		$formatted_address = preg_replace('/  +/', ' ', trim($formatted_address));
-		$formatted_address = preg_replace('/\n\n+/', "\n", $formatted_address);
+		$formatted_address = preg_replace( '/  +/', ' ', trim( $formatted_address ) );
+		$formatted_address = preg_replace( '/\n\n+/', "\n", $formatted_address );
 
 		// Add html breaks
-		$formatted_address = nl2br($formatted_address);
+		$formatted_address = nl2br( $formatted_address );
 
 		// We're done!
 		return $formatted_address;

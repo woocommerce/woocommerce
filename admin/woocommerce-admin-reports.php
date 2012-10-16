@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 function woocommerce_reports() {
 
-	$current_tab 	= isset( $_GET['tab'] ) ? urldecode( $_GET['tab'] ) : 'sales';
-	$current_chart 	= isset( $_GET['chart'] ) ? urldecode( $_GET['chart'] ) : 0;
+	$current_tab 	= isset( $_GET['tab'] ) ? sanitize_title( urldecode( $_GET['tab'] ) ) : 'sales';
+	$current_chart 	= isset( $_GET['chart'] ) ? absint( urldecode( $_GET['chart'] ) ) : 0;
 
 	$charts = apply_filters( 'woocommerce_reports_charts', array(
 		'sales' => array(
@@ -470,10 +470,10 @@ function woocommerce_sales_overview() {
 	$order_counts_array = $order_amounts_array = array();
 	
 	foreach ( $order_counts as $key => $count )
-		$order_counts_array[] = array( $key, $count );
+		$order_counts_array[] = array( esc_js( $key ), esc_js( $count ) );
 	
 	foreach ( $order_amounts as $key => $amount )
-		$order_amounts_array[] = array( $key, $amount );
+		$order_amounts_array[] = array( esc_js( $key ), esc_js( $amount ) );
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
@@ -655,10 +655,10 @@ function woocommerce_daily_sales() {
 	$order_counts_array = $order_amounts_array = array();
 	
 	foreach ( $order_counts as $key => $count )
-		$order_counts_array[] = array($key, $count);
+		$order_counts_array[] = array( esc_js( $key ), esc_js( $count ) );
 
 	foreach ( $order_amounts as $key => $amount )
-		$order_amounts_array[] = array($key, $amount);
+		$order_amounts_array[] = array( esc_js( $key ), esc_js( $amount ) );
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
@@ -842,10 +842,10 @@ function woocommerce_monthly_sales() {
 	$order_counts_array = $order_amounts_array = array();
 	
 	foreach ( $order_counts as $key => $count )
-		$order_counts_array[] = array( $key, $count );
+		$order_counts_array[] = array( esc_js( $key ), esc_js( $count ) );
 	
 	foreach ( $order_amounts as $key => $amount )
-		$order_amounts_array[] = array( $key, $amount );
+		$order_amounts_array[] = array( esc_js( $key ), esc_js( $amount ) );
 
 	$order_data = array( 'order_counts' => $order_counts_array, 'order_amounts' => $order_amounts_array );
 
@@ -1095,7 +1095,7 @@ function woocommerce_product_sales() {
 
 	global $wpdb, $woocommerce;
 
-	$chosen_product_ids = ( isset( $_POST['product_ids'] ) ) ? (array) $_POST['product_ids'] : '';
+	$chosen_product_ids = ( isset( $_POST['product_ids'] ) ) ? array_map( 'absint', (array) $_POST['product_ids'] ) : '';
 
 	if ( $chosen_product_ids && is_array( $chosen_product_ids ) ) {
 
@@ -1377,7 +1377,7 @@ function woocommerce_customer_overview() {
 
 	$signups_array = array();
 	foreach ($signups as $key => $count) :
-		$signups_array[] = array($key, $count);
+		$signups_array[] = array( esc_js( $key ), esc_js( $count ) );
 	endforeach;
 
 	$chart_data = json_encode($signups_array);

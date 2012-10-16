@@ -35,8 +35,8 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 	    do_action( 'woocommerce_settings_start' );
 
 	    // Get current tab/section
-	    $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : urldecode( $_GET['tab'] );
-	    $current_section 	= ( empty( $_REQUEST['section'] ) ) ? '' : urldecode( $_REQUEST['section'] );
+	    $current_tab 		= ( empty( $_GET['tab'] ) ) ? 'general' : sanitize_text_field( urldecode( $_GET['tab'] ) );
+	    $current_section 	= ( empty( $_REQUEST['section'] ) ) ? '' : sanitize_text_field( urldecode( $_REQUEST['section'] ) );
 
 	    // Save settings
 	    if ( ! empty( $_POST ) ) {
@@ -129,7 +129,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 			if ( ! empty( $_POST['subtab'] ) ) $redirect = add_query_arg( 'subtab', esc_attr( str_replace( '#', '', $_POST['subtab'] ) ), $redirect );
 
-			wp_redirect( $redirect );
+			wp_safe_redirect( $redirect );
 			exit;
 		}
 

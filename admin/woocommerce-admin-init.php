@@ -98,7 +98,7 @@ function woocommerce_admin_menu_highlight() {
 
 	if ( isset( $post_type ) ) {
 		if ( in_array( $post_type, $to_highlight_types ) ) {
-			$submenu_file = 'edit.php?post_type=' . $post_type;
+			$submenu_file = 'edit.php?post_type=' . esc_attr( $post_type );
 			$parent_file  = 'woocommerce';
 		}
 
@@ -107,7 +107,7 @@ function woocommerce_admin_menu_highlight() {
 
 			if ( $screen->base == 'edit-tags' && 'pa_' == substr( $taxonomy, 0, 3 ) ) {
 				$submenu_file = 'woocommerce_attributes';
-				$parent_file  = 'edit.php?post_type=' . $post_type;
+				$parent_file  = 'edit.php?post_type=' . esc_attr( $post_type );
 			}
 		}
 	}
@@ -175,13 +175,13 @@ function woocommerce_admin_installed_notice() {
 function woocommerce_admin_notices_styles() {
 
 	// Installed notices
-	if ( get_option('woocommerce_installed')==1 ) {
+	if ( get_option('woocommerce_installed') == 1 ) {
 
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 
-		if (get_option('skip_install_woocommerce_pages')!=1 && woocommerce_get_page_id('shop')<1 && !isset($_GET['install_woocommerce_pages']) && !isset($_GET['skip_install_woocommerce_pages'])) {
+		if ( get_option('skip_install_woocommerce_pages') != 1 && woocommerce_get_page_id('shop') < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
 			add_action( 'admin_notices', 'woocommerce_admin_install_notice' );
-		} elseif ( !isset($_GET['page']) || $_GET['page']!='woocommerce' ) {
+		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
 			add_action( 'admin_notices', 'woocommerce_admin_installed_notice' );
 		}
 
@@ -390,8 +390,8 @@ function woocommerce_admin_scripts() {
 			'load_shipping' 				=> __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 			'featured_label'				=> __( 'Featured', 'woocommerce' ),
 			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
-			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
-			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
+			'prices_include_tax' 			=> esc_attr( get_option('woocommerce_prices_include_tax') ),
+			'round_at_subtotal'				=> esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 			'meta_name'						=> __( 'Meta Name', 'woocommerce' ),
 			'meta_value'					=> __( 'Meta Value', 'woocommerce' ),
 			'no_customer_selected'			=> __( 'No customer selected', 'woocommerce' ),
@@ -408,11 +408,11 @@ function woocommerce_admin_scripts() {
 			'search_products_nonce' 		=> wp_create_nonce("search-products"),
 			'calendar_image'				=> $woocommerce->plugin_url().'/assets/images/calendar.png',
 			'post_id'						=> $post->ID, 
-			'currency_format_num_decimals'	=> (int) get_option( 'woocommerce_price_num_decimals' ),
+			'currency_format_num_decimals'	=> absint( get_option( 'woocommerce_price_num_decimals' ) ),
 			'currency_format_symbol'		=> get_woocommerce_currency_symbol(),
-			'currency_format_decimal_sep'	=> stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ),
-			'currency_format_thousand_sep'	=> stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ),
-			'currency_format'				=> str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) // For accounting JS
+			'currency_format_decimal_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ) ),
+			'currency_format_thousand_sep'	=> esc_attr( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ) ),
+			'currency_format'				=> esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ) // For accounting JS
 		 );
 
 		wp_localize_script( 'woocommerce_writepanel', 'woocommerce_writepanel_params', $woocommerce_witepanel_params );
@@ -425,7 +425,7 @@ function woocommerce_admin_scripts() {
 		wp_register_script( 'woocommerce_term_ordering', $woocommerce->plugin_url() . '/assets/js/admin/term-ordering.js', array('jquery-ui-sortable'), $woocommerce->version );
 		wp_enqueue_script( 'woocommerce_term_ordering' );
 
-		$taxonomy = isset( $_GET['taxonomy'] ) ? $_GET['taxonomy'] : '';
+		$taxonomy = isset( $_GET['taxonomy'] ) ? woocommerce_clean( $_GET['taxonomy'] ) : '';
 
 		$woocommerce_term_order_params = array(
 			'taxonomy' 			=>  $taxonomy
@@ -790,7 +790,7 @@ function woocommerce_permalink_settings() {
 				<th><label><input name="product_permalink" id="woocommerce_custom_selection" type="radio" value="custom" class="tog" <?php checked( in_array( $product_permalink, $structures ), false ); ?> />
 					<?php _e( 'Custom Base', 'woocommerce' ); ?></label></th>
 				<td>
-					<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo $product_permalink; ?>" class="regular-text code"> <span class="description"><?php _e( 'Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
+					<input name="product_permalink_structure" id="woocommerce_permalink_structure" type="text" value="<?php echo esc_attr( $product_permalink ); ?>" class="regular-text code"> <span class="description"><?php _e( 'Enter a custom base to use. A base <strong>must</strong> be set or WordPress will use default instead.', 'woocommerce' ); ?></span>
 				</td>
 			</tr>
 		</tbody>
@@ -859,9 +859,9 @@ function woocommerce_permalink_settings_save() {
 	// We need to save the options ourselves; settings api does not trigger save for the permalinks page
 	if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) ) {
 		// Cat and tag bases
-		$woocommerce_product_category_slug = esc_html( stripslashes( $_POST['woocommerce_product_category_slug'] ) );
-		$woocommerce_product_tag_slug = esc_html( stripslashes( $_POST['woocommerce_product_tag_slug'] ) );
-		$woocommerce_product_attribute_slug = esc_html( stripslashes( $_POST['woocommerce_product_attribute_slug'] ) );
+		$woocommerce_product_category_slug = woocommerce_clean( $_POST['woocommerce_product_category_slug'] );
+		$woocommerce_product_tag_slug = woocommerce_clean( $_POST['woocommerce_product_tag_slug'] );
+		$woocommerce_product_attribute_slug = woocommerce_clean( $_POST['woocommerce_product_attribute_slug'] );
 		
 		$permalinks = get_option( 'woocommerce_permalinks' );
 		if ( ! $permalinks ) 
@@ -872,10 +872,10 @@ function woocommerce_permalink_settings_save() {
 		$permalinks['attribute_base'] 	= untrailingslashit( $woocommerce_product_attribute_slug );
 		
 		// Product base
-		$product_permalink = esc_html( stripslashes( $_POST['product_permalink'] ) );
+		$product_permalink = woocommerce_clean( $_POST['product_permalink'] );
 		
 		if ( $product_permalink == 'custom' ) {
-			$product_permalink = esc_html( stripslashes( $_POST['product_permalink_structure'] ) );
+			$product_permalink = woocommerce_clean( $_POST['product_permalink_structure'] );
 		} elseif ( empty( $product_permalink ) ) {
 			$product_permalink = false;
 		}
