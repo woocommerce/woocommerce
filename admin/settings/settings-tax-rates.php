@@ -406,7 +406,7 @@ function woocommerce_tax_row_label( $selected ) {
 	$counties_array = array();
 	$states_count = 0;
 
-	if ($selected) foreach ($selected as $country => $value) :
+	if ($selected) foreach ( $selected as $country => $value ) :
 
 		$country = woocommerce_clean($country);
 
@@ -414,7 +414,8 @@ function woocommerce_tax_row_label( $selected ) {
 			$states_count+=sizeof($value);
 		endif;
 
-		if (!in_array($country, $counties_array)) $counties_array[] = $woocommerce->countries->countries[$country];
+		if ( ! in_array( $country, $counties_array ) ) 
+			$counties_array[] = esc_html( $woocommerce->countries->countries[ $country ] );
 
 	endforeach;
 

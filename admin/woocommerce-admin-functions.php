@@ -126,7 +126,7 @@ function woocommerce_preview_emails() {
 
 		$email_heading = __( 'Order Received', 'woocommerce' );
 
-		$message  = wpautop( __("Thank you, we are now processing your order. Your order's details are below.", 'woocommerce') );
+		$message  = wpautop( __( 'Thank you, we are now processing your order. Your order\'s details are below.', 'woocommerce' ) );
 
 		$message .= '<h2>' . __( 'Order:', 'woocommerce' ) . ' ' . '#1000</h2>';
 
@@ -366,7 +366,7 @@ function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
 function woocommerce_compile_less_styles() {
 	global $woocommerce;
 
-	$colors 		= get_option( 'woocommerce_frontend_css_colors' );
+	$colors 		= array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
 	$base_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce-base.less';
 	$less_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.less';
 	$css_file		= $woocommerce->plugin_path() . '/assets/css/woocommerce.css';
@@ -495,7 +495,7 @@ function woocommerce_order_bulk_admin_notices() {
 	global $post_type, $pagenow;
 
 	if ( isset( $_REQUEST['marked_completed'] ) || isset( $_REQUEST['marked_processing'] ) ) {
-		$number = isset( $_REQUEST['marked_processing'] ) ? $_REQUEST['marked_processing'] : $_REQUEST['marked_completed'];
+		$number = isset( $_REQUEST['marked_processing'] ) ? absint( $_REQUEST['marked_processing'] ) : absint( $_REQUEST['marked_completed'] );
 
 		if ( 'edit.php' == $pagenow && 'shop_order' == $post_type ) {
 			$message = sprintf( _n( 'Order status changed.', '%s order statuses changed.', $number ), number_format_i18n( $number ) );

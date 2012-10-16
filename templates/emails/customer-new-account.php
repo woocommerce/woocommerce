@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
 <p><?php printf(__("Thanks for creating an account on %s. Your username is <strong>%s</strong>.", 'woocommerce'), esc_html( $blogname ), esc_html( $user_login ) ); ?></p>
 
-<p><?php printf(__("You can access your account area here: %s.", 'woocommerce'), get_permalink(woocommerce_get_page_id('myaccount'))); ?></p>
+<p><?php printf(__( 'You can access your account area here: %s.', 'woocommerce' ), get_permalink(woocommerce_get_page_id('myaccount'))); ?></p>
 
 <div style="clear:both;"></div>
 

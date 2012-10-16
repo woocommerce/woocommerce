@@ -30,7 +30,7 @@ function woocommerce_frontend_styles_setting() {
 			if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
 
 				// Get settings
-				$colors = (array) get_option( 'woocommerce_frontend_css_colors' );
+				$colors = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
 
 				// Defaults
 				if ( empty( $colors['primary'] ) ) $colors['primary'] = '#ad74a2';
@@ -82,8 +82,8 @@ add_action( 'woocommerce_admin_field_frontend_styles', 'woocommerce_frontend_sty
 function woocommerce_frontend_css_color_picker( $name, $id, $value, $desc = '' ) {
 	global $woocommerce;
 
-	echo '<div class="color_box"><strong><img class="help_tip" data-tip="' . $desc . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" /> ' . $name . '</strong>
-   		<input name="' . esc_attr( $id ). '" id="' . $id . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
+	echo '<div class="color_box"><strong><img class="help_tip" data-tip="' . esc_attr( $desc ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" /> ' . esc_html( $name ) . '</strong>
+   		<input name="' . esc_attr( $id ). '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
     </div>';
 
 }

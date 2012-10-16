@@ -188,7 +188,7 @@ function woocommerce_status() {
 
 						if ( $alt == 1 ) echo '<tr>'; else echo '<tr>';
 
-						echo '<td>' . $page_name . '</td><td>';
+						echo '<td>' . esc_html( $page_name ) . '</td><td>';
 
 						$error = false;
 
@@ -214,7 +214,7 @@ function woocommerce_status() {
 
 						}
 
-						if ( ! $error ) echo '<mark class="yes">#' . $page_id . ' - ' . get_permalink( $page_id ) . '</mark>';
+						if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . get_permalink( $page_id ) . '</mark>';
 
 						echo '</td></tr>';
 
@@ -234,7 +234,7 @@ function woocommerce_status() {
                     <td><?php _e('Order Statuses','woocommerce')?></td>
                     <td><?php
                     	$order_statuses = get_terms( 'shop_order_status', array( 'fields' => 'names', 'hide_empty' => 0 ) );
-                    	echo implode( ', ', $order_statuses );
+                    	echo implode( ', ', array_map( 'esc_html', $order_statuses ) );
                     ?></td>
                 </tr>
 			</tbody>
@@ -249,13 +249,14 @@ function woocommerce_status() {
                 <tr>
                     <td><?php _e('PHP Version','woocommerce')?></td>
                     <td><?php
-                    	if ( function_exists( 'phpversion' ) ) echo phpversion();
+                    	if ( function_exists( 'phpversion' ) ) 
+                    		echo esc_html( phpversion() );
                     ?></td>
                 </tr>
                 <tr>
                     <td><?php _e('Server Software','woocommerce')?></td>
                     <td><?php
-                    	echo $_SERVER['SERVER_SOFTWARE'];
+                    	echo esc_html( $_SERVER['SERVER_SOFTWARE'] );
                     ?></td>
                 </tr>
 				<tr>
@@ -358,10 +359,10 @@ function woocommerce_status() {
 			<tbody>
 			<?php foreach($posting as $post) { $mark = ( isset( $post['success'] ) && $post['success'] == true ) ? 'yes' : 'error'; ?>
 				<tr>
-                    <td><?php echo $post['name']; ?></td>
+                    <td><?php echo esc_html( $post['name'] ); ?></td>
                     <td>
                     	<mark class="<?php echo $mark; ?>">
-	                    	<?php echo $post['note']; ?>
+	                    	<?php echo esc_html( $post['note'] ); ?>
                     	</mark>
                     </td>
                 </tr>
@@ -377,11 +378,11 @@ function woocommerce_status() {
 			<tbody class="tools">
 			<?php foreach($tools as $action => $tool) { ?>
 				<tr>
-                    <td><?php echo $tool['name']; ?></td>
+                    <td><?php echo esc_html( $tool['name'] ); ?></td>
                     <td>
                     	<p>
-	                    	<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=woocommerce_status&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo $tool['button']; ?></a>
-	                    	<span class="description"><?php echo $tool['desc']; ?></span>
+	                    	<a href="<?php echo wp_nonce_url( admin_url('admin.php?page=woocommerce_status&action=' . $action ), 'debug_action' ); ?>" class="button"><?php echo esc_html( $tool['button'] ); ?></a>
+	                    	<span class="description"><?php echo wp_kses_post( $tool['desc'] ); ?></span>
                     	</p>
                     </td>
                 </tr>

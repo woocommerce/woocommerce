@@ -95,7 +95,7 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 	global $woocommerce;
 
 	$image 			= '';
-	$thumbnail_id 	= get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true );
+	$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
 	if ($thumbnail_id) :
 		$image = wp_get_attachment_url( $thumbnail_id );
 	else :

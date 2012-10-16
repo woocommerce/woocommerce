@@ -305,7 +305,7 @@ function woocommerce_sales_overview() {
 	");
 
 	$total_sales 	= $order_totals->total_sales;
-	$total_orders 	= $order_totals->total_orders;
+	$total_orders 	= absint( $order_totals->total_orders );
 
 	$discount_total = $wpdb->get_var("
 		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
@@ -973,7 +973,7 @@ function woocommerce_top_sellers() {
 						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold' );
 					}
 
-					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . $sales . '</span></td><td class="bars"><a href="' . $orders_link . '" style="width:' . $width . '%">&nbsp;</a></td></tr>';
+					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . esc_html( $sales ) . '</span></td><td class="bars"><a href="' . esc_url( $orders_link ) . '" style="width:' . esc_attr( $width ) . '%">&nbsp;</a></td></tr>';
 				}
 			?>
 		</tbody>
@@ -1071,7 +1071,7 @@ function woocommerce_top_earners() {
 						$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=&shop_order_status=completed,processing,on-hold' );
 					}
 
-					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . woocommerce_price( $sales ) . '</span></td><td class="bars"><a href="' . $orders_link . '" style="width:' . $width . '%">&nbsp;</a></td></tr>';
+					echo '<tr><th>' . $product_name . '</th><td width="1%"><span>' . woocommerce_price( $sales ) . '</span></td><td class="bars"><a href="' . esc_url( $orders_link ) . '" style="width:' . esc_attr( $width ) . '%">&nbsp;</a></td></tr>';
 				}
 			?>
 		</tbody>
@@ -1171,19 +1171,23 @@ function woocommerce_product_sales() {
 			</thead>
 			<tbody>
 				<?php
-					if (sizeof($product_sales)>0) foreach ($product_sales as $date => $sales) :
-						$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
-						$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
-
-						$orders_link = admin_url('edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( implode( ' ', $chosen_product_titles ) ) . '&m=' . date('Ym', strtotime($date.'01')) . '&shop_order_status=completed,processing,on-hold');
-
-						echo '<tr><th><a href="'.$orders_link.'">'.date_i18n('F', strtotime($date.'01')).'</a></th>
-						<td width="1%"><span>'.$sales.'</span><span class="alt">'.woocommerce_price($product_totals[$date]).'</span></td>
-						<td class="bars">
-							<span style="width:'.$width.'%">&nbsp;</span>
-							<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
-						</td></tr>';
-					endforeach; else echo '<tr><td colspan="3">'.__( 'No sales :(', 'woocommerce' ).'</td></tr>';
+					if ( sizeof( $product_sales ) > 0 ) {
+						foreach ( $product_sales as $date => $sales ) {
+							$width = ($sales>0) ? (round($sales) / round($max_sales)) * 100 : 0;
+							$width2 = ($product_totals[$date]>0) ? (round($product_totals[$date]) / round($max_totals)) * 100 : 0;
+	
+							$orders_link = admin_url( 'edit.php?s&post_status=all&post_type=shop_order&action=-1&s=' . urlencode( implode( ' ', $chosen_product_titles ) ) . '&m=' . date( 'Ym', strtotime( $date . '01' ) ) . '&shop_order_status=completed,processing,on-hold' );
+	
+							echo '<tr><th><a href="' . esc_url( $orders_link ) . '">' . date_i18n( 'F', strtotime( $date . '01' ) ) . '</a></th>
+							<td width="1%"><span>' . esc_html( $sales ) . '</span><span class="alt">' . woocommerce_price( $product_totals[ $date ] ) . '</span></td>
+							<td class="bars">
+								<span style="width:' . esc_attr( $width ) . '%">&nbsp;</span>
+								<span class="alt" style="width:' . esc_attr( $width2 ) . '%">&nbsp;</span>
+							</td></tr>';
+						}
+					} else {
+						echo '<tr><td colspan="3">' . __( 'No sales :(', 'woocommerce' ) . '</td></tr>';
+					}
 				?>
 			</tbody>
 		</table>
@@ -1267,7 +1271,7 @@ function woocommerce_customer_overview() {
 	");
 
 	$total_customer_sales	= $customer_orders->total_sales;
-	$total_customer_orders	= $customer_orders->total_orders;
+	$total_customer_orders	= absint( $customer_orders->total_orders );
 
 	$guest_orders = $wpdb->get_row("
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
@@ -1290,7 +1294,7 @@ function woocommerce_customer_overview() {
 	");
 
 	$total_guest_sales	= $guest_orders->total_sales;
-	$total_guest_orders	= $guest_orders->total_orders;
+	$total_guest_orders	= absint( $guest_orders->total_orders );
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -1542,10 +1546,10 @@ function woocommerce_stock_overview() {
 
 							if ( $stock <= $nostockamount ) continue;
 
-							$title = __( $product->post_title );
+							$title = esc_html__( $product->post_title );
 
 							if ( $sku )
-								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . $sku . ')';
+								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . esc_html( $sku ) . ')';
 
 							if ( $product->post_type=='product' )
 								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
@@ -1577,10 +1581,10 @@ function woocommerce_stock_overview() {
 
 							if ( $stock > $nostockamount ) continue;
 
-							$title = __( $product->post_title );
+							$title = esc_html__( $product->post_title );
 
 							if ( $sku )
-								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . $sku . ')';
+								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . esc_html( $sku ) . ')';
 
 							if ( $product->post_type=='product' )
 								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
@@ -2337,11 +2341,11 @@ function woocommerce_coupon_sales() {
 				// save data for chart while outputting
 				$chart_data = $coupon_totals = array();
 				
-				foreach( $coupon_sales as $coupon_code => $sales ) :
+				foreach( $coupon_sales as $coupon_code => $sales ) {
 					
-					echo '<tr><th>' . $coupon_code . '</th>';
+					echo '<tr><th>' . esc_html( $coupon_code ) . '</th>';
 					
-					for( $count = 0; $count < 12; $count++ ) :
+					for ( $count = 0; $count < 12; $count ++ ) {
 						
 						if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
 								continue;
@@ -2355,7 +2359,7 @@ function woocommerce_coupon_sales() {
 						
 						$chart_data[$coupon_code][] = array( strtotime( date( 'Ymd', strtotime( $month . '01' ) ) ) . '000', $amount );
 				
-					endfor;
+					}
 						
 					echo '<td><strong>' . woocommerce_price( array_sum( $sales ) ) . '</strong></td>';
 					
@@ -2364,7 +2368,7 @@ function woocommerce_coupon_sales() {
 					
 					echo '</tr>';
 					
-				endforeach;
+				}
 				
 				$top_coupon_name = current( array_keys( $coupon_totals, max( $coupon_totals ) ) );
 				$top_coupon_sales = $coupon_totals[$top_coupon_name];

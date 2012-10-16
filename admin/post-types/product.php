@@ -28,8 +28,8 @@ function woocommerce_duplicate_product_link_row($actions, $post) {
 	if ( $post->post_type != 'product' )
 		return $actions;
 
-	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __("Make a duplicate from this product", 'woocommerce')
-		. '" rel="permalink">' .  __("Duplicate", 'woocommerce') . '</a>';
+	$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'admin.php?action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __( 'Make a duplicate from this product', 'woocommerce' )
+		. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
 
 	return $actions;
 }
@@ -47,20 +47,20 @@ add_filter( 'page_row_actions', 'woocommerce_duplicate_product_link_row',10,2 );
 function woocommerce_duplicate_product_post_button() {
 	global $post;
 
-	if (function_exists('duplicate_post_plugin_activation')) return;
+	if ( function_exists( 'duplicate_post_plugin_activation' ) ) return;
 
-	if (!current_user_can('manage_woocommerce')) return;
+	if ( ! current_user_can( 'manage_woocommerce' ) ) return;
 
-	if( !is_object( $post ) ) return;
+	if ( ! is_object( $post ) ) return;
 
-	if ($post->post_type!='product') return;
+	if ( $post->post_type != 'product' ) return;
 
-	if ( isset( $_GET['post'] ) ) :
-		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+	if ( isset( $_GET['post'] ) ) {
+		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 		?>
 		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 		<?php
-	endif;
+	}
 }
 
 add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' );
@@ -79,23 +79,23 @@ function woocommerce_edit_product_columns($columns){
 	$columns = array();
 
 	$columns["cb"] = "<input type=\"checkbox\" />";
-	$columns["thumb"] = __("Image", 'woocommerce');
+	$columns["thumb"] = __( 'Image', 'woocommerce' );
 
-	$columns["name"] = __("Name", 'woocommerce');
+	$columns["name"] = __( 'Name', 'woocommerce' );
 
 	if (get_option('woocommerce_enable_sku', true) == 'yes')
-		$columns["sku"] = __("SKU", 'woocommerce');
+		$columns["sku"] = __( 'SKU', 'woocommerce' );
 
 	if (get_option('woocommerce_manage_stock')=='yes')
-		$columns["is_in_stock"] = __("Stock", 'woocommerce');
+		$columns["is_in_stock"] = __( 'Stock', 'woocommerce' );
 
-	$columns["price"] = __("Price", 'woocommerce');
+	$columns["price"] = __( 'Price', 'woocommerce' );
 
-	$columns["product_cat"] = __("Categories", 'woocommerce');
-	$columns["product_tag"] = __("Tags", 'woocommerce');
-	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="' . __("Featured", 'woocommerce') . '" class="tips" data-tip="' . __("Featured", 'woocommerce') . '" width="12" height="12" />';
-	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __("Type", 'woocommerce') . '" class="tips" data-tip="' . __("Type", 'woocommerce') . '" width="14" height="12" />';
-	$columns["date"] = __("Date", 'woocommerce');
+	$columns["product_cat"] = __( 'Categories', 'woocommerce' );
+	$columns["product_tag"] = __( 'Tags', 'woocommerce' );
+	$columns["featured"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/featured.png" alt="' . __( 'Featured', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Featured', 'woocommerce' ) . '" width="12" height="12" />';
+	$columns["product_type"] = '<img src="' . $woocommerce->plugin_url() . '/assets/images/product_type_head.png" alt="' . __( 'Type', 'woocommerce' ) . '" class="tips" data-tip="' . __( 'Type', 'woocommerce' ) . '" width="14" height="12" />';
+	$columns["date"] = __( 'Date', 'woocommerce' );
 
 	return $columns;
 }
@@ -513,13 +513,13 @@ function woocommerce_admin_product_search_label($query) {
 	$sku = get_query_var( 'sku' );
 	if($sku) {
 		$post_type = get_post_type_object($wp->query_vars['post_type']);
-		return sprintf(__("[%s with SKU of %s]", 'woocommerce'), $post_type->labels->singular_name, $sku);
+		return sprintf(__( '[%s with SKU of %s]', 'woocommerce' ), $post_type->labels->singular_name, $sku);
 	}
 
 	$p = get_query_var( 'p' );
 	if ($p) {
 		$post_type = get_post_type_object($wp->query_vars['post_type']);
-		return sprintf(__("[%s with ID of %d]", 'woocommerce'), $post_type->labels->singular_name, $p);
+		return sprintf(__( '[%s with ID of %d]', 'woocommerce' ), $post_type->labels->singular_name, $p);
 	}
 
 	return $query;

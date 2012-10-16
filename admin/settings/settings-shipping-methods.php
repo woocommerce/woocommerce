@@ -35,7 +35,7 @@ function woocommerce_shipping_methods_setting() {
 			    	<?php
 			    	foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
 
-				    	$default_shipping_method = get_option('woocommerce_default_shipping_method');
+				    	$default_shipping_method = esc_attr( get_option('woocommerce_default_shipping_method') );
 
 				    	echo '<tr>
 				    		<td width="1%" class="radio">

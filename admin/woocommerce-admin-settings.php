@@ -140,9 +140,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 		if ( $error || $message ) {
 
 			if ( $error ) {
-				echo '<div id="message" class="error fade"><p><strong>' . wptexturize( $error ) . '</strong></p></div>';
+				echo '<div id="message" class="error fade"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
 			} else {
-				echo '<div id="message" class="updated fade"><p><strong>' . wptexturize( $message ) . '</strong></p></div>';
+				echo '<div id="message" class="updated fade"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
 			}
 
 		} elseif ( ! empty( $_GET['saved'] ) ) {
@@ -261,7 +261,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 								$current = ( get_class( $email ) == $current_section ) ? 'class="current"' : '';
 
-								$links[] = '<a href="' . add_query_arg( 'section', get_class( $email ), admin_url('admin.php?page=woocommerce_settings&tab=email') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $email ), admin_url('admin.php?page=woocommerce_settings&tab=email') ) . '"' . $current . '>' . esc_html( $title ) . '</a>';
 
 							}
 
@@ -299,7 +299,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 								$current = ( get_class( $method ) == $current_section ) ? 'class="current"' : '';
 
-								$links[] = '<a href="' . add_query_arg( 'section', get_class( $method ), admin_url('admin.php?page=woocommerce_settings&tab=shipping') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', get_class( $method ), admin_url('admin.php?page=woocommerce_settings&tab=shipping') ) . '"' . $current . '>' . esc_html( $title ) . '</a>';
 
 							}
 
@@ -326,7 +326,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
 			            		$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
 
-			            		$links[] = '<a href="#gateway-'.$gateway->id.'">'.$title.'</a>';
+			            		$links[] = '<a href="#gateway-'.$gateway->id.'">' . esc_html( $title ) . '</a>';
 							endforeach;
 
 							echo '<div class="subsubsub_section"><ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
@@ -358,7 +358,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 								$current = ( $integration->id == $current_section ) ? 'class="current"' : '';
 
-								$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce_settings&tab=integration') ) . '"' . $current . '>' . $title . '</a>';
+								$links[] = '<a href="' . add_query_arg( 'section', $integration->id, admin_url('admin.php?page=woocommerce_settings&tab=integration') ) . '"' . $current . '>' . esc_html( $title ) . '</a>';
 							}
 
 							echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $links ) . '</li></ul><br class="clear" />';
@@ -514,13 +514,13 @@ function woocommerce_admin_fields( $options ) {
     	} elseif ( $value['desc_tip'] ) {
     		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc_tip'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
     	} else {
-    		$description = '<span class="description">' . $value['desc'] . '</span>';
+    		$description = '<span class="description">' . wp_kses_post( $value['desc'] ) . '</span>';
     	}
 
         switch( $value['type'] ) {
             case 'title':
-            	if ( isset($value['name'] ) && $value['name'] ) echo '<h3>' . $value['name'] . '</h3>';
-            	if ( isset($value['desc'] ) && $value['desc'] ) echo wpautop( wptexturize( $value['desc'] ) );
+            	if ( isset($value['name'] ) && $value['name'] ) echo '<h3>' . esc_html( $value['name'] ) . '</h3>';
+            	if ( isset($value['desc'] ) && $value['desc'] ) echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
             	echo '<table class="form-table">'. "\n\n";
             	if ( isset($value['id'] ) && $value['id'] ) do_action( 'woocommerce_settings_' . sanitize_title($value['id'] ) );
             break;
@@ -532,7 +532,7 @@ function woocommerce_admin_fields( $options ) {
             case 'text':
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo esc_attr( $value['type'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" /> <?php echo $description; ?></td>
                 </tr><?php
@@ -540,14 +540,14 @@ function woocommerce_admin_fields( $options ) {
             case 'color' :
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="text" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" class="colorpick" /> <?php echo $description; ?> <div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div></td>
                 </tr><?php
             break;
             case 'image_width' :
             	?><tr valign="top">
-					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?></th>
                     <td class="forminp">
 
                     	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" />
@@ -562,7 +562,7 @@ function woocommerce_admin_fields( $options ) {
             case 'select':
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>">
                         <?php
@@ -592,7 +592,7 @@ function woocommerce_admin_fields( $options ) {
             			if ($value['hide_if_checked']=='option') echo 'hide_options_if_checked';
             			if ($value['show_if_checked']=='option') echo 'show_options_if_checked';
             		?>">
-					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+					<th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?></th>
 					<td class="forminp">
 						<fieldset>
 					<?php
@@ -607,10 +607,10 @@ function woocommerce_admin_fields( $options ) {
             	endif;
 
             	?>
-	            <legend class="screen-reader-text"><span><?php echo $value['name'] ?></span></legend>
+	            <legend class="screen-reader-text"><span><?php echo esc_html( $value['name'] ) ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
 					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
-					<?php echo $value['desc'] ?></label> <?php if ( $value['desc_tip'] ) echo $description; ?><br />
+					<?php echo wp_kses_post( $value['desc'] ) ?></label> <?php if ( $value['desc_tip'] ) echo $description; ?><br />
 				<?php
 
 				if (!isset($value['checkboxgroup']) || (isset($value['checkboxgroup']) && $value['checkboxgroup']=='end')) :
@@ -629,10 +629,10 @@ function woocommerce_admin_fields( $options ) {
             case 'textarea':
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp">
-                    	<?php if ( ! empty( $value['desc'] ) ) echo '<p style="margin-top:0;">' . $value['desc'] . '</p>'; ?>
+                    	<?php if ( ! empty( $value['desc'] ) ) echo '<p style="margin-top:0;">' . wp_kses_post( $value['desc'] ) . '</p>'; ?>
                     	
                         <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>"><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea>
                     </td>
@@ -653,7 +653,7 @@ function woocommerce_admin_fields( $options ) {
             	if( isset($value['args']) ) $args = wp_parse_args($value['args'], $args);
 
             	?><tr valign="top" class="single_select_page">
-                    <th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
+                    <th scope="row" class="titledesc"><?php echo esc_html( $value['name'] ) ?></th>
                     <td class="forminp">
 			        	<?php echo str_replace(' id=', " data-placeholder='".__( 'Select a page&hellip;', 'woocommerce' )."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <?php echo $description; ?>
 			        </td>
@@ -671,7 +671,7 @@ function woocommerce_admin_fields( $options ) {
             	endif;
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>
@@ -685,7 +685,7 @@ function woocommerce_admin_fields( $options ) {
             	$selections = (array) get_option($value['id']);
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
                     <td class="forminp">
 	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">

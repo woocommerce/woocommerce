@@ -47,13 +47,13 @@ function woocommerce_user_column_values( $value, $column_name, $user_id ) {
 	switch ($column_name) :
 		case "woocommerce_order_count" :
 
-			$count = $wpdb->get_var( "SELECT COUNT(*)
+			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*)
 			FROM $wpdb->posts
 			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
 			WHERE meta_value = $user_id
 			AND meta_key = '_customer_user'
 			AND post_type IN ('shop_order')
-			AND post_status = 'publish'" );
+			AND post_status = 'publish'" ) );
 
 			$value = '<a href="'.admin_url('edit.php?post_status=all&post_type=shop_order&_customer_user='.$user_id.'').'">'.$count.'</a>';
 
@@ -235,10 +235,10 @@ function woocommerce_customer_meta_fields( $user ) {
 			foreach( $fieldset['fields'] as $key => $field ) :
 				?>
 				<tr>
-					<th><label for="<?php echo $key; ?>"><?php echo $field['label']; ?></label></th>
+					<th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ); ?></label></th>
 					<td>
-						<input type="text" name="<?php echo $key; ?>" id="<?php echo $key; ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="regular-text" /><br/>
-						<span class="description"><?php echo $field['description']; ?></span>
+						<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( get_user_meta( $user->ID, $key, true ) ); ?>" class="regular-text" /><br/>
+						<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
 					</td>
 				</tr>
 				<?php
@@ -269,7 +269,7 @@ function woocommerce_save_customer_meta_fields( $user_id ) {
  	foreach( $save_fields as $fieldset )
  		foreach( $fieldset['fields'] as $key => $field )
  			if ( isset( $_POST[ $key ] ) )
- 				update_user_meta( $user_id, $key, trim( esc_attr( $_POST[ $key ] ) ) );
+ 				update_user_meta( $user_id, $key, woocommerce_clean( $_POST[ $key ] ) );
 }
 
 add_action( 'personal_options_update', 'woocommerce_save_customer_meta_fields' );

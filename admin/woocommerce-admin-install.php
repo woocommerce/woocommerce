@@ -182,7 +182,7 @@ function woocommerce_create_page( $slug, $option, $page_title = '', $page_conten
 	if ( $option_value > 0 && get_post( $option_value ) )
 		return;
 
-	$page_found = $wpdb->get_var( "SELECT ID FROM " . $wpdb->posts . " WHERE post_name = '$slug' LIMIT 1;" );
+	$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_name = %s LIMIT 1;", $slug ) );
 	if ( $page_found ) {
 		if ( ! $option_value )
 			update_option( $option, $page_found );
@@ -275,7 +275,7 @@ function woocommerce_tables_install() {
      **/
     if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<' ) ) { 
 		// remove the existing primary key so we can add the new download_id column
-		$wpdb->query( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" );
+		$wpdb->query( $wpdb->prepare( "ALTER TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions DROP PRIMARY KEY" ) );
 	}
 
     // Table for storing attribute taxonomies - these are user defined
@@ -329,7 +329,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 	if ( version_compare( get_option('woocommerce_db_version'), '1.7', '<' ) ) {
 
 		// upgrade existing meta data
-		$existing_file_paths = $wpdb->get_results( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key = '_file_path'" );
+		$existing_file_paths = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ". $wpdb->postmeta . " WHERE meta_key = '_file_path'" ) );
 		if ( $existing_file_paths ) {
 			foreach( $existing_file_paths as $existing_file_path ) {
 				$existing_file_path->meta_value = trim( $existing_file_path->meta_value );
@@ -346,7 +346,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
     if ( version_compare( get_option('woocommerce_db_version'), '1.0', '>' ) && version_compare( get_option('woocommerce_db_version'), '1.4', '<' ) ) {
 
 	    // Update woocommerce_downloadable_product_permissions table to include order ID's as well as keys
-	    $results = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" );
+	    $results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_downloadable_product_permissions WHERE order_id = 0;" ) );
 
 		if ( $results ) foreach ( $results as $result ) {
 
@@ -371,13 +371,13 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 		// Upgrade old meta keys for product data
 		$meta = array('sku', 'downloadable', 'virtual', 'price', 'visibility', 'stock', 'stock_status', 'backorders', 'manage_stock', 'sale_price', 'regular_price', 'weight', 'length', 'width', 'height', 'tax_status', 'tax_class', 'upsell_ids', 'crosssell_ids', 'sale_price_dates_from', 'sale_price_dates_to', 'min_variation_price', 'max_variation_price', 'featured', 'product_attributes', 'file_path', 'download_limit', 'product_url', 'min_variation_price', 'max_variation_price');
 
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare( "
 			UPDATE {$wpdb->postmeta}
 			LEFT JOIN {$wpdb->posts} ON ( {$wpdb->postmeta}.post_id = {$wpdb->posts}.ID )
 			SET meta_key = CONCAT( '_', meta_key )
 			WHERE meta_key IN ( '" . implode( "', '", $meta ) . "' )
 			AND {$wpdb->posts}.post_type IN ('product', 'product_variation')
-		");
+		" ) );
 	}
 }
 

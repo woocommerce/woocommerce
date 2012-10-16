@@ -37,12 +37,12 @@ function woocommerce_payment_gateways_setting() {
 
 		        		echo '<tr>
 		        			<td width="1%" class="radio">
-		        				<input type="radio" name="default_gateway" value="' . $gateway->id . '" ' . checked( $default_gateway, $gateway->id, false ) . ' />
-		        				<input type="hidden" name="gateway_order[]" value="' . $gateway->id . '" />
+		        				<input type="radio" name="default_gateway" value="' . esc_attr( $gateway->id ) . '" ' . checked( $default_gateway, esc_attr( $gateway->id ), false ) . ' />
+		        				<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
 		        			</td>
 		        			<td>
 		        				<p><strong>' . $gateway->get_title() . '</strong><br/>
-		        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . $gateway->id . '</small></p>
+		        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . esc_html( $gateway->id ) . '</small></p>
 		        			</td>
 		        			<td>';
 

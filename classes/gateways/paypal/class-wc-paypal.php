@@ -135,7 +135,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 							'title' => __( 'Description', 'woocommerce' ),
 							'type' => 'textarea',
 							'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-							'default' => __("Pay via PayPal; you can pay with your credit card if you don't have a PayPal account", 'woocommerce')
+							'default' => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account', 'woocommerce' )
 						),
 			'email' => array(
 							'title' => __( 'PayPal Email', 'woocommerce' ),

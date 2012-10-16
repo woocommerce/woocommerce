@@ -51,7 +51,7 @@ function woocommerce_import_start() {
 
 								$nicename = strtolower(sanitize_title(str_replace('pa_', '', $domain)));
 
-								$exists_in_db = $wpdb->get_var("SELECT attribute_id FROM ".$wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = '".$nicename."';");
+								$exists_in_db = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $nicename ) );
 
 								if (!$exists_in_db) :
 

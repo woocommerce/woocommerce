@@ -373,7 +373,7 @@ function woocommerce_admin_scripts() {
 		wp_enqueue_script( 'plupload-all' );
 
 		$woocommerce_witepanel_params = array(
-			'remove_item_notice' 			=> __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woocommerce'),
+			'remove_item_notice' 			=> __( 'Remove this item? If you have previously reduced this item\'s stock, or this order was submitted by a customer, will need to manually restore the item\'s stock.', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
 			'remove_label'					=> __( 'Remove', 'woocommerce' ),
@@ -383,11 +383,11 @@ function woocommerce_admin_scripts() {
 			'visible_label'					=> __( 'Visible on the product page', 'woocommerce' ),
 			'used_for_variations_label'		=> __( 'Used for variations', 'woocommerce' ),
 			'new_attribute_prompt'			=> __( 'Enter a name for the new attribute term:', 'woocommerce' ),
-			'calc_totals' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually.", 'woocommerce'),
-			'calc_line_taxes' 				=> __("Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.", 'woocommerce'),
-			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
-			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce'),
-			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
+			'calc_totals' 					=> __( 'Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually.', 'woocommerce' ),
+			'calc_line_taxes' 				=> __( 'Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.', 'woocommerce' ),
+			'copy_billing' 					=> __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+			'load_billing' 					=> __( 'Load the customer\'s billing information? This will remove any currently entered billing information.', 'woocommerce' ),
+			'load_shipping' 				=> __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 			'featured_label'				=> __( 'Featured', 'woocommerce' ),
 			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
@@ -592,9 +592,10 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 
 	$parent = get_post( $object->post_parent );
 
-	if ($parent->post_type!=='product') return $fields;
+	if ( $parent->post_type !== 'product' ) 
+		return $fields;
 
-	$exclude_image = (int) get_post_meta($object->ID, '_woocommerce_exclude_image', true);
+	$exclude_image = get_post_meta( absint( $object->ID ), '_woocommerce_exclude_image', true );
 
 	$label = __( 'Exclude image', 'woocommerce' );
 
