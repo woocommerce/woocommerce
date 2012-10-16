@@ -289,7 +289,7 @@ function woocommerce_sales_overview() {
 
 	$total_sales = $total_orders = $order_items = $discount_total = $shipping_total = 0;
 
-	$order_totals = $wpdb->get_row("
+	$order_totals = $wpdb->get_row( $wpdb->prepare( "
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -302,12 +302,12 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	");
+	" ) );
 
 	$total_sales 	= $order_totals->total_sales;
 	$total_orders 	= absint( $order_totals->total_orders );
 
-	$discount_total = $wpdb->get_var("
+	$discount_total = $wpdb->get_var( $wpdb->prepare( "
 		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -320,9 +320,9 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	");
+	" ) );
 
-	$shipping_total = $wpdb->get_var("
+	$shipping_total = $wpdb->get_var( $wpdb->prepare( "
 		SELECT SUM(meta.meta_value) AS total_sales FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -335,9 +335,9 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	");
+	" ) );
 
-	$order_items_serialized = $wpdb->get_col("
+	$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
 		SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -350,7 +350,7 @@ function woocommerce_sales_overview() {
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	");
+	" ) );
 
 	if ( $order_items_serialized ) {
 		foreach ( $order_items_serialized as $order_items_array ) {
@@ -433,7 +433,7 @@ function woocommerce_sales_overview() {
 	}
 	
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results("
+	$orders = $wpdb->get_results( $wpdb->prepare( "
 		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
@@ -447,7 +447,7 @@ function woocommerce_sales_overview() {
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
 		ORDER BY post_date ASC
-	");
+	" ) );
 
 	if ( $orders ) {
 		foreach ( $orders as $order ) {
@@ -570,7 +570,7 @@ function woocommerce_daily_sales() {
 	}
 	
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results("
+	$orders = $wpdb->get_results( $wpdb->prepare( "
 		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
@@ -584,7 +584,7 @@ function woocommerce_daily_sales() {
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
 		ORDER BY post_date ASC
-	");
+	" ) );
 
 	if ( $orders ) {
 		foreach ( $orders as $order ) {
@@ -724,7 +724,7 @@ function woocommerce_monthly_sales() {
 
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = $wpdb->get_var( $wpdb->prepare( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" ) );
 	
 	$first_year = $first_year ? date( 'Y', strtotime( $first_year ) ) : date('Y');
 
@@ -742,7 +742,7 @@ function woocommerce_monthly_sales() {
 
 		$month = date( 'Ym', strtotime(date('Ym', strtotime('+ '.$count.' MONTH', $start_date)).'01') );
 
-		$months_orders = $wpdb->get_row("
+		$months_orders = $wpdb->get_row( $wpdb->prepare( "
 			SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -756,7 +756,7 @@ function woocommerce_monthly_sales() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
 		$order_counts[ $time ] 	= (int) $months_orders->total_orders;
 		$order_amounts[ $time ] 	= (float) $months_orders->total_sales;
@@ -765,7 +765,7 @@ function woocommerce_monthly_sales() {
 		$total_sales			+= (float) $months_orders->total_sales;
 
 		// Count order items
-		$order_items_serialized = $wpdb->get_col("
+		$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
 			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
 
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -779,7 +779,7 @@ function woocommerce_monthly_sales() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
 		if ($order_items_serialized) {
 			foreach ( $order_items_serialized as $order_items_array ) {
@@ -917,7 +917,7 @@ function woocommerce_top_sellers() {
 	$end_date = strtotime( $end_date );
 
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results("
+	$orders = $wpdb->get_results( $wpdb->prepare( "
 		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
@@ -931,7 +931,7 @@ function woocommerce_top_sellers() {
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
 		ORDER BY post_date ASC
-	");
+	" ) );
 
 	$found_products = array();
 
@@ -1009,7 +1009,7 @@ function woocommerce_top_earners() {
 	$end_date = strtotime( $end_date );
 
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results("
+	$orders = $wpdb->get_results( $wpdb->prepare( "
 		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
@@ -1023,7 +1023,7 @@ function woocommerce_top_earners() {
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
 		ORDER BY post_date ASC
-	");
+	" ) );
 
 	$found_products = array();
 
@@ -1116,7 +1116,7 @@ function woocommerce_product_sales() {
 		}
 
 		// Get order items
-		$order_items = $wpdb->get_results("
+		$order_items = $wpdb->get_results( $wpdb->prepare( "
 			SELECT meta.meta_value AS items, posts.post_date FROM {$wpdb->posts} AS posts
 
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1131,7 +1131,7 @@ function woocommerce_product_sales() {
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		posts.post_date		> date_sub( NOW(), INTERVAL 1 YEAR )
 			ORDER BY posts.post_date ASC
-		");
+		" ) );
 
 		if ( $order_items ) {
 
@@ -1250,7 +1250,7 @@ function woocommerce_customer_overview() {
 	$customers = $users_query->get_results();
 	$total_customers = (int) sizeof($customers);
 
-	$customer_orders = $wpdb->get_row("
+	$customer_orders = $wpdb->get_row( $wpdb->prepare( "
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1268,12 +1268,12 @@ function woocommerce_customer_overview() {
 			WHERE 	meta_key 		= '_customer_user'
 			AND		meta_value		> 0
 		)
-	");
+	" ) );
 
 	$total_customer_sales	= $customer_orders->total_sales;
 	$total_customer_orders	= absint( $customer_orders->total_orders );
 
-	$guest_orders = $wpdb->get_row("
+	$guest_orders = $wpdb->get_row( $wpdb->prepare( "
 		SELECT SUM(meta.meta_value) AS total_sales, COUNT(posts.ID) AS total_orders FROM {$wpdb->posts} AS posts
 
 		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1291,7 +1291,7 @@ function woocommerce_customer_overview() {
 			WHERE 	meta_key 		= '_customer_user'
 			AND		meta_value		= 0
 		)
-	");
+	" ) );
 
 	$total_guest_sales	= $guest_orders->total_sales;
 	$total_guest_orders	= absint( $guest_orders->total_orders );
@@ -1616,7 +1616,7 @@ function woocommerce_stock_overview() {
 function woocommerce_monthly_taxes() {
 	global $start_date, $end_date, $woocommerce, $wpdb;
 
-	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = $wpdb->get_var( $wpdb->prepare( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" ) );
 
 	if ( $first_year )
 		$first_year = date( 'Y', strtotime( $first_year ) );
@@ -1638,7 +1638,7 @@ function woocommerce_monthly_taxes() {
 
 		$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ ' . $count . ' MONTH', $start_date ) ) . '01' ) );
 
-		$gross = $wpdb->get_var("
+		$gross = $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( meta.meta_value ) AS order_tax
 			FROM {$wpdb->posts} AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1651,9 +1651,9 @@ function woocommerce_monthly_taxes() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
-		$shipping = $wpdb->get_var("
+		$shipping = $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( meta.meta_value ) AS order_tax
 			FROM {$wpdb->posts} AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1666,9 +1666,9 @@ function woocommerce_monthly_taxes() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
-		$order_tax = $wpdb->get_var("
+		$order_tax = $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( meta.meta_value ) AS order_tax
 			FROM {$wpdb->posts} AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1681,9 +1681,9 @@ function woocommerce_monthly_taxes() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
-		$shipping_tax = $wpdb->get_var("
+		$shipping_tax = $wpdb->get_var( $wpdb->prepare( "
 			SELECT SUM( meta.meta_value ) AS order_tax
 			FROM {$wpdb->posts} AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1696,9 +1696,9 @@ function woocommerce_monthly_taxes() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
-		$order_taxes = $wpdb->get_col("
+		$order_taxes = $wpdb->get_col( $wpdb->prepare( "
 			SELECT meta.meta_value AS order_tax
 			FROM {$wpdb->posts} AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1711,7 +1711,7 @@ function woocommerce_monthly_taxes() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
 		$tax_rows = array();
 
@@ -1891,7 +1891,7 @@ function woocommerce_monthly_taxes() {
 function woocommerce_category_sales() {
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = $wpdb->get_var( $wpdb->prepare( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 ORDER BY post_date ASC LIMIT 1;" ) );
 	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
 
 	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
@@ -1938,7 +1938,7 @@ function woocommerce_category_sales() {
 		$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ '. $count . ' MONTH', $start_date ) ) . '01' ) );
 
 		// Get order items
-		$order_items_serialized = $wpdb->get_col("
+		$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
 			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
 
 			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -1952,7 +1952,7 @@ function woocommerce_category_sales() {
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		");
+		" ) );
 
 		if ( $order_items_serialized ) {
 			foreach ( $order_items_serialized as $order_items_array ) {
@@ -2221,7 +2221,7 @@ function woocommerce_category_sales() {
 function woocommerce_coupon_sales() {
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
-	$first_year = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 AND post_type='shop_order' ORDER BY post_date ASC LIMIT 1;" );
+	$first_year = $wpdb->get_var( $wpdb->prepare( "SELECT post_date FROM $wpdb->posts WHERE post_date != 0 AND post_type='shop_order' ORDER BY post_date ASC LIMIT 1;" ) );
 	$first_year = ( $first_year ) ? date( 'Y', strtotime( $first_year ) ) : date( 'Y' );
 
 	$current_year 	= isset( $_POST['show_year'] ) 	? $_POST['show_year'] 	: date( 'Y', current_time( 'timestamp' ) );
@@ -2230,7 +2230,7 @@ function woocommerce_coupon_sales() {
 	$order_statuses = implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) );
 	
 	
-	$coupons = $wpdb->get_col( "
+	$coupons = $wpdb->get_col( $wpdb->prepare( "
 								SELECT DISTINCT meta.meta_value FROM {$wpdb->postmeta} AS meta
 								LEFT JOIN {$wpdb->posts} AS posts ON posts.ID = meta.post_id
 								LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
@@ -2242,7 +2242,7 @@ function woocommerce_coupon_sales() {
 								AND		posts.post_status	= 'publish'
 								AND		tax.taxonomy		= 'shop_order_status'
 								AND		term.slug			IN ('{$order_statuses}')
-							");
+							" ) );
 	
 	 
 	
@@ -2281,7 +2281,7 @@ function woocommerce_coupon_sales() {
 
 	foreach( $coupons as $coupon ) :
 	
-		$monthly_sales = $wpdb->get_results($wpdb->prepare("
+		$monthly_sales = $wpdb->get_results( $wpdb->prepare( "
 			SELECT SUM(postmeta.meta_value) AS order_total, date_format(posts.post_date, '%%Y%%m') as month FROM {$wpdb->posts} AS posts
 			
 			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID=postmeta.post_ID
@@ -2310,9 +2310,7 @@ function woocommerce_coupon_sales() {
 		
 		
 	endforeach;
-		
 	?>
-	
 	<div class="woocommerce-wide-reports-wrap">
 		<table class="widefat">
 			<thead>

@@ -473,7 +473,9 @@ function woocommerce_order_bulk_action() {
 
 	$changed = 0;
 
-	foreach( $_REQUEST['post'] as $post_id ) {
+	$post_ids = array_map( 'absint', (array) $_REQUEST['post'] );
+
+	foreach( $post_ids as $post_id ) {
 		$order = new WC_Order( $post_id );
 		$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
 		$changed++;
