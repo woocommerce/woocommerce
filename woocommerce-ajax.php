@@ -688,28 +688,32 @@ function woocommerce_grant_access_to_download() {
 
 	global $wpdb;
 
-	$product_id = intval( $_POST['product_id'] );
 	$order_id 	= intval( $_POST['order_id'] );
-
-	$order = new WC_Order( $order_id );
+	$product_id = intval( $_POST['product_id'] );
+	$loop 		= intval( $_POST['loop'] );
+	$file_count = 0;
+	
+	$order 		= new WC_Order( $order_id );
+	$product 	= new WC_Product( $product_id );
 
 	$user_email = $order->billing_email;
 
-	$limit = trim(get_post_meta($product_id, '_download_limit', true));
-	$expiry = trim(get_post_meta($product_id, '_download_expiry', true));
+	$limit		= trim( get_post_meta( $product_id, '_download_limit', true ) );
+	$expiry 	= trim( get_post_meta( $product_id, '_download_expiry', true ) );
 	$file_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, null );
 
-    $limit = (empty($limit)) ? '' : (int) $limit;
+    $limit 		= empty( $limit ) ? '' : (int) $limit;
 
     // Default value is NULL in the table schema
-	$expiry = (empty($expiry)) ? null : (int) $expiry;
+	$expiry 	= empty( $expiry ) ? null : (int) $expiry;
 
-	if ($expiry) $expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
+	if ( $expiry ) 
+		$expiry = date_i18n( "Y-m-d", strtotime( 'NOW + ' . $expiry . ' DAY' ) );
 
 	$wpdb->hide_errors();
 
 	$response = array();
-	if ( $file_paths )
+	if ( $file_paths ) {
 		foreach ( $file_paths as $download_id => $file_path ) {
 	
 		    $data = array(
@@ -720,7 +724,7 @@ function woocommerce_grant_access_to_download() {
 		        'order_id' 				=> $order->id,
 		        'order_key' 			=> $order->order_key,
 		        'downloads_remaining' 	=> $limit,
-		        'access_granted'		=> current_time('mysql'),
+		        'access_granted'		=> current_time( 'mysql' ),
 		        'download_count'		=> 0
 		    );
 	
@@ -736,7 +740,7 @@ function woocommerce_grant_access_to_download() {
 		        '%d'
 		    );
 	
-		    if ( ! is_null($expiry)) {
+		    if ( ! is_null( $expiry ) ) {
 		        $data['access_expires'] = $expiry;
 		        $format[] = '%s';
 		    }
@@ -748,23 +752,22 @@ function woocommerce_grant_access_to_download() {
 		    );
 	
 			if ( $success ) {
-				$response[] = array(
-					'product_id'  	=> $product_id,
-					'download_id'  	=> $download_id,
-					'title'			=> get_the_title( $product_id ),
-					'expires'		=> is_null( $expiry ) ? '' : $expiry,
-					'remaining'		=> $limit,
-					'file_path'		=> $file_path,
-					'file_name'		=> basename( $file_path )
-				);
+			
+				$download = new stdClass();
+				$download->product_id 	= $product_id;
+				$download->download_id 	= $download_id;
+				$download->order_id 	= $order->id;
+				$download->order_key	= $order->order_key;
+				$download->download_count 		= 0;
+				$download->downloads_remaining 	= $limit;
+				$download->access_expires 		= $expiry;
+				
+				$loop++;
+				$file_count++;
+			
+				include( 'admin/post-types/writepanels/order-download-permission-html.php' );
 			}
 		}
-
-	if ( $response ) {
-		echo json_encode( array(
-			'success' => 1,
-			'files' => $response
-		));
 	}
 
 	die();
