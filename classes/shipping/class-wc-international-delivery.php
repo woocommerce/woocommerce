@@ -25,11 +25,11 @@ class WC_International_Delivery extends WC_Flat_Rate {
 	function __construct() {
 
         $this->id 						= 'international_delivery';
-        $this->method_title 			= __('International Delivery', 'woocommerce');
+        $this->method_title 			= __( 'International Delivery', 'woocommerce' );
 
 		$this->flat_rate_option	 		= 'woocommerce_international_delivery_flat_rates';
-		$this->admin_page_heading 		= __('International Delivery', 'woocommerce');
-		$this->admin_page_description 	= __('International delivery based on flat rate shipping.', 'woocommerce');
+		$this->admin_page_heading 		= __( 'International Delivery', 'woocommerce' );
+		$this->admin_page_description 	= __( 'International delivery based on flat rate shipping.', 'woocommerce' );
 
 		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_admin_options'));
 		add_action('woocommerce_update_options_shipping_'.$this->id, array(&$this, 'process_flat_rates'));
@@ -66,8 +66,8 @@ class WC_International_Delivery extends WC_Flat_Rate {
 							'description' 	=> '',
 							'default' 		=> 'including',
 							'options' 		=> array(
-								'including' 	=> __('Selected countries', 'woocommerce'),
-								'excluding' 	=> __('Excluding selected countries', 'woocommerce'),
+								'including' 	=> __( 'Selected countries', 'woocommerce' ),
+								'excluding' 	=> __( 'Excluding selected countries', 'woocommerce' ),
 							)
 						),
 			'countries' => array(
@@ -84,9 +84,9 @@ class WC_International_Delivery extends WC_Flat_Rate {
 							'description' 	=> '',
 							'default' 		=> 'order',
 							'options' 		=> array(
-								'order' 	=> __('Per Order - charge shipping for the entire order as a whole', 'woocommerce'),
-								'item' 		=> __('Per Item - charge shipping for each item individually', 'woocommerce'),
-								'class' 	=> __('Per Class - charge shipping for each shipping class in an order', 'woocommerce')
+								'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
+								'item' 		=> __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
+								'class' 	=> __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' )
 							)
 						),
 			'tax_status' => array(
@@ -95,20 +95,20 @@ class WC_International_Delivery extends WC_Flat_Rate {
 							'description' 	=> '',
 							'default' 		=> 'taxable',
 							'options'		=> array(
-								'taxable' 	=> __('Taxable', 'woocommerce'),
-								'none' 		=> __('None', 'woocommerce')
+								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+								'none' 		=> __( 'None', 'woocommerce' )
 							)
 						),
 			'cost' => array(
 							'title' 		=> __( 'Default Cost', 'woocommerce' ),
 							'type' 			=> 'text',
-							'description'	=> __('Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce'),
+							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default' 		=> ''
 						),
 			'fee' => array(
 							'title' 		=> __( 'Default Handling Fee', 'woocommerce' ),
 							'type' 			=> 'text',
-							'description'	=> __('Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce'),
+							'description'	=> __( 'Fee excluding tax. Enter an amount, e.g. 2.50, or a percentage, e.g. 5%. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> ''
 						),
 			);

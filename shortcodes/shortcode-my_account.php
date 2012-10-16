@@ -168,7 +168,7 @@ function woocommerce_save_address() {
 		$_POST[$key] = apply_filters('woocommerce_process_myaccount_field_' . $key, $_POST[$key]);
 
 		// Validation: Required fields
-		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __('is a required field.', 'woocommerce') );
+		if ( isset($field['required']) && $field['required'] && empty($_POST[$key]) ) $woocommerce->add_error( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ) );
 
 		// Postcode
 		if ($key=='billing_postcode' || $key=='shipping_postcode') :
@@ -250,7 +250,7 @@ function woocommerce_save_password() {
 		$woocommerce->add_error( __( 'Please enter your password.', 'woocommerce' ) );
 
 	if ( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] )
-		$woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
+		$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 	if ( $woocommerce->error_count() == 0 ) {
 
@@ -287,7 +287,7 @@ function woocommerce_view_order() {
 	}
 
 	if ( $order->user_id != $user_id ) {
-		echo '<div class="woocommerce_error">' . __('Invalid order.', 'woocommerce') . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __('My Account &rarr;', 'woocommerce') .'</a>' . '</div>';
+		echo '<div class="woocommerce_error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="'.get_permalink( woocommerce_get_page_id('myaccount') ).'">'. __( 'My Account &rarr;', 'woocommerce' ) .'</a>' . '</div>';
 		return;
 	}
 
@@ -301,13 +301,13 @@ function woocommerce_view_order() {
 	$notes = $order->get_customer_order_notes();
 	if ($notes) :
 		?>
-		<h2><?php _e('Order Updates', 'woocommerce'); ?></h2>
+		<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
 		<ol class="commentlist notes">
 			<?php foreach ($notes as $note) : ?>
 			<li class="comment note">
 				<div class="comment_container">
 					<div class="comment-text">
-						<p class="meta"><?php echo date_i18n(__('l jS \of F Y, h:ia', 'woocommerce'), strtotime($note->comment_date)); ?></p>
+						<p class="meta"><?php echo date_i18n(__( 'l jS \of F Y, h:ia', 'woocommerce' ), strtotime($note->comment_date)); ?></p>
 						<div class="description">
 							<?php echo wpautop(wptexturize($note->comment_content)); ?>
 						</div>

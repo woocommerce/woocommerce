@@ -78,7 +78,7 @@ function woocommerce_lost_password() {
 			}
 
 			if( $_POST[ 'password_1' ] !== $_POST[ 'password_2' ] ) {
-				$woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 				$args['form'] = 'reset_password';
 			}
 

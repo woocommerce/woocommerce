@@ -58,7 +58,7 @@ function woocommerce_duplicate_product_post_button() {
 	if ( isset( $_GET['post'] ) ) :
 		$notifyUrl = wp_nonce_url( admin_url( "admin.php?action=duplicate_product&post=" . $_GET['post'] ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 		?>
-		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e('Copy to a new draft', 'woocommerce'); ?></a></div>
+		<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 		<?php
 	endif;
 }
@@ -203,21 +203,21 @@ function woocommerce_custom_product_columns( $column ) {
 		break;
 		case "product_type" :
 			if( $product->product_type == 'grouped' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Grouped', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
 			elseif ( $product->product_type == 'external' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('External/Affiliate', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
 			elseif ( $product->product_type == 'simple' ):
 
 				if ($product->is_virtual()) {
-					echo '<span class="product-type tips virtual" data-tip="' . __('Virtual', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips virtual" data-tip="' . __( 'Virtual', 'woocommerce' ) . '"></span>';
 				} elseif ($product->is_downloadable()) {
-					echo '<span class="product-type tips downloadable" data-tip="' . __('Downloadable', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips downloadable" data-tip="' . __( 'Downloadable', 'woocommerce' ) . '"></span>';
 				} else {
-					echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Simple', 'woocommerce') . '"></span>';
+					echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
 				}
 
 			elseif ( $product->product_type == 'variable' ):
-				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __('Variable', 'woocommerce') . '"></span>';
+				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
 			else:
 				// Assuming that we have other types in future
 				echo '<span class="product-type tips '.$product->product_type.'" data-tip="' . ucwords($product->product_type) . '"></span>';
@@ -240,7 +240,7 @@ function woocommerce_custom_product_columns( $column ) {
 		break;
 		case "featured" :
 			$url = wp_nonce_url( admin_url('admin-ajax.php?action=woocommerce-feature-product&product_id=' . $post->ID), 'woocommerce-feature-product' );
-			echo '<a href="'.$url.'" title="'.__('Change', 'woocommerce') .'">';
+			echo '<a href="'.$url.'" title="'.__( 'Change', 'woocommerce' ) .'">';
 			if ($product->is_featured()) echo '<a href="'.$url.'"><img src="'.$woocommerce->plugin_url().'/assets/images/featured.png" alt="yes" height="14" width="14" />';
 			else echo '<img src="'.$woocommerce->plugin_url().'/assets/images/featured-off.png" alt="no" height="14" width="14" />';
 			echo '</a>';
@@ -248,9 +248,9 @@ function woocommerce_custom_product_columns( $column ) {
 		case "is_in_stock" :
 
 			if ($product->is_in_stock()) {
-				echo '<mark class="instock">' . __('In stock', 'woocommerce') . '</mark>';
+				echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 			} else {
-				echo '<mark class="outofstock">' . __('Out of stock', 'woocommerce') . '</mark>';
+				echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 			}
 
 			if ( $product->managing_stock() ) :
@@ -366,7 +366,7 @@ function woocommerce_products_by_type() {
     	// Types
 		$terms = get_terms('product_type');
 		$output = "<select name='product_type' id='dropdown_product_type'>";
-		$output .= '<option value="">'.__('Show all product types', 'woocommerce').'</option>';
+		$output .= '<option value="">'.__( 'Show all product types', 'woocommerce' ).'</option>';
 		foreach($terms as $term) :
 			$output .="<option value='$term->slug' ";
 			if ( isset( $wp_query->query['product_type'] ) ) $output .=selected($term->slug, $wp_query->query['product_type'], false);
@@ -374,13 +374,13 @@ function woocommerce_products_by_type() {
 
 				// Its was dynamic but did not support the translations
 				if( $term->name == 'grouped' ):
-					$output .= __('Grouped product', 'woocommerce');
+					$output .= __( 'Grouped product', 'woocommerce' );
 				elseif ( $term->name == 'external' ):
-					$output .= __('External/Affiliate product', 'woocommerce');
+					$output .= __( 'External/Affiliate product', 'woocommerce' );
 				elseif ( $term->name == 'simple' ):
-					$output .= __('Simple product', 'woocommerce');
+					$output .= __( 'Simple product', 'woocommerce' );
 				elseif ( $term->name == 'variable' ):
-					$output .= __('Variable', 'woocommerce');
+					$output .= __( 'Variable', 'woocommerce' );
 				else:
 					// Assuming that we have other types in future
 					$output .= ucwords($term->name);
@@ -392,15 +392,15 @@ function woocommerce_products_by_type() {
 
 		// Downloadable/virtual
 		$output .= "<select name='product_subtype' id='dropdown_product_subtype'>";
-		$output .= '<option value="">'.__('Show all sub-types', 'woocommerce').'</option>';
+		$output .= '<option value="">'.__( 'Show all sub-types', 'woocommerce' ).'</option>';
 
 		$output .="<option value='downloadable' ";
 		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('downloadable', $_GET['product_subtype'], false);
-		$output .=">".__('Downloadable', 'woocommerce')."</option>";
+		$output .=">".__( 'Downloadable', 'woocommerce' )."</option>";
 
 		$output .="<option value='virtual' ";
 		if ( isset( $_GET['product_subtype'] ) ) $output .= selected('virtual', $_GET['product_subtype'], false);
-		$output .=">".__('Virtual', 'woocommerce')."</option>";
+		$output .=">".__( 'Virtual', 'woocommerce' )."</option>";
 
 		$output .="</select>";
 
@@ -545,12 +545,12 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
     <fieldset class="inline-edit-col-left">
 		<div id="woocommerce-fields" class="inline-edit-col">
 
-			<h4><?php _e('Product Data', 'woocommerce'); ?></h4>
+			<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
 
 			<?php if( get_option('woocommerce_enable_sku', true) !== 'no' ) : ?>
 
 				<label>
-				    <span class="title"><?php _e('SKU', 'woocommerce'); ?></span>
+				    <span class="title"><?php _e( 'SKU', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
 						<input type="text" name="_sku" class="text sku" value="">
 					</span>
@@ -561,16 +561,16 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 
 			<div class="price_fields">
 				<label>
-				    <span class="title"><?php _e('Price', 'woocommerce'); ?></span>
+				    <span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
-						<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Regular price', 'woocommerce'); ?>" value="">
+						<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular price', 'woocommerce' ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />
 				<label>
-				    <span class="title"><?php _e('Sale', 'woocommerce'); ?></span>
+				    <span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
-						<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Sale price', 'woocommerce'); ?>" value="">
+						<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale price', 'woocommerce' ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />
@@ -581,7 +581,7 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 
 				<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
 					<label>
-					    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>
+					    <span class="title"><?php _e( 'Weight', 'woocommerce' ); ?></span>
 					    <span class="input-text-wrap">
 							<input type="text" name="_weight" class="text weight" placeholder="0.00" value="">
 						</span>
@@ -592,11 +592,11 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
 					<div class="inline-edit-group dimensions">
 						<div>
-						    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>
+						    <span class="title"><?php _e( 'L/W/H', 'woocommerce' ); ?></span>
 						    <span class="input-text-wrap">
-								<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
-								<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
-								<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+								<input type="text" name="_length" class="text length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" value="">
+								<input type="text" name="_width" class="text width" placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" value="">
+								<input type="text" name="_height" class="text height" placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" value="">
 							</span>
 						</div>
 					</div>
@@ -606,15 +606,15 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 			<?php endif; ?>
 
 			<label class="alignleft">
-			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>
+			    <span class="title"><?php _e( 'Visibility', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
 			    	<select class="visibility" name="_visibility">
 					<?php
 						$options = array(
-							'visible' => __('Catalog &amp; search', 'woocommerce'),
-							'catalog' => __('Catalog', 'woocommerce'),
-							'search' => __('Search', 'woocommerce'),
-							'hidden' => __('Hidden', 'woocommerce')
+							'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
+							'catalog' => __( 'Catalog', 'woocommerce' ),
+							'search' => __( 'Search', 'woocommerce' ),
+							'hidden' => __( 'Hidden', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="'.$key.'">'. $value .'</option>';
@@ -625,17 +625,17 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 			</label>
 			<label class="alignleft featured">
 				<input type="checkbox" name="_featured" value="1">
-				<span class="checkbox-title"><?php _e('Featured', 'woocommerce'); ?></span>
+				<span class="checkbox-title"><?php _e( 'Featured', 'woocommerce' ); ?></span>
 			</label>
 			<br class="clear" />
 			<label class="alignleft">
-			    <span class="title"><?php _e('In stock?', 'woocommerce'); ?></span>
+			    <span class="title"><?php _e( 'In stock?', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
 			    	<select class="stock_status" name="_stock_status">
 					<?php
 						$options = array(
-							'instock' => __('In stock', 'woocommerce'),
-							'outofstock' => __('Out of stock', 'woocommerce')
+							'instock' => __( 'In stock', 'woocommerce' ),
+							'outofstock' => __( 'Out of stock', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="'.$key.'">'. $value .'</option>';
@@ -650,11 +650,11 @@ function woocommerce_admin_product_quick_edit( $column_name, $post_type ) {
 				<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
 					<label class="alignleft manage_stock">
 						<input type="checkbox" name="_manage_stock" value="1">
-						<span class="checkbox-title"><?php _e('Manage stock?', 'woocommerce'); ?></span>
+						<span class="checkbox-title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
 					</label>
 					<br class="clear" />
 					<label class="stock_qty_field">
-					    <span class="title"><?php _e('Stock Qty', 'woocommerce'); ?></span>
+					    <span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
 					    <span class="input-text-wrap">
 							<input type="text" name="_stock" class="text stock" value="">
 						</span>
@@ -776,11 +776,11 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
     <fieldset class="inline-edit-col-right">
 		<div id="woocommerce-fields-bulk" class="inline-edit-col">
 
-			<h4><?php _e('Product Data', 'woocommerce'); ?></h4>
+			<h4><?php _e( 'Product Data', 'woocommerce' ); ?></h4>
 
 			<div class="inline-edit-group">
 				<label class="alignleft">
-					<span class="title"><?php _e('Price', 'woocommerce'); ?></span>
+					<span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
 				    	<select class="change_regular_price change_to" name="change_regular_price">
 						<?php
@@ -798,13 +798,13 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					</span>
 				</label>
 			    <label class="alignright">
-			    	<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e('Enter price', 'woocommerce'); ?>" value="" />
+			    	<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Enter price', 'woocommerce' ); ?>" value="" />
 			    </label>
 			</div>
 
 			<div class="inline-edit-group">
 				<label class="alignleft">
-				    <span class="title"><?php _e('Sale', 'woocommerce'); ?></span>
+				    <span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
 				    	<select class="change_sale_price change_to" name="change_sale_price">
 						<?php
@@ -823,20 +823,20 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 					</span>
 				</label>
 				<label class="alignright">
-					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e('Enter price', 'woocommerce'); ?>" value="" />
+					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Enter price', 'woocommerce' ); ?>" value="" />
 				</label>
 			</div>
 
 			<?php if ( get_option('woocommerce_enable_weight') == "yes" ) : ?>
 				<div class="inline-edit-group">
 					<label class="alignleft">
-					    <span class="title"><?php _e('Weight', 'woocommerce'); ?></span>
+					    <span class="title"><?php _e( 'Weight', 'woocommerce' ); ?></span>
 					    <span class="input-text-wrap">
 					    	<select class="change_weight change_to" name="change_weight">
 							<?php
 								$options = array(
-									'' 	=> __('— No Change —', 'woocommerce'),
-									'1' => __('Change to:', 'woocommerce')
+									'' 	=> __( '— No Change —', 'woocommerce' ),
+									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {
 									echo '<option value="'.$key.'">'. $value .'</option>';
@@ -854,13 +854,13 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 			<?php if ( get_option('woocommerce_enable_dimensions') == "yes" ) : ?>
 				<div class="inline-edit-group dimensions">
 					<label class="alignleft">
-					    <span class="title"><?php _e('L/W/H', 'woocommerce'); ?></span>
+					    <span class="title"><?php _e( 'L/W/H', 'woocommerce' ); ?></span>
 					    <span class="input-text-wrap">
 					    	<select class="change_dimensions change_to" name="change_dimensions">
 							<?php
 								$options = array(
-									'' 	=> __('— No Change —', 'woocommerce'),
-									'1' => __('Change to:', 'woocommerce')
+									'' 	=> __( '— No Change —', 'woocommerce' ),
+									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {
 									echo '<option value="'.$key.'">'. $value .'</option>';
@@ -870,24 +870,24 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 						</span>
 					</label>
 					<div class="alignright">
-						<input type="text" name="_length" class="text length" placeholder="<?php _e('Length', 'woocommerce'); ?>" value="">
-						<input type="text" name="_width" class="text width" placeholder="<?php _e('Width', 'woocommerce'); ?>" value="">
-						<input type="text" name="_height" class="text height" placeholder="<?php _e('Height', 'woocommerce'); ?>" value="">
+						<input type="text" name="_length" class="text length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" value="">
+						<input type="text" name="_width" class="text width" placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" value="">
+						<input type="text" name="_height" class="text height" placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" value="">
 					</div>
 				</div>
 			<?php endif; ?>
 
 			<label>
-			    <span class="title"><?php _e('Visibility', 'woocommerce'); ?></span>
+			    <span class="title"><?php _e( 'Visibility', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
 			    	<select class="visibility" name="_visibility">
 					<?php
 						$options = array(
-							'' => __('— No Change —', 'woocommerce'),
-							'visible' => __('Catalog &amp; search', 'woocommerce'),
-							'catalog' => __('Catalog', 'woocommerce'),
-							'search' => __('Search', 'woocommerce'),
-							'hidden' => __('Hidden', 'woocommerce')
+							'' => __( '— No Change —', 'woocommerce' ),
+							'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
+							'catalog' => __( 'Catalog', 'woocommerce' ),
+							'search' => __( 'Search', 'woocommerce' ),
+							'hidden' => __( 'Hidden', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="'.$key.'">'. $value .'</option>';
@@ -897,14 +897,14 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 				</span>
 			</label>
 			<label>
-			    <span class="title"><?php _e('Featured', 'woocommerce'); ?></span>
+			    <span class="title"><?php _e( 'Featured', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
 			    	<select class="featured" name="_featured">
 					<?php
 						$options = array(
-							'' => __('— No Change —', 'woocommerce'),
-							'yes' => __('Yes', 'woocommerce'),
-							'no' => __('No', 'woocommerce')
+							'' => __( '— No Change —', 'woocommerce' ),
+							'yes' => __( 'Yes', 'woocommerce' ),
+							'no' => __( 'No', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="'.$key.'">'. $value .'</option>';
@@ -915,14 +915,14 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 			</label>
 
 			<label>
-			    <span class="title"><?php _e('In stock?', 'woocommerce'); ?></span>
+			    <span class="title"><?php _e( 'In stock?', 'woocommerce' ); ?></span>
 			    <span class="input-text-wrap">
 			    	<select class="stock_status" name="_stock_status">
 					<?php
 						$options = array(
-							'' => __('— No Change —', 'woocommerce'),
-							'instock' => __('In stock', 'woocommerce'),
-							'outofstock' => __('Out of stock', 'woocommerce')
+							'' => __( '— No Change —', 'woocommerce' ),
+							'instock' => __( 'In stock', 'woocommerce' ),
+							'outofstock' => __( 'Out of stock', 'woocommerce' )
 						);
 						foreach ($options as $key => $value) {
 							echo '<option value="'.$key.'">'. $value .'</option>';
@@ -933,14 +933,14 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 			</label>
 			<?php if (get_option('woocommerce_manage_stock')=='yes') : ?>
 				<label>
-				    <span class="title"><?php _e('Manage stock?', 'woocommerce'); ?></span>
+				    <span class="title"><?php _e( 'Manage stock?', 'woocommerce' ); ?></span>
 				    <span class="input-text-wrap">
 				    	<select class="manage_stock" name="_manage_stock">
 						<?php
 							$options = array(
-								'' => __('— No Change —', 'woocommerce'),
-								'yes' => __('Yes', 'woocommerce'),
-								'no' => __('No', 'woocommerce')
+								'' => __( '— No Change —', 'woocommerce' ),
+								'yes' => __( 'Yes', 'woocommerce' ),
+								'no' => __( 'No', 'woocommerce' )
 							);
 							foreach ($options as $key => $value) {
 								echo '<option value="'.$key.'">'. $value .'</option>';
@@ -952,13 +952,13 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 
 				<div class="inline-edit-group dimensions">
 					<label class="alignleft stock_qty_field">
-					    <span class="title"><?php _e('Stock Qty', 'woocommerce'); ?></span>
+					    <span class="title"><?php _e( 'Stock Qty', 'woocommerce' ); ?></span>
 					    <span class="input-text-wrap">
 					    	<select class="change_stock change_to" name="change_stock">
 							<?php
 								$options = array(
-									'' 	=> __('— No Change —', 'woocommerce'),
-									'1' => __('Change to:', 'woocommerce')
+									'' 	=> __( '— No Change —', 'woocommerce' ),
+									'1' => __( 'Change to:', 'woocommerce' )
 								);
 								foreach ($options as $key => $value) {
 									echo '<option value="'.$key.'">'. $value .'</option>';
@@ -968,7 +968,7 @@ function woocommerce_admin_product_bulk_edit( $column_name, $post_type ) {
 						</span>
 					</label>
 					<label class="alignright">
-						<input type="text" name="_stock" class="text stock" placeholder="<?php _e('Stock Qty', 'woocommerce'); ?>" value="">
+						<input type="text" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" value="">
 					</label>
 				</div>
 			<?php endif; ?>
@@ -1165,7 +1165,7 @@ function woocommerce_default_sorting_link( $views ) {
 	$query_string = remove_query_arg(array( 'orderby', 'order' ));
 	$query_string = add_query_arg( 'orderby', urlencode('menu_order title'), $query_string );
 	$query_string = add_query_arg( 'order', urlencode('ASC'), $query_string );
-	$views['byorder'] = '<a href="'. $query_string . '" class="' . $class . '">' . __('Sort Products', 'woocommerce') . '</a>';
+	$views['byorder'] = '<a href="'. $query_string . '" class="' . $class . '">' . __( 'Sort Products', 'woocommerce' ) . '</a>';
 
 	return $views;
 }

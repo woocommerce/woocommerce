@@ -88,8 +88,8 @@ class WC_Cheque extends WC_Payment_Gateway {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('Cheque Payment', 'woocommerce'); ?></h3>
-    	<p><?php _e('Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce'); ?></p>
+    	<h3><?php _e( 'Cheque Payment', 'woocommerce' ); ?></h3>
+    	<p><?php _e( 'Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' ); ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -145,7 +145,7 @@ class WC_Cheque extends WC_Payment_Gateway {
 		$order = new WC_Order( $order_id );
 
 		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status('on-hold', __('Awaiting cheque payment', 'woocommerce'));
+		$order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

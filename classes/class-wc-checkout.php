@@ -71,7 +71,7 @@ class WC_Checkout {
 			'order_comments' => array(
 				'type' => 'textarea',
 				'class' => array('notes'),
-				'label' => __('Order Notes', 'woocommerce'),
+				'label' => __( 'Order Notes', 'woocommerce' ),
 				'placeholder' => _x('Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce')
 				)
 			);
@@ -182,7 +182,7 @@ class WC_Checkout {
 				$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[$key] );
 
 				// Validation: Required fields
-				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[$key] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is a required field.', 'woocommerce') );
+				if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[$key] ) ) $woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ) );
 
 				if ( ! empty( $this->posted[ $key ] ) ) {
 
@@ -195,7 +195,7 @@ class WC_Checkout {
 							$this->posted[ $key ] = strtoupper( str_replace( ' ', '', $this->posted[ $key ] ) );
 
 							if ( ! $validation->is_postcode( $this->posted[ $key ], $_POST[ $validate_against ] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __('(%s) is not a valid postcode/ZIP.', 'woocommerce'), $this->posted[ $key ] ) );
+								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . sprintf( __( '(%s) is not a valid postcode/ZIP.', 'woocommerce' ), $this->posted[ $key ] ) );
 							else
 								$this->posted[ $key ] = $validation->format_postcode( $this->posted[$key], $_POST[ $validate_against ] );
 
@@ -216,7 +216,7 @@ class WC_Checkout {
 							// Only validate if the country has specific state options
 							if ( $valid_states && sizeof( $valid_states ) > 0 )
 								if ( ! in_array( $this->posted[ $key ], array_keys( $valid_states ) ) )
-									$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not valid. Please enter one of the following:', 'woocommerce') . ' ' . implode( ', ', $valid_states ) );
+									$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not valid. Please enter one of the following:', 'woocommerce' ) . ' ' . implode( ', ', $valid_states ) );
 
 						break;
 						case "billing_phone" :
@@ -224,14 +224,14 @@ class WC_Checkout {
 							$this->posted[ $key ] = $validation->format_phone( $this->posted[ $key ] );
 
 							if ( ! $validation->is_phone( $this->posted[ $key ] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid number.', 'woocommerce') );
+								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid number.', 'woocommerce' ) );
 						break;
 						case "billing_email" :
 
 							$this->posted[ $key ] = strtolower( $this->posted[$key] );
 
 							if ( ! $validation->is_email( $this->posted[$key] ) )
-								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __('is not a valid email address.', 'woocommerce') );
+								$woocommerce->add_error( '<strong>' . $field['label'] . '</strong> ' . __( 'is not a valid email address.', 'woocommerce' ) );
 						break;
 					}
 				}
@@ -291,10 +291,10 @@ class WC_Checkout {
 
 				// Check the username
 				if ( ! validate_username( $this->posted['account_username'] ) )
-					$woocommerce->add_error( __('Invalid email/username.', 'woocommerce') );
+					$woocommerce->add_error( __( 'Invalid email/username.', 'woocommerce' ) );
 
 				elseif ( username_exists( $this->posted['account_username'] ) )
-					$woocommerce->add_error( __('An account is already registered with that username. Please choose another.', 'woocommerce') );
+					$woocommerce->add_error( __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 
 			} else {
 
@@ -304,10 +304,10 @@ class WC_Checkout {
 
 			// Validate passwords
 			if ( empty($this->posted['account_password']) )
-				$woocommerce->add_error( __('Please enter an account password.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Please enter an account password.', 'woocommerce' ) );
 
 			if ( $this->posted['account_password-2'] !== $this->posted['account_password'] )
-				$woocommerce->add_error( __('Passwords do not match.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Passwords do not match.', 'woocommerce' ) );
 
 			// Check the e-mail address
 			if ( email_exists( $this->posted['billing_email'] ) )
@@ -365,7 +365,7 @@ class WC_Checkout {
 		                $user_id 	= wp_create_user( $this->posted['account_username'], $user_pass, $this->posted['billing_email'] );
 
 		                if ( ! $user_id )
-		                	throw new MyException( '<strong>' . __('ERROR', 'woocommerce') . '</strong>: ' . __('Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce') );
+		                	throw new MyException( '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
 
 	                    // Change role
 	                    wp_update_user( array('ID' => $user_id, 'role' => 'customer') ) ;

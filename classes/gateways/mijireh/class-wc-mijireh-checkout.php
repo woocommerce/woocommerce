@@ -163,9 +163,9 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 				'default' => 'no'
 				),
 			'access_key' => array(
-				'title' => __('Access Key', 'woocommerce'),
+				'title' => __( 'Access Key', 'woocommerce' ),
 				'type' => 'text',
-				'description' => __('The Mijireh access key for your store.', 'woocommerce'),
+				'description' => __( 'The Mijireh access key for your store.', 'woocommerce' ),
 				'default' => ''
 				),
 			'title' => array(
@@ -193,18 +193,18 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 	 */
   	public function admin_options() {
 		?>
-		<h3><?php _e('Mijireh Checkout', 'woocommerce');?></h3>
+		<h3><?php _e( 'Mijireh Checkout', 'woocommerce' );?></h3>
 
 		<?php if ( empty( $this->access_key ) ) : ?>
 			<div id="wc_get_started" class="mijireh">
-				<span class="main"><?php _e('Get started with Mijireh Checkout', 'woocommerce'); ?></span>
-				<span><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e('provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.', 'woocommerce'); ?></span>
+				<span class="main"><?php _e( 'Get started with Mijireh Checkout', 'woocommerce' ); ?></span>
+				<span><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site. Mijireh supports a wide variety of payment gateways: Stripe, Authorize.net, PayPal, eWay, SagePay, Braintree, PayLeap, and more.', 'woocommerce' ); ?></span>
 
-				<p><a href="http://secure.mijireh.com/signup" target="_blank" class="button button-primary"><?php _e('Join for free', 'woocommerce'); ?></a> <a href="http://www.mijireh.com/integrations/woocommerce/" target="_blank" class="button"><?php _e('Learn more about WooCommerce and Mijireh', 'woocommerce'); ?></a></p>
+				<p><a href="http://secure.mijireh.com/signup" target="_blank" class="button button-primary"><?php _e( 'Join for free', 'woocommerce' ); ?></a> <a href="http://www.mijireh.com/integrations/woocommerce/" target="_blank" class="button"><?php _e( 'Learn more about WooCommerce and Mijireh', 'woocommerce' ); ?></a></p>
 
 			</div>
 		<?php else : ?>
-			<p><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e('provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site.', 'woocommerce'); ?></p>
+			<p><a href="http://www.mijireh.com/integrations/woocommerce/">Mijireh Checkout</a> <?php _e( 'provides a fully PCI Compliant, secure way to collect and transmit credit card data to your payment gateway while keeping you in control of the design of your site.', 'woocommerce' ); ?></p>
 		<?php endif; ?>
 
 		<table class="form-table">

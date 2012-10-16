@@ -61,26 +61,26 @@ class WC_Google_Analytics extends WC_Integration {
 
     	$this->form_fields = array(
 			'ga_id' => array(
-				'title' 			=> __('Google Analytics ID', 'woocommerce'),
-				'description' 		=> __('Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce'),
+				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
+				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
 				'type' 				=> 'text',
 		    	'default' 			=> get_option('woocommerce_ga_id') // Backwards compat
 			),
 			'ga_standard_tracking_enabled' => array(
-				'title' 			=> __('Tracking code', 'woocommerce'),
-				'label' 			=> __('Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce'),
+				'title' 			=> __( 'Tracking code', 'woocommerce' ),
+				'label' 			=> __( 'Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_ecommerce_tracking_enabled' => array(
-				'label' 			=> __('Add eCommerce tracking code to the thankyou page', 'woocommerce'),
+				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
-				'label' 			=> __('Add event tracking code for add to cart actions', 'woocommerce'),
+				'label' 			=> __( 'Add event tracking code for add to cart actions', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
 				'default' 			=> 'no'
@@ -112,7 +112,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= $current_user->user_login;
 		} else {
 			$user_id 		= '';
-			$username 		= __('Guest', 'woocommerce');
+			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
 		echo "<script type='text/javascript'>
@@ -167,7 +167,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= $current_user->user_login;
 		} else {
 			$user_id 		= '';
-			$username 		= __('Guest', 'woocommerce');
+			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
 		$code = "
@@ -200,7 +200,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 				$code .= "_gaq.push(['_addItem',";
 				$code .= "'" . $order_id . "',";
-				$code .= "'" . ( $_product->get_sku() ? __('SKU:', 'woocommerce') . ' ' . $_product->get_sku() : $_product->id ) . "',";
+				$code .= "'" . ( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
 				$code .= "'" . $item['name'] . "',";
 
 				if ( isset( $_product->variation_data ) ) {

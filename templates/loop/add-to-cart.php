@@ -25,19 +25,19 @@ if ( ! $product->is_purchasable() && ! in_array( $product->product_type, array( 
 		switch ( $product->product_type ) {
 			case "variable" :
 				$link 	= apply_filters( 'variable_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'variable_add_to_cart_text', __('Select options', 'woocommerce') );
+				$label 	= apply_filters( 'variable_add_to_cart_text', __( 'Select options', 'woocommerce' ) );
 			break;
 			case "grouped" :
 				$link 	= apply_filters( 'grouped_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'grouped_add_to_cart_text', __('View options', 'woocommerce') );
+				$label 	= apply_filters( 'grouped_add_to_cart_text', __( 'View options', 'woocommerce' ) );
 			break;
 			case "external" :
 				$link 	= apply_filters( 'external_add_to_cart_url', get_permalink( $product->id ) );
-				$label 	= apply_filters( 'external_add_to_cart_text', __('Read More', 'woocommerce') );
+				$label 	= apply_filters( 'external_add_to_cart_text', __( 'Read More', 'woocommerce' ) );
 			break;
 			default :
 				$link 	= apply_filters( 'add_to_cart_url', esc_url( $product->add_to_cart_url() ) );
-				$label 	= apply_filters( 'add_to_cart_text', __('Add to cart', 'woocommerce') );
+				$label 	= apply_filters( 'add_to_cart_text', __( 'Add to cart', 'woocommerce' ) );
 			break;
 		}
 

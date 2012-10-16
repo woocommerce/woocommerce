@@ -536,7 +536,7 @@ class WC_Email extends WC_Settings_API {
 				} );
 				
 				jQuery('a.delete_template').click(function(){
-					var answer = confirm('" . __('Are you sure you want to delete this template file?', 'woocommerce') . "');
+					var answer = confirm('" . __( 'Are you sure you want to delete this template file?', 'woocommerce' ) . "');
 		
 					if (answer)
 						return true;

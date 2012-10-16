@@ -30,7 +30,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_best_sellers';
 		$this->woo_widget_description = __( 'Display a list of your best selling products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_best_sellers';
-		$this->woo_widget_name = __('WooCommerce Best Sellers', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce Best Sellers', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -68,7 +68,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		ob_start();
 		extract($args);
 
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('Best Sellers', 'woocommerce') : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty($instance['title']) ? __('Best Sellers', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
 		else if ( $number < 1 )
@@ -180,14 +180,14 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 		$hide_free_checked = ( isset( $instance['hide_free'] ) && 1 == $instance['hide_free'] ) ? ' checked="checked"' : '';
 
 		?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e( 'Number of products to show:', 'woocommerce' ); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 
 		<p><input id="<?php echo esc_attr( $this->get_field_id('hide_free') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hide_free') ); ?>" type="checkbox"<?php echo $hide_free_checked; ?> />
-		<label for="<?php echo $this->get_field_id('hide_free'); ?>"><?php _e('Hide free products', 'woocommerce'); ?></label></p>
+		<label for="<?php echo $this->get_field_id('hide_free'); ?>"><?php _e( 'Hide free products', 'woocommerce' ); ?></label></p>
 
 		<?php
 	}

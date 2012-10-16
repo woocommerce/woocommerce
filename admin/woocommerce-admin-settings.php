@@ -227,7 +227,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 				<?php wp_nonce_field( 'woocommerce-settings', '_wpnonce', true, true ); ?>
 
 				<?php if ( ! get_option('hide-wc-extensions-message') ) : ?>
-					<div id="woocommerce_extensions"><a href="<?php echo add_query_arg('hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a><?php printf(__('More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce'), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
+					<div id="woocommerce_extensions"><a href="<?php echo add_query_arg('hide-wc-extensions-message', 'true') ?>" class="hide">&times;</a><?php printf(__( 'More functionality and gateway options available via <a href="%s" target="_blank">WC official extensions</a>.', 'woocommerce' ), 'http://www.woothemes.com/extensions/woocommerce-extensions/'); ?></div>
 				<?php endif; ?>
 
 				<?php
@@ -286,7 +286,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 
 							$current = $current_section ? '' : 'class="current"';
 
-							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce_settings&tab=shipping') . '" ' . $current . '>' . __('Shipping Options', 'woocommerce') . '</a>' );
+							$links = array( '<a href="' . admin_url('admin.php?page=woocommerce_settings&tab=shipping') . '" ' . $current . '>' . __( 'Shipping Options', 'woocommerce' ) . '</a>' );
 
 							// Load shipping methods so we can show any global options they may have
 							$shipping_methods = $woocommerce->shipping->load_shipping_methods();
@@ -321,7 +321,7 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 						case "payment_gateways" :
 							include('settings/settings-payment-gateways.php');
 
-							$links = array( '<a href="#payment-gateways">'.__('Payment Gateways', 'woocommerce').'</a>' );
+							$links = array( '<a href="#payment-gateways">'.__( 'Payment Gateways', 'woocommerce' ).'</a>' );
 
 			            	foreach ( $woocommerce->payment_gateways->payment_gateways() as $gateway ) :
 			            		$title = empty( $gateway->method_title ) ? ucwords( $gateway->id ) : ucwords( $gateway->method_title );
@@ -550,11 +550,11 @@ function woocommerce_admin_fields( $options ) {
 					<th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
 
-                    	<?php _e('Width', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" />
+                    	<?php _e( 'Width', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_width" id="<?php echo esc_attr( $value['id'] ); ?>_width" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_width') ) echo stripslashes($size); else echo $value['std']; ?>" />
 
-                    	<?php _e('Height', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" />
+                    	<?php _e( 'Height', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_height" id="<?php echo esc_attr( $value['id'] ); ?>_height" type="text" size="3" value="<?php if ( $size = get_option( $value['id'].'_height') ) echo stripslashes($size); else echo $value['std']; ?>" />
 
-                    	<label><?php _e('Hard Crop', 'woocommerce'); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php if (get_option( $value['id'].'_crop')!='') checked(get_option( $value['id'].'_crop'), 1); else checked(1); ?> /></label>
+                    	<label><?php _e( 'Hard Crop', 'woocommerce' ); ?> <input name="<?php echo esc_attr( $value['id'] ); ?>_crop" id="<?php echo esc_attr( $value['id'] ); ?>_crop" type="checkbox" <?php if (get_option( $value['id'].'_crop')!='') checked(get_option( $value['id'].'_crop'), 1); else checked(1); ?> /></label>
 
                     	<?php echo $description; ?></td>
                 </tr><?php
@@ -655,7 +655,7 @@ function woocommerce_admin_fields( $options ) {
             	?><tr valign="top" class="single_select_page">
                     <th scope="row" class="titledesc"><?php echo $value['name'] ?></th>
                     <td class="forminp">
-			        	<?php echo str_replace(' id=', " data-placeholder='".__('Select a page&hellip;', 'woocommerce')."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <?php echo $description; ?>
+			        	<?php echo str_replace(' id=', " data-placeholder='".__( 'Select a page&hellip;', 'woocommerce' )."' style='".$value['css']."' class='".$value['class']."' id=", wp_dropdown_pages($args)); ?> <?php echo $description; ?>
 			        </td>
                	</tr><?php
             break;
@@ -673,7 +673,7 @@ function woocommerce_admin_fields( $options ) {
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
 					</th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e('Choose a country&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
 			        	<?php echo $woocommerce->countries->country_dropdown_options($country, $state); ?>
 			        </select> <?php echo $description; ?>
                		</td>
@@ -688,7 +688,7 @@ function woocommerce_admin_fields( $options ) {
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo $value['name']; ?></label>
 					</th>
                     <td class="forminp">
-	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e('Choose countries&hellip;', 'woocommerce'); ?>" title="Country" class="chosen_select">
+	                    <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:450px;" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="Country" class="chosen_select">
 				        	<?php
 				        		if ($countries) foreach ($countries as $key=>$val) :
 	                    			echo '<option value="'.$key.'" '.selected( in_array($key, $selections), true, false ).'>'.$val.'</option>';

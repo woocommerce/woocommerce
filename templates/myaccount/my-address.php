@@ -23,8 +23,8 @@ $customer_id = get_current_user_id();
 <?php endif; ?>
 
 			<header class="title">
-				<h3><?php _e('Billing Address', 'woocommerce'); ?></h3>
-				<a href="<?php echo esc_url( add_query_arg('address', 'billing', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>
+				<h3><?php _e( 'Billing Address', 'woocommerce' ); ?></h3>
+				<a href="<?php echo esc_url( add_query_arg('address', 'billing', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 			</header>
 			<address>
 				<?php
@@ -42,7 +42,7 @@ $customer_id = get_current_user_id();
 
 					$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-					if (!$formatted_address) _e('You have not set up a billing address yet.', 'woocommerce'); else echo $formatted_address;
+					if (!$formatted_address) _e( 'You have not set up a billing address yet.', 'woocommerce' ); else echo $formatted_address;
 				?>
 			</address>
 
@@ -54,8 +54,8 @@ $customer_id = get_current_user_id();
 		<div class="col-2">
 
 			<header class="title">
-				<h3><?php _e('Shipping Address', 'woocommerce'); ?></h3>
-				<a href="<?php echo esc_url( add_query_arg('address', 'shipping', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e('Edit', 'woocommerce'); ?></a>
+				<h3><?php _e( 'Shipping Address', 'woocommerce' ); ?></h3>
+				<a href="<?php echo esc_url( add_query_arg('address', 'shipping', get_permalink(woocommerce_get_page_id('edit_address'))) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 			</header>
 			<address>
 				<?php
@@ -73,7 +73,7 @@ $customer_id = get_current_user_id();
 
 					$formatted_address = $woocommerce->countries->get_formatted_address( $address );
 
-					if (!$formatted_address) _e('You have not set up a shipping address yet.', 'woocommerce'); else echo $formatted_address;
+					if (!$formatted_address) _e( 'You have not set up a shipping address yet.', 'woocommerce' ); else echo $formatted_address;
 				?>
 			</address>
 

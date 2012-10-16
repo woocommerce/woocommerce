@@ -30,7 +30,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_product_search';
 		$this->woo_widget_description = __( 'A Search box for products only.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_search';
-		$this->woo_widget_name = __('WooCommerce Product Search', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce Product Search', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -88,7 +88,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 	function form( $instance ) {
 		global $wpdb;
 		?>
-			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
+			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce' ) ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 		<?php
 	}

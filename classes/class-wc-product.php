@@ -668,7 +668,7 @@ class WC_Product {
 
 		if (!$this->managing_stock()) :
 			if (!$this->is_in_stock()) :
-				$availability = __('Out of stock', 'woocommerce');
+				$availability = __( 'Out of stock', 'woocommerce' );
 				$class = 'out-of-stock';
 			endif;
 		else :
@@ -679,45 +679,45 @@ class WC_Product {
 
 					switch ( $format_option ) {
 						case 'no_amount' :
-							$format = __('In stock', 'woocommerce');
+							$format = __( 'In stock', 'woocommerce' );
 						break;
 						case 'low_amount' :
 							$low_amount = get_option( 'woocommerce_notify_low_stock_amount' );
 
-							$format = ( $this->get_total_stock() <= $low_amount ) ? __('Only %s left in stock', 'woocommerce') : __('In stock', 'woocommerce');
+							$format = ( $this->get_total_stock() <= $low_amount ) ? __( 'Only %s left in stock', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
 						break;
 						default :
-							$format = __('%s in stock', 'woocommerce');
+							$format = __( '%s in stock', 'woocommerce' );
 						break;
 					}
 
 					$availability = sprintf( $format, $this->stock );
 
 					if ($this->backorders_allowed() && $this->backorders_require_notification()) :
-						$availability .= ' ' . __('(backorders allowed)', 'woocommerce');
+						$availability .= ' ' . __( '(backorders allowed)', 'woocommerce' );
 					endif;
 
 				else :
 
 					if ($this->backorders_allowed()) :
 						if ($this->backorders_require_notification()) :
-							$availability = __('Available on backorder', 'woocommerce');
+							$availability = __( 'Available on backorder', 'woocommerce' );
 							$class = 'available-on-backorder';
 						else :
-							$availability = __('In stock', 'woocommerce');
+							$availability = __( 'In stock', 'woocommerce' );
 						endif;
 					else :
-						$availability = __('Out of stock', 'woocommerce');
+						$availability = __( 'Out of stock', 'woocommerce' );
 						$class = 'out-of-stock';
 					endif;
 
 				endif;
 			else :
 				if ($this->backorders_allowed()) :
-					$availability = __('Available on backorder', 'woocommerce');
+					$availability = __( 'Available on backorder', 'woocommerce' );
 					$class = 'available-on-backorder';
 				else :
-					$availability = __('Out of stock', 'woocommerce');
+					$availability = __( 'Out of stock', 'woocommerce' );
 					$class = 'out-of-stock';
 				endif;
 			endif;
@@ -977,7 +977,7 @@ class WC_Product {
 					if ( !$this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
 						$price .= $this->get_price_html_from_text();
 
-					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, __('Free!', 'woocommerce') );
+					$price .= $this->get_price_html_from_to( $this->min_variation_regular_price, __( 'Free!', 'woocommerce' ) );
 
 					$price = apply_filters('woocommerce_variable_free_sale_price_html', $price, $this);
 
@@ -986,7 +986,7 @@ class WC_Product {
 					if ( ! $this->min_variation_price || $this->min_variation_price !== $this->max_variation_price )
 						$price .= $this->get_price_html_from_text();
 
-					$price .= __('Free!', 'woocommerce');
+					$price .= __( 'Free!', 'woocommerce' );
 
 					$price = apply_filters('woocommerce_variable_free_price_html', $price, $this);
 
@@ -1017,13 +1017,13 @@ class WC_Product {
 
 				if ($this->is_on_sale() && isset($this->regular_price)) :
 
-					$price .= $this->get_price_html_from_to( $this->regular_price, __('Free!', 'woocommerce') );
+					$price .= $this->get_price_html_from_to( $this->regular_price, __( 'Free!', 'woocommerce' ) );
 
 					$price = apply_filters('woocommerce_free_sale_price_html', $price, $this);
 
 				else :
 
-					$price = __('Free!', 'woocommerce');
+					$price = __( 'Free!', 'woocommerce' );
 
 					$price = apply_filters('woocommerce_free_price_html', $price, $this);
 
@@ -1102,7 +1102,7 @@ class WC_Product {
 		endif;
 
 		if ( $average_rating>0 ) :
-			return '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'woocommerce'), $average_rating).'"><span style="width:'.($average_rating*$star_size).'px"><span class="rating">'.$average_rating.'</span> '.__('out of 5', 'woocommerce').'</span></div>';
+			return '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average_rating).'"><span style="width:'.($average_rating*$star_size).'px"><span class="rating">'.$average_rating.'</span> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
 		else :
 			return '';
 		endif;

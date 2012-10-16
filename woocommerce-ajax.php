@@ -97,7 +97,7 @@ function woocommerce_ajax_apply_coupon() {
 	if ( ! empty( $_POST['coupon_code'] ) ) {
 		$woocommerce->cart->add_discount( stripslashes( trim( $_POST['coupon_code'] ) ) );
 	} else {
-		$woocommerce->add_error( __('Please enter a coupon code.', 'woocommerce') );
+		$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 	}
 
 	$woocommerce->show_messages();
@@ -267,9 +267,9 @@ function woocommerce_feature_product() {
 
 	if ( ! is_admin() ) die;
 
-	if ( ! current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
+	if ( ! current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 
-	if ( ! check_admin_referer('woocommerce-feature-product')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( ! check_admin_referer('woocommerce-feature-product')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 
 	$post_id = isset( $_GET['product_id'] ) && (int) $_GET['product_id'] ? (int) $_GET['product_id'] : '';
 
@@ -301,8 +301,8 @@ add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product')
 function woocommerce_mark_order_complete() {
 
 	if ( !is_admin() ) die;
-	if ( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if ( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( !current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+	if ( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if (!$order_id) die;
 
@@ -324,8 +324,8 @@ add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_co
 function woocommerce_mark_order_processing() {
 
 	if ( !is_admin() ) die;
-	if ( !current_user_can('edit_posts') ) wp_die( __('You do not have sufficient permissions to access this page.', 'woocommerce') );
-	if ( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __('You have taken too long. Please go back and retry.', 'woocommerce') );
+	if ( !current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+	if ( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if (!$order_id) die;
 
@@ -451,8 +451,8 @@ function woocommerce_add_variation() {
 		// Get tax classes
 		$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 		$tax_class_options = array();
-		$tax_class_options['parent'] =__('Same as parent', 'woocommerce');
-		$tax_class_options[''] = __('Standard', 'woocommerce');
+		$tax_class_options['parent'] =__( 'Same as parent', 'woocommerce' );
+		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
 		if ($tax_classes) foreach ( $tax_classes as $class )
 			$tax_class_options[sanitize_title($class)] = $class;
 		
@@ -862,9 +862,9 @@ function woocommerce_add_order_item() {
 	<tr class="item new_row" rel="<?php echo $index; ?>">
 		<td class="thumb">
 			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
-				echo '<strong>'.__('Product ID:', 'woocommerce').'</strong> '. $_product->id;
-				echo '<br/><strong>'.__('Variation ID:', 'woocommerce').'</strong> '; if (isset($_product->variation_id) && $_product->variation_id) echo $_product->variation_id; else echo '-';
-				echo '<br/><strong>'.__('Product SKU:', 'woocommerce').'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
+				echo '<strong>'.__( 'Product ID:', 'woocommerce' ).'</strong> '. $_product->id;
+				echo '<br/><strong>'.__( 'Variation ID:', 'woocommerce' ).'</strong> '; if (isset($_product->variation_id) && $_product->variation_id) echo $_product->variation_id; else echo '-';
+				echo '<br/><strong>'.__( 'Product SKU:', 'woocommerce' ).'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
 			?>"><?php echo $_product->get_image(); ?></a>
 		</td>
 		<td class="sku" width="1%">
@@ -876,8 +876,8 @@ function woocommerce_add_order_item() {
 		<td class="name">
 
 			<div class="row-actions">
-				<span class="trash"><a class="remove_row" href="#"><?php _e('Delete item', 'woocommerce'); ?></a> | </span>
-				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e('View product', 'woocommerce'); ?></a>
+				<span class="trash"><a class="remove_row" href="#"><?php _e( 'Delete item', 'woocommerce' ); ?></a> | </span>
+				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e( 'View product', 'woocommerce' ); ?></a>
 			</div>
 
 			<?php echo $_product->get_title(); ?>
@@ -885,7 +885,7 @@ function woocommerce_add_order_item() {
 			<table class="meta" cellspacing="0">
 				<tfoot>
 					<tr>
-						<td colspan="3"><button class="add_meta button"><?php _e('Add&nbsp;meta', 'woocommerce'); ?></button></td>
+						<td colspan="3"><button class="add_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
 					</tr>
 				</tfoot>
 				<tbody class="meta_items"></tbody>
@@ -899,7 +899,7 @@ function woocommerce_add_order_item() {
 				<?php
 				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
 				$classes_options = array();
-				$classes_options[''] = __('Standard', 'woocommerce');
+				$classes_options[''] = __( 'Standard', 'woocommerce' );
 				if ($tax_classes) foreach ($tax_classes as $class) :
 					$classes_options[sanitize_title($class)] = $class;
 				endforeach;
@@ -913,15 +913,15 @@ function woocommerce_add_order_item() {
 		</td>
 
 		<td class="line_subtotal" width="1%">
-			<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_subtotal[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_subtotal" /></label>
+			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_subtotal" /></label>
 
-			<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_subtotal_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_subtotal_tax" /></label>
+			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_subtotal_tax" /></label>
 		</td>
 
 		<td class="line_total" width="1%">
-			<label><?php _e('Cost', 'woocommerce'); ?>: <input type="text" name="line_total[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_total" /></label>
+			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo $index; ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_total" /></label>
 
-			<label><?php _e('Tax', 'woocommerce'); ?>: <input type="text" name="line_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_tax" /></label>
+			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo $index; ?>]" placeholder="0.00" class="line_tax" /></label>
 		</td>
 
 	</tr>
@@ -1023,7 +1023,7 @@ function woocommerce_add_order_note() {
 		if ($is_customer_note) echo 'customer-note';
 		echo '"><div class="note_content">';
 		echo wpautop( wptexturize( $note ) );
-		echo '</div><p class="meta"><a href="#" class="delete_note">'.__('Delete note', 'woocommerce').'</a></p>';
+		echo '</div><p class="meta"><a href="#" class="delete_note">'.__( 'Delete note', 'woocommerce' ).'</a></p>';
 		echo '</li>';
 
 	}
@@ -1188,7 +1188,7 @@ function woocommerce_json_search_customers() {
 	if ( empty( $term ) )
 		die();
 
-	$default = isset( $_GET['default'] ) ? $_GET['default'] : __('Guest', 'woocommerce');
+	$default = isset( $_GET['default'] ) ? $_GET['default'] : __( 'Guest', 'woocommerce' );
 
 	$found_customers = array( '' => $default );
 
@@ -1256,12 +1256,12 @@ function woocommerce_upsell_crosssell_search_products() {
 		$SKU = get_post_meta($post->ID, '_sku', true);
 
 		?>
-		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e('Cross-sell', 'woocommerce'); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e('Up-sell', 'woocommerce'); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
+		<li rel="<?php echo $post->ID; ?>"><button type="button" name="Add" class="button add_crosssell" title="Add"><?php _e( 'Cross-sell', 'woocommerce' ); ?> &rarr;</button><button type="button" name="Add" class="button add_upsell" title="Add"><?php _e( 'Up-sell', 'woocommerce' ); ?> &rarr;</button><strong><?php echo $post->post_title; ?></strong> &ndash; #<?php echo $post->ID; ?> <?php if (isset($SKU) && $SKU) echo 'SKU: '.$SKU; ?><input type="hidden" class="product_id" value="0" /></li>
 		<?php
 
 	endforeach; else :
 
-		?><li><?php _e('No products found', 'woocommerce'); ?></li><?php
+		?><li><?php _e( 'No products found', 'woocommerce' ); ?></li><?php
 
 	endif;
 

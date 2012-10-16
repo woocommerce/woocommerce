@@ -24,7 +24,7 @@ get_currentuserinfo();
 
 	<form action="<?php echo esc_url( add_query_arg( 'address', $load_address, get_permalink( woocommerce_get_page_id('edit_address') ) ) ); ?>" method="post">
 
-		<h3><?php if ($load_address=='billing') _e('Billing Address', 'woocommerce'); else _e('Shipping Address', 'woocommerce'); ?></h3>
+		<h3><?php if ($load_address=='billing') _e( 'Billing Address', 'woocommerce' ); else _e( 'Shipping Address', 'woocommerce' ); ?></h3>
 
 		<?php
 		foreach ($address as $key => $field) :
@@ -39,7 +39,7 @@ get_currentuserinfo();
 		endforeach;
 		?>
 
-		<input type="submit" class="button" name="save_address" value="<?php _e('Save Address', 'woocommerce'); ?>" />
+		<input type="submit" class="button" name="save_address" value="<?php _e( 'Save Address', 'woocommerce' ); ?>" />
 
 		<?php $woocommerce->nonce_field('edit_address') ?>
 		<input type="hidden" name="action" value="edit_address" />

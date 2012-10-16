@@ -30,7 +30,7 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_product_tag_cloud';
 		$this->woo_widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_tag_cloud';
-		$this->woo_widget_name = __('WooCommerce Product Tags', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce Product Tags', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -55,7 +55,7 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 			$title = $instance['title'];
 		} else {
 			if ( 'product_tag' == $current_taxonomy ) {
-				$title = __('Product Tags', 'woocommerce');
+				$title = __('Product Tags', 'woocommerce' );
 			} else {
 				$tax = get_taxonomy($current_taxonomy);
 				$title = $tax->labels->name;
@@ -98,7 +98,7 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 	function form( $instance ) {
 		$current_taxonomy = $this->_get_current_taxonomy($instance);
 ?>
-	<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
+	<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ) ?></label>
 	<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 	<?php
 	}

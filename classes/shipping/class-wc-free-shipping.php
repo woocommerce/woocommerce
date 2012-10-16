@@ -22,7 +22,7 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 	 */
 	function __construct() {
         $this->id 			= 'free_shipping';
-        $this->method_title = __('Free Shipping', 'woocommerce');
+        $this->method_title = __( 'Free Shipping', 'woocommerce' );
 		$this->init();
     }
 
@@ -77,14 +77,14 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 			'min_amount' => array(
 							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
 							'type' 			=> 'text',
-							'description' 	=> __('Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woocommerce'),
+							'description' 	=> __( 'Users will need to spend this amount to get free shipping. Leave blank to disable.', 'woocommerce' ),
 							'default' 		=> ''
 						),
 			'requires_coupon' => array(
 							'title' 		=> __( 'Coupon', 'woocommerce' ),
 							'type' 			=> 'checkbox',
 							'label' 		=> __( 'Free shipping requires a free shipping coupon', 'woocommerce' ),
-							'description' 	=> __('Users will need to enter a valid free shipping coupon code to use this method. If a coupon is used, the minimum order amount will be ignored.', 'woocommerce'),
+							'description' 	=> __( 'Users will need to enter a valid free shipping coupon code to use this method. If a coupon is used, the minimum order amount will be ignored.', 'woocommerce' ),
 							'default' 		=> 'no'
 						),
 			'availability' => array(
@@ -93,8 +93,8 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 							'default' 		=> 'all',
 							'class'			=> 'availability',
 							'options'		=> array(
-								'all' 		=> __('All allowed countries', 'woocommerce'),
-								'specific' 	=> __('Specific Countries', 'woocommerce')
+								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
+								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
 							)
 						),
 			'countries' => array(
@@ -121,8 +121,8 @@ class WC_Free_Shipping extends WC_Shipping_Method {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('Free Shipping', 'woocommerce'); ?></h3>
-    	<p><?php _e('Free Shipping - does what it says on the tin.', 'woocommerce'); ?></p>
+    	<h3><?php _e( 'Free Shipping', 'woocommerce' ); ?></h3>
+    	<p><?php _e( 'Free Shipping - does what it says on the tin.', 'woocommerce' ); ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.

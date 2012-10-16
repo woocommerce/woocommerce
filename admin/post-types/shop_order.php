@@ -88,16 +88,16 @@ function woocommerce_custom_order_columns( $column ) {
             	$user .= '</a>';
 
            	else :
-           		$user = __('Guest', 'woocommerce');
+           		$user = __( 'Guest', 'woocommerce' );
            	endif;
 
-           	echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'"><strong>'.sprintf( __('Order %s', 'woocommerce'), $order->get_order_number() ).'</strong></a> ' . __('made by', 'woocommerce') . ' ' . $user;
+           	echo '<a href="'.admin_url('post.php?post='.$post->ID.'&action=edit').'"><strong>'.sprintf( __( 'Order %s', 'woocommerce' ), $order->get_order_number() ).'</strong></a> ' . __( 'made by', 'woocommerce' ) . ' ' . $user;
 
            	if ($order->billing_email) :
-        		echo '<small class="meta">'.__('Email:', 'woocommerce') . ' ' . '<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
+        		echo '<small class="meta">'.__( 'Email:', 'woocommerce' ) . ' ' . '<a href="' . esc_url( 'mailto:'.$order->billing_email ).'">'.esc_html( $order->billing_email ).'</a></small>';
         	endif;
         	if ($order->billing_phone) :
-        		echo '<small class="meta">'.__('Tel:', 'woocommerce') . ' ' . esc_html( $order->billing_phone ) . '</small>';
+        		echo '<small class="meta">'.__( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $order->billing_phone ) . '</small>';
         	endif;
 
 		break;
@@ -110,7 +110,7 @@ function woocommerce_custom_order_columns( $column ) {
         	endif;
 
         	if ($order->payment_method_title) :
-        		echo '<small class="meta">' . __('Via', 'woocommerce') . ' ' . esc_html( $order->payment_method_title ) . '</small>';
+        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $order->payment_method_title ) . '</small>';
         	endif;
 
 		break;
@@ -123,7 +123,7 @@ function woocommerce_custom_order_columns( $column ) {
         	endif;
 
         	if ($order->shipping_method_title) :
-        		echo '<small class="meta">' . __('Via', 'woocommerce') . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
+        		echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $order->shipping_method_title ) . '</small>';
         	endif;
 		break;
 		case "total_cost" :
@@ -191,9 +191,9 @@ function woocommerce_custom_order_columns( $column ) {
 		case "note" :
 
 			if ($order->customer_note)
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="'. __('Yes', 'woocommerce') .'" width="14" height="14" />';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note.png" alt="yes" class="tips" data-tip="'. __( 'Yes', 'woocommerce' ) .'" width="14" height="14" />';
 			else
-				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="'. __('No', 'woocommerce') .'" width="14" height="14" />';
+				echo '<img src="'.$woocommerce->plugin_url().'/assets/images/note-off.png" alt="no" class="tips" data-tip="'. __( 'No', 'woocommerce' ) .'" width="14" height="14" />';
 
 		break;
 		case "order_comments" :
@@ -283,7 +283,7 @@ function woocommerce_restrict_manage_orders() {
 	// Status
 	?>
 	<select name='shop_order_status' id='dropdown_shop_order_status'>
-		<option value=""><?php _e('Show all statuses', 'woocommerce'); ?></option>
+		<option value=""><?php _e( 'Show all statuses', 'woocommerce' ); ?></option>
 		<?php
 			$terms = get_terms('shop_order_status');
 
@@ -302,7 +302,7 @@ function woocommerce_restrict_manage_orders() {
 	// Customers
 	?>
 	<select id="dropdown_customers" name="_customer_user">
-		<option value=""><?php _e('Show all customers', 'woocommerce') ?></option>
+		<option value=""><?php _e( 'Show all customers', 'woocommerce' ) ?></option>
 		<?php
 			if ( ! empty( $_GET['_customer_user'] ) ) {
 				$user = get_user_by( 'id', absint( $_GET['_customer_user'] ) );
@@ -327,7 +327,7 @@ function woocommerce_restrict_manage_orders() {
 		    data:		{
 		    	action: 	'woocommerce_json_search_customers',
 				security: 	'" . wp_create_nonce("search-customers") . "',
-				default:	'" . __('Show all customers', 'woocommerce') . "'
+				default:	'" . __( 'Show all customers', 'woocommerce' ) . "'
 		    }
 		}, function (data) {
 

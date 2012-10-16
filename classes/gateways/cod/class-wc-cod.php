@@ -23,7 +23,7 @@ class WC_COD extends WC_Payment_Gateway {
      */
 	function __construct() {
 		$this->id = 'cod';
-		$this->method_title = __('Cash on Delivery', 'woocommerce');
+		$this->method_title = __( 'Cash on Delivery', 'woocommerce' );
 		$this->has_fields 		= false;
 
 		// Load the form fields.
@@ -171,7 +171,7 @@ class WC_COD extends WC_Payment_Gateway {
 		$order = new WC_Order( $order_id );
 
 		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status('on-hold', __('Payment to be made upon delivery.', 'woocommerce'));
+		$order->update_status('on-hold', __( 'Payment to be made upon delivery.', 'woocommerce' ));
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

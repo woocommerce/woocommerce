@@ -56,7 +56,7 @@ function woocommerce_checkout( $atts ) {
 		$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ) ? true : false;
 
 		if ( $woocommerce->error_count() == 0 && $non_js_checkout )
-			$woocommerce->add_message( __('The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce') );
+			$woocommerce->add_message( __( 'The order totals have been updated. Please confirm your order by pressing the Place Order button at the bottom of the page.', 'woocommerce' ) );
 
 		woocommerce_get_template('checkout/form-checkout.php');
 

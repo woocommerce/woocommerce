@@ -53,7 +53,7 @@ function woocommerce_meta_boxes() {
 	// Excerpt
 	if ( function_exists('wp_editor') ) {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
-		add_meta_box( 'postexcerpt', __('Product Short Description', 'woocommerce'), 'woocommerce_product_short_description_meta_box', 'product', 'normal' );
+		add_meta_box( 'postexcerpt', __( 'Product Short Description', 'woocommerce' ), 'woocommerce_product_short_description_meta_box', 'product', 'normal' );
 	}
 
 	// Comments/Reviews
@@ -62,16 +62,16 @@ function woocommerce_meta_boxes() {
 
 	if ( ('publish' == $post->post_status || 'private' == $post->post_status) ) {
 		remove_meta_box( 'commentsdiv', 'product', 'normal' );
-		add_meta_box( 'commentsdiv', __('Reviews', 'woocommerce'), 'post_comment_meta_box', 'product', 'normal' );
+		add_meta_box( 'commentsdiv', __( 'Reviews', 'woocommerce' ), 'post_comment_meta_box', 'product', 'normal' );
 	}
 
 	// Orders
-	add_meta_box( 'woocommerce-order-data', __('Order Data', 'woocommerce'), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
-	add_meta_box( 'woocommerce-order-items', __('Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woocommerce'), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
-	add_meta_box( 'woocommerce-order-totals', __('Order Totals', 'woocommerce'), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
-	add_meta_box( 'woocommerce-order-notes', __('Order Notes', 'woocommerce'), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
-	add_meta_box( 'woocommerce-order-downloads', __('Downloadable Product Permissions <small>&ndash; Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.</small>', 'woocommerce'), 'woocommerce_order_downloads_meta_box', 'shop_order', 'normal', 'default');
-	add_meta_box( 'woocommerce-order-actions', __('Order Actions', 'woocommerce'), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'high');
+	add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
+	add_meta_box( 'woocommerce-order-items', __( 'Order Items <small>&ndash; Note: if you edit quantities or remove items from the order you will need to manually change the item\'s stock levels.</small>', 'woocommerce' ), 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
+	add_meta_box( 'woocommerce-order-totals', __( 'Order Totals', 'woocommerce' ), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
+	add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions <small>&ndash; Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.</small>', 'woocommerce' ), 'woocommerce_order_downloads_meta_box', 'shop_order', 'normal', 'default');
+	add_meta_box( 'woocommerce-order-actions', __( 'Order Actions', 'woocommerce' ), 'woocommerce_order_actions_meta_box', 'shop_order', 'side', 'high');
 
 	remove_meta_box( 'commentsdiv', 'shop_order' , 'normal' );
 	remove_meta_box( 'woothemes-settings', 'shop_order' , 'normal' );
@@ -79,7 +79,7 @@ function woocommerce_meta_boxes() {
 	remove_meta_box( 'slugdiv', 'shop_order' , 'normal' );
 
 	// Coupons
-	add_meta_box( 'woocommerce-coupon-data', __('Coupon Data', 'woocommerce'), 'woocommerce_coupon_data_meta_box', 'shop_coupon', 'normal', 'high');
+	add_meta_box( 'woocommerce-coupon-data', __( 'Coupon Data', 'woocommerce' ), 'woocommerce_coupon_data_meta_box', 'shop_coupon', 'normal', 'high');
 
 	remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
 	remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
@@ -98,8 +98,8 @@ add_action( 'add_meta_boxes', 'woocommerce_meta_boxes' );
  * @return string
  */
 function woocommerce_enter_title_here( $text, $post ) {
-	if ( $post->post_type == 'shop_coupon' ) return __('Coupon code', 'woocommerce');
-	if ( $post->post_type == 'product' ) return __('Product name', 'woocommerce');
+	if ( $post->post_type == 'shop_coupon' ) return __( 'Coupon code', 'woocommerce' );
+	if ( $post->post_type == 'product' ) return __( 'Product name', 'woocommerce' );
 	return $text;
 }
 

@@ -22,7 +22,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	 */
 	function __construct() {
 		$this->id 			= 'local_pickup';
-		$this->method_title = __('Local Pickup', 'woocommerce');
+		$this->method_title = __( 'Local Pickup', 'woocommerce' );
 		$this->init();
 	}
 
@@ -92,8 +92,8 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 				'default' 		=> 'all',
 				'class'			=> 'availability',
 				'options'		=> array(
-					'all' 		=> __('All allowed countries', 'woocommerce'),
-					'specific' 	=> __('Specific Countries', 'woocommerce')
+					'all' 		=> __( 'All allowed countries', 'woocommerce' ),
+					'specific' 	=> __( 'Specific Countries', 'woocommerce' )
 				)
 			),
 			'countries' => array(
@@ -122,7 +122,7 @@ class WC_Local_Pickup extends WC_Shipping_Method {
 	function admin_options() {
 		global $woocommerce; ?>
 		<h3><?php echo $this->method_title; ?></h3>
-		<p><?php _e('Local pickup is a simple method which allows the customer to pick up their order themselves.', 'woocommerce'); ?></p>
+		<p><?php _e( 'Local pickup is a simple method which allows the customer to pick up their order themselves.', 'woocommerce' ); ?></p>
 		<table class="form-table">
     		<?php $this->generate_settings_html(); ?>
     	</table> <?php

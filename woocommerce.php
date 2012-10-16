@@ -1507,10 +1507,10 @@ class Woocommerce {
 	function get_coupon_discount_types() {
 		if ( ! isset($this->coupon_discount_types ) ) {
 			$this->coupon_discount_types = apply_filters( 'woocommerce_coupon_discount_types', array(
-    			'fixed_cart' 	=> __('Cart Discount', 'woocommerce'),
-    			'percent' 		=> __('Cart % Discount', 'woocommerce'),
-    			'fixed_product'	=> __('Product Discount', 'woocommerce'),
-    			'percent_product'	=> __('Product % Discount', 'woocommerce')
+    			'fixed_cart' 	=> __( 'Cart Discount', 'woocommerce' ),
+    			'percent' 		=> __( 'Cart % Discount', 'woocommerce' ),
+    			'fixed_product'	=> __( 'Product Discount', 'woocommerce' ),
+    			'percent_product'	=> __( 'Product % Discount', 'woocommerce' )
     		) );
 		}
 		return $this->coupon_discount_types;
@@ -1575,7 +1575,7 @@ class Woocommerce {
 		$name = '_n';
 		$action = 'woocommerce-' . $action;
 
-		if ( $error_message === false ) $error_message = __('Action failed. Please refresh the page and retry.', 'woocommerce');
+		if ( $error_message === false ) $error_message = __( 'Action failed. Please refresh the page and retry.', 'woocommerce' );
 
 		if ( ! in_array( $method, array( '_GET', '_POST', '_REQUEST' ) ) ) $method = '_POST';
 

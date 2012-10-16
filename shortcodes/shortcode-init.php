@@ -425,7 +425,7 @@ function woocommerce_product_add_to_cart( $atts ) {
 
 			$link 	= $product->add_to_cart_url();
 
-			$label 	= apply_filters('add_to_cart_text', __('Add to cart', 'woocommerce'));
+			$label 	= apply_filters('add_to_cart_text', __( 'Add to cart', 'woocommerce' ));
 
 			$link = add_query_arg( 'variation_id', $variation->variation_id, $link );
 

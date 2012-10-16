@@ -432,7 +432,7 @@ class WC_Cart {
 					 * Check the stock for this item individually
 					 */
 					if ( ! $_product->is_in_stock() || ! $_product->has_enough_stock( $values['quantity'] ) ) {
-						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
+						$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 						return $error;
 					}
 
@@ -442,14 +442,14 @@ class WC_Cart {
 					if ( $values['variation_id'] && $_product->variation_has_stock && isset( $product_qty_in_cart[$values['variation_id']] ) ) {
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[$values['variation_id']] ) ) {
-							$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
 					} elseif ( isset( $product_qty_in_cart[$values['product_id']] ) ) {
 
 						if ( ! $_product->has_enough_stock( $product_qty_in_cart[$values['product_id']] ) ) {
-							$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title(), $_product->stock ) );
+							$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->stock ) );
 							return $error;
 						}
 
@@ -460,7 +460,7 @@ class WC_Cart {
 				 */
 				} else {
 					if ( ! $_product->is_in_stock() ) {
-						$error->add( 'out-of-stock', sprintf(__('Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce'), $_product->get_title() ) );
+						$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title() ) );
 						return $error;
 					}
 				}
@@ -741,19 +741,19 @@ class WC_Cart {
 
 			// Check product is_purchasable
 			if ( ! $product_data->is_purchasable() ) {
-				$woocommerce->add_error( __('Sorry, this product cannot be purchased.', 'woocommerce') );
+				$woocommerce->add_error( __( 'Sorry, this product cannot be purchased.', 'woocommerce' ) );
 				return false;
 			}
 
 			// Stock check - only check if we're managing stock and backorders are not allowed
 			if ( ! $product_data->is_in_stock() ) {
 			
-				$woocommerce->add_error( sprintf( __('You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce'), $product_data->get_title() ) );
+				$woocommerce->add_error( sprintf( __( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ), $product_data->get_title() ) );
 				
 				return false;
 			} elseif ( ! $product_data->has_enough_stock( $quantity ) ) {
 			
-				$woocommerce->add_error( sprintf(__('You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce'), $product_data->get_title(), $product_data->get_stock_quantity() ));
+				$woocommerce->add_error( sprintf(__( 'You cannot add that amount of &quot;%s&quot; to the cart because there is not enough stock (%s remaining).', 'woocommerce' ), $product_data->get_title(), $product_data->get_stock_quantity() ));
 				
 				return false;
 				
@@ -765,7 +765,7 @@ class WC_Cart {
 
 				// If its greater than 1, its already in the cart
 				if ( $in_cart_quantity > 1 ) {
-					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), __('You already have this item in your cart.', 'woocommerce') ) );
+					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), __( 'You already have this item in your cart.', 'woocommerce' ) ) );
 					return false;
 				}
 			}
@@ -779,7 +779,7 @@ class WC_Cart {
 				if ( $variation_id && $product_data->variation_has_stock ) {
 
 					if ( isset( $product_qty_in_cart[ $variation_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $variation_id ] + $quantity ) ) {
-						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
+						$woocommerce->add_error( sprintf(__( '<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $variation_id ] ));
 						return false;
 					}
 
@@ -787,7 +787,7 @@ class WC_Cart {
 				} else {
 
 					if ( isset( $product_qty_in_cart[ $product_id ] ) && ! $product_data->has_enough_stock( $product_qty_in_cart[ $product_id ] + $quantity ) ) {
-						$woocommerce->add_error( sprintf(__('<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce'), get_permalink(woocommerce_get_page_id('cart')), __('View Cart &rarr;', 'woocommerce'), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
+						$woocommerce->add_error( sprintf(__( '<a href="%s" class="button">%s</a> You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), $product_data->get_stock_quantity(), $product_qty_in_cart[ $product_id ] ));
 						return false;
 					}
 
@@ -1579,7 +1579,7 @@ class WC_Cart {
 					}
 
 				} else {
-					return __('Free!', 'woocommerce');
+					return __( 'Free!', 'woocommerce' );
 				}
 			}
 		}
@@ -1591,7 +1591,7 @@ class WC_Cart {
 		 */
 		function get_cart_shipping_title() {
 			if ( isset( $this->shipping_label ) ) {
-				return __('via', 'woocommerce') . ' ' . $this->shipping_label;
+				return __( 'via', 'woocommerce' ) . ' ' . $this->shipping_label;
 			}
 			return false;
 		}
@@ -1629,13 +1629,13 @@ class WC_Cart {
 				// Check it can be used with cart
 				$return = $the_coupon->is_valid();
 				if ( ! $return || is_wp_error( $return ) ) {
-					$woocommerce->add_error( is_wp_error( $return ) ? $return->get_error_message() : __('Invalid coupon.', 'woocommerce') );
+					$woocommerce->add_error( is_wp_error( $return ) ? $return->get_error_message() : __( 'Invalid coupon.', 'woocommerce' ) );
 					return false;
 				}
 
 				// Check if applied
 				if ( $woocommerce->cart->has_discount( $coupon_code ) ) {
-					$woocommerce->add_error( __('Discount code already applied!', 'woocommerce') );
+					$woocommerce->add_error( __( 'Discount code already applied!', 'woocommerce' ) );
 					return false;
 				}
 
@@ -1655,14 +1655,14 @@ class WC_Cart {
 
 				$this->set_session();
 
-				$woocommerce->add_message( __('Discount code applied successfully.', 'woocommerce') );
+				$woocommerce->add_message( __( 'Discount code applied successfully.', 'woocommerce' ) );
 
 				do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 				return true;
 
 			} else {
-				$woocommerce->add_error( __('Coupon does not exist!', 'woocommerce') );
+				$woocommerce->add_error( __( 'Coupon does not exist!', 'woocommerce' ) );
 				return false;
 			}
 			return false;

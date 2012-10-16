@@ -777,12 +777,12 @@ class WC_Order {
 
 			endif;
 
-			$shipping .= sprintf( __('&nbsp;<small>%svia %s</small>', 'woocommerce'), $tax_text, $this->get_shipping_method() );
+			$shipping .= sprintf( __( '&nbsp;<small>%svia %s</small>', 'woocommerce' ), $tax_text, $this->get_shipping_method() );
 
 		elseif ( $this->get_shipping_method() ) :
 			$shipping = $this->get_shipping_method();
 		else :
-			$shipping = __('Free!', 'woocommerce');
+			$shipping = __( 'Free!', 'woocommerce' );
 		endif;
 
 		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this );
@@ -1128,8 +1128,8 @@ class WC_Order {
 	function add_order_note( $note, $is_customer_note = 0 ) {
 
 		$comment_post_ID 		= $this->id;
-		$comment_author 		= __('WooCommerce', 'woocommerce');
-		$comment_author_email 	= strtolower( __('WooCommerce', 'woocommerce') ) . '@' . str_replace('www.', '', $_SERVER['HTTP_HOST']);
+		$comment_author 		= __( 'WooCommerce', 'woocommerce' );
+		$comment_author_email 	= strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace('www.', '', $_SERVER['HTTP_HOST']);
 		$comment_author_url 	= '';
 		$comment_content 		= $note;
 		$comment_agent			= 'WooCommerce';
@@ -1175,7 +1175,7 @@ class WC_Order {
 				do_action( 'woocommerce_order_status_' . $this->status . '_to_' . $new_status->slug, $this->id );
 				do_action( 'woocommerce_order_status_changed', $this->id, $this->status, $new_status->slug );
 				
-				$this->add_order_note( $note . sprintf( __('Order status changed from %s to %s.', 'woocommerce'), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
+				$this->add_order_note( $note . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), __( $old_status->name, 'woocommerce' ), __( $new_status->name, 'woocommerce' ) ) );
 
 				// Record the completed date of the order
 				if ( $new_status->slug == 'completed' )
@@ -1394,7 +1394,7 @@ class WC_Order {
 
 						$new_quantity = $_product->reduce_stock( $item['qty'] );
 
-						$this->add_order_note( sprintf( __('Item #%s stock reduced from %s to %s.', 'woocommerce'), $item['id'], $old_stock, $new_quantity) );
+						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['id'], $old_stock, $new_quantity) );
 
 						$this->send_stock_notifications( $_product, $new_quantity, $item['qty'] );
 
@@ -1406,7 +1406,7 @@ class WC_Order {
 
 			do_action( 'woocommerce_reduce_order_stock', $this );
 
-			$this->add_order_note( __('Order item stock reduced successfully.', 'woocommerce') );
+			$this->add_order_note( __( 'Order item stock reduced successfully.', 'woocommerce' ) );
 		}
 
 	}

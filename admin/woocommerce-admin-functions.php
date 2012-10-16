@@ -124,19 +124,19 @@ function woocommerce_preview_emails() {
 
 		$mailer = $woocommerce->mailer();
 
-		$email_heading = __('Order Received', 'woocommerce');
+		$email_heading = __( 'Order Received', 'woocommerce' );
 
 		$message  = wpautop( __("Thank you, we are now processing your order. Your order's details are below.", 'woocommerce') );
 
-		$message .= '<h2>' . __('Order:', 'woocommerce') . ' ' . '#1000</h2>';
+		$message .= '<h2>' . __( 'Order:', 'woocommerce' ) . ' ' . '#1000</h2>';
 
 		$message .= '
 		<table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee; margin: 0 0 20px" border="1" bordercolor="#eee">
 			<thead>
 				<tr>
-					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Product', 'woocommerce') . '</th>
-					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Quantity', 'woocommerce') . '</th>
-					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __('Price', 'woocommerce') . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Product', 'woocommerce' ) . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Quantity', 'woocommerce' ) . '</th>
+					<th scope="col" style="text-align:left; border: 1px solid #eee;">' . __( 'Price', 'woocommerce' ) . '</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -154,20 +154,20 @@ function woocommerce_preview_emails() {
 			</tfoot>
 		</table>';
 
-		$message .= '<h2>' . __('Customer details', 'woocommerce') . '</h2>';
+		$message .= '<h2>' . __( 'Customer details', 'woocommerce' ) . '</h2>';
 
 		$message .= '
 		<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 			<tr>
 				<td valign="top" width="50%">
-					<h3>' . __('Billing address', 'woocommerce') . '</h3>
+					<h3>' . __( 'Billing address', 'woocommerce' ) . '</h3>
 					<p>Some Guy
 					1 infinite loop
 					Cupertino
 					CA 95014</p>
 				</td>
 				<td valign="top" width="50%">
-					<h3>' . __('Shipping address', 'woocommerce') . '</h3>
+					<h3>' . __( 'Shipping address', 'woocommerce' ) . '</h3>
 					<p>Some Guy
 					1 infinite loop
 					Cupertino
@@ -415,7 +415,7 @@ function woocommerce_compile_less_styles() {
 		    	file_put_contents( $css_file, $compiled_css );
 
 		} catch ( exception $ex ) {
-			wp_die( __('Could not compile woocommerce.less:', 'woocommerce') . ' ' . $ex->getMessage() );
+			wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
 		}
 	}
 }

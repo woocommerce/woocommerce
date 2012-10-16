@@ -202,7 +202,7 @@ if ( class_exists( 'WP_Importer' ) ) {
 			
 			// Show Result
 			echo '<div class="updated settings-error below-h2"><p>
-				'.sprintf( __('Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>.', 'woocommerce'), $this->imported, $this->skipped ).'
+				'.sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates and skipped <strong>%s</strong>.', 'woocommerce' ), $this->imported, $this->skipped ).'
 			</p></div>';
 	
 			$this->import_end();

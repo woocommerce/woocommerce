@@ -198,22 +198,22 @@ class WC_ShareYourCart extends WC_Integration {
 
 				?>
 				<div class="updated">
-					<h3><?php _e('Create a ShareYourCart account', 'woocommerce') ?></h3>
+					<h3><?php _e( 'Create a ShareYourCart account', 'woocommerce' ) ?></h3>
 					<table class="form-table">
 						<tr>
-							<th><?php _e('Domain', 'woocommerce'); ?></th>
+							<th><?php _e( 'Domain', 'woocommerce' ); ?></th>
 							<td><input type="text" name="domain" id="domain"  class="regular-text" value="<?php echo (isset($_POST['domain']) ? $_POST['domain'] : site_url()); ?>" /></td>
 						</tr>
 						<tr>
-							<th><?php _e('Email', 'woocommerce'); ?></th>
+							<th><?php _e( 'Email', 'woocommerce' ); ?></th>
 							<td><input type="text" name="email" id="email" class="regular-text" value="<?php echo (isset($_POST['email']) ? $_POST['email'] : get_option('admin_email')); ?>"/></td>
 						</tr>
 						<tr>
 							<th>&nbsp;</th>
-							<td><input class="buttonCheckbox" name="syc-terms-agreement" id="syc-terms-agreement" type="checkbox" /> <label for="syc-terms-agreement"><?php printf(__('I agree to the <a href="%s">ShareYourCart terms and conditions</a>', 'woocommerce'), 'http://shareyourcart.com/terms'); ?></label></td>
+							<td><input class="buttonCheckbox" name="syc-terms-agreement" id="syc-terms-agreement" type="checkbox" /> <label for="syc-terms-agreement"><?php printf(__( 'I agree to the <a href="%s">ShareYourCart terms and conditions</a>', 'woocommerce' ), 'http://shareyourcart.com/terms'); ?></label></td>
 						</tr>
 					</table>
-					<p class="submit"><input type="submit" class="button button-primary" value="<?php _e('Create Account', 'woocommerce') ?>" /></p>
+					<p class="submit"><input type="submit" class="button button-primary" value="<?php _e( 'Create Account', 'woocommerce' ) ?>" /></p>
 				</div>
 				<?php
 
@@ -221,18 +221,18 @@ class WC_ShareYourCart extends WC_Integration {
 
 				?>
 				<div class="updated">
-					<h3><?php _e('Recover your ShareYourCart account', 'woocommerce') ?></h3>
+					<h3><?php _e( 'Recover your ShareYourCart account', 'woocommerce' ) ?></h3>
 					<table class="form-table">
 						<tr>
-							<th><?php _e('Domain', 'woocommerce'); ?></th>
+							<th><?php _e( 'Domain', 'woocommerce' ); ?></th>
 							<td><input type="text" name="domain" id="domain"  class="regular-text" value="<?php echo (isset($_POST['domain']) ? $_POST['domain'] : site_url()); ?>" /></td>
 						</tr>
 						<tr>
-							<th><?php _e('Email', 'woocommerce'); ?></th>
+							<th><?php _e( 'Email', 'woocommerce' ); ?></th>
 							<td><input type="text" name="email" id="email" class="regular-text" value="<?php echo (isset($_POST['email']) ? $_POST['email'] : get_option('admin_email')); ?>"/></td>
 						</tr>
 					</table>
-					<p class="submit"><input type="submit" class="button button-primary" value="<?php _e('Email me my details', 'woocommerce') ?>" /></p>
+					<p class="submit"><input type="submit" class="button button-primary" value="<?php _e( 'Email me my details', 'woocommerce' ) ?>" /></p>
 				</div>
 				<?php
 
@@ -240,9 +240,9 @@ class WC_ShareYourCart extends WC_Integration {
 
 				?>
 				<div id="wc_get_started">
-					<span class="main"><?php _e('Setup your ShareYourCart account', 'woocommerce'); ?></span>
+					<span class="main"><?php _e( 'Setup your ShareYourCart account', 'woocommerce' ); ?></span>
 					<span><?php echo $this->method_description; ?></span>
-					<p><a href="<?php echo add_query_arg( 'syc-account', 'create', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button button-primary api-link"><?php _e('Create an account', 'woocommerce'); ?></a> <a href="<?php echo add_query_arg( 'syc-account', 'recover', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button api-link"><?php _e('Can\'t access your account?', 'woocommerce'); ?></a></p>
+					<p><a href="<?php echo add_query_arg( 'syc-account', 'create', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button button-primary api-link"><?php _e( 'Create an account', 'woocommerce' ); ?></a> <a href="<?php echo add_query_arg( 'syc-account', 'recover', admin_url( 'admin.php?page=woocommerce_settings&tab=integration&section=shareyourcart' ) ); ?>" class="button api-link"><?php _e( 'Can\'t access your account?', 'woocommerce' ); ?></a></p>
 				</div>
 				<?php
 
@@ -257,10 +257,10 @@ class WC_ShareYourCart extends WC_Integration {
 			<?php $this->generate_settings_html(); ?>
 			<?php if ( $this->client_id && $this->app_key ) : ?>
 				<tr>
-					<th><?php _e('Configure ShareYourCart', 'woocommerce'); ?></th>
+					<th><?php _e( 'Configure ShareYourCart', 'woocommerce' ); ?></th>
 					<td>
-						<p><?php _e('You can choose how much of a discount to give (in fixed amount, percentage, or free shipping) and to which social media channels it should it be applied. You can also define what the advertisement should say, so that it fully benefits your sales.', 'woocommerce'); ?></p>
-						<p><a href="http://www.shareyourcart.com/configure/?app_key=<?php echo $this->app_key; ?>&amp;client_id=<?php echo $this->client_id; ?>&amp;email=<?php echo $this->email; ?>" class="button" target="_blank"><?php _e('Configure', 'woocommerce'); ?></a></p>
+						<p><?php _e( 'You can choose how much of a discount to give (in fixed amount, percentage, or free shipping) and to which social media channels it should it be applied. You can also define what the advertisement should say, so that it fully benefits your sales.', 'woocommerce' ); ?></p>
+						<p><a href="http://www.shareyourcart.com/configure/?app_key=<?php echo $this->app_key; ?>&amp;client_id=<?php echo $this->client_id; ?>&amp;email=<?php echo $this->email; ?>" class="button" target="_blank"><?php _e( 'Configure', 'woocommerce' ); ?></a></p>
 					</td>
 				</tr>
 			<?php endif; ?>

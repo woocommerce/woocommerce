@@ -282,11 +282,11 @@ class WC_Emails {
 		$sku = ($product->sku) ? '(' . $product->sku . ') ' : '';
 
 		if ( ! empty( $product->variation_id ) )
-			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
+			$title = sprintf(__( 'Variation #%s of %s', 'woocommerce' ), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
 		else
-			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . ' ' . $sku;
+			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . ' ' . $sku;
 
-		$message = $title . __('is low in stock.', 'woocommerce');
+		$message = $title . __( 'is low in stock.', 'woocommerce' );
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'low_stock', $product);
@@ -314,11 +314,11 @@ class WC_Emails {
 		$sku = ($product->sku) ? '(' . $product->sku . ') ' : '';
 
 		if ( ! empty( $product->variation_id ) )
-			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
+			$title = sprintf(__( 'Variation #%s of %s', 'woocommerce' ), $product->variation_id, get_the_title($product->id)) . ' ' . $sku;
 		else
-			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . ' ' . $sku;
+			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . ' ' . $sku;
 
-		$message = $title . __('is out of stock.', 'woocommerce');
+		$message = $title . __( 'is out of stock.', 'woocommerce' );
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'no_stock', $product);
@@ -358,11 +358,11 @@ class WC_Emails {
 		$sku = ($product->sku) ? ' (' . $product->sku . ')' : '';
 
 		if ( ! empty( $product->variation_id ) )
-			$title = sprintf(__('Variation #%s of %s', 'woocommerce'), $product->variation_id, get_the_title($product->id)) . $sku;
+			$title = sprintf(__( 'Variation #%s of %s', 'woocommerce' ), $product->variation_id, get_the_title($product->id)) . $sku;
 		else
-			$title = sprintf(__('Product #%s - %s', 'woocommerce'), $product->id, get_the_title($product->id)) . $sku;
+			$title = sprintf(__( 'Product #%s - %s', 'woocommerce' ), $product->id, get_the_title($product->id)) . $sku;
 
-		$message = sprintf(__('%s units of %s have been backordered in order #%s.', 'woocommerce'), $quantity, $title, $order_id );
+		$message = sprintf(__( '%s units of %s have been backordered in order #%s.', 'woocommerce' ), $quantity, $title, $order_id );
 
 		//	CC, BCC, additional headers
 		$headers = apply_filters('woocommerce_email_headers', '', 'backorder', $args);

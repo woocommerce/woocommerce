@@ -30,48 +30,48 @@ function woocommerce_reports() {
 			'title' 	=>  __( 'Sales', 'woocommerce' ),
 			'charts' 	=> array(
 				array(
-					'title' => __('Overview', 'woocommerce'),
+					'title' => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title' => true,
 					'function' => 'woocommerce_sales_overview'
 				),
 				array(
-					'title' => __('Sales by day', 'woocommerce'),
+					'title' => __( 'Sales by day', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_daily_sales'
 				),
 				array(
-					'title' => __('Sales by month', 'woocommerce'),
+					'title' => __( 'Sales by month', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_monthly_sales'
 				),
 				array(
-					'title' => __('Taxes by month', 'woocommerce'),
+					'title' => __( 'Taxes by month', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_monthly_taxes'
 				),
 				array(
-					'title' => __('Product Sales', 'woocommerce'),
+					'title' => __( 'Product Sales', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_product_sales'
 				),
 				array(
-					'title' => __('Top sellers', 'woocommerce'),
+					'title' => __( 'Top sellers', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_top_sellers'
 				),
 				array(
-					'title' => __('Top earners', 'woocommerce'),
+					'title' => __( 'Top earners', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_top_earners'
 				),
 				array(
-					'title' => __('Sales by category', 'woocommerce'),
+					'title' => __( 'Sales by category', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_category_sales'
 				),
 				array(
-					'title' => __('Sales by coupon', 'woocommerce'),
+					'title' => __( 'Sales by coupon', 'woocommerce' ),
 					'description' => '',
 					'function' => 'woocommerce_coupon_sales'
 				)
@@ -81,7 +81,7 @@ function woocommerce_reports() {
 			'title' 	=>  __( 'Customers', 'woocommerce' ),
 			'charts' 	=> array(
 				array(
-					'title' => __('Overview', 'woocommerce'),
+					'title' => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title' => true,
 					'function' => 'woocommerce_customer_overview'
@@ -92,7 +92,7 @@ function woocommerce_reports() {
 			'title' 	=>  __( 'Stock', 'woocommerce' ),
 			'charts' 	=> array(
 				array(
-					'title' => __('Overview', 'woocommerce'),
+					'title' => __( 'Overview', 'woocommerce' ),
 					'description' => '',
 					'hide_title' => true,
 					'function' => 'woocommerce_stock_overview'
@@ -364,45 +364,45 @@ function woocommerce_sales_overview() {
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Total sales', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total orders', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total orders', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order total', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order total', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order items', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order items', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Discounts used', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Discounts used', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($discount_total>0) echo woocommerce_price($discount_total); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($discount_total>0) echo woocommerce_price($discount_total); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total shipping costs', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total shipping costs', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($shipping_total>0) echo woocommerce_price($shipping_total); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($shipping_total>0) echo woocommerce_price($shipping_total); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('This month\'s sales', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'This month\'s sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
@@ -611,39 +611,39 @@ function woocommerce_daily_sales() {
 	}
 	?>
 	<form method="post" action="">
-		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+		<p><label for="from"><?php _e( 'From:', 'woocommerce' ); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e( 'To:', 'woocommerce' ); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 	</form>
 
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Total sales in range', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total sales in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total orders in range', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total orders in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order total in range', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order total in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order items in range', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order items in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('Sales in range', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Sales in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
@@ -793,44 +793,44 @@ function woocommerce_monthly_sales() {
 	}
 	?>
 	<form method="post" action="">
-		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label>
+		<p><label for="show_year"><?php _e( 'Year:', 'woocommerce' ); ?></label>
 		<select name="show_year" id="show_year">
 			<?php
 				for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
 					printf('<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
 			?>
-		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+		</select> <input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 	</form>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Total sales for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total sales for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total orders for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total orders for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo $total_orders . ' (' . $order_items . ' ' . __( 'items', 'woocommerce' ) . ')'; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order total for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order total for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average order items for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average order items for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('Monthly sales for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Monthly sales for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
@@ -949,13 +949,13 @@ function woocommerce_top_sellers() {
 	reset( $found_products );
 	?>
 	<form method="post" action="">
-		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+		<p><label for="from"><?php _e( 'From:', 'woocommerce' ); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e( 'To:', 'woocommerce' ); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 	</form>
 	<table class="bar_chart">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woocommerce'); ?></th>
-				<th><?php _e('Sales', 'woocommerce'); ?></th>
+				<th><?php _e( 'Product', 'woocommerce' ); ?></th>
+				<th><?php _e( 'Sales', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1046,13 +1046,13 @@ function woocommerce_top_earners() {
 	reset( $found_products );
 	?>
 	<form method="post" action="">
-		<p><label for="from"><?php _e('From:', 'woocommerce'); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e('To:', 'woocommerce'); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+		<p><label for="from"><?php _e( 'From:', 'woocommerce' ); ?></label> <input type="text" name="start_date" id="from" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $start_date) ); ?>" /> <label for="to"><?php _e( 'To:', 'woocommerce' ); ?></label> <input type="text" name="end_date" id="to" readonly="readonly" value="<?php echo esc_attr( date('Y-m-d', $end_date) ); ?>" /> <input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 	</form>
 	<table class="bar_chart">
 		<thead>
 			<tr>
-				<th><?php _e('Product', 'woocommerce'); ?></th>
-				<th colspan="2"><?php _e('Sales', 'woocommerce'); ?></th>
+				<th><?php _e( 'Product', 'woocommerce' ); ?></th>
+				<th colspan="2"><?php _e( 'Sales', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -1165,8 +1165,8 @@ function woocommerce_product_sales() {
 		<table class="bar_chart">
 			<thead>
 				<tr>
-					<th><?php _e('Month', 'woocommerce'); ?></th>
-					<th colspan="2"><?php _e('Sales', 'woocommerce'); ?></th>
+					<th><?php _e( 'Month', 'woocommerce' ); ?></th>
+					<th colspan="2"><?php _e( 'Sales', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -1183,7 +1183,7 @@ function woocommerce_product_sales() {
 							<span style="width:'.$width.'%">&nbsp;</span>
 							<span class="alt" style="width:'.$width2.'%">&nbsp;</span>
 						</td></tr>';
-					endforeach; else echo '<tr><td colspan="3">'.__('No sales :(', 'woocommerce').'</td></tr>';
+					endforeach; else echo '<tr><td colspan="3">'.__( 'No sales :(', 'woocommerce' ).'</td></tr>';
 				?>
 			</tbody>
 		</table>
@@ -1192,7 +1192,7 @@ function woocommerce_product_sales() {
 	} else {
 		?>
 		<form method="post" action="">
-			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e('Search for a product&hellip;', 'woocommerce'); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 			<script type="text/javascript">
 				jQuery(function(){
 					// Ajax Chosen Product Selectors
@@ -1295,45 +1295,45 @@ function woocommerce_customer_overview() {
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Total customers', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total customers', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_customers>0) echo $total_customers; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_customers>0) echo $total_customers; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total customer sales', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total customer sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_customer_sales>0) echo woocommerce_price($total_customer_sales); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_customer_sales>0) echo woocommerce_price($total_customer_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total guest sales', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total guest sales', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_guest_sales>0) echo woocommerce_price($total_guest_sales); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_guest_sales>0) echo woocommerce_price($total_guest_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total customer orders', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total customer orders', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_customer_orders>0) echo $total_customer_orders; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_customer_orders>0) echo $total_customer_orders; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total guest orders', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total guest orders', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_guest_orders>0) echo $total_guest_orders; else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_guest_orders>0) echo $total_guest_orders; else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Average orders per customer', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Average orders per customer', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_customer_orders>0 && $total_customers>0) echo number_format($total_customer_orders/$total_customers, 2); else _e('n/a', 'woocommerce'); ?></p>
+					<p class="stat"><?php if ($total_customer_orders>0 && $total_customers>0) echo number_format($total_customer_orders/$total_customers, 2); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('Signups per day', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Signups per day', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
@@ -1530,7 +1530,7 @@ function woocommerce_stock_overview() {
 	<div id="poststuff" class="woocommerce-reports-wrap halved">
 		<div class="woocommerce-reports-left">
 			<div class="postbox">
-				<h3><span><?php _e('Low stock', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Low stock', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<?php
 					if ( $low_in_stock ) {
@@ -1545,7 +1545,7 @@ function woocommerce_stock_overview() {
 							$title = __( $product->post_title );
 
 							if ( $sku )
-								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';
+								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . $sku . ')';
 
 							if ( $product->post_type=='product' )
 								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
@@ -1557,7 +1557,7 @@ function woocommerce_stock_overview() {
 						}
 						echo '</ul>';
 					} else {
-						echo '<p>'.__('No products are low in stock.', 'woocommerce').'</p>';
+						echo '<p>'.__( 'No products are low in stock.', 'woocommerce' ).'</p>';
 					}
 					?>
 				</div>
@@ -1565,7 +1565,7 @@ function woocommerce_stock_overview() {
 		</div>
 		<div class="woocommerce-reports-right">
 			<div class="postbox">
-				<h3><span><?php _e('Out of stock', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Out of stock', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<?php
 					if ( $low_in_stock ) {
@@ -1580,7 +1580,7 @@ function woocommerce_stock_overview() {
 							$title = __( $product->post_title );
 
 							if ( $sku )
-								$title .= ' (' . __('SKU', 'woocommerce') . ': ' . $sku . ')';
+								$title .= ' (' . __( 'SKU', 'woocommerce' ) . ': ' . $sku . ')';
 
 							if ( $product->post_type=='product' )
 								$product_url = admin_url( 'post.php?post=' . $product->ID . '&action=edit' );
@@ -1592,7 +1592,7 @@ function woocommerce_stock_overview() {
 						}
 						echo '</ul>';
 					} else {
-						echo '<p>'.__('No products are out in stock.', 'woocommerce').'</p>';
+						echo '<p>'.__( 'No products are out in stock.', 'woocommerce' ).'</p>';
 					}
 					?>
 				</div>
@@ -1741,18 +1741,18 @@ function woocommerce_monthly_taxes() {
 	$total_tax = $total_sales_tax + $total_shipping_tax;
 	?>
 	<form method="post" action="">
-		<p><label for="show_year"><?php _e('Year:', 'woocommerce'); ?></label>
+		<p><label for="show_year"><?php _e( 'Year:', 'woocommerce' ); ?></label>
 		<select name="show_year" id="show_year">
 			<?php
 				for ( $i = $first_year; $i <= date('Y'); $i++ )
 					printf( '<option value="%s" %s>%s</option>', $i, selected( $current_year, $i, false ), $i );
 			?>
-		</select> <input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" /></p>
+		</select> <input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 	</form>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Total taxes for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total taxes for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( $total_tax > 0 )
@@ -1763,7 +1763,7 @@ function woocommerce_monthly_taxes() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total product taxes for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total product taxes for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( $total_sales_tax > 0 )
@@ -1774,7 +1774,7 @@ function woocommerce_monthly_taxes() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Total shipping tax for year', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Total shipping tax for year', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( $total_shipping_tax > 0 )
@@ -1789,13 +1789,13 @@ function woocommerce_monthly_taxes() {
 			<table class="widefat">
 				<thead>
 					<tr>
-						<th><?php _e('Month', 'woocommerce'); ?></th>
-						<th class="total_row"><?php _e('Total Sales', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Order Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-						<th class="total_row"><?php _e('Total Shipping', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-						<th class="total_row"><?php _e('Total Product Taxes', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Cart Tax' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-						<th class="total_row"><?php _e('Total Shipping Taxes', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Shipping Tax' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-						<th class="total_row"><?php _e('Total Taxes', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-						<th class="total_row"><?php _e('Net profit', 'woocommerce'); ?> <a class="tips" data-tip="<?php _e("Total sales minus shipping and tax.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th><?php _e( 'Month', 'woocommerce' ); ?></th>
+						<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Order Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th class="total_row"><?php _e( 'Total Product Taxes', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Cart Tax' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th class="total_row"><?php _e( 'Total Shipping Taxes', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Shipping Tax' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th class="total_row"><?php _e( 'Total Taxes', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("This is the sum of the 'Cart Tax' and 'Shipping Tax' fields within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
+						<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e("Total sales minus shipping and tax.", 'woocommerce'); ?>" href="#">[?]</a></th>
 						<?php
 							$tax_row_labels = array_filter( array_unique( $tax_row_labels ) );
 							foreach ( $tax_row_labels as $label )
@@ -1822,7 +1822,7 @@ function woocommerce_monthly_taxes() {
 							}
 
 							echo '
-								<td>' . __('Total', 'woocommerce') . '</td>
+								<td>' . __( 'Total', 'woocommerce' ) . '</td>
 								<td class="total_row">' . woocommerce_price( $total['gross'] ) . '</td>
 								<td class="total_row">' . woocommerce_price( $total['shipping'] ) . '</td>
 								<td class="total_row">' . woocommerce_price( $total['order_tax'] ) . '</td>
@@ -1897,7 +1897,7 @@ function woocommerce_category_sales() {
 	?>
 	<form method="post" action="" class="report_filters">
 		<p>
-			<label for="show_year"><?php _e('Show:', 'woocommerce'); ?></label>
+			<label for="show_year"><?php _e( 'Show:', 'woocommerce' ); ?></label>
 			<select name="show_year" id="show_year">
 				<?php
 					for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
@@ -1918,7 +1918,7 @@ function woocommerce_category_sales() {
 				?>
 			</select>
 
-			<input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" />
+			<input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
 		</p>
 	</form>
 	<?php
@@ -1996,7 +1996,7 @@ function woocommerce_category_sales() {
 			<!--<tfoot>
 				<tr>
 					<th colspan="<?php echo $column_count + 2; ?>">
-						<a class="button export-data" href="<?php echo add_query_arg( 'export', 'true' ); ?>"><?php _e('Export data', 'woocommerce'); ?></a>
+						<a class="button export-data" href="<?php echo add_query_arg( 'export', 'true' ); ?>"><?php _e( 'Export data', 'woocommerce' ); ?></a>
 					</th>
 				</tr>
 			</tfoot>-->
@@ -2089,7 +2089,7 @@ function woocommerce_category_sales() {
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Top category', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Top category', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						echo $top_cat_name . ' (' . woocommerce_price( $top_cat ) . ')';
@@ -2098,7 +2098,7 @@ function woocommerce_category_sales() {
 			</div>
 			<?php if ( sizeof( $category_totals ) > 1 ) : ?>
 			<div class="postbox">
-				<h3><span><?php _e('Worst category', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Worst category', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						echo $bottom_cat_name . ' (' . woocommerce_price( $bottom_cat ) . ')';
@@ -2106,7 +2106,7 @@ function woocommerce_category_sales() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Category sales average', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Category sales average', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( sizeof( $category_totals ) > 0 )
@@ -2117,7 +2117,7 @@ function woocommerce_category_sales() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Category sales median', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Category sales median', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( sizeof( $category_totals ) == 0 )
@@ -2137,7 +2137,7 @@ function woocommerce_category_sales() {
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('Monthly sales by category', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Monthly sales by category', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>
@@ -2246,7 +2246,7 @@ function woocommerce_coupon_sales() {
 	
 	<form method="post" action="" class="report_filters">
 		<p>
-			<label for="show_year"><?php _e('Show:', 'woocommerce'); ?></label>
+			<label for="show_year"><?php _e( 'Show:', 'woocommerce' ); ?></label>
 			<select name="show_year" id="show_year">
 				<?php
 					for ( $i = $first_year; $i <= date( 'Y' ); $i++ ) 
@@ -2263,7 +2263,7 @@ function woocommerce_coupon_sales() {
 				?>
 			</select>
 
-			<input type="submit" class="button" value="<?php _e('Show', 'woocommerce'); ?>" />
+			<input type="submit" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
 		</p>
 	</form>
 	
@@ -2389,7 +2389,7 @@ function woocommerce_coupon_sales() {
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
 			<div class="postbox">
-				<h3><span><?php _e('Top coupon', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Top coupon', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						echo $top_coupon_name . ' (' . woocommerce_price( $top_coupon_sales ) . ')';
@@ -2398,7 +2398,7 @@ function woocommerce_coupon_sales() {
 			</div>
 			<?php if ( sizeof( $coupon_totals ) > 1 ) : ?>
 			<div class="postbox">
-				<h3><span><?php _e('Worst coupon', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Worst coupon', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						echo $worst_coupon_name . ' (' . woocommerce_price( $worst_coupon_sales ) . ')';
@@ -2406,7 +2406,7 @@ function woocommerce_coupon_sales() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Coupon sales average', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Coupon sales average', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 							echo woocommerce_price( array_sum( $coupon_totals ) / count( $coupon_totals ) );
@@ -2414,7 +2414,7 @@ function woocommerce_coupon_sales() {
 				</div>
 			</div>
 			<div class="postbox">
-				<h3><span><?php _e('Coupon sales median', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Coupon sales median', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
 					<p class="stat"><?php
 						if ( count( $median_coupon_sales ) == 2 )
@@ -2435,7 +2435,7 @@ function woocommerce_coupon_sales() {
 		</div>
 		<div class="woocommerce-reports-main">
 			<div class="postbox">
-				<h3><span><?php _e('Monthly sales by coupon', 'woocommerce'); ?></span></h3>
+				<h3><span><?php _e( 'Monthly sales by coupon', 'woocommerce' ); ?></span></h3>
 				<div class="inside chart">
 					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
 				</div>

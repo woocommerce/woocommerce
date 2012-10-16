@@ -13,10 +13,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Order Status Terms
-__('pending', 'woocommerce');
-__('failed', 'woocommerce');
-__('on-hold', 'woocommerce');
-__('processing', 'woocommerce');
-__('completed', 'woocommerce');
-__('refunded', 'woocommerce');
-__('cancelled', 'woocommerce');
+__( 'pending', 'woocommerce' );
+__( 'failed', 'woocommerce' );
+__( 'on-hold', 'woocommerce' );
+__( 'processing', 'woocommerce' );
+__( 'completed', 'woocommerce' );
+__( 'refunded', 'woocommerce' );
+__( 'cancelled', 'woocommerce' );

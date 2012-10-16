@@ -32,7 +32,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_product_categories';
 		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_categories';
-		$this->woo_widget_name = __('WooCommerce Product Categories', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce Product Categories', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -124,7 +124,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 			$cat_args['title_li'] 			= '';
 			$cat_args['show_children_only']	= ( isset( $instance['show_children_only'] ) && $instance['show_children_only'] ) ? 1 : 0;
 			$cat_args['pad_counts'] 		= 1;
-			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce');
+			$cat_args['show_option_none'] 	= __('No product categories exist.', 'woocommerce' );
 			$cat_args['current_category']	= ( $this->current_cat ) ? $this->current_cat->term_id : '';
 			$cat_args['current_category_ancestors']	= $this->cat_ancestors;
 
@@ -183,10 +183,10 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order by:', 'woocommerce') ?></label>
+		<p><label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e( 'Order by:', 'woocommerce' ) ?></label>
 		<select id="<?php echo esc_attr( $this->get_field_id('orderby') ); ?>" name="<?php echo esc_attr( $this->get_field_name('orderby') ); ?>">
-			<option value="order" <?php selected($orderby, 'order'); ?>><?php _e('Category Order', 'woocommerce'); ?></option>
-			<option value="name" <?php selected($orderby, 'name'); ?>><?php _e('Name', 'woocommerce'); ?></option>
+			<option value="order" <?php selected($orderby, 'order'); ?>><?php _e( 'Category Order', 'woocommerce' ); ?></option>
+			<option value="name" <?php selected($orderby, 'name'); ?>><?php _e( 'Name', 'woocommerce' ); ?></option>
 		</select></p>
 
 		<p><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('dropdown') ); ?>" name="<?php echo esc_attr( $this->get_field_name('dropdown') ); ?>"<?php checked( $dropdown ); ?> />

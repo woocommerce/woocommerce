@@ -54,11 +54,11 @@ function woocommerce_admin_menu() {
     if ( current_user_can( 'manage_woocommerce' ) )
     $menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' );
 
-    $main_page = add_menu_page(__('WooCommerce', 'woocommerce'), __('WooCommerce', 'woocommerce'), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
+    $main_page = add_menu_page(__( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce' , 'woocommerce_settings_page', null, '55.5' );
 
-    $reports_page = add_submenu_page('woocommerce', __('Reports', 'woocommerce'),  __('Reports', 'woocommerce') , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
+    $reports_page = add_submenu_page('woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'woocommerce_reports', 'woocommerce_reports_page');
 
-    add_submenu_page('edit.php?post_type=product', __('Attributes', 'woocommerce'), __('Attributes', 'woocommerce'), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
+    add_submenu_page('edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'woocommerce_attributes', 'woocommerce_attributes_page');
 
     add_action('load-' . $main_page, 'woocommerce_admin_help_tab');
     add_action('load-' . $reports_page, 'woocommerce_admin_help_tab');
@@ -78,8 +78,8 @@ add_action('admin_menu', 'woocommerce_admin_menu', 9);
  * @return void
  */
 function woocommerce_admin_menu_after() {
-	add_submenu_page( 'woocommerce', __('WooCommerce Settings', 'woocommerce'),  __('Settings', 'woocommerce') , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
-	add_submenu_page( 'woocommerce', __('WooCommerce Status', 'woocommerce'),  __('System Status', 'woocommerce') , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
+	add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_settings', 'woocommerce_settings_page');
+	add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'woocommerce_status', 'woocommerce_status_page');
 }
 
 add_action('admin_menu', 'woocommerce_admin_menu_after', 50);
@@ -150,7 +150,7 @@ function woocommerce_admin_install_notice() {
 	<div id="message" class="updated woocommerce-message wc-connect">
 		<div class="squeezer">
 			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; You\'re almost ready to start selling :)', 'woocommerce' ); ?></h4>
-			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>"><?php _e('Skip setup', 'woocommerce'); ?></a></p>
+			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>"><?php _e( 'Skip setup', 'woocommerce' ); ?></a></p>
 		</div>
 	</div>
 	<?php
@@ -161,7 +161,7 @@ function woocommerce_admin_installed_notice() {
 		<div class="squeezer">
 			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; You\'re ready to start selling :)', 'woocommerce' ); ?></h4>
 
-			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e('Documentation', 'woocommerce'); ?></a></p>
+			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e( 'Documentation', 'woocommerce' ); ?></a></p>
 
 			<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
@@ -374,31 +374,31 @@ function woocommerce_admin_scripts() {
 
 		$woocommerce_witepanel_params = array(
 			'remove_item_notice' 			=> __("Remove this item? If you have previously reduced this item's stock, or this order was submitted by a customer, will need to manually restore the item's stock.", 'woocommerce'),
-			'remove_attribute'				=> __('Remove this attribute?', 'woocommerce'),
-			'name_label'					=> __('Name', 'woocommerce'),
-			'remove_label'					=> __('Remove', 'woocommerce'),
-			'click_to_toggle'				=> __('Click to toggle', 'woocommerce'),
-			'values_label'					=> __('Value(s)', 'woocommerce'),
-			'text_attribute_tip'			=> __('Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce'),
-			'visible_label'					=> __('Visible on the product page', 'woocommerce'),
-			'used_for_variations_label'		=> __('Used for variations', 'woocommerce'),
-			'new_attribute_prompt'			=> __('Enter a name for the new attribute term:', 'woocommerce'),
+			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
+			'name_label'					=> __( 'Name', 'woocommerce' ),
+			'remove_label'					=> __( 'Remove', 'woocommerce' ),
+			'click_to_toggle'				=> __( 'Click to toggle', 'woocommerce' ),
+			'values_label'					=> __( 'Value(s)', 'woocommerce' ),
+			'text_attribute_tip'			=> __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
+			'visible_label'					=> __( 'Visible on the product page', 'woocommerce' ),
+			'used_for_variations_label'		=> __( 'Used for variations', 'woocommerce' ),
+			'new_attribute_prompt'			=> __( 'Enter a name for the new attribute term:', 'woocommerce' ),
 			'calc_totals' 					=> __("Calculate totals based on order items, discount amount, and shipping? Note, you will need to (optionally) calculate tax rows and cart discounts manually.", 'woocommerce'),
 			'calc_line_taxes' 				=> __("Calculate line taxes? This will calculate taxes based on the customers country. If no billing/shipping is set it will use the store base country.", 'woocommerce'),
 			'copy_billing' 					=> __("Copy billing information to shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
 			'load_billing' 					=> __("Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce'),
 			'load_shipping' 				=> __("Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce'),
-			'featured_label'				=> __('Featured', 'woocommerce'),
+			'featured_label'				=> __( 'Featured', 'woocommerce' ),
 			'tax_or_vat'					=> $woocommerce->countries->tax_or_vat(),
 			'prices_include_tax' 			=> get_option('woocommerce_prices_include_tax'),
 			'round_at_subtotal'				=> get_option( 'woocommerce_tax_round_at_subtotal' ),
-			'meta_name'						=> __('Meta Name', 'woocommerce'),
-			'meta_value'					=> __('Meta Value', 'woocommerce'),
-			'no_customer_selected'			=> __('No customer selected', 'woocommerce'),
-			'tax_label'						=> __('Tax Label:', 'woocommerce'),
-			'compound_label'				=> __('Compound:', 'woocommerce'),
-			'cart_tax_label'				=> __('Cart Tax:', 'woocommerce'),
-			'shipping_tax_label'			=> __('Shipping Tax:', 'woocommerce'),
+			'meta_name'						=> __( 'Meta Name', 'woocommerce' ),
+			'meta_value'					=> __( 'Meta Value', 'woocommerce' ),
+			'no_customer_selected'			=> __( 'No customer selected', 'woocommerce' ),
+			'tax_label'						=> __( 'Tax Label:', 'woocommerce' ),
+			'compound_label'				=> __( 'Compound:', 'woocommerce' ),
+			'cart_tax_label'				=> __( 'Cart Tax:', 'woocommerce' ),
+			'shipping_tax_label'			=> __( 'Shipping Tax:', 'woocommerce' ),
 			'plugin_url' 					=> $woocommerce->plugin_url(),
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
 			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
@@ -596,7 +596,7 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 
 	$exclude_image = (int) get_post_meta($object->ID, '_woocommerce_exclude_image', true);
 
-	$label = __('Exclude image', 'woocommerce');
+	$label = __( 'Exclude image', 'woocommerce' );
 
 	$html = '<input type="checkbox" '.checked($exclude_image, 1, false).' name="attachments['.$object->ID.'][woocommerce_exclude_image]" id="attachments['.$object->ID.'][woocommerce_exclude_image" />';
 
@@ -605,7 +605,7 @@ function woocommerce_exclude_image_from_product_page_field( $fields, $object ) {
 			'input' => 'html',
 			'html' =>  $html,
 			'value' => '',
-			'helps' => __('Enabling this option will hide it from the product page image gallery.', 'woocommerce')
+			'helps' => __( 'Enabling this option will hide it from the product page image gallery.', 'woocommerce' )
 	);
 
 	return $fields;
@@ -676,47 +676,47 @@ function woocommerce_product_updated_messages( $messages ) {
 
 	$messages['product'] = array(
 		0 => '', // Unused. Messages start at index 1.
-		1 => sprintf( __('Product updated. <a href="%s">View Product</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
-		2 => __('Custom field updated.', 'woocommerce'),
-		3 => __('Custom field deleted.', 'woocommerce'),
-		4 => __('Product updated.', 'woocommerce'),
-		5 => isset($_GET['revision']) ? sprintf( __('Product restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-		6 => sprintf( __('Product published. <a href="%s">View Product</a>', 'woocommerce'), esc_url( get_permalink($post_ID) ) ),
-		7 => __('Product saved.', 'woocommerce'),
-		8 => sprintf( __('Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
-		9 => sprintf( __('Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce'),
+		1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink($post_ID) ) ),
+		2 => __( 'Custom field updated.', 'woocommerce' ),
+		3 => __( 'Custom field deleted.', 'woocommerce' ),
+		4 => __( 'Product updated.', 'woocommerce' ),
+		5 => isset($_GET['revision']) ? sprintf( __( 'Product restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink($post_ID) ) ),
+		7 => __( 'Product saved.', 'woocommerce' ),
+		8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+		9 => sprintf( __( 'Product scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Product</a>', 'woocommerce' ),
 		  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink($post_ID) ) ),
-		10 => sprintf( __('Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce'), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
+		10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview Product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink($post_ID) ) ) ),
 	);
 
 	$messages['shop_order'] = array(
 		0 => '', // Unused. Messages start at index 1.
-		1 => __('Order updated.', 'woocommerce'),
-		2 => __('Custom field updated.', 'woocommerce'),
-		3 => __('Custom field deleted.', 'woocommerce'),
-		4 => __('Order updated.', 'woocommerce'),
-		5 => isset($_GET['revision']) ? sprintf( __('Order restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-		6 => __('Order updated.', 'woocommerce'),
-		7 => __('Order saved.', 'woocommerce'),
-		8 => __('Order submitted.', 'woocommerce'),
-		9 => sprintf( __('Order scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		1 => __( 'Order updated.', 'woocommerce' ),
+		2 => __( 'Custom field updated.', 'woocommerce' ),
+		3 => __( 'Custom field deleted.', 'woocommerce' ),
+		4 => __( 'Order updated.', 'woocommerce' ),
+		5 => isset($_GET['revision']) ? sprintf( __( 'Order restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __( 'Order updated.', 'woocommerce' ),
+		7 => __( 'Order saved.', 'woocommerce' ),
+		8 => __( 'Order submitted.', 'woocommerce' ),
+		9 => sprintf( __( 'Order scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 		  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-		10 => __('Order draft updated.', 'woocommerce')
+		10 => __( 'Order draft updated.', 'woocommerce' )
 	);
 
 	$messages['shop_coupon'] = array(
 		0 => '', // Unused. Messages start at index 1.
-		1 => __('Coupon updated.', 'woocommerce'),
-		2 => __('Custom field updated.', 'woocommerce'),
-		3 => __('Custom field deleted.', 'woocommerce'),
-		4 => __('Coupon updated.', 'woocommerce'),
-		5 => isset($_GET['revision']) ? sprintf( __('Coupon restored to revision from %s', 'woocommerce'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-		6 => __('Coupon updated.', 'woocommerce'),
-		7 => __('Coupon saved.', 'woocommerce'),
-		8 => __('Coupon submitted.', 'woocommerce'),
-		9 => sprintf( __('Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce'),
+		1 => __( 'Coupon updated.', 'woocommerce' ),
+		2 => __( 'Custom field updated.', 'woocommerce' ),
+		3 => __( 'Custom field deleted.', 'woocommerce' ),
+		4 => __( 'Coupon updated.', 'woocommerce' ),
+		5 => isset($_GET['revision']) ? sprintf( __( 'Coupon restored to revision from %s', 'woocommerce' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6 => __( 'Coupon updated.', 'woocommerce' ),
+		7 => __( 'Coupon saved.', 'woocommerce' ),
+		8 => __( 'Coupon submitted.', 'woocommerce' ),
+		9 => sprintf( __( 'Coupon scheduled for: <strong>%1$s</strong>.', 'woocommerce' ),
 		  date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) ),
-		10 => __('Coupon draft updated.', 'woocommerce')
+		10 => __( 'Coupon draft updated.', 'woocommerce' )
 	);
 
 	return $messages;

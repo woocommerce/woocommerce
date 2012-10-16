@@ -64,7 +64,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 	} elseif ( is_tax('product_tag') ) {
 
 		$queried_object = $wp_query->get_queried_object();
-		echo $prepend . $before . __('Products tagged &ldquo;', 'woocommerce') . $queried_object->name . '&rdquo;' . $after;
+		echo $prepend . $before . __( 'Products tagged &ldquo;', 'woocommerce' ) . $queried_object->name . '&rdquo;' . $after;
 
 	} elseif ( is_day() ) {
 
@@ -87,7 +87,7 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 		if ( is_search() ) {
 
-			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __('Search results for &ldquo;', 'woocommerce') . get_search_query() . '&rdquo;' . $after;
+			echo $before . '<a href="' . get_post_type_archive_link('product') . '">' . $_name . '</a>' . $delimiter . __( 'Search results for &ldquo;', 'woocommerce' ) . get_search_query() . '&rdquo;' . $after;
 
 		} elseif ( is_paged() ) {
 

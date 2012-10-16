@@ -915,7 +915,7 @@ add_action( 'comment_feed_where', 'woocommerce_exclude_order_comments_from_feed_
 function woocommerce_downloadable_product_permissions( $order_id ) {
 	global $wpdb;
 
-	if (get_post_meta( $order_id, __('Download Permissions Granted', 'woocommerce'), true)==1) return; // Only do this once
+	if (get_post_meta( $order_id, __( 'Download Permissions Granted', 'woocommerce' ), true)==1) return; // Only do this once
 
 	$order = new WC_Order( $order_id );
 
@@ -939,7 +939,7 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 
 	endforeach;
 
-	update_post_meta( $order_id,  __('Download Permissions Granted', 'woocommerce'), 1);
+	update_post_meta( $order_id,  __( 'Download Permissions Granted', 'woocommerce' ), 1);
 }
 
 add_action('woocommerce_order_status_completed', 'woocommerce_downloadable_product_permissions');
@@ -1228,11 +1228,11 @@ function woocommerce_product_dropdown_categories( $show_counts = 1, $hierarchal 
 	if (!$terms) return;
 
 	$output  = "<select name='product_cat' id='dropdown_product_cat'>";
-	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__('Select a category', 'woocommerce').'</option>';
+	$output .= '<option value="" ' .  selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '', false ) . '>'.__( 'Select a category', 'woocommerce' ).'</option>';
 	$output .= woocommerce_walk_category_dropdown_tree( $terms, 0, $r );
 
 	if ( $show_uncategorized )
-		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __('Uncategorized', 'woocommerce') . '</option>';
+		$output .= '<option value="0" ' . selected( isset( $_GET['product_cat'] ) ? $_GET['product_cat'] : '', '0', false ) . '>' . __( 'Uncategorized', 'woocommerce' ) . '</option>';
 
 	$output .="</select>";
 
@@ -1582,14 +1582,14 @@ function woocommerce_init_roles() {
 	if ( is_object( $wp_roles ) ) {
 
 		// Customer role
-		add_role( 'customer', __('Customer', 'woocommerce'), array(
+		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
 		    'read' 						=> true,
 		    'edit_posts' 				=> false,
 		    'delete_posts' 				=> false
 		) );
 
 		// Shop manager role
-		add_role( 'shop_manager', __('Shop Manager', 'woocommerce'), array(
+		add_role( 'shop_manager', __( 'Shop Manager', 'woocommerce' ), array(
 		    'read' 						=> true,
 		    'read_private_pages'		=> true,
 		    'read_private_posts'		=> true,

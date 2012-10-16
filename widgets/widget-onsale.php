@@ -30,7 +30,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_onsale';
 		$this->woo_widget_description = __( 'Display a list of your on-sale products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_onsale';
-		$this->woo_widget_name = __('WooCommerce On-sale', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce On-sale', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -67,7 +67,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		ob_start();
 		extract($args);
 
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('On Sale', 'woocommerce') : $instance['title'], $instance, $this->id_base);
+		$title = apply_filters('widget_title', empty($instance['title']) ? __('On Sale', 'woocommerce' ) : $instance['title'], $instance, $this->id_base);
 		if ( !$number = (int) $instance['number'] )
 			$number = 10;
 		else if ( $number < 1 )
@@ -198,10 +198,10 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 		if ( !isset($instance['number']) || !$number = (int) $instance['number'] ) $number = 5;
 
 		?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ); ?></label>
 		<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of products to show:', 'woocommerce'); ?></label>
+		<p><label for="<?php echo $this->get_field_id('number'); ?>"><?php _e( 'Number of products to show:', 'woocommerce' ); ?></label>
 		<input id="<?php echo esc_attr( $this->get_field_id('number') ); ?>" name="<?php echo esc_attr( $this->get_field_name('number') ); ?>" type="text" value="<?php echo esc_attr( $number ); ?>" size="3" /></p>
 
 		<?php

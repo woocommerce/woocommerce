@@ -88,8 +88,8 @@ class WC_Paypal extends WC_Payment_Gateway {
 	public function admin_options() {
 
     	?>
-    	<h3><?php _e('PayPal standard', 'woocommerce'); ?></h3>
-    	<p><?php _e('PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce'); ?></p>
+    	<h3><?php _e( 'PayPal standard', 'woocommerce' ); ?></h3>
+    	<p><?php _e( 'PayPal standard works by sending the user to PayPal to enter their payment information.', 'woocommerce' ); ?></p>
     	<table class="form-table">
     	<?php
     		if ( $this->is_valid_for_use() ) :
@@ -307,7 +307,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 				if ($item['qty']) $item_names[] = $item['name'] . ' x ' . $item['qty'];
 			endforeach; endif;
 
-			$paypal_args['item_name_1'] 	= sprintf( __('Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
+			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
 			$paypal_args['quantity_1'] 		= 1;
 			$paypal_args['amount_1'] 		= number_format($order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
 
@@ -355,7 +355,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
 			if ($order->get_shipping()>0) :
 				$item_loop++;
-				$paypal_args['item_name_'.$item_loop] = __('Shipping via', 'woocommerce') . ' ' . ucwords($order->shipping_method_title);
+				$paypal_args['item_name_'.$item_loop] = __('Shipping via', 'woocommerce' ) . ' ' . ucwords($order->shipping_method_title);
 				$paypal_args['quantity_'.$item_loop] = '1';
 				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
 			endif;
@@ -396,7 +396,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$woocommerce->add_inline_js('
 			jQuery("body").block({
-					message: "<img src=\"' . esc_url( apply_filters( 'woocommerce_ajax_loader_url', $woocommerce->plugin_url() . '/assets/images/ajax-loader.gif' ) ) . '\" alt=\"Redirecting&hellip;\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce').'",
+					message: "<img src=\"' . esc_url( apply_filters( 'woocommerce_ajax_loader_url', $woocommerce->plugin_url() . '/assets/images/ajax-loader.gif' ) ) . '\" alt=\"Redirecting&hellip;\" style=\"float:left; margin-right: 10px;\" />'.__( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ).'",
 					overlayCSS:
 					{
 						background: "#fff",
@@ -417,7 +417,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
 				' . implode('', $paypal_args_array) . '
-				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__('Pay via PayPal', 'woocommerce').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order &amp; restore cart', 'woocommerce').'</a>
+				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__( 'Pay via PayPal', 'woocommerce' ).'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
 			</form>';
 
 	}
@@ -471,7 +471,7 @@ class WC_Paypal extends WC_Payment_Gateway {
      */
 	function receipt_page( $order ) {
 
-		echo '<p>'.__('Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce').'</p>';
+		echo '<p>'.__( 'Thank you for your order, please click the button below to pay with PayPal.', 'woocommerce' ).'</p>';
 
 		echo $this->generate_paypal_form( $order );
 
@@ -627,7 +627,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	                	update_post_meta( $order_id, 'Payment type', $posted['payment_type'] );
 
 	            	// Payment completed
-	                $order->add_order_note( __('IPN payment completed', 'woocommerce') );
+	                $order->add_order_note( __( 'IPN payment completed', 'woocommerce' ) );
 	                $order->payment_complete();
 
 	                if ( $this->debug == 'yes' ) 
@@ -652,11 +652,11 @@ class WC_Paypal extends WC_Payment_Gateway {
 		            	$mailer = $woocommerce->mailer();
 
 		            	$mailer->wrap_message(
-		            		__('Order refunded/reversed', 'woocommerce'),
-		            		sprintf( __('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
+		            		__( 'Order refunded/reversed', 'woocommerce' ),
+		            		sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
 
-						$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
+						$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
 
 					}
 
@@ -665,16 +665,16 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            case "chargeback" :
 
 	            	// Mark order as refunded
-	            	$order->update_status( 'refunded', sprintf( __('Payment %s via IPN.', 'woocommerce'), strtolower( $posted['payment_status'] ) ) );
+	            	$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
 	            	$mailer = $woocommerce->mailer();
 
 	            	$mailer->wrap_message(
-	            		__('Order refunded/reversed', 'woocommerce'),
-	            		sprintf(__('Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce'), $order->get_order_number(), $posted['reason_code'] )
+	            		__( 'Order refunded/reversed', 'woocommerce' ),
+	            		sprintf(__( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
 
-					$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __('Payment for order %s refunded/reversed', 'woocommerce'), $order->get_order_number() ), $message );
+					$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
 
 	            break;
 	            default :

@@ -76,7 +76,7 @@ class WC_BACS extends WC_Payment_Gateway {
 							'title' => __( 'Customer Message', 'woocommerce' ),
 							'type' => 'textarea',
 							'description' => __( 'Give the customer instructions for paying via BACS, and let them know that their order won\'t be shipping until the money is received.', 'woocommerce' ),
-							'default' => __('Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woocommerce')
+							'default' => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order wont be shipped until the funds have cleared in our account.', 'woocommerce' )
 						),
 			'account_details' => array(
 							'title' => __( 'Account Details', 'woocommerce' ),
@@ -111,7 +111,7 @@ class WC_BACS extends WC_Payment_Gateway {
 			'iban' => array(
 							'title' => __( 'IBAN', 'woocommerce' ),
 							'type' => 'text',
-							'description' => __('Your bank may require this for international payments','woocommerce'),
+							'description' => __( 'Your bank may require this for international payments','woocommerce'),
 							'default' => ''
 						),
 			'bic' => array(
@@ -135,8 +135,8 @@ class WC_BACS extends WC_Payment_Gateway {
 	 */
 	public function admin_options() {
     	?>
-    	<h3><?php _e('BACS Payment', 'woocommerce'); ?></h3>
-    	<p><?php _e('Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer.', 'woocommerce'); ?></p>
+    	<h3><?php _e( 'BACS Payment', 'woocommerce' ); ?></h3>
+    	<p><?php _e('Allows payments by BACS (Bank Account Clearing System), more commonly known as direct bank/wire transfer.', 'woocommerce' ); ?></p>
     	<table class="form-table">
     	<?php
     		// Generate the HTML For the settings form.
@@ -157,15 +157,15 @@ class WC_BACS extends WC_Payment_Gateway {
 		if ( $description = $this->get_description() )
         	echo wpautop( wptexturize( $description ) );
 
-		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
+		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
 
 		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __('Account Name', 'woocommerce'),
-			'account_number'=> __('Account Number', 'woocommerce'),
-			'sort_code'		=> __('Sort Code', 'woocommerce'),
-			'bank_name'		=> __('Bank Name', 'woocommerce'),
-			'iban'			=> __('IBAN', 'woocommerce'),
-			'bic'			=> __('BIC', 'woocommerce')
+			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
+			'account_number'=> __( 'Account Number', 'woocommerce' ),
+			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
+			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
+			'iban'			=> __( 'IBAN', 'woocommerce' ),
+			'bic'			=> __( 'BIC', 'woocommerce' )
 		));
 
 		foreach ($fields as $key=>$value) :
@@ -197,15 +197,15 @@ class WC_BACS extends WC_Payment_Gateway {
 		if ( $description = $this->get_description() )
         	echo wpautop( wptexturize( $description ) );
 
-		?><h2><?php _e('Our Details', 'woocommerce') ?></h2><ul class="order_details bacs_details"><?php
+		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
 
 		$fields = apply_filters('woocommerce_bacs_fields', array(
-			'account_name' 	=> __('Account Name', 'woocommerce'),
-			'account_number'=> __('Account Number', 'woocommerce'),
-			'sort_code'		=> __('Sort Code', 'woocommerce'),
-			'bank_name'		=> __('Bank Name', 'woocommerce'),
-			'iban'			=> __('IBAN', 'woocommerce'),
-			'bic'			=> __('BIC', 'woocommerce')
+			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
+			'account_number'=> __( 'Account Number', 'woocommerce' ),
+			'sort_code'		=> __( 'Sort Code', 'woocommerce' ),
+			'bank_name'		=> __( 'Bank Name', 'woocommerce' ),
+			'iban'			=> __( 'IBAN', 'woocommerce' ),
+			'bic'			=> __( 'BIC', 'woocommerce' )
 		));
 
 		foreach ($fields as $key=>$value) :
@@ -231,7 +231,7 @@ class WC_BACS extends WC_Payment_Gateway {
 		$order = new WC_Order( $order_id );
 
 		// Mark as on-hold (we're awaiting the payment)
-		$order->update_status('on-hold', __('Awaiting BACS payment', 'woocommerce'));
+		$order->update_status('on-hold', __( 'Awaiting BACS payment', 'woocommerce' ));
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

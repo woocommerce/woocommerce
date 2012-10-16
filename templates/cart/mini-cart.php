@@ -49,7 +49,7 @@ global $woocommerce;
 
 	<?php else : ?>
 
-		<li class="empty"><?php _e('No products in the cart.', 'woocommerce'); ?></li>
+		<li class="empty"><?php _e( 'No products in the cart.', 'woocommerce' ); ?></li>
 
 	<?php endif; ?>
 
@@ -57,13 +57,13 @@ global $woocommerce;
 
 <?php if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) : ?>
 
-	<p class="total"><strong><?php _e('Subtotal', 'woocommerce'); ?>:</strong> <?php echo $woocommerce->cart->get_cart_subtotal(); ?></p>
+	<p class="total"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?>:</strong> <?php echo $woocommerce->cart->get_cart_subtotal(); ?></p>
 
 	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
 
 	<p class="buttons">
-		<a href="<?php echo $woocommerce->cart->get_cart_url(); ?>" class="button"><?php _e('View Cart &rarr;', 'woocommerce'); ?></a>
-		<a href="<?php echo $woocommerce->cart->get_checkout_url(); ?>" class="button checkout"><?php _e('Checkout &rarr;', 'woocommerce'); ?></a>
+		<a href="<?php echo $woocommerce->cart->get_cart_url(); ?>" class="button"><?php _e( 'View Cart &rarr;', 'woocommerce' ); ?></a>
+		<a href="<?php echo $woocommerce->cart->get_checkout_url(); ?>" class="button checkout"><?php _e( 'Checkout &rarr;', 'woocommerce' ); ?></a>
 	</p>
 
 <?php endif; ?>

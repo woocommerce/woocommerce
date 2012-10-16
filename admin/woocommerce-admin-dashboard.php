@@ -37,7 +37,7 @@ function woocommerce_init_dashboard_widgets() {
 		$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset+1).'" class="next">'.date_i18n('F', strtotime('01-'.($the_month_num+1).'-2011')).' &rarr;</a>';
 	endif;
 
-	$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__('Monthly Sales', 'woocommerce').'</span>';
+	$sales_heading .= '<a href="index.php?wc_sales_month='.($current_month_offset-1).'" class="previous">&larr; '.date_i18n('F', strtotime('01-'.($the_month_num-1).'-2011')).'</a><span>'.__( 'Monthly Sales', 'woocommerce' ).'</span>';
 
 	if ( current_user_can( 'publish_shop_orders' ) ) {
 		wp_add_dashboard_widget( 'woocommerce_dashboard_right_now', __( 'WooCommerce Right Now', 'woocommerce' ), 'woocommerce_dashboard_widget_right_now' );
@@ -235,8 +235,8 @@ function woocommerce_dashboard_recent_orders() {
 
 			echo '
 			<li>
-				<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords(__($this_order->status, 'woocommerce')).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">' . get_the_time( __('l jS \of F Y h:i:s A', 'woocommerce' ), $order->ID ) . '</a><br />
-				<small>'.sizeof($this_order->get_items()).' '._n('item', 'items', sizeof($this_order->get_items()), 'woocommerce').' <span class="order-cost">'.__('Total:', 'woocommerce') . ' ' . woocommerce_price($this_order->order_total).'</span></small>
+				<span class="order-status '.sanitize_title($this_order->status).'">'.ucwords(__($this_order->status, 'woocommerce')).'</span> <a href="'.admin_url('post.php?post='.$order->ID).'&action=edit">' . get_the_time( __( 'l jS \of F Y h:i:s A', 'woocommerce' ), $order->ID ) . '</a><br />
+				<small>'.sizeof($this_order->get_items()).' '._n('item', 'items', sizeof($this_order->get_items()), 'woocommerce').' <span class="order-cost">'.__('Total:', 'woocommerce' ) . ' ' . woocommerce_price($this_order->order_total).'</span></small>
 			</li>';
 
 		endforeach;
@@ -276,7 +276,7 @@ function woocommerce_dashboard_recent_reviews() {
 			$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
 			echo '<div class="star-rating" title="'.$rating.'">
-				<span style="width:'.($rating*10).'px">'.$rating.' '.__('out of 5', 'woocommerce').'</span></div>';
+				<span style="width:'.($rating*10).'px">'.$rating.' '.__( 'out of 5', 'woocommerce' ).'</span></div>';
 
 			echo '<h4 class="meta"><a href="'.get_permalink($comment->ID).'#comment-'.$comment->comment_ID .'">'. __( $comment->post_title ) .'</a> reviewed by ' .strip_tags($comment->comment_author) .'</h4>';
 			echo '<blockquote>'.strip_tags($comment->comment_excerpt).' [...]</blockquote></li>';
@@ -284,7 +284,7 @@ function woocommerce_dashboard_recent_reviews() {
 		endforeach;
 		echo '</ul>';
 	else :
-		echo '<p>'.__('There are no product reviews yet.', 'woocommerce').'</p>';
+		echo '<p>'.__( 'There are no product reviews yet.', 'woocommerce' ).'</p>';
 	endif;
 }
 

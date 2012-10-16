@@ -22,7 +22,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 	 */
 	function __construct() {
 		$this->id			= 'local_delivery';
-		$this->method_title = __('Local Delivery', 'woocommerce');
+		$this->method_title = __( 'Local Delivery', 'woocommerce' );
 		$this->init();
 	}
 
@@ -114,9 +114,9 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 				'description' 	=> __( 'How to calculate delivery charges', 'woocommerce' ),
 				'default' 		=> 'fixed',
 				'options' 		=> array(
-					'fixed' 	=> __('Fixed amount', 'woocommerce'),
-					'percent'	=> __('Percentage of cart total', 'woocommerce'),
-					'product'	=> __('Fixed amount per product', 'woocommerce'),
+					'fixed' 	=> __( 'Fixed amount', 'woocommerce' ),
+					'percent'	=> __( 'Percentage of cart total', 'woocommerce' ),
+					'product'	=> __( 'Fixed amount per product', 'woocommerce' ),
 				),
 			),
 			'fee' => array(
@@ -137,8 +137,8 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 							'default' 		=> 'all',
 							'class'			=> 'availability',
 							'options'		=> array(
-								'all' 		=> __('All allowed countries', 'woocommerce'),
-								'specific' 	=> __('Specific Countries', 'woocommerce')
+								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
+								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
 							)
 						),
 			'countries' => array(
@@ -161,7 +161,7 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 	function admin_options() {
 		global $woocommerce; ?>
 		<h3><?php echo $this->method_title; ?></h3>
-		<p><?php _e('Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce'); ?></p>
+		<p><?php _e( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' ); ?></p>
 		<table class="form-table">
     		<?php $this->generate_settings_html(); ?>
     	</table> <?php

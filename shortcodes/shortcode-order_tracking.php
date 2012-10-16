@@ -48,11 +48,11 @@ function woocommerce_order_tracking( $atts ) {
 
 		if ( ! $order_id ) {
 
-			echo '<p class="woocommerce_error">' . __('Please enter a valid order ID', 'woocommerce') . '</p>';
+			echo '<p class="woocommerce_error">' . __( 'Please enter a valid order ID', 'woocommerce' ) . '</p>';
 
 		} elseif ( ! $order_email ) {
 
-			echo '<p class="woocommerce_error">' . __('Please enter a valid order email', 'woocommerce') . '</p>';
+			echo '<p class="woocommerce_error">' . __( 'Please enter a valid order email', 'woocommerce' ) . '</p>';
 
 		} else {
 
@@ -71,7 +71,7 @@ function woocommerce_order_tracking( $atts ) {
 
 			} else {
 
-				echo '<p class="woocommerce_error">' . sprintf( __('Sorry, we could not find that order id in our database.', 'woocommerce'), get_permalink($post->ID ) ) . '</p>';
+				echo '<p class="woocommerce_error">' . sprintf( __( 'Sorry, we could not find that order id in our database.', 'woocommerce' ), get_permalink($post->ID ) ) . '</p>';
 
 			}
 

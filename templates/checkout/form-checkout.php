@@ -18,7 +18,7 @@ global $woocommerce; $woocommerce_checkout = $woocommerce->checkout();
 
 // If checkout registration is disabled and not logged in, the user cannot checkout
 if (get_option('woocommerce_enable_signup_and_login_from_checkout')=="no" && get_option('woocommerce_enable_guest_checkout')=="no" && !is_user_logged_in()) :
-	echo apply_filters('woocommerce_checkout_must_be_logged_in_message', __('You must be logged in to checkout.', 'woocommerce'));
+	echo apply_filters('woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ));
 	return;
 endif;
 
@@ -49,7 +49,7 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', $woocommerce-
 
 		<?php do_action( 'woocommerce_checkout_after_customer_details'); ?>
 
-		<h3 id="order_review_heading"><?php _e('Your order', 'woocommerce'); ?></h3>
+		<h3 id="order_review_heading"><?php _e( 'Your order', 'woocommerce' ); ?></h3>
 
 	<?php endif; ?>
 

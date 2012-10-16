@@ -1210,7 +1210,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 			$field .= '</select>';
 
-			$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __('Update country', 'woocommerce') . '" /></noscript>';
+			$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __( 'Update country', 'woocommerce' ) . '" /></noscript>';
 
 			$field .= '</p>' . $after;
 

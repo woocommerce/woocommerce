@@ -240,7 +240,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 
 			<div class="woocommerce_info">
 
-				<p><?php _e('No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location.', 'woocommerce'); ?></p>
+				<p><?php _e( 'No shipping methods were found; please recalculate your shipping and enter your state/county and zip/postcode to ensure there are no other available methods for your location.', 'woocommerce' ); ?></p>
 
 			</div>
 

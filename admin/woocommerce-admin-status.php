@@ -19,7 +19,7 @@ function woocommerce_status() {
 
 	$tools = apply_filters( 'wc_debug_tools', array(
 		'clear_transients' => array(
-			'name'		=> __('Transients','woocommerce'),
+			'name'		=> __( 'Transients','woocommerce'),
 			'button'	=> __('Clear Transients','woocommerce'),
 			'desc'		=> __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 		),
@@ -33,7 +33,7 @@ function woocommerce_status() {
     ?>
 	<div class="wrap woocommerce">
 		<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
-		<h2><?php _e( 'System Status', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce'); ?></a></h2>
+		<h2><?php _e( 'System Status', 'woocommerce' ); ?> <a href="#" class="add-new-h2 debug-report"><?php _e('Generate report', 'woocommerce' ); ?></a></h2>
 
 		<?php
 			if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -42,14 +42,14 @@ function woocommerce_status() {
 					case "clear_transients" :
 						$woocommerce->clear_product_transients();
 
-						echo '<div class="updated"><p>' . __('Product Transients Cleared', 'woocommerce') . '</p></div>';
+						echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 					break;
 					case "reset_roles" :
 						// Remove then re-add caps and roles
 						woocommerce_remove_roles();						
 						woocommerce_init_roles();
 
-						echo '<div class="updated"><p>' . __('Roles successfully reset', 'woocommerce') . '</p></div>';
+						echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 					break;
 					default:
 						$action = esc_attr( $_GET['action'] );
@@ -58,10 +58,10 @@ function woocommerce_status() {
 							$return = call_user_func( $callback );
 							if( $return === false ) {
 								if( is_array( $callback ) ) {
-									echo '<div class="error"><p>' . sprintf( __('There was an error calling %s::%s', 'woocommerce'), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
+									echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
 
 								} else {
-									echo '<div class="error"><p>' . sprintf( __('There was an error calling %s', 'woocommerce'), $callback ) . '</p></div>';
+									echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback ) . '</p></div>';
 								}
 							}
 						}
@@ -103,7 +103,7 @@ function woocommerce_status() {
 
     						if ( ! empty( $plugin_data['Name'] ) ) {
 
-    							$wc_plugins[] = $plugin_data['Name'] . ' ' . __('by', 'woocommerce') . ' ' . $plugin_data['Author'] . ' ' . __('version', 'woocommerce') . ' ' . $plugin_data['Version'];
+    							$wc_plugins[] = $plugin_data['Name'] . ' ' . __( 'by', 'woocommerce' ) . ' ' . $plugin_data['Author'] . ' ' . __( 'version', 'woocommerce' ) . ' ' . $plugin_data['Version'];
 
     						}
 						}
@@ -144,39 +144,39 @@ function woocommerce_status() {
 			<tbody>
 				<?php
 					$check_pages = array(
-						__('Shop base page', 'woocommerce') => array(
+						__( 'Shop base page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_shop_page_id',
 								'shortcode' => ''
 							),
-						__('Cart Page', 'woocommerce') => array(
+						__( 'Cart Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_cart_page_id',
 								'shortcode' => '[woocommerce_cart]'
 							),
-						__('Checkout Page', 'woocommerce') => array(
+						__( 'Checkout Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_checkout_page_id',
 								'shortcode' => '[woocommerce_checkout]'
 							),
-						__('Pay Page', 'woocommerce') => array(
+						__( 'Pay Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_pay_page_id',
 								'shortcode' => '[woocommerce_pay]'
 							),
-						__('Thanks Page', 'woocommerce') => array(
+						__( 'Thanks Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_thanks_page_id',
 								'shortcode' => '[woocommerce_thankyou]'
 							),
-						__('My Account Page', 'woocommerce') => array(
+						__( 'My Account Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_myaccount_page_id',
 								'shortcode' => '[woocommerce_my_account]'
 							),
-						__('Edit Address Page', 'woocommerce') => array(
+						__( 'Edit Address Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_edit_address_page_id',
 								'shortcode' => '[woocommerce_edit_address]'
 							),
-						__('View Order Page', 'woocommerce') => array(
+						__( 'View Order Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_view_order_page_id',
 								'shortcode' => '[woocommerce_view_order]'
 							),
-						__('Change Password Page', 'woocommerce') => array(
+						__( 'Change Password Page', 'woocommerce' ) => array(
 								'option' => 'woocommerce_change_password_page_id',
 								'shortcode' => '[woocommerce_change_password]'
 							)
@@ -196,7 +196,7 @@ function woocommerce_status() {
 
 						// Page ID check
 						if ( ! $page_id ) {
-							echo '<mark class="error">' . __('Page not set', 'woocommerce') . '</mark>';
+							echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 							$error = true;
 						} else {
 
@@ -206,7 +206,7 @@ function woocommerce_status() {
 
 								if ( ! strstr( $page->post_content, $values['shortcode'] ) ) {
 
-									echo '<mark class="error">' . sprintf(__('Page does not contain the shortcode: %s', 'woocommerce'), $values['shortcode'] ) . '</mark>';
+									echo '<mark class="error">' . sprintf(__( 'Page does not contain the shortcode: %s', 'woocommerce' ), $values['shortcode'] ) . '</mark>';
 									$error = true;
 
 								}
@@ -284,7 +284,7 @@ function woocommerce_status() {
                     	$memory = woocommerce_let_to_num( WP_MEMORY_LIMIT );
 
                     	if ( $memory < 67108864 ) {
-                    		echo '<mark class="error">' . sprintf( __('%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce'), wp_convert_bytes_to_hr( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+                    		echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s">Increasing memory allocated to PHP</a>', 'woocommerce' ), wp_convert_bytes_to_hr( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
                     	} else {
                     		echo '<mark class="yes">' . wp_convert_bytes_to_hr( $memory ) . '</mark>';
                     	}
@@ -292,15 +292,15 @@ function woocommerce_status() {
                 </tr>
                 <tr>
                     <td><?php _e('WP Debug Mode','woocommerce')?></td>
-                    <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __('Yes', 'woocommerce') . '</mark>'; else echo '<mark class="no">' . __('No', 'woocommerce') . '</mark>'; ?></td>
+                    <td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . __( 'Yes', 'woocommerce' ) . '</mark>'; else echo '<mark class="no">' . __( 'No', 'woocommerce' ) . '</mark>'; ?></td>
                 </tr>
                 <tr>
                     <td><?php _e('WC Logging','woocommerce')?></td>
                     <td><?php
                     	if ( @fopen( $woocommerce->plugin_path() . '/logs/paypal.txt', 'a' ) )
-                    		echo '<mark class="yes">' . __('Log directory is writable.', 'woocommerce') . '</mark>';
+                    		echo '<mark class="yes">' . __( 'Log directory is writable.', 'woocommerce' ) . '</mark>';
                     	else
-                    		echo '<mark class="error">' . __('Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce') . '</mark>';
+                    		echo '<mark class="error">' . __( 'Log directory (<code>woocommerce/logs/</code>) is not writable. Logging will not be possible.', 'woocommerce' ) . '</mark>';
                     ?></td>
                 </tr>
             </tbody>
@@ -315,23 +315,23 @@ function woocommerce_status() {
 				$posting = array();
 
 				// fsockopen/cURL
-				$posting['fsockopen_curl']['name'] = __('fsockopen/cURL','woocommerce');
+				$posting['fsockopen_curl']['name'] = __( 'fsockopen/cURL','woocommerce');
 				if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
 					if ( function_exists( 'fsockopen' ) && function_exists( 'curl_init' )) {
-						$posting['fsockopen_curl']['note'] = __('Your server has fsockopen and cURL enabled.', 'woocommerce');
+						$posting['fsockopen_curl']['note'] = __('Your server has fsockopen and cURL enabled.', 'woocommerce' );
 					} elseif ( function_exists( 'fsockopen' )) {
-						$posting['fsockopen_curl']['note'] = __('Your server has fsockopen enabled, cURL is disabled.', 'woocommerce');
+						$posting['fsockopen_curl']['note'] = __( 'Your server has fsockopen enabled, cURL is disabled.', 'woocommerce' );
 					} else {
-						$posting['fsockopen_curl']['note'] = __('Your server has cURL enabled, fsockopen is disabled.', 'woocommerce');
+						$posting['fsockopen_curl']['note'] = __( 'Your server has cURL enabled, fsockopen is disabled.', 'woocommerce' );
 					}
 					$posting['fsockopen_curl']['success'] = true;
 				} else {
-            		$posting['fsockopen_curl']['note'] = __('Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce'). '</mark>';
+            		$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
             		$posting['fsockopen_curl']['success'] = false;
             	}
 
             	// WP Remote Post Check
-				$posting['wp_remote_post']['name'] = __('WP Remote Post Check','woocommerce');
+				$posting['wp_remote_post']['name'] = __( 'WP Remote Post Check','woocommerce');
 				$request['cmd'] = '_notify-validate';
 				$params = array(
 					'sslverify' 	=> false,
@@ -342,13 +342,13 @@ function woocommerce_status() {
 				$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 				if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
-            		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce');
+            		$posting['wp_remote_post']['note'] = __('wp_remote_post() was successful - PayPal IPN is working.', 'woocommerce' );
             		$posting['wp_remote_post']['success'] = true;
             	} elseif ( is_wp_error( $response ) ) {
-            		$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce') . ' ' . $response->get_error_message();
+            		$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider. Error:', 'woocommerce' ) . ' ' . $response->get_error_message();
             		$posting['wp_remote_post']['success'] = false;
             	} else {
-	            	$posting['wp_remote_post']['note'] = __('wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce');
+	            	$posting['wp_remote_post']['note'] = __( 'wp_remote_post() failed. PayPal IPN may not work with your server.', 'woocommerce' );
             		$posting['wp_remote_post']['success'] = false;
             	}
 

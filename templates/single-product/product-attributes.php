@@ -25,7 +25,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		<?php if ( $product->has_weight() ) : $alt = $alt * -1; ?>
 
 			<tr class="<?php if ( $alt == 1 ) echo 'alt'; ?>">
-				<th><?php _e('Weight', 'woocommerce') ?></th>
+				<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
 				<td><?php echo $product->get_weight() . ' ' . get_option('woocommerce_weight_unit'); ?></td>
 			</tr>
 
@@ -34,7 +34,7 @@ if ( empty( $attributes ) && ( ! $product->enable_dimensions_display() || ( ! $p
 		<?php if ($product->has_dimensions()) : $alt = $alt * -1; ?>
 
 			<tr class="<?php if ( $alt == 1 ) echo 'alt'; ?>">
-				<th><?php _e('Dimensions', 'woocommerce') ?></th>
+				<th><?php _e( 'Dimensions', 'woocommerce' ) ?></th>
 				<td><?php echo $product->get_dimensions(); ?></td>
 			</tr>
 

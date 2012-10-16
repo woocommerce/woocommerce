@@ -43,7 +43,7 @@ function woocommerce_cart( $atts ) {
 		if ( ! empty( $_POST['coupon_code'] ) ) {
 			$woocommerce->cart->add_discount( stripslashes( trim( $_POST['coupon_code'] ) ) );
 		} else {
-			$woocommerce->add_error( __('Please enter a coupon code.', 'woocommerce') );
+			$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 		}
 
 	// Remove Discount Codes
@@ -63,7 +63,7 @@ function woocommerce_cart( $atts ) {
 		$postcode 	= $_POST['calc_shipping_postcode'];
 
 		if ( $postcode && ! $validation->is_postcode( $postcode, $country ) ) {
-			$woocommerce->add_error( __('Please enter a valid postcode/ZIP.', 'woocommerce') );
+			$woocommerce->add_error( __( 'Please enter a valid postcode/ZIP.', 'woocommerce' ) );
 			$postcode = '';
 		} elseif ( $postcode ) {
 			$postcode = $validation->format_postcode( $postcode, $country );
@@ -74,13 +74,13 @@ function woocommerce_cart( $atts ) {
 			// Update customer location
 			$woocommerce->customer->set_location( $country, $state, $postcode );
 			$woocommerce->customer->set_shipping_location( $country, $state, $postcode );
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
+			$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
 		} else {
 
 			$woocommerce->customer->set_to_base();
 			$woocommerce->customer->set_shipping_to_base();
-			$woocommerce->add_message(  __('Shipping costs updated.', 'woocommerce') );
+			$woocommerce->add_message(  __( 'Shipping costs updated.', 'woocommerce' ) );
 
 		}
 		

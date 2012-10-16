@@ -13,8 +13,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 $localisation_setting = ( defined('WPLANG') ) ? array(
-	'name' => __('Localisation', 'woocommerce'),
-	'desc' 		=> __('Use informal localisation file if it exists', 'woocommerce'),
+	'name' => __( 'Localisation', 'woocommerce' ),
+	'desc' 		=> __( 'Use informal localisation file if it exists', 'woocommerce' ),
 	'id' 		=> 'woocommerce_informal_localisation_type',
 	'type' 		=> 'checkbox',
 	'std' 		=> 'no',
@@ -103,7 +103,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'general_options'),
 
-	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __('The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce'), 'id' => 'checkout_account_options' ),
+	array(	'name' => __( 'Checkout and Accounts', 'woocommerce' ), 'type' => 'title','desc' => __( 'The following options control the behaviour of the checkout process and customer accounts.', 'woocommerce' ), 'id' => 'checkout_account_options' ),
 
 	array(
 		'name' => __( 'Checkout', 'woocommerce' ),
@@ -130,7 +130,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'start',
 		'show_if_checked' => 'option',
-		'desc_tip'	=>  __('Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce'),
+		'desc_tip'	=>  __( 'Force SSL (HTTPS) on the checkout pages (an SSL Certificate is required)', 'woocommerce' ),
 	),
 
 	array(
@@ -222,7 +222,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'checkout_account_options'),
 
-	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce'), 'id' => 'script_styling_options' ),
+	array(	'name' => __( 'Styles and Scripts', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the styling of your store, as well as how certain features behave.', 'woocommerce' ), 'id' => 'script_styling_options' ),
 
 	array(
 		'name' => __( 'Styling', 'woocommerce' ),
@@ -280,11 +280,11 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'script_styling_options'),
 
-	array(	'name' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __('The following options are specific to downloadable products.', 'woocommerce'), 'id' => 'digital_download_options' ),
+	array(	'name' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __( 'The following options are specific to downloadable products.', 'woocommerce' ), 'id' => 'digital_download_options' ),
 
 	array(
-		'name' => __('File download method', 'woocommerce'),
-		'desc' 		=> __('Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce'),
+		'name' => __( 'File download method', 'woocommerce' ),
+		'desc' 		=> __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
 		'id' 		=> 'woocommerce_file_download_method',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
@@ -299,26 +299,26 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'name' => __('Access Restrictions', 'woocommerce'),
-		'desc' 		=> __('Must be logged in to download files', 'woocommerce'),
+		'name' => __( 'Access Restrictions', 'woocommerce' ),
+		'desc' 		=> __( 'Must be logged in to download files', 'woocommerce' ),
 		'id' 		=> 'woocommerce_downloads_require_login',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'no',
-		'desc_tip'	=> __('This setting does not apply to guest downloads.', 'woocommerce'),
+		'desc_tip'	=> __( 'This setting does not apply to guest downloads.', 'woocommerce' ),
 		'checkboxgroup'		=> 'start'
 	),
 
 	array(
-		'desc' 		=> __('Grant access to downloadable products after payment', 'woocommerce'),
+		'desc' 		=> __( 'Grant access to downloadable products after payment', 'woocommerce' ),
 		'id' 		=> 'woocommerce_downloads_grant_access_after_payment',
 		'type' 		=> 'checkbox',
 		'std' 		=> 'yes',
-		'desc_tip'	=> __('Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce'),
+		'desc_tip'	=> __( 'Turn this option off to only grant access when an order is "complete", rather than "processing"', 'woocommerce' ),
 		'checkboxgroup'		=> 'end'
 	),
 
 	array(
-		'name' => __('Limit quantity', 'woocommerce'),
+		'name' => __( 'Limit quantity', 'woocommerce' ),
 		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1', 'woocommerce' ),
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
@@ -337,7 +337,7 @@ $base_slug = ($shop_page_id > 0 && get_page( $shop_page_id )) ? get_page_uri( $s
 $woocommerce_prepend_shop_page_to_products_warning = '';
 
 if ( $shop_page_id > 0 && sizeof(get_pages("child_of=$shop_page_id")) > 0 )
-	$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __('Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce') . '</mark>';
+	$woocommerce_prepend_shop_page_to_products_warning = ' <mark class="notice">' . __( 'Note: The shop page has children - child pages will not work if you enable this option.', 'woocommerce' ) . '</mark>';
 
 $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', array(
 
@@ -426,7 +426,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'name' => __('Thanks Page', 'woocommerce'),
+		'name' => __( 'Thanks Page', 'woocommerce' ),
 		'desc' 		=> __( 'Page contents: [woocommerce_thankyou] Parent: "Checkout"', 'woocommerce' ),
 		'id' 		=> 'woocommerce_thanks_page_id',
 		'type' 		=> 'single_select_page',
@@ -560,7 +560,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'catalog_options' ),
 
-	array(	'name' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the fields available on the edit product page.', 'woocommerce'), 'id' => 'product_data_options' ),
+	array(	'name' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the fields available on the edit product page.', 'woocommerce' ), 'id' => 'product_data_options' ),
 
 	array(
 		'name' => __( 'Product fields', 'woocommerce' ),
@@ -658,7 +658,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'product_review_options' ),
 
-	array(	'name' => __( 'Pricing Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect how prices are displayed on the frontend.', 'woocommerce'), 'id' => 'pricing_options' ),
+	array(	'name' => __( 'Pricing Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
 
 	array(
 		'name' => __( 'Currency Position', 'woocommerce' ),
@@ -716,11 +716,11 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array( 'type' => 'sectionend', 'id' => 'pricing_options' ),
 
-	array(	'name' => __( 'Image Options', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__('These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce'), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
+	array(	'name' => __( 'Image Options', 'woocommerce' ), 'type' => 'title','desc' => sprintf(__( 'These settings affect the actual dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/'), 'id' => 'image_options' ),
 
 	array(
 		'name' => __( 'Catalog Images', 'woocommerce' ),
-		'desc' 		=> __('This size is usually used in product listings', 'woocommerce'),
+		'desc' 		=> __( 'This size is usually used in product listings', 'woocommerce' ),
 		'id' 		=> 'woocommerce_catalog_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
@@ -730,7 +730,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array(
 		'name' => __( 'Single Product Image', 'woocommerce' ),
-		'desc' 		=> __('This is the size used by the main image on the product page.', 'woocommerce'),
+		'desc' 		=> __( 'This is the size used by the main image on the product page.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_single_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
@@ -740,7 +740,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 
 	array(
 		'name' => __( 'Product Thumbnails', 'woocommerce' ),
-		'desc' 		=> __('This size is usually used for the gallery of images on the product page.', 'woocommerce'),
+		'desc' 		=> __( 'This size is usually used for the gallery of images on the product page.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_thumbnail_image',
 		'css' 		=> '',
 		'type' 		=> 'image_width',
@@ -802,7 +802,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 
 	array(
 		'name' => __( 'Out of stock visibility', 'woocommerce' ),
-		'desc' 		=> __('Hide out of stock items from the catalog', 'woocommerce'),
+		'desc' 		=> __( 'Hide out of stock items from the catalog', 'woocommerce' ),
 		'id' 		=> 'woocommerce_hide_out_of_stock_items',
 		'std' 		=> 'no',
 		'type' 		=> 'checkbox'
@@ -907,7 +907,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 
 $woocommerce_settings['payment_gateways'] = apply_filters('woocommerce_payment_gateways_settings', array(
 
-	array( 'name' => __( 'Payment Gateways', 'woocommerce' ), 'desc' => __('Installed payment gateways are displayed below. Drag and drop payment gateways to control their display order on the checkout.', 'woocommerce'), 'type' => 'title', 'id' => 'payment_gateways_options' ),
+	array( 'name' => __( 'Payment Gateways', 'woocommerce' ), 'desc' => __( 'Installed payment gateways are displayed below. Drag and drop payment gateways to control their display order on the checkout.', 'woocommerce' ), 'type' => 'title', 'id' => 'payment_gateways_options' ),
 
 	array(
 		'type' 		=> 'payment_gateways',
@@ -1008,7 +1008,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 	array( 'type' => 'sectionend', 'id' => 'email_recipient_options' ),
 
-	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __('The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce'), 'id' => 'email_options' ),
+	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce' ), 'id' => 'email_options' ),
 
 	array(
 		'name' => __( '"From" name', 'woocommerce' ),
@@ -1030,7 +1030,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 	array( 'type' => 'sectionend', 'id' => 'email_options' ),
 
-	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__('This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce'), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
+	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__( 'This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce' ), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
 
 	array(
 		'name' => __( 'Header image', 'woocommerce' ),
@@ -1047,7 +1047,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'id' 		=> 'woocommerce_email_footer_text',
 		'css' 		=> 'width:100%; height: 75px;',
 		'type' 		=> 'textarea',
-		'std' 		=> get_bloginfo('name') . ' - ' . __('Powered by WooCommerce', 'woocommerce')
+		'std' 		=> get_bloginfo('name') . ' - ' . __( 'Powered by WooCommerce', 'woocommerce' )
 	),
 
 	array(

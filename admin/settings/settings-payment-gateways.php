@@ -24,9 +24,9 @@ function woocommerce_payment_gateways_setting() {
 			<table class="wc_gateways widefat" cellspacing="0">
 				<thead>
 					<tr>
-						<th width="1%"><?php _e('Default', 'woocommerce'); ?></th>
-						<th><?php _e('Gateway', 'woocommerce'); ?></th>
-						<th><?php _e('Status', 'woocommerce'); ?></th>
+						<th width="1%"><?php _e( 'Default', 'woocommerce' ); ?></th>
+						<th><?php _e( 'Gateway', 'woocommerce' ); ?></th>
+						<th><?php _e( 'Status', 'woocommerce' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -42,7 +42,7 @@ function woocommerce_payment_gateways_setting() {
 		        			</td>
 		        			<td>
 		        				<p><strong>' . $gateway->get_title() . '</strong><br/>
-		        				<small>' . __('Gateway ID', 'woocommerce') . ': ' . $gateway->id . '</small></p>
+		        				<small>' . __( 'Gateway ID', 'woocommerce' ) . ': ' . $gateway->id . '</small></p>
 		        			</td>
 		        			<td>';
 

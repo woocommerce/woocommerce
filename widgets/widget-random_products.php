@@ -21,7 +21,7 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 	 */
 	function __construct() {
 		$this->id_base = 'woocommerce_random_products';
-		$this->name    = __('WooCommerce Random Products', 'woocommerce' );
+		$this->name    = __( 'WooCommerce Random Products', 'woocommerce' );
 		$this->widget_options = array(
 			'classname'   => 'widget_random_products',
 			'description' => __( 'Display a list of random products on your site.', 'woocommerce' ),
@@ -43,7 +43,7 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 		global $woocommerce;
 
 		// Use default title as fallback
-		$title = ( '' === $instance['title'] ) ? __('Random Products', 'woocommerce') : $instance['title'];
+		$title = ( '' === $instance['title'] ) ? __('Random Products', 'woocommerce' ) : $instance['title'];
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
 
 		// Setup product query

@@ -32,7 +32,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$this->woo_widget_cssclass = 'widget_price_filter';
 		$this->woo_widget_description = __( 'Shows a price filter slider in a widget which lets you narrow down the list of shown products when viewing product categories.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_price_filter';
-		$this->woo_widget_name = __('WooCommerce Price Filter', 'woocommerce' );
+		$this->woo_widget_name = __( 'WooCommerce Price Filter', 'woocommerce' );
 
 		/* Widget settings. */
 		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
@@ -128,11 +128,11 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
-					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $post_min ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce').'" />
-					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $post_max ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__('Max price', 'woocommerce').'" />
-					<button type="submit" class="button">'.__('Filter', 'woocommerce').'</button>
+					<input type="text" id="min_price" name="min_price" value="'.esc_attr( $post_min ).'" data-min="'.esc_attr( $min ).'" placeholder="'.__('Min price', 'woocommerce' ).'" />
+					<input type="text" id="max_price" name="max_price" value="'.esc_attr( $post_max ).'" data-max="'.esc_attr( $max ).'" placeholder="'.__( 'Max price', 'woocommerce' ).'" />
+					<button type="submit" class="button">'.__( 'Filter', 'woocommerce' ).'</button>
 					<div class="price_label" style="display:none;">
-						'.__('Price:', 'woocommerce').' <span class="from"></span> &mdash; <span class="to"></span>
+						'.__( 'Price:', 'woocommerce' ).' <span class="from"></span> &mdash; <span class="to"></span>
 					</div>
 					'.$fields.'
 					<div class="clear"></div>
@@ -154,7 +154,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	 * @return array
 	 */
 	function update( $new_instance, $old_instance ) {
-		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = __('Filter by price', 'woocommerce');
+		if (!isset($new_instance['title']) || empty($new_instance['title'])) $new_instance['title'] = __( 'Filter by price', 'woocommerce' );
 		$instance['title'] = strip_tags(stripslashes($new_instance['title']));
 		return $instance;
 	}
@@ -171,7 +171,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	function form( $instance ) {
 		global $wpdb;
 		?>
-			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
+			<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ) ?></label>
 			<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 		<?php
 	}

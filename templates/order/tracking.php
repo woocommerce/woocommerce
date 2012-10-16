@@ -15,9 +15,9 @@ global $woocommerce;
 <?php
 	$status = get_term_by('slug', $order->status, 'shop_order_status');
 
-	$order_status_text = sprintf( __('Order %s which was made %s has the status &ldquo;%s&rdquo;', 'woocommerce'), $order->get_order_number(), human_time_diff(strtotime($order->order_date), current_time('timestamp')) . ' ' . __('ago', 'woocommerce'), __($status->name, 'woocommerce') );
+	$order_status_text = sprintf( __( 'Order %s which was made %s has the status &ldquo;%s&rdquo;', 'woocommerce' ), $order->get_order_number(), human_time_diff(strtotime($order->order_date), current_time('timestamp')) . ' ' . __( 'ago', 'woocommerce' ), __($status->name, 'woocommerce') );
 
-	if ($order->status == 'completed') $order_status_text .= ' ' . __('and was completed', 'woocommerce') . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__(' ago', 'woocommerce');
+	if ($order->status == 'completed') $order_status_text .= ' ' . __( 'and was completed', 'woocommerce' ) . ' ' . human_time_diff(strtotime($order->completed_date), current_time('timestamp')).__( ' ago', 'woocommerce' );
 
 	$order_status_text .= '.';
 
@@ -28,7 +28,7 @@ global $woocommerce;
 	$notes = $order->get_customer_order_notes();
 	if ($notes) :
 		?>
-		<h2><?php _e('Order Updates', 'woocommerce'); ?></h2>
+		<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>
 		<ol class="commentlist notes">
 			<?php foreach ($notes as $note) : ?>
 			<li class="comment note">
