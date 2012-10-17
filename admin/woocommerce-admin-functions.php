@@ -326,7 +326,7 @@ function woocommerce_refresh_mce( $ver ) {
  * @param mixed $taxonomy
  * @return void
  */
-function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
+function woocommerce_create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
 
 	if ( ! $taxonomy == 'product_cat' && ! strstr( $taxonomy, 'pa_' ) ) 
 		return;
@@ -342,18 +342,17 @@ function woocommerce_create_term( $term_id, $tt_id, $taxonomy ) {
  *
  * @access public
  * @param mixed $term_id
- * @param mixed $tt_id
- * @param mixed $taxonomy
  * @return void
  */
-function woocommerce_delete_term( $term_id, $tt_id, $taxonomy ) {
+function woocommerce_delete_term( $term_id ) {
 
 	$term_id = (int) $term_id;
 
-	if(!$term_id) return;
+	if ( ! $term_id ) 
+		return;
 
 	global $wpdb;
-	$wpdb->query("DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id);
+	$wpdb->query( "DELETE FROM {$wpdb->woocommerce_termmeta} WHERE `woocommerce_term_id` = " . $term_id );
 }
 
 

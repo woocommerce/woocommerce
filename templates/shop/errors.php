@@ -13,6 +13,6 @@ if ( ! $errors ) return;
 ?>
 <ul class="woocommerce_error">
 	<?php foreach ( $errors as $error ) : ?>
-		<li><?php echo esc_html( $error ); ?></li>
+		<li><?php echo wp_kses_post( $error ); ?></li>
 	<?php endforeach; ?>
 </ul>

@@ -58,8 +58,8 @@ add_filter( 'tiny_mce_version', 'woocommerce_refresh_mce' );
  * @see woocommerce_create_term()
  * @see woocommerce_delete_term()
  */
-add_action("create_term", 'woocommerce_create_term', 5, 3);
-add_action("delete_term", 'woocommerce_delete_term', 5, 3);
+add_action( "create_term", 'woocommerce_create_term', 5, 3 );
+add_action( "delete_term", 'woocommerce_delete_term', 5 );
 
 /**
  * Bulk editing

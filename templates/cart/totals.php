@@ -81,7 +81,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo '<select name="shipping_method" id="shipping_method">';
 	
 										foreach ( $available_methods as $method )
-											echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . sanitize_title_field( $method->full_label ) . '</option>';
+											echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . esc_html( $method->full_label ) . '</option>';
 	
 										echo '</select>';
 	
@@ -91,7 +91,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo '<ul id="shipping_method">';
 	
 										foreach ( $available_methods as $method )
-											echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . sanitize_title_field( $method->full_label ) . '</label></li>';
+											echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . esc_html( $method->full_label ) . '</label></li>';
 	
 										echo '</ul>';
 	
