@@ -1238,29 +1238,30 @@ class WC_Order {
 
 		if ( $this->status == 'on-hold' || $this->status == 'pending' || $this->status == 'failed' ) {
 
-			$downloadable_order = false;
+			$order_needs_processing = true;
 
 			if ( sizeof( $this->get_items() ) > 0 ) {
+			
 				foreach( $this->get_items() as $item ) {
-
+				
 					if ( $item['id'] > 0 ) {
 
 						$_product = $this->get_product_from_item( $item );
 
-						if ( $_product->is_downloadable() && $_product->is_virtual() ) {
-							$downloadable_order = true;
+						if ( ( $_product->is_downloadable() && $_product->is_virtual() ) || ! apply_filters( 'woocommerce_order_item_needs_processing', true, $_product, $this->id ) ) {
+							$order_needs_processing = false;
 							continue;
 						}
 
 					}
-					$downloadable_order = false;
+					$order_needs_processing = true;
 					break;
 				}
 			}
 
-			$new_order_status = ( $downloadable_order ) ? 'completed' : 'processing';
+			$new_order_status = $order_needs_processing ? 'processing' : 'completed';
 
-			$new_order_status = apply_filters('woocommerce_payment_complete_order_status', $new_order_status, $this->id);
+			$new_order_status = apply_filters( 'woocommerce_payment_complete_order_status', $new_order_status, $this->id );
 
 			$this->update_status( $new_order_status );
 
