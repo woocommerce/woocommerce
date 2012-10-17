@@ -25,11 +25,11 @@ Built upon core WordPress functionality for stability, with enough hooks and fil
 Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard or go to the reports section to view stats in more detail.
 
 = CUSTOMIZABLE =
-Your business is unique, as should your online store. Choose one of our [eCommerce themes](http://www.woothemes.com/themes/woocommerce-themes/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
+Your business is unique, as should your online store. Choose one of our [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
 
 WooCommerce works with any theme, including the default WordPress themes Twenty Ten and Eleven. If you need help getting your theme working nicely with WooCommerce read our [theming docs](http://wcdocs.woothemes.com/category/codex/theming/).
 
-Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/themes/woocommerce-themes/) and check out our free themes, such as [WooTique](http://www.woothemes.com/2011/09/wootique/).
+Looking for a tailored WordPress eCommmerce theme designed specifically to be used with WooCommerce? Be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/) and check out our free themes, such as [Mystile](http://www.woothemes.com/products/mystile/).
 
 = FEATURES =
 Seriously, WooCommerce has got more features than you can shake a stick at. But don't just take our word for it, try it for yourself! You can read more about features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
@@ -46,7 +46,7 @@ Payment Gateways, Shipping Methods and Integrations are important to any store -
 * __Sharedaddy__ and __ShareThis__ - Let your customers share your products with their friends
 * __ShareYourCart__ - Encourage your customers to share their purchases in return for a coupon
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a plethora of eCommerce extensions available to provide just that. [View our extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
 
 = GET INVOLVED =
 
