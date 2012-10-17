@@ -54,9 +54,11 @@ jQuery(document).ready(function($) {
 			url: 		woocommerce_params.ajax_url,
 			data: 		data,
 			success: 	function( response ) {
-				$('#order_review').after(response).remove();
-				$('#order_review input[name=payment_method]:checked').click();
-				$('body').trigger('updated_checkout');
+				if ( response ) {
+					$('#order_review').after(response).remove();
+					$('#order_review input[name=payment_method]:checked').click();
+					$('body').trigger('updated_checkout');
+				}
 			}
 		});
 	
