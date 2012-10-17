@@ -45,4 +45,9 @@ jQuery(document).ready(function($) {
 		}
 	});
 	
+	// prevent double form submission
+	$('form.cart').submit(function(){
+		$(this).find(':submit').attr( 'disabled','disabled' );
+	});
+	
 });
