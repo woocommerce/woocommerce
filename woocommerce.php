@@ -1756,7 +1756,7 @@ class Woocommerce {
 	 * @return void
 	 */
 	function add_inline_js( $code ) {
-		$this->_inline_js .= esc_js( "\n" . $code . "\n" );
+		$this->_inline_js .= "\n" . $code . "\n";
 	}
 
 	/**
@@ -1769,7 +1769,13 @@ class Woocommerce {
 		if ( $this->_inline_js ) {
 
 			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
-
+			
+			// Sanitize
+			$this->_inline_js = wp_check_invalid_utf8( $this->_inline_js );
+			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes( $this->_inline_js ) );
+			$this->_inline_js = str_replace( "\r", '', $this->_inline_js );
+			
+			// Output
 			echo $this->_inline_js;
 
 			echo "});\n</script>\n";
