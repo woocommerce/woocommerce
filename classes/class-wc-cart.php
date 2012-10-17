@@ -1033,7 +1033,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon );
+					do_action( 'woocommerce_product_discount_after_tax_' . $coupon->type, $coupon, $values, $price );
 
 					if ( $coupon->type != 'fixed_product' && $coupon->type != 'percent_product' ) continue;
 
