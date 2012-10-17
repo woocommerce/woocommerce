@@ -33,7 +33,7 @@ class WC_Logger {
 	 * @return void
 	 */
 	function __destruct() {
-		foreach ($this->handles as $handle)
+		foreach ( $this->handles as $handle )
 	       fclose( $handle );
 	}
 
@@ -48,10 +48,10 @@ class WC_Logger {
 	private function open( $handle ) {
 		global $woocommerce;
 
-		if ( isset( $this->handles[$handle] ) )
+		if ( isset( $this->handles[ $handle ] ) )
 			return true;
 
-		if ( $this->handles[$handle] = @fopen( $woocommerce->plugin_path() . '/logs/' . $handle . '.txt', 'a' ) )
+		if ( $this->handles[ $handle ] = @fopen( $woocommerce->plugin_path() . '/logs/' . $this->file_name( $handle ) . '.txt', 'a' ) )
 			return true;
 
 		return false;
@@ -69,7 +69,7 @@ class WC_Logger {
 	public function add( $handle, $message ) {
 		if ( $this->open( $handle ) ) {
 			$time = date_i18n( 'm-d-Y @ H:i:s -' ); //Grab Time
-			fwrite( $this->handles[$handle], $time . " " . $message . "\n" );
+			fwrite( $this->handles[ $handle ], $time . " " . $message . "\n" );
 		}
 	}
 
@@ -84,21 +84,19 @@ class WC_Logger {
 	public function clear( $handle ) {
 
 		if ( $this->open( $handle ) )
-			ftruncate( $this->handles[$handle], 0 );
+			ftruncate( $this->handles[ $handle ], 0 );
+	}
+	
+	
+	/**
+	 * file_name function.
+	 * 
+	 * @access private
+	 * @param mixed $handle
+	 * @return void
+	 */
+	private function file_name( $handle ) {
+		return $handle . '-' . sanitize_file_name( wp_hash( $handle ) );
 	}
 
-}
-
-/**
- * woocommerce_logger class.
- *
- * @extends 	WC_Logger
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_logger extends WC_Logger {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_logger', '1.4', 'WC_Logger()' );
-		parent::__construct();
-	}
 }

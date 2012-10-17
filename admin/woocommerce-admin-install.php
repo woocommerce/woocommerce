@@ -69,10 +69,19 @@ function do_install_woocommerce() {
 	// Install folder for uploading files and prevent hotlinking
 	$upload_dir =  wp_upload_dir();
 	$downloads_url = $upload_dir['basedir'] . '/woocommerce_uploads';
-
-	if ( wp_mkdir_p( $downloads_url ) && ! file_exists( $downloads_url.'/.htaccess' ) ) {
+	
+	// Deny access with htaccess
+	if ( wp_mkdir_p( $downloads_url ) && ! file_exists( $downloads_url . '/.htaccess' ) ) {
 		if ( $file_handle = @fopen( $downloads_url . '/.htaccess', 'w' ) ) {
 			fwrite( $file_handle, 'deny from all' );
+			fclose( $file_handle );
+		}
+	}
+	
+	// Prevent directory listing with index.php
+	if ( wp_mkdir_p( $downloads_url ) && ! file_exists( $downloads_url . '/index.html' ) ) {
+		if ( $file_handle = @fopen( $downloads_url . '/index.html', 'w' ) ) {
+			fwrite( $file_handle, '' );
 			fclose( $file_handle );
 		}
 	}
@@ -80,9 +89,18 @@ function do_install_woocommerce() {
 	// Install folder for logs
 	$logs_url = WP_PLUGIN_DIR . "/" . plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/logs';
 
+	// Deny access with htaccess
 	if ( wp_mkdir_p( $logs_url ) && ! file_exists( $logs_url . '/.htaccess' ) ) {
 		if ( $file_handle = @fopen( $logs_url . '/.htaccess', 'w' ) ) {
 			fwrite( $file_handle, 'deny from all' );
+			fclose( $file_handle );
+		}
+	}
+	
+	// Prevent directory listing with index.php
+	if ( wp_mkdir_p( $logs_url ) && ! file_exists( $logs_url . '/index.html' ) ) {
+		if ( $file_handle = @fopen( $logs_url . '/index.html', 'w' ) ) {
+			fwrite( $file_handle, '' );
 			fclose( $file_handle );
 		}
 	}
