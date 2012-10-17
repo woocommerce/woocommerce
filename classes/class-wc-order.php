@@ -1577,9 +1577,9 @@ class WC_Order_Item_Meta {
 	            }
 
 				if ( $flat )
-					$meta_list[] = $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value;
+					$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value );
 				else
-					$meta_list[] = '<dt>' . $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ':</dt><dd>' . $value . '</dd>';
+					$meta_list[] = '<dt>' . esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) ) . ':</dt><dd>' . esc_attr( $value ) . '</dd>';
 
 			}
 

@@ -459,7 +459,7 @@ class WC_Email extends WC_Settings_API {
 					?>
 					<div class="template <?php echo $template; ?>">
 					
-						<h4><?php echo $title; ?></h4>
+						<h4><?php echo wp_kses_post( $title ); ?></h4>
 							
 						<?php if ( file_exists( $local_file ) ) : ?>
 							

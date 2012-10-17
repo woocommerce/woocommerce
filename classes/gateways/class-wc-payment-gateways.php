@@ -100,18 +100,18 @@ class WC_Payment_Gateways {
 	 */
 	function process_admin_options() {
 
-		$default_gateway = (isset($_POST['default_gateway'])) ? esc_attr($_POST['default_gateway']) : '';
-		$gateway_order = (isset($_POST['gateway_order'])) ? $_POST['gateway_order'] : '';
+		$default_gateway = ( isset( $_POST['default_gateway'] ) ) ? esc_attr( $_POST['default_gateway'] ) : '';
+		$gateway_order = ( isset( $_POST['gateway_order'] ) ) ? $_POST['gateway_order'] : '';
 
 		$order = array();
 
-		if (is_array($gateway_order) && sizeof($gateway_order)>0) :
+		if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
 			$loop = 0;
-			foreach ($gateway_order as $gateway_id) :
-				$order[$gateway_id] = $loop;
+			foreach ( $gateway_order as $gateway_id ) {
+				$order[ esc_attr( $gateway_id ) ] = $loop;
 				$loop++;
-			endforeach;
-		endif;
+			}
+		}
 
 		update_option( 'woocommerce_default_gateway', $default_gateway );
 		update_option( 'woocommerce_gateway_order', $order );

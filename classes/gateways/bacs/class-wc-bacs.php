@@ -155,9 +155,11 @@ class WC_BACS extends WC_Payment_Gateway {
      */
     function thankyou_page() {
 		if ( $description = $this->get_description() )
-        	echo wpautop( wptexturize( $description ) );
+        	echo wpautop( wptexturize( wp_kses_post( $description ) ) );
 
-		?><h2><?php _e( 'Our Details', 'woocommerce' ) ?></h2><ul class="order_details bacs_details"><?php
+		echo '<h2>' . __( 'Our Details', 'woocommerce' ) . '</h2>';
+
+		echo '<ul class="order_details bacs_details">';
 
 		$fields = apply_filters('woocommerce_bacs_fields', array(
 			'account_name' 	=> __( 'Account Name', 'woocommerce' ),
@@ -168,13 +170,13 @@ class WC_BACS extends WC_Payment_Gateway {
 			'bic'			=> __( 'BIC', 'woocommerce' )
 		));
 
-		foreach ($fields as $key=>$value) :
-		    if(!empty($this->$key)) :
-		    	echo '<li class="'.$key.'">'.$value.': <strong>'.wptexturize($this->$key).'</strong></li>';
-		    endif;
-		endforeach;
+		foreach ( $fields as $key=>$value ) {
+		    if ( ! empty( $this->$key ) ) {
+		    	echo '<li class="' . esc_attr( $key ) . '">' . esc_attr( $value ) . ': <strong>' . wptexturize( $this->$key ) . '</strong></li>';
+		    }
+		}
 
-		?></ul><?php
+		echo '</ul>';
     }
 
 

@@ -119,7 +119,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			var _gaq = _gaq || [];
 			_gaq.push(
-				['_setAccount', '" . $tracking_id . "'],
+				['_setAccount', '" . esc_js( $tracking_id ) . "'],
 				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
 				['_setCustomVar', 3, 'username', '" . $username . "', 1],
@@ -174,22 +174,22 @@ class WC_Google_Analytics extends WC_Integration {
 			var _gaq = _gaq || [];
 
 			_gaq.push(
-				['_setAccount', '" . $tracking_id . "'],
-				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
-				['_setCustomVar', 2, 'user-id', '" . $user_id . "', 1],
-				['_setCustomVar', 3, 'username', '" . $username . "', 1],
+				['_setAccount', '" . esc_js( $tracking_id ) . "'],
+				['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+				['_setCustomVar', 2, 'user-id', '" . esc_js( $user_id ) . "', 1],
+				['_setCustomVar', 3, 'username', '" . esc_js( $username ) . "', 1],
 				['_trackPageview']
 			);
 
 			_gaq.push(['_addTrans',
-				'" . $order_id . "',           		// order ID - required
-				'" . get_bloginfo( 'name' ) . "',  	// affiliation or store name
-				'" . $order->get_total() . "',   	// total - required
-				'" . $order->get_total_tax() . "',  // tax
-				'" . $order->get_shipping() . "',	// shipping
-				'" . $order->billing_city . "',     // city
-				'" . $order->billing_state . "',    // state or province
-				'" . $order->billing_country . "'   // country
+				'" . esc_js( $order_id ) . "',           		// order ID - required
+				'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
+				'" . esc_js( $order->get_total() ) . "',   	// total - required
+				'" . esc_js( $order->get_total_tax() ) . "',  // tax
+				'" . esc_js( $order->get_shipping() ) . "',	// shipping
+				'" . esc_js( $order->billing_city ) . "',     // city
+				'" . esc_js( $order->billing_state ) . "',    // state or province
+				'" . esc_js( $order->billing_country ) . "'   // country
 			]);
 		";
 
@@ -199,13 +199,13 @@ class WC_Google_Analytics extends WC_Integration {
 				$_product = $order->get_product_from_item( $item );
 
 				$code .= "_gaq.push(['_addItem',";
-				$code .= "'" . $order_id . "',";
-				$code .= "'" . ( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
-				$code .= "'" . $item['name'] . "',";
+				$code .= "'" . esc_js( $order_id ) . "',";
+				$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+				$code .= "'" . esc_js( $item['name'] ) . "',";
 
 				if ( isset( $_product->variation_data ) ) {
 
-					$code .= "'" . woocommerce_get_formatted_variation( $_product->variation_data, true ) . "',";
+					$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 
 				} else {
 					$out = array();
@@ -215,11 +215,11 @@ class WC_Google_Analytics extends WC_Integration {
 							$out[] = $category->name;
 						}
 					}
-					$code .= "'" . join( "/", $out) . "',";
+					$code .= "'" . esc_js( join( "/", $out) ) . "',";
 				}
 
-				$code .= "'" . $order->get_item_total( $item ) . "',";
-				$code .= "'" . $item['qty'] . "'";
+				$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
+				$code .= "'" . esc_js( $item['qty'] ) . "'";
 				$code .= "]);";
 			}
 		}

@@ -433,7 +433,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 		                		echo '<tr class="flat_rate">
 		                			<td class="check-column"><input type="checkbox" name="select" /></td>
 		                			<td class="flat_rate_class">
-		                					<select name="'. $this->id .'_class[' . $i . ']" class="select">';
+		                					<select name="' . esc_attr( $this->id . '_class[' . $i . ']' ) . '" class="select">';
 
 		                		if ( $woocommerce->shipping->get_shipping_classes() ) {
 			                		foreach ( $woocommerce->shipping->get_shipping_classes() as $shipping_class ) {
@@ -445,8 +445,8 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 				                echo '</select>
 				               		</td>
-				                    <td><input type="text" value="' . $rate['cost'] . '" name="'. $this->id .'_cost[' . $i . ']" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
-				                    <td><input type="text" value="' . $rate['fee'] . '" name="'. $this->id .'_fee[' . $i . ']" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
+				                    <td><input type="text" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
+				                    <td><input type="text" value="' . esc_attr( $rate['fee'] ) . '" name="' . esc_attr( $this->id .'_fee[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
 			                    </tr>';
 	                		}
 	                	}
@@ -470,7 +470,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	               				<?php
 	               				if ($woocommerce->shipping->get_shipping_classes()) :
 			                		foreach ($woocommerce->shipping->get_shipping_classes() as $class) :
-			                			echo '<option value="'.$class->slug.'">'.$class->name.'</option>';
+			                			echo '<option value="' . esc_attr( $class->slug ) . '">' . esc_js( $class->name ) . '</option>';
 			                		endforeach;
 		                		else :
 		                			echo '<option value="">'.__( 'Select a class&hellip;', 'woocommerce' ).'</option>';
