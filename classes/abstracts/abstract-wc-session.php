@@ -18,7 +18,23 @@ abstract class WC_Session {
      * @return void
      */
     abstract public function save_data();
-
+	
+	/**
+     * Abstract function to set cookie expiration time in seconds.
+     * 
+     * @access public
+     * @return void
+     */
+	abstract public function set_cookie_expires($seconds);
+	
+	/**
+     * Abstract function to get cookie expiration time in seconds.
+     * 
+     * @access public
+     * @return string
+     */
+	abstract public function get_cookie_expires();
+	
 	/**
 	 * Constructor for the session classes. Hooks in methods.
 	 *
