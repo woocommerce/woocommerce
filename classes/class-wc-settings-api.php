@@ -182,7 +182,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function generate_text_html ( $key, $data ) {
+    function generate_text_html( $key, $data ) {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
@@ -215,7 +215,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function generate_password_html ( $key, $data ) {
+    function generate_password_html( $key, $data ) {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
@@ -261,7 +261,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
-                $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
+                $value = ( isset( $this->settings[ $key ] ) ) ? esc_textarea( $this->settings[ $key ] ) : '';
 				$html .= '<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '">'. $value .'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
@@ -280,7 +280,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function generate_checkbox_html ( $key, $data ) {
+    function generate_checkbox_html( $key, $data ) {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
@@ -311,7 +311,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function generate_select_html ( $key, $data ) {
+    function generate_select_html( $key, $data ) {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
@@ -349,7 +349,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function generate_multiselect_html ( $key, $data ) {
+    function generate_multiselect_html( $key, $data ) {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
@@ -423,7 +423,8 @@ class WC_Settings_API {
     	$this->sanitized_fields = array();
 
     	foreach ( $form_fields as $k => $v ) {
-    		if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) { $v['type'] == 'text'; } // Default to "text" field type.
+    		if ( empty( $v['type'] ) ) 
+    			$v['type'] == 'text'; // Default to "text" field type.
 
     		if ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
     			$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
@@ -445,7 +446,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_checkbox_field ( $key ) {
+    function validate_checkbox_field( $key ) {
     	$status = 'no';
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) && ( 1 == $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
     		$status = 'yes';
@@ -464,7 +465,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_text_field ( $key ) {
+    function validate_text_field( $key ) {
     	$text = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
@@ -485,7 +486,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_password_field ( $key ) {
+    function validate_password_field( $key ) {
     	$text = (isset($this->settings[$key])) ? $this->settings[$key] : '';
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
@@ -506,7 +507,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_textarea_field ( $key ) {
+    function validate_textarea_field( $key ) {
     	$text = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
@@ -527,7 +528,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_select_field ( $key ) {
+    function validate_select_field( $key ) {
     	$value = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
@@ -547,7 +548,7 @@ class WC_Settings_API {
      * @since 1.0.0
      * @return string
      */
-    function validate_multiselect_field ( $key ) {
+    function validate_multiselect_field( $key ) {
     	$value = ( isset( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : '';
 
     	if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
@@ -559,18 +560,4 @@ class WC_Settings_API {
     	return $value;
     }
 
-}
-
-/**
- * woocommerce_settings_api class.
- *
- * @extends 	WC_Settings_Api
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_settings_api extends WC_Settings_Api {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_settings_api', '1.4', 'WC_Settings_Api()' );
-		parent::__construct();
-	}
 }

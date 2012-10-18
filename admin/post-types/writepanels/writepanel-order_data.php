@@ -20,11 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @return void
  */
 function woocommerce_order_data_meta_box($post) {
-	global $post, $wpdb, $thepostid, $order_status, $woocommerce;
+	global $post, $wpdb, $thepostid, $theorder, $order_status, $woocommerce;
 
 	$thepostid = absint( $post->ID );
+	
+	if ( ! is_object( $theorder ) )
+		$theorder = new WC_Order( $thepostid );
 
-	$order = new WC_Order( $thepostid );
+	$order = $theorder;
 
 	wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
@@ -306,9 +309,14 @@ function woocommerce_order_data_meta_box($post) {
  * Displays the order items meta box - for showing individual items in the order.
  */
 function woocommerce_order_items_meta_box( $post ) {
-	global $woocommerce;
+	global $wpdb, $thepostid, $theorder, $woocommerce;
 
-	$order_items = (array) maybe_unserialize( get_post_meta( $post->ID, '_order_items', true ) );
+	if ( ! is_object( $theorder ) )
+		$theorder = new WC_Order( $thepostid );
+
+	$order = $theorder;
+	
+	$order_items = $order->get_items();
 	?>
 	<div class="woocommerce_order_items_wrapper">
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
@@ -327,25 +335,16 @@ function woocommerce_order_items_meta_box( $post ) {
 					<th class="line_subtotal"><?php _e( 'Line&nbsp;Subtotal', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line cost and line tax before pre-tax discounts', 'woocommerce' ); ?>" href="#">[?]</a></th>
 
 					<th class="line_total"><?php _e( 'Line&nbsp;Total', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line cost and line tax after pre-tax discounts', 'woocommerce' ); ?>" href="#">[?]</a></th>
-
 				</tr>
 			</thead>
 			<tbody id="order_items_list">
 
-				<?php $loop = 0; if ( sizeof( $order_items ) > 0 && isset( $order_items[0]['id'] ) ) foreach ( $order_items as $item ) {
+				<?php $loop = 0; if ( ! empty( $order_items ) ) foreach ( $order_items as $item ) {
 
 					if ( isset( $item['variation_id'] ) && $item['variation_id'] > 0 )
 						$_product = new WC_Product_Variation( $item['variation_id'] );
 					else
 						$_product = new WC_Product( $item['id'] );
-
-					// Totals - Backwards Compatibility
-					if ( ! isset( $item['line_total'] ) && isset( $item['taxrate'] ) && isset( $item['cost'] ) ) {
-						$item['line_tax'] 			= number_format( ($item['cost'] * $item['qty'] ) * ( $item['taxrate']/100 ), 2, '.', '' );
-						$item['line_total'] 		= $item['cost'] * $item['qty'];
-						$item['line_subtotal_tax'] 	= $item['line_tax'];
-						$item['line_subtotal'] 		= $item['line_total'];
-					}
 					?>
 					<tr class="item" rel="<?php echo $loop; ?>">
 						<td class="thumb">
@@ -394,20 +393,10 @@ function woocommerce_order_items_meta_box( $post ) {
 								</tfoot>
 								<tbody class="meta_items">
 								<?php
-									if ( isset( $item['item_meta'] ) && is_array( $item['item_meta'] ) && sizeof( $item['item_meta'] ) > 0 ) {
-										foreach ( $item['item_meta'] as $key => $meta ) {
-
-											// Backwards compatibility
-											if ( is_array( $meta ) && isset( $meta['meta_name'] ) ) {
-												$meta_name = $meta['meta_name'];
-												$meta_value = $meta['meta_value'];
-											} else {
-												$meta_name = $key;
-												$meta_value = $meta;
-											}
-
-											echo '<tr><td><input type="text" name="meta_name[' . $loop . '][]" value="' . esc_attr( $meta_name ) . '" /></td><td><input type="text" name="meta_value[' . $loop . '][]" value="' . esc_attr( $meta_value ) . '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
-										}
+									$item_meta = $order->get_item_meta( $item['id'] );
+									
+									foreach ( $item_meta as $meta ) {
+										echo '<tr rel="' . absint( $meta->meta_id ) . '"><td><input type="text" name="meta_name[' . absint( $meta->meta_id ) . '][]" value="' . esc_attr( $meta->meta_key ) . '" /></td><td><input type="text" name="meta_value[' . absint( $meta->meta_id ) . '][]" value="' . esc_attr( $meta->meta_value ) . '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
 									}
 								?>
 								</tbody>

@@ -439,7 +439,6 @@ function woocommerce_shop_order_search_custom_fields( $wp ) {
 		'_billing_country',
 		'_billing_state',
 		'_billing_email',
-		'_order_items',
 		'_billing_phone'
 	) ) );
 

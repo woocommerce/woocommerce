@@ -394,9 +394,53 @@ class WC_Order {
 	 * @return array
 	 */
 	function get_items() {
-		if ( ! $this->items )
-			$this->items = isset( $this->order_custom_fields['_order_items'][0] ) ? maybe_unserialize( $this->order_custom_fields['_order_items'][0] ) : array();
+		global $wpdb, $woocommerce;
+		
+		if ( ! $this->items ) {
+			$this->items = $wpdb->get_results( $wpdb->prepare( "
+				SELECT 
+					*, 
+					item_id as id,
+					item_name as name,
+					item_qty as qty,
+					item_tax_class as tax_class
+				FROM " . $wpdb->prefix . "woocommerce_order_items
+				WHERE order_id = %d
+			", $this->id ), ARRAY_A );
+		}
 		return $this->items;
+	}
+	
+	/**
+	 * Get order item meta.
+	 * 
+	 * @access public
+	 * @param mixed $item_id
+	 * @param string $key (default: '')
+	 * @param bool $single (default: true)
+	 * @return void
+	 */
+	function get_item_meta( $item_id, $key = '', $single = true ) {
+		global $wpdb, $woocommerce;
+		
+		if ( $key ) {
+			
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d", absint( $item_id ) ) );
+			
+			if ( empty( $results ) ) 
+				return false;
+			
+			if ( $single ) {
+				return $results[0];
+			} else {
+				return $results;
+			}
+			
+		} else {
+			
+			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d", absint( $item_id ) ) );
+
+		}
 	}
 
 	/**

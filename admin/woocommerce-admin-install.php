@@ -277,7 +277,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
     // Order line items are stored in a table to make them easily queryable for reports
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
-  ID bigint(20) NOT NULL auto_increment,
+  item_id bigint(20) NOT NULL auto_increment,
   item_name longtext NOT NULL DEFAULT '',
   item_qty int(20) NOT NULL DEFAULT 0,
   item_tax_class varchar(255) NOT NULL DEFAULT '',

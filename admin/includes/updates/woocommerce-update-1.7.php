@@ -72,3 +72,87 @@ if ( empty( $permalinks ) && $shop_page_id > 0 ) {
 	
 	update_option( 'woocommerce_permalinks', $permalinks );	
 }
+
+// Now its time for the massive update to line items - move them to the new DB tables
+// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
+$order_item_rows = $wpdb->get_results( $wpdb->prepare( "
+	SELECT * FROM {$wpdb->postmeta}
+	WHERE meta_key = '_order_items'
+" ) );
+
+foreach ( $order_item_rows as $order_item_row ) {
+	
+	$order_items = (array) maybe_unserialize( $order_item_row->meta_value );
+	
+	foreach ( $order_items as $order_item ) {
+		
+		if ( ! isset( $order_item['line_total'] ) && isset( $order_item['taxrate'] ) && isset( $order_item['cost'] ) ) {
+			$order_item['line_tax'] 			= number_format( ( $order_item['cost'] * $order_item['qty'] ) * ( $order_item['taxrate'] / 100 ), 2, '.', '' );
+			$order_item['line_total'] 			= $order_item['cost'] * $order_item['qty'];
+			$order_item['line_subtotal_tax'] 	= $order_item['line_tax'];
+			$order_item['line_subtotal'] 		= $order_item['line_total'];
+		}
+		
+		$order_item['line_tax'] 			= isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
+		$order_item['line_total']			= isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
+		$order_item['line_subtotal_tax'] 	= isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
+		$order_item['line_subtotal'] 		= isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
+		
+		// Insert line item
+		$wpdb->insert( 
+			$wpdb->prefix . "woocommerce_order_items",
+			array( 
+				'item_name' 		=> $order_item['name'],
+				'item_qty' 			=> $order_item['qty'],
+				'item_tax_class' 	=> $order_item['tax_class'],
+				'order_id' 			=> $order_item_row->post_id,
+				'product_id' 		=> $order_item['id'],
+				'variation_id' 		=> $order_item['variation_id'],
+				'line_subtotal' 	=> $order_item['line_subtotal'],
+				'line_subtotal_tax' => $order_item['line_subtotal_tax'],
+				'line_total' 		=> $order_item['line_total'],
+				'line_tax' 			=> $order_item['line_tax']
+			), 
+			array(
+				'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
+			)
+		);
+		
+		$item_id = absint( $wpdb->insert_id );
+		
+		if ( $item_id > 0 ) {
+		
+			$meta_rows = array();
+			
+			// Insert meta
+			if ( ! empty( $order_item['item_meta'] ) ) {
+				foreach ( $order_item['item_meta'] as $key => $meta ) {
+					// Backwards compatibility
+					if ( is_array( $meta ) && isset( $meta['meta_name'] ) ) {
+						$meta_rows[] = '(' . $item_id . ',"' . $wpdb->escape( $meta['meta_name'] ) . '","' . $wpdb->escape( $meta['meta_value'] ) . '")';
+					} else {
+						$meta_rows[] = '(' . $item_id . ',"' . $wpdb->escape( $key ) . '","' . $wpdb->escape( $meta ) . '")';
+					}
+				}
+			}
+			
+			// Insert meta rows at once
+			if ( sizeof( $meta_rows ) > 0 ) {
+				$wpdb->query( $wpdb->prepare( "
+					INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( item_id, meta_key, meta_value )
+					VALUES " . implode( ',', $meta_rows ) . ";
+				", $order_item_row->post_id ) );
+			}
+			
+			// Delete from DB (rename)
+			$wpdb->query( $wpdb->prepare( "
+				UPDATE {$wpdb->postmeta}
+				SET meta_key = '_order_items_old'
+				WHERE meta_key = '_order_items'
+				AND post_id = %d
+			", $order_item_row->post_id ) );
+		}
+		
+		unset( $meta_rows, $item_id, $order_item );
+	}
+}
