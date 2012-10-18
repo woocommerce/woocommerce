@@ -215,7 +215,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Localized shortcode button.
 * Localization - Norwegian translation by frilyd.
 * Localization - Italian update by Giuseppe-Mazzapica.
-* Localization - Korean translate by Woo Jin Koh
+* Localization - Korean translate by Woo Jin Koh.
+* Localization - Bulgarian update by Hristo Pandjarov.
+
 * Many other refactors, minor fixes and tweaks!
 
 = 1.6.5.2 - 12/09/2012 =
