@@ -823,7 +823,7 @@ add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer
 function woocommerce_add_order_item() {
 	global $woocommerce, $wpdb;
 
-	check_ajax_referer( 'add-order-item', 'security' );
+	check_ajax_referer( 'order-item', 'security' );
 
 	$index = trim(sanitize_text_field($_POST['index']));
 	$item_to_add = trim(sanitize_text_field($_POST['item_to_add']));
@@ -932,6 +932,66 @@ function woocommerce_add_order_item() {
 }
 
 add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
+
+
+/**
+ * woocommerce_add_order_item_meta function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_add_order_item_meta() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$item_id = absint( $_POST['item_id'] );
+		
+	$wpdb->insert( 
+		$wpdb->prefix . "woocommerce_order_itemmeta",
+		array( 
+			'meta_key' 			=> '',
+			'meta_value' 		=> '',
+			'item_id' 			=> $item_id,
+		), 
+		array(
+			'%s', '%s', '%d'
+		)
+	);
+		
+	$meta_id = absint( $wpdb->insert_id );
+	
+	if ( $meta_id ) {
+		
+		echo '<tr data-meta_id="' . $meta_id . '"><td><input type="text" name="meta_key[' . $meta_id . ']" value="" /></td><td><input type="text" name="meta_value[' . $meta_id . ']" value="" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';		
+		
+	}
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_add_order_item_meta', 'woocommerce_add_order_item_meta' );
+
+
+/**
+ * woocommerce_remove_order_item_meta function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_remove_order_item_meta() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$meta_id = absint( $_POST['meta_id'] );
+	
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $meta_id ) );
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_remove_order_item_meta', 'woocommerce_remove_order_item_meta' );
 
 
 /**

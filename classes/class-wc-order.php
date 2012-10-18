@@ -400,12 +400,13 @@ class WC_Order {
 			$this->items = $wpdb->get_results( $wpdb->prepare( "
 				SELECT 
 					*, 
-					item_id as id,
+					product_id as id,
 					item_name as name,
 					item_qty as qty,
 					item_tax_class as tax_class
 				FROM " . $wpdb->prefix . "woocommerce_order_items
 				WHERE order_id = %d
+				ORDER BY item_id
 			", $this->id ), ARRAY_A );
 		}
 		return $this->items;
@@ -425,7 +426,7 @@ class WC_Order {
 		
 		if ( $key ) {
 			
-			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d", absint( $item_id ) ) );
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d ORDER BY meta_id", absint( $item_id ) ) );
 			
 			if ( empty( $results ) ) 
 				return false;
@@ -438,7 +439,7 @@ class WC_Order {
 			
 		} else {
 			
-			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d", absint( $item_id ) ) );
+			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d ORDER BY meta_id", absint( $item_id ) ) );
 
 		}
 	}

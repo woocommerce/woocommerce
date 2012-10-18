@@ -451,7 +451,7 @@ jQuery( function($){
 					action: 		'woocommerce_add_order_item',
 					item_to_add: 	value,
 					index:			size,
-					security: 		woocommerce_writepanel_params.add_order_item_nonce
+					security: 		woocommerce_writepanel_params.order_item_nonce
 				};
 
 				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
@@ -484,19 +484,53 @@ jQuery( function($){
 	});
 
 	$('button.add_meta').live('click', function(){
-
-		var index = $(this).closest('tr.item').attr('rel');
-
-		$(this).closest('table.meta').find('.meta_items').append('<tr><td><input type="text" name="meta_name[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_name + '" /></td><td><input type="text" name="meta_value[' + index + '][]" placeholder="' + woocommerce_writepanel_params.meta_value + '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>');
+		
+		var $button = $(this);
+		var $item = $button.closest('tr.item');
+				
+		var data = {
+			item_id: 	$item.attr( 'data-item_id' ),
+			action: 	'woocommerce_add_order_item_meta',
+			security: 	woocommerce_writepanel_params.order_item_nonce
+		};
+		
+		$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+		
+		$.ajax( {
+			url: woocommerce_writepanel_params.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
+				$item.find('tbody.meta_items').append( response );
+				$('table.woocommerce_order_items').unblock();
+			}
+		} );
 
 		return false;
-
 	});
 
 	$('button.remove_meta').live('click', function(){
-		var answer = confirm("Remove this meta key?")
-		if (answer){
-			$(this).closest('tr').remove();
+		var answer = confirm( woocommerce_writepanel_params.remove_item_meta )
+		if ( answer ) {
+			var $row = $(this).closest('tr');
+			
+			var data = {
+				meta_id: 			$row.attr( 'data-meta_id' ),
+				action: 			'woocommerce_remove_order_item_meta',
+				security: 			woocommerce_writepanel_params.order_item_nonce
+			};
+			
+			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+			$.ajax( {
+				url: woocommerce_writepanel_params.ajax_url,
+				data: data,
+				type: 'POST',
+				success: function( response ) {
+					$row.hide();
+					$('table.woocommerce_order_items').unblock();
+				}
+			} );
 		}
 		return false;
 	});

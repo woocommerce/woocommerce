@@ -404,6 +404,7 @@ function woocommerce_admin_scripts() {
 
 		$woocommerce_witepanel_params = array(
 			'remove_item_notice' 			=> __( 'Remove this item? If you have previously reduced this item\'s stock, or this order was submitted by a customer, will need to manually restore the item\'s stock.', 'woocommerce' ),
+			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
 			'remove_label'					=> __( 'Remove', 'woocommerce' ),
@@ -431,7 +432,7 @@ function woocommerce_admin_scripts() {
 			'shipping_tax_label'			=> __( 'Shipping Tax:', 'woocommerce' ),
 			'plugin_url' 					=> $woocommerce->plugin_url(),
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
-			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
+			'order_item_nonce' 				=> wp_create_nonce("order-item"),
 			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
