@@ -90,27 +90,32 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$min = $max = 0;
 		$post_min = $post_max = '';
 
-		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) == 0 ) :
-
-			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0)
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_key = '_price'"));
-
-		else :
-
-			$max = ceil($wpdb->get_var("SELECT max(meta_value + 0)
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id
-			WHERE meta_key = '_price' AND (
-				$wpdb->posts.ID IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")
-				OR (
-					$wpdb->posts.post_parent IN (".implode(',', $woocommerce->query->layered_nav_product_ids).")
-					AND $wpdb->posts.post_parent != 0
-				)
-			)"));
-
-		endif;
+		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) != 0 ) {
+			$max = ceil( $wpdb->get_var(
+				$wpdb->prepare('
+					SELECT max(meta_value + 0)
+					FROM %1$s
+					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
+					WHERE meta_key = %3$s
+				'), $wpdb->posts, $wpdb->postmeta, '_price'
+			) );
+		} else {
+			$max = ceil( $wpdb->get_var(
+				$wpdb->prepare('
+					SELECT max(meta_value + 0)
+					FROM %1$s
+					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
+					WHERE meta_key = %3$s
+					AND (
+						%1$s.ID IN (%4$s)
+						OR (
+							%1$s.post_parent IN (%4$s)
+							AND %1$s.post_parent != 0
+						)
+					)
+				'), $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', $woocommerce->query->layered_nav_product_ids )
+			) );
+		}
 
 		if ( $min == $max ) return;
 
