@@ -261,7 +261,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	function get_from_name() {
-		return get_option( 'woocommerce_email_from_name' );
+		return esc_html( get_option( 'woocommerce_email_from_name' ) );
 	}
 
 	/**
@@ -271,7 +271,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	function get_from_address() {
-		return get_option( 'woocommerce_email_from_address' );
+		return sanitize_email( get_option( 'woocommerce_email_from_address' ) );
 	}
 	
 	/**
@@ -290,7 +290,7 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
 		
-		wp_mail( $to, $subject, $message, $headers, $attachments );
+		wp_mail( $to, $subject, wp_kses_post( $message ), $headers, $attachments );
 
 		remove_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );

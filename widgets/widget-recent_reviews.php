@@ -73,24 +73,24 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 
 		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
 
-		if ( $comments ) :
+		if ( $comments ) {
 			echo $before_widget;
 			if ( $title ) echo $before_title . $title . $after_title;
 			echo '<ul class="product_list_widget">';
 
-			foreach ( (array) $comments as $comment) :
+			foreach ( (array) $comments as $comment) {
 
 				$_product = new WC_Product( $comment->comment_post_ID );
 
-				$star_size = apply_filters('woocommerce_star_rating_size_recent_reviews', 16);
+				$star_size = intval( apply_filters( 'woocommerce_star_rating_size_recent_reviews', 16 ) );
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-				$rating_html = '<div class="star-rating" title="'.$rating.'">
-					<span style="width:'.($rating*$star_size).'px">'.$rating.' '.__( 'out of 5', 'woocommerce' ).'</span>
+				$rating_html = '<div class="star-rating" title="' . $rating . '">
+					<span style="width:' . ( $rating * $star_size ) . 'px">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span>
 				</div>';
 
-				echo '<li><a href="' . esc_url( get_comment_link($comment->comment_ID) ) . '">';
+				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
 				echo $_product->get_image();
 
@@ -98,13 +98,13 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 
 				echo $rating_html;
 
-				printf(_x('by %1$s', 'by comment author', 'woocommerce'), get_comment_author()) . '</li>';
+				printf( _x( 'by %1$s', 'by comment author', 'woocommerce' ), get_comment_author() ) . '</li>';
 
-			endforeach;
+			}
 
 			echo '</ul>';
 			echo $after_widget;
-		endif;
+		}
 
 		$content = ob_get_clean();
 

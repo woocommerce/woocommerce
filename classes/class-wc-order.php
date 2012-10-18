@@ -1127,9 +1127,11 @@ class WC_Order {
 	 */
 	function add_order_note( $note, $is_customer_note = 0 ) {
 
+		$is_customer_note = intval( $is_customer_note );
+
 		$comment_post_ID 		= $this->id;
 		$comment_author 		= __( 'WooCommerce', 'woocommerce' );
-		$comment_author_email 	= strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace('www.', '', $_SERVER['HTTP_HOST']);
+		$comment_author_email 	= sanitize_email( strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@' . str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) );
 		$comment_author_url 	= '';
 		$comment_content 		= $note;
 		$comment_agent			= 'WooCommerce';

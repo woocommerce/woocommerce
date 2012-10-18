@@ -80,21 +80,21 @@ class WC_Coupon {
 		$coupon_data = apply_filters('woocommerce_get_shop_coupon_data', false, $code);
 
         if ($coupon_data) :
-            $this->id = $coupon_data['id'];
-            $this->type = $coupon_data['type'];
-            $this->amount = $coupon_data['amount'];
-            $this->individual_use = $coupon_data['individual_use'];
-            $this->product_ids = $coupon_data['product_ids'];
-            $this->exclude_product_ids = $coupon_data['exclude_product_ids'];
-            $this->usage_limit = $coupon_data['usage_limit'];
-            $this->usage_count = $coupon_data['usage_count'];
-            $this->expiry_date = $coupon_data['expiry_date'];
-            $this->apply_before_tax = $coupon_data['apply_before_tax'];
-            $this->free_shipping = $coupon_data['free_shipping'];
-            $this->product_categories = $coupon_data['product_categories'];
-            $this->exclude_product_categories = $coupon_data['exclude_product_categories'];
-            $this->minimum_amount = $coupon_data['minimum_amount'];
-            $this->customer_email = $coupon_data['customer_email'];
+            $this->id = absint( $coupon_data['id'] );
+            $this->type = esc_html( $coupon_data['type'] );
+            $this->amount = esc_html( $coupon_data['amount'] );
+            $this->individual_use = esc_html( $coupon_data['individual_use'] );
+            $this->product_ids = ( is_array( $coupon_data['product_ids'] ) ) ? $coupon_data['product_ids'] : array();
+            $this->exclude_product_ids = ( is_array( $coupon_data['exclude_product_ids'] ) ) ? $coupon_data['exclude_product_ids'] : array();
+            $this->usage_limit = absint( $coupon_data['usage_limit'] );
+            $this->usage_count = absint( $coupon_data['usage_count'] );
+            $this->expiry_date = esc_html( $coupon_data['expiry_date'] );
+            $this->apply_before_tax = esc_html( $coupon_data['apply_before_tax'] );
+            $this->free_shipping = esc_html( $coupon_data['free_shipping'] );
+            $this->product_categories = ( is_array( $coupon_data['product_categories'] ) ) ? $coupon_data['product_categories'] : array();
+            $this->exclude_product_categories = ( is_array( $coupon_data['exclude_product_categories'] ) ) ? $coupon_data['exclude_product_categories'] : array();
+            $this->minimum_amount = esc_html( $coupon_data['minimum_amount'] );
+            $this->customer_email = esc_html( $coupon_data['customer_email'] );
             return true;
         else:
             $coupon_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE BINARY post_title = %s AND post_type= %s", $this->code, 'shop_coupon' ) );

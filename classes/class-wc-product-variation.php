@@ -60,14 +60,14 @@ class WC_Product_Variation extends WC_Product {
 	 * Loads all product data from custom fields
 	 *
 	 * @access public
-	 * @param mixed $variation_id ID of the variation to load
+	 * @param int $variation_id ID of the variation to load
 	 * @param int $parent_id (default: '') ID of the parent product
 	 * @param array $parent_custom_fields (default: '') Array of the parent products meta data
 	 * @return void
 	 */
 	function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
 
-		$this->variation_id = $variation_id;
+		$this->variation_id = intval( $variation_id );
 
 		$product_custom_fields = get_post_custom( $this->variation_id );
 
@@ -77,13 +77,14 @@ class WC_Product_Variation extends WC_Product {
 
 			if ( ! strstr( $name, 'attribute_' ) ) continue;
 
-			$this->variation_data[$name] = $value[0];
+			$this->variation_data[ $name ] = $value[0];
 
 		}
 
 		/* Get main product data from parent */
-		$this->id = ($parent_id>0) ? $parent_id : wp_get_post_parent_id( $this->variation_id );
-		if (!$parent_custom_fields) $parent_custom_fields = get_post_custom( $this->id );
+		$this->id = ( $parent_id > 0 ) ? intval( $parent_id ) : wp_get_post_parent_id( $this->variation_id );
+		
+		if ( ! $parent_custom_fields ) $parent_custom_fields = get_post_custom( $this->id );
 
 		// Define the data we're going to load from the parent: Key => Default value
 		$load_data = array(
@@ -108,7 +109,7 @@ class WC_Product_Variation extends WC_Product {
 
 		// Load the data from the custom fields
 		foreach ( $load_data as $key => $default )
-			$this->$key = ( isset( $parent_custom_fields['_' . $key][0] ) && $parent_custom_fields['_' . $key][0] !== '' ) ? $parent_custom_fields['_' . $key][0] : $default;
+			$this->$key = ( isset( $parent_custom_fields['_' . $key ][0] ) && $parent_custom_fields['_' . $key ][0] !== '' ) ? $parent_custom_fields['_' . $key ][0] : $default;
 
 		$this->product_type = 'variable';
 
@@ -379,10 +380,16 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	function get_shipping_class() {
-		if (!$this->variation_shipping_class) :
+		if ( ! $this->variation_shipping_class ) {
 			$classes = get_the_terms( $this->variation_id, 'product_shipping_class' );
-			if ($classes && !is_wp_error($classes)) $this->variation_shipping_class = current($classes)->slug; else $this->variation_shipping_class = parent::get_shipping_class();
-		endif;
+			
+			if ( $classes && ! is_wp_error( $classes ) ) {
+				$this->variation_shipping_class = esc_attr( current( $classes )->slug );
+			} else {
+				$this->variation_shipping_class = parent::get_shipping_class();
+			}
+		}
+
 		return $this->variation_shipping_class;
 	}
 

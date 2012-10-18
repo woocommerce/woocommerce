@@ -387,13 +387,15 @@ class WC_Cart {
 
 					if ( is_array( $coupon->customer_email ) && sizeof( $coupon->customer_email ) > 0 ) {
 
+						$coupon->customer_email = array_map( 'sanitize_email', $coupon->customer_email );
+
 						if ( is_user_logged_in() ) {
 							$current_user = wp_get_current_user();
 							$check_emails[] = $current_user->user_email;
 						}
 						$check_emails[] = $posted['billing_email'];
 
-						$check_emails = array_map( 'strtolower', $check_emails );
+						$check_emails = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
 						if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
 							$woocommerce->add_error( sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), $code ) );

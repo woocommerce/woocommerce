@@ -103,7 +103,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 			endforeach;
 
 			// Get redirect URL
-			$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(woocommerce_get_page_id('myaccount')) );
+			$redirect_to = esc_url( apply_filters( 'woocommerce_login_widget_redirect', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) );
 			?>
 			<form method="post">
 
@@ -174,9 +174,9 @@ class WooCommerce_Widget_Login extends WP_Widget {
 
 				echo '<ul class="pagenav">';
 
-				foreach ($links as $name => $link) :
-					echo '<li><a href="'.$link.'">'.$name.'</a></li>';
-				endforeach;
+				foreach ( $links as $name => $link ) {
+					echo '<li><a href="' . esc_attr( $link ) . '">' . wp_kses_post( $name ) . '</a></li>';
+				}
 
 				echo '</ul>';
 
@@ -239,7 +239,7 @@ function woocommerce_sidebar_login_process() {
 		global $login_errors;
 
 		// Get redirect URL
-		$redirect_to = apply_filters( 'woocommerce_login_widget_redirect', get_permalink(woocommerce_get_page_id('myaccount')) );
+		$redirect_to = esc_url( apply_filters( 'woocommerce_login_widget_redirect', get_permalink( woocommerce_get_page_id( 'myaccount' ) ) ) );
 
 		// Check for Secure Cookie
 		$secure_cookie = '';

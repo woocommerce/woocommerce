@@ -35,11 +35,11 @@ class WC_Customer {
         	}
 
 			$this->_data = array(
-				'country' 				=> $country,
+				'country' 				=> esc_html( $country ),
 				'state' 				=> '',
 				'postcode' 				=> '',
 				'city'					=> '',
-				'shipping_country' 		=> $country,
+				'shipping_country' 		=> esc_html( $country ),
 				'shipping_state' 		=> '',
 				'shipping_postcode' 	=> '',
 				'shipping_city'			=> '',

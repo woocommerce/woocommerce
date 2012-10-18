@@ -446,10 +446,10 @@ class WC_Countries {
 	 * @return string
 	 */
 	function get_base_country() {
-		$default = get_option('woocommerce_default_country');
-		if (($pos = strpos($default, ':')) === false)
+		$default = esc_attr( get_option('woocommerce_default_country') );
+		if ( ( $pos = strpos( $default, ':' ) ) === false )
 			return $default;
-		return substr($default, 0, $pos);
+		return substr( $default, 0, $pos );
 	}
 
 
@@ -460,10 +460,10 @@ class WC_Countries {
 	 * @return string
 	 */
 	function get_base_state() {
-		$default = get_option('woocommerce_default_country');
-		if (($pos = strrpos($default, ':')) === false)
+		$default = esc_attr( get_option( 'woocommerce_default_country' ) );
+		if ( ( $pos = strrpos( $default, ':' ) ) === false )
 			return '';
-		return substr($default, $pos + 1);
+		return substr( $default, $pos + 1 );
 	}
 
 
