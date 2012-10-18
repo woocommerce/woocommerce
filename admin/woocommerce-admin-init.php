@@ -140,55 +140,82 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
 
 
 /**
- * Show notices in admin.
- *
+ * woocommerce_admin_notices_styles function.
+ * 
  * @access public
  * @return void
  */
-function woocommerce_admin_install_notice() {
-	?>
-	<div id="message" class="updated woocommerce-message wc-connect">
-		<div class="squeezer">
-			<h4><?php _e( '<strong>Welcome to WooCommerce</strong> &#8211; You\'re almost ready to start selling :)', 'woocommerce' ); ?></h4>
-			<p class="submit"><a href="<?php echo add_query_arg('install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>" class="button-primary"><?php _e( 'Install WooCommerce Pages', 'woocommerce' ); ?></a> <a class="skip button-primary" href="<?php echo add_query_arg('skip_install_woocommerce_pages', 'true', admin_url('admin.php?page=woocommerce_settings')); ?>"><?php _e( 'Skip setup', 'woocommerce' ); ?></a></p>
-		</div>
-	</div>
-	<?php
-}
-function woocommerce_admin_installed_notice() {
-	?>
-	<div id="message" class="updated woocommerce-message wc-connect">
-		<div class="squeezer">
-			<h4><?php _e( '<strong>WooCommerce has been installed</strong> &#8211; You\'re ready to start selling :)', 'woocommerce' ); ?></h4>
-
-			<p class="submit"><a href="<?php echo admin_url('admin.php?page=woocommerce_settings'); ?>" class="button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a> <a class="docs button-primary" href="http://www.woothemes.com/woocommerce-docs/"><?php _e( 'Documentation', 'woocommerce' ); ?></a></p>
-
-			<p><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="A open-source (free) #ecommerce plugin for #WordPress that helps you sell anything. Beautifully." data-via="WooThemes" data-size="large" data-hashtags="WooCommerce">Tweet</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
-		</div>
-	</div>
-	<?php
-
-	// Set installed option
-	update_option('woocommerce_installed', 0);
-}
 function woocommerce_admin_notices_styles() {
 
-	// Installed notices
-	if ( get_option('woocommerce_installed') == 1 ) {
-
+	if ( get_option( 'woocommerce_needs_update' ) == 1 || get_option( 'woocommerce_installed' ) == 1 ) {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
-
-		if ( get_option('skip_install_woocommerce_pages') != 1 && woocommerce_get_page_id('shop') < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
-			add_action( 'admin_notices', 'woocommerce_admin_install_notice' );
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
-			add_action( 'admin_notices', 'woocommerce_admin_installed_notice' );
-		}
-
+		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
+		
 }
 
 add_action( 'admin_print_styles', 'woocommerce_admin_notices_styles' );
+
+
+/**
+ * woocommerce_admin_install_notices function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_admin_install_notices() {
+	global $woocommerce;
+	
+	if ( get_option( 'woocommerce_needs_update' ) == 1 ) {
+		
+		if ( ! isset( $_GET['do_db_update'] ) ) {
+		
+			include( 'includes/notice-update.php' );
+			
+		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
+			
+			// Do updates
+			$current_db_version = get_option( 'woocommerce_db_version' );
+			
+			if ( version_compare( $current_db_version, '1.4', '<' ) ) {
+				include( 'includes/updates/woocommerce-update-1.4.php' );
+				update_option( 'woocommerce_db_version', '1.4' );
+			}
+			
+			if ( version_compare( $current_db_version, '1.5', '<' ) ) {
+				include( 'includes/updates/woocommerce-update-1.5.php' );
+				update_option( 'woocommerce_db_version', '1.5' );
+			}
+			
+			if ( version_compare( $current_db_version, '1.7', '<' ) ) {
+				include( 'includes/updates/woocommerce-update-1.7.php' );
+				update_option( 'woocommerce_db_version', '1.7' );
+			}
+	
+			// Show notice
+			include( 'includes/notice-updated.php' );
+			
+			update_option( 'woocommerce_installed', 0 );
+			update_option( 'woocommerce_needs_update', 0 );
+			update_option( 'woocommerce_db_version', $woocommerce->version );
+		}
+		
+	} elseif ( get_option('woocommerce_installed') == 1 ) {
+		
+		if ( get_option( 'skip_install_woocommerce_pages' ) != 1 && woocommerce_get_page_id( 'shop' ) < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
+		
+			include( 'includes/notice-install.php' );
+			
+		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
+		
+			include( 'includes/notice-installed.php' );
+			
+			update_option( 'woocommerce_installed', 0 );
+			
+		}
+		
+	}
+}
 
 
 /**

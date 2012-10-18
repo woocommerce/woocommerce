@@ -83,7 +83,12 @@ if ( ( ! is_home() && ! is_front_page() && ! ( is_post_type_archive() && get_opt
 
 	} elseif ( is_post_type_archive('product') && get_option('page_on_front') !== woocommerce_get_page_id('shop') ) {
 
-		$_name = woocommerce_get_page_id( 'shop' ) ? get_the_title( woocommerce_get_page_id( 'shop' ) ) : ucwords( get_option( 'woocommerce_shop_slug' ) );
+		$_name = woocommerce_get_page_id( 'shop' ) ? get_the_title( woocommerce_get_page_id( 'shop' ) ) : '';
+		
+		if ( ! $_name ) {
+			$product_post_type = get_post_type_object( 'product' );
+			$_name = $product_post_type->labels->singular_name;
+		}
 
 		if ( is_search() ) {
 

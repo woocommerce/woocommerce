@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 
+* Tweak - Improved installation + upgrade process upon activation.
 * Tweak - Protect logs and uploads with a blank index.html
 * Tweak - Append unique hash to log file names
 * Tweak - get_order_number support for PayPal (thanks Justin)

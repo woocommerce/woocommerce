@@ -81,7 +81,11 @@ function woocommerce_status() {
 			<tbody>
                 <tr>
                     <td><?php _e('WooCommerce version','woocommerce')?></td>
-                    <td><?php echo $woocommerce->version; ?></td>
+                    <td><?php echo esc_html( $woocommerce->version ); ?></td>
+                </tr>
+                <tr>
+                    <td><?php _e('WooCommerce DB version','woocommerce')?></td>
+                    <td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
                 </tr>
                 <tr>
                     <td><?php _e('WordPress version','woocommerce')?></td>
