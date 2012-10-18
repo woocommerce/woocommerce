@@ -806,7 +806,7 @@ function woocommerce_download_product() {
 
 		$product_id 	= (int) urldecode($_GET['download_file']);
 		$order_key 		= urldecode( $_GET['order'] );
-		$email 			= str_replace( ' ', '+', urldecode( $_GET['email'] ) );
+		$email 			= sanitize_email( str_replace( ' ', '+', urldecode( $_GET['email'] ) ) );
 		$download_id 	= isset( $_GET['key'] ) ? urldecode( $_GET['key'] ) : '';  // backwards compatibility for existing download URLs
 		$_product	 	= new WC_Product( $product_id );
 

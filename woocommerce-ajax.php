@@ -1323,13 +1323,13 @@ function woocommerce_product_ordering() {
 	$nextid = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
 	$new_pos = array(); // store new positions for ajax
 
-	$siblings = $wpdb->get_results("
-		SELECT ID, menu_order FROM {$wpdb->posts} AS posts
+	$siblings = $wpdb->get_results( $wpdb->prepare("
+		SELECT ID, menu_order FROM %s AS posts
 		WHERE 	posts.post_type 	= 'product'
 		AND 	posts.post_status 	IN ( 'publish', 'pending', 'draft', 'future', 'private' )
-		AND 	posts.ID			NOT IN ( {$post->ID} )
+		AND 	posts.ID			NOT IN (%s)
 		ORDER BY posts.menu_order ASC, posts.ID DESC
-	");
+	"), $wpdb->posts, $post->ID );
 
 	$menu_order = 0;
 

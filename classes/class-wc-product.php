@@ -1068,22 +1068,22 @@ class WC_Product {
 
 			global $wpdb;
 
-			$count = $wpdb->get_var("
+			$count = $wpdb->get_var( $wpdb->prepare("
 				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
 				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 				WHERE meta_key = 'rating'
-				AND comment_post_ID = $this->id
+				AND comment_post_ID = %d
 				AND comment_approved = '1'
 				AND meta_value > 0
-			");
+			"), $this->id );
 
-			$ratings = $wpdb->get_var("
+			$ratings = $wpdb->get_var( $wpdb->prepare("
 				SELECT SUM(meta_value) FROM $wpdb->commentmeta
 				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 				WHERE meta_key = 'rating'
-				AND comment_post_ID = $this->id
+				AND comment_post_ID = %d
 				AND comment_approved = '1'
-			");
+			"), $this->id );
 
 			if ( $count>0 ) :
 				$average_rating = number_format($ratings / $count, 2);
@@ -1622,7 +1622,7 @@ class WC_Product {
 	 */
 	function grouped_product_sync() {
 		global $wpdb, $woocommerce;
-		$post_parent = $wpdb->get_var("SELECT post_parent FROM $wpdb->posts WHERE ID = $this->id;");
+		$post_parent = $wpdb->get_var( $wpdb->prepare( "SELECT post_parent FROM $wpdb->posts WHERE ID = %d;"), $this->id );
 
 		if (!$post_parent) return;
 
