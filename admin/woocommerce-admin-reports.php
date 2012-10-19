@@ -284,7 +284,6 @@ function woocommerce_datepicker_js() {
  * @return void
  */
 function woocommerce_sales_overview() {
-
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
 	$total_sales = $total_orders = $order_items = $discount_total = $shipping_total = 0;
@@ -336,30 +335,18 @@ function woocommerce_sales_overview() {
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	" ) );
-
-	$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
-		SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
-
-		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+	
+	$order_items = absint( $wpdb->get_var( $wpdb->prepare( "
+		SELECT SUM( order_items.order_item_qty ) 
+		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-		WHERE 	meta.meta_key 		= '_order_items'
-		AND 	posts.post_type 	= 'shop_order'
+		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	" ) );
-
-	if ( $order_items_serialized ) {
-		foreach ( $order_items_serialized as $order_items_array ) {
-			$order_items_array = maybe_unserialize( $order_items_array );
-			if ( is_array( $order_items_array ) ) 
-				foreach ( $order_items_array as $item ) 
-					$order_items += absint( $item['qty'] );
-		}
-	}
+	" ) ) );
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -755,41 +742,28 @@ function woocommerce_monthly_sales() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
 		$order_counts[ $time ] 	= (int) $months_orders->total_orders;
-		$order_amounts[ $time ] 	= (float) $months_orders->total_sales;
+		$order_amounts[ $time ] = (float) $months_orders->total_sales;
 
 		$total_orders			+= (int) $months_orders->total_orders;
 		$total_sales			+= (float) $months_orders->total_sales;
 
 		// Count order items
-		$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
-			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		$order_items = absint( $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_items.order_item_qty ) 
+			FROM {$wpdb->prefix}woocommerce_order_items as order_items
+			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-			WHERE 	meta.meta_key 		= '_order_items'
-			AND 	posts.post_type 	= 'shop_order'
+			WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		" ) );
-
-		if ($order_items_serialized) {
-			foreach ( $order_items_serialized as $order_items_array ) {
-				$order_items_array = maybe_unserialize($order_items_array);
-				if ( is_array( $order_items_array ) ) 
-					foreach ( $order_items_array as $item ) 
-						$order_items += (int) $item['qty'];
-			}
-		}
-
+			AND		'{$month}' 			= date_format( posts.post_date, '%%Y%%m' )
+		" ) ) );
 	}
 	?>
 	<form method="post" action="">
