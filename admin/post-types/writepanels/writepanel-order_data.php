@@ -345,102 +345,10 @@ function woocommerce_order_items_meta_box( $post ) {
 						$_product = new WC_Product_Variation( $item['variation_id'] );
 					else
 						$_product = new WC_Product( $item['product_id'] );
-					?>
-					<tr class="item" data-item_id="<?php echo $item['item_id']; ?>" rel="<?php echo absint( $item['item_id'] ); ?>">
-						<td class="thumb">
-							<a href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>" class="tips" data-tip="<?php
-								echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
-								echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> '; 
-								
-								if ( $item['variation_id'] ) 
-									echo $item['variation_id']; 
-								else 
-									echo '-';
-								
-								echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> '; 
-								
-								if ( $_product->sku ) 
-									echo esc_html( $_product->sku ); 
-								else 
-									echo '-';
-								
-							?>"><?php echo $_product->get_image(); ?></a>
-						</td>
-						<td class="sku" width="1%">
-							<?php if ($_product->sku) echo esc_html( $_product->sku ); else echo '-'; ?>
-							<input type="hidden" class="item_id" name="item_id[]" value="<?php echo esc_attr( $item['item_id'] ); ?>" />
-						</td>
-						<td class="name">
-
-							<div class="row-actions">
-								<span class="trash"><a class="remove_row" href="#"><?php _e( 'Delete item', 'woocommerce' ); ?></a> | </span>
-								<span class="view"><a href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>"><?php _e( 'View product', 'woocommerce' ); ?></a>
-							</div>
-
-							<?php echo esc_html( $item['name'] ); ?>
-							
-							<?php
-								if ( isset( $_product->variation_data ) ) 
-									echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true );
-							?>
-							<table class="meta" cellspacing="0">
-								<tfoot>
-									<tr>
-										<td colspan="4"><button class="add_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
-									</tr>
-								</tfoot>
-								<tbody class="meta_items">
-								<?php
-									$item_meta = $order->get_item_meta( $item['item_id'] );
-									
-									foreach ( $item_meta as $meta ) {
-										echo '<tr data-meta_id="' . absint( $meta->meta_id ) . '"><td><input type="text" name="meta_key[' . absint( $meta->meta_id ) . ']" value="' . esc_attr( $meta->meta_key ) . '" /></td><td><input type="text" name="meta_value[' . absint( $meta->meta_id ) . ']" value="' . esc_attr( $meta->meta_value ) . '" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';
-									}
-								?>
-								</tbody>
-							</table>
-						</td>
-
-						<?php do_action( 'woocommerce_admin_order_item_values', $_product, $item, absint( $item['item_id'] ) ); ?>
-
-						<td class="tax_class" width="1%">
-							<select class="tax_class" name="item_tax_class[<?php echo absint( $item['item_id'] ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
-								<?php
-								$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
-								
-								$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-								
-								$classes_options = array();
-								$classes_options[''] = __( 'Standard', 'woocommerce' );
-								
-								if ( $tax_classes ) 
-									foreach ( $tax_classes as $class )
-										$classes_options[ sanitize_title( $class ) ] = $class;
-								
-								foreach ( $classes_options as $value => $name ) 
-									echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $item_value, false ) . '>'. esc_html( $name ) . '</option>';
-								?>
-							</select>
-						</td>
-
-						<td class="quantity" width="1%">
-							<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo absint( $item['item_id'] ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
-						</td>
-
-						<td class="line_subtotal" width="1%">
-							<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo absint( $item['item_id'] ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
-
-							<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo absint( $item['item_id'] ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></label>
-						</td>
-
-						<td class="line_total" width="1%">
-							<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item['item_id'] ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
-
-							<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo absint( $item['item_id'] ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
-						</td>
-
-					</tr>
-					<?php 
+					
+					$item_meta = $order->get_item_meta( $item['item_id'] );
+					
+					include( 'order-item-html.php' );
 				} 	
 				?>
 			</tbody>
@@ -448,9 +356,9 @@ function woocommerce_order_items_meta_box( $post ) {
 	</div>
 
 	<p class="buttons">
-		<select id="add_item_id" name="add_item_id[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
+		<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
 
-		<button type="button" class="button add_shop_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
+		<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc line tax &uarr;', 'woocommerce' ); ?></button>

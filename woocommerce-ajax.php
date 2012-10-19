@@ -825,113 +825,86 @@ function woocommerce_add_order_item() {
 
 	check_ajax_referer( 'order-item', 'security' );
 
-	$index = trim(sanitize_text_field($_POST['index']));
-	$item_to_add = trim(sanitize_text_field($_POST['item_to_add']));
-
-	$post = '';
+	$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
+	$order_id = absint( $_POST['order_id'] );
 
 	// Find the item
-	if (is_numeric($item_to_add)) :
-		$post = get_post( $item_to_add );
-	endif;
-
-	if (!$post || ($post->post_type!=='product' && $post->post_type!=='product_variation')) :
-		$post_id = $wpdb->get_var($wpdb->prepare("
-			SELECT post_id
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-			WHERE $wpdb->postmeta.meta_key = '_sku'
-			AND $wpdb->posts.post_status = 'publish'
-			AND $wpdb->posts.post_type = 'shop_product'
-			AND $wpdb->postmeta.meta_value = %s
-			LIMIT 1
-		"), $item_to_add );
-		$post = get_post( $post_id );
-	endif;
-
-	if (!$post || ($post->post_type!=='product' && $post->post_type!=='product_variation')) :
+	if ( ! is_numeric( $item_to_add ) )
 		die();
-	endif;
+		
+	$post = get_post( $item_to_add );
 
-	if ($post->post_type=="product") :
-		$_product = new WC_Product( $post->ID );
-	else :
+	if ( ! $post || ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' ) )
+		die();
+	
+	if ( $post->post_type != "product" )
 		$_product = new WC_Product_Variation( $post->ID );
-	endif;
-	?>
-	<tr class="item new_row" rel="<?php echo esc_attr( $index ); ?>">
-		<td class="thumb">
-			<a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>" class="tips" data-tip="<?php
-				echo '<strong>'.__( 'Product ID:', 'woocommerce' ).'</strong> '. $_product->id;
-				echo '<br/><strong>'.__( 'Variation ID:', 'woocommerce' ).'</strong> '; if (isset($_product->variation_id) && $_product->variation_id) echo $_product->variation_id; else echo '-';
-				echo '<br/><strong>'.__( 'Product SKU:', 'woocommerce' ).'</strong> '; if ($_product->sku) echo $_product->sku; else echo '-';
-			?>"><?php echo $_product->get_image(); ?></a>
-		</td>
-		<td class="sku" width="1%">
-			<?php if ($_product->sku) echo $_product->sku; else echo '-'; ?>
-			<input type="hidden" class="item_id" name="item_id[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $_product->id ); ?>" />
-			<input type="hidden" name="item_name[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $_product->get_title() ); ?>" />
-			<input type="hidden" name="item_variation[<?php echo esc_attr( $index ); ?>]" value="<?php if (isset($_product->variation_id)) echo $_product->variation_id; ?>" />
-		</td>
-		<td class="name">
-
-			<div class="row-actions">
-				<span class="trash"><a class="remove_row" href="#"><?php _e( 'Delete item', 'woocommerce' ); ?></a> | </span>
-				<span class="view"><a href="<?php echo esc_url( admin_url('post.php?post='. $_product->id .'&action=edit') ); ?>"><?php _e( 'View product', 'woocommerce' ); ?></a>
-			</div>
-
-			<?php echo $_product->get_title(); ?>
-			<?php if (isset($_product->variation_data)) echo '<br/>' . woocommerce_get_formatted_variation( $_product->variation_data, true ); ?>
-			<table class="meta" cellspacing="0">
-				<tfoot>
-					<tr>
-						<td colspan="3"><button class="add_meta button"><?php _e( 'Add&nbsp;meta', 'woocommerce' ); ?></button></td>
-					</tr>
-				</tfoot>
-				<tbody class="meta_items"></tbody>
-			</table>
-		</td>
-
-		<?php do_action('woocommerce_admin_order_item_values', $_product, '', $index); ?>
-
-		<td class="tax_class" width="1%">
-			<select class="tax_class" name="item_tax_class[<?php echo esc_attr( $index ); ?>]">
-				<?php
-				$tax_classes = array_filter(array_map('trim', explode("\n", get_option('woocommerce_tax_classes'))));
-				$classes_options = array();
-				$classes_options[''] = __( 'Standard', 'woocommerce' );
-				if ($tax_classes) foreach ($tax_classes as $class) :
-					$classes_options[sanitize_title($class)] = $class;
-				endforeach;
-				foreach ($classes_options as $value => $name) echo '<option value="'. $value .'" '.selected( $value, $_product->get_tax_status(), false ).'>'. esc_attr( $name ) .'</option>';
-				?>
-			</select>
-		</td>
-
-		<td class="quantity" width="1%">
-			<input type="number" step="any" min="0" autocomplete="off" name="item_quantity[<?php echo esc_attr( $index ); ?>]" placeholder="0" value="1" size="2" class="quantity" />
-		</td>
-
-		<td class="line_subtotal" width="1%">
-			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_subtotal" /></label>
-
-			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" class="line_subtotal_tax" /></label>
-		</td>
-
-		<td class="line_total" width="1%">
-			<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" value="<?php echo esc_attr( number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' ) ); ?>" class="line_total" /></label>
-
-			<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo esc_attr( $index ); ?>]" placeholder="0.00" class="line_tax" /></label>
-		</td>
-
-	</tr>
-	<?php
+	else
+		$_product = new WC_Product( $post->ID );
+		
+	// Set values
+	$item['product_id'] 		= $_product->id;
+	$item['variation_id'] 		= isset( $_product->variation_id ) ? $_product->variation_id : '';
+	$item['name'] 				= $_product->get_title();
+	$item['tax_class']			= $_product->get_tax_class();
+	$item['qty'] 				= 1;
+	$item['line_subtotal'] 		= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+	$item['line_subtotal_tax'] 	= '';
+	$item['line_total'] 		= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );	
+	$item['line_tax'] 			= '';
+	
+	// Insert line item	
+	$wpdb->insert( 
+		$wpdb->prefix . "woocommerce_order_items",
+		array( 
+			'item_name' 		=> $item['name'],
+			'item_qty' 			=> $item['qty'],
+			'item_tax_class' 	=> $item['tax_class'],
+			'order_id'			=> $order_id,
+			'product_id'		=> $item['product_id'],
+			'variation_id'		=> $item['variation_id'],
+			'line_subtotal'		=> $item['line_subtotal'],
+			'line_subtotal_tax'	=> $item['line_subtotal_tax'],
+			'line_total'		=> $item['line_total'],
+			'line_tax'			=> $item['line_tax']
+		), 
+		array(
+			'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
+		)
+	);
+		
+	$class = 'new_row';
+	$item['item_id'] = absint( $wpdb->insert_id );		
+		
+	include( 'admin/post-types/writepanels/order-item-html.php' );
 
 	// Quit out
 	die();
 }
 
 add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
+
+
+/**
+ * woocommerce_remove_order_item function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_remove_order_item() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$item_id = absint( $_POST['item_id'] );
+	
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE item_id = %d", $item_id ) );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE item_id = %d", $item_id ) );
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_remove_order_item' );
 
 
 /**
@@ -963,7 +936,7 @@ function woocommerce_add_order_item_meta() {
 	
 	if ( $meta_id ) {
 		
-		echo '<tr data-meta_id="' . $meta_id . '"><td><input type="text" name="meta_key[' . $meta_id . ']" value="" /></td><td><input type="text" name="meta_value[' . $meta_id . ']" value="" /></td><td width="1%"><button class="remove_meta button">&times;</button></td></tr>';		
+		echo '<tr data-meta_id="' . $meta_id . '"><td><input type="text" name="meta_key[' . $meta_id . ']" value="" /></td><td><input type="text" name="meta_value[' . $meta_id . ']" value="" /></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';		
 		
 	}
 	
