@@ -277,10 +277,10 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
     // Order line items are stored in a table to make them easily queryable for reports
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
-  item_id bigint(20) NOT NULL auto_increment,
-  item_name longtext NOT NULL DEFAULT '',
-  item_qty int(20) NOT NULL DEFAULT 0,
-  item_tax_class varchar(255) NOT NULL DEFAULT '',
+  order_item_id bigint(20) NOT NULL auto_increment,
+  order_item_name longtext NOT NULL DEFAULT '',
+  order_item_qty int(20) NOT NULL DEFAULT 0,
+  order_item_tax_class varchar(255) NOT NULL DEFAULT '',
   order_id bigint(20) NOT NULL,
   product_id varchar(255) NOT NULL DEFAULT '',
   variation_id varchar(255) NOT NULL DEFAULT '',
@@ -288,7 +288,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
   line_subtotal_tax varchar(255) NOT NULL DEFAULT '',
   line_total varchar(255) NOT NULL DEFAULT '',
   line_tax varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY  (item_id)
+  PRIMARY KEY  (order_item_id)
 ) $collate;
 ";
     dbDelta( $sql );
@@ -297,7 +297,7 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
     $sql = "
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_itemmeta (
   meta_id bigint(20) NOT NULL auto_increment,
-  item_id bigint(20) NOT NULL,
+  order_item_id bigint(20) NOT NULL,
   meta_key varchar(255) NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id)

@@ -346,7 +346,7 @@ function woocommerce_order_items_meta_box( $post ) {
 					else
 						$_product = new WC_Product( $item['product_id'] );
 					
-					$item_meta = $order->get_item_meta( $item['item_id'] );
+					$item_meta = $order->get_item_meta( $item['order_item_id'] );
 					
 					include( 'order-item-html.php' );
 				} 	
@@ -755,31 +755,26 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_order_taxes', $order_taxes );
 
 	// Order items
-	if ( isset( $_POST['item_id'] ) ) {
-		$item_id			= $_POST['item_id'];
-		$item_quantity 		= $_POST['item_quantity'];
+	if ( isset( $_POST['order_item_id'] ) ) {
+		$order_item_id		= $_POST['order_item_id'];
+		$order_item_qty 	= $_POST['order_item_qty'];
 		$line_subtotal		= $_POST['line_subtotal'];
 		$line_subtotal_tax	= $_POST['line_subtotal_tax'];
 		$line_total 		= $_POST['line_total'];
 		$line_tax		 	= $_POST['line_tax'];
-		$item_tax_class		= $_POST['item_tax_class'];
+		$item_tax_class		= $_POST['order_item_tax_class'];
 
-		foreach ( $item_id as $id ) {
-
-			$wpdb->update( 
-				$wpdb->prefix . "woocommerce_order_items", 
-				array( 
-					'item_qty' 			=> absint( $item_quantity[ $id ] ),
-					'item_tax_class' 	=> woocommerce_clean( $item_tax_class[ $id ] ),
-					'line_subtotal' 	=> rtrim( rtrim( number_format( woocommerce_clean( $line_subtotal[ $id ] ), 4, '.', '' ), '0' ), '.' ),
-					'line_subtotal_tax' => rtrim( rtrim( number_format( woocommerce_clean( $line_subtotal_tax[ $id ] ), 4, '.', '' ), '0' ), '.' ),
-					'line_total' 		=> rtrim( rtrim( number_format( woocommerce_clean( $line_total[ $id ] ), 4, '.', '' ), '0' ), '.' ),
-					'line_tax' 			=> rtrim( rtrim( number_format( woocommerce_clean( $line_tax[ $id ] ), 4, '.', '' ), '0' ), '.' ),
-				), 
-				array( 'item_id' => absint( $id ) ), 
-				array( '%d', '%s', '%s', '%s', '%s', '%s' ), 
-				array( '%d' ) 
-			);
+		foreach ( $order_item_id as $item_id ) {
+			
+			woocommerce_update_order_item( array(
+				'order_item_id' 		=> absint( $item_id ),
+				'order_item_qty' 		=> absint( $order_item_qty[ $item_id ] ),
+				'order_item_tax_class' 	=> woocommerce_clean( $item_tax_class[ $item_id ] ),
+				'line_subtotal' 		=> woocommerce_clean( $line_subtotal[ $item_id ] ),
+				'line_subtotal_tax' 	=> woocommerce_clean( $line_subtotal_tax[ $item_id ] ),
+				'line_total' 			=> woocommerce_clean( $line_total[ $item_id ] ),
+				'line_tax' 				=> woocommerce_clean( $line_tax[ $item_id ] )
+			) );
 		}
 	}
 	

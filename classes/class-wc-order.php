@@ -401,13 +401,18 @@ class WC_Order {
 				SELECT 
 					*, 
 					product_id as id,
-					item_name as name,
-					item_qty as qty,
-					item_tax_class as tax_class
+					order_item_name as name,
+					order_item_qty as qty,
+					order_item_tax_class as tax_class
 				FROM " . $wpdb->prefix . "woocommerce_order_items
 				WHERE order_id = %d
-				ORDER BY item_id
+				ORDER BY order_item_id
 			", $this->id ), ARRAY_A );
+			
+			// Populate item_meta
+			foreach ( $this->items as $key => $item ) {
+				$this->items[ $key ]['item_meta'] = $this->get_item_meta( $item['order_item_id'] );
+			}
 		}
 		return $this->items;
 	}
@@ -421,12 +426,12 @@ class WC_Order {
 	 * @param bool $single (default: true)
 	 * @return void
 	 */
-	function get_item_meta( $item_id, $key = '', $single = true ) {
+	function get_item_meta( $order_item_id, $key = '', $single = true ) {
 		global $wpdb, $woocommerce;
 		
 		if ( $key ) {
 			
-			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d ORDER BY meta_id", absint( $item_id ) ) );
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
 			
 			if ( empty( $results ) ) 
 				return false;
@@ -439,7 +444,7 @@ class WC_Order {
 			
 		} else {
 			
-			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE item_id = %d ORDER BY meta_id", absint( $item_id ) ) );
+			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_key", absint( $order_item_id ) ) );
 
 		}
 	}
@@ -1545,41 +1550,9 @@ class WC_Order_Item_Meta {
 	 * @param string $item_meta (default: '')
 	 * @return void
 	 */
-	function __construct( $item_meta = '' ) {
-		$this->meta = array();
-
-		if ( $item_meta ) $this->meta = $item_meta;
+	function __construct( $item_meta = array() ) {
+		$this->meta = $item_meta;
 	}
-
-
-	/**
-	 * new_order_item function.
-	 *
-	 * @access public
-	 * @param array $item
-	 * @return void
-	 */
-	function new_order_item( $item ) {
-		if ( $item )
-			do_action('woocommerce_order_item_meta', $this, $item);
-	}
-
-
-	/**
-	 * Add meta
-	 *
-	 * @access public
-	 * @param string $name
-	 * @param string $value
-	 * @return void
-	 */
-	function add( $name, $value ) {
-		$this->meta[] = array(
-			'meta_name' 	=> $name,
-			'meta_value' 	=> $value
-		);
-	}
-
 
 	/**
 	 * Display meta in a formatted list
@@ -1593,7 +1566,7 @@ class WC_Order_Item_Meta {
 	function display( $flat = false, $return = false, $hideprefix = '_' ) {
 		global $woocommerce;
 
-		if ( $this->meta && is_array( $this->meta ) ) {
+		if ( ! empty( $this->meta ) ) {
 			
 			$output = $flat ? '' : '<dl class="variation">';
 
@@ -1601,30 +1574,22 @@ class WC_Order_Item_Meta {
 
 			foreach ( $this->meta as $meta ) {
 			
-				if ( ! empty( $hideprefix ) && substr( $meta['meta_name'], 0, 1 ) == $hideprefix ) {
-					// Skip
-					continue;
-				} else {
-					$name 	= $meta['meta_name'];
-					$value	= $meta['meta_value'];
-				}
-
-				if ( ! $value ) 
+				if ( ! $meta->meta_value || ( ! empty( $hideprefix ) && substr( $meta->meta_key, 0, 1 ) == $hideprefix ) )  
 					continue;
 
 				// If this is a term slug, get the term's nice name
-	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
-	            	$term = get_term_by('slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
+	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $meta->meta_key ) ) ) ) {
+	            	$term = get_term_by('slug', $meta->meta_value, esc_attr( str_replace( 'attribute_', '', $meta->meta_key ) ) );
 	            	if ( ! is_wp_error( $term ) && $term->name )
-	            		$value = $term->name;
+	            		$meta->meta_value = $term->name;
 	            } else {
-	            	$value = ucfirst($value);
+	            	$meta->meta_value = ucfirst( $meta->meta_value );
 	            }
 
 				if ( $flat )
-					$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) . ': ' . $value );
+					$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta->meta_key ) ) . ': ' . $meta->meta_value );
 				else
-					$meta_list[] = '<dt>' . esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $name ) ) ) . ':</dt><dd>' . esc_attr( $value ) . '</dd>';
+					$meta_list[] = '<dt>' . wp_kses_post( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta->meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( $meta->meta_value ) . '</dd>';
 
 			}
 
@@ -1636,8 +1601,10 @@ class WC_Order_Item_Meta {
 			if ( ! $flat ) 
 				$output .= '</dl>';
 
-			if ( $return ) return $output; else echo $output;
-
+			if ( $return ) 
+				return $output; 
+			else 
+				echo $output;
 		}
 	}
 }
@@ -1663,8 +1630,7 @@ class woocommerce_order extends WC_Order {
  * @package		WooCommerce/Classes
  */
 class order_item_meta extends WC_Order_Item_Meta {
-	public function __construct( $item_meta = '' ) {
-		//_deprecated_function( 'order_item_meta', '1.6.4', 'WC_Order_Item_Meta()' );
+	public function __construct( $item_meta = array() ) {
 		parent::__construct( $item_meta );
 	}
 }

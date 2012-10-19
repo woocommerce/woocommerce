@@ -308,7 +308,7 @@ jQuery( function($){
 
 				var data = {
 					action: 		'woocommerce_calc_line_taxes',
-					item_id:		$row.find('input.item_id').val(),
+					order_item_id:	$row.find('input.order_item_id').val(),
 					line_subtotal:	$row.find('input.line_subtotal').val(),
 					line_total:		$row.find('input.line_total').val(),
 					tax_class:		$row.find('select.tax_class').val(),
@@ -476,7 +476,7 @@ jQuery( function($){
 			var $item = $(this).closest('tr.item');
 			
 			var data = {
-				item_id: 			$item.attr( 'data-item_id' ),
+				order_item_id: 		$item.attr( 'data-order_item_id' ),
 				action: 			'woocommerce_remove_order_item',
 				security: 			woocommerce_writepanel_params.order_item_nonce
 			};
@@ -502,7 +502,7 @@ jQuery( function($){
 		var $item = $button.closest('tr.item');
 				
 		var data = {
-			item_id: 	$item.attr( 'data-item_id' ),
+			order_item_id: 	$item.attr( 'data-order_item_id' ),
 			action: 	'woocommerce_add_order_item_meta',
 			security: 	woocommerce_writepanel_params.order_item_nonce
 		};

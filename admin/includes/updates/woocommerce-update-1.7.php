@@ -102,16 +102,16 @@ foreach ( $order_item_rows as $order_item_row ) {
 		$wpdb->insert( 
 			$wpdb->prefix . "woocommerce_order_items",
 			array( 
-				'item_name' 		=> $order_item['name'],
-				'item_qty' 			=> $order_item['qty'],
-				'item_tax_class' 	=> $order_item['tax_class'],
-				'order_id' 			=> $order_item_row->post_id,
-				'product_id' 		=> $order_item['id'],
-				'variation_id' 		=> $order_item['variation_id'],
-				'line_subtotal' 	=> $order_item['line_subtotal'],
-				'line_subtotal_tax' => $order_item['line_subtotal_tax'],
-				'line_total' 		=> $order_item['line_total'],
-				'line_tax' 			=> $order_item['line_tax']
+				'order_item_name' 		=> $order_item['name'],
+				'order_item_qty' 		=> $order_item['qty'],
+				'order_item_tax_class' 	=> $order_item['tax_class'],
+				'order_id' 				=> $order_item_row->post_id,
+				'product_id' 			=> $order_item['id'],
+				'variation_id' 			=> $order_item['variation_id'],
+				'line_subtotal' 		=> $order_item['line_subtotal'],
+				'line_subtotal_tax' 	=> $order_item['line_subtotal_tax'],
+				'line_total' 			=> $order_item['line_total'],
+				'line_tax' 				=> $order_item['line_tax']
 			), 
 			array(
 				'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'

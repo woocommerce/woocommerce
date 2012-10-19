@@ -1260,16 +1260,21 @@ function woocommerce_walk_category_dropdown_tree() {
 
 
 /**
- * WooCommerce Term Meta API - set table name
+ * WooCommerce Term/Order item Meta API - set table name
  *
  * @access public
  * @return void
  */
 function woocommerce_taxonomy_metadata_wpdbfix() {
 	global $wpdb;
-	$variable_name = 'woocommerce_termmeta';
-	$wpdb->$variable_name = $wpdb->prefix . $variable_name;
-	$wpdb->tables[] = $variable_name;
+	$termmeta_name = 'woocommerce_termmeta';
+	$itemmeta_name = 'woocommerce_order_itemmeta';
+	
+	$wpdb->woocommerce_termmeta = $wpdb->prefix . $termmeta_name;
+	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
+	
+	$wpdb->tables[] = 'woocommerce_termmeta';
+	$wpdb->tables[] = 'order_itemmeta';
 }
 
 add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
@@ -1701,4 +1706,183 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 			}
 		}
 	}
+}
+
+
+/**
+ * Add a line item to an order.
+ * 
+ * @access public
+ * @param int $order_id
+ * @param array $data
+ * @return mixed
+ */
+function woocommerce_add_order_item( $order_id, $item ) {
+	global $wpdb;
+	
+	$order_id = absint( $order_id );
+	
+	if ( ! $order_id )
+		return false;
+
+	$defaults = array(
+		'order_item_name' 		=> '',
+		'order_item_qty' 			=> 1,
+		'order_item_tax_class' 	=> '',
+		'product_id' 		=> '',
+		'variation_id'		=> '',
+		'line_subtotal'		=> '',
+		'line_subtotal_tax'	=> '',
+		'line_total'		=> '',
+		'line_tax'			=> ''
+	);
+
+	$item = wp_parse_args( $item, $defaults );
+	
+	$wpdb->insert( 
+		$wpdb->prefix . "woocommerce_order_items",
+		array( 
+			'order_item_name' 		=> $item['order_item_name'],
+			'order_item_qty' 		=> $item['order_item_qty'],
+			'order_item_tax_class' 	=> $item['order_item_tax_class'],
+			'order_id'				=> $order_id,
+			'product_id'			=> $item['product_id'],
+			'variation_id'			=> $item['variation_id'],
+			'line_subtotal'			=> woocommerce_format_decimal( $item['line_subtotal'] ),
+			'line_subtotal_tax'		=> woocommerce_format_decimal( $item['line_subtotal_tax'] ),
+			'line_total'			=> woocommerce_format_decimal( $item['line_total'] ),
+			'line_tax'				=> woocommerce_format_decimal( $item['line_tax'] )
+		), 
+		array(
+			'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
+		)
+	);
+	
+	do_action( 'woocommerce_new_order_item', absint( $wpdb->insert_id ) );
+	
+	return absint( $wpdb->insert_id );
+}
+
+/**
+ * woocommerce_update_order_item function.
+ * 
+ * @access public
+ * @param array $item
+ * @return void
+ */
+function woocommerce_update_order_item( $item ) {
+	global $wpdb;
+	
+	$order_item_id = absint( $item['order_item_id'] );
+	
+	if ( ! $order_item_id )
+		return false;
+
+	$defaults = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $order_item_id ), ARRAY_A ); 
+	
+	if ( ! $defaults )
+		return false;
+	
+	$item = wp_parse_args( $item, $defaults );
+	
+	$wpdb->update( 
+		$wpdb->prefix . "woocommerce_order_items", 
+		array( 
+			'order_item_name' 		=> $item['order_item_name'],
+			'order_item_qty' 		=> absint( $item['order_item_qty'] ),
+			'order_item_tax_class' 	=> $item['order_item_tax_class'],
+			'product_id'			=> $item['product_id'],
+			'variation_id'			=> $item['variation_id'],
+			'line_subtotal'			=> woocommerce_format_decimal( $item['line_subtotal'] ),
+			'line_subtotal_tax'		=> woocommerce_format_decimal( $item['line_subtotal_tax'] ),
+			'line_total'			=> woocommerce_format_decimal( $item['line_total'] ),
+			'line_tax'				=> woocommerce_format_decimal( $item['line_tax'] )
+		), 
+		array( 'order_item_id' => absint( $order_item_id ) ), 
+		array( '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s' ), 
+		array( '%d' ) 
+	);
+	
+	do_action( 'woocommerce_save_order_item', absint( $order_item_id ) );
+}
+
+/**
+ * woocommerce_delete_order_item function.
+ * 
+ * @access public
+ * @param int $item_id
+ * @return bool
+ */
+function woocommerce_delete_order_item( $item_id ) {
+	global $wpdb;
+	
+	$item_id = absint( $item_id );
+	
+	if ( ! $item_id )
+		return false;
+	
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
+	
+	do_action( 'woocommerce_delete_order_item', $item_id );
+	
+	return true;	
+}
+
+/**
+ * WooCommerce Order Item Meta API - Update term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param string $prev_value (default: '')
+ * @return bool
+ */
+function woocommerce_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Add term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param bool $unique (default: false)
+ * @return bool
+ */
+function woocommerce_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ){
+	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Delete term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param string $meta_value (default: '')
+ * @param bool $delete_all (default: false)
+ * @return bool
+ */
+function woocommerce_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Get term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $key
+ * @param bool $single (default: true)
+ * @return mixed
+ */
+function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
+	return get_metadata( 'order_item', $item_id, $key, $single );
 }

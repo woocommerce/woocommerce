@@ -820,7 +820,7 @@ add_action('wp_ajax_woocommerce_get_customer_details', 'woocommerce_get_customer
  * @access public
  * @return void
  */
-function woocommerce_add_order_item() {
+function woocommerce_ajax_add_order_item() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'order-item', 'security' );
@@ -841,40 +841,22 @@ function woocommerce_add_order_item() {
 		$_product = new WC_Product_Variation( $post->ID );
 	else
 		$_product = new WC_Product( $post->ID );
-		
-	// Set values
-	$item['product_id'] 		= $_product->id;
-	$item['variation_id'] 		= isset( $_product->variation_id ) ? $_product->variation_id : '';
-	$item['name'] 				= $_product->get_title();
-	$item['tax_class']			= $_product->get_tax_class();
-	$item['qty'] 				= 1;
-	$item['line_subtotal'] 		= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
-	$item['line_subtotal_tax'] 	= '';
-	$item['line_total'] 		= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );	
-	$item['line_tax'] 			= '';
 	
-	// Insert line item	
-	$wpdb->insert( 
-		$wpdb->prefix . "woocommerce_order_items",
-		array( 
-			'item_name' 		=> $item['name'],
-			'item_qty' 			=> $item['qty'],
-			'item_tax_class' 	=> $item['tax_class'],
-			'order_id'			=> $order_id,
-			'product_id'		=> $item['product_id'],
-			'variation_id'		=> $item['variation_id'],
-			'line_subtotal'		=> $item['line_subtotal'],
-			'line_subtotal_tax'	=> $item['line_subtotal_tax'],
-			'line_total'		=> $item['line_total'],
-			'line_tax'			=> $item['line_tax']
-		), 
-		array(
-			'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
-		)
-	);
-		
 	$class = 'new_row';
-	$item['item_id'] = absint( $wpdb->insert_id );		
+	
+	// Set values
+	$item = array();
+	
+	$item['product_id'] 			= $_product->id;
+	$item['variation_id'] 			= isset( $_product->variation_id ) ? $_product->variation_id : '';
+	$item['order_item_name'] 		= $_product->get_title();
+	$item['order_item_tax_class']	= $_product->get_tax_class();
+	$item['order_item_qty'] 		= 1;
+	$item['line_subtotal'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
+	$item['line_subtotal_tax'] 		= '';
+	$item['line_total'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );	
+	$item['line_tax'] 				= '';
+	$item['order_item_id'] 			= woocommerce_add_order_item( $order_id, $item );
 		
 	include( 'admin/post-types/writepanels/order-item-html.php' );
 
@@ -882,58 +864,41 @@ function woocommerce_add_order_item() {
 	die();
 }
 
-add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_add_order_item');
+add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_ajax_add_order_item');
 
 
 /**
- * woocommerce_remove_order_item function.
+ * woocommerce_ajax_remove_order_item function.
  * 
  * @access public
  * @return void
  */
-function woocommerce_remove_order_item() {
+function woocommerce_ajax_remove_order_item() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'order-item', 'security' );
 	
-	$item_id = absint( $_POST['item_id'] );
-	
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE item_id = %d", $item_id ) );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE item_id = %d", $item_id ) );
+	woocommerce_delete_order_item( absint( $_POST['order_item_id'] ) );
 	
 	die();
 }
 
-add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_remove_order_item' );
+add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_ajax_remove_order_item' );
 
 
 /**
- * woocommerce_add_order_item_meta function.
+ * woocommerce_ajax_add_order_item_meta function.
  * 
  * @access public
  * @return void
  */
-function woocommerce_add_order_item_meta() {
+function woocommerce_ajax_add_order_item_meta() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'order-item', 'security' );
 	
-	$item_id = absint( $_POST['item_id'] );
-		
-	$wpdb->insert( 
-		$wpdb->prefix . "woocommerce_order_itemmeta",
-		array( 
-			'meta_key' 			=> '',
-			'meta_value' 		=> '',
-			'item_id' 			=> $item_id,
-		), 
-		array(
-			'%s', '%s', '%d'
-		)
-	);
-		
-	$meta_id = absint( $wpdb->insert_id );
-	
+	$meta_id = woocommerce_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );	
+			
 	if ( $meta_id ) {
 		
 		echo '<tr data-meta_id="' . $meta_id . '"><td><input type="text" name="meta_key[' . $meta_id . ']" value="" /></td><td><input type="text" name="meta_value[' . $meta_id . ']" value="" /></td><td width="1%"><button class="remove_order_item_meta button">&times;</button></td></tr>';		
@@ -943,16 +908,16 @@ function woocommerce_add_order_item_meta() {
 	die();
 }
 
-add_action( 'wp_ajax_woocommerce_add_order_item_meta', 'woocommerce_add_order_item_meta' );
+add_action( 'wp_ajax_woocommerce_add_order_item_meta', 'woocommerce_ajax_add_order_item_meta' );
 
 
 /**
- * woocommerce_remove_order_item_meta function.
+ * woocommerce_ajax_remove_order_item_meta function.
  * 
  * @access public
  * @return void
  */
-function woocommerce_remove_order_item_meta() {
+function woocommerce_ajax_remove_order_item_meta() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'order-item', 'security' );
@@ -964,7 +929,7 @@ function woocommerce_remove_order_item_meta() {
 	die();
 }
 
-add_action( 'wp_ajax_woocommerce_remove_order_item_meta', 'woocommerce_remove_order_item_meta' );
+add_action( 'wp_ajax_woocommerce_remove_order_item_meta', 'woocommerce_ajax_remove_order_item_meta' );
 
 
 /**
@@ -991,7 +956,7 @@ function woocommerce_calc_line_taxes() {
 	$line_subtotal 	= esc_attr( $_POST['line_subtotal'] );
 	$line_total 	= esc_attr( $_POST['line_total'] );
 
-	$item_id		= esc_attr( $_POST['item_id'] );
+	$item_id		= esc_attr( $_POST['order_item_id'] );
 	$tax_class 		= esc_attr( $_POST['tax_class'] );
 
 	if ( ! $item_id ) return;
