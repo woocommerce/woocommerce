@@ -1455,7 +1455,7 @@ class Woocommerce {
 
 			if ( ! $label ) $label = ucfirst( $name );
 		} else {
-			$label = $name;
+			$label = ucfirst( $name );
 		}
 
 		return apply_filters( 'woocommerce_attribute_label', $label, $name );
