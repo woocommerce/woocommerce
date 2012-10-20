@@ -1486,18 +1486,30 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	if ( sizeof( $emails ) == 0 )
 		return false;
 
-	$orders = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE ( meta_key = '_billing_email' AND meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) ) OR ( meta_key = '_customer_user' AND meta_value = %s AND meta_value > 0 )", $user_id ) );
-
-	foreach ( $orders as $order_id ) {
-
-		$items = maybe_unserialize( get_post_meta( $order_id, '_order_items', true ) );
-
-		if ( $items )
-			foreach ( $items as $item )
-				if ( $item['id'] == $product_id || $item['variation_id'] == $product_id )
-					return true;
-
-	}
+	return $wpdb->get_var( $wpdb->prepare( "
+		SELECT COUNT( order_items.order_item_id ) 
+		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON postmeta.post_id = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		(
+			order_items.product_id = %s
+			OR
+			order_items.variation_id = %s
+		)
+		AND 	( 
+					(
+						postmeta.meta_key = '_billing_email' 
+						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) 
+					) OR ( 
+						postmeta.meta_key = '_customer_user' 
+						AND postmeta.meta_value = %s AND postmeta.meta_value > 0 
+					)
+				) 
+	", $product_id, $product_id, $user_id ) );
 }
 
 /**
