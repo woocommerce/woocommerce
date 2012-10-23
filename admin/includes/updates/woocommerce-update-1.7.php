@@ -98,31 +98,23 @@ foreach ( $order_item_rows as $order_item_row ) {
 		$order_item['line_subtotal_tax'] 	= isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
 		$order_item['line_subtotal'] 		= isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
 		
-		// Insert line item
-		$wpdb->insert( 
-			$wpdb->prefix . "woocommerce_order_items",
-			array( 
-				'order_item_name' 		=> $order_item['name'],
-				'order_item_qty' 		=> $order_item['qty'],
-				'order_item_tax_class' 	=> $order_item['tax_class'],
-				'order_id' 				=> $order_item_row->post_id,
-				'product_id' 			=> $order_item['id'],
-				'variation_id' 			=> $order_item['variation_id'],
-				'line_subtotal' 		=> $order_item['line_subtotal'],
-				'line_subtotal_tax' 	=> $order_item['line_subtotal_tax'],
-				'line_total' 			=> $order_item['line_total'],
-				'line_tax' 				=> $order_item['line_tax']
-			), 
-			array(
-				'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
-			)
-		);
-		
-		$item_id = absint( $wpdb->insert_id );
-		
-		if ( $item_id > 0 ) {
-		
-			$meta_rows = array();
+		$item_id = woocommerce_add_order_item( $order_item_row->post_id, array(
+	 		'order_item_name' 		=> $order_item['name'],
+	 		'order_item_type' 		=> 'line_item'
+	 	) );
+	 	
+	 	// Add line item meta
+	 	if ( $item_id ) {
+		 	woocommerce_add_order_item_meta( $item_id, '_qty', absint( $order_item['qty'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $order_item['tax_class'] );
+		 	woocommerce_add_order_item_meta( $item_id, '_product_id', $order_item['id'] );
+		 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $order_item['variation_id'] );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $order_item['line_subtotal'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $order_item['line_subtotal_tax'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $order_item['line_total'] ) );
+		 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $order_item['line_tax'] ) );
+		 	
+		 	$meta_rows = array();
 			
 			// Insert meta
 			if ( ! empty( $order_item['item_meta'] ) ) {
@@ -139,7 +131,7 @@ foreach ( $order_item_rows as $order_item_row ) {
 			// Insert meta rows at once
 			if ( sizeof( $meta_rows ) > 0 ) {
 				$wpdb->query( $wpdb->prepare( "
-					INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( item_id, meta_key, meta_value )
+					INSERT INTO {$wpdb->prefix}woocommerce_order_itemmeta ( order_item_id, meta_key, meta_value )
 					VALUES " . implode( ',', $meta_rows ) . ";
 				", $order_item_row->post_id ) );
 			}
@@ -151,7 +143,7 @@ foreach ( $order_item_rows as $order_item_row ) {
 				WHERE meta_key = '_order_items'
 				AND post_id = %d
 			", $order_item_row->post_id ) );
-		}
+	 	}
 		
 		unset( $meta_rows, $item_id, $order_item );
 	}

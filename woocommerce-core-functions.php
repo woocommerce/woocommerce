@@ -921,12 +921,12 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 
 	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 
-		if ($item['id']>0) :
+		if ($item['product_id']>0) :
 			$_product = $order->get_product_from_item( $item );
 
 			if ( $_product->exists() && $_product->is_downloadable() ) :
 
-				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['id'];
+				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
 
 				$file_download_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, $item );
 				foreach ( $file_download_paths as $download_id => $file_path ) {
@@ -1489,6 +1489,7 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	return $wpdb->get_var( $wpdb->prepare( "
 		SELECT COUNT( order_items.order_item_id ) 
 		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
 		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON postmeta.post_id = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
@@ -1496,9 +1497,13 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		(
-			order_items.product_id = %s
-			OR
-			order_items.variation_id = %s
+					(
+						itemmeta.meta_key = '_variation_id' 
+						AND itemmeta.meta_value = %s
+					) OR ( 
+						itemmeta.meta_key = '_product_id' 
+						AND itemmeta.meta_value = %s
+					)
 		)
 		AND 	( 
 					(
@@ -1722,7 +1727,7 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 
 
 /**
- * Add a line item to an order.
+ * Add a item to an order (for example a line item).
  * 
  * @access public
  * @param int $order_id
@@ -1739,14 +1744,7 @@ function woocommerce_add_order_item( $order_id, $item ) {
 
 	$defaults = array(
 		'order_item_name' 		=> '',
-		'order_item_qty' 			=> 1,
-		'order_item_tax_class' 	=> '',
-		'product_id' 		=> '',
-		'variation_id'		=> '',
-		'line_subtotal'		=> '',
-		'line_subtotal_tax'	=> '',
-		'line_total'		=> '',
-		'line_tax'			=> ''
+		'order_item_type' 		=> 'line_item',
 	);
 
 	$item = wp_parse_args( $item, $defaults );
@@ -1755,67 +1753,17 @@ function woocommerce_add_order_item( $order_id, $item ) {
 		$wpdb->prefix . "woocommerce_order_items",
 		array( 
 			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_qty' 		=> $item['order_item_qty'],
-			'order_item_tax_class' 	=> $item['order_item_tax_class'],
-			'order_id'				=> $order_id,
-			'product_id'			=> $item['product_id'],
-			'variation_id'			=> $item['variation_id'],
-			'line_subtotal'			=> woocommerce_format_decimal( $item['line_subtotal'] ),
-			'line_subtotal_tax'		=> woocommerce_format_decimal( $item['line_subtotal_tax'] ),
-			'line_total'			=> woocommerce_format_decimal( $item['line_total'] ),
-			'line_tax'				=> woocommerce_format_decimal( $item['line_tax'] )
+			'order_item_type' 		=> $item['order_item_type'],
+			'order_id'				=> $order_id
 		), 
 		array(
-			'%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s'
+			'%s', '%s', '%d'
 		)
 	);
 	
 	do_action( 'woocommerce_new_order_item', absint( $wpdb->insert_id ) );
 	
 	return absint( $wpdb->insert_id );
-}
-
-/**
- * woocommerce_update_order_item function.
- * 
- * @access public
- * @param array $item
- * @return void
- */
-function woocommerce_update_order_item( $item ) {
-	global $wpdb;
-	
-	$order_item_id = absint( $item['order_item_id'] );
-	
-	if ( ! $order_item_id )
-		return false;
-
-	$defaults = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $order_item_id ), ARRAY_A ); 
-	
-	if ( ! $defaults )
-		return false;
-	
-	$item = wp_parse_args( $item, $defaults );
-	
-	$wpdb->update( 
-		$wpdb->prefix . "woocommerce_order_items", 
-		array( 
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_qty' 		=> absint( $item['order_item_qty'] ),
-			'order_item_tax_class' 	=> $item['order_item_tax_class'],
-			'product_id'			=> $item['product_id'],
-			'variation_id'			=> $item['variation_id'],
-			'line_subtotal'			=> woocommerce_format_decimal( $item['line_subtotal'] ),
-			'line_subtotal_tax'		=> woocommerce_format_decimal( $item['line_subtotal_tax'] ),
-			'line_total'			=> woocommerce_format_decimal( $item['line_total'] ),
-			'line_tax'				=> woocommerce_format_decimal( $item['line_tax'] )
-		), 
-		array( 'order_item_id' => absint( $order_item_id ) ), 
-		array( '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s' ), 
-		array( '%d' ) 
-	);
-	
-	do_action( 'woocommerce_save_order_item', absint( $order_item_id ) );
 }
 
 /**

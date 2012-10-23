@@ -339,14 +339,14 @@ function woocommerce_order_items_meta_box( $post ) {
 			</thead>
 			<tbody id="order_items_list">
 
-				<?php if ( ! empty( $order_items ) ) foreach ( $order_items as $item ) {
+				<?php if ( ! empty( $order_items ) ) foreach ( $order_items as $item_id => $item ) {
 
 					if ( ! empty( $item['variation_id'] ) )
 						$_product = new WC_Product_Variation( $item['variation_id'] );
 					else
 						$_product = new WC_Product( $item['product_id'] );
 					
-					$item_meta = $order->get_item_meta( $item['order_item_id'] );
+					$item_meta = $order->get_item_meta( $item_id );
 					
 					include( 'order-item-html.php' );
 				} 	
@@ -766,15 +766,14 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 		foreach ( $order_item_id as $item_id ) {
 			
-			woocommerce_update_order_item( array(
-				'order_item_id' 		=> absint( $item_id ),
-				'order_item_qty' 		=> absint( $order_item_qty[ $item_id ] ),
-				'order_item_tax_class' 	=> woocommerce_clean( $item_tax_class[ $item_id ] ),
-				'line_subtotal' 		=> woocommerce_clean( $line_subtotal[ $item_id ] ),
-				'line_subtotal_tax' 	=> woocommerce_clean( $line_subtotal_tax[ $item_id ] ),
-				'line_total' 			=> woocommerce_clean( $line_total[ $item_id ] ),
-				'line_tax' 				=> woocommerce_clean( $line_tax[ $item_id ] )
-			) );
+			$item_id = absint( $item_id );
+
+		 	woocommerce_update_order_item_meta( $item_id, '_qty', absint( $order_item_qty[ $item_id ] ) );
+		 	woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
+		 	woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
+		 	woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
+		 	woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
+		 	woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
 		}
 	}
 	

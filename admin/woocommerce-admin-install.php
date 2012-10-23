@@ -279,15 +279,8 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
   order_item_id bigint(20) NOT NULL auto_increment,
   order_item_name longtext NOT NULL DEFAULT '',
-  order_item_qty int(20) NOT NULL DEFAULT 0,
-  order_item_tax_class varchar(255) NOT NULL DEFAULT '',
-  order_id bigint(20) NOT NULL,
-  product_id varchar(255) NOT NULL DEFAULT '',
-  variation_id varchar(255) NOT NULL DEFAULT '',
-  line_subtotal varchar(255) NOT NULL DEFAULT '',
-  line_subtotal_tax varchar(255) NOT NULL DEFAULT '',
-  line_total varchar(255) NOT NULL DEFAULT '',
-  line_tax varchar(255) NOT NULL DEFAULT '',
+  order_item_type varchar(200) NOT NULL DEFAULT '',
+  order_id bigint(20) NOT NULL, 
   PRIMARY KEY  (order_item_id)
 ) $collate;
 ";

@@ -397,24 +397,53 @@ class WC_Order {
 		global $wpdb, $woocommerce;
 		
 		if ( ! $this->items ) {
-			$this->items = $wpdb->get_results( $wpdb->prepare( "
-				SELECT 
-					*, 
-					product_id as id,
-					order_item_name as name,
-					order_item_qty as qty,
-					order_item_tax_class as tax_class
-				FROM " . $wpdb->prefix . "woocommerce_order_items
-				WHERE order_id = %d
-				ORDER BY order_item_id
-			", $this->id ), ARRAY_A );
+			$line_items = $wpdb->get_results( $wpdb->prepare( "
+				SELECT 		order_item_id, order_item_name
+				FROM 		{$wpdb->prefix}woocommerce_order_items
+				WHERE 		order_id = %d
+				AND 		order_item_type = 'line_item'
+				ORDER BY 	order_item_id
+			", $this->id ) );
 			
-			// Populate item_meta
-			foreach ( $this->items as $key => $item ) {
-				$this->items[ $key ]['item_meta'] = $this->get_item_meta( $item['order_item_id'] );
+			$this->items = array();
+			
+			foreach ( $line_items as $item ) {
+				
+				$item_meta = $this->get_item_meta( $item->order_item_id );
+			
+				// Place line item into array to return
+				$this->items[ $item->order_item_id ] = array(
+					'name'					=> $item->order_item_name,
+					'qty'					=> $item_meta['_qty'][0],
+					'tax_class'				=> $item_meta['_tax_class'][0],
+					'product_id'			=> $item_meta['_product_id'][0],
+					'variation_id'			=> $item_meta['_variation_id'][0],
+					'line_subtotal'			=> $item_meta['_line_subtotal'][0],
+					'line_subtotal_tax'		=> $item_meta['_line_subtotal_tax'][0],
+					'line_total'			=> $item_meta['_line_total'][0],
+					'line_tax'				=> $item_meta['_line_tax'][0],
+					'item_meta'				=> $item_meta,
+					
+					// Backwards compat
+					'id'					=> $item_meta['_product_id'][0],
+				);
 			}
 		}
 		return $this->items;
+	}
+
+	/**
+	 * has_meta function for order items.
+	 * 
+	 * @access public
+	 * @return array of meta data
+	 */
+	function has_meta( $order_item_id ) {
+		global $wpdb;
+		
+		return $wpdb->get_results( $wpdb->prepare("SELECT meta_key, meta_value, meta_id, order_item_id
+			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
+			ORDER BY meta_key,meta_id", absint( $order_item_id ) ), ARRAY_A );
 	}
 	
 	/**
@@ -423,30 +452,11 @@ class WC_Order {
 	 * @access public
 	 * @param mixed $item_id
 	 * @param string $key (default: '')
-	 * @param bool $single (default: true)
+	 * @param bool $single (default: false)
 	 * @return void
 	 */
-	function get_item_meta( $order_item_id, $key = '', $single = true ) {
-		global $wpdb, $woocommerce;
-		
-		if ( $key ) {
-			
-			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
-			
-			if ( empty( $results ) ) 
-				return false;
-			
-			if ( $single ) {
-				return $results[0];
-			} else {
-				return $results;
-			}
-			
-		} else {
-			
-			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $wpdb->prefix . "woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_key", absint( $order_item_id ) ) );
-
-		}
+	function get_item_meta( $order_item_id, $key = '', $single = false ) {
+		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
 	/**
@@ -873,7 +883,7 @@ class WC_Order {
 		if (isset($item['variation_id']) && $item['variation_id']>0) :
 			$_product = new WC_Product_Variation( $item['variation_id'] );
 		else :
-			$_product = new WC_Product( $item['id'] );
+			$_product = new WC_Product( $item['product_id'] );
 		endif;
 
 		return $_product;
@@ -1294,7 +1304,7 @@ class WC_Order {
 			
 				foreach( $this->get_items() as $item ) {
 				
-					if ( $item['id'] > 0 ) {
+					if ( $item['product_id'] > 0 ) {
 
 						$_product = $this->get_product_from_item( $item );
 
@@ -1344,11 +1354,11 @@ class WC_Order {
 
 		if ( sizeof( $this->get_items() ) > 0 ) {
 			foreach ( $this->get_items() as $item ) {
-				if ( $item['id'] > 0 ) {
-					$sales = (int) get_post_meta( $item['id'], 'total_sales', true );
+				if ( $item['product_id'] > 0 ) {
+					$sales = (int) get_post_meta( $item['product_id'], 'total_sales', true );
 					$sales += (int) $item['qty'];
 					if ( $sales )
-						update_post_meta( $item['id'], 'total_sales', $sales );
+						update_post_meta( $item['product_id'], 'total_sales', $sales );
 				}
 			}
 		}
@@ -1436,7 +1446,7 @@ class WC_Order {
 			// Reduce stock levels and do any other actions with products in the cart
 			foreach ( $this->get_items() as $item ) {
 
-				if ($item['id']>0) {
+				if ($item['product_id']>0) {
 					$_product = $this->get_product_from_item( $item );
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
@@ -1445,7 +1455,7 @@ class WC_Order {
 
 						$new_quantity = $_product->reduce_stock( $item['qty'] );
 
-						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['id'], $old_stock, $new_quantity) );
+						$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $old_stock, $new_quantity) );
 
 						$this->send_stock_notifications( $_product, $new_quantity, $item['qty'] );
 
@@ -1572,24 +1582,27 @@ class WC_Order_Item_Meta {
 
 			$meta_list = array();
 
-			foreach ( $this->meta as $meta ) {
+			foreach ( $this->meta as $meta_key => $meta_value ) {
 			
-				if ( ! $meta->meta_value || ( ! empty( $hideprefix ) && substr( $meta->meta_key, 0, 1 ) == $hideprefix ) )  
+				if ( ! $meta_value || ( ! empty( $hideprefix ) && substr( $meta_key, 0, 1 ) == $hideprefix ) )  
 					continue;
+					
+				// Get first value
+				$meta_value = $meta_value[0];
 
 				// If this is a term slug, get the term's nice name
-	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $meta->meta_key ) ) ) ) {
-	            	$term = get_term_by('slug', $meta->meta_value, esc_attr( str_replace( 'attribute_', '', $meta->meta_key ) ) );
+	            if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $meta_key ) ) ) ) {
+	            	$term = get_term_by('slug', $meta_value, esc_attr( str_replace( 'attribute_', '', $meta_key ) ) );
 	            	if ( ! is_wp_error( $term ) && $term->name )
-	            		$meta->meta_value = $term->name;
+	            		$meta_value = $term->name;
 	            } else {
-	            	$meta->meta_value = ucfirst( $meta->meta_value );
+	            	$meta_value = ucfirst( $meta_value );
 	            }
 
 				if ( $flat )
-					$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta->meta_key ) ) . ': ' . $meta->meta_value );
+					$meta_list[] = esc_attr( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) . ': ' . $meta_value );
 				else
-					$meta_list[] = '<dt>' . wp_kses_post( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta->meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( $meta->meta_value ) . '</dd>';
+					$meta_list[] = '<dt>' . wp_kses_post( $woocommerce->attribute_label( str_replace( 'attribute_', '', $meta_key ) ) ) . ':</dt><dd>' . wp_kses_post( $meta_value ) . '</dd>';
 
 			}
 

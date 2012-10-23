@@ -842,6 +842,7 @@ function woocommerce_ajax_add_order_item() {
 	else
 		$_product = new WC_Product( $post->ID );
 	
+	$order = new WC_Order( $order_id );
 	$class = 'new_row';
 	
 	// Set values
@@ -849,15 +850,32 @@ function woocommerce_ajax_add_order_item() {
 	
 	$item['product_id'] 			= $_product->id;
 	$item['variation_id'] 			= isset( $_product->variation_id ) ? $_product->variation_id : '';
-	$item['order_item_name'] 		= $_product->get_title();
-	$item['order_item_tax_class']	= $_product->get_tax_class();
-	$item['order_item_qty'] 		= 1;
+	$item['name'] 					= $_product->get_title();
+	$item['tax_class']				= $_product->get_tax_class();
+	$item['qty'] 					= 1;
 	$item['line_subtotal'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );
 	$item['line_subtotal_tax'] 		= '';
 	$item['line_total'] 			= number_format( (double) $_product->get_price_excluding_tax(), 2, '.', '' );	
 	$item['line_tax'] 				= '';
-	$item['order_item_id'] 			= woocommerce_add_order_item( $order_id, $item );
-		
+	
+	// Add line item
+   	$item_id = woocommerce_add_order_item( $order_id, array(
+ 		'order_item_name' 		=> $item['name'],
+ 		'order_item_type' 		=> 'line_item'
+ 	) );
+ 	
+ 	// Add line item meta
+ 	if ( $item_id ) {
+	 	woocommerce_add_order_item_meta( $item_id, '_qty', $item['qty'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+ 	}
+	
 	include( 'admin/post-types/writepanels/order-item-html.php' );
 
 	// Quit out
