@@ -1772,7 +1772,7 @@ class Woocommerce {
 			
 			// Sanitize
 			$this->_inline_js = wp_check_invalid_utf8( $this->_inline_js );
-			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", stripslashes( $this->_inline_js ) );
+			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $this->_inline_js );
 			$this->_inline_js = str_replace( "\r", '', $this->_inline_js );
 			
 			// Output
