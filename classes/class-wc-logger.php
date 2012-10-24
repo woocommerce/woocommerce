@@ -34,7 +34,7 @@ class WC_Logger {
 	 */
 	function __destruct() {
 		foreach ( $this->handles as $handle )
-	       fclose( escapeshellarg( $handle ) );
+	       @fclose( escapeshellarg( $handle ) );
 	}
 
 
