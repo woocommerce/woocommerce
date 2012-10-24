@@ -921,12 +921,12 @@ function woocommerce_downloadable_product_permissions( $order_id ) {
 
 	if (sizeof($order->get_items())>0) foreach ($order->get_items() as $item) :
 
-		if ($item['id']>0) :
+		if ($item['product_id']>0) :
 			$_product = $order->get_product_from_item( $item );
 
 			if ( $_product->exists() && $_product->is_downloadable() ) :
 
-				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['id'];
+				$product_id = ($item['variation_id']>0) ? $item['variation_id'] : $item['product_id'];
 
 				$file_download_paths = apply_filters( 'woocommerce_file_download_paths', get_post_meta( $product_id, '_file_paths', true ), $product_id, $order_id, $item );
 				foreach ( $file_download_paths as $download_id => $file_path ) {
@@ -1260,16 +1260,21 @@ function woocommerce_walk_category_dropdown_tree() {
 
 
 /**
- * WooCommerce Term Meta API - set table name
+ * WooCommerce Term/Order item Meta API - set table name
  *
  * @access public
  * @return void
  */
 function woocommerce_taxonomy_metadata_wpdbfix() {
 	global $wpdb;
-	$variable_name = 'woocommerce_termmeta';
-	$wpdb->$variable_name = $wpdb->prefix . $variable_name;
-	$wpdb->tables[] = $variable_name;
+	$termmeta_name = 'woocommerce_termmeta';
+	$itemmeta_name = 'woocommerce_order_itemmeta';
+	
+	$wpdb->woocommerce_termmeta = $wpdb->prefix . $termmeta_name;
+	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
+	
+	$wpdb->tables[] = 'woocommerce_termmeta';
+	$wpdb->tables[] = 'order_itemmeta';
 }
 
 add_action( 'init', 'woocommerce_taxonomy_metadata_wpdbfix', 0 );
@@ -1481,18 +1486,35 @@ function woocommerce_customer_bought_product( $customer_email, $user_id, $produc
 	if ( sizeof( $emails ) == 0 )
 		return false;
 
-	$orders = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE ( meta_key = '_billing_email' AND meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) ) OR ( meta_key = '_customer_user' AND meta_value = %s AND meta_value > 0 )", $user_id ) );
-
-	foreach ( $orders as $order_id ) {
-
-		$items = maybe_unserialize( get_post_meta( $order_id, '_order_items', true ) );
-
-		if ( $items )
-			foreach ( $items as $item )
-				if ( $item['id'] == $product_id || $item['variation_id'] == $product_id )
-					return true;
-
-	}
+	return $wpdb->get_var( $wpdb->prepare( "
+		SELECT COUNT( order_items.order_item_id ) 
+		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
+		LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON postmeta.post_id = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
+		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		(
+					(
+						itemmeta.meta_key = '_variation_id' 
+						AND itemmeta.meta_value = %s
+					) OR ( 
+						itemmeta.meta_key = '_product_id' 
+						AND itemmeta.meta_value = %s
+					)
+		)
+		AND 	( 
+					(
+						postmeta.meta_key = '_billing_email' 
+						AND postmeta.meta_value IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) 
+					) OR ( 
+						postmeta.meta_key = '_customer_user' 
+						AND postmeta.meta_value = %s AND postmeta.meta_value > 0 
+					)
+				) 
+	", $product_id, $product_id, $user_id ) );
 }
 
 /**
@@ -1701,4 +1723,126 @@ function woocommerce_manual_category_count( $terms, $taxonomy ) {
 			}
 		}
 	}
+}
+
+
+/**
+ * Add a item to an order (for example a line item).
+ * 
+ * @access public
+ * @param int $order_id
+ * @param array $data
+ * @return mixed
+ */
+function woocommerce_add_order_item( $order_id, $item ) {
+	global $wpdb;
+	
+	$order_id = absint( $order_id );
+	
+	if ( ! $order_id )
+		return false;
+
+	$defaults = array(
+		'order_item_name' 		=> '',
+		'order_item_type' 		=> 'line_item',
+	);
+
+	$item = wp_parse_args( $item, $defaults );
+	
+	$wpdb->insert( 
+		$wpdb->prefix . "woocommerce_order_items",
+		array( 
+			'order_item_name' 		=> $item['order_item_name'],
+			'order_item_type' 		=> $item['order_item_type'],
+			'order_id'				=> $order_id
+		), 
+		array(
+			'%s', '%s', '%d'
+		)
+	);
+	
+	do_action( 'woocommerce_new_order_item', absint( $wpdb->insert_id ) );
+	
+	return absint( $wpdb->insert_id );
+}
+
+/**
+ * woocommerce_delete_order_item function.
+ * 
+ * @access public
+ * @param int $item_id
+ * @return bool
+ */
+function woocommerce_delete_order_item( $item_id ) {
+	global $wpdb;
+	
+	$item_id = absint( $item_id );
+	
+	if ( ! $item_id )
+		return false;
+	
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
+	
+	do_action( 'woocommerce_delete_order_item', $item_id );
+	
+	return true;	
+}
+
+/**
+ * WooCommerce Order Item Meta API - Update term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param string $prev_value (default: '')
+ * @return bool
+ */
+function woocommerce_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Add term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param mixed $meta_value
+ * @param bool $unique (default: false)
+ * @return bool
+ */
+function woocommerce_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ){
+	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Delete term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $meta_key
+ * @param string $meta_value (default: '')
+ * @param bool $delete_all (default: false)
+ * @return bool
+ */
+function woocommerce_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
+}
+
+
+/**
+ * WooCommerce Order Item Meta API - Get term meta
+ *
+ * @access public
+ * @param mixed $item_id
+ * @param mixed $key
+ * @param bool $single (default: true)
+ * @return mixed
+ */
+function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
+	return get_metadata( 'order_item', $item_id, $key, $single );
 }

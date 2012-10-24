@@ -43,21 +43,21 @@ $order = new WC_Order( $order_id );
 				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
 					$_product = new WC_Product_Variation( $item['variation_id'] );
 				else :
-					$_product = new WC_Product( $item['id'] );
+					$_product = new WC_Product( $item['product_id'] );
 				endif;
 
 				echo '
 					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">
 						<td class="product-name">';
 
-				echo '<a href="'.get_permalink( $item['id'] ).'">' . $item['name'] . '</a>';
+				echo '<a href="'.get_permalink( $item['product_id'] ).'">' . $item['name'] . '</a>';
 
 				$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
 				$item_meta->display();
 
 				if ( $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) :
 
-				$download_file_urls = $order->get_downloadable_file_urls( $item['id'], $item['variation_id'], $item );
+				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
 				foreach ( $download_file_urls as $i => $download_file_url ) :
 					echo '<br/><small><a href="' . $download_file_url . '">' . sprintf( __( 'Download file %s &rarr;', 'woocommerce' ), ( count( $download_file_urls ) > 1 ? $i + 1 : '' ) ) . '</a></small>';
 				endforeach;
