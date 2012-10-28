@@ -73,10 +73,11 @@ add_action( 'post_submitbox_start', 'woocommerce_duplicate_product_post_button' 
  * @param mixed $columns
  * @return array
  */
-function woocommerce_edit_product_columns($columns){
+function woocommerce_edit_product_columns( $columns ) {
 	global $woocommerce;
 
-	$columns = array();
+	if ( empty( $columns ) && ! is_array( $columns ) )
+		$columns = array();
 
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["thumb"] = __( 'Image', 'woocommerce' );
