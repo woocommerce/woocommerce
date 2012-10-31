@@ -1575,7 +1575,7 @@ class WC_Order_Item_Meta {
 	            	if ( ! is_wp_error( $term ) && $term->name )
 	            		$value = $term->name;
 	            } else {
-	            	$value = ucfirst( apply_filters('woocommerce_variation_option_name', $value) );
+	            	$value = ucfirst( apply_filters( 'woocommerce_variation_option_name', $value ) );
 	            }
 
 				if ( $flat )
