@@ -48,12 +48,14 @@ global $woocommerce;
 						<td class="product-thumbnail">
 							<?php
 								$thumbnail = apply_filters( 'woocommerce_in_cart_product_thumbnail', $_product->get_image(), $values, $cart_item_key );
-								$thumbnail_link = esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) );
 
-								if ( ! $_product->is_visible() || ( $_product instanceof WC_Product_Variation && ! $_product->parent_is_visible() ) )
-									$thumbnail_link = '#';
-								
-								printf('<a href="%s">%s</a>', $thumbnail_link, $thumbnail );
+								if ( ! $_product->is_visible() || ( $_product instanceof WC_Product_Variation && ! $_product->parent_is_visible() ) ) {
+									echo $thumbnail;
+								}
+								else {
+									$thumbnail_link = esc_url( get_permalink( apply_filters('woocommerce_in_cart_product_id', $values['product_id'] ) ) );
+									printf('<a href="%s">%s</a>', $thumbnail_link, $thumbnail );
+								}
 							?>
 						</td>
 
