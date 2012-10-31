@@ -103,6 +103,15 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
+			echo '<div class="options_group show_if_simple show_if_variable">';
+
+				// Individual product
+				woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Product Sold Individually?', 'woocommerce'), 'description' => __('For items of singular quantity.', 'woocommerce') ) );
+
+				do_action('woocommerce_product_options_sold_individually');
+
+			echo '</div>';
+
 			echo '<div class="options_group show_if_external">';
 
 				// External URL
@@ -824,6 +833,13 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		$woocommerce->clear_product_transients( $post_parent );
 	}
 
+	// Sold Individuall
+	if ( ! empty( $_POST['_sold_individually'] ) ) {
+		update_post_meta( $post_id, '_sold_individually', 'yes' );
+	} else {
+		update_post_meta( $post_id, '_sold_individually', '' );
+	}
+	
 	// Stock Data
 	if ( get_option('woocommerce_manage_stock') == 'yes' ) {
 
