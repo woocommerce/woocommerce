@@ -213,7 +213,7 @@ function variable_product_type_options() {
 						} else {
 							$options = explode( '|', $attribute['value'] );
 							foreach ( $options as $option )
-								echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . ucfirst( esc_html( $option ) ) . '</option>';
+								echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . ucfirst( apply_filters( 'woocommerce_variation_option_name', ( esc_html( $option ) ) ) ) . '</option>';
 						}
 
 						echo '</select>';
