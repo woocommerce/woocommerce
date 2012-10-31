@@ -176,6 +176,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added option to resend order emails, checkboxes select which one.
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 
+* Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in there own table with meta. Existing data can be be updated on upgrade. 
+
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
@@ -1116,6 +1118,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Initial Release. Woo!
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+There are many improvements in this major release - see the changelog for full details. 
+
+The biggest change is that we're redone order item storage making them easier (and faster) to access for reporting and querying purchases; there are huge performance gains for reports. 
+
+Order items are no longer serialised data and store in meta - they are stored in there own table with their own meta. Existing data can be be updated upon upgrade (you will be prompted). You should backup before upgrading.
 
 = 1.6.2 =
 1.6 introduced some template changes, for loops in particular. See the changelog for details and ensure theme compatibility before upgrading.

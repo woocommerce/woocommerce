@@ -27,7 +27,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		global $woocommerce;
 
         $this->id			= 'paypal';
-        $this->icon 		= apply_filters('woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png');
+        $this->icon 		= apply_filters( 'woocommerce_paypal_icon', $woocommerce->plugin_url() . '/assets/images/icons/paypal.png' );
         $this->has_fields 	= false;
         $this->liveurl 		= 'https://www.paypal.com/webscr';
 		$this->testurl 		= 'https://www.sandbox.paypal.com/webscr';
@@ -74,7 +74,7 @@ class WC_Paypal extends WC_Payment_Gateway {
      * @return bool
      */
     function is_valid_for_use() {
-        if (!in_array(get_woocommerce_currency(), array('AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB'))) return false;
+        if (!in_array(get_woocommerce_currency(), array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB' ))) return false;
 
         return true;
     }
@@ -218,25 +218,25 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		$order_id = $order->id;
 
-		if ($this->debug=='yes') 
+		if ( $this->debug == 'yes' ) 
 			$this->log->add( 'paypal', 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
-		if (in_array($order->billing_country, array('US','CA'))) :
-			$order->billing_phone = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
+		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
+			$order->billing_phone = str_replace( array( '( ', '-', ' ', ' )', '.' ), '', $order->billing_phone );
 			$phone_args = array(
-				'night_phone_a' => substr($order->billing_phone,0,3),
-				'night_phone_b' => substr($order->billing_phone,3,3),
-				'night_phone_c' => substr($order->billing_phone,6,4),
-				'day_phone_a' 	=> substr($order->billing_phone,0,3),
-				'day_phone_b' 	=> substr($order->billing_phone,3,3),
-				'day_phone_c' 	=> substr($order->billing_phone,6,4)
+				'night_phone_a' => substr( $order->billing_phone, 0, 3 ),
+				'night_phone_b' => substr( $order->billing_phone, 3, 3 ),
+				'night_phone_c' => substr( $order->billing_phone, 6, 4 ),
+				'day_phone_a' 	=> substr( $order->billing_phone, 0, 3 ),
+				'day_phone_b' 	=> substr( $order->billing_phone, 3, 3 ),
+				'day_phone_c' 	=> substr( $order->billing_phone, 6, 4 )
 			);
-		else :
+		} else {
 			$phone_args = array(
 				'night_phone_b' => $order->billing_phone,
 				'day_phone_b' 	=> $order->billing_phone
 			);
-		endif;
+		}
 
 		// PayPal Args
 		$paypal_args = array_merge(
@@ -295,7 +295,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If prices include tax or have order discounts, send the whole order as a single item
-		if ( get_option('woocommerce_prices_include_tax')=='yes' || $order->get_order_discount() > 0 ) :
+		if ( get_option( 'woocommerce_prices_include_tax' ) == 'yes' || $order->get_order_discount() > 0 ) {
 
 			// Discount
 			$paypal_args['discount_amount_cart'] = $order->get_order_discount();
@@ -303,64 +303,66 @@ class WC_Paypal extends WC_Payment_Gateway {
 			// Don't pass items - paypal borks tax due to prices including tax. PayPal has no option for tax inclusive pricing sadly. Pass 1 item for the order items overall
 			$item_names = array();
 
-			if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
-				if ($item['qty']) $item_names[] = $item['name'] . ' x ' . $item['qty'];
-			endforeach; endif;
+			if ( sizeof( $order->get_items() ) > 0 ) 
+				foreach ( $order->get_items() as $item )
+					if ( $item['qty'] ) 
+						$item_names[] = $item['name'] . ' x ' . $item['qty'];
 
-			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode(', ', $item_names);
+			$paypal_args['item_name_1'] 	= sprintf( __( 'Order %s' , 'woocommerce'), $order->get_order_number() ) . " - " . implode( ', ', $item_names );
 			$paypal_args['quantity_1'] 		= 1;
-			$paypal_args['amount_1'] 		= number_format($order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '');
+			$paypal_args['amount_1'] 		= number_format( $order->get_total() - $order->get_shipping() - $order->get_shipping_tax() + $order->get_order_discount(), 2, '.', '' );
 
 			// Shipping Cost
 			// No longer using shipping_1 because
 			//		a) paypal ignore it if *any* shipping rules are within paypal
 			//		b) paypal ignore anyhing over 5 digits, so 999.99 is the max
 			// $paypal_args['shipping_1']		= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
-
-			if ( ( $order->get_shipping() + $order->get_shipping_tax() ) > 0 ) :
+			if ( ( $order->get_shipping() + $order->get_shipping_tax() ) > 0 ) {
 				$paypal_args['item_name_2'] = __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );
 				$paypal_args['quantity_2'] 	= '1';
 				$paypal_args['amount_2'] 	= number_format( $order->get_shipping() + $order->get_shipping_tax() , 2, '.', '' );
-			endif;
+			}
 
-		else :
+		} else {
 
 			// Tax
 			$paypal_args['tax_cart'] = $order->get_total_tax();
 
 			// Cart Contents
 			$item_loop = 0;
-			if (sizeof($order->get_items())>0) : foreach ($order->get_items() as $item) :
-				if ($item['qty']) :
-
-					$item_loop++;
-
-					$product = $order->get_product_from_item($item);
-
-					$item_name 	= $item['name'];
-
-					$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
-					if ($meta = $item_meta->display( true, true )) :
-						$item_name .= ' ('.$meta.')';
-					endif;
-
-					$paypal_args['item_name_'.$item_loop] = $item_name;
-					if ($product->get_sku()) $paypal_args['item_number_'.$item_loop] = $product->get_sku();
-					$paypal_args['quantity_'.$item_loop] = $item['qty'];
-					$paypal_args['amount_'.$item_loop] = $order->get_item_total( $item, false );
-
-				endif;
-			endforeach; endif;
+			if ( sizeof( $order->get_items() ) > 0 ) {
+				foreach ( $order->get_items() as $item ) {
+					if ( $item['qty'] ) {
+	
+						$item_loop++;
+	
+						$product = $order->get_product_from_item( $item );
+	
+						$item_name 	= $item['name'];
+	
+						$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+						if ( $meta = $item_meta->display( true, true ) )
+							$item_name .= ' ( ' . $meta . ' )';
+	
+						$paypal_args[ 'item_name_' . $item_loop ] 	= $item_name;
+						$paypal_args[ 'quantity_' . $item_loop ] 	= $item['qty'];
+						$paypal_args[ 'amount_' . $item_loop ] 		= $order->get_item_total( $item, false );
+						
+						if ( $product->get_sku() ) 
+							$paypal_args[ 'item_number_' . $item_loop ] = $product->get_sku();
+					}
+				}
+			}
 
 			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-			if ($order->get_shipping()>0) :
+			if ( $order->get_shipping() > 0 ) {
 				$item_loop++;
-				$paypal_args['item_name_'.$item_loop] = __('Shipping via', 'woocommerce' ) . ' ' . ucwords($order->shipping_method_title);
-				$paypal_args['quantity_'.$item_loop] = '1';
-				$paypal_args['amount_'.$item_loop] = number_format($order->get_shipping(), 2, '.', '');
-			endif;
+				$paypal_args[ 'item_name_' . $item_loop ] 	= __( 'Shipping via', 'woocommerce' ) . ' ' . ucwords( $order->shipping_method_title );
+				$paypal_args[ 'quantity_' . $item_loop ] 	= '1';
+				$paypal_args[ 'amount_' . $item_loop ] 		= number_format( $order->get_shipping(), 2, '.', '' );
+			}
 
-		endif;
+		}
 
 		$paypal_args = apply_filters( 'woocommerce_paypal_args', $paypal_args );
 
@@ -394,7 +396,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 			$paypal_args_array[] = '<input type="hidden" name="'.esc_attr( $key ).'" value="'.esc_attr( $value ).'" />';
 		}
 
-		$woocommerce->add_inline_js('
+		$woocommerce->add_inline_js( '
 			jQuery("body").block({
 					message: "<img src=\"' . esc_url( apply_filters( 'woocommerce_ajax_loader_url', $woocommerce->plugin_url() . '/assets/images/ajax-loader.gif' ) ) . '\" alt=\"Redirecting&hellip;\" style=\"float:left; margin-right: 10px;\" />'.__( 'Thank you for your order. We are now redirecting you to PayPal to make payment.', 'woocommerce' ).'",
 					overlayCSS:
@@ -413,10 +415,10 @@ class WC_Paypal extends WC_Payment_Gateway {
 				    }
 				});
 			jQuery("#submit_paypal_payment_form").click();
-		');
+		' );
 
 		return '<form action="'.esc_url( $paypal_adr ).'" method="post" id="paypal_payment_form" target="_top">
-				' . implode('', $paypal_args_array) . '
+				' . implode( '', $paypal_args_array) . '
 				<input type="submit" class="button-alt" id="submit_paypal_payment_form" value="'.__( 'Pay via PayPal', 'woocommerce' ).'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__( 'Cancel order &amp; restore cart', 'woocommerce' ).'</a>
 			</form>';
 
@@ -455,7 +457,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 			return array(
 				'result' 	=> 'success',
-				'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay'))))
+				'redirect'	=> add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('pay' ))))
 			);
 
 		}
@@ -544,7 +546,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
     	if ( $this->check_ipn_request_is_valid() ) {
 
-    		header('HTTP/1.1 200 OK');
+    		header( 'HTTP/1.1 200 OK' );
 
         	do_action( "valid-paypal-standard-ipn-request", $_POST );
 
@@ -656,7 +658,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 		            		sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
 
-						$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
+						$mailer->send( get_option( 'woocommerce_new_order_email_recipient' ), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
 
 					}
 
@@ -674,7 +676,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 	            		sprintf(__( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
 
-					$mailer->send( get_option('woocommerce_new_order_email_recipient'), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
+					$mailer->send( get_option( 'woocommerce_new_order_email_recipient' ), sprintf( __( 'Payment for order %s refunded/reversed', 'woocommerce' ), $order->get_order_number() ), $message );
 
 	            break;
 	            default :

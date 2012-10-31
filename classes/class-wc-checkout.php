@@ -388,9 +388,7 @@ class WC_Checkout {
 				}
 
 				// Create Order (send cart variable so we can record items and reduce inventory). Only create if this is a new order, not if the payment was rejected last time.
-				$_tax = new WC_Tax();
-
-				$order_data = array(
+				$order_data = apply_filters( 'woocommerce_new_order_data', array(
 					'post_type' 	=> 'shop_order',
 					'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
 					'post_status' 	=> 'publish',
@@ -398,48 +396,7 @@ class WC_Checkout {
 					'post_excerpt' 	=> $this->posted['order_comments'],
 					'post_author' 	=> 1,
 					'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
-				);
-
-				// Cart items
-				$order_items = array();
-
-				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
-
-					$_product = $values['data'];
-
-					// Store any item meta data - item meta class lets plugins add item meta in a standardized way
-					$item_meta = new WC_Order_Item_Meta();
-
-					$item_meta->new_order_item( $values );
-
-					// Store variation data in meta so admin can view it
-					if ( $values['variation'] && is_array( $values['variation'] ) ) {
-						foreach ( $values['variation'] as $key => $value ) {
-							$item_meta->add( esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
-						}
-					}
-
-					// Store backorder status
-					if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
-                   		$item_meta->add( __( 'Backordered', 'woocommerce' ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
-
-					$order_items[] = apply_filters( 'new_order_item', array(
-				 		'id' 				=> $values['product_id'],
-				 		'variation_id' 		=> $values['variation_id'],
-				 		'name' 				=> $_product->get_title(),
-				 		'qty' 				=> (int) $values['quantity'],
-				 		'item_meta'			=> $item_meta->meta,
-				 		'line_subtotal' 	=> woocommerce_format_decimal( $values['line_subtotal'] ),		// Line subtotal (before discounts)
-				 		'line_subtotal_tax' => woocommerce_format_decimal( $values['line_subtotal_tax'] ), 	// Line tax (before discounts)
-				 		'line_total'		=> woocommerce_format_decimal( $values['line_total'] ), 		// Line total (after discounts)
-				 		'line_tax' 			=> woocommerce_format_decimal( $values['line_tax'] ), 			// Line Tax (after discounts)
-				 		'tax_class'			=> $_product->get_tax_class()									// Tax class (adjusted by filters)
-				 	), $values );
-
-				}
-
-				// Check order items for errors
-				do_action('woocommerce_check_new_order_items', $order_items);
+				) );
 
 				if ( $woocommerce->error_count() > 0 ) 
 					throw new MyException();
@@ -463,7 +420,6 @@ class WC_Checkout {
 						do_action( 'woocommerce_resume_order', $order_id );
 
 						$create_new_order = false;
-
 					}
 				}
 
@@ -475,19 +431,45 @@ class WC_Checkout {
 					else
 						do_action( 'woocommerce_new_order', $order_id ); // Inserted successfully
 				}
+				
+				
+				// SAVE LINE ITEMS
+				
+				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
 
-				// Get better formatted shipping method (title)
-				$shipping_method = $this->posted['shipping_method'];
-				if ( isset( $available_methods[ $this->posted['shipping_method'] ] ) )
-					$shipping_method = $available_methods[ $this->posted['shipping_method'] ]->label;
+					$_product = $values['data'];
 
-				// Get better formatted payment method (title/label)
-				$payment_method = $this->posted['payment_method'];
-				if ( isset( $available_gateways[ $this->posted['payment_method'] ] ) )
-					$payment_method = $available_gateways[ $this->posted['payment_method'] ]->get_title();
-
-				// UPDATE ORDER META
-
+                   	// Add line item
+                   	$item_id = woocommerce_add_order_item( $order_id, array(
+				 		'order_item_name' 		=> $_product->get_title(),
+				 		'order_item_type' 		=> 'line_item'
+				 	) );
+				 	
+				 	// Add line item meta
+				 	if ( $item_id ) {
+					 	woocommerce_add_order_item_meta( $item_id, '_qty', absint( $values['quantity'] ) );
+					 	woocommerce_add_order_item_meta( $item_id, '_tax_class', $_product->get_tax_class() );
+					 	woocommerce_add_order_item_meta( $item_id, '_product_id', $values['product_id'] );
+					 	woocommerce_add_order_item_meta( $item_id, '_variation_id', $values['variation_id'] );
+					 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal', woocommerce_format_decimal( $values['line_subtotal'] ) );
+					 	woocommerce_add_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_format_decimal( $values['line_subtotal_tax'] ) );
+					 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $values['line_total'] ) );
+					 	woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $values['line_tax'] ) );
+					 	
+					 	// Store variation data in meta so admin can view it
+						if ( $values['variation'] && is_array( $values['variation'] ) )
+							foreach ( $values['variation'] as $key => $value )
+								woocommerce_add_order_item_meta( $item_id, esc_attr( str_replace( 'attribute_', '', $key ) ), $value );
+					 	
+					 	// Add line item meta for backorder status
+					 	if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $values['quantity'] ) )
+					 		woocommerce_add_order_item_meta( $item_id, __( 'Backordered', 'woocommerce' ), $values['quantity'] - max( 0, $_product->get_total_stock() ) );
+				 	}
+				}
+				
+				
+				// UPDATE USER META
+				
 				// Save billing and shipping first, also save to user meta if logged in
 				if ( $this->checkout_fields['billing'] ) {
 					foreach ( $this->checkout_fields['billing'] as $key => $field ) {
@@ -538,7 +520,19 @@ class WC_Checkout {
 				// Save any other user meta
 				if ( $user_id ) 
 					do_action( 'woocommerce_checkout_update_user_meta', $user_id, $this->posted );
+				
+				// UPDATE ORDER META
+				
+				// Get better formatted shipping method (title)
+				$shipping_method = $this->posted['shipping_method'];
+				if ( isset( $available_methods[ $this->posted['shipping_method'] ] ) )
+					$shipping_method = $available_methods[ $this->posted['shipping_method'] ]->label;
 
+				// Get better formatted payment method (title/label)
+				$payment_method = $this->posted['payment_method'];
+				if ( isset( $available_gateways[ $this->posted['payment_method'] ] ) )
+					$payment_method = $available_gateways[ $this->posted['payment_method'] ]->get_title();
+					
 				// Prepare order taxes for storage
 				$order_taxes = array();
 
@@ -570,7 +564,6 @@ class WC_Checkout {
 				update_post_meta( $order_id, '_order_total', 			woocommerce_format_total( $woocommerce->cart->total ) );
 				update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 				update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
-				update_post_meta( $order_id, '_order_items', 			$order_items );
 				update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
 				update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
 				update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
@@ -702,20 +695,20 @@ class WC_Checkout {
 	function get_value( $input ) {
 		global $woocommerce;
 
-		if (isset( $_POST[$input] ) && !empty($_POST[$input])) :
+		if ( ! empty( $_POST[ $input ] ) ) {
 
-			return esc_attr($_POST[$input]);
+			return esc_attr( $_POST[ $input ] );
 
-		elseif (is_user_logged_in()) :
+		} elseif ( is_user_logged_in() ) {
 
-			if ($meta = get_user_meta( get_current_user_id(), $input, true )) return $meta;
+			if ( $meta = get_user_meta( get_current_user_id(), $input, true ) ) 
+				return $meta;
 
 			$current_user = wp_get_current_user();
-			if ($input == "billing_email") :
+			if ( $input == "billing_email" )
 				return $current_user->user_email;
-			endif;
 
-		else :
+		} else {
 
 			$default_billing_country 	= apply_filters('default_checkout_country', ($woocommerce->customer->get_country()) ? $woocommerce->customer->get_country() : $woocommerce->countries->get_base_country());
 
@@ -729,19 +722,19 @@ class WC_Checkout {
 				$default_shipping_state 	= apply_filters('default_checkout_state', '');
 			}
 
-			if ($input == "billing_country") return $default_billing_country;
+			if ( $input == "billing_country" ) return $default_billing_country;
 
-			if ($input == "billing_state") return $default_billing_state;
+			if ( $input == "billing_state" ) return $default_billing_state;
 
-			if ($input == "billing_postcode") return ($woocommerce->customer->get_postcode()) ? $woocommerce->customer->get_postcode() : '';
+			if ( $input == "billing_postcode" ) return ($woocommerce->customer->get_postcode()) ? $woocommerce->customer->get_postcode() : '';
 
-			if ($input == "shipping_country") return $default_shipping_country;
+			if ( $input == "shipping_country" ) return $default_shipping_country;
 
-			if ($input == "shipping_state") return $default_shipping_state;
+			if ( $input == "shipping_state" ) return $default_shipping_state;
 
-			if ($input == "shipping_postcode") return ($woocommerce->customer->get_shipping_postcode()) ? $woocommerce->customer->get_shipping_postcode() : '';
+			if ( $input == "shipping_postcode" ) return ($woocommerce->customer->get_shipping_postcode()) ? $woocommerce->customer->get_shipping_postcode() : '';
 
-		endif;
+		}
 	}
 }
 

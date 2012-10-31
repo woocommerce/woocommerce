@@ -33,7 +33,7 @@ foreach ($items as $item) :
 
 			// File URLs
 			if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) :
-				$download_file_urls = $order->get_downloadable_file_urls( $item['id'], $item['variation_id'], $item );
+				$download_file_urls = $order->get_downloadable_file_urls( $item['product_id'], $item['variation_id'], $item );
 				foreach ( $download_file_urls as $i => $download_file_url ) :
 					echo '<br/><small>';
 					if ( count( $download_file_urls ) > 1 ) {

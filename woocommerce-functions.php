@@ -724,7 +724,7 @@ function woocommerce_order_again() {
 	// Copy products from the order to the cart
 	foreach ( $order->get_items() as $item ) {
 		// Load all product info including variation data
-		$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['id'] );
+		$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item['product_id'] );
 		$quantity     = (int) $item['qty'];
 		$variation_id = (int) $item['variation_id'];
 		$variations   = array();

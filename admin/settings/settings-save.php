@@ -183,7 +183,15 @@ function woocommerce_update_options($options) {
             	update_option( $value['id'] . '_crop', 1 );
             }
 
-    	} else {
+    	} elseif (isset( $value['type'] ) && $value['type'] == 'textarea' ) {
+    	
+    		if ( isset( $value['id'] ) && isset( $_POST[$value['id']] ) ) {
+            	update_option( $value['id'], wp_kses_post( $_POST[ $value['id'] ] ) );
+            } elseif( isset( $value['id'] ) ) {
+                delete_option( $value['id'] );
+            }
+        
+        } else {
 
     		if ( isset( $value['id'] ) && isset( $_POST[$value['id']] ) ) {
             	update_option( $value['id'], woocommerce_clean( $_POST[ $value['id'] ] ) );
