@@ -254,8 +254,6 @@ function woocommerce_datepicker_js() {
 	var dates = jQuery( "#from, #to" ).datepicker({
 		defaultDate: "",
 		dateFormat: "yy-mm-dd",
-		//changeMonth: true,
-		//changeYear: true,
 		numberOfMonths: 1,
 		minDate: "-12M",
 		maxDate: "+0D",
@@ -284,7 +282,6 @@ function woocommerce_datepicker_js() {
  * @return void
  */
 function woocommerce_sales_overview() {
-
 	global $start_date, $end_date, $woocommerce, $wpdb, $wp_locale;
 
 	$total_sales = $total_orders = $order_items = $discount_total = $shipping_total = 0;
@@ -336,30 +333,21 @@ function woocommerce_sales_overview() {
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 	" ) );
-
-	$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
-		SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
-
-		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+	
+	$order_items = absint( $wpdb->get_var( $wpdb->prepare( "
+		SELECT SUM( order_item_meta.meta_value ) 
+		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+		LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-		WHERE 	meta.meta_key 		= '_order_items'
-		AND 	posts.post_type 	= 'shop_order'
+		WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
-		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-	" ) );
-
-	if ( $order_items_serialized ) {
-		foreach ( $order_items_serialized as $order_items_array ) {
-			$order_items_array = maybe_unserialize( $order_items_array );
-			if ( is_array( $order_items_array ) ) 
-				foreach ( $order_items_array as $item ) 
-					$order_items += absint( $item['qty'] );
-		}
-	}
+		AND 	order_items.order_item_type = 'line_item'
+		AND 	order_item_meta.meta_key = '_qty'
+	" ) ) );
 	?>
 	<div id="poststuff" class="woocommerce-reports-wrap">
 		<div class="woocommerce-reports-sidebar">
@@ -571,42 +559,57 @@ function woocommerce_daily_sales() {
 	
 	// Get order ids and dates in range
 	$orders = $wpdb->get_results( $wpdb->prepare( "
-		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
-
+		SELECT posts.ID, posts.post_date, meta.meta_value AS total_sales FROM {$wpdb->posts} AS posts
+		
+		LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-		WHERE 	posts.post_type 	= 'shop_order'
+		
+		WHERE 	meta.meta_key 		= '_order_total'
+		AND 	posts.post_type 	= 'shop_order'
 		AND 	posts.post_status 	= 'publish'
 		AND 	tax.taxonomy		= 'shop_order_status'
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
+		
+		GROUP BY posts.ID
 		ORDER BY post_date ASC
 	" ) );
-
+	
 	if ( $orders ) {
+	
+		$total_orders = sizeof( $orders );
+	
 		foreach ( $orders as $order ) {
-
-			$order_total = get_post_meta($order->ID, '_order_total', true);
+			
+			// get order timestamp
 			$time = strtotime( date( 'Ymd', strtotime( $order->post_date ) ) ) . '000';
 
-			$order_items_array = (array) get_post_meta( $order->ID, '_order_items', true );
-			foreach ( $order_items_array as $item ) 
-				$order_items += absint( $item['qty'] );
-			$total_sales += $order_total;
-			$total_orders++;
-
+			// Add order total
+			$total_sales += $order->total_sales;
+			
+			// Get items
+			$order_items += absint( $wpdb->get_var( $wpdb->prepare( "
+				SELECT SUM( order_item_meta.meta_value ) 
+				FROM {$wpdb->prefix}woocommerce_order_items as order_items
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+				WHERE	order_id = %d
+				AND 	order_items.order_item_type = 'line_item'
+				AND 	order_item_meta.meta_key = '_qty'
+			", $order->ID ) ) );
+			
+			// Set times
 			if ( isset( $order_counts[ $time ] ) )
 				$order_counts[ $time ]++;
 			else
 				$order_counts[ $time ] = 1;
 
 			if ( isset( $order_amounts[ $time ] ) )
-				$order_amounts[ $time ] = $order_amounts[ $time ] + $order_total;
+				$order_amounts[ $time ] = $order_amounts[ $time ] + $order->total_sales;
 			else
-				$order_amounts[ $time ] = floatval( $order_total );
+				$order_amounts[ $time ] = floatval( $order->total_sales );
 		}
 	}
 	?>
@@ -619,7 +622,7 @@ function woocommerce_daily_sales() {
 			<div class="postbox">
 				<h3><span><?php _e( 'Total sales in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_sales>0) echo woocommerce_price($total_sales); else _e( 'n/a', 'woocommerce' ); ?></p>
+					<p class="stat"><?php if ( $total_sales > 0 ) echo woocommerce_price( $total_sales ); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
@@ -631,13 +634,13 @@ function woocommerce_daily_sales() {
 			<div class="postbox">
 				<h3><span><?php _e( 'Average order total in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo woocommerce_price($total_sales/$total_orders); else _e( 'n/a', 'woocommerce' ); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo woocommerce_price( $total_sales / $total_orders ); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 			<div class="postbox">
 				<h3><span><?php _e( 'Average order items in range', 'woocommerce' ); ?></span></h3>
 				<div class="inside">
-					<p class="stat"><?php if ($total_orders>0) echo number_format($order_items/$total_orders, 2); else _e( 'n/a', 'woocommerce' ); ?></p>
+					<p class="stat"><?php if ( $total_orders > 0 ) echo number_format( $order_items / $total_orders, 2 ); else _e( 'n/a', 'woocommerce' ); ?></p>
 				</div>
 			</div>
 		</div>
@@ -755,41 +758,31 @@ function woocommerce_monthly_sales() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
 		$order_counts[ $time ] 	= (int) $months_orders->total_orders;
-		$order_amounts[ $time ] 	= (float) $months_orders->total_sales;
+		$order_amounts[ $time ] = (float) $months_orders->total_sales;
 
 		$total_orders			+= (int) $months_orders->total_orders;
 		$total_sales			+= (float) $months_orders->total_sales;
 
 		// Count order items
-		$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
-			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+		$order_items += absint( $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_item_meta.meta_value ) 
+			FROM {$wpdb->prefix}woocommerce_order_items as order_items
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-			WHERE 	meta.meta_key 		= '_order_items'
-			AND 	posts.post_type 	= 'shop_order'
+			WHERE 	term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		" ) );
-
-		if ($order_items_serialized) {
-			foreach ( $order_items_serialized as $order_items_array ) {
-				$order_items_array = maybe_unserialize($order_items_array);
-				if ( is_array( $order_items_array ) ) 
-					foreach ( $order_items_array as $item ) 
-						$order_items += (int) $item['qty'];
-			}
-		}
-
+			AND		'{$month}' 			= date_format( posts.post_date, '%%Y%%m' )
+			AND 	order_items.order_item_type = 'line_item'
+			AND 	order_item_meta.meta_key = '_qty'
+		" ) ) );
 	}
 	?>
 	<form method="post" action="">
@@ -917,9 +910,12 @@ function woocommerce_top_sellers() {
 	$end_date = strtotime( $end_date );
 
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results( $wpdb->prepare( "
-		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
-
+	$order_items = $wpdb->get_results( $wpdb->prepare( "
+		SELECT order_item_meta_2.meta_value as product_id, SUM( order_item_meta.meta_value ) as item_quantity FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
+		LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID		
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -930,16 +926,17 @@ function woocommerce_top_sellers() {
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
-		ORDER BY post_date ASC
+		AND 	order_items.order_item_type = 'line_item'
+		AND 	order_item_meta.meta_key = '_qty'
+		AND 	order_item_meta_2.meta_key = '_product_id'
+		GROUP BY order_item_meta_2.meta_value
 	" ) );
-
+	
 	$found_products = array();
 
-	if ( $orders ) {
-		foreach ($orders as $order) {
-			$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
-			foreach ( $order_items as $item )
-				$found_products[ $item['id'] ] = isset( $found_products[ $item['id'] ] ) ? $found_products[ $item['id'] ] + $item['qty'] : $item['qty'];
+	if ( $order_items ) {
+		foreach ( $order_items as $order_item ) {
+			$found_products[ $order_item->product_id ] = $order_item->item_quantity;
 		}
 	}
 
@@ -1007,11 +1004,14 @@ function woocommerce_top_earners() {
 
 	$start_date = strtotime( $start_date );
 	$end_date = strtotime( $end_date );
-
+	
 	// Get order ids and dates in range
-	$orders = $wpdb->get_results( $wpdb->prepare( "
-		SELECT posts.ID, posts.post_date FROM {$wpdb->posts} AS posts
-
+	$order_items = $wpdb->get_results( $wpdb->prepare( "
+		SELECT order_item_meta_2.meta_value as product_id, SUM( order_item_meta.meta_value ) as line_total FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
+		LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID		
 		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
@@ -1022,24 +1022,20 @@ function woocommerce_top_earners() {
 		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
 		AND 	post_date > '" . date('Y-m-d', $start_date ) . "'
 		AND 	post_date < '" . date('Y-m-d', strtotime('+1 day', $end_date ) ) . "'
-		ORDER BY post_date ASC
+		AND 	order_items.order_item_type = 'line_item'
+		AND 	order_item_meta.meta_key = '_line_total'
+		AND 	order_item_meta_2.meta_key = '_product_id'
+		GROUP BY order_item_meta_2.meta_value
 	" ) );
 
 	$found_products = array();
 
-	if ( $orders ) {
-		foreach ($orders as $order) {
-			$order_items = (array) get_post_meta( $order->ID, '_order_items', true );
-			foreach ( $order_items as $item ) {
-				if ( isset( $item['line_total'] ) ) 
-					$row_cost = $item['line_total'];
-				else 
-					$row_cost = $item['cost'] * $item['qty'];
-				$found_products[ $item['id'] ] = isset( $found_products[ $item['id'] ] ) ? $found_products[ $item['id'] ] + $row_cost : $row_cost;
-			}
+	if ( $order_items ) {
+		foreach ( $order_items as $order_item ) {
+			$found_products[ $order_item->product_id ] = $order_item->line_total;
 		}
 	}
-
+	
 	asort( $found_products );
 	$found_products = array_reverse( $found_products, true );
 	$found_products = array_slice( $found_products, 0, 25, true );
@@ -1117,49 +1113,52 @@ function woocommerce_product_sales() {
 
 		// Get order items
 		$order_items = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta.meta_value AS items, posts.post_date FROM {$wpdb->posts} AS posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
+			SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as item_quantity, SUM( order_item_meta_3.meta_value ) as line_total 
+			FROM {$wpdb->prefix}woocommerce_order_items as order_items
+			
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_3 ON order_items.order_item_id = order_item_meta_3.order_item_id
+			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID		
+			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
 			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
 			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-			WHERE 	meta.meta_key 		= '_order_items'
-			AND 	posts.post_type 	= 'shop_order'
+	
+			WHERE 	posts.post_type 	= 'shop_order'
+			AND 	order_item_meta_2.meta_value IN ('" . implode( "','", array_merge( $chosen_product_ids, $children_ids ) ) . "')
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		posts.post_date		> date_sub( NOW(), INTERVAL 1 YEAR )
+			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "') 
+			AND 	order_items.order_item_type = 'line_item'
+			AND 	order_item_meta.meta_key = '_qty'
+			AND 	order_item_meta_2.meta_key = '_product_id'
+			AND 	order_item_meta_3.meta_key = '_line_total'
+			GROUP BY order_items.order_id
 			ORDER BY posts.post_date ASC
 		" ) );
 
+		$found_products = array();
+	
 		if ( $order_items ) {
-
 			foreach ( $order_items as $order_item ) {
-
+				
+				if ( $order_item->line_total == 0 && $order_item->item_quantity == 0 )
+					continue;
+				
+				// Get date
 				$date 	= date( 'Ym', strtotime( $order_item->post_date ) );
-				$items 	= maybe_unserialize( $order_item->items );
-
-				foreach ( $items as $item ) {
-
-					if ( ! in_array( $item['id'], $chosen_product_ids ) && ! in_array( $item['id'], $children_ids ) )
-						continue;
-
-					if ( isset( $item['line_total'] ) ) $row_cost = $item['line_total'];
-					else $row_cost = $item['cost'] * $item['qty'];
-
-					if ( ! $row_cost ) continue;
-
-					$product_sales[ $date ] = isset( $product_sales[ $date ] ) ? $product_sales[$date] + $item['qty'] : $item['qty'];
-					$product_totals[ $date ] = isset( $product_totals[ $date ] ) ? $product_totals[ $date ] + $row_cost : $row_cost;
-
-					if ( $product_sales[ $date ] > $max_sales ) $max_sales = $product_sales[ $date ];
-					if ( $product_totals[ $date ] > $max_totals ) $max_totals = $product_totals[ $date ];
-				}
-
+				
+				// Set values
+				$product_sales[ $date ] 	= isset( $product_sales[ $date ] ) ? $product_sales[ $date ] + $order_item->item_quantity : $order_item->item_quantity;
+				$product_totals[ $date ] 	= isset( $product_totals[ $date ] ) ? $product_totals[ $date ] + $order_item->line_total : $order_item->line_total;
+	
+				if ( $product_sales[ $date ] > $max_sales ) 
+					$max_sales = $product_sales[ $date ];
+					
+				if ( $product_totals[ $date ] > $max_totals ) 
+					$max_totals = $product_totals[ $date ];
 			}
-
-		}
+		}		
 		?>
 		<h4><?php printf( __( 'Sales for %s:', 'woocommerce' ), implode( ', ', $chosen_product_titles ) ); ?></h4>
 		<table class="bar_chart">
@@ -1199,12 +1198,13 @@ function woocommerce_product_sales() {
 			<p><select id="product_ids" name="product_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px;"></select> <input type="submit" style="vertical-align: top;" class="button" value="<?php _e( 'Show', 'woocommerce' ); ?>" /></p>
 			<script type="text/javascript">
 				jQuery(function(){
+				
 					// Ajax Chosen Product Selectors
 					jQuery("select.ajax_chosen_select_products").ajaxChosen({
 					    method: 	'GET',
 					    url: 		'<?php echo admin_url('admin-ajax.php'); ?>',
 					    dataType: 	'json',
-					     afterTypeDelay: 100,
+					    afterTypeDelay: 100,
 					    data:		{
 					    	action: 		'woocommerce_json_search_products',
 							security: 		'<?php echo wp_create_nonce("search-products"); ?>'
@@ -1219,6 +1219,7 @@ function woocommerce_product_sales() {
 
 					    return terms;
 					});
+					
 				});
 			</script>
 		</form>
@@ -1718,7 +1719,7 @@ function woocommerce_monthly_taxes() {
 		if ( $order_taxes ) {
 			foreach ( $order_taxes as $order_tax_rows ) {
 				$order_tax_rows = maybe_unserialize( $order_tax_rows );
-				if ( $order_tax_rows )
+				if ( is_array( $order_tax_rows ) && ! empty( $order_tax_rows ) )
 					foreach ( $order_tax_rows as $tax_row )
 						if ( isset( $tax_row['cart_tax'] ) ) {
 
@@ -1929,279 +1930,265 @@ function woocommerce_category_sales() {
 
 	$item_sales = array();
 
-	for ( $count = 0; $count < 12; $count++ ) {
-		$time = strtotime( date( 'Ym', strtotime( '+ ' . $count . ' MONTH', $start_date ) ) . '01' ) . '000';
+	// Get order items
+	$start_date = date( 'Ym', strtotime( date( 'Ym', strtotime( '-1 year', $start_date ) ) . '01' ) );
+	
+	$order_items = $wpdb->get_results( $wpdb->prepare( "
+		SELECT order_item_meta_2.meta_value as product_id, posts.post_date, SUM( order_item_meta.meta_value ) as line_total 
+		FROM {$wpdb->prefix}woocommerce_order_items as order_items
+		
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+		LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
+		LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID		
+		LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+		LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+		LEFT JOIN {$wpdb->terms} AS term USING( term_id )
 
-		if ( $time > current_time( 'timestamp' ) . '000' )
-			continue;
-
-		$month = date( 'Ym', strtotime( date( 'Ym', strtotime( '+ '. $count . ' MONTH', $start_date ) ) . '01' ) );
-
-		// Get order items
-		$order_items_serialized = $wpdb->get_col( $wpdb->prepare( "
-			SELECT meta.meta_value AS items FROM {$wpdb->posts} AS posts
-
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-
-			WHERE 	meta.meta_key 		= '_order_items'
-			AND 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
-		" ) );
-
-		if ( $order_items_serialized ) {
-			foreach ( $order_items_serialized as $order_items_array ) {
-				$order_items_array = maybe_unserialize( $order_items_array );
-				if ( is_array( $order_items_array ) ) 
-					foreach ( $order_items_array as $item ) {
-						
-						if ( ! isset( $item_sales[ $count ][ $item['id'] ] ) )
-							$item_sales[ $count ][ $item['id'] ] = 0;
-						
-						if ( ! empty( $item['line_total'] ) )
-							$item_sales[ $count ][ $item['id'] ] += $item['line_total'];
-						
-					}
-			}
+		WHERE 	posts.post_type 	= 'shop_order'
+		AND 	posts.post_status 	= 'publish'
+		AND 	tax.taxonomy		= 'shop_order_status'
+		AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "') 
+		AND		date_format(posts.post_date,'%%Y%%m') >= '{$start_date}'
+		AND 	order_items.order_item_type = 'line_item'
+		AND 	order_item_meta.meta_key = '_line_total'
+		AND 	order_item_meta_2.meta_key = '_product_id'
+		GROUP BY order_items.order_id
+		ORDER BY posts.post_date ASC
+	" ) );
+		
+	if ( $order_items ) {
+		foreach ( $order_items as $order_item ) {
+			
+			$month = date( 'm', strtotime( $order_item->post_date ) ) - 1;
+			
+			$item_sales[ $month ][ $order_item->product_id ] = isset( $item_sales[ $month ][ $order_item->product_id ] ) ? $item_sales[ $month ][ $order_item->product_id ] + $order_item->line_total : $order_item->line_total;
 		}
 	}
 	
 	if ( ! empty( $_POST['show_categories'] ) && sizeof( $_POST['show_categories'] ) > 0 ) {
 	
-	$show_categories = $include_categories = array_map( 'absint', $_POST['show_categories'] );
-	
-	foreach( $show_categories as $cat )
-		$include_categories = array_merge( $include_categories, get_term_children( $cat, 'product_cat' ) );
-	
-	$categories = get_terms( 'product_cat', array( 'include' => array_unique( $include_categories ) ) );
-	?>
-	<div class="woocommerce-wide-reports-wrap">
-		<table class="widefat">
-			<thead>
-				<tr>
-					<th><?php _e( 'Category', 'woocommerce' ); ?></th>
-					<?php 
-						$column_count = 0;
-						for ( $count = 0; $count < 12; $count++ ) : 
-							if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
-								continue;
-							$column_count++;
-							?>
-							<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
-					<?php endfor; ?>
-					<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
-				</tr>
-			</thead>
-			<!--<tfoot>
-				<tr>
-					<th colspan="<?php echo $column_count + 2; ?>">
-						<a class="button export-data" href="<?php echo add_query_arg( 'export', 'true' ); ?>"><?php _e( 'Export data', 'woocommerce' ); ?></a>
-					</th>
-				</tr>
-			</tfoot>-->
-			<tbody><?php
-				// While outputting, lets store them for the chart
-				$chart_data = $month_totals = $category_totals = array();
-				$top_cat = $bottom_cat = $top_cat_name = $bottom_cat_name = '';
-				
-				for ( $count = 0; $count < 12; $count++ )
-					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
-						break;
-					else
-						$month_totals[ $count ] = 0;
-				
-				foreach ( $categories as $category ) {
+		$show_categories = $include_categories = array_map( 'absint', $_POST['show_categories'] );
+		
+		foreach( $show_categories as $cat )
+			$include_categories = array_merge( $include_categories, get_term_children( $cat, 'product_cat' ) );
+		
+		$categories = get_terms( 'product_cat', array( 'include' => array_unique( $include_categories ) ) );
+		?>
+		<div class="woocommerce-wide-reports-wrap">
+			<table class="widefat">
+				<thead>
+					<tr>
+						<th><?php _e( 'Category', 'woocommerce' ); ?></th>
+						<?php 
+							$column_count = 0;
+							for ( $count = 0; $count < 12; $count++ ) : 
+								if ( $count >= date ( 'm' ) && $current_year == date( 'Y' ) )	
+									continue;
+								$column_count++;
+								?>
+								<th><?php echo date( 'F', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ); ?></th>
+						<?php endfor; ?>
+						<th><strong><?php _e( 'Total', 'woocommerce' ); ?></strong></th>
+					</tr>
+				</thead>
+				<tbody><?php
+					// While outputting, lets store them for the chart
+					$chart_data = $month_totals = $category_totals = array();
+					$top_cat = $bottom_cat = $top_cat_name = $bottom_cat_name = '';
 					
-					$cat_total = 0;
-					$category_chart_data = $term_ids = array();
+					for ( $count = 0; $count < 12; $count++ )
+						if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+							break;
+						else
+							$month_totals[ $count ] = 0;
 					
-					$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
-					$term_ids[] 	= $category->term_id;
-					$product_ids 	= get_objects_in_term( $term_ids, 'product_cat' );
-					
-					if ( $category->parent > 0 )
-						$prepend = '&mdash; ';
-					else
-						$prepend = '';
-					
-					$category_sales_html = '<tr><th>' . $prepend . $category->name . '</th>';
-	
-					for ( $count = 0; $count < 12; $count++ ) {
+					foreach ( $categories as $category ) {
 						
-						if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )	
-							continue;
-					
-						if ( ! empty( $item_sales[ $count ] ) ) {
-							$matches = array_intersect_key( $item_sales[ $count ], array_flip( $product_ids ) );
-							$total = array_sum( $matches );
-							$cat_total += $total;
-						} else {
-							$total = 0;
-						}
+						$cat_total = 0;
+						$category_chart_data = $term_ids = array();
+						
+						$term_ids 		= get_term_children( $category->term_id, 'product_cat' );
+						$term_ids[] 	= $category->term_id;
+						$product_ids 	= get_objects_in_term( $term_ids, 'product_cat' );
+						
+						if ( $category->parent > 0 )
+							$prepend = '&mdash; ';
+						else
+							$prepend = '';
+						
+						$category_sales_html = '<tr><th>' . $prepend . $category->name . '</th>';
+		
+						for ( $count = 0; $count < 12; $count++ ) {
 							
-						$month_totals[ $count ] += $total;
+							if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )	
+								continue;
 						
-						$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
+							if ( ! empty( $item_sales[ $count ] ) ) {
+								$matches = array_intersect_key( $item_sales[ $count ], array_flip( $product_ids ) );
+								$total = array_sum( $matches );
+								$cat_total += $total;
+							} else {
+								$total = 0;
+							}
+								
+							$month_totals[ $count ] += $total;
+							
+							$category_sales_html .= '<td>' . woocommerce_price( $total ) . '</td>';
+							
+							$category_chart_data[] = array( strtotime( date( 'Ymd', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ) ) . '000', $total );
+						}
 						
-						$category_chart_data[] = array( strtotime( date( 'Ymd', strtotime( '2012-' . ( $count + 1 ) . '-01' ) ) ) . '000', $total );
+						if ( $cat_total == 0 )
+							continue;
+						
+						$category_totals[] = $cat_total;
+						
+						$category_sales_html .= '<td><strong>' . woocommerce_price( $cat_total ) . '</strong></td>';
+						
+						$category_sales_html .= '</tr>';
+						
+						echo $category_sales_html;
+						
+						$chart_data[ $category->name ] = $category_chart_data;
+						
+						if ( $cat_total > $top_cat ) {
+							$top_cat = $cat_total;
+							$top_cat_name = $category->name;
+						}
+						
+						if ( $cat_total < $bottom_cat || $bottom_cat === '' ) {
+							$bottom_cat = $cat_total;
+							$bottom_cat_name = $category->name;
+						}
+		
 					}
 					
-					if ( $cat_total == 0 )
-						continue;
+					sort( $category_totals );
 					
-					$category_totals[] = $cat_total;
-					
-					$category_sales_html .= '<td><strong>' . woocommerce_price( $cat_total ) . '</strong></td>';
-					
-					$category_sales_html .= '</tr>';
-					
-					echo $category_sales_html;
-					
-					$chart_data[ $category->name ] = $category_chart_data;
-					
-					if ( $cat_total > $top_cat ) {
-						$top_cat = $cat_total;
-						$top_cat_name = $category->name;
-					}
-					
-					if ( $cat_total < $bottom_cat || $bottom_cat === '' ) {
-						$bottom_cat = $cat_total;
-						$bottom_cat_name = $category->name;
-					}
-	
-				}
-				
-				sort( $category_totals );
-				
-				echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
-				for ( $count = 0; $count < 12; $count++ )
-					if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
-						break;
-					else
-						echo '<td><strong>' . woocommerce_price( $month_totals[ $count ] ) . '</strong></td>';
-				echo '<td><strong>' .  woocommerce_price( array_sum( $month_totals ) ) . '</strong></td></tr>';
-				
-			?></tbody>
-		</table>
-	</div>
-	
-	<div id="poststuff" class="woocommerce-reports-wrap">
-		<div class="woocommerce-reports-sidebar">
-			<div class="postbox">
-				<h3><span><?php _e( 'Top category', 'woocommerce' ); ?></span></h3>
-				<div class="inside">
-					<p class="stat"><?php
-						echo $top_cat_name . ' (' . woocommerce_price( $top_cat ) . ')';
-					?></p>
-				</div>
-			</div>
-			<?php if ( sizeof( $category_totals ) > 1 ) : ?>
-			<div class="postbox">
-				<h3><span><?php _e( 'Worst category', 'woocommerce' ); ?></span></h3>
-				<div class="inside">
-					<p class="stat"><?php
-						echo $bottom_cat_name . ' (' . woocommerce_price( $bottom_cat ) . ')';
-					?></p>
-				</div>
-			</div>
-			<div class="postbox">
-				<h3><span><?php _e( 'Category sales average', 'woocommerce' ); ?></span></h3>
-				<div class="inside">
-					<p class="stat"><?php
-						if ( sizeof( $category_totals ) > 0 )
-							echo woocommerce_price( array_sum( $category_totals ) / sizeof( $category_totals ) );
+					echo '<tr><th><strong>' . __( 'Total', 'woocommerce' ) . '</strong></th>';
+					for ( $count = 0; $count < 12; $count++ )
+						if ( $count >= date( 'm' ) && $current_year == date( 'Y' ) )
+							break;
 						else
-							echo __( 'N/A', 'woocommerce' );
-					?></p>
-				</div>
-			</div>
-			<div class="postbox">
-				<h3><span><?php _e( 'Category sales median', 'woocommerce' ); ?></span></h3>
-				<div class="inside">
-					<p class="stat"><?php
-						if ( sizeof( $category_totals ) == 0 )
-							echo __( 'N/A', 'woocommerce' );
-						elseif ( sizeof( $category_totals ) % 2 )
-							echo woocommerce_price( 
-								( 
-									$category_totals[ floor( sizeof( $category_totals ) / 2 ) ] + $category_totals[ ceil( sizeof( $category_totals ) / 2 ) ] 
-								) / 2 
-							);
-						else
-							echo woocommerce_price( $category_totals[ sizeof( $category_totals ) / 2 ] );
-					?></p>
-				</div>
-			</div>
-			<?php endif; ?>
+							echo '<td><strong>' . woocommerce_price( $month_totals[ $count ] ) . '</strong></td>';
+					echo '<td><strong>' .  woocommerce_price( array_sum( $month_totals ) ) . '</strong></td></tr>';
+					
+				?></tbody>
+			</table>
 		</div>
-		<div class="woocommerce-reports-main">
-			<div class="postbox">
-				<h3><span><?php _e( 'Monthly sales by category', 'woocommerce' ); ?></span></h3>
-				<div class="inside chart">
-					<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+		
+		<div id="poststuff" class="woocommerce-reports-wrap">
+			<div class="woocommerce-reports-sidebar">
+				<div class="postbox">
+					<h3><span><?php _e( 'Top category', 'woocommerce' ); ?></span></h3>
+					<div class="inside">
+						<p class="stat"><?php
+							echo $top_cat_name . ' (' . woocommerce_price( $top_cat ) . ')';
+						?></p>
+					</div>
+				</div>
+				<?php if ( sizeof( $category_totals ) > 1 ) : ?>
+				<div class="postbox">
+					<h3><span><?php _e( 'Worst category', 'woocommerce' ); ?></span></h3>
+					<div class="inside">
+						<p class="stat"><?php
+							echo $bottom_cat_name . ' (' . woocommerce_price( $bottom_cat ) . ')';
+						?></p>
+					</div>
+				</div>
+				<div class="postbox">
+					<h3><span><?php _e( 'Category sales average', 'woocommerce' ); ?></span></h3>
+					<div class="inside">
+						<p class="stat"><?php
+							if ( sizeof( $category_totals ) > 0 )
+								echo woocommerce_price( array_sum( $category_totals ) / sizeof( $category_totals ) );
+							else
+								echo __( 'N/A', 'woocommerce' );
+						?></p>
+					</div>
+				</div>
+				<div class="postbox">
+					<h3><span><?php _e( 'Category sales median', 'woocommerce' ); ?></span></h3>
+					<div class="inside">
+						<p class="stat"><?php
+							if ( sizeof( $category_totals ) == 0 )
+								echo __( 'N/A', 'woocommerce' );
+							elseif ( sizeof( $category_totals ) % 2 )
+								echo woocommerce_price( 
+									( 
+										$category_totals[ floor( sizeof( $category_totals ) / 2 ) ] + $category_totals[ ceil( sizeof( $category_totals ) / 2 ) ] 
+									) / 2 
+								);
+							else
+								echo woocommerce_price( $category_totals[ sizeof( $category_totals ) / 2 ] );
+						?></p>
+					</div>
+				</div>
+				<?php endif; ?>
+			</div>
+			<div class="woocommerce-reports-main">
+				<div class="postbox">
+					<h3><span><?php _e( 'Monthly sales by category', 'woocommerce' ); ?></span></h3>
+					<div class="inside chart">
+						<div id="placeholder" style="width:100%; overflow:hidden; height:568px; position:relative;"></div>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<script type="text/javascript">
-		jQuery(function(){
-			
-			<?php
-				// Variables
-				foreach ( $chart_data as $name => $data ) {
-					$varname = 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
-					echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
-				}
-			?>
-
-			var placeholder = jQuery("#placeholder");
-
-			var plot = jQuery.plot(placeholder, [ 
-				<?php 
-				$labels = array();
+		<script type="text/javascript">
+			jQuery(function(){
 				
-				foreach ( $chart_data as $name => $data ) {
-					$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
-				}
-				
-				echo implode( ',', $labels );
+				<?php
+					// Variables
+					foreach ( $chart_data as $name => $data ) {
+						$varname = 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data';
+						echo 'var ' . $varname . ' = jQuery.parseJSON( \'' . json_encode( $data ) . '\' );';
+					}
 				?>
-			], {
-				series: {
-					lines: { show: true, fill: true },
-					points: { show: true, align: "left" }
-				},
-				grid: {
-					show: true,
-					aboveData: false,
-					color: '#aaa',
-					backgroundColor: '#fff',
-					borderWidth: 2,
-					borderColor: '#aaa',
-					clickable: false,
-					hoverable: true
-				},
-				xaxis: {
-					mode: "time",
-					timeformat: "%b %y",
-					monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
-					tickLength: 1,
-					minTickSize: [1, "month"]
-				},
-				yaxes: [ { min: 0, tickDecimals: 2 } ]
-		 	});
-
-		 	placeholder.resize();
-
-			<?php woocommerce_tooltip_js(); ?>
-		});
-	</script>
-	<?php
+	
+				var placeholder = jQuery("#placeholder");
+	
+				var plot = jQuery.plot(placeholder, [ 
+					<?php 
+					$labels = array();
+					
+					foreach ( $chart_data as $name => $data ) {
+						$labels[] = '{ label: "' . esc_js( $name ) . '", data: ' . 'cat_' . str_replace( '-', '_', sanitize_title( $name ) ) . '_data }';
+					}
+					
+					echo implode( ',', $labels );
+					?>
+				], {
+					series: {
+						lines: { show: true, fill: true },
+						points: { show: true, align: "left" }
+					},
+					grid: {
+						show: true,
+						aboveData: false,
+						color: '#aaa',
+						backgroundColor: '#fff',
+						borderWidth: 2,
+						borderColor: '#aaa',
+						clickable: false,
+						hoverable: true
+					},
+					xaxis: {
+						mode: "time",
+						timeformat: "%b %y",
+						monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+						tickLength: 1,
+						minTickSize: [1, "month"]
+					},
+					yaxes: [ { min: 0, tickDecimals: 2 } ]
+			 	});
+	
+			 	placeholder.resize();
+	
+				<?php woocommerce_tooltip_js(); ?>
+			});
+		</script>
+		<?php
 	}
 	?>
 	<script type="text/javascript">

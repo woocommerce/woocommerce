@@ -273,6 +273,30 @@ CREATE TABLE ". $wpdb->prefix . "woocommerce_downloadable_product_permissions (
 ) $collate;
 ";
     dbDelta( $sql );
+    
+    // Order line items are stored in a table to make them easily queryable for reports
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_order_items (
+  order_item_id bigint(20) NOT NULL auto_increment,
+  order_item_name longtext NOT NULL DEFAULT '',
+  order_item_type varchar(200) NOT NULL DEFAULT '',
+  order_id bigint(20) NOT NULL, 
+  PRIMARY KEY  (order_item_id)
+) $collate;
+";
+    dbDelta( $sql );
+    
+    // Order line item meta is stored in a table for storing extra data.
+    $sql = "
+CREATE TABLE ". $wpdb->prefix . "woocommerce_order_itemmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  order_item_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id)
+) $collate;
+";
+    dbDelta( $sql );
 }
 
 

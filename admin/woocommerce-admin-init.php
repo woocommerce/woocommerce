@@ -147,7 +147,7 @@ add_action( 'admin_head', 'woocommerce_admin_menu_highlight' );
  */
 function woocommerce_admin_notices_styles() {
 
-	if ( get_option( 'woocommerce_needs_update' ) == 1 || get_option( 'woocommerce_installed' ) == 1 ) {
+	if ( get_option( 'woocommerce_updated' ) == 1 || get_option( 'woocommerce_needs_update' ) == 1 || get_option( 'woocommerce_installed' ) == 1 ) {
 		wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', dirname( __FILE__ ) ) );
 		add_action( 'admin_notices', 'woocommerce_admin_install_notices' );
 	}
@@ -168,39 +168,16 @@ function woocommerce_admin_install_notices() {
 	
 	if ( get_option( 'woocommerce_needs_update' ) == 1 ) {
 		
-		if ( ! isset( $_GET['do_db_update'] ) ) {
+		include( 'includes/notice-update.php' );
 		
-			include( 'includes/notice-update.php' );
-			
-		} elseif ( ! isset( $_GET['page'] ) || $_GET['page'] != 'woocommerce' ) {
-			
-			// Do updates
-			$current_db_version = get_option( 'woocommerce_db_version' );
-			
-			if ( version_compare( $current_db_version, '1.4', '<' ) ) {
-				include( 'includes/updates/woocommerce-update-1.4.php' );
-				update_option( 'woocommerce_db_version', '1.4' );
-			}
-			
-			if ( version_compare( $current_db_version, '1.5', '<' ) ) {
-				include( 'includes/updates/woocommerce-update-1.5.php' );
-				update_option( 'woocommerce_db_version', '1.5' );
-			}
-			
-			if ( version_compare( $current_db_version, '1.7', '<' ) ) {
-				include( 'includes/updates/woocommerce-update-1.7.php' );
-				update_option( 'woocommerce_db_version', '1.7' );
-			}
+	} elseif ( get_option( 'woocommerce_updated' ) == 1 ) {
 	
-			// Show notice
-			include( 'includes/notice-updated.php' );
-			
-			update_option( 'woocommerce_installed', 0 );
-			update_option( 'woocommerce_needs_update', 0 );
-			update_option( 'woocommerce_db_version', $woocommerce->version );
-		}
+		include( 'includes/notice-updated.php' );
 		
-	} elseif ( get_option('woocommerce_installed') == 1 ) {
+		update_option( 'woocommerce_updated', 0 );
+		update_option( 'woocommerce_installed', 0 );
+		
+	} elseif ( get_option( 'woocommerce_installed' ) == 1 ) {
 		
 		if ( get_option( 'skip_install_woocommerce_pages' ) != 1 && woocommerce_get_page_id( 'shop' ) < 1 && ! isset( $_GET['install_woocommerce_pages'] ) && !isset( $_GET['skip_install_woocommerce_pages'] ) ) {
 		
@@ -216,7 +193,6 @@ function woocommerce_admin_install_notices() {
 		
 	}
 }
-
 
 /**
  * Include some admin files conditonally.
@@ -335,6 +311,23 @@ function install_woocommerce() {
 	do_install_woocommerce();
 }
 
+/**
+ * update_woocommerce function.
+ * 
+ * @access public
+ * @return void
+ */
+function update_woocommerce() {
+	if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+		include_once( 'woocommerce-admin-update.php' );
+		do_update_woocommerce();
+		update_option( 'woocommerce_updated', 1 );
+		update_option( 'woocommerce_needs_update', 0 );
+	}
+}
+
+add_action( 'admin_init', 'update_woocommerce' );
+
 
 /**
  * Include and add help tabs to WordPress admin.
@@ -411,6 +404,7 @@ function woocommerce_admin_scripts() {
 
 		$woocommerce_witepanel_params = array(
 			'remove_item_notice' 			=> __( 'Remove this item? If you have previously reduced this item\'s stock, or this order was submitted by a customer, will need to manually restore the item\'s stock.', 'woocommerce' ),
+			'remove_item_meta'				=> __( 'Remove this item meta?', 'woocommerce' ),
 			'remove_attribute'				=> __( 'Remove this attribute?', 'woocommerce' ),
 			'name_label'					=> __( 'Name', 'woocommerce' ),
 			'remove_label'					=> __( 'Remove', 'woocommerce' ),
@@ -438,7 +432,7 @@ function woocommerce_admin_scripts() {
 			'shipping_tax_label'			=> __( 'Shipping Tax:', 'woocommerce' ),
 			'plugin_url' 					=> $woocommerce->plugin_url(),
 			'ajax_url' 						=> admin_url('admin-ajax.php'),
-			'add_order_item_nonce' 			=> wp_create_nonce("add-order-item"),
+			'order_item_nonce' 				=> wp_create_nonce("order-item"),
 			'add_attribute_nonce' 			=> wp_create_nonce("add-attribute"),
 			'calc_totals_nonce' 			=> wp_create_nonce("calc-totals"),
 			'get_customer_details_nonce' 	=> wp_create_nonce("get-customer-details"),
