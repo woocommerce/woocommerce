@@ -26,19 +26,20 @@ get_header('shop'); ?>
 		<h1 class="page-title">
 			<?php if ( is_search() ) : ?>
 				<?php
-					printf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
+					$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
 					if ( get_query_var( 'paged' ) )
-						printf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
+						$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
 				?>
 			<?php elseif ( is_tax() ) : ?>
-				<?php echo single_term_title( "", false ); ?>
+				<?php $page_title = single_term_title( "", false ); ?>
 			<?php else : ?>
 				<?php
 					$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
 
-					echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
+					$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
 				?>
 			<?php endif; ?>
+            <?php echo apply_filters ( 'woocommerce_archive_page_title', $page_title ); ?>
 		</h1>
 
 		<?php do_action( 'woocommerce_archive_description' ); ?>
