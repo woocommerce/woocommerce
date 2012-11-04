@@ -679,7 +679,7 @@ function woocommerce_get_formatted_variation( $variation = '', $flat = false ) {
             	if ( ! is_wp_error( $term ) && $term->name )
             		$value = $term->name;
             } else {
-            	$value = ucfirst($value);
+            	$value = ucfirst( apply_filters( 'woocommerce_variation_option_name', $value ) );
             }
 
 			if ( $flat )

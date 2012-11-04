@@ -1598,7 +1598,7 @@ class WC_Order_Item_Meta {
 	            	if ( ! is_wp_error( $term ) && $term->name )
 	            		$meta_value = $term->name;
 	            } else {
-	            	$meta_value = ucfirst( $meta_value );
+	            	$meta_value = ucfirst( apply_filters( 'woocommerce_variation_option_name', $meta_value ) );
 	            }
 
 				if ( $flat )
