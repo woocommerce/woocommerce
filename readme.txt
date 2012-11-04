@@ -219,6 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Italian update by Giuseppe-Mazzapica.
 * Localization - Korean translate by Woo Jin Koh.
 * Localization - Bulgarian update by Hristo Pandjarov.
+* Localization - Spanish update by bolorino.
 
 * Many other refactors, minor fixes and tweaks!
 
