@@ -334,6 +334,16 @@ function woocommerce_status() {
             		$posting['fsockopen_curl']['note'] = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
             		$posting['fsockopen_curl']['success'] = false;
             	}
+            	
+            	// SOAP
+            	$posting['soap_client']['name'] = __( 'SOAP Client','woocommerce' );
+				if ( class_exists( 'SoapClient' ) ) {
+					$posting['soap_client']['note'] = __('Your server has the SOAP Client class enabled.', 'woocommerce' );
+					$posting['soap_client']['success'] = true;
+				} else {
+            		$posting['soap_client']['note'] = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
+            		$posting['soap_client']['success'] = false;
+            	}
 
             	// WP Remote Post Check
 				$posting['wp_remote_post']['name'] = __( 'WP Remote Post Check','woocommerce');
@@ -366,7 +376,7 @@ function woocommerce_status() {
                     <td><?php echo esc_html( $post['name'] ); ?></td>
                     <td>
                     	<mark class="<?php echo $mark; ?>">
-	                    	<?php echo esc_html( $post['note'] ); ?>
+	                    	<?php echo wp_kses_data( $post['note'] ); ?>
                     	</mark>
                     </td>
                 </tr>
