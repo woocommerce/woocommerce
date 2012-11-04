@@ -23,24 +23,7 @@ get_header('shop'); ?>
 		do_action('woocommerce_before_main_content');
 	?>
 
-		<h1 class="page-title">
-			<?php if ( is_search() ) : ?>
-				<?php
-					$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
-					if ( get_query_var( 'paged' ) )
-						$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
-				?>
-			<?php elseif ( is_tax() ) : ?>
-				<?php $page_title = single_term_title( "", false ); ?>
-			<?php else : ?>
-				<?php
-					$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
-
-					$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
-				?>
-			<?php endif; ?>
-            <?php echo apply_filters ( 'woocommerce_archive_page_title', $page_title ); ?>
-		</h1>
+		<h1 class="page-title"><?php woocommerce_page_title(); ?></h1>
 
 		<?php do_action( 'woocommerce_archive_description' ); ?>
 

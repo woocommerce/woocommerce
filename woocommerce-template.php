@@ -38,23 +38,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 		} else {
 
-			?><h1 class="page-title">
-				<?php if ( is_search() ) : ?>
-					<?php printf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() ); ?>
-				<?php elseif ( is_tax() ) : ?>
-					<?php echo single_term_title( "", false ); ?>
-				<?php else : ?>
-					<?php
-						$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
-
-						echo apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
-					?>
-				<?php endif; ?>
-
-				<?php if ( get_query_var( 'paged' ) ) : ?>
-					<?php printf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) ); ?>
-				<?php endif; ?>
-			</h1>
+			?><h1 class="page-title"><?php woocommerce_page_title(); ?></h1>
 
 			<?php do_action( 'woocommerce_archive_description' ); ?>
 
@@ -230,6 +214,38 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 }
 
 /** Loop ******************************************************************/
+
+if ( ! function_exists( 'woocommerce_page_title' ) ) {
+
+	/**
+	 * woocommerce_page_title function.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function woocommerce_page_title() {
+		
+		if ( is_search() ) {
+			$page_title = sprintf( __( 'Search Results: &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() );
+			
+			if ( get_query_var( 'paged' ) )
+				$page_title .= sprintf( __( '&nbsp;&ndash; Page %s', 'woocommerce' ), get_query_var( 'paged' ) );
+		
+		} elseif ( is_tax() ) {
+			
+			$page_title = single_term_title( "", false );
+		
+		} else {
+	
+			$shop_page = get_post( woocommerce_get_page_id( 'shop' ) );
+	
+			$page_title = apply_filters( 'the_title', ( $shop_page_title = get_option( 'woocommerce_shop_page_title' ) ) ? $shop_page_title : $shop_page->post_title, $shop_page->ID );
+			
+		}
+				
+	    echo apply_filters( 'woocommerce_page_title', $page_title );
+	}
+}
 
 if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 

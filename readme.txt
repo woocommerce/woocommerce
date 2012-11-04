@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - Revised pagination, sorting areas (sorting is now above products, numbered pagination below) and added a result count.
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
+* Templating - woocommerce_page_title function for archive titles.
 
 * Tweak - Improved installation + upgrade process upon activation.
 * Tweak - Protect logs and uploads with a blank index.html
