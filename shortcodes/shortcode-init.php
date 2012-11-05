@@ -33,6 +33,50 @@ include_once('shortcode-pay.php');
 /** Thanks shortcode */
 include_once('shortcode-thankyou.php');
 
+/**
+ * Determine ordering arguments
+ * @access public
+ * @param $orderby, $order
+ * @return array
+ */
+function get_catalog_ordering_args($orderby, $order) {
+	switch ( $orderby ) {
+		case 'date' :
+			$orderby = 'date';
+			$order = 'desc';
+			$meta_key = '';
+		break;
+		case 'price' :
+			$orderby = 'meta_value_num';
+			$order = 'asc';
+			$meta_key = '_price';
+		break;
+		case 'high_price' :
+			$orderby = 'meta_value_num';
+			$order = 'desc';
+			$meta_key = '_price';
+		break;
+		case 'title' :
+			$orderby = 'title';
+			$order = 'asc';
+			$meta_key = '';
+		break;
+		default :
+			$orderby = 'menu_order title';
+			$order = 'asc';
+			$meta_key = '';
+		break;
+	}
+		$args = array();
+
+	$args['orderby'] = $orderby;
+	$args['order'] = $order;
+	if ($meta_key)
+		$args['meta_key'] = $meta_key;
+
+	return $args;
+}
+
 
 /**
  * List products in a category shortcode
@@ -54,14 +98,16 @@ function woocommerce_product_category( $atts ){
 	  	'category'		=> ''
 		), $atts ) );
 
+  $ordering_args = get_catalog_ordering_args($orderby, $order);
+
 	if ( ! $category ) return;
 
   	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
 		'ignore_sticky_posts'	=> 1,
-		'orderby' => $orderby,
-		'order' => $order,
+		'orderby' => $ordering_args['orderby'],
+		'order' => $ordering_args['order'],
 		'posts_per_page' => $per_page,
 		'meta_query' => array(
 			array(
@@ -79,6 +125,9 @@ function woocommerce_product_category( $atts ){
 			)
 	    )
 	);
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
   	ob_start();
 
@@ -133,13 +182,18 @@ function woocommerce_product_categories( $atts ) {
 
 	$hide_empty = ( $hide_empty == true || $hide_empty == 1 ) ? 1 : 0;
 
+  $ordering_args = get_catalog_ordering_args($orderby, $order);
+
   	$args = array(
   		'number'     => $number,
-  		'orderby'    => $orderby,
-  		'order'      => $order,
+  		'orderby'    => $ordering_args['orderby'],
+  		'order'      => $ordering_args['order'],
   		'hide_empty' => $hide_empty,
 		'include'    => $ids
 	);
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
   	$product_categories = get_terms( 'product_cat', $args );
 
@@ -190,13 +244,15 @@ function woocommerce_recent_products( $atts ) {
 		'order' => 'desc'
 	), $atts));
 
+  $ordering_args = get_catalog_ordering_args($orderby, $order);
+
 	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
 		'ignore_sticky_posts'	=> 1,
 		'posts_per_page' => $per_page,
-		'orderby' => $orderby,
-		'order' => $order,
+		'orderby' => $ordering_args['orderby'],
+		'order' => $ordering_args['order'],
 		'meta_query' => array(
 			array(
 				'key' => '_visibility',
@@ -205,6 +261,9 @@ function woocommerce_recent_products( $atts ) {
 			)
 		)
 	);
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
 	ob_start();
 
@@ -250,12 +309,14 @@ function woocommerce_products( $atts ) {
 	  	'order'     => 'asc'
 		), $atts));
 
+  $ordering_args = get_catalog_ordering_args($orderby, $order);
+
   	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
 		'ignore_sticky_posts'	=> 1,
-		'orderby' => $orderby,
-		'order' => $order,
+		'orderby' => $ordering_args['orderby'],
+		'order' => $ordering_args['order'],
 		'posts_per_page' => -1,
 		'meta_query' => array(
 			array(
@@ -265,6 +326,9 @@ function woocommerce_products( $atts ) {
 			)
 		)
 	);
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
 	if(isset($atts['skus'])){
 		$skus = explode(',', $atts['skus']);
@@ -640,12 +704,14 @@ function woocommerce_top_rated_products( $atts ){
         'order'         => 'asc'
         ), $atts ) );
 
+    $ordering_args = get_catalog_ordering_args($orderby, $order);
+
     $args = array(
         'post_type' => 'product',
         'post_status' => 'publish',
         'ignore_sticky_posts'   => 1,
-        'orderby' => $orderby,
-        'order' => $order,
+    		'orderby' => $ordering_args['orderby'],
+		    'order' => $ordering_args['order'],
         'posts_per_page' => $per_page,
         'meta_query' => array(
             array(
@@ -655,6 +721,9 @@ function woocommerce_top_rated_products( $atts ){
             )
         )
     );
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
   	ob_start();
   	
@@ -703,13 +772,15 @@ function woocommerce_featured_products( $atts ) {
 		'order' => 'desc'
 	), $atts));
 
+  $ordering_args = get_catalog_ordering_args($orderby, $order);
+
 	$args = array(
 		'post_type'	=> 'product',
 		'post_status' => 'publish',
 		'ignore_sticky_posts'	=> 1,
 		'posts_per_page' => $per_page,
-		'orderby' => $orderby,
-		'order' => $order,
+ 		'orderby' => $ordering_args['orderby'],
+    'order' => $ordering_args['order'],
 		'meta_query' => array(
 			array(
 				'key' => '_visibility',
@@ -722,6 +793,9 @@ function woocommerce_featured_products( $atts ) {
 			)
 		)
 	);
+	if ( isset( $ordering_args['meta_key'] ) ) {
+		$args['meta_key'] = $ordering_args['meta_key'];
+	}
 
 	ob_start();
 
