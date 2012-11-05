@@ -78,6 +78,8 @@ function woocommerce_edit_product_columns( $columns ) {
 
 	if ( empty( $columns ) && ! is_array( $columns ) )
 		$columns = array();
+		
+	unset( $columns['title'], $columns['comments'], $columns['date'] );
 
 	$columns["cb"] = "<input type=\"checkbox\" />";
 	$columns["thumb"] = __( 'Image', 'woocommerce' );
