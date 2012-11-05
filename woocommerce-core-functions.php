@@ -197,7 +197,7 @@ if ( ! function_exists( 'woocommerce_disable_admin_bar' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_disable_admin_bar( $show_admin_bar ) {
-		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! current_user_can('edit_posts') ) {
+		if ( get_option('woocommerce_lock_down_admin')=='yes' && ! ( current_user_can('edit_posts') || current_user_can('manage_woocommerce') ) ) {
 			$show_admin_bar = false;
 		}
 

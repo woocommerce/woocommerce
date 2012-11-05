@@ -267,7 +267,7 @@ function woocommerce_feature_product() {
 
 	if ( ! is_admin() ) die;
 
-	if ( ! current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+	if ( ! current_user_can('edit_products') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 
 	if ( ! check_admin_referer('woocommerce-feature-product')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 
@@ -301,7 +301,7 @@ add_action('wp_ajax_woocommerce-feature-product', 'woocommerce_feature_product')
 function woocommerce_mark_order_complete() {
 
 	if ( !is_admin() ) die;
-	if ( !current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+	if ( !current_user_can('edit_shop_orders') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 	if ( !check_admin_referer('woocommerce-mark-order-complete')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if (!$order_id) die;
@@ -324,7 +324,7 @@ add_action('wp_ajax_woocommerce-mark-order-complete', 'woocommerce_mark_order_co
 function woocommerce_mark_order_processing() {
 
 	if ( !is_admin() ) die;
-	if ( !current_user_can('edit_posts') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
+	if ( !current_user_can('edit_shop_orders') ) wp_die( __( 'You do not have sufficient permissions to access this page.', 'woocommerce' ) );
 	if ( !check_admin_referer('woocommerce-mark-order-processing')) wp_die( __( 'You have taken too long. Please go back and retry.', 'woocommerce' ) );
 	$order_id = isset($_GET['order_id']) && (int) $_GET['order_id'] ? (int) $_GET['order_id'] : '';
 	if (!$order_id) die;
@@ -1328,7 +1328,7 @@ function woocommerce_product_ordering() {
 	global $wpdb;
 
 	// check permissions again and make sure we have what we need
-	if ( ! current_user_can('edit_others_pages') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) )
+	if ( ! current_user_can('edit_products') || empty( $_POST['id'] ) || ( ! isset( $_POST['previd'] ) && ! isset( $_POST['nextid'] ) ) )
 		die(-1);
 
 	// real post?
