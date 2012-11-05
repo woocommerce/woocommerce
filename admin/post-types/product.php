@@ -483,12 +483,12 @@ function woocommerce_admin_product_search( $wp ) {
 
 		if( !$sku ) return;
 
-		$id = $wpdb->get_var('SELECT post_id FROM '.$wpdb->postmeta.' WHERE meta_key="_sku" AND meta_value LIKE "%'.$sku.'%";');
+		$ids = $wpdb->get_col( 'SELECT post_id FROM ' . $wpdb->postmeta . ' WHERE meta_key="_sku" AND meta_value LIKE "%' . $sku . '%";' );
 
-		if( !$id ) return;
+		if ( ! $ids ) return;
 
 		unset( $wp->query_vars['s'] );
-		$wp->query_vars['p'] = $id;
+		$wp->query_vars['post__in'] = $ids;
 		$wp->query_vars['sku'] = $sku;
 
 	endif;
