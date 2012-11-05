@@ -55,30 +55,36 @@ function woocommerce_product_category( $atts ){
 		), $atts ) );
 
 	if ( ! $category ) return;
+	
+	$ordering_args = get_catalog_ordering_args( $orderby, $order );
 
   	$args = array(
-		'post_type'	=> 'product',
-		'post_status' => 'publish',
+		'post_type'				=> 'product',
+		'post_status' 			=> 'publish',
 		'ignore_sticky_posts'	=> 1,
-		'orderby' => $orderby,
-		'order' => $order,
-		'posts_per_page' => $per_page,
-		'meta_query' => array(
+		'orderby' 				=> $ordering_args['orderby'],
+		'order' 				=> $ordering_args['order'],
+		'posts_per_page' 		=> $per_page,
+		'meta_query' 			=> array(
 			array(
-				'key' => '_visibility',
-				'value' => array('catalog', 'visible'),
-				'compare' => 'IN'
+				'key' 			=> '_visibility',
+				'value' 		=> array('catalog', 'visible'),
+				'compare' 		=> 'IN'
 			)
 		),
-		'tax_query' => array(
+		'tax_query' 			=> array(
 	    	array(
-		    	'taxonomy' => 'product_cat',
-				'terms' => array( esc_attr($category) ),
-				'field' => 'slug',
-				'operator' => 'IN'
+		    	'taxonomy' 		=> 'product_cat',
+				'terms' 		=> array( esc_attr($category) ),
+				'field' 		=> 'slug',
+				'operator' 		=> 'IN'
 			)
 	    )
 	);
+	
+	if ( isset( $ordering_args['meta_key'] ) ) {
+ 		$args['meta_key'] = $ordering_args['meta_key'];
+ 	}
 
   	ob_start();
 
