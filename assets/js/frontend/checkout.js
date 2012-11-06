@@ -335,7 +335,7 @@ jQuery(document).ready(function($) {
 	
 	// Init trigger
 	$('body').bind('init_checkout', function() {
-		$('select.country_to_state').change();
+		$('#billing_country, #shipping_country, .country_to_state').change();
 		$('body').trigger('update_checkout');
 	});
 	

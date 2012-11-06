@@ -1214,21 +1214,35 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		switch ( $args['type'] ) {
 		case "country" :
+		
+			if ( sizeof( $woocommerce->countries->get_allowed_countries() ) == 1 ) {
+			
+				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
+						<label class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']  . '</label>';
+				
+				$field .= '<strong>' . current( array_values( $woocommerce->countries->get_allowed_countries() ) ) . '</strong>';
+	
+				$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" value="' . current( array_keys( $woocommerce->countries->get_allowed_countries() ) ) . '" />';
+	
+				$field .= '</p>' . $after;
+				
+			} else {
 
-			$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
-					<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required  . '</label>
-					<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="country_to_state country_select">
-						<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
-
-			foreach ( $woocommerce->countries->get_allowed_countries() as $ckey => $cvalue ) {
-				$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $key ) . '_field">
+						<label for="' . esc_attr( $key ) . '" class="' . implode( ' ', $args['label_class'] ) .'">' . $args['label']. $required  . '</label>
+						<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $key ) . '" class="country_to_state country_select">
+							<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
+	
+				foreach ( $woocommerce->countries->get_allowed_countries() as $ckey => $cvalue )
+					$field .= '<option value="' . $ckey . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+	
+				$field .= '</select>';
+	
+				$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __( 'Update country', 'woocommerce' ) . '" /></noscript>';
+	
+				$field .= '</p>' . $after;
+			
 			}
-
-			$field .= '</select>';
-
-			$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __( 'Update country', 'woocommerce' ) . '" /></noscript>';
-
-			$field .= '</p>' . $after;
 
 			break;
 		case "state" :
