@@ -103,15 +103,6 @@ function woocommerce_product_data_box() {
 
 			echo '</div>';
 
-			echo '<div class="options_group show_if_simple show_if_variable">';
-
-				// Individual product
-				woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Product Sold Individually?', 'woocommerce'), 'description' => __('For items of singular quantity.', 'woocommerce') ) );
-
-				do_action('woocommerce_product_options_sold_individually');
-
-			echo '</div>';
-
 			echo '<div class="options_group show_if_external">';
 
 				// External URL
@@ -568,6 +559,15 @@ function woocommerce_product_data_box() {
 				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents ) );
 
 				do_action( 'woocommerce_product_options_grouping' );
+
+			echo '</div>';
+			
+			echo '<div class="options_group show_if_simple show_if_variable">';
+
+				// Individual product
+				woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Sold Individually', 'woocommerce'), 'description' => __('Enable this to only allow one of this item to be bought in a single order', 'woocommerce') ) );
+
+				do_action('woocommerce_product_options_sold_individually');
 
 			echo '</div>';
 
