@@ -50,7 +50,7 @@ Need a specific payment gateway? Perhaps additional shipping methods? WooCommerc
 
 = GET INVOLVED =
 
-Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/) or submit extensions to be listed on the WooThemes site [here](http://www.woothemes.com/become-a-woocommerce-developer/).
+Developers can checkout and contribute to the source code on the [WooCommerce GitHub Repository](http://github.com/woothemes/woocommerce/).
 
 == Installation ==
 
