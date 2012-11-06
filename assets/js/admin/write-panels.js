@@ -1068,7 +1068,7 @@ jQuery( function($){
 
 		window.send_to_editor = window.send_to_download_url;
 
-		tb_show('', 'media-upload.php?post_id=' + woocommerce_writepanel_params.post_id + '&amp;type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
+		tb_show('', 'media-upload.php?type=downloadable_product&amp;from=wc01&amp;TB_iframe=true');
 		return false;
 	});
 
