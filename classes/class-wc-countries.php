@@ -1112,7 +1112,7 @@ class WC_Countries {
 				'label' 		=> __( 'Country', 'woocommerce' ),
 				'placeholder' 	=> _x('Country', 'placeholder', 'woocommerce'),
 				'required' 		=> true,
-				'class' 		=> array('form-row-first', 'update_totals_on_change', 'country_select'),
+				'class' 		=> array('form-row-first', 'update_totals_on_change'),
 				),
 			'state' 	=> array(
 				'type'			=> 'state',
