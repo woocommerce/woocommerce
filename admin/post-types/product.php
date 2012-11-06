@@ -1129,19 +1129,22 @@ function woocommerce_admin_product_bulk_edit_save( $post_id, $post ) {
 
 	// Handle stock
 	if ( ! $product->is_type( 'grouped' ) ) {
+		
+		if ( ! empty( $_REQUEST['change_stock'] ) ) {
+			update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
+			update_post_meta( $post_id, '_manage_stock', 'yes' );	
+		}
+		
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 
 			if ( $_REQUEST['_manage_stock'] == 'yes' ) {
-				update_post_meta( $post_id, '_manage_stock', 'yes' );
-
-				if ( ! empty( $_REQUEST['change_stock'] ) ) 
-					update_post_meta( $post_id, '_stock', (int) $_REQUEST['_stock'] );
-					
+				update_post_meta( $post_id, '_manage_stock', 'yes' );					
 			} else {
 				update_post_meta( $post_id, '_manage_stock', 'no' );
 				update_post_meta( $post_id, '_stock', '0' );
 			}
 		}
+		
 	}
 
 	// Clear transient

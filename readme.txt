@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 3.3
 Tested up to: 3.4.2
-Stable tag: 1.6.5.1
+Stable tag: 1.6.5.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -207,6 +207,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Coupon description field.
 * Tweak - Exclude up-sells from related products.
 * Tweak - Allowed sku search to return > 1 result.
+* Tweak - If only one country is enabled, don't show country dropdown on checkout.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
