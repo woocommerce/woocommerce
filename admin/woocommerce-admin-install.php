@@ -84,9 +84,9 @@ function do_install_woocommerce() {
 	update_option( 'woocommerce_version', $woocommerce->version );
 
 	// Queue upgrades
-	$current_db_version = get_option( 'woocommerce_db_version' );
+	$current_db_version = get_option( 'woocommerce_db_version', null );
 	
-	if ( version_compare( $current_db_version, '1.7', '<' ) ) {
+	if ( version_compare( $current_db_version, '1.7', '<' ) && null !== $current_db_version ) {
 		update_option( 'woocommerce_needs_update', 1 );
 	} else {
 		update_option( 'woocommerce_db_version', $woocommerce->version );
