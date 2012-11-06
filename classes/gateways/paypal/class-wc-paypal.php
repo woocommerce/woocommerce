@@ -653,7 +653,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 		            	$mailer = $woocommerce->mailer();
 
-		            	$mailer->wrap_message(
+		            	$message = $mailer->wrap_message(
 		            		__( 'Order refunded/reversed', 'woocommerce' ),
 		            		sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 						);
@@ -671,7 +671,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 
 	            	$mailer = $woocommerce->mailer();
 
-	            	$mailer->wrap_message(
+	            	$message = $mailer->wrap_message(
 	            		__( 'Order refunded/reversed', 'woocommerce' ),
 	            		sprintf(__( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 					);
