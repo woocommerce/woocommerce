@@ -48,7 +48,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 	
 								// Prepare text labels with price for each shipping method
 								foreach ( $available_methods as $method ) {
-									$method->full_label = esc_html( $method->label );
+									$method->full_label = $method->label;
 	
 									if ( $method->cost > 0 ) {
 										$method->full_label .= ': ';
@@ -71,7 +71,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 								// Print a single available shipping method as plain text
 								if ( 1 === count( $available_methods ) ) {
 	
-									echo $method->full_label . '<input type="hidden" name="shipping_method" id="shipping_method" value="' . esc_attr( $method->id ) . '" />';
+									echo wp_kses_post( $method->full_label ) . '<input type="hidden" name="shipping_method" id="shipping_method" value="' . esc_attr( $method->id ) . '" />';
 	
 								// Show multiple shipping methods
 								} else {
@@ -81,7 +81,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo '<select name="shipping_method" id="shipping_method">';
 	
 										foreach ( $available_methods as $method )
-											echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . esc_html( $method->full_label ) . '</option>';
+											echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( $method->id, $woocommerce->session->chosen_shipping_method, false ) . '>' . wp_kses_post( $method->full_label ) . '</option>';
 	
 										echo '</select>';
 	
@@ -91,7 +91,7 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 										echo '<ul id="shipping_method">';
 	
 										foreach ( $available_methods as $method )
-											echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . esc_html( $method->full_label ) . '</label></li>';
+											echo '<li><input type="radio" name="shipping_method" id="shipping_method_' . sanitize_title( $method->id ) . '" value="' . esc_attr( $method->id ) . '" ' . checked( $method->id, $woocommerce->session->chosen_shipping_method, false) . ' /> <label for="shipping_method_' . sanitize_title( $method->id ) . '">' . wp_kses_post( $method->full_label ) . '</label></li>';
 	
 										echo '</ul>';
 	
