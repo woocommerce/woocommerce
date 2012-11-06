@@ -19,6 +19,9 @@ class WC_Session_Transients extends WC_Session {
 	/** cookie name */
 	private $_cookie;
 	
+	/** cookie expiration time */
+	private $_cookie_expires;
+	
 	/**
 	 * Constructor for the session class.
 	 *
@@ -28,9 +31,10 @@ class WC_Session_Transients extends WC_Session {
 	public function __construct() {
 		parent::__construct();
 		
-		$this->_cookie		= 'wc_session_cookie_' . COOKIEHASH;
-		$this->_customer_id = $this->get_customer_id();
-		$this->_data 		= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
+		$this->_cookie				= 'wc_session_cookie_' . COOKIEHASH;
+		$this->_customer_id 		= $this->get_customer_id();
+		$this->_data 				= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
+    	$this->_cookie_expiration	= apply_filters( 'wc_session_transients_expiration', 172800 ); // 48 hours default
     	
     	if ( false === $this->_data )
     		$this->_data = array();
@@ -82,7 +86,7 @@ class WC_Session_Transients extends WC_Session {
 	 */
 	private function create_customer_id() {
 		$customer_id 	= wp_generate_password( 32 ); // Ensure this and the transient is < 45 chars. wc_session_ leaves 34.
-		$expires 		= time() + 172800;
+		$expires 		= time() + $this->_cookie_expiration;
 		$data 			= $customer_id . $expires;
 		$hash 			= hash_hmac( 'md5', $data, wp_hash( $data ) );
 		$value 			= $customer_id . '|' . $expires . '|' . $hash;
@@ -99,7 +103,7 @@ class WC_Session_Transients extends WC_Session {
      * @return void
      */
     public function save_data() {
-	    // Set cart data for 48 hours
-	    set_transient( 'wc_session_' . $this->_customer_id, $this->_data, 172800 );
+	    // Set cart data
+	    set_transient( 'wc_session_' . $this->_customer_id, $this->_data, $this->_cookie_expiration );
     }
 }
