@@ -20,12 +20,6 @@ class WC_Shipping {
 	/** @var array Stores methods loaded into woocommerce. */
 	var $shipping_methods 			= array();
 
-	/** @var array Stores available shipping method instances. */
-	var $available_shipping_methods = array();
-
-	/** @var string Stores the customers chosen shipping method. */
-	var $chosen_method				= null;
-
 	/** @var float Stores the cost of shipping */
 	var $shipping_total 			= 0;
 
@@ -278,7 +272,7 @@ class WC_Shipping {
 			$package['rates'] = array();
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
-
+			
 				if ( $shipping_method->is_available( $package ) ) {
 
 					// Reset Rates
@@ -286,7 +280,7 @@ class WC_Shipping {
 
 					// Calculate Shipping for package
 					$shipping_method->calculate_shipping( $package );
-
+					
 					// Place rates in package array
 					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) )
 						foreach ( $shipping_method->rates as $rate )
@@ -294,6 +288,9 @@ class WC_Shipping {
 				}
 
 			}
+			
+			// Filter the calculated rates
+			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 
 			// Store
 			set_transient( $package_hash, $package['rates'], 60 * 60 ); // Cached for an hour
@@ -338,7 +335,7 @@ class WC_Shipping {
 					    $available_methods[$id]->taxes[$key] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $available_methods[$id]->taxes[$key] ) ? $available_methods[$id]->taxes[$key] : 0 );
 					}
 				} else {
-					$available_methods[$id] = new WC_Shipping_Rate( $rate->id, $rate->label, $rate->cost, $rate->taxes );
+					$available_methods[$id] = $rate;
 				}
 
 			}

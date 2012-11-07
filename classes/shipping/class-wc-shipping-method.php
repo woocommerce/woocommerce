@@ -144,7 +144,7 @@ class WC_Shipping_Method extends WC_Settings_API {
 
 		}
 
-		$this->rates[] = new WC_Shipping_Rate( $id, $label, $total_cost, $taxes );
+		$this->rates[] = new WC_Shipping_Rate( $id, $label, $total_cost, $taxes, $this->id );
 	}
 
 	/**
@@ -244,10 +244,11 @@ class WC_Shipping_Method extends WC_Settings_API {
  */
 class WC_Shipping_Rate {
 
-	var $id 	= '';
-	var $label 	= '';
-	var $cost 	= 0;
-	var $taxes 	= array();
+	var $id 		= '';
+	var $label 		= '';
+	var $cost 		= 0;
+	var $taxes 		= array();
+	var $method_id 	= '';
 
 	/**
 	 * __construct function.
@@ -259,11 +260,12 @@ class WC_Shipping_Rate {
 	 * @param mixed $taxes
 	 * @return void
 	 */
-	public function __construct( $id, $label, $cost, $taxes ) {
-		$this->id 		= $id;
-		$this->label 	= $label;
-		$this->cost 	= $cost;
-		$this->taxes 	= $taxes ? $taxes : array();
+	public function __construct( $id, $label, $cost, $taxes, $method_id ) {
+		$this->id 			= $id;
+		$this->label 		= $label;
+		$this->cost 		= $cost;
+		$this->taxes 		= $taxes ? $taxes : array();
+		$this->method_id 	= $method_id;
 	}
 
 	/**
