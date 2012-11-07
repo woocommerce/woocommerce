@@ -106,14 +106,16 @@ jQuery(document).ready(function($) {
 	
 	}
 	
-	if($('.payment_methods input.input-radio').length > 1) {
-		$('.payment_methods input.input-radio').live('click', function(){
+	$('.payment_methods input.input-radio').live('click', function(){
+		if ( $('.payment_methods input.input-radio').length > 1 ) {
 			$('div.payment_box').filter(':visible').slideUp(250);
 			if ($(this).is(':checked')) {
 				$('div.payment_box.' + $(this).attr('ID')).slideDown(250);
 			}
-		});
-	}
+		} else {
+			$('div.payment_box').show();
+		}
+	});
 	
 	$('#order_review input[name=payment_method]:checked').click();
 	
