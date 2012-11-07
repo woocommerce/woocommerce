@@ -432,7 +432,12 @@ class WC_Checkout {
 						do_action( 'woocommerce_new_order', $order_id ); // Inserted successfully
 				}
 				
+				// DELETE ANY ITEMS IN CURRENT ORDER
 				
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d )", $order_id ) );
+				
+				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
+	
 				// SAVE LINE ITEMS
 				
 				foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) {
