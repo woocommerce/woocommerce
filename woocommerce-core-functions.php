@@ -1171,7 +1171,7 @@ function woocommerce_get_product_terms( $object_id, $taxonomy, $fields = 'all' )
 		return array();
 
 	$terms 			= array();
-	$object_terms 	= wp_get_object_terms( $object_id, $taxonomy );
+	$object_terms 	= get_the_terms( $object_id, $taxonomy );
 	$all_terms 		= array_flip( get_terms( $taxonomy, array( 'menu_order' => 'ASC', 'fields' => 'ids' ) ) );
 
 	switch ( $fields ) {
