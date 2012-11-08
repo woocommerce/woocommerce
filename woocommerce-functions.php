@@ -248,7 +248,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     // Variable product handling
     if ( $adding_to_cart->is_type( 'variable' ) ) {
     
-    	$variation_id 		= empty( $_REQUEST['quantity'] ) ? '' : absint( $_REQUEST['variation_id'] );
+    	$variation_id 		= empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
     	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : absint( $_REQUEST['quantity'] );
     	$all_variations_set = true;
     	$variations 		= array();
