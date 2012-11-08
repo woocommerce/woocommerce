@@ -32,9 +32,9 @@ class WC_Session_Transients extends WC_Session {
 		parent::__construct();
 		
 		$this->_cookie				= 'wc_session_cookie_' . COOKIEHASH;
+		$this->_cookie_expiration	= apply_filters( 'wc_session_transients_expiration', 172800 ); // 48 hours default
 		$this->_customer_id 		= $this->get_customer_id();
 		$this->_data 				= maybe_unserialize( get_transient( 'wc_session_' . $this->_customer_id ) );
-    	$this->_cookie_expiration	= apply_filters( 'wc_session_transients_expiration', 172800 ); // 48 hours default
     	
     	if ( false === $this->_data )
     		$this->_data = array();
@@ -90,7 +90,7 @@ class WC_Session_Transients extends WC_Session {
 		$data 			= $customer_id . $expires;
 		$hash 			= hash_hmac( 'md5', $data, wp_hash( $data ) );
 		$value 			= $customer_id . '|' . $expires . '|' . $hash;
-
+		
 		setcookie( $this->_cookie, $value, $expires, COOKIEPATH, COOKIE_DOMAIN, false, true );
 
 		return $customer_id;
