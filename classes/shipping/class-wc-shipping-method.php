@@ -281,16 +281,3 @@ class WC_Shipping_Rate {
 		return $taxes;
 	}
 }
-
-/**
- * woocommerce_shipping_method class.
- *
- * @package		WooCommerce/Classes/Shipping
- * @extends 	WC_Shipping_Method
- * @deprecated 	1.4
- */
-class woocommerce_shipping_method extends WC_Shipping_Method {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_shipping_method', '1.4', 'WC_Shipping_Method()' );
-	}
-}

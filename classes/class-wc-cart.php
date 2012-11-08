@@ -1942,17 +1942,3 @@ class WC_Cart {
 			return apply_filters( 'woocommerce_cart_total_discount', $total_discount, $this );
 		}
 }
-
-/**
- * woocommerce_cart class.
- *
- * @extends 	WC_Cart
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_cart extends WC_Cart {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_cart', '1.4', 'WC_Cart()' );
-		parent::__construct();
-	}
-}

@@ -631,16 +631,3 @@ class WC_Tax {
 	}
 
 }
-
-/**
- * woocommerce_tax class.
- *
- * @extends 	WC_Tax
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_tax extends WC_Tax {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_tax', '1.4', 'WC_Tax()' );
-	}
-}

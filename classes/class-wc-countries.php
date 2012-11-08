@@ -1183,17 +1183,3 @@ class WC_Countries {
 		return $address_fields;
 	}
 }
-
-/**
- * woocommerce_countries class.
- *
- * @extends 	WC_Countries
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_countries extends WC_Countries {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_countries', '1.4', 'WC_Countries()' );
-		parent::__construct();
-	}
-}

@@ -146,20 +146,6 @@ class WC_Payment_Gateway extends WC_Settings_API {
 
 
 	/**
-	 * The Gateway Icon
-	 *
-	 * Display the gateway's icon.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	function icon() {
-		_deprecated_function( __FUNCTION__, '1.6.0', 'get_icon()' );
-		return $this->get_icon();
-	}
-
-
-	/**
 	 * Process Payment
 	 *
 	 * Process the payment. Override this in your gateway.
@@ -209,17 +195,4 @@ class WC_Payment_Gateway extends WC_Settings_API {
 		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
 	}
 
-}
-
-/**
- * woocommerce_payment_gateway class.
- *
- * @extends WC_Payment_Gateway
- * @package		WooCommerce/Classes/Payment
- * @deprecated 1.4
- */
-class woocommerce_payment_gateway extends WC_Payment_Gateway {
-	public function __construct() {
-		parent::__construct();
-	}
 }

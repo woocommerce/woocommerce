@@ -308,17 +308,3 @@ class WC_Coupon {
 		return new WP_Error( 'coupon_error', apply_filters( 'woocommerce_coupon_error', $error, $this ) );
 	}
 }
-
-/**
- * woocommerce_coupon class.
- *
- * @extends 	WC_Coupon
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_coupon extends WC_Coupon {
-	public function __construct( $code ) {
-		_deprecated_function( 'woocommerce_coupon', '1.4', 'WC_Coupon()' );
-		parent::__construct( $code );
-	}
-}

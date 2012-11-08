@@ -1393,19 +1393,6 @@ class WC_Product {
 	}
 
 
-	/**
-	 * get_available_attribute_variations Deprecated - naming was confusing.
-	 *
-	 * @deprecated 1.5.7
-	 * @access public
-	 * @return void
-	 */
-	function get_available_attribute_variations() {
-		_deprecated_function( 'get_available_attribute_variations', '1.5.7', 'get_variation_attributes' );
-		return $this->get_variation_attributes();
-	}
-
-
     /**
      * Return an array of attributes used for variations, as well as their possible values.
      *
@@ -1703,19 +1690,5 @@ class WC_Product {
 		update_post_meta( $this->id, '_max_variation_sale_price', $this->max_variation_sale_price );
 
 		$woocommerce->clear_product_transients( $this->id );
-	}
-}
-
-/**
- * woocommerce_product class.
- *
- * @extends 	WC_Product
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_product extends WC_Product {
-	public function __construct( $id ) {
-		_deprecated_function( 'woocommerce_product', '1.4', 'WC_Product()' );
-		parent::__construct( $id );
 	}
 }

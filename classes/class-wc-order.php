@@ -658,50 +658,6 @@ class WC_Order {
 		return apply_filters( 'woocommerce_order_amount_line_tax', number_format( $item['line_tax'], 2, '.', '') );
 	}
 
-	/** Deprecated functions */
-
-
-	/**
-	 * get_order_total function.
-	 *
-	 * @deprecated 1.4
-	 * @access public
-	 * @return float
-	 */
-	function get_order_total() {
-		return $this->get_total();
-	}
-
-
-	/**
-	 * get_item_cost function.
-	 *
-	 * @deprecated 1.4
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @return float
-	 */
-	function get_item_cost( $item, $inc_tax = false ) {
-		_deprecated_function( __FUNCTION__, '1.4', 'get_item_total()' );
-		return $this->get_item_total( $item, $inc_tax );
-	}
-
-
-	/**
-	 * get_row_cost function.
-	 *
-	 * @deprecated 1.4
-	 * @access public
-	 * @param mixed $item
-	 * @param bool $inc_tax (default: false)
-	 * @return float
-	 */
-	function get_row_cost( $item, $inc_tax = false ) {
-		_deprecated_function( __FUNCTION__, '1.4', 'get_row_cost()' );
-		return $this->get_line_total( $item, $inc_tax );
-	}
-
 	/** End Total Getters *******************************************************/
 
 	/**
@@ -1120,26 +1076,6 @@ class WC_Order {
 		global $woocommerce;
 		return apply_filters('woocommerce_get_cancel_order_url', $woocommerce->nonce_url( 'cancel_order', add_query_arg('cancel_order', 'true', add_query_arg('order', $this->order_key, add_query_arg('order_id', $this->id, trailingslashit( home_url() ))))));
 	}
-
-
-	/**
-	 * Gets a downloadable products file url.
-	 *
-	 * @access public
-	 * @param int $item_id
-	 * @param int $variation_id
-	 * @return string
-	 */
-	function get_downloadable_file_url( $item_id, $variation_id ) {
-
-		_deprecated_function( __METHOD__, '1.7', 'WC_Order::get_downloadable_file_urls' );
-
-	 	$download_id = $variation_id > 0 ? $variation_id : $item_id;
-
-	 	$user_email = $this->billing_email;
-
-	 	return add_query_arg( 'download_file', $download_id, add_query_arg( 'order', $this->order_key, add_query_arg( 'email', $user_email, trailingslashit( home_url() ) ) ) );
-	 }
 
 
 	/**
@@ -1621,31 +1557,5 @@ class WC_Order_Item_Meta {
 			else 
 				echo $output;
 		}
-	}
-}
-
-/**
- * woocommerce_order class.
- *
- * @extends 	WC_Order
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_order extends WC_Order {
-	public function __construct( $id = '' ) {
-		parent::__construct( $id );
-	}
-}
-
-/**
- * order_item_meta class.
- *
- * @extends 	WC_Order_Item_Meta
- * @deprecated 	1.6.4
- * @package		WooCommerce/Classes
- */
-class order_item_meta extends WC_Order_Item_Meta {
-	public function __construct( $item_meta = array() ) {
-		parent::__construct( $item_meta );
 	}
 }

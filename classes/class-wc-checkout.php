@@ -745,17 +745,3 @@ class WC_Checkout {
 		}
 	}
 }
-
-/**
- * woocommerce_checkout class.
- *
- * @extends		WC_Checkout
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_checkout extends WC_Checkout {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_checkout', '1.4', 'WC_Checkout()' );
-		parent::__construct();
-	}
-}

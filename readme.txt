@@ -225,6 +225,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Localization - Bulgarian update by Hristo Pandjarov.
 * Localization - Spanish update by bolorino.
 
+* Removed all deprecated classes and functions except for 1.6.x template files and functions
 * Many other refactors, minor fixes and tweaks!
 
 = 1.6.5.2 - 12/09/2012 =

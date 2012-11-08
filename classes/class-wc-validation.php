@@ -152,17 +152,3 @@ class WC_Validation {
 	}
 
 }
-
-/**
- * woocommerce_validation class.
- *
- * @extends 	WC_Validation
- * @deprecated 	1.4
- * @package		WooCommerce/Classes
- */
-class woocommerce_validation extends WC_Validation {
-	public function __construct() {
-		_deprecated_function( 'woocommerce_validation', '1.4', 'WC_Validation()' );
-		parent::__construct();
-	}
-}
