@@ -272,7 +272,6 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						}
 						
 					endif;
-					$i = 1;
 					foreach ($available_gateways as $gateway ) :
 						?>
 						<li>
@@ -280,15 +279,13 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 						<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
-									$display = ( $i > 1 ) ? 'style="display:none;"' : '';
-									echo '<div class="payment_box payment_method_'.$gateway->id.'" ' . $display . '>';
+									echo '<div class="payment_box payment_method_' . $gateway->id . '" style="display:none;">';
 									$gateway->payment_fields();
 									echo '</div>';
 								endif;
 							?>
 						</li>
 						<?php
-						$i++;
 					endforeach;
 				else :
 

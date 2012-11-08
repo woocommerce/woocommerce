@@ -57,7 +57,6 @@ global $woocommerce;
 				if ($available_gateways) :
 					// Chosen Method
 					if (sizeof($available_gateways)) current($available_gateways)->set_current();
-				$i = 1;
 					foreach ($available_gateways as $gateway ) :
 						?>
 						<li>
@@ -65,8 +64,7 @@ global $woocommerce;
 							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
 								if ( $gateway->has_fields() || $gateway->get_description() ) :
-									$display = ( $i > 1 ) ? 'style="display:none;"' : '';
-									echo '<div class="payment_box payment_method_'.$gateway->id.'" ' . $display . '>';
+									echo '<div class="payment_box payment_method_' . $gateway->id . '" style="display:none;">';
 									$gateway->payment_fields();
 									echo '</div>';
 								endif;

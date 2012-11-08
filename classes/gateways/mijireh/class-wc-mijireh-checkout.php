@@ -231,9 +231,11 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 
 		// add items to order
 		$items = $wc_order->get_items();
+		
 		foreach($items as $item) {
 			$product = $wc_order->get_product_from_item( $item );
-			$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal($item), $item['qty'], $product->get_sku() );
+			
+			$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, false ), $item['qty'], $product->get_sku() );
 		}
 
 		// add billing address to order
@@ -281,10 +283,10 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 
 		// Set URL for mijireh payment notificatoin - use WC API
 		$mj_order->return_url 		= str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Mijireh_Checkout', home_url( '/' ) ) );
-
+		
 		// Identify woocommerce
 		$mj_order->partner_id 		= 'woo';
-
+		
 		try {
 			$mj_order->create();
 			$result = array(
