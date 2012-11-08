@@ -743,7 +743,7 @@ class WC_Cart {
 
 			// Check product is_purchasable
 			if ( ! $product_data->is_purchasable() ) {
-				$woocommerce->add_error( __( 'Sorry, this product cannot be purchased.', 'woocommerce' ) );
+				$woocommerce->add_error( sprintf( __( 'Sorry, &quot;%s&quot; cannot be purchased.', 'woocommerce' ), $product_data->get_title() ) );
 				return false;
 			}
 

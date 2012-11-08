@@ -347,6 +347,7 @@ function woocommerce_wp_hidden_input( $field ) {
 	
 	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 	
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) .  '" /> ';
 }

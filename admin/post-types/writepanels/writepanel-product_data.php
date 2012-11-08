@@ -557,6 +557,8 @@ function woocommerce_product_data_box() {
 				}
 
 				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents ) );
+				
+				woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
 
 				do_action( 'woocommerce_product_options_grouping' );
 
@@ -810,27 +812,42 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 	}
 
 	// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-	if ( $post->post_parent > 0 || $product_type == 'grouped' ) {
-		$post_parent = $post->post_parent > 0 ? $post->post_parent : $post_id;
+	if ( $post->post_parent > 0 || $product_type == 'grouped' || $_POST['previous_parent_id'] > 0 ) {
+		
+		$clear_parent_ids = array();
+		
+		if ( $post->post_parent > 0 )
+			$clear_parent_ids[] = $post->post_parent;
+			
+		if ( $product_type == 'grouped' )
+			$clear_parent_ids[] = $post_id;
+			
+		if ( $_POST['previous_parent_id'] > 0 )
+			$clear_parent_ids[] = absint( $_POST['previous_parent_id'] );
 
-		$children_by_price = get_posts( array(
-			'post_parent' 	=> $post_parent,
-			'orderby' 		=> 'meta_value_num',
-			'order'			=> 'asc',
-			'meta_key'		=> '_price',
-			'posts_per_page'=> 1,
-			'post_type' 	=> 'product',
-			'fields' 		=> 'ids'
-		) );
-		if ( $children_by_price ) {
-			foreach ( $children_by_price as $child ) {
-				$child_price = get_post_meta( $child, '_price', true );
-				update_post_meta( $post_parent, '_price', $child_price );
+		if ( $clear_parent_ids ) {
+			foreach( $clear_parent_ids as $clear_id ) {
+				
+				$children_by_price = get_posts( array(
+					'post_parent' 	=> $clear_id,
+					'orderby' 		=> 'meta_value_num',
+					'order'			=> 'asc',
+					'meta_key'		=> '_price',
+					'posts_per_page'=> 1,
+					'post_type' 	=> 'product',
+					'fields' 		=> 'ids'
+				) );
+				if ( $children_by_price ) {
+					foreach ( $children_by_price as $child ) {
+						$child_price = get_post_meta( $child, '_price', true );
+						update_post_meta( $clear_id, '_price', $child_price );
+					}
+				}
+		
+				// Clear cache/transients
+				$woocommerce->clear_product_transients( $clear_id );
 			}
 		}
-
-		// Clear cache/transients
-		$woocommerce->clear_product_transients( $post_parent );
 	}
 
 	// Sold Individuall

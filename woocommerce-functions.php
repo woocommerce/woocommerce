@@ -301,6 +301,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
 		
 			$quantity_set = false;
+			$added_to_cart = array();
 		
 			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
 				if ( $quantity < 1 ) 
@@ -314,9 +315,13 @@ function woocommerce_add_to_cart_action( $url = false ) {
 				if ( $passed_validation ) {
 					if ( $woocommerce->cart->add_to_cart( $item, $quantity ) ) {
 						$was_added_to_cart = true;
-						woocommerce_add_to_cart_message( $item );
+						$added_to_cart[] = $item;
 					}
 				}
+			}
+			
+			if ( $was_added_to_cart ) {
+				woocommerce_add_to_cart_message( $added_to_cart );
 			}
 			
 			if ( ! $was_added_to_cart && ! $quantity_set ) {
@@ -389,7 +394,19 @@ function woocommerce_add_to_cart_action( $url = false ) {
 function woocommerce_add_to_cart_message( $product_id ) {
 	global $woocommerce;
 	
-	$added_text = sprintf( __( '&quot;%s&quot; was successfully added to your cart.', 'woocommerce' ), get_the_title( $product_id ) );
+	if ( is_array( $product_id ) ) {
+	
+		$titles = array();
+		
+		foreach ( $product_id as $id ) {
+			$titles[] = get_the_title( $id );
+		}
+
+		$added_text = sprintf( __( 'Added &quot;%s&quot; to your cart.', 'woocommerce' ), join( __('&quot; and &quot;'), array_filter( array_merge( array( join( '&quot;, &quot;', array_slice( $titles, 0, -1 ) ) ), array_slice( $titles, -1 ) ) ) ) );
+		
+	} else {
+		$added_text = sprintf( __( '&quot;%s&quot; was successfully added to your cart.', 'woocommerce' ), get_the_title( $product_id ) );
+	}
 
 	// Output success messages
 	if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) :
