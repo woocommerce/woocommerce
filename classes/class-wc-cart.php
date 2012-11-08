@@ -1608,7 +1608,7 @@ class WC_Cart {
 		 * @return bool
 		 */
 		function has_discount( $code ) {
-			if ( in_array($code, $this->applied_coupons) ) return true;
+			if ( in_array( $code, $this->applied_coupons ) ) return true;
 			return false;
 		}
 
@@ -1624,7 +1624,7 @@ class WC_Cart {
 			// Coupons are globally disabled
 			if ( get_option('woocommerce_enable_coupons') == 'no' ) return false;
 
-			$the_coupon = new WC_Coupon($coupon_code);
+			$the_coupon = new WC_Coupon( $coupon_code );
 
 			if ( $the_coupon->id ) {
 

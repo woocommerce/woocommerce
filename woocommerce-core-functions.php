@@ -13,6 +13,12 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
+ * Hooks used in admin and frontend
+ */
+add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
+add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
+
+/**
  * woocommerce_get_dimension function.
  *
  * Normalise dimensions, unify to cm then convert to wanted unit value

@@ -41,7 +41,7 @@ function woocommerce_cart( $atts ) {
 	if ( ! empty( $_POST['apply_coupon'] ) ) {
 
 		if ( ! empty( $_POST['coupon_code'] ) ) {
-			$woocommerce->cart->add_discount( stripslashes( trim( $_POST['coupon_code'] ) ) );
+			$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 		} else {
 			$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 		}

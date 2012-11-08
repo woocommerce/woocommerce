@@ -170,7 +170,11 @@ function woocommerce_coupon_data_meta_box( $post ) {
  */
 function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	global $wpdb, $woocommerce_errors;
-
+	
+	// Ensure coupon code is correctly formatted
+	$post->post_title = apply_filters( 'woocommerce_coupon_code', $post->post_title );
+	$wpdb->update( $wpdb->posts, array( 'post_title' => $post->post_title ), array( 'ID' => $post_id ) );
+	
 	// Check for dupe coupons
 	$coupon_found = $wpdb->get_var( $wpdb->prepare( "
 		SELECT $wpdb->posts.ID
@@ -179,10 +183,10 @@ function woocommerce_process_shop_coupon_meta( $post_id, $post ) {
 	    AND $wpdb->posts.post_status = 'publish'
 	    AND $wpdb->posts.post_title = '%s'
 	    AND $wpdb->posts.ID != %s
-	 ", esc_attr( $_POST['post_title'] ), $post_id ) );
+	 ", $post->post_title, $post_id ) );
 	 
 	if ( $coupon_found )
-		$woocommerce_errors[] = __( 'Coupon code already exists.', 'woocommerce' );
+		$woocommerce_errors[] = __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' );
 
 	// Add/Replace data to array
 	$type 				= woocommerce_clean( $_POST['discount_type'] );

@@ -95,7 +95,7 @@ function woocommerce_ajax_apply_coupon() {
 	check_ajax_referer( 'apply-coupon', 'security' );
 
 	if ( ! empty( $_POST['coupon_code'] ) ) {
-		$woocommerce->cart->add_discount( sanitize_text_field( trim( $_POST['coupon_code'] ) ) );
+		$woocommerce->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
 	} else {
 		$woocommerce->add_error( __( 'Please enter a coupon code.', 'woocommerce' ) );
 	}
