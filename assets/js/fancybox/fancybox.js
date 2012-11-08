@@ -1150,7 +1150,7 @@
 
 })(jQuery);
 
-jQuery(function(){
+jQuery(document).ready(function() {
 	
 	// Hide review form - it will be in a lightbox
 	jQuery('#review_form_wrapper').hide();
