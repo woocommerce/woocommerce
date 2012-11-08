@@ -1145,23 +1145,21 @@
 	};
 
 	$(document).ready(function() {
+		
 		$.fancybox.init();
+	
+		// Hide review form - it will be in a lightbox
+		$('#review_form_wrapper').hide();
+		
+		// Lightbox
+		$('a.zoom, a.show_review_form').fancybox({
+			'transitionIn'	:	'elastic',
+			'transitionOut'	:	'elastic',
+			'speedIn'		:	600, 
+			'speedOut'		:	200, 
+			'overlayShow'	:	true
+		});
+	
 	});
 
 })(jQuery);
-
-jQuery(document).ready(function() {
-	
-	// Hide review form - it will be in a lightbox
-	jQuery('#review_form_wrapper').hide();
-	
-	// Lightbox
-	jQuery('a.zoom, a.show_review_form').fancybox({
-		'transitionIn'	:	'elastic',
-		'transitionOut'	:	'elastic',
-		'speedIn'		:	600, 
-		'speedOut'		:	200, 
-		'overlayShow'	:	true
-	});
-
-});
