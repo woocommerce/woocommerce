@@ -1009,16 +1009,24 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 		if ( is_search() || is_filtered() || is_paged() )
 			return true;
 			
-		if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'no' )
-			return true;
-		
-		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) 
+		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) != 'subcategories' )
 			return true;
 			
-		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) 
-			return true;
+		$term = get_queried_object();
 			
-		$term 			= get_queried_object();
+		if ( is_product_category() ) {			
+			switch ( get_woocommerce_term_meta( $term->term_id, 'display_type', true ) ) {
+				case 'products' :
+				case 'both' :
+					return true;
+				break;
+				case '' :
+					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' )
+						return true;
+				break;
+			}
+		}
+			
 		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
 		$has_children 	= $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d", $parent_id ) );
 	
@@ -1069,14 +1077,27 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 
 		// Don't show when filtering, searching or when on page > 1 and ensure we're on a product archive
 		if ( is_search() || is_filtered() || is_paged() || ( ! is_product_category() && ! is_shop() ) ) return;
-
+		
 		// Check categories are enabled
-		if ( is_product_category() && get_option( 'woocommerce_show_subcategories' ) == 'no' ) return;
-		if ( is_shop() && get_option( 'woocommerce_shop_show_subcategories' ) == 'no' ) return;
-
+		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) == '' ) return;
+		
 		// Find the category + category parent, if applicable
 		$term 			= get_queried_object();
 		$parent_id 		= empty( $term->term_id ) ? 0 : $term->term_id;
+		
+		if ( is_product_category() ) {
+			$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
+			
+			switch ( $display_type ) {
+				case 'products' :
+					return;
+				break;
+				case '' :
+					if ( get_option( 'woocommerce_category_archive_display' ) == '' )
+						return;
+				break;
+			}
+		}
 
 		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$args = array(
@@ -1113,12 +1134,28 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		}
 
 		// If we are hiding products disable the loop and pagination
-		if ( $product_category_found == true && get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
-			$wp_query->post_count = 0;
-			$wp_query->max_num_pages = 0;
-		}
-
 		if ( $product_category_found ) {
+			if ( is_product_category() ) {
+				$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
+				
+				switch ( $display_type ) {
+					case 'subcategories' :
+						$wp_query->post_count = 0;
+						$wp_query->max_num_pages = 0;
+					break;
+					case '' :
+						if ( get_option( 'woocommerce_category_archive_display' ) == 'subcategories' ) {
+							$wp_query->post_count = 0;
+							$wp_query->max_num_pages = 0;
+						}
+					break;
+				}
+			}
+			if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) == 'subcategories' ) {
+				$wp_query->post_count = 0;
+				$wp_query->max_num_pages = 0;
+			}
+			
 			echo esc_html( $after );
 			return true;
 		}

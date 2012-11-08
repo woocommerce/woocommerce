@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added option to resend order emails, checkboxes select which one.
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
+* Feature - New shop page/category archive display settings, and the ability to change display per-category.
 
 * Feature - Redone order item storage making them easier (and faster) to access for reporting, and querying purchases. Huge performance gains for reports. Order items are no longer serialised - they are stored in there own table with meta. Existing data can be be updated on upgrade. 
 

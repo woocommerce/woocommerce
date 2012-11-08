@@ -73,6 +73,23 @@ if ( empty( $permalinks ) && $shop_page_id > 0 ) {
 	update_option( 'woocommerce_permalinks', $permalinks );	
 }
 
+// Update subcat display settings
+if ( get_option( 'woocommerce_shop_show_subcategories' ) == 'yes' ) {
+	if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+		update_option( 'woocommerce_shop_page_display', 'subcategories' );
+	} else {
+		update_option( 'woocommerce_shop_page_display', 'both' );
+	}
+}
+
+if ( get_option( 'woocommerce_show_subcategories' ) == 'yes' ) {
+	if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+		update_option( 'woocommerce_category_archive_display', 'subcategories' );
+	} else {
+		update_option( 'woocommerce_category_archive_display', 'both' );
+	}
+}
+
 // Now its time for the massive update to line items - move them to the new DB tables
 // Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
 $order_item_rows = $wpdb->get_results( $wpdb->prepare( "

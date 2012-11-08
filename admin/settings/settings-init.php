@@ -515,30 +515,35 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		)),
 		'desc_tip'	=>  true,
 	),
-
+	
 	array(
-		'name' => __( 'Show subcategories', 'woocommerce' ),
-		'desc' 		=> __( 'Show subcategories on category pages', 'woocommerce' ),
-		'id' 		=> 'woocommerce_show_subcategories',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'start'
+		'name' => __( 'Shop page display', 'woocommerce' ),
+		'desc' 		=> __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shop_page_display',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array(
+			''  			=> __( 'Show products', 'woocommerce' ),
+			'subcategories' => __( 'Show subcategories', 'woocommerce' ),
+			'both'   		=> __( 'Show both', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
 	),
-
+	
 	array(
-		'desc' 		=> __( 'Show subcategories on the shop page', 'woocommerce' ),
-		'id' 		=> 'woocommerce_shop_show_subcategories',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> ''
-	),
-
-	array(
-		'desc' 		=> __( 'When showing subcategories, hide products', 'woocommerce' ),
-		'id' 		=> 'woocommerce_hide_products_when_showing_subcategories',
-		'std' 		=> 'no',
-		'type' 		=> 'checkbox',
-		'checkboxgroup'		=> 'end'
+		'name' => __( 'Default category display', 'woocommerce' ),
+		'desc' 		=> __( 'This controls what is shown on category archives.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_category_archive_display',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> '',
+		'type' 		=> 'select',
+		'options' => array(
+			''  			=> __( 'Show products', 'woocommerce' ),
+			'subcategories' => __( 'Show subcategories', 'woocommerce' ),
+			'both'   		=> __( 'Show both', 'woocommerce' ),
+		),
+		'desc_tip'	=>  true,
 	),
 
 	array(

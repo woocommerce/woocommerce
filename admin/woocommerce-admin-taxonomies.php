@@ -18,9 +18,18 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @access public
  * @return void
  */
-function woocommerce_add_category_thumbnail_field() {
+function woocommerce_add_category_fields() {
 	global $woocommerce;
 	?>
+	<div class="form-field">
+		<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
+		<select id="display_type" name="display_type" class="postform">
+			<option value=""><?php _e( 'Default', 'woocommerce' ); ?></option>
+			<option value="products"><?php _e( 'Products', 'woocommerce' ); ?></option>
+			<option value="subcategories"><?php _e( 'Subcategories', 'woocommerce' ); ?></option>
+			<option value="both"><?php _e( 'Both', 'woocommerce' ); ?></option>
+		</select>
+	</div>
 	<div class="form-field">
 		<label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label>
 		<div id="product_cat_thumbnail" style="float:left;margin-right:10px;"><img src="<?php echo woocommerce_placeholder_img_src(); ?>" width="60px" height="60px" /></div>
@@ -79,9 +88,7 @@ function woocommerce_add_category_thumbnail_field() {
 	<?php
 }
 
-add_action( 'product_cat_add_form_fields', 'woocommerce_add_category_thumbnail_field' );
-add_action( 'product_cat_edit_form_fields', 'woocommerce_edit_category_thumbnail_field', 10,2 );
-
+add_action( 'product_cat_add_form_fields', 'woocommerce_add_category_fields' );
 
 /**
  * Edit category thumbnail field.
@@ -91,9 +98,10 @@ add_action( 'product_cat_edit_form_fields', 'woocommerce_edit_category_thumbnail
  * @param mixed $taxonomy Taxonomy of the term being edited
  * @return void
  */
-function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
+function woocommerce_edit_category_fields( $term, $taxonomy ) {
 	global $woocommerce;
-
+	
+	$display_type	= get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 	$image 			= '';
 	$thumbnail_id 	= absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
 	if ($thumbnail_id) :
@@ -102,6 +110,17 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 		$image = woocommerce_placeholder_img_src();
 	endif;
 	?>
+	<tr class="form-field">
+		<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
+		<td>
+			<select id="display_type" name="display_type" class="postform">
+				<option value="" <?php selected( '', $display_type ); ?>><?php _e( 'Default', 'woocommerce' ); ?></option>
+				<option value="products" <?php selected( 'products', $display_type ); ?>><?php _e( 'Products', 'woocommerce' ); ?></option>
+				<option value="subcategories" <?php selected( 'subcategories', $display_type ); ?>><?php _e( 'Subcategories', 'woocommerce' ); ?></option>
+				<option value="both" <?php selected( 'both', $display_type ); ?>><?php _e( 'Both', 'woocommerce' ); ?></option>
+			</select>
+		</td>
+	</tr>
 	<tr class="form-field">
 		<th scope="row" valign="top"><label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 		<td>
@@ -152,8 +171,11 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
 	<?php
 }
 
+add_action( 'product_cat_edit_form_fields', 'woocommerce_edit_category_fields', 10,2 );
+
+
 /**
- * woocommerce_category_thumbnail_field_save function.
+ * woocommerce_category_fields_save function.
  *
  * @access public
  * @param mixed $term_id Term ID being saved
@@ -161,13 +183,16 @@ function woocommerce_edit_category_thumbnail_field( $term, $taxonomy ) {
  * @param mixed $taxonomy Taxonomy of the term being saved
  * @return void
  */
-function woocommerce_category_thumbnail_field_save( $term_id, $tt_id, $taxonomy ) {
+function woocommerce_category_fields_save( $term_id, $tt_id, $taxonomy ) {
+	if ( isset( $_POST['display_type'] ) )
+		update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) );
+		
 	if ( isset( $_POST['product_cat_thumbnail_id'] ) )
-		update_woocommerce_term_meta( $term_id, 'thumbnail_id', $_POST['product_cat_thumbnail_id'] );
+		update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
 }
 
-add_action( 'created_term', 'woocommerce_category_thumbnail_field_save', 10,3 );
-add_action( 'edit_term', 'woocommerce_category_thumbnail_field_save', 10,3 );
+add_action( 'created_term', 'woocommerce_category_fields_save', 10,3 );
+add_action( 'edit_term', 'woocommerce_category_fields_save', 10,3 );
 
 
 /**
