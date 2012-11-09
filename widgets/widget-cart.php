@@ -10,9 +10,6 @@
  * @version 	1.6.4
  * @extends 	WP_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WooCommerce_Widget_Cart extends WP_Widget {
 
 	var $woo_widget_cssclass;
@@ -58,7 +55,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 
 		if ( is_cart() || is_checkout() ) return;
 
-		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __( 'Cart', 'woocommerce' ) : $instance['title'], $instance, $this->id_base );
+		$title = apply_filters('widget_title', empty( $instance['title'] ) ? __('Cart', 'woocommerce') : $instance['title'], $instance, $this->id_base );
 		$hide_if_empty = empty( $instance['hide_if_empty'] )  ? 0 : 1;
 
 		echo $before_widget;
@@ -72,9 +69,9 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 
 		if ( $hide_if_empty && sizeof( $woocommerce->cart->get_cart() ) == 0 ) {
 			$woocommerce->add_inline_js( "
-				jQuery('.hide_cart_widget_if_empty').closest('.widget').hide();
+				jQuery('.hide_cart_widget_if_empty').parent().hide();
 				jQuery('body').bind('adding_to_cart', function(){
-					jQuery(this).find('.hide_cart_widget_if_empty').closest('.widget').fadeIn();
+					jQuery(this).find('.hide_cart_widget_if_empty').parent().fadeIn();
 				});
 			" );
 		}
@@ -108,7 +105,7 @@ class WooCommerce_Widget_Cart extends WP_Widget {
 	function form( $instance ) {
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
 		?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title:', 'woocommerce' ) ?></label>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'woocommerce') ?></label>
 		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php if (isset ( $instance['title'])) {echo esc_attr( $instance['title'] );} ?>" /></p>
 
 		<p><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id('hide_if_empty') ); ?>" name="<?php echo esc_attr( $this->get_field_name('hide_if_empty') ); ?>"<?php checked( $hide_if_empty ); ?> />
