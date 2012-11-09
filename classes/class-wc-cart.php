@@ -76,11 +76,6 @@ class WC_Cart {
 	 * @return void
 	 */
 	function __construct() {
-	
-	
-		$this->add_fee( 'Gay fee', 10, true );
-		$this->add_fee( 'Another fee', 0.10, true );
-	
 		$this->tax = new WC_Tax();
 		$this->prices_include_tax = ( get_option('woocommerce_prices_include_tax') == 'yes' ) ? true : false;
 		$this->display_totals_ex_tax = ( get_option('woocommerce_display_totals_excluding_tax') == 'yes' ) ? true : false;
