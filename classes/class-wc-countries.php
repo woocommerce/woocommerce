@@ -259,7 +259,6 @@ class WC_Countries {
 			'TC' => __( 'Turks and Caicos Islands', 'woocommerce' ),
 			'TV' => __( 'Tuvalu', 'woocommerce' ),
 			'VI' => __( 'U.S. Virgin Islands', 'woocommerce' ),
-			'USAF' => __( 'US Armed Forces', 'woocommerce' ),
 			'UM' => __( 'US Minor Outlying Islands', 'woocommerce' ),
 			'UG' => __( 'Uganda', 'woocommerce' ),
 			'UA' => __( 'Ukraine', 'woocommerce' ),
@@ -427,12 +426,10 @@ class WC_Countries {
 				'WA' => __( 'Washington', 'woocommerce' ) ,
 				'WV' => __( 'West Virginia', 'woocommerce' ) ,
 				'WI' => __( 'Wisconsin', 'woocommerce' ) ,
-				'WY' => __( 'Wyoming', 'woocommerce' )
-			),
-			'USAF' => array(
-				'AA' => __( 'Americas', 'woocommerce' ) ,
-				'AE' => __( 'Europe', 'woocommerce' ) ,
-				'AP' => __( 'Pacific', 'woocommerce' )
+				'WY' => __( 'Wyoming', 'woocommerce' ) ,
+				'AA' => __( 'Armed Forces (AA)', 'woocommerce' ) ,
+				'AE' => __( 'Armed Forces (AE)', 'woocommerce' ) ,
+				'AP' => __( 'Armed Forces (AP)', 'woocommerce' )
 			),
 			'VN' => array()
 		));

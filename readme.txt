@@ -211,6 +211,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allowed sku search to return > 1 result.
 * Tweak - If only one country is enabled, don't show country dropdown on checkout.
 * Tweak - Case insensitive coupons.
+* Tweak - Made armed forces 'states' under the US rather than in their own 'country'.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
