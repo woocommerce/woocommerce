@@ -472,17 +472,6 @@ table.wc_status_table {
 	h3 small {
 		color: #999;
 	}
-	.row-actions {
-		float:right;
-		padding:0;
-		color: #999;
-		a {
-			color: #999;
-		}
-		a.remove_row:hover {
-			color: red;
-		}
-	}
 }
 #woocommerce-order-downloads {
 	.buttons {
@@ -615,12 +604,14 @@ table.wc_status_table {
 			border-style: dotted;
 		}
 	}
-	#tax_rows {
+	.total_rows {
 		margin: 6px 0 0;
 	}
-	.tax_row {
+	.total_row {
 		margin:0 0 9px;
 		border:1px solid #DFDFDF;
+		border-right-width: 2px;
+		border-bottom-width: 2px;
 		background: #fff;
 		padding:6px 6px 0;
 		position: relative;
@@ -649,6 +640,12 @@ table.wc_status_table {
 			float: right;
 			width: 49%;
 			clear: none;
+			input, select {
+				width: 100%;
+			}
+		}
+		p.wide {
+			clear: both;
 			input, select {
 				width: 100%;
 			}
@@ -705,7 +702,7 @@ table.wc_status_table {
 			font-size: 11px;
 			text-align: left;
 		}
-		td {
+		tbody th, td {
 			padding: 8px;
 			text-align: left;
 			line-height: 26px;
@@ -723,16 +720,15 @@ table.wc_status_table {
 				color: #555;
 			}
 		}
-		.name {
+		.item {
 			min-width: 200px;
 		}
 		.center, .variation-id {
 			text-align: center;
 		}
-		.cost, .tax, .quantity, .line_total, .line_subtotal, .tax_class {
+		.cost, .tax, .quantity, .line_cost, .line_tax, .tax_class {
 			text-align: right;
 			label {
-				display: block;
 				white-space: nowrap;
 				color: #999;
 				font-size: 0.833em;
@@ -751,12 +747,20 @@ table.wc_status_table {
 				vertical-align:middle;
 			}
 		}
+		.shipping_method {
+			select {
+				width: 100%;
+			}
+		}
 		.quantity {
 			text-align: center;
 			input {
 				text-align: center;
 				width: 50px;
 			}
+		}
+		span.subtotal {
+			opacity: 0.5;
 		}
 		td.tax_class, th.tax_class {
 			text-align: left;
@@ -778,7 +782,8 @@ table.wc_status_table {
 			}
 		}
 		.thumb {
-			text-align: center;
+			text-align: left;
+			width: 52px;
 			a {
 				display: block;
 			}
@@ -789,6 +794,16 @@ table.wc_status_table {
 				vertical-align: middle;
 				width: 46px;
 				height: 46px;
+			}
+		}
+		tr.fee {
+			th {
+				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAARklEQVQYGWP8//8/AzGACV3Rnj17/oMwujiGQnQFMD7RChlBbsRmFcwkEO3i4sJImonIumGmg0xBFifaRKIVgj2DbAUuNgCfThpracSKqwAAAABJRU5ErkJggg==) no-repeat center;
+			}
+		}
+		tr.shipping {
+			th {
+				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAICAYAAADA+m62AAAANklEQVQYV2NkIBIwnjt37j+6WiMjI7g4iA2SJ6gQpAikGKtCbK6hgUKQNTAPwRyOTQzsI2IAABr8IkSi93/bAAAAAElFTkSuQmCC) no-repeat center;
 			}
 		}
 	}

@@ -53,6 +53,9 @@ class WC_Cart {
 
 	/** @var float Discounts after tax. */
 	var $discount_total;
+	
+	/** @var float Total for additonal fees. */
+	var $fee_total;
 
 	/** @var float Shipping cost. */
 	var $shipping_total;
@@ -73,6 +76,11 @@ class WC_Cart {
 	 * @return void
 	 */
 	function __construct() {
+	
+	
+		$this->add_fee( 'Gay fee', 10, true );
+		$this->add_fee( 'Another fee', 0.10, true );
+	
 		$this->tax = new WC_Tax();
 		$this->prices_include_tax = ( get_option('woocommerce_prices_include_tax') == 'yes' ) ? true : false;
 		$this->display_totals_ex_tax = ( get_option('woocommerce_display_totals_excluding_tax') == 'yes' ) ? true : false;
@@ -860,7 +868,7 @@ class WC_Cart {
 		private function reset() {
 			global $woocommerce;
 
-			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = 0;
+			$this->total = $this->cart_contents_total = $this->cart_contents_weight = $this->cart_contents_count = $this->cart_contents_tax = $this->tax_total = $this->shipping_tax_total = $this->subtotal = $this->subtotal_ex_tax = $this->discount_total = $this->discount_cart = $this->shipping_total = $this->fee_total = 0;
 			$this->shipping_taxes = $this->taxes = array();
 
 			unset( $woocommerce->session->cart_contents_total, $woocommerce->session->cart_contents_weight, $woocommerce->session->cart_contents_count, $woocommerce->session->cart_contents_tax, $woocommerce->session->total, $woocommerce->session->subtotal, $woocommerce->session->subtotal_ex_tax, $woocommerce->session->tax_total, $woocommerce->session->taxes, $woocommerce->session->shipping_taxes, $woocommerce->session->discount_cart, $woocommerce->session->discount_total, $woocommerce->session->shipping_total, $woocommerce->session->shipping_tax_total, $woocommerce->session->shipping_label );
@@ -1380,6 +1388,22 @@ class WC_Cart {
 					}
 				}
 			}
+			
+			// Add fees
+			foreach ( $this->get_fees() as $fee ) {
+				$this->fee_total += $fee->amount;
+				
+				if ( $fee->taxable ) {
+					// Get tax rates
+					$tax_rates 				= $this->tax->get_rates();
+					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
+
+					// Tax rows - merge the totals we just got
+					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
+					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
+					}
+				}
+			}
 
 			// Set tax total to sum of all tax rows
 			$this->tax_total = $this->tax->get_tax_total( $this->taxes );
@@ -1420,7 +1444,7 @@ class WC_Cart {
 			 *
 			 * Based on discounted product prices, discounted tax, shipping cost + tax, and any discounts to be added after tax (e.g. store credit)
 			 */
-			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total, $this->dp, '.', '' ), $this );
+			$this->total = apply_filters( 'woocommerce_calculated_total', number_format( $this->cart_contents_total + $this->tax_total + $this->shipping_tax_total + $this->shipping_total - $this->discount_total + $this->fee_total, $this->dp, '.', '' ), $this );
 			
 			if ( $this->total < 0 ) 
 				$this->total = 0;
@@ -1709,6 +1733,37 @@ class WC_Cart {
 				unset( $woocommerce->session->coupons );
 				$this->applied_coupons = array();
 			}
+		}
+
+ 	/*-----------------------------------------------------------------------------------*/
+	/* Fees API to add additonal costs to orders */
+	/*-----------------------------------------------------------------------------------*/
+
+		/**
+		 * add_fee function.
+		 * 
+		 * @access public
+		 * @param mixed $name
+		 * @param mixed $amount
+		 * @param bool $taxable (default: false)
+		 * @return void
+		 */
+		function add_fee( $name, $amount, $taxable = false ) {
+			
+			if ( empty( $this->fees ) ) 
+				$this->fees = array();
+				
+			$new_fee 			= new stdClass();
+			$new_fee->id 		= sanitize_title( $name );
+			$new_fee->name 		= esc_attr( $name );
+			$new_fee->amount	= (float) esc_attr( $amount );
+			$new_fee->taxable	= $taxable ? true : false;
+			
+			$this->fees[] 		= $new_fee;
+		}
+		
+		function get_fees() {
+			return (array) $this->fees;
 		}
 
     /*-----------------------------------------------------------------------------------*/

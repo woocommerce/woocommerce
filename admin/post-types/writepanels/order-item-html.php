@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <tr class="item <?php if ( ! empty( $class ) ) echo $class; ?>" data-order_item_id="<?php echo $item_id; ?>">
+	<td><input type="checkbox" /></td>
 	<td class="thumb">
 		<a href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>" class="tips" data-tip="<?php
 			
@@ -15,18 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			
 		?>"><?php echo $_product->get_image(); ?></a>
 	</td>
-	<td class="sku" width="1%">
-		<?php if ( $_product->get_sku() ) echo esc_html( $_product->get_sku() ); else echo '-'; ?>
-		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
-	</td>
 	<td class="name">
 
-		<div class="row-actions">
-			<span class="trash"><a class="remove_order_item" href="#"><?php _e( 'Delete item', 'woocommerce' ); ?></a> | </span>
-			<span class="view"><a href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>"><?php _e( 'View product', 'woocommerce' ); ?></a>
-		</div>
-
-		<?php echo esc_html( $item['name'] ); ?>
+		<?php if ( $_product->get_sku() ) echo esc_html( $_product->get_sku() ) . ' &ndash; '; ?>
+		
+		<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post='. absint( $_product->id ) .'&action=edit' ) ); ?>"><?php echo esc_html( $item['name'] ); ?></a>
+		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		
 		<?php
 			if ( isset( $_product->variation_data ) ) 
@@ -107,16 +102,16 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 		<input type="number" step="any" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
 	</td>
 
-	<td class="line_subtotal" width="1%">
-		<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
-
-		<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></label>
+	<td class="line_cost" width="1%">
+		<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
+		
+		<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label></span>
 	</td>
 
-	<td class="line_total" width="1%">
-		<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
-
-		<label><?php _e( 'Tax', 'woocommerce' ); ?>: <input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
+	<td class="line_tax" width="1%">
+		<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" />
+		
+		<span class="subtotal"><input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal_tax'] ) ) echo esc_attr( $item['line_subtotal_tax'] ); ?>" class="line_subtotal_tax" /></span>
 	</td>
 
 </tr>
