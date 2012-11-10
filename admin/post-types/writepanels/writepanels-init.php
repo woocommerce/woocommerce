@@ -67,7 +67,7 @@ function woocommerce_meta_boxes() {
 
 	// Orders
 	add_meta_box( 'woocommerce-order-data', __( 'Order Data', 'woocommerce' ), 'woocommerce_order_data_meta_box', 'shop_order', 'normal', 'high' );
-	add_meta_box( 'woocommerce-order-items', __( 'Line Items', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: if you edit quantities or remove items from the order you will need to manually update stock levels.', 'woocommerce' ) . '">[?]</span>', 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
+	add_meta_box( 'woocommerce-order-items', __( 'Order Items', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: if you edit quantities or remove items from the order you will need to manually update stock levels.', 'woocommerce' ) . '">[?]</span>', 'woocommerce_order_items_meta_box', 'shop_order', 'normal', 'high');
 	add_meta_box( 'woocommerce-order-totals', __( 'Order Totals', 'woocommerce' ), 'woocommerce_order_totals_meta_box', 'shop_order', 'side', 'default');
 	add_meta_box( 'woocommerce-order-notes', __( 'Order Notes', 'woocommerce' ), 'woocommerce_order_notes_meta_box', 'shop_order', 'side', 'default');
 	add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'woocommerce_order_downloads_meta_box', 'shop_order', 'normal', 'default');

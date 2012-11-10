@@ -388,49 +388,7 @@ function woocommerce_order_items_meta_box( $post ) {
 						</td>
 						
 						<td class="line_cost" width="1%">
-							<label><?php _e( 'Fee', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
-						</td>
-						
-						<td class="line_tax" width="1%">
-							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
-						</td>
-	
-					</tr>
-					
-					<tr class="shipping">
-						<td><input type="checkbox" /></td>
-						<th></th>
-						<td><input type="text" placeholder="<?php _e( 'Shipping Title', 'woocommerce' ); ?>" name="_shipping_method_title" value="<?php
-							if ( isset( $data['_shipping_method_title'][0] ) ) 
-								echo esc_attr( $data['_shipping_method_title'][0] );
-						?>" /></td>
-						
-						<td class="shipping_method" width="1%" colspan="2">
-							<select name="_shipping_method" id="_shipping_method" class="first">
-								<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
-								<?php
-									$chosen_method 	= $data['_shipping_method'][0];
-									$found_method 	= false;
-			
-									if ( $woocommerce->shipping ) {
-										foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-											echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
-											if ( strpos( $chosen_method, $method->id ) === 0 )
-												$found_method = true;
-										}
-									}
-			
-									if ( ! $found_method && ! empty( $chosen_method ) ) {
-										echo '<option value="' . esc_attr( $chosen_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
-									} else {
-										echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
-									}
-								?>
-							</select>
-						</td>
-						
-						<td class="line_cost" width="1%">
-							<label><?php _e( 'Cost', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
+							<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
 						</td>
 						
 						<td class="line_tax" width="1%">
@@ -447,18 +405,18 @@ function woocommerce_order_items_meta_box( $post ) {
 	
 	<p class="bulk_actions">
 		<select>
-			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?>
-			<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?>
-			<option value="refund"><?php _e( 'Refund Lines', 'woocommerce' ); ?>
-			
+			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
+			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
+				<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
+				<option value="refund"><?php _e( 'Refund Lines', 'woocommerce' ); ?></option>
+			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
-				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?>
-				<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?>
-			</option>
-			<optgroup label="<?php _e( 'Add Lines', 'woocommerce' ); ?>">
-				<option value="add_fee"><?php _e( 'Add Fee', 'woocommerce' ); ?>
-				<option value="add_shipping"><?php _e( 'Add Shipping', 'woocommerce' ); ?>
-			</option>
+				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
+				<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
+			</optgroup>
+			<optgroup label="<?php _e( 'Fees', 'woocommerce' ); ?>"></option>
+				<option value="add_fee"><?php _e( 'Add Fee', 'woocommerce' ); ?></option>
+			</optgroup>
 		</select>
 		
 		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
@@ -491,10 +449,6 @@ function woocommerce_order_actions_meta_box($post) {
 	?>
 	<ul class="order_actions submitbox">
 
-		<li><input type="submit" class="button tips" name="reduce_stock" value="<?php _e( 'Reduce stock', 'woocommerce' ); ?>" data-tip="<?php _e( 'Reduces stock for each item in the order; useful after manually creating an order or manually marking an order as paid.', 'woocommerce' ); ?>" /></li>
-
-		<li><input type="submit" class="button tips" name="restore_stock" value="<?php _e( 'Restore stock', 'woocommerce' ); ?>" data-tip="<?php _e( 'Restores stock for each item in the order; useful after refunding or canceling the entire order.', 'woocommerce' ); ?>" /></li>
-		
 		<?php do_action( 'woocommerce_order_actions', $post->ID ); ?>
 
 		<li class="wide" id="order-emails">
@@ -585,10 +539,43 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 
 			<li class="left">
-				<label><?php _e( 'Cost ex. tax:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Shipping Cost:', 'woocommerce' ); ?></label>
 				<input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
 					if ( isset( $data['_order_shipping'][0] ) ) 
 						echo esc_attr( $data['_order_shipping'][0] );
+				?>" class="first" />
+			</li>
+
+			<li class="right">
+				<label><?php _e( 'Shipping Method:', 'woocommerce' ); ?></label>
+				<select name="_shipping_method" id="_shipping_method" class="first">
+					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+					<?php
+						$chosen_method 	= $data['_shipping_method'][0];
+						$found_method 	= false;
+
+						if ( $woocommerce->shipping ) {
+							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
+								echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
+								if ( strpos( $chosen_method, $method->id ) === 0 )
+									$found_method = true;
+							}
+						}
+
+						if ( ! $found_method && ! empty( $chosen_method ) ) {
+							echo '<option value="' . esc_attr( $chosen_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
+						} else {
+							echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
+						}
+					?>
+				</select>
+			</li>
+
+			<li class="wide">
+				<label><?php _e( 'Shipping Title:', 'woocommerce' ); ?></label>
+				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php 
+					if ( isset( $data['_shipping_method_title'][0] ) ) 
+						echo esc_attr( $data['_shipping_method_title'][0] );
 				?>" class="first" />
 			</li>
 
@@ -615,7 +602,7 @@ function woocommerce_order_totals_meta_box($post) {
 								<input type="checkbox" name="_order_taxes_compound[<?php echo $loop; ?>]" <?php checked( $tax['compound'], 1 ); ?> /></label>
 							</p>
 							<p class="first">
-								<label><?php _e( 'Tax:', 'woocommerce' ); ?></label>
+								<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?></label>
 								<input type="text" name="_order_taxes_cart[<?php echo $loop; ?>]" placeholder="0.00" value="<?php echo esc_attr( $tax['cart_tax'] ); ?>" />
 							</p>
 							<p class="last">
@@ -639,7 +626,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 
 			<li class="left">
-				<label><?php _e( 'Tax:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?></label>
 				<input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_tax'][0] ) ) 
 						echo esc_attr( $data['_order_tax'][0] );
