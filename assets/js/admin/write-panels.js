@@ -559,7 +559,13 @@ jQuery( function($){
 				} );
 			
 			}
-			
+		
+		} else if ( action == 'refund' ) {
+		
+		} else if ( action == 'reduce_stock' ) {
+		
+		} else if ( action == 'increase_stock' ) {
+		
 		}
 		
 		return false;
