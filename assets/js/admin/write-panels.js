@@ -538,7 +538,7 @@ jQuery( function($){
 			
 				$(selected_rows).each( function() {
 					
-					var $item = $(this).closest('tr.item');
+					var $item = $(this).closest('tr.item, tr.fee');
 					
 					var data = {
 						order_item_id: 		$item.attr( 'data-order_item_id' ),

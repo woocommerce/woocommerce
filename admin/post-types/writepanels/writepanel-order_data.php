@@ -414,9 +414,6 @@ function woocommerce_order_items_meta_box( $post ) {
 				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
 				<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?></option>
 			</optgroup>
-			<optgroup label="<?php _e( 'Fees', 'woocommerce' ); ?>"></option>
-				<option value="add_fee"><?php _e( 'Add Fee', 'woocommerce' ); ?></option>
-			</optgroup>
 		</select>
 		
 		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
@@ -426,6 +423,7 @@ function woocommerce_order_items_meta_box( $post ) {
 		<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
 
 		<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
+		<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc line tax &uarr;', 'woocommerce' ); ?></button>
