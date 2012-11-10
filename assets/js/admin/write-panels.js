@@ -470,32 +470,6 @@ jQuery( function($){
 
 	});
 	
-	$('#order_items_list .remove_order_item').live('click', function(){
-		var answer = confirm( woocommerce_writepanel_params.remove_item_notice );
-		if ( answer ) {
-			var $item = $(this).closest('tr.item');
-			
-			var data = {
-				order_item_id: 		$item.attr( 'data-order_item_id' ),
-				action: 			'woocommerce_remove_order_item',
-				security: 			woocommerce_writepanel_params.order_item_nonce
-			};
-			
-			$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
-			
-			$.ajax( {
-				url: woocommerce_writepanel_params.ajax_url,
-				data: data,
-				type: 'POST',
-				success: function( response ) {
-					$item.hide();
-					$('table.woocommerce_order_items').unblock();
-				}
-			} );
-		}
-		return false;
-	});
-
 	$('#order_items_list button.add_order_item_meta').live('click', function(){
 		
 		var $button = $(this);
@@ -547,6 +521,50 @@ jQuery( function($){
 		}
 		return false;
 	});
+	
+	// Bulk actions for line items
+	$('#woocommerce-order-items').on( 'click', '.do_bulk_action', function() {
+		
+		var action = $(this).closest('.bulk_actions').find('select').val();
+		var selected_rows = $('#woocommerce-order-items').find('.check-column input:checked');
+		
+		if ( action == 'delete' ) {
+		
+			var answer = confirm( woocommerce_writepanel_params.remove_item_notice );
+			
+			if ( answer ) {
+			
+				$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+			
+				$(selected_rows).each( function() {
+					
+					var $item = $(this).closest('tr.item');
+					
+					var data = {
+						order_item_id: 		$item.attr( 'data-order_item_id' ),
+						action: 			'woocommerce_remove_order_item',
+						security: 			woocommerce_writepanel_params.order_item_nonce
+					};
+					
+					$.ajax( {
+						url: woocommerce_writepanel_params.ajax_url,
+						data: data,
+						type: 'POST',
+						success: function( response ) {
+							$item.hide();
+							$('table.woocommerce_order_items').unblock();
+						}
+					} );
+					
+				} );
+			
+			}
+			
+		}
+		
+		return false;
+	} );
+	
 
 	$('button.load_customer_billing').live('click', function(){
 
