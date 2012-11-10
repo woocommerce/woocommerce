@@ -322,7 +322,7 @@ function woocommerce_order_items_meta_box( $post ) {
 		<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
 			<thead>
 				<tr>
-					<th><input type="checkbox" /></th>
+					<th><input type="checkbox" class="check-column" /></th>
 					<th class="item" colspan="2"><?php _e( 'Item', 'woocommerce' ); ?></th>
 					
 					<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
@@ -333,7 +333,7 @@ function woocommerce_order_items_meta_box( $post ) {
 
 					<th class="line_cost"><?php _e( 'Cost', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotals are before pre-tax discounts, totals are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
 
-					<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Line subtotal taxes are before pre-tax discounts, total taxes are after.', 'woocommerce' ); ?>" href="#">[?]</a></th>
+					<th class="line_tax"><?php _e( 'Tax', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
 			<tbody id="order_items_list">
@@ -444,18 +444,34 @@ function woocommerce_order_items_meta_box( $post ) {
 			</tbody>
 		</table>
 	</div>
+	
+	<p class="bulk_actions">
+		<select>
+			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?>
+			<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?>
+			<option value="refund"><?php _e( 'Refund Lines', 'woocommerce' ); ?>
+			
+			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
+				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?>
+				<option value="increase_stock"><?php _e( 'Increase Line Stock', 'woocommerce' ); ?>
+			</option>
+			<optgroup label="<?php _e( 'Add Lines', 'woocommerce' ); ?>">
+				<option value="add_fee"><?php _e( 'Add Fee', 'woocommerce' ); ?>
+				<option value="add_shipping"><?php _e( 'Add Shipping', 'woocommerce' ); ?>
+			</option>
+		</select>
+		
+		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
+	</p>
 
 	<p class="buttons">
 		<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
 
 		<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
-		
-		<button type="button" class="button add_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
-		<button type="button" class="button add_shipping"><?php _e( 'Add shipping', 'woocommerce' ); ?></button>
 	</p>
 	<p class="buttons buttons-alt">
 		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc line tax &uarr;', 'woocommerce' ); ?></button>
-		<button type="button" class="button calc_totals"><?php _e( 'Calc totals &rarr;', 'woocommerce' ); ?></button>
+		<button type="button" class="button calc_totals button-primary"><?php _e( 'Calc totals', 'woocommerce' ); ?></button>
 	</p>
 	<div class="clear"></div>
 	<?php
@@ -546,7 +562,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 
 			<li class="left">
-				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts before tax', 'woocommerce' ); ?>." href="#">[?]</a></label>
 				<input type="text" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_cart_discount'][0] ) ) 
 						echo esc_attr( $data['_cart_discount'][0] );
@@ -554,7 +570,7 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 
 			<li class="right">
-				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts after tax', 'woocommerce' ); ?>." href="#">[?]</a></label>
 				<input type="text" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_discount'][0] ) ) 
 						echo esc_attr( $data['_order_discount'][0] );
@@ -573,39 +589,6 @@ function woocommerce_order_totals_meta_box($post) {
 				<input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
 					if ( isset( $data['_order_shipping'][0] ) ) 
 						echo esc_attr( $data['_order_shipping'][0] );
-				?>" class="first" />
-			</li>
-
-			<li class="right">
-				<label><?php _e( 'Shipping Method:', 'woocommerce' ); ?></label>
-				<select name="_shipping_method" id="_shipping_method" class="first">
-					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
-					<?php
-						$chosen_method 	= $data['_shipping_method'][0];
-						$found_method 	= false;
-
-						if ( $woocommerce->shipping ) {
-							foreach ( $woocommerce->shipping->load_shipping_methods() as $method ) {
-								echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( ( strpos( $chosen_method, $method->id ) === 0 ), true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
-								if ( strpos( $chosen_method, $method->id ) === 0 )
-									$found_method = true;
-							}
-						}
-
-						if ( ! $found_method && ! empty( $chosen_method ) ) {
-							echo '<option value="' . esc_attr( $chosen_method ) . '" selected="selected">' . __( 'Other', 'woocommerce' ) . '</option>';
-						} else {
-							echo '<option value="other">' . __( 'Other', 'woocommerce' ) . '</option>';
-						}
-					?>
-				</select>
-			</li>
-
-			<li class="wide">
-				<label><?php _e( 'Shipping Title:', 'woocommerce' ); ?></label>
-				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php 
-					if ( isset( $data['_shipping_method_title'][0] ) ) 
-						echo esc_attr( $data['_shipping_method_title'][0] );
 				?>" class="first" />
 			</li>
 
