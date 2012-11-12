@@ -523,6 +523,13 @@ jQuery( function($){
 	});
 	
 	// Bulk actions for line items
+	$('#woocommerce-order-items').on( 'click', 'input.check-column', function() {
+		if ( $(this).is(':checked') )
+			$('#woocommerce-order-items').find('.check-column input').attr('checked', 'checked');
+		else
+			$('#woocommerce-order-items').find('.check-column input').removeAttr('checked');
+	} );
+	
 	$('#woocommerce-order-items').on( 'click', '.do_bulk_action', function() {
 		
 		var action = $(this).closest('.bulk_actions').find('select').val();
