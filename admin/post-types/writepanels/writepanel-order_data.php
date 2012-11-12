@@ -579,7 +579,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 
 			<li class="left">
-				<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Total tax for line items + fees.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 				<input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_tax'][0] ) ) 
 						echo esc_attr( $data['_order_tax'][0] );

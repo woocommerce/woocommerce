@@ -1101,52 +1101,112 @@ function woocommerce_calc_line_taxes() {
 
 	$tax = new WC_Tax();
 
-	$base_tax_amount = 0;
-	$line_tax_amount = 0;
+	$taxes = $tax_rows = $item_taxes = $shipping_taxes = array();
 
 	$country 		= strtoupper( esc_attr( $_POST['country'] ) );
 	$state 			= strtoupper( esc_attr( $_POST['state'] ) );
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
 	$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
 
-	$line_subtotal 	= isset( $_POST['line_subtotal'] ) ? esc_attr( $_POST['line_subtotal'] ) : 0;
-	$line_total 	= esc_attr( $_POST['line_total'] );
+	$items			= $_POST['items'];
+	$shipping		= $_POST['shipping'];
+	
+	// Calculate sales tax first
+	if ( sizeof( $items ) > 0 ) {
+		foreach( $items as $item_id => $item ) {
+			
+			$item_id		= absint( $item_id );
+			$line_subtotal 	= isset( $item['line_subtotal']  ) ? esc_attr( $item['line_subtotal'] ) : '';
+			$line_total		= esc_attr( $item['line_total'] );
+			$tax_class 		= esc_attr( $item['tax_class'] );
+			
+			if ( ! $item_id || $tax_class == '0' ) 
+				continue;
+			
+			// Get product details
+			if ( get_post_type( $item_id ) == 'product' ) {
+				$_product			= new WC_Product( $item_id );
+				$item_tax_status 	= $_product->get_tax_status();
+			} else {
+				$item_tax_status 	= 'taxable';
+			}
+			
+			// Only calc if taxable
+			if ( $item_tax_status == 'taxable' ) {
 
-	$item_id		= esc_attr( $_POST['order_item_id'] );
-	$tax_class 		= esc_attr( $_POST['tax_class'] );
-
-	if ( ! $item_id || $tax_class == '0' ) 
-		return;
-
-	// Get product details
-	if ( get_post_type( $item_id ) == 'product' ) {
-		$_product			= new WC_Product( $item_id );
-		$item_tax_status 	= $_product->get_tax_status();
-	} else {
-		$item_tax_status 	= 'taxable';
+				$tax_rates = $tax->find_rates( array(
+					'country' 	=> $country, 
+					'state' 	=> $state, 
+					'postcode' 	=> $postcode, 
+					'city'		=> $city,
+					'tax_class' => $tax_class 
+				) );
+				
+				$line_subtotal_taxes = $tax->calc_tax( $line_subtotal, $tax_rates, false );
+				$line_taxes = $tax->calc_tax( $line_total, $tax_rates, false );
+				
+				$line_subtotal_tax = rtrim( rtrim( number_format( array_sum( $line_subtotal_taxes ), 4, '.', '' ), '0' ), '.' );
+				$line_tax = rtrim( rtrim( number_format( array_sum( $line_taxes ), 4, '.', '' ), '0' ), '.' );
+				
+				if ( $line_subtotal_tax < 0 ) 
+					$line_subtotal_tax = 0;
+					
+				if ( $line_tax < 0 ) 
+					$line_tax = 0;
+				
+				$item_taxes[ $item_id ] = array(
+					'line_subtotal_tax' => $line_subtotal_tax,
+					'line_tax' 			=> $line_tax
+				);
+				
+				// Sum the item taxes
+				foreach ( array_keys( $taxes + $line_taxes ) as $key )
+					$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+			}
+			
+		}
 	}
+	
+	// Now calculate shipping tax
+	$matched_tax_rates = array();
 
-	if ( $item_tax_status == 'taxable' ) {
+	$tax_rates = $tax->find_rates( array(
+		'country' 	=> $country, 
+		'state' 	=> $state, 
+		'postcode' 	=> $postcode, 
+		'city'		=> $city,
+		'tax_class' => ''
+	) );
 
-		$tax_rates = $tax->find_rates( array(
-			'country' 	=> $country, 
-			'state' 	=> $state, 
-			'postcode' 	=> $postcode, 
-			'city'		=> $city,
-			'tax_class' => $tax_class 
-		) );
+	if ( $tax_rates ) 
+		foreach ( $tax_rates as $key => $rate )
+			if ( isset( $rate['shipping'] ) && $rate['shipping'] == 'yes' )
+				$matched_tax_rates[ $key ] = $rate;
+	
+	$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
+	$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
 
-		$line_subtotal_tax_amount	= rtrim( rtrim( number_format( array_sum( $tax->calc_tax( $line_subtotal, $tax_rates, false ) ), 4, '.', '' ), '0' ), '.' );
-		$line_tax_amount			= rtrim( rtrim( number_format( array_sum( $tax->calc_tax( $line_total, $tax_rates, false ) ), 4, '.', '' ), '0' ), '.' );
+	// Now merge to keep tax rows
+	foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
 
+		$is_compound = $tax->is_compound( $key ) ? 1 : 0;
+
+		$cart_tax = isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0;
+		$shipping_tax = isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0;
+
+		$tax_rows[] = array(
+			'label' 		=> $tax->get_rate_label( $key ),
+			'compound' 		=> $is_compound,
+			'cart_tax' 		=> woocommerce_format_total( $cart_tax ),
+			'shipping_tax' 	=> woocommerce_format_total( $shipping_tax )
+		);
 	}
-
-	if ( $line_subtotal_tax_amount < 0 ) $line_subtotal_tax_amount = 0;
-	if ( $line_tax_amount < 0 ) $line_tax_amount = 0;
-
+	
+	// Return
 	echo json_encode( array(
-		'line_subtotal_tax' => $line_subtotal_tax_amount,
-		'line_tax' => $line_tax_amount
+		'item_taxes' 	=> $item_taxes,
+		'shipping_tax' 	=> $shipping_tax,
+		'tax_rows' 		=> $tax_rows
 	) );
 
 	// Quit out

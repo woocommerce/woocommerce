@@ -263,7 +263,8 @@ jQuery( function($){
 		var total = 0;
 		
 		fields.each(function(){
-			total = total + parseFloat( $(this).val() );
+			if ( $(this).val() )
+				total = total + parseFloat( $(this).val() );
 		});
 
 		var formatted_total = accounting.formatMoney( total, {
@@ -301,36 +302,51 @@ jQuery( function($){
 				var postcode = $('#_billing_postcode').val();
 				var city = $('#_billing_city').val();
 			}
-
-			$items.each(function( idx ){
-
+			
+			// Get items and values
+			var calculate_items = {};
+			
+			$items.each( function() {
+			
 				var $row = $(this);
+				
+				var item_id 		= $row.find('input.order_item_id').val();
+				var line_subtotal	= $row.find('input.line_subtotal').val();
+				var line_total		= $row.find('input.line_total').val();
+				var tax_class		= $row.find('select.tax_class').val();
+				
+				calculate_items[ item_id ] = {};
+				calculate_items[ item_id ].line_subtotal = line_subtotal;
+				calculate_items[ item_id ].line_total = line_total;
+				calculate_items[ item_id ].tax_class = tax_class;
+			} );
+			
+			var data = {
+				action: 		'woocommerce_calc_line_taxes',
+				items:			calculate_items,
+				shipping:		accounting.unformat( $('#_order_shipping').val() ),
+				country:		country,
+				state:			state,
+				postcode:		postcode,
+				city:			city,
+				security: 		woocommerce_writepanel_params.calc_totals_nonce
+			};
 
-				var data = {
-					action: 		'woocommerce_calc_line_taxes',
-					order_item_id:	$row.find('input.order_item_id').val(),
-					line_subtotal:	$row.find('input.line_subtotal').val(),
-					line_total:		$row.find('input.line_total').val(),
-					tax_class:		$row.find('select.tax_class').val(),
-					country:		country,
-					state:			state,
-					postcode:		postcode,
-					city:			city,
-					security: 		woocommerce_writepanel_params.calc_totals_nonce
-				};
-
-				$.post( woocommerce_writepanel_params.ajax_url, data, function(response) {
-
-					result = jQuery.parseJSON( response );
-					$row.find('input.line_subtotal_tax').val( result.line_subtotal_tax ).change();
-					$row.find('input.line_tax').val( result.line_tax ).change();
-
-					if (idx == ($items.size() - 1)) {
-						$('.woocommerce_order_items_wrapper').unblock();
-					}
-
-				});
-
+			$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
+				
+				result = jQuery.parseJSON( response );
+				
+				$items.each( function() {
+					var $row = $(this);
+					var item_id = $row.find('input.order_item_id').val();
+					
+					$row.find('input.line_tax').val( result['item_taxes'][ item_id ]['line_tax'] ).change();
+					$row.find('input.line_subtotal_tax').val( result['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+				} );
+				
+				$('#_order_shipping_tax').val( result['shipping_tax'] ).change();
+				
+				$('.woocommerce_order_items_wrapper').unblock();
 			});
 
 		} else {
@@ -338,9 +354,9 @@ jQuery( function($){
 		}
 		return false;
 	}).hover(function() {
-		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax').css('background-color', '#d8c8d2');
+		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax').css('background-color', '#d8c8d2');
 	}, function() {
-		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax').css('background-color', '');
+		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax').css('background-color', '');
 	});
 
 
