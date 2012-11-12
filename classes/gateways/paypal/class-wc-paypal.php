@@ -605,6 +605,18 @@ class WC_Paypal extends WC_Payment_Gateway {
 						if ($this->debug=='yes') $this->log->add( 'paypal', 'Aborting, Invalid type:' . $posted['txn_type'] );
 						exit;
 					endif;
+					
+					// Validate Amount
+				    if ( $order->get_total() != $posted['mc_gross'] ) {
+				    	
+				    	if ( $this->debug == 'yes' ) 
+				    		$this->log->add( 'paypal', 'Payment error: Amounts do not match (gross ' . $posted['mc_gross'] . ')' );
+				    
+				    	// Put this order on-hold for manual checking
+				    	$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $posted['mc_gross'] ) );
+				    	
+				    	exit;
+				    }
 
 					 // Store PP Details
 	                if ( ! empty( $posted['payer_email'] ) )
