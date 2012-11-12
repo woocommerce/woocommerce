@@ -401,7 +401,7 @@ class WC_Order {
 		
 		if ( ! $this->items ) {
 			$line_items = $wpdb->get_results( $wpdb->prepare( "
-				SELECT 		order_item_id, order_item_name
+				SELECT 		order_item_id, order_item_name, order_item_type
 				FROM 		{$wpdb->prefix}woocommerce_order_items
 				WHERE 		order_id = %d
 				AND 		order_item_type = 'line_item'
@@ -417,6 +417,7 @@ class WC_Order {
 				// Place line item into array to return
 				$this->items[ $item->order_item_id ] = array(
 					'name'					=> $item->order_item_name,
+					'type'					=> $item->order_item_type,
 					'qty'					=> $item_meta['_qty'][0],
 					'tax_class'				=> $item_meta['_tax_class'][0],
 					'product_id'			=> $item_meta['_product_id'][0],
@@ -446,7 +447,7 @@ class WC_Order {
 		
 		if ( ! $this->fees ) {
 			$line_items = $wpdb->get_results( $wpdb->prepare( "
-				SELECT 		order_item_id, order_item_name
+				SELECT 		order_item_id, order_item_name, order_item_type
 				FROM 		{$wpdb->prefix}woocommerce_order_items
 				WHERE 		order_id = %d
 				AND 		order_item_type = 'fee'
@@ -460,6 +461,7 @@ class WC_Order {
 				
 				$this->fees[ $item->order_item_id ] = array(
 					'name'					=> $item->order_item_name,
+					'type'					=> $item->order_item_type,
 					'tax_class'				=> $item_meta['_tax_class'][0],
 					'line_total'			=> $item_meta['_line_total'][0],
 					'line_tax'				=> $item_meta['_line_tax'][0],

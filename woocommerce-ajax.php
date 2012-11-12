@@ -1108,17 +1108,22 @@ function woocommerce_calc_line_taxes() {
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
 	$city 			= sanitize_title( esc_attr( $_POST['city'] ) );
 
-	$line_subtotal 	= esc_attr( $_POST['line_subtotal'] );
+	$line_subtotal 	= isset( $_POST['line_subtotal'] ) ? esc_attr( $_POST['line_subtotal'] ) : 0;
 	$line_total 	= esc_attr( $_POST['line_total'] );
 
 	$item_id		= esc_attr( $_POST['order_item_id'] );
 	$tax_class 		= esc_attr( $_POST['tax_class'] );
 
-	if ( ! $item_id ) return;
+	if ( ! $item_id ) 
+		return;
 
 	// Get product details
-	$_product			= new WC_Product( $item_id );
-	$item_tax_status 	= $_product->get_tax_status();
+	if ( get_post_type( $item_id ) == 'product' ) {
+		$_product			= new WC_Product( $item_id );
+		$item_tax_status 	= $_product->get_tax_status();
+	} else {
+		$item_tax_status 	= 'taxable';
+	}
 
 	if ( $item_tax_status == 'taxable' ) {
 

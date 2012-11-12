@@ -288,7 +288,7 @@ jQuery( function($){
 
 		if (answer) {
 
-			var $items = $('#order_items_list tr.item');
+			var $items = $('#order_items_list').find('tr.item, tr.fee');
 
 			var country = $('#_shipping_country').val();
 			if (country) {
@@ -386,8 +386,23 @@ jQuery( function($){
 					line_tax = accounting.toFixed( line_tax, 2 );
 				}
 
-				cart_tax = cart_tax + line_tax;
+				cart_tax = cart_tax + parseFloat( line_tax );
+			});
+			
+			$('#order_items_list tr.fee').each(function(){
+				var line_total 			= accounting.unformat( $(this).find('input.line_total').val() );
+				var line_tax 			= accounting.unformat( $(this).find('input.line_tax').val() );
 
+				if ( ! line_total ) line_total = 0;
+				if ( ! line_tax ) line_tax = 0;
+
+				line_totals = line_totals + line_total;
+
+				if ( woocommerce_writepanel_params.round_at_subtotal=='no' ) {
+					line_tax = accounting.toFixed( line_tax, 2 );
+				}
+
+				cart_tax = cart_tax + parseFloat( line_tax );
 			});
 
 			// Tax
@@ -406,9 +421,9 @@ jQuery( function($){
 			cart_tax = accounting.toFixed( cart_tax, 2 );
 			
 			// Set fields
-			$('#_cart_discount').val( cart_discount );
-			$('#_order_tax').val( cart_tax );
-			$('#_order_total').val( order_total );
+			$('#_cart_discount').val( cart_discount ).change();
+			$('#_order_tax').val( cart_tax ).change();
+			$('#_order_total').val( order_total ).change();
 
 			// Since we currently cannot calc shipping from the backend, ditch the rows. They must be manually calculated.
 			$('#tax_rows').empty();
@@ -583,7 +598,9 @@ jQuery( function($){
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$item.hide();
+						$(selected_rows).each( function() {
+							$(this).closest('tr.item, tr.fee').hide();
+						} );
 						$('table.woocommerce_order_items').unblock();
 					}
 				} );

@@ -1734,16 +1734,8 @@ class WC_Cart {
 	/* Fees API to add additonal costs to orders */
 	/*-----------------------------------------------------------------------------------*/
 
-		/**
-		 * add_fee function.
-		 * 
-		 * @access public
-		 * @param mixed $name
-		 * @param mixed $amount
-		 * @param bool $taxable (default: false)
-		 * @return void
-		 */
-		function add_fee( $name, $amount, $taxable = false ) {
+		
+		function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 			
 			if ( empty( $this->fees ) ) 
 				$this->fees = array();
@@ -1752,6 +1744,7 @@ class WC_Cart {
 			$new_fee->id 		= sanitize_title( $name );
 			$new_fee->name 		= esc_attr( $name );
 			$new_fee->amount	= (float) esc_attr( $amount );
+			$new_fee->tax_class	= $tax_class;
 			$new_fee->taxable	= $taxable ? true : false;
 			
 			$this->fees[] 		= $new_fee;

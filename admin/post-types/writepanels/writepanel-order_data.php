@@ -340,20 +340,22 @@ function woocommerce_order_items_meta_box( $post ) {
 
 				<?php
 					// List order items 
-					$order_items = $order->get_items();
+					$order_items = $order->get_items() + $order->get_fees();
 					
 					foreach ( $order_items as $item_id => $item ) {
-						$_product 	= $order->get_product_from_item( $item );
-						$item_meta 	= $order->get_item_meta( $item_id );
 						
-						include( 'order-item-html.php' );
-					}
-					
-					// List any fees
-					$order_fees = $order->get_fees();
-					
-					foreach ( $order_fees as $item_id => $item ) {
-						include( 'order-fee-html.php' );
+						switch ( $item['type'] ) {
+							case 'line_item' :
+								$_product 	= $order->get_product_from_item( $item );
+								$item_meta 	= $order->get_item_meta( $item_id );
+						
+								include( 'order-item-html.php' );
+							break;
+							case 'fee' : 
+								include( 'order-fee-html.php' );
+							break;
+						}
+						
 					}
 				?>
 			</tbody>
