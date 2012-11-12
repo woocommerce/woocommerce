@@ -860,74 +860,9 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	// Order status
 	$order->update_status( $_POST['order_status'] );
-
+	
 	// Handle button actions
-	if ( ! empty( $_POST['reduce_stock'] ) && sizeof( $order_items ) > 0 ) {
-
-		$order->add_order_note( __( 'Manually reducing stock.', 'woocommerce' ) );
-
-		foreach ( $order_items as $order_item ) {
-
-			$_product = $order->get_product_from_item( $order_item );
-
-			if ( $_product->exists() ) {
-
-			 	if ( $_product->managing_stock() ) {
-
-					$old_stock = $_product->stock;
-
-					$new_quantity = $_product->reduce_stock( $order_item['qty'] );
-
-					$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity) );
-
-					$order->send_stock_notifications( $_product, $new_quantity, $order_item['qty'] );
-
-				}
-
-			} else {
-
-				$order->add_order_note( sprintf( __( 'Item %s %s not found, skipping.', 'woocommerce' ), $order_item['id'], $order_item['name'] ) );
-
-			}
-		}
-
-		$order->add_order_note( __( 'Manual stock reduction complete.', 'woocommerce' ) );
-
-		do_action( 'woocommerce_reduce_order_stock', $order );
-
-	} elseif ( ! empty( $_POST['restore_stock'] ) && sizeof( $order_items ) > 0 ) {
-
-		$order->add_order_note( __( 'Manually restoring stock.', 'woocommerce' ) );
-
-		foreach ( $order_items as $order_item ) {
-
-			$_product = $order->get_product_from_item( $order_item );
-
-			if ( $_product->exists() ) {
-
-			 	if ( $_product->managing_stock() ) {
-
-					$old_stock = $_product->stock;
-
-					$new_quantity = $_product->increase_stock( $order_item['qty'] );
-
-					$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity) );
-
-				}
-
-			} else {
-
-				$order->add_order_note( sprintf( __( 'Item %s %s not found, skipping.', 'woocommerce' ), $order_item['id'], $order_item['name'] ) );
-
-			}
-
-		}
-
-		$order->add_order_note( __( 'Manual stock restore complete.', 'woocommerce' ) );
-
-		do_action( 'woocommerce_restore_order_stock', $order );
-
-	} elseif ( ! empty( $_POST['order_email'] ) ) {
+	if ( ! empty( $_POST['order_email'] ) ) {
 
 		do_action( 'woocommerce_before_resend_order_emails', $order );
 

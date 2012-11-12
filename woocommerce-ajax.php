@@ -896,13 +896,115 @@ function woocommerce_ajax_remove_order_item() {
 
 	check_ajax_referer( 'order-item', 'security' );
 	
-	woocommerce_delete_order_item( absint( $_POST['order_item_id'] ) );
+	$order_item_ids = $_POST['order_item_ids'];
+	
+	if ( sizeof( $order_item_ids ) > 0 ) {
+		foreach( $order_item_ids as $id ) {
+			woocommerce_delete_order_item( absint( $id ) );
+		}
+	}
 	
 	die();
 }
 
 add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_ajax_remove_order_item' );
 
+/**
+ * woocommerce_ajax_reduce_order_item_stock function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_ajax_reduce_order_item_stock() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$order_id		= absint( $_POST['order_id'] );
+	$order_item_ids	= $_POST['order_item_ids'];
+	$order_item_qty	= $_POST['order_item_qty'];
+	$order 			= new WC_Order( $order_id );
+	$order_items 	= $order->get_items();
+	$return 		= array();
+	
+	if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+		
+		foreach ( $order_items as $item_id => $order_item ) {
+			
+			// Only reduce checked items
+			if ( ! in_array( $item_id, $order_item_ids ) )
+				continue;
+
+			$_product = $order->get_product_from_item( $order_item );
+
+			if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+
+				$old_stock 		= $_product->stock;
+				$new_quantity 	= $_product->reduce_stock( $order_item_qty[ $item_id ] );
+				
+				$return[] = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity );
+				$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity) );
+				$order->send_stock_notifications( $_product, $new_quantity, $order_item_qty[ $item_id ] );
+			}
+		} 	
+		
+		do_action( 'woocommerce_reduce_order_stock', $order );
+		
+		echo implode( ', ', $return );
+	}
+	
+	die();	
+}
+
+add_action( 'wp_ajax_woocommerce_reduce_order_item_stock', 'woocommerce_ajax_reduce_order_item_stock' );
+
+/**
+ * woocommerce_ajax_increase_order_item_stock function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_ajax_increase_order_item_stock() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$order_id		= absint( $_POST['order_id'] );
+	$order_item_ids	= $_POST['order_item_ids'];
+	$order_item_qty	= $_POST['order_item_qty'];
+	$order 			= new WC_Order( $order_id );
+	$order_items 	= $order->get_items();
+	$return 		= array();
+
+	if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+	
+		foreach ( $order_items as $item_id => $order_item ) {
+			
+			// Only reduce checked items
+			if ( ! in_array( $item_id, $order_item_ids ) )
+				continue;
+
+			$_product = $order->get_product_from_item( $order_item );
+
+			if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+
+				$old_stock 		= $_product->stock;
+				$new_quantity 	= $_product->increase_stock( $order_item_qty[ $item_id ] );
+				
+				$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity );
+				$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity ) );
+			}
+		} 	
+		
+		do_action( 'woocommerce_restore_order_stock', $order );
+		
+		echo implode( ', ', $return );
+	}
+	
+	die();	
+}
+
+add_action( 'wp_ajax_woocommerce_increase_order_item_stock', 'woocommerce_ajax_increase_order_item_stock' );
 
 /**
  * woocommerce_ajax_add_order_item_meta function.
