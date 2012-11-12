@@ -449,13 +449,11 @@ table.wc_status_table {
 	.bulk_actions {
 		float:left;
 		padding-left: 12px;
-		padding-right: 12px;
 		vertical-align: top;
-		border-right: 1px dotted #cecece;
 	}
-	.buttons {
-		float:left;
-		padding-left: 12px;
+	.add_items {
+		float:right;
+		padding-right: 12px;
 		vertical-align: top;
 		.add_item_id, .chzn-container {
 			margin-right: 9px;
@@ -468,10 +466,6 @@ table.wc_status_table {
 		button {
 			margin: 2px 0 0 0;
 		}
-	}
-	.buttons-alt {
-		float: right;
-		padding-right: 12px;
 	}
 	.add_meta {
 		margin-left:0 !important;
@@ -540,8 +534,13 @@ table.wc_status_table {
 		&:first-child {
 			border-top:0;
 		}
-		&:last-child {
-			border-bottom:0;
+	}
+	.buttons {
+		border-top: 1px solid white;
+		padding: 0 10px 0 10px;
+		text-align: right;
+		.calc_line_taxes {
+			float: left;
 		}
 	}
 	ul.totals {

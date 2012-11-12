@@ -68,6 +68,9 @@ class WC_Cart {
 
 	/** @var WC_Tax */
 	var $tax;
+	
+	/** @var array An array of fees. */
+	var $fees;
 
 	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
@@ -1734,7 +1737,16 @@ class WC_Cart {
 	/* Fees API to add additonal costs to orders */
 	/*-----------------------------------------------------------------------------------*/
 
-		
+		/**
+		 * add_fee function.
+		 * 
+		 * @access public
+		 * @param mixed $name
+		 * @param mixed $amount
+		 * @param bool $taxable (default: false)
+		 * @param string $tax_class (default: '')
+		 * @return void
+		 */
 		function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 			
 			if ( empty( $this->fees ) ) 
@@ -1750,6 +1762,12 @@ class WC_Cart {
 			$this->fees[] 		= $new_fee;
 		}
 		
+		/**
+		 * get_fees function.
+		 * 
+		 * @access public
+		 * @return void
+		 */
 		function get_fees() {
 			return (array) $this->fees;
 		}

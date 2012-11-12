@@ -340,7 +340,7 @@ function woocommerce_order_items_meta_box( $post ) {
 
 				<?php
 					// List order items 
-					$order_items = $order->get_items() + $order->get_fees();
+					$order_items = $order->get_items( array( 'line_item', 'fee' ) );
 					
 					foreach ( $order_items as $item_id => $item ) {
 						
@@ -378,15 +378,11 @@ function woocommerce_order_items_meta_box( $post ) {
 		<button type="button" class="button do_bulk_action"><?php _e( 'Apply', 'woocommerce' ); ?></button>
 	</p>
 
-	<p class="buttons">
+	<p class="add_items">
 		<select id="add_item_id" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" style="width: 400px"></select>
 
 		<button type="button" class="button add_order_item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
 		<button type="button" class="button add_order_fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
-	</p>
-	<p class="buttons buttons-alt">
-		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc line tax &uarr;', 'woocommerce' ); ?></button>
-		<button type="button" class="button calc_totals button-primary"><?php _e( 'Calc totals', 'woocommerce' ); ?></button>
 	</p>
 	<div class="clear"></div>
 	<?php
@@ -643,6 +639,10 @@ function woocommerce_order_totals_meta_box($post) {
 		</ul>
 		<div class="clear"></div>
 	</div>
+	<p class="buttons">
+		<button type="button" class="button calc_line_taxes"><?php _e( 'Calc taxes', 'woocommerce' ); ?></button>
+		<button type="button" class="button calc_totals button-primary"><?php _e( 'Calc totals', 'woocommerce' ); ?></button>
+	</p>
 	<?php
 }
 

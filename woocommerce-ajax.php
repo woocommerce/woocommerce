@@ -977,8 +977,8 @@ function woocommerce_ajax_reduce_order_item_stock() {
 				$old_stock 		= $_product->stock;
 				$new_quantity 	= $_product->reduce_stock( $order_item_qty[ $item_id ] );
 				
-				$return[] = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity );
-				$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity) );
+				$return[] = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
+				$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity) );
 				$order->send_stock_notifications( $_product, $new_quantity, $order_item_qty[ $item_id ] );
 			}
 		} 	
@@ -1026,8 +1026,8 @@ function woocommerce_ajax_increase_order_item_stock() {
 				$old_stock 		= $_product->stock;
 				$new_quantity 	= $_product->increase_stock( $order_item_qty[ $item_id ] );
 				
-				$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity );
-				$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['id'], $old_stock, $new_quantity ) );
+				$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
+				$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
 			}
 		} 	
 		
