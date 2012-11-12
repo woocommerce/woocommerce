@@ -342,62 +342,19 @@ function woocommerce_order_items_meta_box( $post ) {
 					// List order items 
 					$order_items = $order->get_items();
 					
-					if ( ! empty( $order_items ) ) {
-						foreach ( $order_items as $item_id => $item ) {
-		
-							if ( ! empty( $item['variation_id'] ) )
-								$_product = new WC_Product_Variation( $item['variation_id'] );
-							else
-								$_product = new WC_Product( $item['product_id'] );
-							
-							$item_meta = $order->get_item_meta( $item_id );
-							
-							include( 'order-item-html.php' );
-						} 	
+					foreach ( $order_items as $item_id => $item ) {
+						$_product 	= $order->get_product_from_item( $item );
+						$item_meta 	= $order->get_item_meta( $item_id );
+						
+						include( 'order-item-html.php' );
 					}
 					
-					?>
+					// List any fees
+					$order_fees = $order->get_fees();
 					
-					<tr class="fee">
-						<td><input type="checkbox" /></td>
-						<th></th>
-						<td><input type="text" placeholder="<?php _e( 'Fee Name', 'woocommerce' ); ?>" name="fee_name[]" /></td>
-						
-						<td class="tax_class" width="1%">
-							<select class="tax_class" name="fee_tax_class[<?php echo absint( $item_id ); ?>]" title="<?php _e( 'Tax class', 'woocommerce' ); ?>">
-								<?php
-								$item_value = isset( $item['tax_class'] ) ? sanitize_title( $item['tax_class'] ) : '';
-								
-								$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option('woocommerce_tax_classes' ) ) ) );
-								
-								$classes_options = array();
-								$classes_options[''] = __( 'Standard', 'woocommerce' );
-								
-								if ( $tax_classes ) 
-									foreach ( $tax_classes as $class )
-										$classes_options[ sanitize_title( $class ) ] = $class;
-								
-								foreach ( $classes_options as $value => $name ) 
-									echo '<option value="' . esc_attr( $value ) . '" ' . selected( $value, $item_value, false ) . '>'. esc_html( $name ) . '</option>';
-								?>
-							</select>
-						</td>
-						
-						<td class="quantity" width="1%">
-							<input type="number" step="any" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
-						</td>
-						
-						<td class="line_cost" width="1%">
-							<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
-						</td>
-						
-						<td class="line_tax" width="1%">
-							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_tax'] ) ) echo esc_attr( $item['line_tax'] ); ?>" class="line_tax" /></label>
-						</td>
-	
-					</tr>
-					
-					<?php
+					foreach ( $order_fees as $item_id => $item ) {
+						include( 'order-fee-html.php' );
+					}
 				?>
 			</tbody>
 		</table>
@@ -815,26 +772,44 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	update_post_meta( $post_id, '_order_taxes', $order_taxes );
 
-	// Order items
+	// Order items + fees
 	if ( isset( $_POST['order_item_id'] ) ) {
-		$order_item_id		= $_POST['order_item_id'];
-		$order_item_qty 	= $_POST['order_item_qty'];
-		$line_subtotal		= $_POST['line_subtotal'];
-		$line_subtotal_tax	= $_POST['line_subtotal_tax'];
-		$line_total 		= $_POST['line_total'];
-		$line_tax		 	= $_POST['line_tax'];
-		$item_tax_class		= $_POST['order_item_tax_class'];
+	
+		$get_values = array( 'order_item_id', 'order_item_name', 'order_item_qty', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'order_item_tax_class' );
+		
+		foreach( $get_values as $value )
+			$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
 
 		foreach ( $order_item_id as $item_id ) {
 			
 			$item_id = absint( $item_id );
-
-		 	woocommerce_update_order_item_meta( $item_id, '_qty', absint( $order_item_qty[ $item_id ] ) );
-		 	woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
-		 	woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
-		 	woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
-		 	woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
-		 	woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
+			
+			if ( isset( $order_item_name[ $item_id ] ) )
+				$wpdb->update( 
+					$wpdb->prefix . "woocommerce_order_items", 
+					array( 'order_item_name' => woocommerce_clean( $order_item_name[ $item_id ] ) ), 
+					array( 'order_item_id' => $item_id ), 
+					array( '%s' ), 
+					array( '%d' ) 
+				);
+		 		
+			if ( isset( $order_item_qty[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_qty', absint( $order_item_qty[ $item_id ] ) );
+		 	
+		 	if ( isset( $item_tax_class[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );
+		 	
+		 	if ( isset( $line_subtotal[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal', woocommerce_clean( $line_subtotal[ $item_id ] ) );
+		 	
+		 	if ( isset(  $line_subtotal_tax[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_line_subtotal_tax', woocommerce_clean( $line_subtotal_tax[ $item_id ] ) );
+		 	
+		 	if ( isset( $line_total[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_line_total', woocommerce_clean( $line_total[ $item_id ] ) );
+		 	
+		 	if ( isset( $line_tax[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, '_line_tax', woocommerce_clean( $line_tax[ $item_id ] ) );
 		}
 	}
 	

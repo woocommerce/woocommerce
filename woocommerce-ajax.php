@@ -886,6 +886,41 @@ add_action('wp_ajax_woocommerce_add_order_item', 'woocommerce_ajax_add_order_ite
 
 
 /**
+ * Add order fee via ajax
+ *
+ * @access public
+ * @return void
+ */
+function woocommerce_ajax_add_order_fee() {
+	global $woocommerce;
+
+	check_ajax_referer( 'order-item', 'security' );
+
+	$order_id 	= absint( $_POST['order_id'] );
+	$order 		= new WC_Order( $order_id );
+	
+	// Add line item
+   	$item_id = woocommerce_add_order_item( $order_id, array(
+ 		'order_item_name' 		=> '',
+ 		'order_item_type' 		=> 'fee'
+ 	) );
+ 	
+ 	// Add line item meta
+ 	if ( $item_id ) {
+	 	woocommerce_add_order_item_meta( $item_id, '_tax_class', '' );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_total', '' );
+	 	woocommerce_add_order_item_meta( $item_id, '_line_tax', '' );
+ 	}
+	
+	include( 'admin/post-types/writepanels/order-fee-html.php' );
+
+	// Quit out
+	die();
+}
+
+add_action('wp_ajax_woocommerce_add_order_fee', 'woocommerce_ajax_add_order_fee');
+
+/**
  * woocommerce_ajax_remove_order_item function.
  * 
  * @access public

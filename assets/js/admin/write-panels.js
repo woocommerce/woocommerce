@@ -423,7 +423,8 @@ jQuery( function($){
 	}, function() {
 		$('#woocommerce-order-totals .calculated').css('background-color', '');
 	});
-
+	
+	// Add a line item
 	$('#woocommerce-order-items button.add_order_item').click(function(){
 		
 		var add_item_ids = $('select#add_item_id').val();
@@ -467,9 +468,28 @@ jQuery( function($){
 		} else {
 			$('select#add_item_id, #add_item_id_chzn .chzn-choices').css('border-color', 'red');
 		}
-
+		return false;
 	});
 	
+	// Add a fee
+	$('#woocommerce-order-items button.add_order_fee').click(function(){
+		
+		$('table.woocommerce_order_items').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		var data = {
+			action: 		'woocommerce_add_order_fee',
+			order_id:		woocommerce_writepanel_params.post_id,
+			security: 		woocommerce_writepanel_params.order_item_nonce
+		};
+
+		$.post( woocommerce_writepanel_params.ajax_url, data, function( response ) {
+			$('table.woocommerce_order_items tbody#order_items_list').append( response );
+			$('table.woocommerce_order_items').unblock();
+		});
+		return false;
+	});
+
+	// Add some meta to a line item
 	$('#order_items_list button.add_order_item_meta').live('click', function(){
 		
 		var $button = $(this);

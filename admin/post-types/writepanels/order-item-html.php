@@ -103,9 +103,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	</td>
 
 	<td class="line_cost" width="1%">
-		<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label>
+		<label><?php _e( 'Total', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label>
 		
-		<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_total'] ) ) echo esc_attr( $item['line_total'] ); ?>" class="line_total" /></label></span>
+		<span class="subtotal"><label><?php _e( 'Subtotal', 'woocommerce' ); ?>: <input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="0.00" value="<?php if ( isset( $item['line_subtotal'] ) ) echo esc_attr( $item['line_subtotal'] ); ?>" class="line_subtotal" /></label></span>
 	</td>
 
 	<td class="line_tax" width="1%">

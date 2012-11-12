@@ -124,6 +124,9 @@ class WC_Order {
 
 	/** @var array Order line items array */
 	var $items;
+	
+	/** @var array Order Fees array */
+	var $fees;
 
 	/** @var array Taxes array (tax rows) */
 	var $taxes;
@@ -430,6 +433,40 @@ class WC_Order {
 			}
 		}
 		return $this->items;
+	}
+
+	/**
+	 * Return an array of fees within this order.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	function get_fees() {
+		global $wpdb, $woocommerce;
+		
+		if ( ! $this->fees ) {
+			$line_items = $wpdb->get_results( $wpdb->prepare( "
+				SELECT 		order_item_id, order_item_name
+				FROM 		{$wpdb->prefix}woocommerce_order_items
+				WHERE 		order_id = %d
+				AND 		order_item_type = 'fee'
+				ORDER BY 	order_item_id
+			", $this->id ) );
+			
+			$this->fees = array();
+			
+			foreach ( $line_items as $item ) {
+				$item_meta = $this->get_item_meta( $item->order_item_id );
+				
+				$this->fees[ $item->order_item_id ] = array(
+					'name'					=> $item->order_item_name,
+					'tax_class'				=> $item_meta['_tax_class'][0],
+					'line_total'			=> $item_meta['_line_total'][0],
+					'line_tax'				=> $item_meta['_line_tax'][0],
+				);
+			}
+		}
+		return $this->fees;
 	}
 
 	/**
