@@ -42,7 +42,7 @@ include_once('shortcode-thankyou.php');
  * @return string
  */
 function woocommerce_product_category( $atts ){
-	global $woocommerce_loop;
+	global $woocommerce, $woocommerce_loop;
 
   	if ( empty( $atts ) ) return;
 
@@ -56,7 +56,7 @@ function woocommerce_product_category( $atts ){
 
 	if ( ! $category ) return;
 	
-	$ordering_args = get_catalog_ordering_args( $orderby, $order );
+	$ordering_args = $woocommerce->query->get_catalog_ordering_args( $orderby, $order );
 
   	$args = array(
 		'post_type'				=> 'product',
