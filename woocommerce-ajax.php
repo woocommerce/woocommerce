@@ -920,6 +920,7 @@ function woocommerce_ajax_add_order_fee() {
 
 add_action('wp_ajax_woocommerce_add_order_fee', 'woocommerce_ajax_add_order_fee');
 
+
 /**
  * woocommerce_ajax_remove_order_item function.
  * 
@@ -1114,7 +1115,7 @@ function woocommerce_calc_line_taxes() {
 	$item_id		= esc_attr( $_POST['order_item_id'] );
 	$tax_class 		= esc_attr( $_POST['tax_class'] );
 
-	if ( ! $item_id ) 
+	if ( ! $item_id || $tax_class == '0' ) 
 		return;
 
 	// Get product details

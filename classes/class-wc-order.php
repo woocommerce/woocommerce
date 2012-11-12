@@ -122,12 +122,6 @@ class WC_Order {
 	/** @var string Grand total */
 	var $order_total;
 
-	/** @var array Order line items array */
-	var $items;
-	
-	/** @var array Order Fees array */
-	var $fees;
-
 	/** @var array Taxes array (tax rows) */
 	var $taxes;
 
@@ -409,32 +403,30 @@ class WC_Order {
 		
 		$type = array_map( 'esc_attr', $type );
 		
-		if ( ! $this->items ) {
-			$line_items = $wpdb->get_results( $wpdb->prepare( "
-				SELECT 		order_item_id, order_item_name, order_item_type
-				FROM 		{$wpdb->prefix}woocommerce_order_items
-				WHERE 		order_id = %d
-				AND 		order_item_type IN ( '" . implode( "','", $type ) . "' )
-				ORDER BY 	order_item_id
-			", $this->id ) );
+		$line_items = $wpdb->get_results( $wpdb->prepare( "
+			SELECT 		order_item_id, order_item_name, order_item_type
+			FROM 		{$wpdb->prefix}woocommerce_order_items
+			WHERE 		order_id = %d
+			AND 		order_item_type IN ( '" . implode( "','", $type ) . "' )
+			ORDER BY 	order_item_id
+		", $this->id ) );
+		
+		$items = array();
+		
+		foreach ( $line_items as $item ) {
 			
-			$this->items = array();
+			// Place line item into array to return
+			$items[ $item->order_item_id ]['name'] = $item->order_item_name;
+			$items[ $item->order_item_id ]['type'] = $item->order_item_type;
+			$items[ $item->order_item_id ]['item_meta'] = $this->get_item_meta( $item->order_item_id );
 			
-			foreach ( $line_items as $item ) {
-				
-				// Place line item into array to return
-				$this->items[ $item->order_item_id ]['name'] = $item->order_item_name;
-				$this->items[ $item->order_item_id ]['type'] = $item->order_item_type;
-				$this->items[ $item->order_item_id ]['item_meta'] = $this->get_item_meta( $item->order_item_id );
-				
-				// Put meta into item array
-				foreach( $this->items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
-					$key = substr( $name, 0, 1 ) == '_' ? substr( $name, 1 ) : $name;
-					$this->items[ $item->order_item_id ][ $key ] = $value[0];
-				}
+			// Put meta into item array
+			foreach( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
+				$key = substr( $name, 0, 1 ) == '_' ? substr( $name, 1 ) : $name;
+				$items[ $item->order_item_id ][ $key ] = $value[0];
 			}
 		}
-		return $this->items;
+		return $items;
 	}
 
 	/**
@@ -892,11 +884,23 @@ class WC_Order {
 			);
 			
 		if ( $fees = $this->get_fees() )
-			foreach( $fees as $fee ) {
-				$total_rows['shipping'] = array(
-					'label' => $fee['name'],
-					'value'	=> woocommerce_price( $fee['line_total'] )
-				);
+			foreach( $fees as $id => $fee ) {
+				
+				if ( $this->display_cart_ex_tax || ! $this->prices_include_tax ) {
+				
+					$total_rows[ 'fee_' . $id ] = array(
+						'label' => $fee['name'],
+						'value'	=> woocommerce_price( $fee['line_total'] )
+					);
+					
+				} else {
+					
+					$total_rows[ 'fee_' . $id ] = array(
+						'label' => $fee['name'],
+						'value'	=> woocommerce_price( $fee['line_total'] + $fee['line_tax'] )
+					);
+
+				}
 			}
 		
 		// Tax for tax exclusive prices

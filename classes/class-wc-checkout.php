@@ -475,6 +475,21 @@ class WC_Checkout {
 				 	}
 				}
 				
+				// Store fees
+				foreach ( $woocommerce->cart->get_fees() as $fee ) {
+					$item_id = woocommerce_add_order_item( $order_id, array(
+				 		'order_item_name' 		=> $fee->name,
+				 		'order_item_type' 		=> 'fee'
+				 	) );
+				 	
+				 	if ( $fee->taxable )
+				 		woocommerce_add_order_item_meta( $item_id, '_tax_class', $fee->tax_class );
+				 	else
+				 		woocommerce_add_order_item_meta( $item_id, '_tax_class', '0' );
+				 		
+				 	woocommerce_add_order_item_meta( $item_id, '_line_total', woocommerce_format_decimal( $fee->amount ) );
+					woocommerce_add_order_item_meta( $item_id, '_line_tax', woocommerce_format_decimal( $fee->tax ) );
+				}
 				
 				// UPDATE USER META
 				

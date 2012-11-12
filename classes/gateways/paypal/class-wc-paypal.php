@@ -353,6 +353,17 @@ class WC_Paypal extends WC_Payment_Gateway {
 					}
 				}
 			}
+			
+			// Fees
+			if ( sizeof( $order->get_fees() ) > 0 ) {
+				foreach ( $order->get_fees() as $item ) {
+					$item_loop++;
+	
+					$paypal_args[ 'item_name_' . $item_loop ] 	= $item['name'];
+					$paypal_args[ 'quantity_' . $item_loop ] 	= 1;
+					$paypal_args[ 'amount_' . $item_loop ] 		= $item['line_total'];
+				}
+			}
 
 			// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
 			if ( $order->get_shipping() > 0 ) {

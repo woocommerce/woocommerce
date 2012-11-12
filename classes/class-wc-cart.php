@@ -1395,7 +1395,10 @@ class WC_Cart {
 					// Get tax rates
 					$tax_rates 				= $this->tax->get_rates();
 					$fee_taxes				= $this->tax->calc_tax( $fee->amount, $tax_rates, false );
-
+					
+					// Store
+					$fee->tax 				= array_sum( $fee_taxes );
+					
 					// Tax rows - merge the totals we just got
 					foreach ( array_keys( $this->taxes + $fee_taxes ) as $key ) {
 					    $this->taxes[ $key ] = ( isset( $fee_taxes[ $key ] ) ? $fee_taxes[ $key ] : 0 ) + ( isset( $this->taxes[ $key ] ) ? $this->taxes[ $key ] : 0 );
@@ -1758,6 +1761,7 @@ class WC_Cart {
 			$new_fee->amount	= (float) esc_attr( $amount );
 			$new_fee->tax_class	= $tax_class;
 			$new_fee->taxable	= $taxable ? true : false;
+			$new_fee->tax		= 0;
 			
 			$this->fees[] 		= $new_fee;
 		}

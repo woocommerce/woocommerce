@@ -51,13 +51,18 @@ $available_methods = $woocommerce->shipping->get_available_shipping_methods();
 					
 					<tr class="fee fee-<?php echo $fee->id ?>">
 						<th><?php echo $fee->name ?></th>
-						<td><?php echo woocommerce_price( $fee->amount ) ?></td>
+						<td><?php 
+							if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax )
+								echo woocommerce_price( $fee->amount );
+							else
+								echo woocommerce_price( $fee->amount + $fee->tax );
+						?></td>
 					</tr>
 					
 				<?php endforeach; ?>
 
 				<?php
-					// Show the tax row if showing prices exlcusive of tax only
+					// Show the tax row if showing prices exclusive of tax only
 					if ( $woocommerce->cart->display_totals_ex_tax || ! $woocommerce->cart->prices_include_tax ) {
 						if ( $woocommerce->cart->get_cart_tax() ) {
 	

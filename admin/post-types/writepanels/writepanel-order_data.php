@@ -469,7 +469,7 @@ function woocommerce_order_totals_meta_box($post) {
 		<ul class="totals">
 
 			<li class="left">
-				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts before tax', 'woocommerce' ); ?>." href="#">[?]</a></label>
+				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts before tax - calculated by comparing subtotals to totals.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 				<input type="text" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_cart_discount'][0] ) ) 
 						echo esc_attr( $data['_cart_discount'][0] );
@@ -477,7 +477,7 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 
 			<li class="right">
-				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts after tax', 'woocommerce' ); ?>." href="#">[?]</a></label>
+				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts after tax - user defined.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 				<input type="text" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_discount'][0] ) ) 
 						echo esc_attr( $data['_order_discount'][0] );
@@ -490,9 +490,17 @@ function woocommerce_order_totals_meta_box($post) {
 	<div class="totals_group">
 		<h4><?php _e( 'Shipping', 'woocommerce' ); ?></h4>
 		<ul class="totals">
-
+			
+			<li class="wide">
+				<label><?php _e( 'Label:', 'woocommerce' ); ?></label>
+				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php 
+					if ( isset( $data['_shipping_method_title'][0] ) ) 
+						echo esc_attr( $data['_shipping_method_title'][0] );
+				?>" class="first" />
+			</li>
+			
 			<li class="left">
-				<label><?php _e( 'Shipping Cost:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Cost:', 'woocommerce' ); ?></label>
 				<input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
 					if ( isset( $data['_order_shipping'][0] ) ) 
 						echo esc_attr( $data['_order_shipping'][0] );
@@ -500,7 +508,7 @@ function woocommerce_order_totals_meta_box($post) {
 			</li>
 
 			<li class="right">
-				<label><?php _e( 'Shipping Method:', 'woocommerce' ); ?></label>
+				<label><?php _e( 'Method:', 'woocommerce' ); ?></label>
 				<select name="_shipping_method" id="_shipping_method" class="first">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
@@ -522,14 +530,6 @@ function woocommerce_order_totals_meta_box($post) {
 						}
 					?>
 				</select>
-			</li>
-
-			<li class="wide">
-				<label><?php _e( 'Shipping Title:', 'woocommerce' ); ?></label>
-				<input type="text" id="_shipping_method_title" name="_shipping_method_title" placeholder="<?php _e( 'The shipping title the customer sees', 'woocommerce' ); ?>" value="<?php 
-					if ( isset( $data['_shipping_method_title'][0] ) ) 
-						echo esc_attr( $data['_shipping_method_title'][0] );
-				?>" class="first" />
 			</li>
 
 		</ul>

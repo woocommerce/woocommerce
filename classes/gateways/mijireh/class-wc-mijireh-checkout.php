@@ -232,10 +232,17 @@ class WC_Mijireh_Checkout extends WC_Payment_Gateway {
 		// add items to order
 		$items = $wc_order->get_items();
 		
-		foreach($items as $item) {
+		foreach( $items as $item ) {
 			$product = $wc_order->get_product_from_item( $item );
 			
 			$mj_order->add_item( $item['name'], $wc_order->get_item_subtotal( $item, false, false ), $item['qty'], $product->get_sku() );
+		}
+		
+		// Handle fees
+		$items = $wc_order->get_fees();
+		
+		foreach( $items as $item ) {
+			$mj_order->add_item( $item['name'], $item['line_total'], 1, '' );
 		}
 
 		// add billing address to order
