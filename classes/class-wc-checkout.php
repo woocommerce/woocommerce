@@ -556,22 +556,21 @@ class WC_Checkout {
 				if ( isset( $available_gateways[ $this->posted['payment_method'] ] ) )
 					$payment_method = $available_gateways[ $this->posted['payment_method'] ]->get_title();
 					
-				// Prepare order taxes for storage
-				$order_taxes = array();
-
+				// Store tax rows
 				foreach ( array_keys( $woocommerce->cart->taxes + $woocommerce->cart->shipping_taxes ) as $key ) {
+					
+					$item_id = woocommerce_add_order_item( $order_id, array(
+				 		'order_item_name' 		=> $woocommerce->cart->tax->get_rate_label( $key ),
+				 		'order_item_type' 		=> 'tax'
+				 	) );
+				 	
+				 	// Add line item meta
+				 	if ( $item_id ) {
+					 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0 ) );
+					 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0 ) );
+					 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0 ) );
+					}
 
-					$is_compound = $woocommerce->cart->tax->is_compound( $key ) ? 1 : 0;
-
-					$cart_tax = isset( $woocommerce->cart->taxes[ $key ] ) ? $woocommerce->cart->taxes[ $key ] : 0;
-					$shipping_tax = isset( $woocommerce->cart->shipping_taxes[ $key ] ) ? $woocommerce->cart->shipping_taxes[ $key ] : 0;
-
-					$order_taxes[] = array(
-						'label' 		=> $woocommerce->cart->tax->get_rate_label( $key ),
-						'compound' 		=> $is_compound,
-						'cart_tax' 		=> woocommerce_format_total( $cart_tax ),
-						'shipping_tax' 	=> woocommerce_format_total( $shipping_tax )
-					);
 				}
 
 				// Save other order meta fields
@@ -587,7 +586,6 @@ class WC_Checkout {
 				update_post_meta( $order_id, '_order_total', 			woocommerce_format_total( $woocommerce->cart->total ) );
 				update_post_meta( $order_id, '_order_key', 				apply_filters('woocommerce_generate_order_key', uniqid('order_') ) );
 				update_post_meta( $order_id, '_customer_user', 			(int) $user_id );
-				update_post_meta( $order_id, '_order_taxes', 			$order_taxes );
 				update_post_meta( $order_id, '_order_currency', 		get_woocommerce_currency() );
 				update_post_meta( $order_id, '_prices_include_tax', 	get_option( 'woocommerce_prices_include_tax' ) );
 
