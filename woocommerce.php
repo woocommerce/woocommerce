@@ -1601,6 +1601,7 @@ class Woocommerce {
 	function shortcode_wrapper(
 		$function,
 		$wrapper = array(
+			'bool' => true,
 			'class' => 'woocommerce',
 			'before' => null,
 			'after' => null
@@ -1609,21 +1610,17 @@ class Woocommerce {
 	){
 		ob_start();
 
-		if( $wrapper['before'] == null && $wrapper['after'] == null ) :
-			echo '<div class="' . $wrapper['class'] . '">';
-		else:
-			echo $wrapper['before'];
+		$content = '';
+
+		if ( $wrapper['bool'] == true ) :
+			if( $wrapper['before'] == null ) : $before = '<div class="' . $wrapper['class'] . '">' ? $before = $wrapper['before'];
+			if( $wrapper['after'] == null ) : $after = '<div class="' . $wrapper['class'] . '">' ? $after = $wrapper['after'];
+			$content .=  $before . call_user_func( $function, $atts ) . $after;
+		else :
+			$content .= call_user_func( $function, $atts );
 		endif;
 
-		call_user_func( $function, $atts );
-
-		if( $wrapper['before'] == null && $wrapper['after'] == null ) :
-			echo '</div>';
-		else:
-			echo $wrapper['after'];
-		endif;
-
-		return ob_get_clean();
+		return ob_get_clean($content);
 	}
 
 	/** Cache Helpers *********************************************************/
