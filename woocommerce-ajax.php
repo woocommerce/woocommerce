@@ -978,19 +978,23 @@ function woocommerce_ajax_refund_order_item() {
 			$refund_amount = 0;
 
 			foreach( $order_item_ids as $item_id ) {
-				$amount = woocommerce_get_order_item_meta( $item_id, '_line_total', true );
+				$refunded = woocommerce_get_order_item_meta( $item_id, '_refunded', true );
 
-				$refund_return = false;
+				if ( 1 != $refunded ) {
+					$amount = woocommerce_get_order_item_meta( $item_id, '_line_total', true );
 
-				if ( $automated_refund ) {
-					$refund_return = $gateway->refund( $order, absint( $item_id ), $amount );
-				}
+					$refund_return = false;
 
-				if ( ! $automated_refund || $refund_return ) {
-					$refund_amount = $refund_amount + $amount;
+					if ( $automated_refund ) {
+						$refund_return = $gateway->refund( $order, absint( $item_id ), $amount );
+					}
 
-					woocommerce_update_order_item_meta( $item_id, '_refunded', true );
-					do_action( 'woocommerce_refund_order_item', $item_id );
+					if ( ! $automated_refund || $refund_return ) {
+						$refund_amount = $refund_amount + $amount;
+
+						woocommerce_update_order_item_meta( $item_id, '_refunded', 1 );
+						do_action( 'woocommerce_refund_order_item', $item_id );
+					}
 				}
 			}
 
