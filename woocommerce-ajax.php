@@ -955,12 +955,27 @@ function woocommerce_ajax_refund_order_item() {
 	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'order-item', 'security' );
+
+	$order_id = absint( $_POST['order_id'] );
+	$order = &new WC_Order( $order_id );
 	
-	$order_item_ids = $_POST['order_item_ids'];
-	
-	if ( sizeof( $order_item_ids ) > 0 ) {
-		foreach( $order_item_ids as $id ) {
-			woocommerce_refund_order_item( absint( $id ) );
+	if ( $order ) {
+		global $woocommerce;
+		$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+
+		if ( isset( $gateways[ $order->payment_method ] ) ) {
+			$gateway = $order->payment_method;
+
+			if ( in_array( 'refunds', $gateway->supports ) &&  method_exists( $gateway, 'refund' ) {
+			$order_item_ids = $_POST['order_item_ids'];
+		
+			if ( sizeof( $order_item_ids ) > 0 ) {
+				foreach( $order_item_ids as $id ) {
+					$gateway->refund( absint( $id ) );
+
+					do_action( 'woocommerce_refund_order_item', $item_id );
+				}
+			}
 		}
 	}
 	
