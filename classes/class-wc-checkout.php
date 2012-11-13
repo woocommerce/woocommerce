@@ -393,7 +393,7 @@ class WC_Checkout {
 					'post_title' 	=> sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
 					'post_status' 	=> 'publish',
 					'ping_status'	=> 'closed',
-					'post_excerpt' 	=> $this->posted['order_comments'],
+					'post_excerpt' 	=> isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
 					'post_author' 	=> 1,
 					'post_password'	=> uniqid( 'order_' )	// Protects the post just in case
 				) );
