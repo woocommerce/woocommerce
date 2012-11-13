@@ -946,6 +946,63 @@ function woocommerce_ajax_remove_order_item() {
 add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_ajax_remove_order_item' );
 
 /**
+ * woocommerce_ajax_refund_order_item function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_ajax_refund_order_item() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+
+	$order_id = absint( $_POST['order_id'] );
+	$order = &new WC_Order( $order_id );
+	
+	if ( $order ) {
+		global $woocommerce;
+		$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+
+		if ( isset( $gateways[ $order->payment_method ] ) ) {
+			$gateway = $gateways[ $order->payment_method ];
+
+			if ( in_array( 'refunds', $gateway->supports ) &&  method_exists( $gateway, 'refund' ) ) {
+				$order_item_ids = $_POST['order_item_ids'];
+			
+				if ( sizeof( $order_item_ids ) > 0 ) {
+					$refund_amount = 0;
+
+					foreach( $order_item_ids as $item_id ) {
+						$amount = woocommerce_get_order_item_meta( $item_id, '_line_total', true );
+						
+						if ( $gateway->refund( $order, absint( $item_id ), $amount ) ) {
+							$refund_amount = $refund_amount + $amount;
+
+							woocommerce_update_order_item_meta( $item_id, '_refunded', true );
+							do_action( 'woocommerce_refund_order_item', $item_id );
+						}
+					}
+
+					$order_refund_total = get_post_meta( $order_id, '_refund_total', true );
+
+					if ( ! $order_refund_total ) {
+						$order_refund_total = $refund_amount;
+					} else {
+						$order_refund_total = $order_refund_total + $refund_amount;
+					}
+
+					update_post_meta( $order_id, '_refund_total', woocommerce_format_total( $order_refund_total ) );
+				}
+			}
+		}
+	}
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_refund_order_item', 'woocommerce_ajax_refund_order_item' );
+
+/**
  * woocommerce_ajax_reduce_order_item_stock function.
  * 
  * @access public
