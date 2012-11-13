@@ -966,7 +966,7 @@ function woocommerce_ajax_refund_order_item() {
 		if ( isset( $gateways[ $order->payment_method ] ) ) {
 			$gateway = $order->payment_method;
 
-			if ( in_array( 'refunds', $gateway->supports ) &&  method_exists( $gateway, 'refund' ) {
+			if ( in_array( 'refunds', $gateway->supports ) &&  method_exists( $gateway, 'refund' ) ) {
 				$order_item_ids = $_POST['order_item_ids'];
 			
 				if ( sizeof( $order_item_ids ) > 0 ) {
