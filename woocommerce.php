@@ -1600,13 +1600,13 @@ class Woocommerce {
 	 */
 	function shortcode_wrapper(
 		$function,
+		$atts = array(),
 		$wrapper = array(
 			'bool' => true,
 			'class' => 'woocommerce',
 			'before' => null,
 			'after' => null
 		)
-		$atts = array()
 	){
 		ob_start();
 
