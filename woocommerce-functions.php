@@ -527,6 +527,8 @@ function woocommerce_pay_action() {
 				update_post_meta( $order_id, '_payment_method', $payment_method);
 				if (isset($available_gateways) && isset($available_gateways[$payment_method])) :
 					$payment_method_title = $available_gateways[$payment_method]->get_title();
+                    // Payment Method Field Validation
+                    $available_gateways[$payment_method]->validate_fields();
 				endif;
 				update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
 
