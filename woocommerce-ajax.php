@@ -1111,6 +1111,7 @@ function woocommerce_calc_line_taxes() {
 
 	$items			= $_POST['items'];
 	$shipping		= $_POST['shipping'];
+	$item_tax		= 0;
 	
 	// Calculate sales tax first
 	if ( sizeof( $items ) > 0 ) {
@@ -1159,6 +1160,8 @@ function woocommerce_calc_line_taxes() {
 					'line_subtotal_tax' => $line_subtotal_tax,
 					'line_tax' 			=> $line_tax
 				);
+				
+				$item_tax += $line_tax;
 				
 				// Sum the item taxes
 				foreach ( array_keys( $taxes + $line_taxes ) as $key )
@@ -1226,6 +1229,7 @@ function woocommerce_calc_line_taxes() {
 	
 	// Return
 	echo json_encode( array(
+		'item_tax' 		=> $item_tax,
 		'item_taxes' 	=> $item_taxes,
 		'shipping_tax' 	=> $shipping_tax,
 		'tax_row_html' 	=> $tax_row_html

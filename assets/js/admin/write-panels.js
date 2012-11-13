@@ -346,6 +346,7 @@ jQuery( function($){
 					$('#tax_rows').empty().append( result['tax_row_html'] );
 				} );
 				
+				$('#_order_tax').val( result['item_tax'] ).change();
 				$('#_order_shipping_tax').val( result['shipping_tax'] ).change();
 				
 				$('.woocommerce_order_items_wrapper').unblock();
