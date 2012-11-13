@@ -372,14 +372,14 @@ function woocommerce_order_items_meta_box( $post ) {
 				$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
 				if ( isset( $gateways[ $order->payment_method ] ) ) {
-					$gateway = $order->payment_method;
+					$gateway = $gateways[ $order->payment_method ];
 
 					if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
 						$disabled = ' disabled="disabled"';
 					}
 				}
 
-				echo '<option value="refund"' . $disabled . '>' . _e( 'Refund Lines', 'woocommerce' ) . '</option>';
+				echo '<option value="refund"' . $disabled . '>' . __( 'Refund Lines', 'woocommerce' ) . '</option>';
 				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
