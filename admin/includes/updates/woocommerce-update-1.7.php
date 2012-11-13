@@ -187,9 +187,9 @@ foreach ( $order_tax_rows as $order_tax_row ) {
 		 	
 		 	// Add line item meta
 		 	if ( $item_id ) {
-			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $order_item['compound'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', absint( $order_item['cart_tax'] ) );
-			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', absint( $order_item['shipping_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $order_tax['compound'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', absint( $order_tax['cart_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', absint( $order_tax['shipping_tax'] ) );
 			}
 			
 			// Delete from DB (rename)
