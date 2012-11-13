@@ -501,54 +501,69 @@ function woocommerce_checkout_action() {
 function woocommerce_pay_action() {
 	global $woocommerce;
 
-	if (isset($_POST['woocommerce_pay']) && $woocommerce->verify_nonce('pay')) :
+	if ( isset( $_POST['woocommerce_pay'] ) && $woocommerce->verify_nonce( 'pay' ) ) {
 
 		ob_start();
 
 		// Pay for existing order
-		$order_key = urldecode( $_GET['order'] );
-		$order_id = (int) $_GET['order_id'];
-		$order = new WC_Order( $order_id );
+		$order_key 	= urldecode( $_GET['order'] );
+		$order_id 	= absint( $_GET['order_id'] );
+		$order 		= new WC_Order( $order_id );
 
-		if ($order->id == $order_id && $order->order_key == $order_key && in_array($order->status, array('pending', 'failed'))) :
+		if ( $order->id == $order_id && $order->order_key == $order_key && in_array( $order->status, array( 'pending', 'failed' ) ) ) {
 
 			// Set customer location to order location
-			if ($order->billing_country) $woocommerce->customer->set_country( $order->billing_country );
-			if ($order->billing_state) $woocommerce->customer->set_state( $order->billing_state );
-			if ($order->billing_postcode) $woocommerce->customer->set_postcode( $order->billing_postcode );
+			if ( $order->billing_country ) 
+				$woocommerce->customer->set_country( $order->billing_country );
+			if ( $order->billing_state ) 
+				$woocommerce->customer->set_state( $order->billing_state );
+			if ( $order->billing_postcode ) 
+				$woocommerce->customer->set_postcode( $order->billing_postcode );
+			if ( $order->billing_city ) 
+				$woocommerce->customer->set_city( $order->billing_city );
 
 			// Update payment method
-			if ($order->order_total > 0 ) :
-				$payment_method 			= woocommerce_clean($_POST['payment_method']);
+			if ( $order->order_total > 0 ) {
+				$payment_method = woocommerce_clean( $_POST['payment_method'] );
 
 				$available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
 				// Update meta
-				update_post_meta( $order_id, '_payment_method', $payment_method);
-				if (isset($available_gateways) && isset($available_gateways[$payment_method])) :
-					$payment_method_title = $available_gateways[$payment_method]->get_title();
-				endif;
+				update_post_meta( $order_id, '_payment_method', $payment_method );
+				
+				if ( isset( $available_gateways[ $payment_method ] ) )
+					$payment_method_title = $available_gateways[ $payment_method ]->get_title();
+				
 				update_post_meta( $order_id, '_payment_method_title', $payment_method_title);
+				
+				// Validate
+				$available_gateways[ $payment_method ]->validate_fields();
+				
+				// Process
+				if ( $woocommerce->error_count() == 0 ) {
+					
+					$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
-				$result = $available_gateways[$payment_method]->process_payment( $order_id );
-
-				// Redirect to success/confirmation/payment page
-				if ($result['result']=='success') :
-					wp_redirect( $result['redirect'] );
-					exit;
-				endif;
-			else :
+					// Redirect to success/confirmation/payment page
+					if ( $result['result'] == 'success' ) {
+						wp_redirect( $result['redirect'] );
+						exit;
+					}
+				
+				}
+				
+			} else {
 
 				// No payment was required for order
 				$order->payment_complete();
-				wp_safe_redirect( get_permalink(woocommerce_get_page_id('thanks')) );
+				wp_safe_redirect( get_permalink( woocommerce_get_page_id( 'thanks' ) ) );
 				exit;
 
-			endif;
+			}
 
-		endif;
+		}
 
-	endif;
+	}
 }
 
 
