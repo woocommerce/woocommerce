@@ -367,7 +367,20 @@ function woocommerce_order_items_meta_box( $post ) {
 			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
 			<optgroup label="<?php _e( 'Edit', 'woocommerce' ); ?>">
 				<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
-				<option value="refund"><?php _e( 'Refund Lines', 'woocommerce' ); ?></option>
+
+				<?php
+				$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+
+				if ( isset( $gateways[ $order->payment_method ] ) ) {
+					$gateway = $order->payment_method;
+
+					if ( ! in_array( 'refunds', $gateway->supports ) || ! method_exists( $gateway, 'refund' ) ) {
+						$disabled = ' disabled="disabled"';
+					}
+				}
+
+				echo '<option value="refund"' . $disabled . '>' . _e( 'Refund Lines', 'woocommerce' ) . '</option>';
+				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
 				<option value="reduce_stock"><?php _e( 'Reduce Line Stock', 'woocommerce' ); ?></option>
