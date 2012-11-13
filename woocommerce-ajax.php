@@ -946,6 +946,30 @@ function woocommerce_ajax_remove_order_item() {
 add_action( 'wp_ajax_woocommerce_remove_order_item', 'woocommerce_ajax_remove_order_item' );
 
 /**
+ * woocommerce_ajax_refund_order_item function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_ajax_refund_order_item() {
+	global $woocommerce, $wpdb;
+
+	check_ajax_referer( 'order-item', 'security' );
+	
+	$order_item_ids = $_POST['order_item_ids'];
+	
+	if ( sizeof( $order_item_ids ) > 0 ) {
+		foreach( $order_item_ids as $id ) {
+			woocommerce_refund_order_item( absint( $id ) );
+		}
+	}
+	
+	die();
+}
+
+add_action( 'wp_ajax_woocommerce_refund_order_item', 'woocommerce_ajax_refund_order_item' );
+
+/**
  * woocommerce_ajax_reduce_order_item_stock function.
  * 
  * @access public

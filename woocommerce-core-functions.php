@@ -1796,6 +1796,28 @@ function woocommerce_delete_order_item( $item_id ) {
 }
 
 /**
+ * woocommerce_refund_order_item function.
+ * 
+ * @access public
+ * @param int $item_id
+ * @return bool
+ */
+function woocommerce_refund_order_item( $item_id ) {
+	global $wpdb;
+	
+	$item_id = absint( $item_id );
+	
+	if ( ! $item_id )
+		return false;
+	
+	// @todo refund handling here
+	
+	do_action( 'woocommerce_refund_order_item', $item_id );
+	
+	return true;	
+}
+
+/**
  * WooCommerce Order Item Meta API - Update term meta
  *
  * @access public
