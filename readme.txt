@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Taxes - tweaked display of tax when using inclusive pricing to avoid confusion.
 * Tweak - More granular capabilities for admin/shop manager covering products, orders and coupons.
 * Tweak - Added some calculations to the order page when manually entering rows. Also added accounting.js for more accurate rounding of floats.
+* Tweak - Order page can now calculate tax rows for you.
 * Tweak - Display tax/discount total for reference on orders
 * Tweak - Humanised order email subjects/headings
 * Tweak - Cleaned up the tax settings.

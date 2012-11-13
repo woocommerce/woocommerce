@@ -459,8 +459,13 @@ function woocommerce_order_actions_meta_box($post) {
  * @param mixed $post
  * @return void
  */
-function woocommerce_order_totals_meta_box($post) {
-	global $woocommerce;
+function woocommerce_order_totals_meta_box( $post ) {
+	global $woocommerce, $theorder;
+	
+	if ( ! is_object( $theorder ) )
+		$theorder = new WC_Order( $post->ID );
+		
+	$order = $theorder;
 
 	$data = get_post_custom( $post->ID );
 	?>
@@ -536,42 +541,16 @@ function woocommerce_order_totals_meta_box($post) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $post->ID ) ?>
 		<div class="clear"></div>
 	</div>
-	<div class="totals_group">
+	<div class="totals_group tax_rows_group">
 		<h4><?php _e( 'Tax Rows', 'woocommerce' ); ?></h4>
 		<div id="tax_rows" class="total_rows">
 			<?php
-				$loop = 0;
-				$taxes = isset( $data['_order_taxes'][0] ) ? maybe_unserialize( $data['_order_taxes'][0] ) : '';
-				if ( is_array( $taxes ) && sizeof( $taxes ) > 0 ) {
-					foreach ( $taxes as $tax ) {
-						?>
-						<div class="total_row">
-							<p class="first">
-								<label><?php _e( 'Tax Label:', 'woocommerce' ); ?></label>
-								<input type="text" name="_order_taxes_label[<?php echo $loop; ?>]" placeholder="<?php echo $woocommerce->countries->tax_or_vat(); ?>" value="<?php echo esc_attr( $tax['label'] ); ?>" />
-							</p>
-							<p class="last">
-								<label><?php _e( 'Compound:', 'woocommerce' ); ?>
-								<input type="checkbox" name="_order_taxes_compound[<?php echo $loop; ?>]" <?php checked( $tax['compound'], 1 ); ?> /></label>
-							</p>
-							<p class="first">
-								<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?></label>
-								<input type="text" name="_order_taxes_cart[<?php echo $loop; ?>]" placeholder="0.00" value="<?php echo esc_attr( $tax['cart_tax'] ); ?>" />
-							</p>
-							<p class="last">
-								<label><?php _e( 'Shipping Tax:', 'woocommerce' ); ?></label>
-								<input type="text" name="_order_taxes_shipping[<?php echo $loop; ?>]" placeholder="0.00" value="<?php echo esc_attr( $tax['shipping_tax'] ); ?>" />
-							</p>
-							<a href="#" class="delete_tax_row">&times;</a>
-							<div class="clear"></div>
-						</div>
-						<?php
-						$loop++;
-					}
+				foreach ( $order->get_taxes() as $item_id => $item ) {
+					include( 'order-tax-html.php' );
 				}
 			?>
 		</div>
-		<h4><a href="#" class="add_tax_row tips" data-tip="<?php _e( 'These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce' ); ?>"><?php _e( '+ Add tax row', 'woocommerce' ); ?> [?]</a></a></h4>
+		<h4><a href="#" class="add_tax_row"><?php _e( '+ Add tax row', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'These rows contain taxes for this order. This allows you to display multiple or compound taxes rather than a single total.', 'woocommerce' ); ?>">[?]</span></a></a></h4>
 		<div class="clear"></div>
 	</div>
 	<div class="totals_group">
@@ -737,42 +716,42 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 
 	$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s WHERE ID = %s", date_i18n( 'Y-m-d H:i:s', $date ), $post_id ) );
 
+
 	// Tax rows
-	$order_taxes = array();
+	if ( isset( $_POST['order_taxes_id'] ) ) {
+		
+		$get_values = array( 'order_taxes_id', 'order_taxes_label', 'order_taxes_compound', 'order_taxes_amount', 'order_taxes_shipping_amount' );
 
-	if ( isset( $_POST['_order_taxes_label'] ) ) {
+		foreach( $get_values as $value )
+			$$value = isset( $_POST[ $value ] ) ? $_POST[ $value ] : array();
 
-		$order_taxes_label		= $_POST['_order_taxes_label'];
-		$order_taxes_compound 	= isset( $_POST['_order_taxes_compound'] ) ? $_POST['_order_taxes_compound'] : array();
-		$order_taxes_cart 		= $_POST['_order_taxes_cart'];
-		$order_taxes_shipping 	= $_POST['_order_taxes_shipping'];
-		$order_taxes_label_count = sizeof( $order_taxes_label );
+		foreach( $order_taxes_id as $item_id ) {
+			
+			$item_id = absint( $item_id );
 
-		for ( $i = 0; $i < $order_taxes_label_count; $i ++ ) {
+			if ( ! $order_taxes_label[ $item_id ] ) 
+				$order_taxes_label[ $item_id ] = $woocommerce->countries->tax_or_vat();
 
-			// Add to array if the tax amount is set
-			if ( ! $order_taxes_cart[ $i ] && ! $order_taxes_shipping[ $i ] ) 
-				continue;
-
-			if ( ! $order_taxes_label[ $i ] ) 
-				$order_taxes_label[ $i ] = $woocommerce->countries->tax_or_vat();
-
-			if ( isset( $order_taxes_compound[ $i ] ) ) 
-				$is_compound = 1; 
-			else 
-				$is_compound = 0;
-
-			$order_taxes[] = array(
-				'label' 		=> esc_attr( $order_taxes_label[ $i ] ),
-				'compound' 		=> $is_compound,
-				'cart_tax' 		=> esc_attr( $order_taxes_cart[ $i ] ),
-				'shipping_tax' 	=> esc_attr( $order_taxes_shipping[ $i ] )
-			);
-
+			if ( isset( $order_taxes_label[ $item_id ] ) )
+				$wpdb->update( 
+					$wpdb->prefix . "woocommerce_order_items", 
+					array( 'order_item_name' => woocommerce_clean( $order_taxes_label[ $item_id ] ) ), 
+					array( 'order_item_id' => $item_id ), 
+					array( '%s' ), 
+					array( '%d' ) 
+				);
+			
+			if ( isset( $order_taxes_compound[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, 'compound', isset( $order_taxes_compound[ $item_id ] ) ? 1 : 0 );
+			
+			if ( isset( $order_taxes_amount[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, 'tax_amount', woocommerce_clean( $order_taxes_amount[ $item_id ] ) );
+		 		
+		 	if ( isset( $order_taxes_shipping_amount[ $item_id ] ) )
+		 		woocommerce_update_order_item_meta( $item_id, 'shipping_tax_amount', woocommerce_clean( $order_taxes_shipping_amount[ $item_id ] ) );
 		}
 	}
-
-	update_post_meta( $post_id, '_order_taxes', $order_taxes );
+	
 
 	// Order items + fees
 	if ( isset( $_POST['order_item_id'] ) ) {

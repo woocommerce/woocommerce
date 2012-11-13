@@ -1095,14 +1095,15 @@ add_action( 'wp_ajax_woocommerce_remove_order_item_meta', 'woocommerce_ajax_remo
  * @return void
  */
 function woocommerce_calc_line_taxes() {
-	global $woocommerce;
+	global $woocommerce, $wpdb;
 
 	check_ajax_referer( 'calc-totals', 'security' );
 
 	$tax = new WC_Tax();
 
 	$taxes = $tax_rows = $item_taxes = $shipping_taxes = array();
-
+	
+	$order_id 		= absint( $_POST['order_id'] );
 	$country 		= strtoupper( esc_attr( $_POST['country'] ) );
 	$state 			= strtoupper( esc_attr( $_POST['state'] ) );
 	$postcode 		= strtoupper( esc_attr( $_POST['postcode'] ) );
@@ -1186,27 +1187,48 @@ function woocommerce_calc_line_taxes() {
 	$shipping_taxes = $tax->calc_shipping_tax( $shipping, $matched_tax_rates );
 	$shipping_tax = rtrim( rtrim( number_format( array_sum( $shipping_taxes ), 2, '.', '' ), '0' ), '.' );
 
+	// Remove old tax rows
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax' )", $order_id ) );
+				
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = 'tax'", $order_id ) );
+
 	// Now merge to keep tax rows
+	ob_start();
+	
 	foreach ( array_keys( $taxes + $shipping_taxes ) as $key ) {
 
-		$is_compound = $tax->is_compound( $key ) ? 1 : 0;
+	 	$item 							= array();
+		$item['name'] 					= $tax->get_rate_label( $key );
+		$item['compound'] 				= $tax->is_compound( $key ) ? 1 : 0;
+		$item['tax_amount'] 			= woocommerce_format_total( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+		$item['shipping_tax_amount'] 	= woocommerce_format_total( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
 
-		$cart_tax = isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0;
-		$shipping_tax = isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0;
+		if ( ! $item['name'] ) 
+			$item['name'] = $woocommerce->countries->tax_or_vat();
 
-		$tax_rows[] = array(
-			'label' 		=> $tax->get_rate_label( $key ),
-			'compound' 		=> $is_compound,
-			'cart_tax' 		=> woocommerce_format_total( $cart_tax ),
-			'shipping_tax' 	=> woocommerce_format_total( $shipping_tax )
-		);
+		// Add line item
+	   	$item_id = woocommerce_add_order_item( $order_id, array(
+	 		'order_item_name' 		=> $item['name'],
+	 		'order_item_type' 		=> 'tax'
+	 	) );
+	 	
+	 	// Add line item meta
+	 	if ( $item_id ) {
+		 	woocommerce_add_order_item_meta( $item_id, 'compound', $item['compound'] );
+		 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', $item['tax_amount'] );
+		 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', $item['shipping_tax_amount'] );
+	 	}
+		
+		include( 'admin/post-types/writepanels/order-tax-html.php' );
 	}
+	
+	$tax_row_html = ob_get_clean();
 	
 	// Return
 	echo json_encode( array(
 		'item_taxes' 	=> $item_taxes,
 		'shipping_tax' 	=> $shipping_tax,
-		'tax_rows' 		=> $tax_rows
+		'tax_row_html' 	=> $tax_row_html
 	) );
 
 	// Quit out
@@ -1215,6 +1237,61 @@ function woocommerce_calc_line_taxes() {
 
 add_action('wp_ajax_woocommerce_calc_line_taxes', 'woocommerce_calc_line_taxes');
 
+/**
+ * woocommerce_add_line_tax function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_add_line_tax() {
+	global $woocommerce;
+
+	check_ajax_referer( 'calc-totals', 'security' );
+	
+	$order_id 	= absint( $_POST['order_id'] );
+	$order 		= new WC_Order( $order_id );
+	
+	// Add line item
+   	$item_id = woocommerce_add_order_item( $order_id, array(
+ 		'order_item_name' 		=> '',
+ 		'order_item_type' 		=> 'tax'
+ 	) );
+ 	
+ 	// Add line item meta
+ 	if ( $item_id ) {
+	 	woocommerce_add_order_item_meta( $item_id, 'compound', '' );
+	 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', '' );
+	 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', '' );
+ 	}
+	
+	include( 'admin/post-types/writepanels/order-tax-html.php' );
+	
+	// Quit out
+	die();
+}
+
+add_action('wp_ajax_woocommerce_add_line_tax', 'woocommerce_add_line_tax');
+
+/**
+ * woocommerce_add_line_tax function.
+ * 
+ * @access public
+ * @return void
+ */
+function woocommerce_remove_line_tax() {
+	global $woocommerce;
+
+	check_ajax_referer( 'calc-totals', 'security' );
+	
+	$tax_row_id = absint( $_POST['tax_row_id'] );
+	
+	woocommerce_delete_order_item( $tax_row_id );
+	
+	// Quit out
+	die();
+}
+
+add_action('wp_ajax_woocommerce_remove_line_tax', 'woocommerce_remove_line_tax');
 
 /**
  * Add order note via ajax

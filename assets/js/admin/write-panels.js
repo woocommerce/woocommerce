@@ -323,6 +323,7 @@ jQuery( function($){
 			
 			var data = {
 				action: 		'woocommerce_calc_line_taxes',
+				order_id: 		woocommerce_writepanel_params.post_id,
 				items:			calculate_items,
 				shipping:		accounting.unformat( $('#_order_shipping').val() ),
 				country:		country,
@@ -342,6 +343,7 @@ jQuery( function($){
 					
 					$row.find('input.line_tax').val( result['item_taxes'][ item_id ]['line_tax'] ).change();
 					$row.find('input.line_subtotal_tax').val( result['item_taxes'][ item_id ]['line_subtotal_tax'] ).change();
+					$('#tax_rows').empty().append( result['tax_row_html'] );
 				} );
 				
 				$('#_order_shipping_tax').val( result['shipping_tax'] ).change();
@@ -354,9 +356,9 @@ jQuery( function($){
 		}
 		return false;
 	}).hover(function() {
-		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax').css('background-color', '#d8c8d2');
+		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax, .tax_rows_group').css('background-color', '#e3d2dd');
 	}, function() {
-		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax').css('background-color', '');
+		$('#order_items_list input.line_subtotal_tax, #order_items_list input.line_tax, #_order_shipping_tax, #_order_tax, .tax_rows_group').css('background-color', '');
 	});
 
 
@@ -405,6 +407,16 @@ jQuery( function($){
 				cart_tax = cart_tax + parseFloat( line_tax );
 			});
 			
+			// Tax
+			if (woocommerce_writepanel_params.round_at_subtotal=='yes') {
+				cart_tax = accounting.toFixed( cart_tax, 2 );
+			}
+
+			// Cart discount
+			var cart_discount = ( line_subtotals + line_subtotal_taxes ) - ( line_totals + cart_tax );
+			if ( cart_discount < 0 ) cart_discount = 0;
+			cart_discount = accounting.toFixed( cart_discount, 2 );
+			
 			$('#order_items_list tr.fee').each(function(){
 				var line_total 			= accounting.unformat( $(this).find('input.line_total').val() );
 				var line_tax 			= accounting.unformat( $(this).find('input.line_tax').val() );
@@ -426,11 +438,6 @@ jQuery( function($){
 				cart_tax = accounting.toFixed( cart_tax, 2 );
 			}
 
-			// Cart discount
-			var cart_discount = ( (line_subtotals + line_subtotal_taxes) - (line_totals + cart_tax) );
-			if ( cart_discount < 0 ) cart_discount = 0;
-			cart_discount = accounting.toFixed( cart_discount, 2 );
-
 			// Total
 			var order_total = line_totals + cart_tax + order_shipping + order_shipping_tax - order_discount;
 			order_total = accounting.toFixed( order_total, 2 );
@@ -441,8 +448,6 @@ jQuery( function($){
 			$('#_order_tax').val( cart_tax ).change();
 			$('#_order_total').val( order_total ).change();
 
-			// Since we currently cannot calc shipping from the backend, ditch the rows. They must be manually calculated.
-			$('#tax_rows').empty();
 			$('#woocommerce-order-totals').unblock();
 
 		} else {
@@ -450,7 +455,7 @@ jQuery( function($){
 		}
 		return false;
 	}).hover(function() {
-		$('#woocommerce-order-totals .calculated').css('background-color', '#d8c8d2');
+		$('#woocommerce-order-totals .calculated').css('background-color', '#e3d2dd');
 	}, function() {
 		$('#woocommerce-order-totals .calculated').css('background-color', '');
 	});
@@ -810,38 +815,53 @@ jQuery( function($){
 		return false;
 	});
 
+	// Add a tax row
 	$('a.add_tax_row').live('click', function(){
 
-		var size = $('#tax_rows .tax_row').size();
+		var data = {
+			order_id: 	woocommerce_writepanel_params.post_id,
+			action: 	'woocommerce_add_line_tax',
+			security: 	woocommerce_writepanel_params.calc_totals_nonce
+		};
 
-		$('#tax_rows').append('<div class="tax_row">\
-			<p class="first">\
-				<label>' + woocommerce_writepanel_params.tax_label + '</label>\
-				<input type="text" name="_order_taxes_label[' + size + ']" placeholder="' + woocommerce_writepanel_params.tax_or_vat + '" />\
-			</p>\
-			<p class="last">\
-				<label>' + woocommerce_writepanel_params.compound_label + '\
-				<input type="checkbox" name="_order_taxes_compound[' + size + ']" /></label>\
-			</p>\
-			<p class="first">\
-				<label>' + woocommerce_writepanel_params.cart_tax_label + '</label>\
-				<input type="text" name="_order_taxes_cart[' + size + ']" placeholder="0.00" />\
-			</p>\
-			<p class="last">\
-				<label>' + woocommerce_writepanel_params.shipping_tax_label + '</label>\
-				<input type="text" name="_order_taxes_shipping[' + size + ']" placeholder="0.00" />\
-			</p>\
-			<a href="#" class="delete_tax_row">&times;</a>\
-			<div class="clear"></div>\
-		</div>');
+		$('#tax_rows').closest('.totals_group').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		$.ajax({
+			url: woocommerce_writepanel_params.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
+				$('#tax_rows').append( response ).closest('.totals_group').unblock();
+			}
+		});
 
 		return false;
 	});
-
+	
+	// Delete a tax row
 	$('a.delete_tax_row').live('click', function(){
 		$tax_row = $(this).closest('.tax_row');
-		$tax_row.find('input').val('');
-		$tax_row.hide();
+		
+		var tax_row_id = $tax_row.attr( 'data-order_item_id' )
+		
+		var data = {
+			tax_row_id: tax_row_id,
+			action: 	'woocommerce_remove_line_tax',
+			security: 	woocommerce_writepanel_params.calc_totals_nonce
+		};
+
+		$('#tax_rows').closest('.totals_group').block({ message: null, overlayCSS: { background: '#fff url(' + woocommerce_writepanel_params.plugin_url + '/assets/images/ajax-loader.gif) no-repeat center', opacity: 0.6 } });
+
+		$.ajax({
+			url: woocommerce_writepanel_params.ajax_url,
+			data: data,
+			type: 'POST',
+			success: function( response ) {
+				$tax_row.remove();
+				$('#tax_rows').closest('.totals_group').unblock();
+			}
+		});
+		
 		return false;
 	});
 

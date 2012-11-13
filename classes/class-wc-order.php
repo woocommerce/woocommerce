@@ -438,6 +438,16 @@ class WC_Order {
 	function get_fees() {
 		return $this->get_items( 'fee' );
 	}
+	
+	/**
+	 * Return an array of taxes within this order.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_taxes() {
+		return $this->get_items( 'tax' );
+	}
 
 	/**
 	 * has_meta function for order items.
@@ -464,18 +474,6 @@ class WC_Order {
 	 */
 	function get_item_meta( $order_item_id, $key = '', $single = false ) {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
-	}
-
-	/**
-	 * Return an array of taxes for this order.
-	 *
-	 * @access public
-	 * @return array
-	 */
-	function get_taxes() {
-		if ( ! $this->taxes )
-			$this->taxes = isset( $this->order_custom_fields['_order_taxes'][0] ) ? maybe_unserialize( $this->order_custom_fields['_order_taxes'][0] ) : array();
-		return $this->taxes;
 	}
 
 
@@ -752,16 +750,16 @@ class WC_Order {
 			// Remove non-compound taxes
 			foreach ( $this->get_taxes() as $tax ) :
 
-				if (isset($tax['compound']) && $tax['compound']) continue;
+				if ( ! empty( $tax['compound'] ) ) continue;
 
-				$subtotal = $subtotal + $tax['cart_tax'] + $tax['shipping_tax'];
+				$subtotal = $subtotal + $tax['tax_amount'] + $tax['shipping_tax_amount'];
 
 			endforeach;
 
 			// Remove discounts
 			$subtotal = $subtotal - $this->get_cart_discount();
 
-			$subtotal = woocommerce_price($subtotal);
+			$subtotal = woocommerce_price( $subtotal );
 
 		endif;
 
@@ -918,12 +916,12 @@ class WC_Order {
 							continue;
 						}
 	
-						if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
+						if ( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) == 0 )
 							continue;
 	
-						$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
-							'label' => $tax[ 'label' ] . ':',
-							'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
+						$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
+							'label' => $tax[ 'name' ] . ':',
+							'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 						);
 					}
 	
@@ -940,12 +938,12 @@ class WC_Order {
 						if ( ! $tax[ 'compound' ] )
 							continue;
 	
-						if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
+						if ( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) == 0 )
 							continue;
 	
-						$total_rows[ sanitize_title( $tax[ 'label' ] ) ] = array(
-							'label' => $tax[ 'label' ] . ':',
-							'value'	=> woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) )
+						$total_rows[ sanitize_title( $tax[ 'name' ] ) ] = array(
+							'label' => $tax[ 'name' ] . ':',
+							'value'	=> woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) )
 						);
 					}
 				} else {
@@ -986,10 +984,10 @@ class WC_Order {
 					
 					foreach ( $this->get_taxes() as $tax ) {
 					
-						if ( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) == 0 )
+						if ( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) == 0 )
 							continue;
 							
-						$tax_string_array[] = sprintf( '%s %s', woocommerce_price( ( $tax[ 'cart_tax' ] + $tax[ 'shipping_tax' ] ) ), $tax[ 'label' ] );
+						$tax_string_array[] = sprintf( '%s %s', woocommerce_price( ( $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ] ) ), $tax[ 'name' ] );
 					}
 					
 				} else {
