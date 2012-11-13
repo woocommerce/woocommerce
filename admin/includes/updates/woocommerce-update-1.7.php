@@ -165,3 +165,42 @@ foreach ( $order_item_rows as $order_item_row ) {
 		unset( $meta_rows, $item_id, $order_item );
 	}
 }
+
+// Do the same kind of update for order_taxes - move to lines
+// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'
+$order_tax_rows = $wpdb->get_results( $wpdb->prepare( "
+	SELECT * FROM {$wpdb->postmeta}
+	WHERE meta_key = '_order_taxes'
+" ) );
+
+foreach ( $order_tax_rows as $order_tax_row ) {
+	
+	$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
+	
+	if ( $order_taxes ) {
+		foreach( $order_taxes as $order_tax ) {
+			
+			$item_id = woocommerce_add_order_item( $order_tax_row->post_id, array(
+		 		'order_item_name' 		=> $order_tax['label'],
+		 		'order_item_type' 		=> 'tax'
+		 	) );
+		 	
+		 	// Add line item meta
+		 	if ( $item_id ) {
+			 	woocommerce_add_order_item_meta( $item_id, 'compound', absint( $order_item['compound'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'tax_amount', absint( $order_item['cart_tax'] ) );
+			 	woocommerce_add_order_item_meta( $item_id, 'shipping_tax_amount', absint( $order_item['shipping_tax'] ) );
+			}
+			
+			// Delete from DB (rename)
+			$wpdb->query( $wpdb->prepare( "
+				UPDATE {$wpdb->postmeta}
+				SET meta_key = '_order_taxes_old'
+				WHERE meta_key = '_order_taxes'
+				AND post_id = %d
+			", $order_tax_row->post_id ) );
+			
+			unset( $tax_amount );
+		}
+	}
+}
