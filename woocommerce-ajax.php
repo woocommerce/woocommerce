@@ -963,37 +963,46 @@ function woocommerce_ajax_refund_order_item() {
 		global $woocommerce;
 		$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
 
+		$automated_refund = false;
+		$order_item_ids = $_POST['order_item_ids'];
+
 		if ( isset( $gateways[ $order->payment_method ] ) ) {
 			$gateway = $gateways[ $order->payment_method ];
 
 			if ( in_array( 'refunds', $gateway->supports ) &&  method_exists( $gateway, 'refund' ) ) {
-				$order_item_ids = $_POST['order_item_ids'];
+				$automated_refund = true;
+			}
+		}
 			
-				if ( sizeof( $order_item_ids ) > 0 ) {
-					$refund_amount = 0;
+		if ( sizeof( $order_item_ids ) > 0 ) {
+			$refund_amount = 0;
 
-					foreach( $order_item_ids as $item_id ) {
-						$amount = woocommerce_get_order_item_meta( $item_id, '_line_total', true );
-						
-						if ( $gateway->refund( $order, absint( $item_id ), $amount ) ) {
-							$refund_amount = $refund_amount + $amount;
+			foreach( $order_item_ids as $item_id ) {
+				$amount = woocommerce_get_order_item_meta( $item_id, '_line_total', true );
 
-							woocommerce_update_order_item_meta( $item_id, '_refunded', true );
-							do_action( 'woocommerce_refund_order_item', $item_id );
-						}
-					}
+				$refund_return = false;
 
-					$order_refund_total = get_post_meta( $order_id, '_refund_total', true );
+				if ( $automated_refund ) {
+					$refund_return = $gateway->refund( $order, absint( $item_id ), $amount );
+				}
 
-					if ( ! $order_refund_total ) {
-						$order_refund_total = $refund_amount;
-					} else {
-						$order_refund_total = $order_refund_total + $refund_amount;
-					}
+				if ( ! $automated_refund || $refund_return ) {
+					$refund_amount = $refund_amount + $amount;
 
-					update_post_meta( $order_id, '_refund_total', woocommerce_format_total( $order_refund_total ) );
+					woocommerce_update_order_item_meta( $item_id, '_refunded', true );
+					do_action( 'woocommerce_refund_order_item', $item_id );
 				}
 			}
+
+			$order_refund_total = get_post_meta( $order_id, '_refund_total', true );
+
+			if ( ! $order_refund_total ) {
+				$order_refund_total = $refund_amount;
+			} else {
+				$order_refund_total = $order_refund_total + $refund_amount;
+			}
+
+			update_post_meta( $order_id, '_refund_total', woocommerce_format_total( $order_refund_total ) );
 		}
 	}
 	

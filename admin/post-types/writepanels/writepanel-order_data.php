@@ -380,6 +380,7 @@ function woocommerce_order_items_meta_box( $post ) {
 				}
 
 				echo '<option value="refund"' . $disabled . '>' . __( 'Refund Lines', 'woocommerce' ) . '</option>';
+				echo '<option value="refund">' . __( 'Manual Refund Lines', 'woocommerce' ) . '</option>';
 				?>
 			</optgroup>
 			<optgroup label="<?php _e( 'Stock Actions', 'woocommerce' ); ?>">
