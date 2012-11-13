@@ -1020,8 +1020,9 @@ jQuery( function($){
 		buttonImage: woocommerce_writepanel_params.calendar_image,
 		buttonImageOnly: true,
 		onSelect: function( selectedDate ) {
-			var option = this.id == "_sale_price_dates_from" ? "minDate" : "maxDate",
-				instance = $( this ).data( "datepicker" ),
+			var option = $(this).is('#_sale_price_dates_from, .sale_price_dates_from') ? "minDate" : "maxDate";
+
+			var instance = $( this ).data( "datepicker" ),
 				date = $.datepicker.parseDate(
 					instance.settings.dateFormat ||
 					$.datepicker._defaults.dateFormat,
