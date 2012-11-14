@@ -1074,6 +1074,7 @@ class Woocommerce {
 			'ajax_url' 						=> $this->ajax_url(),
 			'ajax_loader_url'				=> apply_filters( 'woocommerce_ajax_loader_url', $this->plugin_url() . '/assets/images/ajax-loader.gif' ),
 			'required_rating_text'			=> esc_attr__( 'Please select a rating', 'woocommerce' ),
+			'no_matching_variations_text'	=> esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
 			'review_rating_required'		=> get_option( 'woocommerce_review_rating_required' ),
 			'required_text'					=> esc_attr__( 'required', 'woocommerce' ),
 			'update_order_review_nonce' 	=> wp_create_nonce( "update-order-review" ),

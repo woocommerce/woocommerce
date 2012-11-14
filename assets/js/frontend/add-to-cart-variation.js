@@ -115,6 +115,8 @@ jQuery(document).ready(function($) {
 
 	            	if ( ! focus )
 	            		$variation_form.trigger( 'reset_image' );
+	            		
+	            	alert( woocommerce_params.no_matching_variations_text );
 
 	            }
 
