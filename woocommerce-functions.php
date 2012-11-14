@@ -189,8 +189,12 @@ function woocommerce_update_cart_action() {
 				if ( ! isset( $cart_totals[$cart_item_key]['qty'] ) )
 					continue;
 
-				// Clean the quantity input
-				$quantity = absint( $cart_totals[$cart_item_key]['qty'] );
+				// Check the quantity input
+				if ( is_int( $cart_totals[ $cart_item_key ]['qty'] ) ) {
+					$quantity = absint( $cart_totals[ $cart_item_key ]['qty'] );
+				} else {
+					$quantity = $woocommerce->cart->cart_contents[ $cart_item_key ]['quantity'];
+				}
 
 				// Update cart validation
 	    		$passed_validation 	= apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity);
