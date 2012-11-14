@@ -165,7 +165,17 @@ function woocommerce_update_options($options) {
                 update_option( $value['id'], 'no' );
             }
 
-        } elseif (isset( $value['type'] ) && $value['type'] == 'image_width' ) {
+        } elseif ( isset( $value['type'] ) && $value['type'] == 'multicheck' ) {
+
+			// Get checked array
+			if ( isset( $_POST[ $value['id'] ] ) ) 
+				$checked = array_map( 'woocommerce_clean', (array) $_POST[ $value['id'] ] ); 
+			else 
+				$checked = array();
+				
+			update_option( $value['id'], $checked );
+
+		} elseif (isset( $value['type'] ) && $value['type'] == 'image_width' ) {
 
             if ( isset( $value['id'] ) && isset( $_POST[$value['id'] . '_width'] ) ) {
               	

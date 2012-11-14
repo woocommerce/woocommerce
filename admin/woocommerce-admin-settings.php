@@ -580,6 +580,30 @@ function woocommerce_admin_fields( $options ) {
                     </td>
                 </tr><?php
             break;
+            case 'multicheck':
+            	//get the saved values
+            	$checked = (array) get_option($value['id']);
+            	//if option does not exist, use default
+            	if ( ! $checked ) {
+					$_current = (array) $value['std'];
+				}
+
+            	?><tr valign="top">
+					<th scope="row" class="titledesc">
+						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
+					</th>
+                    <td class="forminp">
+                        <?php
+                        if( $value['options'] ) foreach ($value['options'] as $key => $val) {
+                        	?>
+                        	<input type="checkbox" name="<?php echo esc_attr( $value['id'] ); ?>[]" value="<?php echo esc_attr( $key ); ?>" <?php checked( in_array( $key, $checked ), true, true ); ?>> <?php echo $val ?>
+                        	<?php
+                        }
+                        ?>
+                       <?php echo $description; ?>
+                    </td>
+                </tr><?php
+            break;
             case 'checkbox' :
 
             	if (!isset($value['hide_if_checked'])) $value['hide_if_checked'] = false;
