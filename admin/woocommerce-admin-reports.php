@@ -1651,7 +1651,7 @@ function woocommerce_monthly_taxes() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
 		$shipping = $wpdb->get_var( $wpdb->prepare( "
@@ -1666,7 +1666,7 @@ function woocommerce_monthly_taxes() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
 		$order_tax = $wpdb->get_var( $wpdb->prepare( "
@@ -1681,7 +1681,7 @@ function woocommerce_monthly_taxes() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
 		$shipping_tax = $wpdb->get_var( $wpdb->prepare( "
@@ -1696,38 +1696,41 @@ function woocommerce_monthly_taxes() {
 			AND 	posts.post_status 	= 'publish'
 			AND 	tax.taxonomy		= 'shop_order_status'
 			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+			AND		'{$month}' 			= date_format(posts.post_date,'%%Y%%m')
 		" ) );
 
-		$order_taxes = $wpdb->get_col( $wpdb->prepare( "
-			SELECT meta.meta_value AS order_tax
-			FROM {$wpdb->posts} AS posts
-			LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-			LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID=rel.object_ID
-			LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-			LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-			WHERE 	meta.meta_key 		= '_order_taxes'
-			AND 	posts.post_type 	= 'shop_order'
-			AND 	posts.post_status 	= 'publish'
-			AND 	tax.taxonomy		= 'shop_order_status'
-			AND		term.slug			IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
-			AND		'{$month}' 			= date_format(posts.post_date,'%Y%m')
+		$tax_rows = $wpdb->get_results( $wpdb->prepare( "
+			SELECT 		
+				order_items.order_item_name as name,
+				SUM( order_item_meta.meta_value ) as tax_amount, 
+				SUM( order_item_meta_2.meta_value ) as shipping_tax_amount,
+				SUM( order_item_meta.meta_value + order_item_meta_2.meta_value ) as total_tax_amount
+			
+			FROM 		{$wpdb->prefix}woocommerce_order_items as order_items
+			
+			LEFT JOIN 	{$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+			LEFT JOIN 	{$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id
+		
+			LEFT JOIN 	{$wpdb->posts} AS posts ON order_items.order_id = posts.ID	
+			LEFT JOIN 	{$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
+			LEFT JOIN 	{$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
+			LEFT JOIN 	{$wpdb->terms} AS term USING( term_id )
+		
+			WHERE 		order_items.order_item_type = 'tax'
+			AND 		posts.post_type 	= 'shop_order'
+			AND 		posts.post_status 	= 'publish'
+			AND 		tax.taxonomy		= 'shop_order_status'
+			AND			term.slug IN ('" . implode( "','", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "')
+			AND			'{$month}' = date_format( posts.post_date,'%%Y%%m' )
+			AND 		order_item_meta.meta_key = 'tax_amount'
+			AND 		order_item_meta_2.meta_key = 'shipping_tax_amount'
+			
+			GROUP BY 	order_items.order_item_name
 		" ) );
-
-		$tax_rows = array();
-
-		if ( $order_taxes ) {
-			foreach ( $order_taxes as $order_tax_rows ) {
-				$order_tax_rows = maybe_unserialize( $order_tax_rows );
-				if ( is_array( $order_tax_rows ) && ! empty( $order_tax_rows ) )
-					foreach ( $order_tax_rows as $tax_row )
-						if ( isset( $tax_row['cart_tax'] ) ) {
-
-							$tax_row_labels[] = $tax_row['label'];
-
-							$tax_rows[ $tax_row['label'] ] = isset( $tax_rows[ $tax_row['label'] ] ) ? $tax_rows[ $tax_row['label'] ] + $tax_row['cart_tax'] + $tax_row['shipping_tax'] : $tax_row['cart_tax'] + $tax_row['shipping_tax'];
-
-						}
+		
+		if ( $tax_rows ) {
+			foreach ( $tax_rows as $tax_row ) {
+				$tax_row_labels[] = $tax_row->name;
 			}
 		}
 
@@ -1821,8 +1824,10 @@ function woocommerce_monthly_taxes() {
 								$total['total_tax'] = isset( $total['total_tax'] ) ? $total['total_tax'] + $tax['total_tax'] : $tax['total_tax'];
 
 								foreach ( $tax_row_labels as $label )
-									if ( isset( $tax['tax_rows'][ $label ] ) )
-										$total['tax_rows'][ $label ] = isset( $total['tax_rows'][ $label ] ) ? $total['tax_rows'][ $label ] + $tax['tax_rows'][ $label ] : $tax['tax_rows'][ $label ];
+									foreach ( $tax['tax_rows'] as $tax_row )
+										if ( $tax_row->name == $label ) {
+											$total['tax_rows'][ $label ] = isset( $total['tax_rows'][ $label ] ) ? $total['tax_rows'][ $label ] + $tax_row->total_tax_amount : $tax_row->total_tax_amount;
+										}
 
 							}
 
@@ -1859,11 +1864,20 @@ function woocommerce_monthly_taxes() {
 								<td class="total_row">' . woocommerce_price( $tax['total_tax'] ) . '</td>
 								<td class="total_row">' . woocommerce_price( $tax['gross'] - $tax['shipping'] - $tax['total_tax'] ) . '</td>';
 
-							foreach ( $tax_row_labels as $label )
-								if ( isset( $tax['tax_rows'][ $label ] ) )
-									echo '<td class="tax_row">' . woocommerce_price( $tax['tax_rows'][ $label ] ) . '</td>';
-								else
-									echo '<td class="tax_row">' .  woocommerce_price( 0 ) . '</td>';
+							
+							
+							foreach ( $tax_row_labels as $label ) {
+								
+								$row_total = 0;
+								
+								foreach ( $tax['tax_rows'] as $tax_row ) {
+									if ( $tax_row->name == $label ) {
+										$row_total = $tax_row->total_tax_amount;
+									}
+								}
+							
+								echo '<td class="tax_row">' . woocommerce_price( $row_total ) . '</td>';	
+							}
 
 							echo '</tr>';
 						}
