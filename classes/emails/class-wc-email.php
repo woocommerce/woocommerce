@@ -232,10 +232,58 @@ class WC_Email extends WC_Settings_API {
 		if ( $this->get_email_type() == 'plain' ) {
 			$email_content = html_entity_decode( strip_tags( $this->get_content_plain() ) );
 		} else {
-			$email_content = $this->get_content_html();
+			$email_content = $this->style_inline( $this->get_content_html() );
 		}
 
 		return $email_content;
+	}
+	
+	/**
+	 * Apply inline styles to dynamic content.
+	 * 
+	 * @access public
+	 * @param mixed $content
+	 * @return void
+	 */
+	function style_inline( $content ) {
+		
+		if ( ! class_exists( 'DOMDocument' ) )
+			return $content;
+		
+		$dom = new DOMDocument();
+		@$dom->loadHTML( $content );
+		
+		$nodes = $dom->getElementsByTagName('img');
+		
+		foreach( $nodes as $node )
+			if ( ! $node->hasAttribute( 'style' ) )
+				$node->setAttribute( "style", "display:inline; border:none; font-size:14px; font-weight:bold; height:auto; line-height:100%; outline:none; text-decoration:none; text-transform:capitalize;" );
+				
+		$nodes_h1 = $dom->getElementsByTagName('h1');
+		$nodes_h2 = $dom->getElementsByTagName('h2');
+		$nodes_h3 = $dom->getElementsByTagName('h3');
+		
+		foreach( $nodes_h1 as $node )
+			if ( ! $node->hasAttribute( 'style' ) )
+				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:34px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
+				
+		foreach( $nodes_h2 as $node )
+			if ( ! $node->hasAttribute( 'style' ) )
+				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:30px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
+		
+		foreach( $nodes_h3 as $node )
+			if ( ! $node->hasAttribute( 'style' ) )
+				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; display:block; font-family:Arial; font-size:26px; font-weight:bold; margin-top: 10px; margin-right:0; margin-bottom:10px; margin-left:0; text-align:left; line-height: 150%;" );
+				
+		$nodes = $dom->getElementsByTagName('a');
+		
+		foreach( $nodes as $node )
+			if ( ! $node->hasAttribute( 'style' ) )
+				$node->setAttribute( "style", "color: " . get_option( 'woocommerce_email_text_color' ) . "; font-weight:normal; text-decoration:underline;" );
+		
+		$content = $dom->saveHTML();
+				
+		return $content;
 	}
 	
 	/**
@@ -290,7 +338,7 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( &$this, 'get_content_type' ) );
 		
-		wp_mail( $to, $subject, wp_kses_post( $message ), $headers, $attachments );
+		wp_mail( $to, $subject, $message, $headers, $attachments );
 
 		remove_filter( 'wp_mail_from', array( &$this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( &$this, 'get_from_name' ) );

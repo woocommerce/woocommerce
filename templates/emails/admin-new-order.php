@@ -19,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;" border="1" bordercolor="#eee">
 	<thead>
 		<tr>
-			<th scope="col"><?php _e( 'Product', 'woocommerce' ); ?></th>
-			<th scope="col"><?php _e( 'Quantity', 'woocommerce' ); ?></th>
-			<th scope="col"><?php _e( 'Price', 'woocommerce' ); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e( 'Product', 'woocommerce' ); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e( 'Quantity', 'woocommerce' ); ?></th>
+			<th scope="col" style="text-align:left; border: 1px solid #eee;"><?php _e( 'Price', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -30,10 +30,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	<tfoot>
 		<?php
 			if ( $totals = $order->get_order_item_totals() ) {
+				$i = 0;
 				foreach ( $totals as $total ) {
+					$i++;
 					?><tr>
-						<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
-						<td><?php echo $total['value']; ?></td>
+						<th scope="row" colspan="2" style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['label']; ?></th>
+						<td style="text-align:left; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['value']; ?></td>
 					</tr><?php
 				}
 			}
