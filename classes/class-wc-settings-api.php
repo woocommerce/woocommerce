@@ -186,6 +186,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
     	$data['placeholder'] = (isset( $data['placeholder'] )) ? $data['placeholder'] : '';
@@ -197,7 +198,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" placeholder="' . $data['placeholder'] . '" />';
+                $html .= '<input class="input-text regular-input '.$data['class'].'" type="text" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" placeholder="' . $data['placeholder'] . '" '.$disabled.'/>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -219,6 +220,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
 
@@ -229,7 +231,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" />';
+                $html .= '<input class="input-text regular-input '.$data['class'].'" type="password" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" value="' . $value . '" '.$disabled.'/>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -251,6 +253,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -262,7 +265,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'">'. $value .'</textarea>';
+                $html .= '<textarea rows="3" cols="20" class="input-text wide-input '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" '.$disabled.'>'. $value .'</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -284,6 +287,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	if ( isset( $data['label'] ) && $data['label'] != '' ) $label = $data['label']; else $label = $data['title'];
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -293,7 +297,7 @@ class WC_Settings_API {
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
 				$html .= '<label for="' . $this->plugin_id . $this->id . '_' . $key . '">';
-				$html .= '<input style="'.$data['css'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="'.$data['class'].'" /> ' . $label . '</label><br />' . "\n";
+                $html .= '<input style="'.$data['css'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="'.$data['class'].'" '.$disabled.'/> ' . $label . '</label><br />' . "\n";
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . $data['description'] . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -315,6 +319,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -325,7 +330,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<select name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" class="select '.$data['class'].'">';
+                $html .= '<select name="' . $this->plugin_id . $this->id . '_' . $key . '" id="' . $this->plugin_id . $this->id . '_' . $key . '" style="'.$data['css'].'" class="select '.$data['class'].'"'.$disabled.'>';
 
 				foreach ($data['options'] as $option_key => $option_value) :
 					$html .= '<option value="'.$option_key.'" '.selected($option_key, esc_attr($this->settings[$key]), false).'>'.$option_value.'</option>';
@@ -353,6 +358,7 @@ class WC_Settings_API {
     	$html = '';
 
     	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+        $disabled = (isset( $data['disabled'] ) && $data['disabled'] ) ? ' disabled' : '';
     	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
     	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
     	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
@@ -363,7 +369,7 @@ class WC_Settings_API {
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
 				$html .= '<fieldset><legend class="screen-reader-text"><span>' . $title . '</span></legend>' . "\n";
-				$html .= '<select multiple="multiple" style="'.$data['css'].'" class="multiselect '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '[]" id="' . $this->plugin_id . $this->id . '_' . $key . '">';
+                $html .= '<select multiple="multiple" style="'.$data['css'].'" class="multiselect '.$data['class'].'" name="' . $this->plugin_id . $this->id . '_' . $key . '[]" id="' . $this->plugin_id . $this->id . '_' . $key . '"'.$disabled.'>';
 
 				foreach ($data['options'] as $option_key => $option_value) :
 					$html .= '<option value="'.$option_key.'" ';
