@@ -52,7 +52,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 	 * @return void
 	 */
 	function widget( $args, $instance ) {
-		extract($args);
+		extract( $args );
 
 		global $_chosen_attributes, $wpdb, $woocommerce, $wp_query, $wp;
 
@@ -90,14 +90,14 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 		$min = $max = 0;
 		$post_min = $post_max = '';
 
-		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) != 0 ) {
+		if ( sizeof( $woocommerce->query->layered_nav_product_ids ) === 0 ) {
 			$max = ceil( $wpdb->get_var(
 				$wpdb->prepare('
 					SELECT max(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key = %3$s
-				'), $wpdb->posts, $wpdb->postmeta, '_price'
+					WHERE meta_key = \'%3$s\'
+				', $wpdb->posts, $wpdb->postmeta, '_price' )
 			) );
 		} else {
 			$max = ceil( $wpdb->get_var(
@@ -105,7 +105,7 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 					SELECT max(meta_value + 0)
 					FROM %1$s
 					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key = %3$s
+					WHERE meta_key =\'%3$s\'
 					AND (
 						%1$s.ID IN (%4$s)
 						OR (
@@ -113,8 +113,8 @@ class WooCommerce_Widget_Price_Filter extends WP_Widget {
 							AND %1$s.post_parent != 0
 						)
 					)
-				'), $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', $woocommerce->query->layered_nav_product_ids )
-			) );
+				', $wpdb->posts, $wpdb->postmeta, '_price', implode( ',', $woocommerce->query->layered_nav_product_ids )
+			) ) );
 		}
 
 		if ( $min == $max ) return;
