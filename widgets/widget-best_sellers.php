@@ -81,7 +81,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
     		'post_status' 	 => 'publish',
     		'post_type' 	 => 'product',
     		'meta_key' 		 => 'total_sales',
-    		'orderby' 		 => 'meta_value',
+    		'orderby' 		 => 'meta_value_num',
     		'no_found_rows'  => 1,
     	);
 

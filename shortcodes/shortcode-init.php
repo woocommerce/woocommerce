@@ -42,7 +42,7 @@ include_once('shortcode-thankyou.php');
  * @return string
  */
 function woocommerce_product_category( $atts ){
-	global $woocommerce_loop, $woocommerce;
+	global $woocommerce, $woocommerce_loop;
 
   	if ( empty( $atts ) ) return;
 
