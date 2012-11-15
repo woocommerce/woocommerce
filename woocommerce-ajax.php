@@ -637,6 +637,8 @@ function woocommerce_link_all_variations() {
 		}
 
 		$added++;
+		
+		do_action( 'product_variation_linked', $variation_id );
 
 		if ( $added > WC_MAX_LINKED_VARIATIONS ) break;
 
