@@ -436,7 +436,7 @@ class WC_Product {
 		$return = false;
 
 		// Sold individually if downloadable, virtual, and the option is enabled OR if intentionally a singular item
-		if ( 'yes' == get_post_meta( $this->id, '_sold_individually', true ) || ( $this->is_downloadable() && $this->is_virtual() && get_option('woocommerce_limit_downloadable_product_qty') == 'yes'  ) ) {
+		if ( 'yes' == get_post_meta( $this->id, '_sold_individually', true ) || ( $this->is_downloadable() && $this->is_virtual() && get_option('woocommerce_limit_downloadable_product_qty') == 'yes'  ) || ( ! $this->backorders_allowed() && $this->get_stock_quantity() == 1 ) ) {
 			$return = true;
 		}
 
