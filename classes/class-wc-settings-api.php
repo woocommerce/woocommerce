@@ -185,19 +185,20 @@ class WC_Settings_API {
     function generate_text_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
-    	$data['placeholder'] = (isset( $data['placeholder'] )) ? $data['placeholder'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
+    	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
+    	$data['placeholder'] 	= isset( $data['placeholder'] ) ? $data['placeholder'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
-			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $title ) . '</label>';
+			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $data['title'] ) . '</label>';
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" />';
+				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true, false ) . ' />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -218,18 +219,19 @@ class WC_Settings_API {
     function generate_password_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
+    	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
-			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $title ) . '</label>';
+			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $data['title'] ) . '</label>';
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_attr( $this->settings[ $key ] ) : '';
-				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="password" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" />';
+				$html .= '<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="password" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . $value . '" ' . disabled( $data['disabled'], true, false ) . ' />';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . esc_attr( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -250,19 +252,20 @@ class WC_Settings_API {
     function generate_textarea_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
     	if ( ! isset( $this->settings[$key] ) ) $this->settings[$key] = '';
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['class']			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
-			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $title ) . '</label>';
+			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $data['title'] ) . '</label>';
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
                 $value = ( isset( $this->settings[ $key ] ) ) ? esc_textarea( $this->settings[ $key ] ) : '';
-				$html .= '<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '">'. $value .'</textarea>';
+				$html .= '<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" ' . disabled( $data['disabled'], true, false ) . '>' . $value . '</textarea>';
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -283,17 +286,18 @@ class WC_Settings_API {
     function generate_checkbox_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	if ( isset( $data['label'] ) && $data['label'] != '' ) $label = $data['label']; else $label = $data['title'];
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['label']			= isset( $data['label'] ) ? $data['label'] : $data['title'];
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
+    	$data['class'] 		= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 		= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
-			$html .= '<th scope="row" class="titledesc">' . $title . '</th>' . "\n";
+			$html .= '<th scope="row" class="titledesc">' . $data['title'] . '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
 				$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">';
-				$html .= '<input style="' . esc_attr( $data['css'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="' . esc_attr( $data['class'] ).'" /> ' . wp_kses_post( $label ) . '</label><br />' . "\n";
+				$html .= '<input style="' . esc_attr( $data['css'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" type="checkbox" value="1" ' . checked( $this->settings[$key], 'yes', false ) . ' class="' . esc_attr( $data['class'] ).'" ' . disabled( $data['disabled'], true, false ) . ' /> ' . wp_kses_post( $data['label'] ) . '</label><br />' . "\n";
 				if ( isset( $data['description'] ) && $data['description'] != '' ) { $html .= ' <p class="description">' . wp_kses_post( $data['description'] ) . '</p>' . "\n"; }
 			$html .= '</fieldset>';
 			$html .= '</td>' . "\n";
@@ -314,18 +318,19 @@ class WC_Settings_API {
     function generate_select_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
+    	$data['options'] 		= isset( $data['options'] ) ? (array) $data['options'] : array();
+    	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
-			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $title ) . '</label>';
+			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $data['title'] ) . '</label>';
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
-				$html .= '<select name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" class="select ' .esc_attr( $data['class'] ) . '">';
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
+				$html .= '<select name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" style="' . esc_attr( $data['css'] ) . '" class="select ' .esc_attr( $data['class'] ) . '" ' . disabled( $data['disabled'], true, false ) . '>';
 
 				foreach ($data['options'] as $option_key => $option_value) :
 					$html .= '<option value="' . esc_attr( $option_key ) . '" '.selected($option_key, esc_attr($this->settings[$key]), false).'>' . esc_attr( $option_value ) . '</option>';
@@ -352,18 +357,19 @@ class WC_Settings_API {
     function generate_multiselect_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	$data['options'] = (isset( $data['options'] )) ? (array) $data['options'] : array();
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['disabled']		= empty( $data['disabled'] ) ? false : true;
+    	$data['options'] 		= isset( $data['options'] ) ? (array) $data['options'] : array();
+    	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '<tr valign="top">' . "\n";
 			$html .= '<th scope="row" class="titledesc">';
-			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $title ) . '</label>';
+			$html .= '<label for="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">' . wp_kses_post( $data['title'] ) . '</label>';
 			$html .= '</th>' . "\n";
 			$html .= '<td class="forminp">' . "\n";
-				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $title ) . '</span></legend>' . "\n";
-				$html .= '<select multiple="multiple" style="' . esc_attr( $data['css'] ) . '" class="multiselect ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '[]" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '">';
+				$html .= '<fieldset><legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>' . "\n";
+				$html .= '<select multiple="multiple" style="' . esc_attr( $data['css'] ) . '" class="multiselect ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '[]" id="' . esc_attr( $this->plugin_id . $this->id . '_' . $key ) . '" ' . disabled( $data['disabled'], true, false ) . '>';
 
 				foreach ( $data['options'] as $option_key => $option_value) {
 					$html .= '<option value="' . esc_attr( $option_key ) . '" ';
@@ -392,9 +398,9 @@ class WC_Settings_API {
 	function generate_title_html( $key, $data ) {
     	$html = '';
 
-    	if ( isset( $data['title'] ) && $data['title'] != '' ) $title = $data['title']; else $title = '';
-    	$data['class'] = (isset( $data['class'] )) ? $data['class'] : '';
-    	$data['css'] = (isset( $data['css'] )) ? $data['css'] : '';
+    	$data['title']			= isset( $data['title'] ) ? $data['title'] : '';
+    	$data['class'] 			= isset( $data['class'] ) ? $data['class'] : '';
+    	$data['css'] 			= isset( $data['css'] ) ? $data['css'] : '';
 
 		$html .= '</table>' . "\n";
 			$html .= '<h4 class="' . esc_attr( $data['class'] ) . '">' . wp_kses_post( $data['title'] ) . '</h4>' . "\n";

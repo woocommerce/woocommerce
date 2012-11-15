@@ -215,6 +215,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Case insensitive coupons.
 * Tweak - Made armed forces 'states' under the US rather than in their own 'country'.
 * Tweak - Extended woocommerce_update_options for flexibility.
+* Tweak - Added disabled to settings API.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
