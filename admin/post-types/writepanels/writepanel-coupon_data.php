@@ -32,25 +32,27 @@ function woocommerce_coupon_data_meta_box( $post ) {
 		<?php
 
 			echo '<div class="options_group">';
-						
+
+			// Description
+			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __( 'Coupon description', 'woocommerce' ), 'description' => __( 'Optionally enter a description for this coupon for your reference.', 'woocommerce' ), 'value' => $post->post_excerpt, 'name' => 'excerpt' ) );
+			
+			echo '</div><div class="options_group">';
+			
 			// Type
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
 			// Amount
 			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ) ) );
-
-			// Description
-			woocommerce_wp_text_input( array( 'id' => 'coupon_description', 'label' => __( 'Coupon description', 'woocommerce' ), 'description' => __( 'Optionally enter a description for this coupon', 'woocommerce' ), 'value' => $post->post_excerpt, 'name' => 'excerpt' ) );
+			
+			// Free Shipping
+			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Enable free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled with the "must use coupon" setting checked.', 'woocommerce' ), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
 
 			// Individual use
-			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons', 'woocommerce' ) ) );
+			woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ) ) );
 
 			// Apply before tax
-			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax', 'woocommerce' ) ) );
-
-			// Free Shipping
-			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Enable free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon enables free shipping (see <a href="%s">Free Shipping</a>)', 'woocommerce' ), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
-
+			woocommerce_wp_checkbox( array( 'id' => 'apply_before_tax', 'label' => __( 'Apply before tax', 'woocommerce' ), 'description' => __( 'Check this box if the coupon should be applied before calculating cart tax.', 'woocommerce' ) ) );
+			
 			echo '</div><div class="options_group">';
 
 			// minimum spend
@@ -85,7 +87,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Exclude Product ids
 			?>
-			<p class="form-field"><label for="exclude_product_ids"><?php _e( 'Exclude Products', 'woocommerce' ) ?></label>
+			<p class="form-field"><label for="exclude_product_ids"><?php _e( 'Exclude products', 'woocommerce' ) ?></label>
 			<select id="exclude_product_ids" name="exclude_product_ids[]" class="ajax_chosen_select_products_and_variations" multiple="multiple" data-placeholder="<?php _e( 'Search for a product…', 'woocommerce' ); ?>">
 				<?php
 					$product_ids = get_post_meta( $post->ID, 'exclude_product_ids', true );
@@ -112,7 +114,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Categories
 			?>
-			<p class="form-field"><label for="product_ids"><?php _e( 'Product Categories', 'woocommerce' ) ?></label>
+			<p class="form-field"><label for="product_ids"><?php _e( 'Product categories', 'woocommerce' ) ?></label>
 			<select id="product_categories" name="product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
 				<?php
 					$category_ids = (array) get_post_meta( $post->ID, 'product_categories', true );
@@ -126,7 +128,7 @@ function woocommerce_coupon_data_meta_box( $post ) {
 
 			// Exclude Categories
 			?>
-			<p class="form-field"><label for="exclude_product_categories"><?php _e( 'Exclude Categories', 'woocommerce' ) ?></label>
+			<p class="form-field"><label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ) ?></label>
 			<select id="exclude_product_categories" name="exclude_product_categories[]" class="chosen_select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
 				<?php
 					$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_categories', true );
@@ -141,15 +143,15 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			echo '</div><div class="options_group">';
 
 			// Customers
-			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer Emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true )) ) );
+			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true )) ) );
 
 			echo '</div><div class="options_group">';
 
 			// Usage limit
-			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ) ) );
 
 			// Expiry date
-			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>', 'woocommerce' ), 'class' => 'short date-picker' ) );
+			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker' ) );
 
 			echo '</div>';
 
