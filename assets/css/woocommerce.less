@@ -6,70 +6,70 @@
 @tertiarytext: 	@primarytext;								/* Text on tertiary colour bg */
 @quaternary: 	desaturate( darken( @tertiary, 45%), 40% ); /* Price slider bg */
 
-.woocommerce-page { // namespace to avoid conflict with common global class names
+/* =Global styles/layout
+-------------------------------------------------------------- */
+.woocommerce_message, .woocommerce_error, .woocommerce_info {
+	padding: .55em 1em .55em 3em;
+	margin: 0 0 2em;
+	position: relative;
+	.border_radius(2px);
+	.vertical_gradient( @secondary, darken( @secondary, 3 ) );
+	color: @secondarytext;
+	.box_shadow( 0, 1px, 2px, 0, rgba(0,0,0,0.25) );
+	.text_shadow( 0, 1px, 0, lighten( @secondary, 4 ) );
+	list-style:none outside;
+	.clearfix();
+	width: auto;
 
-	/* =Global styles/layout
-	-------------------------------------------------------------- */
-	.woocommerce_message, .woocommerce_error, .woocommerce_info {
-		padding: .55em 1em .55em 3em;
-		margin: 0 0 2em;
-		position: relative;
-		.border_radius(2px);
-		.vertical_gradient( @secondary, darken( @secondary, 3 ) );
-		color: @secondarytext;
-		.box_shadow( 0, 1px, 2px, 0, rgba(0,0,0,0.25) );
-		.text_shadow( 0, 1px, 0, lighten( @secondary, 4 ) );
+	&:before {
+		content: "";
+		height: 16px;
+		width: 16px;
+		display:block;
+		position:absolute;
+		top: .8em;
+		left: 1em;
+		background-color: white;
+		.border_radius(1em);
+	}
+
+	.button {
+		float: right;
+	}
+
+	li {
 		list-style:none outside;
-		.clearfix();
-		width: auto;
-
-		&:before {
-			content: "";
-			height: 16px;
-			width: 16px;
-			display:block;
-			position:absolute;
-			top: .8em;
-			left: 1em;
-			background-color: white;
-			.border_radius(1em);
-		}
-
-		.button {
-			float: right;
-		}
-
-		li {
-			list-style:none outside;
-		}
 	}
+}
 
-	.woocommerce_message:before {
-		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAYAAAAPDoR2AAAAN0lEQVQIHXWMQQ4AMAjCxv7/ZxZIanbYPIhSUbbXo2Jqf0BsA4mjgU1ioAVpSSrDVbPzFgPt7QH7qwoJ3MDCYgAAAABJRU5ErkJggg==) center no-repeat #8fae1b; /* check icon */
-	}
-	.woocommerce_info:before {
-		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAYAAABvsz2cAAAAG0lEQVQIHWP8DwQMQMACxIwwBliECcQDATgDAMHrBQqJ6tMZAAAAAElFTkSuQmCC) center no-repeat #18919c; /* info icon */
-	}
-	.woocommerce_error:before {
-		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAYAAABvsz2cAAAAHUlEQVQIHWP8DwQMQMAEIkAAzmABchhBIiAGWA0Ar6MFCigWCYMAAAAASUVORK5CYII=) center no-repeat #b81c23; /* error icon */
-	}
+.woocommerce_message:before {
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAGCAYAAAAPDoR2AAAAN0lEQVQIHXWMQQ4AMAjCxv7/ZxZIanbYPIhSUbbXo2Jqf0BsA4mjgU1ioAVpSSrDVbPzFgPt7QH7qwoJ3MDCYgAAAABJRU5ErkJggg==) center no-repeat #8fae1b; /* check icon */
+}
+.woocommerce_info:before {
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAYAAABvsz2cAAAAG0lEQVQIHWP8DwQMQMACxIwwBliECcQDATgDAMHrBQqJ6tMZAAAAAElFTkSuQmCC) center no-repeat #18919c; /* info icon */
+}
+.woocommerce_error:before {
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAFCAYAAABvsz2cAAAAHUlEQVQIHWP8DwQMQMAEIkAAzmABchhBIiAGWA0Ar6MFCigWCYMAAAAASUVORK5CYII=) center no-repeat #b81c23; /* error icon */
+}
 
-	p.demo_store {
-		position:fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		margin: 0;
-		width: 100%;
-		font-size: 1em;
-		padding: .5em 0;
-		text-align: center;
-		.vertical_gradient( @primary, darken(@primary, 10) );
-		border: 1px solid darken(@primary, 10);
-		color: @primarytext;
-		z-index: 999999;
-		.inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
-	}
+p.demo_store {
+	position:fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+	width: 100%;
+	font-size: 1em;
+	padding: .5em 0;
+	text-align: center;
+	.vertical_gradient( @primary, darken(@primary, 10) );
+	border: 1px solid darken(@primary, 10);
+	color: @primarytext;
+	z-index: 999999;
+	.inset_box_shadow( 0, 0, 0, 3px, rgba(255,255,255,0.2) );
+}
+	
+.woocommerce-page { // namespace to avoid conflict with common global class names
 
 	small.note {
 		display:block;

@@ -1613,15 +1613,16 @@ class Woocommerce {
 
 		$content = '';
 
-		if ( $wrapper['bool'] == true ) :
-			if( $wrapper['before'] == null ) : $before = '<div class="' . $wrapper['class'] . '">' ? $before = $wrapper['before'];
-			if( $wrapper['after'] == null ) : $after = '<div class="' . $wrapper['class'] . '">' ? $after = $wrapper['after'];
+		if ( $wrapper['bool'] == true ) {
+			$before = empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
+			$after = empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
+			
 			$content .=  $before . call_user_func( $function, $atts ) . $after;
-		else :
+		} else {
 			$content .= call_user_func( $function, $atts );
-		endif;
+		}
 
-		return ob_get_clean($content);
+		return ob_get_clean( $content );
 	}
 
 	/** Cache Helpers *********************************************************/
