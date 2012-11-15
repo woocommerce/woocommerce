@@ -43,7 +43,7 @@ function woocommerce_tax_rates_setting() {
 	    				<th><?php _e( 'Label', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce' ); ?>">[?]</a></th>
 	    				<th><?php _e( 'Rate', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce' ); ?>">[?]</a></th>
 	    				<th><?php _e( 'Compound', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce' ); ?>">[?]</a></th>
-	    				<th><?php _e( 'Shipping', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce' ); ?>">[?]</a></th>
+	    				<th class="apply_to_shipping"><?php _e( 'Shipping', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce' ); ?>">[?]</a></th>
 	    			</tr>
 	    		</thead>
 	    		<tfoot>
@@ -125,7 +125,7 @@ function woocommerce_tax_rates_setting() {
 	    				<th><?php _e( 'Label', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Optionally, enter a label for this rate - this will appear in the totals table', 'woocommerce' ); ?>">[?]</a></th>
 	    				<th><?php _e( 'Rate', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a tax rate (percentage) to 4 decimal places.', 'woocommerce' ); ?>">[?]</a></th>
 	    				<th><?php _e( 'Compound', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this is a compound rate. Compound tax rates are applied on top of other tax rates.', 'woocommerce' ); ?>">[?]</a></th>
-	    				<th><?php _e( 'Shipping', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce' ); ?>">[?]</a></th>
+	    				<th class="apply_to_shipping"><?php _e( 'Shipping', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Choose whether or not this tax rate also gets applied to shipping.', 'woocommerce' ); ?>">[?]</a></th>
 	    			</tr>
 	    		</thead>
 	    		<tfoot>

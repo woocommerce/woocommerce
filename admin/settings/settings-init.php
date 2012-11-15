@@ -43,7 +43,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 		'type' 		=> 'select',
 		'class'		=> 'chosen_select',
 		'desc_tip'	=>  true,
-		'options' => array_unique(apply_filters('woocommerce_currencies', array(
+		'options' => array_unique( apply_filters( 'woocommerce_currencies', array(
 			'USD' => __( 'US Dollars (&#36;)', 'woocommerce' ),
 			'EUR' => __( 'Euros (&euro;)', 'woocommerce' ),
 			'GBP' => __( 'Pounds Sterling (&pound;)', 'woocommerce' ),
@@ -71,7 +71,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 			'TRY' => __( 'Turkish Lira (TL)', 'woocommerce' ),
 			'ZAR' => __( 'South African rand (R)', 'woocommerce' ),
 			'RON' => __( 'Romanian Leu (RON)', 'woocommerce' ),
-			))
+			) )
 		)
 	),
 
@@ -283,7 +283,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	array(	'name' => __( 'Digital Downloads', 'woocommerce' ), 'type' => 'title','desc' => __( 'The following options are specific to downloadable products.', 'woocommerce' ), 'id' => 'digital_download_options' ),
 
 	array(
-		'name' => __( 'File download method', 'woocommerce' ),
+		'name' => __( 'File Download Method', 'woocommerce' ),
 		'desc' 		=> __( 'Forcing downloads will keep URLs hidden, but some servers may serve large files unreliably. If supported, <code>X-Accel-Redirect</code>/ <code>X-Sendfile</code> can be used to serve downloads instead (server requires <code>mod_xsendfile</code>).', 'woocommerce' ),
 		'id' 		=> 'woocommerce_file_download_method',
 		'type' 		=> 'select',
@@ -318,7 +318,7 @@ $woocommerce_settings['general'] = apply_filters('woocommerce_general_settings',
 	),
 
 	array(
-		'name' => __( 'Limit quantity', 'woocommerce' ),
+		'name' => __( 'Limit Quantity', 'woocommerce' ),
 		'desc' 		=> __( 'Limit the purchasable quantity of downloadable-virtual items to 1', 'woocommerce' ),
 		'id' 		=> 'woocommerce_limit_downloadable_product_qty',
 		'std' 		=> 'yes',
@@ -370,7 +370,7 @@ $woocommerce_settings['pages'] = apply_filters('woocommerce_page_settings', arra
 	),
 
 	array(
-		'name' => __( 'Terms page ID', 'woocommerce' ),
+		'name' => __( 'Terms Page ID', 'woocommerce' ),
 		'desc' 		=> __( 'If you define a "Terms" page the customer will be asked if they accept them when checking out.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_terms_page_id',
 		'std' 		=> '',
@@ -501,7 +501,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(	'name' => __( 'Catalog Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'catalog_options' ),
 
 	array(
-		'name' => __( 'Default product sorting', 'woocommerce' ),
+		'name' => __( 'Default Product Sorting', 'woocommerce' ),
 		'desc' 		=> __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_default_catalog_orderby',
 		'css' 		=> 'min-width:150px;',
@@ -517,7 +517,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 	
 	array(
-		'name' => __( 'Shop page display', 'woocommerce' ),
+		'name' => __( 'Shop Page Display', 'woocommerce' ),
 		'desc' 		=> __( 'This controls what is shown on the product archive.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_shop_page_display',
 		'css' 		=> 'min-width:150px;',
@@ -532,7 +532,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 	
 	array(
-		'name' => __( 'Default category display', 'woocommerce' ),
+		'name' => __( 'Default Category Display', 'woocommerce' ),
 		'desc' 		=> __( 'This controls what is shown on category archives.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_category_archive_display',
 		'css' 		=> 'min-width:150px;',
@@ -568,7 +568,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	array(	'name' => __( 'Product Data', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the fields available on the edit product page.', 'woocommerce' ), 'id' => 'product_data_options' ),
 
 	array(
-		'name' => __( 'Product fields', 'woocommerce' ),
+		'name' => __( 'Product Fields', 'woocommerce' ),
 		'desc' 		=> __( 'Enable the SKU field for products', 'woocommerce' ),
 		'id' 		=> 'woocommerce_enable_sku',
 		'std' 		=> 'yes',
@@ -682,7 +682,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'name' => __( 'Thousand separator', 'woocommerce' ),
+		'name' => __( 'Thousand Separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_thousand_sep',
 		'css' 		=> 'width:30px;',
@@ -692,7 +692,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'name' => __( 'Decimal separator', 'woocommerce' ),
+		'name' => __( 'Decimal Separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_decimal_sep',
 		'css' 		=> 'width:30px;',
@@ -702,7 +702,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'name' => __( 'Number of decimals', 'woocommerce' ),
+		'name' => __( 'Number of Decimals', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_num_decimals',
 		'css' 		=> 'width:30px;',
@@ -712,7 +712,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 	),
 
 	array(
-		'name'		=> __( 'Trailing zeros', 'woocommerce' ),
+		'name'		=> __( 'Trailing Zeros', 'woocommerce' ),
 		'desc' 		=> __( 'Remove zeros after the decimal point. e.g. <code>$10.00</code> becomes <code>$10</code>', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_trim_zeros',
 		'std' 		=> 'yes',
@@ -763,7 +763,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	array(	'name' => __( 'Inventory Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'inventory_options' ),
 
 	array(
-		'name' => __( 'Manage stock', 'woocommerce' ),
+		'name' => __( 'Manage Stock', 'woocommerce' ),
 		'desc' 		=> __( 'Enable stock management', 'woocommerce' ),
 		'id' 		=> 'woocommerce_manage_stock',
 		'std' 		=> 'yes',
@@ -788,7 +788,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
-		'name' => __( 'Low stock threshold', 'woocommerce' ),
+		'name' => __( 'Low Stock Threshold', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_notify_low_stock_amount',
 		'css' 		=> 'width:30px;',
@@ -797,7 +797,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
-		'name' => __( 'Out of stock threshold', 'woocommerce' ),
+		'name' => __( 'Out Of Stock Threshold', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_notify_no_stock_amount',
 		'css' 		=> 'width:30px;',
@@ -806,7 +806,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
-		'name' => __( 'Out of stock visibility', 'woocommerce' ),
+		'name' => __( 'Out Of Stock Visibility', 'woocommerce' ),
 		'desc' 		=> __( 'Hide out of stock items from the catalog', 'woocommerce' ),
 		'id' 		=> 'woocommerce_hide_out_of_stock_items',
 		'std' 		=> 'no',
@@ -814,7 +814,7 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 	),
 
 	array(
-		'name' => __( 'Stock display format', 'woocommerce' ),
+		'name' => __( 'Stock Display Format', 'woocommerce' ),
 		'desc' 		=> __( 'This controls how stock is displayed on the frontend.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_stock_format',
 		'css' 		=> 'min-width:150px;',
@@ -838,7 +838,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 	array( 'name' => __( 'Shipping Options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
 
 	array(
-		'name' 		=> __( 'Shipping calculations', 'woocommerce' ),
+		'name' 		=> __( 'Shipping Calculations', 'woocommerce' ),
 		'desc' 		=> __( 'Enable shipping', 'woocommerce' ),
 		'id' 		=> 'woocommerce_calc_shipping',
 		'std' 		=> 'yes',
@@ -863,7 +863,7 @@ $woocommerce_settings['shipping'] = apply_filters('woocommerce_shipping_settings
 	),
 
 	array(
-		'name' => __( 'Shipping method display', 'woocommerce' ),
+		'name' => __( 'Shipping Method Display', 'woocommerce' ),
 		'desc' 		=> __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_shipping_method_format',
 		'css' 		=> 'min-width:150px;',
@@ -922,13 +922,18 @@ $woocommerce_settings['payment_gateways'] = apply_filters('woocommerce_payment_g
 
 )); // End payment_gateway settings
 
+$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+$classes_options = array();
+if ( $tax_classes ) 
+	foreach ( $tax_classes as $class )
+		$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 
 $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 
 	array(	'name' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
 	array(
-		'name' => __( 'Tax calculations', 'woocommerce' ),
+		'name' => __( 'Tax Calculations', 'woocommerce' ),
 		'desc' 		=> __( 'Enable taxes and tax calculations', 'woocommerce' ),
 		'id' 		=> 'woocommerce_calc_taxes',
 		'std' 		=> 'no',
@@ -936,7 +941,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 	
 	array(
-		'name' => __( 'Calculation settings', 'woocommerce' ),
+		'name' => __( 'Calculation Settings', 'woocommerce' ),
 		'desc' 		=> __( 'Calculate tax based on the customer shipping address', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_shipping_address',
 		'std' 		=> 'yes',
@@ -985,11 +990,22 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 		'std' 		=> 'yes',
 		'type' 		=> 'checkbox',
 		'checkboxgroup'		=> 'end',
-		'show_if_checked' => 'yes',
+		'show_if_checked' 	=> 'yes',
 	),
 
 	array(
-		'name' => __( 'Additional Tax classes', 'woocommerce' ),
+		'name' 		=> __( 'Shipping Tax Class', 'woocommerce' ),
+		'desc' 		=> __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
+		'id' 		=> 'woocommerce_shipping_tax_class',
+		'css' 		=> 'min-width:150px;',
+		'std' 		=> 'title',
+		'type' 		=> 'select',
+		'options' 	=> array( '' => 'Shipping tax class based on cart items', 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,
+		'desc_tip'	=>  true,
+	),
+	
+	array(
+		'name' 		=> __( 'Additional Tax classes', 'woocommerce' ),
 		'desc' 		=> __( 'List additonal tax classes below (1 per line). This is in addition to the default <code>Standard Rate</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_classes',
 		'css' 		=> 'width:100%; height: 65px;',
@@ -998,7 +1014,7 @@ $woocommerce_settings['tax'] = apply_filters('woocommerce_tax_settings', array(
 	),
 
 	array(
-		'name' => __( 'Tax rates', 'woocommerce' ),
+		'name' => __( 'Tax Rates', 'woocommerce' ),
 		'id' 		=> 'woocommerce_tax_rates',
 		'css' 		=> 'min-width:50px;',
 		'type' 		=> 'tax_rates',
@@ -1016,7 +1032,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	array(	'name' => __( 'Email Sender Options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect the sender (email address and name) used in WooCommerce emails.', 'woocommerce' ), 'id' => 'email_options' ),
 
 	array(
-		'name' => __( '"From" name', 'woocommerce' ),
+		'name' => __( '"From" Name', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_name',
 		'type' 		=> 'text',
@@ -1025,7 +1041,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( '"From" email address', 'woocommerce' ),
+		'name' => __( '"From" Email Address', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_address',
 		'type' 		=> 'text',
@@ -1035,10 +1051,10 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 
 	array( 'type' => 'sectionend', 'id' => 'email_options' ),
 
-	array(	'name' => __( 'Email template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__( 'This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce' ), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
+	array(	'name' => __( 'Email Template', 'woocommerce' ), 'type' => 'title', 'desc' => sprintf(__( 'This section lets you customise the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>. For more advanced control copy <code>woocommerce/templates/emails/</code> to <code>yourtheme/woocommerce/emails/</code>.', 'woocommerce' ), wp_nonce_url(admin_url('?preview_woocommerce_mail=true'), 'preview-mail')), 'id' => 'email_template_options' ),
 
 	array(
-		'name' => __( 'Header image', 'woocommerce' ),
+		'name' => __( 'Header Image', 'woocommerce' ),
 		'desc' 		=> sprintf(__( 'Enter a URL to an image you want to show in the email\'s header. Upload your image using the <a href="%s">media uploader</a>.', 'woocommerce' ), admin_url('media-new.php')),
 		'id' 		=> 'woocommerce_email_header_image',
 		'type' 		=> 'text',
@@ -1047,7 +1063,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( 'Email footer text', 'woocommerce' ),
+		'name' => __( 'Email Footer Text', 'woocommerce' ),
 		'desc' 		=> __( 'The text to appear in the footer of WooCommerce emails.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_footer_text',
 		'css' 		=> 'width:100%; height: 75px;',
@@ -1056,7 +1072,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( 'Base colour', 'woocommerce' ),
+		'name' => __( 'Base Colour', 'woocommerce' ),
 		'desc' 		=> __( 'The base colour for WooCommerce email templates. Default <code>#557da1</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_base_color',
 		'type' 		=> 'color',
@@ -1065,7 +1081,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( 'Background colour', 'woocommerce' ),
+		'name' => __( 'Background Colour', 'woocommerce' ),
 		'desc' 		=> __( 'The background colour for WooCommerce email templates. Default <code>#f5f5f5</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_background_color',
 		'type' 		=> 'color',
@@ -1074,7 +1090,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( 'Email body background colour', 'woocommerce' ),
+		'name' => __( 'Email Body Background Colour', 'woocommerce' ),
 		'desc' 		=> __( 'The main body background colour. Default <code>#fdfdfd</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_body_background_color',
 		'type' 		=> 'color',
@@ -1083,7 +1099,7 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 	),
 
 	array(
-		'name' => __( 'Email body text colour', 'woocommerce' ),
+		'name' => __( 'Email Body Text Colour', 'woocommerce' ),
 		'desc' 		=> __( 'The main body text colour. Default <code>#505050</code>.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_email_text_color',
 		'type' 		=> 'color',
