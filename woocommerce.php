@@ -1604,7 +1604,7 @@ class Woocommerce {
 		$atts = array(),
 		$wrapper = array(
 			'bool' => true,
-			'class' => 'woocommerce',
+			'class' => 'woocommerce-page',
 			'before' => null,
 			'after' => null
 		)
