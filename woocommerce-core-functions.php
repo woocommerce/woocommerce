@@ -1118,7 +1118,7 @@ function woocommerce_terms_clauses( $clauses, $taxonomies, $args ) {
 	if ( isset($args['orderby']) && $args['orderby'] != 'name' ) return $clauses;
 
 	// No sorting in admin when sorting by a column
-	if ( isset($_GET['orderby']) ) return $clauses;
+	if ( is_admin() && isset($_GET['orderby']) ) return $clauses;
 
 	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
 	$found = false;
