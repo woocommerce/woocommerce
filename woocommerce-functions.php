@@ -190,7 +190,10 @@ function woocommerce_update_cart_action() {
 					continue;
 
 				// Check the quantity input
-				if ( is_int( $cart_totals[ $cart_item_key ]['qty'] ) ) {
+				$original = $cart_totals[ $cart_item_key ]['qty'];
+				$casted = (int) $cart_totals[ $cart_item_key ]['qty'];
+				$casted = (string) $casted;
+				if ( $original == $casted ) {
 					$quantity = absint( $cart_totals[ $cart_item_key ]['qty'] );
 				} else {
 					$quantity = $woocommerce->cart->cart_contents[ $cart_item_key ]['quantity'];
