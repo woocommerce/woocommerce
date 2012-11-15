@@ -185,6 +185,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - email-order-items.php change get_downloadable_file_url() to get_downloadable_file_urls() to support multiple files.
 * Templating - loop-end and start for product loops, allow changing the UL's used by default to something else.
 * Templating - woocommerce_page_title function for archive titles.
+* Templating - CSS namespacing changes (courtesy of Brian Feister).
 
 * Tweak - Improved installation + upgrade process upon activation.
 * Tweak - Protect logs and uploads with a blank index.html
