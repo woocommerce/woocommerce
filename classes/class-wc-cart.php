@@ -1679,6 +1679,11 @@ class WC_Cart {
 				}
 
 				$this->applied_coupons[] = $coupon_code;
+				
+				// Choose free shipping
+				if ( $the_coupon->enable_free_shipping() ) {
+					$woocommerce->session->chosen_shipping_method = 'free_shipping';
+				}
 
 				$this->set_session();
 

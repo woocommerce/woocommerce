@@ -202,7 +202,7 @@ class WC_Shipping {
 		$_available_methods = $this->get_available_shipping_methods();
 
 		// Get chosen method
-		if ( ! empty( $woocommerce->session->chosen_shipping_method ) && isset( $woocommerce->session->available_methods_count ) && $woocommerce->session->available_methods_count == sizeof( $_available_methods ) )
+		if ( ! empty( $woocommerce->session->chosen_shipping_method ) )
 			$chosen_method = $woocommerce->session->chosen_shipping_method;
 
 		$woocommerce->session->available_methods_count = sizeof( $_available_methods );
