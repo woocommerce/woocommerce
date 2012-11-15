@@ -27,7 +27,7 @@ class WooCommerce_Widget_Login extends WP_Widget {
 	function WooCommerce_Widget_Login() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_login';
+		$this->woo_widget_cssclass = 'woocommerce widget_login';
 		$this->woo_widget_description = __( 'Display a login area and "My Account" links in the sidebar.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_login';
 		$this->woo_widget_name = __( 'WooCommerce Login', 'woocommerce' );

@@ -1603,26 +1603,21 @@ class Woocommerce {
 		$function,
 		$atts = array(),
 		$wrapper = array(
-			'bool' => true,
-			'class' => 'woocommerce-page',
+			'class' => 'woocommerce',
 			'before' => null,
 			'after' => null
 		)
 	){
 		ob_start();
 
-		$content = '';
+		$before 	= empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
+		$after 		= empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
+		
+		echo $before;
+		call_user_func( $function, $atts );
+		echo $after;
 
-		if ( $wrapper['bool'] == true ) {
-			$before = empty( $wrapper['before'] ) ? '<div class="' . $wrapper['class'] . '">' : $wrapper['before'];
-			$after = empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
-			
-			$content .=  $before . call_user_func( $function, $atts ) . $after;
-		} else {
-			$content .= call_user_func( $function, $atts );
-		}
-
-		return ob_get_clean( $content );
+		return ob_get_clean();
 	}
 
 	/** Cache Helpers *********************************************************/

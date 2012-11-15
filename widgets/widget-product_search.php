@@ -27,7 +27,7 @@ class WooCommerce_Widget_Product_Search extends WP_Widget {
 	function WooCommerce_Widget_Product_Search() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_product_search';
+		$this->woo_widget_cssclass = 'woocommerce widget_product_search';
 		$this->woo_widget_description = __( 'A Search box for products only.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_search';
 		$this->woo_widget_name = __( 'WooCommerce Product Search', 'woocommerce' );

@@ -23,7 +23,7 @@ class WooCommerce_Widget_Random_Products extends WP_Widget {
 		$this->id_base = 'woocommerce_random_products';
 		$this->name    = __( 'WooCommerce Random Products', 'woocommerce' );
 		$this->widget_options = array(
-			'classname'   => 'widget_random_products',
+			'classname'   => 'woocommerce widget_random_products',
 			'description' => __( 'Display a list of random products on your site.', 'woocommerce' ),
 		);
 

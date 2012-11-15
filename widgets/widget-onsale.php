@@ -27,7 +27,7 @@ class WooCommerce_Widget_On_Sale extends WP_Widget {
 	function WooCommerce_Widget_On_Sale() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_onsale';
+		$this->woo_widget_cssclass = 'woocommerce widget_onsale';
 		$this->woo_widget_description = __( 'Display a list of your on-sale products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_onsale';
 		$this->woo_widget_name = __( 'WooCommerce On-sale', 'woocommerce' );

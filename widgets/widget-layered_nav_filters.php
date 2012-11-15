@@ -27,7 +27,7 @@ class WooCommerce_Widget_Layered_Nav_Filters extends WP_Widget {
 	function WooCommerce_Widget_Layered_Nav_Filters() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass 		= 'widget_layered_nav_filters';
+		$this->woo_widget_cssclass 		= 'woocommerce widget_layered_nav_filters';
 		$this->woo_widget_description	= __( 'Shows active layered nav filters so users can see and deactivate them.', 'woocommerce' );
 		$this->woo_widget_idbase 		= 'woocommerce_layered_nav_filters';
 		$this->woo_widget_name 			= __( 'WooCommerce Layered Nav Filters', 'woocommerce' );

@@ -29,7 +29,7 @@ class WooCommerce_Widget_Product_Categories extends WP_Widget {
 	function WooCommerce_Widget_Product_Categories() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_product_categories';
+		$this->woo_widget_cssclass = 'woocommerce widget_product_categories';
 		$this->woo_widget_description = __( 'A list or dropdown of product categories.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_categories';
 		$this->woo_widget_name = __( 'WooCommerce Product Categories', 'woocommerce' );

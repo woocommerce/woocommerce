@@ -27,7 +27,7 @@ class WooCommerce_Widget_Recent_Reviews extends WP_Widget {
 	function WooCommerce_Widget_Recent_Reviews() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_recent_reviews';
+		$this->woo_widget_cssclass = 'woocommerce widget_recent_reviews';
 		$this->woo_widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recent_reviews';
 		$this->woo_widget_name = __( 'WooCommerce Recent Reviews', 'woocommerce' );

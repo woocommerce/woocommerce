@@ -27,7 +27,7 @@ class WooCommerce_Widget_Recent_Products extends WP_Widget {
 	function WooCommerce_Widget_Recent_Products() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_recent_products';
+		$this->woo_widget_cssclass = 'woocommerce widget_recent_products';
 		$this->woo_widget_description = __( 'Display a list of your most recent products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_recent_products';
 		$this->woo_widget_name = __( 'WooCommerce Recent Products', 'woocommerce' );

@@ -31,7 +31,7 @@ class WooCommerce_Widget_Featured_Products extends WP_Widget {
 	function WooCommerce_Widget_Featured_Products() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_featured_products';
+		$this->woo_widget_cssclass = 'woocommerce widget_featured_products';
 		$this->woo_widget_description = __( 'Display a list of featured products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_featured_products';
 		$this->woo_widget_name = __( 'WooCommerce Featured Products', 'woocommerce' );

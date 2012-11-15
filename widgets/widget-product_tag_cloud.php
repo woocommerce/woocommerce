@@ -27,7 +27,7 @@ class WooCommerce_Widget_Product_Tag_Cloud extends WP_Widget {
 	function WooCommerce_Widget_Product_Tag_Cloud() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_product_tag_cloud';
+		$this->woo_widget_cssclass = 'woocommerce widget_product_tag_cloud';
 		$this->woo_widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_product_tag_cloud';
 		$this->woo_widget_name = __( 'WooCommerce Product Tags', 'woocommerce' );

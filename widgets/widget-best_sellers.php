@@ -27,7 +27,7 @@ class WooCommerce_Widget_Best_Sellers extends WP_Widget {
 	function WooCommerce_Widget_Best_Sellers() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_cssclass = 'widget_best_sellers';
+		$this->woo_widget_cssclass = 'woocommerce widget_best_sellers';
 		$this->woo_widget_description = __( 'Display a list of your best selling products on your site.', 'woocommerce' );
 		$this->woo_widget_idbase = 'woocommerce_best_sellers';
 		$this->woo_widget_name = __( 'WooCommerce Best Sellers', 'woocommerce' );
