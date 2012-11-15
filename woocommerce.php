@@ -279,7 +279,7 @@ class Woocommerce {
 	function init() {
 		//Before init action
 		do_action( 'before_woocommerce_init' );
-		
+
 		// Set up localisation
 		$this->load_plugin_textdomain();
 
@@ -332,7 +332,7 @@ class Woocommerce {
 		// Email Actions
 		$email_actions = array( 'woocommerce_low_stock', 'woocommerce_no_stock', 'woocommerce_product_on_backorder', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_completed', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_failed_to_processing', 'woocommerce_order_status_failed_to_completed', 'woocommerce_order_status_pending_to_processing', 'woocommerce_order_status_pending_to_on-hold', 'woocommerce_order_status_completed', 'woocommerce_new_customer_note' );
 
-		foreach ( $email_actions as $action ) 
+		foreach ( $email_actions as $action )
 			add_action( $action, array( &$this, 'send_transactional_email') );
 
 		// Actions for SSL
@@ -607,7 +607,7 @@ class Woocommerce {
 
 		if ( is_account_page() ) $this->add_body_class('woocommerce-account');
 
-		if ( is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page( woocommerce_get_page_id('order_tracking') ) || is_page( woocommerce_get_page_id('thanks') ) ) $this->add_body_class('woocommerce-page');	
+		if ( is_woocommerce() || is_checkout() || is_cart() || is_account_page() || is_page( woocommerce_get_page_id('order_tracking') ) || is_page( woocommerce_get_page_id('thanks') ) ) $this->add_body_class('woocommerce-page');
 	}
 
 
@@ -619,7 +619,7 @@ class Woocommerce {
 	 */
 	function init_taxonomy() {
 
-		if ( post_type_exists('product') ) 
+		if ( post_type_exists('product') )
 			return;
 
 		/**
@@ -627,21 +627,21 @@ class Woocommerce {
 		 **/
 		$permalinks 	= get_option( 'woocommerce_permalinks' );
 		$shop_page_id 	= woocommerce_get_page_id( 'shop' );
-		
+
 		// Base slug is also used for the product post type archive
 		$base_slug 		= $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
-		
+
 		// Get bases
 		$product_category_slug 	= empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'];
 		$product_tag_slug 		= empty( $permalinks['tag_base'] ) ? _x( 'product-tag', 'slug', 'woocommerce' ) : $permalinks['tag_base'];
 		$product_attribute_base	= empty( $permalinks['attribute_base'] ) ? '' : $permalinks['attribute_base'];
 		$product_permalink 		= empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
-		
-		if ( $product_permalink ) 
+
+		if ( $product_permalink )
 			$rewrite =  array( 'slug' => untrailingslashit( $product_permalink ), 'with_front' => false, 'feeds' => true );
 		else
 			$rewrite = false;
-			
+
 		$show_in_menu = current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : true;
 
 		/**
@@ -830,9 +830,9 @@ class Woocommerce {
 		 * Post Types
 		 **/
 		do_action( 'woocommerce_register_post_type' );
-		
+
 		register_post_type( "product",
-			apply_filters( 'woocommerce_register_post_type_product', 
+			apply_filters( 'woocommerce_register_post_type_product',
 				array(
 					'labels' => array(
 							'name' 					=> __( 'Products', 'woocommerce' ),
@@ -870,7 +870,7 @@ class Woocommerce {
 		// Sort out attachment urls (removed, breaks pagination) no alternatives add_rewrite_rule( '^' . $attachment_base . '([^/]*)/([^/]*)/([^/]*)/?', 'index.php?attachment=$matches[3]', 'top' );
 
 		register_post_type( "product_variation",
-			apply_filters( 'woocommerce_register_post_type_product_variation', 
+			apply_filters( 'woocommerce_register_post_type_product_variation',
 				array(
 					'labels' => array(
 							'name' 					=> __( 'Variations', 'woocommerce' ),
@@ -908,7 +908,7 @@ class Woocommerce {
 		}
 
 	    register_post_type( "shop_order",
-		    apply_filters( 'woocommerce_register_post_type_shop_order', 
+		    apply_filters( 'woocommerce_register_post_type_shop_order',
 				array(
 					'labels' => array(
 							'name' 					=> __( 'Orders', 'woocommerce' ),
@@ -1091,19 +1091,19 @@ class Woocommerce {
 
 		wp_localize_script( 'woocommerce', 'woocommerce_params', apply_filters( 'woocommerce_params', $woocommerce_params ) );
 	}
-	
+
 	/**
 	 * WC requires jQuery 1.7 since it uses functions like .on() for events.
 	 * If, by the time wp_print_scrips is called, jQuery is outdated (i.e not
-	 * using the version in core) we need to deregister it and register the 
+	 * using the version in core) we need to deregister it and register the
 	 * core version of the file.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
 	function check_jquery() {
 		global $wp_scripts;
-		
+
 		// Enforce minimum version of jQuery
 		if ( isset( $wp_scripts->registered['jquery']->ver ) && $wp_scripts->registered['jquery']->ver < '1.7' ) {
 			wp_deregister_script( 'jquery' );
@@ -1461,8 +1461,8 @@ class Woocommerce {
 
 		return apply_filters( 'woocommerce_attribute_label', $label, $name );
 	}
-	
-	
+
+
 	/**
 	 * Get a product attributes orderby setting.
 	 *
@@ -1599,10 +1599,29 @@ class Woocommerce {
 	 * @param array $atts (default: array())
 	 * @return string
 	 */
-	function shortcode_wrapper( $function, $atts = array() ) {
+	function shortcode_wrapper(
+		$function,
+		$atts = array(),
+		$wrapper = array(
+			'bool' => true,
+			'class' => 'woocommerce',
+			'before' => null,
+			'after' => null
+		)
+	){
 		ob_start();
-		call_user_func( $function, $atts );
-		return ob_get_clean();
+
+		$content = '';
+
+		if ( $wrapper['bool'] == true ) :
+			if( $wrapper['before'] == null ) : $before = '<div class="' . $wrapper['class'] . '">' ? $before = $wrapper['before'];
+			if( $wrapper['after'] == null ) : $after = '<div class="' . $wrapper['class'] . '">' ? $after = $wrapper['after'];
+			$content .=  $before . call_user_func( $function, $atts ) . $after;
+		else :
+			$content .= call_user_func( $function, $atts );
+		endif;
+
+		return ob_get_clean($content);
 	}
 
 	/** Cache Helpers *********************************************************/
@@ -1668,51 +1687,51 @@ class Woocommerce {
 	 */
 	function clear_product_transients( $post_id = 0 ) {
 		global $wpdb;
-		
+
 		$post_id = absint( $post_id );
-		
+
 		$wpdb->show_errors();
-		
+
 		// Clear core transients
-		$transients_to_clear = array( 
-			'wc_products_onsale', 
-			'wc_hidden_product_ids', 
-			'wc_hidden_product_ids_search' 
+		$transients_to_clear = array(
+			'wc_products_onsale',
+			'wc_hidden_product_ids',
+			'wc_hidden_product_ids_search'
 		);
-		
+
 		foreach( $transients_to_clear as $transient ) {
 			delete_transient( 'wc_products_onsale' );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient ) );
 		}
-		
+
 		// Clear transients for which we don't have the name
 		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_uf_pid_%')" );
 		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ln_count_%')" );
 		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%')" );
-		
+
 		// Clear product specific transients
-		$post_transients_to_clear = array( 
-			'wc_product_children_ids_', 
-			'wc_product_total_stock_', 
-			'wc_average_rating_', 
-			'wc_product_type_' 
+		$post_transients_to_clear = array(
+			'wc_product_children_ids_',
+			'wc_product_total_stock_',
+			'wc_average_rating_',
+			'wc_product_type_'
 		);
-		
+
 		if ( $post_id > 0 ) {
-		
+
 			foreach( $post_transients_to_clear as $transient ) {
 				delete_transient( $transient . $post_id );
 				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient . $post_id ) );
 			}
-			
+
 			clean_post_cache( $post_id );
-			
+
 		} else {
-		
+
 			foreach( $post_transients_to_clear as $transient ) {
 				$wpdb->query( $wpdb->prepare( "DELETE FROM `$wpdb->options` WHERE `option_name` = %s", '_transient_' . $transient . '%' ) );
 			}
-			
+
 		}
 	}
 
@@ -1770,12 +1789,12 @@ class Woocommerce {
 		if ( $this->_inline_js ) {
 
 			echo "<!-- WooCommerce JavaScript-->\n<script type=\"text/javascript\">\njQuery(document).ready(function($) {";
-			
+
 			// Sanitize
 			$this->_inline_js = wp_check_invalid_utf8( $this->_inline_js );
 			$this->_inline_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $this->_inline_js );
 			$this->_inline_js = str_replace( "\r", '', $this->_inline_js );
-			
+
 			// Output
 			echo $this->_inline_js;
 
