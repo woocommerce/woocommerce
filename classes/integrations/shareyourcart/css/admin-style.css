@@ -22,24 +22,8 @@ p.submit .button-primary{
     padding: 8px 10px;
 }
 
-.form-table a{
-	color: #21759B;
-	font-weight: normal;
-}
-
-.api-link {
-	color: #464646;
-	font-weight: normal;
-	text-decoration: none;
-}
-
 .api-status {
 	float: left;
-}
-
-.api-link:hover{
-	color: #d54e21;
-	font-weight: normal;
 }
 
 .syc-configuration {

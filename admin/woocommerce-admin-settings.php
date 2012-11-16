@@ -373,7 +373,9 @@ if ( ! function_exists( 'woocommerce_settings' ) ) {
 					endswitch;
 				?>
 		        <p class="submit">
-		        	<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+		        	<?php if ( ! isset( $GLOBALS['hide_save_button'] ) ) : ?>
+		        		<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+		        	<?php endif; ?>
 		        	<input type="hidden" name="subtab" id="last_tab" />
 		        </p>
 			</form>

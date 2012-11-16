@@ -78,7 +78,7 @@ if(!class_exists('ShareYourCartWordpressPlugin',false)){
 	*/
 		protected function getAdminEmail(){
 
-			return get_settings('admin_email');
+			return get_option('admin_email');
 		}
 
 		/**
