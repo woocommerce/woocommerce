@@ -1520,6 +1520,8 @@ class WC_Product {
 					'price_html' 			=> $this->min_variation_price != $this->max_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 					'availability_html' 	=> $availability_html,
 					'sku' 					=> $variation->get_sku(),
+					'weight'				=> $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+					'dimensions'			=> $variation->get_dimensions(),
 					'min_qty' 				=> 1,
 					'max_qty' 				=> $this->backorders_allowed() ? '' : $variation->stock,
 					'backorders_allowed' 	=> $this->backorders_allowed(),

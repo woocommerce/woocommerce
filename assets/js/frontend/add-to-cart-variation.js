@@ -10,10 +10,18 @@ jQuery(document).ready(function($) {
 
 			$(this).closest('form.variations_form').find('.variations select').val('').change();
 			
-			var $sku = $(this).closest('.product').find('.sku');
+			var $sku 		= $(this).closest('.product').find('.sku');
+			var $weight 	= $(this).closest('.product').find('.product_weight');
+			var $dimensions = $(this).closest('.product').find('.product_dimensions');
 
 			if ( $sku.attr( 'data-o_sku' ) )
 				$sku.text( $sku.attr( 'data-o_sku' ) );
+				
+			if ( $weight.attr( 'data-o_weight' ) )
+				$weight.text( $weight.attr( 'data-o_weight' ) );
+				
+			if ( $dimensions.attr( 'data-o_dimensions' ) )
+				$dimensions.text( $dimensions.attr( 'data-o_dimensions' ) );
 
 			return false;
 		} )
@@ -278,15 +286,35 @@ jQuery(document).ready(function($) {
 
 	        var $single_variation_wrap = $variation_form.find('.single_variation_wrap');
 	        
-	        var $sku = $product.find('.product_meta').find('.sku');
+	        var $sku 		= $product.find('.product_meta').find('.sku');
+	        var $weight 	= $product.find('.product_weight');
+			var $dimensions = $product.find('.product_dimensions');
 	        
 	        if ( ! $sku.attr( 'data-o_sku' ) )
 	        	$sku.attr( 'data-o_sku', $sku.text() );
+	        	
+	        if ( ! $weight.attr( 'data-o_weight' ) )
+	        	$weight.attr( 'data-o_weight', $weight.text() );
+	        	
+	        if ( ! $dimensions.attr( 'data-o_dimensions' ) )
+	        	$dimensions.attr( 'data-o_dimensions', $dimensions.text() );
 	        		
 	        if ( variation.sku ) {
 		    	$sku.text( variation.sku );
 	        } else {
 	        	$sku.text( $sku.attr( 'data-o_sku' ) );
+	        }
+	        
+	        if ( variation.weight ) {
+		    	$weight.text( variation.weight );
+	        } else {
+	        	$weight.text( $weight.attr( 'data-o_weight' ) );
+	        }
+	        
+	        if ( variation.dimensions ) {
+		    	$dimensions.text( variation.dimensions );
+	        } else {
+	        	$dimensions.text( $dimensions.attr( 'data-o_dimensions' ) );
 	        }
 
 	        $single_variation_wrap.find('.quantity').show();
