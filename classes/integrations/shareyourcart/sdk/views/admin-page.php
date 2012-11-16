@@ -1,7 +1,20 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-?>
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); 
 
+$admin_base_url = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+
+//in case we need to refresh the page
+if($refresh)
+{
+	//recreate the url ( but before that make sure there is no syc-account parameter in it )
+	unset($_GET['syc-account']);
+	$url =  $admin_base_url.'?'.http_build_query($_GET,'','&');
+		
+	@header("HTTP/1.1 302 Found");
+	@header("Location: $url");
+	echo "<meta http-equiv=\"refresh\" content=\"0; url=$url\">"; //it can happen that the headers have allready been sent, so use the html version as well
+	exit;
+}
+?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin-view']);
 </script>
@@ -12,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
     <h2>
         <a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart" class="shareyourcart-logo" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/logo-click']);">
-            <img src="<?php echo $this->createUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
+            <img src="<?php echo $this->getUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
         </a>
 		<div class="syc-slogan"><?php echo SyC::t('sdk','Increase your social media exposure by 10%!'); ?></div>
 		
@@ -23,9 +36,22 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
     </h2>
 	<?php endif; ?>
 
-    <?php if(!empty($status_message)): ?>
+	<?php if(!empty($status_message) || !empty($error_message)): ?>
 	<div class="updated settings-error"><p><strong>
-		<?php echo $status_message; ?>
+		<?php 
+			$message = @$error_message; 
+		
+			//is there a status message?
+			if(!empty($status_message))
+			{
+				//put the status message on a new line
+				if(!empty($message)) $message .= "<br /><br />";
+				
+				$message .= $status_message;
+			}
+		
+			echo $message; 
+		?>
 	</strong></p></div>
 	<?php endif; ?>
 	
@@ -60,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
             </tr>
             <tr>
                 <td></td>
-                <td><a href="?<?php echo http_build_query(array_merge($_GET,array('syc-account'=>'recover')),'','&')?>" class="api-link" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/recover-click']);"><?php echo SyC::t('sdk',"Can't access your account?"); ?></a> <strong><?php echo SyC::t('sdk','or'); ?></strong> <?php echo SyC::t('sdk','New to ShareYourCart&trade;?'); ?> <a href="?<?php echo http_build_query(array_merge($_GET,array('syc-account'=>'create')),'','&')?>" id="account-recovery" class="api-link" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/create-account-click']);"><?php echo SyC::t('sdk','Create an account'); ?></a></td>
+                <td><a href="<?php echo $admin_base_url.'?'.http_build_query(array_merge($_GET,array('syc-account'=>'recover')),'','&')?>" class="api-link" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/recover-click']);"><?php echo SyC::t('sdk',"Can't access your account?"); ?></a> <strong><?php echo SyC::t('sdk','or'); ?></strong> <?php echo SyC::t('sdk','New to ShareYourCart&trade;?'); ?> <a href="<?php echo $admin_base_url.'?'.http_build_query(array_merge($_GET,array('syc-account'=>'create')),'','&')?>" id="account-recovery" class="api-link" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin-view/create-account-click']);"><?php echo SyC::t('sdk','Create an account'); ?></a></td>
             </tr>
         </table>
        <?php echo $html;?>
