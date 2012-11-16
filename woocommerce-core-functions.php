@@ -325,6 +325,18 @@ if ( ! function_exists( 'is_account_page' ) ) {
 		return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ? true : false;
 	}
 }
+if ( ! function_exists( 'is_order_received_page' ) ) {
+
+    /**
+    * is_order_received_page - Returns true when viewing the order received page.
+    *
+    * @access public
+    * @return bool
+    */
+    function is_order_received_page() {
+        return ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) ? true : false;
+    }
+}
 if ( ! function_exists( 'is_ajax' ) ) {
 
 	/**
