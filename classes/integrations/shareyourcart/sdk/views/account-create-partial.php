@@ -1,7 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-?>
-
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/create-view']);
 </script>
@@ -26,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 </tr>
 <tr>
 <td colspan="2">
-<input class="buttonCheckbox" name="syc-terms-agreement" id="syc-terms-agreement" <?php if( $_SERVER['REQUEST_METHOD'] !== 'POST' || isset($_POST['syc-terms-agreement'])){ echo 'checked="checked"'; } ?> type="checkbox" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/create-view/toogle-terms-agreement-click']);"><label for="syc-terms-agreement"><?php echo SyC::t('sdk','I agree to create the account on {brand}',array('{brand}' => '<a href="http://www.shareyourcart.com" target="_blank" onclick=" if(_gaq) _gaq.push([\'_trackPageview\', \'/admin/create-view/logo-terms-click\']);">www.shareyourcart.com</a>')); ?></label>
+<input class="buttonCheckbox" name="syc-terms-agreement" id="syc-terms-agreement" <?php if( $_SERVER['REQUEST_METHOD'] !== 'POST' || isset($_POST['syc-terms-agreement'])){ echo 'checked="checked"'; } ?> type="checkbox" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/create-view/toogle-terms-agreement-click']);"><label for="syc-terms-agreement"><?php echo SyC::t('sdk','I agree with the {brand} terms & conditions',array('{brand}' => '<a href="http://www.shareyourcart.com/terms" target="_blank" onclick=" if(_gaq) _gaq.push([\'_trackPageview\', \'/admin/create-view/logo-terms-click\']);">ShareYourCart</a>')); ?></label>
 </td>
 </tr>
 <tr>

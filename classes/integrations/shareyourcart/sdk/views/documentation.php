@@ -1,7 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-?>
-
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <?php if(!$this->isActive()) return; //if the plugin is not active, do not show this page ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/documentation']);
@@ -13,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
     <h2>
         <a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart" class="shareyourcart-logo" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/documentation/logo-click']);">
-            <img src="<?php echo $this->createUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
+            <img src="<?php echo $this->getUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
         </a>
 		<div class="syc-slogan"><?php echo SyC::t('sdk','Increase your social media exposure by 10%!'); ?></div>
 		<br clear="all" /> 
