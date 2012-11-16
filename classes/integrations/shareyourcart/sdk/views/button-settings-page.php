@@ -1,7 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-?>
-
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <?php if(!$this->isActive()) return; //if the plugin is not active, do not show this page ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view']);
@@ -13,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
     <h2>
         <a href="http://www.shareyourcart.com" target="_blank" title="Shareyourcart" class="shareyourcart-logo" onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/logo-click']);">
-            <img src="<?php echo $this->createUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
+            <img src="<?php echo $this->getUrl(dirname(__FILE__).'/../img/shareyourcart-logo.png'); ?>"/>
         </a>
 		<div class="syc-slogan"><?php echo SyC::t('sdk','Increase your social media exposure by 10%!'); ?></div>
 		<br clear="all" /> 
@@ -129,6 +126,18 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
                                 <input class="buttonCheckbox" name="show_on_product" <?php echo $show_on_product ? 'checked="checked"' : ''; ?>  type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-product-click']);"><?php echo SyC::t('sdk','Product page'); ?></input>
                                 <br />
                                 <input class="buttonCheckbox" name="show_on_checkout" <?php echo $show_on_checkout ? 'checked="checked"' : ''; ?> type='checkbox' onclick=" if(_gaq) _gaq.push(['_trackPageview', '/admin/button-settings-view/toggle-show-on-checkout-click']);"><?php echo SyC::t('sdk','Checkout page'); ?></input>                        
+                            </td>
+                        </tr>
+						<tr>
+                            <th scope="row" valign="top"><?php echo SyC::t('sdk','Position product button after: '); ?></th>
+                            <td>
+                                <input name="product_button_position" class="regular-text" value="<?php echo $this->getProductButtonPosition(); ?>" /><p><?php echo SyC::t('sdk','<strong>jQuery selector</strong>. Start with <strong>{elem}</strong> to position the button before the actual object',array('{elem}' => "/*before*/")); ?></p>
+                            </td>
+                        </tr>
+						 <tr>
+                            <th scope="row" valign="top"><?php echo SyC::t('sdk','Position cart button after: '); ?></th>
+                            <td>
+                                <input name="cart_button_position" class="regular-text" value="<?php echo $this->getCartButtonPosition(); ?>" /><p><?php echo SyC::t('sdk','<strong>jQuery selector</strong>. Start with <strong>{elem}</strong> to position the button before the actual object',array('{elem}' => "/*before*/")); ?></p>
                             </td>
                         </tr>
                     </table>

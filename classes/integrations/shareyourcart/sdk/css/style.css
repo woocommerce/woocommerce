@@ -7,13 +7,22 @@
 }
 
 .button_iframe-normal iframe {
-    float:right;
-    height: 58px;
+    height: 78px;
     width: 230px;
 	position:relative;
 	z-index:1000;
+	vertical-align: middle; 
+}
+
+.button_iframe-normal[data-syc-skin="light"] iframe,  .button_iframe-normal[data-syc-skin="dark"] iframe{
+	height: 25px;
+	width: 125px;
 }
 
 .button_iframe-normal.button_height {
 	height: 60px;
+}
+
+.button_iframe-normal.button_height[data-syc-skin="light"],.button_iframe-normal.button_height[data-syc-skin="dark"] {
+	height: 27px;
 }

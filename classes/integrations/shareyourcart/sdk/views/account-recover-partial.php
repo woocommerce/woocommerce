@@ -1,7 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-?>
-
+<?php if(!class_exists('ShareYourCartBase',false)) die('Access Denied'); ?>
 <script type="text/javascript">
   if(_gaq) _gaq.push(['_trackPageview', '/admin/recover-view']);
 </script>
