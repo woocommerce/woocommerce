@@ -220,6 +220,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Extended woocommerce_update_options for flexibility.
 * Tweak - Added disabled to settings API.
 * Tweak - Flat rate shipping - if no rules match, and no default is set, don't return a rate.
+* Tweak - custom_attributes option added to woocommerce_form_field args. Pass name/value pairs.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
