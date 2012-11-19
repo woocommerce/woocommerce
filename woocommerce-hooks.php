@@ -81,13 +81,6 @@ if ( ! is_admin() || defined('DOING_AJAX') ) {
 	add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
 
 	/**
-	 * Categories
-	 *
-	 * @see wc_get_terms_count_filter()
-	 */
-	add_filter( 'get_terms', 'wc_get_terms_count_filter', 10, 2 );
-
-	/**
 	 * Subcategories
 	 *
 	 * @see woocommerce_subcategory_thumbnail()

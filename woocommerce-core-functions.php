@@ -1702,48 +1702,6 @@ function woocommerce_remove_roles() {
 	}
 }
 
-/**
- * Manual category counting to prevent category widget from showing hidden products in total
- *
- * @access public
- * @return void
- */
-function woocommerce_manual_category_count( $terms, $taxonomy ) {
-	// Keep the normal count in sync
-	_update_post_term_count( $terms, $taxonomy );
-
-	if ( isset( $_POST['post_ID'] ) && isset( $_POST['_visibility'] ) && 'product_cat' == $taxonomy->query_var ) {
-		foreach ( $terms as $term_id ) {
-			$do_count = array( 'visible', 'catalog' );
-			$do_not_count = array( 'search', 'hidden' );
-
-			$counted_ids = get_option( 'wc_prod_cat_counts' );
-			if ( ! is_array( $counted_ids ) ) 
-				$counted_ids = array();
-			$counted_ids[ $term_id ] = ( empty( $counted_ids[ $term_id ] ) || ! is_array( $counted_ids[ $term_id ] ) ) ? array() : $counted_ids[ $term_id ];
-
-			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! empty( $counted_ids[ $term_id ] ) ) {
-					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
-						array_push( $counted_ids[ $term_id ], absint( $_POST['post_ID'] ) );
-						update_option( 'wc_prod_cat_counts', $counted_ids );
-					}
-				} else {
-					$counted_ids[ $term_id ] = array( absint( $_POST['post_ID'] ) );
-					update_option( 'wc_prod_cat_counts', $counted_ids );
-				}
-			} elseif ( in_array( $_POST['_visibility'], $do_not_count ) ) {
-				if ( in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
-					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) !== false ) {
-					    unset( $counted_ids[ $term_id ][ $key ] );
-					    update_option( 'wc_prod_cat_counts', $counted_ids );
-					}
-				}
-			}
-		}
-	}
-}
-
 
 /**
  * Add a item to an order (for example a line item).
