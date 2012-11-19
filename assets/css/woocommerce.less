@@ -621,7 +621,12 @@ p.demo_store {
 		margin: 0 auto;
 		overflow:hidden;
 		zoom: 1;
-
+		
+		/* Disable input[type=number] buttons until the world is ready */
+		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+			display:none;
+		}
+		
 		input.qty {
 			width: 40px;
 			height: 28px;
@@ -634,6 +639,11 @@ p.demo_store {
 			.inset_box_shadow( 0, 0, 2px, 0, @secondary );
 			font-weight:bold;
 			.border_radius_left(2px);
+		}
+		
+		/* Hide buttons for opera */
+		noindex:-o-prefocus, input[type=number] {
+		    padding-right: 1.2em;
 		}
 
 		.plus, .minus {

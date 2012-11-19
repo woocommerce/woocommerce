@@ -672,14 +672,17 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * @return void
 	 */
 	function woocommerce_quantity_input( $args = array() ) {
+		global $product;
+		
 		$defaults = array(
-			'input_name'  => 'quantity',
-			'input_value'  => '1',
-			'max_value'  => '',
-			'min_value'  => '0'
+			'input_name'  	=> 'quantity',
+			'input_value'  	=> '1',
+			'max_value'  	=> apply_filters( 'woocommerce_quantity_input_max', '', $product ),
+			'min_value'  	=> apply_filters( 'woocommerce_quantity_input_min', '', $product ),
+			'step' 			=> apply_filters( 'woocommerce_quantity_input_step', '1', $product )
 		);
 
-		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults  ) );
+		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 
 		woocommerce_get_template( 'single-product/add-to-cart/quantity.php', $args );
 	}

@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	</td>
 
 	<td class="quantity" width="1%">
-		<input type="number" step="any" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
+		<input type="number" step="<?php echo apply_filters( 'woocommerce_quantity_input_step', '1', $_product ); ?>" min="0" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item['qty'] ); ?>" size="4" class="quantity" />
 	</td>
 
 	<td class="line_cost" width="1%">

@@ -132,7 +132,7 @@ class WC_Product {
 	 */
 	function __construct( $id ) {
 
-		$this->id = (int) $id;
+		$this->id = absint( $id );
 
 		$this->product_custom_fields = get_post_custom( $this->id );
 
@@ -226,7 +226,7 @@ class WC_Product {
 			}
 		}
 
-		return (int) $this->total_stock;
+		return apply_filters( 'woocommerce_stock_amount', $this->total_stock );
     }
 
 	/**
@@ -302,7 +302,7 @@ class WC_Product {
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
-			return $this->stock;
+			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		endif;
 	}
 
@@ -329,7 +329,7 @@ class WC_Product {
 
 			$woocommerce->clear_product_transients( $this->id ); // Clear transient
 
-			return $this->stock;
+			return apply_filters( 'woocommerce_stock_amount', $this->stock );
 		endif;
 	}
 
@@ -624,7 +624,7 @@ class WC_Product {
     	if ( get_option( 'woocommerce_manage_stock' ) == 'no' )
     		return '';
 
-        return (int) $this->stock;
+        return apply_filters( 'woocommerce_stock_amount', $this->stock );
     }
 
 
@@ -1184,7 +1184,7 @@ class WC_Product {
 			else
 				$this->shipping_class_id = 0;
 		endif;
-		return (int) $this->shipping_class_id;
+		return absint( $this->shipping_class_id );
 	}
 
 

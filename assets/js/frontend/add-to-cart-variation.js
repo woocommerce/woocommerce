@@ -324,14 +324,14 @@ jQuery(document).ready(function($) {
 	        }
 	        
 	        if ( variation.min_qty )
-	        	$single_variation_wrap.find('input[name=quantity]').attr( 'data-min', variation.min_qty ).val( variation.min_qty );
+	        	$single_variation_wrap.find('input[name=quantity]').attr( 'min', variation.min_qty ).val( variation.min_qty );
 	        else
-	        	$single_variation_wrap.find('input[name=quantity]').removeAttr('data-min');
+	        	$single_variation_wrap.find('input[name=quantity]').removeAttr('min');
 
 	        if ( variation.max_qty )
-	        	$single_variation_wrap.find('input[name=quantity]').attr('data-max', variation.max_qty);
+	        	$single_variation_wrap.find('input[name=quantity]').attr('max', variation.max_qty);
 	        else
-	        	$single_variation_wrap.find('input[name=quantity]').removeAttr('data-max');
+	        	$single_variation_wrap.find('input[name=quantity]').removeAttr('max');
 
 	        if ( variation.is_sold_individually == 'yes' ) {
 	        	$single_variation_wrap.find('input[name=quantity]').val('1');

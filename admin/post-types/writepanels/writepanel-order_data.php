@@ -369,7 +369,7 @@ function woocommerce_order_items_meta_box( $post ) {
 				<option value="delete"><?php _e( 'Delete Lines', 'woocommerce' ); ?></option>
 
 				<?php
-				$gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
+				$gateways = $woocommerce->payment_gateways->payment_gateways();
 
 				if ( isset( $gateways[ $order->payment_method ] ) ) {
 					$gateway = $gateways[ $order->payment_method ];
@@ -789,7 +789,7 @@ function woocommerce_process_shop_order_meta( $post_id, $post ) {
 				);
 		 		
 			if ( isset( $order_item_qty[ $item_id ] ) )
-		 		woocommerce_update_order_item_meta( $item_id, '_qty', absint( $order_item_qty[ $item_id ] ) );
+		 		woocommerce_update_order_item_meta( $item_id, '_qty', apply_filters( 'woocommerce_stock_amount', $order_item_qty[ $item_id ] ) );
 		 	
 		 	if ( isset( $item_tax_class[ $item_id ] ) )
 		 		woocommerce_update_order_item_meta( $item_id, '_tax_class', woocommerce_clean( $item_tax_class[ $item_id ] ) );

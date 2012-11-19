@@ -189,18 +189,14 @@ function woocommerce_update_cart_action() {
 				if ( ! isset( $cart_totals[$cart_item_key]['qty'] ) )
 					continue;
 
-				// Check the quantity input
-				$original = $cart_totals[ $cart_item_key ]['qty'];
-				$casted = (int) $cart_totals[ $cart_item_key ]['qty'];
-				$casted = (string) $casted;
-				if ( $original == $casted ) {
-					$quantity = absint( $cart_totals[ $cart_item_key ]['qty'] );
-				} else {
-					$quantity = $woocommerce->cart->cart_contents[ $cart_item_key ]['quantity'];
-				}
+				// Sanitize
+				$quantity = preg_replace( "/[^0-9\.]/", "", $cart_totals[ $cart_item_key ]['qty'] );
+				
+				if ( $quantity == "" )
+					continue;				
 
 				// Update cart validation
-	    		$passed_validation 	= apply_filters('woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity);
+	    		$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
 
 	    		// Check downloadable items
 				if ( get_option('woocommerce_limit_downloadable_product_qty') == 'yes' ) {
@@ -256,7 +252,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
     if ( $adding_to_cart->is_type( 'variable' ) ) {
     
     	$variation_id 		= empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-    	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : absint( $_REQUEST['quantity'] );
+    	$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
     	$all_variations_set = true;
     	$variations 		= array();
 
@@ -311,7 +307,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 			$added_to_cart = array();
 		
 			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
-				if ( $quantity < 1 ) 
+				if ( $quantity <= 0 ) 
 					continue;
 		
 				$quantity_set = true;
@@ -349,7 +345,7 @@ function woocommerce_add_to_cart_action( $url = false ) {
 	// Simple Products
     } else {
 
-		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : absint( $_REQUEST['quantity'] );
+		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : apply_filters( 'woocommerce_stock_amount', $_REQUEST['quantity'] );
 
 		// Add to cart validation
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );

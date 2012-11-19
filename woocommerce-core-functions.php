@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
+add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integers by default
 
 /**
  * woocommerce_get_dimension function.

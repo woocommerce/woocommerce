@@ -238,7 +238,7 @@ class WC_Product_Variation extends WC_Product {
      * @return int
      */
     function get_variation_id() {
-        return (int) $this->variation_id;
+        return absint( $this->variation_id );
     }
 
     /**
@@ -335,7 +335,7 @@ class WC_Product_Variation extends WC_Product {
 
 				}
 
-				return $this->stock;
+				return apply_filters( 'woocommerce_stock_amount', $this->stock );
 			}
 		} else {
 			return parent::reduce_stock( $by );
@@ -365,7 +365,7 @@ class WC_Product_Variation extends WC_Product {
 				if ( $this->is_in_stock() )
 					update_post_meta( $this->id, '_stock_status', 'instock' );
 
-				return $this->stock;
+				return apply_filters( 'woocommerce_stock_amount', $this->stock );
 			endif;
 		else :
 			return parent::increase_stock( $by );
@@ -411,7 +411,7 @@ class WC_Product_Variation extends WC_Product {
 				$this->variation_shipping_class_id = parent::get_shipping_class_id();
 
 		}
-		return (int) $this->variation_shipping_class_id;
+		return absint( $this->variation_shipping_class_id );
 	}
 
 	/**

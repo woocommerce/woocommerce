@@ -324,7 +324,7 @@ add_action( 'comment_post', 'woocommerce_add_comment_rating', 1 );
 add_filter( 'preprocess_comment', 'woocommerce_check_comment_rating', 0 );
 
 /**
- * Text filters
+ * Filters
  */
 add_filter( 'woocommerce_short_description', 'wptexturize'        );
 add_filter( 'woocommerce_short_description', 'convert_smilies'    );
