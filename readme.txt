@@ -219,6 +219,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Made armed forces 'states' under the US rather than in their own 'country'.
 * Tweak - Extended woocommerce_update_options for flexibility.
 * Tweak - Added disabled to settings API.
+* Tweak - Flat rate shipping - if no rules match, and no default is set, don't return a rate.
 
 * Fix - Added more error messages for coupons.
 * Fix - Variation sku updating after selection.
