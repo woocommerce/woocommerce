@@ -1856,6 +1856,10 @@ img.help_tip {
 		padding-left: 20px;
 		background: #fefefe url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAQ0lEQVQYV3WPUQoAMAhC1+E6tYdrFBgiW185X7biSAGolpkZfN6GJg1CA7ip0CYo+FzxBTqeE/7J1qGAXsTEAdxQfQHJTymZe4oqiAAAAABJRU5ErkJggg==) no-repeat 8px 5px;
 	}
+	input:invalid {
+		border: 1px solid #cc010b;
+		background: #ffebe8 url(../images/icons/invalid.png) right center no-repeat;
+	}
 }
 #woocommerce-product-data input.dp-applied {
 	float: left;
@@ -2054,6 +2058,10 @@ img.help_tip {
 			td {
 				input {
 					min-width: inherit !important;
+				}
+				input:invalid {
+					border: 1px solid #cc010b;
+					background: #ffebe8 url(../images/icons/invalid.png) right center no-repeat;
 				}
 				&.dimensions_field {
 					input {

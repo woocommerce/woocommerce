@@ -319,8 +319,16 @@ function woocommerce_wp_text_input( $field ) {
 	$field['class'] 		= isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['value'] 		= isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['name'] 			= isset( $field['name'] ) ? $field['name'] : $field['id'];
-
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="text" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" /> ';
+	$field['type'] 			= isset( $field['type'] ) ? $field['type'] : 'text';
+	
+	// Custom attribute handling
+	$custom_attributes = array();
+	
+	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) )
+		foreach ( $field['custom_attributes'] as $attribute => $value )
+			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+				
+	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
 
 	if ( ! empty( $field['description'] ) ) {
 
