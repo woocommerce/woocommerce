@@ -71,7 +71,7 @@ function woocommerce_order_data_meta_box($post) {
 				</select></p>
 
 				<p class="form-field last"><label for="order_date"><?php _e( 'Order Date:', 'woocommerce' ) ?></label>
-					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" />
+					<input type="text" class="date-picker-field" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" /> @ <input type="text" class="hour" placeholder="<?php _e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php _e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
 				</p>
 
 				<p class="form-field form-field-wide">
@@ -489,7 +489,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="left">
 				<label><?php _e( 'Cart Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts before tax - calculated by comparing subtotals to totals.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
+				<input type="number" step="any" min="0" id="_cart_discount" name="_cart_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_cart_discount'][0] ) ) 
 						echo esc_attr( $data['_cart_discount'][0] );
 				?>" class="calculated" />
@@ -497,7 +497,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="right">
 				<label><?php _e( 'Order Discount:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Discounts after tax - user defined.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
+				<input type="number" step="any" min="0" id="_order_discount" name="_order_discount" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_discount'][0] ) ) 
 						echo esc_attr( $data['_order_discount'][0] );
 				?>" />
@@ -520,7 +520,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 			
 			<li class="left">
 				<label><?php _e( 'Cost:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
+				<input type="number" step="any" min="0" id="_order_shipping" name="_order_shipping" placeholder="0.00 <?php _e( '(ex. tax)', 'woocommerce' ); ?>" value="<?php 
 					if ( isset( $data['_order_shipping'][0] ) ) 
 						echo esc_attr( $data['_order_shipping'][0] );
 				?>" class="first" />
@@ -573,7 +573,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="left">
 				<label><?php _e( 'Sales Tax:', 'woocommerce' ); ?>&nbsp;<a class="tips" data-tip="<?php _e( 'Total tax for line items + fees.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-				<input type="text" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
+				<input type="number" step="any" min="0" id="_order_tax" name="_order_tax" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_tax'][0] ) ) 
 						echo esc_attr( $data['_order_tax'][0] );
 				?>" class="calculated" />
@@ -581,7 +581,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="right">
 				<label><?php _e( 'Shipping Tax:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php
+				<input type="number" step="any" min="0" id="_order_shipping_tax" name="_order_shipping_tax" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_shipping_tax'][0] ) ) 
 						echo esc_attr( $data['_order_shipping_tax'][0] );
 				?>" />
@@ -596,7 +596,7 @@ function woocommerce_order_totals_meta_box( $post ) {
 
 			<li class="left">
 				<label><?php _e( 'Order Total:', 'woocommerce' ); ?></label>
-				<input type="text" id="_order_total" name="_order_total" placeholder="0.00" value="<?php
+				<input type="number" step="any" min="0" id="_order_total" name="_order_total" placeholder="0.00" value="<?php
 					if ( isset( $data['_order_total'][0] ) ) 
 						echo esc_attr( $data['_order_total'][0] );
 				?>" class="calculated" />
