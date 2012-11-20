@@ -93,7 +93,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'cost_per_order' => array(
 							'title' 		=> __( 'Cost per order', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Enter a cost per order, e.g. 5.00. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 						),
@@ -138,7 +142,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'cost' => array(
 							'title' 		=> __( 'Default Cost', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Cost excluding tax. Enter an amount, e.g. 2.50.', 'woocommerce' ),
 							'default' 		=> '',
 						),
@@ -150,7 +158,11 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 						),
 			'minimum_fee' => array(
 							'title' 		=> __( 'Minimum Fee', 'woocommerce' ),
-							'type' 			=> 'text',
+							'type' 			=> 'number',
+							'custom_attributes' => array(
+								'step'	=> 'any',
+								'min'	=> '0'
+							),
 							'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
 							'default'		=> '',
 						),
@@ -482,7 +494,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 
 				                echo '</select>
 				               		</td>
-				                    <td><input type="text" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
+				                    <td><input type="number" step="any" min="0" value="' . esc_attr( $rate['cost'] ) . '" name="' . esc_attr( $this->id .'_cost[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
 				                    <td><input type="text" value="' . esc_attr( $rate['fee'] ) . '" name="' . esc_attr( $this->id .'_fee[' . $i . ']' ) . '" placeholder="'.__( '0.00', 'woocommerce' ).'" size="4" /></td>
 			                    </tr>';
 	                		}
@@ -515,7 +527,7 @@ class WC_Flat_Rate extends WC_Shipping_Method {
 	               				?>\
 	               			</select>\
 	               		</td>\
-	                    <td><input type="text" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" /></td>\
+	                    <td><input type="number" step="any" min="0" name="<?php echo $this->id; ?>_cost[' + size + ']" placeholder="0.00" size="4" /></td>\
 	                    <td><input type="text" name="<?php echo $this->id; ?>_fee[' + size + ']" placeholder="0.00" size="4" /></td>\
                     </tr>').appendTo('#<?php echo $this->id; ?>_flat_rates table tbody');
 

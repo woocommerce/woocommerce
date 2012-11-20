@@ -510,6 +510,13 @@ function woocommerce_admin_fields( $options ) {
     	if ( ! isset( $value['std'] ) ) $value['std'] = '';
     	if ( ! isset( $value['desc'] ) ) $value['desc'] = '';
     	if ( ! isset( $value['desc_tip'] ) ) $value['desc_tip'] = false;
+    	
+    	// Custom attribute handling
+		$custom_attributes = array();
+		
+		if ( ! empty( $value['custom_attributes'] ) && is_array( $value['custom_attributes'] ) )
+			foreach ( $value['custom_attributes'] as $attribute => $attribute_value )
+				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
 
     	if ( $value['desc_tip'] === true ) {
     		$description = '<img class="help_tip" data-tip="' . esc_attr( $value['desc'] ) . '" src="' . $woocommerce->plugin_url() . '/assets/images/help.png" />';
@@ -532,11 +539,13 @@ function woocommerce_admin_fields( $options ) {
             	if ( isset($value['id'] ) && $value['id'] ) do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
             break;
             case 'text':
+            case 'email':
+            case 'number':
             	?><tr valign="top">
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
-                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo esc_attr( $value['type'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" /> <?php echo $description; ?></td>
+                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="<?php echo esc_attr( $value['type'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" <?php echo implode( ' ', $custom_attributes ); ?> /> <?php echo $description; ?></td>
                 </tr><?php
             break;
             case 'color' :
@@ -544,7 +553,7 @@ function woocommerce_admin_fields( $options ) {
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
-                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="text" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" class="colorpick" /> <?php echo $description; ?> <div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div></td>
+                    <td class="forminp"><input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="text" style="<?php echo esc_attr( $value['css'] ); ?>" value="<?php if ( get_option( $value['id'] ) !== false && get_option( $value['id'] ) !== null ) { echo esc_attr( stripslashes( get_option($value['id'] ) ) ); } else { echo esc_attr( $value['std'] ); } ?>" class="colorpick" <?php echo implode( ' ', $custom_attributes ); ?> /> <?php echo $description; ?> <div id="colorPickerDiv_<?php echo esc_attr( $value['id'] ); ?>" class="colorpickdiv" style="z-index: 100;background:#eee;border:1px solid #ccc;position:absolute;display:none;"></div></td>
                 </tr><?php
             break;
             case 'image_width' :
@@ -566,7 +575,7 @@ function woocommerce_admin_fields( $options ) {
 					<th scope="row" class="titledesc">
 						<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['name'] ); ?></label>
 					</th>
-                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>">
+                    <td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" class="<?php if (isset($value['class'])) echo $value['class']; ?>" <?php echo implode( ' ', $custom_attributes ); ?>>
                         <?php
                         foreach ($value['options'] as $key => $val) {
                         	$_current = get_option( $value['id'] );
@@ -611,7 +620,7 @@ function woocommerce_admin_fields( $options ) {
             	?>
 	            <legend class="screen-reader-text"><span><?php echo esc_html( $value['name'] ) ?></span></legend>
 					<label for="<?php echo $value['id'] ?>">
-					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> />
+					<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="checkbox" value="1" <?php checked(get_option($value['id']), 'yes'); ?> <?php echo implode( ' ', $custom_attributes ); ?> />
 					<?php echo wp_kses_post( $value['desc'] ) ?></label> <?php if ( $value['desc_tip'] ) echo $description; ?><br />
 				<?php
 
@@ -636,7 +645,7 @@ function woocommerce_admin_fields( $options ) {
                     <td class="forminp">
                     	<?php if ( ! empty( $value['desc'] ) ) echo '<p style="margin-top:0;">' . wp_kses_post( $value['desc'] ) . '</p>'; ?>
                     	
-                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>"><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea>
+                        <textarea <?php if ( isset($value['args']) ) echo $value['args'] . ' '; ?>name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" <?php echo implode( ' ', $custom_attributes ); ?>><?php if (false !== get_option($value['id'])) echo esc_textarea(stripslashes(get_option($value['id']))); else echo esc_textarea( $value['std'] ); ?></textarea>
                     </td>
                 </tr><?php
             break;

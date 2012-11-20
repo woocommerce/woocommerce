@@ -121,7 +121,11 @@ class WC_Local_Delivery extends WC_Shipping_Method {
 			),
 			'fee' => array(
 				'title' 		=> __( 'Delivery Fee', 'woocommerce' ),
-				'type' 			=> 'text',
+				'type' 			=> 'number',
+				'custom_attributes' => array(
+					'step'	=> 'any',
+					'min'	=> '0'
+				),
 				'description' 	=> __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
 				'default'		=> ''
 			),

@@ -89,7 +89,7 @@ function woocommerce_tax_rates_setting() {
 	               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="tax_label[<?php echo $i; ?>]" title="<?php _e( 'Label', 'woocommerce' ); ?>" size="16" />
 	               		</td>
 	    				<td class="rate">
-	    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e( 'Rate', 'woocommerce' ); ?>" placeholder="<?php _e( 'Rate', 'woocommerce' ); ?>" maxlength="8" size="4" />%
+	    					<input type="number" step="any" min="0" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="tax_rate[<?php echo $i; ?>]" title="<?php _e( 'Rate', 'woocommerce' ); ?>" placeholder="<?php _e( 'Rate', 'woocommerce' ); ?>" maxlength="8" size="4" />%
 	    				</td>
 	    				<td class="compound">
 	    					<input type="checkbox" class="checkbox" name="tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />
@@ -175,7 +175,7 @@ function woocommerce_tax_rates_setting() {
 		               			<input type="text" class="text" value="<?php if (isset($rate['label'])) echo esc_attr( $rate['label'] ); ?>" name="local_tax_label[<?php echo $i; ?>]" title="<?php _e( 'Label', 'woocommerce' ); ?>" size="16" />
 		               		</td>
 		    				<td class="rate">
-		    					<input type="text" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e( 'Rate', 'woocommerce' ); ?>" placeholder="<?php _e( 'Rate', 'woocommerce' ); ?>" maxlength="8" size="4" />%
+		    					<input type="number" step="any" min="0" class="text" value="<?php echo esc_attr( $rate['rate'] ); ?>" name="local_tax_rate[<?php echo $i; ?>]" title="<?php _e( 'Rate', 'woocommerce' ); ?>" placeholder="<?php _e( 'Rate', 'woocommerce' ); ?>" maxlength="8" size="4" />%
 		    				</td>
 		    				<td class="compound">
 		    					<input type="checkbox" class="checkbox" name="local_tax_compound[<?php echo $i; ?>]" <?php  if (isset($rate['compound'])) checked($rate['compound'], 'yes'); ?> />

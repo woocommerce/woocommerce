@@ -139,7 +139,7 @@ class WC_Paypal extends WC_Payment_Gateway {
 						),
 			'email' => array(
 							'title' => __( 'PayPal Email', 'woocommerce' ),
-							'type' => 'text',
+							'type' 			=> 'email',
 							'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ),
 							'default' => ''
 						),
