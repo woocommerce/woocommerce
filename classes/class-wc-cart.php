@@ -491,7 +491,7 @@ class WC_Cart {
 			if ( ! $flat ) $return .= '<dl class="variation">';
 
 			// Variation data
-			if ( $cart_item['data'] instanceof WC_Product_Variation && is_array( $cart_item['variation'] ) ) {
+			if ( ! empty( $cart_item['data']->variation_id ) && is_array( $cart_item['variation'] ) ) {
 
 				$variation_list = array();
 

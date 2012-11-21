@@ -414,7 +414,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = $this->get_child( $child_id );
 
-			if ( $variation instanceof WC_Product_Variation ) {
+			if ( ! empty( $variation->variation_id ) ) {
 
 				if ( get_post_status( $variation->get_variation_id() ) != 'publish' || ! $variation->is_visible() )
 					continue; // Disabled or hidden

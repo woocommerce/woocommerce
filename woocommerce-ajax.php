@@ -547,7 +547,7 @@ function woocommerce_link_all_variations() {
     foreach( $_product->get_children() as $child_id ) {
     	$child = $_product->get_child( $child_id );
 
-        if ( $child instanceof WC_Product_Variation ) {
+        if ( ! empty( $child->variation_id ) ) {
             $available_variations[] = $child->get_variation_attributes();
         }
     }
