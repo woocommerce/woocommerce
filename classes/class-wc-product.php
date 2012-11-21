@@ -393,7 +393,7 @@ class WC_Product {
 	function exists() {
 		global $wpdb;
 		
-		return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ? true : false;
+		return ! empty( $this->post ) || $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE ID = %d LIMIT 1;", $this->id ) ) > 0 ? true : false;
 	}
 
 

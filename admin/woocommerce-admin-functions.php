@@ -83,7 +83,8 @@ function woocommerce_ms_protect_download_rewite_rules( $rewrite ) {
  * @return void
  */
 function woocommerce_delete_post( $id ) {
-
+	global $woocommerce;
+	
 	if ( ! current_user_can( 'delete_posts' ) ) return;
 
 	if ( $id > 0 ) :
@@ -103,7 +104,8 @@ function woocommerce_delete_post( $id ) {
 		endif;
 
 	endif;
-
+	
+	$woocommerce->clear_product_transients();
 	delete_transient( 'woocommerce_processing_order_count' );
 }
 
