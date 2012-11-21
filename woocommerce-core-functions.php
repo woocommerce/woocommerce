@@ -1823,3 +1823,13 @@ function woocommerce_delete_order_item_meta( $item_id, $meta_key, $meta_value = 
 function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
 	return get_metadata( 'order_item', $item_id, $key, $single );
 }
+
+/**
+ * WooCommerce Date Format - Allows to change date format for everything WooCommerce
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_date_format() {
+	return apply_filters( 'woocommerce_date_format', get_option( 'date_format' ) );
+}

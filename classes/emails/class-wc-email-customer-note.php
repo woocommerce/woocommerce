@@ -67,7 +67,7 @@ class WC_Email_Customer_Note extends WC_Email {
 			$this->customer_note = $customer_note;
 			
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( __( get_option('date_format'), 'woocommerce' ), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
 			
 			$this->find[] = '{order_number}';
 			$this->replace[] = $this->object->get_order_number();
