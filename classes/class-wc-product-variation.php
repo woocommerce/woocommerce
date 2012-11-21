@@ -65,9 +65,13 @@ class WC_Product_Variation extends WC_Product {
 	 * @param array $parent_custom_fields (default: '') Array of the parent products meta data
 	 * @return void
 	 */
-	function __construct( $variation_id, $parent_id = '', $parent_custom_fields = '' ) {
+	function __construct( $variation, $parent_id = '', $parent_custom_fields = '' ) {
 
-		$this->variation_id = intval( $variation_id );
+		if ( is_object( $variation ) ) {
+			$this->variation_id = absint( $variation->ID );
+		} else {
+			$this->variation_id = absint( $variation );
+		}
 
 		$product_custom_fields = get_post_custom( $this->variation_id );
 
@@ -324,7 +328,7 @@ class WC_Product_Variation extends WC_Product {
 				if ( ! $this->is_in_stock() ) {
 
 					// Check parent
-					$parent_product = new WC_Product( $this->id );
+					$parent_product = get_product( $this->id );
 
 					// Only continue if the parent has backorders off
 					if ( ! $parent_product->backorders_allowed() && $parent_product->get_total_stock() <= 0 ) {

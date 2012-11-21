@@ -125,10 +125,7 @@ class WC_Cart {
 
 				foreach ( $cart as $key => $values ) {
 
-					if ( $values['variation_id'] > 0 )
-						$_product = new WC_Product_Variation( $values['variation_id'] );
-					else
-						$_product = new WC_Product( $values['product_id'] );
+					$_product = get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
 					if ( $_product->exists() && $values['quantity'] > 0 ) {
 
@@ -738,10 +735,7 @@ class WC_Cart {
 			// See if this product and its options is already in the cart
 			$cart_item_key = $this->find_product_in_cart( $cart_id );
 
-			if ( $variation_id > 0 )
-				$product_data = new WC_Product_Variation( $variation_id );
-			else
-				$product_data = new WC_Product( $product_id );
+			$product_data = get_product( $variation_id ? $variation_id : $product_id );
 
 			// Force quantity to 1 if sold individually
 			if ( $product_data->is_sold_individually() )

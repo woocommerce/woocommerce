@@ -513,7 +513,7 @@ function woocommerce_link_all_variations() {
 
 	$variations = array();
 
-	$_product = new WC_Product( $post_id );
+	$_product = get_product( $post_id );
 
 	// Put variation attributes into an array
 	foreach ( $_product->get_attributes() as $attribute ) {
@@ -696,7 +696,7 @@ function woocommerce_grant_access_to_download() {
 	$file_count = 0;
 	
 	$order 		= new WC_Order( $order_id );
-	$product 	= new WC_Product( $product_id );
+	$product 	= get_product( $product_id );
 
 	$user_email = sanitize_email( $order->billing_email );
 
@@ -839,10 +839,7 @@ function woocommerce_ajax_add_order_item() {
 	if ( ! $post || ( $post->post_type !== 'product' && $post->post_type !== 'product_variation' ) )
 		die();
 	
-	if ( $post->post_type != "product" )
-		$_product = new WC_Product_Variation( $post->ID );
-	else
-		$_product = new WC_Product( $post->ID );
+	$_product = get_product( $post->ID );
 	
 	$order = new WC_Order( $order_id );
 	$class = 'new_row';
@@ -1199,7 +1196,7 @@ function woocommerce_calc_line_taxes() {
 			
 			// Get product details
 			if ( get_post_type( $item_id ) == 'product' ) {
-				$_product			= new WC_Product( $item_id );
+				$_product			= get_product( $item_id );
 				$item_tax_status 	= $_product->get_tax_status();
 			} else {
 				$item_tax_status 	= 'taxable';

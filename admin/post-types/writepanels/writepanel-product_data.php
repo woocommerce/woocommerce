@@ -820,7 +820,7 @@ function woocommerce_process_product_meta( $post_id, $post ) {
 		else
 			update_post_meta( $post_id, '_price', stripslashes( $_POST['_regular_price'] ) );
 
-		if ( $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
+		if ( $_POST['_sale_price'] != '' && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) )
 			update_post_meta( $post_id, '_price', stripslashes($_POST['_sale_price']) );
 
 		if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {

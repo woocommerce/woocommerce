@@ -20,6 +20,52 @@ add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensiti
 add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integers by default
 
 /**
+ * Main function for returning products. 
+ * 
+ * @access public
+ * @param mixed $the_product Post object or post ID of the product.
+ * @param string $parent_id (default: '') Used when calling variations
+ * @param string $meta (default: '') Used when calling variations
+ * @return void
+ */
+function get_product( $the_product = false, $parent_id = '', $meta = '' ) {
+	global $post;
+	
+	if ( false === $the_product )
+		$the_product = $post;
+	elseif ( is_numeric( $the_product ) )
+		$the_product = get_post( $the_product );
+		
+	$product_id 	= absint( $the_product->ID );
+	$post_type 		= $the_product->post_type;
+	
+	if ( $post_type == 'product_variation' ) {
+		// Filter classname so that the class can be overridden if extended.
+		$classname = apply_filters( 'woocommerce_product_variation_class', 'WC_Product_Variation', $product_id );
+		
+		if ( class_exists( $classname ) ) {
+			return new $classname( $the_product, $parent_id, $meta );
+		} else {
+			// Use simple
+			return new WC_Product_Variation( $the_product, $parent_id, $meta );
+		}
+	} else {
+		$terms 			= get_the_terms( $product_id, 'product_type' );
+		$product_type 	= isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		
+		// Filter classname so that the class can be overridden if extended.
+		$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_' . $product_type, $product_type, $post_type, $product_id );
+		
+		if ( class_exists( $classname ) ) {
+			return new $classname( $the_product );
+		} else {
+			// Use simple
+			return new WC_Product( $the_product );
+		}
+	}
+}
+
+/**
  * woocommerce_get_dimension function.
  *
  * Normalise dimensions, unify to cm then convert to wanted unit value

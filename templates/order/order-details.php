@@ -40,11 +40,7 @@ $order = new WC_Order( $order_id );
 
 			foreach($order->get_items() as $item) :
 
-				if (isset($item['variation_id']) && $item['variation_id'] > 0) :
-					$_product = new WC_Product_Variation( $item['variation_id'] );
-				else :
-					$_product = new WC_Product( $item['product_id'] );
-				endif;
+				$_product = get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
 
 				echo '
 					<tr class = "' . esc_attr( apply_filters('woocommerce_order_table_item_class', 'order_table_item', $item, $order ) ) . '">

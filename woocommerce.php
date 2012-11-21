@@ -171,8 +171,13 @@ class Woocommerce {
 		include( 'widgets/widget-init.php' );					// Widget classes
 		include( 'classes/class-wc-countries.php' );			// Defines countries and states
 		include( 'classes/class-wc-order.php' );				// Single order class
+		
 		include( 'classes/class-wc-product.php' );				// Product class
+		include( 'classes/class-wc-product-external.php' );		// External product type class
+		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
+		include( 'classes/class-wc-product-grouped.php' );		// Grouped product type class
 		include( 'classes/class-wc-product-variation.php' );	// Product variation class
+		
 		include( 'classes/class-wc-tax.php' );					// Tax class
 		include( 'classes/class-wc-settings-api.php' );			// Settings API
 
@@ -499,7 +504,7 @@ class Woocommerce {
 		if ( is_int( $post ) ) $post = get_post( $post );
 		if ( $post->post_type !== 'product' ) return;
 		unset( $GLOBALS['product'] );
-		$GLOBALS['product'] = new WC_Product( $post->ID );
+		$GLOBALS['product'] = get_product( $post );
 		return $GLOBALS['product'];
 	}
 

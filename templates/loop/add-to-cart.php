@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 global $product;
 
-if ( ! $product->is_purchasable() && ! in_array( $product->product_type, array( 'external', 'grouped' ) ) ) return;
+if ( ! $product->is_purchasable() ) return;
 ?>
 
 <?php if ( ! $product->is_in_stock() ) : ?>
