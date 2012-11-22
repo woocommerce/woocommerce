@@ -26,6 +26,7 @@ class WC_Product_Factory {
 		$product_id 	= absint( $the_product->ID );
 		$terms 			= get_the_terms( $product_id, 'product_type' );
 		$product_type 	= isset( current( $terms )->name ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		$post_type 		= $the_product->post_type;
 		
 		// Filter classname so that the class can be overridden if extended.
 		$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_' . $product_type, $product_type, $post_type, $product_id );
