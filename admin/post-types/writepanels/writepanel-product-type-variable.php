@@ -222,8 +222,6 @@ function variable_product_type_options() {
 			</p>
 
 		<?php endif; ?>
-
-		<div class="clear"></div>
 	</div>
 	<?php
 	/**

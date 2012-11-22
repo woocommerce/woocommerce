@@ -69,18 +69,18 @@ function woocommerce_product_data_box() {
 	<div class="panel-wrap product_data">
 
 		<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
-
+		
+		<div class="wc-tabs-back"></div>
+		
 		<ul class="product_data_tabs wc-tabs" style="display:none;">
 
 			<li class="active general_options hide_if_grouped"><a href="#general_product_data"><?php _e( 'General', 'woocommerce' ); ?></a></li>
-
-			<li class="tax_tab show_if_simple show_if_variable tax_options"><a href="#tax_product_data"><?php _e( 'Taxes', 'woocommerce' ); ?></a></li>
 
 			<li class="inventory_tab show_if_simple show_if_variable show_if_grouped inventory_options"><a href="#inventory_product_data"><?php _e( 'Inventory', 'woocommerce' ); ?></a></li>
 
 			<li class="shipping_tab hide_if_virtual shipping_options hide_if_grouped hide_if_external"><a href="#shipping_product_data"><?php _e( 'Shipping', 'woocommerce' ); ?></a></li>
 
-			<li class="related_product_tab related_product_options"><a href="#related_product_data"><?php _e( 'Related Products', 'woocommerce' ); ?></a></li>
+			<li class="linked_product_tab linked_product_options"><a href="#linked_product_data"><?php _e( 'Linked Products', 'woocommerce' ); ?></a></li>
 
 			<li class="attributes_tab attribute_options"><a href="#woocommerce_attributes"><?php _e( 'Attributes', 'woocommerce' ); ?></a></li>
 
@@ -169,36 +169,38 @@ function woocommerce_product_data_box() {
 				do_action( 'woocommerce_product_options_downloads' );
 
 			echo '</div>';
+			
+			echo '<div class="options_group show_if_simple show_if_variable">';
+			
+				// Tax
+				woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
+					'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+					'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
+					'none' 		=> __( 'None', 'woocommerce' )
+				) ) );
+	
+				$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
+				$classes_options = array();
+				$classes_options[''] = __( 'Standard', 'woocommerce' );
+	    		if ( $tax_classes ) 
+	    			foreach ( $tax_classes as $class )
+	    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
+	
+				woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+	
+				do_action( 'woocommerce_product_options_tax' );
+			
+			echo '</div>';
 
 			do_action( 'woocommerce_product_options_general_product_data' );
-			?>
-		</div>
-		<div id="tax_product_data" class="panel woocommerce_options_panel">
-			<?php
-			
-			// Tax
-			woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
-				'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-				'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-				'none' 		=> __( 'None', 'woocommerce' )
-			) ) );
-
-			$tax_classes = array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ) );
-			$classes_options = array();
-			$classes_options[''] = __( 'Standard', 'woocommerce' );
-    		if ( $tax_classes ) 
-    			foreach ( $tax_classes as $class )
-    				$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
-
-			woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
-
-			do_action( 'woocommerce_product_options_tax' );
 			?>
 		</div>
 
 		<div id="inventory_product_data" class="panel woocommerce_options_panel">
 
 			<?php
+			
+			echo '<div class="options_group">';
 
 			if (get_option('woocommerce_manage_stock')=='yes') {
 
@@ -240,6 +242,17 @@ function woocommerce_product_data_box() {
 				echo '</div>';
 
 			}
+			
+			echo '</div>';
+			
+			echo '<div class="options_group show_if_simple show_if_variable">';
+
+			// Individual product
+			woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Sold Individually', 'woocommerce'), 'description' => __('Enable this to only allow one of this item to be bought in a single order', 'woocommerce') ) );
+
+			do_action('woocommerce_product_options_sold_individually');
+
+			echo '</div>';
 
 			?>
 
@@ -475,10 +488,11 @@ function woocommerce_product_data_box() {
 					?>
 				</select>
 			</p>
-			<div class="clear"></div>
 		</div>
-		<div id="related_product_data" class="panel woocommerce_options_panel">
-
+		<div id="linked_product_data" class="panel woocommerce_options_panel">
+			
+			<div class="options_group">
+			
 			<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
 			<select id="upsell_ids" name="upsell_ids[]" class="ajax_chosen_select_products" multiple="multiple" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>">
 				<?php
@@ -520,31 +534,11 @@ function woocommerce_product_data_box() {
 					}
 				?>
 			</select> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo $woocommerce->plugin_url(); ?>/assets/images/help.png" /></p>
-
-			<?php do_action( 'woocommerce_product_options_related' ); ?>
-
-		</div>
-
-		<div id="advanced_product_data" class="panel woocommerce_options_panel">
+			
+			</div>
 
 			<?php
-
-			echo '<div class="options_group hide_if_external">';
-
-				// Purchase note
-				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
-
-			echo '</div>';
-
-			echo '<div class="options_group">';
-
-				// menu_order
-				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
-					'step' 	=> '1'
-				)  ) );
-
-			echo '</div>';
-
+			
 			echo '<div class="options_group grouping show_if_simple show_if_external">';
 
 				// List Grouped products
@@ -575,20 +569,36 @@ function woocommerce_product_data_box() {
 					}
 				}
 
-				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents ) );
+				woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
 				
 				woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
 
 				do_action( 'woocommerce_product_options_grouping' );
 
 			echo '</div>';
+			?>
 			
-			echo '<div class="options_group show_if_simple show_if_variable">';
+			<?php do_action( 'woocommerce_product_options_related' ); ?>
 
-				// Individual product
-				woocommerce_wp_checkbox( array( 'id' => '_sold_individually', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __('Sold Individually', 'woocommerce'), 'description' => __('Enable this to only allow one of this item to be bought in a single order', 'woocommerce') ) );
+		</div>
 
-				do_action('woocommerce_product_options_sold_individually');
+		<div id="advanced_product_data" class="panel woocommerce_options_panel">
+
+			<?php
+
+			echo '<div class="options_group hide_if_external">';
+
+				// Purchase note
+				woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+
+			echo '</div>';
+
+			echo '<div class="options_group">';
+
+				// menu_order
+				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1'
+				)  ) );
 
 			echo '</div>';
 
@@ -604,6 +614,8 @@ function woocommerce_product_data_box() {
 		</div>
 
 		<?php do_action( 'woocommerce_product_write_panels' ); ?>
+		
+		<div class="clear"></div>
 
 	</div>
 	<?php

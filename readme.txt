@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Templating - woocommerce_page_title function for archive titles.
 * Templating - CSS namespacing changes (courtesy of Brian Feister).
 
+* Tweak - Improved product data panels.
 * Tweak - Improved installation + upgrade process upon activation.
 * Tweak - Protect logs and uploads with a blank index.html
 * Tweak - Append unique hash to log file names
