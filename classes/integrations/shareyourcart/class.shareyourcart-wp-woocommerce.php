@@ -105,7 +105,7 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
 		update_post_meta( $post_id, 'expiry_date', '' );
 		update_post_meta( $post_id, 'usage_limit', 1 );
 		update_post_meta( $post_id, 'exclude_product_ids', '' );
-		update_post_meta( $post_id, 'product_ids', '' );
+		update_post_meta( $post_id, 'product_ids', implode(',', $product_unique_ids));
 		update_post_meta( $post_id, 'individual_use', 'yes' );
 		update_post_meta( $post_id, 'coupon_amount', $coupon_value );
 		update_post_meta( $post_id, 'discount_type', $discount_type );
@@ -217,6 +217,7 @@ class ShareYourCartWooCommerce extends ShareYourCartWordpressPlugin{
             "item_url"         => get_permalink($product_id),
             "item_price"       => $product->price, 
             "item_picture_url" => $image,
+			"item_unique_id"   => $product_id,
         );
     }
     
