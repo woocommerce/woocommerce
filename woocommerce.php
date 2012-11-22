@@ -178,7 +178,7 @@ class Woocommerce {
 		include( 'classes/class-wc-order.php' );				// Single order class
 		
 		include( 'classes/class-wc-product-factory.php' );		// Product factory
-		include( 'classes/class-wc-product.php' );				// Product class abstract
+		include( 'classes/abstracts/abstract-wc-product.php' );	// Product class abstract
 		include( 'classes/class-wc-product-simple.php' );		// Simple product type class
 		include( 'classes/class-wc-product-external.php' );		// External product type class
 		include( 'classes/class-wc-product-variable.php' );		// Variable product type class
