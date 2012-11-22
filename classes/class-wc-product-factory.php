@@ -41,7 +41,7 @@ class WC_Product_Factory {
 			return new $classname( $the_product, $args );
 		} else {
 			// Use simple
-			return new WC_Product_Simple( $the_product );
+			return new WC_Product_Simple( $the_product, $args );
 		}
 	}
 }
