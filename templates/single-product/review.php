@@ -38,7 +38,7 @@ global $post;
 							if ( woocommerce_customer_bought_product( $GLOBALS['comment']->comment_author_email, $GLOBALS['comment']->user_id, $post->ID ) )
 								echo '(' . __( 'verified owner', 'woocommerce' ) . ') ';
 
-					?>&ndash; <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( 'M jS Y', 'woocommerce' )); ?></time>:
+					?>&ndash; <time itemprop="datePublished" time datetime="<?php echo get_comment_date('c'); ?>"><?php echo get_comment_date(__( get_option('date_format'), 'woocommerce' )); ?></time>:
 				</p>
 			<?php endif; ?>
 

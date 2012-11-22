@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensitive by default
+add_filter( 'woocommerce_stock_amount', 'absint' ); // Stock amounts are integers by default
 
 /**
  * woocommerce_get_dimension function.
@@ -324,6 +325,18 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	function is_account_page() {
 		return ( is_page( woocommerce_get_page_id( 'myaccount' ) ) || is_page( woocommerce_get_page_id( 'edit_address' ) ) || is_page( woocommerce_get_page_id( 'view_order' ) ) || is_page( woocommerce_get_page_id( 'change_password' ) ) ) ? true : false;
 	}
+}
+if ( ! function_exists( 'is_order_received_page' ) ) {
+
+    /**
+    * is_order_received_page - Returns true when viewing the order received page.
+    *
+    * @access public
+    * @return bool
+    */
+    function is_order_received_page() {
+        return ( is_page( woocommerce_get_page_id( 'thanks' ) ) ) ? true : false;
+    }
 }
 if ( ! function_exists( 'is_ajax' ) ) {
 
@@ -1689,48 +1702,6 @@ function woocommerce_remove_roles() {
 	}
 }
 
-/**
- * Manual category counting to prevent category widget from showing hidden products in total
- *
- * @access public
- * @return void
- */
-function woocommerce_manual_category_count( $terms, $taxonomy ) {
-	// Keep the normal count in sync
-	_update_post_term_count( $terms, $taxonomy );
-
-	if ( isset( $_POST['post_ID'] ) && isset( $_POST['_visibility'] ) && 'product_cat' == $taxonomy->query_var ) {
-		foreach ( $terms as $term_id ) {
-			$do_count = array( 'visible', 'catalog' );
-			$do_not_count = array( 'search', 'hidden' );
-
-			$counted_ids = get_option( 'wc_prod_cat_counts' );
-			if ( ! is_array( $counted_ids ) ) 
-				$counted_ids = array();
-			$counted_ids[ $term_id ] = ( empty( $counted_ids[ $term_id ] ) || ! is_array( $counted_ids[ $term_id ] ) ) ? array() : $counted_ids[ $term_id ];
-
-			if ( in_array( $_POST['_visibility'], $do_count ) ) {
-				if ( ! empty( $counted_ids[ $term_id ] ) ) {
-					if ( ! in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
-						array_push( $counted_ids[ $term_id ], absint( $_POST['post_ID'] ) );
-						update_option( 'wc_prod_cat_counts', $counted_ids );
-					}
-				} else {
-					$counted_ids[ $term_id ] = array( absint( $_POST['post_ID'] ) );
-					update_option( 'wc_prod_cat_counts', $counted_ids );
-				}
-			} elseif ( in_array( $_POST['_visibility'], $do_not_count ) ) {
-				if ( in_array( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) {
-					if ( ( $key = array_search( $_POST['post_ID'], $counted_ids[ $term_id ] ) ) !== false ) {
-					    unset( $counted_ids[ $term_id ][ $key ] );
-					    update_option( 'wc_prod_cat_counts', $counted_ids );
-					}
-				}
-			}
-		}
-	}
-}
-
 
 /**
  * Add a item to an order (for example a line item).
@@ -1851,4 +1822,14 @@ function woocommerce_delete_order_item_meta( $item_id, $meta_key, $meta_value = 
  */
 function woocommerce_get_order_item_meta( $item_id, $key, $single = true ) {
 	return get_metadata( 'order_item', $item_id, $key, $single );
+}
+
+/**
+ * WooCommerce Date Format - Allows to change date format for everything WooCommerce
+ *
+ * @access public
+ * @return string
+ */
+function woocommerce_date_format() {
+	return apply_filters( 'woocommerce_date_format', get_option( 'date_format' ) );
 }

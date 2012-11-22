@@ -727,7 +727,7 @@ class WC_Cart {
 		function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = '', $cart_item_data = array() ) {
 			global $woocommerce;
 
-			if ( $quantity < 1 ) return false;
+			if ( $quantity <= 0 ) return false;
 
 			// Load cart item data - may be added by other plugins
 			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
@@ -769,10 +769,10 @@ class WC_Cart {
 
 			// Downloadable/virtual qty check
 			if ( $product_data->is_sold_individually() ) {
-				$in_cart_quantity = ( $cart_item_key ) ? $this->cart_contents[$cart_item_key]['quantity'] + $quantity : $quantity;
+				$in_cart_quantity = $cart_item_key ? $this->cart_contents[$cart_item_key]['quantity'] : 0;
 
-				// If its greater than 1, its already in the cart
-				if ( $in_cart_quantity > 1 ) {
+				// If its greater than 0, its already in the cart
+				if ( $in_cart_quantity > 0 ) {
 					$woocommerce->add_error( sprintf('<a href="%s" class="button">%s</a> %s', get_permalink(woocommerce_get_page_id('cart')), __( 'View Cart &rarr;', 'woocommerce' ), __( 'You already have this item in your cart.', 'woocommerce' ) ) );
 					return false;
 				}

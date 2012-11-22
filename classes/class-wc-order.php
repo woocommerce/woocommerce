@@ -555,7 +555,17 @@ class WC_Order {
 	function get_total() {
 		return apply_filters( 'woocommerce_order_amount_total', number_format( (double) $this->order_total, 2, '.', '' ) );
 	}
-
+	
+	
+	/**
+	 * get_order_total function. Alias for get_total()
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function get_order_total() {
+		return $this->get_total();
+	}
 
 	/**
 	 * Gets shipping method title.

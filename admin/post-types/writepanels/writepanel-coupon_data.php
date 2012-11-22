@@ -42,7 +42,10 @@ function woocommerce_coupon_data_meta_box( $post ) {
     		woocommerce_wp_select( array( 'id' => 'discount_type', 'label' => __( 'Discount type', 'woocommerce' ), 'options' => $woocommerce->get_coupon_discount_types() ) );
 
 			// Amount
-			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'coupon_amount', 'label' => __( 'Coupon amount', 'woocommerce' ), 'placeholder' => '0.00', 'description' => __( 'Enter an amount e.g. 2.99', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				)  ) );
 			
 			// Free Shipping
 			woocommerce_wp_checkbox( array( 'id' => 'free_shipping', 'label' => __( 'Enable free shipping', 'woocommerce' ), 'description' => sprintf(__( 'Check this box if the coupon grants free shipping. The <a href="%s">free shipping method</a> must be enabled with the "must use coupon" setting checked.', 'woocommerce' ), admin_url('admin.php?page=woocommerce_settings&tab=shipping&section=WC_Free_Shipping')) ) );
@@ -56,7 +59,10 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			echo '</div><div class="options_group">';
 
 			// minimum spend
-			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum amount', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum amount', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 			echo '</div><div class="options_group">';
 
@@ -143,15 +149,20 @@ function woocommerce_coupon_data_meta_box( $post ) {
 			echo '</div><div class="options_group">';
 
 			// Customers
-			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true )) ) );
+			woocommerce_wp_text_input( array( 'id' => 'customer_email', 'label' => __( 'Customer emails', 'woocommerce' ), 'placeholder' => __( 'Any customer', 'woocommerce' ), 'description' => __( 'Comma separate email addresses to restrict this coupon to specific billing and user emails.', 'woocommerce' ), 'value' => implode(', ', (array) get_post_meta( $post->ID, 'customer_email', true ) ), 'type' => 'email', 'custom_attributes' => array(
+					'multiple' 	=> 'multiple'
+				) ) );
 
 			echo '</div><div class="options_group">';
 
 			// Usage limit
-			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ) ) );
+			woocommerce_wp_text_input( array( 'id' => 'usage_limit', 'label' => __( 'Usage limit', 'woocommerce' ), 'placeholder' => _x('Unlimited usage', 'placeholder', 'woocommerce'), 'description' => __( 'How many times this coupon can be used before it is void.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 			// Expiry date
-			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker' ) );
+			woocommerce_wp_text_input( array( 'id' => 'expiry_date', 'label' => __( 'Expiry date', 'woocommerce' ), 'placeholder' => _x('Never expire', 'placeholder', 'woocommerce'), 'description' => __( 'The date this coupon will expire, <code>YYYY-MM-DD</code>.', 'woocommerce' ), 'class' => 'short date-picker', 'custom_attributes' => array( 'pattern' => "[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" ) ) );
 
 			echo '</div>';
 

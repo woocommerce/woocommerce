@@ -685,7 +685,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'name' => __( 'Thousand Separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_thousand_sep',
-		'css' 		=> 'width:30px;',
+		'css' 		=> 'width:50px;',
 		'std' 		=> ',',
 		'type' 		=> 'text',
 		'desc_tip'	=>  true,
@@ -695,7 +695,7 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'name' => __( 'Decimal Separator', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_decimal_sep',
-		'css' 		=> 'width:30px;',
+		'css' 		=> 'width:50px;',
 		'std' 		=> '.',
 		'type' 		=> 'text',
 		'desc_tip'	=>  true,
@@ -705,10 +705,14 @@ $woocommerce_settings['catalog'] = apply_filters('woocommerce_catalog_settings',
 		'name' => __( 'Number of Decimals', 'woocommerce' ),
 		'desc' 		=> __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
 		'id' 		=> 'woocommerce_price_num_decimals',
-		'css' 		=> 'width:30px;',
+		'css' 		=> 'width:50px;',
 		'std' 		=> '2',
-		'type' 		=> 'text',
 		'desc_tip'	=>  true,
+		'type' 		=> 'number',
+		'custom_attributes' => array(
+			'min' 	=> 0,
+			'step' 	=> 1
+		)
 	),
 
 	array(
@@ -791,8 +795,12 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'name' => __( 'Low Stock Threshold', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_notify_low_stock_amount',
-		'css' 		=> 'width:30px;',
-		'type' 		=> 'text',
+		'css' 		=> 'width:50px;',
+		'type' 		=> 'number',
+		'custom_attributes' => array(
+			'min' 	=> 0,
+			'step' 	=> 1
+		),
 		'std' 		=> '2'
 	),
 
@@ -800,8 +808,12 @@ $woocommerce_settings['inventory'] = apply_filters('woocommerce_inventory_settin
 		'name' => __( 'Out Of Stock Threshold', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_notify_no_stock_amount',
-		'css' 		=> 'width:30px;',
-		'type' 		=> 'text',
+		'css' 		=> 'width:50px;',
+		'type' 		=> 'number',
+		'custom_attributes' => array(
+			'min' 	=> 0,
+			'step' 	=> 1
+		),
 		'std' 		=> '0'
 	),
 
@@ -1044,7 +1056,10 @@ $woocommerce_settings['email'] = apply_filters('woocommerce_email_settings', arr
 		'name' => __( '"From" Email Address', 'woocommerce' ),
 		'desc' 		=> '',
 		'id' 		=> 'woocommerce_email_from_address',
-		'type' 		=> 'text',
+		'type' 		=> 'email',
+		'custom_attributes' => array(
+			'multiple' 	=> 'multiple'
+		),
 		'css' 		=> 'min-width:300px;',
 		'std' 		=> get_option('admin_email')
 	),

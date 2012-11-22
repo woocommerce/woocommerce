@@ -116,10 +116,16 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group pricing show_if_simple show_if_external">';
 
 				// Price
-				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')' ) );
+				woocommerce_wp_text_input( array( 'id' => '_regular_price', 'class' => 'wc_input_price short', 'label' => __( 'Regular Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 				// Special Price
-				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>' ) );
+				woocommerce_wp_text_input( array( 'id' => '_sale_price', 'class' => 'wc_input_price short', 'label' => __( 'Sale Price', 'woocommerce' ) . ' ('.get_woocommerce_currency_symbol().')', 'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>', 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 
 				// Special Price date range
 				$sale_price_dates_from 	= ( $date = get_post_meta( $thepostid, '_sale_price_dates_from', true ) ) ? date_i18n( 'Y-m-d', $date ) : '';
@@ -127,8 +133,8 @@ function woocommerce_product_data_box() {
 
 				echo '	<p class="form-field sale_price_dates_fields">
 							<label for="_sale_price_dates_from">' . __( 'Sale Price Dates', 'woocommerce' ) . '</label>
-							<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . $sale_price_dates_from . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . '" maxlength="10" />
-							<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . $sale_price_dates_to . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '" maxlength="10" />
+							<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . $sale_price_dates_from . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+							<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . $sale_price_dates_to . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 							<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) .'</a>
 						</p>';
 
@@ -149,10 +155,16 @@ function woocommerce_product_data_box() {
 				</p>';
 
 				// Download Limit
-				woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_download_limit', 'label' => __( 'Download Limit', 'woocommerce' ), 'placeholder' => __( 'Unlimited', 'woocommerce' ), 'description' => __( 'Leave blank for unlimited re-downloads.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 				// Expirey
-				woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download Expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_download_expiry', 'label' => __( 'Download Expiry', 'woocommerce' ), 'placeholder' => __( 'Never', 'woocommerce' ), 'description' => __( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1',
+					'min'	=> '0'
+				) ) );
 
 				do_action( 'woocommerce_product_options_downloads' );
 
@@ -198,7 +210,9 @@ function woocommerce_product_data_box() {
 				echo '<div class="stock_fields show_if_simple show_if_variable">';
 
 				// Stock
-				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __( 'Stock Qty', 'woocommerce' ), 'desc_tip' => true, 'description' => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ) ) );
+				woocommerce_wp_text_input( array( 'id' => '_stock', 'label' => __( 'Stock Qty', 'woocommerce' ), 'desc_tip' => true, 'description' => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any'
+				)  ) );
 
 				do_action('woocommerce_product_options_stock_fields');
 
@@ -239,7 +253,10 @@ function woocommerce_product_data_box() {
 				
 				// Weight
 				if( get_option('woocommerce_enable_weight', true) !== 'no' ) :
-					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ) ) );
+					woocommerce_wp_text_input( array( 'id' => '_weight', 'label' => __( 'Weight', 'woocommerce' ) . ' ('.get_option('woocommerce_weight_unit').')', 'placeholder' => '0.00', 'description' => __( 'Weight in decimal form', 'woocommerce' ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> 'any',
+					'min'	=> '0'
+				) ) );
 				else:
 					echo '<input type="hidden" name="_weight" value="' . esc_attr( get_post_meta( $thepostid, '_weight', true ) ) . '" />';
 				endif;
@@ -249,9 +266,9 @@ function woocommerce_product_data_box() {
 					?><p class="form-field dimensions_field">
 						<label for"product_length"><?php echo __( 'Dimensions', 'woocommerce' ) . ' (' . get_option( 'woocommerce_dimension_unit' ) . ')'; ?></label>
 						<span class="wrap">
-							<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="text" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" />
-							<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="text" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>" />
-							<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="text" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>" />
+							<input id="product_length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_length" value="<?php echo esc_attr( get_post_meta( $thepostid, '_length', true ) ); ?>" step="any" min="0" />
+							<input placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" class="input-text" size="6" type="number" name="_width" value="<?php echo esc_attr( get_post_meta( $thepostid, '_width', true ) ); ?>"  step="any" min="0" />
+							<input placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" class="input-text last" size="6" type="number" name="_height" value="<?php echo esc_attr( get_post_meta( $thepostid, '_height', true ) ); ?>"  step="any" min="0" />
 						</span>
 						<span class="description"><?php _e( 'LxWxH in decimal form', 'woocommerce' ); ?></span>
 					</p><?php
@@ -522,7 +539,9 @@ function woocommerce_product_data_box() {
 			echo '<div class="options_group">';
 
 				// menu_order
-				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ) ) );
+				woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+					'step' 	=> '1'
+				)  ) );
 
 			echo '</div>';
 
